@@ -7,15 +7,7 @@ import traceback
 from smtplib import SMTP
 from email import MIMEText
 
-TIMEOUT = 10 * 1000
-
-RUNPATH = os.path.abspath('..') # what will be the subproceses' current directory
-BINPATH = os.path.abspath("../build_environment/target/lib/release")
-LIBPATH = BINPATH
-TESTBIN = os.path.join(BINPATH, 'common_ut')
-
-MailFrom = "autotest-script"
-MailTo = 'dlavrentyuk@networkoptix.com'
+from testconf import *
 
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
@@ -29,29 +21,18 @@ READY = select.POLLIN | select.POLLPRI
 
 ToSend = []
 
-def email_notify(text):
-    text['From'] = MailFrom
-    text['To'] = MailTo
+def email_notify(lines):
+    msg = MIMEText.MIMEText(
+        "\n".join(lines) +
+        ("\n\n[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"))
+    )
+    msg['Subject'] = "Autotest run results"
+    msg['From'] = MAIL_FROM
+    msg['To'] = MAIL_TO
     smtp = SMTP('localhost')
     #smtp.set_debuglevel(1)
-    smtp.sendmail(MailFrom, MailTo, text.as_string())
+    smtp.sendmail(MAIL_FROM, MAIL_TO, msg.as_string())
     smtp.quit()
-
-def error_notify(lines, has_error, has_stranges):
-    what = ("errors and dubious messages" if has_error and has_stranges
-        else 'errors' if has_error else 'dubious mesages')
-    msg = MIMEText.MIMEText(
-        ("%s:\n\n" % what.capitalize()) +
-        "\n".join(lines) +
-        ("\n\n[%s]" % time.strftime("%x %X %Z"))
-    )
-    msg['Subject'] = "Autotest errors"
-    email_notify(msg)
-
-def ok_notify():
-    msg = MIMEText.MIMEText("Autotest passed OK")
-    msg['Subject'] = "Autotest OK"
-    email_notify(msg)
 
 
 def get_name(line):
@@ -64,16 +45,7 @@ def check_repeats(repeats):
         ToSend[-1] += "   [ REPEATS %s TIMES ]" % repeats
 
 
-def run():
-    env = os.environ.copy()
-    if env.get('LD_LIBRARY_PATH'):
-        env['LD_LIBRARY_PATH'] += os.pathsep + LIBPATH
-    else:
-        env['LD_LIBRARY_PATH'] = LIBPATH
-    poller = select.poll()
-    proc = Popen([TESTBIN], bufsize=0, stdout=PIPE, stderr=STDOUT, cwd=RUNPATH, env=env, universal_newlines=True)
-    #print "Test is started with PID", proc.pid
-    poller.register(proc.stdout, READ_ONLY)
+def perfom_test(poller, proc):
     line = ''
     last_suit_line = ''
     has_errors = False
@@ -89,7 +61,6 @@ def run():
             ch = proc.stdout.read(1)
             if ch == '\n':
                 if len(line) > 0:
-#                    print line
                     if line.startswith(SUITMARK):
                         if line.startswith(FAILMARK):
                             ToSend.append(line) # line[len(FAILMARK):].strip())
@@ -120,29 +91,62 @@ def run():
                 line += ch
         else:
             check_repeats(repeats)
-            print "TEST SUIT HAS TIMED OUT"
             ToSend.append("TEST SUIT HAS TIMED OUT")
             has_errors = True
             break
-    #print "---"
     if proc.poll() is None:
         proc.terminate()
 
     if proc.returncode:
-        print "TEST SUIT RETURNS CODE %s" % proc.returncode
         check_repeats(repeats)
         ToSend.append("TEST SUIT RETURNS CODE %s" % proc.returncode)
         has_errors = True
 
-    if ToSend:
-        #print "Interesting output:"
-        #for line in ToSend:
-        #    print line
-        #print "Sending email..."
-        error_notify(ToSend, has_errors, has_stranges)
+    if has_stranges and not has_errors:
+        ToSend.append("Tests passed OK, but has some output.")
+
+
+
+def call_test(testname, env, poller):
+    proc = None
+    try:
+        ToSend.append("Calling %s tests" % testname)
+        old_len = len(ToSend)
+        proc = Popen([os.path.join(BIN_PATH, testname)], bufsize=0, stdout=PIPE, stderr=STDOUT, cwd=PROJECT_ROOT,
+                     env=env, universal_newlines=True)
+        #print "Test is started with PID", proc.pid
+        poller.register(proc.stdout, READ_ONLY)
+        perfom_test(poller, proc)
+    except BaseException, e:
+        tstr = traceback.format_exc()
+        if isinstance(e, Exception):
+            ToSend.append("Tests call error:")
+            ToSend.append(tstr)
+        else:
+            ToSend.append("Tests has been interrupted:")
+            ToSend.append(tstr)
+            raise
+    finally:
+        if proc: poller.unregister(proc.stdout)
+        if len(ToSend) == old_len:
+            del ToSend[-1]
+        else:
+            ToSend.append('')
+
+
+def run():
+    env = os.environ.copy()
+    if env.get('LD_LIBRARY_PATH'):
+        env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
     else:
-        ok_notify()
-        print "OK"
+        env['LD_LIBRARY_PATH'] = LIB_PATH
+    poller = select.poll()
+
+    for name in TESTS:
+        call_test(name, env, poller)
+
+    if ToSend:
+        email_notify(ToSend)
 
 
 if __name__ == '__main__':
