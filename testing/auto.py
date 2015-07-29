@@ -20,6 +20,11 @@ READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
 READY = select.POLLIN | select.POLLPRI
 
 ToSend = []
+Env = os.environ.copy()
+
+
+def log(text):
+    print "[%s] %s" % (time.strftime("%Y:%m:%d %X %Z"), text)
 
 def email_notify(lines):
     msg = MIMEText.MIMEText(
@@ -53,7 +58,7 @@ def perfom_test(poller, proc):
     repeats = 0 # now many times the same 'strange' line repeats
     running_test_name = ''
     while True:
-        res = poller.poll(TIMEOUT)
+        res = poller.poll(PIPE_TIMEOUT)
         if res:
             event = res[0][1]
             if not(event & READY):
@@ -91,7 +96,7 @@ def perfom_test(poller, proc):
                 line += ch
         else:
             check_repeats(repeats)
-            ToSend.append("TEST SUIT HAS TIMED OUT")
+            ToSend.append("[ TEST SUIT HAS TIMED OUT ]")
             has_errors = True
             break
     if proc.poll() is None:
@@ -99,32 +104,34 @@ def perfom_test(poller, proc):
 
     if proc.returncode:
         check_repeats(repeats)
-        ToSend.append("TEST SUIT RETURNS CODE %s" % proc.returncode)
+        ToSend.append("[ TEST SUIT RETURNS CODE %s ]" % proc.returncode)
         has_errors = True
 
     if has_stranges and not has_errors:
-        ToSend.append("Tests passed OK, but has some output.")
+        ToSend.append("[ Tests passed OK, but has some output. ]")
 
 
 
-def call_test(testname, env, poller):
+def call_test(testname, poller):
+    ToSend.append("[ Calling %s tests ]" % testname)
+    old_len = len(ToSend)
     proc = None
     try:
-        ToSend.append("Calling %s tests" % testname)
-        old_len = len(ToSend)
         proc = Popen([os.path.join(BIN_PATH, testname)], bufsize=0, stdout=PIPE, stderr=STDOUT, cwd=PROJECT_ROOT,
-                     env=env, universal_newlines=True)
+                     env=Env, universal_newlines=True)
         #print "Test is started with PID", proc.pid
         poller.register(proc.stdout, READ_ONLY)
         perfom_test(poller, proc)
     except BaseException, e:
         tstr = traceback.format_exc()
         if isinstance(e, Exception):
-            ToSend.append("Tests call error:")
+            ToSend.append("[[ Tests call error:")
             ToSend.append(tstr)
+            ToSend.append("]]")
         else:
-            ToSend.append("Tests has been interrupted:")
+            ToSend.append("[[ Tests has been interrupted:")
             ToSend.append(tstr)
+            ToSend.append("]]")
             raise
     finally:
         if proc: poller.unregister(proc.stdout)
@@ -134,19 +141,49 @@ def call_test(testname, env, poller):
             ToSend.append('')
 
 
-def run():
-    env = os.environ.copy()
-    if env.get('LD_LIBRARY_PATH'):
-        env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
-    else:
-        env['LD_LIBRARY_PATH'] = LIB_PATH
+def run_tests():
+    ToSend = []
     poller = select.poll()
 
     for name in TESTS:
-        call_test(name, env, poller)
+        call_test(name, poller)
 
     if ToSend:
         email_notify(ToSend)
+
+
+def check_new_commits():
+    "Check the repository for new commits in the controlled branches"
+    log("Check for new commits")
+    
+
+def perform_check():
+    "Check for repository updates, get'em, build and test"
+    run_tests()
+
+
+
+def run():
+    log("Starting...")
+    old_cwd = os.getcwd()
+    if old_cwd != PROJECT_ROOT:
+        os.chdir(PROJECT_ROOT)
+        log("Switched to the project directory %s" % PROJECT_ROOT)
+    log("Watched branches: " + ','.join(BRANCHES))
+
+    if Env.get('LD_LIBRARY_PATH'):
+        Env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
+    else:
+        Env['LD_LIBRARY_PATH'] = LIB_PATH
+
+    while True:
+        t = time.time()
+        try:
+            perform_check()
+        except Exception:
+            traceback.print_exc()
+        time.sleep(max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t)))
+    log("Finishing...")
 
 
 if __name__ == '__main__':
