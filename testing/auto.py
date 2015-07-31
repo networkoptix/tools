@@ -64,7 +64,7 @@ def email_notify(lines):
 def email_build_error(branch, loglines, crash=False):
     cause = "Error building branch %s" if not crash else ("Branch %s build crashes!" + ("Traceback: "))
     msg = MIMEText.MIMEText(
-        ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
+        ("%s\nThe build log last %d lines are:\n" % (cause % branch, len(loglines))) +
         "\n".join(loglines) + "\n"
     )
     msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
@@ -234,10 +234,10 @@ def call_maven_build(branch, unit_tests=False):
             kwargs["cwd"] = os.path.join(kwargs["cwd"], UT_SUBDIR)
             branch += ' unit tests'
         log("Build branch %s..." % branch)
-        proc = Popen([MVN, "package"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
+        proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
         for line in proc.stdout:
             last_lines.append(line)
-            print ":: " + line,
+            #print ":: " + line,
             #if proc.poll() is not None:
             #    break
         if proc.poll() is None:
