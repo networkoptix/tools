@@ -25,7 +25,7 @@ LIB_PATH = os.path.join(TARGET_PATH, "lib/release")
 HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consumed by check, builds and tests
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 PIPE_TIMEOUT = 10 * 1000  # milliseconds
-BUILD_LOG_LINES = 200 # How may last lines are saved to report build process failure
+BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
 
 BRANCHES = ('dev_2.4.0', 'dev_2.5', 'prod_2.3.2')
 BRANCHES = ('dev_2.4.0',)

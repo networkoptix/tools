@@ -62,10 +62,10 @@ def email_notify(lines):
 
 
 def email_build_error(branch, loglines, crash=False):
-    cause = "Error building branch %s" if not crash else ("Branch %s build crashes!" + ("Traceback: "))
+    cause = ("Error building branch " + branch) if not crash else (("Branch %s build crashes!" % branch) + crash)
     msg = MIMEText.MIMEText(
-        ("%s\nThe build log last %d lines are:\n" % (cause % branch, len(loglines))) +
-        "\n".join(loglines) + "\n"
+        ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
+        "".join(loglines) + "\n"
     )
     msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
     email_send(MAIL_FROM, MAIL_TO, msg)
