@@ -15,13 +15,13 @@ def update(project, translationDir, projectFile):
         path = os.path.join(translationDir, entry)
         
         if (os.path.isdir(path)):
-            continue;
+            continue
                 
         if (not path[-2:] == 'ts'):
-            continue;
+            continue
             
         if (not entry.startswith(project)):
-            continue;
+            continue
             
         entries.append(path)
             
