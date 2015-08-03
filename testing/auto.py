@@ -7,6 +7,7 @@ from collections import deque
 import errno
 import select
 import traceback
+import argparse
 from smtplib import SMTP
 from email import MIMEText
 
@@ -15,6 +16,7 @@ from testconf import *
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
 STARTMARK = '[ RUN      ]'
+BARMARK = '[==========]'
 OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
@@ -23,9 +25,12 @@ READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
 READY = select.POLLIN | select.POLLPRI
 
 ToSend = []
+FailedTests = []
 Env = os.environ.copy()
 
-DEBUG = 1
+Args = {}
+
+DEBUG = True
 
 
 def log_print(s):
@@ -52,8 +57,9 @@ def email_send(mailfrom, mailto, msg):
     smtp.quit()
 
 
-def email_notify(lines):
+def email_notify(branch, lines):
     msg = MIMEText.MIMEText(
+        ("Branch %s unit tests run reports:\n\n" % branch) +
         "\n".join(lines) +
         ("\n\n[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"))
     )
@@ -87,64 +93,88 @@ def perfom_test(poller, proc):
     has_stranges = False
     repeats = 0 # now many times the same 'strange' line repeats
     running_test_name = ''
-    while True:
-        res = poller.poll(PIPE_TIMEOUT)
-        if res:
-            event = res[0][1]
-            if not(event & READY):
-                break
-            ch = proc.stdout.read(1)
-            if ch == '\n':
-                if len(line) > 0:
-                    if line.startswith(SUITMARK):
-                        if line.startswith(FAILMARK):
-                            ToSend.append(line) # line[len(FAILMARK):].strip())
-                            last_suit_line = ''
-                            running_test_name = ''
-                            has_errors = True
-                        elif line.startswith(OKMARK):
-                            if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
-                                ToSend.append(line)
-                                running_test_name = ''
-                        else:
-                            last_suit_line = line
-                    else: # gother test's messages
-                        if last_suit_line != '':
-                            ToSend.append(last_suit_line)
-                            if last_suit_line.startswith(STARTMARK):
-                                running_test_name = get_name(last_suit_line) # remember to print OK test result
-                            last_suit_line = ''
-                        if ToSend and (line == ToSend[-1]):
-                            repeats += 1
-                        else:
+    complete = False
+    to_send_count = 0
+    try:
+        while True:
+            res = poller.poll(PIPE_TIMEOUT)
+            if res:
+                event = res[0][1]
+                if not(event & READY):
+                    break
+                ch = proc.stdout.read(1)
+                if complete:
+                    continue
+                if ch == '\n':
+                    if len(line) > 0:
+                        debug(line.rstrip())
+                        if line.startswith(SUITMARK):
                             check_repeats(repeats)
                             repeats = 1
-                            ToSend.append(line)
-                        has_stranges = True
-                    line = ''
+                            last_suit_line = line
+                            if line.startswith(STARTMARK):
+                                running_test_name = get_name(line) # remember to print OK test result and for abnormal termination case
+                                to_send_count = len(ToSend)
+                            elif line.startswith(FAILMARK) and not complete:
+                                debug("Appending: %s", line.rstrip())
+                                FailedTests.append(get_name(line))
+                                ToSend.append(line)
+                                running_test_name = ''
+                                has_errors = True
+                            elif line.startswith(OKMARK):
+                                if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
+                                    if to_send_count < len(ToSend):
+                                        ToSend.append(line)
+                                else:
+                                    debug("!!!! running_test_name == get_name(line): %s; %s", running_test_name, line.rstrip())
+                                running_test_name = ''
+                            elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
+                                complete = True
+                                debug("Complete!")
+                        else: # gather test's messages
+                            if last_suit_line != '':
+                                ToSend.append(last_suit_line)
+                                last_suit_line = ''
+                            if ToSend and (line == ToSend[-1]):
+                                repeats += 1
+                            else:
+                                check_repeats(repeats)
+                                repeats = 1
+                                ToSend.append(line)
+                            has_stranges = True
+                        line = ''
+                else:
+                    line += ch
             else:
-                line += ch
-        else:
+                check_repeats(repeats)
+                ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s]" % running_test_name)
+                FailedTests.append(running_test_name)
+                has_errors = True
+                break
+
+        if proc.poll() is None:
+            proc.terminate()
+            proc.wait()
+
+        if proc.returncode != 0:
             check_repeats(repeats)
-            ToSend.append("[ TEST SUIT HAS TIMED OUT ]")
+            if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
+                ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
+                FailedTests.append(running_test_name)
+            ToSend.append("[ TEST SUIT RETURNS CODE %s ]" % proc.returncode)
             has_errors = True
-            break
-    if proc.poll() is None:
-        proc.terminate()
 
-    if proc.returncode:
-        check_repeats(repeats)
-        ToSend.append("[ TEST SUIT RETURNS CODE %s ]" % proc.returncode)
-        has_errors = True
+        if has_stranges and not has_errors:
+            ToSend.append("[ Tests passed OK, but has some output. ]")
 
-    if has_stranges and not has_errors:
-        ToSend.append("[ Tests passed OK, but has some output. ]")
-
+    finally:
+        if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
+            FailedTests.append(running_test_name)
 
 
 def call_test(testname, poller):
-    debug("[ Calling %s tests ]" % testname)
-    ToSend.append("[ Calling %s tests ]" % testname)
+    debug("[ Calling %s test suit ]" % testname)
+    ToSend.append("[ Calling %s test suit ]" % testname)
     old_len = len(ToSend)
     proc = None
     try:
@@ -175,15 +205,25 @@ def call_test(testname, poller):
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
-    ToSend = []
+    lines = []
     poller = select.poll()
 
     for name in TESTS:
+        del ToSend[:]
+        del FailedTests[:]
         call_test(name, poller)
+        if FailedTests:
+            debug("Failed tests: %s", FailedTests)
+            if lines:
+                lines.append('')
+            lines.append("Tests, failed in the %s test suit:" % branch)
+            lines.extend("\t" + name for name in FailedTests)
+            lines.append('')
+            lines.extend(ToSend)
 
-    if ToSend:
-        debug("Tests output:\n" + "\n".join(ToSend))
-        email_notify(ToSend)
+    if lines:
+        debug("Tests output:\n" + "\n".join(lines))
+        email_notify(branch, lines)
 
 
 def filter_branch_names(branches):
@@ -203,14 +243,13 @@ def check_new_commits(bundle_fn):
     try:
         ready_branches = subprocess.check_output(HG_IN + ['--bundle', bundle_fn], **SUBPROC_ARGS)
         if ready_branches:
-            debug("Commits found in branches: %s", ready_branches)
             branches = filter_branch_names(ready_branches.split(','))
-            debug("Filtered branches: %s", branches)
+            debug("Commits found in branches: %s", branches)
             if branches:
                 return branches
     except CalledProcessError, e:
         if e.returncode != 1:
-            debug("hg in call returns %s code. Output:\n%s", e.returncode, e.output)
+            debug("`hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
             raise
     log("No new commits found for controlled branches.")
     return []
@@ -221,6 +260,7 @@ def update_repo(branches, bundle_fn):
     debug("Using bundle file %s", bundle_fn)
     #try:
     subprocess.check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
+    os.remove(bundle_fn)
     #except CalledProcessError, e:
 
 
@@ -237,9 +277,6 @@ def call_maven_build(branch, unit_tests=False):
         proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
         for line in proc.stdout:
             last_lines.append(line)
-            #print ":: " + line,
-            #if proc.poll() is not None:
-            #    break
         if proc.poll() is None:
             debug("Maven call has stoped print lines but isn't terminated yet")
             proc.terminate()
@@ -279,14 +316,22 @@ def perform_check():
 
 
 def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
+    parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
+    parser.add_argument("-b", "--build", action='store_true', help="Build all (including unit tests) and run unit tests")
+    parser.add_argument("--debug", action='store_true', help="Run in debug mode")
+    parser.add_argument("--prod", action='store_true', help="Run in production mode")
+    global Args
+    Args = parser.parse_args()
+    global DEBUG
+    if DEBUG and Args.prod:
+        DEBUG = False
+    elif not DEBUG and Args.debug:
+        DEBUG = True
+    if DEBUG:
+        print "Debug mode ON"
     log("Starting...")
-#    start_cwd = os.getcwd()
-#    if TEMP == '':
-#        global TEMP
-#        TEMP = start_cwd
-#    if old_cwd != PROJECT_ROOT:
-#        os.chdir(PROJECT_ROOT)
- #       log("Switched to the project directory %s" % PROJECT_ROOT)
     if not os.path.isdir(PROJECT_ROOT):
         raise EnvironmentError(errno.ENOENT, "The project root directory not found", PROJECT_ROOT)
     if not os.access(PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
@@ -301,7 +346,15 @@ def run():
     while True:
         t = time.time()
         try:
-            perform_check()
+            if Args.test_only:
+                run_tests('(test only run)')
+                break
+            elif Args.build:
+                br = "(build and run tests)"
+                if call_maven_build(br) and call_maven_build(br, unit_tests=True):
+                    run_tests(br)
+            else:
+                perform_check()
         except Exception:
             traceback.print_exc()
         time.sleep(max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t)))
