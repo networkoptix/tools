@@ -44,6 +44,7 @@ HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"] + [ "--branch=%s" % b for b in BRANCHES ]
+HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|date};{desc}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
 HG_UP = [HG, "update", "--rev"]
 HG_PURGE = [HG, "purge", "--all"]

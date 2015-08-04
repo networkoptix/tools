@@ -26,6 +26,7 @@ READY = select.POLLIN | select.POLLPRI
 
 ToSend = []
 FailedTests = []
+Changesets = {}
 Env = os.environ.copy()
 
 Args = {}
@@ -57,9 +58,18 @@ def email_send(mailfrom, mailto, msg):
     smtp.quit()
 
 
+def format_changesets(branch):
+    chs = Changesets.get(branch, [])
+    if chs and isinstance(chs[0], dict):
+        return "Changesets:\n" + "\n".join("[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % v for v in chs)
+    else:
+        return "\n".join(chs)
+
 def email_notify(branch, lines):
+
     msg = MIMEText.MIMEText(
-        ("Branch %s unit tests run reports:\n\n" % branch) +
+        ("Branch %s unit tests run report.\n\n" % branch) +
+        format_changesets(branch) + "\n\n" +
         "\n".join(lines) +
         ("\n\n[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"))
     )
@@ -70,6 +80,7 @@ def email_notify(branch, lines):
 def email_build_error(branch, loglines, crash=False):
     cause = ("Error building branch " + branch) if not crash else (("Branch %s build crashes!" % branch) + crash)
     msg = MIMEText.MIMEText(
+        format_changesets(branch) + "\n" +
         ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
         "".join(loglines) + "\n"
     )
@@ -216,7 +227,7 @@ def run_tests(branch):
             debug("Failed tests: %s", FailedTests)
             if lines:
                 lines.append('')
-            lines.append("Tests, failed in the %s test suit:" % branch)
+            lines.append("Tests, failed in the %s test suit:" % name)
             lines.extend("\t" + name for name in FailedTests)
             lines.append('')
             lines.extend(ToSend)
@@ -237,16 +248,37 @@ def filter_branch_names(branches):
     return filtered
 
 
+def get_changesets(branch, bundle_fn):
+    debug("Run: " + (' '.join(HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
+    proc = subprocess.Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
+    (outdata, errdata) = proc.communicate()
+    if proc.returncode == 0:
+        Changesets[branch] = [ dict(zip(['branch','author','node','date','desc'], line.split(';',4))) for line in outdata.splitlines() ]
+        return True
+    elif proc.returncode == 1:
+        debug("No changes found for branch %s", branch)
+    else:
+        Changesets[branch] = [
+            "Error getting changeset list info.",
+            "hg return code = %s" % proc.returncode,
+            "STDOUT: %s" % outdata,
+            "STDERR: %s" % errdata,
+            '']
+    return False
+
+
 def check_new_commits(bundle_fn):
     "Check the repository for new commits in the controlled branches"
     log("Check for new commits")
     try:
+        debug("Run: %s", ' '.join(HG_IN + ['--bundle', bundle_fn]))
         ready_branches = subprocess.check_output(HG_IN + ['--bundle', bundle_fn], **SUBPROC_ARGS)
         if ready_branches:
             branches = filter_branch_names(ready_branches.split(','))
             debug("Commits found in branches: %s", branches)
             if branches:
-                return branches
+                Changesets.clear()
+                return [ b for b in branches if get_changesets(b, bundle_fn) ]
     except CalledProcessError, e:
         if e.returncode != 1:
             debug("`hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
@@ -256,11 +288,10 @@ def check_new_commits(bundle_fn):
 
 
 def update_repo(branches, bundle_fn):
-    log("Pulling branches %s" % (', '.join(branches)))
+    log("Pulling branches: %s" % (', '.join(branches)))
     debug("Using bundle file %s", bundle_fn)
     #try:
     subprocess.check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
-    os.remove(bundle_fn)
     #except CalledProcessError, e:
 
 
@@ -270,8 +301,8 @@ def call_maven_build(branch, unit_tests=False):
     kwargs = SUBPROC_ARGS
     try:
         if unit_tests:
-            kwargs = kwargs.copy()
-            kwargs["cwd"] = os.path.join(kwargs["cwd"], UT_SUBDIR)
+            kwargs = SUBPROC_ARGS.copy()
+            kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
             branch += ' unit tests'
         log("Build branch %s..." % branch)
         proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
@@ -308,10 +339,13 @@ def perform_check():
     bundle_fn = os.path.join(TEMP, "in.hg")
     branches = check_new_commits(bundle_fn)
     if branches:
-        update_repo(branches, bundle_fn)
+        if not Args.check_only:
+            update_repo(branches, bundle_fn)
         for branch in branches:
-            if prepare_branch(branch):
+            if (not Args.check_only) and prepare_branch(branch):
                 run_tests(branch)
+    if os.access(bundle_fn, os.F_OK):
+        os.remove(bundle_fn)
 
 
 
@@ -320,6 +354,7 @@ def run():
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
     parser.add_argument("-b", "--build", action='store_true', help="Build all (including unit tests) and run unit tests")
+    parser.add_argument("-c", "--check-only", action='store_true', help="Only checks if there any new changes to get")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode")
     parser.add_argument("--prod", action='store_true', help="Run in production mode")
     global Args
@@ -355,6 +390,8 @@ def run():
                     run_tests(br)
             else:
                 perform_check()
+                if Args.check_only:
+                    break
         except Exception:
             traceback.print_exc()
         time.sleep(max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t)))
