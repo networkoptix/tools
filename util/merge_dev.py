@@ -6,10 +6,14 @@ import sys
 import os
 import argparse
 
-targetBranch = 'prod_2.3.2';
+targetBranch = '.';
 ignoredCommits = ['Merge', '']
 verbose = False
 header = 'Merge Changelog:'
+
+def getCurrentBranch():
+    command = 'hg branch'
+    return subprocess.check_output(command, shell=True).strip('\n')
 
 def execCommand(command):
     if verbose:
@@ -44,16 +48,18 @@ def main():
     global verbose
     verbose = args.verbose
     
+    global targetBranch
     target = args.target
     if target:
-        global targetBranch
         targetBranch = target
+    else:      
+        targetBranch = getCurrentBranch()
     
     ignoredCommits.append('Merge with {0}'.format(targetBranch))
     
     revision = args.rev
     if not revision:
-        revision = 'dev_2.3.1'
+        revision = '.'
    
     if args.preview:
         print getChangelog(revision)
