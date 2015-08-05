@@ -69,9 +69,9 @@ def email_notify(branch, lines):
 
     msg = MIMEText.MIMEText(
         ("Branch %s unit tests run report.\n\n" % branch) +
-        format_changesets(branch) + "\n\n" +
         "\n".join(lines) +
-        ("\n\n[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"))
+        ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) +
+        format_changesets(branch) + "\n"
     )
     msg['Subject'] = "Autotest run results"
     email_send(MAIL_FROM, MAIL_TO, msg)
@@ -275,7 +275,7 @@ def check_new_commits(bundle_fn):
         ready_branches = subprocess.check_output(HG_IN + ['--bundle', bundle_fn], **SUBPROC_ARGS)
         if ready_branches:
             branches = filter_branch_names(ready_branches.split(','))
-            debug("Commits found in branches: %s", branches)
+            debug("Commits are found in branches: %s", branches)
             if branches:
                 Changesets.clear()
                 return [ b for b in branches if get_changesets(b, bundle_fn) ]
