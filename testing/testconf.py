@@ -32,7 +32,16 @@ BRANCHES = ('dev_2.4.0',)
 TESTS = ('common_ut', 'mediaserver_core_ut')
 UT_SUBDIR = "unit_tests"
 
-MAIL_FROM = "autotest-script"
+SMTP_ADDR = '127.0.0.1'
+SMTP_LOGIN = ''
+SMTP_PASS = ''
+SMTP_ADDR = 'smtp.gmail.com:587'
+SMTP_LOGIN = 'dlavrentyuk@networkoptix.com'
+SMTP_PASS = ''
+
+
+MAIL_FROM = 'dlavrentyuk@networkoptix.com'
+MAIL_TO = 'test-results@networkoptix.com'
 MAIL_TO = 'dlavrentyuk@networkoptix.com'
 
 #TODO
@@ -44,7 +53,7 @@ HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"] + [ "--branch=%s" % b for b in BRANCHES ]
-HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|date};{desc}\n"]
+HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
 HG_UP = [HG, "update", "--rev"]
 HG_PURGE = [HG, "purge", "--all"]

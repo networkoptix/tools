@@ -52,7 +52,11 @@ def debug(text, *args):
 def email_send(mailfrom, mailto, msg):
     msg['From'] = mailfrom
     msg['To'] = mailto
-    smtp = SMTP('localhost')
+    smtp = SMTP(SMTP_ADDR)
+    if SMTP_LOGIN:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(SMTP_LOGIN, SMTP_PASS)
     #smtp.set_debuglevel(1)
     smtp.sendmail(mailfrom, mailto, msg.as_string())
     smtp.quit()
@@ -61,7 +65,12 @@ def email_send(mailfrom, mailto, msg):
 def format_changesets(branch):
     chs = Changesets.get(branch, [])
     if chs and isinstance(chs[0], dict):
-        return "Changesets:\n" + "\n".join("[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % v for v in chs)
+        #for v in chs:
+        #    debug("Changeset: %s", v)
+        return "Changesets:\n" + "\n".join(
+            "\t%s" % v['line'] if 'line' in v else
+            "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % v
+            for v in chs)
     else:
         return "\n".join(chs)
 
@@ -70,7 +79,7 @@ def email_notify(branch, lines):
     msg = MIMEText.MIMEText(
         ("Branch %s unit tests run report.\n\n" % branch) +
         "\n".join(lines) +
-        ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) +
+        ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) + "\n" +
         format_changesets(branch) + "\n"
     )
     msg['Subject'] = "Autotest run results"
@@ -80,7 +89,7 @@ def email_notify(branch, lines):
 def email_build_error(branch, loglines, crash=False):
     cause = ("Error building branch " + branch) if not crash else (("Branch %s build crashes!" % branch) + crash)
     msg = MIMEText.MIMEText(
-        format_changesets(branch) + "\n" +
+        format_changesets(branch) + "\n\n" +
         ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
         "".join(loglines) + "\n"
     )
@@ -253,7 +262,11 @@ def get_changesets(branch, bundle_fn):
     proc = subprocess.Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
     (outdata, errdata) = proc.communicate()
     if proc.returncode == 0:
-        Changesets[branch] = [ dict(zip(['branch','author','node','date','desc'], line.split(';',4))) for line in outdata.splitlines() ]
+        Changesets[branch] = [
+            ({"line": line.lstrip()} if line.startswith("\t") else
+            dict(zip(['branch','author','node','date','desc'], line.split(';',4))))
+            for line in outdata.splitlines()
+        ]
         return True
     elif proc.returncode == 1:
         debug("No changes found for branch %s", branch)
@@ -391,6 +404,7 @@ def run():
             else:
                 perform_check()
                 if Args.check_only:
+                    debug("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
                     break
         except Exception:
             traceback.print_exc()
