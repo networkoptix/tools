@@ -361,15 +361,38 @@ def perform_check():
         os.remove(bundle_fn)
 
 
-
 def run():
+    try:
+        if Args.test_only:
+            run_tests('(test only run, current branch)')
+            break
+        elif not Args.auto:
+            br = "(build and run tests, current branch)"
+            if call_maven_build(br) and call_maven_build(br, unit_tests=True):
+                run_tests(br)
+        else:
+            perform_check()
+            if Args.hg_only:
+                log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
+                break
+    except Exception:
+        traceback.print_exc()
+
+
+def main():
     parser = argparse.ArgumentParser()
+    #TODO: add parameters:
+    # usage
+    # description
+    parser.add_argument("-a", "--auto", action="store true", help="Continuos autotest mode.")
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
-    parser.add_argument("-b", "--build", action='store_true', help="Build all (including unit tests) and run unit tests")
-    parser.add_argument("-c", "--check-only", action='store_true', help="Only checks if there any new changes to get")
+    parser.add_argument("-b", "--branch", action='append', help="Branches to test instead of configured. Use . for a current branch.")
+    parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
+    parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one"):memoryview
     parser.add_argument("--debug", action='store_true', help="Run in debug mode")
     parser.add_argument("--prod", action='store_true', help="Run in production mode")
+    parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
     global Args
     Args = parser.parse_args()
     global DEBUG
@@ -391,26 +414,29 @@ def run():
     else:
         Env['LD_LIBRARY_PATH'] = LIB_PATH
 
-    while True:
-        t = time.time()
-        try:
-            if Args.test_only:
-                run_tests('(test only run)')
-                break
-            elif Args.build:
-                br = "(build and run tests)"
-                if call_maven_build(br) and call_maven_build(br, unit_tests=True):
-                    run_tests(br)
-            else:
-                perform_check()
-                if Args.check_only:
-                    debug("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
-                    break
-        except Exception:
-            traceback.print_exc()
-        time.sleep(max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t)))
-    log("Finishing...")
+    if Args.conf:
+        print "Configuration parameters used:"
+        print "DEBUG = %s" % DEBUG
+        print "PROJECT_ROOT = %s" % PROJECT_ROOT
+        print "BRANCHES = %s" % BRANCHES
+        print "TESTS = %s" % TESTS
+        print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
+        print "PIPE_TIMEOUT = %s" % PIPE_TIMEOUT
+        print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
+        exit(0)
+
+    if Args.auto:
+        while True:
+            t = time.time()
+            log("Checking...")
+            run()
+            t = max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t))
+            log("Sleeping %s secs...", t)
+            time.sleep(t)
+        log("Finishing...")
+    else:
+        run()
 
 
 if __name__ == '__main__':
-    run()
+    main()
