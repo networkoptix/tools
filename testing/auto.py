@@ -65,8 +65,6 @@ def email_send(mailfrom, mailto, msg):
 def format_changesets(branch):
     chs = Changesets.get(branch, [])
     if chs and isinstance(chs[0], dict):
-        #for v in chs:
-        #    debug("Changeset: %s", v)
         return "Changesets:\n" + "\n".join(
             "\t%s" % v['line'] if 'line' in v else
             "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % v
@@ -75,15 +73,18 @@ def format_changesets(branch):
         return "\n".join(chs)
 
 def email_notify(branch, lines):
-
-    msg = MIMEText.MIMEText(
+    text = (
         ("Branch %s unit tests run report.\n\n" % branch) +
         "\n".join(lines) +
         ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) + "\n" +
         format_changesets(branch) + "\n"
     )
-    msg['Subject'] = "Autotest run results"
-    email_send(MAIL_FROM, MAIL_TO, msg)
+    if Args.stdout:
+        print text
+    else:
+        msg = MIMEText.MIMEText(text)
+        msg['Subject'] = "Autotest run results"
+        email_send(MAIL_FROM, MAIL_TO, msg)
 
 
 def email_build_error(branch, loglines, crash=False):
@@ -351,11 +352,10 @@ def perform_check():
     "Check for repository updates, get'em, build and test"
     bundle_fn = os.path.join(TEMP, "in.hg")
     branches = check_new_commits(bundle_fn)
-    if branches:
-        if not Args.check_only:
-            update_repo(branches, bundle_fn)
+    if branches and not Args.hg_only:
+        update_repo(branches, bundle_fn)
         for branch in branches:
-            if (not Args.check_only) and prepare_branch(branch):
+            if prepare_branch(branch):
                 run_tests(branch)
     if os.access(bundle_fn, os.F_OK):
         os.remove(bundle_fn)
@@ -365,7 +365,6 @@ def run():
     try:
         if Args.test_only:
             run_tests('(test only run, current branch)')
-            break
         elif not Args.auto:
             br = "(build and run tests, current branch)"
             if call_maven_build(br) and call_maven_build(br, unit_tests=True):
@@ -374,27 +373,32 @@ def run():
             perform_check()
             if Args.hg_only:
                 log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
-                break
     except Exception:
         traceback.print_exc()
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser()
     #TODO: add parameters:
     # usage
     # description
-    parser.add_argument("-a", "--auto", action="store true", help="Continuos autotest mode.")
-    parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
+    parser.add_argument("-a", "--auto", action="store_true", help="Continuos autotest mode.")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
-    parser.add_argument("-b", "--branch", action='append', help="Branches to test instead of configured. Use . for a current branch.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
-    parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one"):memoryview
-    parser.add_argument("--debug", action='store_true', help="Run in debug mode")
-    parser.add_argument("--prod", action='store_true', help="Run in production mode")
+    parser.add_argument("-b", "--branch", action='append', help="Branches to test instead of configured. Use . for a current branch.")
+    parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't build the project itself (use with -t).")
+    parser.add_argument("-n", "--no-build", action="store_true", help="Do not build the project and unit tests (use with -t).")
+    parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
+    parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
+    parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
+    parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
+    parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
     global Args
     Args = parser.parse_args()
+
+
+def check_debug_mode():
     global DEBUG
     if DEBUG and Args.prod:
         DEBUG = False
@@ -402,28 +406,51 @@ def main():
         DEBUG = True
     if DEBUG:
         print "Debug mode ON"
-    log("Starting...")
+
+
+def set_paths():
     if not os.path.isdir(PROJECT_ROOT):
         raise EnvironmentError(errno.ENOENT, "The project root directory not found", PROJECT_ROOT)
     if not os.access(PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
         raise IOError(errno.EACCES, "Full access to the project root directory required", PROJECT_ROOT)
-    log("Watched branches: " + ','.join(BRANCHES))
 
     if Env.get('LD_LIBRARY_PATH'):
         Env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
     else:
         Env['LD_LIBRARY_PATH'] = LIB_PATH
 
+
+def change_branch_list():
+    global BRANCHES
+    BRANCHES = Args.branch
+
+
+def show_conf():
+    print "Configuration parameters used:"
+    print "DEBUG = %s" % DEBUG
+    print "PROJECT_ROOT = %s" % PROJECT_ROOT
+    print "BRANCHES = %s" % (', '.join(BRANCHES),)
+    print "TESTS = %s" % (', '.join(TESTS),)
+    print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
+    print "PIPE_TIMEOUT = %s" % PIPE_TIMEOUT
+    print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
+
+
+def main():
+    parse_args()
+    check_debug_mode()
+    log("Starting...")
+
+    set_paths()
+
+    if Args.branch:
+        change_branch_list()
+
     if Args.conf:
-        print "Configuration parameters used:"
-        print "DEBUG = %s" % DEBUG
-        print "PROJECT_ROOT = %s" % PROJECT_ROOT
-        print "BRANCHES = %s" % BRANCHES
-        print "TESTS = %s" % TESTS
-        print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
-        print "PIPE_TIMEOUT = %s" % PIPE_TIMEOUT
-        print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
+        show_conf() # changes done by other options are shown here
         exit(0)
+
+    log("Watched branches: " + ','.join(BRANCHES))
 
     if Args.auto:
         while True:
