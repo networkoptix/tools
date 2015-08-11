@@ -298,11 +298,13 @@ def check_new_commits(bundle_fn):
     "Check the repository for new commits in the controlled branches"
     log("Check for new commits")
     try:
-        debug("Run: %s", ' '.join(HG_IN + ['--bundle', bundle_fn]))
-        ready_branches = subprocess.check_output(HG_IN + ['--bundle', bundle_fn], **SUBPROC_ARGS)
+        cmd = HG_IN + [ "--branch=%s" % b for b in BRANCHES ] + ['--bundle', bundle_fn]
+        debug("Run: %s", ' '.join(cmd))
+        ready_branches = subprocess.check_output(cmd, **SUBPROC_ARGS)
         if ready_branches:
-            branches = filter_branch_names(ready_branches.split(','))
-            debug("Commits are found in branches: %s", branches)
+            branches = ['.'] if BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
+            if BRANCHES[0] != '.':
+                debug("Commits are found in branches: %s", branches)
             if branches:
                 Changesets.clear()
                 return [ b for b in branches if get_changesets(b, bundle_fn) ]
@@ -329,16 +331,21 @@ def call_maven_build(branch, unit_tests=False):
         line += " (branch %s)" % branch
     log("%s..." % line)
     kwargs = SUBPROC_ARGS.copy()
+    cmd = [MVN, "package", "-e"]
+    if MVN_THREADS:
+        cmd.extend(["-T", "%d" % MVN_THREADS])
+    if unit_tests:
+        kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
+        branch += ' unit tests'
+    #debug("MVN: %s", cmd)
+    time.sleep(1)
     try:
-        if unit_tests:
-            kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
-            branch += ' unit tests'
         if Args.full_build_log:
             kwargs.pop('universal_newlines')
-            proc = Popen([MVN, "package", "-e"], **kwargs)
+            proc = Popen(cmd, **kwargs)
             proc.wait()
         else:
-            proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
+            proc = Popen(cmd, bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
             for line in proc.stdout:
                 last_lines.append(line)
             if proc.poll() is None:
@@ -416,6 +423,7 @@ def parse_args():
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Use '.' for a current branch. Multiple times accepted.")
     parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
+    parser.add_argument("-T", "--threads", type=int, help="Number of threads to be used by maven (for -T mvn argument)")
     # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
     parser.add_argument("-l", "--full-build-log", action="store_true", help="Print full build log, immediate. Use with -o only.")
@@ -430,6 +438,9 @@ def parse_args():
         exit(1)
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
+    if Args.threads:
+        global MVN_THREADS
+        MVN_THREADS = Args.threads
 
 
 def check_debug_mode():
@@ -458,7 +469,8 @@ def change_branch_list():
     global BRANCHES
     BRANCHES = Args.branch
     if '.' in BRANCHES and len(BRANCHES) > 1:
-        BRANCHES = ['.'] + [p for p in BRANCHES if p != '.']
+        log("WARNING: there is '.' branch in the branch list -- ALL other branches will be skipped!")
+        BRANCHES = ['.']
 
 
 def show_conf():
@@ -470,6 +482,7 @@ def show_conf():
     print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
     print "PIPE_TIMEOUT = %s" % PIPE_TIMEOUT
     print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
+    print "MVN_THREADS = %s" % MVN_THREADS
 
 
 def main():
@@ -507,3 +520,5 @@ if __name__ == '__main__':
     main()
 
 # TODO: with -o turn off output lines accumulator, just print 'em
+# Check . branch processing in full test
+#

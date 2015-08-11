@@ -4,7 +4,8 @@ The main configuration file for (auto-)test scripts.
 """
 import os, os.path
 
-PROJECT_ROOT = "~/develop/nvms-tmp"
+PROJECT_ROOT = "~/develop/netoptix_vms"
+PROJECT_ROOT = "~/develop/nvms-tmp-"
 TEMP = '' # temporary files directory, leave it '' for the process' current directory
 
 ######################################################################
@@ -26,6 +27,8 @@ HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consum
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 PIPE_TIMEOUT = 10 * 1000  # milliseconds
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
+
+MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)q
 
 BRANCHES = ('dev_2.4.0', 'dev_2.5', 'prod_2.3.2')
 BRANCHES = ('dev_2.4.0',)
