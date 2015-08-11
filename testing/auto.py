@@ -89,13 +89,17 @@ def email_notify(branch, lines):
 
 def email_build_error(branch, loglines, crash=False):
     cause = ("Error building branch " + branch) if not crash else (("Branch %s build crashes!" % branch) + crash)
-    msg = MIMEText.MIMEText(
+    text = (
         format_changesets(branch) + "\n\n" +
         ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
         "".join(loglines) + "\n"
     )
-    msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
-    email_send(MAIL_FROM, MAIL_TO, msg)
+    if Args.stdout:
+        print text
+    else:
+        msg = MIMEText.MIMEText(text)
+        msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
+        email_send(MAIL_FROM, MAIL_TO, msg)
 
 def get_name(line):
     m = NameRx.match(line)
@@ -199,26 +203,35 @@ def call_test(testname, poller):
     old_len = len(ToSend)
     proc = None
     try:
-        proc = Popen([os.path.join(BIN_PATH, testname)], bufsize=0, stdout=PIPE, stderr=STDOUT,
-                    env=Env, **SUBPROC_ARGS)
+        testpath = os.path.join(BIN_PATH, testname)
+        if not os.access(testpath, os.F_OK):
+            FailedTests.append('(all)')
+            ToSend.append("Testsuit '%s' not found!" % testpath)
+            return
+        if not os.access(testpath, os.R_OK|os.X_OK):
+            FailedTests.append('(all)')
+            ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
+            return
+        proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         poller.register(proc.stdout, READ_ONLY)
         perfom_test(poller, proc)
     except BaseException, e:
         tstr = traceback.format_exc()
+        print tstr
         if isinstance(e, Exception):
             ToSend.append("[[ Tests call error:")
             ToSend.append(tstr)
             ToSend.append("]]")
         else:
-            ToSend.append("[[ Tests has been interrupted:")
-            ToSend.append(tstr)
-            ToSend.append("]]")
-            raise
+            s = "[[ Tests has been interrupted:\n%s\n]]" % tstr
+            ToSend.append(s)
+            log(s)
+            raise # it wont be catched and will allow the script to terminate
     finally:
         if proc: poller.unregister(proc.stdout)
         if len(ToSend) == old_len:
-            debug("No intereating output from these tests")
+            debug("No interesting output from these tests")
             del ToSend[-1]
         else:
             ToSend.append('')
@@ -311,32 +324,40 @@ def update_repo(branches, bundle_fn):
 
 def call_maven_build(branch, unit_tests=False):
     last_lines = deque(maxlen=BUILD_LOG_LINES)
-    log("Build netoptix_vms...")
-    kwargs = SUBPROC_ARGS
+    line = "Build unit tests" if unit_tests else "Build netoptix_vms"
+    if branch != '.':
+        line += " (branch %s)" % branch
+    log("%s..." % line)
+    kwargs = SUBPROC_ARGS.copy()
     try:
         if unit_tests:
-            kwargs = SUBPROC_ARGS.copy()
             kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
             branch += ' unit tests'
-        log("Build branch %s..." % branch)
-        proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
-        for line in proc.stdout:
-            last_lines.append(line)
-        if proc.poll() is None:
-            debug("Maven call has stoped print lines but isn't terminated yet")
-            proc.terminate()
+        if Args.full_build_log:
+            kwargs.pop('universal_newlines')
+            proc = Popen([MVN, "package", "-e"], **kwargs)
+            proc.wait()
+        else:
+            proc = Popen([MVN, "package", "-e"], bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
+            for line in proc.stdout:
+                last_lines.append(line)
+            if proc.poll() is None:
+                debug("Maven call has stoped print lines but isn't terminated yet")
+                proc.terminate()
         if proc.returncode != 0:
-            log("Error calling maven")
-            log("The last %d log lines:" % len(last_lines))
-            log_print("".join(last_lines))
-            email_build_error(branch, last_lines)
+            log("Error calling maven: ret.code = %s" % proc.returncode)
+            if not Args.full_build_log:
+                log("The last %d log lines:" % len(last_lines))
+                log_print("".join(last_lines))
+                email_build_error(branch, last_lines)
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
         log("maven call has failed: %s" % tb)
-        log("The last %d log lines:" % len(last_lines))
-        log_print("".join(last_lines))
-        email_build_error(branch, last_lines, crash=tb)
+        if not Args.full_build_log:
+            log("The last %d log lines:" % len(last_lines))
+            log_print("".join(last_lines))
+            email_build_error(branch, last_lines, crash=tb)
         return False
     return True
 
@@ -363,16 +384,16 @@ def perform_check():
 
 def run():
     try:
-        if Args.test_only:
-            run_tests('(test only run, current branch)')
-        elif not Args.auto:
-            br = "(build and run tests, current branch)"
-            if call_maven_build(br) and call_maven_build(br, unit_tests=True):
-                run_tests(br)
-        else:
+        if Args.full:
             perform_check()
             if Args.hg_only:
                 log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
+        else:
+            if Args.test_only:
+                log("Test only run...")
+            if Args.test_only or (
+                    (Args.build_ut_only or call_maven_build('.')) and call_maven_build('.', unit_tests=True)):
+                run_tests('.')
     except Exception:
         traceback.print_exc()
 
@@ -382,20 +403,33 @@ def parse_args():
     #TODO: add parameters:
     # usage
     # description
-    parser.add_argument("-a", "--auto", action="store_true", help="Continuos autotest mode.")
+    #----
+    # Run mode
+    # No args -- just build and test current project
+    # (could be modified by -p, -t, -u)
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
+    parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
+    parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
-    parser.add_argument("-b", "--branch", action='append', help="Branches to test instead of configured. Use . for a current branch.")
-    parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't build the project itself (use with -t).")
-    parser.add_argument("-n", "--no-build", action="store_true", help="Do not build the project and unit tests (use with -t).")
+    parser.add_argument("-f", "--full", action="store_true", help="Full test for all configuged branches. (Not required with -b)")
+    parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
+    # change settings
+    parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Use '.' for a current branch. Multiple times accepted.")
     parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
+    # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
-    parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as errors")
+    parser.add_argument("-l", "--full-build-log", action="store_true", help="Print full build log, immediate. Use with -o only.")
+    parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as error, report even if no errors but some strange output from tests")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
-    parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
+    #
     global Args
     Args = parser.parse_args()
+    if Args.full_build_log and not Args.stdout:
+        print "ERROR: --full-build-log option requires --stdout!"
+        exit(1)
+    if Args.auto or Args.hg_only or Args.branch:
+        Args.full = True # to simplify checks in run()
 
 
 def check_debug_mode():
@@ -404,7 +438,7 @@ def check_debug_mode():
         DEBUG = False
     elif not DEBUG and Args.debug:
         DEBUG = True
-    if DEBUG:
+    if DEBUG and not Args.conf:
         print "Debug mode ON"
 
 
@@ -423,6 +457,8 @@ def set_paths():
 def change_branch_list():
     global BRANCHES
     BRANCHES = Args.branch
+    if '.' in BRANCHES and len(BRANCHES) > 1:
+        BRANCHES = ['.'] + [p for p in BRANCHES if p != '.']
 
 
 def show_conf():
@@ -439,7 +475,8 @@ def show_conf():
 def main():
     parse_args()
     check_debug_mode()
-    log("Starting...")
+    if Args.auto:
+        log("Starting...")
 
     set_paths()
 
@@ -450,7 +487,8 @@ def main():
         show_conf() # changes done by other options are shown here
         exit(0)
 
-    log("Watched branches: " + ','.join(BRANCHES))
+    if Args.full:
+        log("Watched branches: " + ','.join(BRANCHES))
 
     if Args.auto:
         while True:
@@ -467,3 +505,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# TODO: with -o turn off output lines accumulator, just print 'em
