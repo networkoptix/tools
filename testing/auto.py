@@ -439,7 +439,7 @@ def parse_args():
         exit(1)
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
-    if Args.threads:
+    if Args.threads is not None:
         global MVN_THREADS
         MVN_THREADS = Args.threads
 
