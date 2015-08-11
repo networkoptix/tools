@@ -37,8 +37,9 @@ DEBUG = True
 def log_print(s):
     print s
 
-def log(text):
-    log_print("[%s] %s" % (time.strftime("%Y:%m:%d %X %Z"), text))
+
+def log(text, *args):
+    log_print("[%s] %s" % (time.strftime("%Y:%m:%d %X %Z"), ((text % args) if args else text)))
 
 
 def debug(text, *args):
