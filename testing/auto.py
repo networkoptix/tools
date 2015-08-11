@@ -424,7 +424,7 @@ def parse_args():
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Use '.' for a current branch. Multiple times accepted.")
     parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
-    parser.add_argument("-T", "--threads", type=int, help="Number of threads to be used by maven (for -T mvn argument)")
+    parser.add_argument("-T", "--threads", type=int, help="Number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override internal default and use maven's default.")
     # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
     parser.add_argument("-l", "--full-build-log", action="store_true", help="Print full build log, immediate. Use with -o only.")
