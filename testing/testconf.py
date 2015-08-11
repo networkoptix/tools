@@ -30,8 +30,8 @@ BUILD_LOG_LINES = 250 # How may last lines are saved to report build process fai
 
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)q
 
-BRANCHES = ('dev_2.4.0', 'dev_2.5', 'prod_2.3.2')
-BRANCHES = ('dev_2.4.0',)
+BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
+#BRANCHES = ('dev_2.4.0',)
 TESTS = ('common_ut', 'mediaserver_core_ut')
 UT_SUBDIR = "unit_tests"
 
@@ -55,7 +55,7 @@ ALERT_TO = 'dlavrentyuk@networkoptix.com' # to send mail about check process fai
 HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 
-HG_IN = [HG, "incoming", "--quiet", "--template={branch},"] + [ "--branch=%s" % b for b in BRANCHES ]
+HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
 HG_UP = [HG, "update", "--rev"]
