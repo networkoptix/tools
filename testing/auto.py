@@ -453,7 +453,7 @@ def parse_args():
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
-    parser.add_argument("-f", "--full", action="store_true", help="Full test for all configuged branches. (Not required with -b)")
+    parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Use '.' for a current branch. Multiple times accepted.")
