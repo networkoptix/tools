@@ -184,8 +184,7 @@ def main():
         global colorer
         import colorama as colorer
 
-    scriptDir = os.path.dirname(os.path.abspath(__file__))   
-    rootDir = os.path.join(scriptDir, '..')
+    rootDir = os.getcwd()
     
     for project in projects:
         projectDir = os.path.join(rootDir, project)
