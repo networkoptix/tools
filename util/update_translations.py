@@ -32,8 +32,7 @@ def update(project, translationDir, projectFile):
     subprocess.call(command)
 
 def main():
-    scriptDir = os.path.dirname(os.path.abspath(__file__))   
-    rootDir = os.path.join(scriptDir, '..')
+    rootDir = os.getcwd()
     
     threads = []
     for project in projects:
