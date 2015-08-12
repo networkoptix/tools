@@ -5,7 +5,6 @@ The main configuration file for (auto-)test scripts.
 import os, os.path
 
 PROJECT_ROOT = "~/develop/netoptix_vms"
-PROJECT_ROOT = "~/develop/nvms-tmp-"
 TEMP = '' # temporary files directory, leave it '' for the process' current directory
 
 ######################################################################

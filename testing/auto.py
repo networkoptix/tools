@@ -21,8 +21,41 @@ OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
-READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
-READY = select.POLLIN | select.POLLPRI
+if os.name == 'posix':
+    READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
+    READY = select.POLLIN | select.POLLPRI
+
+    def check_poll_res(res):
+        return bool(res[0][1] & READY)
+else:
+    print "Windoze is temporary unsupported!"
+    os.exit(1)
+    class WinPoller(object):
+        def __init__(self):
+            self.fdlist = []
+
+        def register(self, fd, flags=None):
+            # flags are ignored, just for compatibility
+            self.fdlist.append(fd.fileno() if hasattr(fd, 'fileno') else fd)
+
+        def unregister(self, fd):
+            if hasattr(fd, 'fileno'):
+                fd = fd.fileno()
+            try:
+                self.fdlist.remove(fd)
+            except ValueError:
+                pass
+
+        def poll(self, timeout):
+            iready, oready, eready = select.select(self.fdlist, [], [], timeout)
+            if eready:
+                print "!"
+                print "!!!!!! eready: %s !!!!!!" % eready
+                print "!"
+            return iready
+
+    def check_poll_res(res):
+        return bool(res)
 
 ToSend = []
 FailedTests = []
@@ -112,7 +145,7 @@ def check_repeats(repeats):
         ToSend[-1] += "   [ REPEATS %s TIMES ]" % repeats
 
 
-def perfom_test(poller, proc):
+def read_test_output(proc, poller):
     line = ''
     last_suit_line = ''
     has_errors = False
@@ -125,8 +158,7 @@ def perfom_test(poller, proc):
         while True:
             res = poller.poll(PIPE_TIMEOUT)
             if res:
-                event = res[0][1]
-                if not(event & READY):
+                if not check_poll_res(res):
                     break
                 ch = proc.stdout.read(1)
                 if complete:
@@ -215,8 +247,9 @@ def call_test(testname, poller):
             return
         proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
-        poller.register(proc.stdout, READ_ONLY)
-        perfom_test(poller, proc)
+        if poller:
+            poller.register(proc.stdout, READ_ONLY)
+        read_test_output(proc, poller)
     except BaseException, e:
         tstr = traceback.format_exc()
         print tstr
@@ -230,7 +263,8 @@ def call_test(testname, poller):
             log(s)
             raise # it wont be catched and will allow the script to terminate
     finally:
-        if proc: poller.unregister(proc.stdout)
+        if proc and poller:
+            poller.unregister(proc.stdout)
         if len(ToSend) == old_len:
             debug("No interesting output from these tests")
             del ToSend[-1]
@@ -241,7 +275,7 @@ def call_test(testname, poller):
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
     lines = []
-    poller = select.poll()
+    poller = select.poll() if os.name == 'posix' else WinPoller()
 
     for name in TESTS:
         del ToSend[:]
