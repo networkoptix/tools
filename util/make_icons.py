@@ -119,8 +119,7 @@ def main():
         print 'ERROR: You are not in the root of the repository.'
         return
     
-    script_path = os.path.dirname(os.path.realpath(__file__))
-    colorizer = imp.load_source('svg_colorize', os.path.join(script_path, 'svg_colorize.py'))
+    colorizer = imp.load_source('svg_colorize', 'util/svg_colorize.py')
     
     modified = getModifiedIcons(changeset)
     customizations = getCustomizations()
