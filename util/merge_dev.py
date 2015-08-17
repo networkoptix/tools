@@ -48,12 +48,14 @@ def main():
     global verbose
     verbose = args.verbose
     
+    currentBranch = getCurrentBranch()
+    
     global targetBranch
     target = args.target
     if target:
         targetBranch = target
     else:      
-        targetBranch = getCurrentBranch()
+        targetBranch = currentBranch
     
     ignoredCommits.append('Merge with {0}'.format(targetBranch))
     
@@ -64,7 +66,10 @@ def main():
     if args.preview:
         print getChangelog(revision)
         sys.exit(0)
-        
+   
+    if revision == '.' and targetBranch != currentBranch:
+        revision = currentBranch
+   
     execCommand('hg up {0}'.format(targetBranch))
     execCommand('hg merge  --tool=internal:merge {0}'.format(revision))
     execCommand('hg ci -m"{0}"'.format(getChangelog(revision)))
