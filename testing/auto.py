@@ -5,7 +5,6 @@ import subprocess
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 from collections import deque
 import errno
-import select
 import traceback
 import argparse
 from smtplib import SMTP
@@ -21,15 +20,103 @@ OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
+PIPE_READY = 0
+PIPE_EOF = 1
+PIPE_TIMEOUT = 2
+
+class PipeReaderBase(object):
+    def __init__(self):
+        self.fd = None
+        self.buf = ''
+        self.state = PIPE_READY
+
+    def register(self, fd):
+        if self.fd is not None and self.fd != fd:
+            raise RuntimeError("PipeReader: double fd register")
+        self.fd = fd
+
+    def unregister(self, fd):
+        if self.fd != fd:
+            raise RuntimeError("PipeReader: unknown fd for unregister")
+
+    def read_ch(self, timeout=0):
+        # ONLY two possible results:
+        # 1) return the next character
+        # 2) return '' and change self.state
+        raise NotImplementedError()
+
+    def readline(self, timeout=0):
+        if self.state != PIPE_READY:
+            return None
+        while True:
+            ch = self.read_ch(timeout)
+            if ch is None or ch == '':
+                return self.buf
+            if ch == '\n' or ch == '\r': # use all three: \n, \r\n, \r
+                if len(self.buf) > 0:
+                    debug(self.buf)
+                    try:
+                        return self.buf
+                    finally:
+                        self.buf = ''
+                else:
+                    pass # all empty lines are skipped (so \r\n doesn't produce fake empty line)
+            else:
+                self.buf += ch
+
+
 if os.name == 'posix':
+    import select
     READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
     READY = select.POLLIN | select.POLLPRI
 
-    def check_poll_res(res):
-        return bool(res[0][1] & READY)
+    #def check_poll_res(res):
+    #    return bool(res[0][1] & READY)
+
+    class PipeReader(PipeReaderBase):
+        def __init__(self):
+            super(PipeReader, self).__init__()
+            self.poller = select.poll()
+
+        def register(self, fd):
+            super(PipeReader, self).register(fd)
+            self.poller.register(fd, READ_ONLY)
+
+        def unregister(self, fd):
+            super(PipeReader, self).unregister(fd)
+            self.poller.unregister(fd)
+
+        def read_ch(self, timeout):
+            res = self.poller.poll(timeout)
+            if res:
+                if res[0][1] & READY:
+                    return self.fd.read(1)
+                # EOF
+                self.state = PIPE_EOF
+            else:
+                self.state = PIPE_TIMEOUT
+            return ''
+
 else:
     print "Windoze is temporary unsupported!"
     os.exit(1)
+    import msvcrt
+    import pywintypes
+    import win32pipe
+
+    class PipeReader(object):
+        def __init__(self):
+            super(PipeReader, self).__init__()
+
+        def register(self, fd):
+            raise NotImplementedError()
+
+        def unregister(self, fd):
+            raise NotImplementedError()
+
+        def readline(self, timeout=0):
+            raise NotImplementedError()
+
     class WinPoller(object):
         def __init__(self):
             self.fdlist = []
@@ -106,6 +193,7 @@ def format_changesets(branch):
     else:
         return "\n".join(chs)
 
+
 def email_notify(branch, lines):
     text = (
         ("Branch %s unit tests run report.\n\n" % branch) +
@@ -135,6 +223,7 @@ def email_build_error(branch, loglines, crash=False):
         msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
         email_send(MAIL_FROM, MAIL_TO, msg)
 
+
 def get_name(line):
     m = NameRx.match(line)
     return m.group(1) if m else ''
@@ -145,8 +234,7 @@ def check_repeats(repeats):
         ToSend[-1] += "   [ REPEATS %s TIMES ]" % repeats
 
 
-def read_test_output(proc, poller):
-    line = ''
+def read_test_output(proc, reader):
     last_suit_line = ''
     has_errors = False
     has_stranges = False
@@ -155,71 +243,60 @@ def read_test_output(proc, poller):
     complete = False
     to_send_count = 0
     try:
-        while True:
-            res = poller.poll(PIPE_TIMEOUT)
-            if res:
-                if not check_poll_res(res):
-                    break
-                ch = proc.stdout.read(1)
-                if complete:
-                    continue
-                if ch == '\n':
-                    if len(line) > 0:
-                        debug(line.rstrip())
-                        if line.startswith(SUITMARK):
-                            check_repeats(repeats)
-                            repeats = 1
-                            last_suit_line = line
-                            if line.startswith(STARTMARK):
-                                running_test_name = get_name(line) # remember to print OK test result and for abnormal termination case
-                                to_send_count = len(ToSend)
-                            elif line.startswith(FAILMARK) and not complete:
-                                debug("Appending: %s", line.rstrip())
-                                FailedTests.append(get_name(line))
+        while reader.state == PIPE_READY:
+            line = reader.readline(PIPE_TIMEOUT)
+            if not complete and len(line) > 0:
+                if line.startswith(SUITMARK):
+                    check_repeats(repeats)
+                    repeats = 1
+                    last_suit_line = line
+                    if line.startswith(STARTMARK):
+                        running_test_name = get_name(line) # remember to print OK test result and for abnormal termination case
+                        to_send_count = len(ToSend)
+                    elif line.startswith(FAILMARK) and not complete:
+                        debug("Appending: %s", line.rstrip())
+                        FailedTests.append(get_name(line))
+                        ToSend.append(line)
+                        running_test_name = ''
+                        has_errors = True
+                    elif line.startswith(OKMARK):
+                        if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
+                            if to_send_count < len(ToSend):
                                 ToSend.append(line)
-                                running_test_name = ''
-                                has_errors = True
-                            elif line.startswith(OKMARK):
-                                if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
-                                    if to_send_count < len(ToSend):
-                                        ToSend.append(line)
-                                else:
-                                    debug("!!!! running_test_name == get_name(line): %s; %s", running_test_name, line.rstrip())
-                                running_test_name = ''
-                            elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
-                                complete = True
-                                debug("Complete!")
-                        else: # gather test's messages
-                            if last_suit_line != '':
-                                ToSend.append(last_suit_line)
-                                last_suit_line = ''
-                            if ToSend and (line == ToSend[-1]):
-                                repeats += 1
-                            else:
-                                check_repeats(repeats)
-                                repeats = 1
-                                ToSend.append(line)
-                            has_stranges = True
-                        line = ''
-                else:
-                    line += ch
-            else:
-                check_repeats(repeats)
-                ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s]" % running_test_name)
-                FailedTests.append(running_test_name)
-                has_errors = True
-                break
+                        else:
+                            debug("!!!! running_test_name == get_name(line): %s; %s", running_test_name, line.rstrip())
+                        running_test_name = ''
+                    elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
+                        complete = True
+                        debug("Complete!")
+                else: # gather test's messages
+                    if last_suit_line != '':
+                        ToSend.append(last_suit_line)
+                        last_suit_line = ''
+                    if ToSend and (line == ToSend[-1]):
+                        repeats += 1
+                    else:
+                        check_repeats(repeats)
+                        repeats = 1
+                        ToSend.append(line)
+                    has_stranges = True
+        else: # end reading
+            check_repeats(repeats)
+
+        if reader.state == PIPE_TIMEOUT:
+            ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s]" % running_test_name)
+            FailedTests.append(running_test_name)
+            has_errors = True
 
         if proc.poll() is None:
             proc.terminate()
             proc.wait()
 
         if proc.returncode != 0:
-            check_repeats(repeats)
             if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
                 ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
                 FailedTests.append(running_test_name)
-            ToSend.append("[ TEST SUIT RETURNS CODE %s ]" % proc.returncode)
+            ToSend.append("[ TEST SUIT'S RETURN CODE = %s ]" % proc.returncode)
             has_errors = True
 
         if has_stranges and not has_errors:
@@ -230,7 +307,7 @@ def read_test_output(proc, poller):
             FailedTests.append(running_test_name)
 
 
-def call_test(testname, poller):
+def call_test(testname, reader):
     debug("[ Calling %s test suit ]" % testname)
     ToSend.append("[ Calling %s test suit ]" % testname)
     old_len = len(ToSend)
@@ -247,9 +324,8 @@ def call_test(testname, poller):
             return
         proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
-        if poller:
-            poller.register(proc.stdout, READ_ONLY)
-        read_test_output(proc, poller)
+        reader.register(proc.stdout, READ_ONLY)
+        read_test_output(proc, reader)
     except BaseException, e:
         tstr = traceback.format_exc()
         print tstr
@@ -263,8 +339,8 @@ def call_test(testname, poller):
             log(s)
             raise # it wont be catched and will allow the script to terminate
     finally:
-        if proc and poller:
-            poller.unregister(proc.stdout)
+        if proc:
+            reader.unregister(proc.stdout)
         if len(ToSend) == old_len:
             debug("No interesting output from these tests")
             del ToSend[-1]
@@ -275,12 +351,12 @@ def call_test(testname, poller):
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
     lines = []
-    poller = select.poll() if os.name == 'posix' else WinPoller()
+    reader = PipeReader()
 
     for name in TESTS:
         del ToSend[:]
         del FailedTests[:]
-        call_test(name, poller)
+        call_test(name, reader)
         if FailedTests:
             debug("Failed tests: %s", FailedTests)
             if lines:
