@@ -27,6 +27,7 @@ HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consum
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 PIPE_TIMEOUT = 10 * 1000  # milliseconds
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
+MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
 
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 

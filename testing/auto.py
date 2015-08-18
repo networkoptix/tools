@@ -493,7 +493,7 @@ def call_maven_build(branch, unit_tests=False):
             proc = Popen(cmd, bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
             for line in proc.stdout:
                 last_lines.append(line)
-            stop = time.time() + 15
+            stop = time.time() + MVN_TERMINATION_WAIT
             while proc.poll() is None and time.time() < stop:
                 time.sleep(0.2)
             if proc.returncode is None:
