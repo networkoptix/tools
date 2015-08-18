@@ -493,15 +493,23 @@ def call_maven_build(branch, unit_tests=False):
             proc = Popen(cmd, bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
             for line in proc.stdout:
                 last_lines.append(line)
-            if proc.poll() is None:
-                debug("Maven call has stoped print lines but isn't terminated yet")
+            stop = time.time() + 15
+            while proc.poll() is None and time.time() < stop:
+                time.sleep(0.2)
+            if proc.returncode is None:
+                last_lines.append("*** Maven has hanged in the end!")
+                log("Maven has hanged in the end!")
                 proc.terminate()
+                if proc.poll() is None:
+                    time.sleep(0.5)
+                    proc.poll()
+                debug("proc.terminate() called. RC = %s", proc.returncode)
         if proc.returncode != 0:
             log("Error calling maven: ret.code = %s" % proc.returncode)
             if not Args.full_build_log:
                 log("The last %d log lines:" % len(last_lines))
                 log_print("".join(last_lines))
-                email_build_error(branch, last_lines)
+                email_build_error(branch, list(last_lines) + ["Maven return code = %s" % proc.returncode])
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
