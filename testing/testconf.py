@@ -5,6 +5,7 @@ The main configuration file for (auto-)test scripts.
 import os, os.path
 
 PROJECT_ROOT = "~/develop/netoptix_vms"
+PROJECT_ROOT = "~/develop/nvms-tmp"
 TEMP = '' # temporary files directory, leave it '' for the process' current directory
 
 ######################################################################
@@ -44,7 +45,7 @@ SMTP_PASS = ''
 
 MAIL_FROM = 'dlavrentyuk@networkoptix.com'
 MAIL_TO = 'test-results@networkoptix.com'
-MAIL_TO = 'dlavrentyuk@networkoptix.com'
+#MAIL_TO = 'dlavrentyuk@networkoptix.com'
 
 #TODO
 ALERT_TO = 'dlavrentyuk@networkoptix.com' # to send mail about check process fails (such as hg call fails)
@@ -57,7 +58,8 @@ MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
-HG_UP = [HG, "update", "--rev"]
+HG_UP = [HG, "update"]
 HG_PURGE = [HG, "purge", "--all"]
+HG_BRANCH = [HG, "branch"]
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)

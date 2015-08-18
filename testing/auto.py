@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-import subprocess
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
 from collections import deque
 import errno
 import traceback
 import argparse
 from smtplib import SMTP
 from email import MIMEText
+import signal
 
 from testconf import *
 
@@ -22,7 +22,20 @@ NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
 PIPE_READY = 0
 PIPE_EOF = 1
-PIPE_TIMEOUT = 2
+PIPE_HANG = 2
+
+def get_signals():
+    d = {}
+    for name in dir(signal):
+        if name.startswith('SIG') and name[3] != '_':
+            value = getattr(signal, name)
+            if value in d:
+                d[value].append(name)
+            else:
+                d[value] = [name]
+    return d
+
+SignalNames = get_signals()
 
 class PipeReaderBase(object):
     def __init__(self):
@@ -34,10 +47,16 @@ class PipeReaderBase(object):
         if self.fd is not None and self.fd != fd:
             raise RuntimeError("PipeReader: double fd register")
         self.fd = fd
+        self.state = PIPE_READY # new fd -- new process, so the reader is ready again
 
-    def unregister(self, fd):
-        if self.fd != fd:
-            raise RuntimeError("PipeReader: unknown fd for unregister")
+    def unregister(self):
+        if self.fd is None:
+            raise RuntimeError("PipeReader.unregister: fd was not registered")
+        self._unregister()
+        self.fd = None
+
+    def _unregister(self):
+        raise NotImplementedError()
 
     def read_ch(self, timeout=0):
         # ONLY two possible results:
@@ -82,9 +101,8 @@ if os.name == 'posix':
             super(PipeReader, self).register(fd)
             self.poller.register(fd, READ_ONLY)
 
-        def unregister(self, fd):
-            super(PipeReader, self).unregister(fd)
-            self.poller.unregister(fd)
+        def _unregister(self):
+            self.poller.unregister(self.fd)
 
         def read_ch(self, timeout):
             res = self.poller.poll(timeout)
@@ -94,7 +112,7 @@ if os.name == 'posix':
                 # EOF
                 self.state = PIPE_EOF
             else:
-                self.state = PIPE_TIMEOUT
+                self.state = PIPE_HANG
             return ''
 
 else:
@@ -283,8 +301,8 @@ def read_test_output(proc, reader):
         else: # end reading
             check_repeats(repeats)
 
-        if reader.state == PIPE_TIMEOUT:
-            ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s]" % running_test_name)
+        if reader.state == PIPE_HANG:
+            ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s ]" % running_test_name)
             FailedTests.append(running_test_name)
             has_errors = True
 
@@ -296,7 +314,13 @@ def read_test_output(proc, reader):
             if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
                 ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
                 FailedTests.append(running_test_name)
-            ToSend.append("[ TEST SUIT'S RETURN CODE = %s ]" % proc.returncode)
+            if proc.returncode < 0:
+                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours proc.terminate()
+                    signames = SignalNames.get(-proc.returncode, [])
+                    signames = ' (%s)' % (','.join(signames),) if signames else ''
+                    ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+            else:
+                ToSend.append("[ TEST SUIT'S RETURN CODE = %s ]" % proc.returncode)
             has_errors = True
 
         if has_stranges and not has_errors:
@@ -324,7 +348,7 @@ def call_test(testname, reader):
             return
         proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
-        reader.register(proc.stdout, READ_ONLY)
+        reader.register(proc.stdout)
         read_test_output(proc, reader)
     except BaseException, e:
         tstr = traceback.format_exc()
@@ -340,7 +364,7 @@ def call_test(testname, reader):
             raise # it wont be catched and will allow the script to terminate
     finally:
         if proc:
-            reader.unregister(proc.stdout)
+            reader.unregister()
         if len(ToSend) == old_len:
             debug("No interesting output from these tests")
             del ToSend[-1]
@@ -384,7 +408,7 @@ def filter_branch_names(branches):
 
 def get_changesets(branch, bundle_fn):
     debug("Run: " + (' '.join(HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
-    proc = subprocess.Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
+    proc = Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
     (outdata, errdata) = proc.communicate()
     if proc.returncode == 0:
         Changesets[branch] = [
@@ -411,7 +435,7 @@ def check_new_commits(bundle_fn):
     try:
         cmd = HG_IN + [ "--branch=%s" % b for b in BRANCHES ] + ['--bundle', bundle_fn]
         debug("Run: %s", ' '.join(cmd))
-        ready_branches = subprocess.check_output(cmd, **SUBPROC_ARGS)
+        ready_branches = check_output(cmd, stderr=STDOUT, **SUBPROC_ARGS)
         if ready_branches:
             branches = ['.'] if BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
             if BRANCHES[0] != '.':
@@ -421,17 +445,27 @@ def check_new_commits(bundle_fn):
                 return [ b for b in branches if get_changesets(b, bundle_fn) ]
     except CalledProcessError, e:
         if e.returncode != 1:
-            debug("`hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
+            log("ERROR: `hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
             raise
     log("No new commits found for controlled branches.")
     return []
+
+
+def current_branch_name():
+    try:
+        branch_name = check_output(HG_BRANCH, stderr=STDOUT, **SUBPROC_ARGS)
+        return branch_name.split("\n")[0]
+    except CalledProcessError, e:
+        if e.returncode != 1:
+            log("ERROR: Failed to find current branch name: `hg branch` call returns %s code. Output:\n%s", e.returncode, e.output)
+            raise
 
 
 def update_repo(branches, bundle_fn):
     log("Pulling branches: %s" % (', '.join(branches)))
     debug("Using bundle file %s", bundle_fn)
     #try:
-    subprocess.check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
+    check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
     #except CalledProcessError, e:
 
 
@@ -481,9 +515,10 @@ def call_maven_build(branch, unit_tests=False):
 
 
 def prepare_branch(branch):
-    log("Switch to the banch %s" % branch)
-    subprocess.check_call(HG_PURGE, **SUBPROC_ARGS)
-    subprocess.check_call(HG_UP + [branch], **SUBPROC_ARGS)
+    if branch != '.':
+        log("Switch to the banch %s" % branch)
+    check_call(HG_PURGE, **SUBPROC_ARGS)
+    check_call(HG_UP if branch == '.' else (HG_UP + ['--rev', branch]), **SUBPROC_ARGS)
     return call_maven_build(branch) and call_maven_build(branch, unit_tests=True)
 
 
@@ -532,7 +567,8 @@ def parse_args():
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
     # change settings
-    parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Use '.' for a current branch. Multiple times accepted.")
+    parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
+                                                                "Use '.' for a current branch (it WILL update to the last commit of the branch, and it will ignore all other -b). ")
     parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
     parser.add_argument("-T", "--threads", type=int, help="Number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override internal default and use maven's default.")
     # output control
@@ -606,6 +642,8 @@ def main():
 
     if Args.branch:
         change_branch_list()
+    if BRANCHES[0] == '.':
+        BRANCHES[0] = current_branch_name()
 
     if Args.conf:
         show_conf() # changes done by other options are shown here
