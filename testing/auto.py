@@ -227,10 +227,12 @@ def email_notify(branch, lines):
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
-def email_build_error(branch, loglines, crash=False):
-    cause = ("Error building branch " + branch) if not crash else (("Branch %s build crashes!" % branch) + crash)
+def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None):
+    bstr = ("%s unit tests" % branch) if unit_tests else branch
+    cause = ("Error building branch " + bstr) if not crash else (("Branch %s build crashes!" % bstr) + crash)
     text = (
         format_changesets(branch) + "\n\n" +
+        ('' if not single_project else 'Failed build was restarted for the single failed project: %s\n\n' % single_project) +
         ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
         "".join(loglines) + "\n"
     )
@@ -238,7 +240,7 @@ def email_build_error(branch, loglines, crash=False):
         print text
     else:
         msg = MIMEText.MIMEText(text)
-        msg['Subject'] = "Autotest scriprt fails to build the branch " + branch
+        msg['Subject'] = "Autotest scriprt fails to build the branch " + bstr
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
@@ -469,47 +471,91 @@ def update_repo(branches, bundle_fn):
     #except CalledProcessError, e:
 
 
-def call_maven_build(branch, unit_tests=False):
+def check_mvn_exit(proc, last_lines):
+    stop = time.time() + MVN_TERMINATION_WAIT
+    while proc.poll() is None and time.time() < stop:
+        time.sleep(0.2)
+    if proc.returncode is None:
+        last_lines.append("*** Maven has hanged in the end!")
+        log("Maven has hanged in the end!")
+        proc.terminate()
+        if proc.poll() is None:
+            time.sleep(0.5)
+            proc.poll()
+        debug("proc.terminate() called. RC = %s", proc.returncode)
+
+
+build_fail_rx = re.compile(r"^\[INFO\] ([^\.]+)\s+\.+\s+FAILURE")
+mvn_rf_prefix = "[ERROR]   mvn <goals> -rf :"
+
+def get_failed_project(last_lines):
+    phase = 'start'
+    project = ''
+    project_name = ''
+    for line in last_lines:
+        if phase == 'start':
+            if line.startswith('[INFO] Reactor Summary:'):
+                phase = 'sum'
+        elif phase =='sum':
+            m = build_fail_rx.match(line)
+            if m:
+                project_name = m.group(1)
+                phase = 'tail'
+            elif line.startswith("[INFO] ------------"):
+                phase = 'tail'
+        elif phase == 'tail':
+            if line.startswith('[ERROR] After correcting the problems'):
+                phase = 'got'
+        elif phase == 'got':
+            if line.startswith(mvn_rf_prefix):
+                project = line[len(mvn_rf_prefix):].rstrip()
+                break
+    return (project, project_name)
+
+
+def failed_project_single_build(last_lines, branch, unit_tests):
+    project, project_name = get_failed_project(last_lines)
+    if project == '':
+        last_lines.append("ERROR: Can't figure failed project '%s'", project_name)
+        return False
+    log("[ Restarting maven to re-build '%s' ]", project_name)
+    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, single_name=project_name or project)
+    return True
+
+
+def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, single_name=None):
     last_lines = deque(maxlen=BUILD_LOG_LINES)
-    line = "Build unit tests" if unit_tests else "Build netoptix_vms"
-    if branch != '.':
-        line += " (branch %s)" % branch
-    log("%s..." % line)
+    log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = SUBPROC_ARGS.copy()
     cmd = [MVN, "package", "-e"]
-    if MVN_THREADS:
+    if MVN_THREADS and not no_threads:
         cmd.extend(["-T", "%d" % MVN_THREADS])
+    if single_project is not None:
+        cmd.extend(['-pl', single_project])
     if unit_tests:
         kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
-        branch += ' unit tests'
-    #debug("MVN: %s", cmd)
-    time.sleep(1)
+    debug("MVN: %s", cmd); time.sleep(1.5)
     try:
         if Args.full_build_log:
             kwargs.pop('universal_newlines')
             proc = Popen(cmd, **kwargs)
             proc.wait()
         else:
-            proc = Popen(cmd, bufsize=50000, stdout=PIPE, stderr=STDOUT, **kwargs)
+            proc = Popen(cmd, bufsize=MVN_BUFFER, stdout=PIPE, stderr=STDOUT, **kwargs)
             for line in proc.stdout:
                 last_lines.append(line)
-            stop = time.time() + MVN_TERMINATION_WAIT
-            while proc.poll() is None and time.time() < stop:
-                time.sleep(0.2)
-            if proc.returncode is None:
-                last_lines.append("*** Maven has hanged in the end!")
-                log("Maven has hanged in the end!")
-                proc.terminate()
-                if proc.poll() is None:
-                    time.sleep(0.5)
-                    proc.poll()
-                debug("proc.terminate() called. RC = %s", proc.returncode)
+            check_mvn_exit(proc, last_lines)
         if proc.returncode != 0:
             log("Error calling maven: ret.code = %s" % proc.returncode)
             if not Args.full_build_log:
                 log("The last %d log lines:" % len(last_lines))
                 log_print("".join(last_lines))
-                email_build_error(branch, list(last_lines) + ["Maven return code = %s" % proc.returncode])
+                last_lines = list(last_lines)
+                last_lines.append("Maven return code = %s" % proc.returncode)
+                if not single_project:
+                    if failed_project_single_build(last_lines, branch, unit_tests):
+                        return False
+                email_build_error(branch, last_lines, unit_tests, single_project=single_name)
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
@@ -517,7 +563,7 @@ def call_maven_build(branch, unit_tests=False):
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
             log_print("".join(last_lines))
-            email_build_error(branch, last_lines, crash=tb)
+            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=single_name)
         return False
     return True
 
@@ -553,8 +599,8 @@ def run():
             if Args.test_only:
                 log("Test only run...")
             if Args.test_only or (
-                    (Args.build_ut_only or call_maven_build('.')) and call_maven_build('.', unit_tests=True)):
-                run_tests('.')
+                    (Args.build_ut_only or call_maven_build(BRANCHES[0])) and call_maven_build(BRANCHES[0], unit_tests=True)):
+                run_tests(BRANCHES[0])
     except Exception:
         traceback.print_exc()
 
@@ -650,6 +696,8 @@ def main():
 
     if Args.branch:
         change_branch_list()
+    elif not Args.full:
+        BRANCHES = ['.']
     if BRANCHES[0] == '.':
         BRANCHES[0] = current_branch_name()
 
