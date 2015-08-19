@@ -694,6 +694,7 @@ def main():
 
     set_paths()
 
+    global BRANCHES
     if Args.branch:
         change_branch_list()
     elif not Args.full:
