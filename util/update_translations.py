@@ -63,7 +63,6 @@ def update(project, translationDir, projectFile):
 
 def handleOutput(log):
     for line in log.split('\n'):
-        line = line.strip('\n')
         if len(line) == 0:
             continue
         
