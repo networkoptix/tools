@@ -11,10 +11,29 @@ from common_module import init_color,info,green,warn,err,separator
 
 projects = ['common', 'traytool', 'client']
 ignored = [
-            'qstringbuilder.h', 'qstring.h', 'qmatrix.h', 'qaction.h', 'qnetworkcookiejar.h',
-            '/boost', '/libavutil', '/openssl', 
-            '.prf', '.pro(1)'
+            # QT files
+            '/qstringbuilder.h', '/qstring.h', '/qmatrix.h', '/qaction.h', '/qnetworkcookiejar.h', '/qboxlayout.h', '/qgridlayout.h',
+            
+            # 3rd-party libraries
+            '/boost', '/libavutil', '/openssl', '/directx', '/festival', 
+            
+            # Project files
+            '.prf', '.pro(1)', 'Project MESSAGE:'
           ]
+
+errors = [  
+            # Module lacks Q_OBJECT macro
+            'lacks'
+         ]
+         
+warnings = [
+            # Discarding unconsumed metadata, usually warned on sequences like /*=
+            'Discarding',
+
+            # Circular inclusions
+            'circular'
+           ]
+         
 verbose = False
 results = dict()
 
@@ -37,11 +56,8 @@ def update(project, translationDir, projectFile):
             
     command = 'lupdate -no-obsolete -no-ui-lines -pro ' + projectFile + ' -locations none -ts'
     for path in entries:
-        command = command + ' ' + path
-    if verbose:
-        info(command)
-        separator()
-    log = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+        command = command + ' ' + path    
+    log = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)  
     global results
     results[project] = log
 
@@ -49,20 +65,20 @@ def handleOutput(log):
     for line in log.split('\n'):
         line = line.strip('\n')
         if len(line) == 0:
-            continue;
+            continue
         
-        skipLine = False
-        for s in ignored:
-            if s in line:
-                skipLine = True
-        if skipLine:
-            continue;
-                
-        if "Discarding" in line:
+        if any(s in line for s in ignored):
+            continue
+        
+        if any(s in line for s in warnings):
             warn(line)
-        elif "lacks" in line:
+            continue
+        
+        if any(s in line for s in errors):        
             err(line)
-        elif verbose:
+            continue
+            
+        if verbose:
             info(line)
             
 def main():
