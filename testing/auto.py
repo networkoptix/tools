@@ -20,9 +20,11 @@ OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
-PIPE_READY = 0
-PIPE_EOF = 1
-PIPE_HANG = 2
+PIPE_NONE = 0
+PIPE_READY = 1
+PIPE_EOF = 2
+PIPE_HANG = 3
+PIPE_ERROR = 4
 
 def get_signals():
     d = {}
@@ -40,13 +42,15 @@ SignalNames = get_signals()
 class PipeReaderBase(object):
     def __init__(self):
         self.fd = None
+        self.proc = None
         self.buf = ''
-        self.state = PIPE_READY
+        self.state = PIPE_NONE
 
-    def register(self, fd):
+    def register(self, proc):
         if self.fd is not None and self.fd != fd:
             raise RuntimeError("PipeReader: double fd register")
-        self.fd = fd
+        self.proc = proc
+        self.fd = proc.stdout
         self.state = PIPE_READY # new fd -- new process, so the reader is ready again
 
     def unregister(self):
@@ -54,6 +58,7 @@ class PipeReaderBase(object):
             raise RuntimeError("PipeReader.unregister: fd was not registered")
         self._unregister()
         self.fd = None
+        self.proc = None
 
     def _unregister(self):
         raise NotImplementedError()
@@ -67,7 +72,7 @@ class PipeReaderBase(object):
     def readline(self, timeout=0):
         if self.state != PIPE_READY:
             return None
-        while True:
+        while self.proc.poll() is None:
             ch = self.read_ch(timeout)
             if ch is None or ch == '':
                 return self.buf
@@ -82,6 +87,8 @@ class PipeReaderBase(object):
                     pass # all empty lines are skipped (so \r\n doesn't produce fake empty line)
             else:
                 self.buf += ch
+        self.state = PIPE_EOF
+        return self.buf
 
 
 if os.name == 'posix':
@@ -89,17 +96,14 @@ if os.name == 'posix':
     READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
     READY = select.POLLIN | select.POLLPRI
 
-    #def check_poll_res(res):
-    #    return bool(res[0][1] & READY)
-
     class PipeReader(PipeReaderBase):
         def __init__(self):
             super(PipeReader, self).__init__()
             self.poller = select.poll()
 
-        def register(self, fd):
-            super(PipeReader, self).register(fd)
-            self.poller.register(fd, READ_ONLY)
+        def register(self, proc):
+            super(PipeReader, self).register(proc)
+            self.poller.register(self.fd, READ_ONLY)
 
         def _unregister(self):
             self.poller.unregister(self.fd)
@@ -112,6 +116,7 @@ if os.name == 'posix':
                 # EOF
                 self.state = PIPE_EOF
             else:
+
                 self.state = PIPE_HANG
             return ''
 
@@ -122,42 +127,32 @@ else:
     import pywintypes
     import win32pipe
 
-    class PipeReader(object):
-        def __init__(self):
-            super(PipeReader, self).__init__()
+    class PipeReader(PipeReaderBase):
+        #def __init__(self):
+        #    super(PipeReader, self).__init__()
 
-        def register(self, fd):
-            raise NotImplementedError()
+        def register(self, proc):
+            super(PipeReader, self).register(proc)
+            self.osf = msvcrt.get_osfhandle(self.fd)
 
-        def unregister(self, fd):
-            raise NotImplementedError()
+        def read_ch(self, timeout):
+            endtime = (time.time() + timeout) if timeout > 0 else 0
+            while self.proc.poll() is None:
+                try:
+                    _, avail, _ = win32pipe.PeekNamedPipe(self.osf, 1)
+                except pywintypes.error:
+                    self.state = PIPE_ERROR
+                    return ''
+                if avail:
+                    return os.read(self.fd, 1)
+                if endtime:
+                    t = time.time()
+                    if endtime > t:
+                        time.sleep(min(0.01, endtime- t))
+                    else:
+                        self.state = PIPE_HANG
+                        return ''
 
-        def readline(self, timeout=0):
-            raise NotImplementedError()
-
-    class WinPoller(object):
-        def __init__(self):
-            self.fdlist = []
-
-        def register(self, fd, flags=None):
-            # flags are ignored, just for compatibility
-            self.fdlist.append(fd.fileno() if hasattr(fd, 'fileno') else fd)
-
-        def unregister(self, fd):
-            if hasattr(fd, 'fileno'):
-                fd = fd.fileno()
-            try:
-                self.fdlist.remove(fd)
-            except ValueError:
-                pass
-
-        def poll(self, timeout):
-            iready, oready, eready = select.select(self.fdlist, [], [], timeout)
-            if eready:
-                print "!"
-                print "!!!!!! eready: %s !!!!!!" % eready
-                print "!"
-            return iready
 
     def check_poll_res(res):
         return bool(res)
@@ -303,8 +298,10 @@ def read_test_output(proc, reader):
         else: # end reading
             check_repeats(repeats)
 
-        if reader.state == PIPE_HANG:
-            ToSend.append("[ TEST SUIT HAS TIMED OUT on test %s ]" % running_test_name)
+        if reader.state in (PIPE_HANG, PIPE_ERROR):
+            ToSend.append((
+                "[ test suit has TIMED OUT on test %s ]" if reader.state == PIPE_HANG else
+                "[ PIPE ERROR reading test suit output on test %s ]") % running_test_name)
             FailedTests.append(running_test_name)
             has_errors = True
 
@@ -350,7 +347,7 @@ def call_test(testname, reader):
             return
         proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
-        reader.register(proc.stdout)
+        reader.register(proc)
         read_test_output(proc, reader)
     except BaseException, e:
         tstr = traceback.format_exc()
