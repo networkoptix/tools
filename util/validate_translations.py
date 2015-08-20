@@ -15,6 +15,7 @@ numerus = ['%n']
 
 verbose = False
 noTarget = False
+strict = False
 
 class ValidationResult():
     error = 0
@@ -72,9 +73,11 @@ def checkText(source, target, context, result, index):
 
     return result;
 
-def validateXml(root):
+def validateXml(root, name):
     result = ValidationResult()
-
+       
+    printAll = strict and 'en_US' in name
+    
     for context in root:
         contextName = context.find('name').text
         for message in context.iter('message'):
@@ -101,10 +104,12 @@ def validateXml(root):
                     continue;
                 result = checkText(source.text, numerusform.text, contextName, result, index)
                 
-
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index)
+                if printAll:
+                    info(u'Translation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 
+                
     return result
 
 def validate(path):
@@ -113,7 +118,7 @@ def validate(path):
         info('Validating {0}...'.format(name))
     tree = ET.parse(path)
     root = tree.getroot()
-    result = validateXml(root)
+    result = validateXml(root, name)
 
     if result.error > 0:
         err('{0}: {1} errors found'.format(name, result.error))
@@ -149,6 +154,7 @@ def main():
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-t', '--no-target', action='store_true', help="skip target field")
+    parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
     args = parser.parse_args()
     
     global verbose
@@ -156,6 +162,9 @@ def main():
     
     global noTarget
     noTarget = args.no_target
+    
+    global strict
+    strict = args.strict
     
     if args.color:
         init_color()
