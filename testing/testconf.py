@@ -28,7 +28,7 @@ MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 PIPE_TIMEOUT = 10 * 1000  # milliseconds
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
 MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
-
+MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 
 BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
@@ -36,9 +36,6 @@ BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 TESTS = ('common_ut', 'mediaserver_core_ut')
 UT_SUBDIR = "unit_tests"
 
-SMTP_ADDR = '127.0.0.1'
-SMTP_LOGIN = ''
-SMTP_PASS = ''
 SMTP_ADDR = 'smtp.gmail.com:587'
 SMTP_LOGIN = 'dlavrentyuk@networkoptix.com'
 SMTP_PASS = ''
