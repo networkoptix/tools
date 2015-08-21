@@ -121,15 +121,11 @@ if os.name == 'posix':
             return ''
 
 else:
-    print "Windoze is temporary unsupported!"
-    os.exit(1)
     import msvcrt
     import pywintypes
     import win32pipe
 
     class PipeReader(PipeReaderBase):
-        #def __init__(self):
-        #    super(PipeReader, self).__init__()
 
         def register(self, proc):
             super(PipeReader, self).register(proc)
@@ -283,7 +279,6 @@ def read_test_output(proc, reader):
                         running_test_name = ''
                     elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
                         complete = True
-                        debug("Complete!")
                 else: # gather test's messages
                     if last_suit_line != '':
                         ToSend.append(last_suit_line)
