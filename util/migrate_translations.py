@@ -12,6 +12,8 @@ projects = ['common', 'client', 'traytool']
 verbose = False
 similarityLevel = 100
     
+ignored = ['Ctrl+', 'Shift+', 'Alt+']
+    
 class MigrationResult():
     migrated = 0
     total = 0
@@ -45,6 +47,9 @@ def existingTranslations(context):
             
         if translation.get('type') == 'obsolete':
             continue
+            
+        if any(s in source.text for s in ignored):
+            continue            
             
         result[source.text] = translation.text
     
