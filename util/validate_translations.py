@@ -106,8 +106,8 @@ def validateXml(root, name):
                 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index)
-                if printAll:
-                    info(u'Translation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
+                if printAll and not (source.text == translation.text):
+                    info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 
                 
     return result
