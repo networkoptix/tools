@@ -8,12 +8,9 @@ projects = ['common', 'client', 'traytool']
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l', '--language', default='', help="target language")
+    parser.add_argument('-l', '--language', help="target language", required=True)
     args = parser.parse_args()
     language = args.language
-    if not args.language:
-        print "language not found"
-        return
 
     scriptDir = os.path.dirname(os.path.abspath(__file__))   
     rootDir = os.path.join(scriptDir, '..')

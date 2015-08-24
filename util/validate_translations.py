@@ -145,7 +145,6 @@ def validateProject(project, translationDir):
             
         entries.append(path)
             
-    count = 0
     for path in entries:
         validate(path)
 
