@@ -73,6 +73,7 @@ def main():
     execCommand('hg up {0}'.format(targetBranch))
     execCommand('hg merge  --tool=internal:merge {0}'.format(revision))
     execCommand('hg ci -m"{0}"'.format(getChangelog(revision)))
+    execCommand('hg up {0}'.format(currentBranch))
     sys.exit(0)
     
 if __name__ == "__main__":

@@ -12,8 +12,7 @@ def main():
     args = parser.parse_args()
     language = args.language
 
-    scriptDir = os.path.dirname(os.path.abspath(__file__))   
-    rootDir = os.path.join(scriptDir, '..')
+    rootDir = os.getcwd()
     
     for project in projects:
         projectDir = os.path.join(rootDir, project)
