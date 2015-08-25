@@ -1,3 +1,4 @@
 syntax: glob
 .idea
 *.pyc
+testconf_local.py

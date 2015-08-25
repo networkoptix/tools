@@ -160,8 +160,6 @@ Env = os.environ.copy()
 
 Args = {}
 
-DEBUG = True
-
 
 def log_print(s):
     print s
@@ -203,6 +201,15 @@ def format_changesets(branch):
         return "\n".join(chs)
 
 
+def get_platform():
+    if os.name == 'posix':
+        return 'POSIX'
+    elif os.name == 'nt':
+        return 'Windows'
+    else:
+        return os.name
+
+
 def email_notify(branch, lines):
     text = (
         ("Branch %s unit tests run report.\n\n" % branch) +
@@ -214,7 +221,7 @@ def email_notify(branch, lines):
         print text
     else:
         msg = MIMEText.MIMEText(text)
-        msg['Subject'] = "Autotest run results"
+        msg['Subject'] = "Autotest run results on %s platform" % get_platform()
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
@@ -231,7 +238,7 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
         print text
     else:
         msg = MIMEText.MIMEText(text)
-        msg['Subject'] = "Autotest scriprt fails to build the branch " + bstr
+        msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
@@ -604,19 +611,18 @@ def parse_args():
     # description
     #----
     # Run mode
-    # No args -- just build and test current project
-    # (could be modified by -p, -t, -u)
+    # No args -- just build and test current project (could be modified by -p, -t, -u)
+    parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
-    parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
                                                                 "Use '.' for a current branch (it WILL update to the last commit of the branch, and it will ignore all other -b). ")
-    parser.add_argument("-p", "--path", help="Path to the project directory to use instead the default one")
-    parser.add_argument("-T", "--threads", type=int, help="Number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override internal default and use maven's default.")
+    parser.add_argument("-p", "--path", help="Path to the project directory to use instead of the default one")
+    parser.add_argument("-T", "--threads", type=int, help="The number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override configured default and use maven's default.")
     # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
     parser.add_argument("-l", "--full-build-log", action="store_true", help="Print full build log, immediate. Use with -o only.")
