@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  #config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/precise64.box"
+  config.vm.box_url = "file:///home/danil/work/vagrant_scripts/14-04-ubuntu-A.box"
+  config.ssh.forward_agent = true
+  
+  #config.vm.provision :shell, :path => "bootstrap.sh"
+  #config.vm.provision :shell, :path => "bootstrap.sh", :args => "u14m1"
+  
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 512
+    vb.cpus = 1
+    vb.gui = true
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+    vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+	vb.customize ["modifyvm", :id, "--ioapic", "on"]
+	vb.customize ["modifyvm", :id, "--vram", "32"]
+  end
+
+  config.vm.define "u14m1" do |u14m1|
+    u14m1.vm.provider :virtualbox do |vb|
+		vb.customize ["modifyvm", :id, "--name", "u14m1"]
+	end
+    u14m1.vm.box = "u14m1"
+    u14m1.vm.network :private_network, ip: "192.168.109.12"
+    u14m1.vm.provision :shell, :path => "bootstrap.sh", :args => "u14m1" # , :name => "u14m1"
+  end
+
+  config.vm.define "u14m2" do |u14m2|
+    u14m2.vm.provider :virtualbox do |vb|
+		vb.customize ["modifyvm", :id, "--name", "u14m2"]
+	end
+    u14m2.vm.box = "u14m2"
+    u14m2.vm.network :private_network, ip: "192.168.109.13"
+    u14m2.vm.provision :shell, :path => "bootstrap.sh", :args => "u14m2" # , :name => "u14m2"
+  end
+
+end
