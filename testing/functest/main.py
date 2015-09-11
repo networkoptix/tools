@@ -22,6 +22,7 @@ import errno
 
 from functest_util import *
 
+CONFIG_FNAME = "ec2_tests.cfg"
 
 # Rollback support
 class UnitTestRollback:
@@ -477,7 +478,7 @@ class ClusterTest():
 
     def _loadConfig(self):
         parser = ConfigParser.RawConfigParser()
-        parser.read("ec2_tests.cfg")
+        parser.read(CONFIG_FNAME)
         self.clusterTestServerList = parser.get("General","serverList").split(",")
         self.clusterTestSleepTime = parser.getint("General","clusterTestSleepTime")
         self.threadNumber = parser.getint("General","threadNumber")
@@ -1761,7 +1762,7 @@ class MergeTestBase:
 
     def __init__(self):
         config_parser = ConfigParser.RawConfigParser()
-        config_parser.read("ec2_tests.cfg")
+        config_parser.read(CONFIG_FNAME)
         self._mergeTestTimeout = config_parser.getint("General","mergeTestTimeout")
 
     # This function is used to generate unique system name but random.  It
@@ -2005,7 +2006,7 @@ class MergeTest_AdminPassword(MergeTestBase):
     def __init__(self):
         # load the configuration file for username and oldClusterPassword
         config_parser = ConfigParser.RawConfigParser()
-        config_parser.read("ec2_tests.cfg")
+        config_parser.read(CONFIG_FNAME)
         self._oldClusterPassword = config_parser.get("General","password")
         self._username = config_parser.get("General","username")
 
@@ -2968,7 +2969,7 @@ class InfiniteRtspTest:
 
 def runRtspTest():
     config_parser = ConfigParser.RawConfigParser()
-    config_parser.read("ec2_tests.cfg")
+    config_parser.read(CONFIG_FNAME)
     username = config_parser.get("General","username")
     password = config_parser.get("General","password")
     testSize = config_parser.getint("Rtsp","testSize")
@@ -3273,7 +3274,7 @@ class RtspPerf:
 
     def _loadConfig(self):
         config_parser = ConfigParser.RawConfigParser()
-        config_parser.read("ec2_tests.cfg")
+        config_parser.read(CONFIG_FNAME)
         threadNumbers = config_parser.get("Rtsp","threadNumbers").split(",")
         if len(threadNumbers) != len(clusterTest.clusterTestServerList):
             print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
@@ -3950,7 +3951,7 @@ class SystemNameTest:
 
     def _loadConfig(self):
         configParser = ConfigParser.RawConfigParser()
-        configParser.read("ec2_tests.cfg")
+        configParser.read(CONFIG_FNAME)
         username = configParser.get("General","username")
         passwd = configParser.get("General","password")
         sl = configParser.get("General","serverList")

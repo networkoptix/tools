@@ -12,6 +12,8 @@ import signal
 
 from testconf import *
 
+__version__ = 1.1
+
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
 STARTMARK = '[ RUN      ]'
@@ -604,20 +606,26 @@ def run():
         traceback.print_exc()
 
 
+def perform_func_test():
+    # 1. Get the .deb file and fix vagrant/bootstrap.sh
+    # 2. Start virtual boxes
+    # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
+    # 4. Call functest/main.py (what about imoirt it and call internally?)
+    pass
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    #TODO: add parameters:
-    # usage
-    # description
-    #----
+    #TODO: add parameters: usage, description
+
     # Run mode
     # No args -- just build and test current project (could be modified by -p, -t, -u)
     parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
-    parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again")
+    parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again.")
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
-    parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get")
+    parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
-    parser.add_argument("--conf", action='store_true', help="Show configuration and exit")
+    parser.add_argument("-v", "--virt", action="store_true", help="Create virtual boxes and run functional test on them.")
+    parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
                                                                 "Use '.' for a current branch (it WILL update to the last commit of the branch, and it will ignore all other -b). ")
@@ -629,7 +637,7 @@ def parse_args():
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as error, report even if no errors but some strange output from tests")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
-    #
+
     global Args
     Args = parser.parse_args()
     if Args.full_build_log and not Args.stdout:
@@ -716,6 +724,8 @@ def main():
             log("Sleeping %s secs...", t)
             time.sleep(t)
         log("Finishing...")
+    elif Args.virt: # temporary, later becomes a part of the run()
+        perform_func_test()
     else:
         run()
 

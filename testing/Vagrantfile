@@ -2,8 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  #config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/precise64.box"
-  config.vm.box_url = "file:///home/danil/work/vagrant_scripts/14-04-ubuntu-A.box"
+  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20150911.box"
   config.ssh.forward_agent = true
   
   #config.vm.provision :shell, :path => "bootstrap.sh"

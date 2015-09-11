@@ -64,6 +64,7 @@ ALERT_TO = 'dlavrentyuk@networkoptix.com' # to send mail about check process fai
 
 HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
+VAGRANT = "/usr/bin/vagrant"
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
