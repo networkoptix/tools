@@ -52,6 +52,7 @@ class PipeReaderBase(object):
         if self.fd is not None and self.fd != fd:
             raise RuntimeError("PipeReader: double fd register")
         self.proc = proc
+        self.buf = ''
         self.fd = proc.stdout
         self.state = PIPE_READY # new fd -- new process, so the reader is ready again
 
@@ -74,13 +75,16 @@ class PipeReaderBase(object):
     def readline(self, timeout=0):
         if self.state != PIPE_READY:
             return None
-        while self.proc.poll() is None:
+#        while self.proc.poll() is None:
+        while True:
             ch = self.read_ch(timeout)
             if ch is None or ch == '':
+                if self.proc.poll() is not None:
+                    break
                 return self.buf
             if ch == '\n' or ch == '\r': # use all three: \n, \r\n, \r
                 if len(self.buf) > 0:
-                    debug(self.buf)
+                    #debug('::'+self.buf)
                     try:
                         return self.buf
                     finally:
@@ -266,6 +270,7 @@ def read_test_output(proc, reader):
         while reader.state == PIPE_READY:
             line = reader.readline(PIPE_TIMEOUT)
             if not complete and len(line) > 0:
+                #debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
                     check_repeats(repeats)
                     repeats = 1
@@ -349,6 +354,7 @@ def call_test(testname, reader):
             FailedTests.append('(all)')
             ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
             return
+        #debug("Calling: %s", testpath)
         proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         reader.register(proc)
@@ -605,13 +611,25 @@ def run():
     except Exception:
         traceback.print_exc()
 
+#####################################
+# Functional tests block
+def get_server_package_name():
+    #TODO find out how to get it in runtime
+    return os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/x64/deb/networkoptix-mediaserver-2.4.0.0-x64-release-beta.deb')
+
+def get_server_package():
+    pass
+
 
 def perform_func_test():
     # 1. Get the .deb file and fix vagrant/bootstrap.sh
+    get_server_package()
     # 2. Start virtual boxes
     # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
     # 4. Call functest/main.py (what about imoirt it and call internally?)
     pass
+
+#####################################
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -670,6 +688,7 @@ def set_paths():
         Env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
     else:
         Env['LD_LIBRARY_PATH'] = LIB_PATH
+    #debug("LD_LIBRARY_PATH=%s",Env['LD_LIBRARY_PATH'])
 
 
 def change_branch_list():
