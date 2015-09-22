@@ -270,7 +270,7 @@ def read_test_output(proc, reader):
         while reader.state == PIPE_READY:
             line = reader.readline(PIPE_TIMEOUT)
             if not complete and len(line) > 0:
-                #debug("Line: %s", line.lstrip())
+                debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
                     check_repeats(repeats)
                     repeats = 1
@@ -354,8 +354,10 @@ def call_test(testname, reader):
             FailedTests.append('(all)')
             ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
             return
-        #debug("Calling: %s", testpath)
-        proc = Popen([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
+        debug("Calling %s", testpath)
+        # sudo is required since some unittest start server
+        # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
+        proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         reader.register(proc)
         read_test_output(proc, reader)
@@ -462,7 +464,8 @@ def check_new_commits(bundle_fn):
 
 def current_branch_name():
     try:
-        branch_name = check_output(HG_BRANCH, stderr=STDOUT, **SUBPROC_ARGS)
+#        branch_name = check_output(HG_BRANCH, stderr=STDOUT, **SUBPROC_ARGS)
+        branch_name = check_output(HG_BRANCH, stderr=None, **SUBPROC_ARGS)
         return branch_name.split("\n")[0]
     except CalledProcessError, e:
         if e.returncode != 1:
@@ -578,8 +581,11 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
 def prepare_branch(branch):
     if branch != '.':
         log("Switch to the banch %s" % branch)
+    debug("Call %s", HG_PURGE)
     check_call(HG_PURGE, **SUBPROC_ARGS)
+    debug("Call %s", HG_UP if branch == '.' else (HG_UP + ['--rev', branch]))
     check_call(HG_UP if branch == '.' else (HG_UP + ['--rev', branch]), **SUBPROC_ARGS)
+    debug("Going to call maven...")
     return call_maven_build(branch) and call_maven_build(branch, unit_tests=True)
 
 
