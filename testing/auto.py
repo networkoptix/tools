@@ -354,7 +354,7 @@ def call_test(testname, reader):
             FailedTests.append('(all)')
             ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
             return
-        debug("Calling %s", testpath)
+        #debug("Calling %s", testpath)
         # sudo is required since some unittest start server
         # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
         proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
@@ -620,14 +620,44 @@ def run():
 #####################################
 # Functional tests block
 def get_server_package_name():
-    #TODO find out how to get it in runtime
-    return os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/x64/deb/networkoptix-mediaserver-2.4.0.0-x64-release-beta.deb')
+    #TODO move all paths into testconf.py !
+    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
+    av = 'arch='
+    arch=''
+    with open(curconf_fn) as f:
+        for line in f:
+            if line.startswith(av):
+                arch=line[len(av):].rstrip()
+
+    if arch == '':
+        print "Architecture not found!"
+        return None
+
+    fn = os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/finalname-server.properties' % arch)
+    fv = 'server.finalName='
+    debfn = ''
+    with open(fn) as f:
+        for line in f:
+            if line.startswith(fv):
+                debfn = line[len(fv):].rstrip() + '.deb'
+
+    if debfn == '':
+        print "Deb file name npt found!"
+        return None
+
+    return os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/deb/%s' % (arch, debfn))
+
 
 def get_server_package():
+    fname = get_server_package_name()
+    #TODO check for None
+    #TODO copy file to .
+    #TODO update bootstrap.sh with deb-file name
     pass
 
 
 def perform_func_test():
+    #TODO check for Linux while it doesn't support other OSes!
     # 1. Get the .deb file and fix vagrant/bootstrap.sh
     get_server_package()
     # 2. Start virtual boxes

@@ -46,7 +46,7 @@ MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
-BRANCHES = ('dev_2.4.0',)
+BRANCHES = ('dev_2.4.1',)
 TESTS = ('common_ut', 'mediaserver_core_ut') # unit tests' binary files names
 
 SMTP_ADDR = 'smtp.gmail.com:587'
