@@ -1,5 +1,5 @@
 #!/bin/sh
-_DEB=/vagrant/networkoptix-mediaserver-2.4.0.0-x64-release-beta.deb
+_DEB=/vagrant/networkoptix-mediaserver.deb
 _CONF=/opt/networkoptix/mediaserver/etc/mediaserver.conf
 
 . /vagrant/fix-hostname.sh $1

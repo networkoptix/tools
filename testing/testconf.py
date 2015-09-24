@@ -73,6 +73,18 @@ HG_UP = [HG, "update"]
 HG_PURGE = [HG, "purge", "--all"]
 HG_BRANCH = [HG, "branch"]
 
+VAGR_DESTROY = [VAGRANT, "destroy", "-f"]
+VAGR_RUN = [VAGRANT, "up"]
+VAGR_STOP = [VAGRANT, "halt"]
+
+VG_BOXES_IP = ['192.168.109.12', '192.168.109.13']
+MEDIASERVER_PORT = 7001
+MEDIASERVER_USER = 'admin'
+MEDIASERVER_PASS = '123'
+
+START_CHECK_TIMEOUT = 30 # seconds
+ALL_START_TIMEOUT_BASE = 120 # seconds, per server
+
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
 try:

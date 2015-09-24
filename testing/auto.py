@@ -9,6 +9,10 @@ import argparse
 from smtplib import SMTP
 from email import MIMEText
 import signal
+import shutil
+import urllib2
+import json
+
 
 from testconf import *
 
@@ -40,6 +44,9 @@ def get_signals():
     return d
 
 SignalNames = get_signals()
+
+class FuncTestError(RuntimeError):
+    pass
 
 class PipeReaderBase(object):
     def __init__(self):
@@ -633,10 +640,11 @@ def get_server_package_name():
         for line in f:
             if line.startswith(av):
                 arch=line[len(av):].rstrip()
+                break
 
     if arch == '':
-        print "Architecture not found!"
-        return None
+        raise FuncTestError("Can't find server package: architecture not found!")
+
 
     fn = os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/finalname-server.properties' % arch)
     fv = 'server.finalName='
@@ -645,30 +653,77 @@ def get_server_package_name():
         for line in f:
             if line.startswith(fv):
                 debfn = line[len(fv):].rstrip() + '.deb'
+                break
 
     if debfn == '':
-        print "Deb file name npt found!"
-        return None
+        raise FuncTestError("Server package .deb file name not found!")
 
     return os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/deb/%s' % (arch, debfn))
 
 
-def get_server_package():
-    fname = get_server_package_name()
-    #TODO check for None
-    #TODO copy file to .
-    #TODO update bootstrap.sh with deb-file name
-    pass
+def wait_servers_ready():
+    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in VG_BOXES_IP]
+    not_ready = set(urls)
+    # 1. Prepare authentication for http queries
+    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    for u in urls:
+        passman.add_password(None, u, MEDIASERVER_USER, MEDIASERVER_PASS)
+    urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+    # 2. Wait for responses for query
+    # For each URL check number of servers online
+    too_slow = time.time() + len(urls) * ALL_START_TIMEOUT_BASE
+    while not_ready:
+        for url in urls:
+            if time.time() > too_slow:
+                raise FuncTestError("Server start timed out! Functional tests wasn't performed.")
+            if url in not_ready:
+                try:
+                    jdata = urllib2.urlopen(url, timeout=START_CHECK_TIMEOUT).read()
+                    # Check response for 'status' field (Online/Offline) for all servers
+                except Exception, e:
+                    continue # wait for good response or for global timeout
+                try:
+                    data = json.loads(jdata)
+                except ValueError, e:
+                    continue # just ignore wrong answer, wait for correct
+                count = 0
+                for server in data:
+                    if server.get('status', '') == 'Online':
+                        count += 1
+                if count == len(urls):
+                    debug("Ready response from %s", url)
+                    not_ready.discard(url)
 
 
 def perform_func_test():
-    #TODO check for Linux while it doesn't support other OSes!
-    # 1. Get the .deb file and fix vagrant/bootstrap.sh
-    get_server_package()
-    # 2. Start virtual boxes
-    # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-    # 4. Call functest/main.py (what about imoirt it and call internally?)
-    pass
+    if os.name != 'posix':
+        print "Functional tests require POSIX-compatible OS"
+        return
+    need_stop = False
+    try:
+        # 1. Get the .deb file and fix vagrant/bootstrap.sh
+        # The same filename used for all versions here:
+        # a) To remove (by override) any previous version automatically.
+        # b) To use fixed name in the bootstrap.sh script
+        shutil.copy(get_server_package_name(), './networkoptix-mediaserver.deb') # put this name into config
+        # 2. Start virtual boxes
+        log("Removing old vargant boxes..")
+        check_call(VAGR_DESTROY, shell=False)
+        log("Creating and starting vagrant boxes...")
+        need_stop = True
+        check_call(VAGR_RUN, shell=False)
+        # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
+        wait_servers_ready()
+        # 4. Call functest/main.py (what about imoirt it and call internally?)
+    except FuncTestError, e:
+        log("Functional test aborted: %s", e.message)
+    except Exception:
+        log("Exception during functional test run:\n%s", traceback.format_exc())
+    finally:
+        if need_stop:
+            log("Stopping vagrant boxes...")
+            check_call(VAGR_STOP, shell=False)
+
 
 #####################################
 
