@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output, call as subcall
 from collections import deque
 import errno
 import traceback
@@ -315,7 +315,7 @@ def read_test_output(proc, reader):
             has_errors = True
 
         if proc.poll() is None:
-            proc.terminate()
+            kill_test(proc)
             proc.wait()
 
         if proc.returncode != 0:
@@ -323,7 +323,7 @@ def read_test_output(proc, reader):
                 ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
                 FailedTests.append(running_test_name)
             if proc.returncode < 0:
-                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours proc.terminate()
+                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
                     signames = SignalNames.get(-proc.returncode, [])
                     signames = ' (%s)' % (','.join(signames),) if signames else ''
                     ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
@@ -382,6 +382,11 @@ def call_test(testname, reader):
         else:
             ToSend.append('')
 
+
+def kill_test(proc):
+    "Kills subproces under sudo"
+    debug("Killing unit test process %s", proc.pid)
+    subcall(['/usr/bin/sudo', 'kill', str(proc.pid)], shell=False)
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
@@ -488,11 +493,11 @@ def check_mvn_exit(proc, last_lines):
     if proc.returncode is None:
         last_lines.append("*** Maven has hanged in the end!")
         log("Maven has hanged in the end!")
-        proc.terminate()
+        kill_test(proc)
         if proc.poll() is None:
             time.sleep(0.5)
             proc.poll()
-        debug("proc.terminate() called. RC = %s", proc.returncode)
+        debug("Unittest proces was killed. RC = %s", proc.returncode)
 
 
 build_fail_rx = re.compile(r"^\[INFO\] ([^\.]+)\s+\.+\s+FAILURE")
