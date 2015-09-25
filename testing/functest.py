@@ -22,7 +22,7 @@ import errno
 
 from functest_util import *
 
-CONFIG_FNAME = "functests.cfg"
+CONFIG_FNAME = "functest.cfg"
 
 # Rollback support
 class UnitTestRollback:
@@ -69,7 +69,7 @@ class UnitTestRollback:
         response.close()
         return True
 
-    def doRollback(self):
+    def doRollback(self, quiet=False):
         recoverList = []
         failed = False
         # set the cursor for the file to the file beg
@@ -77,11 +77,7 @@ class UnitTestRollback:
         for line in self._rollbackFile:
             if line == '\n':
                 continue
-            # python will left the last line break character there
-            # so we need to wipe it out if we find one there
-            l = line.split(',')
-            if l[2][len(l[2]) - 1] == "\n" :
-                l[2] = l[2][:-1] # remove last character
+            l = line.rstrip('\n').split(',')
             # now we have method,serverAddress,resourceId
             if self._doSingleRollback(l[0],l[1],l[2]) == False:
                 failed = True
@@ -90,9 +86,13 @@ class UnitTestRollback:
                 print  "Or you could run recover later when all the rollback done\n"
                 recoverList.append("%s,%s,%s\n" % (l[0],l[1],l[2]))
             else:
-                print "..rollback done.."
+                if quiet:
+                    print '+',
+                else:
+                    print "..rollback done.."
+        if quiet:
+            print
 
-        # close the resource file
         self._rollbackFile.close()
         os.remove(".rollback")
 
@@ -1399,7 +1399,7 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
                     uuid,name))
         return ret
 
-
+####################################################################################################
 
 class ClusterTestBase(unittest.TestCase):
     _Lock = threading.Lock()
@@ -1750,6 +1750,8 @@ class ResourceConflictionTest(ClusterTestBase):
 
         print "Test:ResourceConfliction finish!\n"
         print "===================================\n"
+
+####################################################################################################
 
 # ========================================
 # Server Merge Automatic Test
@@ -2987,6 +2989,8 @@ def runRtspTest():
 # ======================================================
 # RTSP performance Operations
 # ======================================================
+RTSP_DUMP = False # TODO pass it through arguments to SingleServerRtspPerf()
+
 class SingleServerRtspPerf(SingleServerRtspTestBase):
     ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
     _timeoutMax = 0
@@ -3245,17 +3249,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         print "======================================="
 
     def run(self):
-        dump = False
-        if len(sys.argv) == 3 and sys.argv[2] == '--dump':
-            dump = True
-
         if len(self._cameraList) == 0:
             print "The camera list on server:%s is empty!"%(self._serverEndpoint)
             print "Do nothing and abort!"
             return False
 
         for _ in xrange(self._threadNum):
-            th = threading.Thread(target=self._threadMain,args=(dump,))
+            th = threading.Thread(target=self._threadMain,args=(RTSP_DUMP,))
             th.start()
             self._threadPool.append(th)
 
@@ -3519,6 +3519,7 @@ class CameraOperation(PerformanceOperation):
         self._removeAll(uuidList)
         return True
 
+
 def doClearAll(fake=False):
     if fake:
         CameraOperation().removeAllFake()
@@ -3530,11 +3531,11 @@ def doClearAll(fake=False):
         MediaServerOperation().removeAll()
 
 
-def runMiscFunction():
-    if len(sys.argv) != 3 and len(sys.argv) != 2 :
+def runMiscFunction(argc, argv):
+    if argc not in (2, 3):
         return (False,"2/1 parameters are needed")
 
-    l = sys.argv[1].split('=')
+    l = argv[1].split('=')
     
     if l[0] != '--add' and l[0] != '--remove':
         return (False,"Unknown first parameter options")
@@ -3547,9 +3548,9 @@ def runMiscFunction():
         t = t()
     
     if l[0] == '--add':
-        if len(sys.argv) != 3 :
+        if argc != 3 :
             return (False,"--add must have --count option")
-        l = sys.argv[2].split('=')
+        l = argv[2].split('=')
         if l[0] == '--count':
             num = int(l[1])
             if num <= 0 :
@@ -3559,8 +3560,8 @@ def runMiscFunction():
         else:
             return (False,"--add can only have --count options")
     elif l[0] == '--remove':
-        if len(sys.argv) == 3:
-            l = sys.argv[2].split('=')
+        if argc == 3:
+            l = argv[2].split('=')
             if l[0] == '--id':
                 if t.remove(l[1]) == False:
                     return (False,"cannot perform remove UID operation")
@@ -3569,7 +3570,7 @@ def runMiscFunction():
                     return (False,"cannot perform remove UID operation")
             else:
                 return (False,"--remove can only have --id options")
-        elif len(sys.argv) == 2:
+        elif argc == 2:
             if t.removeAll() == False:
                 return (False,"cannot perform remove all operation")
     else:
@@ -3832,7 +3833,7 @@ class PerfTest:
                 continue
         return ret
             
-    def run(self,par):
+    def run(self, par):
         ret = self._parseParameters(par)
         if not ret[0] and not ret[1] and not ret[2]:
             return False
@@ -3868,13 +3869,14 @@ class PerfTest:
             print "Resource Remove Fail:    %d" % (value.removeFail)
             print "---------------------------------"
         print "===================================="
-                        
-def runPerfTest():
-    options = sys.argv[2]
-    l = options.split('=')
+
+
+def runPerfTest(argv):
+    l = argv[2].split('=')
     PerfTest().run(l[1])
     doCleanUp()
-    
+
+
 class SystemNameTest:
     _serverList = []
     _guidDict = dict()
@@ -4016,70 +4018,75 @@ class SystemNameTest:
         print "SystemName test rollback done"
         print "========================================="
 
-def doCleanUp():
-    selection = None
-    try :
-        selection = raw_input("Press Enter to continue ROLLBACK or press x to SKIP it...")
-    except:
-        pass
+def doCleanUp(auto=False):
+    selection = '' if auto else 'x'
+    if not auto:
+        try :
+            selection = raw_input("Press Enter to continue ROLLBACK or press x to SKIP it...")
+        except:
+            pass
 
-    if selection != None and (len(selection) == 0 or selection[0] != 'x'):
+    if len(selection) == 0 or selection[0] != 'x':
         print "Now do the rollback, do not close the program!"
-        clusterTest.unittestRollback.doRollback()
+        clusterTest.unittestRollback.doRollback(auto)
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
 
 
-def DoTests():
+def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
-    ret,reason = clusterTest.init()
+    argc = len(argv)
+    ret, reason = clusterTest.init()
     if ret == False:
-        print "Failed to initialize the cluster test object:%s" % (reason)
-    elif len(sys.argv) == 2 and sys.argv[1] == '--sync':
+        print "Failed to initialize the cluster test object: %s" % (reason)
+    elif argc == 2 and argv[1] == '--sync':
         pass # done here, since we just need to test whether
              # all the servers are on the same page
     else:
-        if len(sys.argv) == 1:
-            ret = None
-            try:
-                ret = unittest.main()
-            except SystemExit,e:
-                if not e.code:
-                    if MergeTest().test():
-                        SystemNameTest().run()
+        if argc == 1 or (argc == 2 and argv[1] == '--autorollback'):
+            tmp_argv = sys.argv
+            sys.argv = tmp_argv[:-1] # hide all arguments from unittest.main
+            the_test = unittest.main(exit=False)
+            sys.argv = tmp_argv
+            if the_test.result.wasSuccessful():
+                if MergeTest().test():
+                    SystemNameTest().run()
 
-                print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
-                doCleanUp()
+            print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
+            doCleanUp(argc == 2)
 
-        elif (len(sys.argv) == 2 or len(sys.argv) == 3) and sys.argv[1] == '--clear':
-            if len(sys.argv) == 3:
-                if sys.argv[2] == '--fake':
+        elif (argc == 2 or argc == 3) and argv[1] == '--clear':
+            if argc == 3:
+                if argv[2] == '--fake':
                     doClearAll(True)
                 else:
-                    print "Unknown option:%s in --clear" % (sys.argv[2])
+                    print "Unknown option: %s in --clear" % (argv[2])
             else:
                 doClearAll(False)
             clusterTest.unittestRollback.removeRollbackDB()
-        elif len(sys.argv) == 2 and sys.argv[1] == '--perf':
+        elif argc == 2 and argv[1] == '--perf':
             PerfTest().start()
             doCleanUp()
         else:
-            if sys.argv[1] == '--merge-test':
+            if argv[1] == '--merge-test':
                 MergeTest().test()
                 doCleanUp()
-            elif sys.argv[1] == '--merge-admin':
+            elif argv[1] == '--merge-admin':
                 MergeTest_AdminPassword().test()
                 clusterTest.unittestRollback.removeRollbackDB()
-            elif sys.argv[1] == '--rtsp-test':
+            elif argv[1] == '--rtsp-test':
                 runRtspTest()
-            elif sys.argv[1] == '--rtsp-perf':
+            elif argv[1] == '--rtsp-perf':
+                if argc == 3 and argv[2] == '--dump':
+                    global RTSP_DUMP
+                    RTSP_DUMP = True
                 runRtspPerf()
-            elif len(sys.argv) == 3 and sys.argv[1] == '--perf':
+            elif argc == 3 and argv[1] == '--perf':
                 runPerfTest()
             else:
-                runMiscFunction()
+                runMiscFunction(argc, argv)
 
 if __name__ == '__main__':
     if len(sys.argv) >= 2 and sys.argv[1] == '--help':
@@ -4089,4 +4096,4 @@ if __name__ == '__main__':
     elif len(sys.argv) == 2 and sys.argv[1] == '--sys-name':
         SystemNameTest().run()
     else:
-        DoTests()
+        DoTests(sys.argv)

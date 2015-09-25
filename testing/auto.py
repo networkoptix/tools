@@ -715,6 +715,11 @@ def perform_func_test():
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
         wait_servers_ready()
         # 4. Call functest/main.py (what about imoirt it and call internally?)
+        if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
+            os.remove(".rollback")
+        subcall(["python", "functest.py", "--autorollback"], shell=False)
+        #import functest
+        #functest.DoTests()
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
     except Exception:
