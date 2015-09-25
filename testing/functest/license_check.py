@@ -7,7 +7,7 @@ class LicenseCheck:
 
     def _load_config(self):
         cfg = ConfigParser.RawConfigParser()
-        cfg.read("config.cfg")
+        cfg.read("lcconfig.cfg")
 
         # get the configuration
         self._server_list = cfg.get("LicenseActivate","serverList").split(',')
