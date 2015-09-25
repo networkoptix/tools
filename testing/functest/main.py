@@ -22,7 +22,7 @@ import errno
 
 from functest_util import *
 
-CONFIG_FNAME = "ec2_tests.cfg"
+CONFIG_FNAME = "functests.cfg"
 
 # Rollback support
 class UnitTestRollback:
