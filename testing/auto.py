@@ -737,6 +737,7 @@ def perform_func_test():
             os.remove(".rollback")
         reader = PipeReader()
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
+        log("Running functional tests: %s", [sys.executable, "functest.py", "--autorollback"])
         proc = Popen([sys.executable, "functest.py", "--autorollback"], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
         reader.register(proc)
         read_functest_output(proc, reader)
@@ -772,6 +773,7 @@ FT_MERGE_IN = 3
 FT_MERGE_FAILED = 4
 FT_SYSNAME = 5
 FT_SYSNAME_IN = 6
+FT_SYSNAME_FAILED = 7
 FT_END = 20
 
 FT_FAIL_MARK = "FAIL:"
@@ -805,6 +807,7 @@ def read_functest_output(proc, reader):
                             log_to_send(line)
                             pass
                         elif line.startswith(FT_MAIN_END):
+                            log("Main functest done.")
                             phase = FT_MERGE
                     elif phase == FT_MAIN_FAILED:
                         log_to_send(line)
@@ -820,6 +823,7 @@ def read_functest_output(proc, reader):
                             if has_errors:
                                 log_to_send(line)
                             phase = FT_SYSNAME
+                            log("Merge Server test done.")
                         elif has_errors:
                             log_to_send(line)
                         elif line.startswith(FT_FAIL_MARK):
@@ -829,12 +833,14 @@ def read_functest_output(proc, reader):
                                 log_to_send(s)
                             del collector[:]
                             log_to_send(line)
+                            phase = FT_MERGE_FAILED
                         else:
                             collector.append(line)
                     elif phase == FT_MERGE_FAILED:
                         log_to_send(line)
                         if line.startswith(FT_MERGE_END):
                             phase = FT_SYSNAME
+                            log("Merge Server test done.")
 
                     elif phase == FT_SYSNAME:
                         if line.startswith(FT_SYSNAME_MARK):
@@ -845,6 +851,7 @@ def read_functest_output(proc, reader):
                             if has_errors:
                                 log_to_send(line)
                             phase = FT_END
+                            log("SystemName test done.")
                         elif has_errors:
                             log_to_send(line)
                         elif line.startswith(FT_FAIL_MARK):
@@ -853,8 +860,14 @@ def read_functest_output(proc, reader):
                             for s in collector:
                                 log_to_send(s)
                             log_to_send(line)
+                            phase = FT_SYSNAME_FAILED
                         else:
                             collector.append(line)
+                    elif phase == FT_SYSNAME_FAILED:
+                        log_to_send(line)
+                        if line.startswith(FT_SYSNAME_END):
+                            phase = FT_END
+                            log("SystemName test done.")
 
         else: # end reading
             pass
