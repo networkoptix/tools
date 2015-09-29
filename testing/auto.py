@@ -182,6 +182,13 @@ def log(text, *args):
     log_print("[%s] %s" % (time.strftime("%Y:%m:%d %X %Z"), ((text % args) if args else text)))
 
 
+def log_to_send(text, *args):
+    if args:
+        text = text % args
+    log(text)
+    print "L: " + text
+    ToSend.append(text)
+
 def debug(text, *args):
     if DEBUG:
         if args:
@@ -225,7 +232,7 @@ def get_platform():
 
 def email_notify(branch, lines):
     text = (
-        ("Branch %s unit tests run report.\n\n" % branch) +
+        ("Branch %s tests run report.\n\n" % branch) +
         "\n".join(lines) +
         ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) + "\n" +
         format_changesets(branch) + "\n"
@@ -265,7 +272,7 @@ def check_repeats(repeats):
         ToSend[-1] += "   [ REPEATS %s TIMES ]" % repeats
 
 
-def read_test_output(proc, reader):
+def read_unittest_output(proc, reader):
     last_suit_line = ''
     has_errors = False
     has_stranges = False
@@ -367,7 +374,7 @@ def call_test(testname, reader):
         proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         reader.register(proc)
-        read_test_output(proc, reader)
+        read_unittest_output(proc, reader)
     except BaseException, e:
         tstr = traceback.format_exc()
         print tstr
@@ -390,10 +397,13 @@ def call_test(testname, reader):
             ToSend.append('')
 
 
-def kill_test(proc):
+def kill_test(proc, sudo=False):
     "Kills subproces under sudo"
-    debug("Killing unit test process %s", proc.pid)
-    subcall(['/usr/bin/sudo', 'kill', str(proc.pid)], shell=False)
+    debug("Killing test process %s", proc.pid)
+    if sudo:
+        subcall(['/usr/bin/sudo', 'kill', str(proc.pid)], shell=False)
+    else:
+        subcall(['kill', str(proc.pid)], shell=False)
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
@@ -410,6 +420,13 @@ def run_tests(branch):
                 lines.append('')
             lines.append("Tests, failed in the %s test suit:" % name)
             lines.extend("\t" + name for name in FailedTests)
+            lines.append('')
+            lines.extend(ToSend)
+
+    if not lines:
+        del ToSend[:]
+        perform_func_test()
+        if ToSend:
             lines.append('')
             lines.extend(ToSend)
 
@@ -700,6 +717,7 @@ def perform_func_test():
         print "Functional tests require POSIX-compatible OS"
         return
     need_stop = False
+    reader = proc = None
     try:
         # 1. Get the .deb file and fix vagrant/bootstrap.sh
         # The same filename used for all versions here:
@@ -717,17 +735,160 @@ def perform_func_test():
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
-        subcall(["python", "functest.py", "--autorollback"], shell=False)
+        reader = PipeReader()
+        sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
+        proc = Popen([sys.executable, "functest.py", "--autorollback"], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
+        reader.register(proc)
+        read_functest_output(proc, reader)
         #import functest
         #functest.DoTests()
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
-    except Exception:
+    except BaseException:
+        tstr = traceback.format_exc()
+        print tstr
         log("Exception during functional test run:\n%s", traceback.format_exc())
+        if isinstance(e, Exception):
+            pass
+            #ToSend.append("[[ Tests call error:")
+            #ToSend.append(tstr)
+            #ToSend.append("]]")
+        else:
+            s = "[[ Functional tests has been interrupted:\n%s\n]]" % tstr
+            #ToSend.append(s)
+            log(s)
+            raise # it wont be catched and will allow the script to terminate
     finally:
+        if reader and proc:
+            reader.unregister()
         if need_stop:
             log("Stopping vagrant boxes...")
             check_call(VAGR_STOP, shell=False)
+
+FT_MAIN = 0
+FT_MAIN_FAILED = 1
+FT_MERGE = 2
+FT_MERGE_IN = 3
+FT_MERGE_FAILED = 4
+FT_SYSNAME = 5
+FT_SYSNAME_IN = 6
+FT_END = 20
+
+FT_FAIL_MARK = "FAIL:"
+FT_FAIL_END_MAIN = "FAILED (failures"
+FT_MAIN_END = "Main tests passed OK"
+FT_MERGE_MARK = "Server Merge Test:Resource Start"
+FT_MERGE_END = "Server Merge Test:Resource End"
+FT_SYSNAME_MARK = "SystemName Test Start"
+FT_SYSNAME_END = "SystemName test rollback done"
+FT_END_MARK = "ALL AUTOMATIC TEST ARE DONE"
+
+
+def read_functest_output(proc, reader):
+    has_errors = False
+    to_send_count = 0
+    phase = FT_MAIN
+    collector = []
+    try:
+        while reader.state == PIPE_READY:
+            line = reader.readline(PIPE_TIMEOUT)
+            if len(line) > 0:
+                #debug("FTLine: %s", line.lstrip())
+                if line.startswith(FT_END_MARK):
+                    phase = FT_END
+                else:
+                    if phase == FT_MAIN:
+                        if line.startswith(FT_FAIL_MARK):
+                            has_errors = True
+                            phase = FT_MAIN_FAILED
+                            log_to_send("Functional test failed!")
+                            log_to_send(line)
+                            pass
+                        elif line.startswith(FT_MAIN_END):
+                            phase = FT_MERGE
+                    elif phase == FT_MAIN_FAILED:
+                        log_to_send(line)
+                        if line.startswith(FT_FAIL_END_MAIN):
+                            phase = FT_END # there won't be more tests
+
+                    elif phase == FT_MERGE:
+                        if line.startswith(FT_MERGE_MARK):
+                            phase = FT_MERGE_IN
+                            collector = [line]
+                    elif phase == FT_MERGE_IN:
+                        if line.startswith(FT_MERGE_END):
+                            if has_errors:
+                                log_to_send(line)
+                            phase = FT_SYSNAME
+                        elif has_errors:
+                            log_to_send(line)
+                        elif line.startswith(FT_FAIL_MARK):
+                            has_errors = True
+                            log_to_send("Functional test failed on Merge Server test!")
+                            for s in collector:
+                                log_to_send(s)
+                            del collector[:]
+                            log_to_send(line)
+                        else:
+                            collector.append(line)
+                    elif phase == FT_MERGE_FAILED:
+                        log_to_send(line)
+                        if line.startswith(FT_MERGE_END):
+                            phase = FT_SYSNAME
+
+                    elif phase == FT_SYSNAME:
+                        if line.startswith(FT_SYSNAME_MARK):
+                            phase = FT_SYSNAME_IN
+                            collector = [line]
+                    elif phase == FT_SYSNAME_IN:
+                        if line.startswith(FT_SYSNAME_END):
+                            if has_errors:
+                                log_to_send(line)
+                            phase = FT_END
+                        elif has_errors:
+                            log_to_send(line)
+                        elif line.startswith(FT_FAIL_MARK):
+                            has_errors = True
+                            log_to_send("Functional test failed on SystemName test!")
+                            for s in collector:
+                                log_to_send(s)
+                            log_to_send(line)
+                        else:
+                            collector.append(line)
+
+        else: # end reading
+            pass
+
+        if reader.state in (PIPE_HANG, PIPE_ERROR):
+            ToSend.append(
+                "[ functional tests has TIMED OUT ]" if reader.state == PIPE_HANG else
+                "[ PIPE ERROR reading functional tests output  ]")
+            #FailedTests.append(running_test_name)
+            has_errors = True
+
+        if proc.poll() is None:
+            kill_test(proc)
+            proc.wait()
+
+        if proc.returncode != 0:
+            #if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
+            #    ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
+            #    FailedTests.append(running_test_name)
+            if proc.returncode < 0:
+                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+                    signames = SignalNames.get(-proc.returncode, [])
+                    signames = ' (%s)' % (','.join(signames),) if signames else ''
+                    log_to_send("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+            else:
+                log_to_send("[ FUNCTIONAL TESTS' RETURN CODE = %s ]" % proc.returncode)
+            has_errors = True
+
+    finally:
+        pass
+        #if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
+        #    FailedTests.append(running_test_name)
+
+
 
 
 #####################################
@@ -845,7 +1006,11 @@ def main():
             time.sleep(t)
         log("Finishing...")
     elif Args.virt: # temporary, later becomes a part of the run()
+        ToSend[:] = []
         perform_func_test()
+        if ToSend:
+            email_notify("Debug func tests", ToSend)
+
     else:
         run()
 

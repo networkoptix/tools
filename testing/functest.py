@@ -1519,6 +1519,9 @@ class ClusterTestBase(unittest.TestCase):
             ret , reason = clusterTest.checkMethodStatusConsistent(observer)
             self.assertTrue(ret,reason)
 
+        #DEBUG
+        #self.assertNotEqual(0, 0, "DEBUG FAIL")
+
         print "Test:%s finish!\n" % (self._getMethodName())
         print "===================================\n"
 
@@ -1955,13 +1958,13 @@ class MergeTest_Resource(MergeTestBase):
             worker.enqueue(PrepareServerStatus(self).main,(s,))
 
         worker.join()
-        print "Merge test phase1 done, now sleep and wait for sync"
+        print "Merge test phase1 done, now sleep %s seconds and wait for sync" % self._mergeTestTimeout
         time.sleep(self._mergeTestTimeout)
 
     def _phase2(self):
         print "Merge test phase2: set ALL the servers with system name :mergeTest"
         self._setClusterToMerge()
-        print "Merge test phase2: wait for sync"
+        print "Merge test phase2: wait %s seconds for sync" % self._mergeTestTimeout
         # Wait until the synchronization time out expires
         time.sleep(self._mergeTestTimeout)
         # Do the status checking of _ALL_ API
@@ -1976,13 +1979,14 @@ class MergeTest_Resource(MergeTestBase):
         print "================================\n"
         print "Server Merge Test:Resource Start\n"
         if not self._prolog():
+            print "FAIL: Merge Test: Resource prolog failed!"
             return False
         self._phase1()
         ret,reason = self._phase2()
         if not ret:
-            print reason
+            print "FAIL: %s" % reason
         self._epilog()
-        print "Server Merge Test:Resource End\n"
+        print "Server Merge Test:Resource End%s\n" % ('' if ret else ": test FAILED")
         print "================================\n"
         return ret
 
@@ -3941,9 +3945,11 @@ class SystemNameTest:
 
             if systemName != None:
                 if systemName != obj["systemName"]:
-                    return (False,"Server:%s has systemName:%s which is different with others:%s" % (s,obj["systemName"],systemName))
+                    return (False,"Server: %s has systemName: %s which is different with others: %s" % (s,obj["systemName"],systemName))
             else:
                 systemName = obj["systemName"]
+
+            #return (False, "SystemNameTest DEBUG FAIL: %s" % (s))
 
             self._guidDict[s] = obj["ecsGuid"]
 
@@ -3997,26 +4003,35 @@ class SystemNameTest:
             self._changeSystemName(s,self._oldSystemName)
 
     def run(self):
+        print "========================================="
+        print "SystemName Test Start"
+
         user,pwd = self._loadConfig()
         self._setUpAuth(user,pwd)
 
         ret,reason = self._ensureServerSystemName()
 
-        if not ret:
-            print reason
-            return False
-        
-        print "========================================="
-        print "Start to test SystemName for server lists"
-        ret,reason = self._doTest()
-        if not ret:
-            print reason
+        if ret:
+            print "-----------------------------------------"
+            print "Start to test SystemName for server lists"
+            ret,reason = self._doTest()
+            if not ret:
+                print "FAIL: %s" % reason
+            # DEBUG!
+            #elif random.randint(0,5) == 0:
+            #    ret = False
+            #    print "FAIL: JUST A DEBUG FAIL"
 
-        print "SystemName test finished"
-        print "Start SystemName test rollback"
-        self._doRollback()
-        print "SystemName test rollback done"
+            print "SystemName test finished"
+            print "Start SystemName test rollback"
+            self._doRollback()
+        else:
+            print "FAIL: %s" % reason
+
+        print "SystemName test rollback done%s" % ('' if ret else ": test FAILED")
         print "========================================="
+        return ret
+
 
 def doCleanUp(auto=False):
     selection = '' if auto else 'x'
@@ -4051,6 +4066,7 @@ def DoTests(argv):
             the_test = unittest.main(exit=False)
             sys.argv = tmp_argv
             if the_test.result.wasSuccessful():
+                print "Main tests passed OK"
                 if MergeTest().test():
                     SystemNameTest().run()
 
