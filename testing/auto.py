@@ -714,7 +714,7 @@ def wait_servers_ready():
 
 def perform_func_test():
     if os.name != 'posix':
-        print "Functional tests require POSIX-compatible OS"
+        print "\nFunctional tests require POSIX-compatible OS. Skipped."
         return
     need_stop = False
     reader = proc = None
