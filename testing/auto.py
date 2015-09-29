@@ -745,7 +745,7 @@ def perform_func_test():
         #functest.DoTests()
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
-    except BaseException:
+    except BaseException, e:
         tstr = traceback.format_exc()
         print tstr
         log("Exception during functional test run:\n%s", traceback.format_exc())
