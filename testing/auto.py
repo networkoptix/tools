@@ -328,7 +328,7 @@ def read_unittest_output(proc, reader):
             has_errors = True
 
         if proc.poll() is None:
-            kill_test(proc)
+            kill_test(proc, sudo=True)
             proc.wait()
 
         if proc.returncode != 0:
