@@ -201,7 +201,7 @@ def compareJson(lhs,rhs):
             result.leave()
         else:
             return result.typeNotSame(lhs,rhs)
-    #FIXME check if lhs neother list nor dit!
+    #FIXME check if lhs neither list nor dit!
 
     return result
 

@@ -186,7 +186,6 @@ def log_to_send(text, *args):
     if args:
         text = text % args
     log(text)
-    print "L: " + text
     ToSend.append(text)
 
 def debug(text, *args):
@@ -282,7 +281,7 @@ def read_unittest_output(proc, reader):
     to_send_count = 0
     try:
         while reader.state == PIPE_READY:
-            line = reader.readline(PIPE_TIMEOUT)
+            line = reader.readline(UT_PIPE_TIMEOUT)
             if not complete and len(line) > 0:
                 debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
@@ -737,12 +736,18 @@ def perform_func_test():
             os.remove(".rollback")
         reader = PipeReader()
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
-        log("Running functional tests: %s", [sys.executable, "functest.py", "--autorollback"])
-        proc = Popen([sys.executable, "functest.py", "--autorollback"], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
+        cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
+        log("Running functional tests: %s", cmd)
+        proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
         reader.register(proc)
         read_functest_output(proc, reader)
-        #import functest
-        #functest.DoTests()
+        reader.unregister()
+        cmd = [sys.executable, "-u", "redir_test.py"]
+        log("Running server redirection test: %s", cmd)
+        proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
+        reader.register(proc)
+        #TODO make it a part of the functest.py
+        read_redirtest_output(proc, reader)
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
     except BaseException, e:
@@ -791,117 +796,155 @@ def read_functest_output(proc, reader):
     to_send_count = 0
     phase = FT_MAIN
     collector = []
-    try:
-        while reader.state == PIPE_READY:
-            line = reader.readline(PIPE_TIMEOUT)
-            if len(line) > 0:
-                #debug("FTLine: %s", line.lstrip())
-                if line.startswith(FT_END_MARK):
-                    phase = FT_END
-                else:
-                    if phase == FT_MAIN:
-                        if line.startswith(FT_FAIL_MARK):
-                            has_errors = True
-                            phase = FT_MAIN_FAILED
-                            log_to_send("Functional test failed!")
-                            log_to_send(line)
-                            pass
-                        elif line.startswith(FT_MAIN_END):
-                            log("Main functest done.")
-                            phase = FT_MERGE
-                    elif phase == FT_MAIN_FAILED:
-                        log_to_send(line)
-                        if line.startswith(FT_FAIL_END_MAIN):
-                            phase = FT_END # there won't be more tests
-
-                    elif phase == FT_MERGE:
-                        if line.startswith(FT_MERGE_MARK):
-                            phase = FT_MERGE_IN
-                            collector = [line]
-                    elif phase == FT_MERGE_IN:
-                        if line.startswith(FT_MERGE_END):
-                            if has_errors:
-                                log_to_send(line)
-                            phase = FT_SYSNAME
-                            log("Merge Server test done.")
-                        elif has_errors:
-                            log_to_send(line)
-                        elif line.startswith(FT_FAIL_MARK):
-                            has_errors = True
-                            log_to_send("Functional test failed on Merge Server test!")
-                            for s in collector:
-                                log_to_send(s)
-                            del collector[:]
-                            log_to_send(line)
-                            phase = FT_MERGE_FAILED
-                        else:
-                            collector.append(line)
-                    elif phase == FT_MERGE_FAILED:
-                        log_to_send(line)
-                        if line.startswith(FT_MERGE_END):
-                            phase = FT_SYSNAME
-                            log("Merge Server test done.")
-
-                    elif phase == FT_SYSNAME:
-                        if line.startswith(FT_SYSNAME_MARK):
-                            phase = FT_SYSNAME_IN
-                            collector = [line]
-                    elif phase == FT_SYSNAME_IN:
-                        if line.startswith(FT_SYSNAME_END):
-                            if has_errors:
-                                log_to_send(line)
-                            phase = FT_END
-                            log("SystemName test done.")
-                        elif has_errors:
-                            log_to_send(line)
-                        elif line.startswith(FT_FAIL_MARK):
-                            has_errors = True
-                            log_to_send("Functional test failed on SystemName test!")
-                            for s in collector:
-                                log_to_send(s)
-                            log_to_send(line)
-                            phase = FT_SYSNAME_FAILED
-                        else:
-                            collector.append(line)
-                    elif phase == FT_SYSNAME_FAILED:
-                        log_to_send(line)
-                        if line.startswith(FT_SYSNAME_END):
-                            phase = FT_END
-                            log("SystemName test done.")
-
-        else: # end reading
-            pass
-
-        if reader.state in (PIPE_HANG, PIPE_ERROR):
-            ToSend.append(
-                "[ functional tests has TIMED OUT ]" if reader.state == PIPE_HANG else
-                "[ PIPE ERROR reading functional tests output  ]")
-            #FailedTests.append(running_test_name)
-            has_errors = True
-
-        if proc.poll() is None:
-            kill_test(proc)
-            proc.wait()
-
-        if proc.returncode != 0:
-            #if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-            #    ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
-            #    FailedTests.append(running_test_name)
-            if proc.returncode < 0:
-                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
-                    signames = SignalNames.get(-proc.returncode, [])
-                    signames = ' (%s)' % (','.join(signames),) if signames else ''
-                    log_to_send("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+    last_lines = deque(maxlen=FUNCTEST_LAST_LINES)
+    stage = 'Main functional tests'
+    while reader.state == PIPE_READY:
+        line = reader.readline(FT_PIPE_TIMEOUT)
+        if len(line) > 0:
+            last_lines.append(line)
+            #debug("FTLine: %s", line.lstrip())
+            if line.startswith(FT_END_MARK):
+                phase = FT_END
             else:
-                log_to_send("[ FUNCTIONAL TESTS' RETURN CODE = %s ]" % proc.returncode)
-            has_errors = True
+                if phase == FT_MAIN:
+                    if line.startswith(FT_FAIL_MARK):
+                        has_errors = True
+                        phase = FT_MAIN_FAILED
+                        log_to_send("Functional test failed!")
+                        log_to_send(line)
+                        pass
+                    elif line.startswith(FT_MAIN_END):
+                        log("Main functest done.")
+                        phase = FT_MERGE
+                        stage = 'Merge server test'
+                elif phase == FT_MAIN_FAILED:
+                    log_to_send(line)
+                    if line.startswith(FT_FAIL_END_MAIN):
+                        phase = FT_END # there won't be more tests
 
-    finally:
+                elif phase == FT_MERGE:
+                    if line.startswith(FT_MERGE_MARK):
+                        phase = FT_MERGE_IN
+                        collector = [line]
+                elif phase == FT_MERGE_IN:
+                    if line.startswith(FT_MERGE_END):
+                        if has_errors:
+                            log_to_send(line)
+                        phase = FT_SYSNAME
+                        stage = 'SystemName test'
+                        log("Merge Server test done.")
+                    elif has_errors:
+                        log_to_send(line)
+                    elif line.startswith(FT_FAIL_MARK):
+                        has_errors = True
+                        log_to_send("Functional test failed on Merge Server test!")
+                        for s in collector:
+                            log_to_send(s)
+                        del collector[:]
+                        log_to_send(line)
+                        phase = FT_MERGE_FAILED
+                    else:
+                        collector.append(line)
+                elif phase == FT_MERGE_FAILED:
+                    log_to_send(line)
+                    if line.startswith(FT_MERGE_END):
+                        phase = FT_SYSNAME
+                        stage = 'SystemName test'
+                        log("Merge Server test done.")
+
+                elif phase == FT_SYSNAME:
+                    if line.startswith(FT_SYSNAME_MARK):
+                        phase = FT_SYSNAME_IN
+                        collector = [line]
+                elif phase == FT_SYSNAME_IN:
+                    if line.startswith(FT_SYSNAME_END):
+                        if has_errors:
+                            log_to_send(line)
+                        phase = FT_END
+                        log("SystemName test done.")
+                    elif has_errors:
+                        log_to_send(line)
+                    elif line.startswith(FT_FAIL_MARK):
+                        has_errors = True
+                        log_to_send("Functional test failed on SystemName test!")
+                        for s in collector:
+                            log_to_send(s)
+                        log_to_send(line)
+                        phase = FT_SYSNAME_FAILED
+                    else:
+                        collector.append(line)
+                elif phase == FT_SYSNAME_FAILED:
+                    log_to_send(line)
+                    if line.startswith(FT_SYSNAME_END):
+                        phase = FT_END
+                        log("SystemName test done.")
+    else: # end reading
         pass
-        #if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-        #    FailedTests.append(running_test_name)
+
+    if reader.state in (PIPE_HANG, PIPE_ERROR):
+        log_to_send((
+            "[ functional tests has TIMED OUT on %s stage ]" if reader.state == PIPE_HANG else
+            "[ PIPE ERROR reading functional tests output on %s stage ]") % stage)
+        log_to_send("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
+        has_errors = True
+
+    if proc.poll() is None:
+        kill_test(proc)
+        proc.wait()
+
+    if proc.returncode != 0:
+        if proc.returncode < 0:
+            if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+                signames = SignalNames.get(-proc.returncode, [])
+                signames = ' (%s)' % (','.join(signames),) if signames else ''
+                log_to_send("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+        else:
+            log_to_send("[ FUNCTIONAL TESTS' RETURN CODE = %s ]" % proc.returncode)
+        has_errors = True
 
 
+RT_FAIL = 'FAIL: '
+RT_DONE = 'Test complete.'
+
+def read_redirtest_output(proc, reader):
+    collector = []
+    has_errors = False
+    reading = True
+    while reader.state == PIPE_READY:
+        line = reader.readline(FT_PIPE_TIMEOUT)
+        if reading and len(line) > 0:
+            collector.append(line)
+            if line.startswith(RT_FAIL):
+                has_errors = True
+            elif line.startswith(RT_DONE):
+                log("Server redirection test done.")
+                reading = False
+
+    if has_errors:
+        log_to_send("Redirection test failed:\n%s", "\n".join(collector))
+        collector = []
+
+    if reader.state in (PIPE_HANG, PIPE_ERROR):
+        log_to_send(
+            "[ redirection tests has TIMED OUT ]" if reader.state == PIPE_HANG else
+            "[ PIPE ERROR reading redirection tests output  ]")
+        if collector:
+            log_to_send("Test's output:\n%s", "\n".join(collector))
+        has_errors = True
+
+    if proc.poll() is None:
+        kill_test(proc)
+        proc.wait()
+
+    if proc.returncode != 0:
+        if proc.returncode < 0:
+            if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+                signames = SignalNames.get(-proc.returncode, [])
+                signames = ' (%s)' % (','.join(signames),) if signames else ''
+                log_to_send("[ REDIRECTION TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+        else:
+            log_to_send("[ REDIRECTION TEST'S RETURN CODE = %s ]" % proc.returncode)
+        has_errors = True
 
 
 #####################################
@@ -981,7 +1024,8 @@ def show_conf():
     print "BRANCHES = %s" % (', '.join(BRANCHES),)
     print "TESTS = %s" % (', '.join(TESTS),)
     print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
-    print "PIPE_TIMEOUT = %s" % PIPE_TIMEOUT
+    print "UT_PIPE_TIMEOUT = %s" % UT_PIPE_TIMEOUT
+    print "FT_PIPE_TIMEOUT = %s" % FT_PIPE_TIMEOUT
     print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
     print "MVN_THREADS = %s" % MVN_THREADS
 
@@ -1018,7 +1062,7 @@ def main():
             log("Sleeping %s secs...", t)
             time.sleep(t)
         log("Finishing...")
-    elif Args.virt: # temporary, later becomes a part of the run()
+    elif Args.virt: # virtual boxes functest only
         ToSend[:] = []
         perform_func_test()
         if ToSend:
