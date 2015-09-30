@@ -1521,9 +1521,6 @@ class ClusterTestBase(unittest.TestCase):
 
         #DEBUG
         #self.assertNotEqual(0, 0, "DEBUG FAIL")
-        #DEBUG hang it!
-        print "Sleeping for long time"
-        time.sleep(200)
 
         print "Test:%s finish!\n" % (self._getMethodName())
         print "===================================\n"
