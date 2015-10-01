@@ -13,7 +13,6 @@ import shutil
 import urllib2
 import json
 
-
 from testconf import *
 
 __version__ = 1.1
@@ -31,6 +30,10 @@ PIPE_READY = 1
 PIPE_EOF = 2
 PIPE_HANG = 3
 PIPE_ERROR = 4
+
+RESTART_FLAG = './.restart'
+STOP_FLAG = './.stop'
+RESTART_BY_EXEC = True
 
 def get_signals():
     d = {}
@@ -259,6 +262,42 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
         email_send(MAIL_FROM, MAIL_TO, msg)
+
+
+def check_restart():
+    if os.path.isfile(RESTART_FLAG):
+        log("Restart flag founnd. Calling: %s", ([sys.executable] + sys.argv,))
+        try:
+            if RESTART_BY_EXEC:
+                sys.stdout.flush()
+                sys.stderr.flush()
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+            else:
+                proc = Popen([sys.executable] + sys.argv, shell=False)
+                log("New copy of %s started with PID %s", sys.argv[0], proc.pid)
+                timeout = time.time() + SELF_RESTART_TIMEOUT
+                while os.path.isfile(RESTART_FLAG):
+                    if time.time() > timeout:
+                        raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % SELF_RESTART_TIMEOUT)
+                    time.sleep(0.1)
+                log("The old proces goes away.")
+                sys.exit(0)
+        except Exception:
+            log("Failed to restart: %s", traceback.format_exc())
+            drop_flag(RESTART_FLAG)
+
+
+def check_control_flags():
+    check_restart()
+    if os.path.isfile(STOP_FLAG):
+        log("Stop flag found. Exiting...")
+        os.remove(STOP_FLAG)
+        sys.exit(0)
+
+
+def drop_flag(flag):
+    if os.path.isfile(flag):
+        os.remove(flag)
 
 
 def get_name(line):
@@ -570,6 +609,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
         cmd.extend(["-T", "%d" % MVN_THREADS])
     if single_project is not None:
         cmd.extend(['-pl', single_project])
+    #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
     if unit_tests:
         kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
     debug("MVN: %s", cmd); time.sleep(1.5)
@@ -1031,6 +1071,8 @@ def show_conf():
 
 
 def main():
+    drop_flag(RESTART_FLAG)
+    drop_flag(STOP_FLAG)
     parse_args()
     check_debug_mode()
     if Args.auto:
@@ -1060,7 +1102,10 @@ def main():
             run()
             t = max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t))
             log("Sleeping %s secs...", t)
-            time.sleep(t)
+            wake_time = time.time() + t
+            while time.time() < wake_time:
+                time.sleep(1)
+                check_control_flags()
         log("Finishing...")
     elif Args.virt: # virtual boxes functest only
         ToSend[:] = []

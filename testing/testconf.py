@@ -45,6 +45,7 @@ FUNCTEST_LAST_LINES = 10 # Lines to show if the functional tests hang.
 MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
 MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
+SELF_RESTART_TIMEOUT = 10 # seconds
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
