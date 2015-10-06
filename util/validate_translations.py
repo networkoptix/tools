@@ -137,7 +137,7 @@ def validateProject(project, translationDir):
         if (os.path.isdir(path)):
             continue;
                 
-        if (not path[-2:] == 'ts'):
+        if (not path[-3:] == '.ts'):
             continue;
             
         if (not entry.startswith(project)):
