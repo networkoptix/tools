@@ -1,7 +1,9 @@
 __author__ = 'Danil Lavrentyuk'
 """Test inter-server redirects."""
 
+import sys
 import urllib2
+from httplib import HTTPException
 import json
 import time
 from functest_util import JsonDiff, compareJson
@@ -62,21 +64,37 @@ def perform_request(peer, redirect_to=None):
     return (json.loads(data), content_len)
     #print "Resulting data len: %s" % len(data)
 
-if __name__ == '__main__':
-    prepare_loader()
-    for h in (MAIN_HOST, SEC_HOST):
-        get_server_guid(h)
-    time.sleep(1)
-    (data1, len1) = perform_request(MAIN_HOST)
-    time.sleep(1)
-    (data2, len2) = perform_request(MAIN_HOST, SEC_HOST)
-    diff = compareJson(data1, data2)
-    if len1 != len2:
-        print "FAIL: Different data lengths: %s and %s" % (len1, len2)
-    elif diff.hasDiff():
-        print "FAIL: Diferent responses: %s" % diff.errorInfo()
-    else:
-        print "Test complete. Responses are the same."
+def redir_test():
+    try:
+        prepare_loader()
+        for h in (MAIN_HOST, SEC_HOST):
+            get_server_guid(h)
+        time.sleep(1)
+        try:
+            (data1, len1) = perform_request(MAIN_HOST)
+        except HTTPException, e:
+            print "FAIL: error requesting %s: %s: %s" % ((MAIN_HOST,) + sys.exc_info()[0:2])
+            return False
+        time.sleep(1)
+        try:
+            (data2, len2) = perform_request(MAIN_HOST, SEC_HOST)
+        except HTTPException, e:
+            print "FAIL: error requesting %s through %s: %s: %s" % ((SEC_HOST, MAIN_HOST) + sys.exc_info()[0:2])
+            return False
+        diff = compareJson(data1, data2)
+        if len1 != len2:
+            print "FAIL: Different data lengths: %s and %s" % (len1, len2)
+        elif diff.hasDiff():
+            print "FAIL: Diferent responses: %s" % diff.errorInfo()
+        else:
+            print "Test complete. Responses are the same."
+    except:
+        print "FAIL: %s: %s:\n%s" % sys.exc_info()
+        raise
+    return True
 
+if __name__ == '__main__':
+    if not redir_test():
+        exit(1)
 
 

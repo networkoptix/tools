@@ -1,22 +1,23 @@
 #!/bin/sh
-_DEB=/vagrant/networkoptix-mediaserver.deb
-_CONF=/opt/networkoptix/mediaserver/etc/mediaserver.conf
-
+. /vagrant/conf.sh
 . /vagrant/fix-hostname.sh $1
-DEBIAN_FRONTEND=noninteractive dpkg -i --force-depends "$_DEB"
+DEBIAN_FRONTEND=noninteractive dpkg -i --force-depends "$SERV_DEB"
 #apt-get install -f --yes --allow-unauthenticated
+
+# We need it stopped for some tests
+service ntp stop
 
 stop networkoptix-mediaserver
 #echo '...Before:'
-#cat "$_CONF"
-sed -i 's/^appserverPassword\s*=.*/appserverPassword=123/' "$_CONF"
-if grep -q '^systemName' "$_CONF"; then
-	sed -i 's/^systemName\s*=.*/systemName=functesting/' "$_CONF"
+#cat "$SERVCONF"
+sed -i 's/^appserverPassword\s*=.*/appserverPassword=123/' "$SERVCONF"
+if grep -q '^systemName' "$SERVCONF"; then
+	sed -i 's/^systemName\s*=.*/systemName=functesting/' "$SERVCONF"
 else
-	sed -i 's/^\[General\].*/\0\nsystemName=functest/' "$_CONF"
+	sed -i 's/^\[General\].*/\0\nsystemName=functest/' "$SERVCONF"
 fi
 #echo '...After:'
-#cat "$_CONF"
+#cat "$SERVCONF"
 start networkoptix-mediaserver
 
 

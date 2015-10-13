@@ -7,20 +7,19 @@ import threading
 import json
 import random
 import md5
-import string
 import sys
-import Queue
 import socket
 import os.path
 import signal
 import sys
-import difflib
 import datetime
 import time
 import select
 import errno
 
 from functest_util import *
+from generator import *
+import timetest
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -50,7 +49,7 @@ class UnitTestRollback:
         self._rollbackFile = open(".rollback","w+")
 
     def addOperations(self,methodName,serverAddress,resourceId):
-        for s in  clusterTest.clusterTestServerList:
+        for s in clusterTest.clusterTestServerList:
             self._rollbackFile.write(("%s,%s,%s\n") % (methodName,s,resourceId))
         self._rollbackFile.flush()
 
@@ -125,10 +124,12 @@ class UnitTestRollback:
 #        return urllib2.HTTPDigestAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
 
 
-class ClusterTest():
+class ClusterTest(object):
     clusterTestServerList = []
     clusterTestSleepTime = None
     clusterTestServerUUIDList = []
+    config = None
+    openerReady = False
     threadNumber = 16
     testCaseSize = 2
     unittestRollback = None
@@ -476,9 +477,14 @@ class ClusterTest():
                 return (ret,reason)
         return self._checkTransactionLog()
 
+    def getConfig(self):
+        if self.config is None:
+            self.config = ConfigParser.RawConfigParser()
+            self.config.read(CONFIG_FNAME)
+        return self.config
+
     def _loadConfig(self):
-        parser = ConfigParser.RawConfigParser()
-        parser.read(CONFIG_FNAME)
+        parser = self.getConfig()
         self.clusterTestServerList = parser.get("General","serverList").split(",")
         self.clusterTestSleepTime = parser.getint("General","clusterTestSleepTime")
         self.threadNumber = parser.getint("General","threadNumber")
@@ -487,21 +493,23 @@ class ClusterTest():
         except :
             self.testCaseSize = 2
 
-        return (parser.get("General","password"),parser.get("General","username"))
 
-
-    def _setUpPassword(self):
-        pwd,un = self._loadConfig()
+    def setUpPassword(self):
+        config = self.getConfig()
+        pwd = config.get("General","password")
+        un = config.get("General","username")
         # configure different domain password strategy
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
         for s in self.clusterTestServerList:
             ManagerAddPassword(passman, s, un, pwd)
 
         urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+        self.openerReady = True
 #        urllib2.install_opener(urllib2.build_opener(AuthH(passman)))
 
     def init(self):
-        self._setUpPassword()
+        self._loadConfig()
+        self.setUpPassword()
 
         if not self._testConnection():
             return (False,"Connection test failed")
@@ -527,163 +535,9 @@ class ClusterTest():
 
 clusterTest = ClusterTest()
 
-_uniqueSessionNumber = None
-_uniqueCameraSeedNumber = 0
-_uniqueUserSeedNumber = 0
-_uniqueMediaServerSeedNumber = 0
-
-
-# Thread queue for multi-task.  This is useful since if the user
-# want too many data to be sent to the server, then there maybe
-# thousands of threads to be created, which is not something we
-# want it.  This is not a real-time queue, but a push-sync-join
-class ClusterWorker():
-    _queue = None
-    _threadList = None
-    _threadNum = 1
-
-    def __init__(self,num,element_size):
-        self._queue = Queue.Queue(element_size)
-        self._threadList = []
-        self._threadNum = num
-        if element_size < num:
-            self._threadNum = element_size
-
-    def _worker(self):
-        while not self._queue.empty():
-            t,a = self._queue.get(True)
-            t(*a)
-            self._queue.task_done()
-
-    def _initializeThreadWorker(self):
-        for _ in xrange(self._threadNum):
-            t = threading.Thread(target=self._worker)
-            t.start()
-            self._threadList.append(t)
-
-    def join(self):
-        # We delay the real operation until we call join
-        self._initializeThreadWorker()
-        # Second we call queue join to join the queue
-        self._queue.join()
-        # Now we safely join the thread since the queue
-        # will utimatly be empty after execution
-        for t in self._threadList:
-            t.join()
-
-    def enqueue(self,task,args):
-        self._queue.put((task,args),True)
-
-
-class BasicGenerator():
-    def __init__(self):
-        global _uniqueSessionNumber
-        if _uniqueSessionNumber == None:
-            # generate unique session number
-            _uniqueSessionNumber = str(random.randint(1,1000000))
-
-    # generate MAC address of the object
-    def generateMac(self):
-        l = []
-        for i in xrange(0,5):
-            l.append(str(random.randint(0,255)) + '-')
-        l.append(str(random.randint(0,255)))
-        return ''.join(l)
-
-    def generateTrueFalse(self):
-        if random.randint(0,1) == 0:
-            return "false"
-        else:
-            return "true"
-
-    def generateRandomString(self,length):
-        chars = string.ascii_uppercase + string.digits
-        return ''.join(random.choice(chars) for _ in xrange(length))
-
-    def generateUUIdFromMd5(self,salt):
-        m = md5.new()
-        m.update(salt)
-        v = m.digest()
-        return "{%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x}" \
-            % (ord(v[0]),ord(v[1]),ord(v[2]),ord(v[3]),
-              ord(v[4]),ord(v[5]),ord(v[6]),ord(v[7]),
-              ord(v[8]),ord(v[9]),ord(v[10]),ord(v[11]),
-              ord(v[12]),ord(v[13]),ord(v[14]),ord(v[15]))
-        
-    def generateRandomId(self):
-        length = random.randint(6,12)
-        salt = self.generateRandomString(length)
-        return self.generateUUIdFromMd5(salt)
-
-    def generateIpV4(self):
-        return "%d.%d.%d.%d" % (random.randint(0,255),
-            random.randint(0,255),
-            random.randint(0,255),
-            random.randint(0,255))
-
-    def generateIpV4Endpoint(self):
-        return "%s:%d" % (self.generateIpV4(),random.randint(0,65535))
-
-    def generateEmail(self):
-        len = random.randint(6,20)
-        user_name = self.generateRandomString(len)
-        return "%s@gmail.com" % (user_name)
-
-    def generateEnum(self,*args):
-        idx = random.randint(0,len(args) - 1)
-        return args[idx]
-
-    def generateUsernamePasswordAndDigest(self,namegen):
-        pwd_len = random.randint(8,20)
-
-        un = namegen()
-        pwd = self.generateRandomString(pwd_len)
-
-        m = md5.new()
-        m.update("%s:NetworkOptix:%s" % (un,pwd))
-        d = m.digest()
-
-        return (un,pwd,''.join('%02x' % ord(i) for i in d))
-
-    def generateDigest(self,uname,pwd):
-        m = md5.new()
-        m.update("%s:NetworkOptix:%s" % (uname,pwd))
-        d = m.digest()
-        return ''.join("%02x" % ord(i) for i in d)
-    
-    def generatePasswordHash(self,pwd):
-        salt = "%x" % (random.randint(0,4294967295))
-        m = md5.new()
-        m.update(salt)
-        m.update(pwd)
-        md5_digest = ''.join('%02x' % ord(i) for i in m.digest())
-        return "md5$%s$%s" % (salt,md5_digest)
-
-
-    def generateCameraName(self):
-        global _uniqueSessionNumber
-        global _uniqueCameraSeedNumber
-
-        ret = "ec2_test_cam_%s_%s" % (_uniqueSessionNumber,_uniqueCameraSeedNumber)
-        _uniqueCameraSeedNumber = _uniqueCameraSeedNumber + 1
-        return ret
-
-    def generateUserName(self):
-        global _uniqueSessionNumber
-        global _uniqueUserSeedNumber
-
-        ret = "ec2_test_user_%s_%s" % (_uniqueSessionNumber,_uniqueUserSeedNumber)
-        _uniqueUserSeedNumber = _uniqueUserSeedNumber + 1
-        return ret
-
-    def generateMediaServerName(self):
-        global _uniqueSessionNumber
-        global _uniqueMediaServerSeedNumber
-
-        ret = "ec2_test_media_server_%s_%s" % (_uniqueSessionNumber,_uniqueMediaServerSeedNumber)
-        _uniqueMediaServerSeedNumber = _uniqueMediaServerSeedNumber + 1
-        return ret
-
+####################################################################################################
+## Some more generators, a bit complex than clases from generator.py
+####################################################################################################
 
 class CameraDataGenerator(BasicGenerator):
     _template = """[
@@ -764,89 +618,6 @@ class CameraDataGenerator(BasicGenerator):
                 mac,
                 self.generateIpV4(),
                 self.generateRandomString(4)),id)
-
-
-class UserDataGenerator(BasicGenerator):
-    _template = """
-    {
-        "digest": "%s",
-        "email": "%s",
-        "hash": "%s",
-        "id": "%s",
-        "isAdmin": %s,
-        "name": "%s",
-        "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "permissions": "255",
-        "typeId": "{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}",
-        "url": ""
-    }
-    """
-
-    def generateUserData(self,number):
-        ret = []
-        for i in xrange(number):
-            id = self.generateRandomId()
-            un,pwd,digest = self.generateUsernamePasswordAndDigest(self.generateUserName)
-            ret.append((self._template % (digest,
-                self.generateEmail(),
-                self.generatePasswordHash(pwd),
-                id,"false",un),id))
-
-        return ret
-
-    def generateUpdateData(self,id):
-        un,pwd,digest = self.generateUsernamePasswordAndDigest(self.generateUserName)
-        return (self._template % (digest,
-                self.generateEmail(),
-                self.generatePasswordHash(pwd),
-                id,"false",un),id)
-
-    def createManualUpdateData(self,id,username,password,admin,email):
-        digest = self.generateDigest(username,password)
-        hash = self.generatePasswordHash(password)
-        if admin:
-            admin = "true"
-        else:
-            admin = "false"
-        return self._template%(digest,
-                                email,
-                                hash,id,admin,username)
-
-
-class MediaServerGenerator(BasicGenerator):
-    _template = """
-    {
-        "apiUrl": "%s",
-        "authKey": "%s",
-        "flags": "SF_HasPublicIP",
-        "id": "%s",
-        "name": "%s",
-        "networkAddresses": "192.168.0.1;10.0.2.141;192.168.88.1;95.31.23.214",
-        "panicMode": "PM_None",
-        "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "systemInfo": "windows x64 win78",
-        "systemName": "%s",
-        "typeId": "{be5d1ee0-b92c-3b34-86d9-bca2dab7826f}",
-        "url": "rtsp://%s",
-        "version": "2.3.0.0"
-    }
-    """
-    def _generateRandomName(self):
-        length = random.randint(5,20)
-        return self.generateRandomString(length)
-
-    def generateMediaServerData(self,number):
-        ret = []
-        for i in xrange(number):
-            id = self.generateRandomId()
-            ret.append((self._template % (self.generateIpV4Endpoint(),
-                   self.generateRandomId(),
-                   id,
-                   self.generateMediaServerName(),
-                   self._generateRandomName(),
-                   self.generateIpV4Endpoint()),id))
-
-        return ret
 
 
 # This class serves as an in-memory data base.  Before doing the confliction
@@ -1436,7 +1207,7 @@ class ClusterTestBase(unittest.TestCase):
         f.close()
 
     def _sendRequest(self,methodName,d,server):
-        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName), \
+        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
             data=d, headers={'Content-Type': 'application/json'})
         response = None
         
@@ -1448,7 +1219,7 @@ class ClusterTestBase(unittest.TestCase):
         if response.getcode() != 200:
             self._dumpFailedRequest(d,methodName) 
 
-        self.assertTrue(response.getcode() == 200, \
+        self.assertTrue(response.getcode() == 200,
             "%s failed with statusCode %d" % (methodName,response.getcode()))
 
         response.close()
@@ -1766,9 +1537,7 @@ class MergeTestBase:
     _mergeTestTimeout = 1
 
     def __init__(self):
-        config_parser = ConfigParser.RawConfigParser()
-        config_parser.read(CONFIG_FNAME)
-        self._mergeTestTimeout = config_parser.getint("General","mergeTestTimeout")
+        self._mergeTestTimeout = clusterTest.getConfig().getint("General","mergeTestTimeout")
 
     # This function is used to generate unique system name but random.  It
     # will gaurantee that the generated name is UNIQUE inside of the system
@@ -2011,8 +1780,7 @@ class MergeTest_AdminPassword(MergeTestBase):
 
     def __init__(self):
         # load the configuration file for username and oldClusterPassword
-        config_parser = ConfigParser.RawConfigParser()
-        config_parser.read(CONFIG_FNAME)
+        config_parser = clusterTest.getConfig()
         self._oldClusterPassword = config_parser.get("General","password")
         self._username = config_parser.get("General","username")
 
@@ -2974,8 +2742,7 @@ class InfiniteRtspTest:
 
 
 def runRtspTest():
-    config_parser = ConfigParser.RawConfigParser()
-    config_parser.read(CONFIG_FNAME)
+    config_parser = clusterTest.getConfig()
     username = config_parser.get("General","username")
     password = config_parser.get("General","password")
     testSize = config_parser.getint("Rtsp","testSize")
@@ -3277,8 +3044,7 @@ class RtspPerf:
         self._exit = True
 
     def _loadConfig(self):
-        config_parser = ConfigParser.RawConfigParser()
-        config_parser.read(CONFIG_FNAME)
+        config_parser = clusterTest.getConfig()
         threadNumbers = config_parser.get("Rtsp","threadNumbers").split(",")
         if len(threadNumbers) != len(clusterTest.clusterTestServerList):
             print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
@@ -3958,8 +3724,7 @@ class SystemNameTest:
 
 
     def _loadConfig(self):
-        configParser = ConfigParser.RawConfigParser()
-        configParser.read(CONFIG_FNAME)
+        configParser = clusterTest.getConfig()
         username = configParser.get("General","username")
         passwd = configParser.get("General","password")
         sl = configParser.get("General","serverList")
@@ -4049,6 +3814,23 @@ def doCleanUp(auto=False):
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
 
 
+def print_tests(suit, shift='    '):
+    for test in suit:
+        if isinstance(test, unittest.TestSuite):
+            print "DEBUG:%s[%s]:" % (shift, type(test))
+            print_tests(test, shift+'    ')
+        else:
+            print "DEBUG:%s%s" % (shift, test)
+
+
+def RunTimeTest():
+    if not clusterTest.openerReady:
+        clusterTest.setUpPassword()
+    test = timetest.TestLoader().load(clusterTest.getConfig())
+    result = unittest.TextTestRunner(verbosity=2, failfast=True).run(test)
+    return result.wasSuccessful()
+
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
@@ -4061,17 +3843,30 @@ def DoTests(argv):
              # all the servers are on the same page
     else:
         if argc == 1 or (argc == 2 and argv[1] == '--autorollback'):
-            tmp_argv = sys.argv
-            sys.argv = tmp_argv[:-1] # hide all arguments from unittest.main
-            the_test = unittest.main(exit=False)
-            sys.argv = tmp_argv
+            the_test = unittest.main(exit=False, argv=sys.argv[:1])
+            #print "DEBUG: Test are:"
+            #print_tests(the_test.test)
+#        test (__main__.CameraUserAttributeListTest) +
+#        test (__main__.CameraTest)                  +
+#        test (__main__.ClusterTestBase)             !
+#        test (__main__.MediaServerTest)             +
+#        test (__main__.ResourceConflictionTest)     +
+#        test (__main__.ResourceParaTest)            +
+#        test (__main__.ResourceRemoveTest)          +
+#        test (__main__.ServerUserAttributesListDataTest)  +
+#        test (__main__.UserTest)                    +
+
             if the_test.result.wasSuccessful():
                 print "Main tests passed OK"
                 if MergeTest().test():
-                    SystemNameTest().run()
+                    if SystemNameTest().run():
+                        RunTimeTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp(argc == 2)
+
+        elif argc == 2 and argv[1] == '--timesync':
+            RunTimeTest()
 
         elif (argc == 2 or argc == 3) and argv[1] == '--clear':
             if argc == 3:
@@ -4104,8 +3899,9 @@ def DoTests(argv):
             else:
                 runMiscFunction(argc, argv)
 
+
 if __name__ == '__main__':
-    if len(sys.argv) >= 2 and sys.argv[1] == '--help':
+    if len(sys.argv) >= 2 and sys.argv[1] in ('--help', '-h'):
         showHelp()
     elif len(sys.argv) == 2 and sys.argv[1] == '--recover':
         UnitTestRollback().doRecover()

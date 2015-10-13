@@ -3,7 +3,7 @@ __author__ = 'Danil Lavrentyuk'
 import sys
 import json
 
-__all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads']
+__all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads', 'ClusterWorker']
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
@@ -352,3 +352,51 @@ def SafeJsonLoads(text, serverAddr, methodName):
     except ValueError, e:
         print "Error parsing server %s, method %s response: %s" % (serverAddr, methodName, e)
         return None
+
+
+
+import Queue
+import threading
+
+# Thread queue for multi-task.  This is useful since if the user
+# want too many data to be sent to the server, then there maybe
+# thousands of threads to be created, which is not something we
+# want it.  This is not a real-time queue, but a push-sync-join
+class ClusterWorker():
+    _queue = None
+    _threadList = None
+    _threadNum = 1
+
+    def __init__(self,num,element_size):
+        self._queue = Queue.Queue(element_size)
+        self._threadList = []
+        self._threadNum = num
+        if element_size < num:
+            self._threadNum = element_size
+
+    def _worker(self):
+        while not self._queue.empty():
+            t,a = self._queue.get(True)
+            t(*a)
+            self._queue.task_done()
+
+    def _initializeThreadWorker(self):
+        for _ in xrange(self._threadNum):
+            t = threading.Thread(target=self._worker)
+            t.start()
+            self._threadList.append(t)
+
+    def join(self):
+        # We delay the real operation until we call join
+        self._initializeThreadWorker()
+        # Second we call queue join to join the queue
+        self._queue.join()
+        # Now we safely join the thread since the queue
+        # will utimatly be empty after execution
+        for t in self._threadList:
+            t.join()
+
+    def enqueue(self,task,args):
+        self._queue.put((task,args),True)
+
+

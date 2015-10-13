@@ -59,7 +59,7 @@ class PipeReaderBase(object):
         self.state = PIPE_NONE
 
     def register(self, proc):
-        if self.fd is not None and self.fd != fd:
+        if self.fd is not None and self.fd != self.fd:
             raise RuntimeError("PipeReader: double fd register")
         self.proc = proc
         self.buf = ''
@@ -751,32 +751,59 @@ def wait_servers_ready():
                     not_ready.discard(url)
 
 
-def perform_func_test():
+def check_mediaserver_deb():
+    # The same filename used for all versions here:
+    # a) To remove (by override) any previous version automatically.
+    # b) To use fixed name in the bootstrap.sh script
+    src = get_server_package_name()
+    dest = './networkoptix-mediaserver.deb'
+#    debug("Src: %s\nDest: %s", src, dest)
+    dest_stat = os.stat(dest) if os.path.isfile(dest) else None
+    if not os.path.isfile(src):
+        if dest_stat is None:
+            raise FuncTestError("ERROR: networkoptix-mediaserver deb-package isn't found!")
+#        else:
+#            debug("No newly made mediaserver package found, using the old one.")
+    else:
+        src_stat = os.stat(src)
+        if dest_stat is None or (src_stat.st_mtime > dest_stat.st_mtime or src_stat.st_size != dest_stat.st_size):
+#            log("%s -> %s", src, dest)
+            shutil.copy(src, dest) # put this name into config
+        else:
+            pass
+#            log("%s is up to date", dest)
+
+
+def start_boxes():
+    # 1. Get the .deb file
+    check_mediaserver_deb()
+    # 2. Start virtual boxes
+    log("Removing old vargant boxes..")
+    check_call(VAGR_DESTROY, shell=False)
+    log("Creating and starting vagrant boxes...")
+    check_call(VAGR_RUN, shell=False)
+    # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
+    wait_servers_ready()
+
+
+def perform_func_test(timesync_only=False):
     if os.name != 'posix':
         print "\nFunctional tests require POSIX-compatible OS. Skipped."
         return
     need_stop = False
     reader = proc = None
     try:
-        # 1. Get the .deb file and fix vagrant/bootstrap.sh
-        # The same filename used for all versions here:
-        # a) To remove (by override) any previous version automatically.
-        # b) To use fixed name in the bootstrap.sh script
-        shutil.copy(get_server_package_name(), './networkoptix-mediaserver.deb') # put this name into config
-        # 2. Start virtual boxes
-        log("Removing old vargant boxes..")
-        check_call(VAGR_DESTROY, shell=False)
-        log("Creating and starting vagrant boxes...")
-        need_stop = True
-        check_call(VAGR_RUN, shell=False)
-        # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-        wait_servers_ready()
+        if not Args.nobox:
+            start_boxes()
+            need_stop = True
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
         reader = PipeReader()
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
         cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
+        if timesync_only:
+            cmd.append("--timesync")
         log("Running functional tests: %s", cmd)
         proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **sub_args)
         reader.register(proc)
@@ -791,18 +818,11 @@ def perform_func_test():
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
     except BaseException, e:
-        tstr = traceback.format_exc()
-        print tstr
-        log("Exception during functional test run:\n%s", traceback.format_exc())
-        if isinstance(e, Exception):
-            pass
-            #ToSend.append("[[ Tests call error:")
-            #ToSend.append(tstr)
-            #ToSend.append("]]")
-        else:
-            s = "[[ Functional tests has been interrupted:\n%s\n]]" % tstr
+        log_to_send("Exception during functional test run:\n%s", traceback.format_exc())
+        if not isinstance(e, Exception):
+            #s = "[[ Functional tests has been interrupted:\n%s\n]]" % tstr
             #ToSend.append(s)
-            log(s)
+            #log(s)
             raise # it wont be catched and will allow the script to terminate
     finally:
         if reader and proc:
@@ -952,6 +972,7 @@ def read_redirtest_output(proc, reader):
     reading = True
     while reader.state == PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
+        debug("RT: %s", line.rstrip())
         if reading and len(line) > 0:
             collector.append(line)
             if line.startswith(RT_FAIL):
@@ -1000,7 +1021,10 @@ def parse_args():
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
-    parser.add_argument("-v", "--virt", action="store_true", help="Create virtual boxes and run functional test on them.")
+    parser.add_argument("--functest", action="store_true", help="Create virtual boxes and run functional test on them.")
+    parser.add_argument("--timetest", action="store_true", help="Run time synchronization functional test only.")
+    parser.add_argument("--boxes", "--box", action="store_true", help="Only start virtual boxes and wait the mediaserver comes up.")
+    parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
@@ -1017,7 +1041,10 @@ def parse_args():
     global Args
     Args = parser.parse_args()
     if Args.full_build_log and not Args.stdout:
-        print "ERROR: --full-build-log option requires --stdout!"
+        print "ERROR: --full-build-log option requires --stdout!\n"
+        exit(1)
+    if Args.nobox and not (Args.functest or Args.timetest):
+        print "ERROR: --nobox allowed with --functest and --timetest only!\n"
         exit(1)
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
@@ -1107,11 +1134,28 @@ def main():
                 time.sleep(1)
                 check_control_flags()
         log("Finishing...")
-    elif Args.virt: # virtual boxes functest only
+
+    elif Args.functest: # virtual boxes functest only
         ToSend[:] = []
         perform_func_test()
         if ToSend:
             email_notify("Debug func tests", ToSend)
+
+    elif Args.timetest:
+        ToSend[:] = []
+        perform_func_test()
+        if ToSend:
+            email_notify("Debug timesync tests", ToSend)
+
+    elif Args.boxes:
+        try:
+            start_boxes()
+        except FuncTestError, e:
+            log("Virtual boxes start up failed: %s", e.message)
+        except BaseException, e:
+            log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
+            if not isinstance(e, Exception):
+                raise # it wont be catched and will allow the script to terminate
 
     else:
         run()
