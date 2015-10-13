@@ -16,6 +16,7 @@ numerus = ['%n']
 verbose = False
 noTarget = False
 strict = False
+language = None
 
 class ValidationResult():
     error = 0
@@ -136,13 +137,17 @@ def validateProject(project, translationDir):
         
         if (os.path.isdir(path)):
             continue;
-                
-        if (not path[-3:] == '.ts'):
+        
+        suffix = '.ts'
+        if language:
+            suffix = '_{0}{1}'.format(language, suffix)
+        
+        if (not path.endswith(suffix)):
             continue;
             
         if (not entry.startswith(project)):
             continue;
-            
+                           
         entries.append(path)
             
     for path in entries:
@@ -154,6 +159,7 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-t', '--no-target', action='store_true', help="skip target field")
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
+    parser.add_argument('-l', '--language', help="check only selected language")
     args = parser.parse_args()
     
     global verbose
@@ -164,10 +170,14 @@ def main():
     
     global strict
     strict = args.strict
+
+    global language
+    language = args.language
     
     if args.color:
         init_color()
 
+        
     rootDir = os.getcwd()
     
     for project in projects:
