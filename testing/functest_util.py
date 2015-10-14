@@ -3,7 +3,8 @@ __author__ = 'Danil Lavrentyuk'
 import sys
 import json
 
-__all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads', 'ClusterWorker']
+__all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
+           'ClusterWorker', 'ClusterLongWorker']
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
@@ -362,41 +363,83 @@ import threading
 # want too many data to be sent to the server, then there maybe
 # thousands of threads to be created, which is not something we
 # want it.  This is not a real-time queue, but a push-sync-join
-class ClusterWorker():
+class ClusterWorker(object):
     _queue = None
     _threadList = None
     _threadNum = 1
 
-    def __init__(self,num,element_size):
+    def __init__(self, num, element_size=0):
+        self._threadNum = num
+        if element_size == 0:
+            element_size = num
+        elif element_size < num:
+            self._threadNum = element_size
         self._queue = Queue.Queue(element_size)
         self._threadList = []
-        self._threadNum = num
-        if element_size < num:
-            self._threadNum = element_size
+        self._working = False
+
+    def _do_work(self):
+        return not self._queue.empty()
 
     def _worker(self):
-        while not self._queue.empty():
+        while self._do_work():
             t,a = self._queue.get(True)
-            t(*a)
-            self._queue.task_done()
+            try:
+                t(*a)
+            finally:
+                self._queue.task_done()
 
-    def _initializeThreadWorker(self):
+    def startThreads(self):
         for _ in xrange(self._threadNum):
             t = threading.Thread(target=self._worker)
             t.start()
             self._threadList.append(t)
 
+    def joinThreads(self):
+        for t in self._threadList:
+            t.join()
+
+    def joinQueue(self):
+        self._queue.join()
+
+    def workDone(self):
+        return self._queue.empty()
+
     def join(self):
         # We delay the real operation until we call join
-        self._initializeThreadWorker()
+        self.startThreads()
         # Second we call queue join to join the queue
         self._queue.join()
         # Now we safely join the thread since the queue
         # will utimatly be empty after execution
-        for t in self._threadList:
-            t.join()
+        self.joinThreads()
 
-    def enqueue(self,task,args):
-        self._queue.put((task,args),True)
+    def enqueue(self, task, args):
+        self._queue.put((task, args), True)
 
 
+class ClusterLongWorker(ClusterWorker):
+
+    def __init__(self, num, element_size=0):
+        super(ClusterLongWorker, self).__init__(num, element_size)
+        self._working = False
+
+    def _do_work(self):
+        return self._working
+
+    def startThreads(self):
+        self._working = True
+        super(ClusterLongWorker, self).startThreads()
+
+    def stopWork(self):
+        self.enqueue(self._terminate, ())
+        self.joinThreads()
+        while not self._queue.empty():
+            try:
+                self._queue.get_nowait()
+            except Queue.Empty:
+                break
+
+    def _terminate(self):
+        self._working = False
+        self.enqueue(self._terminate, ()) # for other threads

@@ -4,6 +4,7 @@ __author__ = 'Danil Lavrentyuk'
 """
 import random
 import string
+from hashlib import md5
 
 
 __all__ = ['BasicGenerator', 'UserDataGenerator', 'MediaServerGenerator']
@@ -40,9 +41,7 @@ class BasicGenerator():
         return ''.join(random.choice(chars) for _ in xrange(length))
 
     def generateUUIdFromMd5(self,salt):
-        m = md5.new()
-        m.update(salt)
-        v = m.digest()
+        v = md5(salt).digest()
         return "{%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x}" \
             % (ord(v[0]),ord(v[1]),ord(v[2]),ord(v[3]),
               ord(v[4]),ord(v[5]),ord(v[6]),ord(v[7]),
@@ -78,24 +77,18 @@ class BasicGenerator():
         un = namegen()
         pwd = self.generateRandomString(pwd_len)
 
-        m = md5.new()
-        m.update("%s:NetworkOptix:%s" % (un,pwd))
-        d = m.digest()
+        d = md5("%s:NetworkOptix:%s" % (un,pwd)).digest()
 
         return (un,pwd,''.join('%02x' % ord(i) for i in d))
 
     def generateDigest(self,uname,pwd):
-        m = md5.new()
-        m.update("%s:NetworkOptix:%s" % (uname,pwd))
-        d = m.digest()
+        d = md5("%s:NetworkOptix:%s" % (uname,pwd)).digest()
         return ''.join("%02x" % ord(i) for i in d)
 
     def generatePasswordHash(self,pwd):
         salt = "%x" % (random.randint(0,4294967295))
-        m = md5.new()
-        m.update(salt)
-        m.update(pwd)
-        md5_digest = ''.join('%02x' % ord(i) for i in m.digest())
+        d = md5(salt+pwd).digest()
+        md5_digest = ''.join('%02x' % ord(i) for i in d)
         return "md5$%s$%s" % (salt,md5_digest)
 
 

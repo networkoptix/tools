@@ -3846,15 +3846,6 @@ def DoTests(argv):
             the_test = unittest.main(exit=False, argv=sys.argv[:1])
             #print "DEBUG: Test are:"
             #print_tests(the_test.test)
-#        test (__main__.CameraUserAttributeListTest) +
-#        test (__main__.CameraTest)                  +
-#        test (__main__.ClusterTestBase)             !
-#        test (__main__.MediaServerTest)             +
-#        test (__main__.ResourceConflictionTest)     +
-#        test (__main__.ResourceParaTest)            +
-#        test (__main__.ResourceRemoveTest)          +
-#        test (__main__.ServerUserAttributesListDataTest)  +
-#        test (__main__.UserTest)                    +
 
             if the_test.result.wasSuccessful():
                 print "Main tests passed OK"
