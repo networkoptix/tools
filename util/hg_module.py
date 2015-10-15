@@ -3,6 +3,7 @@
 
 from subprocess import check_output
 from datetime import datetime
+import threading
 
 class Branch():
     def __init__(self, name, rev, hash, active):
@@ -17,10 +18,31 @@ class Branch():
     def __str__(self):
         return self.name
         
+def get_branch_details(branch):
+    log = "hg log -r " + branch.rev + ' --template "date:{date|shortdate}\\nuser:{author}"'
+    info = check_output(log, shell=True)
+    for row in info.split('\n'):
+        if 'user:' in row:
+            key, value = row.split(':')
+            user = value.strip()
+            if '<' in user:
+                user = user.split('<')[0].strip()
+            branch.user = user
+        if 'date:' in row:
+            dateStr = row[5:].strip()
+            date = datetime.strptime(dateStr, "%Y-%m-%d")
+            age = datetime.now() - date
+            branch.date = date
+            branch.age = age
+        
+def get_branch_details_threaded(branch):   
+    thread = threading.Thread(None, get_branch_details, args=(branch,))
+    thread.start()
+    return thread
+        
 def get_branches(detailed = True):
     output = check_output("hg branches", shell=True)
     result = []
-    curDate = datetime.now()
 
     for row in output.split('\n'):
         if ':' in row:
@@ -35,25 +57,13 @@ def get_branches(detailed = True):
             result.append(branch)
             
     if not detailed:
-        return result
-            
-    curDate = datetime.now()
+        return result  
    
+    threads = []
     for branch in result:
-        log = "hg log -r " + branch.rev + ' --template "date:{date|shortdate}\\nuser:{author}"'
-        info = check_output(log, shell=True)
-        for row in info.split('\n'):
-            if 'user:' in row:
-                key, value = row.split(':')
-                user = value.strip()
-                if '<' in user:
-                    user = user.split('<')[0].strip()
-                branch.user = user
-            if 'date:' in row:
-                dateStr = row[5:].strip()
-                date = datetime.strptime(dateStr, "%Y-%m-%d")
-                age = curDate - date
-                branch.date = date
-                branch.age = age
-    
+        threads.append(get_branch_details_threaded(branch))
+
+    for thread in threads:
+        thread.join()
+        
     return result         
