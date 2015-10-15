@@ -461,8 +461,7 @@ def unquote_guid(guid):
 
 
 def get_server_guid(host):
-    #req = urllib2.Request("%s/api/moduleInformation" % host)
     info = safe_request_json("http://%s/api/moduleInformation" % host)
     if info and (u'id' in info['reply']):
-        return unquote_guid(info['reply']['id'])
+        return unquote_guid(info['reply'][u'id'])
     return None
