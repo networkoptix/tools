@@ -2,6 +2,7 @@ __author__ = 'Danil Lavrentyuk'
 "This module contains some utility functions and classes for the functional tests script."
 import sys
 import json
+import urllib2
 
 __all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'ClusterWorker', 'ClusterLongWorker']
@@ -443,3 +444,25 @@ class ClusterLongWorker(ClusterWorker):
     def _terminate(self):
         self._working = False
         self.enqueue(self._terminate, ()) # for other threads
+
+
+def safe_request_json(req):
+    try:
+        return json.loads(urllib2.urlopen(req).read())
+    except Exception, e:
+        if isinstance(req, urllib2.Request):
+            req = req.get_full_uri()
+        print "FAIL: error requesting '%s': %s" % (req, e)
+        return None
+
+
+def unquote_guid(guid):
+    return guid[1:-1] if guid[0] == '{' and guid[-1] == '}' else guid
+
+
+def get_server_guid(host):
+    #req = urllib2.Request("%s/api/moduleInformation" % host)
+    info = safe_request_json("http://%s/api/moduleInformation" % host)
+    if info and (u'id' in info['reply']):
+        return unquote_guid(info['reply']['id'])
+    return None
