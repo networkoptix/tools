@@ -593,7 +593,7 @@ def get_failed_project(last_lines):
 def failed_project_single_build(last_lines, branch, unit_tests):
     project, project_name = get_failed_project(last_lines)
     if project == '':
-        last_lines.append("ERROR: Can't figure failed project '%s'", project_name)
+        last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
         return False
     log("[ Restarting maven to re-build '%s' ]", project_name)
     call_maven_build(branch, unit_tests, no_threads=True, single_project=project, single_name=project_name or project)
