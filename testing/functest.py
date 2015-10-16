@@ -3851,7 +3851,8 @@ def DoTests(argv):
                 print "Main tests passed OK"
                 if MergeTest().test():
                     if SystemNameTest().run():
-                        RunTimeTest()
+                        #RunTimeTest()
+                        pass
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp(argc == 2)
