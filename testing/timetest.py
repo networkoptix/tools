@@ -11,11 +11,14 @@ from functest_util import ClusterWorker, ClusterLongWorker, SafeJsonLoads, get_s
 
 NUM_SERV = 2 # number of servers for test
 GRACE = 1.000 # max time difference between responses to say that times are equal
+DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
+                   # used to check if the server time hasn't changed
 HTTP_TIMEOUT = 5 # seconds
 SERVER_UP_TIMEOUT = 20 # seconds
 SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
+SYSTEM_TIME_NOTSYNC_SURE = 30 # seconds, how long wait to shure server hasn't synced with system time
 
 class TimeTestError(AssertionError):
     pass
@@ -34,10 +37,15 @@ class TestLoader(unittest.TestLoader):
 
 class TimeSyncTest(unittest.TestCase):
     config = None
-    names = ['InitialSynchronization', 'ChangePrimayServer', 'SystemTimeChangeSynchronization']
+    names = ['InitialSynchronization', 'ChangePrimayServer',
+             'PrimarySystemTimeChange',
+             'SecondarySystemTimeChange',
+             'StopPrimary', 'RestartSecondaryWhilePrimaryOff', 'StartPrimary',
+             'PrimaryStillSynchronized']
     guids = {}
     _init_time = ['01:00:00', '05:00:00']
     _primary = None
+    _secondary = None
 
     @classmethod
     def setUpClass(cls):
@@ -89,6 +97,8 @@ class TimeSyncTest(unittest.TestCase):
             self._worker.enqueue(self._show_systime, (box,))
 
     def InitialSynchronization(self):
+        """Stop both mediaservers, initialize boxes' system time and start the servers again.
+        """
         print
         for num, box in enumerate(self.hosts):
             self._worker.enqueue(self._stop_and_init, (box,num))
@@ -138,7 +148,7 @@ class TimeSyncTest(unittest.TestCase):
         print "Servers are ready"
 
 
-    def _request_gettime(self, boxnum):
+    def _request_gettime(self, boxnum, ask_box_time=True):
         "Request server's time and its system time. Also return current local time at moment response was received."
         addr = self.sl[boxnum]
         url = "http://%s/api/gettime" % addr
@@ -146,21 +156,20 @@ class TimeSyncTest(unittest.TestCase):
             response = urllib2.urlopen(url)
         except Exception, e:
             self.fail("%sw request failed with exception: %s" % (url, traceback.format_exc()))
-        self.assertEqual(response.getcode(), 200, "%s failed with statusCode %d" % (url, response.getcode()))
         loctime = time.time()
-        boxtime = self.get_box_time(self.hosts[boxnum])
-        loctime2 = time.time()
+        self.assertEqual(response.getcode(), 200, "%s failed with statusCode %d" % (url, response.getcode()))
+        boxtime = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
         jresp = SafeJsonLoads(response.read(), addr, 'api/gettime')
         response.close()
         self.assertIsNotNone(jresp, "Bad response from %s" % url)
-        return (int(jresp['reply'][u'utcTime'])/1000.0, loctime, boxtime, loctime2)
+        return (int(jresp['reply'][u'utcTime'])/1000.0, loctime, boxtime)
 
     def _task_get_time(self, boxnum):
         "Call _request_gettime and store result in self.times"
         self.times[boxnum] = self._request_gettime(boxnum)
 
 
-    def _check_time_sync(self):
+    def _check_time_sync(self, sync_with_system=True):
         end_time = time.time() + SERVER_SYNC_TIMEOUT
         reason = ''
         while time.time() < end_time:
@@ -175,31 +184,36 @@ class TimeSyncTest(unittest.TestCase):
             if abs(diff) > GRACE:
                 reason = "Time difference too high: %.3f" % diff
                 continue
-            td = [abs(t[2] - t[0]) for t in self.times]
-            min_td = min(td)
-            if min_td <= GRACE:
-                type(self)._primary = td.index(min_td)
-                print "Synchromized by box %s" % self._primary
+            elif not sync_with_system:
                 return
-            else:
-                reason = "None of servers report time close enough to it's system time. Min delta = %.3f" % min_td
+            if sync_with_system:
+                td = [abs(t[2] - t[0]) for t in self.times]
+                min_td = min(td)
+                if min_td <= GRACE:
+                    type(self)._primary = td.index(min_td)
+                    print "Synchromized by box %s" % self._primary
+                    return
+                else:
+                    reason = "None of servers report time close enough to it's system time. Min delta = %.3f" % min_td
             time.sleep(0.2)
         #self.debug_systime()
+        print "0: ", self.times[0]
+        print "1: ", self.times[1]
         self.fail(reason)
         #TODO: Add more details about servers' and their systems' time!
 
     def _check_systime_sync(self, boxnum, must_synchronize=True):
-        t1 = time.time()
-        time.sleep(SYSTEM_TIME_SYNC_SLEEP)
-        tt = time.time()
-        while time.time() < tt + 30:
-            server_time, t2, system_time, t3 = self._request_gettime(boxnum)
+        tt = time.time() + (1 if must_synchronize else SYSTEM_TIME_NOTSYNC_SURE)
+        while time.time() < tt:
+            server_time, _, system_time = self._request_gettime(boxnum)
             print "DEBUG: server time: %s, system time: %s" % (server_time, system_time)
             timediff = system_time - server_time
             if timediff > GRACE:
-                print "timediff too high!"
-                time.sleep(1)
-        print "time passed: %02.f" % (time.time() - t1,)
+                if must_synchronize:
+                    print "DEBUG: timediff too high!"
+                time.sleep(0.5)
+            elif must_synchronize: # break if it must synchronize and has done it
+                break
         if must_synchronize:
             self.assertLess(timediff, GRACE, "Primary server time hasn't synchronized with it's system time change. Time difference = %s" % timediff)
         else:
@@ -222,6 +236,8 @@ class TimeSyncTest(unittest.TestCase):
 
 
     def ChangePrimayServer(self):
+        """Check mediaservers' time synchronization by the new primary server.
+        """
         print
         #self.debug_systime()
         self._setPrimaryServer()
@@ -254,8 +270,12 @@ class TimeSyncTest(unittest.TestCase):
         if error is not None:
             self.fail(error)
 
-    def SystemTimeChangeSynchronization(self):
+    @unittest.expectedFailure
+    def PrimarySystemTimeChange(self):
+        """Change system time on the primary servers' box, check if the servers have synchronized.
+        """
         print
+        self.shortDescription()
         self.debug_systime()
         primary = self._primary
         box = self.hosts[primary]
@@ -263,19 +283,70 @@ class TimeSyncTest(unittest.TestCase):
         newtime = self.get_box_time(box) + 12345
         self.call_box(box, 'date', '--set=@%d' % newtime)
         self.debug_systime()
+        time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(primary)
         self._check_time_sync()
-        self.assertEqual(primary, self._primary, "Time was synchronized by secondary server!")
-        #
+        self.assertEqual(primary, self._primary, "Time was synchronized by secondary server")
+
+    @unittest.expectedFailure
+    def SecondarySystemTimeChange(self):
+        """Change system time on the secondary servers' box, check if the servers have ignored it.
+        """
+        print
         sec = self._get_secondary()
         box = self.hosts[sec]
         print "Use secondary box %s (%s)" % (sec, box)
         newtime = self.get_box_time(box) - 12345
         self.call_box(box, 'date', '--set=@%d' % newtime)
         self.debug_systime()
+        time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(sec, False)
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "Primary server has been changed")
 
 
+    def _serv_local_delta(self, boxnum):
+        """Returns delta between mediasever's time and local script's time
+        """
+        times = self._request_gettime(self._secondary, False)
+        return times[1] - times[0]
 
+    def StopPrimary(self):
+        """Check if stopping the primary server doesn't lead to the secondary's time change.
+        """
+        print
+        type(self)._secondary = self._get_secondary()
+        delta_before = self._serv_local_delta(self._secondary) # remember difference between seco9ndary server's time and the local time
+        self.call_box(self.hosts[self._primary], 'stop', 'networkoptix-mediaserver')
+        time.sleep(MINOR_SLEEP)
+        delta_after = self._serv_local_delta(self._secondary)
+        self.assertLess(abs(delta_before - delta_after), DELTA_GRACE, "The secondary server's time changed after the primary server was stopped")
+
+    def RestartSecondaryWhilePrimaryOff(self):
+        """Check if restarting the secondary (while the primary is off) doesn't change it's time
+        """
+        print
+        delta_before = self._serv_local_delta(self._secondary)
+        #print "Delta before = %.2f" % delta_before
+        self.call_box(self.hosts[self._secondary], 'restart', 'networkoptix-mediaserver')
+        time.sleep(SERVER_UP_TIMEOUT)
+        #print "Delta after = %.2f" % delta_after
+        delta_delta = delta_before - self._serv_local_delta(self._secondary)
+        self.assertLess(abs(delta_delta), DELTA_GRACE, "The secondary server's time changed (by %.3f) after it was restarted (while the primary is off)" % delta_delta)
+
+    def StartPrimary(self):
+        """Check if starting the primary server again doesn't change time on the both primary and secondary.
+        """
+        print
+        delta_before = self._serv_local_delta(self._secondary)
+        self.call_box(self.hosts[self._primary], 'start', 'networkoptix-mediaserver')
+        time.sleep(SERVER_UP_TIMEOUT)
+        delta_after = self._serv_local_delta(self._secondary)
+        self.assertLess(abs(delta_before - delta_after), DELTA_GRACE, "The secondary server's time changed after the primary server was stopped")
+        #self.debug_systime()
+        self._check_time_sync(False)
+
+    @unittest.expectedFailure
+    def PrimaryStillSynchronized(self):
+        print
+        self._check_systime_sync(self._primary)
