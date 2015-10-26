@@ -2,6 +2,7 @@
 #/bin/python
 
 from subprocess import check_output
+import _strptime    #workaround multithreading bug
 from datetime import datetime
 import threading
 
