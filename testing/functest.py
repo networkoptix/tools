@@ -1746,7 +1746,7 @@ class MergeTest_Resource(MergeTestBase):
 
     def test(self):
         print "================================\n"
-        print "Server Merge Test:Resource Start\n"
+        print "Server Merge Test: Resource Start\n"
         if not self._prolog():
             print "FAIL: Merge Test: Resource prolog failed!"
             return False
@@ -1755,7 +1755,7 @@ class MergeTest_Resource(MergeTestBase):
         if not ret:
             print "FAIL: %s" % reason
         self._epilog()
-        print "Server Merge Test:Resource End%s\n" % ('' if ret else ": test FAILED")
+        print "Server Merge Test: Resource End%s\n" % ('' if ret else ": test FAILED")
         print "================================\n"
         return ret
 
@@ -3823,12 +3823,15 @@ def print_tests(suit, shift='    '):
             print "DEBUG:%s%s" % (shift, test)
 
 
-def RunTimeTest():
+def CallTimesyncTest():
     if not clusterTest.openerReady:
         clusterTest.setUpPassword()
-    test = timetest.TestLoader().load(clusterTest.getConfig())
-    result = unittest.TextTestRunner(verbosity=2, failfast=True).run(test)
-    return result.wasSuccessful()
+    return all( [
+        unittest.TextTestRunner(verbosity=2, failfast=True).run(
+            timetest.TestLoader().load(name, clusterTest.getConfig())
+        ).wasSuccessful()
+        for name in ('NoInetTests', 'InetSyncTests')
+    ] )
 
 
 def DoTests(argv):
@@ -3850,15 +3853,14 @@ def DoTests(argv):
             if the_test.result.wasSuccessful():
                 print "Main tests passed OK"
                 if MergeTest().test():
-                    if SystemNameTest().run():
-                        #RunTimeTest()
-                        pass
+                    SystemNameTest().run()
+            CallTimesyncTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp(argc == 2)
 
         elif argc == 2 and argv[1] == '--timesync':
-            RunTimeTest()
+            CallTimesyncTest()
 
         elif (argc == 2 or argc == 3) and argv[1] == '--clear':
             if argc == 3:

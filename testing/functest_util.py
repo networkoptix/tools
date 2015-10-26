@@ -382,7 +382,7 @@ class ClusterWorker(object):
     def _do_work(self):
         return not self._queue.empty()
 
-    def _worker(self):
+    def _worker(self, num):
         while self._do_work():
             t,a = self._queue.get(True)
             try:
@@ -392,7 +392,7 @@ class ClusterWorker(object):
 
     def startThreads(self):
         for _ in xrange(self._threadNum):
-            t = threading.Thread(target=self._worker)
+            t = threading.Thread(target=self._worker, args=(_,))
             t.start()
             self._threadList.append(t)
 
@@ -422,6 +422,7 @@ class ClusterWorker(object):
 class ClusterLongWorker(ClusterWorker):
 
     def __init__(self, num, element_size=0):
+        print "ClusterLongWorker starting"
         super(ClusterLongWorker, self).__init__(num, element_size)
         self._working = False
 
@@ -438,6 +439,7 @@ class ClusterLongWorker(ClusterWorker):
         while not self._queue.empty():
             try:
                 self._queue.get_nowait()
+                self._queue.task_done()
             except Queue.Empty:
                 break
 
