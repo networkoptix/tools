@@ -23,6 +23,8 @@ import timetest
 
 CONFIG_FNAME = "functest.cfg"
 
+auto_rollback = False
+
 # Rollback support
 class UnitTestRollback:
     _rollbackFile = None
@@ -34,14 +36,15 @@ class UnitTestRollback:
 
     def __init__(self):
         if os.path.isfile(".rollback"):
-            selection = None
-            try :
-                print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
-                print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
-                print "Do you want to run Recover NOW?\n"
-                selection = raw_input("Press r to RUN RECOVER at first or press Enter to SKIP RECOVER and run the test")
-            except:
-                pass
+            selection = 'r' if auto_rollback else None
+            if not auto_rollback:
+                try :
+                    print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
+                    print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
+                    print "Do you want to run Recover NOW?\n"
+                    selection = raw_input("Press r to RUN RECOVER at first or press Enter to SKIP RECOVER and run the test")
+                except Exception:
+                    pass
 
             if len(selection) != 0 and selection[0] in ('r', 'R'):
                 self.doRecover()
@@ -3798,9 +3801,9 @@ class SystemNameTest:
         return ret
 
 
-def doCleanUp(auto=False):
-    selection = '' if auto else 'x'
-    if not auto:
+def doCleanUp():
+    selection = '' if auto_rollback else 'x'
+    if not auto_rollback:
         try :
             selection = raw_input("Press Enter to continue ROLLBACK or press x to SKIP it...")
         except:
@@ -3808,7 +3811,7 @@ def doCleanUp(auto=False):
 
     if len(selection) == 0 or selection[0] != 'x':
         print "Now do the rollback, do not close the program!"
-        clusterTest.unittestRollback.doRollback(auto)
+        clusterTest.unittestRollback.doRollback(quiet=auto_rollback)
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
@@ -3837,6 +3840,10 @@ def CallTimesyncTest():
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
+    if '--autorollback' in argv:
+        global auto_rollback
+        auto_rollback = True
+        argv.remove('--autorollback')
     argc = len(argv)
     ret, reason = clusterTest.init()
     if ret == False:
@@ -3845,7 +3852,7 @@ def DoTests(argv):
         pass # done here, since we just need to test whether
              # all the servers are on the same page
     else:
-        if argc == 1 or (argc == 2 and argv[1] == '--autorollback'):
+        if argc == 1:
             the_test = unittest.main(exit=False, argv=sys.argv[:1])
             #print "DEBUG: Test are:"
             #print_tests(the_test.test)
@@ -3857,7 +3864,7 @@ def DoTests(argv):
             CallTimesyncTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
-            doCleanUp(argc == 2)
+            doCleanUp()
 
         elif argc == 2 and argv[1] == '--timesync':
             CallTimesyncTest()
