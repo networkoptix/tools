@@ -8,61 +8,17 @@ from datetime import datetime
 from datetime import timedelta
 from itertools import groupby
 from common_module import init_color,info,green,warn,err,separator
+from hg_module import get_branches
 
 tooOld = timedelta(days = 30)
 verbose = False
 
-class Branch():
-    def __init__(self, name, rev, hash, active):
-        self.name = name
-        self.rev = rev
-        self.hash = hash
-        self.active = active
-        self.user = ''
-        self.date = datetime.now()
-        self.age = self.date - self.date
-        
-    def __str__(self):
-        return self.name
-
-def check_branches():
-    output = subprocess.check_output("hg branches", shell=True)
-    result = []
-    curDate = datetime.now()
-
-    for row in output.split('\n'):
-        if ':' in row:
-            key, hash = row.split(':')
-            name, rev = key.split()
-            if name == 'default':
-                continue
-            branch = Branch(name, rev, hash, True)
-            branch = Branch(name, rev, hash, True)
-            if '(' in hash:
-                branch.hash = hash.split('(')[0].strip()
-                branch.active = False
-            result.append(branch)
-
-    for branch in result:
-        log = "hg log -r " + branch.rev + ' --template "date:{date|shortdate}\\nuser:{author}"'
-        info = subprocess.check_output(log, shell=True)
-        for row in info.split('\n'):
-            if 'user:' in row:
-                key, value = row.split(':')
-                user = value.strip()
-                if '<' in user:
-                    user = user.split('<')[0].strip()
-                branch.user = user
-            if 'date:' in row:
-                dateStr = row[5:].strip()
-                date = datetime.strptime(dateStr, "%Y-%m-%d")
-                age = curDate - date
-                branch.date = date
-                branch.age = age
-  
+def group_branches():
+    branches = get_branches()
+    
     userKey = lambda branch: branch.user
-    result.sort(key=userKey)
-    return groupby(result, userKey)
+    branches.sort(key=userKey)
+    return groupby(branches, userKey)   
 
 def print_branches(grouped_branches):
     prevUser = ''
@@ -96,7 +52,7 @@ def main():
     if args.color:
         init_color()    
            
-    branches = check_branches()
+    branches = group_branches()
     print_branches(branches)
 
 if __name__ == "__main__":
