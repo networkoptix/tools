@@ -49,8 +49,8 @@ SELF_RESTART_TIMEOUT = 10 # seconds
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
-BRANCHES = ('dev_2.4.1',)
-TESTS = ('common_ut', 'mediaserver_core_ut') # unit tests' binary files names
+BRANCHES = ('dev_2.5',)
+TESTS = ('common_ut', 'mediaserver_core_ut', 'client_ut') # unit tests' binary files names
 
 SMTP_ADDR = 'smtp.gmail.com:587'
 SMTP_LOGIN = 'service@networkoptix.com'

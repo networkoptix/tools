@@ -9,7 +9,7 @@ import json
 import socket
 import struct
 
-from functest_util import ClusterWorker, ClusterLongWorker, SafeJsonLoads, get_server_guid
+from functest_util import ClusterLongWorker, SafeJsonLoads, get_server_guid
 
 NUM_SERV = 2 # number of servers for test
 GRACE = 1.000 # max time difference between responses to say that times are equal
