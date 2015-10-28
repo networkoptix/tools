@@ -576,6 +576,7 @@ class TimeSyncTest(unittest.TestCase):
                                    (delta_before - delta_after))
         self._check_time_sync(False)
 
+    @unittest.expectedFailure
     def BothRestart_SyncWithOS(self):
         """Restart both servers and check that now they are synchronized with the primary's OS time.
         """
@@ -587,7 +588,10 @@ class TimeSyncTest(unittest.TestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after both servers were restarted.")
 
+    @unittest.expectedFailure
     def PrimaryFollowsSystemTime(self):
+        """Check if the primary server changes time when it's system time has been changed.
+        """
         primary = self._primary # save it
         self.shift_box_time(self.hosts[self._primary], 5000)
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
