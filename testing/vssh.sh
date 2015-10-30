@@ -1,5 +1,5 @@
 #!/bin/bash
-key=/home/danil/.vagrant.d/insecure_private_key
+key=~/.vagrant.d/insecure_private_key
 box="$1"
 shift
 if [ -z "$box" ]; then
