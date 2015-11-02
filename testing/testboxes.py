@@ -21,16 +21,19 @@ def boxssh(box, command):
 
 class FuncTestCase(unittest.TestCase): # a base class for mediaserver functional tests
     config = None
+    num_serv = None
     _configured = False
 
     @classmethod
     def setUpClass(cls):
         if cls.config is None:
             raise FuncTestError("%s hasn't been configured" % cls.__name__)
+        if cls.num_serv is None:
+            raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
         if not cls._configured:
             cls.sl = cls.config.get("General","serverList").split(',')
 
-            cls._worker = ClusterLongWorker(NUM_SERV)
+            cls._worker = ClusterLongWorker(cls.num_serv)
             cls._configured = True
 
 

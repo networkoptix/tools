@@ -75,6 +75,7 @@ class TestLoader(unittest.TestLoader):
 ##
 
 class TimeSyncTest(FuncTestCase):
+    num_serv = NUM_SERV # override
     NoInetTests = [
         'InitialSynchronization',
         'ChangePrimayServer',
@@ -113,10 +114,10 @@ class TimeSyncTest(FuncTestCase):
             t = int(time.time())
             cls._init_time = [str(t - v) for v in (72000, 144000)]
         if not cls._tt_configured:
-            if len(cls.sl) < NUM_SERV:
+            if len(cls.sl) < cls.num_serv:
                 raise TimeTestError("not enough servers configured to test time synchronization")
-            if len(cls.sl) > NUM_SERV:
-                cls.sl[NUM_SERV:] = []
+            if len(cls.sl) > cls.num_serv:
+                cls.sl[cls.num_serv:] = []
             cls.hosts = [addr.split(':')[0] for addr in cls.sl]
             print "Server list: %s" % cls.sl
             cls._tt_configured = True
@@ -233,11 +234,11 @@ class TimeSyncTest(FuncTestCase):
         end_time = time.time() + SERVER_SYNC_TIMEOUT
         reason = ''
         while time.time() < end_time:
-            self.times = [[0,0] for _ in xrange(NUM_SERV)]
-            for boxnum in xrange(NUM_SERV):
+            self.times = [[0,0] for _ in xrange(self.num_serv)]
+            for boxnum in xrange(self.num_serv):
                 self._worker.enqueue(self._task_get_time, (boxnum,))
             self._worker.joinQueue()
-            #for i in xrange(NUM_SERV):
+            #for i in xrange(self.num_serv):
             #    print "Server %s time: %.3f" % (i, self.times[i][0])
             delta = self.times[0][1] - self.times[1][1]
             diff = self.times[0][0] - self.times[1][0] + delta
@@ -298,7 +299,7 @@ class TimeSyncTest(FuncTestCase):
 
     def _get_secondary(self):
         "Return any (next) server number which isn't the primary server"
-        return NUM_SERV - 1 if self._primary == 0 else self._primary - 1
+        return self.num_serv - 1 if self._primary == 0 else self._primary - 1
 
     def _setPrimaryServer(self, boxnum):
         print "New primary is %s (%s)" % (boxnum, self.hosts[boxnum])
@@ -416,7 +417,7 @@ class TimeSyncTest(FuncTestCase):
         #self.debug_systime()
         self._check_time_sync(False)
 
-    @unittest.expectedFailur
+    @unittest.expectedFailure
     def PrimaryStillSynchronized(self):
         self._check_systime_sync(self._primary)
 
@@ -480,11 +481,12 @@ class TimeSyncTest(FuncTestCase):
         itime = struct.unpack('!I', itime_str)[0] - SHIFT_1900_1970
         print "DEBUG: time from internet: %s, %s" % (itime, time.asctime(time.localtime(itime)))
 
-        for boxnum in xrange(NUM_SERV):
+        for boxnum in xrange(self.num_serv):
             btime = self._request_gettime(boxnum)
             print "Server %s time %s" % (boxnum, btime[0])
             self.assertAlmostEqual(itime, btime[0], delta=GRACE,
-                                   msg="Server at box %s hasn't sinchronized with Internet time")
+                                   msg="Server at box %s hasn't sinchronized with Internet time in %s seconds" %
+                                       (boxnum, INET_SYNC_TIMEOUT))
 
     def ChangePrimarySystime(self):
         delta_before = self._serv_local_delta(self._primary)

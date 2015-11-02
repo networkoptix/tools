@@ -842,6 +842,7 @@ class FunctestParser(object):
         self.parser = self.parse_main
 
     FAIL_MARK = "FAIL:"
+    ERROR_MARK = "ERROR:"
 
     # Tests structure:
     # The merge test runs only if the main test was successful.
@@ -854,10 +855,11 @@ class FunctestParser(object):
     # the main tests phase -- don't use self.collector
     # lines are appended to ToSend since the first 'FAIL:' found
     def parse_main(self, line):  # FT_MAIN
-        if line.startswith(self.FAIL_MARK):
+        if line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
             self.has_errors = True
             self.parser = self.parse_main_failed
-            log_to_send("Functional test failed!")
+            is_fail = line.startswith(self.FAIL_MARK)
+            log_to_send("Functional test %s!", "failed" if is_fail else "reports an error")
             log_to_send(line)
         elif line.startswith("Main tests passed OK"):
             log("Main functest done.")
@@ -883,9 +885,10 @@ class FunctestParser(object):
     def parse_merge(self, line):  # FT_MERGE_IN
         if line.startswith(self.MERGE_END):
             self._merge_test_end(True)
-        elif line.startswith(self.FAIL_MARK):
+        elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
             self.has_errors = True
-            log_to_send("Functional test failed on Merge Server test!")
+            is_fail = line.startswith(self.FAIL_MARK)
+            log_to_send("Functional test %s on Merge Server test!", "failed" if is_fail else "reports an error")
             for s in self.collector:
                 log_to_send(s)
             log_to_send(line)
@@ -916,9 +919,10 @@ class FunctestParser(object):
     def parse_sysname(self, line):
         if line.startswith(self.SYSNAME_END):
             self._sysname_test_end()
-        elif line.startswith(self.FAIL_MARK):
+        elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
             self.has_errors = True
-            log_to_send("Functional test failed on SystemName test!")
+            is_fail = line.startswith(self.FAIL_MARK)
+            log_to_send("Functional test %s on SystemName test!", "failed" if is_fail else "reports an error")
             for s in self.collector:
                 log_to_send(s)
             log_to_send(line)
@@ -961,8 +965,8 @@ class FunctestParser(object):
     def parse_timesync(self, line):
         if line.startswith(self.TS_END):
             self.parser = self.parse_timesync_tail
-        elif line.startswith(self.FAIL_MARK):
-            self._ts_got_fail(line)
+        elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
+            self._ts_got_fail(line, line.startswith(self.FAIL_MARK))
         else:
             self.collector.append(line)
 
@@ -977,9 +981,9 @@ class FunctestParser(object):
         elif line.startswith("OK ("):
             self._end_timesync()
 
-    def _ts_got_fail(self, line):
+    def _ts_got_fail(self, line, is_fail):
         self.has_errors = True
-        log_to_send("Time synchronization test %s failed!")
+        log_to_send("Time synchronization test %s %s!", self.ts_name, "failed" if is_fail else "reports an error")
         for s in self.collector:
             log_to_send(s)
         log_to_send(line)
@@ -1013,12 +1017,13 @@ def read_functest_output(proc, reader, from_timesync=False):
         line = reader.readline(FT_PIPE_TIMEOUT)
         if len(line) > 0:
             last_lines.append(line)
-            #debug("FTLine: %s", line.lstrip())
+            #debug("FT: %s", line.lstrip())
             if line.startswith("ALL AUTOMATIC TEST ARE DONE"):
                 p.set_end()
             else:
                 p.parser(line)
     else: # end reading
+        debug("while reader.state == PIPE_READY - ends with reader.state = %s", reader.state)
         pass
 
     if reader.state in (PIPE_HANG, PIPE_ERROR):
@@ -1031,6 +1036,8 @@ def read_functest_output(proc, reader, from_timesync=False):
     if proc.poll() is None:
         kill_test(proc)
         proc.wait()
+        debug("The last test stage was %s. Last %s lines are:\n%s" %
+              (p.stage, len(last_lines), "\n".join(last_lines)))
 
     if proc.returncode != 0:
         if proc.returncode < 0:
@@ -1039,7 +1046,9 @@ def read_functest_output(proc, reader, from_timesync=False):
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
                 log_to_send("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
         else:
-            log_to_send("[ FUNCTIONAL TESTS' RETURN CODE = %s ]" % proc.returncode)
+            log_to_send("[ FUNCTIONAL TESTS' RETURN CODE = %s ]\n"
+                        "The last test stage was %s. Last %s lines are:\n%s" %
+                        (proc.returncode, p.stage, len(last_lines), "\n".join(last_lines)))
         #has_errors = True
 
 
