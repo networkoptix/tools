@@ -810,7 +810,7 @@ def perform_func_test(timesync_only=False):
         read_functest_output(proc, reader, timesync_only)
         reader.unregister()
         if not timesync_only:
-            cmd = [sys.executable, "-u", "redir_test.py"]
+            cmd = [sys.executable, "-u", "redirtest.py"]
             log("Running server redirection test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
@@ -862,14 +862,14 @@ class FunctestParser(object):
         elif line.startswith("Main tests passed OK"):
             log("Main functest done.")
             self.parser = self.parse_merge_start
-            self.stage = 'Merge server test'
+            self.stage = 'wait for Merge server test'
 
     def parse_main_failed(self, line):  # FT_MAIN_FAILED
         log_to_send(line)
         if line.startswith("FAILED (failures"):
             ToSend.append('')
             self.parser = self.parse_timesync_start  # skip merge and sysname tests
-            self.stage = 'Merge server test'
+            self.stage = 'wait for timesync test'
 
     # Merge test
     MERGE_END = "Server Merge Test: Resource End"
@@ -877,11 +877,12 @@ class FunctestParser(object):
     def parse_merge_start(self, line):  # FT_MERGE
         if line.startswith("Server Merge Test: Resource Start"):
             self.parser = self.parse_merge
+            self.stage = 'Merge server test'
             self.collector[:] = [line]
 
     def parse_merge(self, line):  # FT_MERGE_IN
         if line.startswith(self.MERGE_END):
-            self._merge_test_end()
+            self._merge_test_end(True)
         elif line.startswith(self.FAIL_MARK):
             self.has_errors = True
             log_to_send("Functional test failed on Merge Server test!")
@@ -896,11 +897,11 @@ class FunctestParser(object):
     def parse_merge_failed(self, line):  # FT_MERGE_FAILED
         log_to_send(line)
         if line.startswith(self.MERGE_END):
-            self._merge_test_end()
+            self._merge_test_end(False)
 
-    def _merge_test_end(self):
-        self.parser = self.parse_sysname_start
-        self.stage = ''
+    def _merge_test_end(self, success):
+        self.parser = self.parse_sysname_start if success else self.parse_timesync_start
+        self.stage = 'wait for ' + ('SystemName' if success else 'timesync') + ' test'
         log("Merge Server test done.")
 
     # Sysname test
@@ -933,7 +934,7 @@ class FunctestParser(object):
 
     def _sysname_test_end(self):
         log("SystemName test done.")
-        self.stage = ""
+        self.stage = "wait for timesunc test"
         self.parse = self.parse_timesync_start
 
     # Time synchronization tests
@@ -945,6 +946,7 @@ class FunctestParser(object):
     def parse_timesync_start(self, line):  # FT_OLD_END
         if line.startswith(self.TS_START):
             self.ts_name = line[len(self.TS_START):].rstrip()
+            self.stage = 'time syncronization test'
             if self.ts_name == self.TS_PARTS[self.current_ts_part]:
                 self.parser = self.parse_timesync
                 self.collector[:] = [line]
@@ -1004,7 +1006,6 @@ class FunctestParser(object):
 
 def read_functest_output(proc, reader, from_timesync=False):
     last_lines = deque(maxlen=FUNCTEST_LAST_LINES)
-    stage = 'Main functional tests'
     p = FunctestParser()
     if from_timesync:
         p.parser = p.parse_timesync_start
@@ -1023,7 +1024,7 @@ def read_functest_output(proc, reader, from_timesync=False):
     if reader.state in (PIPE_HANG, PIPE_ERROR):
         log_to_send((
             "[ functional tests has TIMED OUT on %s stage ]" if reader.state == PIPE_HANG else
-            "[ PIPE ERROR reading functional tests output on %s stage ]") % stage)
+            "[ PIPE ERROR reading functional tests output on %s stage ]") % p.stage)
         log_to_send("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
         #has_errors = True
 

@@ -39,7 +39,7 @@ def fix_paths():
 HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consumed by check, builds and tests
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 UT_PIPE_TIMEOUT = 10 * 1000  # milliseconds. Unit tests' pipe timeout
-FT_PIPE_TIMEOUT = 30 * 1000  # ... Functional tests' pipe timeout
+FT_PIPE_TIMEOUT = 60 * 1000  # ... Functional tests' pipe timeout
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
 FUNCTEST_LAST_LINES = 30 # Lines to show if the functional tests hang.
 MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code

@@ -10,6 +10,7 @@ import socket
 import struct
 
 from functest_util import ClusterLongWorker, SafeJsonLoads, get_server_guid
+from testboxes import *
 
 NUM_SERV = 2 # number of servers for test
 GRACE = 1.000 # max time difference between responses to say that times are equal
@@ -25,16 +26,8 @@ INET_SYNC_TIMEOUT = 15 # equals to value in tt_setisync.sh
 
 IF_EXT = 'eth0'
 
-class TimeTestError(AssertionError):
+class TimeTestError(FuncTestError):
     pass
-
-
-def boxssh(box, command):
-    return subprocess.check_output(
-        ['./vssh.sh', box, 'sudo'] + list(command),
-        shell=False, stderr=subprocess.STDOUT
-    )
-
 
 time_servers = ('time.nist.gov', 'time.ien.it')
 TIME_PORT = 37
@@ -75,13 +68,13 @@ class TestLoader(unittest.TestLoader):
         else:
             print "ERROR: No time test set '%s' found!" % testset
 
+
 ###########
 ## NOTE:
 ## Really it's a sequence of tests where most of tests depend on the previous test result.
 ##
 
-class TimeSyncTest(unittest.TestCase):
-    config = None
+class TimeSyncTest(FuncTestCase):
     NoInetTests = [
         'InitialSynchronization',
         'ChangePrimayServer',
@@ -102,11 +95,11 @@ class TimeSyncTest(unittest.TestCase):
     ]
     guids = {}
     testset = None
-    _configured = False
     _init_time = []
     _primary = None
     _secondary = None
     _stopped = set()
+    _tt_configured = False
 
     @classmethod
     def setUpClass(cls):
@@ -115,22 +108,18 @@ class TimeSyncTest(unittest.TestCase):
         if cls.testset == 'InetSyncTests':
             if not check_inet_time:
                 raise unittest.SkipTest("Internet time servers aren't sccessible")
-        if cls.config is None:
-            raise TimeTestError("%s hasn't been configured" % cls.__name__)
+        super(TimeSyncTest, cls).setUpClass()
         if not cls._init_time:
             t = int(time.time())
             cls._init_time = [str(t - v) for v in (72000, 144000)]
-        if not cls._configured:
-            cls.sl = cls.config.get("General","serverList").split(',')
+        if not cls._tt_configured:
             if len(cls.sl) < NUM_SERV:
                 raise TimeTestError("not enough servers configured to test time synchronization")
             if len(cls.sl) > NUM_SERV:
                 cls.sl[NUM_SERV:] = []
             cls.hosts = [addr.split(':')[0] for addr in cls.sl]
             print "Server list: %s" % cls.sl
-            cls.boxes = cls.config.get("General","boxList").split(',')
-            cls._worker = ClusterLongWorker(NUM_SERV)
-            cls._configured = True
+            cls._tt_configured = True
         cls._worker.startThreads()
 
 
@@ -156,23 +145,6 @@ class TimeSyncTest(unittest.TestCase):
         print "========================================="
 
     ################################################################
-
-    @classmethod
-    def class_call_box(cls, box, *command):
-        try:
-            return boxssh(box, command)
-        except subprocess.CalledProcessError, e:
-            print ("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
-                      (box, ' '.join(command), e.returncode, e.output))
-            return ''
-
-    def _call_box(self, box, *command):
-        #print "%s: %s" % (box, ' '.join(command))
-        try:
-            return boxssh(box, command)
-        except subprocess.CalledProcessError, e:
-            self.fail("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
-                      (box, ' '.join(command), e.returncode, e.output))
 
     def _get_guids(self):
         for i, addr in enumerate(self.sl):
@@ -406,7 +378,6 @@ class TimeSyncTest(unittest.TestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "Primary server has been changed")
 
-
     def StopPrimary(self):
         """Check if stopping the primary server doesn't lead to the secondary's time change.
         """
@@ -445,7 +416,7 @@ class TimeSyncTest(unittest.TestCase):
         #self.debug_systime()
         self._check_time_sync(False)
 
-    @unittest.expectedFailure
+    @unittest.expectedFailur
     def PrimaryStillSynchronized(self):
         self._check_systime_sync(self._primary)
 
@@ -469,7 +440,7 @@ class TimeSyncTest(unittest.TestCase):
         try:
             response = urllib2.urlopen(req, timeout=HTTP_TIMEOUT)
         except Exception:
-            error = "forcePrimaryTimeServer failed with exception: %s" % traceback.format_exc()
+            error = "removeMediaServer failed with exception: %s" % traceback.format_exc()
         else:
             if response.getcode() != 200:
                 error = "forcePrimaryTimeServer failed with code %s" % response.getcode()
