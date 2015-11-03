@@ -841,6 +841,15 @@ class FunctestParser(object):
         self.stage = 'Main functional tests'
         self.parser = self.parse_main
 
+    #@property
+    #def parser(self):
+    #    return self._parser
+    #
+    #@parser.setter
+    #def parser(self, value):
+    #    self._parser = value
+    #    print "Assigned parser: %s" % value
+
     FAIL_MARK = "FAIL:"
     ERROR_MARK = "ERROR:"
 
@@ -939,7 +948,7 @@ class FunctestParser(object):
     def _sysname_test_end(self):
         log("SystemName test done.")
         self.stage = "wait for timesunc test"
-        self.parse = self.parse_timesync_start
+        self.parser = self.parse_timesync_start
 
     # Time synchronization tests
     TS_PARTS = ['NoInetTests', 'InetSyncTests']
@@ -959,7 +968,6 @@ class FunctestParser(object):
                 log_to_send("ERROR: unknow tymesync test part: " + self.ts_name)
                 self.parser = self.parse_timesync_failed
             self.stage = "Time synchronization test: " + self.ts_name
-            debug("parse_timesync_start: " + self.ts_name)
 
 
     def parse_timesync(self, line):
@@ -991,19 +999,20 @@ class FunctestParser(object):
         self.parser = self.parse_timesync_failed
 
     def _end_timesync(self):
-        log("Timesync test %s done" % self.ts_name)
-        self.stage = ""
+        log("Timesync test %s done", self.ts_name)
         if self.current_ts_part < len(self.TS_PARTS):
             self.current_ts_part += 1
             self.parser = self.parse_timesync_start
             del self.collector[:]
+            self.stare = "wait for timesunc test"
         else:
             self.set_end()
 
     def set_end(self):
-        self.parser = self.skip_all
+        self.parser = self.skip_to_the_end
+        self.stage = "ending"
 
-    def skip_all(self, line):
+    def skip_to_the_end(self, line):
         pass
 
 
@@ -1023,7 +1032,6 @@ def read_functest_output(proc, reader, from_timesync=False):
             else:
                 p.parser(line)
     else: # end reading
-        debug("while reader.state == PIPE_READY - ends with reader.state = %s", reader.state)
         pass
 
     if reader.state in (PIPE_HANG, PIPE_ERROR):
@@ -1032,6 +1040,10 @@ def read_functest_output(proc, reader, from_timesync=False):
             "[ PIPE ERROR reading functional tests output on %s stage ]") % p.stage)
         log_to_send("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
         #has_errors = True
+
+    t = time.time() + 5.0 # wait a bit
+    while proc.poll() is None and time.time() < t:
+        time.sleep(0.1)
 
     if proc.poll() is None:
         kill_test(proc)

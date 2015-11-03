@@ -3865,6 +3865,7 @@ def DoTests(argv):
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()
+            print "\nFunctest finnished\n"
 
         elif argc == 2 and argv[1] == '--timesync':
             CallTimesyncTest()
