@@ -58,7 +58,7 @@ def check_inet_time():
 
 class TestLoader(unittest.TestLoader):
 
-    def load(self, testset, config):
+    def load(self, testclass, testset, config):
         TimeSyncTest.config = config
         names = getattr(TimeSyncTest, testset, None)
         if names is not None:
@@ -66,7 +66,7 @@ class TestLoader(unittest.TestLoader):
             TimeSyncTest.testset = testset
             return self.suiteClass(map(TimeSyncTest, names))
         else:
-            print "ERROR: No time test set '%s' found!" % testset
+            print "ERROR: No test set '%s' found!" % testset
 
 
 ###########
@@ -99,38 +99,21 @@ class TimeSyncTest(FuncTestCase):
     _init_time = []
     _primary = None
     _secondary = None
-    _stopped = set()
-    _tt_configured = False
 
     @classmethod
     def setUpClass(cls):
         print "========================================="
         print "TimeSync Test Start: %s" % cls.testset
         if cls.testset == 'InetSyncTests':
-            if not check_inet_time:
+            if not check_inet_time():
                 raise unittest.SkipTest("Internet time servers aren't sccessible")
         super(TimeSyncTest, cls).setUpClass()
         if not cls._init_time:
             t = int(time.time())
             cls._init_time = [str(t - v) for v in (72000, 144000)]
-        if not cls._tt_configured:
-            if len(cls.sl) < cls.num_serv:
-                raise TimeTestError("not enough servers configured to test time synchronization")
-            if len(cls.sl) > cls.num_serv:
-                cls.sl[cls.num_serv:] = []
-            cls.hosts = [addr.split(':')[0] for addr in cls.sl]
-            print "Server list: %s" % cls.sl
-            cls._tt_configured = True
-        cls._worker.startThreads()
-
 
     @classmethod
     def tearDownClass(cls):
-        # and test if they work in parallel!
-        for host in cls._stopped:
-            print "Restoring mediaserver on %s" % host
-            cls.class_call_box(host, 'start', 'networkoptix-mediaserver')
-        cls._stopped.clear()
         print "Restoring external interfaces"
         #FIXME: use threads and subprocess.check_output, tbe able to log stderr messages
         with open(os.devnull, 'w') as FNULL:
@@ -141,7 +124,7 @@ class TimeSyncTest(FuncTestCase):
             for b, p in proc:
                 if p.wait() != 0:
                     print "ERROR: Failed to start external interface for box %s" % (b,)
-        cls._worker.stopWork()
+        super(TimeSyncTest, cls).tearDownClass()
         print "TimeSync Test End"
         print "========================================="
 
@@ -160,25 +143,12 @@ class TimeSyncTest(FuncTestCase):
         for box in self.hosts:
             self._worker.enqueue(self._show_systime, (box,))
 
-    def _mediaserver_ctl(self, box, cmd):
-        self._call_box(box, cmd, 'networkoptix-mediaserver')
-        if cmd == 'stop':
-            self._stopped.add(box)
-        elif cmd in ('start', 'restart'): # for 'restart' - just in case it was off unexpectedly
-            self._stopped.discard(box)
-
-    def _servers_th_ctl(self, cmd):
-        for box in self.hosts:
-            self._worker.enqueue(self._mediaserver_ctl, (box, cmd))
-        self._worker.joinQueue()
-
     def _stop_and_init(self, box, num):
         print "Stopping box %s" % box
         self._mediaserver_ctl(box, 'stop')
         time.sleep(0)
         self._call_box(box, '/vagrant/tt_init.sh', self._init_time[num])
         print "Box %s stopped and ready" % box
-
 
     def _prepare_test_phase(self, method):
         for num, box in enumerate(self.hosts):
@@ -319,11 +289,6 @@ class TimeSyncTest(FuncTestCase):
         if error is not None:
             self.fail(error)
 
-    ####################################################
-
-    def setUp(self):
-        print
-    #    print "*** Setting up: %s" % self._testMethodName
     ####################################################
 
 
@@ -570,5 +535,4 @@ class TimeSyncTest(FuncTestCase):
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after the previous primary's system time changed.")
-
 

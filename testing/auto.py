@@ -973,9 +973,7 @@ class FunctestParser(object):
     def parse_timesync(self, line):
         if line.startswith(self.TS_END):
             self.parser = self.parse_timesync_tail
-        elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
-            self._ts_got_fail(line, line.startswith(self.FAIL_MARK))
-        else:
+        elif not self._ts_check_fail(line):
             self.collector.append(line)
 
     def parse_timesync_failed(self, line):
@@ -984,19 +982,21 @@ class FunctestParser(object):
             self._end_timesync()
 
     def parse_timesync_tail(self, line):
-        if line.startswith(self.FAIL_MARK):
-            self._ts_got_fail(line)
-        elif line.startswith("OK ("):
+        if not self._ts_check_fail(line) and line.startswith("OK ("):
             self._end_timesync()
 
-    def _ts_got_fail(self, line, is_fail):
+    def _ts_check_fail(self, line):
+        if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
+            return False
         self.has_errors = True
-        log_to_send("Time synchronization test %s %s!", self.ts_name, "failed" if is_fail else "reports an error")
+        log_to_send("Time synchronization test %s %s!", self.ts_name,
+                    "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
         for s in self.collector:
             log_to_send(s)
         log_to_send(line)
         del self.collector[:]
         self.parser = self.parse_timesync_failed
+        return True
 
     def _end_timesync(self):
         log("Timesync test %s done", self.ts_name)
@@ -1073,7 +1073,6 @@ def read_redirtest_output(proc, reader):
     reading = True
     while reader.state == PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
-        debug("RT: %s", line.rstrip())
         if reading and len(line) > 0:
             collector.append(line)
             if line.startswith(RT_FAIL):

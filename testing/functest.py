@@ -3831,7 +3831,7 @@ def CallTimesyncTest():
         clusterTest.setUpPassword()
     return all( [
         unittest.TextTestRunner(verbosity=2, failfast=True).run(
-            timetest.TestLoader().load(name, clusterTest.getConfig())
+            timetest.TestLoader().load(timetest.TimeSyncTest, name, clusterTest.getConfig())
         ).wasSuccessful()
         for name in ('NoInetTests', 'InetSyncTests')
     ] )
@@ -3854,8 +3854,6 @@ def DoTests(argv):
     else:
         if argc == 1:
             the_test = unittest.main(exit=False, argv=sys.argv[:1])
-            #print "DEBUG: Test are:"
-            #print_tests(the_test.test)
 
             if the_test.result.wasSuccessful():
                 print "Main tests passed OK"

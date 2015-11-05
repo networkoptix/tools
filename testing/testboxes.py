@@ -19,10 +19,14 @@ def boxssh(box, command):
     )
 
 
-class FuncTestCase(unittest.TestCase): # a base class for mediaserver functional tests
+class FuncTestCase(unittest.TestCase):
+    """A base class for mediaserver functional tests using virtual boxes
+    """
     config = None
     num_serv = None
     _configured = False
+    _stopped = set()
+    _worker = None
 
     @classmethod
     def setUpClass(cls):
@@ -35,7 +39,24 @@ class FuncTestCase(unittest.TestCase): # a base class for mediaserver functional
 
             cls._worker = ClusterLongWorker(cls.num_serv)
             cls._configured = True
+        if len(cls.sl) < cls.num_serv:
+            raise FuncTestError("not enough servers configured to test time synchronization")
+        if len(cls.sl) > cls.num_serv:
+            cls.sl[cls.num_serv:] = []
+        cls.hosts = [addr.split(':')[0] for addr in cls.sl]
+        print "Server list: %s" % cls.sl
+        cls._worker.startThreads()
 
+    @classmethod
+    def tearDownClass(cls):
+        # and test if they work in parallel!
+        for host in cls._stopped:
+            print "Restoring mediaserver on %s" % host
+            cls.class_call_box(host, 'start', 'networkoptix-mediaserver')
+        cls._stopped.clear()
+        cls._worker.stopWork()
+
+    ################################################################################
 
     def _call_box(self, box, *command):
         #print "%s: %s" % (box, ' '.join(command))
@@ -54,4 +75,22 @@ class FuncTestCase(unittest.TestCase): # a base class for mediaserver functional
                       (box, ' '.join(command), e.returncode, e.output))
             return ''
 
+    def _mediaserver_ctl(self, box, cmd):
+        "Perform a service control command for a mediaserver on one of boxes"
+        self._call_box(box, cmd, 'networkoptix-mediaserver')
+        if cmd == 'stop':
+            self._stopped.add(box)
+        elif cmd in ('start', 'restart'): # for 'restart' - just in case it was off unexpectedly
+            self._stopped.discard(box)
 
+    def _servers_th_ctl(self, cmd):
+        "Perform the same service control command for all mediaservers in parallel (using threads)."
+        for box in self.hosts:
+            self._worker.enqueue(self._mediaserver_ctl, (box, cmd))
+        self._worker.joinQueue()
+
+    def setUp(self):
+        "Just prints \n after unittest module prints a test name"
+        print
+    #    print "*** Setting up: %s" % self._testMethodName  # may be used for debug ;)
+    ####################################################
