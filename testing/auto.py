@@ -951,13 +951,16 @@ class FunctestParser(object):
         self.parser = self.parse_timesync_start
 
     # Time synchronization tests
-    TS_PARTS = ['NoInetTests', 'InetSyncTests']
+    TS_PARTS = [] #it should be filled!
     current_ts_part = 0
+    TS_HEAD = "TimeSyncTest suits: "
     TS_START = "TimeSync Test Start: "
     TS_END = "TimeSync Test End"
 
     def parse_timesync_start(self, line):  # FT_OLD_END
-        if line.startswith(self.TS_START):
+        if line.startswith(self.TS_HEAD):
+            type(self).TS_PARTS = [s.strip() for s in line[len(self.TS_HEAD):].split(',')]
+        elif line.startswith(self.TS_START):
             self.ts_name = line[len(self.TS_START):].rstrip()
             self.stage = 'time syncronization test'
             if self.ts_name == self.TS_PARTS[self.current_ts_part]:

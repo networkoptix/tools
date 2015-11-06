@@ -19,7 +19,8 @@ import errno
 
 from functest_util import *
 from generator import *
-import timetest
+import timetest, backuptest
+from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -3829,12 +3830,8 @@ def print_tests(suit, shift='    '):
 def CallTimesyncTest():
     if not clusterTest.openerReady:
         clusterTest.setUpPassword()
-    return all( [
-        unittest.TextTestRunner(verbosity=2, failfast=True).run(
-            timetest.TestLoader().load(timetest.TimeSyncTest, name, clusterTest.getConfig())
-        ).wasSuccessful()
-        for name in ('NoInetTests', 'InetSyncTests')
-    ] )
+    print "TimeSyncTest suits: %s" % (','.join(timetest.TimeSyncTest.iter_suits()))
+    return RunBoxTests(timetest.TimeSyncTest, clusterTest.getConfig())
 
 
 def DoTests(argv):

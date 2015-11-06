@@ -6,7 +6,7 @@ import unittest
 
 from functest_util import ClusterLongWorker
 
-__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError']
+__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests']
 
 class FuncTestError(AssertionError):
     pass
@@ -19,6 +19,29 @@ def boxssh(box, command):
     )
 
 
+class TestLoader(unittest.TestLoader):
+
+    def load(self, testclass, testset, config):
+        testclass.config = config
+        names = getattr(testclass, testset, None)
+        if names is not None:
+            print "[Preparing %s tests]" % testset
+            testclass.testset = testset
+            return self.suiteClass(map(testclass, names))
+        else:
+            print "ERROR: No test set '%s' found!" % testset
+
+
+def RunTests(testclass, config):
+    testclass.init_suits()
+    return all( [
+            unittest.TextTestRunner(verbosity=2, failfast=True).run(
+                TestLoader().load(testclass, suit_name, config)
+            ).wasSuccessful()
+            for suit_name in testclass.iter_suits()
+        ] )
+
+
 class FuncTestCase(unittest.TestCase):
     """A base class for mediaserver functional tests using virtual boxes
     """
@@ -27,6 +50,8 @@ class FuncTestCase(unittest.TestCase):
     _configured = False
     _stopped = set()
     _worker = None
+    _suits = ()
+    _init_suits_done = False
 
     @classmethod
     def setUpClass(cls):
@@ -55,6 +80,29 @@ class FuncTestCase(unittest.TestCase):
             cls.class_call_box(host, 'start', 'networkoptix-mediaserver')
         cls._stopped.clear()
         cls._worker.stopWork()
+
+    ################################################################################
+
+    @classmethod
+    def _check_suits(cls):
+        if not cls._suits:
+            raise RuntimeError("%s's test suits list is empty!" % cls.__name__)
+
+    @classmethod
+    def iter_suits(cls):
+        cls._check_suits()
+        return (s[0] for s in cls._suits)
+
+    @classmethod
+    def init_suits(cls):
+        if cls._init_suits_done:
+            return
+        cls._check_suits()
+        for name, tests in cls._suits:
+            setattr(cls, name, tests)
+        cls._init_suits_done = True
+
+
 
     ################################################################################
 

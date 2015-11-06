@@ -12,7 +12,8 @@ import struct
 from functest_util import ClusterLongWorker, SafeJsonLoads, get_server_guid
 from testboxes import *
 
-NUM_SERV = 2 # number of servers for test
+_NUM_SERV = 2 # number of servers for test
+
 GRACE = 1.000 # max time difference between responses to say that times are equal
 DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
                    # used to check if the server time hasn't changed
@@ -22,7 +23,7 @@ SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
 SYSTEM_TIME_NOTSYNC_SURE = 30 # seconds, how long wait to shure server hasn't synced with system time
-INET_SYNC_TIMEOUT = 15 # equals to value in tt_setisync.sh
+INET_SYNC_TIMEOUT = 15 * 2 # a little bigger than the value in tt_setisync.sh
 
 IF_EXT = 'eth0'
 
@@ -56,7 +57,7 @@ def check_inet_time():
 
 
 
-class TestLoader(unittest.TestLoader):
+class ___TestLoader(unittest.TestLoader):
 
     def load(self, testclass, testset, config):
         TimeSyncTest.config = config
@@ -75,25 +76,27 @@ class TestLoader(unittest.TestLoader):
 ##
 
 class TimeSyncTest(FuncTestCase):
-    num_serv = NUM_SERV # override
-    NoInetTests = [
-        'InitialSynchronization',
-        'ChangePrimayServer',
-        'PrimarySystemTimeChange',
-        'SecondarySystemTimeChange',
-        'StopPrimary', 'RestartSecondaryWhilePrimaryOff', 'StartPrimary',
-        'PrimaryStillSynchronized',
-        'MakeSecondaryAlone'
-    ]
-    InetSyncTests = [
-        'TurnInetOn', 'ChangePrimarySystime',
-        'KeepInetTimeAfterIfdown',
-        'KeepInetTimeAfterSecondaryOff',
-        'KeepInetTimeAfterSecondaryOn',
-        'KeepInetTimeAfterRestartPrimary',
-        'BothRestart_SyncWithOS',
-        'PrimaryFollowsSystemTime',
-    ]
+    num_serv = _NUM_SERV # override
+    _suits = (
+        ('SyncTimeNoInetTests', [
+            'InitialSynchronization',
+            'ChangePrimayServer',
+            'PrimarySystemTimeChange',
+            'SecondarySystemTimeChange',
+            'StopPrimary', 'RestartSecondaryWhilePrimaryOff', 'StartPrimary',
+            'PrimaryStillSynchronized',
+            'MakeSecondaryAlone'
+        ]),
+        ('InetTimeSyncTests', [
+            'TurnInetOn', 'ChangePrimarySystime',
+            'KeepInetTimeAfterIfdown',
+            'KeepInetTimeAfterSecondaryOff',
+            'KeepInetTimeAfterSecondaryOn',
+            'KeepInetTimeAfterRestartPrimary',
+            'BothRestart_SyncWithOS',
+            'PrimaryFollowsSystemTime',
+        ])
+    )
     guids = {}
     testset = None
     _init_time = []
@@ -104,7 +107,7 @@ class TimeSyncTest(FuncTestCase):
     def setUpClass(cls):
         print "========================================="
         print "TimeSync Test Start: %s" % cls.testset
-        if cls.testset == 'InetSyncTests':
+        if cls.testset == 'InetTimeSyncTests':
             if not check_inet_time():
                 raise unittest.SkipTest("Internet time servers aren't sccessible")
         super(TimeSyncTest, cls).setUpClass()
@@ -444,11 +447,13 @@ class TimeSyncTest(FuncTestCase):
         itime_str = check_inet_time()
         self.assertTrue(itime_str, "Internet time request filed!")
         itime = struct.unpack('!I', itime_str)[0] - SHIFT_1900_1970
+        idelta = itime - time.time() # get the difference between local ant inet time to use it later
         print "DEBUG: time from internet: %s, %s" % (itime, time.asctime(time.localtime(itime)))
 
         for boxnum in xrange(self.num_serv):
             btime = self._request_gettime(boxnum)
-            print "Server %s time %s" % (boxnum, btime[0])
+            itime = time.time() + idelta
+            print "Server %s time %s; inet time %s" % (boxnum, btime[0], itime)
             self.assertAlmostEqual(itime, btime[0], delta=GRACE,
                                    msg="Server at box %s hasn't sinchronized with Internet time in %s seconds" %
                                        (boxnum, INET_SYNC_TIMEOUT))
