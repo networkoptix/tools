@@ -19,7 +19,7 @@ def execCommand(command):
     if verbose:
         print command
     
-    code = subprocess.call(command)
+    code = subprocess.call(command, shell=True)
     if code != 0:
         sys.exit(code)
     return code
