@@ -19,7 +19,6 @@ INET_GRACE = 2.0 # max time difference between a mediaserver time and the intern
 DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
                    # used to check if the server time hasn't changed
 HTTP_TIMEOUT = 5 # seconds
-SERVER_UP_TIMEOUT = 20 # seconds
 SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
@@ -148,28 +147,6 @@ class TimeSyncTest(FuncTestCase):
     def debug_systime(self):
         for box in self.hosts:
             self._worker.enqueue(self._show_systime, (box,))
-
-    def _wait_servers_up(self):
-        #print "=================================================="
-        #print "Now:       %.1f" % time.time()
-        starttime = time.time()
-        endtime = starttime + SERVER_UP_TIMEOUT
-        #print "Wait until %.1f" % endtime
-        tocheck = set(self.sl)
-        while tocheck and time.time() < endtime:
-            for addr in tocheck.copy():
-                try:
-                    response = urllib2.urlopen("http://%s/ec2/testConnection" % (addr), timeout=1)
-                except urllib2.URLError , e:
-                    continue
-                if response.getcode() != 200:
-                    continue
-                response.close()
-                tocheck.discard(addr)
-            if tocheck:
-                time.sleep(0.5)
-        if tocheck:
-            self.fail("Servers startup timed out: %s" % (', '.join(tocheck)))
 
     def _request_gettime(self, boxnum, ask_box_time=True):
         "Request server's time and its system time. Also return current local time at moment response was received."

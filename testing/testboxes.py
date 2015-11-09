@@ -3,9 +3,12 @@
 __author__ = 'Danil Lavrentyuk'
 import subprocess
 import unittest
+import urllib2
 import time
 
 from functest_util import ClusterLongWorker
+
+SERVER_UP_TIMEOUT = 20 # seconds, timeout for server to start to respond requests
 
 __all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests']
 
@@ -157,6 +160,28 @@ class FuncTestCase(unittest.TestCase):
         for box in self.hosts:
             self._worker.enqueue(self._mediaserver_ctl, (box, cmd))
         self._worker.joinQueue()
+
+    def _wait_servers_up(self):
+        #print "=================================================="
+        #print "Now:       %.1f" % time.time()
+        starttime = time.time()
+        endtime = starttime + SERVER_UP_TIMEOUT
+        #print "Wait until %.1f" % endtime
+        tocheck = set(self.sl)
+        while tocheck and time.time() < endtime:
+            for addr in tocheck.copy():
+                try:
+                    response = urllib2.urlopen("http://%s/ec2/testConnection" % (addr), timeout=1)
+                except urllib2.URLError , e:
+                    continue
+                if response.getcode() != 200:
+                    continue
+                response.close()
+                tocheck.discard(addr)
+            if tocheck:
+                time.sleep(0.5)
+        if tocheck:
+            self.fail("Servers startup timed out: %s" % (', '.join(tocheck)))
 
     def setUp(self):
         "Just prints \n after unittest module prints a test name"

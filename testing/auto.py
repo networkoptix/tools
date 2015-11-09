@@ -1003,8 +1003,8 @@ class FunctestParser(object):
 
     def _end_timesync(self):
         log("Timesync test %s done", self.ts_name)
+        self.current_ts_part += 1
         if self.current_ts_part < len(self.TS_PARTS):
-            self.current_ts_part += 1
             self.parser = self.parse_timesync_start
             del self.collector[:]
             self.stare = "wait for timesunc test"

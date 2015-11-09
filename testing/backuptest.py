@@ -15,6 +15,24 @@ from testboxes import *
 
 _NUM_SERV=1
 
+TEST_CAMERA_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
+
+TEST_CAMERA_DATA = {
+    'mac': '11:22:33:44:55:66',
+    'physicalId': '11:22:33:44:55:66',
+    'manuallyAdded': False,
+    'model': 'test-camera',
+    'groupId': '',
+    'groupName': '',
+    'statusFlags': '',
+    'vendor': 'test-v',
+    'id': '', #TODO generate: any globally unique id
+    'parentId': '',#TODO put the server guid here
+    'name': 'test-camera',
+    'url': '192.168.109.63',
+    'typeId': TEST_CAMERA_ID
+}
+
 class BackupStorageTestError(FuncTestError):
     pass
 
@@ -54,7 +72,7 @@ class BackupStorageTest(FuncTestCase):
             except Exception, e:
                 self.fail("%s request failed with exception: %s" % (url, traceback.format_exc()))
             self.assertEqual(response.getcode(), 200, "%s request returns code %d" % (url, response.getcode()))
-            jresp = SafeJsonLoads(response.read(), addr, 'api/storageSpace')
+            jresp = SafeJsonLoads(response.read(), self.sl[num], 'api/storageSpace')
             response.close()
             self._storages[num] = [s for s in jresp["reply"]["storages"] if s['storageType'] == 'local']
             print "[DEBUG] Storages found:"
