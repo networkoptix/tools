@@ -3,6 +3,7 @@
 __author__ = 'Danil Lavrentyuk'
 import subprocess
 import unittest
+import time
 
 from functest_util import ClusterLongWorker
 
@@ -47,6 +48,7 @@ class FuncTestCase(unittest.TestCase):
     """
     config = None
     num_serv = None
+    testset = None
     _configured = False
     _stopped = set()
     _worker = None
@@ -102,8 +104,6 @@ class FuncTestCase(unittest.TestCase):
             setattr(cls, name, tests)
         cls._init_suits_done = True
 
-
-
     ################################################################################
 
     def _call_box(self, box, *command):
@@ -122,6 +122,27 @@ class FuncTestCase(unittest.TestCase):
             print ("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
                       (box, ' '.join(command), e.returncode, e.output))
             return ''
+
+    def _get_init_script(self, boxnum):
+        "Return init script's name and arguments for it. It should return a tupple."
+        return () # the default is no script to run
+
+    def _stop_and_init(self, box, num):
+        print "Stopping box %s" % box
+        self._mediaserver_ctl(box, 'stop')
+        time.sleep(0)
+        init_script = self._get_init_script(num)
+        if init_script:
+            self._call_box(box, *init_script)
+        print "Box %s stopped and ready" % box
+
+    def _prepare_test_phase(self, method):
+        for num, box in enumerate(self.hosts):
+            self._worker.enqueue(method, (box, num))
+        self._worker.joinQueue()
+        self._servers_th_ctl('start')
+        self._wait_servers_up()
+        print "Servers are ready"
 
     def _mediaserver_ctl(self, box, cmd):
         "Perform a service control command for a mediaserver on one of boxes"

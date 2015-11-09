@@ -13,6 +13,7 @@ stop networkoptix-mediaserver
 #cat "$SERVCONF"
 setpw
 edconf systemName functesting
+cp "$SERVCONF" "${SERVCONF}.orig"
 #echo '...After:'
 #cat "$SERVCONF"
 start networkoptix-mediaserver

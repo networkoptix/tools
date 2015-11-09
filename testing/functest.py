@@ -3834,6 +3834,13 @@ def CallTimesyncTest():
     return RunBoxTests(timetest.TimeSyncTest, clusterTest.getConfig())
 
 
+def CallBackupStorageTest():
+    if not clusterTest.openerReady:
+        clusterTest.setUpPassword()
+    print backuptest.BackupStorageTest._suits
+    print "BackupStorage suits: %s" % (','.join(backuptest.BackupStorageTest.iter_suits()))
+    return RunBoxTests(backuptest.BackupStorageTest, clusterTest.getConfig())
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
@@ -3857,6 +3864,7 @@ def DoTests(argv):
                 if MergeTest().test():
                     SystemNameTest().run()
             CallTimesyncTest()
+            CallBackupStorageTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()
@@ -3864,6 +3872,9 @@ def DoTests(argv):
 
         elif argc == 2 and argv[1] == '--timesync':
             CallTimesyncTest()
+
+        elif argc == 2 and argv[1] == '--bstorage':
+            CallBackupStorageTest()
 
         elif (argc == 2 or argc == 3) and argv[1] == '--clear':
             if argc == 3:

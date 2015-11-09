@@ -808,8 +808,8 @@ def perform_func_test(timesync_only=False):
         proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
         reader.register(proc)
         read_functest_output(proc, reader, timesync_only)
-        reader.unregister()
         if not timesync_only:
+            reader.unregister()
             cmd = [sys.executable, "-u", "redirtest.py"]
             log("Running server redirection test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)

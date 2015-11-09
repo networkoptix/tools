@@ -14,7 +14,8 @@ from testboxes import *
 
 _NUM_SERV = 2 # number of servers for test
 
-GRACE = 1.000 # max time difference between responses to say that times are equal
+GRACE = 1.0 # max time difference between responses to say that times are equal
+INET_GRACE = 2.0 # max time difference between a mediaserver time and the internet time
 DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
                    # used to check if the server time hasn't changed
 HTTP_TIMEOUT = 5 # seconds
@@ -23,7 +24,7 @@ SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
 SYSTEM_TIME_NOTSYNC_SURE = 30 # seconds, how long wait to shure server hasn't synced with system time
-INET_SYNC_TIMEOUT = 15 * 2 # a little bigger than the value in tt_setisync.sh
+INET_SYNC_TIMEOUT = 15 * 2 # twice as bigger than the value in tt_setisync.sh
 
 IF_EXT = 'eth0'
 
@@ -98,7 +99,6 @@ class TimeSyncTest(FuncTestCase):
         ])
     )
     guids = {}
-    testset = None
     _init_time = []
     _primary = None
     _secondary = None
@@ -133,6 +133,9 @@ class TimeSyncTest(FuncTestCase):
 
     ################################################################
 
+    def _get_init_script(self, boxnum):
+        return '/vagrant/tt_init.sh', self._init_time[boxnum]
+
     def _get_guids(self):
         for i, addr in enumerate(self.sl):
             guid = get_server_guid(addr)
@@ -145,21 +148,6 @@ class TimeSyncTest(FuncTestCase):
     def debug_systime(self):
         for box in self.hosts:
             self._worker.enqueue(self._show_systime, (box,))
-
-    def _stop_and_init(self, box, num):
-        print "Stopping box %s" % box
-        self._mediaserver_ctl(box, 'stop')
-        time.sleep(0)
-        self._call_box(box, '/vagrant/tt_init.sh', self._init_time[num])
-        print "Box %s stopped and ready" % box
-
-    def _prepare_test_phase(self, method):
-        for num, box in enumerate(self.hosts):
-            self._worker.enqueue(method, (box,num))
-        self._worker.joinQueue()
-        self._servers_th_ctl('start')
-        self._wait_servers_up()
-        print "Servers are ready"
 
     def _wait_servers_up(self):
         #print "=================================================="
@@ -190,7 +178,7 @@ class TimeSyncTest(FuncTestCase):
         try:
             response = urllib2.urlopen(url)
         except Exception, e:
-            self.fail("%sw request failed with exception: %s" % (url, traceback.format_exc()))
+            self.fail("%s request failed with exception: %s" % (url, traceback.format_exc()))
         loctime = time.time()
         self.assertEqual(response.getcode(), 200, "%s failed with statusCode %d" % (url, response.getcode()))
         boxtime = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
@@ -293,7 +281,6 @@ class TimeSyncTest(FuncTestCase):
             self.fail(error)
 
     ####################################################
-
 
     def InitialSynchronization(self):
         """Stop both mediaservers, initialize boxes' system time and start the servers again.
@@ -454,7 +441,7 @@ class TimeSyncTest(FuncTestCase):
             btime = self._request_gettime(boxnum)
             itime = time.time() + idelta
             print "Server %s time %s; inet time %s" % (boxnum, btime[0], itime)
-            self.assertAlmostEqual(itime, btime[0], delta=GRACE,
+            self.assertAlmostEqual(itime, btime[0], delta=INET_GRACE,
                                    msg="Server at box %s hasn't sinchronized with Internet time in %s seconds" %
                                        (boxnum, INET_SYNC_TIMEOUT))
 
