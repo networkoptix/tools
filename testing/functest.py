@@ -3837,7 +3837,6 @@ def CallTimesyncTest():
 def CallBackupStorageTest():
     if not clusterTest.openerReady:
         clusterTest.setUpPassword()
-    print backuptest.BackupStorageTest._suits
     print "BackupStorage suits: %s" % (','.join(backuptest.BackupStorageTest.iter_suits()))
     return RunBoxTests(backuptest.BackupStorageTest, clusterTest.getConfig())
 

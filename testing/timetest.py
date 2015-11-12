@@ -9,10 +9,8 @@ import json
 import socket
 import struct
 
-from functest_util import ClusterLongWorker, SafeJsonLoads, get_server_guid
+from functest_util import ClusterLongWorker, get_server_guid
 from testboxes import *
-
-_NUM_SERV = 2 # number of servers for test
 
 GRACE = 1.0 # max time difference between responses to say that times are equal
 INET_GRACE = 2.0 # max time difference between a mediaserver time and the internet time
@@ -76,7 +74,7 @@ class ___TestLoader(unittest.TestLoader):
 ##
 
 class TimeSyncTest(FuncTestCase):
-    num_serv = _NUM_SERV # override
+    #num_serv = _NUM_SERV # override
     _suits = (
         ('SyncTimeNoInetTests', [
             'InitialSynchronization',
@@ -97,7 +95,6 @@ class TimeSyncTest(FuncTestCase):
             'PrimaryFollowsSystemTime',
         ])
     )
-    guids = {}
     _init_time = []
     _primary = None
     _secondary = None
@@ -135,11 +132,11 @@ class TimeSyncTest(FuncTestCase):
     def _get_init_script(self, boxnum):
         return '/vagrant/tt_init.sh', self._init_time[boxnum]
 
-    def _get_guids(self):
-        for i, addr in enumerate(self.sl):
-            guid = get_server_guid(addr)
-            self.assertIsNotNone(guid, "Can't get box %s guid!" % addr)
-            self.guids[self.hosts[i]] = guid
+    #def _get_guids(self):
+    #    for i, addr in enumerate(self.sl):
+    #        guid = get_server_guid(addr)
+    #        self.assertIsNotNone(guid, "Can't get box %s guid!" % addr)
+    #        self.guids[self.hosts[i]] = guid
 
     def _show_systime(self, box):
         print "OS time for %s: %s " % (box, self.get_box_time(box))
@@ -159,9 +156,8 @@ class TimeSyncTest(FuncTestCase):
         loctime = time.time()
         self.assertEqual(response.getcode(), 200, "%s failed with statusCode %d" % (url, response.getcode()))
         boxtime = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
-        jresp = SafeJsonLoads(response.read(), addr, 'api/gettime')
+        jresp = self._json_loads(response.read(), url)
         response.close()
-        self.assertIsNotNone(jresp, "Bad response from %s" % url)
         return (int(jresp['reply'][u'utcTime'])/1000.0, loctime, boxtime)
 
     def _task_get_time(self, boxnum):
@@ -241,7 +237,7 @@ class TimeSyncTest(FuncTestCase):
 
     def _setPrimaryServer(self, boxnum):
         print "New primary is %s (%s)" % (boxnum, self.hosts[boxnum])
-        d = json.dumps({'id': self.guids[self.hosts[boxnum]]})
+        d = json.dumps({'id': self.guids[boxnum]})
         req = urllib2.Request("http://%s/ec2/forcePrimaryTimeServer" % self.sl[boxnum],
                       data=d, headers={'Content-Type': 'application/json'})
         response = None
@@ -264,7 +260,7 @@ class TimeSyncTest(FuncTestCase):
         """
         self._prepare_test_phase(self._stop_and_init)
         #self.debug_systime()
-        self._get_guids()
+        #self._get_guids()
         print "Checking time..."
         self._check_time_sync()
         #self.debug_systime()
@@ -358,14 +354,13 @@ class TimeSyncTest(FuncTestCase):
     def MakeSecondaryAlone(self):
         """Check if the secondary after stopping and deleting the primary becomes primary itself and synchronize with it's OS time.
         """
-        prime = self.hosts[self._primary]
-        self._mediaserver_ctl(prime, 'stop')
+        self._mediaserver_ctl(self.hosts[self._primary], 'stop')
         box = self.hosts[self._secondary]
         self.shift_box_time(box, -12345)
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
 
         # remove from the secondary server the record about the prime (which is down now)
-        d = json.dumps({'id': self.guids[prime]})
+        d = json.dumps({'id': self.guids[self._primary]})
         req = urllib2.Request("http://%s/ec2/removeMediaServer" % self.sl[self._secondary],
                       data=d, headers={'Content-Type': 'application/json'})
         response = None

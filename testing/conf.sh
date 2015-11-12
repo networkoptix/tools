@@ -1,6 +1,7 @@
 #!/bin/bash
 SERV_DEB=/vagrant/networkoptix-mediaserver.deb
-SERVCONF=/opt/networkoptix/mediaserver/etc/mediaserver.conf
+SERVDIR=/opt/networkoptix/mediaserver
+SERVCONF=${SERVDIR}/etc/mediaserver.conf
 EXT_IF=eth0
 INT_IF=eth1
 

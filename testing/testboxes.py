@@ -5,9 +5,12 @@ import subprocess
 import unittest
 import urllib2
 import time
+import json
+import traceback
 
-from functest_util import ClusterLongWorker
+from functest_util import ClusterLongWorker, unquote_guid
 
+NUM_SERV=2
 SERVER_UP_TIMEOUT = 20 # seconds, timeout for server to start to respond requests
 
 __all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests']
@@ -50,8 +53,9 @@ class FuncTestCase(unittest.TestCase):
     """A base class for mediaserver functional tests using virtual boxes
     """
     config = None
-    num_serv = None
+    num_serv = NUM_SERV
     testset = None
+    guids = {}
     _configured = False
     _stopped = set()
     _worker = None
@@ -66,7 +70,6 @@ class FuncTestCase(unittest.TestCase):
             raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
         if not cls._configured:
             cls.sl = cls.config.get("General","serverList").split(',')
-
             cls._worker = ClusterLongWorker(cls.num_serv)
             cls._configured = True
         if len(cls.sl) < cls.num_serv:
@@ -161,23 +164,62 @@ class FuncTestCase(unittest.TestCase):
             self._worker.enqueue(self._mediaserver_ctl, (box, cmd))
         self._worker.joinQueue()
 
+    def _json_loads(self, text, url):
+        if text == '':
+            return None
+        try:
+            return json.loads(text)
+        except ValueError, e:
+            self.fail("Error parsing response for %s: %s.\nResponse:%s" % (url, e, text))
+
+    def _prepare_request(self, host, func, data=None):
+        if type(host) is int:
+            host = self.sl[host]
+        url = "http://%s/%s" % (host, func)
+        if data is None:
+            return urllib2.Request(url)
+        else:
+            return urllib2.Request(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+
+    def _server_request_nofail(self, host, func, data=None, timeout=None):
+        "Sends request that don't fail on exception or non-200 return code."
+        req = self._prepare_request(host, func, data)
+        try:
+            response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
+        except Exception, e:
+            return None
+        if response.getcode() != 200:
+            return None
+        # but it could fail here since with code == 200 the response must be parsable or empty
+        answer = self._json_loads(response.read(), req.get_full_url())
+        response.close()
+        return answer
+
+    def _server_request(self, host, func, data=None, timeout=None):
+        req = self._prepare_request(host, func, data)
+        url = req.get_full_url()
+        try:
+            response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
+        except urllib2.URLError , e:
+            self.fail("%s request failed with %s" % (url, e))
+        except Exception, e:
+            self.fail("%s request failed with exception:\n%s\n\n" % (url, traceback.format_exc()))
+        self.assertEqual(response.getcode(), 200, "%s request returns error code %d" % (url, response.getcode()))
+        answer = self._json_loads(response.read(), url)
+        response.close()
+        return answer
+
     def _wait_servers_up(self):
-        #print "=================================================="
-        #print "Now:       %.1f" % time.time()
         starttime = time.time()
         endtime = starttime + SERVER_UP_TIMEOUT
-        #print "Wait until %.1f" % endtime
-        tocheck = set(self.sl)
+        tocheck = set(range(self.num_serv))
         while tocheck and time.time() < endtime:
-            for addr in tocheck.copy():
-                try:
-                    response = urllib2.urlopen("http://%s/ec2/testConnection" % (addr), timeout=1)
-                except urllib2.URLError , e:
+            for num in tocheck.copy():
+                data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1)
+                if data is None:
                     continue
-                if response.getcode() != 200:
-                    continue
-                response.close()
-                tocheck.discard(addr)
+                self.guids[num] = unquote_guid(data['ecsGuid'])
+                tocheck.discard(num)
             if tocheck:
                 time.sleep(0.5)
         if tocheck:
