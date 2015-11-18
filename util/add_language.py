@@ -12,17 +12,28 @@ def main():
     args = parser.parse_args()
     language = args.language
 
+    languageSuffix = "_{0}.ts".format(language)
     rootDir = os.getcwd()
     
     for project in projects:
         projectDir = os.path.join(rootDir, project)
         translationDir = os.path.join(projectDir, 'translations')
-        template = os.path.join(translationDir, 'template.xml')
-        target = os.path.join(translationDir, project + '_' + language + '.ts')
         
-        with open(template, "r") as src, open(target, "w") as tgt:
-            for line in src:
-                tgt.write(line.replace('%', language))
+        for entry in os.listdir(translationDir):
+            path = os.path.join(translationDir, entry)
+        
+            if (os.path.isdir(path)):
+                continue;        
+            suffix = '.xml'       
+            if (not path.endswith(suffix)):
+                continue;
+        
+            template = path
+            target = template.replace(suffix, languageSuffix)
+        
+            with open(template, "r") as src, open(target, "w") as tgt:
+                for line in src:
+                    tgt.write(line.replace('%', language))
     print "ok"
     
     
