@@ -227,7 +227,7 @@ class BackupStorageTest(FuncTestCase):
         self._load_storage_info()
 
     def AddBackupStorage(self):
-        "Prepare a single camera data, add a backup storage and check how the data has been copied =to it."
+        "Prepare a single camera data and add a backup storage"
         self._add_test_camera(_WORK_HOST)
         #self._fill_storage(_WORK_HOST, "step1")
         self._create_backup_storage(_WORK_HOST)
