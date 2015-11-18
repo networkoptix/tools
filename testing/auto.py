@@ -962,7 +962,6 @@ class FunctestParser(object):
             type(self).TS_PARTS = [s.strip() for s in line[len(self.TS_HEAD):].split(',')]
         elif line.startswith(self.TS_START):
             self.ts_name = line[len(self.TS_START):].rstrip()
-            self.stage = 'time syncronization test'
             if self.ts_name == self.TS_PARTS[self.current_ts_part]:
                 self.parser = self.parse_timesync
                 self.collector[:] = [line]
@@ -970,8 +969,7 @@ class FunctestParser(object):
                 log_to_send(line)
                 log_to_send("ERROR: unknow tymesync test part: " + self.ts_name)
                 self.parser = self.parse_timesync_failed
-            self.stage = "Time synchronization test: " + self.ts_name
-
+            self.stage = "time synchronization test: " + self.ts_name
 
     def parse_timesync(self, line):
         if line.startswith(self.TS_END):
@@ -1009,7 +1007,56 @@ class FunctestParser(object):
             del self.collector[:]
             self.stare = "wait for timesunc test"
         else:
+            self.parser = self.parse_bstorage_start
+            self.stage = "wait for backup storage test"
+
+    # backup storage test
+
+    BS_START = "Backup Storage Test Start"
+    BS_END = "Backup Storage Test End"
+
+    def parse_bstorage_start(self, line):
+        if line.startswith(self.BS_START):
+            self.ts_name = line[len(self.BS_START):].rstrip()
+            self.stage = 'backup storage test'
+            #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
+            self.parser = self.parse_bstorage
+            self.collector[:] = [line]
+            #else:
+            #    log_to_send(line)
+            #    log_to_send("ERROR: unknow tymesync test part: " + self.ts_name)
+            #    self.parser = self.parse_timesync_failed
+
+    def parse_bstorage(self, line):
+        if line.startswith(self.BS_END):
+            self.parser = self.parse_bstorage_tail
+        elif not self._ts_check_fail(line):
+            self.collector.append(line)
+
+    def parse_bstorage_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
+        log_to_send(line)
+        if line.startswith("FAILED (failures"):
+            log("Backup storage test done")
             self.set_end()
+
+    def parse_bstorage_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
+        if not self._bs_check_fail(line) and line.startswith("OK"):
+            log("Backup storage test done")
+            self.set_end()
+
+    def _bs_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
+        if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
+            return False
+        self.has_errors = True
+        log_to_send("Backup storage test %s!",
+                    "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
+        for s in self.collector:
+            log_to_send(s)
+        log_to_send(line)
+        del self.collector[:]
+        self.parser = self.parse_bstorage_failed
+        return True
+    #
 
     def set_end(self):
         self.parser = self.skip_to_the_end
@@ -1126,7 +1173,6 @@ def parse_args():
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
-    parser.add_argument("--boxes", "--box", action="store_true", help="Only start virtual boxes and wait the mediaserver comes up.")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
@@ -1140,6 +1186,8 @@ def parse_args():
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as error, report even if no errors but some strange output from tests")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
+    # single utillity actions
+    parser.add_argument("--boxes", "--box", action="store_true", help="Only start virtual boxes and wait the mediaserver comes up.")
 
     global Args
     Args = parser.parse_args()

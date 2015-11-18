@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import unittest
 import urllib2
 import urllib
@@ -511,7 +512,7 @@ class ClusterTest(object):
         self.openerReady = True
 #        urllib2.install_opener(urllib2.build_opener(AuthH(passman)))
 
-    def init(self):
+    def init(self, short=False):
         self._loadConfig()
         self.setUpPassword()
 
@@ -529,9 +530,10 @@ class ClusterTest(object):
         if ret == False:
             return (ret,reason)
 
-        ret,reason = self._callAllGetters()
-        if ret == False:
-            return (ret,reason)
+        if not short:
+            ret,reason = self._callAllGetters()
+            if ret == False:
+                return (ret,reason)
 
         # do the rollback here
         self.unittestRollback = UnitTestRollback()
@@ -3848,7 +3850,7 @@ def DoTests(argv):
         auto_rollback = True
         argv.remove('--autorollback')
     argc = len(argv)
-    ret, reason = clusterTest.init()
+    ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage')))
     if ret == False:
         print "Failed to initialize the cluster test object: %s" % (reason)
     elif argc == 2 and argv[1] == '--sync':

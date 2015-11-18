@@ -120,6 +120,7 @@ class FuncTestCase(unittest.TestCase):
             self.fail("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
                       (box, ' '.join(command), e.returncode, e.output))
 
+
     @classmethod
     def class_call_box(cls, box, *command):
         try:
@@ -172,16 +173,23 @@ class FuncTestCase(unittest.TestCase):
         except ValueError, e:
             self.fail("Error parsing response for %s: %s.\nResponse:%s" % (url, e, text))
 
-    def _prepare_request(self, host, func, data=None):
+    def _prepare_request(self, host, func, data=None, headers=None):
         if type(host) is int:
             host = self.sl[host]
         url = "http://%s/%s" % (host, func)
         if data is None:
-            return urllib2.Request(url)
+            if headers:
+                return urllib2.Request(url, headers=headers)
+            else:
+                return urllib2.Request(url)
         else:
-            return urllib2.Request(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+            if headers:
+                headers.setdefault('Content-Type', 'application/json')
+            else:
+                headers = {'Content-Type': 'application/json'}
+            return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
-    def _server_request_nofail(self, host, func, data=None, timeout=None):
+    def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None):
         "Sends request that don't fail on exception or non-200 return code."
         req = self._prepare_request(host, func, data)
         try:
@@ -195,8 +203,8 @@ class FuncTestCase(unittest.TestCase):
         response.close()
         return answer
 
-    def _server_request(self, host, func, data=None, timeout=None):
-        req = self._prepare_request(host, func, data)
+    def _server_request(self, host, func, data=None, headers=None, timeout=None):
+        req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
