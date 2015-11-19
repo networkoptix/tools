@@ -16,7 +16,6 @@ GRACE = 1.0 # max time difference between responses to say that times are equal
 INET_GRACE = 2.0 # max time difference between a mediaserver time and the internet time
 DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
                    # used to check if the server time hasn't changed
-HTTP_TIMEOUT = 5 # seconds
 SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
@@ -53,6 +52,15 @@ def check_inet_time():
             return d # The first success means OK
     return False
 
+EMPTY_TIME = dict(
+    value=0,
+    time=0,
+    local=0,
+    boxtime=0,
+    isPrimaryTimeServer=False,
+    primaryTimeServerGuid='',
+    syncTimeFlags='',
+)
 
 
 class ___TestLoader(unittest.TestLoader):
@@ -132,12 +140,6 @@ class TimeSyncTest(FuncTestCase):
     def _get_init_script(self, boxnum):
         return '/vagrant/tt_init.sh', self._init_time[boxnum]
 
-    #def _get_guids(self):
-    #    for i, addr in enumerate(self.sl):
-    #        guid = get_server_guid(addr)
-    #        self.assertIsNotNone(guid, "Can't get box %s guid!" % addr)
-    #        self.guids[self.hosts[i]] = guid
-
     def _show_systime(self, box):
         print "OS time for %s: %s " % (box, self.get_box_time(box))
 
@@ -147,18 +149,12 @@ class TimeSyncTest(FuncTestCase):
 
     def _request_gettime(self, boxnum, ask_box_time=True):
         "Request server's time and its system time. Also return current local time at moment response was received."
-        addr = self.sl[boxnum]
-        url = "http://%s/api/gettime" % addr
-        try:
-            response = urllib2.urlopen(url)
-        except Exception, e:
-            self.fail("%s request failed with exception: %s" % (url, traceback.format_exc()))
-        loctime = time.time()
-        self.assertEqual(response.getcode(), 200, "%s failed with statusCode %d" % (url, response.getcode()))
-        boxtime = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
-        jresp = self._json_loads(response.read(), url)
-        response.close()
-        return (int(jresp['reply'][u'utcTime'])/1000.0, loctime, boxtime)
+#        answer = self._server_request(boxnum, 'api/gettime',)
+        answer = self._server_request(boxnum, 'ec2/getCurrentTime',)
+        answer['time'] = int(answer['value']) / 1000.0
+        answer['local'] = time.time()
+        answer['boxtime'] = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
+        return answer
 
     def _task_get_time(self, boxnum):
         "Call _request_gettime and store result in self.times - used tu run in a separate thread"
@@ -168,24 +164,24 @@ class TimeSyncTest(FuncTestCase):
         end_time = time.time() + SERVER_SYNC_TIMEOUT
         reason = ''
         while time.time() < end_time:
-            self.times = [[0,0] for _ in xrange(self.num_serv)]
+            self.times = [EMPTY_TIME.copy() for _ in xrange(self.num_serv)]
             for boxnum in xrange(self.num_serv):
                 self._worker.enqueue(self._task_get_time, (boxnum,))
             self._worker.joinQueue()
-            #for i in xrange(self.num_serv):
-            #    print "Server %s time: %.3f" % (i, self.times[i][0])
-            delta = self.times[0][1] - self.times[1][1]
-            diff = self.times[0][0] - self.times[1][0] + delta
+            delta = self.times[0]['local'] - self.times[1]['local']
+            diff = self.times[0]['time'] - self.times[1]['time'] + delta
             if abs(diff) > GRACE:
                 reason = "Time difference too high: %.3f" % diff
                 continue
             elif not sync_with_system:
                 return
             if sync_with_system:
-                td = [abs(t[2] - t[0]) for t in self.times]
+                td = [abs(t['boxtime'] - t['time']) for t in self.times]
                 min_td = min(td)
                 if min_td <= GRACE:
                     type(self)._primary = td.index(min_td)
+                    self.assertTrue(self.times[self._primary]['isPrimaryTimeServer'],
+                                    "Time was syncronized by server %s system time, but it's isPrimaryTimeServer flag is False" % self._primary)
                     print "Synchromized by box %s" % self._primary
                     return
                 else:
@@ -201,12 +197,13 @@ class TimeSyncTest(FuncTestCase):
         tt = time.time() + (1 if must_synchronize else SYSTEM_TIME_NOTSYNC_SURE)
         timediff = 0
         while time.time() < tt:
-            server_time, _, system_time = self._request_gettime(boxnum)
-            #print "DEBUG: server time: %s, system time: %s" % (server_time, system_time)
-            timediff = abs(system_time - server_time)
+            timedata = self._request_gettime(boxnum)
+            #print "DEBUG: server time: %s, system time: %s" % (timedata['time'], timedata['boxtime'])
+            timediff = abs(timedata['time'] - timedata['boxtime'])
             if timediff > GRACE:
                 if must_synchronize:
-                    print "DEBUG: %s server time: %s, system time: %s. Diff = %.2f - too high" % (boxnum, server_time, system_time, timediff)
+                    print "DEBUG: %s server time: %s, system time: %s. Diff = %.2f - too high" % (
+                        boxnum, timedata['time'], timedata['boxtime'], timediff)
                 time.sleep(0.5)
             else:
                 break
@@ -228,8 +225,8 @@ class TimeSyncTest(FuncTestCase):
         """Returns delta between mediasever's time and local script's time
         """
         times = self._request_gettime(boxnum) #, False) -- return this after removing the next debug
-        print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times[0], times[2], times[1])
-        return times[1] - times[0]  # local time -- server's time
+        print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
+        return times['local'] - times['time']  # local time -- server's time
 
     def _get_secondary(self):
         "Return any (next) server number which isn't the primary server"
@@ -237,21 +234,7 @@ class TimeSyncTest(FuncTestCase):
 
     def _setPrimaryServer(self, boxnum):
         print "New primary is %s (%s)" % (boxnum, self.hosts[boxnum])
-        d = json.dumps({'id': self.guids[boxnum]})
-        req = urllib2.Request("http://%s/ec2/forcePrimaryTimeServer" % self.sl[boxnum],
-                      data=d, headers={'Content-Type': 'application/json'})
-        response = None
-        error = None
-        try:
-            response = urllib2.urlopen(req, timeout=HTTP_TIMEOUT)
-        except Exception:
-            error = "forcePrimaryTimeServer failed with exception: %s" % traceback.format_exc()
-        else:
-            if response.getcode() != 200:
-                error = "forcePrimaryTimeServer failed with code %s" % response.getcode()
-        response.close()
-        if error is not None:
-            self.fail(error)
+        self._server_request(boxnum, 'ec2/forcePrimaryTimeServer', data={'id': self.guids[boxnum]})
 
     ####################################################
 
@@ -360,21 +343,7 @@ class TimeSyncTest(FuncTestCase):
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
 
         # remove from the secondary server the record about the prime (which is down now)
-        d = json.dumps({'id': self.guids[self._primary]})
-        req = urllib2.Request("http://%s/ec2/removeMediaServer" % self.sl[self._secondary],
-                      data=d, headers={'Content-Type': 'application/json'})
-        response = None
-        error = None
-        try:
-            response = urllib2.urlopen(req, timeout=HTTP_TIMEOUT)
-        except Exception:
-            error = "removeMediaServer failed with exception: %s" % traceback.format_exc()
-        else:
-            if response.getcode() != 200:
-                error = "forcePrimaryTimeServer failed with code %s" % response.getcode()
-        response.close()
-        if error is not None:
-            self.fail(error)
+        self._server_request(self._secondary, 'ec2/removeMediaServer', data={'id': self.guids[self._primary]})
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
 
         # wait if the secondary becomes new primary
@@ -404,7 +373,7 @@ class TimeSyncTest(FuncTestCase):
         self._call_box(self.hosts[self._secondary], '/vagrant/tt_iup.sh')
         time.sleep(INET_SYNC_TIMEOUT)
         itime_str = check_inet_time()
-        self.assertTrue(itime_str, "Internet time request filed!")
+        self.assertTrue(itime_str, "Internet time request failed!")
         itime = struct.unpack('!I', itime_str)[0] - SHIFT_1900_1970
         idelta = itime - time.time() # get the difference between local ant inet time to use it later
         print "DEBUG: time from internet: %s, %s" % (itime, time.asctime(time.localtime(itime)))
@@ -412,10 +381,11 @@ class TimeSyncTest(FuncTestCase):
         for boxnum in xrange(self.num_serv):
             btime = self._request_gettime(boxnum)
             itime = time.time() + idelta
-            print "Server %s time %s; inet time %s" % (boxnum, btime[0], itime)
-            self.assertAlmostEqual(itime, btime[0], delta=INET_GRACE,
-                                   msg="Server at box %s hasn't sinchronized with Internet time in %s seconds" %
-                                       (boxnum, INET_SYNC_TIMEOUT))
+            print "Server %s time %s; inet time %s" % (boxnum, btime['time'], itime)
+            self.assertAlmostEqual(itime, btime['time'], delta=INET_GRACE,
+                                   msg="Server at box %s hasn't sinchronized with Internet time in %s seconds. "
+                                       "Time delta %s, max delta allowed: %s, "%
+                                       (boxnum, INET_SYNC_TIMEOUT, abs(itime - btime['time']), INET_GRACE))
 
     def ChangePrimarySystime(self):
         delta_before = self._serv_local_delta(self._primary)
