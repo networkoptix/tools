@@ -106,6 +106,7 @@ class TimeSyncTest(FuncTestCase):
     _init_time = []
     _primary = None
     _secondary = None
+    times = []
 
     @classmethod
     def setUpClass(cls):
@@ -134,6 +135,9 @@ class TimeSyncTest(FuncTestCase):
         super(TimeSyncTest, cls).tearDownClass()
         print "TimeSync Test End"
         print "========================================="
+
+    def setUp(self):
+        self.times = [EMPTY_TIME.copy() for _ in xrange(self.num_serv)]
 
     ################################################################
 
@@ -164,7 +168,6 @@ class TimeSyncTest(FuncTestCase):
         end_time = time.time() + SERVER_SYNC_TIMEOUT
         reason = ''
         while time.time() < end_time:
-            self.times = [EMPTY_TIME.copy() for _ in xrange(self.num_serv)]
             for boxnum in xrange(self.num_serv):
                 self._worker.enqueue(self._task_get_time, (boxnum,))
             self._worker.joinQueue()
@@ -225,6 +228,7 @@ class TimeSyncTest(FuncTestCase):
         """Returns delta between mediasever's time and local script's time
         """
         times = self._request_gettime(boxnum) #, False) -- return this after removing the next debug
+        self.times[boxnum] = times
         print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
         return times['local'] - times['time']  # local time -- server's time
 
@@ -312,6 +316,7 @@ class TimeSyncTest(FuncTestCase):
         self._wait_servers_up()
         delta_after = self._serv_local_delta(self._secondary)
         print "Delta after = %.2f" % delta_after
+        self.assertFalse(self.times[self._secondary]['isPrimaryTimeServer'], "The secondary server (%s) has become the primary" % self._secondary)
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
                                msg="The secondary server's time changed (by %.3f) after it was restarted (while the primary is off)" %
                                    (delta_before - delta_after))
