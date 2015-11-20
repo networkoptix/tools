@@ -467,3 +467,15 @@ def get_server_guid(host):
     if info and (u'id' in info['reply']):
         return unquote_guid(info['reply'][u'id'])
     return None
+
+class Version(object):
+    value = []
+
+    def __init__(self, verstr=''):
+        self.value = verstr.split('.')
+
+    def __str__(self):
+        return '.'.join(self.value)
+
+    def __cmp__(self, other):
+        return cmp(self.value, other.value)

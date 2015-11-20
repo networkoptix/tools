@@ -42,7 +42,7 @@ def perform_request(peer, redirect_to=None):
     return (json.loads(data), content_len)
     #print "Resulting data len: %s" % len(data)
 
-def redir_test():
+def proxy_test():
     try:
         prepare_loader()
         for h in (MAIN_HOST, SEC_HOST):
@@ -77,7 +77,7 @@ def redir_test():
     return True
 
 if __name__ == '__main__':
-    if not redir_test():
+    if not proxy_test():
         exit(1)
 
 

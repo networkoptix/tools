@@ -8,7 +8,7 @@ import time
 import json
 import traceback
 
-from functest_util import ClusterLongWorker, unquote_guid
+from functest_util import ClusterLongWorker, unquote_guid, Version
 
 NUM_SERV=2
 SERVER_UP_TIMEOUT = 20 # seconds, timeout for server to start to respond requests
@@ -61,6 +61,8 @@ class FuncTestCase(unittest.TestCase):
     _worker = None
     _suits = ()
     _init_suits_done = False
+    _serv_version = None  # here I suppose that all servers being created from the same image have the same version
+    before_2_5 = False
 
     @classmethod
     def setUpClass(cls):
@@ -149,7 +151,11 @@ class FuncTestCase(unittest.TestCase):
         self._worker.joinQueue()
         self._servers_th_ctl('start')
         self._wait_servers_up()
-        print "Servers are ready"
+        if self._serv_version is None:
+            self._get_version()
+            if self._serv_version < Version("2.5.0"):
+                (type).before_2_5 = True
+        print "Servers are ready. Server servion = %s" % self._serv_version
 
     def _mediaserver_ctl(self, box, cmd):
         "Perform a service control command for a mediaserver on one of boxes"
@@ -232,6 +238,18 @@ class FuncTestCase(unittest.TestCase):
                 time.sleep(0.5)
         if tocheck:
             self.fail("Servers startup timed out: %s" % (', '.join(tocheck)))
+
+    def _get_version(self):
+        """ Returns mediaserver version as reported in api/moduleInformation.
+        If it hasn't been get earlie, perform the 'api/moduleInformation' request.
+
+        """
+        if self._serv_version is None:
+            data = self._server_request(0, 'api/moduleInformation')
+            type(self)._serv_version = Version(data["reply"]["version"])
+        return self._serv_version
+
+
 
     def setUp(self):
         "Just prints \n after unittest module prints a test name"

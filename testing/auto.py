@@ -322,7 +322,7 @@ def read_unittest_output(proc, reader):
         while reader.state == PIPE_READY:
             line = reader.readline(UT_PIPE_TIMEOUT)
             if not complete and len(line) > 0:
-                debug("Line: %s", line.lstrip())
+                #debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
                     check_repeats(repeats)
                     repeats = 1
@@ -445,25 +445,32 @@ def kill_test(proc, sudo=False):
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
+    to_skip = set()
+    if branch in SKIP_TESTS:
+        to_skip = SKIP_TESTS[branch]
+        log("Configured to skip tests: %s", ', '.join(to_skip))
     lines = []
     reader = PipeReader()
 
-    for name in TESTS:
-        del ToSend[:]
-        del FailedTests[:]
-        call_test(name, reader)
-        if FailedTests:
-            debug("Failed tests: %s", FailedTests)
-            if lines:
+    if 'all_ut' not in to_skip:
+        for name in TESTS:
+            if name in to_skip:
+                continue
+            del ToSend[:]
+            del FailedTests[:]
+            call_test(name, reader)
+            if FailedTests:
+                debug("Failed tests: %s", FailedTests)
+                if lines:
+                    lines.append('')
+                lines.append("Tests, failed in the %s test suit:" % name)
+                lines.extend("\t" + name for name in FailedTests)
                 lines.append('')
-            lines.append("Tests, failed in the %s test suit:" % name)
-            lines.extend("\t" + name for name in FailedTests)
-            lines.append('')
-            lines.extend(ToSend)
+                lines.extend(ToSend)
 
     if not lines:
         del ToSend[:]
-        perform_func_test()
+        perform_func_test(to_skip)
         if ToSend:
             lines.append('')
             lines.extend(ToSend)
@@ -786,7 +793,7 @@ def start_boxes():
     wait_servers_ready()
 
 
-def perform_func_test(timesync_only=False):
+def perform_func_test(to_skip, timesync_only=False):
     if os.name != 'posix':
         print "\nFunctional tests require POSIX-compatible OS. Skipped."
         return
@@ -804,18 +811,22 @@ def perform_func_test(timesync_only=False):
         cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
         if timesync_only:
             cmd.append("--timesync")
+        elif 'time' in to_skip:
+            cmd.append("--skiptime")
+        if 'backup' in to_skip:
+            cmd.append("--skipbak")
         log("Running functional tests: %s", cmd)
         proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
         reader.register(proc)
         read_functest_output(proc, reader, timesync_only)
-        if not timesync_only:
+        if not timesync_only and 'proxy' not in to_skip:
             reader.unregister()
-            cmd = [sys.executable, "-u", "redirtest.py"]
-            log("Running server redirection test: %s", cmd)
+            cmd = [sys.executable, "-u", "proxytest.py"]
+            log("Running server proxy test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
             #TODO make it a part of the functest.py
-            read_redirtest_output(proc, reader)
+            read_serverproxy_output(proc, reader)
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
     except BaseException, e:
@@ -1117,7 +1128,7 @@ def read_functest_output(proc, reader, from_timesync=False):
 RT_FAIL = 'FAIL: '
 RT_DONE = 'Test complete.'
 
-def read_redirtest_output(proc, reader):
+def read_serverproxy_output(proc, reader):
     collector = []
     has_errors = False
     reading = True
@@ -1128,17 +1139,17 @@ def read_redirtest_output(proc, reader):
             if line.startswith(RT_FAIL):
                 has_errors = True
             elif line.startswith(RT_DONE):
-                log("Server redirection test done.")
+                log("Server proxy test done.")
                 reading = False
 
     if has_errors:
-        log_to_send("Redirection test failed:\n%s", "\n".join(collector))
+        log_to_send("Server proxy test failed:\n%s", "\n".join(collector))
         collector = []
 
     if reader.state in (PIPE_HANG, PIPE_ERROR):
         log_to_send(
-            "[ redirection tests has TIMED OUT ]" if reader.state == PIPE_HANG else
-            "[ PIPE ERROR reading redirection tests output  ]")
+            "[ proxy tests has TIMED OUT ]" if reader.state == PIPE_HANG else
+            "[ PIPE ERROR reading proxy tests output  ]")
         if collector:
             log_to_send("Test's output:\n%s", "\n".join(collector))
         has_errors = True
@@ -1152,9 +1163,9 @@ def read_redirtest_output(proc, reader):
             if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
                 signames = SignalNames.get(-proc.returncode, [])
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
-                log_to_send("[ REDIRECTION TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+                log_to_send("[ SERVER PROXY TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
         else:
-            log_to_send("[ REDIRECTION TEST'S RETURN CODE = %s ]" % proc.returncode)
+            log_to_send("[ SERVER PROXY TEST'S RETURN CODE = %s ]" % proc.returncode)
         has_errors = True
 
 
@@ -1186,7 +1197,7 @@ def parse_args():
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as error, report even if no errors but some strange output from tests")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
-    # single utillity actions
+    # utillity actions
     parser.add_argument("--boxes", "--box", action="store_true", help="Only start virtual boxes and wait the mediaserver comes up.")
 
     global Args

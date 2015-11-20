@@ -26,6 +26,7 @@ from testboxes import RunTests as RunBoxTests
 CONFIG_FNAME = "functest.cfg"
 
 auto_rollback = False
+skip_timesync = False
 
 # Rollback support
 class UnitTestRollback:
@@ -3849,6 +3850,15 @@ def DoTests(argv):
         global auto_rollback
         auto_rollback = True
         argv.remove('--autorollback')
+    if '--skiptime' in argv:
+        global skip_timesync
+        skip_timesync = True
+        argv.remove('--skiptime')
+    if '--skipbak' in argv:
+        global skip_backup
+        skip_backup = True
+        argv.remove('--skipbak')
+
     argc = len(argv)
     ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage')))
     if ret == False:
@@ -3858,14 +3868,16 @@ def DoTests(argv):
              # all the servers are on the same page
     else:
         if argc == 1:
-            the_test = unittest.main(exit=False, argv=sys.argv[:1])
+            the_test = unittest.main(exit=False, argv=argv[:1])
 
             if the_test.result.wasSuccessful():
                 print "Main tests passed OK"
                 if MergeTest().test():
                     SystemNameTest().run()
-            CallTimesyncTest()
-            CallBackupStorageTest()
+            if not skip_timesync:
+                CallTimesyncTest()
+            if not skip_backup:
+                CallBackupStorageTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()

@@ -316,7 +316,9 @@ class TimeSyncTest(FuncTestCase):
         self._wait_servers_up()
         delta_after = self._serv_local_delta(self._secondary)
         print "Delta after = %.2f" % delta_after
-        self.assertFalse(self.times[self._secondary]['isPrimaryTimeServer'], "The secondary server (%s) has become the primary" % self._secondary)
+        if not self.before_2_5:
+            self.assertFalse(self.times[self._secondary]['isPrimaryTimeServer'],
+                             "The secondary server (%s) has become the primary" % self._secondary)
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
                                msg="The secondary server's time changed (by %.3f) after it was restarted (while the primary is off)" %
                                    (delta_before - delta_after))

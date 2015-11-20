@@ -88,12 +88,22 @@ MEDIASERVER_PASS = '123'
 START_CHECK_TIMEOUT = 30 # seconds
 ALL_START_TIMEOUT_BASE = 120 # seconds, per server
 
+SKIP_TESTS = {
+# 'branch_label' : set((...names...))
+# possible test names:
+#   all names from TESTS list
+#   'all_ut' - all unit tests completly
+#   'time' - to skip time synchronization test
+#   'backup' - to skip backup storage test
+#   'proxy' - to skip server proxy test
+}
+
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
 try:
     from testconf_local import *
     if "update_configuration" in locals():
-        update_configuration() # in could be useful since during importing it's difficult to access importer's namespace
+        update_configuration() # it could be useful since during importing it's difficult to access importer's namespace
 except ImportError:
     pass
 
