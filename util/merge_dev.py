@@ -1,5 +1,5 @@
+#!/bin/python2
 # -*- coding: utf-8 -*-
-#/bin/python
 
 import subprocess
 import sys
