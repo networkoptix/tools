@@ -27,6 +27,7 @@ CONFIG_FNAME = "functest.cfg"
 
 auto_rollback = False
 skip_timesync = False
+skip_backup = False
 
 # Rollback support
 class UnitTestRollback:
