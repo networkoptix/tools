@@ -13,7 +13,7 @@ from functest_util import ClusterLongWorker, get_server_guid
 from testboxes import *
 
 GRACE = 1.0 # max time difference between responses to say that times are equal
-INET_GRACE = 2.0 # max time difference between a mediaserver time and the internet time
+INET_GRACE = 3.0 # max time difference between a mediaserver time and the internet time
 DELTA_GRACE = 0.05 # max difference between two deltas (each between a mediaserver time and this script local time)
                    # used to check if the server time hasn't changed
 SERVER_SYNC_TIMEOUT = 10 # seconds
@@ -183,9 +183,10 @@ class TimeSyncTest(FuncTestCase):
                 min_td = min(td)
                 if min_td <= GRACE:
                     type(self)._primary = td.index(min_td)
-                    self.assertTrue(self.times[self._primary]['isPrimaryTimeServer'],
-                                    "Time was syncronized by server %s system time, but it's isPrimaryTimeServer flag is False" % self._primary)
-                    print "Synchromized by box %s" % self._primary
+                    if not self.before_2_5:
+                        self.assertTrue(self.times[self._primary]['isPrimaryTimeServer'],
+                            "Time was syncronized by server %s system time, but it's isPrimaryTimeServer flag is False" % self._primary)
+                    print "Synchronized by box %s" % self._primary
                     return
                 else:
                     reason = "None of servers report time close enough to it's system time. Min delta = %.3f" % min_td

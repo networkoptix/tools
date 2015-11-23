@@ -274,9 +274,10 @@ class FailTracker(object):
     @classmethod
     def mark_success(cls, branch):
         if branch in cls.fails:
-            del cls.fails[branch]
+            cls.fails.discard(branch)
             cls.save()
-            log_to_send("\nThe branch %s is repeired after the previous errors and makes no errors.", branch)
+            log_to_send('')
+            log_to_send("The branch %s is repaired after the previous errors and makes no errors.", branch)
             if branch in SKIP_TESTS and SKIP_TESTS[branch]:
                 log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
                             ', '.join(SKIP_TESTS[branch]))
