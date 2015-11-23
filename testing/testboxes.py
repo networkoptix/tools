@@ -154,7 +154,7 @@ class FuncTestCase(unittest.TestCase):
         if self._serv_version is None:
             self._get_version()
             if self._serv_version < Version("2.5.0"):
-                (type).before_2_5 = True
+                type(self).before_2_5 = True
         print "Servers are ready. Server servion = %s" % self._serv_version
 
     def _mediaserver_ctl(self, box, cmd):
