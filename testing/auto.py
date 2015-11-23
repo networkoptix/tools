@@ -35,6 +35,8 @@ RESTART_FLAG = './.restart'
 STOP_FLAG = './.stop'
 RESTART_BY_EXEC = True
 
+FAIL_FILE = './fails.py' # where to save failed branches list
+
 def get_signals():
     d = {}
     for name in dir(signal):
@@ -264,6 +266,61 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
+#####################################
+
+class FailTracker(object):
+    fails = set()
+
+    @classmethod
+    def mark_success(cls, branch):
+        if branch in cls.fails:
+            del cls.fails[branch]
+            cls.save()
+            log_to_send("\nThe branch %s is repeired after the previous errors and makes no errors.", branch)
+            if branch in SKIP_TESTS and SKIP_TESTS[branch]:
+                log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
+                            ', '.join(SKIP_TESTS[branch]))
+
+    @classmethod
+    def mark_fail(cls, branch):
+        if branch not in cls.fails:
+            cls.fails.add(branch)
+            cls.save()
+            log("The branch %s marked as failed.", branch)
+
+    @classmethod
+    def load(cls):
+        data = ''
+        cls.fails =  set()
+        if not os.path.isfile(FAIL_FILE):
+            return
+        try:
+            with open(FAIL_FILE) as f:
+                data = ' '.join(f.readlines()).strip()
+        except IOError, e:
+            log("Failed branches list file load error: %s", e) #TODO some another log is required to easily find such messages
+            return
+        if  data == '':
+            debug("No branches was failed earlie")
+            return
+        try:
+            cls.fails = eval(data)
+        except Exception, e:
+            log("Failed branches list parsing: %s", e)
+        debug("Failed branches list loaded: %s", ', '.join(cls.fails))
+
+    @classmethod
+    def save(cls):
+        log("FailTracker.save: %s", cls.fails)
+        try:
+            with open(FAIL_FILE, "w") as f:
+                print >>f, repr(cls.fails)
+        except Exception, e:
+            log("Error saving failed branches list: %s", e)
+
+
+
+
 def check_restart():
     if os.path.isfile(RESTART_FLAG):
         log("Restart flag founnd. Calling: %s", ([sys.executable] + sys.argv,))
@@ -475,8 +532,12 @@ def run_tests(branch):
             lines.append('')
             lines.extend(ToSend)
 
+    if not lines:
+        FailTracker.mark_success(branch)
+
     if lines:
-        debug("Tests output:\n" + "\n".join(lines))
+        #debug("Tests output:\n" + "\n".join(lines))
+        FailTracker.mark_fail(branch)
         email_notify(branch, lines)
 
 
@@ -673,6 +734,8 @@ def perform_check():
         for branch in branches:
             if prepare_branch(branch):
                 run_tests(branch)
+            else:
+                FailTracker.mark_fail(branch)
     if os.access(bundle_fn, os.F_OK):
         os.remove(bundle_fn)
 
@@ -1280,6 +1343,8 @@ def main():
     if Args.conf:
         show_conf() # changes done by other options are shown here
         exit(0)
+
+    FailTracker.load()
 
     if Args.full:
         log("Watched branches: " + ','.join(BRANCHES))
