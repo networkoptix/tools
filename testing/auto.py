@@ -277,7 +277,7 @@ class FailTracker(object):
             cls.fails.discard(branch)
             cls.save()
             log_to_send('')
-            log_to_send("The branch %s is repaired after the previous errors and makes no errors.", branch)
+            log_to_send("The branch %s is repaired after the previous errors and makes no errors now.", branch)
             if branch in SKIP_TESTS and SKIP_TESTS[branch]:
                 log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
                             ', '.join(SKIP_TESTS[branch]))
@@ -312,7 +312,7 @@ class FailTracker(object):
 
     @classmethod
     def save(cls):
-        log("FailTracker.save: %s", cls.fails)
+        debug("FailTracker.save: %s", cls.fails)
         try:
             with open(FAIL_FILE, "w") as f:
                 print >>f, repr(cls.fails)
@@ -532,9 +532,13 @@ def run_tests(branch):
         if ToSend:
             lines.append('')
             lines.extend(ToSend)
+            del ToSend[:]
 
     if not lines:
         FailTracker.mark_success(branch)
+        if ToSend:
+            email_notify(branch, ToSend)
+            del ToSend[:]
 
     if lines:
         #debug("Tests output:\n" + "\n".join(lines))
