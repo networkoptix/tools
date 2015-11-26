@@ -18,10 +18,10 @@ from testboxes import *
 
 BACKUP_STORAGE_READY_TIMEOUT = 60 # seconds
 
-_NUM_SERV = 1
+_NUM_SERV_BAK = 1
 _WORK_HOST = 0
 
-TEST_CAMERA_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
+TEST_CAMERA_TYPE_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
 
 TEST_CAMERA_DATA = {
     'id': '',
@@ -36,7 +36,7 @@ TEST_CAMERA_DATA = {
     'vendor': 'test-v',
     'name': 'test-camera',
     'url': '192.168.109.63',
-    'typeId': TEST_CAMERA_ID
+    'typeId': TEST_CAMERA_TYPE_ID
 }
 TEST_CAMERA_ATTR = {
     'cameraID': '',
@@ -74,9 +74,63 @@ TMP_STORAGE = '/tmp/bstorage'
 class BackupStorageTestError(FuncTestError):
     pass
 
-class BackupStorageTest(FuncTestCase):
-    num_serv_t = _NUM_SERV
+class StorageBasedTest(FuncTestCase):
+    num_serv_t = 0
     _storages = dict()
+    _fill_storage_script = ''
+
+    def _load_storage_info(self):
+        for num in xrange(self.num_serv_t):
+            resp = self._server_request(num, 'api/storageSpace')
+            self._storages[num] = [s for s in resp["reply"]["storages"] if s['storageType'] == 'local']
+            #print "[DEBUG] Storages found:"
+            #for s in self._storages[num]:
+            #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
+
+    @classmethod
+    def new_test_camera(cls):
+        data = TEST_CAMERA_DATA.copy()
+        data['id'] = str(uuid.uuid4())
+        cls.test_camera_id = data['id']
+        cls.test_camera_physical_id = data['physicalId']
+        return data
+
+    def _add_test_camera(self, boxnum, camera=None):
+        camera = self.new_test_camera() if camera is None else camera.copy()
+        camera['parentId'] = self.guids[boxnum]
+        self._server_request(boxnum, 'ec2/saveCamera', camera)
+        answer = self._server_request(boxnum, 'ec2/getCameras')
+        #print "getCameras response: '%s'" % answer
+        self.assertEquals(unquote_guid(answer[0]['id']), self.test_camera_id, "Failed to assign a test camera to to a server")
+        attr_data = [TEST_CAMERA_ATTR.copy()]
+        attr_data[0]['cameraID'] = self.test_camera_id
+        self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
+        #answer = self._server_request(boxnum, 'ec2/getCamerasEx')
+        #print "getCamerasEx response: '%s'" % answer
+
+    def _fill_storage(self, boxnum, step):
+        print "Filling the main storage with the test data."
+        self._call_box(self.hosts[boxnum], "python", "/vagrant/" + self._fill_storage_script,
+                       self._storages[boxnum][0]['url'], self.test_camera_physical_id, step)
+        answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
+        try:
+            state = answer["reply"]["state"]
+        except Exception:
+            state = ''
+        while state != 'RebuildState_None':
+            time.sleep(0.5)
+            answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
+            #print "rebuildArchive status: %s" % answer
+            try:
+                state = answer["reply"]["state"]
+            except Exception:
+                pass
+        print "rebuildArchive done"
+
+
+class BackupStorageTest(StorageBasedTest):
+    num_serv_t = _NUM_SERV_BAK
+    _fill_storage_script = 'fill_stor.py'
 
     _suits = (
         ('BackupStartTests', [
@@ -103,57 +157,6 @@ class BackupStorageTest(FuncTestCase):
         print "========================================="
 
     ################################################################
-
-    def _load_storage_info(self):
-        for num in xrange(self.num_serv_t):
-            url = "http://%s/api/storageSpace" % self.sl[num]
-            try:
-                response = urllib2.urlopen(url)
-            except Exception, e:
-                self.fail("%s request failed with exception: %s" % (url, traceback.format_exc()))
-            self.assertEqual(response.getcode(), 200, "%s request returns code %d" % (url, response.getcode()))
-            jresp = self._json_loads(response.read(), url)
-            response.close()
-            self._storages[num] = [s for s in jresp["reply"]["storages"] if s['storageType'] == 'local']
-            #print "[DEBUG] Storages found:"
-            #for s in self._storages[num]:
-            #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
-
-    def _add_test_camera(self, boxnum):
-        data = TEST_CAMERA_DATA.copy()
-        type(self).test_camera_id = data['id'] = str(uuid.uuid4())
-        type(self).test_camera_physical_id = data['physicalId']
-        data['parentId'] = self.guids[boxnum]
-        self._server_request(boxnum, 'ec2/saveCamera', data)
-        answer = self._server_request(boxnum, 'ec2/getCameras')
-        #print "getCameras response: '%s'" % answer
-        self.assertEquals(unquote_guid(answer[0]['id']), self.test_camera_id, "Failed to assign a test camera to to a server")
-        attr_data = [TEST_CAMERA_ATTR.copy()]
-        attr_data[0]['cameraID'] = self.test_camera_id
-        self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
-        #answer = self._server_request(boxnum, 'ec2/getCamerasEx')
-        #print "getCamerasEx response: '%s'" % answer
-
-
-    def _fill_storage(self, boxnum, step):
-        print "Filling the main storage with the test data."
-        self._call_box(self.hosts[boxnum], "python", "/vagrant/fill_stor.py",
-                       self._storages[boxnum][0]['url'], self.test_camera_physical_id, step)
-        answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
-        try:
-            state = answer["reply"]["state"]
-        except Exception:
-            state = ''
-        while state != 'RebuildState_None':
-            time.sleep(0.5)
-            answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
-            #print "rebuildArchive status: %s" % answer
-            try:
-                state = answer["reply"]["state"]
-            except Exception:
-                pass
-        print "rebuildArchive done"
-
 
     def _create_backup_storage(self, boxnum):
         self._call_box(self.hosts[boxnum], "mkdir", '-p', TMP_STORAGE)
