@@ -19,6 +19,7 @@ from testboxes import *
 BACKUP_STORAGE_READY_TIMEOUT = 60 # seconds
 
 _NUM_SERV_BAK = 1
+_NUM_SERV_MARCH = 2
 _WORK_HOST = 0
 
 TEST_CAMERA_TYPE_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
@@ -108,10 +109,10 @@ class StorageBasedTest(FuncTestCase):
         #answer = self._server_request(boxnum, 'ec2/getCamerasEx')
         #print "getCamerasEx response: '%s'" % answer
 
-    def _fill_storage(self, boxnum, step):
+    def _fill_storage(self, boxnum, *args):
         print "Filling the main storage with the test data."
         self._call_box(self.hosts[boxnum], "python", "/vagrant/" + self._fill_storage_script,
-                       self._storages[boxnum][0]['url'], self.test_camera_physical_id, step)
+                       self._storages[boxnum][0]['url'], self.test_camera_physical_id, *args)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
         try:
             state = answer["reply"]["state"]
@@ -120,17 +121,16 @@ class StorageBasedTest(FuncTestCase):
         while state != 'RebuildState_None':
             time.sleep(0.5)
             answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
-            #print "rebuildArchive status: %s" % answer
             try:
                 state = answer["reply"]["state"]
             except Exception:
                 pass
-        print "rebuildArchive done"
+        print "Server %s: rebuildArchive done" % boxnum
 
 
 class BackupStorageTest(StorageBasedTest):
     num_serv_t = _NUM_SERV_BAK
-    _fill_storage_script = 'fill_stor.py'
+    _fill_storage_script = 'bs_fill_stor.py'
 
     _suits = (
         ('BackupStartTests', [
@@ -204,7 +204,7 @@ class BackupStorageTest(StorageBasedTest):
         while True:
             time.sleep(0.5)
             data = self._server_request(_WORK_HOST, 'api/backupControl/')
-            #print "backupControl: %s" % data
+            print "backupControl: %s" % data
             try:
                 if data['reply']['state'] == "BackupState_None":
                     break
@@ -232,14 +232,18 @@ class BackupStorageTest(StorageBasedTest):
     def AddBackupStorage(self):
         "Prepare a single camera data and add a backup storage"
         self._add_test_camera(_WORK_HOST)
-        #self._fill_storage(_WORK_HOST, "step1")
         self._create_backup_storage(_WORK_HOST)
 
     def ScheduledBackupTest(self):
         "In fact it tests that scheduling packup for a some moment before the current initiates backup immidiately."
-        self._fill_storage(_WORK_HOST, "step1")
         data = SERVER_USER_ATTR.copy()
         data['serverID'] = self.guids[_WORK_HOST]
+        data['backupType'] = 'BackupManual'
+        self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        time.sleep(0.1)
+        self._fill_storage(_WORK_HOST, "step1")
+        data['backupType'] = 'BackupSchedule'
+        time.sleep(0.1)
         self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
         self._wait_backup_start()
         #print "Scheduled backup started"
@@ -247,12 +251,23 @@ class BackupStorageTest(StorageBasedTest):
         self._check_backup_result()
 
     def BackupByRequestTest(self):
+        data = SERVER_USER_ATTR.copy()
+        data['serverID'] = self.guids[_WORK_HOST]
+        data['backupType'] = 'BackupManual'
+        self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        time.sleep(0.1)
         self._fill_storage(_WORK_HOST, "step2")
+        time.sleep(1)
         data = self._server_request(_WORK_HOST, 'api/backupControl/?action=start')
         #print "backupControl start: %s" % data
         self._wait_backup_end()
+        time.sleep(1)
         self._check_backup_result()
 
+
+class MultiserverArchiveTest(StorageBasedTest):
+    num_serv_t = _NUM_SERV_MARCH
+    _fill_storage_script = ''
 
 # find . -type d -o -name '*.mkv'|sort > main..dir
 # find /tmp/bstorage/ -type d -o -name '*.mkv'|sort > bak.dir
