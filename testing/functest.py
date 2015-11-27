@@ -20,7 +20,7 @@ import errno
 
 from functest_util import *
 from generator import *
-import timetest, backuptest
+import timetest, stortest
 from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
@@ -3841,8 +3841,8 @@ def CallTimesyncTest():
 def CallBackupStorageTest():
     if not clusterTest.openerReady:
         clusterTest.setUpPassword()
-    print "BackupStorage suits: %s" % (','.join(backuptest.BackupStorageTest.iter_suits()))
-    return RunBoxTests(backuptest.BackupStorageTest, clusterTest.getConfig())
+    print "BackupStorage suits: %s" % (','.join(stortest.BackupStorageTest.iter_suits()))
+    return RunBoxTests(stortest.BackupStorageTest, clusterTest.getConfig())
 
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
