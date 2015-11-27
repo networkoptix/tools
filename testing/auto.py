@@ -320,8 +320,6 @@ class FailTracker(object):
             log("Error saving failed branches list: %s", e)
 
 
-
-
 def check_restart():
     if os.path.isfile(RESTART_FLAG):
         log("Restart flag founnd. Calling: %s", ([sys.executable] + sys.argv,))
@@ -450,8 +448,7 @@ def read_unittest_output(proc, reader):
 
 
 def call_test(testname, reader):
-    debug("[ Calling %s test suit ]" % testname)
-    ToSend.append("[ Calling %s test suit ]" % testname)
+    log_to_send("[ Calling %s test suit ]", testname)
     old_len = len(ToSend)
     proc = None
     try:
