@@ -3,6 +3,7 @@
 __author__ = 'Danil Lavrentyuk'
 import subprocess
 import unittest
+import urllib
 import urllib2
 import time
 import json
@@ -195,14 +196,18 @@ class FuncTestCase(unittest.TestCase):
                 headers = {'Content-Type': 'application/json'}
             return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
-    def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None):
+    def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None, with_debug=False):
         "Sends request that don't fail on exception or non-200 return code."
         req = self._prepare_request(host, func, data)
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except Exception, e:
+            if with_debug:
+                print "Host %s, call %s, exception: %s" % (host, func, e)
             return None
         if response.getcode() != 200:
+            if with_debug:
+                print "Host %s, call %s, HTTP code: %s" % (host, func, response.getcode())
             return None
         # but it could fail here since with code == 200 the response must be parsable or empty
         answer = self._json_loads(response.read(), req.get_full_url())
@@ -223,13 +228,13 @@ class FuncTestCase(unittest.TestCase):
         response.close()
         return answer
 
-    def _wait_servers_up(self):
-        starttime = time.time()
-        endtime = starttime + SERVER_UP_TIMEOUT
-        tocheck = set(range(self.num_serv))
+    def _wait_servers_up(self, servers=None):
+        endtime = time.time() + SERVER_UP_TIMEOUT
+        tocheck = servers or set(range(self.num_serv))
         while tocheck and time.time() < endtime:
+            print "%s, %s" % (endtime - time.time(), str(tocheck))
             for num in tocheck.copy():
-                data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1)
+                data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=False)
                 if data is None:
                     continue
                 self.guids[num] = unquote_guid(data['ecsGuid'])
@@ -237,7 +242,7 @@ class FuncTestCase(unittest.TestCase):
             if tocheck:
                 time.sleep(0.5)
         if tocheck:
-            self.fail("Servers startup timed out: %s" % (', '.join(tocheck)))
+            self.fail("Servers startup timed out: %s" % (', '.join(map(str, tocheck))))
 
     def _get_version(self):
         """ Returns mediaserver version as reported in api/moduleInformation.
@@ -248,6 +253,11 @@ class FuncTestCase(unittest.TestCase):
             data = self._server_request(0, 'api/moduleInformation')
             type(self)._serv_version = Version(data["reply"]["version"])
         return self._serv_version
+
+    def _change_system_name(self, host, newName):
+        res = self._server_request(host, 'api/configure?systemName='+urllib.quote_plus(newName))
+        self.assertEqual(res['error'], "0",
+            "api/configure failed to set a new systemName %s for the server %s: %s" % (newName, host, res['errorString']))
 
 
 
