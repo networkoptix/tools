@@ -130,7 +130,7 @@ class StorageBasedTest(FuncTestCase):
 
 class BackupStorageTest(StorageBasedTest):
     num_serv_t = _NUM_SERV_BAK
-    _fill_storage_script = 'bs_fill_stor.py'
+    _fill_storage_script = 'fill_stor.py'
 
     _suits = (
         ('BackupStartTests', [
