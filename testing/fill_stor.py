@@ -19,6 +19,10 @@ if not os.path.isfile(sample_path):
 SAMPLE_LEN = 65 # sample video length, in seconds
 SAMPLE_LEN_MS = SAMPLE_LEN * 1000
 
+HOUR = 60*60
+DAY = HOUR*24
+START_OFFSET = 10 * DAY
+
 if len(sys.argv) < 3:
     print "The base storage path and a camera physical id arguments are necessary!"
     sys.exit(1)
@@ -31,24 +35,17 @@ if not os.path.isdir(base_path):
     print "The base storage directory %s isn't found!" % base_path
     sys.exit(2)
 
-hi_path = os.path.join(base_path, 'hi_quality', camera)
-low_path = os.path.join(base_path, 'low_quality', camera)
-
-def mk(path, log=False):
+def mkpath(path, log=False):
     if not os.path.isdir(path):
         if log:
             print "Creating %s" % path
         os.makedirs(path)
 
-mk(hi_path, False)
-mk(low_path, False)
-
-HOUR = 60*60
-DAY = HOUR*24
-START_OFFSET = 10 * DAY
-
 
 def mk_base_time(offset):
+    """ Finds the moment in the past by offset from the current moment,
+    then truncate down to the nearest hour border.
+    """
     t = int(time.time())
     gt = time.gmtime(t)
     return t - gt.tm_sec - gt.tm_min * 60 - offset
@@ -58,6 +55,8 @@ time_dir_fmt = os.path.join("%s","%02d","%02d","%02d")
 
 
 def time2path(dt):
+    """Generates subdirectories path for video files, based on date and hour: YEAR/MONTH/DAY/HOUR
+    """
     if dt < 1400000000:
         dt += time_base
     tm = time.gmtime(dt)
@@ -65,11 +64,16 @@ def time2path(dt):
 
 
 def time2fn(t):
+    "Creates a recorded video file name by format START_LENGTH.mkv, where START and LENGTH are mesured in miliseconds."
     return "%d_%d.mkv" % (int(t*1000), SAMPLE_LEN_MS)
 
+
 def mk_rec_path(d, h):
+    """Creates timestamp and subdirectories path for specified day and hour since time_base
+    """
     t = d*DAY + h*HOUR + time_base
     return t, time2path(t)
+
 
 RECORDED_PATHS = { k: [mk_rec_path(*p) for p in v] for k, v in (
     ('step1', (
@@ -79,7 +83,7 @@ RECORDED_PATHS = { k: [mk_rec_path(*p) for p in v] for k, v in (
         (3, 0),
     )),
     ('step2', (
-        (4, 5),  (4, 6),  (4, 20),
+        (4, 5),  (4, 6),  (4, 7),  (4, 20),
         (5, 21), (5, 22), (5, 23),
         (6, 0),  (6, 1),  (6, 2),
     )),
@@ -93,14 +97,11 @@ if step not in RECORDED_PATHS.iterkeys():
 
 def create_datepaths(base):
     for t, p in RECORDED_PATHS[step]:
-        mk(os.path.join(base, p))
+        mkpath(os.path.join(base, p))
 
-def create_datepaths_(base): # the shorten debug version
+def create_datepaths_short(base): # a shorten debug version
     for t, p in RECORDED_PATHS[step][:1]:
-        mk(os.path.join(base, p))
-
-create_datepaths(hi_path)
-create_datepaths(low_path)
+        mkpath(os.path.join(base, p))
 
 def fill_data():
     start = 0
@@ -118,7 +119,7 @@ def fill_data():
                 shutil.copyfile(sample_path, dest)
             start += SAMPLE_LEN
 
-def fill_data_(): # the shorten debug version
+def fill_data_short(): # a shorten debug version
     tm, path = RECORDED_PATHS[0]
     start = tm
     #print "Start: %s, end %s, d %s" % (start, end, end-start)
@@ -129,5 +130,14 @@ def fill_data_(): # the shorten debug version
         shutil.copyfile(sample_path, dest)
     start += SAMPLE_LEN
 
+
+hi_path = os.path.join(base_path, 'hi_quality', camera)
+low_path = os.path.join(base_path, 'low_quality', camera)
+
+mkpath(hi_path, False)
+mkpath(low_path, False)
+
+create_datepaths(hi_path)
+create_datepaths(low_path)
 
 fill_data()
