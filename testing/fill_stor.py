@@ -1,7 +1,14 @@
 #!/usr/bin/python
 __author__ = 'Danil Lavrentyuk'
 """Creates camera data storage directories and fills then with test data files.
-Call with two necessary arguments -- base storage path and a camera physicalId
+Call with 4 necessary arguments:
+    - data filling mode: random, multiserv
+    - the base storage path
+    - a camera physicalId
+    - test specific:
+      - a test step for 'random' mode
+      - a server number for 'multiserv' mode
+
 """
 import sys
 import os
@@ -23,13 +30,15 @@ HOUR = 60*60
 DAY = HOUR*24
 START_OFFSET = 10 * DAY
 
-if len(sys.argv) < 3:
-    print "The base storage path and a camera physical id arguments are necessary!"
+if len(sys.argv) < 5:
+    print "Not enough parameters!"
     sys.exit(1)
 
-base_path = sys.argv[1]
-camera = sys.argv[2]
-step = sys.argv[3] if len(sys.argv) >= 4 else 'step1'
+run_mode, base_path, camera, special = sys.argv[1:5]
+
+if run_mode not in ['random', 'multiserv']:
+    print "Wrong mode: '%s'" % run_mode
+    sys.exit(1)
 
 if not os.path.isdir(base_path):
     print "The base storage directory %s isn't found!" % base_path
@@ -89,23 +98,24 @@ RECORDED_PATHS = { k: [mk_rec_path(*p) for p in v] for k, v in (
     )),
 )}
 
-if step not in RECORDED_PATHS.iterkeys():
-    print "Wrong step value: %s. Allowed values: %s" % (step, ', '.join(RECORDED_PATHS.iterkeys()))
-    sys.exit(3)
+if run_mode == 'random':
+    if special not in RECORDED_PATHS.iterkeys():
+        print "Wrong step value: %s. Allowed values: %s" % (step, ', '.join(RECORDED_PATHS.iterkeys()))
+        sys.exit(3)
 
 #print "DEBUG: step %s recorded paths: %s" % (step, RECORDED_PATHS[step])
 
 def create_datepaths(base):
-    for t, p in RECORDED_PATHS[step]:
+    for t, p in RECORDED_PATHS[special]:
         mkpath(os.path.join(base, p))
 
 def create_datepaths_short(base): # a shorten debug version
-    for t, p in RECORDED_PATHS[step][:1]:
+    for t, p in RECORDED_PATHS[special][:1]:
         mkpath(os.path.join(base, p))
 
 def fill_data():
     start = 0
-    for tm, path in RECORDED_PATHS[step]:
+    for tm, path in RECORDED_PATHS[special]:
         end = tm+HOUR
         start = max(start, tm) + max(0, (random.random() * 60) - 15)
         #print "Start: %s, end %s, d %s" % (start, end, end-start)
@@ -137,7 +147,11 @@ low_path = os.path.join(base_path, 'low_quality', camera)
 mkpath(hi_path, False)
 mkpath(low_path, False)
 
-create_datepaths(hi_path)
-create_datepaths(low_path)
-
-fill_data()
+if run_mode == 'random':
+    create_datepaths(hi_path)
+    create_datepaths(low_path)
+    fill_data()
+elif run_mode == 'multiserv':
+    pass
+else:
+    print "Unknown mode: '%s'" % run_mode

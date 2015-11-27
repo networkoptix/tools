@@ -111,7 +111,7 @@ class StorageBasedTest(FuncTestCase):
 
     def _fill_storage(self, boxnum, *args):
         print "Filling the main storage with the test data."
-        self._call_box(self.hosts[boxnum], "python", "/vagrant/" + self._fill_storage_script,
+        self._call_box(self.hosts[boxnum], "python", "/vagrant/" + self._fill_storage_script, 'random',
                        self._storages[boxnum][0]['url'], self.test_camera_physical_id, *args)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
         try:
