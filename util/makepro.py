@@ -94,7 +94,6 @@ def get_pro_files(modules):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--path-suffix', type=str, help="Relative path to module .pro file (now it's processor arch name).", default="x64")
     parser.add_argument('-o', '--output', type=str, help="Output .pro file name.", default="vms.pro")
 
     args, mvnargs = parser.parse_known_args()
