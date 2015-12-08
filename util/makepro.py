@@ -59,7 +59,7 @@ def get_dep_tree(mvn_args):
     return dep_tree
 
 def find_pro(module):
-    command = ['find', '-name', module + '.pro', '-printf', '%P']
+    command = ['find', '.', '-name', module + '.pro']
     output = subprocess.check_output(command)
     lines = output.splitlines()
     if len(lines) > 1:
@@ -74,6 +74,8 @@ def find_pro(module):
         return None
 
     path = lines[0].decode('utf-8').strip()
+    if path.startswith('./'):
+        path = path[2:]
     return path
 
 def get_pro_files(modules):
@@ -97,6 +99,8 @@ def main():
 
     dep_tree = get_dep_tree(mvnargs)
     pro_files = get_pro_files(list(dep_tree.keys()))
+    print(pro_files)
+    return
 
     with open(args.output, 'w') as pro_file:
         pro_file.write('TEMPLATE = subdirs\n\n')
