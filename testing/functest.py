@@ -17,6 +17,7 @@ import datetime
 import time
 import select
 import errno
+import traceback
 
 from functest_util import *
 from generator import *
@@ -29,6 +30,7 @@ auto_rollback = False
 skip_timesync = False
 skip_backup = False
 skip_mservarc = False
+do_main_only = False
 
 # Rollback support
 class UnitTestRollback:
@@ -2820,13 +2822,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             begin = time.clock()
             ready = select.select([socket], [], [], timeout)
             if ready[0]:
-                d= None
-                if rate <0:
-                    d = socket.recv(1024*16)
-                else:
-                    d = socket.recv(rate)
-                last_packet_sz = len(d)
-                buf.append(d)
+                data = socket.recv(1024*16) if rate < 0 else socket.recv(rate)
+                last_packet_sz = len(data)
+                buf.append(data)
                 end = time.clock()
                 elapsed = end-begin
                 # compensate the rate of packet size here
@@ -2838,7 +2836,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                     else:
                         rate -= last_packet_sz
                 else:
-                    return d
+                    return data
             else:
                 # timeout reached
                 socket.setblocking(1)
@@ -2851,8 +2849,8 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 if dump is not None:
                     dump.write(data)
                     dump.flush()
-            except:
-                continue
+            except Exception:
+                traceback.print_exc()
             
             if data == None:
                 with self._lock:
@@ -2899,8 +2897,8 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 if dump is not None:
                     dump.write(data)
                     dump.flush()
-            except:
-                continue
+            except Exception:
+                traceback.print_exc()
             
             if data == None:
                 with self._lock:
@@ -3057,6 +3055,8 @@ class RtspPerf:
         threadNumbers = config_parser.get("Rtsp","threadNumbers").split(",")
         if len(threadNumbers) != len(clusterTest.clusterTestServerList):
             print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
+            print "threadNumbers = %s" % threadNumbers
+            print "clusterTestServerList = %s" % clusterTest.clusterTestServerList
             print "Every server MUST be assigned with a correct thread Numbers"
             print "RTSP Pressure test failed"
             return False
@@ -3855,7 +3855,8 @@ Flags = {
     '--autorollback': 'auto_rollback',
     '--skiptime': 'skip_timesync',
     '--skipbak': 'skip_backup',
-    '--skipmsa': 'skip_mservarc'
+    '--skipmsa': 'skip_mservarc',
+    '--mainonly': 'do_main_only',
 }
 
 def check_flags(argv):
@@ -3876,7 +3877,7 @@ def DoTests(argv):
 
     check_flags(argv)
     argc = len(argv)
-    ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage')))
+    ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage', '--msarch')))
     if ret == False:
         print "Failed to initialize the cluster test object: %s" % (reason)
     elif argc == 2 and argv[1] == '--sync':
@@ -3890,12 +3891,13 @@ def DoTests(argv):
                 print "Main tests passed OK"
                 if MergeTest().test():
                     SystemNameTest().run()
-            if not skip_timesync:
-                CallTimesyncTest()
-            if not skip_backup:
-                CallBackupStorageTest()
-            if not skip_mservarc:
-                CallMultiservArchTest()
+            if not do_main_only:
+                if not skip_timesync:
+                    CallTimesyncTest()
+                if not skip_backup:
+                    CallBackupStorageTest()
+                if not skip_mservarc:
+                    CallMultiservArchTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()
