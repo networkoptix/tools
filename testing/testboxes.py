@@ -41,6 +41,7 @@ class TestLoader(unittest.TestLoader):
 
 
 def RunTests(testclass, config):
+    print "DEBUG: run test class %s" % testclass
     testclass.init_suits()
     return all( [
             unittest.TextTestRunner(verbosity=2, failfast=True).run(
@@ -123,13 +124,12 @@ class FuncTestCase(unittest.TestCase):
             self.fail("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
                       (box, ' '.join(command), e.returncode, e.output))
 
-
     @classmethod
     def class_call_box(cls, box, *command):
         try:
             return boxssh(box, command)
         except subprocess.CalledProcessError, e:
-            print ("Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
+            print ("ERROR: Box %s: remote command `%s` failed at %s with code. Output:\n%s" %
                       (box, ' '.join(command), e.returncode, e.output))
             return ''
 
@@ -156,7 +156,7 @@ class FuncTestCase(unittest.TestCase):
             self._get_version()
             if self._serv_version < Version("2.5.0"):
                 type(self).before_2_5 = True
-        print "Servers are ready. Server servion = %s" % self._serv_version
+        print "Servers are ready. Server vervion = %s" % self._serv_version
 
     def _mediaserver_ctl(self, box, cmd):
         "Perform a service control command for a mediaserver on one of boxes"
@@ -217,6 +217,7 @@ class FuncTestCase(unittest.TestCase):
     def _server_request(self, host, func, data=None, headers=None, timeout=None):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
+        print "DEBUG: requesting: %s" % url
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except urllib2.URLError , e:
@@ -258,6 +259,7 @@ class FuncTestCase(unittest.TestCase):
         res = self._server_request(host, 'api/configure?systemName='+urllib.quote_plus(newName))
         self.assertEqual(res['error'], "0",
             "api/configure failed to set a new systemName %s for the server %s: %s" % (newName, host, res['errorString']))
+        print "DEBUG: _change_system_name reply: %s" % res
 
 
 

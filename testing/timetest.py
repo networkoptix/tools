@@ -8,6 +8,7 @@ import os
 import json
 import socket
 import struct
+import pprint
 
 from functest_util import ClusterLongWorker, get_server_guid
 from testboxes import *
@@ -230,7 +231,9 @@ class TimeSyncTest(FuncTestCase):
         """
         times = self._request_gettime(boxnum) #, False) -- return this after removing the next debug
         self.times[boxnum] = times
-        print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
+        #print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
+        print "!DEBUG: %s server times: " % boxnum,
+        pprint.pprint(times)
         return times['local'] - times['time']  # local time -- server's time
 
     def _get_secondary(self):
@@ -307,19 +310,27 @@ class TimeSyncTest(FuncTestCase):
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
                                msg="The secondary server's time changed after the primary server was stopped")
 
-    @unittest.expectedFailure
+    #@unittest.expectedFailure
     def RestartSecondaryWhilePrimaryOff(self):
         """Check if restarting the secondary (while the primary is off) doesn't change it's time
         """
         delta_before = self._serv_local_delta(self._secondary)
         print "Delta before = %.2f" % delta_before
         self._mediaserver_ctl(self.hosts[self._secondary], 'restart')
-        self._wait_servers_up()
+        print "Waiting for secondary restarted"
+        #try:
+        self._wait_servers_up(set((self._secondary,)))
+        #except Exception, e:
+        #    print "_wait_servers_up() fails with exception:"
+        #    traceback.print_exc()
+        #    raise
+        #print "Check...."
         delta_after = self._serv_local_delta(self._secondary)
         print "Delta after = %.2f" % delta_after
+        time.sleep(0.1)
         if not self.before_2_5:
             self.assertFalse(self.times[self._secondary]['isPrimaryTimeServer'],
-                             "The secondary server (%s) has become the primary" % self._secondary)
+                             "The secondary server (%s) has become the primary one" % self._secondary)
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
                                msg="The secondary server's time changed (by %.3f) after it was restarted (while the primary is off)" %
                                    (delta_before - delta_after))

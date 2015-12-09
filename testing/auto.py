@@ -162,7 +162,7 @@ else:
                 if endtime:
                     t = time.time()
                     if endtime > t:
-                        time.sleep(min(0.01, endtime- t))
+                        time.sleep(min(0.01, endtime - t))
                     else:
                         self.state = PIPE_HANG
                         return ''
@@ -718,7 +718,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
 
 def prepare_branch(branch):
     if branch != '.':
-        log("Switch to the banch %s" % branch)
+        log("Switch to the branch %s" % branch)
     debug("Call %s", HG_PURGE)
     check_call(HG_PURGE, **SUBPROC_ARGS)
     debug("Call %s", HG_UP if branch == '.' else (HG_UP + ['--rev', branch]))

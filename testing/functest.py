@@ -28,6 +28,7 @@ CONFIG_FNAME = "functest.cfg"
 auto_rollback = False
 skip_timesync = False
 skip_backup = False
+skip_mservarc = False
 
 # Rollback support
 class UnitTestRollback:
@@ -3844,22 +3845,36 @@ def CallBackupStorageTest():
     print "BackupStorage suits: %s" % (','.join(stortest.BackupStorageTest.iter_suits()))
     return RunBoxTests(stortest.BackupStorageTest, clusterTest.getConfig())
 
+def CallMultiservArchTest():
+    if not clusterTest.openerReady:
+        clusterTest.setUpPassword()
+    print "BackupStorage suits: %s" % (','.join(stortest.MultiserverArchiveTest.iter_suits()))
+    return RunBoxTests(stortest.MultiserverArchiveTest, clusterTest.getConfig())
+
+Flags = {
+    '--autorollback': 'auto_rollback',
+    '--skiptime': 'skip_timesync',
+    '--skipbak': 'skip_backup',
+    '--skipmsa': 'skip_mservarc'
+}
+
+def check_flags(argv):
+    "Checks flag options and remove them from argv"
+    g = globals()
+    found = False
+    for arg in argv:
+        if arg in Flags:
+            g[Flags[arg]] = True
+            found = True
+    if found:
+        argv[:] = [arg for arg in argv if arg not in Flags]
+
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
-    if '--autorollback' in argv:
-        global auto_rollback
-        auto_rollback = True
-        argv.remove('--autorollback')
-    if '--skiptime' in argv:
-        global skip_timesync
-        skip_timesync = True
-        argv.remove('--skiptime')
-    if '--skipbak' in argv:
-        global skip_backup
-        skip_backup = True
-        argv.remove('--skipbak')
 
+    check_flags(argv)
     argc = len(argv)
     ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage')))
     if ret == False:
@@ -3879,6 +3894,8 @@ def DoTests(argv):
                 CallTimesyncTest()
             if not skip_backup:
                 CallBackupStorageTest()
+            if not skip_mservarc:
+                CallMultiservArchTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()
@@ -3889,6 +3906,9 @@ def DoTests(argv):
 
         elif argc == 2 and argv[1] == '--bstorage':
             CallBackupStorageTest()
+
+        elif argc == 2 and argv[1] == '--msarch':
+            CallMultiservArchTest()
 
         elif (argc == 2 or argc == 3) and argv[1] == '--clear':
             if argc == 3:

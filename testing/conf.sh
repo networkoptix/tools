@@ -18,3 +18,11 @@ function edconf {
 function setpw {
 	sed -i 's/^appserverPassword\s*=.*/appserverPassword=123/' "$SERVCONF"
 }
+
+function rmbase() {
+    if [ -n "$1" -a -d "$1" ]; then
+        rm "$1"/*.sqlite
+        rm -rf "$1/hi_quality"
+        rm -rf "$1/low_quality"
+    fi
+}

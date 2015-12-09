@@ -36,7 +36,7 @@ def iter_lowest(p, q):
             yield x
 
 
-def _combine_iter(sdata):
+def combine_iter(sdata):
     "Combine all hi- and lo-res chunk start times into one stream"
     hi = sdata['hi']
     lo = sdata['lo']
@@ -71,8 +71,8 @@ def _combine_iter(sdata):
 
 def check():
     "Checks if there is no chunk intersection betwen two servers"
-    s0 = _combine_iter(data['0'])
-    s1 = _combine_iter(data['1'])
+    s0 = combine_iter(data['0'])
+    s1 = combine_iter(data['1'])
     go = True
     s0time = s0.next()
     s1time = s1.next()
@@ -100,31 +100,34 @@ def check():
     return True
 
 
-# Read both files into data dictionary
-for serv in ('0', '1'):
-    fn = fn_template % serv
-    sd = data[serv]
-    with open(fn) as f:
-        cur_hour = ''
-        starts = {'hi': [], 'lo': []}
-        for line in f:
-            if len(line.rstrip()) > 0:
-                res, hour, start = line.split()
-                if hour != cur_hour:
-                    starts['hi'] = []
-                    starts['lo'] = []
-                    cur_hour = hour
-                    sd['hi'].append((int(hour), starts['hi']))
-                    sd['lo'].append((int(hour), starts['lo']))
-                starts[res].append(int(start))
+def main():
 
-if not check():
-    print "# Wrong chunk set!"
-    sys.exit(1)
-else:
-    print "# Chunk separation is OK"
+    # Read both files into data dictionary
+    for serv in ('0', '1'):
+        fn = fn_template % serv
+        sd = data[serv]
+        with open(fn) as f:
+            cur_hour = ''
+            starts = {'hi': [], 'lo': []}
+            for line in f:
+                if len(line.rstrip()) > 0:
+                    res, hour, start = line.split()
+                    if hour != cur_hour:
+                        starts['hi'] = []
+                        starts['lo'] = []
+                        cur_hour = hour
+                        sd['hi'].append((int(hour), starts['hi']))
+                        sd['lo'].append((int(hour), starts['lo']))
+                    starts[res].append(int(start))
 
-print "chunk_starts = " + pprint.pformat(data, width=250)
+    if not check():
+        print "# Wrong chunk set!"
+        sys.exit(1)
+    else:
+        print "# Chunk separation is OK"
 
+    print "chunk_starts = " + pprint.pformat(data, width=250)
 
+if __name__ == '__main__':
+    main()
 
