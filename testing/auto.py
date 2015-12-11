@@ -1023,7 +1023,7 @@ class FunctestParser(object):
 
     def _sysname_test_end(self):
         log("SystemName test done.")
-        self.stage = "wait for timesunc test"
+        self.stage = "wait for timesync test"
         self.parser = self.parse_timesync_start
 
     # Time synchronization tests
@@ -1081,7 +1081,7 @@ class FunctestParser(object):
         if self.current_ts_part < len(self.TS_PARTS):
             self.parser = self.parse_timesync_start
             del self.collector[:]
-            self.stare = "wait for timesunc test"
+            self.stage = "wait for timestnc test"
         else:
             self.parser = self.parse_bstorage_start
             self.stage = "wait for backup storage test"
@@ -1098,27 +1098,23 @@ class FunctestParser(object):
             #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
             self.parser = self.parse_bstorage
             self.collector[:] = [line]
-            #else:
-            #    log_to_send(line)
-            #    log_to_send("ERROR: unknow tymesync test part: " + self.ts_name)
-            #    self.parser = self.parse_timesync_failed
 
     def parse_bstorage(self, line):
         if line.startswith(self.BS_END):
             self.parser = self.parse_bstorage_tail
-        elif not self._ts_check_fail(line):
+        elif not self._bs_check_fail(line):
             self.collector.append(line)
 
     def parse_bstorage_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
         log_to_send(line)
         if line.startswith("FAILED (failures"):
             log("Backup storage test done")
-            self.set_end()
+            self.parser = self.parse_msarch_start
 
     def parse_bstorage_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
         if not self._bs_check_fail(line) and line.startswith("OK"):
             log("Backup storage test done")
-            self.set_end()
+            self.parser = self.parse_msarch_start
 
     def _bs_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
         if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
@@ -1132,6 +1128,50 @@ class FunctestParser(object):
         del self.collector[:]
         self.parser = self.parse_bstorage_failed
         return True
+
+    # multiserver archive test
+
+    MS_START = "Multiserver Archive Test Start"
+    MS_END = "Multiserver Archive Test End"
+
+    def parse_msarch_start(self, line):
+        if line.startswith(self.MS_START):
+            self.ts_name = line[len(self.MS_START):].rstrip()
+            self.stage = 'multiserver archive test'
+            #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
+            self.parser = self.parse_msarch
+            self.collector[:] = [line]
+
+    def parse_msarch_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
+        log_to_send(line)
+        if line.startswith("FAILED (failures"):
+            log("Multiserver archive test done")
+            self.set_end()
+
+    def parse_msarch(self, line):
+        if line.startswith(self.MS_END):
+            self.parser = self.parse_msarch_tail
+        elif not self._ms_check_fail(line):
+            self.collector.append(line)
+
+    def parse_msarch_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
+        if not self._ms_check_fail(line) and line.startswith("OK"):
+            log("Multiserver archive test done")
+            self.set_end()
+
+    def _ms_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
+        if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
+            return False
+        self.has_errors = True
+        log_to_send("Multiserver archive test %s!",
+                    "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
+        for s in self.collector:
+            log_to_send(s)
+        log_to_send(line)
+        del self.collector[:]
+        self.parser = self.parse_msarch_failed
+        return True
+
     #
 
     def set_end(self):
