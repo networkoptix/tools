@@ -311,8 +311,8 @@ _helpMenu = {
         ))
     }
 
-def showHelp():
-    if len(sys.argv) == 2:
+def showHelp(argv):
+    if len(argv) == 2:
         helpStrHeader=("Help for auto test tool\n\n"
                  "*****************************************\n"
                  "**************Function Menu**************\n"
@@ -332,7 +332,7 @@ def showHelp():
 
         print helpStrFooter
     else:
-        option = sys.argv[2]
+        option = argv[2]
         if option in _helpMenu:
             print "==================================="
             print option
