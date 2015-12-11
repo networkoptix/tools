@@ -26,12 +26,6 @@ from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
 
-auto_rollback = False
-skip_timesync = False
-skip_backup = False
-skip_mservarc = False
-do_main_only = False
-
 # Rollback support
 class UnitTestRollback:
     _rollbackFile = None
@@ -43,8 +37,8 @@ class UnitTestRollback:
 
     def __init__(self):
         if os.path.isfile(".rollback"):
-            selection = 'r' if auto_rollback else None
-            if not auto_rollback:
+            selection = 'r' if clusterTest.auto_rollback else None
+            if not clusterTest.auto_rollback:
                 try :
                     print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
                     print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
@@ -138,13 +132,28 @@ class ClusterTest(object):
     clusterTestServerList = []
     clusterTestSleepTime = None
     clusterTestServerUUIDList = []
+    configFname = CONFIG_FNAME
     config = None
+    argv = []
     openerReady = False
     threadNumber = 16
     testCaseSize = 2
     unittestRollback = None
     CHUNK_SIZE=4*1024*1024 # 4 MB
     TRANSACTION_LOG="__transaction.log"
+    auto_rollback = False
+    skip_timesync = False
+    skip_backup = False
+    skip_mservarc = False
+    do_main_only = False
+
+    _argFlags = {
+        '--autorollback': 'auto_rollback',
+        '--skiptime': 'skip_timesync',
+        '--skipbak': 'skip_backup',
+        '--skipmsa': 'skip_mservarc',
+        '--mainonly': 'do_main_only',
+    }
 
     _getterAPIList = ["getResourceParams",
         "getMediaServersEx",
@@ -490,7 +499,7 @@ class ClusterTest(object):
     def getConfig(self):
         if self.config is None:
             self.config = ConfigParser.RawConfigParser()
-            self.config.read(CONFIG_FNAME)
+            self.config.read(self.configFname)
         return self.config
 
     def _loadConfig(self):
@@ -502,7 +511,6 @@ class ClusterTest(object):
             self.testCaseSize = parser.getint("General","testCaseSize")
         except :
             self.testCaseSize = 2
-
 
     def setUpPassword(self):
         config = self.getConfig()
@@ -516,6 +524,35 @@ class ClusterTest(object):
         urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
         self.openerReady = True
 #        urllib2.install_opener(urllib2.build_opener(AuthH(passman)))
+
+    def check_flags(self, argv):
+        "Checks flag options and remove them from argv"
+        g = globals()
+        found = False
+        for arg in argv:
+            if arg in self._argFlags:
+                g[self._argFlags[arg]] = True
+                found = True
+        if found:
+            argv[:] = [arg for arg in argv if arg not in self._argFlags]
+
+    def preparseArgs(self, argv):
+        g = globals()
+        other = []
+        config_next = True
+        for arg in argv:
+            if config_next:
+                self.configFname = arg
+                config_next = False
+            elif arg in self._argFlags:
+                g[self._argFlags[arg]] = True
+            elif arg == '--config':
+                config_next = True
+            elif arg.startswith == '--config=':
+                self.configFname = argv[len('--config='):]
+            else:
+                other.append(arg)
+        self.argv = argv
 
     def init(self, short=False):
         self._loadConfig()
@@ -3808,8 +3845,8 @@ class SystemNameTest:
 
 
 def doCleanUp():
-    selection = '' if auto_rollback else 'x'
-    if not auto_rollback:
+    selection = '' if clusterTest.auto_rollback else 'x'
+    if not clusterTest.auto_rollback:
         try :
             selection = raw_input("Press Enter to continue ROLLBACK or press x to SKIP it...")
         except:
@@ -3817,7 +3854,7 @@ def doCleanUp():
 
     if len(selection) == 0 or selection[0] != 'x':
         print "Now do the rollback, do not close the program!"
-        clusterTest.unittestRollback.doRollback(quiet=auto_rollback)
+        clusterTest.unittestRollback.doRollback(quiet=clusterTest.auto_rollback)
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
@@ -3851,31 +3888,10 @@ def CallMultiservArchTest():
     print "BackupStorage suits: %s" % (','.join(stortest.MultiserverArchiveTest.iter_suits()))
     return RunBoxTests(stortest.MultiserverArchiveTest, clusterTest.getConfig())
 
-Flags = {
-    '--autorollback': 'auto_rollback',
-    '--skiptime': 'skip_timesync',
-    '--skipbak': 'skip_backup',
-    '--skipmsa': 'skip_mservarc',
-    '--mainonly': 'do_main_only',
-}
-
-def check_flags(argv):
-    "Checks flag options and remove them from argv"
-    g = globals()
-    found = False
-    for arg in argv:
-        if arg in Flags:
-            g[Flags[arg]] = True
-            found = True
-    if found:
-        argv[:] = [arg for arg in argv if arg not in Flags]
-
-
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
 
-    check_flags(argv)
     argc = len(argv)
     ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage', '--msarch')))
     if ret == False:
@@ -3891,12 +3907,12 @@ def DoTests(argv):
                 print "Main tests passed OK"
                 if MergeTest().test():
                     SystemNameTest().run()
-            if not do_main_only:
-                if not skip_timesync:
+            if not clusterTest.do_main_only:
+                if not clusterTest.skip_timesync:
                     CallTimesyncTest()
-                if not skip_backup:
+                if not clusterTest.skip_backup:
                     CallBackupStorageTest()
-                if not skip_mservarc:
+                if not clusterTest.skip_mservarc:
                     CallMultiservArchTest()
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
@@ -3945,11 +3961,12 @@ def DoTests(argv):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2 and sys.argv[1] in ('--help', '-h'):
-        showHelp()
-    elif len(sys.argv) == 2 and sys.argv[1] == '--recover':
+    clusterTest.preparseArgs(sys.argv)
+    if len(clusterTest.argv) >= 2 and clusterTest.argv[1] in ('--help', '-h'):
+        showHelp(clusterTest.argv)
+    elif len(clusterTest.argv) == 2 and clusterTest.argv[1] == '--recover':
         UnitTestRollback().doRecover()
-    elif len(sys.argv) == 2 and sys.argv[1] == '--sys-name':
+    elif len(clusterTest.argv) == 2 and clusterTest.argv[1] == '--sys-name':
         SystemNameTest().run()
     else:
-        DoTests(sys.argv)
+        DoTests(clusterTest.argv)
