@@ -538,18 +538,20 @@ class ClusterTest(object):
 
     def preparseArgs(self, argv):
         g = globals()
-        other = []
-        config_next = True
-        for arg in argv:
+        other = [argv[0]]
+        config_next = False
+        for arg in argv[1:]:
             if config_next:
                 self.configFname = arg
                 config_next = False
+                print "Use config", self.configFname
             elif arg in self._argFlags:
                 g[self._argFlags[arg]] = True
             elif arg == '--config':
                 config_next = True
-            elif arg.startswith == '--config=':
-                self.configFname = argv[len('--config='):]
+            elif arg.startswith('--config='):
+                self.configFname = arg[len('--config='):]
+                print "Use config", self.configFname
             else:
                 other.append(arg)
         self.argv = argv
