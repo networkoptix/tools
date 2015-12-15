@@ -441,7 +441,7 @@ class ClusterTest(object):
                         if data is None or len(data) == 0:
                             break
                         f.write(data)
-                # for the very first transactionLog, just skip 
+                # for the very first transactionLog, just skip
                 continue
             else:
                 assert os.path.isfile(self.TRANSACTION_LOG), \
@@ -555,6 +555,7 @@ class ClusterTest(object):
             else:
                 other.append(arg)
         self.argv = argv
+        return argv
 
     def init(self, short=False):
         self._loadConfig()
@@ -683,7 +684,7 @@ class ConflictionDataGenerator(BasicGenerator):
     conflictMediaServerList = []
     _lock = threading.Lock()
     _listLock = threading.Lock()
-    
+
     def _prepareData(self,dataList,methodName,l):
         worker = ClusterWorker(8,len(clusterTest.clusterTestServerList) * len(dataList))
 
@@ -707,7 +708,7 @@ class ConflictionDataGenerator(BasicGenerator):
                         clusterTest.unittestRollback.addOperations(methodName,server,post_data[1])
                         with list_lock:
                             list.append(post_data[0])
-                    response.close() 
+                    response.close()
 
                 worker.enqueue(task,(self._lock,l,self._listLock,d,s,))
 
@@ -778,7 +779,7 @@ class ResourceDataGenerator(BasicGenerator):
     # the list _ec2ResourceGetter.  What's more , the parentId, typeId
     # and resource name will be recorded (Can be None).
     _existedResourceList = []
-    
+
     # this function is used to retrieve the resource list on the
     # server side.  We just retrieve the resource list from the
     # very first server since each server has exact same resource
@@ -799,9 +800,9 @@ class ResourceDataGenerator(BasicGenerator):
         for entry in gen.conflictMediaServerList:
             obj = json.loads(entry)
             self._existedResourceList.append((obj["id"],obj["parentId"],obj["typeId"]))
-        
+
         return True
-    
+
     def __init__(self,num):
         ret = self._retrieveResourceUUIDList(num)
         if ret == False:
@@ -831,7 +832,7 @@ class ResourceDataGenerator(BasicGenerator):
         kv_list.append("]")
 
         return ''.join(kv_list)
-    
+
     def generateResourceParams(self,number):
         ret = []
         for i in xrange(number):
@@ -898,7 +899,7 @@ class CameraConflictionDataGenerator(BasicGenerator):
     def __init__(self,dataGen):
         if self._fetchExistedCameras(dataGen) == False:
             raise Exception("Cannot get existed camera list")
-    
+
     def _generateModify(self,camera):
         name = self.generateRandomString(random.randint(8,12))
         return self._updateTemplate % (camera[0],
@@ -906,14 +907,14 @@ class CameraConflictionDataGenerator(BasicGenerator):
             camera[2],
             name,
             camera[3],
-            camera[1], 
+            camera[1],
             camera[4],
             camera[5],
             camera[6])
-    
+
     def _generateRemove(self,camera):
-        return self._removeTemplate % (camera[0])  
-    
+        return self._removeTemplate % (camera[0])
+
     def generateData(self):
         camera = self._existedCameraList[random.randint(0,len(self._existedCameraList) - 1)]
 
@@ -1167,7 +1168,7 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
 
         for d in dataList:
             for s in clusterTest.clusterTestServerList:
-                
+
                 def task(lock,list,listLock,post_data,mname,server):
                     req = urllib2.Request("http://%s/ec2/%s" % (server,mname),
                         data=post_data[0], headers={'Content-Type': 'application/json'})
@@ -1185,8 +1186,8 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
 
                     response.close()
 
-                worker.enqueue(task,(self._lock,l,self._listLock,d,methodName,s,))        
-                               
+                worker.enqueue(task,(self._lock,l,self._listLock,d,methodName,s,))
+
         worker.join()
         return True
 
@@ -1260,14 +1261,14 @@ class ClusterTestBase(unittest.TestCase):
         req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
             data=d, headers={'Content-Type': 'application/json'})
         response = None
-        
+
         with self._Lock:
             print "Connection to http://%s/ec2/%s" % (server,methodName)
             response = urllib2.urlopen(req)
 
         # Do a sligtly graceful way to dump the sample of failure
         if response.getcode() != 200:
-            self._dumpFailedRequest(d,methodName) 
+            self._dumpFailedRequest(d,methodName)
 
         self.assertTrue(response.getcode() == 200,
             "%s failed with statusCode %d" % (methodName,response.getcode()))
@@ -1328,7 +1329,7 @@ class ClusterTestBase(unittest.TestCase):
             workerQueue.enqueue(self._sendRequest , (self._getMethodName(),test[0],test[1],))
 
         workerQueue.join()
-                
+
         time.sleep(clusterTest.clusterTestSleepTime)
         observer = self._getObserverName()
 
@@ -1357,8 +1358,8 @@ class CameraTest(ClusterTestBase):
     def setUp(self):
         self._testCase = clusterTest.testCaseSize
         self._gen = CameraDataGenerator()
-    
-    
+
+
     def _generateModifySeq(self):
         ret = []
         for _ in xrange(self._testCase):
@@ -1430,7 +1431,7 @@ class ResourceParaTest(ClusterTestBase):
 
     def _generateModifySeq(self):
         return self._defaultModifySeq(self._gen.generateResourceParams(self._testCase))
-    
+
     def _getMethodName(self):
         return "setResourceParams"
 
@@ -1507,7 +1508,7 @@ class ServerUserAttributesListDataTest(ClusterTestBase):
 class ResourceConflictionTest(ClusterTestBase):
     _testCase = clusterTest.testCaseSize
     _conflictList = []
-    
+
     def setTestCase(self,num):
         self._testCase = num
 
@@ -1547,7 +1548,7 @@ class ResourceConflictionTest(ClusterTestBase):
         time.sleep(clusterTest.clusterTestSleepTime)
         for api in  apiList:
             ret , reason = clusterTest.checkMethodStatusConsistent(api)
-            self.assertTrue(ret,reason) 
+            self.assertTrue(ret,reason)
 
 
     # Overwrite the test function since the base method doesn't work here
@@ -1664,7 +1665,7 @@ class PrepareServerStatus(BasicGenerator):
         "getCameraUserAttributes"]
 
     _mergeTest = None
-    
+
     def __init__(self,mt):
         self._mergeTest = mt
 
@@ -1689,9 +1690,9 @@ class PrepareServerStatus(BasicGenerator):
 
     def _sendRequest(self,addr,method,d):
         req = urllib2.Request("http://%s/ec2/%s" % (addr,method), \
-              data=d, 
+              data=d,
               headers={'Content-Type': 'application/json'})
-        
+
         with self._mergeTest._lock:
             print "Connection to http://%s/ec2/%s" % (addr,method)
             response = urllib2.urlopen(req)
@@ -1756,7 +1757,7 @@ class MergeTest_Resource(MergeTestBase):
 
         print "Merge test prolog pass"
         return True
-    
+
     def _epilog(self):
         print "Merge test epilog, change all servers system name back to its original one"
         self._rollbackSystemName()
@@ -1809,10 +1810,10 @@ class MergeTest_Resource(MergeTestBase):
         print "================================\n"
         return ret
 
-# This merge test is used to test admin's password 
+# This merge test is used to test admin's password
 # Steps:
 # Change _EACH_ server into different system name
-# Modify _EACH_ server's password into a different one 
+# Modify _EACH_ server's password into a different one
 # Reconnect to _EACH_ server with _NEW_ password and change its system name back to mergeTest
 # Check _EACH_ server's status that with a possible password in the list and check getMediaServer's Status
 # also _ALL_ the server must be Online
@@ -1891,7 +1892,7 @@ class MergeTest_AdminPassword(MergeTestBase):
 
         print "This password can be used on the whole cluster"
         return True
-        
+
     # This function is used to probe the correct password that _CAN_ be used to log on each server
     def _probePassword(self):
         possiblePWD = None
@@ -1904,7 +1905,7 @@ class MergeTest_AdminPassword(MergeTestBase):
                 try:
                     response = urllib2.urlopen("http://%s/ec2/testConnection"%(server))
                 except urllib2.URLError,e:
-                    # Every failed urllib2.urlopen will screw up the opener 
+                    # Every failed urllib2.urlopen will screw up the opener
                     self._setUpClusterAuthentication(pwd)
                     continue # This password doesn't work
 
@@ -2014,7 +2015,7 @@ class MergeTest_AdminPassword(MergeTestBase):
                 print "It's current password is:%s"%(entry[1])
                 print "It's old password is:%s"(self._oldClusterPassword)
                 print "----------------------------------------------------------------------------------"
-        # Now set back the authentcation 
+        # Now set back the authentcation
         self._restoreAuthentication()
 
     # This function is used to change admin's password on each server
@@ -2043,7 +2044,7 @@ class MergeTest_AdminPassword(MergeTestBase):
         self._rollbackPartialPasswordChange(
             [(s,self._oldClusterPassword) for s in clusterTest.clusterTestServerList])
 
-        # rollback the system name 
+        # rollback the system name
         self._rollbackSystemName()
 
     def _failRollbackPassword(self):
@@ -2144,7 +2145,7 @@ class MergeTest:
         if not MergeTest_Resource().test():
             return False
         # The following merge test ALWAYS fail and I don't know it is my problem or not
-        # Current it is disabled and you could use a seperate command line to run it 
+        # Current it is disabled and you could use a seperate command line to run it
         #MergeTest_AdminPassword().test()
 
         return True
@@ -2241,6 +2242,7 @@ class RRRtspTcpBasic:
     _uname = None
     _pwd = None
     _urlGen = None
+    _socket_close_timeout = 5
 
     _rtspBasicTemplate = "PLAY %s RTSP/1.0\r\n\
         CSeq: 2\r\n\
@@ -2269,10 +2271,10 @@ class RRRtspTcpBasic:
 
     _lock = None
     _log  = None
-    
-    def __init__(self, addr, port, mac, cid, sid, uname, pwd, urlGen, lock = None,log = None):
-        self._port = port
+
+    def __init__(self, (addr, port), (mac, cid), sid, uname, pwd, urlGen, lock=None,log=None, socket_reraise=False):
         self._addr = addr
+        self._port = int(port)
         self._urlGen = urlGen
         self._url = urlGen.generateURL()
         self._data = self._rtspBasicTemplate % (self._url, cid, sid)
@@ -2284,6 +2286,7 @@ class RRRtspTcpBasic:
         self._pwd = pwd
         self._lock = lock
         self._log = log
+        self._socket_reraise = socket_reraise
 
     def _checkEOF(self,data):
         return data.find("\r\n\r\n") > 0
@@ -2361,16 +2364,16 @@ class RRRtspTcpBasic:
 
     def _checkAuthorization(self,data):
         return data.find("Unauthorized") < 0
-    
-    
+
+
     def _request(self,data):
         while True:
             sz = self._socket.send(data)
             if sz == len(data):
                 return
             else:
-                data = data[sz:] 
-            
+                data = data[sz:]
+
     def _response(self):
         global _rtspBackOffTimer
 
@@ -2380,6 +2383,8 @@ class RRRtspTcpBasic:
                 data = self._socket.recv(1024)
             except socket.error,e:
                 _rtspBackOffTimer.increase("%s:%d"%(self._addr,self._port))
+                if self._socket_reraise:
+                    raise
                 return "This is not RTSP error but socket error:%s"%(e)
 
             _rtspBackOffTimer.decrease("%s:%d"%(self._addr,self._port))
@@ -2406,21 +2411,26 @@ class RRRtspTcpBasic:
                     print s
                     self._log.write(s)
 
+    @classmethod
+    def set_close_timeout_global(cls, timeout):
+        cls._socket_close_timeout = timeout
 
     def _gracefulShutdown(self):
         # This shutdown will issue a FIN on the peer side therefore, the peer side (if it recv blocks)
         # will recv EOF on that socket fd. And it should behave properly regarding that problem there.
         self._socket.shutdown(socket.SHUT_WR)
-        # Now if the peer server behaves properly it will definitly 
-        # close that connection and I will be able to read an EOF 
+        # Now if the peer server behaves properly it will definitly
+        # close that connection and I will be able to read an EOF
         while True:
             # Now we block on a timeout select
             try :
-                ready = select.select([self._socket], [], [], 5)
-            except socket.error,e:
+                ready = select.select([self._socket], [], [], self._socket_close_timeout)
+            except socket.error, e:
                 self._dumpError("select:%s"%(e))
+                if self._socket_reraise:
+                    raise
                 return
-                   
+
             if ready[0]:
                 # Now we get some data , read it and then try to read to EOF
                 try :
@@ -2429,16 +2439,19 @@ class RRRtspTcpBasic:
                         # The server performance gracefully and close that connection now
                         return
 
-                except socket.error , e:
+                except socket.error, e:
                     if e.errno == errno.EAGAIN or e.errno == errno.EWOULDBLOCK or e == errno.WSAEWOULDBLOCK:
                         pass
                     else:
-                       self._dumpError("socket::recv : %s"%(e))
-                       return
+                        self._dumpError("socket::recv : %s"%(e))
+                        if self._socket_reraise:
+                            raise
+                        return
             else:
-                # Timeout reached 
-                self._dumpError( ("The server doesn't try to send me data or shutdown the connection for about 5 seconds\n"
-                                  "However,I have issued the shutdown for read side,so the server _SHOULD_ close the connection\n") )
+                # Timeout reached
+                self._dumpError( ("The server doesn't try to send me data or shutdown the connection for about %s seconds\n"
+                                  "However,I have issued the shutdown for read side,so the server _SHOULD_ close the connection\n"
+                                  % self._socket_close_timeout) )
                 return
 
 
@@ -2451,7 +2464,7 @@ class RRRtspTcpBasic:
             return (self._requestWithDigest(reply),self._url)
         else:
             return (reply,self._url)
-        
+
     def __exit__(self,type,value,trace):
         # Do graceful closing here
         self._gracefulShutdown()
@@ -2496,27 +2509,27 @@ class SingleServerRtspTestBase:
         if guid[0] == '{':
             return guid
         else:
-            return "{" + obj["ecsGuid"] + "}" 
+            return "{" + obj["ecsGuid"] + "}"
 
     def _fetchCameraList(self):
         # Get this server's GUID and filter out the only cameras that should be used on this server
         guid = self._getServerGUID()
-        response = urllib2.urlopen("http://%s/ec2/getCameras?id=%s" % (self._serverEndpoint,guid))
+        response = urllib2.urlopen("http://%s/ec2/getCamerasEx?id=%s" % (self._serverEndpoint,guid))
 
         if response.getcode() != 200:
-            raise Exception("Cannot connect to server:%s using getCameras" % (self._serverEndpoint))
-        json_obj = SafeJsonLoads(response.read(), self._serverEndpoint, 'getCameras')
+            raise Exception("Cannot connect to server:%s using getCamerasEx" % (self._serverEndpoint))
+        json_obj = SafeJsonLoads(response.read(), self._serverEndpoint, 'getCamerasEx')
+        response.close()
 
         for c in json_obj:
             if c["typeId"] == "{1657647e-f6e4-bc39-d5e8-563c93cb5e1c}":
                 continue # Skip desktop
             if "name" in c and c["name"].startswith("ec2_test"):
                 continue # Skip fake camera
-            self._cameraList.append((c["physicalId"],c["id"],c["name"]))
-            self._cameraInfoTable[c["id"]] = c
+            if c['status'] in ('Online', 'Recording'):
+                self._cameraList.append((c["physicalId"],c["id"],c["name"]))
+                self._cameraInfoTable[c["id"]] = c
 
-        response.close()
-        
     def _checkReply(self,reply):
         idx = reply.find("\r\n")
         if idx < 0:
@@ -2556,7 +2569,8 @@ class SingleServerRtspTestBase:
             return ret
 
     def run(self):
-        pass 
+        pass
+
 
 class FiniteSingleServerRtspTest(SingleServerRtspTestBase):
     _log = None
@@ -2578,19 +2592,15 @@ class FiniteSingleServerRtspTest(SingleServerRtspTestBase):
         l = self._serverEndpoint.split(":")
 
         # Streaming version RTSP test
-        with RRRtspTcpBasic(l[0],int(l[1]),
-                     c[0],
-                     c[1],
+        with RRRtspTcpBasic(l[0:2], c[0:2],
                      self._serverGUID,
                      self._username,
                      self._password,
                      RtspStreamURLGenerator(l[0],int(l[1]),c[0])) as reply:
             self._checkRtspRequest(c,reply)
-            
 
-        with RRRtspTcpBasic(l[0],int(l[1]),
-                     c[0],
-                     c[1],
+
+        with RRRtspTcpBasic(l[0:2], c[0:2],
                      self._serverGUID,
                      self._username,
                      self._password,
@@ -2616,7 +2626,7 @@ class RtspLog:
 
     def writeFail(self,msg):
         self._fileFail.write("%s\n" % (msg))
-    
+
     def flushOK(self):
         self._fileOK.flush()
 
@@ -2634,7 +2644,7 @@ class FiniteRtspTest:
     _archiveMax = 360
     _archiveMin = 60
     _lock = threading.Lock()
-    
+
     def __init__(self,testSize,userName,passWord,archiveMax,archiveMin):
         self._testCase = testSize
         self._username = userName
@@ -2664,7 +2674,7 @@ class FiniteRtspTest:
         for t in thPool:
             t[0].join()
             t[1].close()
-            
+
         print "Finite RTSP test ends"
         print "-----------------------------------"
 
@@ -2692,9 +2702,7 @@ class InfiniteSingleServerRtspTest(SingleServerRtspTestBase):
         while self._flag.isOn():
             for c in self._cameraList:
                 # Streaming version RTSP test
-                with RRRtspTcpBasic(l[0],int(l[1]),
-                             c[0],
-                             c[1],
+                with RRRtspTcpBasic(l[0:2], c[0:2],
                              self._serverGUID,
                              self._username,
                              self._password,
@@ -2704,9 +2712,7 @@ class InfiniteSingleServerRtspTest(SingleServerRtspTestBase):
                     else:
                         self._negative = self._negative + 1
 
-                with RRRtspTcpBasic(l[0],int(l[1]),
-                             c[0],
-                             c[1],
+                with RRRtspTcpBasic(l[0:2], c[0:2],
                              self._serverGUID,
                              self._username,
                              self._password,
@@ -2810,8 +2816,6 @@ def runRtspTest():
 # ======================================================
 # RTSP performance Operations
 # ======================================================
-RTSP_DUMP = False # TODO pass it through arguments to SingleServerRtspPerf()
-
 class SingleServerRtspPerf(SingleServerRtspTestBase):
     ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
     _timeoutMax = 0
@@ -2826,8 +2830,15 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
     _archiveNumOK = 0
     _archiveNumFail = 0
+    _archiveNumTimeout = 0
+    _archiveNumClose = 0
+    _archiveNumSocketError = 0
     _streamNumOK = 0
     _streamNumFail = 0
+    _streamNumTimeout = 0
+    _streamNumClose = 0
+    _streamNumSocketError = 0
+    _need_dump = False
 
     def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,timeoutMax,timeoutMin,threadNum,flag,lock):
         SingleServerRtspTestBase.__init__(self,
@@ -2844,139 +2855,136 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         self._lock = lock
         self._timeoutMax = timeoutMax
         self._timeoutMin = timeoutMin
+        self._rtspTimeout = flag.rtspTimeout
         # Initialize the performance log
         l = serverEndpoint.split(":")
         self._perfLog = open("%s_%s.perf.rtsp.log" % (l[0],l[1]),"w+")
 
-
-    # This function will blocked on socket to recv data in a fashion of _RATE_
-    def _timeoutRecv(self,socket,rate,timeout):
+    # Read some bytes from the socket, no more then RATE, no longer then TIMEOUT
+    def _timeoutRecv(self, socket, rate, timeout):
         socket.setblocking(0)
-        elapsed = 0
         buf = []
-        last_packet_sz = 0
+        finish = time.time() + timeout
 
-        while True:
-            # recording the time for fetching an event
-            begin = time.clock()
-            ready = select.select([socket], [], [], timeout)
-            if ready[0]:
-                data = socket.recv(1024*16) if rate < 0 else socket.recv(rate)
-                last_packet_sz = len(data)
-                buf.append(data)
-                end = time.clock()
-                elapsed = end-begin
-                # compensate the rate of packet size here
-                if rate != -1:
-                    if len(data) >= rate:
-                        time.sleep(1.0-elapsed)
-                        socket.setblocking(1)
-                        return ''.join(buf)
+        try:
+            while time.time() < finish:
+                # recording the time for fetching an event
+                begin = time.time()
+                ready = select.select([socket], [], [], timeout)
+                if ready[0]:
+                    data = socket.recv(1024*16) if rate < 0 else socket.recv(rate)
+                    last_packet_sz = len(data)
+                    buf.append(data)
+                    elapsed = time.time() - begin
+                    # compensate the rate of packet size here
+                    if rate != -1:
+                        if len(data) >= rate:
+                            time.sleep(1.0-elapsed)
+                            return ''.join(buf)
+                        else:
+                            rate -= last_packet_sz
                     else:
-                        rate -= last_packet_sz
+                        return data
                 else:
-                    return data
-            else:
-                # timeout reached
-                socket.setblocking(1)
-                return None
+                    # timeout reached
+                    return None
+            # time limit reached
+            return ''.join(buf)
+        finally:
+            socket.setblocking(1)
 
-    def _dumpArchiveHelper(self,c,tcp_rtsp,timeout,dump,rate):
-        for _ in xrange(timeout):
+    def _dumpArchiveHelper(self, c, tcp_rtsp, timeout, dump_file):
+        finish = time.time() + timeout
+        while time.time() < finish:
             try:
-                data = self._timeoutRecv(tcp_rtsp._socket,rate,3)
-                if dump is not None:
-                    dump.write(data)
-                    dump.flush()
+                data = self._timeoutRecv(tcp_rtsp._socket, self.ARCHIVE_STREAM_RATE, self._rtspTimeout)
+                if dump_file is not None:
+                    dump_file.write(data)
+                    dump_file.flush()
             except Exception:
                 traceback.print_exc()
-            
-            if data == None:
-                with self._lock:
-                    print "--------------------------------------------"
-                    print "The RTSP url:%s 3 seconds not response with any data" % (tcp_rtsp._url)
-                    print "--------------------------------------------"
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
-                    self._perfLog.write("The RTSP/RTP url:%s 3 seconds not response with any data\n" % (tcp_rtsp._url))
-                    self._perfLog.write("Camera name:%s\n" % (c[2]))
-                    self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                    self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.flush()
-                return
-            elif not data:
-                with self._lock:
-                    print "--------------------------------------------"
-                    print "The RTSP url:%s manully close the connection" % (tcp_rtsp._url)
-                    print "--------------------------------------------"
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
-                    self._perfLog.write("The RTSP/RTP url:%s manully close the connection\n" % (tcp_rtsp._url))
-                    self._perfLog.write("Camera name:%s\n" % (c[2]))
-                    self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                    self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.flush()
-                return
+            else:
+                if data == None:
+                    with self._lock:
+                        print "--------------------------------------------"
+                        print "The RTSP url %s no data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
+                        self._perfLog.write("The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
+                        self._perfLog.write("Camera name:%s\n" % (c[2]))
+                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
+                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.flush()
+                        self._archiveNumTimeout += 1
+                        self._archiveNumOK -= 1
+                    return
+                elif data == '':
+                    with self._lock:
+                        print "--------------------------------------------"
+                        print "The RTSP url %s connection has been closed by server" % (tcp_rtsp._url)
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.write("This is an exceptional case, the server _SHOULD_ not terminate the connection\n")
+                        self._perfLog.write("The RTSP/RTP url %s connection has been closed by server\n" % (tcp_rtsp._url))
+                        self._perfLog.write("Camera name:%s\n" % (c[2]))
+                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
+                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.flush()
+                        self._archiveNumClose += 1
+                        self._archiveNumOK -= 1
+                    return
 
         with self._lock:
             print "--------------------------------------------"
-            print "The RTP sink normally timeout with:%d on RTSP url:%s" % (timeout,tcp_rtsp._url)
-            print "--------------------------------------------"
-        return
+            print "The RTP sink normally finished with period %d on RTSP url:%s" % (timeout,tcp_rtsp._url)
 
-
-    def _dumpStreamHelper(self,c,tcp_rtsp,timeout,dump,rate):
-        elapsed = 0.0
-        while True:
-            begin = time.clock()
+    def _dumpStreamHelper(self, c, tcp_rtsp, timeout, dump_file):
+        finish = time.time() + timeout
+        while time.time() < finish:
             try:
-                data = self._timeoutRecv(tcp_rtsp._socket,rate,3)
-                if dump is not None:
-                    dump.write(data)
-                    dump.flush()
+                data = self._timeoutRecv(tcp_rtsp._socket, -1, self._rtspTimeout)
+                if dump_file is not None:
+                    dump_file.write(data)
+                    dump_file.flush()
             except Exception:
                 traceback.print_exc()
-            
-            if data == None:
-                with self._lock:
-                    print "--------------------------------------------"
-                    print "The RTSP url:%s 3 seconds not response with any data" % (tcp_rtsp._url)
-                    print "--------------------------------------------"
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
-                    self._perfLog.write("The RTSP/RTP url:%s 3 seconds not response with any data\n" % (tcp_rtsp._url))
-                    self._perfLog.write("Camera name:%s\n" % (c[2]))
-                    self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                    self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.flush()
-                return
-            elif not data:
-                with self._lock:
-                    print "--------------------------------------------"
-                    print "The RTSP url:%s manully close the connection" % (tcp_rtsp._url)
-                    print "--------------------------------------------"
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
-                    self._perfLog.write("The RTSP/RTP url:%s manully close the connection\n" % (tcp_rtsp._url))
-                    self._perfLog.write("Camera name:%s\n" % (c[2]))
-                    self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                    self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                    self._perfLog.write("--------------------------------------------\n")
-                    self._perfLog.flush()
-                return
+            else:
+                if data == None:
+                    with self._lock:
+                        print "--------------------------------------------"
+                        print "The RTSP url %s no data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
+                        self._perfLog.write("The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
+                        self._perfLog.write("Camera name:%s\n" % (c[2]))
+                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
+                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.flush()
+                        self._streamNumTimeout += 1
+                        self._streamNumOK -= 1
+                    return
+                elif data == '':
+                    with self._lock:
+                        print "--------------------------------------------"
+                        print "The RTSP url %s connection has been closed by server" % (tcp_rtsp._url)
+                        print "--------------------------------------------"
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
+                        self._perfLog.write("The RTSP/RTP url %s connection has been closed by server\n" % (tcp_rtsp._url))
+                        self._perfLog.write("Camera name:%s\n" % (c[2]))
+                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
+                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
+                        self._perfLog.write("--------------------------------------------\n")
+                        self._perfLog.flush()
+                        self._streamNumClose += 1
+                        self._streamNumOK -= 1
+                    return
 
-            end = time.clock()
-            elapsed += (end-begin)
-
-            if elapsed >= timeout:
-                with self._lock:
-                    print "--------------------------------------------"
-                    print "The RTP sink normally timeout with:%d on RTSP url:%s" % (timeout,tcp_rtsp._url)
-                    print "--------------------------------------------"
-                return
+        with self._lock:
+            print "--------------------------------------------"
+            print "The RTP sink normally finished with period %d on RTSP url:%s" % (timeout, tcp_rtsp._url)
 
     def _buildUrlPath(self,url):
         l = len(url)
@@ -2998,60 +3006,66 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
         return ''.join(buf)
 
-    def _dump(self,c,tcp_rtsp,timeout,dump,rate,helper):
-        if dump :
+    def _dump(self,c, tcp_rtsp, timeout, helper):
+        if self._need_dump:
             with open(self._buildUrlPath(tcp_rtsp._url),"w+") as f:
-                helper(c,tcp_rtsp,timeout,f,rate)
+                helper(c, tcp_rtsp, timeout, f)
         else:
-            helper(c,tcp_rtsp,timeout,None,rate)
+            helper(c, tcp_rtsp, timeout, None)
 
     # Represent a streaming TASK on the camera
-    def _main_streaming(self,c,dump):
+    def _main_streaming(self, c):
         l = self._serverEndpoint.split(':')
-        obj = RRRtspTcpBasic(l[0],int(l[1]),
-                     c[0],
-                     c[1],
+        obj = RRRtspTcpBasic(l[0:2], c[0:2],
                      self._serverGUID,
-                     self._username,
-                     self._password,
+                     self._username, self._password,
                      RtspStreamURLGenerator(l[0],int(l[1]),c[0]),
-                     self._lock,self._perfLog)
+                     self._lock, self._perfLog, socket_reraise=True)
 
-        with obj as reply:
-            # 1.  Check the reply here
-            if self._checkRtspRequest(c,reply):
-                self._dump(c,obj,random.randint(self._timeoutMin,self._timeoutMax),dump,-1,self._dumpStreamHelper)
-                self._streamNumOK = self._streamNumOK + 1
-            else:
-                self._streamNumFail = self._streamNumFail + 1
+        try:
+            with obj as reply:
+                # 1.  Check the reply here
+                if self._checkRtspRequest(c,reply):
+                    self._dump(c, tcp_rtsp=obj, timeout=random.randint(self._timeoutMin,self._timeoutMax),
+                               helper=self._dumpStreamHelper)
+                    self._streamNumOK += 1
+                else:
+                    self._streamNumFail += 1
+        except socket.error:
+            print "--------------------------------------------"
+            print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
+            self._streamNumSocketError += 1
 
-
-    def _main_archive(self,c,dump):
+    def _main_archive(self, c):
         l = self._serverEndpoint.split(':')
-        obj = RRRtspTcpBasic(l[0],int(l[1]),
-                             c[0],
-                             c[1],
+        obj = RRRtspTcpBasic(l[0:2], c[0:2],
                              self._serverGUID,
-                             self._username,
-                             self._password,
+                             self._username, self._password,
                              RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,l[0],int(l[1]),c[0]),
-                             self._lock,self._perfLog)
-        with obj as reply:
-            # 1.  Check the reply here
-           if self._checkRtspRequest(c,reply):
-                self._dump(c,obj,random.randint(self._timeoutMin,self._timeoutMax),dump,self.ARCHIVE_STREAM_RATE,self._dumpArchiveHelper)
-                self._archiveNumOK = self._archiveNumOK + 1
-           else:
-               self._archiveNumFail = self._archiveNumFail + 1
+                             self._lock, self._perfLog, socket_reraise=True)
+        try:
+            with obj as reply:
+                # 1.  Check the reply here
+               if self._checkRtspRequest(c,reply):
+                    self._dump(c, tcp_rtsp=obj, timeout=random.randint(self._timeoutMin,self._timeoutMax),
+                               helper=self._dumpArchiveHelper)
+                    self._archiveNumOK += 1
+               else:
+                   self._archiveNumFail += 1
+        except socket.error:
+            print "--------------------------------------------"
+            print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
+            self._archiveNumSocketError += 1
 
-    def _threadMain(self,dump):
+    def _threadMain(self, num):
         while self._exitFlag.isOn():
             # choose a random camera in the server list
-            c = self._cameraList[random.randint(0,len(self._cameraList) - 1)]
+            c = random.choice(self._cameraList)
             if random.randint(0,1) == 0:
-                self._main_streaming(c,dump)
+                print
+                self._main_streaming(c)
             else:
-                self._main_archive(c,dump)
+                self._main_archive(c)
 
     def join(self):
         for th in self._threadPool:
@@ -3059,20 +3073,27 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         self._perfLog.close()
         print "======================================="
         print "Server:%s:" % (self._serverEndpoint)
-        print "Archive Success Number:%d" % (self._archiveNumOK)
-        print "Archive Failed Number:%d" % (self._archiveNumFail)
-        print "Stream Success Number:%d" % (self._streamNumOK)
-        print "Stream Failed Number:%d" % (self._streamNumFail)
+        print "Archive Success Number: %d" % self._archiveNumOK
+        print "Archive Failed Number: %d" % self._archiveNumFail
+        print "Archive Timed Out Number: %d" % self._archiveNumTimeout
+        print "Archive Server Closed Number: %d" % self._archiveNumClose
+        print "Archive Socket Error Number: %d" % self._archiveNumSocketError
+        print "Stream Success Number:%d" % self._streamNumOK
+        print "Stream Failed Number:%d" % self._streamNumFail
+        print "Stream Timed Out Number: %d" % self._streamNumTimeout
+        print "Stream Server Closed Number: %d" % self._streamNumClose
+        print "Stream Socket Error Number: %d" % self._streamNumSocketError
         print "======================================="
 
-    def run(self):
+    def run(self, need_dump=False):
         if len(self._cameraList) == 0:
             print "The camera list on server:%s is empty!"%(self._serverEndpoint)
             print "Do nothing and abort!"
             return False
 
+        self._need_dump = need_dump
         for _ in xrange(self._threadNum):
-            th = threading.Thread(target=self._threadMain,args=(RTSP_DUMP,))
+            th = threading.Thread(target=self._threadMain, args=(_,))
             th.start()
             self._threadPool.append(th)
 
@@ -3107,18 +3128,24 @@ class RtspPerf:
         username = config_parser.get("General","username")
         password = config_parser.get("General","password")
 
+        config_parser.defaults()["rtspTimeout"] = 3
+        config_parser.defaults()["rtspCloseTimeout"] = 5
+
+        self.rtspTimeout = config_parser.getint("Rtsp", "rtspTimeout")
+        RRRtspTcpBasic.set_close_timeout_global(config_parser.getint("Rtsp", "rtspCloseTimeout"))
+
         # Let's add those RtspSinglePerf
         for i in xrange(len(clusterTest.clusterTestServerList)):
             serverAddr = clusterTest.clusterTestServerList[i]
             serverGUID = clusterTest.clusterTestServerUUIDList[i][0]
             serverThreadNum = int(threadNumbers[i])
-            
+
             self._perfServer.append(SingleServerRtspPerf(archiveMax,archiveMin,serverAddr,serverGUID,username,password,
                     timeoutMax,timeoutMin,serverThreadNum,self,self._lock))
 
         return True
-            
-    def run(self):
+
+    def run(self, need_dump=False):
         if not self._loadConfig():
             return False
         else:
@@ -3126,18 +3153,20 @@ class RtspPerf:
             print "Start to run RTSP pressure test now!"
             print "Press CTRL+C to interrupt the test!"
             print "The exceptional cases are stored inside of server_end_point.rtsp.perf.log"
-            
+
             # Add the signal handler
             signal.signal(signal.SIGINT,self._onInterrupt)
 
             for e in self._perfServer:
-                if not e.run():
+                if not e.run(need_dump):
                     return
 
             while self.isOn():
                 try:
                     time.sleep(1)
-                except:
+                except Exception:
+                    break
+                except KeyboardInterrupt:
                     break
 
             for e in self._perfServer:
@@ -3148,8 +3177,8 @@ class RtspPerf:
 
 
 
-def runRtspPerf():
-    RtspPerf().run()
+def runRtspPerf(need_dump):
+    RtspPerf().run(need_dump)
     clusterTest.unittestRollback.removeRollbackDB()
 
 # Performance test function
@@ -3174,7 +3203,7 @@ class PerformanceOperation():
 
         # Do a sligtly graceful way to dump the sample of failure
         if response.getcode() != 200:
-            self._dumpFailedRequest(d,methodName) #FIXME WTF?! looks like this wascopy-pasted  but the referred method wasn't!
+            self._dumpFailedRequest(d,methodName) #FIXME WTF?! looks like this was copy-pasted but the referred method wasn't!
 
         if response.getcode() != 200:
             print "%s failed with statusCode %d" % (methodName,response.getcode())
@@ -3206,7 +3235,7 @@ class PerformanceOperation():
             ret.append((s,data))
 
         return ret
-    
+
     # This function will retrieve data that has name prefixed with ec2_test as
     # prefix
     # This sort of resources are generated by our software .
@@ -3354,7 +3383,7 @@ def runMiscFunction(argc, argv):
         return (False,"2/1 parameters are needed")
 
     l = argv[1].split('=')
-    
+
     if l[0] != '--add' and l[0] != '--remove':
         return (False,"Unknown first parameter options")
 
@@ -3364,7 +3393,7 @@ def runMiscFunction(argc, argv):
         return (False,"Unknown target operations:%s" % (l[1]))
     else:
         t = t()
-    
+
     if l[0] == '--add':
         if argc != 3 :
             return (False,"--add must have --count option")
@@ -3409,13 +3438,13 @@ class SingleResourcePerfGenerator:
 
     def saveAPI(self):
         pass
-    
+
     def updateAPI(self):
         pass
 
     def getAPI(self):
         pass
-        
+
     def resourceName(self):
         pass
 
@@ -3433,30 +3462,30 @@ class SingleResourcePerfTest:
             "id":"%s"
         }
     """
-    
+
     def __init__(self,glock,gen,addr):
         self._globalLock = glock
         self._resourceGen = gen
         self._serverAddr = addr
         self._initializeResourceList()
-        
+
     def _initializeResourceList(self):
         for _ in xrange(self._initialData):
-            self._create() 
-            
+            self._create()
+
     def _create(self):
         d = self._resourceGen.generateCreation(self._serverAddr)
         # Create the resource in the remote server
         response = None
-        
+
         with self._globalLock:
             req = urllib2.Request("http://%s/ec2/%s" % (self._serverAddr,self._resourceGen.saveAPI()),
-                data=d[0], headers={'Content-Type': 'application/json'}) 
+                data=d[0], headers={'Content-Type': 'application/json'})
             try:
                 response = urllib2.urlopen(req)
             except urllib2.URLError,e:
                 return False
-        
+
         if response.getcode() != 200:
             response.close()
             return False
@@ -3466,7 +3495,7 @@ class SingleResourcePerfTest:
             with self._lock:
                 self._resourceList.append(d[1])
                 return True
-                
+
     def _remove(self):
         id = None
         # Pick up a deleted resource Id
@@ -3477,11 +3506,11 @@ class SingleResourcePerfTest:
             id = self._resourceList[idx]
             # Do the deletion from the list FIRST
             del self._resourceList[idx]
-            
+
         # Do the deletion on remote machine
         with self._globalLock:
             req = urllib2.Request("http://%s/ec2/removeResource" % (self._serverAddr),
-                data=self._deletionTemplate % (id), headers={'Content-Type': 'application/json'}) 
+                data=self._deletionTemplate % (id), headers={'Content-Type': 'application/json'})
             try:
                 response = urllib2.urlopen(req)
             except urllib2.URLError,e:
@@ -3492,7 +3521,7 @@ class SingleResourcePerfTest:
                 return False
             else:
                 return True
-    
+
     def _update(self):
         id = None
         with self._lock:
@@ -3503,13 +3532,13 @@ class SingleResourcePerfTest:
             # Do the deletion here in order to ensure that another thread will NOT
             # delete it
             del self._resourceList[idx]
-            
+
         # Do the updating on the remote machine here
         d = self._resourceGen.generateUpdate(id,self._serverAddr)
-        
+
         with self._globalLock:
             req = urllib2.Request("http://%s/ec2/%s" % (self._serverAddr,self._resourceGen.updateAPI()),
-                data=d, headers={'Content-Type': 'application/json'}) 
+                data=d, headers={'Content-Type': 'application/json'})
             try:
                 response = urllib2.urlopen(req)
             except urllib2.URLError,e:
@@ -3518,18 +3547,18 @@ class SingleResourcePerfTest:
                 response.close()
                 return False
             else:
-                return True 
-                
+                return True
+
         # Insert that resource _BACK_ to the list
         with self._lock:
             self._resourceList.append(id)
-            
+
     def _takePlace(self,prob):
         if random.random() <= prob:
             return True
         else:
             return False
-    
+
     def runOnce(self):
         if self._takePlace(self._creationProb):
             return (self._create(),"Create")
@@ -3537,7 +3566,7 @@ class SingleResourcePerfTest:
             return (self._update(),"Update")
         else:
             return (self._remove(),"Remove")
-        
+
 class CameraPerfResourceGen(SingleResourcePerfGenerator):
     _gen = CameraDataGenerator()
 
@@ -3549,31 +3578,31 @@ class CameraPerfResourceGen(SingleResourcePerfGenerator):
 
     def saveAPI(self):
         return "saveCameras"
-    
+
     def updateAPI(self):
         return "saveCameras"
 
     def getAPI(self):
         return "getCameras"
-        
+
     def resourceName(self):
         return "Camera"
 
 class UserPerfResourceGen(SingleResourcePerfGenerator):
     _gen = UserDataGenerator()
-    
+
     def generateUpdate(self,id,parentId):
         return self._gen.generateUpdateData(id)[0]
-        
+
     def generateCreation(self,parentId):
         return self._gen.generateUserData(1)[0]
-        
+
     def saveAPI(self):
         return "saveUser"
-    
+
     def getAPI(self):
         return "getUsers"
-        
+
     def resourceName(self):
         return "User"
 
@@ -3591,10 +3620,10 @@ class PerfTest:
     _perfList = []
     _exit = False
     _threadPool = []
-    
+
     def _onInterrupt(self,a,b):
         self._exit = True
-    
+
     def _initPerfList(self,type):
         for s in clusterTest.clusterTestServerList:
             if type[0] :
@@ -3602,9 +3631,9 @@ class PerfTest:
 
             if type[1]:
                 self._perfList.append((s,SingleResourcePerfTest(self._globalLock,CameraPerfResourceGen(),s)))
-                
+
             self._statics[s] = PerfStatistic()
-                    
+
     def _threadMain(self):
         while not self._exit:
             for entry in self._perfList:
@@ -3626,17 +3655,17 @@ class PerfTest:
                         self._statics[serverAddr].removeOK = self._statics[serverAddr].removeOK + 1
                     else:
                         self._statics[serverAddr].removeFail = self._statics[serverAddr].removeFail + 1
-        
+
     def _initThreadPool(self,threadNumber):
         for _ in xrange(threadNumber):
             th = threading.Thread(target=self._threadMain)
             th.start()
             self._threadPool.append(th)
-    
+
     def _joinThreadPool(self):
         for th in self._threadPool:
             th.join()
-            
+
     def _parseParameters(self,par):
         sl = par.split(',')
         ret = [False,False,False]
@@ -3650,7 +3679,7 @@ class PerfTest:
             else:
                 continue
         return ret
-            
+
     def run(self, par):
         ret = self._parseParameters(par)
         if not ret[0] and not ret[1] and not ret[2]:
@@ -3803,7 +3832,7 @@ class SystemNameTest:
                     return (False,"The server that has IP address:%s and GUID:%s \
                     should be Offline when login on Server:%s" % (ele["networkAddresses"],ele["id"],s))
         return (True,"")
-    
+
     def _doTest(self):
         for s in self._serverList:
             ret,reason = self._doSingleTest(s)
@@ -3952,10 +3981,7 @@ def DoTests(argv):
             elif argv[1] == '--rtsp-test':
                 runRtspTest()
             elif argv[1] == '--rtsp-perf':
-                if argc == 3 and argv[2] == '--dump':
-                    global RTSP_DUMP
-                    RTSP_DUMP = True
-                runRtspPerf()
+                runRtspPerf(argc == 3 and argv[2] == '--dump')
             elif argc == 3 and argv[1] == '--perf':
                 runPerfTest()
             else:
@@ -3963,12 +3989,12 @@ def DoTests(argv):
 
 
 if __name__ == '__main__':
-    clusterTest.preparseArgs(sys.argv)
-    if len(clusterTest.argv) >= 2 and clusterTest.argv[1] in ('--help', '-h'):
-        showHelp(clusterTest.argv)
-    elif len(clusterTest.argv) == 2 and clusterTest.argv[1] == '--recover':
+    argv = clusterTest.preparseArgs(sys.argv)
+    if len(argv) >= 2 and argv[1] in ('--help', '-h'):
+        showHelp(argv)
+    elif len(argv) == 2 and argv[1] == '--recover':
         UnitTestRollback().doRecover()
-    elif len(clusterTest.argv) == 2 and clusterTest.argv[1] == '--sys-name':
+    elif len(argv) == 2 and argv[1] == '--sys-name':
         SystemNameTest().run()
     else:
-        DoTests(clusterTest.argv)
+        DoTests(argv)
