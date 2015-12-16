@@ -3,8 +3,9 @@ __author__ = 'Danil Lavrentyuk'
 import sys
 import json
 import urllib2
+from ConfigParser import RawConfigParser
 
-__all__ = ['JsonDiff', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
+__all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'ClusterWorker', 'ClusterLongWorker']
 
 # ---------------------------------------------------------------------
@@ -104,6 +105,24 @@ class JsonDiff:
     def resetDiff(self):
         self._hasDiff = False
         self._errorInfo=""
+
+
+class FtConfigParser(RawConfigParser):
+
+    def get_safe(self, section, option, default=None):
+        if not self.has_option(section, option):
+            return default
+        return self.get(section, option)
+
+    def getint_safe(self, section, option, default=None):
+        if not self.has_option(section, option):
+            return default
+        return self.getint(section, option)
+
+    def getfloat_safe(self, section, option, default=None):
+        if not self.has_option(section, option):
+            return default
+        return self.getfloat(section, option)
 
 
 def _compareJsonObject(lhs,rhs,result):

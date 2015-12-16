@@ -2,7 +2,6 @@
 import unittest
 import urllib2
 import urllib
-import ConfigParser
 import time
 import threading
 import json
@@ -29,11 +28,7 @@ CONFIG_FNAME = "functest.cfg"
 # Rollback support
 class UnitTestRollback:
     _rollbackFile = None
-    _removeTemplate = """
-        {
-            "id":"%s"
-        }
-    """
+    _removeTemplate = '{ "id":"%s" }'
 
     def __init__(self):
         if os.path.isfile(".rollback"):
@@ -54,7 +49,7 @@ class UnitTestRollback:
 
     def addOperations(self,methodName,serverAddress,resourceId):
         for s in clusterTest.clusterTestServerList:
-            self._rollbackFile.write(("%s,%s,%s\n") % (methodName,s,resourceId))
+            self._rollbackFile.write(("%s,%s,%s\n") % (methodName,s,resourceId)) #FIXME Is it OK - ignore serverAddress and record operation for ALL SERVERS?!
         self._rollbackFile.flush()
 
     def _doSingleRollback(self,methodName,serverAddress,resourceId):
@@ -498,7 +493,7 @@ class ClusterTest(object):
 
     def getConfig(self):
         if self.config is None:
-            self.config = ConfigParser.RawConfigParser()
+            self.config = FtConfigParser()
             self.config.read(self.configFname)
         return self.config
 
@@ -587,7 +582,7 @@ class ClusterTest(object):
 clusterTest = ClusterTest()
 
 ####################################################################################################
-## Some more generators, a bit complex than clases from generator.py
+## Some more generators, a bit complex than classes from generator.py
 ####################################################################################################
 
 class CameraDataGenerator(BasicGenerator):
@@ -2160,8 +2155,6 @@ class RtspStreamURLGenerator:
     _mac = None
 
     def __init__(self,server,port,mac):
-        self._diffMax = max
-        self._diffMin = min
         self._server = server
         self._port = port
         self._mac = mac
@@ -2271,6 +2264,9 @@ class RRRtspTcpBasic:
 
     _lock = None
     _log  = None
+
+    _skip_errno = [errno.EAGAIN, errno.EWOULDBLOCK] + ([errno.WSAEWOULDBLOCK] if hasattr(errno, 'WSAEWOULDBLOCK') else [])
+    # There is no errno.WSAEWOULDBLOCK on Linux.
 
     def __init__(self, (addr, port), (mac, cid), sid, uname, pwd, urlGen, lock=None,log=None, socket_reraise=False):
         self._addr = addr
@@ -2440,7 +2436,7 @@ class RRRtspTcpBasic:
                         return
 
                 except socket.error, e:
-                    if e.errno == errno.EAGAIN or e.errno == errno.EWOULDBLOCK or e == errno.WSAEWOULDBLOCK:
+                    if e.errno in self._skip_errno:
                         pass
                     else:
                         self._dumpError("socket::recv : %s"%(e))
@@ -2527,7 +2523,8 @@ class SingleServerRtspTestBase:
             if "name" in c and c["name"].startswith("ec2_test"):
                 continue # Skip fake camera
             if c['status'] in ('Online', 'Recording'):
-                self._cameraList.append((c["physicalId"],c["id"],c["name"]))
+                self._cameraList.append((c["physicalId"],c["id"],c["name"].encode('utf8')))
+                # c['name'] is used for output only and some pseudo-OSes (like Windows) don't have UTF-8 consoles :(
                 self._cameraInfoTable[c["id"]] = c
 
     def _checkReply(self,reply):
@@ -2544,7 +2541,7 @@ class SingleServerRtspTestBase:
             print "RTSP request on URL:%s issued!" % (reply[1])
             if not self._checkReply(reply[0]):
                 print "RTSP request on Server:%s failed" % (self._serverEndpoint)
-                print "Camera name:%s" % (c[2])
+                print "Camera name:%s" % (c[2].encode('utf8'),)
                 print "Camera Physical Id:%s" % (c[0])
                 print "Camera Id:%s" % (c[1])
 
@@ -2612,6 +2609,7 @@ class FiniteSingleServerRtspTest(SingleServerRtspTestBase):
         for _ in xrange(self._testCase):
             self._testMain()
 
+
 class RtspLog:
     _fileOK = None
     _fileFail = None
@@ -2636,6 +2634,7 @@ class RtspLog:
     def close(self):
         self._fileOK.close()
         self._fileFail.close()
+
 
 class FiniteRtspTest:
     _testCase = 0
@@ -2818,10 +2817,8 @@ def runRtspTest():
 # ======================================================
 class SingleServerRtspPerf(SingleServerRtspTestBase):
     ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
-    _timeoutMax = 0
-    _timeoutMin = 0
-    _diffMax = 0
-    _diffMin = 0
+    _timeoutMax = 0 # whole number of milliseconds
+    _timeoutMin = 0 # whole number of milliseconds
     _lock = None
     _perfLog = None
     _threadNum = 0
@@ -2839,8 +2836,12 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _streamNumClose = 0
     _streamNumSocketError = 0
     _need_dump = False
+    _rtspTimeout = 3
+    _threadStartSpacing = 0
+    _socketCloseGrace = 0
 
-    def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,timeoutMax,timeoutMin,threadNum,flag,lock):
+
+    def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,threadNum,flag,lock):
         SingleServerRtspTestBase.__init__(self,
                                           archiveMax,
                                           archiveMin,
@@ -2853,12 +2854,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         self._threadNum = threadNum
         self._exitFlag = flag
         self._lock = lock
-        self._timeoutMax = timeoutMax
-        self._timeoutMin = timeoutMin
-        self._rtspTimeout = flag.rtspTimeout
         # Initialize the performance log
         l = serverEndpoint.split(":")
         self._perfLog = open("%s_%s.perf.rtsp.log" % (l[0],l[1]),"w+")
+
+    @classmethod
+    def set_global(cls, name, value):
+        setattr(cls, '_'+name, value)
 
     # Read some bytes from the socket, no more then RATE, no longer then TIMEOUT
     def _timeoutRecv(self, socket, rate, timeout):
@@ -2911,7 +2913,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                         self._perfLog.write("--------------------------------------------\n")
                         self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
                         self._perfLog.write("The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
-                        self._perfLog.write("Camera name:%s\n" % (c[2]))
+                        self._perfLog.write("Camera name:%s\n" % (c[2]).encode('utf8'))
                         self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
                         self._perfLog.write("Camera Id:%s\n" % (c[1]))
                         self._perfLog.write("--------------------------------------------\n")
@@ -2937,7 +2939,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
         with self._lock:
             print "--------------------------------------------"
-            print "The RTP sink normally finished with period %d on RTSP url:%s" % (timeout,tcp_rtsp._url)
+            print "The RTP sink normally finished with a period of %.3f seconds on RTSP url:%s" % (timeout,tcp_rtsp._url)
 
     def _dumpStreamHelper(self, c, tcp_rtsp, timeout, dump_file):
         finish = time.time() + timeout
@@ -2984,7 +2986,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
         with self._lock:
             print "--------------------------------------------"
-            print "The RTP sink normally finished with period %d on RTSP url:%s" % (timeout, tcp_rtsp._url)
+            print "The RTP sink normally finished with a period of %.3f seconds on RTSP url:%s" % (timeout, tcp_rtsp._url)
 
     def _buildUrlPath(self,url):
         l = len(url)
@@ -3013,6 +3015,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         else:
             helper(c, tcp_rtsp, timeout, None)
 
+    def _makeDataReceivePeriod(self):
+        return random.randint(self._timeoutMin, self._timeoutMax) / 1000.0
+
     # Represent a streaming TASK on the camera
     def _main_streaming(self, c):
         l = self._serverEndpoint.split(':')
@@ -3026,8 +3031,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             with obj as reply:
                 # 1.  Check the reply here
                 if self._checkRtspRequest(c,reply):
-                    self._dump(c, tcp_rtsp=obj, timeout=random.randint(self._timeoutMin,self._timeoutMax),
-                               helper=self._dumpStreamHelper)
+                    self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpStreamHelper)
                     self._streamNumOK += 1
                 else:
                     self._streamNumFail += 1
@@ -3047,8 +3051,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             with obj as reply:
                 # 1.  Check the reply here
                if self._checkRtspRequest(c,reply):
-                    self._dump(c, tcp_rtsp=obj, timeout=random.randint(self._timeoutMin,self._timeoutMax),
-                               helper=self._dumpArchiveHelper)
+                    self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpArchiveHelper)
                     self._archiveNumOK += 1
                else:
                    self._archiveNumFail += 1
@@ -3062,23 +3065,25 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             # choose a random camera in the server list
             c = random.choice(self._cameraList)
             if random.randint(0,1) == 0:
-                print
                 self._main_streaming(c)
             else:
                 self._main_archive(c)
+            if self._socketCloseGrace:
+                time.sleep(self._socketCloseGrace)
 
     def join(self):
         for th in self._threadPool:
             th.join()
         self._perfLog.close()
         print "======================================="
-        print "Server:%s:" % (self._serverEndpoint)
-        print "Archive Success Number: %d" % self._archiveNumOK
+        print "Server: %s" % (self._serverEndpoint)
+        print "Number of threads: %s" % self._threadNum
+        print "Archive Success Number: %d" % (self._archiveNumOK - self._archiveNumTimeout - self._archiveNumClose)
         print "Archive Failed Number: %d" % self._archiveNumFail
         print "Archive Timed Out Number: %d" % self._archiveNumTimeout
         print "Archive Server Closed Number: %d" % self._archiveNumClose
         print "Archive Socket Error Number: %d" % self._archiveNumSocketError
-        print "Stream Success Number:%d" % self._streamNumOK
+        print "Stream Success Number:%d" % (self._streamNumOK - self._streamNumTimeout - self._streamNumClose)
         print "Stream Failed Number:%d" % self._streamNumFail
         print "Stream Timed Out Number: %d" % self._streamNumTimeout
         print "Stream Server Closed Number: %d" % self._streamNumClose
@@ -3096,6 +3101,8 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             th = threading.Thread(target=self._threadMain, args=(_,))
             th.start()
             self._threadPool.append(th)
+            if self._threadStartSpacing:
+                time.sleep(self._threadStartSpacing)
 
         return True
 
@@ -3111,8 +3118,8 @@ class RtspPerf:
         self._exit = True
 
     def _loadConfig(self):
-        config_parser = clusterTest.getConfig()
-        threadNumbers = config_parser.get("Rtsp","threadNumbers").split(",")
+        config = clusterTest.getConfig()
+        threadNumbers = config.get("Rtsp","threadNumbers").split(",")
         if len(threadNumbers) != len(clusterTest.clusterTestServerList):
             print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
             print "threadNumbers = %s" % threadNumbers
@@ -3121,18 +3128,18 @@ class RtspPerf:
             print "RTSP Pressure test failed"
             return False
 
-        archiveMax = config_parser.getint("Rtsp","archiveDiffMax")
-        archiveMin = config_parser.getint("Rtsp","archiveDiffMin")
-        timeoutMax = config_parser.getint("Rtsp","timeoutMax")
-        timeoutMin = config_parser.getint("Rtsp","timeoutMin")
-        username = config_parser.get("General","username")
-        password = config_parser.get("General","password")
+        archiveMax = config.getint("Rtsp","archiveDiffMax")
+        archiveMin = config.getint("Rtsp","archiveDiffMin")
+        username = config.get("General","username")
+        password = config.get("General","password")
 
-        config_parser.defaults()["rtspTimeout"] = 3
-        config_parser.defaults()["rtspCloseTimeout"] = 5
+        RRRtspTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
+        SingleServerRtspPerf.set_global('timeoutMin', config.getint("Rtsp","timeoutMin") * 1000)
+        SingleServerRtspPerf.set_global('timeoutMax', config.getint("Rtsp","timeoutMax") * 1000)
+        SingleServerRtspPerf.set_global('rtspTimeout', config.getint_safe("Rtsp", "rtspTimeout", 3))
+        SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
+        SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
 
-        self.rtspTimeout = config_parser.getint("Rtsp", "rtspTimeout")
-        RRRtspTcpBasic.set_close_timeout_global(config_parser.getint("Rtsp", "rtspCloseTimeout"))
 
         # Let's add those RtspSinglePerf
         for i in xrange(len(clusterTest.clusterTestServerList)):
@@ -3141,7 +3148,7 @@ class RtspPerf:
             serverThreadNum = int(threadNumbers[i])
 
             self._perfServer.append(SingleServerRtspPerf(archiveMax,archiveMin,serverAddr,serverGUID,username,password,
-                    timeoutMax,timeoutMin,serverThreadNum,self,self._lock))
+                    serverThreadNum,self,self._lock))
 
         return True
 
@@ -3321,8 +3328,8 @@ class MediaServerOperation(PerformanceOperation):
                          self._filterOutId(gen.generateMediaServerData(num)),s)
         return True
 
-    def remove(self,uuid):
-        self_.remove(uuid)
+    def remove(self, uuid):
+        self._remove(uuid)
         return True
 
     def removeAll(self):
