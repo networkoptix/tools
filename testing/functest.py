@@ -25,6 +25,9 @@ from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
 
+DEFAULT_ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
+
+
 # Rollback support
 class UnitTestRollback:
     _rollbackFile = None
@@ -2816,7 +2819,7 @@ def runRtspTest():
 # RTSP performance Operations
 # ======================================================
 class SingleServerRtspPerf(SingleServerRtspTestBase):
-    ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
+    _archiveStreamRate = DEFAULT_ARCHIVE_STREAM_RATE
     _timeoutMax = 0 # whole number of milliseconds
     _timeoutMin = 0 # whole number of milliseconds
     _lock = None
@@ -2840,6 +2843,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _threadStartSpacing = 0
     _socketCloseGrace = 0
 
+    _startTime = 0
 
     def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,threadNum,flag,lock):
         SingleServerRtspTestBase.__init__(self,
@@ -2871,13 +2875,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         try:
             while time.time() < finish:
                 # recording the time for fetching an event
-                begin = time.time()
+                #begin = time.time()
                 ready = select.select([socket], [], [], timeout)
                 if ready[0]:
                     data = socket.recv(1024*16) if rate < 0 else socket.recv(rate)
                     last_packet_sz = len(data)
                     buf.append(data)
-                    elapsed = time.time() - begin
+                    elapsed = time.time() - self._startTime
                     # compensate the rate of packet size here
                     if rate != -1:
                         if len(data) >= rate:
@@ -2896,10 +2900,12 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             socket.setblocking(1)
 
     def _dumpArchiveHelper(self, c, tcp_rtsp, timeout, dump_file):
-        finish = time.time() + timeout
+        self._startTime = time.time()
+        finish = self._startTime + timeout
+
         while time.time() < finish:
             try:
-                data = self._timeoutRecv(tcp_rtsp._socket, self.ARCHIVE_STREAM_RATE, self._rtspTimeout)
+                data = self._timeoutRecv(tcp_rtsp._socket, self._archiveStreamRate, self._rtspTimeout)
                 if dump_file is not None:
                     dump_file.write(data)
                     dump_file.flush()
@@ -2909,7 +2915,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 if data == None:
                     with self._lock:
                         print "--------------------------------------------"
-                        print "The RTSP url %s no data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
+                        print "The RTSP url %s no archive data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
                         self._perfLog.write("--------------------------------------------\n")
                         self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
                         self._perfLog.write("The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
@@ -2955,7 +2961,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 if data == None:
                     with self._lock:
                         print "--------------------------------------------"
-                        print "The RTSP url %s no data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
+                        print "The RTSP url %s no live data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
                         self._perfLog.write("--------------------------------------------\n")
                         self._perfLog.write("This is an exceptional case,the server _SHOULD_ not terminate the connection\n")
                         self._perfLog.write("The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
@@ -3078,12 +3084,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         print "======================================="
         print "Server: %s" % (self._serverEndpoint)
         print "Number of threads: %s" % self._threadNum
-        print "Archive Success Number: %d" % (self._archiveNumOK - self._archiveNumTimeout - self._archiveNumClose)
+        print "rtspTimeout value: %s" % self._rtspTimeout
+        print "Archive Success Number: %d" % self._archiveNumOK
         print "Archive Failed Number: %d" % self._archiveNumFail
         print "Archive Timed Out Number: %d" % self._archiveNumTimeout
         print "Archive Server Closed Number: %d" % self._archiveNumClose
         print "Archive Socket Error Number: %d" % self._archiveNumSocketError
-        print "Stream Success Number:%d" % (self._streamNumOK - self._streamNumTimeout - self._streamNumClose)
+        print "Stream Success Number:%d" % self._streamNumOK
         print "Stream Failed Number:%d" % self._streamNumFail
         print "Stream Timed Out Number: %d" % self._streamNumTimeout
         print "Stream Server Closed Number: %d" % self._streamNumClose
@@ -3140,6 +3147,9 @@ class RtspPerf:
         SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
         SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
 
+        rate = config.get_safe("Rtsp", "archiveStreamRate", None)
+        if rate is not None:
+            SingleServerRtspPerf.set_global('archiveStreamRate', parse_size(rate))
 
         # Let's add those RtspSinglePerf
         for i in xrange(len(clusterTest.clusterTestServerList)):

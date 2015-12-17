@@ -6,7 +6,7 @@ import urllib2
 from ConfigParser import RawConfigParser
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
-           'ClusterWorker', 'ClusterLongWorker']
+           'ClusterWorker', 'ClusterLongWorker', 'parse_size']
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
@@ -487,6 +487,7 @@ def get_server_guid(host):
         return unquote_guid(info['reply'][u'id'])
     return None
 
+
 class Version(object):
     value = []
 
@@ -498,3 +499,18 @@ class Version(object):
 
     def __cmp__(self, other):
         return cmp(self.value, other.value)
+
+
+def parse_size(size_str):
+    "Parse string like 100M, 20k to a number of bytes, i.e. 100M = 100*1024*1024 bytes"
+    if size_str[-1].upper() == 'K':
+        mult = 1024
+        size_str = size_str[:-1].rstrip()
+    elif size_str[-1].upper() == 'M':
+        mult = 1024*1024
+        size_str = size_str[:-1].rstrip()
+    else:
+        mult = 1
+    return int(size_str) * mult
+
+
