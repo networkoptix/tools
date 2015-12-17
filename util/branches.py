@@ -13,6 +13,7 @@ from hg_module import get_branches
 tooOld = timedelta(days = 30)
 verbose = False
 
+
 def group_branches():
     branches = get_branches()
     
