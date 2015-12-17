@@ -2928,7 +2928,8 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 elif data == '':
                     with self._lock:
                         print "--------------------------------------------"
-                        print "The RTSP url %s connection has been closed by server" % (tcp_rtsp._url)
+                        print "The RTSP url %s connection has been closed by server after %.2f seconds" % (tcp_rtsp._url,
+                                                                                                           time.time() - self._startTime)
                         self._perfLog.write("--------------------------------------------\n")
                         self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (tcp_rtsp._url))
                         self._perfLog.write("Camera name:%s\n" % (c[2]))
@@ -2972,7 +2973,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 elif data == '':
                     with self._lock:
                         print "--------------------------------------------"
-                        print "The RTSP url %s connection has been closed by server" % (tcp_rtsp._url)
+                        print "The RTSP url %s connection has been closed by server after %.2f seconds" % (tcp_rtsp._url, time.time() - self._startTime)
                         self._perfLog.write("--------------------------------------------\n")
                         self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (tcp_rtsp._url))
                         self._perfLog.write("Camera name:%s\n" % (c[2]))
