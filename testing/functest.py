@@ -2396,6 +2396,8 @@ class RRRtspTcpBasic:
                 data = self._socket.recv(1024)
             except socket.error,e:
                 _rtspBackOffTimer.increase("%s:%d"%(self._addr,self._port))
+                with self._lock:
+                    print "Socket errror %s on URL %s" % (e, self._url)
                 if self._socket_reraise:
                     raise
                 return "This is not RTSP error but socket error:%s"%(e)
@@ -2403,6 +2405,8 @@ class RRRtspTcpBasic:
             _rtspBackOffTimer.decrease("%s:%d"%(self._addr,self._port))
 
             if not data:
+                with self._lock:
+                    print "Empty RSTP response on URL %s" % self._url
                 return ret
             else:
                 ret += data
