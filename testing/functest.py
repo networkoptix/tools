@@ -35,7 +35,7 @@ class UnitTestRollback:
 
     def __init__(self):
         if os.path.isfile(".rollback"):
-            selection = 'r' if clusterTest.auto_rollback else None
+            selection = 'r' if clusterTest.auto_rollback else ''
             if not clusterTest.auto_rollback:
                 try :
                     print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
@@ -546,7 +546,7 @@ class ClusterTest(object):
                 config_next = False
                 print "Use config", self.configFname
             elif arg in self._argFlags:
-                g[self._argFlags[arg]] = True
+                setattr(self, self._argFlags[arg], True)
             elif arg == '--config':
                 config_next = True
             elif arg.startswith('--config='):
@@ -2553,10 +2553,10 @@ class SingleServerRtspTestBase:
     def _checkRtspRequest(self,c,reply):
         ret = None
         with self._lock:
-            #print "----------------------------------------------------"
             print "RTSP request on URL:%s issued!" % (reply[1])
             if not self._checkReply(reply[0]):
                 print "RTSP request on Server %s failed" % (self._serverEndpoint)
+                print reply
                 print "Camera name: %s" % (c[2].encode('utf8'),)
                 print "Camera Physical Id: %s" % (c[0])
                 print "Camera Id: %s" % (c[1])
@@ -2568,13 +2568,11 @@ class SingleServerRtspTestBase:
                 self._log.writeFail("Camera Physical Id:%s" % (c[0]))
                 self._log.writeFail("Camera Id:%s" % (c[1]))
                 self._log.writeFail("Detail RTSP reply protocol:\n\n%s" % (reply[0]))
-                self._log.writeFail("-------------------------------------------")
                 self._log.flushFail()
                 ret = False
             else:
                 self._log.writeOK("-------------------------------------")
                 self._log.writeOK("RTSP request on Server:%s with URL:%s passed!" % (self._serverEndpoint,reply[1]))
-                self._log.writeOK("-------------------------------------")
                 self._log.flushOK()
                 print "Rtsp Test Passed!"
                 ret = True
