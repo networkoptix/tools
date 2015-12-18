@@ -226,11 +226,13 @@ class ClusterTest(object):
             return (False,"getMediaServersEx resposne with error code:%d" % (response.getcode()))
 
         json_obj = SafeJsonLoads(response.read(), self.clusterTestServerList[0], 'getMediaServersEx')
+        print json_obj
         if json_obj is None:
             return (False, "Wrong response")
 
         for uuid in server_id_list:
             n = self._getServerName(json_obj,uuid)
+            print "%s: %s" % (uuid, n)
             if n == None:
                 return (False,"Cannot fetch server name with UUID:%s" % (uuid))
             else:
@@ -2239,31 +2241,34 @@ class RRRtspTcpBasic:
     _pwd = None
     _urlGen = None
     _socket_close_timeout = 5
+    _resolution = None
 
-    _rtspBasicTemplate = "PLAY %s RTSP/1.0\r\n\
-        CSeq: 2\r\n\
-        Range: npt=now-\r\n\
-        Scale: 1\r\n\
-        x-guid: %s\r\n\
-        Session:\r\n\
-        User-Agent: Network Optix\r\n\
-        x-play-now: true\r\n\
-        Authorization: Basic YWRtaW46MTIz\r\n\
-        x-server-guid: %s\r\n\r\n"
+    _rtspBasicTemplate = "\r\n".join((
+        "PLAY %s RTSP/1.0",
+        "CSeq: 2",
+        "Range: npt=now-",
+        "Scale: 1",
+        "x-guid: %s",
+        "Session:",
+        "User-Agent: Network Optix",
+        "x-play-now: true",
+        "Authorization: Basic YWRtaW46MTIz",
+        "x-server-guid: %s", '', '')) # two '' -- to add two '\r\n' at the end
     #FIXME insert login-password from config
 
-    _rtspDigestTemplate = "PLAY %s RTSP/1.0\r\n\
-        CSeq: 2\r\n\
-        Range: npt=now-\r\n\
-        Scale: 1\r\n\
-        x-guid: %s\r\n\
-        Session:\r\n\
-        User-Agent: Network Optix\r\n\
-        x-play-now: true\r\n\
-        %s\r\n \
-        x-server-guid: %s\r\n\r\n"
+    _rtspDigestTemplate = "\r\n".join((
+        "PLAY %s RTSP/1.0",
+        "CSeq: 2",
+        "Range: npt=now-",
+        "Scale: 1",
+        "x-guid: %s",
+        "Session:",
+        "User-Agent: Network Optix",
+        "x-play-now: true",
+        "%s",
+        "x-server-guid: %s", '' ''))
 
-    _digestAuthTemplate = "Authorization:Digest username=\"%s\",realm=\"%s\",nonce=\"%s\",uri=\"%s\",response=\"%s\",algorithm=\"MD5\""
+    _digestAuthTemplate = 'Authorization:Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s",algorithm="MD5"'
 
     _lock = None
     _log  = None
@@ -2286,6 +2291,13 @@ class RRRtspTcpBasic:
         self._lock = lock
         self._log = log
         self._socket_reraise = socket_reraise
+
+    def add_prefered_resolution(self, resolution):
+        self._resolution = resolution
+        self._data = self._add_resolution_str(self._data)
+
+    def _add_resolution_str(self, header):
+        return ''.join((header[:-2], 'x-media-quality: ', self._resolution, "\r\n\r\n"))
 
     def _checkEOF(self,data):
         return data.find("\r\n\r\n") > 0
@@ -2358,6 +2370,8 @@ class RRRtspTcpBasic:
             self._cid,
             auth,
             self._sid)
+        if self._resolution:
+            data = self._add_resolution_str(data)
         self._request(data)
         return self._response()
 
@@ -2413,7 +2427,7 @@ class RRRtspTcpBasic:
     def set_close_timeout_global(cls, timeout):
         cls._socket_close_timeout = timeout
 
-    def _gracefulShutdown(self):
+    def _gracefulShutdown(self): # FIXME useless! remove it!
         # This shutdown will issue a FIN on the peer side therefore, the peer side (if it recv blocks)
         # will recv EOF on that socket fd. And it should behave properly regarding that problem there.
         self._socket.shutdown(socket.SHUT_WR)
@@ -2448,7 +2462,7 @@ class RRRtspTcpBasic:
             else:
                 # Timeout reached
                 self._dumpError( ("The server doesn't try to send me data or shutdown the connection for about %s seconds\n"
-                                  "However,I have issued the shutdown for read side,so the server _SHOULD_ close the connection\n"
+                                  "However,I have issued the shutdown for read side,so the server _SHOULD_ close the connection"
                                   % self._socket_close_timeout) )
                 return
 
@@ -2465,7 +2479,7 @@ class RRRtspTcpBasic:
 
     def __exit__(self,type,value,trace):
         # Do graceful closing here
-        self._gracefulShutdown()
+        #self._gracefulShutdown()
         self._socket.close()
 
 
@@ -2525,7 +2539,7 @@ class SingleServerRtspTestBase:
             if "name" in c and c["name"].startswith("ec2_test"):
                 continue # Skip fake camera
             if c['status'] in ('Online', 'Recording'):
-                self._cameraList.append((c["physicalId"],c["id"],c["name"].encode('utf8')))
+                self._cameraList.append((c["physicalId"],c["id"],c["name"].encode('utf8'),c['status']))
                 # c['name'] is used for output only and some pseudo-OSes (like Windows) don't have UTF-8 consoles :(
                 self._cameraInfoTable[c["id"]] = c
 
@@ -2839,10 +2853,93 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _streamNumSocketError = 0
     _need_dump = False
     _rtspTimeout = 3
+    _httpTimeout = 5
     _threadStartSpacing = 0
     _socketCloseGrace = 0
+    _camerasStartGrace = 8
 
     _startTime = 0
+
+    SCHEDULE_TASKS = [
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 1,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 2,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 3,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 4,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 5,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 6,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        },
+        {
+            "afterThreshold": 5,
+            "beforeThreshold": 5,
+            "dayOfWeek": 7,
+            "endTime": 86400,
+            "fps": 15,
+            "recordAudio": False,
+            "recordingType": "RT_Always",
+            "startTime": 0,
+            "streamQuality": "highest"
+        }
+    ]
+
 
     def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,threadNum,flag,lock):
         SingleServerRtspTestBase.__init__(self,
@@ -2860,36 +2957,60 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         # Initialize the performance log
         l = serverEndpoint.split(":")
         self._perfLog = open("%s_%s.perf.rtsp.log" % (l[0],l[1]),"w+")
+        self._startRecording()
+        self._camerasReady = time.time() + self._camerasStartGrace
+
+    def _startRecording(self):
+        "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
+        cameras = []
+        for ph_id, id, name, status in self._cameraList:
+            if status != 'Recording':
+                attr_data = CAMERA_ATTR_EMPTY.copy()
+                attr_data['cameraID'] = id
+                attr_data['scheduleEnabled'] = True
+                attr_data['scheduleTasks'] = self.SCHEDULE_TASKS
+                cameras.append(attr_data)
+
+        print "Sending schedule: %s" % cameras
+
+        response = urllib2.urlopen(urllib2.Request(
+                "http://%s/ec2/saveCameraUserAttributesList" % (self._serverEndpoint),
+                data=json.dumps(cameras),
+                headers={'Content-Type': 'application/json'}),
+            timeout=self._httpTimeout
+        )
+        if response.getcode() != 200:
+            raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverEndpoint, response.getcode()))
+        response.close()
+
 
     @classmethod
     def set_global(cls, name, value):
         setattr(cls, '_'+name, value)
 
     # Read some bytes from the socket, no more then RATE, no longer then TIMEOUT
-    def _timeoutRecv(self, socket, rate, timeout):
+    # If RATE == -1, just read one portion of data
+    def _timeoutRecv(self, socket, rate_limit, timeout):
         socket.setblocking(0)
         buf = []
+        total_size = 0
         finish = time.time() + timeout
 
         try:
             while time.time() < finish:
                 # recording the time for fetching an event
-                #begin = time.time()
                 ready = select.select([socket], [], [], timeout)
                 if ready[0]:
-                    data = socket.recv(1024*16) if rate < 0 else socket.recv(rate)
-                    last_packet_sz = len(data)
-                    buf.append(data)
-                    elapsed = time.time() - self._startTime
-                    # compensate the rate of packet size here
-                    if rate != -1:
-                        if len(data) >= rate:
-                            time.sleep(1.0-elapsed)
-                            return ''.join(buf)
-                        else:
-                            rate -= last_packet_sz
-                    else:
+                    data = socket.recv(1024*16) if rate_limit < 0 else socket.recv(rate_limit)
+                    if rate_limit == -1:
                         return data
+                    buf.append(data)
+                    total_size += len(data)
+                    if total_size > rate_limit:
+                        extra = total_size - rate_limit * (time.time() - self._startTime)
+                        if extra > 0:
+                            time.sleep(extra/rate_limit) # compensate the rate of packet size here
+                        return ''.join(buf)
                 else:
                     # timeout reached
                     return None
@@ -3027,6 +3148,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                      self._username, self._password,
                      RtspStreamURLGenerator(l[0],int(l[1]),c[0]),
                      self._lock, self._perfLog, socket_reraise=True)
+        obj.add_prefered_resolution(random.choice(['low', 'high']))
 
         try:
             with obj as reply:
@@ -3048,12 +3170,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                              self._username, self._password,
                              RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,l[0],int(l[1]),c[0]),
                              self._lock, self._perfLog, socket_reraise=True)
+        obj.add_prefered_resolution(random.choice(['low', 'high']))
         try:
             with obj as reply:
                 # 1.  Check the reply here
                if self._checkRtspRequest(c,reply):
-                    self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpArchiveHelper)
-                    self._archiveNumOK += 1
+                   self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpArchiveHelper)
+                   self._archiveNumOK += 1
                else:
                    self._archiveNumFail += 1
         except socket.error:
@@ -3097,6 +3220,10 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             print "The camera list on server:%s is empty!"%(self._serverEndpoint)
             print "Do nothing and abort!"
             return False
+        dt = self._camerasReady - time.time()
+        if dt > 0:
+            print "DEBUG: cameras could be unready, sleep %.2f seconds" % dt
+            time.sleep(dt)
 
         self._need_dump = need_dump
         for _ in xrange(self._threadNum):
@@ -3135,10 +3262,12 @@ class RtspPerf:
         username = config.get("General","username")
         password = config.get("General","password")
 
-        RRRtspTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
+        #RRRtspTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
         SingleServerRtspPerf.set_global('timeoutMin', config.getint("Rtsp","timeoutMin") * 1000)
         SingleServerRtspPerf.set_global('timeoutMax', config.getint("Rtsp","timeoutMax") * 1000)
         SingleServerRtspPerf.set_global('rtspTimeout', config.getint_safe("Rtsp", "rtspTimeout", 3))
+        SingleServerRtspPerf.set_global('httpTimeout', config.getint_safe("Rtsp", "httpTimeout", 5))
+        SingleServerRtspPerf.set_global('camerasStartGrace', config.getint_safe("Rtsp", "camerasStartGrace", 5))
         SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
         SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
 
@@ -3205,8 +3334,8 @@ class PerformanceOperation():
         return ret
 
     def _sendRequest(self,methodName,d,server):
-        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName), \
-        data=d, headers={'Content-Type': 'application/json'})
+        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName), data=d,
+                              headers={'Content-Type': 'application/json'})
 
         response = None
 
@@ -3765,8 +3894,8 @@ class SystemNameTest:
 
     def _doPost(self,addr,methodName,d):
         response = None
-        req = urllib2.Request("http://%s/ec2/%s" % (addr,methodName), \
-            data=d, headers={'Content-Type': 'application/json'})
+        req = urllib2.Request("http://%s/ec2/%s" % (addr,methodName), data=d,
+                              headers={'Content-Type': 'application/json'})
 
         print "Connection to http://%s/ec2/%s" % (addr,methodName)
         response = urllib2.urlopen(req)
@@ -4010,3 +4139,4 @@ if __name__ == '__main__':
         SystemNameTest().run()
     else:
         DoTests(argv)
+

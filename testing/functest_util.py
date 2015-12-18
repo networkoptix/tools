@@ -6,7 +6,30 @@ import urllib2
 from ConfigParser import RawConfigParser
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
-           'ClusterWorker', 'ClusterLongWorker', 'parse_size']
+           'ClusterWorker', 'ClusterLongWorker', 'parse_size',
+           'CAMERA_ATTR_EMPTY']
+
+
+CAMERA_ATTR_EMPTY = {
+    'cameraID': '',
+    'scheduleEnabled': '',
+    'backupType': '',  # CameraBackup_HighQuality, CameraBackup_LowQuality or CameraBackupBoth
+    'cameraName': '',
+    'userDefinedGroupName': '',
+    'licenseUsed': '',
+    'motionType': '',
+    'motionMask': '',
+    'scheduleTasks': '',
+    'audioEnabled': '',
+    'secondaryStreamQuality': '',
+    'controlEnabled': '',
+    'dewarpingParams': '',
+    'minArchiveDays': '',
+    'maxArchiveDays': '',
+    'preferedServerId': '',
+    'failoverPriority': ''
+}
+
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
