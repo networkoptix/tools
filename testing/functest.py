@@ -230,7 +230,6 @@ class ClusterTest(object):
 
         for uuid in server_id_list:
             n = self._getServerName(json_obj,uuid)
-            print "%s: %s" % (uuid, n)
             if n == None:
                 return (False,"Cannot fetch server name with UUID:%s" % (uuid))
             else:
@@ -2815,8 +2814,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         # Initialize the performance log
         l = serverEndpoint.split(":")
         self._perfLog = open("%s_%s.perf.rtsp.log" % (l[0],l[1]),"w+")
-        self._startRecording()
-        self._camerasReady = time.time() + self._camerasStartGrace
+        self._camerasReady = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
 
     def _startRecording(self):
         "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
@@ -2829,8 +2827,6 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
                 cameras.append(attr_data)
 
-        print "Sending schedule: %s" % cameras
-
         response = urllib2.urlopen(urllib2.Request(
                 "http://%s/ec2/saveCameraUserAttributesList" % (self._serverEndpoint),
                 data=json.dumps(cameras),
@@ -2840,6 +2836,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         if response.getcode() != 200:
             raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverEndpoint, response.getcode()))
         response.close()
+        return len(cameras) > 0
 
 
     @classmethod
@@ -3128,7 +3125,7 @@ class RtspPerf:
         SingleServerRtspPerf.set_global('camerasStartGrace', config.getint_safe("Rtsp", "camerasStartGrace", 5))
         SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
         SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
-        SingleServerRtspPerf.set_global('liveDataPart', config.getint_safe("Rtsp", "liveDataPart", 0))
+        SingleServerRtspPerf.set_global('liveDataPart', config.getint_safe("Rtsp", "liveDataPart", 50))
 
         rate = config.get_safe("Rtsp", "archiveStreamRate", None)
         if rate is not None:
