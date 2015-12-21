@@ -12,7 +12,6 @@ import socket
 import os.path
 import signal
 import sys
-import datetime
 import time
 import select
 import errno
@@ -2184,15 +2183,11 @@ class RtspArchiveURLGenerator:
         self._mac = mac
 
     def _generateUTC(self):
-        diff = random.randint(self._diffMin,self._diffMax)
-        moment = datetime.datetime.now() - datetime.timedelta(minutes=diff)
-        return time.mktime(moment.timetuple()) * 1e6 + moment.microsecond
+        return int((time.time() - random.randint(self._diffMin,self._diffMax) * 60) * 1e6)
 
     def generateURL(self):
-        return self._archiveURLTemplate % (self._server,
-                                         self._port,
-                                         self._mac,
-                                         self._generateUTC())
+        return self._archiveURLTemplate % (self._server, self._port, self._mac, self._generateUTC())
+
 
 # RTSP global backoff timer, this is used to solve too many connection to server
 # which makes the server think it is suffering DOS attack
@@ -2240,7 +2235,6 @@ class RRRtspTcpBasic:
     _uname = None
     _pwd = None
     _urlGen = None
-    _socket_close_timeout = 5
     _resolution = None
 
     _rtspBasicTemplate = "\r\n".join((
@@ -2412,64 +2406,6 @@ class RRRtspTcpBasic:
                 ret += data
                 if self._checkEOF(ret):
                     return ret
-
-    def _dumpError(self,err):
-        if self._lock:
-            msg = [
-                "--------------------------------------------",
-                "Graceful shutdown error, it may be caused by the server improper behavior",
-                err,
-                "ServerEndpoint: %s:%d. Address: %s" % (self._addr,self._port,self._url),
-                "---------------------------------------------"
-            ]
-            with self._lock:
-                for s in msg:
-                    print s
-                    self._log.write(s)
-
-    @classmethod
-    def set_close_timeout_global(cls, timeout):
-        cls._socket_close_timeout = timeout
-
-    def _gracefulShutdown(self): # FIXME useless! remove it!
-        # This shutdown will issue a FIN on the peer side therefore, the peer side (if it recv blocks)
-        # will recv EOF on that socket fd. And it should behave properly regarding that problem there.
-        self._socket.shutdown(socket.SHUT_WR)
-        # Now if the peer server behaves properly it will definitly
-        # close that connection and I will be able to read an EOF
-        while True:
-            # Now we block on a timeout select
-            try :
-                ready = select.select([self._socket], [], [], self._socket_close_timeout)
-            except socket.error, e:
-                self._dumpError("socket.select: %s"%(e))
-                if self._socket_reraise:
-                    raise
-                return
-
-            if ready[0]:
-                # Now we get some data , read it and then try to read to EOF
-                try :
-                    buf = self._socket.recv(1024)
-                    if buf is None or len(buf) == 0:
-                        # The server performance gracefully and close that connection now
-                        return
-
-                except socket.error, e:
-                    if e.errno in self._skip_errno:
-                        pass
-                    else:
-                        self._dumpError("socket.recv: %s"%(e))
-                        if self._socket_reraise:
-                            raise
-                        return
-            else:
-                # Timeout reached
-                self._dumpError( ("The server doesn't try to send me data or shutdown the connection for about %s seconds\n"
-                                  "However,I have issued the shutdown for read side,so the server _SHOULD_ close the connection"
-                                  % self._socket_close_timeout) )
-                return
-
 
     def __enter__(self):
         self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -2859,88 +2795,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _threadStartSpacing = 0
     _socketCloseGrace = 0
     _camerasStartGrace = 8
+    _liveDataPart = 50
 
     _startTime = 0
-
-    SCHEDULE_TASKS = [
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 1,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 2,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 3,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 4,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 5,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 6,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        },
-        {
-            "afterThreshold": 5,
-            "beforeThreshold": 5,
-            "dayOfWeek": 7,
-            "endTime": 86400,
-            "fps": 15,
-            "recordAudio": False,
-            "recordingType": "RT_Always",
-            "startTime": 0,
-            "streamQuality": "highest"
-        }
-    ]
 
 
     def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,threadNum,flag,lock):
@@ -2970,7 +2827,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 attr_data = CAMERA_ATTR_EMPTY.copy()
                 attr_data['cameraID'] = id
                 attr_data['scheduleEnabled'] = True
-                attr_data['scheduleTasks'] = self.SCHEDULE_TASKS
+                attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
                 cameras.append(attr_data)
 
         print "Sending schedule: %s" % cameras
@@ -3190,7 +3047,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         while self._exitFlag.isOn():
             # choose a random camera in the server list
             c = random.choice(self._cameraList)
-            if random.randint(0,1) == 0:
+            if random.randint(1,100) <= self._liveDataPart:
                 self._main_streaming(c)
             else:
                 self._main_archive(c)
@@ -3272,6 +3129,7 @@ class RtspPerf:
         SingleServerRtspPerf.set_global('camerasStartGrace', config.getint_safe("Rtsp", "camerasStartGrace", 5))
         SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
         SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
+        SingleServerRtspPerf.set_global('liveDataPart', config.getint_safe("Rtsp", "liveDataPart", 0))
 
         rate = config.get_safe("Rtsp", "archiveStreamRate", None)
         if rate is not None:

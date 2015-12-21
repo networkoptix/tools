@@ -7,9 +7,10 @@ from ConfigParser import RawConfigParser
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'ClusterWorker', 'ClusterLongWorker', 'parse_size',
-           'CAMERA_ATTR_EMPTY']
+           'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
 
+# Empty camera's attributes structure
 CAMERA_ATTR_EMPTY = {
     'cameraID': '',
     'scheduleEnabled': '',
@@ -30,6 +31,86 @@ CAMERA_ATTR_EMPTY = {
     'failoverPriority': ''
 }
 
+# Schedule to activate camera recording
+FULL_SCHEDULE_TASKS = [
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 1,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 2,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 3,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 4,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 5,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 6,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    },
+    {
+        "afterThreshold": 5,
+        "beforeThreshold": 5,
+        "dayOfWeek": 7,
+        "endTime": 86400,
+        "fps": 15,
+        "recordAudio": False,
+        "recordingType": "RT_Always",
+        "startTime": 0,
+        "streamQuality": "highest"
+    }
+]
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
