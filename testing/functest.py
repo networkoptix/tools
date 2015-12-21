@@ -225,7 +225,6 @@ class ClusterTest(object):
             return (False,"getMediaServersEx resposne with error code:%d" % (response.getcode()))
 
         json_obj = SafeJsonLoads(response.read(), self.clusterTestServerList[0], 'getMediaServersEx')
-        print json_obj
         if json_obj is None:
             return (False, "Wrong response")
 
@@ -2387,7 +2386,7 @@ class RRRtspTcpBasic:
         ret = ""
         while True:
             try:
-                data = self._socket.recv(1024)
+                data = self._socket.recv(256)
             except socket.error,e:
                 _rtspBackOffTimer.increase("%s:%d"%(self._addr,self._port))
                 with self._lock:
