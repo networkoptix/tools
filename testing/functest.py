@@ -146,6 +146,7 @@ class ClusterTest(object):
 
     _argFlags = {
         '--autorollback': 'auto_rollback',
+        '--arb': 'auto_rollback', # an alias for the previous
         '--skiptime': 'skip_timesync',
         '--skipbak': 'skip_backup',
         '--skipmsa': 'skip_mservarc',
@@ -534,7 +535,6 @@ class ClusterTest(object):
             argv[:] = [arg for arg in argv if arg not in self._argFlags]
 
     def preparseArgs(self, argv):
-        g = globals()
         other = [argv[0]]
         config_next = False
         for arg in argv[1:]:
@@ -551,8 +551,8 @@ class ClusterTest(object):
                 print "Use config", self.configFname
             else:
                 other.append(arg)
-        self.argv = argv
-        return argv
+        self.argv = other
+        return other
 
     def init(self, short=False):
         self._loadConfig()
