@@ -12,6 +12,7 @@ import signal
 import shutil
 import urllib2
 import json
+import xml.etree.ElementTree as ET
 
 from testconf import *
 
@@ -773,8 +774,8 @@ def get_server_package_name():
     if arch == '':
         raise FuncTestError("Can't find server package: architecture not found!")
 
-
-    fn = os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/finalname-server.properties' % arch)
+    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
+    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
     fv = 'server.finalName='
     debfn = ''
     with open(fn) as f:
@@ -786,7 +787,7 @@ def get_server_package_name():
     if debfn == '':
         raise FuncTestError("Server package .deb file name not found!")
 
-    return os.path.join(PROJECT_ROOT, 'debsetup/mediaserver-deb/%s/deb/%s' % (arch, debfn))
+    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
 
 
 def wait_servers_ready():
@@ -1351,7 +1352,30 @@ def change_branch_list():
         BRANCHES = ['.']
 
 
+def load_ut_names():
+    "Parses unit_tests/pom.xml finding unittests modules names"
+    path = os.path.join(PROJECT_ROOT, UT_SUBDIR, "pom.xml")
+    #ns = 'http://maven.apache.org/POM/4.0.0'
+    global TESTS
+    try:
+        tree = ET.parse(path)
+        # extract the default namespace, the root element of pom.xml should be 'project' from this namespace
+        m = re.match("(\{[^}]+\}).+", tree.getroot().tag)
+        # unfortunately, xml.etree.ElementTree adds namespace to all tags and there is no way to use clear tag names
+        pomtests = [el.text.strip() for el in tree.findall('{0}modules/{0}module'.format(m.group(1) if m else ''))]
+    except Exception, e:
+        print "Error loading %s: %s" % (path, e)
+        print "Use default unittest names: %s" % (TESTS, )
+        return
+    if pomtests:
+        TESTS = pomtests
+    else:
+        print "No <module>s found in %s" % path
+        print "Use default unittest names: %s" % (TESTS, )
+
+
 def show_conf():
+    print "(Warning: this function is outdated a bit.)"
     print "Configuration parameters used:"
     print "DEBUG = %s" % DEBUG
     print "PROJECT_ROOT = %s" % PROJECT_ROOT
@@ -1386,6 +1410,7 @@ def main():
         show_conf() # changes done by other options are shown here
         exit(0)
 
+    load_ut_names()
     FailTracker.load()
 
     if Args.full:
