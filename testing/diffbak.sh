@@ -26,7 +26,7 @@ if diff -q "$MAIN_LIST" "$BAK_LIST" > /dev/null; then
 	echo OK
 	RC=0
 else
-	echo DIFFEENT
+	echo DIFFERENT
 	RC=1
 fi
 rm "$MAIN_LIST" "$BAK_LIST"

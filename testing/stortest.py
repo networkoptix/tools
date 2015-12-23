@@ -1,6 +1,5 @@
 __author__ = 'Danil Lavrentyuk'
 import urllib2
-import unittest
 import subprocess
 import traceback
 import time
@@ -8,14 +7,12 @@ import sys
 import os
 import os.path
 import json
-import socket
-import struct
 import uuid
 from pipes import quote as shquote
 
 import pprint
 
-from functest_util import ClusterLongWorker, get_server_guid, unquote_guid
+from functest_util import ClusterLongWorker, get_server_guid, unquote_guid, CAMERA_ATTR_EMPTY
 from testboxes import *
 
 mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -44,25 +41,13 @@ TEST_CAMERA_DATA = {
     'url': '192.168.109.63',
     'typeId': TEST_CAMERA_TYPE_ID
 }
-TEST_CAMERA_ATTR = {
-    'cameraID': '',
+
+TEST_CAMERA_ATTR = CAMERA_ATTR_EMPTY.copy()
+TEST_CAMERA_ATTR.update({
     'scheduleEnabled': True,
     'backupType': "CameraBackup_HighQuality|CameraBackup_LowQuality",  # or CameraBackupBoth
     'cameraName': 'test-camera',
-    'userDefinedGroupName': '',
-    'licenseUsed': '',
-    'motionType': '',
-    'motionMask': '',
-    'scheduleTasks': '',
-    'audioEnabled': '',
-    'secondaryStreamQuality': '',
-    'controlEnabled': '',
-    'dewarpingParams': '',
-    'minArchiveDays': '',
-    'maxArchiveDays': '',
-    'preferedServerId': '',
-    'failoverPriority': ''
-}
+})
 SERVER_USER_ATTR = {
     'serverID': '', # put the server guid here
     'maxCameras': 10,
@@ -256,7 +241,7 @@ class BackupStorageTest(StorageBasedTest):
             boxssh(self.hosts[_WORK_HOST], ('/vagrant/diffbak.sh', self._storages[_WORK_HOST][0]['url'], TMP_STORAGE))
         except subprocess.CalledProcessError, e:
             DIFF_FAIL_CODE = 1
-            DIFF_FAIL_MSG = "DIFFEENT"
+            DIFF_FAIL_MSG = "DIFFERENT"
             if e.returncode == DIFF_FAIL_CODE and e.output.strip() == DIFF_FAIL_MSG:
                 self.fail("The main storage and the backup storage contents are different")
             else:
