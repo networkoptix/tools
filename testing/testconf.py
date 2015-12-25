@@ -89,14 +89,18 @@ START_CHECK_TIMEOUT = 30 # seconds
 ALL_START_TIMEOUT_BASE = 120 # seconds, per server
 
 SKIP_TESTS = {
-# 'branch_label' : set((...names...))
+# 'branch_label' : {...names...} (!!! it should be set or frozenset)
 # possible test names:
 #   all names from TESTS list
 #   'all_ut' - all unit tests completly
 #   'time' - to skip time synchronization test
 #   'backup' - to skip backup storage test
+#   'msarch' - to skip nultiserver archive test
 #   'proxy' - to skip server proxy test
 }
+
+# Skip these test for all branches
+SKIP_ALL = {'msarch'}
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 

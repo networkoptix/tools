@@ -279,9 +279,9 @@ class FailTracker(object):
             cls.save()
             log_to_send('')
             log_to_send("The branch %s is repaired after the previous errors and makes no errors now.", branch)
-            if branch in SKIP_TESTS and SKIP_TESTS[branch]:
+            if (branch in SKIP_TESTS and SKIP_TESTS[branch]) or SKIP_ALL:
                 log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
-                            ', '.join(SKIP_TESTS[branch]))
+                            ', '.join(SKIP_TESTS[branch] | SKIP_ALL))
 
     @classmethod
     def mark_fail(cls, branch):
@@ -502,8 +502,8 @@ def kill_test(proc, sudo=False):
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
     to_skip = set()
-    if branch in SKIP_TESTS:
-        to_skip = SKIP_TESTS[branch]
+    if branch in SKIP_TESTS or SKIP_ALL:
+        to_skip = SKIP_TESTS[branch] | SKIP_ALL
         log("Configured to skip tests: %s", ', '.join(to_skip))
     lines = []
     reader = PipeReader()
@@ -881,6 +881,8 @@ def perform_func_test(to_skip, timesync_only=False):
             cmd.append("--skiptime")
         if 'backup' in to_skip:
             cmd.append("--skipbak")
+        if 'msarch' in to_skip:
+            cmd.append('--skipmsa')
         log("Running functional tests: %s", cmd)
         proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
         reader.register(proc)
