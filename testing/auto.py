@@ -509,7 +509,7 @@ def run_tests(branch):
     reader = PipeReader()
 
     if 'all_ut' not in to_skip:
-        for name in TESTS:
+        for name in get_ut_names():
             if name in to_skip:
                 continue
             del ToSend[:]
@@ -1354,26 +1354,29 @@ def change_branch_list():
         BRANCHES = ['.']
 
 
-def load_ut_names():
-    "Parses unit_tests/pom.xml finding unittests modules names"
+def get_ut_names():
+    """
+    Parses unit_tests/pom.xml finding unittests modules names.
+    If it fails, returns global TESTS.
+    """
     path = os.path.join(PROJECT_ROOT, UT_SUBDIR, "pom.xml")
     #ns = 'http://maven.apache.org/POM/4.0.0'
-    global TESTS
     try:
         tree = ET.parse(path)
         # extract the default namespace, the root element of pom.xml should be 'project' from this namespace
         m = re.match("(\{[^}]+\}).+", tree.getroot().tag)
         # unfortunately, xml.etree.ElementTree adds namespace to all tags and there is no way to use clear tag names
         pomtests = [el.text.strip() for el in tree.findall('{0}modules/{0}module'.format(m.group(1) if m else ''))]
+        if pomtests:
+            print "DEBUG: ut list found: %s" % (pomtests,)
+            return pomtests
+        else:
+            print "No <module>s found in %s" % path
+            # and go further to the end of the function
     except Exception, e:
         print "Error loading %s: %s" % (path, e)
-        print "Use default unittest names: %s" % (TESTS, )
-        return
-    if pomtests:
-        TESTS = pomtests
-    else:
-        print "No <module>s found in %s" % path
-        print "Use default unittest names: %s" % (TESTS, )
+    print "Use default unittest names: %s" % (TESTS, )
+    return TESTS
 
 
 def show_conf():
@@ -1412,7 +1415,6 @@ def main():
         show_conf() # changes done by other options are shown here
         exit(0)
 
-    load_ut_names()
     FailTracker.load()
 
     if Args.full:
