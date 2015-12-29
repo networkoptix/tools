@@ -10,7 +10,7 @@ import imp
 
 colorizer = None
 
-defaultProfile = '-d180'
+defaultProfile = '-d90'
 srcExtensions = ['.svg', '.ai']
 defaultCustomization = 'default'
 baseCustomizations = ['default', 'digitalwatchdog', 'vista']
