@@ -2,3 +2,6 @@ syntax: glob
 .idea
 *.pyc
 testconf_local.py
+ci/crash
+ci/gdb-bt
+ci/links-gdb-bt
