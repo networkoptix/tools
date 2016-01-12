@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output, call as subcall
@@ -1435,13 +1436,13 @@ def main():
 
     elif Args.functest: # virtual boxes functest only
         ToSend[:] = []
-        perform_func_test()
+        perform_func_test(set())
         if ToSend:
             email_notify("Debug func tests", ToSend)
 
     elif Args.timetest:
         ToSend[:] = []
-        perform_func_test(True)
+        perform_func_test(set(), True)
         if ToSend:
             email_notify("Debug timesync tests", ToSend)
 
@@ -1460,6 +1461,8 @@ def main():
 
 
 if __name__ == '__main__':
+    reload(sys)
+    sys.setdefaultencoding('utf8')
     main()
 
 # TODO: with -o turn off output lines accumulator, just print 'em

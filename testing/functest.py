@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import unittest
 import urllib2
 import urllib
@@ -765,11 +766,7 @@ class ResourceDataGenerator(BasicGenerator):
         }
     """
 
-    _resourceRemoveTemplate = """
-        {
-            "id":"%s"
-        }
-    """
+    _resourceRemoveTemplate = '{ "id":"%s" }'
 
     # this list contains all the existed resource that I can find.
     # The method for finding each resource is based on the API in
@@ -878,13 +875,8 @@ class CameraConflictionDataGenerator(BasicGenerator):
             "vendor": "%s"
         }]
     """
-    # removeTemplate
-    _removeTemplate = \
-        """
-        {
-            "id":"%s"
-        }
-        """
+
+    _removeTemplate = '{ "id":"%s" }'
 
     def _fetchExistedCameras(self,dataGen):
         for entry in dataGen.conflictCameraList:
@@ -934,11 +926,7 @@ class UserConflictionDataGenerator(BasicGenerator):
     }
     """
 
-    _removeTemplate = """
-        {
-            "id":"%s"
-        }
-    """
+    _removeTemplate = '{ "id":"%s" }'
 
     _existedUserList = []
 
@@ -994,11 +982,7 @@ class MediaServerConflictionDataGenerator(BasicGenerator):
     }
     """
 
-    _removeTemplate = """
-        {
-            "id":"%s"
-        }
-    """
+    _removeTemplate = '{ "id":"%s" }'
 
     _existedMediaServerList = []
 
@@ -2244,9 +2228,8 @@ class RRRtspTcpBasic:
         "Session:",
         "User-Agent: Network Optix",
         "x-play-now: true",
-        "Authorization: Basic YWRtaW46MTIz",
+        "Authorization: Basic %s",
         "x-server-guid: %s", '', '')) # two '' -- to add two '\r\n' at the end
-    #FIXME insert login-password from config
 
     _rtspDigestTemplate = "\r\n".join((
         "PLAY %s RTSP/1.0",
@@ -2273,7 +2256,8 @@ class RRRtspTcpBasic:
         self._port = int(port)
         self._urlGen = urlGen
         self._url = urlGen.generateURL()
-        self._data = self._rtspBasicTemplate % (self._url, cid, sid)
+        self._basic_auth = urllib2.base64.encodestring('%s:%s' % (uname, pwd)).rstrip()
+        self._data = self._rtspBasicTemplate % (self._url, cid, self._basic_auth, sid)
 
         self._cid = cid
         self._sid = sid
@@ -3986,6 +3970,8 @@ def DoTests(argv):
 
 
 if __name__ == '__main__':
+    reload(sys)
+    sys.setdefaultencoding('utf8')
     argv = clusterTest.preparseArgs(sys.argv)
     if len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
