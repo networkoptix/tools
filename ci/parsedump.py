@@ -88,10 +88,10 @@ def parse_gdb(f, fpath):
 
 crash_signal_rx = re.compile("^[^(]+\(\d+\)")
 
-def check_crash(line, f):
+def check_crash(line, stream):
     if line.strip() == '': # Search for the first empty line
         try:
-            line = f.next()
+            line = stream.next()
             BUF.append(line)
         except StopIteration:
             return False
@@ -106,7 +106,7 @@ def check_crash(line, f):
 GDB_MARK = "Program terminated with signal"
 GDB_MARK_LEN = len(GDB_MARK)
 
-def check_gdb(line, f):
+def check_gdb(line, stream):
     if line.startswith(GDB_MARK):
         global Signal
         Signal = line[GDB_MARK_LEN:].strip()
@@ -151,8 +151,8 @@ def store_dump(key, fpath, fext, storage):
 
 
 def main(fmt):
-    base = os.path.join(root_path, fmt)
-    storage = os.path.join(root_path, store_base)
+    base = os.path.join(root_path, fmt) # base directory where to store loaded files (with their subpaths)
+    storage = os.path.join(root_path, store_base) # storage for downloaded dumps
     if Args.store and not os.path.isdir(storage):
         os.mkdir(storage)
     for dirpath, dirnames, filenames in os.walk(base):
@@ -183,7 +183,7 @@ def print_fault_case(f, calls, fnames):
             print >>f, "\t" + func
     print >>f, "Files (%s):" % len(fnames)
     for fname in fnames:
-        print >>f, "\t%s" % (NewPaths[fname] if Args.store else fname, )
+        print >>f, "\t%s" % (NewPaths[fname] if Args.store else fname,)
     print >>f
 
 
