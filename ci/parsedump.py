@@ -17,7 +17,6 @@ NewPaths = dict() # filepath -> new_filepath
 faults_fname = "faults.list"
 store_base = 'dump_store'
 
-BUF = []
 Signal = None
 Args = None
 
@@ -41,15 +40,13 @@ def demangle_names(names):
 
 def parse_crash(f, fpath):
     try:
-        BUF.append(f.next()) # skip one empty line
+        f.next() # skip one empty line
     except StopIteration:
         return []
     call_path = []
     call_file = ''
     for line in f:
-        BUF.append(line)
         if line.rstrip() == '':
-            BUF.extend(_ for _ in f)
             break
         m = line_rx.match(line)
         if not m:
@@ -69,12 +66,11 @@ gdb_frame_rx = re.compile("^\#\d+\s+\w+ in (.+?) \(")
 
 def parse_gdb(f, fpath):
     call_path = []
-    print "DEBUG: %s for %s" % (Signal, fpath)
     for line in f:
         if line.startswith("Thread 1 "):
             break
     else:
-        print "DEBUG: no thread 1 found"
+        print "WARNING: no thread 1 found in ", fpath
         return []
 
     for line in f:
@@ -92,15 +88,12 @@ def check_crash(line, stream):
     if line.strip() == '': # Search for the first empty line
         try:
             line = stream.next()
-            BUF.append(line)
         except StopIteration:
-            return False
+            return None
         m = crash_signal_rx.match(line)
         if m:
-            global Signal
-            Signal = m.group(0)
-            return True
-    return False
+            return m.group(0)
+    return None
 
 
 GDB_MARK = "Program terminated with signal"
@@ -108,12 +101,9 @@ GDB_MARK_LEN = len(GDB_MARK)
 
 def check_gdb(line, stream):
     if line.startswith(GDB_MARK):
-        global Signal
-        Signal = line[GDB_MARK_LEN:].strip()
-        if Signal.endswith('.'):
-            Signal = Signal[:-1]
-        return True
-    return False
+        signal = line[GDB_MARK_LEN:].strip()
+        return signal[:-1] if signal.endswith('.') else signal
+    return None
 
 
 FORMATS = ('crash', 'gdb-bt')
@@ -121,17 +111,15 @@ CHECKER = dict(zip(FORMATS, (check_crash, check_gdb)))
 PARSER = dict(zip(FORMATS, (parse_crash, parse_gdb)))
 
 
-def parse_dump(fpath, fmt):
-    BUF[:] = []
-    with open(fpath) as f:
-        for line in f:
-            BUF.append(line)
-            if CHECKER[fmt](line, f):
-                return ['<%s>' % Signal] + PARSER[fmt](f, fpath)
+def parse_dump(stream, fmt, path):
+    for line in stream:
+        signal =  CHECKER[fmt](line, stream)
+        if signal is not None:
+            return ['<%s>' % signal] + PARSER[fmt](stream, path)
     return None
 
 
-def store_dump(key, fpath, fext, storage):
+def store_dump(data, key, fpath, fext, storage):
     dirname = os.path.join(storage, md5('\n'.join(key)).hexdigest() if key else 'UNTRACED')
     if not os.path.isdir(dirname):
         os.mkdir(dirname)
@@ -147,7 +135,7 @@ def store_dump(key, fpath, fext, storage):
     NewPaths[fpath] = fname
     with open(fname, 'wt') as f:
         print >>f, '[%s]\n' % (fpath,)
-        f.writelines(BUF)
+        f.writelines(data)
 
 
 def main(fmt):
@@ -160,7 +148,8 @@ def main(fmt):
             if fname.endswith('.' + fmt):
                 key = ()
                 fpath = os.path.join(dirpath, fname)
-                calls = parse_dump(fpath, fmt)
+                data = open(fpath).readlines()
+                calls = parse_dump(iter(data), fmt, fpath)
                 original_path = fpath[len(base):]
                 if calls is not None:
                     print fpath
@@ -170,7 +159,7 @@ def main(fmt):
                 else:
                     Faults.setdefault('<UNKNOWN>', []).append(original_path)
                 if Args.store:
-                    store_dump(key, original_path, fmt, storage)
+                    store_dump(data, key, original_path, fmt, storage)
 
 
 def print_fault_case(f, calls, fnames):
