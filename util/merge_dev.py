@@ -7,9 +7,11 @@ import os
 import argparse
 
 targetBranch = '.';
-ignoredCommits = ['Merge', '']
 verbose = False
-header = 'Merge Changelog:'
+mergeCommit = 'merge'
+
+def getHeader(merged, current):
+    return "Merge: {0} -> {1}".format(merged, current)
 
 def getCurrentBranch():
     return subprocess.check_output(['hg', 'branch']).strip('\n')
@@ -37,10 +39,10 @@ def getChangelog(revision):
         return ''
     changes = sorted(set(changelog.split('\n\n')))
     changes = [x.strip('\n').replace('"', '\'') for x in changes if 
-        not x in ignoredCommits and not x.startswith(header)]
+        x and not x.lower().startswith(mergeCommit)]
 
     if changes:
-        changes.insert(0, 'Merge Changelog:')
+        changes.insert(0, getHeader(revision, targetBranch))
     else:
         return 'Merge Changelog is empty!'
     
@@ -65,9 +67,7 @@ def main():
         targetBranch = target
     else:      
         targetBranch = currentBranch
-    
-    ignoredCommits.append('Merge with {0}'.format(targetBranch))
-    
+       
     revision = args.rev
     if not revision:
         revision = '.'
