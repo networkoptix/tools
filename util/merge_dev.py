@@ -71,13 +71,13 @@ def main():
     revision = args.rev
     if not revision:
         revision = '.'
-   
+
+    if revision == '.' and targetBranch != currentBranch:
+        revision = currentBranch
+        
     if args.preview:
         print getChangelog(revision)
         sys.exit(0)
-   
-    if revision == '.' and targetBranch != currentBranch:
-        revision = currentBranch
    
     execCommand('hg', 'up', targetBranch)
     execCommand('hg', 'merge',  '--tool=internal:merge', revision)
