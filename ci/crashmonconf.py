@@ -1,6 +1,7 @@
 __author__ = 'Danil Lavrentyuk'
 
 CHECK_PERIOD = 1 # minutes
+SUMMARY_PERIOD = 7 # days!
 PROCESS_NAME = "crashmon"
 
 CRASH_LIST_URL = "http://stats.networkoptix.com/crashserver/api/list?extension={0}"
@@ -18,6 +19,7 @@ def crash_list_url(ext):
 LAST_CRASH_TIME_TPL = """# Last crashfile timestamps
 # Maintained automaticaly. Edit if you really know what do you do only!
 %s = %r
+%s = %d
 """
 
 SMTP_ADDR = 'smtp.gmail.com:587'
