@@ -14,6 +14,7 @@ import socket
 import requests
 import traceback
 import argparse
+import errno
 from subprocess import Popen, PIPE
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -70,11 +71,18 @@ def demangle_names(names):
 
 def load_known_faults():
     known = set()
-    with open(KNOWN_FALTS_FILE) as f:
-        for line in f:
-            if line.strip() != '':
-                known.add(eval(line))
-    print "%s faults are known already" % len(known)
+    try:
+        with open(KNOWN_FALTS_FILE) as f:
+            for line in f:
+                if line.strip() != '':
+                    known.add(eval(line))
+    except IOError, e:
+        if e.errno == errno.ENOENT:
+            print "%s not found, use empty list" % KNOWN_FALTS_FILE
+        else:
+            raise
+    else:
+        print "%s faults are known already" % len(known)
     return known
 
 
