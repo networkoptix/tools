@@ -251,21 +251,17 @@ class CrashMonitor(object):
                         email_newcrash(url, dump, formated_calls, crash['path'])
                         self._known.add(key)
                         open(KNOWN_FALTS_FILE, "a").write("%s\n" % (key,))
-                        if faults is not None:
-                            paths[key] = formated_calls
-                        faults[key] = [crash['path']]
-                    else:
-                        faults[key].append(crash['path'])
-                else:
                     if faults is not None:
-                        faults.setdefault('<UNKNOWN>', []).append(crash['path'])
-                    #    print "DEBUG: a new fault with ALREADY known trace path found.\nDump: %s\nCalls:\n%s" % (
-                    #        crash['path'], formated_calls
-                    #    )
-                    #print "Uploaded at %s" % crash['upload']
+                        faults.setdefault(key, []).append(crash['path'])
+                        if key not in paths:
+                            paths[key] = formated_calls
+                else:
+                    key = '<UNKNOWN>'
                     self._lasts.set(ct, crash['path'], crash['upload'])
                     self._lasts.store()
-                    #
+
+                if faults is not None:
+                    faults.setdefault(key, []).append(crash['path'])
 
         if faults is not None:
             unknown = faults.pop('<UNKNOWN>', None)
