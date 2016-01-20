@@ -162,11 +162,12 @@ class CrashMonitor(object):
     The main class.
     Recurrent crash server checker. New crashes loader.
     """
-    def __init__(self):
+    def __init__(self, args):
         # Setup the interruption handler
         self._stop = False
         self._lasts = LastCrashTracker(LASTS_FILE)
         self._known = load_known_faults()
+        self.args = args
         signal.signal(signal.SIGINT,self._onInterrupt)
 
     def _onInterrupt(self, _signum, _stack):
@@ -225,16 +226,7 @@ class CrashMonitor(object):
                 #    print "DEBUG: no calls found in " + url
 
     def run(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
-        parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time between since end of one check to start of another), minutes")
-        parser.add_argument("-t", "--time", action="store_true", help="Log start and finish times (useful for scheduled runs).")
-        args = parser.parse_args()
-
-        if args.time:
-            print "[Start at %s]" % time.asctime()
-
-        # The main cyrcle
+        """ The main cyrcle """
         if args.auto:
             try:
                 period = int(args.period)
@@ -248,13 +240,23 @@ class CrashMonitor(object):
         else:
             self.updateCrashLists()
 
-        if args.time:
-            print "[Finished at %s]" % time.asctime()
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
+    parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time between since end of one check to start of another), minutes")
+    parser.add_argument("-t", "--time", action="store_true", help="Log start and finish times (useful for scheduled runs).")
+    args = parser.parse_args()
+
+    if args.time:
+        print "[Start at %s]" % time.asctime()
+
     if get_lock(PROCESS_NAME):
-        CrashMonitor().run()
+        CrashMonitor(args).run()
     else:
         print "Another copy of process found. Lock name: " + PROCESS_NAME
         sys.exit(1)
+
+    if args.time:
+        print "[Finished at %s]" % time.asctime()
