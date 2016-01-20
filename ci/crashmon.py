@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: UTF-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """
 Crash Inspector regulary analizes crash reports, finds crashed function names,

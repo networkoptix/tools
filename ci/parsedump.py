@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: UTF-8 -*-
 __author__ = 'Danil Lavrentyuk'
 import sys
 import os.path
@@ -184,11 +185,8 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--store', action='store_true', help="Store crash dump files in directories, groupped by trsce paths")
     Args = parser.parse_args()
 
-    if Args.format == 'all':
-        for fmt in FORMATS:
-            main(fmt)
-    else:
-        main(Args.format)
+    for fmt in (FORMATS if Args.format == 'all' else [Args.format]):
+        main(fmt)
 
     with open(os.path.join(root_path, faults_fname), "wt") as f:
         unknown = Faults.pop('<UNKNOWN>', None)

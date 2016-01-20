@@ -24,6 +24,6 @@ SMTP_ADDR = 'smtp.gmail.com:587'
 SMTP_LOGIN = 'service@networkoptix.com'
 SMTP_PASS = 'kbnUk06boqBkwU'
 
-MAIL_FROM = '"Crash Monitoring System" <autotest@networkoptix.com>'
-MAIL_TO = 'test-results@networkoptix.com'
+MAIL_FROM = '"Crash Monitor" <crashmon@networkoptix.com>'
+MAIL_TO = 'crashdumps@networkoptix.com'
 MAIL_TO = 'dlavrentyuk@networkoptix.com'
