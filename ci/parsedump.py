@@ -72,7 +72,7 @@ def parse_gdb(f, fpath):
             break
     else:
         print "WARNING: no thread 1 found in ", fpath
-        return []
+        return ['<WARNING: no thread 1 found in gdb-bt!>']
 
     for line in f:
         m = gdb_frame_rx.match(line)
@@ -114,7 +114,7 @@ PARSER = dict(zip(FORMATS, (parse_crash, parse_gdb)))
 
 def parse_dump(stream, fmt, path):
     for line in stream:
-        signal =  CHECKER[fmt](line, stream)
+        signal = CHECKER[fmt](line, stream)
         if signal is not None:
             return ['<%s>' % signal] + PARSER[fmt](stream, path)
     return None
