@@ -219,8 +219,8 @@ class CrashMonitor(object):
                     #print "Uploaded at %s" % crash['upload']
                     self._lasts.set(ct, crash['path'], crash['upload'])
                     self._lasts.store()
-                    print "debug sleep 2"
-                    time.sleep(2) # FIXME DEBUG!!!
+                    #print "debug sleep 2"
+                    #time.sleep(2) # FIXME DEBUG!!!
                 #else:
                 #    print "DEBUG: no calls found in " + url
 
@@ -228,7 +228,12 @@ class CrashMonitor(object):
         parser = argparse.ArgumentParser()
         parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
         parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time between since end of one check to start of another), minutes")
+        parser.add_argument("-t", "--time", action="store_true", help="Log start and finish times (useful for scheduled runs).")
         args = parser.parse_args()
+
+        if args.time:
+            print "[Start at %s]" % time.asctime()
+
         # The main cyrcle
         if args.auto:
             try:
@@ -242,6 +247,9 @@ class CrashMonitor(object):
                 time.sleep(period)
         else:
             self.updateCrashLists()
+
+        if args.time:
+            print "[Finished at %s]" % time.asctime()
 
 
 if __name__ == '__main__':
