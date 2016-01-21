@@ -64,15 +64,27 @@ def parse_crash(f, fpath):
     return call_path if call_path else (['file:'+call_file,] if call_file != '' else [])
 
 gdb_frame_rx = re.compile("^\#\d+\s+\w+ in (.+?) \(")
+gdb_frame_sgort_rx = re.compile("^\#\d+\s+(.+?) \(")
 
 def parse_gdb(f, fpath):
     call_path = []
+    fail_point = False
     for line in f:
+        if not fail_point:
+            if line.startswith('#0'):
+                m = gdb_frame_rx.match(line) or gdb_frame_sgort_rx.match(line)
+                if m:
+                    name = m.group(1)
+                    if name not in ('', '??'):
+                        call_path.append(name)
+                        fail_point = True
+            elif line.startswith('(gdb)'):
+                fail_point = True
         if line.startswith("Thread 1 "):
             break
     else:
         print "WARNING: no thread 1 found in ", fpath
-        return ['<WARNING: no thread 1 found in gdb-bt!>']
+        return call_path + ['<WARNING: no thread 1 found in gdb-bt!>']
 
     for line in f:
         m = gdb_frame_rx.match(line)
@@ -103,7 +115,13 @@ GDB_MARK_LEN = len(GDB_MARK)
 def check_gdb(line, stream):
     if line.startswith(GDB_MARK):
         signal = line[GDB_MARK_LEN:].strip()
-        return signal[:-1] if signal.endswith('.') else signal
+        if signal.endswith('.'):
+            signal = signal[:-1]
+        try:
+            num, name = signal.split(',')
+            return "%s (%s)" % (name.lstrip(), num)
+        except Exception, e:
+            return "Unparsed signal %s (error %s)" % (signal, e)
     return None
 
 
@@ -139,6 +157,17 @@ def store_dump(data, key, fpath, fext, storage):
         f.writelines(data)
 
 
+def read_and_parse(fmt, fpath):
+    data = open(fpath).readlines()
+    calls = parse_dump(iter(data), fmt, fpath)
+    if calls is not None:
+        print fpath
+        calls = demangle_names(calls)
+        print "\n".join("\t"+c for c in calls)
+        return data, tuple(calls)
+    else:
+        return data, '<UNKNOWN>' # not a tuple, because <UNKNOWN> is a special key!
+
 def main(fmt):
     base = os.path.join(root_path, fmt) # base directory where to store loaded files (with their subpaths)
     storage = os.path.join(root_path, store_base) # storage for downloaded dumps
@@ -147,18 +176,10 @@ def main(fmt):
     for dirpath, dirnames, filenames in os.walk(base):
         for fname in filenames:
             if fname.endswith('.' + fmt):
-                key = ()
                 fpath = os.path.join(dirpath, fname)
-                data = open(fpath).readlines()
-                calls = parse_dump(iter(data), fmt, fpath)
                 original_path = fpath[len(base):]
-                if calls is not None:
-                    print fpath
-                    print "\n".join("\t"+c for c in demangle_names(calls))
-                    key = tuple(calls)
-                    Faults.setdefault(key, []).append(original_path)
-                else:
-                    Faults.setdefault('<UNKNOWN>', []).append(original_path)
+                data, key = read_and_parse(fmt, fpath)
+                Faults.setdefault(key, []).append(original_path)
                 if Args.store:
                     store_dump(data, key, original_path, fmt, storage)
 
@@ -167,9 +188,10 @@ def print_fault_case(f, calls, fnames):
     if calls == None:
         print >>f, "<UNKNOWN>:"
     else:
+        calls = demangle_names(calls)
         print >>f, "Key: %s" % repr(calls)
         print >>f, "Stack:"
-        for func in demangle_names(calls):
+        for func in calls:
             print >>f, "\t" + func
     print >>f, "Files (%s):" % len(fnames)
     for fname in fnames:
@@ -177,16 +199,33 @@ def print_fault_case(f, calls, fnames):
     print >>f
 
 
+def singe_file_run(fname):
+    fmt = Args.format if Args.format != 'all' else ''
+    for s in FORMATS:
+        if fname.endswith(s):
+            fmt = s
+            break
+    if not fmt:
+        print "Specify your file format"
+        return
+    data, key = read_and_parse(fmt, fname)
+    print "Key: "
+
 
 if __name__ == '__main__':
 
     parser = ArgumentParser()
     parser.add_argument('format', choices=('all',) + FORMATS, default='all', help="Crash dump file format to parse. Default: all", metavar="FORMAT", nargs='?')
     parser.add_argument('-s', '--store', action='store_true', help="Store crash dump files in directories, groupped by trsce paths")
+    parser.add_argument('-f', '--file', help="Parse the specified crash dump file, don't go to the crash server")
     Args = parser.parse_args()
 
-    for fmt in (FORMATS if Args.format == 'all' else [Args.format]):
-        main(fmt)
+    if Args.file is not None:
+        singe_file_run(Args.file)
+        sys.exit(0)
+    else:
+        for fmt in (FORMATS if Args.format == 'all' else [Args.format]):
+            main(fmt)
 
     with open(os.path.join(root_path, faults_fname), "wt") as f:
         unknown = Faults.pop('<UNKNOWN>', None)

@@ -16,6 +16,7 @@ import traceback
 import argparse
 import errno
 import re
+from hashlib import md5
 from subprocess import Popen, PIPE
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -46,11 +47,11 @@ def get_lock(process_name):
 def get_crashes(crtype):
     print "Getting %s data" % crtype
     url = crash_list_url(crtype)
-    res = requests.get(url, auth = AUTH)
-    if res.status_code != 200:
-        print "Error: %s" % (res.status_code)
-        return []
     try:
+        res = requests.get(url, auth = AUTH)
+        if res.status_code != 200:
+            print "Error: %s" % (res.status_code)
+            return []
         return res.json()
     except Exception:
         print "Failed to get %s: %s" % (url, traceback.format_exc())
@@ -71,12 +72,13 @@ def demangle_names(names):
 
 
 def load_known_faults():
-    known = set()
+    known = []
     try:
         with open(KNOWN_FALTS_FILE) as f:
             for line in f:
                 if line.strip() != '':
-                    known.add(eval(line))
+                    hash, key = line.split(':',1)
+                    known.append((hash, eval(key)))
     except IOError, e:
         if e.errno == errno.ENOENT:
             print "%s not found, use empty list" % KNOWN_FALTS_FILE
@@ -100,6 +102,11 @@ def load_crash_dump(crash_type, crash):
     crash['dump'] = result.text
     crash['url'] = url
     crash['calls'] = parse_dump(iter(crash['dump'].split("\n")), crash_type, crash['path'])
+    if crash['calls']:
+        crash['calls'] = tuple(demangle_names(crash['calls']))
+        crash['hash'] = md5(''.join(crash['calls'])).hexdigest()
+    else:
+        crash['hash'] = ''
     return True
 
 
@@ -116,28 +123,29 @@ def email_send(mailfrom, mailto, msg): #FIXME move into a separate file!
     smtp.quit()
 
 
-def email_newcrash(url, dump, calls, path):
+def email_newcrash(crash, calls):
     msg = MIMEMultipart()
     text = MIMEText(
         "A crash with a new trace path found.\n\n"
+        "Hash: %s\n"
         "URL: %s\n\n"
         "Call stask (named functions only):\n%s\n\n"
-         % (url, calls)
+         % (crash['hash'], crash['url'], calls)
     )
     msg.attach(text)
-    att = MIMEText(dump)
-    att.add_header('Content-Disposition', 'attachment', filename=path.lstrip('/'))
+    att = MIMEText(crash['dump'])
+    att.add_header('Content-Disposition', 'attachment', filename=crash['path'].lstrip('/'))
     msg.attach(att)
     msg['Subject'] = "Crash with a new trace path found!"
     email_send(MAIL_FROM, MAIL_TO, msg)
 
 
-def fault_case2str(calls, (fnames, path)):
+def fault_case2str(fnames, path, hash):
     buf = []
-    if calls is None:
+    if hash == '':
         buf.append("<UNKNOWN>:")
     else:
-        buf.append("Key: %s" % repr(calls))
+        buf.append("Hash: %s" % hash)
         if path:
             buf.append("Stack:")
             buf.append(path)
@@ -153,19 +161,28 @@ def email_summary(faults, mintime, maxtime):
     sig_only = []
     buf = []
     for k in sorted(faults.keys(), key=lambda x: (len(faults[x][0]), x), reverse=True):
-        (sig_only if len(k) == 1 else buf).append(fault_case2str(k, faults[k]))
+        (sig_only if len(k) == 1 else buf).append(fault_case2str(*faults[k]))
     if sig_only:
         buf += sig_only
     if unknown is not None:
-        buf.append(fault_case2str(None, unknown))
+        buf.append(fault_case2str(*unknown))
     if buf:
         msg = MIMEText("\n".join(buf))
-        if re.search("\.\d\d\d\d\d\d$", mintime):
+        if re.search(r"\.\d\d\d\d\d\d$", mintime):
             mintime = mintime[:-7]
-        if re.search("\.\d\d\d\d\d\d$", maxtime):
+        if re.search(r"\.\d\d\d\d\d\d$", maxtime):
             maxtime = maxtime[:-7]
         msg['Subject'] = "Crashes by trace paths summary from %s to %s" % (mintime, maxtime)
         email_send(MAIL_FROM, MAIL_TO, msg)
+
+
+def email_hash_collision(hash, keys):
+    msg = MIMEText(
+        "WARNING! A hash collision detected!\n(We're very lucky, take a drink! :) It's a really rare occation!)\n\n"
+        "Hash: %s\nKeys:\n%s\n"
+         % (hash, keys))
+    msg['Subject'] = "WARNING! A hash collision detected for %s" % hash
+    email_send(MAIL_FROM, MAIL_TO, msg)
 
 
 class LastCrashTracker(object):
@@ -233,7 +250,11 @@ class CrashMonitor(object):
         # Setup the interruption handler
         self._stop = False
         self._lasts = LastCrashTracker(LASTS_FILE)
-        self._known = load_known_faults()
+        self._known = set()
+        self._hashes = dict()
+        for hash, key in load_known_faults():
+            self._known.add(key)
+            self._hashes.setdefault(hash, []).append(key)
         self.args = args
         signal.signal(signal.SIGINT,self._onInterrupt)
 
@@ -247,8 +268,11 @@ class CrashMonitor(object):
         crash_sort_key = lambda v: (v['upload'],v['path'])
 
         for ct in CRASH_EXT:
-            if self._stop: break
+            if self._stop:
+                break
             crash_list = get_crashes(ct)
+            if not crash_list:
+                continue
             mark = self._lasts[ct]
             for crash in crash_list:
                 crash['new'] = crash['upload'] >= mark['time'] and crash['path'] > mark['path']
@@ -270,13 +294,17 @@ class CrashMonitor(object):
                 # calls is empty when the crash trace function names and the signal haven't been found out
                 # if calls consists only of one element -- it should be the signal (and there is no function names)
                 if crash['calls']:
-                    key = tuple(crash['calls'])
-                    formated_calls = format_calls(demangle_names(crash['calls']))
+                    key = crash['calls']
+                    formated_calls = format_calls(key)
                     if crash['new'] and key not in self._known:
+                        if crash['hash'] in self._hashes:
+                            self.report_hash_collision(crash['hash'], key)
+                        else:
+                            self._hashes[crash['hash']] = [key]
                         print "New crash found in %s" % crash['path']
-                        email_newcrash(crash['url'], crash['dump'], formated_calls, crash['path'])
+                        email_newcrash(crash, formated_calls)
                         self._known.add(key)
-                        open(KNOWN_FALTS_FILE, "a").write("%s\n" % (key,))
+                        open(KNOWN_FALTS_FILE, "a").write("%s:%s\n" % (crash['hash'], key))
                 else:
                     key, formated_calls = '<UNKNOWN>', ''
 
@@ -284,11 +312,17 @@ class CrashMonitor(object):
                     self._lasts.set(ct, crash['path'], crash['upload'])
 
                 if faults is not None:
-                    faults.setdefault(key, ([], formated_calls))[0].append(crash['path'])
+                    faults.setdefault(key, ([], formated_calls, crash['hash']))[0].append(crash['url'])
 
         if faults is not None:
             email_summary(faults, mintime, maxtime)
             self._lasts.set_summary()
+
+    def report_hash_collision(self, hash, key):
+        self._hashes[hash].append(key)
+        keys = "\n".join("\t%s" % (v,) for v in self._hashes[hash])
+        print "WARNING: a hash collision detected! Hash = %s. Keys:\n%s" % (hash, keys)
+        email_hash_collision(hash, keys)
 
     def run(self):
         """ The main cyrcle """
