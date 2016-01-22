@@ -74,14 +74,14 @@ def demangle_names(names):
 def load_known_faults():
     known = []
     try:
-        with open(KNOWN_FALTS_FILE) as f:
+        with open(KNOWN_FAULTS_FILE) as f:
             for line in f:
                 if line.strip() != '':
                     hash, key = line.split(':',1)
                     known.append((hash, eval(key)))
     except IOError, e:
         if e.errno == errno.ENOENT:
-            print "%s not found, use empty list" % KNOWN_FALTS_FILE
+            print "%s not found, use empty list" % KNOWN_FAULTS_FILE
         else:
             raise
     else:
@@ -304,7 +304,7 @@ class CrashMonitor(object):
                         print "New crash found in %s" % crash['path']
                         email_newcrash(crash, formated_calls)
                         self._known.add(key)
-                        open(KNOWN_FALTS_FILE, "a").write("%s:%s\n" % (crash['hash'], key))
+                        open(KNOWN_FAULTS_FILE, "a").write("%s:%s\n" % (crash['hash'], key))
                 else:
                     key, formated_calls = '<UNKNOWN>', ''
 

@@ -1,6 +1,6 @@
 __author__ = 'Danil Lavrentyuk'
 
-CHECK_PERIOD = 1 # minutes
+CHECK_PERIOD = 1 # minutes, used with -a command line option
 SUMMARY_PERIOD = 7 # days!
 PROCESS_NAME = "crashmon"
 
@@ -11,7 +11,7 @@ CRASH_EXT = ('crash', 'gdb-bt')
 AUTH = ("statlord", "razdvatri")
 
 LASTS_FILE = "last_crash.py" #
-KNOWN_FALTS_FILE = "known-faults.list"
+KNOWN_FAULTS_FILE = "known-faults.list"
 
 def crash_list_url(ext):
     return CRASH_LIST_URL.format(ext)
