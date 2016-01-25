@@ -26,8 +26,8 @@ def extractReplaces(root):
         for message in context.iter('message'):
             source = message.find('source')
             translation = message.find('translation')
-            if translation.get('type') == 'unfinished':
-                continue
+            #if translation.get('type') == 'unfinished':
+            #    continue
             
             if translation.get('type') == 'obsolete':
                 continue

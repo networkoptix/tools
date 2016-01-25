@@ -4,7 +4,7 @@ import sys
 import os
 import argparse
 
-projects = ['common', 'client', 'traytool']
+projects = ['common', 'client', 'traytool', 'mobile_client']
 
 def main():
     parser = argparse.ArgumentParser()
