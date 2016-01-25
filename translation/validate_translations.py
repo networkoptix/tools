@@ -5,7 +5,13 @@ import sys
 import os
 import argparse
 import xml.etree.ElementTree as ET
-from common_module import init_color,info,green,warn,err
+
+from vms_projects import getTranslatableProjectsList
+
+utilDir = os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir), "util")
+sys.path.insert(0, utilDir)
+from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
 
 projects = ['common', 'client', 'traytool']
 
@@ -180,7 +186,7 @@ def main():
         
     rootDir = os.getcwd()
     
-    for project in projects:
+    for project in getTranslatableProjectsList():
         projectDir = os.path.join(rootDir, project)
         translationDir = os.path.join(projectDir, 'translations')
         validateProject(project, translationDir)
