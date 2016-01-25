@@ -76,7 +76,7 @@ def update(project, suffix = '', filter = ' -locations none'):
         filename += suffix
     entries = calculateEntries(filename, translationDir)
 
-    command = 'lupdate -no-obsolete -no-ui-lines'
+    command = 'c:\\develop\\buildenv\\qt5\\qtbase-x64\\bin\\lupdate.exe -no-obsolete -no-ui-lines'
     if filter:
         command += filter
     command += ' ' + sourcesDir
