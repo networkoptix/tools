@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from vms_projects import getTranslatableProjectsList
 
-utilDir = os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir), "util")
+utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
