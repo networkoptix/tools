@@ -4,7 +4,7 @@ import sys
 import os
 import argparse
 
-projects = ['common', 'client', 'traytool', 'mobile_client']
+from vms_projects import getTranslatableProjectsList
 
 def main():
     parser = argparse.ArgumentParser()
@@ -15,7 +15,7 @@ def main():
     languageSuffix = "_{0}.ts".format(language)
     rootDir = os.getcwd()
     
-    for project in projects:
+    for project in getTranslatableProjectsList():
         projectDir = os.path.join(rootDir, project)
         translationDir = os.path.join(projectDir, 'translations')
         
