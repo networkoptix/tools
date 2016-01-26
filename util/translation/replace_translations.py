@@ -14,7 +14,7 @@ sys.path.pop(0)
 
 from vms_projects import getTranslatableProjectsList
 
-allowedSrcExtensions = ['.cpp', '.h', 'ui']
+allowedSrcExtensions = ['.cpp', '.h', '.ui', '.qml']
 ignoredFiles = ['translation_manager.cpp']
 ignoredContexts = ['Language']
 
@@ -75,11 +75,23 @@ def WriteTextToFile(fileName, text):
     fileEntry.write(text)
     fileEntry.close()
     
-def processReplaceItem(replaceItem, srcDir):
-    for entry in os.listdir(srcDir):
-        if entry in ignoredFiles:
-            continue
+def allowedEntry(entry):
+    if entry in ignoredFiles:
+        return False
     
+    for ext in allowedSrcExtensions:
+        if entry.endswith(ext):
+            return True
+            
+    return False
+    
+def formatSearchString(entry, text):
+    if entry.endswith('.ui'):
+        return '<string>{0}'.format(text)
+    return '"{0}"'.format(text)
+    
+def processReplaceItem(replaceItem, srcDir):
+    for entry in os.listdir(srcDir):  
         fullEntryPath = os.path.join(srcDir, entry)
         if os.path.isdir(fullEntryPath):
             if processReplaceItem(replaceItem, fullEntryPath):
@@ -87,26 +99,24 @@ def processReplaceItem(replaceItem, srcDir):
             else:
                 continue
     
-        allowed = False
-        for ext in allowedSrcExtensions:
-            if (ext in fullEntryPath):
-                allowed = True
-                break
-            
-        if (not allowed):
+        if not allowedEntry(entry):
             continue
-            
+    
         text = ReadFileText(fullEntryPath)
         if not replaceItem.context in text:
             continue
         
-        if not ('"' + replaceItem.source + '"') in text:
-            continue            
+        source = formatSearchString(entry, replaceItem.source)
+        if not (source) in text:
+            continue
             
-        newText = string.replace(text, replaceItem.source, replaceItem.target)
+        target = formatSearchString(entry, replaceItem.target)
+            
+        newText = string.replace(text, source, target)
         WriteTextToFile(fullEntryPath, newText)
         
-        info('Replacing at path: {0}\n{1}\n'.format(fullEntryPath, replaceItem))
+        if verbose:
+            info('Replacing at path: {0}\n{1}\n'.format(fullEntryPath, replaceItem))
         return True
         
     return False
