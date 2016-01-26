@@ -251,12 +251,19 @@ def email_notify(branch, lines):
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
-def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None):
+def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
     bstr = ("%s unit tests" % branch) if unit_tests else branch
     cause = ("Error building branch " + bstr) if not crash else (("Branch %s build crashes!" % bstr) + crash)
+    if single_project:
+        special = 'Failed build was restarted for the single failed project: %s\n\n' % single_project
+    elif dep_error:
+        special = ("DEPENDENCY ERROR DETECTED!\n"
+                   "Multithread build has failed on '%s', but singlethreaded has succeeded." % dep_error)
+    else:
+        special = ''
     text = (
         format_changesets(branch) + "\n\n" +
-        ('' if not single_project else 'Failed build was restarted for the single failed project: %s\n\n' % single_project) +
+        special +
         ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
         "".join(loglines) + "\n"
     )
@@ -659,7 +666,34 @@ def get_failed_project(last_lines):
             if line.startswith(mvn_rf_prefix):
                 project = line[len(mvn_rf_prefix):].rstrip()
                 break
-    return (project, project_name)
+    return (project, project_name or project)
+
+
+def execute_maven(cmd, kwargs, last_lines):
+    if Args.full_build_log:
+        kwargs.pop('universal_newlines')
+        proc = Popen(cmd, **kwargs)
+        proc.wait()
+    else:
+        proc = Popen(cmd, bufsize=MVN_BUFFER, stdout=PIPE, stderr=STDOUT, **kwargs)
+        for line in proc.stdout:
+            last_lines.append(line)
+        check_mvn_exit(proc, last_lines)
+    return proc.returncode
+
+
+def nothreads_rebuild(last_lines, branch, unit_tests):
+    project, project_name = get_failed_project(last_lines)
+    if not project_name:
+        project_name = project
+    log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
+    if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
+        # Project dependencies  error! Report but go on.
+        email_build_error(branch, last_lines, unit_tests, dep_error=project_name)
+        return True
+    else:
+        # Other errors - already reported
+        return False
 
 
 def failed_project_single_build(last_lines, branch, unit_tests):
@@ -668,44 +702,45 @@ def failed_project_single_build(last_lines, branch, unit_tests):
         last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
         return False
     log("[ Restarting maven to re-build '%s' ]", project_name)
-    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, single_name=project_name or project)
+    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, project_name=project_name)
     return True
 
 
-def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, single_name=None):
+def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
     last_lines = deque(maxlen=BUILD_LOG_LINES)
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = SUBPROC_ARGS.copy()
+
     cmd = [MVN, "package", "-e"]
     if MVN_THREADS and not no_threads:
         cmd.extend(["-T", "%d" % MVN_THREADS])
+    elif no_threads:
+        cmd.extend(["-T", "1"])
     if single_project is not None:
         cmd.extend(['-pl', single_project])
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
+
     if unit_tests:
         kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
     debug("MVN: %s", cmd); time.sleep(1.5)
+
     try:
-        if Args.full_build_log:
-            kwargs.pop('universal_newlines')
-            proc = Popen(cmd, **kwargs)
-            proc.wait()
-        else:
-            proc = Popen(cmd, bufsize=MVN_BUFFER, stdout=PIPE, stderr=STDOUT, **kwargs)
-            for line in proc.stdout:
-                last_lines.append(line)
-            check_mvn_exit(proc, last_lines)
-        if proc.returncode != 0:
-            log("Error calling maven: ret.code = %s" % proc.returncode)
+        retcode = execute_maven(cmd, kwargs, last_lines)
+        if retcode != 0:
+            log("Error calling maven: ret.code = %s" % retcode)
             if not Args.full_build_log:
                 log("The last %d log lines:" % len(last_lines))
                 log_print("".join(last_lines))
                 last_lines = list(last_lines)
-                last_lines.append("Maven return code = %s" % proc.returncode)
+                last_lines.append("Maven return code = %s" % retcode)
                 if not single_project:
-                    if failed_project_single_build(last_lines, branch, unit_tests):
-                        return False
-                email_build_error(branch, last_lines, unit_tests, single_project=single_name)
+                    if not no_threads:
+                        return nothreads_rebuild(last_lines, branch, unit_tests)
+                    #else: -- removed since singlethread build possible would be enough to get the fault cause
+                    #    if failed_project_single_build(last_lines, branch, unit_tests):
+                    #        # on success it reports from the recursive call call_maven_build(), so we can return here
+                    #        return False
+                email_build_error(branch, last_lines, unit_tests, single_project=project_name)
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
@@ -713,8 +748,10 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
             log_print("".join(last_lines))
-            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=single_name)
+            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=project_name)
         return False
+    if no_threads and (project_name is not None):
+        pass
     return True
 
 
@@ -1354,6 +1391,8 @@ def change_branch_list():
         log("WARNING: there is '.' branch in the branch list -- ALL other branches will be skipped!")
         BRANCHES = ['.']
 
+
+#def get_pom_modules
 
 def get_ut_names():
     """

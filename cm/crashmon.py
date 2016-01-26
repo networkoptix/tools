@@ -343,9 +343,9 @@ class CrashMonitor(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
-    parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time between since end of one check to start of another), minutes")
-    parser.add_argument("-t", "--time", action="store_true", help="Log start and finish times (useful for scheduled runs).")
+    parser.add_argument("-a", "--auto", action="store_true", help="automatically periodical check mode.")
+    parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time since end of one check to start of another), minutes, use with -a")
+    parser.add_argument("-t", "--time", action="store_true", help="log start and finish times (useful for scheduled runs).")
     args = parser.parse_args()
 
     if args.time:
