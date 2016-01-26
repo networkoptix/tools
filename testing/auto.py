@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 
 from testconf import *
 
-__version__ = 1.1
+__version__ = '1.1.1'
 
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
@@ -740,7 +740,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
                     #    if failed_project_single_build(last_lines, branch, unit_tests):
                     #        # on success it reports from the recursive call call_maven_build(), so we can return here
                     #        return False
-                email_build_error(branch, last_lines, unit_tests, single_project=project_name)
+                email_build_error(branch, last_lines, unit_tests, single_project=(project_name if single_project else None))
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
@@ -748,7 +748,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
             log_print("".join(last_lines))
-            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=project_name)
+            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=(project_name if single_project else None))
         return False
     if no_threads and (project_name is not None):
         pass
