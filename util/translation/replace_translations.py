@@ -2,13 +2,21 @@
 #/bin/python
 
 import os
+import sys
 import argparse
 import string
 import xml.etree.ElementTree as ET
-from common_module import info
 
-projects = ['common', 'client', 'traytool']
+utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+sys.path.insert(0, utilDir)
+from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+from vms_projects import getTranslatableProjectsList
+
 allowedSrcExtensions = ['.cpp', '.h', 'ui']
+ignoredFiles = ['translation_manager.cpp']
+ignoredContexts = ['Language']
 
 verbose = False
 
@@ -17,12 +25,18 @@ class ReplaceItemStruct():
         self.context = initContext
         self.source = initSource
         self.target = initTarget
+        
+    def __str__(self):
+        return 'Context: {0}\nSource:\t{1}\nTarget:\t{2}\n'.format(self.context, self.source, self.target)
 
 def extractReplaces(root):
     result = []
     
     for context in root:
         contextName = context.find('name').text
+        if contextName in ignoredContexts:
+            continue
+        
         for message in context.iter('message'):
             source = message.find('source')
             translation = message.find('translation')
@@ -63,6 +77,9 @@ def WriteTextToFile(fileName, text):
     
 def processReplaceItem(replaceItem, srcDir):
     for entry in os.listdir(srcDir):
+        if entry in ignoredFiles:
+            continue
+    
         fullEntryPath = os.path.join(srcDir, entry)
         if os.path.isdir(fullEntryPath):
             if processReplaceItem(replaceItem, fullEntryPath):
@@ -89,8 +106,7 @@ def processReplaceItem(replaceItem, srcDir):
         newText = string.replace(text, replaceItem.source, replaceItem.target)
         WriteTextToFile(fullEntryPath, newText)
         
-        if verbose:
-            info('Found candidate for replace:\nContext: {0}\nEntry path:{1}\nSource:\t{2}\nTarget:\t{3}\n'.format(replaceItem.context, fullEntryPath, replaceItem.source, replaceItem.target))
+        info('Replacing at path: {0}\n{1}\n'.format(fullEntryPath, replaceItem))
         return True
         
     return False
@@ -118,26 +134,27 @@ def validateProject(project, translationDir, srcDir):
         root = tree.getroot()
         replaceList.extend(extractReplaces(root))
         
-    index = 0
     for replaceItem in replaceList:
-        processReplaceItem(replaceItem, srcDir)
-        index = index + 1
-        if verbose:
-            info('Processed item {0}'.format(index))
+        if not processReplaceItem(replaceItem, srcDir):
+            err('Could not find:\n{0}'.format(replaceItem))
         
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
+    parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     args = parser.parse_args()
     
     global verbose
     verbose = args.verbose
 
+    if args.color:
+        init_color()
+    
     rootDir = os.getcwd()
     
-    for project in projects:
+    for project in getTranslatableProjectsList():
         projectDir = os.path.join(rootDir, project)
         
         srcDir = os.path.join(projectDir, 'src')

@@ -8,17 +8,12 @@ from multiprocessing import Process
 import threading
 import subprocess
 
+from vms_projects import getTranslatableProjects
+
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
-
-projects = {
-    'common': [],
-    'traytool': [],
-    'client': ['base', 'ui'],
-    'mobile_client': ['base', 'qml']
-}
 
 ignored = [
             # QT files
@@ -135,6 +130,7 @@ def main():
     if args.color:
         init_color()
 
+    projects = getTranslatableProjects()
     threads = []
     for project, targets in projects.items():
         if not targets:
