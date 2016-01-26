@@ -13,8 +13,6 @@ sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
 
-projects = ['common', 'client', 'traytool']
-
 critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>']
 warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
 numerus = ['%n']
@@ -55,7 +53,14 @@ def checkSymbol(symbol, source, target, context, out):
         
     return invalid
     
-def checkText(source, target, context, result, index):
+def checkText(source, target, context, result, index, hasNumerusForm):
+
+    if not hasNumerusForm:
+        for symbol in numerus:
+            if source.count(symbol):
+                err(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
+                result.error += 1
+                break
 
     for symbol in critical:
         if checkSymbol(symbol, source, target, context, err):
@@ -90,6 +95,11 @@ def validateXml(root, name):
         for message in context.iter('message'):
             result.total += 1
             source = message.find('source')
+#            translatorcomment = message.find('translatorcomment')
+#            if translatorcomment is not None:
+#                info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}'.format(contextName, source.text))
+#                warn(u'Translator comment: {0}'.format(translatorcomment.text))
+            
             translation = message.find('translation')
             if translation.get('type') == 'unfinished':
                 result.unfinished += 1
@@ -109,10 +119,10 @@ def validateXml(root, name):
                 index = index + 1
                 if not numerusform.text:
                     continue;
-                result = checkText(source.text, numerusform.text, contextName, result, index)
+                result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
                 
             if not hasNumerusForm:
-                result = checkText(source.text, translation.text, contextName, result, index)
+                result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
                 if printAll and not (source.text == translation.text):
                     info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 

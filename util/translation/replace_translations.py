@@ -28,6 +28,9 @@ class ReplaceItemStruct():
         
     def __str__(self):
         return 'Context: {0}\nSource:\t{1}\nTarget:\t{2}\n'.format(self.context, self.source, self.target)
+        
+    def isValid(self):
+        return self.source != self.target
 
 def extractReplaces(root):
     result = []
@@ -60,7 +63,10 @@ def extractReplaces(root):
                 
             if not hasNumerusForm:
                 replaceItem = ReplaceItemStruct(contextName, source.text, translation.text)
-                result.append(replaceItem)
+                if replaceItem.isValid():
+                    result.append(replaceItem)
+                else:
+                    warn("Invalid item:\n{0}".format(replaceItem))
                 
     return result
     
@@ -140,6 +146,8 @@ def validateProject(project, translationDir, srcDir):
             
     replaceList = []
     for translationPath in entries:
+        if verbose:
+            info("Parsing file: {0}".format(translationPath))
         tree = ET.parse(translationPath)
         root = tree.getroot()
         replaceList.extend(extractReplaces(root))
