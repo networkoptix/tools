@@ -60,10 +60,12 @@ def get_dep_tree(mvn_args):
 
     return dep_tree
 
-def find_pro(module):
+def find_pro(module, filt=None):
     command = ['find', '.', '-name', module + '.pro']
     output = subprocess.check_output(command)
     lines = output.splitlines()
+    if filt:
+        lines = list(i for i in lines if i.find(filt) != -1)
     if len(lines) > 1:
         print('Multiple .pro files found for {0}:'.format(module))
         for line in lines:
@@ -80,11 +82,11 @@ def find_pro(module):
         path = path[2:]
     return path
 
-def get_pro_files(modules):
+def get_pro_files(modules, filt=None):
     result = {}
 
     for module in modules:
-        pro = find_pro(module)
+        pro = find_pro(module, filt)
         if pro:
             result[module] = pro
         else:
@@ -95,11 +97,12 @@ def get_pro_files(modules):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', type=str, help="Output .pro file name.", default="vms.pro")
+    parser.add_argument('-f', '--filt', type=str, help="Pro path filter", default='')
 
     args, mvnargs = parser.parse_known_args()
 
     dep_tree = get_dep_tree(mvnargs)
-    pro_files = get_pro_files(list(dep_tree.keys()))
+    pro_files = get_pro_files(list(dep_tree.keys()), args.filt)
 
     with open(args.output, 'w') as pro_file:
         pro_file.write('TEMPLATE = subdirs\n\n')
