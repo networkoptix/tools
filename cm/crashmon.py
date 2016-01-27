@@ -228,7 +228,7 @@ class LastCrashTracker(object):
 
     def set(self, ext, path, tm):
         last = self._stamps.get(ext, None)
-        if last is None or (tm > last['time'] and path > last['path']):
+        if last is None or tm > last['time'] or (tm == last['time'] and path > last['path']):
             self._stamps[ext] = {'path': path, 'time': tm}
             self._changed = True
             self.store()
