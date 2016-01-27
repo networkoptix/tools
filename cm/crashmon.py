@@ -222,6 +222,8 @@ class LastCrashTracker(object):
     def __getitem__(self, item):
         if item == 'summary':
             return self._summary_tm
+        elif item == 'next_summary':
+            return self.next_summary_time()
         return self._stamps.get(item, 0)
 
     def set(self, ext, path, tm):
@@ -235,6 +237,9 @@ class LastCrashTracker(object):
         self._summary_tm = time.time()
         self._changed = True
         self.store()
+
+    def next_summary_time(self):
+        return self._summary_tm + SUMMARY_PERIOD * (24 * 60 * 60)
 
     def __str__(self):
         return "%s('%s', changed=%s, summary_tm=%s, %s)" % (
@@ -263,7 +268,10 @@ class CrashMonitor(object):
 
     def updateCrashes(self):
         "Loads crashes list from the crashserver, filters by last parsed crash times."
-        faults = dict() if self._lasts['summary'] + SUMMARY_PERIOD * (24 * 60 * 60) <= time.time() else None
+        now = time.time()
+        next_summary = self._lasts['next_summary']
+        print "Last summary was at %s, period ends at %s, now %s" % (self._lasts['summary'], next_summary, int(now))
+        faults = dict() if next_summary <= now else None
         mintime, maxtime = '9999999999', ''
         crash_sort_key = lambda v: (v['upload'],v['path'])
 
@@ -275,7 +283,9 @@ class CrashMonitor(object):
                 continue
             mark = self._lasts[ct]
             for crash in crash_list:
-                crash['new'] = crash['upload'] >= mark['time'] and crash['path'] > mark['path']
+                crash['new'] = crash['upload'] > mark['time'] or (
+                                    crash['upload'] == mark['time'] and crash['path'] > mark['path']
+                               )
             print "Loaded %s: %s new crashes" % (ct, sum(v['new'] for v in crash_list))
 
             if faults is not None: # We need all crashes from the list
