@@ -262,7 +262,6 @@ class FuncTestCase(unittest.TestCase):
         print "DEBUG: _change_system_name reply: %s" % res
 
 
-
     def setUp(self):
         "Just prints \n after unittest module prints a test name"
         print
