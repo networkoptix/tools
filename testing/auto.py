@@ -816,6 +816,8 @@ def get_server_package_name():
     fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
     fv = 'server.finalName='
     debfn = ''
+    if not os.path.isfile(fn):
+        return None
     with open(fn) as f:
         for line in f:
             if line.startswith(fv):
@@ -870,7 +872,7 @@ def check_mediaserver_deb():
     dest = './networkoptix-mediaserver.deb'
 #    debug("Src: %s\nDest: %s", src, dest)
     dest_stat = os.stat(dest) if os.path.isfile(dest) else None
-    if not os.path.isfile(src):
+    if src is None or not os.path.isfile(src):
         if dest_stat is None:
             raise FuncTestError("ERROR: networkoptix-mediaserver deb-package isn't found!")
 #        else:
