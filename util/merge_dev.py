@@ -1,6 +1,17 @@
 #!/bin/python2
 # -*- coding: utf-8 -*-
 
+#Options:
+#   -P preview (do not merge)
+#   -t {target_branch} Merge current branch to target
+#   -r {source_branch} Merge from source_branch to the current one
+
+#Example:
+#merge_dev.py -r prod_2.5 -P    //prod_2.5 to current branch merge preview
+#merge_dev.py -r prod_2.5       //merge prod_2.5 to the current branch
+#merge_dev.py -t prod_2.5       //merge current branch to prod_2.5 ()
+
+
 import subprocess
 import sys
 import os
