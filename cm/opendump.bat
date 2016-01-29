@@ -1,10 +1,6 @@
 @ECHO OFF
 SET DUMPFILE=%1
-
 IF EXIST temp.txt DEL temp.txt
-
-REM This needs to be invoked to be able to pass FOR tokens to external outside-of-the-loop variables (fecking bat) to retrieve buildnumber, branch etc.
-SETLOCAL ENABLEDELAYEDEXPANSION
 
 IF NOT "%DUMPFILE%" == "" (
     goto :UNPACK 
@@ -13,20 +9,30 @@ IF NOT "%DUMPFILE%" == "" (
 )    
 :UNPACK
     IF EXIST %DUMPFILE% (
+        REM This needs to be invoked to be able to pass FOR tokens to external outside-of-the-loop variables (fecking bat) to retrieve buildnumber, branch etc.
+        SETLOCAL ENABLEDELAYEDEXPANSION
         REM Finding build number
-        FOR /F "tokens=5-8 delims=.-" %%I IN ("%DUMPFILE%") DO (
-            SET BUILDNUMBER=%%I
-            SET CUSTOMIZATION=%%K
+        FOR /F "tokens=1-8 delims=.-_" %%I IN ("%DUMPFILE%") DO (
+            SET EXECUTABLE=%%I
+            SET BUILDNUMBER=%%N
+            SET CUSTOMIZATION=%%P
         )    
+        ECHO Executable Name = !EXECUTABLE!
         ECHO Build Number = !BUILDNUMBER!
         ECHO Customization = !CUSTOMIZATION!
+        IF "!EXECUTABLE!" == "mediaserver" (
+            SET INSTALLTYPE=server
+        ) ELSE (
+            SET INSTALLTYPE=client
+        )
+        ECHO Install Type = !INSTALLTYPE!
         
         wget -qO - http://beta.networkoptix.com/beta-builds/daily/ | findstr !BUILDNUMBER! > temp.txt
         FOR /F "tokens=2 delims=><" %%I IN (temp.txt) DO SET BUILDBRANCH=%%I
         IF "!BUILDBRANCH!" == "" SET /p DUMMY = The build does not exist on the server ot Internet connection error occurs. Press any key to exit...
         ECHO Build Branch = !BUILDBRANCH!
         
-        wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/ | findstr !BUILDNUMBER! | findstr server-only | findstr x64 > temp.txt 
+        wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/ | findstr !BUILDNUMBER! | findstr !INSTALLTYPE!-only | findstr x64 > temp.txt 
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET INSTALLER_FILENAME=%%I
         IF "!INSTALLER_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
         ECHO Installer Filename = !INSTALLER_FILENAME!        
@@ -52,19 +58,18 @@ IF NOT "%DUMPFILE%" == "" (
         wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER!/!PDBAPPS_FILENAME!
         
         ECHO Unpacking Installer...
-        msiexec /a !INSTALLER_FILENAME! /qb TARGETDIR="%cd%\!BUILDNUMBER!"
+        msiexec /a !INSTALLER_FILENAME! /qb TARGETDIR="%~dp0!BUILDNUMBER!"
         
         REM DIR /s /b mediaserver.exe > temp.txt
-        REM SET /p MEDIASERVER_DIR=<temp.txt
-        REM FOR /f %%i in ('DIR /s /b mediaserver.exe') do set MEDIASERVER_DIR=%%i
-        FOR /r %%a in (.) DO @IF EXIST "%%~fa\mediaserver.exe" set MEDIASERVER_DIR=%%~fa
-        ECHO Media Server folder is "!MEDIASERVER_DIR!"
+        REM SET /p EXECUTABLE_DIR=<temp.txt
+        REM FOR /f %%i in ('DIR /s /b mediaserver.exe') do set EXECUTABLE_DIR=%%i
+        FOR /r %%a in (.) DO @IF EXIST "%%~fa\!EXECUTABLE!.exe" set EXECUTABLE_DIR=%%~fa
+        ECHO Media Server folder is "!EXECUTABLE_DIR!"
         
         ECHO Copying and extracting Files...
-        copy %DUMPFILE% "!MEDIASERVER_DIR!"
-        7z x !PDBALL_FILENAME! -o"!MEDIASERVER_DIR!" -y
-        7z x !PDBAPPS_FILENAME! -o"!MEDIASERVER_DIR!" -y
-        7z x !PDBAPPS_FILENAME! -o"!MEDIASERVER_DIR!"-y
+        copy %DUMPFILE% "!EXECUTABLE_DIR!"
+        7z x !PDBALL_FILENAME! -o"!EXECUTABLE_DIR!" -y
+        7z x !PDBAPPS_FILENAME! -o"!EXECUTABLE_DIR!" -y
     ) ELSE (
         SET /p DUMMY = Dump file does not exist in this subdirectory. Press any key to exit...       
     )   
