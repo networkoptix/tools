@@ -289,7 +289,7 @@ class FailTracker(object):
             log_to_send("The branch %s is repaired after the previous errors and makes no errors now.", branch)
             if (branch in SKIP_TESTS and SKIP_TESTS[branch]) or SKIP_ALL:
                 log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
-                            ', '.join(SKIP_TESTS[branch] | SKIP_ALL))
+                            ', '.join(SKIP_TESTS.get(branch, set()) | SKIP_ALL))
 
     @classmethod
     def mark_fail(cls, branch):
@@ -473,6 +473,7 @@ def call_test(testname, reader):
         #debug("Calling %s", testpath)
         # sudo is required since some unittest start server
         # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
+        #FIXME! Make it windows compatible! sudo and LD_LIBRARY_PATH iren't for Windows
         proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         reader.register(proc)
@@ -502,18 +503,23 @@ def call_test(testname, reader):
 def kill_test(proc, sudo=False):
     "Kills subproces under sudo"
     debug("Killing test process %s", proc.pid)
-    if sudo:
+    if sudo and os.name == 'posix':
         subcall(['/usr/bin/sudo', 'kill', str(proc.pid)], shell=False)
     else:
-        subcall(['kill', str(proc.pid)], shell=False)
+        os.kill(proc.pid, signal.SIGTERM)
+        #subcall(['kill', str(proc.pid)], shell=False)
+
+def get_to_skip(branch):
+    to_skip = set()
+    if (branch in SKIP_TESTS) or SKIP_ALL:
+        to_skip = SKIP_TESTS.get(branch, set()) | SKIP_ALL
+        log("Configured to skip tests: %s", ', '.join(to_skip))
+    return to_skip
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
-    to_skip = set()
-    if branch in SKIP_TESTS or SKIP_ALL:
-        to_skip = SKIP_TESTS[branch] | SKIP_ALL
-        log("Configured to skip tests: %s", ', '.join(to_skip))
     lines = []
+    to_skip = get_to_skip(branch)
     reader = PipeReader()
 
     if 'all_ut' not in to_skip:
@@ -899,7 +905,7 @@ def start_boxes():
     wait_servers_ready()
 
 
-def perform_func_test(to_skip, timesync_only=False):
+def perform_func_test(to_skip):
     if os.name != 'posix':
         print "\nFunctional tests require POSIX-compatible OS. Skipped."
         return
@@ -914,27 +920,49 @@ def perform_func_test(to_skip, timesync_only=False):
             os.remove(".rollback")
         reader = PipeReader()
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
-        cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
-        if timesync_only:
-            cmd.append("--timesync")
-        elif 'time' in to_skip:
-            cmd.append("--skiptime")
-        if 'backup' in to_skip:
-            cmd.append("--skipbak")
-        if 'msarch' in to_skip:
-            cmd.append('--skipmsa')
-        log("Running functional tests: %s", cmd)
-        proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
-        reader.register(proc)
-        read_functest_output(proc, reader, timesync_only)
-        if not timesync_only and 'proxy' not in to_skip:
-            reader.unregister()
-            cmd = [sys.executable, "-u", "proxytest.py"]
-            log("Running server proxy test: %s", cmd)
+        unreg = False
+
+        if not Args.httpstress:
+            unreg = True
+            cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
+            if Args.timetest:
+                cmd.append("--timesync")
+            else:
+                if 'time' in to_skip:
+                    cmd.append("--skiptime")
+                if 'backup' in to_skip:
+                    cmd.append("--skipbak")
+                if 'msarch' in to_skip:
+                    cmd.append('--skipmsa')
+            log("Running functional tests: %s", cmd)
+            proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+            reader.register(proc)
+            read_functest_output(proc, reader, Args.timetest)
+
+            if not Args.timetest and 'proxy' not in to_skip:
+                reader.unregister()
+                cmd = [sys.executable, "-u", "proxytest.py"]
+                log("Running server proxy test: %s", cmd)
+                proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+                reader.register(proc)
+                #TODO make it a part of the functest.py
+                read_misctest_output(proc, reader, "server proxy")
+
+        if not Args.timetest and 'httpstress' not in to_skip:
+            if unreg:
+                reader.unregister()
+            url = "%s:%s" % (VG_BOXES_IP[0], MEDIASERVER_PORT)
+            cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
+            #TODO add test durations to config
+            #TODO add the host address and port
+            #TODO add -T value to config
+            #TODO add the test duration and a server hang timeout
+            log("Running http stress test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
             #TODO make it a part of the functest.py
-            read_serverproxy_output(proc, reader)
+            read_misctest_output(proc, reader, "http stress")
+
     except FuncTestError, e:
         log("Functional test aborted: %s", e.message)
     except BaseException, e:
@@ -1225,7 +1253,6 @@ class FunctestParser(object):
         pass
 
 
-
 def read_functest_output(proc, reader, from_timesync=False):
     last_lines = deque(maxlen=FUNCTEST_LAST_LINES)
     p = FunctestParser()
@@ -1273,51 +1300,60 @@ def read_functest_output(proc, reader, from_timesync=False):
         #has_errors = True
 
 
-RT_FAIL = 'FAIL: '
-RT_DONE = 'Test complete.'
+T_FAIL = 'FAIL: '
+T_DONE = 'Test complete.'
 
-def read_serverproxy_output(proc, reader):
+def read_misctest_output(proc, reader, name):
     collector = []
     has_errors = False
     reading = True
     while reader.state == PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
+        #print ":DEBUG: " + line.rstrip()
         if reading and len(line) > 0:
             collector.append(line)
-            if line.startswith(RT_FAIL):
+            if line.startswith(T_FAIL):
+                #print ":DEBUG: Fail detected!"
                 has_errors = True
-            elif line.startswith(RT_DONE):
-                log("Server proxy test done.")
+            elif line.startswith(T_DONE):
+                log("%s test done." % name.capitalize())
                 reading = False
 
     if has_errors:
-        log_to_send("Server proxy test failed:\n%s", "\n".join(collector))
+        log_to_send("%s test failed:\n%s", name.capitalize(), "\n".join(collector))
         collector = []
 
     if reader.state in (PIPE_HANG, PIPE_ERROR):
         log_to_send(
-            "[ proxy tests has TIMED OUT ]" if reader.state == PIPE_HANG else
-            "[ PIPE ERROR reading proxy tests output  ]")
+            ("[ %s test has TIMED OUT ]" % name) if reader.state == PIPE_HANG else
+            ("[ PIPE ERROR reading %s test's output ]" % name))
         if collector:
             log_to_send("Test's output:\n%s", "\n".join(collector))
         has_errors = True
 
     if proc.poll() is None:
-        kill_test(proc)
-        proc.wait()
+        stop = time.time() + 1.0
+        time.sleep(0.05)
+        while proc.poll() is None and time.time() < stop:
+            time.sleep(0.05)
+        if proc.returncode is None:
+            kill_test(proc)
+            proc.wait()
 
     if proc.returncode != 0:
         if proc.returncode < 0:
             if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
                 signames = SignalNames.get(-proc.returncode, [])
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
-                log_to_send("[ SERVER PROXY TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+                log_to_send("[ %s TEST HAVE BEEN INTERRUPTED by signal %s%s ]" % (name.upper(), -proc.returncode, signames))
         else:
-            log_to_send("[ SERVER PROXY TEST'S RETURN CODE = %s ]" % proc.returncode)
-        has_errors = True
+            log_to_send("[ %s TESTS' RETURN CODE = %s ]" % (name.upper(), proc.returncode))
+        has_errors = True  #FIXME? what os ot for?
 
 
 #####################################
+
+NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress'))
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -1332,6 +1368,7 @@ def parse_args():
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
+    parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
@@ -1353,8 +1390,8 @@ def parse_args():
     if Args.full_build_log and not Args.stdout:
         print "ERROR: --full-build-log option requires --stdout!\n"
         exit(1)
-    if Args.nobox and not (Args.functest or Args.timetest):
-        print "ERROR: --nobox allowed with --functest and --timetest only!\n"
+    if Args.nobox and not any(getattr(Args, opt) for opt in NOBOX_ALLOWED):
+        print "ERROR: --nobox is only allowed with options: %s\n" % ", ".join("--"+opt for opt in NOBOX_ALLOWED)
         exit(1)
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
@@ -1475,17 +1512,15 @@ def main():
                 check_control_flags()
         log("Finishing...")
 
-    elif Args.functest: # virtual boxes functest only
+    elif Args.functest or Args.timetest or Args.httpstress: # virtual boxes functest only
         ToSend[:] = []
-        perform_func_test(set())
+        perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
-            email_notify("Debug func tests", ToSend)
-
-    elif Args.timetest:
-        ToSend[:] = []
-        perform_func_test(set(), True)
-        if ToSend:
-            email_notify("Debug timesync tests", ToSend)
+            email_notify("Debug %s tests" % (
+                "func" if Args.functest else
+                "timesync" if Args.timetest else
+                "http-stress" if Args.httpstress else "UNKNOWN!!!"),
+            ToSend)
 
     elif Args.boxes:
         try:
