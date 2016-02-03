@@ -59,6 +59,7 @@ SMTP_PASS = 'kbnUk06boqBkwU'
 
 MAIL_FROM = '"AutoTest System" <autotest@networkoptix.com>'
 MAIL_TO = 'test-results@networkoptix.com'
+BRANCH_CC_TO = dict() # additional addresses per branch
 
 #TODO
 ALERT_TO = 'dlavrentyuk@networkoptix.com' # to send mail about check process fails (such as hg call fails)
