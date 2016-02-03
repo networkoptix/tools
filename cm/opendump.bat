@@ -11,13 +11,39 @@ IF NOT "%DUMPFILE%" == "" (
     IF EXIST %DUMPFILE% (
         REM This needs to be invoked to be able to pass FOR tokens to external outside-of-the-loop variables (fecking bat) to retrieve buildnumber, branch etc.
         SETLOCAL ENABLEDELAYEDEXPANSION
-        REM Finding build number
-        FOR /F "tokens=1-8 delims=.-_" %%I IN ("%DUMPFILE%") DO (
-            SET EXECUTABLE=%%I
-            SET BUILDNUMBER=%%N
-            SET CUSTOMIZATION=%%P
+        REM Removing "sent" prefix
+        FOR /F "tokens=1 delims=_" %%I IN ("%DUMPFILE%") DO (
+            SET SENT=%%I
+        )                 
+        IF "!SENT!" == "sent" (
+            set SHORT_DUMPFILE=!DUMPFILE:~5!
+        ) else (
+            set SHORT_DUMPFILE=!DUMPFILE!
         )    
+        ECHO Short Dumpfile = !SHORT_DUMPFILE!
+        
+        REM Finding executable name
+        FOR /F "tokens=1 delims=." %%I IN ("!SHORT_DUMPFILE!") DO (
+            SET TOKEN=%%I
+        )         
+
+        FOR /F "tokens=1-2 delims=_" %%I IN ("!TOKEN!") DO (
+            SET FIRST=%%I
+            SET SECOND=%%J
+        )
+        IF "!SECOND!" == "" (
+            SET EXECUTABLE=!FIRST!
+        ) ELSE (
+            SET EXECUTABLE=!FIRST! !SECOND!
+        )           
         ECHO Executable Name = !EXECUTABLE!
+
+        REM Finding build number
+        FOR /F "tokens=1-8 delims=.-" %%I IN ("!SHORT_DUMPFILE!") DO (
+            SET BUILDNUMBER=%%M
+            SET CUSTOMIZATION=%%O
+        )    
+
         ECHO Build Number = !BUILDNUMBER!
         ECHO Customization = !CUSTOMIZATION!
         IF "!EXECUTABLE!" == "mediaserver" (
@@ -25,8 +51,8 @@ IF NOT "%DUMPFILE%" == "" (
         ) ELSE (
             SET INSTALLTYPE=client
         )
-        ECHO Install Type = !INSTALLTYPE!
-        
+        ECHO Install Type = !INSTALLTYPE! 
+
         wget -qO - http://beta.networkoptix.com/beta-builds/daily/ | findstr !BUILDNUMBER! > temp.txt
         FOR /F "tokens=2 delims=><" %%I IN (temp.txt) DO SET BUILDBRANCH=%%I
         IF "!BUILDBRANCH!" == "" SET /p DUMMY = The build does not exist on the server ot Internet connection error occurs. Press any key to exit...
@@ -69,7 +95,7 @@ IF NOT "%DUMPFILE%" == "" (
         ECHO Copying and extracting Files...
         copy %DUMPFILE% "!EXECUTABLE_DIR!"
         7z x !PDBALL_FILENAME! -o"!EXECUTABLE_DIR!" -y
-        7z x !PDBAPPS_FILENAME! -o"!EXECUTABLE_DIR!" -y
+        7z x !PDBAPPS_FILENAME! -o"!EXECUTABLE_DIR!" -y        
     ) ELSE (
         SET /p DUMMY = Dump file does not exist in this subdirectory. Press any key to exit...       
     )   
