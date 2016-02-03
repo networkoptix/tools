@@ -203,9 +203,14 @@ def debug(text, *args):
             log_print("DEBUG: " + text)
 
 
-def email_send(mailfrom, mailto, msg):
+def email_send(mailfrom, mailto, cc, msg):
     msg['From'] = mailfrom
     msg['To'] = mailto
+    if cc:
+        if isinstance(cc, basestring):
+            cc = [cc]
+        mailto = [mailto] + cc
+        msg['Cc'] = ','.join(cc)
     smtp = SMTP(SMTP_ADDR)
     if SMTP_LOGIN:
         smtp.ehlo()
@@ -248,7 +253,7 @@ def email_notify(branch, lines):
     else:
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest run results on %s platform" % get_platform()
-        email_send(MAIL_FROM, MAIL_TO, msg)
+        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO[branch], msg)
 
 
 def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
@@ -272,7 +277,7 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
     else:
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
-        email_send(MAIL_FROM, MAIL_TO, msg)
+        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO[branch], msg)
 
 
 #####################################
