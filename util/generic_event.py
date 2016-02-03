@@ -14,11 +14,18 @@ def send_request():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--timeout', type=int, help="Timeout (in seconds), default value is 60")
+    parser.add_argument('-o', '--once', help="Send only once", action="store_true")
     args = parser.parse_args()
     
     timeout = args.timeout
     if not timeout:
         timeout = default_timeout
+       
+    if args.once:
+        print "Generate event once"
+        send_request()
+        return
+        
        
     print "Generate event every {0} seconds".format(timeout)
 
