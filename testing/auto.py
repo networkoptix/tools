@@ -253,7 +253,7 @@ def email_notify(branch, lines):
     else:
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest run results on %s platform" % get_platform()
-        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO[branch], msg)
+        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO.get(branch, []), msg)
 
 
 def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
@@ -277,7 +277,7 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
     else:
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
-        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO[branch], msg)
+        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO.get(branch, []), msg)
 
 
 #####################################
