@@ -15,6 +15,7 @@ sys.path.pop(0)
 
 verbose = False
 targetFolder = None
+kMinFileSize = 112
 
 def copyFiles(project, filesByLang):
     for lang, files in filesByLang.items():
@@ -35,6 +36,9 @@ def calculateTsEntries(dir, prefix, extension, results):
         if not entry.startswith(prefix):
             continue
         path = os.path.join(dir, entry)
+        size = os.path.getsize(path)
+        if size <= kMinFileSize:
+            continue
         lang = entry[len(prefix):-len(extension)]
         if not lang in results:
             results[lang] = []
