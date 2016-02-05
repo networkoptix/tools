@@ -65,26 +65,27 @@ IF NOT "%DUMPFILE%" == "" (
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET INSTALLER_FILENAME=%%I
         IF "!INSTALLER_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
         ECHO Installer Filename = !INSTALLER_FILENAME!        
+        ECHO Downloading installer...
+        IF EXIST !INSTALLER_FILENAME! DEL !INSTALLER_FILENAME!
+        wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/!INSTALLER_FILENAME!        
         
-        wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER! | findstr pdb-all > temp.txt  
+        wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER! | findstr pdb-all | findstr x64 > temp.txt  
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET PDBALL_FILENAME=%%I
         IF "!PDBALL_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
         ECHO PDB All Filename = !PDBALL_FILENAME!
-
-        wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER! | findstr pdb-apps > temp.txt  
-        FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET PDBAPPS_FILENAME=%%I
-        IF "!PDBAPPS_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
-        ECHO PDB Zip Filename = !PDBAPPS_FILENAME!
-        
-        ECHO Downloading installer...
-        IF EXIST !INSTALLER_FILENAME! DEL !INSTALLER_FILENAME!
-        wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/!INSTALLER_FILENAME!
         ECHO Downloading PDB All...
         IF EXIST !PDBALL_FILENAME! DEL !PDBALL_FILENAME!
-        wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER!/!PDBALL_FILENAME!
-        ECHO Downloading PDB Apps...
-        IF EXIST !PDBAPPS_FILENAME! DEL !PDBAPPS_FILENAME!
-        wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER!/!PDBAPPS_FILENAME!
+        wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER!/!PDBALL_FILENAME!        
+
+        if "!INSTALLTYPE!" == "server" (
+            wget -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER! | findstr pdb-apps | findstr x64 > temp.txt  
+            FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET PDBAPPS_FILENAME=%%I
+            IF "!PDBAPPS_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
+            ECHO PDB Zip Filename = !PDBAPPS_FILENAME!
+            ECHO Downloading PDB Apps...
+            IF EXIST !PDBAPPS_FILENAME! DEL !PDBAPPS_FILENAME!
+            wget http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER!/!PDBAPPS_FILENAME!            
+        )
         
         ECHO Unpacking Installer...
         msiexec /a !INSTALLER_FILENAME! /qb TARGETDIR="%~dp0!BUILDNUMBER!"
