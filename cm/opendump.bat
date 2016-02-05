@@ -1,4 +1,7 @@
 @ECHO OFF
+
+SET PATH=%ENVIRONMENT%\bin;%PATH%
+
 SET DUMPFILE=%1
 IF EXIST temp.txt DEL temp.txt
 
