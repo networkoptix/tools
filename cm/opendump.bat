@@ -14,14 +14,20 @@ IF NOT "%DUMPFILE%" == "" (
     IF EXIST %DUMPFILE% (
         REM This needs to be invoked to be able to pass FOR tokens to external outside-of-the-loop variables (fecking bat) to retrieve buildnumber, branch etc.
         SETLOCAL ENABLEDELAYEDEXPANSION
+        REM Removing quotes prefix
+        set CROPPED_DUMPFILE=!DUMPFILE:"=!
         REM Removing "sent" prefix
-        FOR /F "tokens=1 delims=_" %%I IN ("%DUMPFILE%") DO (
+        ECHO Cropped Dumpfile = !CROPPED_DUMPFILE!        
+        FOR /F "tokens=1 delims=_" %%I IN ("!CROPPED_DUMPFILE!") DO (
             SET SENT=%%I
         )                 
+        set SENT=!SENT: =!
+        echo sent = "!SENT!"
         IF "!SENT!" == "sent" (
-            set SHORT_DUMPFILE=!DUMPFILE:~5!
+            echo "Removing sent_ prefix"
+            set SHORT_DUMPFILE=!CROPPED_DUMPFILE:~5!
         ) else (
-            set SHORT_DUMPFILE=!DUMPFILE!
+            set SHORT_DUMPFILE=!CROPPED_DUMPFILE!
         )    
         ECHO Short Dumpfile = !SHORT_DUMPFILE!
         
@@ -46,7 +52,9 @@ IF NOT "%DUMPFILE%" == "" (
             SET BUILDNUMBER=%%M
             SET CUSTOMIZATION=%%O
         )    
-
+        FOR /F "tokens=1 delims=_" %%I IN ("!CUSTOMIZATION!") DO (
+            SET CUSTOMIZATION=%%I
+        )    
         ECHO Build Number = !BUILDNUMBER!
         ECHO Customization = !CUSTOMIZATION!
         IF "!EXECUTABLE!" == "mediaserver" (
@@ -58,12 +66,18 @@ IF NOT "%DUMPFILE%" == "" (
 
         %WGET% -qO - http://beta.networkoptix.com/beta-builds/daily/ | findstr !BUILDNUMBER! > temp.txt
         FOR /F "tokens=2 delims=><" %%I IN (temp.txt) DO SET BUILDBRANCH=%%I
-        IF "!BUILDBRANCH!" == "" SET /p DUMMY = The build does not exist on the server ot Internet connection error occurs. Press any key to exit...
+        IF "!BUILDBRANCH!" == "" (
+            SET /p DUMMY = The build does not exist on the server ot Internet connection error occurs. Press any key to exit...
+            EXIT /B 1
+        )    
         ECHO Build Branch = !BUILDBRANCH!
         
         %WGET% -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/ | findstr !BUILDNUMBER! | findstr !INSTALLTYPE!-only | findstr x64 > temp.txt 
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET INSTALLER_FILENAME=%%I
-        IF "!INSTALLER_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
+        IF "!INSTALLER_FILENAME!" == "" (
+            SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
+            EXIT /B 1
+        )    
         ECHO Installer Filename = !INSTALLER_FILENAME!        
         ECHO Downloading installer...
         IF EXIST !INSTALLER_FILENAME! DEL !INSTALLER_FILENAME!
@@ -71,7 +85,10 @@ IF NOT "%DUMPFILE%" == "" (
         
         %WGET% -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/updates/!BUILDNUMBER! | findstr pdb-all | findstr x64 > temp.txt  
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET PDBALL_FILENAME=%%I
-        IF "!PDBALL_FILENAME!" == "" SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
+        IF "!PDBALL_FILENAME!" == "" (
+            SET /p DUMMY = The Windows Installer does not exist on the server ot Internet connection error occurs. Press any key to exit...
+            EXIT /B 1            
+        )    
         ECHO PDB All Filename = !PDBALL_FILENAME!
         ECHO Downloading PDB All...
         IF EXIST !PDBALL_FILENAME! DEL !PDBALL_FILENAME!
@@ -99,7 +116,7 @@ IF NOT "%DUMPFILE%" == "" (
         ECHO Copying and extracting Files...
         copy %DUMPFILE% "!EXECUTABLE_DIR!"
         7z x !PDBALL_FILENAME! -o"!EXECUTABLE_DIR!" -y
-        7z x !PDBAPPS_FILENAME! -o"!EXECUTABLE_DIR!" -y        
+        7z x !PDBAPPS_FILENAME! -o"!EXECUTABLE_DIR!" -y             
     ) ELSE (
         SET /p DUMMY = Dump file does not exist in this subdirectory. Press any key to exit...       
     )   
