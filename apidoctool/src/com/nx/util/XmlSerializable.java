@@ -44,7 +44,7 @@ public abstract class XmlSerializable
 
         readFromElement(element);
 
-        if (!arbitraryInnerElementsAllowed())
+        if (element != null && !arbitraryInnerElementsAllowed())
         {
             // Check for unsupported elements.
             for (Node node = element.getFirstChild(); node != null;
@@ -60,9 +60,9 @@ public abstract class XmlSerializable
                     }
                 }
             }
-
-            processedElNames.clear();
         }
+
+        processedElNames.clear();
     }
 
     public final void readFromDocument(Document document) throws Error

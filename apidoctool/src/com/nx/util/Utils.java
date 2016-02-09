@@ -140,4 +140,18 @@ public final class Utils
             writer.close();
         }
     }
+
+    /**
+     * Insert the specified suffix before the file extension (if any).
+     */
+    public static File insertSuffix(File file, String suffix)
+    {
+        final String[] pathAndExt = matchRegex(Pattern.compile(
+            "(.*)(\\.[^./]+)"), file.getPath());
+
+        if (pathAndExt == null) //< The file has no extension.
+            return new File(file + suffix);
+
+        return new File(pathAndExt[0] + suffix + pathAndExt[1]);
+    }
 }

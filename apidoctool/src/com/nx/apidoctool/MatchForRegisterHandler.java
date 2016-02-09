@@ -27,6 +27,8 @@ public final class MatchForRegisterHandler
 
     public final String method;
 
+    //--------------------------------------------------------------------------
+
     /**
      * @return Null if the line is not a registration line.
      */
@@ -36,30 +38,24 @@ public final class MatchForRegisterHandler
     {
         String[] params;
 
-        params = sourceCode.matchLine(line,
-            lineRegexForGetFunc,
-            groupRegexForGetFunc,
-            continuationRegex);
+        params = sourceCode.matchMultiline(line,
+            firstLineRegexForGetFunc, groupRegexForGetFunc, lastLineRegex);
         if (params != null)
         {
             return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
                 params[2], params[0], params[1], "GET");
         }
 
-        params = sourceCode.matchLine(line,
-            lineRegexForUpdateFunc,
-            groupRegexForUpdateFunc,
-            continuationRegex);
+        params = sourceCode.matchMultiline(line,
+            firstLineRegexForUpdateFunc, groupRegexForUpdateFunc, lastLineRegex);
         if (params != null)
         {
             return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
                 params[1], params[0], null, "POST");
         }
 
-        params = sourceCode.matchLine(line,
-            lineRegexForFunctor,
-            groupRegexForFunctor,
-            continuationRegex);
+        params = sourceCode.matchMultiline(line,
+            firstLineRegexForFunctor, groupRegexForFunctor, lastLineRegex);
         if (params != null)
         {
             return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
@@ -97,10 +93,10 @@ public final class MatchForRegisterHandler
 
     //--------------------------------------------------------------------------
 
-    private static final Pattern continuationRegex = Pattern.compile(
+    private static final Pattern lastLineRegex = Pattern.compile(
         ".*[;\\[].*");
 
-    private static final Pattern lineRegexForGetFunc = Pattern.compile(
+    private static final Pattern firstLineRegexForGetFunc = Pattern.compile(
         "\\s*registerGetFuncHandler\\s*<.*");
 
     private static final Pattern groupRegexForGetFunc = Pattern.compile(
@@ -110,7 +106,7 @@ public final class MatchForRegisterHandler
         "(\\w+)" +
         "\\s*>.+ApiCommand\\s*::\\s*(\\w+).*");
 
-    private static final Pattern lineRegexForUpdateFunc = Pattern.compile(
+    private static final Pattern firstLineRegexForUpdateFunc = Pattern.compile(
         "\\s*registerUpdateFuncHandler\\s*<.*");
 
     private static final Pattern groupRegexForUpdateFunc = Pattern.compile(
@@ -118,7 +114,7 @@ public final class MatchForRegisterHandler
         "([a-zA-Z_0-9:]+)" +
         "\\s*>.+ApiCommand\\s*::\\s*(\\w+).*");
 
-    private static final Pattern lineRegexForFunctor = Pattern.compile(
+    private static final Pattern firstLineRegexForFunctor = Pattern.compile(
         "\\s*registerFunctorHandler\\s*<.*");
 
     private static final Pattern groupRegexForFunctor = Pattern.compile(

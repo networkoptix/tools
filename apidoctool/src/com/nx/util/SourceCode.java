@@ -44,35 +44,41 @@ public class SourceCode
     }
 
     /**
-     * Try to match the line with the specified regexes as follows: first test
-     * whether the line matches lineRegex (if not - return null); then, if the
-     * the line does not match lineTerminationRegex, concatenate (replacing line
-     * breaks with spaces) the line with the following consecutive lines up to
-     * (and including) a line which does not match lineTerminationRegex, and try
-     * to match the concatenated text with groupRegex (no match - throw Error),
-     * extracting group values.
+     * Identify a multiline block of text starting from the specified line and
+     * lasting up to and including the line matching lastLineRegex. After the
+     * block of lines is identified, the lines are concatenated replacing line
+     * breaks with spaces, and the result is matched with groupRegex.
+     * @param firstLineRegex Should match the first line of the block,
+     *     otherwise, null is returned.
+     * @param lastLineRegex Defines the last line of the block. The last line
+     *     can be the first line if it matches both firstLineRegex and
+     *     lastLineRegex.
+     * @return Matched groups in groupRegex, or null if the first line does not
+     * match firstLineRegex.
      * @throw Error if groupRegex is not matched.
-     * @return Matched groups, or null If the text does not match lineRegex.
      */
-    public final String[] matchLine(
-        final int line, Pattern lineRegex, Pattern groupRegex,
-        Pattern lineTerminationRegex) throws Error
+    public final String[] matchMultiline(
+        final int firstLine,
+        Pattern firstLineRegex,
+        Pattern groupRegex,
+        Pattern lastLineRegex)
+        throws Error
     {
-        assert line > 0;
-        assert line <= lines.size();
+        assert firstLine > 0;
+        assert firstLine <= lines.size();
 
-        int index = line - 1;
+        int index = firstLine - 1;
         String text = lines.get(index);
-        if (!lineRegex.matcher(text).matches())
+        if (!firstLineRegex.matcher(text).matches())
             return null;
 
-        if (!lineTerminationRegex.matcher(text).matches())
+        if (!lastLineRegex.matcher(text).matches())
         {
             ++index;
             while (index < lines.size())
             {
                 text = text + " " + lines.get(index);
-                if (lineTerminationRegex.matcher(lines.get(index)).matches())
+                if (lastLineRegex.matcher(lines.get(index)).matches())
                     break;
                 ++index;
             }
@@ -81,7 +87,7 @@ public class SourceCode
         String[] result = Utils.matchRegex(groupRegex, text);
         if (result == null)
         {
-            throw new Error(file, line, "No match for regex: " +
+            throw new Error(file, firstLine, "No match for regex: " +
                 groupRegex.pattern() + "\n" +
                 "Text:\n" +
                 text);

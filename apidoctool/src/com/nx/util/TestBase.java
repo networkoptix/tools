@@ -56,6 +56,7 @@ public abstract class TestBase
             System.out.println("ATTENTION: " +
                 (failedTestsCount == 1 ?
                 "1 test" : failedTestsCount + " tests") + " FAILED");
+            System.exit(3);
         }
     }
 
@@ -81,7 +82,7 @@ public abstract class TestBase
      * of each line).
      * @throws RuntimeException If the result is negative.
      */
-    public static void checkTextFileEqualIgnoringIndents(File file1, File file2)
+    public static void checkTextFilesEqualIgnoringIndents(File file1, File file2)
         throws Exception
     {
         List<String> lines1 = Utils.readAllLines(file1);

@@ -86,6 +86,9 @@ public final class ApidocCommentParser
 
     //--------------------------------------------------------------------------
 
+    /**
+     * @return Null if the comment should not convert to an XML function.
+     */
     private static Apidoc.Function createFunctionFromApidocItem(
         ApidocTagParser parser,
         String expectedUrlPrefix,

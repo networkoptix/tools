@@ -8,6 +8,47 @@
             <groupDescription>This group contains functions related to whole system (all servers).</groupDescription>
             <functions>
                 <function>
+                    <name>listDirectory</name>
+                    <description>Return list of folders and files in a virtual FS stored inside
+                        database. This function is used to add files (such audio for notifications)
+                        to database.</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>format</name>
+                            <description>Data format. Default value: 'json'</description>
+                            <optional>true</optional>
+                            <values>
+                                <value>
+                                    <name>ubjson</name>
+                                    <description>universal binary json data format</description>
+                                </value>
+                                <value>
+                                    <name>json</name>
+                                    <description>json data format</description>
+                                </value>
+                                <value>
+                                    <name>xml</name>
+                                    <description>xml data format</description>
+                                </value>
+                                <value>
+                                    <name>csv</name>
+                                    <description>CSV data format. In case of hierarchical structure only
+                                        top level data will be provided</description>
+                                </value>
+                            </values>
+                        </param>
+                        <param>
+                            <name>folder</name>
+                            <description>Folder name in a virtual FS</description>
+                            <optional>true</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>Return object in requested format</caption>
+                    </result>
+                </function>
+                <function>
                     <name>bookmarks</name>
                     <description>Reads bookmarks using specified parameters</description>
                     <method>GET</method>
@@ -943,47 +984,6 @@
                                         top level data will be provided</description>
                                 </value>
                             </values>
-                        </param>
-                    </params>
-                    <result>
-                        <caption>Return object in requested format</caption>
-                    </result>
-                </function>
-                <function>
-                    <name>listDirectory</name>
-                    <description>Return list of folders and files in a virtual FS stored inside
-                        database. This function is used to add files (such audio for notifications)
-                        to database.</description>
-                    <method>GET</method>
-                    <params>
-                        <param>
-                            <name>format</name>
-                            <description>Data format. Default value: 'json'</description>
-                            <optional>true</optional>
-                            <values>
-                                <value>
-                                    <name>ubjson</name>
-                                    <description>universal binary json data format</description>
-                                </value>
-                                <value>
-                                    <name>json</name>
-                                    <description>json data format</description>
-                                </value>
-                                <value>
-                                    <name>xml</name>
-                                    <description>xml data format</description>
-                                </value>
-                                <value>
-                                    <name>csv</name>
-                                    <description>CSV data format. In case of hierarchical structure only
-                                        top level data will be provided</description>
-                                </value>
-                            </values>
-                        </param>
-                        <param>
-                            <name>folder</name>
-                            <description>Folder name in a virtual FS</description>
-                            <optional>true</optional>
                         </param>
                     </params>
                     <result>

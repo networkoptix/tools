@@ -59,7 +59,9 @@ public final class SourceCodeParser
                     match, line, targetGroup.urlPrefix);
                 if (function != null)
                 {
-                    System.out.println("Processed function: " + function.name);
+                    if (targetGroup.functions.isEmpty())
+                        System.out.println("Processed functions:");
+                    System.out.println("    " + function.name);
                     targetGroup.functions.add(function);
                 }
             }
@@ -67,36 +69,40 @@ public final class SourceCodeParser
             ++line;
         }
 
+        if (targetGroup.functions.isEmpty())
+            System.out.println("WARNING: No functions were processed.");
+
         return targetGroup;
     }
 
     //--------------------------------------------------------------------------
 
     /**
+     * @param mainLine Line of code below the Apidoc Comment.
      * @return Null if the comment should not convert to an XML function.
      */
     private Apidoc.Function createFunctionFromComment(
         MatchForRegisterHandler match, int mainLine, String expectedUrlPrefix)
         throws Error, ApidocCommentParser.Error
     {
-        // Look for an Apidoc Comment above the main line.
+        // Look for an Apidoc Comment end "*/" directly above the main line.
         int line = mainLine - 1;
-        if (line == 0 ||
-            !sourceCode.lineMatches(line, commentEndRegex))
-        {
+        if (line == 0 || !sourceCode.lineMatches(line, commentEndRegex))
             return null;
-        }
 
-        --line; //< line points to the line preceding comment end line.
-        while (line > 0 &&
-            !sourceCode.lineMatches(line, commentStartRegex))
-        {
+        --line;
+        // Now line points to the line preceding the comment-end line "*/".
+
+        while (line > 0 && !sourceCode.lineMatches(line, commentStartRegex))
             --line;
-        }
-        if (line == 0) //< Did not find Apidoc Comment start.
+        if (line == 0) //< Did not find comment start.
             return null;
 
-        // line points to Apidoc Comment start.
+        // Now line points to a comment start: "/*...".
+
+        // Check that the found comment starts with "/**".
+        if (!sourceCode.lineMatches(line, apidocCommentStartRegex))
+            return null;
 
         List<String> commentLines = new ArrayList<String>(mainLine - line);
         for (int i = line; i < mainLine - 1; ++i)
@@ -145,5 +151,8 @@ public final class SourceCodeParser
         "\\s*\\*/\\s*");
 
     private static final Pattern commentStartRegex = Pattern.compile(
+        "\\s*/\\*.*");
+
+    private static final Pattern apidocCommentStartRegex = Pattern.compile(
         "\\s*/\\*\\*.*");
 }

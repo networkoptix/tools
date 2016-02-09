@@ -151,8 +151,10 @@ namespace ec2
         registerGetFuncHandler<QnUuid, ApiResourceParamWithRefDataList>( restProcessorPool, ApiCommand::getResourceParams );
         //AbstractResourceManager::save
         registerUpdateFuncHandler<ApiResourceParamWithRefDataList>( restProcessorPool, ApiCommand::setResourceParams );
+
         //AbstractResourceManager::remove
         registerUpdateFuncHandler<ApiIdData>( restProcessorPool, ApiCommand::removeResource );
+
 
         registerGetFuncHandler<QnUuid, ApiResourceStatusDataList>( restProcessorPool, ApiCommand::getStatusList );
 
