@@ -121,10 +121,12 @@ def validateXml(root, name):
                 result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
                 
             if hasNumerusForm:
+                forms = [numerusform for numerusform in translation.iter('numerusform') if numerusform.text]
                 filled = len([numerusform for numerusform in translation.iter('numerusform') if numerusform.text])
                 if filled > 0 and filled != index:
+                    result.error += 1
                     err(u'Incomplete numerus translation:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
-
+                    err(u'Filled {0} of {1} numerus forms'.format(filled, index))
                 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
