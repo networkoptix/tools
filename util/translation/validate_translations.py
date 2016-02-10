@@ -103,7 +103,6 @@ def validateXml(root, name):
             translation = message.find('translation')
             if translation.get('type') == 'unfinished':
                 result.unfinished += 1
-                continue
             
             if translation.get('type') == 'obsolete':
                 continue
@@ -120,6 +119,12 @@ def validateXml(root, name):
                 if not numerusform.text:
                     continue;
                 result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
+                
+            if hasNumerusForm:
+                filled = len([numerusform for numerusform in translation.iter('numerusform') if numerusform.text])
+                if filled > 0 and filled != index:
+                    err(u'Incomplete numerus translation:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
+
                 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
