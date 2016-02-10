@@ -9,12 +9,15 @@ from subprocess import Popen, PIPE
 from os.path import dirname, join, exists, isfile
 from fnmatch import fnmatch
 
-basedir = join(dirname(os.path.abspath(__file__)))
-root = basedir + '/' + '..'
-pattern = "*.json"
-
 def main():
-    p = subprocess.Popen('chmod +x ./validate_jsons.sh && ./validate_jsons.sh', shell=True, stdout=PIPE)
+    utildir = join(dirname(os.path.abspath(__file__)))
+    shellscript = "{0}/validate_jsons.sh".format(utildir)
+
+    root = os.getcwd()
+    pattern = "*.json"
+
+    command = 'chmod +x {0} && {0}'.format(shellscript)
+    p = subprocess.Popen(command, shell=True, stdout=PIPE)
     out, err = p.communicate()
     print out
     p.wait()
