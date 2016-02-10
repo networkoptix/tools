@@ -45,11 +45,11 @@ public class Main
             }
             else if ("sort-xml".equals(arg.action()))
             {
-                final SortXmlExecutor exec = new SortXmlExecutor();
-                exec.groupName = arg.get("-group-name");
-                exec.sourceApiXmlFile = arg.getFile("-source-xml");
-                exec.outputApiXmlFile = arg.getFile("-output-xml");
-                exec.execute();
+                final XmlSorter sorter = new XmlSorter();
+                sorter.groupName = arg.get("-group-name");
+                sorter.sourceApiXmlFile = arg.getFile("-source-xml");
+                sorter.outputApiXmlFile = arg.getFile("-output-xml");
+                sorter.execute();
             }
             else if ("xml-to-code".equals(arg.action()))
             {

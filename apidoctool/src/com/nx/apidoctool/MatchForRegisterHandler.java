@@ -1,6 +1,5 @@
 package com.nx.apidoctool;
 
-import com.nx.apidoc.ApidocCommentParser;
 import com.nx.util.SourceCode;
 
 import java.util.regex.Pattern;
@@ -34,7 +33,7 @@ public final class MatchForRegisterHandler
      */
     public static MatchForRegisterHandler create(
         SourceCode sourceCode, int line)
-        throws SourceCode.Error, ApidocCommentParser.Error
+        throws SourceCode.Error
     {
         String[] params;
 

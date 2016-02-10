@@ -82,11 +82,11 @@ public final class Tests
     {
         final File sortedApiXmlFile = Utils.insertSuffix(apiXmlFile, ".SORTED");
 
-        final SortXmlExecutor exec = new SortXmlExecutor();
-        exec.groupName = Executor.SYSTEM_API_GROUP_NAME;
-        exec.sourceApiXmlFile = apiXmlFile;
-        exec.outputApiXmlFile = sortedApiXmlFile;
-        exec.execute();
+        final XmlSorter sorter = new XmlSorter();
+        sorter.groupName = Executor.SYSTEM_API_GROUP_NAME;
+        sorter.sourceApiXmlFile = apiXmlFile;
+        sorter.outputApiXmlFile = sortedApiXmlFile;
+        sorter.execute();
 
         checkTextFilesEqualIgnoringIndents(
             sortedApiXmlFile, generatedApiXmlFile);

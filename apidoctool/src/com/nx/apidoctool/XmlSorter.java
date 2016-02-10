@@ -6,8 +6,7 @@ import com.nx.util.XmlUtils;
 
 import java.io.File;
 
-public class SortXmlExecutor
-    extends Executor
+public class XmlSorter
 {
     public String groupName;
     public File sourceApiXmlFile;
