@@ -1,10 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
-__author__ = 'Danil Lavrentyuk'
 """
 Crash Inspector regulary analizes crash reports, finds crashed function names,
 manages a know crashes list and creates tickets for new crashes.
 """
+__author__ = 'Danil Lavrentyuk'
 import sys
 import os
 import os.path
@@ -14,21 +14,21 @@ import socket
 import requests
 import traceback
 import argparse
-import errno
 import re
-from hashlib import md5
 from subprocess import Popen, PIPE
 from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-
 from parsedump import parse_dump
+from crashdb import KnowCrashDB
+import nxjira
 
 from crashmonconf import *
 
-filt_path = "/usr/bin/c++filt"
+__version__ = '1.2'
 
+filt_path = "/usr/bin/c++filt"
 
 def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
@@ -44,7 +44,7 @@ def get_lock(process_name):
     return True
 
 
-def get_crashes(crtype):
+def get_crashes(crtype, mark):
     print "Getting %s data" % crtype
     url = crash_list_url(crtype)
     try:
@@ -52,7 +52,13 @@ def get_crashes(crtype):
         if res.status_code != 200:
             print "Error: %s" % (res.status_code)
             return []
-        return res.json()
+        crashes = res.json()
+        for crash in crashes:
+            crash['new'] = crash['upload'] > mark['time'] or (
+                                crash['upload'] == mark['time'] and crash['path'] > mark['path']
+                           )
+        print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
+        return sorted(crashes, key=lambda v: (v['upload'],v['path']))
     except Exception:
         print "Failed to get %s: %s" % (url, traceback.format_exc())
         return []
@@ -71,26 +77,12 @@ def demangle_names(names):
     return out.split("\n")
 
 
-def load_known_faults():
-    known = []
-    try:
-        with open(KNOWN_FAULTS_FILE) as f:
-            for line in f:
-                if line.strip() != '':
-                    hash, key = line.split(':',1)
-                    known.append((hash, eval(key)))
-    except IOError, e:
-        if e.errno == errno.ENOENT:
-            print "%s not found, use empty list" % KNOWN_FAULTS_FILE
-        else:
-            raise
-    else:
-        print "%s faults are known already" % len(known)
-    return known
+def dump_url(path):
+    return ('' if path[0] == '/' else '/').join((DUMP_BASE, path))
 
 
 def load_crash_dump(crash_type, crash):
-    url = ('' if crash['path'][0] == '/' else '/').join((DUMP_BASE, crash['path']))
+    url = dump_url(crash['path'])
     try:
         result = requests.get(url, auth=AUTH)
         if result.status_code != 200:
@@ -104,7 +96,7 @@ def load_crash_dump(crash_type, crash):
     crash['calls'] = parse_dump(iter(crash['dump'].split("\n")), crash_type, crash['path'])
     if crash['calls']:
         crash['calls'] = tuple(demangle_names(crash['calls']))
-        crash['hash'] = md5(''.join(crash['calls'])).hexdigest()
+        crash['hash'] = KnowCrashDB.hash(crash['calls'])
     else:
         crash['hash'] = ''
     return True
@@ -123,50 +115,74 @@ def email_send(mailfrom, mailto, msg): #FIXME move into a separate file!
     smtp.quit()
 
 
-def email_newcrash(crash, calls):
+def email_newcrash(crash, calls, jira_error=None):
     msg = MIMEMultipart()
+    if jira_error:
+        title = (
+            "Jira error reported while trying to create a new crash issue:\n"
+            "%s\nJira reply: %s\n"
+            "New crash details:\n"
+            % (jira_error.message, jira_error.reply)
+        )
+        msg['Subject'] = "Failed to reate issue for a new crash!"
+    else:
+        title = "A crash with a new trace path found.\n\n"
+        msg['Subject'] = "Crash with a new trace path found!"
     text = MIMEText(
-        "A crash with a new trace path found.\n\n"
+        "%s"
         "Hash: %s\n"
         "URL: %s\n\n"
         "Call stask (named functions only):\n%s\n\n"
-         % (crash['hash'], crash['url'], calls)
+         % (title, crash['hash'], crash['url'], calls)
     )
     msg.attach(text)
     att = MIMEText(crash['dump'])
     att.add_header('Content-Disposition', 'attachment', filename=crash['path'].lstrip('/'))
     msg.attach(att)
-    msg['Subject'] = "Crash with a new trace path found!"
     email_send(MAIL_FROM, MAIL_TO, msg)
 
 
-def fault_case2str(fnames, path, hash):
+def email_cant_attach(crash, issue, url, response, dump_path):
+    print "DEBUG: email_cant_attach: %s, %s, %s, %s" % (issue, url, response, dump_url(dump_path))
+    pass # TODO!!!
+
+
+def email_priority_fail(key, issue, pold, pnew, error):
+    print "DEBUG: email_priority_fail: %s, %s => %s, %s" % (issue, pold, pnew, error)
+    pass # TODO!!!
+
+
+def fault_case2str(dumps, path, hash, issue=None):
     buf = []
     if hash == '':
         buf.append("<UNKNOWN>:")
     else:
         buf.append("Hash: %s" % hash)
+        if issue:
+            buf.append("Jira issue: %s" % (nxjira.browse_url(issue[0]),))
         if path:
             buf.append("Stack:")
             buf.append(path)
-    buf.append("Files (%s):" % len(fnames))
-    for fname in fnames:
+    buf.append("Files (%s):" % len(dumps))
+    for fname, _, _ in dumps:
         buf.append("\t%s" % fname)
     buf.append('')
     return "\n".join(buf)
 
 
-def email_summary(faults, mintime, maxtime):
+def email_summary(faults, mintime, maxtime, known_issues):
     unknown = faults.pop('<UNKNOWN>', None)
     sig_only = []
     buf = []
     for k in sorted(faults.keys(), key=lambda x: (len(faults[x][0]), x), reverse=True):
-        (sig_only if len(k) == 1 else buf).append(fault_case2str(*faults[k]))
+        issue = known_issues.crashes[k] if known_issues.has(k) else None
+        (sig_only if len(k) == 1 else buf).append(fault_case2str(faults[k][0], faults[k][1], faults[k][2], issue))
     if sig_only:
         buf += sig_only
     if unknown is not None:
         buf.append(fault_case2str(*unknown))
     if buf:
+        #print "DEBUG:\n%s" % ("\n".join(buf),)
         msg = MIMEText("\n".join(buf))
         if re.search(r"\.\d\d\d\d\d\d$", mintime):
             mintime = mintime[:-7]
@@ -246,6 +262,13 @@ class LastCrashTracker(object):
             self.__class__.__name__, self._name, self._changed, self._summary_tm, self._stamps)
 
 
+def find_priority(number):
+    for i, level in enumerate(ISSUE_LEVEL):
+        if number < level[0]:
+            return i
+    return i+1
+
+
 class CrashMonitor(object):
     """
     The main class.
@@ -255,11 +278,10 @@ class CrashMonitor(object):
         # Setup the interruption handler
         self._stop = False
         self._lasts = LastCrashTracker(LASTS_FILE)
-        self._known = set()
+        self._known = KnowCrashDB(KNOWN_FAULTS_FILE)
         self._hashes = dict()
-        for hash, key in load_known_faults():
-            self._known.add(key)
-            self._hashes.setdefault(hash, []).append(key)
+        for key, hashval in self._known.iterhash():
+            self._hashes.setdefault(hashval, []).append(key)
         self.args = args
         signal.signal(signal.SIGINT,self._onInterrupt)
 
@@ -268,65 +290,115 @@ class CrashMonitor(object):
 
     def updateCrashes(self):
         "Loads crashes list from the crashserver, filters by last parsed crash times."
-        now = time.time()
         next_summary = self._lasts['next_summary']
-        print "Last summary was at %s, period ends at %s, now %s" % (self._lasts['summary'], next_summary, int(now))
-        faults = dict() if next_summary <= now else None
+        faults = dict()  # count number of loaded crashes with the same keys
         mintime, maxtime = '9999999999', ''
-        crash_sort_key = lambda v: (v['upload'],v['path'])
 
         for ct in CRASH_EXT:
-            if self._stop:
-                break
-            crash_list = get_crashes(ct)
-            if not crash_list:
-                continue
-            mark = self._lasts[ct]
-            for crash in crash_list:
-                crash['new'] = crash['upload'] > mark['time'] or (
-                                    crash['upload'] == mark['time'] and crash['path'] > mark['path']
-                               )
-            print "Loaded %s: %s new crashes" % (ct, sum(v['new'] for v in crash_list))
-
-            if faults is not None: # We need all crashes from the list
-                crash_list = sorted(crash_list, key=crash_sort_key)
-                if crash_list:
-                    mintime = min(crash_list[0]['upload'], mintime)
-                    maxtime = max(crash_list[-1]['upload'], maxtime)
-            else:
-                crash_list = sorted((v for v in crash_list if v['new']), key=crash_sort_key)
+            if self._stop: break
+            crash_list = get_crashes(ct, self._lasts[ct])
+            if not crash_list: continue
+            mintime = min(crash_list[0]['upload'], mintime)
+            maxtime = max(crash_list[-1]['upload'], maxtime)
 
             for crash in crash_list:
-                if self._stop:
-                    break
-                if not load_crash_dump(ct, crash):
-                    continue
+                if self._stop: break
+                if not load_crash_dump(ct, crash): continue
                 # calls is empty when the crash trace function names and the signal haven't been found out
                 # if calls consists only of one element -- it should be the signal (and there is no function names)
                 if crash['calls']:
                     key = crash['calls']
                     formated_calls = format_calls(key)
-                    if crash['new'] and key not in self._known:
+                    if crash['new'] and not self._known.has(key):
                         if crash['hash'] in self._hashes:
                             self.report_hash_collision(crash['hash'], key)
                         else:
                             self._hashes[crash['hash']] = [key]
                         print "New crash found in %s" % crash['path']
-                        email_newcrash(crash, formated_calls)
+                        if SEND_NEW_CRASHES:
+                            email_newcrash(crash, formated_calls)
                         self._known.add(key)
-                        open(KNOWN_FAULTS_FILE, "a").write("%s:%s\n" % (crash['hash'], key))
                 else:
                     key, formated_calls = '<UNKNOWN>', ''
 
+                faults.setdefault(key, ([], formated_calls, crash['hash']))[0].append((crash['url'], crash['path'], crash['dump']))
+
                 if crash['new']:
+                    # only new crashes can increase counter
+                    if crash['calls']:
+                        i = find_priority(len(faults[key][0]))
+                        if i > 0:
+                            issue = self._known.crashes[key]
+                            if issue:
+                                _, issue_data = nxjira.get_issue(issue[0])
+                                if issue_data.ok:
+                                # 1. Attach the new crash dump
+                                    counted = nxjira.count_attachments(issue_data)
+                                    if counted[1] < MAX_ATTACHMENTS:
+                                        nxjira.create_attachment(issue[0], crash['path'], crash['dump'])
+                                    # 2. Check if the priority should be increased
+                                    if issue[1] < i: # new priority is higher
+                                        rc = self.increase_priority(key, issue, i, issue_data)
+                                        if rc:
+                                            self._known.set_issue(key, (issue[0], i))
+                                        elif rc is not None:
+                                            print "No issue %s found in Jira, priority change ignored" % (issue[0],)
+                                else:
+                                    print "ERROR: can't load issue %s: %s, %s" % (
+                                        issue[0], issue_data.code, issue_data.reason)
+                            else:
+                                try:
+                                    new_issue = self.create_jira_issue(crash, formated_calls, i, faults[key][0])
+                                    self._known.set_issue(key, (new_issue, i))
+                                except nxjira.JiraError, e:
+                                    email_newcrash(crash, formated_calls, e)
                     self._lasts.set(ct, crash['path'], crash['upload'])
 
-                if faults is not None:
-                    faults.setdefault(key, ([], formated_calls, crash['hash']))[0].append(crash['url'])
+        if self._known.changed:
+            self._known.rewrite()
 
-        if faults is not None:
-            email_summary(faults, mintime, maxtime)
+        if next_summary <= time.time():
+            print "Sending crashes summary..."
+            email_summary(faults, mintime, maxtime, self._known)
             self._lasts.set_summary()
+
+    def create_jira_issue(self, crash, calls, priority, dumps):
+        name = "Crash detected: %s" % crash['hash']
+        desc = (
+            "Crash Monitor detected a crash with a new trace path\n\n"
+            "Hash: %s\n"
+            "URL: %s\n\n"
+            "Call stask (named functions only):\n%s\n\n"
+             % (crash['hash'], crash['url'], calls)
+        )
+        if priority < 1:
+            print "ERROR: create_jira_issue int number value < 1"
+            return
+        if priority > len(ISSUE_LEVEL):
+            priority = len(ISSUE_LEVEL)
+        issue_key, url = nxjira.create_issue(name, desc, ISSUE_LEVEL[priority-1][1])
+        if len(dumps) > MAX_ATTACHMENTS:
+            del dumps[MAX_ATTACHMENTS:]
+        for _, path, dump in dumps:
+            res = nxjira.create_attachment(issue_key, path, dump)
+            if res is not None:
+                email_cant_attach(crash, issue_key, url, res, path)
+        return issue_key
+
+    def increase_priority(self, key, issue, priority, issue_data=None):
+        print "DEBUG: called increase_priority(%s, %s, %s)" % (key, issue, priority)
+        if priority < 1: # FIXME copypasta!
+            print "ERROR: increase_priority int number value < 1"
+            return
+        if priority > len(ISSUE_LEVEL):
+            priority = len(ISSUE_LEVEL)
+        pnew = ISSUE_LEVEL[priority-1][1]
+        pold = ISSUE_LEVEL[issue[1]-1][1] if 0 < issue[1] <= len(ISSUE_LEVEL) else None
+        try:
+            return nxjira.priority_change(issue_data or issue[0], pnew, pold)
+        except nxjira.JiraError, e:
+            email_priority_fail(key, issue, pold, pnew, e)
+            return None
 
     def report_hash_collision(self, hash, key):
         self._hashes[hash].append(key)

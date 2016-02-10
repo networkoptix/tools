@@ -10,8 +10,19 @@ DUMP_BASE = "http://stats.networkoptix.com/crash_dumps"
 CRASH_EXT = ('crash', 'gdb-bt')
 AUTH = ("statlord", "razdvatri")
 
-LASTS_FILE = "last_crash.py" #
+LASTS_FILE = "last-crash" #
 KNOWN_FAULTS_FILE = "known-faults.list"
+
+ISSUE_LEVEL = [ # pairs of crash number  to set and priority name
+    #[3, "Low"],
+    [3, "Medium"],
+    [10, "High"],
+    #[20, "Highest"]
+]
+
+MAX_ATTACHMENTS = 10
+
+SEND_NEW_CRASHES = True # send an email for each new crash trace ptath or not?
 
 def crash_list_url(ext):
     return CRASH_LIST_URL.format(ext)
@@ -26,6 +37,6 @@ SMTP_ADDR = 'smtp.gmail.com:587'
 SMTP_LOGIN = 'service@networkoptix.com'
 SMTP_PASS = 'kbnUk06boqBkwU'
 
-MAIL_FROM = '"Crash Monitor" <crashmon@networkoptix.com>'
+MAIL_FROM = '"Crash Monitor (local)" <crashmon@networkoptix.com>'
 MAIL_TO = 'crashdumps@networkoptix.com'
 MAIL_TO = 'dlavrentyuk@networkoptix.com'
