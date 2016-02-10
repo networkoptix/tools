@@ -56,7 +56,7 @@ def report(data):
 
 issue_data = {
     "fields" : {
-        "project": { "key": "TEST" },  # "VMS"
+        "project": { "key": "TEST" },  # "VMS" #FIXME make it configurable
         "issuetype": { "name": "Task" },
         "summary": "Testing bug creation scripting",
         "customfield_10200": {"value": "Server"},
@@ -64,7 +64,7 @@ issue_data = {
         "components": [ {"name": "Server" } ] ,
         "description": "Not a bug really, just testing the API",
         'priority': { "name": "Low" },
-        "customfield_10009": "TEST-1", # TODO: change to the real epic in VMS
+        "customfield_10009": "TEST-1", # TODO: change to the real epic in VMS  #FIXME make it configurable
     }
 }
 

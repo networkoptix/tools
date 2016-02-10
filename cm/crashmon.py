@@ -383,10 +383,10 @@ class CrashMonitor(object):
             res = nxjira.create_attachment(issue_key, path, dump)
             if res is not None:
                 email_cant_attach(crash, issue_key, url, res, path)
+        print "New jira issue created: %s" % (issue_key,)
         return issue_key
 
     def increase_priority(self, key, issue, priority, issue_data=None):
-        print "DEBUG: called increase_priority(%s, %s, %s)" % (key, issue, priority)
         if priority < 1: # FIXME copypasta!
             print "ERROR: increase_priority int number value < 1"
             return
@@ -395,7 +395,10 @@ class CrashMonitor(object):
         pnew = ISSUE_LEVEL[priority-1][1]
         pold = ISSUE_LEVEL[issue[1]-1][1] if 0 < issue[1] <= len(ISSUE_LEVEL) else None
         try:
-            return nxjira.priority_change(issue_data or issue[0], pnew, pold)
+            rc = nxjira.priority_change(issue_data or issue[0], pnew, pold)
+            if rc:
+                print "Issue %s priority changed: %s -> %s" % (issue[0], pold, pnew)
+            return rc
         except nxjira.JiraError, e:
             email_priority_fail(key, issue, pold, pnew, e)
             return None
