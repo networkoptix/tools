@@ -30,6 +30,15 @@ __version__ = '1.2'
 
 filt_path = "/usr/bin/c++filt"
 
+
+def is_crash_dump_path(path):
+    return path.startswith('mediaserver') and (path.endswith('.crash') or path.endswith('.gdb-bt'))
+
+
+def attachment_filter(attachment):
+    return is_crash_dump_path(attachment["filename"])
+
+
 def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
 
@@ -333,14 +342,16 @@ class CrashMonitor(object):
                                 _, issue_data = nxjira.get_issue(issue[0])
                                 if issue_data.ok:
                                 # 1. Attach the new crash dump
-                                    _, counted = nxjira.count_attachments(issue_data)
+                                    _, counted = nxjira.count_attachments(issue_data, predicat=attachment_filter)
                                     while counted >= MAX_ATTACHMENTS:
                                         print "Deleting oldest attachment in %s" % (issue[0],)
-                                        if not nxjira.delete_oldest_attchment(issue_data):
+                                        if not nxjira.delete_oldest_attchment(issue_data, predicat=attachment_filter):
                                             break
                                         counted -= 1
                                     if counted < MAX_ATTACHMENTS:
-                                        nxjira.create_attachment(issue[0], crash['path'], crash['dump'])
+                                        res = self.add_attachment(issue[0], crash['path'], crash['dump'])
+                                        if res is not None:
+                                            email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])
                                     # 2. Check if the priority should be increased
                                     if issue[1] < i: # new priority is higher
                                         rc = self.increase_priority(key, issue, i, issue_data)
@@ -385,11 +396,18 @@ class CrashMonitor(object):
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         for _, path, dump in dumps:
-            res = nxjira.create_attachment(issue_key, path, dump)
+            res = self.add_attachment(issue_key, path, dump)
             if res is not None:
                 email_cant_attach(crash, issue_key, url, res, path)
         print "New jira issue created: %s" % (issue_key,)
         return issue_key
+
+    def add_attachment(self, issue, name, dump):
+        name = name.lstrip('/')
+        if not is_crash_dump_path(name):
+            print "WARNING: Strange crash dump name: %s" % name
+            print "POSSIBLY is_crash_dump_path() conditions are to be updated!"
+        return nxjira.create_attachment(issue, name, dump)
 
     def increase_priority(self, key, issue, priority, issue_data=None):
         if priority < 1: # FIXME copypasta!

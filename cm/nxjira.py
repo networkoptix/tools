@@ -106,7 +106,7 @@ def create_issue(name, desc, priority="Medium"):
 
 
 def create_attachment(issue, name, data):
-    name = name.lstrip('/').replace('/','--')
+    name = name.replace('/','--')
     res = requests.request('POST', ISSUE + issue + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
                            files={'file': (name, data, 'text/plain')})
     if res.status_code != CODE_OK:
@@ -145,34 +145,41 @@ def priority_change(key, new_prio, old_prio=None):
     return False
 
 
-def count_attachments(key):
+def count_attachments(key, predicat=None):
     """"Returns tuple (None, numnber_attachments) if result.ok
     else (result.code, result.reason)
     """
     key, result = get_issue(key)
     if result.ok:
-        return None, len(result.data['fields'].get('attachment',[]))
+        if predicat is None:
+            count = len(result.data['fields'].get('attachment',[]))
+        else:
+            count = sum(1 for att in result.data['fields'].get('attachment',[]) if predicat(att))
+        return None, count
     return result.code, result.reason
 
 
-def delete_oldest_attchment(key):
+def delete_oldest_attchment(key, predicat=None):
     """"Deletes issue's attachment with the oldest u[load time.
     Returns True if no attachments found in the issue or on sucessful deletion.
     """
     k, result = get_issue(key)
     if not result.ok:
         return False
-    att = result.data['fields'].get('attachment',[])
-    if not att:
+    attachments = result.data['fields'].get('attachment', None)
+    if not attachments:
         return True
-    sorted_att = sorted(att, key=lambda a: a['created'])
-    to_del = sorted_att[0]['id']
-    reply = jirareq('DELETE', to_del, what='attachment')
+    if predicat is not None:
+        attachments = filter(predicat, attachments)
+        if not attachments:
+            return True
+    to_del = sorted(attachments, key=lambda a: a['created'])[0]
+    reply = jirareq('DELETE', to_del['id'], what='attachment')
     if reply.ok:
         if key == result: # i.e. we work with preloaded data
-            result.data['fields']['attachment'][:] = sorted_att[1:]
+            result.data['fields']['attachment'].remove(to_del)
         return True
-    print "WARNING: Failed to delete attachment %s of issue %s" % (to_del, k)
+    print "WARNING: Failed to delete attachment %s of issue %s" % (to_del['id'], k)
     return False
 
 def test_create():
