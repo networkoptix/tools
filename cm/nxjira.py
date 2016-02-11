@@ -9,7 +9,8 @@ import StringIO
 #import jira
 
 JIRA = "https://networkoptix.atlassian.net"
-BASE = JIRA + "/rest/api/2/issue/"
+JIRAAPI = JIRA + "/rest/api/2/"
+ISSUE = JIRAAPI + "issue/"
 BROWSE = JIRA + "/browse/"
 AUTH = ("dlavrentyuk", "LathanderTest109")
 
@@ -26,7 +27,7 @@ class JiraError(RuntimeError):
         self.reply = reply
 
 
-class JiraIssue(object):
+class JiraReply(object):
 
     def __init__(self, data, code, reason):
         self.data = data
@@ -38,16 +39,31 @@ class JiraIssue(object):
         return JiraError(self.code, self.reason, self.data)
 
 
-def jirareq(op, query, data=None):
+def jirareq(op, query, data=None, what='issue'):
+    if what == 'issue':
+        url = ISSUE + query
+    else:
+        url = JIRAAPI + what + '/' + query
     if op == 'GET':
-        res = requests.get(BASE + query, auth=AUTH)
+        res = requests.get(url, auth=AUTH)
+    elif op == 'DELETE':
+        res = requests.delete(url, auth=AUTH)
     else:
         jdata = json.dumps(data)
-        url = BASE + query
         #print "Sending by %s json data: %s\nTo: %s" % (op, jdata, url)
         res = requests.request(op, url, data=jdata, auth=AUTH, headers={"Content-Type": "application/json"})
     #print "DEBUG: Query %s status: %s %s" % (query, res.status_code, res.reason)
-    return JiraIssue((res.json() if res.content else ''), res.status_code, res.reason)
+    if res.content is not None and len(res.content) > 0:
+        try:
+            content = res.json()
+        except ValueError:
+            content = res.content
+    else:
+        content = ''
+    reply = JiraReply(content, res.status_code, res.reason)
+    if op == 'DELETE' and res.status_code == CODE_NO_CONTENT:
+        reply.ok = True
+    return reply
 
 
 def report(data):
@@ -91,17 +107,18 @@ def create_issue(name, desc, priority="Medium"):
 
 def create_attachment(issue, name, data):
     name = name.lstrip('/').replace('/','--')
-    res = requests.request('POST', BASE + issue + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
+    res = requests.request('POST', ISSUE + issue + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
                            files={'file': (name, data, 'text/plain')})
     if res.status_code != CODE_OK:
         print "Error creating attachment %s to the JIRA issue %s" % (name, issue)
         return (res.status_code, res.reason, res.content)
+    #print "DEBUG: attached %s" % (name,)
     return None
 
 
 def get_issue(key):
     "Allows to pass a string issue key or already loaded issue data"
-    if isinstance(key, JiraIssue):
+    if isinstance(key, JiraReply):
         return key.data['key'], key
     else:
         return key, jirareq('GET', key)
@@ -138,6 +155,25 @@ def count_attachments(key):
     return result.code, result.reason
 
 
+def delete_oldest_attchment(key):
+    """"Deletes issue's attachment with the oldest u[load time.
+    Returns True if no attachments found in the issue or on sucessful deletion.
+    """
+    k, result = get_issue(key)
+    if not result.ok:
+        return False
+    att = result.data['fields'].get('attachment',[])
+    if not att:
+        return True
+    sorted_att = sorted(att, key=lambda a: a['created'])
+    to_del = sorted_att[0]['id']
+    reply = jirareq('DELETE', to_del, what='attachment')
+    if reply.ok:
+        if key == result: # i.e. we work with preloaded data
+            result.data['fields']['attachment'][:] = sorted_att[1:]
+        return True
+    print "WARNING: Failed to delete attachment %s of issue %s" % (to_del, k)
+    return False
 
 def test_create():
     result =  jirareq('POST', '', issue_data)
@@ -157,7 +193,7 @@ def test_create():
 
 def test_attach(key):
     test = open('opendump.bat').read()
-    res = requests.request('POST', BASE + key + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
+    res = requests.request('POST', ISSUE + key + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
                            files={'file': ('some-file-name.txt', test, 'text/plain')})
     print "Query status: %s %s" % (res.status_code, res.reason)
     print res.content
@@ -172,8 +208,23 @@ def test_priority_boost(key):
         if p == 1:
             print "Highest priority already!"
             return
-        code, newdata, reason = jirareq('PUT', key, {"fields": { "priority": {"id": str(p-1)}}})
-        print "Result: %s\n%s" % (code, newdata)
+        reply = jirareq('PUT', key, {"fields": { "priority": {"id": str(p-1)}}})
+        print "Result: %s\n%s" % (reply.code, reply.data)
+
+
+def test_check_attachments(key):
+    key, result = get_issue(key)
+    if result.ok:
+        sorted_att = sorted(result.data['fields'].get('attachment',[]), key=lambda a: a['created'])
+        for att in sorted_att:
+            print "Id %s, tm %s" % (att['id'], att['created'])
+            print att['filename']
+        print "Now removing the elder attachment"
+        reply = jirareq('DELETE', sorted_att[0]['id'], what='attachment')
+        # good answer is CODE_NO_CONTENT
+        print "Reply: code %s, reason %s, data: %s" % (reply.code, reply.reason, reply.data)
+
+
 
 
 if __name__ == '__main__':
@@ -181,4 +232,5 @@ if __name__ == '__main__':
     #priority_boost('TEST-26')
     #for k in ('TEST-97', 'TEST-100'):
     #    print "%s: %s" % (k, count_attachments(k))
+    #test_check_attachments('TEST-108')
     print "Don't run me!"

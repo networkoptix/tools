@@ -333,8 +333,13 @@ class CrashMonitor(object):
                                 _, issue_data = nxjira.get_issue(issue[0])
                                 if issue_data.ok:
                                 # 1. Attach the new crash dump
-                                    counted = nxjira.count_attachments(issue_data)
-                                    if counted[1] < MAX_ATTACHMENTS:
+                                    _, counted = nxjira.count_attachments(issue_data)
+                                    while counted >= MAX_ATTACHMENTS:
+                                        print "Deleting oldest attachment in %s" % (issue[0],)
+                                        if not nxjira.delete_oldest_attchment(issue_data):
+                                            break
+                                        counted -= 1
+                                    if counted < MAX_ATTACHMENTS:
                                         nxjira.create_attachment(issue[0], crash['path'], crash['dump'])
                                     # 2. Check if the priority should be increased
                                     if issue[1] < i: # new priority is higher
