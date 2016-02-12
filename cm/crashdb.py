@@ -56,9 +56,9 @@ class KnowCrashDB(object):
             open(self.fname, "a").write("%r\n" % ([key],))
 
     def set_issue(self, key, issue):
-        if key in self.crashes and self.crashes[key] is not None and self.crashes[key][0] != issue[0]:
-            print "ERROR: Trying to owerride issue %s with %s" % (self.crashes[key], issue)
-            return
+        #if key in self.crashes and self.crashes[key] is not None and self.crashes[key][0] != issue[0]:
+        #    print "ERROR: Trying to owerride issue %s with %s" % (self.crashes[key], issue)
+        #    return
         self.crashes[key] = issue
         open(self.fname, "a").write("%r\n" % ([key, issue],))
         self.changed = True

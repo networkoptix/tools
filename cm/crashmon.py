@@ -32,7 +32,9 @@ filt_path = "/usr/bin/c++filt"
 
 
 def is_crash_dump_path(path):
-    return path.startswith('mediaserver') and (path.endswith('.crash') or path.endswith('.gdb-bt'))
+    return (path.startswith('mediaserver') or path.startswith('client')
+            ) and (
+            path.endswith('.crash') or path.endswith('.gdb-bt'))
 
 
 def attachment_filter(attachment):
@@ -62,10 +64,18 @@ def get_crashes(crtype, mark):
             print "Error: %s" % (res.status_code)
             return []
         crashes = res.json()
+        rx = re.compile(r"\d+\.\d+\.\d+(\.\d+)")
         for crash in crashes:
             crash['new'] = crash['upload'] > mark['time'] or (
                                 crash['upload'] == mark['time'] and crash['path'] > mark['path']
                            )
+
+            cp = crash['path'].lstrip('/').split('/')
+            if cp[0] not in ('mediaserver', 'mediaserver-bin', 'client-bin', 'client.bin'):
+                print "WARNING: unexpected the first crash dump path element: %s", cp[0]
+            m = rx.match(cp[1])
+            crash["version"] = [int(n) for n in m.group(0).split('.')[:3]] if m else None
+
         print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
         return sorted(crashes, key=lambda v: (v['upload'],v['path']))
     except Exception:
@@ -222,6 +232,13 @@ class LastCrashTracker(object):
             self.load()
         self._changed = False
 
+    def __getitem__(self, item):
+        if item == 'summary':
+            return self._summary_tm
+        elif item == 'next_summary':
+            return self.next_summary_time()
+        return self._stamps.get(item, 0)
+
     def load(self):
         v = {}
         try:
@@ -243,13 +260,6 @@ class LastCrashTracker(object):
     def store(self):
         file(self._fn, 'w').write(LAST_CRASH_TIME_TPL % (self._name, self._stamps, self._sumname, self._summary_tm))
         self._changed = False
-
-    def __getitem__(self, item):
-        if item == 'summary':
-            return self._summary_tm
-        elif item == 'next_summary':
-            return self.next_summary_time()
-        return self._stamps.get(item, 0)
 
     def set(self, ext, path, tm):
         last = self._stamps.get(ext, None)
@@ -312,6 +322,7 @@ class CrashMonitor(object):
 
             for crash in crash_list:
                 if self._stop: break
+                #
                 if not load_crash_dump(ct, crash): continue
                 # calls is empty when the crash trace function names and the signal haven't been found out
                 # if calls consists only of one element -- it should be the signal (and there is no function names)
@@ -340,25 +351,33 @@ class CrashMonitor(object):
                             issue = self._known.crashes[key]
                             if issue:
                                 _, issue_data = nxjira.get_issue(issue[0])
+                                if issue_data.code == nxjira.CODE_NOT_FOUND:
+                                    print "WARNING: Jira issue %s is not found. Issue will be created anew!"
+                                    self._known.set_issue(key, None)
+                                    issue = None
+                            if issue:
                                 if issue_data.ok:
-                                # 1. Attach the new crash dump
-                                    _, counted = nxjira.count_attachments(issue_data, predicat=attachment_filter)
-                                    while counted >= MAX_ATTACHMENTS:
-                                        print "Deleting oldest attachment in %s" % (issue[0],)
-                                        if not nxjira.delete_oldest_attchment(issue_data, predicat=attachment_filter):
-                                            break
-                                        counted -= 1
-                                    if counted < MAX_ATTACHMENTS:
-                                        res = self.add_attachment(issue[0], crash['path'], crash['dump'])
-                                        if res is not None:
-                                            email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])
-                                    # 2. Check if the priority should be increased
-                                    if issue[1] < i: # new priority is higher
-                                        rc = self.increase_priority(key, issue, i, issue_data)
-                                        if rc:
-                                            self._known.set_issue(key, (issue[0], i))
-                                        elif rc is not None:
-                                            print "No issue %s found in Jira, priority change ignored" % (issue[0],)
+                                    if self.can_change(issue_data, crash['version']):
+                                        # 1. Attach the new crash dump
+                                        _, counted = nxjira.count_attachments(issue_data, predicat=attachment_filter)
+                                        while counted >= MAX_ATTACHMENTS:
+                                            print "Deleting oldest attachment in %s" % (issue[0],)
+                                            if not nxjira.delete_oldest_attchment(issue_data, predicat=attachment_filter):
+                                                break
+                                            counted -= 1
+                                        if counted < MAX_ATTACHMENTS:
+                                            res = self.add_attachment(issue[0], crash['path'], crash['dump'])
+                                            if res is not None:
+                                                email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])
+                                        # 2. Check if the priority should be increased
+                                        if issue[1] < i: # new priority is higher
+                                            rc = self.increase_priority(key, issue, i, issue_data)
+                                            if rc:
+                                                self._known.set_issue(key, (issue[0], i))
+                                            elif rc is not None:
+                                                print "No issue %s found in Jira, priority change ignored" % (issue[0],)
+                                    else:
+                                        print "Ignore already closed issue %s" % (issue[0],)
                                 else:
                                     print "ERROR: can't load issue %s: %s, %s" % (
                                         issue[0], issue_data.code, issue_data.reason)
@@ -425,6 +444,17 @@ class CrashMonitor(object):
         except nxjira.JiraError, e:
             email_priority_fail(key, issue, pold, pnew, e)
             return None
+
+    def can_change(self, issue_data, crashed_version): # TODO why not to move int into the JireReply class?
+        if issue_data.is_done(): # it's a readon not to add more dumps and increase priority
+            if issue_data.is_closed(): # hmm...
+                print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (issue_data.data['key'], issue_data.smallest_fixversion(), crashed_version)
+                if crashed_version > issue_data.smallest_fixversion():
+                    if issue_data.reopen():
+                        print "Issue %s reopened" % (issue_data.data['key'],)
+                        return True
+            return False
+        return True
 
     def report_hash_collision(self, hash, key):
         self._hashes[hash].append(key)

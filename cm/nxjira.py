@@ -7,6 +7,7 @@ import requests
 import json
 import StringIO
 #import jira
+import re
 
 JIRA = "https://networkoptix.atlassian.net"
 JIRAAPI = JIRA + "/rest/api/2/"
@@ -17,6 +18,44 @@ AUTH = ("dlavrentyuk", "LathanderTest109")
 CODE_OK = 200
 CODE_CREATED = 201
 CODE_NO_CONTENT = 204
+CODE_NOT_FOUND = 404
+
+_version_rx = re.compile(r"^\d+\.\d+\.\d+")
+
+
+issue_data = {
+    "fields" : {
+        "project": { "key": "TEST" },  # "VMS" #FIXME make it configurable
+        "issuetype": { "name": "Task" },
+        "summary": "Testing bug creation scripting",
+        "customfield_10200": {"value": "Server"},
+        "fixVersions": [ {"name": "Future"} ],
+        "components": [ {"name": "Server" } ] ,
+        "description": "Not a bug really, just testing the API",
+        'priority': { "name": "Low" },
+        "customfield_10009": "TEST-1", # TODO: change to the real epic in VMS  #FIXME make it configurable
+    }
+}
+
+transition_data = {
+    #"Start Development": {
+    #    "update" : { "comment": [{"add":{"body": "start fixing"}}]},
+    #    "transition" : { "id": 11 }
+    #},
+    #"Back to Development": {
+    #    "update" : { "comment": [{"add":{"body": "Crash Monitor: New crashes detected"}}]},
+    #    "transition" : { "id": 91 }
+    #},
+    "Reopen": {
+        "update" : { "comment": [{"add":{"body": "Crash Monitor: New crashes detected"}}]},
+        "transition" : { "id": 121 }
+    },
+}
+
+
+def _parse_fixVersion(version):
+    m = _version_rx.match(version)
+    return [int(n) for n in m.group(0).split('.')] if m else None
 
 
 class JiraError(RuntimeError):
@@ -37,6 +76,33 @@ class JiraReply(object):
 
     def mk_error(self):
         return JiraError(self.code, self.reason, self.data)
+
+    def is_done(self):
+        return self.ok and self.data['fields']['status']['statusCategory']["name"] == "Done"
+
+    def is_closed(self):
+        return self.ok and self.data['fields']['status']["name"] == "Closed"
+
+    def smallest_fixversion(self):
+        if self.ok:
+            versions = sorted(filter(None,
+                (_parse_fixVersion(v['name']) for v in self.data['fields'].get('fixVersions', []))))
+            return versions[0] if versions else None
+        return None
+
+    def reopen(self):
+        if self.ok and self.is_closed():
+            reply = jirareq("POST", self.data['key'] + '/transitions', data=transition_data["Reopen"])
+            if reply.code != CODE_NO_CONTENT:
+                print "ERROR: Can't reopen issue %s: %s %s - %s" % (
+                    self.data['key'], reply.code, reply.reason, reply.data['errorMessages'])
+                return False
+            return True
+        if self.ok:
+            print "ERROR: issue %s isn't closed, so can't reopen id" % (self.data['key'],)
+        else:
+            print "ERROR: JiraReply.reopen() called when self.ok isn't True"
+        return False
 
 
 def jirareq(op, query, data=None, what='issue'):
@@ -68,21 +134,6 @@ def jirareq(op, query, data=None, what='issue'):
 
 def report(data):
     print json.dumps(data, indent=4, sort_keys=True)
-
-
-issue_data = {
-    "fields" : {
-        "project": { "key": "TEST" },  # "VMS" #FIXME make it configurable
-        "issuetype": { "name": "Task" },
-        "summary": "Testing bug creation scripting",
-        "customfield_10200": {"value": "Server"},
-        "fixVersions": [ {"name": "Future"} ],
-        "components": [ {"name": "Server" } ] ,
-        "description": "Not a bug really, just testing the API",
-        'priority': { "name": "Low" },
-        "customfield_10009": "TEST-1", # TODO: change to the real epic in VMS  #FIXME make it configurable
-    }
-}
 
 
 def browse_url(issue):
@@ -182,7 +233,11 @@ def delete_oldest_attchment(key, predicat=None):
     print "WARNING: Failed to delete attachment %s of issue %s" % (to_del['id'], k)
     return False
 
-def test_create():
+
+##############
+# Testing (development tries) function
+
+def _test_create():
     result =  jirareq('POST', '', issue_data)
     if result.code != CODE_CREATED:
         print "Error!"
@@ -194,11 +249,11 @@ def test_create():
     #    code, reply, reason = jirareq('PUT', key, data)
     #    if code != CODE_NO_CONTENT:
     #        print reply
-    test_attach(key)
-    test_priority_boost(key)
+    _test_attach(key)
+    _test_priority_boost(key)
 
 
-def test_attach(key):
+def _test_attach(key):
     test = open('opendump.bat').read()
     res = requests.request('POST', ISSUE + key + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
                            files={'file': ('some-file-name.txt', test, 'text/plain')})
@@ -206,7 +261,7 @@ def test_attach(key):
     print res.content
 
 
-def test_priority_boost(key):
+def _test_priority_boost(key):
     result = jirareq('GET', key)
     if result.ok:
         pd = result.data['fields']['priority']
@@ -219,7 +274,7 @@ def test_priority_boost(key):
         print "Result: %s\n%s" % (reply.code, reply.data)
 
 
-def test_check_attachments(key):
+def _test_check_attachments(key):
     key, result = get_issue(key)
     if result.ok:
         sorted_att = sorted(result.data['fields'].get('attachment',[]), key=lambda a: a['created'])
@@ -232,12 +287,39 @@ def test_check_attachments(key):
         print "Reply: code %s, reason %s, data: %s" % (reply.code, reply.reason, reply.data)
 
 
+def _test_get_fixVersion(key):
+    key, result = get_issue(key)
+    if result.ok:
+        for v in result.data['fields']['fixVersions']:
+            print v
+            m = _version_rx.match(v['name'])
+            if m:
+                print "Match: %s" % (m.group(0),)
+            else:
+                print "Don't match"
 
+        versions = [[int(n) for n in m.group(0).split('.')] for m in (
+            _version_rx.match(v['name']) for v in result.data['fields']['fixVersions']
+        ) if m]
+        print sorted(versions)
+
+def _test_trans(key, trans):
+    key, result = get_issue(key)
+    if result.ok:
+        data = transition_data[trans]
+        reply = jirareq("POST", key + '/transitions', data=data)
+        print reply.code, reply.reason
+        print reply.data
 
 if __name__ == '__main__':
+    #_test_trans('TEST-121', "Reopen")
     #create()
     #priority_boost('TEST-26')
     #for k in ('TEST-97', 'TEST-100'):
     #    print "%s: %s" % (k, count_attachments(k))
     #test_check_attachments('TEST-108')
+    #test_get_fixVersion('TEST-123')
+    #for issue in ('TEST-120','TEST-121','TEST-123'):
+    #    print issue, get_smallest_fixversion(issue)
+
     print "Don't run me!"
