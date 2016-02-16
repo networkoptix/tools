@@ -55,6 +55,11 @@ def checkSymbol(symbol, source, target, context, out):
     
 def checkText(source, target, context, result, index, hasNumerusForm):
 
+    if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
+        if target != source:
+            err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
+            result.error += 1
+
     if not hasNumerusForm:
         for symbol in numerus:
             if source.count(symbol):
