@@ -221,17 +221,6 @@ def email_send(mailfrom, mailto, cc, msg):
     smtp.quit()
 
 
-def format_changesets(branch):
-    chs = Changesets.get(branch, [])
-    if chs and isinstance(chs[0], dict):
-        return "Changesets:\n" + "\n".join(
-            "\t%s" % v['line'] if 'line' in v else
-            "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % v
-            for v in chs)
-    else:
-        return "\n".join(chs)
-
-
 def get_platform():
     if os.name == 'posix':
         return 'POSIX'
@@ -574,6 +563,21 @@ def filter_branch_names(branches):
     return filtered
 
 
+def chs_str(changeset):
+    try:
+        return "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % changeset
+    except KeyError, e:
+        return "WARNING: no %s key in changeset dict: %s!" % (e.args[0], changeset)
+
+def format_changesets(branch):
+    chs = Changesets.get(branch, [])
+    if chs and isinstance(chs[0], dict):
+        return "Changesets:\n" + "\n".join(
+                ("\t%s" % v['line']) if 'line' in v else chs_str(v) for v in chs)
+    else:
+        return "\n".join(chs)
+
+
 def get_changesets(branch, bundle_fn):
     debug("Run: " + (' '.join(HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
     proc = Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
@@ -605,6 +609,7 @@ def check_new_commits(bundle_fn):
         debug("Run: %s", ' '.join(cmd))
         ready_branches = check_output(cmd, stderr=STDOUT, **SUBPROC_ARGS)
         if ready_branches:
+            # Specifying the current branch (.) turns off all other
             branches = ['.'] if BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
             if BRANCHES[0] != '.':
                 debug("Commits are found in branches: %s", branches)
