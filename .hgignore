@@ -1,3 +1,5 @@
+subinclude:apidoctool/.hgignore
+
 syntax: glob
 .idea
 *.pyc
