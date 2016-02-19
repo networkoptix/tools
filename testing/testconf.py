@@ -70,6 +70,8 @@ HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 
+VAG_DIR = "./vagrant"
+
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
@@ -101,7 +103,7 @@ SKIP_TESTS = {
 }
 
 # Skip these test for all branches
-SKIP_ALL = {'msarch'}
+SKIP_ALL = set() # {'msarch'}
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 

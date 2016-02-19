@@ -1,4 +1,5 @@
 #!/bin/bash
+# Time test initialisation. $1 has to be unix timestamp
 . /vagrant/conf.sh
 
 edconf removeDbOnStartup 1

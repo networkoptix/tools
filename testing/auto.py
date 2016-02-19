@@ -885,7 +885,7 @@ def check_mediaserver_deb():
     # a) To remove (by override) any previous version automatically.
     # b) To use fixed name in the bootstrap.sh script
     src = get_server_package_name()
-    dest = './networkoptix-mediaserver.deb'
+    dest = os.path.join(VAG_DIR, 'networkoptix-mediaserver.deb')
 #    debug("Src: %s\nDest: %s", src, dest)
     dest_stat = os.stat(dest) if os.path.isfile(dest) else None
     if src is None or not os.path.isfile(src):
@@ -908,9 +908,9 @@ def start_boxes():
     check_mediaserver_deb()
     # 2. Start virtual boxes
     log("Removing old vargant boxes..")
-    check_call(VAGR_DESTROY, shell=False)
+    check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
     log("Creating and starting vagrant boxes...")
-    check_call(VAGR_RUN, shell=False)
+    check_call(VAGR_RUN, shell=False, cwd=VAG_DIR)
     # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
     wait_servers_ready()
 
@@ -932,11 +932,16 @@ def perform_func_test(to_skip):
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
         unreg = False
 
+        only_test = ""
         if not Args.httpstress:
             unreg = True
             cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
             if Args.timetest:
                 cmd.append("--timesync")
+                only_test = "timesync"
+            elif Args.msarch:
+                cmd.append("--msarch")
+                only_test = "msarch"
             else:
                 if 'time' in to_skip:
                     cmd.append("--skiptime")
@@ -947,9 +952,9 @@ def perform_func_test(to_skip):
             log("Running functional tests: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
-            read_functest_output(proc, reader, Args.timetest)
+            read_functest_output(proc, reader, only_test)
 
-            if not Args.timetest and 'proxy' not in to_skip:
+            if not only_test and 'proxy' not in to_skip:
                 reader.unregister()
                 cmd = [sys.executable, "-u", "proxytest.py"]
                 log("Running server proxy test: %s", cmd)
@@ -958,7 +963,7 @@ def perform_func_test(to_skip):
                 #TODO make it a part of the functest.py
                 read_misctest_output(proc, reader, "server proxy")
 
-        if not Args.timetest and 'httpstress' not in to_skip:
+        if not only_test and 'httpstress' not in to_skip:
             if unreg:
                 reader.unregister()
             url = "%s:%s" % (VG_BOXES_IP[0], MEDIASERVER_PORT)
@@ -987,7 +992,7 @@ def perform_func_test(to_skip):
             reader.unregister()
         if need_stop:
             log("Stopping vagrant boxes...")
-            check_call(VAGR_STOP, shell=False)
+            check_call(VAGR_STOP, shell=False, cwd=VAG_DIR)
 
 
 class FunctestParser(object):
@@ -1116,7 +1121,7 @@ class FunctestParser(object):
 
     def parse_timesync_start(self, line):  # FT_OLD_END
         if line.startswith(self.TS_HEAD):
-            type(self).TS_PARTS = [s.strip() for s in line[len(self.TS_HEAD):].split(',')]
+            type(self).TS_PARTS = [s.strip() for s in line[len(self.TS_HEAD):].split(', ')]
         elif line.startswith(self.TS_START):
             self.ts_name = line[len(self.TS_START):].rstrip()
             if self.ts_name == self.TS_PARTS[self.current_ts_part]:
@@ -1244,6 +1249,7 @@ class FunctestParser(object):
         if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
             return False
         self.has_errors = True
+        print ":::::" + line
         log_to_send("Multiserver archive test %s!",
                     "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
         for s in self.collector:
@@ -1263,11 +1269,13 @@ class FunctestParser(object):
         pass
 
 
-def read_functest_output(proc, reader, from_timesync=False):
+def read_functest_output(proc, reader, from_test=''):
     last_lines = deque(maxlen=FUNCTEST_LAST_LINES)
     p = FunctestParser()
-    if from_timesync:
+    if from_test == 'timesync':
         p.parser = p.parse_timesync_start
+    elif from_test == 'msarch':
+        p.parser = p.parse_msarch_start
     while reader.state == PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
         if len(line) > 0:
@@ -1363,7 +1371,7 @@ def read_misctest_output(proc, reader, name):
 
 #####################################
 
-NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress'))
+NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress', 'msarch'))
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -1379,6 +1387,7 @@ def parse_args():
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
+    parser.add_argument("--msarch", action="store_true")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
@@ -1522,14 +1531,16 @@ def main():
                 check_control_flags()
         log("Finishing...")
 
-    elif Args.functest or Args.timetest or Args.httpstress: # virtual boxes functest only
+    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch: # virtual boxes functest only
         ToSend[:] = []
         perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
             email_notify("Debug %s tests" % (
                 "func" if Args.functest else
                 "timesync" if Args.timetest else
-                "http-stress" if Args.httpstress else "UNKNOWN!!!"),
+                "http-stress" if Args.httpstress else
+                "multiserver archive" if Args.msarch else
+                "UNKNOWN!!!"),
             ToSend)
 
     elif Args.boxes:

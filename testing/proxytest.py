@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """Test inter-server redirects."""
 
@@ -10,6 +11,7 @@ from functest_util import JsonDiff, compareJson, get_server_guid
 
 MAIN_HOST = '192.168.109.12:7001'
 SEC_HOST = '192.168.109.13:7001'
+#FIXME USE CONFIG!!!!
 IDS = {}
 
 CHECK_URI = ''
@@ -52,6 +54,7 @@ def proxy_test():
                 print "%s - %s" % (h, guid)
             else:
                 print "FAIL: Can't get server %s guid!" % h
+                return False
         time.sleep(1)
         try:
             (data1, len1) = perform_request(MAIN_HOST)

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Turns on inet time syncronisation and prepare for teesting it
 echo configuring inet sync
 . /vagrant/conf.sh
 

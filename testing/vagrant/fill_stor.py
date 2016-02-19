@@ -18,7 +18,7 @@ import shutil
 import random
 
 mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
-sample_path = os.path.join(mypath, 'files/sample.mkv')
+sample_path = os.path.join(mypath, 'sample.mkv')
 #WARNING! It changes the sample start time, recorded in the sample file, so changing that file format you MUST modify this script!
 if not os.path.isfile(sample_path):
     print "Sample file %s doesn't exist" % sample_path

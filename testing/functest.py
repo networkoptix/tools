@@ -20,7 +20,8 @@ import traceback
 
 from functest_util import *
 from generator import *
-import timetest, stortest
+from timetest import TimeSyncTest
+from stortest import BackupStorageTest, MultiserverArchiveTest
 from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
@@ -3881,24 +3882,13 @@ def print_tests(suit, shift='    '):
             print "DEBUG:%s%s" % (shift, test)
 
 
-def CallTimesyncTest():
+def CallTest(testClass):
     if not clusterTest.openerReady:
         clusterTest.setUpPassword()
-    print "TimeSyncTest suits: %s" % (','.join(timetest.TimeSyncTest.iter_suits()))
-    return RunBoxTests(timetest.TimeSyncTest, clusterTest.getConfig())
+    # this print is used by FunctestParser.parse_timesync_start
+    print "%s suits: %s" % (testClass.__name__, ', '.join(testClass.iter_suits()))
+    return RunBoxTests(testClass, clusterTest.getConfig())
 
-
-def CallBackupStorageTest():
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
-    print "BackupStorage suits: %s" % (','.join(stortest.BackupStorageTest.iter_suits()))
-    return RunBoxTests(stortest.BackupStorageTest, clusterTest.getConfig())
-
-def CallMultiservArchTest():
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
-    print "BackupStorage suits: %s" % (','.join(stortest.MultiserverArchiveTest.iter_suits()))
-    return RunBoxTests(stortest.MultiserverArchiveTest, clusterTest.getConfig())
 
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
@@ -3921,24 +3911,24 @@ def DoTests(argv):
                     SystemNameTest().run()
             if not clusterTest.do_main_only:
                 if not clusterTest.skip_timesync:
-                    CallTimesyncTest()
+                    CallTest(TimeSyncTest)
                 if not clusterTest.skip_backup:
-                    CallBackupStorageTest()
+                    CallTest(BackupStorageTest)
                 if not clusterTest.skip_mservarc:
-                    CallMultiservArchTest()
+                    CallTest(MultiserverArchiveTest)
 
             print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
             doCleanUp()
             print "\nFunctest finnished\n"
 
         elif argc == 2 and argv[1] == '--timesync':
-            CallTimesyncTest()
+            CallTest(TimeSyncTest)
 
         elif argc == 2 and argv[1] == '--bstorage':
-            CallBackupStorageTest()
+            CallTest(BackupStorageTest)
 
         elif argc == 2 and argv[1] == '--msarch':
-            CallMultiservArchTest()
+            CallTest(MultiserverArchiveTest)
 
         elif (argc == 2 or argc == 3) and argv[1] == '--clear':
             if argc == 3:

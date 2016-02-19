@@ -41,7 +41,7 @@ class TestLoader(unittest.TestLoader):
 
 
 def RunTests(testclass, config):
-    print "DEBUG: run test class %s" % testclass
+    #print "DEBUG: run test class %s" % testclass
     testclass.init_suits()
     return all( [
             unittest.TextTestRunner(verbosity=2, failfast=True).run(
@@ -217,7 +217,7 @@ class FuncTestCase(unittest.TestCase):
     def _server_request(self, host, func, data=None, headers=None, timeout=None):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
-        print "DEBUG: requesting: %s" % url
+        #print "DEBUG: requesting: %s" % url
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except urllib2.URLError , e:
@@ -233,7 +233,7 @@ class FuncTestCase(unittest.TestCase):
         endtime = time.time() + SERVER_UP_TIMEOUT
         tocheck = servers or set(range(self.num_serv))
         while tocheck and time.time() < endtime:
-            print "%s, %s" % (endtime - time.time(), str(tocheck))
+            #print "_wait_servers_up: %s, %s" % (endtime - time.time(), str(tocheck))
             for num in tocheck.copy():
                 data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=False)
                 if data is None:
@@ -259,7 +259,7 @@ class FuncTestCase(unittest.TestCase):
         res = self._server_request(host, 'api/configure?systemName='+urllib.quote_plus(newName))
         self.assertEqual(res['error'], "0",
             "api/configure failed to set a new systemName %s for the server %s: %s" % (newName, host, res['errorString']))
-        print "DEBUG: _change_system_name reply: %s" % res
+        #print "DEBUG: _change_system_name reply: %s" % res
 
 
     def setUp(self):
