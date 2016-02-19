@@ -1,10 +1,12 @@
 package com.nx.util;
 
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +31,9 @@ public abstract class XmlSerializable
         }
     }
 
+    /**
+     * Override if XML element name should be different from lower-case class name.
+     */
     public String getElementName()
     {
         return getClass().getSimpleName().toLowerCase();
@@ -266,6 +271,25 @@ public abstract class XmlSerializable
     }
 
     /**
+     * Read inner XML elements to a string.
+     */
+    protected final String readInnerXml(
+        Element parentEl, String parentElName)
+    {
+        if (parentEl == null)
+            return "";
+
+        String xml = XmlUtils.xmlNodeToString(parentEl).trim();
+        if (xml.equals("<" + parentElName + "/>"))
+            return "";
+
+        // Trim opening and closing tags, since only contents is needed.
+        final int openingTagLen = ("<" + parentElName + ">").length();
+        final int closingTagLen = ("</" + parentElName + ">").length();
+        return xml.substring(openingTagLen, xml.length() - closingTagLen);
+    }
+
+    /**
      * Read contents of a single child element with the specified name.
      */
     protected final String readString(
@@ -288,9 +312,6 @@ public abstract class XmlSerializable
         return value;
     }
 
-    /**
-     * Read contents of a single child element with the specified name.
-     */
     protected final boolean readBoolean(
         Element parentEl, String name, BooleanDefault booleanDefault)
         throws Error
@@ -311,6 +332,41 @@ public abstract class XmlSerializable
         if (booleanDefault == BooleanDefault.TRUE && value == true)
             return;
         el.setAttribute(name, Boolean.toString(value));
+    }
+
+    /**
+     * Parse XML string to a list of inner elements.
+     */
+    protected final void appendInnerXml(Element el, String xml)
+    {
+        Document doc = null;
+        try
+        {
+            doc = XmlUtils.parseXmlString("<" + getElementName() + ">" +
+                xml + "</" + getElementName() + ">");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(
+                "INTERNAL ERROR: Failed to parse <" + getElementName() +
+                    "> string as XML:\n" +
+                    xml, e);
+        }
+        catch (SAXException e)
+        {
+            throw new RuntimeException(
+                "INTERNAL ERROR: Failed to parse <" + getElementName() +
+                    "> string as XML:\n" +
+                    xml, e);
+        }
+
+        Element rootEl = doc.getDocumentElement();
+        for (Node node = rootEl.getFirstChild(); node != null;
+             node = node.getNextSibling())
+        {
+            Node importedNode = el.getOwnerDocument().importNode(node, true);
+            el.appendChild(importedNode);
+        }
     }
 
     protected final void appendString(Element el, String name, String value,

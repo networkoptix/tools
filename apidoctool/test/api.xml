@@ -389,117 +389,139 @@
                     </params>
                     <result>
                         <caption>Returns camera list data formatted in a requested format</caption>
-                        <attributes>
-                            <attribute>
+                        <params>
+                            <param>
                                 <name>addParams</name>
                                 <description>List of additional parameters for camera. This list can contain such information as full ONVIF url, camera maximum fps e.t.c</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>audioEnabled</name>
                                 <description>Server will push audio stream from a camera if parameter is true</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>controlEnabled</name>
                                 <description>Server will manage camera (change resolution, fps, create profiles e.t.c) if parameter if true</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>dewarpingParams</name>
                                 <description>Json string with dewarping parameters</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>groupId</name>
                                 <description>Internal group identifier. It is used for grouping channels for multi-channels cameras together.</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>groupName</name>
                                 <description>Group name. This name can be changed by user</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>id</name>
                                 <description>Object ID. All ID for all objects in a system is GUIDs</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>login</name>
                                 <description>Login for camera authentication</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>mac</name>
                                 <description>camera MAC address</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>manuallyAdded</name>
                                 <description>True if user added camera manually</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>maxArchiveDays</name>
                                 <description>Maximum archive duration in days for this camera. If value less or equal to zero, it is not used</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>minArchiveDays</name>
                                 <description>Minimum archive duration in days for this camera. If value less or equal to zero, it is not used</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>model</name>
                                 <description>Camera model</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>motionMask</name>
                                 <description>Camera's motion mask. This string defines several rectangles via ':' delimiter. Each rectangle is described by 5 digits: sensitivity, x,y(for left top corner), width, height</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>motionType</name>
-                                <description>If value is 'MT_SoftwareGrid' then server determine motion, otherwise camera built-in motion will be used</description>
-                            </attribute>
-                            <attribute>
+                                <description>Type of motion detection method.</description>
+                                <values>
+                                    <value>
+                                        <name>MT_Default</name>
+                                        <description>Use default method.</description>
+                                    </value>
+                                    <value>
+                                        <name>MT_HardwareGrid</name>
+                                        <description>Use hardware grid.</description>
+                                    </value>
+                                    <value>
+                                        <name>MT_SoftwareGrid</name>
+                                        <description>Use software grid.</description>
+                                    </value>
+                                    <value>
+                                        <name>MT_MotionWindow</name>
+                                        <description>Use motion window.</description>
+                                    </value>
+                                    <value>
+                                        <name>MT_NoMotion</name>
+                                        <description>Do not perform motion detection.</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
                                 <name>name</name>
                                 <description>Camera name</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>parentId</name>
                                 <description>Camera's server ID</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>physicalId</name>
                                 <description>Camera unique identifier. This identifier is used in all requests related to a camera. For instance, in RTSP requests</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>password</name>
                                 <description>Password for camera authentication</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>scheduleEnabled</name>
                                 <description>Do record camera archive if true</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>scheduleTasks</name>
                                 <description>List of 'scheduleTask' objects with camera recording schedule.</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>secondaryStreamQuality</name>
                                 <description>Secondary stream quality. Possible values:'SSQualityLow', 'SSQualityMedium', 'SSQualityHigh', 'SSQualityDontUse'</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>status</name>
                                 <description>Camera status. Possible values are: 'Offline', 'Online', 'Recording'</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>statusFlags</name>
                                 <description>Usually this field is zero. Non zero value is used to mark that a lot of network issues was occurred with this camera</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>typeId</name>
                                 <description>Unique ID with camera's type. Camera's type can describe predefined information such as camera maximum resolution, fps e.t.c.
                                                                         Detailed type information can be obtained via 'getResourceTypes' request.</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>url</name>
                                 <description>Camera plain IP address or full http url if camera was added manually. Also, for multichannel encoders full url is used</description>
-                            </attribute>
-                            <attribute>
+                            </param>
+                            <param>
                                 <name>vendor</name>
                                 <description>Camera manufacturer</description>
-                            </attribute>
-                        </attributes>
+                            </param>
+                        </params>
                     </result>
                 </function>
                 <function>

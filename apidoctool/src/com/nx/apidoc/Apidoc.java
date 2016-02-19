@@ -2,15 +2,12 @@ package com.nx.apidoc;
 
 import com.nx.util.XmlSerializable;
 import com.nx.util.XmlUtils;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,71 +28,12 @@ public final class Apidoc extends XmlSerializable
 
         protected void readFromElement(Element el)
         {
-            if (el == null)
-            {
-                xml = "";
-                return;
-            }
-
-            StringWriter writer = new StringWriter();
-
-            OutputFormat format = new OutputFormat();
-            format.setLineWidth(80);
-            format.setIndenting(true);
-            format.setIndent(4);
-            format.setOmitXMLDeclaration(true);
-
-            XMLSerializer serializer = new XMLSerializer(writer, format);
-            try
-            {
-                serializer.serialize(el);
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("INTERNAL ERROR", e);
-            }
-
-            // Trim opening and closing tags, since only contents is needed.
-            xml = writer.toString().trim();
-            if (xml.equals("<" + getElementName() + "/>"))
-            {
-                xml = "";
-                return;
-            }
-
-            final int openingTagLen = ("<" + getElementName() + ">").length();
-            final int closingTagLen = ("</" + getElementName() + ">").length();
-            xml = xml.substring(openingTagLen, xml.length() - closingTagLen);
+            xml = readInnerXml(el, getElementName());
         }
 
         protected void writeToElement(Element el)
         {
-            Document doc = null;
-            try
-            {
-                doc = XmlUtils.parseXmlString(
-                    "<description>" + xml + "</description>");
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException(
-                    "INTERNAL ERROR: Failed to parse Description as XML:\n" +
-                    xml, e);
-            }
-            catch (SAXException e)
-            {
-                throw new RuntimeException(
-                    "INTERNAL ERROR: Failed to parse Description as XML:\n" +
-                    xml, e);
-            }
-
-            Element rootEl = doc.getDocumentElement();
-            for (Node node = rootEl.getFirstChild(); node != null;
-                 node = node.getNextSibling())
-            {
-                Node importedNode = el.getOwnerDocument().importNode(node, true);
-                el.appendChild(importedNode);
-            }
+            appendInnerXml(el, xml);
         }
     }
 
@@ -119,10 +57,12 @@ public final class Apidoc extends XmlSerializable
 
     public static final class Param extends XmlSerializable
     {
-        public boolean proprietary; ///< xml-attribute; optional(false)
+        protected boolean optionalOmitIfFalse = false; ///< Used for XML writing.
+
+        public boolean proprietary; ///< xml-attribute; optional(default=false)
         public String name;
         public Description description; ///< optional
-        public boolean optional;
+        public boolean optional; ///< optional(default=false)
         public List<Value> values; ///< optional
 
         public Param()
@@ -135,7 +75,7 @@ public final class Apidoc extends XmlSerializable
             proprietary = readBooleanAttr(el, "proprietary", BooleanDefault.FALSE);
             name = readString(el, "name", Presence.REQUIRED);
             description = readObj(el, Description.class, Presence.OPTIONAL);
-            optional = readBoolean(el, "optional", BooleanDefault.NONE);
+            optional = readBoolean(el, "optional", BooleanDefault.FALSE);
             readObjList(el, "values", values, Value.class, Presence.OPTIONAL);
         }
 
@@ -144,49 +84,34 @@ public final class Apidoc extends XmlSerializable
             appendBooleanAttr(el, "proprietary", proprietary, BooleanDefault.FALSE);
             appendString(el, "name", name, Mode.PROHIBIT_EMPTY);
             appendObj(el, description, Mode.ALLOW_EMPTY);
-            appendBoolean(el, "optional", optional, BooleanDefault.NONE);
+            appendBoolean(el, "optional", optional,
+                optionalOmitIfFalse ? BooleanDefault.FALSE : BooleanDefault.NONE);
             appendObjList(el, "values", values, Mode.OMIT_EMPTY);
-        }
-    }
-
-    public static final class Attribute extends XmlSerializable
-    {
-        public String name;
-        public Description description; ///< optional
-
-        protected void readFromElement(Element el) throws Error
-        {
-            name = readString(el, "name", Presence.REQUIRED);
-            description = readObj(el, Description.class, Presence.OPTIONAL);
-        }
-
-        protected void writeToElement(Element el)
-        {
-            appendString(el, "name", name, Mode.PROHIBIT_EMPTY);
-            appendObj(el, description, Mode.ALLOW_EMPTY);
         }
     }
 
     public static final class Result extends XmlSerializable
     {
         public String caption; ///< optional
-        public List<Attribute> attributes; ///< optional
+        public List<Param> params; ///< optional
 
         public Result()
         {
-            attributes = new ArrayList<Attribute>();
+            params = new ArrayList<Param>();
         }
 
         protected void readFromElement(Element el) throws Error
         {
             caption = readString(el, "caption", Presence.OPTIONAL);
-            readObjList(el, "attributes", attributes, Attribute.class, Presence.OPTIONAL);
+            readObjList(el, "params", params, Param.class, Presence.OPTIONAL);
         }
 
         protected void writeToElement(Element el)
         {
             appendString(el, "caption", caption, Mode.OMIT_EMPTY);
-            appendObjList(el, "attributes", attributes, Mode.OMIT_EMPTY);
+            for (Param param: params)
+                param.optionalOmitIfFalse = true;
+            appendObjList(el, "params", params, Mode.OMIT_EMPTY);
         }
     }
 

@@ -50,12 +50,12 @@ public final class XmlUtils
         StringWriter writer = new StringWriter();
 
         OutputFormat format = new OutputFormat();
-        format.setLineWidth(80);
         format.setIndenting(true);
         format.setIndent(4);
+        format.setLineWidth(1000); //< Needed to avoid limit on max indentation.
+        format.setOmitXMLDeclaration(true);
 
         XMLSerializer serializer = new XMLSerializer(writer, format);
-
         try
         {
             serializer.serialize(node);
@@ -72,9 +72,9 @@ public final class XmlUtils
         throws IOException
     {
         OutputFormat format = new OutputFormat(document);
-        format.setLineWidth(80);
         format.setIndenting(true);
         format.setIndent(4);
+        format.setLineWidth(1000); //< Needed to avoid limit on max indentation.
 
         FileWriter writer = new FileWriter(xmlFile);
         try

@@ -101,17 +101,24 @@ public final class ApidocCommentGenerator
                 TAG_RETURN + " " + result.caption);
         }
 
-        for (Apidoc.Attribute attribute: result.attributes)
+        for (Apidoc.Param param: result.params)
         {
+            // NOTE: Attributes are not supported for Result.Param.
+
             addTextToComment(lines, INNER_INDENT, INNER_INDENT,
-                TAG_ATTRIBUTE + " " + attribute.name + " " +
-                attribute.description.xml);
+                TAG_PARAM + " " + param.name + " " + param.description.xml);
+
+            for (Apidoc.Value value: param.values)
+            {
+                addTextToComment(lines, 2 * INNER_INDENT, INNER_INDENT,
+                    TAG_VALUE + " " + value.name + " " +
+                        value.description.xml);
+            }
         }
     }
 
     /**
-     * Add possibly multiline text to the comment, word-wrapping at
-     * LINE_WIDTH - indent.
+     * Add possibly multiline text to the comment.
      * @param innerIndent Additional indent after initial "*".
      * @param newLineIndent Additional indent for each non-first line.
      */

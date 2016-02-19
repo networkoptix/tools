@@ -189,19 +189,38 @@ public final class ApidocCommentParser
         }
 
         parser.parseNextItem();
-        while (parser.getItem() != null &&
-            TAG_VALUE.equals(parser.getItem().getTag()))
-        {
-            checkNoAttribute(parser, function.name);
-            Apidoc.Value value = new Apidoc.Value();
-            value.name = getInitialToken(parser, function.name);
-            value.description = new Apidoc.Description();
-            value.description.xml = parser.getItem().getTextAfterInitialToken();
-            param.values.add(value);
-            parser.parseNextItem();
-        }
+
+        parseParamValues(parser, function, param);
 
         function.params.add(param);
+    }
+
+    private static void parseParamValues(
+        ApidocTagParser parser, Apidoc.Function function, Apidoc.Param param)
+        throws Error
+    {
+        while (parser.getItem() != null)
+        {
+            if (TAG_VALUE.equals(parser.getItem().getTag()))
+            {
+                checkNoAttribute(parser, function.name);
+                Apidoc.Value value = new Apidoc.Value();
+                value.name = getInitialToken(parser, function.name);
+                value.description = new Apidoc.Description();
+                value.description.xml = parser.getItem().getTextAfterInitialToken();
+                param.values.add(value);
+                parser.parseNextItem();
+            }
+            else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
+            {
+                // Ignore: this comment part is not intended for XML.
+                parser.parseNextItem();
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     private static void fillDefaultFormatParam(
@@ -247,18 +266,53 @@ public final class ApidocCommentParser
         function.result.caption = parser.getItem().getFullText();
 
         parser.parseNextItem();
-        while (parser.getItem() != null &&
-            TAG_ATTRIBUTE.equals(parser.getItem().getTag()))
+        while (parser.getItem() != null)
         {
-            checkNoAttribute(parser, function.name);
-            Apidoc.Attribute attribute = new Apidoc.Attribute();
-            attribute.name = getInitialToken(parser, function.name);
-            attribute.description = new Apidoc.Description();
-            attribute.description.xml =
-                parser.getItem().getTextAfterInitialToken();
-            function.result.attributes.add(attribute);
-            parser.parseNextItem();
+            if (TAG_PARAM.equals(parser.getItem().getTag()))
+            {
+                parseFunctionResultParam(parser, function);
+            }
+            else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
+            {
+                // Ignore: this comment part is not intended for XML.
+                parser.parseNextItem();
+            }
+            else
+            {
+                break;
+            }
         }
+    }
+
+    private static void parseFunctionResultParam(
+        ApidocTagParser parser, Apidoc.Function function)
+        throws Error
+    {
+        assert TAG_PARAM.equals(parser.getItem().getTag());
+
+        Apidoc.Param param = new Apidoc.Param();
+        param.description = new Apidoc.Description();
+        param.description.xml = parser.getItem().getTextAfterInitialToken();
+
+        param.name = getInitialToken(parser, function.name);
+        for (Apidoc.Param existingParam: function.result.params)
+        {
+            if (existingParam.name.equals(param.name))
+            {
+                throw new Error("Duplicate result param \"" + param.name + "\" found" +
+                    " in function " + function.name + ".");
+            }
+        }
+
+        checkNoAttribute(parser, function.name);
+        param.proprietary = false;
+        param.optional = false;
+
+        parser.parseNextItem();
+
+        parseParamValues(parser, function, param);
+
+        function.result.params.add(param);
     }
 
     /**
