@@ -265,12 +265,20 @@ public final class ApidocCommentParser
         checkNoAttribute(parser, function.name);
         function.result.caption = parser.getItem().getFullText();
 
+        boolean deprecatedAttributeTagFound = false;
         parser.parseNextItem();
         while (parser.getItem() != null)
         {
             if (TAG_PARAM.equals(parser.getItem().getTag()))
             {
                 parseFunctionResultParam(parser, function);
+            }
+            else if ("%attribute".equals(parser.getItem().getTag()))
+            {
+                // Support for old deprecated Apidoc Comment format which has
+                // "%attribute" tags following "%result" instead of "%param".
+                deprecatedAttributeTagFound = true;
+                parseFunctionResultAttributeDeprecated(parser, function);
             }
             else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
             {
@@ -282,6 +290,43 @@ public final class ApidocCommentParser
                 break;
             }
         }
+
+        if (deprecatedAttributeTagFound)
+        {
+            System.out.println(
+                "WARNING: Deprecated Apidoc tag \"%attribute\" found" +
+                    " instead of \"" + TAG_PARAM + "\"" +
+                    " in function " + function.name + ".");
+        }
+    }
+
+    private static void parseFunctionResultAttributeDeprecated(
+        ApidocTagParser parser, Apidoc.Function function)
+        throws Error
+    {
+        assert "%attribute".equals(parser.getItem().getTag());
+
+        Apidoc.Param param = new Apidoc.Param();
+        param.description = new Apidoc.Description();
+        param.description.xml = parser.getItem().getTextAfterInitialToken();
+
+        param.name = getInitialToken(parser, function.name);
+        for (Apidoc.Param existingParam: function.result.params)
+        {
+            if (existingParam.name.equals(param.name))
+            {
+                throw new Error("Duplicate result attribute \"" + param.name + "\" found" +
+                    " in function " + function.name + ".");
+            }
+        }
+
+        checkNoAttribute(parser, function.name);
+        param.proprietary = false;
+        param.optional = false;
+
+        parser.parseNextItem();
+
+        function.result.params.add(param);
     }
 
     private static void parseFunctionResultParam(
