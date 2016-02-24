@@ -1,7 +1,7 @@
 package com.nx.apidoc;
 
 /**
- * Base class for mechanisms which require knowledge about Apidoc Comments .both
+ * Base class for mechanisms which require knowledge about Apidoc Comments, both
  * for generation and parsing.
  */
 public abstract class ApidocComment
