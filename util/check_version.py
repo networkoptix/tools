@@ -74,7 +74,9 @@ def checkVersion(root_version, filename, parentOnly):
         ok = False
         if parent:
             err("{0} has parent version {1}".format(strip_root(filename), parent))
-        elif parent is not None:
+        elif parent is None:
+            err("{0} has NO <parent> at all".format(strip_root(filename)))
+        else:
             err("{0} has NO parent version".format(strip_root(filename)))
     if verbose and ok:
         info("{0} - OK".format(strip_root(filename)))
