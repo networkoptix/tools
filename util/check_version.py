@@ -15,7 +15,6 @@ import traceback
 from common_module import init_color,info,green,warn,err
 
 pomFileName = "pom.xml"
-versionPattern = "{0}-SNAPSHOT"
 rootDir = os.getcwd() # TODO make it possible to use the parameter
 verbose = False
 
@@ -38,9 +37,7 @@ def subgetVersion(element, ns, file):
 
 
 def getVersionsXML(fileName):
-    """
-    """
-    parent_version = ''
+    parent_version = None
     version = ''
     try:
         tree = ET.parse(fileName)
@@ -52,13 +49,15 @@ def getVersionsXML(fileName):
         shortFn = strip_root(fileName)
         version = subgetVersion(root, ns, shortFn)
         for p in root.findall('{0}parent'.format(ns)):
+            if parent_version is None:
+                parent_version = ''
             v = subgetVersion(p, ns, shortFn)
             if parent_version:
                 err("Too many <parents>s found in {0}".format(shortFn))
             else:
                 parent_version = v
-    except Exception, e:
-        err("Error parsing XML in %s: %s" % (fileName, e))
+    except Exception:
+        err("Error parsing XML in %s:\n%s" % (fileName, traceback.format_exc()))
     return version, parent_version
 
 
@@ -75,7 +74,7 @@ def checkVersion(root_version, filename, parentOnly):
         ok = False
         if parent:
             err("{0} has parent version {1}".format(strip_root(filename), parent))
-        else:
+        elif parent is not None:
             err("{0} has NO parent version".format(strip_root(filename)))
     if verbose and ok:
         info("{0} - OK".format(strip_root(filename)))
@@ -86,7 +85,6 @@ def checkVersionRecursive():
     if not version:
         err('The version cannot be detected')
         sys.exit(1)
-    #version_text = versionPattern.format(version)
 
     info('The root {0} file version is {1}'.format(pomFileName, version))
 
@@ -96,7 +94,6 @@ def checkVersionRecursive():
         except ValueError:
             pass
         if path != rootDir and pomFileName in files:
-
             checkVersion(version, os.path.join(path, pomFileName), strip_root(path) in parentOnlyCheck)
 
 
@@ -113,6 +110,7 @@ def main():
         verbose = True
     
     checkVersionRecursive()
+
 
 if __name__ == "__main__":
     main()
