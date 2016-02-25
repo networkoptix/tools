@@ -113,7 +113,7 @@ def try_sync(root, url, prefix, package, force):
     if not os.path.isdir(config_dst):
         os.makedirs(config_dst)
 
-    command = [ RSYNC, "--archive", "--delete"]
+    command = [ RSYNC, "--archive", "--delete", "--chmod=ugo=rwx"]
 
     time = get_package_timestamp(config_dst)
     newtime = None
