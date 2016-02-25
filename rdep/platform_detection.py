@@ -16,7 +16,7 @@ supported_arches = [
 ]
 
 supported_boxes = [
-    "default",
+    "none",
     "rpi",
     "bpi",
     "isd",
@@ -36,7 +36,7 @@ def detect_platform():
 
 def detect_arch():
     arch = platform.machine()
-    if arch == "x86_64":
+    if arch == "x86_64" or arch == "AMD64":
         return "x64"
 
     return arch

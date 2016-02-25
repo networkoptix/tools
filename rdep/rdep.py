@@ -94,31 +94,40 @@ def sync_url(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     return config["General"]["url"]
-
+   
 SYNC_NOT_FOUND = 0
 SYNC_FAILED = 1
 SYNC_SUCCESS = 2
 
+def remote_path(path):
+    return path.replace(os.sep, '/')
+    
+def local_path(path):
+    return os.path.relpath(path)
+
 def try_sync(root, url, prefix, package, force):
-    src = os.path.join(url, prefix, package)
-    dst = os.path.join(root, prefix, package)
+    src = remote_path(os.path.join(url, prefix, package))
+    dst = local_path(os.path.join(root, prefix))
+    config_dst = local_path(os.path.join(dst, package))
 
-    if not os.path.isdir(dst):
-        os.makedirs(dst)
+    if not os.path.isdir(config_dst):
+        os.makedirs(config_dst)
 
-    command = [ RSYNC, "--archive", "--delete", "--relative"]
+    command = [ RSYNC, "--archive", "--delete"]
 
-    time = get_package_timestamp(dst)
+    time = get_package_timestamp(config_dst)
     newtime = None
 
-    config_sync_command = command.copy()
-    config_sync_command.append(os.path.join(src, PACKAGE_CONFIG_NAME))
-    config_sync_command.append(dst)
+    #copy command instance
+    config_sync_command = list(command)
+    config_sync_command.append(remote_path(os.path.join(src, PACKAGE_CONFIG_NAME)))
+    config_sync_command.append(config_dst)
+    print("Executing rsync command:\n{0}".format(' '.join(config_sync_command)))
     ret = subprocess.call(config_sync_command)
     if ret != 0:
         return SYNC_NOT_FOUND
 
-    newtime = get_package_timestamp(dst)
+    newtime = get_package_timestamp(config_dst)
 
     if not newtime:
         return SYNC_NOT_FOUND
@@ -127,8 +136,9 @@ def try_sync(root, url, prefix, package, force):
         print("Package %s is up to date." % package)
         return SYNC_SUCCESS
 
-    command.append(src + os.sep)
+    command.append(remote_path(src))
     command.append(dst)
+    print("Executing rsync command:\n{0}".format(' '.join(command)))
     ret = subprocess.call(command)
     if ret != 0:
         print("Could not sync %s" % package)
@@ -182,7 +192,7 @@ def upload_package(root, url, prefix, package):
 
     update_package_timestamp(local)
 
-    command = [ RSYNC, "--archive", "--delete" ]
+    command = [ RSYNC, "--archive", "--delete", "--relative" ]
     command.append(local + os.sep)
     command.append(remote)
 
@@ -232,46 +242,38 @@ def locate_package(root, prefix, package, debug):
     return None
 
 def main():
-    platform, arch, box, debug, package = detect_settings()
+    #platform, arch, box, debug, package = detect_settings()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--platform", type=str, help="Platform name.", default="")
-    parser.add_argument("-a", "--arch", type=str, help="Architecture name.", default="")
-    parser.add_argument("-b", "--box", type=str, help="Box name.", default="")
-    parser.add_argument("-d", "--debug", dest="debug", help="Sync debug version.", action="store_true")
-    parser.add_argument("-f", "--force", dest="force", help="Force sync.", action="store_true")
-    parser.add_argument("-u", "--upload", dest="upload", help="Upload package to the repository.", action="store_true")
-    parser.add_argument("--print-path", dest="print_path", help="Print package dir and exit.", action="store_true")
+    parser.add_argument("-p", "--platform", help="Platform name.",      default=detect_platform())
+    parser.add_argument("-a", "--arch",     help="Architecture name.",  default=detect_arch())
+    parser.add_argument("-b", "--box",      help="Box name.",           default="none")
+    parser.add_argument("-d", "--debug",    help="Sync debug version.", action="store_true")
+    parser.add_argument("-f", "--force",    help="Force sync.", action="store_true")
+    parser.add_argument("-u", "--upload",   help="Upload package to the repository.", action="store_true")
+    parser.add_argument("--print-path",     help="Print package dir and exit.", action="store_true")
     parser.add_argument("packages", nargs='*', help="Packages to sync.", default="")
 
     args = parser.parse_args()
 
-    if args.platform:
-        platform = args.platform
-    if not platform:
-        platform = detect_platform()
+    platform = args.platform
     if not platform in supported_platforms and platform != ANY_KEYWORD:
         print("Unsupported platform " + platform)
         exit(1)
 
-    if args.arch:
-        arch = args.arch
-    if not arch:
-        arch = detect_arch()
+    arch = args.arch
     if not arch in supported_arches and arch != ANY_KEYWORD:
         print("Unsupported arch " + arch)
         exit(1)
 
-    if args.box:
-        box = args.box
-    if not box:
-        box = "default"
+    box = args.box
     if not box in supported_boxes and box != ANY_KEYWORD:
         print("Unsupported box " + box)
         exit(1)
 
-    if args.debug:
-        debug = args.debug
+    print("Ready to work. Platform: {0}, arch: {1}, box: {2}".format(platform, arch, box))    
+        
+    debug = args.debug
 
     packages = args.packages
     if not packages:
@@ -284,8 +286,8 @@ def main():
     if not root:
         root = os.getenv("NX_REPOSITORY", "")
     if not root:
-        print("Package repository is not defined.")
-        exit(1)
+        root = os.path.join(os.getcwd(), 'packages')
+    print ("Repository root dir: {0}".format(root))
 
     if args.print_path:
         if not packages:
@@ -294,7 +296,7 @@ def main():
         if len(packages) != 1:
             exit(1)
 
-        path = locate_package(root, prefix, packages[0], args.debug)
+        path = locate_package(root, prefix, packages[0], debug)
 
         if not path:
             exit(1)
@@ -309,7 +311,7 @@ def main():
             print("No packages to upload")
             exit(1)
 
-        if not upload_packages(root, url, prefix, packages, args.debug):
+        if not upload_packages(root, url, prefix, packages, debug):
             exit(1)
 
     else:
@@ -317,7 +319,7 @@ def main():
             print("No packages to sync")
             exit(0)
 
-        if not sync_packages(root, url, prefix, packages, args.debug, args.force):
+        if not sync_packages(root, url, prefix, packages, debug, args.force):
             exit(1)
 
 if __name__ == "__main__":
