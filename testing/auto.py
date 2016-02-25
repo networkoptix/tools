@@ -904,15 +904,22 @@ def check_mediaserver_deb():
 
 
 def start_boxes():
-    # 1. Get the .deb file
-    check_mediaserver_deb()
-    # 2. Start virtual boxes
-    log("Removing old vargant boxes..")
-    check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
-    log("Creating and starting vagrant boxes...")
-    check_call(VAGR_RUN, shell=False, cwd=VAG_DIR)
-    # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-    wait_servers_ready()
+    try:
+        # 1. Get the .deb file
+        check_mediaserver_deb()
+        # 2. Start virtual boxes
+        log("Removing old vargant boxes..")
+        check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
+        log("Creating and starting vagrant boxes...")
+        check_call(VAGR_RUN, shell=False, cwd=VAG_DIR)
+        # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
+        wait_servers_ready()
+    except FuncTestError as e:
+        log("Virtual boxes start up failed: %s", e.message)
+    except BaseException as e:
+        log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
+        if not isinstance(e, Exception):
+            raise # it wont be catched and will allow the script to terminate
 
 
 def perform_func_test(to_skip):
@@ -1417,6 +1424,9 @@ def parse_args():
     if Args.threads is not None:
         global MVN_THREADS
         MVN_THREADS = Args.threads
+    check_debug_mode()
+    if Args.auto:
+        log("Starting...")
 
 
 def check_debug_mode():
@@ -1434,12 +1444,23 @@ def set_paths():
         raise EnvironmentError(errno.ENOENT, "The project root directory not found", PROJECT_ROOT)
     if not os.access(PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
         raise IOError(errno.EACCES, "Full access to the project root directory required", PROJECT_ROOT)
-
     if Env.get('LD_LIBRARY_PATH'):
         Env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
     else:
         Env['LD_LIBRARY_PATH'] = LIB_PATH
     #debug("LD_LIBRARY_PATH=%s",Env['LD_LIBRARY_PATH'])
+
+
+def set_branches():
+    global BRANCHES
+    if Args.branch:
+        change_branch_list()
+    elif not Args.full:
+        BRANCHES = ['.']
+    if BRANCHES[0] == '.':
+        BRANCHES[0] = current_branch_name()
+    if Args.full and not Args.branch:
+        log("Watched branches: " + ','.join(BRANCHES))
 
 
 def change_branch_list():
@@ -1495,28 +1516,14 @@ def main():
     drop_flag(RESTART_FLAG)
     drop_flag(STOP_FLAG)
     parse_args()
-    check_debug_mode()
-    if Args.auto:
-        log("Starting...")
-
     set_paths()
-
-    global BRANCHES
-    if Args.branch:
-        change_branch_list()
-    elif not Args.full:
-        BRANCHES = ['.']
-    if BRANCHES[0] == '.':
-        BRANCHES[0] = current_branch_name()
+    set_branches()
 
     if Args.conf:
         show_conf() # changes done by other options are shown here
         exit(0)
 
     FailTracker.load()
-
-    if Args.full:
-        log("Watched branches: " + ','.join(BRANCHES))
 
     if Args.auto:
         while True:
@@ -1544,14 +1551,7 @@ def main():
             ToSend)
 
     elif Args.boxes:
-        try:
-            start_boxes()
-        except FuncTestError, e:
-            log("Virtual boxes start up failed: %s", e.message)
-        except BaseException, e:
-            log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
-            if not isinstance(e, Exception):
-                raise # it wont be catched and will allow the script to terminate
+        start_boxes()
 
     else:
         run()
