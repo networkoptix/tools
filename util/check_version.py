@@ -18,7 +18,8 @@ pomFileName = "pom.xml"
 rootDir = os.getcwd() # TODO make it possible to use the parameter
 verbose = False
 
-parentOnlyCheck = ['common_libs/udt']
+parentOnlyCheck = [] # use any subpaths here (example: 'common_libs/udt') 
+                     # to check only parent version there (not recurcive in subdirs)
 
 def strip_root(filename):
     if filename.startswith(rootDir):
