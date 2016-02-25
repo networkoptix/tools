@@ -276,9 +276,9 @@ def main():
     debug = args.debug
 
     packages = args.packages
-    if not packages:
-        if package:
-            packages = [ os.path.basename(package) ]
+#    if not packages:
+#        if package:
+#            packages = [ os.path.basename(package) ]
 
     root = find_root(ROOT_CONFIG_NAME)
     prefix = os.path.join(platform, arch, box)
