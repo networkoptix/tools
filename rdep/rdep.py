@@ -286,7 +286,7 @@ def main():
     if not root:
         root = os.getenv("NX_REPOSITORY", "")
     if not root:
-        root = os.path.join(os.getcwd(), 'packages')
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
     print ("Repository root dir: {0}".format(root))
 
     if args.print_path:
