@@ -5,6 +5,7 @@ import os
 import time
 import configparser
 import subprocess
+import shutil
 
 from platform_detection import *
 
@@ -13,8 +14,10 @@ PACKAGE_CONFIG_NAME = ".rdpack"
 ANY_KEYWORD = "any"
 RSYNC = "rsync"
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
 def find_root(file_name):
-    path = os.path.abspath(os.getcwd())
+    path = script_dir
 
     while not os.path.isfile(os.path.join(path, file_name)):
         nextpath = os.path.dirname(path)
@@ -42,7 +45,7 @@ def detect_settings():
     root = find_root(ROOT_CONFIG_NAME)
 
     if root:
-        path = splitpath(os.path.relpath(os.getcwd(), root))
+        path = splitpath(os.path.relpath(script_dir, root))
 
         if path:
             platform = path[0]
@@ -103,7 +106,7 @@ def remote_path(path):
     return path.replace(os.sep, '/')
     
 def local_path(path):
-    return os.path.relpath(path)
+    return os.path.relpath(path, script_dir)
 
 def try_sync(root, url, prefix, package, force):
     src = remote_path(os.path.join(url, prefix, package))
@@ -241,18 +244,38 @@ def locate_package(root, prefix, package, debug):
 
     return None
 
+def copy_packages(root, prefix, packages, debug, target_dir):
+    for package in packages:
+        print("Copying package {0} into {1}".format(package, target_dir))
+        path = locate_package(root, prefix, package, debug)
+        if not path:
+            print("Could not locate {0}".format(package))
+            exit(1)
+        
+        for dirname, dirnames, filenames in os.walk(path):
+            rel_dir = os.path.relpath(dirname, path)
+            dir = os.path.abspath(os.path.join(target_dir, rel_dir))
+            if not os.path.isdir(dir):
+                os.makedirs(dir)               
+            for filename in filenames:
+                entry = os.path.join(dirname, filename)
+                shutil.copy(entry, dir)
+        
+
+        
 def main():
     #platform, arch, box, debug, package = detect_settings()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--platform", help="Platform name.",      default=detect_platform())
-    parser.add_argument("-a", "--arch",     help="Architecture name.",  default=detect_arch())
-    parser.add_argument("-b", "--box",      help="Box name.",           default="none")
-    parser.add_argument("-d", "--debug",    help="Sync debug version.", action="store_true")
-    parser.add_argument("-f", "--force",    help="Force sync.", action="store_true")
-    parser.add_argument("-u", "--upload",   help="Upload package to the repository.", action="store_true")
-    parser.add_argument("--print-path",     help="Print package dir and exit.", action="store_true")
-    parser.add_argument("packages", nargs='*', help="Packages to sync.", default="")
+    parser.add_argument("-p", "--platform",     help="Platform name.",      default=detect_platform())
+    parser.add_argument("-a", "--arch",         help="Architecture name.",  default=detect_arch())
+    parser.add_argument("-b", "--box",          help="Box name.",           default="none")
+    parser.add_argument("-d", "--debug",        help="Sync debug version.",                 action="store_true")
+    parser.add_argument("-f", "--force",        help="Force sync.",                         action="store_true")
+    parser.add_argument("-u", "--upload",       help="Upload package to the repository.",   action="store_true")
+    parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
+    parser.add_argument("--copy-to",            help="Endpoint directory for packages")
+    parser.add_argument("packages", nargs='*',  help="Packages to sync.",   default="")
 
     args = parser.parse_args()
 
@@ -271,8 +294,7 @@ def main():
         print("Unsupported box " + box)
         exit(1)
 
-    print("Ready to work. Platform: {0}, arch: {1}, box: {2}".format(platform, arch, box))    
-        
+       
     debug = args.debug
 
     packages = args.packages
@@ -281,12 +303,13 @@ def main():
 #            packages = [ os.path.basename(package) ]
 
     root = find_root(ROOT_CONFIG_NAME)
-    prefix = os.path.join(platform, arch, box)
+    prefix = os.path.join(platform, arch, box) if arch == 'arm' else os.path.join(platform, arch)
+    print("Ready to work on {0}".format(prefix))
 
     if not root:
         root = os.getenv("NX_REPOSITORY", "")
     if not root:
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'packages')
+        root = os.path.join(script_dir, 'packages')
     print ("Repository root dir: {0}".format(root))
 
     if args.print_path:
@@ -321,6 +344,9 @@ def main():
 
         if not sync_packages(root, url, prefix, packages, debug, args.force):
             exit(1)
+            
+        if args.copy_to:
+            copy_packages(root, prefix, packages, debug, args.copy_to)
 
 if __name__ == "__main__":
     main()
