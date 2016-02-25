@@ -16,6 +16,7 @@ import json
 import xml.etree.ElementTree as ET
 
 from testconf import *
+import pipereader
 
 __version__ = '1.1.1'
 
@@ -26,12 +27,6 @@ BARMARK = '[==========]'
 OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
-
-PIPE_NONE = 0
-PIPE_READY = 1
-PIPE_EOF = 2
-PIPE_HANG = 3
-PIPE_ERROR = 4
 
 RESTART_FLAG = './.restart'
 STOP_FLAG = './.stop'
@@ -55,123 +50,6 @@ SignalNames = get_signals()
 class FuncTestError(RuntimeError):
     pass
 
-class PipeReaderBase(object):
-    def __init__(self):
-        self.fd = None
-        self.proc = None
-        self.buf = ''
-        self.state = PIPE_NONE
-
-    def register(self, proc):
-        if self.fd is not None and self.fd != self.fd:
-            raise RuntimeError("PipeReader: double fd register")
-        self.proc = proc
-        self.buf = ''
-        self.fd = proc.stdout
-        self.state = PIPE_READY # new fd -- new process, so the reader is ready again
-
-    def unregister(self):
-        if self.fd is None:
-            raise RuntimeError("PipeReader.unregister: fd was not registered")
-        self._unregister()
-        self.fd = None
-        self.proc = None
-
-    def _unregister(self):
-        raise NotImplementedError()
-
-    def read_ch(self, timeout=0):
-        # ONLY two possible results:
-        # 1) return the next character
-        # 2) return '' and change self.state
-        raise NotImplementedError()
-
-    def readline(self, timeout=0):
-        if self.state != PIPE_READY:
-            return None
-#        while self.proc.poll() is None:
-        while True:
-            ch = self.read_ch(timeout)
-            if ch is None or ch == '':
-                if self.proc.poll() is not None:
-                    break
-                return self.buf
-            if ch == '\n' or ch == '\r': # use all three: \n, \r\n, \r
-                if len(self.buf) > 0:
-                    #debug('::'+self.buf)
-                    try:
-                        return self.buf
-                    finally:
-                        self.buf = ''
-                else:
-                    pass # all empty lines are skipped (so \r\n doesn't produce fake empty line)
-            else:
-                self.buf += ch
-        self.state = PIPE_EOF
-        return self.buf
-
-
-if os.name == 'posix':
-    import select
-    READ_ONLY = select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR
-    READY = select.POLLIN | select.POLLPRI
-
-    class PipeReader(PipeReaderBase):
-        def __init__(self):
-            super(PipeReader, self).__init__()
-            self.poller = select.poll()
-
-        def register(self, proc):
-            super(PipeReader, self).register(proc)
-            self.poller.register(self.fd, READ_ONLY)
-
-        def _unregister(self):
-            self.poller.unregister(self.fd)
-
-        def read_ch(self, timeout):
-            res = self.poller.poll(timeout)
-            if res:
-                if res[0][1] & READY:
-                    return self.fd.read(1)
-                # EOF
-                self.state = PIPE_EOF
-            else:
-
-                self.state = PIPE_HANG
-            return ''
-
-else:
-    import msvcrt
-    import pywintypes
-    import win32pipe
-
-    class PipeReader(PipeReaderBase):
-
-        def register(self, proc):
-            super(PipeReader, self).register(proc)
-            self.osf = msvcrt.get_osfhandle(self.fd)
-
-        def read_ch(self, timeout):
-            endtime = (time.time() + timeout) if timeout > 0 else 0
-            while self.proc.poll() is None:
-                try:
-                    _, avail, _ = win32pipe.PeekNamedPipe(self.osf, 1)
-                except pywintypes.error:
-                    self.state = PIPE_ERROR
-                    return ''
-                if avail:
-                    return os.read(self.fd, 1)
-                if endtime:
-                    t = time.time()
-                    if endtime > t:
-                        time.sleep(min(0.01, endtime - t))
-                    else:
-                        self.state = PIPE_HANG
-                        return ''
-
-
-    def check_poll_res(res):
-        return bool(res)
 
 ToSend = []
 FailedTests = []
@@ -378,7 +256,7 @@ def read_unittest_output(proc, reader):
     complete = False
     to_send_count = 0
     try:
-        while reader.state == PIPE_READY:
+        while reader.state == pipereader.PIPE_READY:
             line = reader.readline(UT_PIPE_TIMEOUT)
             if not complete and len(line) > 0:
                 #debug("Line: %s", line.lstrip())
@@ -418,9 +296,9 @@ def read_unittest_output(proc, reader):
         else: # end reading
             check_repeats(repeats)
 
-        if reader.state in (PIPE_HANG, PIPE_ERROR):
+        if reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR):
             ToSend.append((
-                "[ test suit has TIMED OUT on test %s ]" if reader.state == PIPE_HANG else
+                "[ test suit has TIMED OUT on test %s ]" if reader.state == pipereader.PIPE_HANG else
                 "[ PIPE ERROR reading test suit output on test %s ]") % running_test_name)
             FailedTests.append(running_test_name)
             has_errors = True
@@ -434,7 +312,7 @@ def read_unittest_output(proc, reader):
                 ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
                 FailedTests.append(running_test_name)
             if proc.returncode < 0:
-                if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+                if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                     signames = SignalNames.get(-proc.returncode, [])
                     signames = ' (%s)' % (','.join(signames),) if signames else ''
                     ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
@@ -514,7 +392,7 @@ def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
     lines = []
     to_skip = get_to_skip(branch)
-    reader = PipeReader()
+    reader = pipereader.PipeReader()
 
     if 'all_ut' not in to_skip:
         for name in get_ut_names():
@@ -812,74 +690,8 @@ def run():
     except Exception:
         traceback.print_exc()
 
+
 #####################################
-# Functional tests block
-def get_server_package_name():
-    #TODO move all paths into testconf.py !
-    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
-    av = 'arch='
-    arch=''
-    with open(curconf_fn) as f:
-        for line in f:
-            if line.startswith(av):
-                arch=line[len(av):].rstrip()
-                break
-
-    if arch == '':
-        raise FuncTestError("Can't find server package: architecture not found!")
-
-    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
-    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
-    fv = 'server.finalName='
-    debfn = ''
-    if not os.path.isfile(fn):
-        return None
-    with open(fn) as f:
-        for line in f:
-            if line.startswith(fv):
-                debfn = line[len(fv):].rstrip() + '.deb'
-                break
-
-    if debfn == '':
-        raise FuncTestError("Server package .deb file name not found!")
-
-    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
-
-
-def wait_servers_ready():
-    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in VG_BOXES_IP]
-    not_ready = set(urls)
-    # 1. Prepare authentication for http queries
-    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    for u in urls:
-        passman.add_password(None, u, MEDIASERVER_USER, MEDIASERVER_PASS)
-    urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
-    # 2. Wait for responses for query
-    # For each URL check number of servers online
-    too_slow = time.time() + len(urls) * ALL_START_TIMEOUT_BASE
-    while not_ready:
-        for url in urls:
-            if time.time() > too_slow:
-                raise FuncTestError("Server start timed out! Functional tests wasn't performed.")
-            if url in not_ready:
-                try:
-                    jdata = urllib2.urlopen(url, timeout=START_CHECK_TIMEOUT).read()
-                    # Check response for 'status' field (Online/Offline) for all servers
-                except Exception, e:
-                    continue # wait for good response or for global timeout
-                try:
-                    data = json.loads(jdata)
-                except ValueError, e:
-                    continue # just ignore wrong answer, wait for correct
-                count = 0
-                for server in data:
-                    if server.get('status', '') == 'Online':
-                        count += 1
-                if count == len(urls):
-                    debug("Ready response from %s", url)
-                    not_ready.discard(url)
-
-
 def check_mediaserver_deb():
     # The same filename used for all versions here:
     # a) To remove (by override) any previous version automatically.
@@ -922,6 +734,94 @@ def start_boxes():
             raise # it wont be catched and will allow the script to terminate
 
 
+#####################################
+# Functional tests block
+def wait_servers_ready():
+    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in VG_BOXES_IP]
+    not_ready = set(urls)
+    # 1. Prepare authentication for http queries
+    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    for u in urls:
+        passman.add_password(None, u, MEDIASERVER_USER, MEDIASERVER_PASS)
+    urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+    # 2. Wait for responses for query
+    # For each URL check number of servers online
+    too_slow = time.time() + len(urls) * ALL_START_TIMEOUT_BASE
+    while not_ready:
+        for url in urls:
+            if time.time() > too_slow:
+                raise FuncTestError("Server start timed out! Functional tests wasn't performed.")
+            if url in not_ready:
+                try:
+                    jdata = urllib2.urlopen(url, timeout=START_CHECK_TIMEOUT).read()
+                    # Check response for 'status' field (Online/Offline) for all servers
+                except Exception, e:
+                    continue # wait for good response or for global timeout
+                try:
+                    data = json.loads(jdata)
+                except ValueError, e:
+                    continue # just ignore wrong answer, wait for correct
+                count = 0
+                for server in data:
+                    if server.get('status', '') == 'Online':
+                        count += 1
+                if count == len(urls):
+                    debug("Ready response from %s", url)
+                    not_ready.discard(url)
+
+
+def get_server_package_name():
+    #TODO move all paths into testconf.py !
+    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
+    av = 'arch='
+    arch=''
+    with open(curconf_fn) as f:
+        for line in f:
+            if line.startswith(av):
+                arch=line[len(av):].rstrip()
+                break
+
+    if arch == '':
+        raise FuncTestError("Can't find server package: architecture not found!")
+
+    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
+    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
+    fv = 'server.finalName='
+    debfn = ''
+    if not os.path.isfile(fn):
+        return None
+    with open(fn) as f:
+        for line in f:
+            if line.startswith(fv):
+                debfn = line[len(fv):].rstrip() + '.deb'
+                break
+
+    if debfn == '':
+        raise FuncTestError("Server package .deb file name not found!")
+
+    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
+
+
+def mk_functest_cmd(to_skip):
+    only_test = ''
+    cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
+    if Args.timetest:
+        cmd.append("--timesync")
+        only_test = "timesync"
+    elif Args.msarch:
+        cmd.append("--msarch")
+        only_test = "msarch"
+    else:
+        if 'time' in to_skip:
+            cmd.append("--skiptime")
+        if 'backup' in to_skip:
+            cmd.append("--skipbak")
+        if 'msarch' in to_skip:
+            cmd.append('--skipmsa')
+    log("Running functional tests: %s", cmd)
+    return cmd, only_test
+
+
 def perform_func_test(to_skip):
     if os.name != 'posix':
         print "\nFunctional tests require POSIX-compatible OS. Skipped."
@@ -935,28 +835,14 @@ def perform_func_test(to_skip):
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
-        reader = PipeReader()
+        reader = pipereader.PipeReader()
         sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
         unreg = False
 
-        only_test = ""
+        only_test = ''
         if not Args.httpstress:
             unreg = True
-            cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
-            if Args.timetest:
-                cmd.append("--timesync")
-                only_test = "timesync"
-            elif Args.msarch:
-                cmd.append("--msarch")
-                only_test = "msarch"
-            else:
-                if 'time' in to_skip:
-                    cmd.append("--skiptime")
-                if 'backup' in to_skip:
-                    cmd.append("--skipbak")
-                if 'msarch' in to_skip:
-                    cmd.append('--skipmsa')
-            log("Running functional tests: %s", cmd)
+            cmd, only_test = mk_functest_cmd(to_skip)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
             read_functest_output(proc, reader, only_test)
@@ -1283,7 +1169,7 @@ def read_functest_output(proc, reader, from_test=''):
         p.parser = p.parse_timesync_start
     elif from_test == 'msarch':
         p.parser = p.parse_msarch_start
-    while reader.state == PIPE_READY:
+    while reader.state == pipereader.PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
         if len(line) > 0:
             last_lines.append(line)
@@ -1295,9 +1181,9 @@ def read_functest_output(proc, reader, from_test=''):
     else: # end reading
         pass
 
-    if reader.state in (PIPE_HANG, PIPE_ERROR):
+    if reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR):
         log_to_send((
-            "[ functional tests has TIMED OUT on %s stage ]" if reader.state == PIPE_HANG else
+            "[ functional tests has TIMED OUT on %s stage ]" if reader.state == pipereader.PIPE_HANG else
             "[ PIPE ERROR reading functional tests output on %s stage ]") % p.stage)
         log_to_send("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
         #has_errors = True
@@ -1314,7 +1200,7 @@ def read_functest_output(proc, reader, from_test=''):
 
     if proc.returncode != 0:
         if proc.returncode < 0:
-            if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+            if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                 signames = SignalNames.get(-proc.returncode, [])
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
                 log_to_send("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
@@ -1332,7 +1218,7 @@ def read_misctest_output(proc, reader, name):
     collector = []
     has_errors = False
     reading = True
-    while reader.state == PIPE_READY:
+    while reader.state == pipereader.PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
         #print ":DEBUG: " + line.rstrip()
         if reading and len(line) > 0:
@@ -1348,9 +1234,9 @@ def read_misctest_output(proc, reader, name):
         log_to_send("%s test failed:\n%s", name.capitalize(), "\n".join(collector))
         collector = []
 
-    if reader.state in (PIPE_HANG, PIPE_ERROR):
+    if reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR):
         log_to_send(
-            ("[ %s test has TIMED OUT ]" % name) if reader.state == PIPE_HANG else
+            ("[ %s test has TIMED OUT ]" % name) if reader.state == pipereader.PIPE_HANG else
             ("[ PIPE ERROR reading %s test's output ]" % name))
         if collector:
             log_to_send("Test's output:\n%s", "\n".join(collector))
@@ -1367,7 +1253,7 @@ def read_misctest_output(proc, reader, name):
 
     if proc.returncode != 0:
         if proc.returncode < 0:
-            if not (proc.returncode == -signal.SIGTERM and reader.state == PIPE_HANG): # do not report signal if it was ours kill result
+            if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                 signames = SignalNames.get(-proc.returncode, [])
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
                 log_to_send("[ %s TEST HAVE BEEN INTERRUPTED by signal %s%s ]" % (name.upper(), -proc.returncode, signames))
@@ -1394,7 +1280,7 @@ def parse_args():
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
-    parser.add_argument("--msarch", action="store_true")
+    parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings
