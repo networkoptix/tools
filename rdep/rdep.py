@@ -14,6 +14,8 @@ PACKAGE_CONFIG_NAME = ".rdpack"
 ANY_KEYWORD = "any"
 RSYNC = "rsync"
 
+verbose = False
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 def find_root(file_name):
@@ -106,12 +108,15 @@ def remote_path(path):
     return path.replace(os.sep, '/')
     
 def local_path(path):
-    return os.path.relpath(path, script_dir)
+    return os.path.relpath(path, os.getcwd())
 
-def try_sync(root, url, prefix, package, force):
+def try_sync(root, url, prefix, package, force):   
     src = remote_path(os.path.join(url, prefix, package))
     dst = local_path(os.path.join(root, prefix))
-    config_dst = local_path(os.path.join(dst, package))
+    config_dst = os.path.join(dst, package)
+    
+    if verbose:
+        print("root {0}\nurl {1}\nprefix {2}\npackage {3}\nsrc {4}\ndst {5}\nconfig_dst {6}".format(root, url, prefix, package, src, dst, config_dst))
 
     if not os.path.isdir(config_dst):
         os.makedirs(config_dst)
@@ -125,7 +130,8 @@ def try_sync(root, url, prefix, package, force):
     config_sync_command = list(command)
     config_sync_command.append(remote_path(os.path.join(src, PACKAGE_CONFIG_NAME)))
     config_sync_command.append(config_dst)
-    print("Executing rsync command:\n{0}".format(' '.join(config_sync_command)))
+    if verbose:
+        print("Executing rsync command:\n{0}".format(' '.join(config_sync_command)))
     ret = subprocess.call(config_sync_command)
     if ret != 0:
         return SYNC_NOT_FOUND
@@ -273,12 +279,17 @@ def main():
     parser.add_argument("-d", "--debug",        help="Sync debug version.",                 action="store_true")
     parser.add_argument("-f", "--force",        help="Force sync.",                         action="store_true")
     parser.add_argument("-u", "--upload",       help="Upload package to the repository.",   action="store_true")
+    parser.add_argument("-v", "--verbose",      help="Additional debug output.",            action="store_true")
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
     parser.add_argument("--copy-to",            help="Endpoint directory for packages")
     parser.add_argument("packages", nargs='*',  help="Packages to sync.",   default="")
 
     args = parser.parse_args()
 
+    if args.verbose:
+        global verbose
+        verbose = args.verbose
+    
     platform = args.platform
     if not platform in supported_platforms and platform != ANY_KEYWORD:
         print("Unsupported platform " + platform)

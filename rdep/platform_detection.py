@@ -20,7 +20,8 @@ supported_boxes = [
     "rpi",
     "bpi",
     "isd",
-    "isd_s2"
+    "isd_s2",
+    "windows"
 ]
 
 def detect_platform():
