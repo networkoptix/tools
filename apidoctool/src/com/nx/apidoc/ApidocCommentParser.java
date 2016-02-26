@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 public final class ApidocCommentParser
     extends ApidocComment
 {
-
     private ApidocCommentParser() {}
 
     public static final class Error
