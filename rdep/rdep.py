@@ -267,7 +267,57 @@ def copy_packages(root, prefix, packages, debug, target_dir):
                 entry = os.path.join(dirname, filename)
                 shutil.copy(entry, dir)
         
+def get_prefix(platform, arch, box):
+    return os.path.join(platform, arch, box) if arch == 'arm' else os.path.join(platform, arch)
+        
+def get_repository_root():
+    root = find_root(ROOT_CONFIG_NAME)
+    if not root:
+        root = os.getenv("NX_REPOSITORY", "")
+    if not root:
+        root = os.path.join(script_dir, 'packages')
+    return root
+        
+def fetch_packages(packages, platform, arch, box, debug = False, verbose_messages = False):
+    if verbose_messages:
+        global verbose
+        verbose = True
+    
+    if not platform in supported_platforms and platform != ANY_KEYWORD:
+        print("Unsupported platform " + platform)
+        return False
 
+    if not arch in supported_arches and arch != ANY_KEYWORD:
+        print("Unsupported arch " + arch)
+        return False
+
+    if not box in supported_boxes and box != ANY_KEYWORD:
+        print("Unsupported box " + box)
+        return False
+
+#    if not packages:
+#        if package:
+#            packages = [ os.path.basename(package) ]
+    
+    prefix = get_prefix(platform, arch, box)
+    print("Ready to work on {0}".format(prefix))
+
+    root = get_repository_root()
+    print ("Repository root dir: {0}".format(root))
+
+    url = sync_url(os.path.join(root, ROOT_CONFIG_NAME))
+
+    if not packages:
+        print("No packages to sync")
+        return True
+
+    #args.force
+    if not sync_packages(root, url, prefix, packages, debug, False):
+        return False
+    
+    return True
+#    if args.copy_to:
+#        copy_packages(root, prefix, packages, debug, args.copy_to)
         
 def main():
     #platform, arch, box, debug, package = detect_settings()
@@ -281,47 +331,9 @@ def main():
     parser.add_argument("-u", "--upload",       help="Upload package to the repository.",   action="store_true")
     parser.add_argument("-v", "--verbose",      help="Additional debug output.",            action="store_true")
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
-    parser.add_argument("--copy-to",            help="Endpoint directory for packages")
     parser.add_argument("packages", nargs='*',  help="Packages to sync.",   default="")
 
     args = parser.parse_args()
-
-    if args.verbose:
-        global verbose
-        verbose = args.verbose
-    
-    platform = args.platform
-    if not platform in supported_platforms and platform != ANY_KEYWORD:
-        print("Unsupported platform " + platform)
-        exit(1)
-
-    arch = args.arch
-    if not arch in supported_arches and arch != ANY_KEYWORD:
-        print("Unsupported arch " + arch)
-        exit(1)
-
-    box = args.box
-    if not box in supported_boxes and box != ANY_KEYWORD:
-        print("Unsupported box " + box)
-        exit(1)
-
-       
-    debug = args.debug
-
-    packages = args.packages
-#    if not packages:
-#        if package:
-#            packages = [ os.path.basename(package) ]
-
-    root = find_root(ROOT_CONFIG_NAME)
-    prefix = os.path.join(platform, arch, box) if arch == 'arm' else os.path.join(platform, arch)
-    print("Ready to work on {0}".format(prefix))
-
-    if not root:
-        root = os.getenv("NX_REPOSITORY", "")
-    if not root:
-        root = os.path.join(script_dir, 'packages')
-    print ("Repository root dir: {0}".format(root))
 
     if args.print_path:
         if not packages:
@@ -330,6 +342,9 @@ def main():
         if len(packages) != 1:
             exit(1)
 
+        prefix = get_prefix(platform, arch, box)
+        root = get_repository_root()
+
         path = locate_package(root, prefix, packages[0], debug)
 
         if not path:
@@ -337,27 +352,22 @@ def main():
 
         print(path)
         exit(0)
-
-    url = sync_url(os.path.join(root, ROOT_CONFIG_NAME))
-
+        
     if args.upload:
         if not packages:
             print("No packages to upload")
             exit(1)
 
-        if not upload_packages(root, url, prefix, packages, debug):
+        prefix = get_prefix(platform, arch, box)
+        root = get_repository_root()            
+        if not upload_packages(root, url, prefix, packages, args.debug):
             exit(1)
+        print "Uploaded successfully"
+        exit(0)
+    
+    if not fetch_packages(args.packages, args.platform, args.arch, args.box, args.debug, args.verbose):
+        exit(1)
 
-    else:
-        if not packages:
-            print("No packages to sync")
-            exit(0)
-
-        if not sync_packages(root, url, prefix, packages, debug, args.force):
-            exit(1)
-            
-        if args.copy_to:
-            copy_packages(root, prefix, packages, debug, args.copy_to)
 
 if __name__ == "__main__":
     main()
