@@ -13,6 +13,7 @@ from platform_detection import *
 ROOT_CONFIG_NAME = ".rdep"
 PACKAGE_CONFIG_NAME = ".rdpack"
 ANY_KEYWORD = "any"
+DEBUG_SUFFIX = "-debug"
 RSYNC = [ "rsync", "--archive", "--delete" ]
 if detect_platform() == "windows":
     RSYNC.append("--chmod=ugo=rwx")
@@ -182,17 +183,12 @@ def try_sync(root, url, prefix, package, force):
     print "Done {0}".format(package)
     return SYNC_SUCCESS
 
-def debug_prefix(prefix, debug):
-    if not debug:
-        return prefix
-    return os.path.join(prefix, "debug")
-
 def sync_package(root, url, prefix, package, debug, force):
     print "Synching {0}...".format(package)
 
     ret = SYNC_NOT_FOUND
     if debug:
-        ret = try_sync(root, url, debug_prefix(prefix, debug), package, force)
+        ret = try_sync(root, url, prefix, package + DEBUG_SUFFIX, force)
     if ret == SYNC_NOT_FOUND:
         ret = try_sync(root, url, prefix, package, force)
 
@@ -201,7 +197,7 @@ def sync_package(root, url, prefix, package, debug, force):
         any_prefix = ANY_KEYWORD
 
         if debug:
-            ret = try_sync(root, url, debug_prefix(any_prefix, debug), package, force)
+            ret = try_sync(root, url, any_prefix, package + DEBUG_SUFFIX, force)
         if ret == SYNC_NOT_FOUND:
             ret = try_sync(root, url, any_prefix, package, force)
 
@@ -267,7 +263,7 @@ def package_config_path(path):
 
 def locate_package(root, prefix, package, debug):
     if debug:
-        path = os.path.join(root, debug_prefix(prefix, debug), package)
+        path = os.path.join(root, prefix, package + DEBUG_SUFFIX)
         if os.path.exists(package_config_path(path)):
             return path
 
@@ -278,7 +274,7 @@ def locate_package(root, prefix, package, debug):
     any_prefix = ANY_KEYWORD
 
     if debug:
-        path = os.path.join(root, debug_prefix(any_prefix, debug), package)
+        path = os.path.join(root, any_prefix, package + DEBUG_SUFFIX)
         if os.path.exists(package_config_path(path)):
             return path
 
