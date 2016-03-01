@@ -163,39 +163,37 @@ def try_sync(root, url, target, package, force):
 
     if subprocess.call(command) != 0:
         os.remove(config_file)
-        print "Could not sync {0}".format(package)
         return SYNC_FAILED
 
     verbose_message("Moving {0} to {1}".format(config_file, os.path.join(dst, PACKAGE_CONFIG_NAME)))
     shutil.move(config_file, os.path.join(dst, PACKAGE_CONFIG_NAME))
 
-    print "Done {0}".format(package)
     return SYNC_SUCCESS
 
 def sync_package(root, url, target, package, debug, force):
     print "Synching {0}...".format(package)
 
-    ret = SYNC_NOT_FOUND
-    if debug:
-        ret = try_sync(root, url, target, package + DEBUG_SUFFIX, force)
+    ret = try_sync(root, url, target, package, force)
     if ret == SYNC_NOT_FOUND:
-        ret = try_sync(root, url, target, package, force)
+        target = ANY_KEYWORD
 
-    if ret == SYNC_NOT_FOUND:
-        any_target = ANY_KEYWORD
-
-        if debug:
-            ret = try_sync(root, url, any_target, package + DEBUG_SUFFIX, force)
-        if ret == SYNC_NOT_FOUND:
-            ret = try_sync(root, url, any_target, package, force)
-
+    ret = try_sync(root, url, target, package, force)
     if ret == SYNC_NOT_FOUND:
         print "Could not find {0}".format(package)
         return False
 
     if ret == SYNC_FAILED:
+        print "Sync failed for {0}".format(package)
         return False
 
+    if debug:
+        ret = try_sync(root, url, target, package + DEBUG_SUFFIX, force)
+
+        if ret == SYNC_FAILED:
+            print "Sync failed for {0}".format(package + DEBUG_SUFFIX)
+            return False
+
+    print "Done {0}".format(package)
     return True
 
 def sync_packages(root, url, target, packages, debug, force):
@@ -243,7 +241,7 @@ def upload_packages(target, packages, debug = False):
 
     if not packages:
         print "No packages to upload"
-        exit(1)
+        return True
 
     for package in packages:
         package_name = package + DEBUG_SUFFIX if debug else package
@@ -251,7 +249,7 @@ def upload_packages(target, packages, debug = False):
             success = False
 
     print "Uploaded successfully"
-    exit(0 if success else 1)
+    return success
 
 def package_config_path(path):
     return os.path.join(path, PACKAGE_CONFIG_NAME)
@@ -289,12 +287,12 @@ def fetch_packages(target, packages, debug = False, force = False):
 
     if not packages:
         print "No packages to sync"
-        exit(1)
+        return False
 
     if not sync_packages(root, url, target, packages, debug, force):
-        exit(1)
+        return False
 
-    exit(0)
+    return True
 
 def print_path(target, packages, debug):
     if not packages or len(packages) != 1:
@@ -340,12 +338,16 @@ def main():
         global verbose
         verbose = True
 
+    success = True
+
     if args.print_path:
-        print_path(target, packages, args.debug)
+        success = print_path(target, packages, args.debug)
     elif args.upload:
-        upload_packages(target, packages, args.debug)
+        success = upload_packages(target, packages, args.debug)
     else:
-        fetch_packages(target, packages, args.debug, args.force)
+        success = fetch_packages(target, packages, args.debug, args.force)
+
+    exit(0 if success else 1)
 
 if __name__ == "__main__":
     main()
