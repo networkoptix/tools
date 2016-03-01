@@ -1,27 +1,18 @@
 import platform
 import sys
 
-supported_platforms = [
-    "windows",
-    "linux",
-    "macos",
-    "android",
-    "ios"
-]
-
-supported_arches = [
-    "x64",
-    "x86",
-    "arm"
-]
-
-supported_boxes = [
-    "none",
+supported_targets = [
+    "windows-x64",
+    "windows-x86",
+    "linux-x64",
+    "linux-x86",
+    "macos-x64",
     "rpi",
     "bpi",
     "isd",
     "isd_s2",
-    "windows"
+    "android-arm",
+    "ios"
 ]
 
 def detect_platform():
@@ -41,3 +32,6 @@ def detect_arch():
         return "x64"
 
     return arch
+
+def detect_target():
+    return detect_platform() + "-" + detect_arch()
