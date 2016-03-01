@@ -89,7 +89,11 @@ def get_timestamp_from_package_config(file_name):
 
     config = ConfigParser.ConfigParser()
     config.read(file_name)
-    return config.get("General", "time")
+
+    if not config.has_option("General", "time"):
+        return None
+
+    return config.getint("General", "time")
 
 def get_package_timestamp(path):
     return get_timestamp_from_package_config(os.path.join(path, PACKAGE_CONFIG_NAME))
@@ -117,6 +121,9 @@ def sync_url(config_file):
 
     config = ConfigParser.ConfigParser()
     config.read(config_file)
+    if not config.has_option("General", "url"):
+        return None
+
     return config.get("General", "url")
 
 SYNC_NOT_FOUND = 0
@@ -340,6 +347,10 @@ def fetch_packages(packages, platform, arch, box, debug = False, verbose_message
     print "Repository root dir: {0}".format(root)
 
     url = sync_url(os.path.join(root, ROOT_CONFIG_NAME))
+
+    if not url:
+        print "Could not find sync url for {0}".format(root)
+        return False
 
     if not packages:
         print "No packages to sync"
