@@ -98,10 +98,10 @@ def posix_path(path):
     return path
 
 def fetch_package_timestamp(url):
-    file_name = posix_path(tempfile.mktemp())
+    file_name = tempfile.mktemp()
     command = list(RSYNC)
     command.append(url)
-    command.append(file_name)
+    command.append(posix_path(file_name))
 
     verbose_rsync(command)
 
@@ -118,7 +118,7 @@ def fetch_package_timestamp(url):
 
 def try_sync(root, url, target, package, force):
     src = posixpath.join(url, target, package)
-    dst = posixpath.join(root, target, package)
+    dst = os.path.join(root, target, package)
     config_src = posixpath.join(src, PACKAGE_CONFIG_NAME)
 
     verbose_message("root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}".format(root, url, target, package, src, dst))
@@ -138,7 +138,7 @@ def try_sync(root, url, target, package, force):
     command.append("--exclude")
     command.append(PACKAGE_CONFIG_NAME)
     command.append(src + "/")
-    command.append(dst)
+    command.append(posix_path(dst))
 
     verbose_rsync(command)
 
@@ -190,14 +190,14 @@ def upload_package(root, url, target, package):
     print "Uploading {0}...".format(package)
 
     remote = posixpath.join(url, target, package)
-    local = posixpath.join(posix_path(root), target, package)
+    local = os.path.join(root, target, package)
 
     update_package_timestamp(local)
 
     command = list(RSYNC)
     command.append("--exclude")
     command.append(PACKAGE_CONFIG_NAME)
-    command.append(local + os.sep)
+    command.append(posix_path(local) + "/")
     command.append(remote)
 
     if subprocess.call(command) != 0:
@@ -205,7 +205,7 @@ def upload_package(root, url, target, package):
         return False
 
     command = list(RSYNC)
-    command.append(posixpath.join(local, PACKAGE_CONFIG_NAME))
+    command.append(posix_path(os.path.join(local, PACKAGE_CONFIG_NAME)))
     command.append(remote)
 
     if subprocess.call(command) != 0:
@@ -216,8 +216,6 @@ def upload_package(root, url, target, package):
     return True
 
 def upload_packages(root, url, target, packages, debug):
-    root = posix_path(root)
-
     success = True
 
     if not packages:
@@ -226,7 +224,8 @@ def upload_packages(root, url, target, packages, debug):
 
     for package in packages:
         package_name = package + DEBUG_SUFFIX if debug else package
-        success = success and upload_package(root, url, target, package_name)
+        if not upload_package(root, url, target, package_name):
+            success = False
 
     print "Uploaded successfully"
     exit(0 if success else 1)
@@ -268,8 +267,6 @@ def get_repository_root():
     return root
 
 def fetch_packages(root, url, target, packages, debug = False, force = False):
-    root = posix_path(root)
-
     print "Ready to work on {0}".format(target)
     print "Repository root dir: {0}".format(root)
 
