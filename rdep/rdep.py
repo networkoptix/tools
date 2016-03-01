@@ -98,7 +98,7 @@ def posix_path(path):
     return path
 
 def fetch_package_timestamp(url):
-    file_name = tempfile.mktemp()
+    file_name = posix_path(tempfile.mktemp())
     command = list(RSYNC)
     command.append(url)
     command.append(file_name)
@@ -216,6 +216,8 @@ def upload_package(root, url, target, package):
     return True
 
 def upload_packages(root, url, target, packages, debug):
+    root = posix_path(root)
+
     success = True
 
     if not packages:
@@ -265,8 +267,8 @@ def get_repository_root():
         root = os.path.join(script_dir, 'packages')
     return root
 
-def fetch_packages(url, target, packages, debug = False, force = False):
-    root = posix_path(get_repository_root())
+def fetch_packages(root, url, target, packages, debug = False, force = False):
+    root = posix_path(root)
 
     print "Ready to work on {0}".format(target)
     print "Repository root dir: {0}".format(root)
@@ -337,7 +339,7 @@ def main():
     elif args.upload:
         upload_packages(root, url, target, packages, args.debug)
     else:
-        fetch_packages(url, target, packages, args.debug, args.force)
+        fetch_packages(root, url, target, packages, args.debug, args.force)
 
 if __name__ == "__main__":
     main()
