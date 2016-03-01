@@ -42,6 +42,38 @@ def find_root(file_name):
 
     return path
 
+def get_repository_root():
+    root = find_root(ROOT_CONFIG_NAME)
+    if not root:
+        root = os.getenv("NX_REPOSITORY", "")
+    if not root:
+        root = os.path.join(script_dir, 'packages')
+    return root
+
+def get_sync_url(config_file):
+    if not os.path.isfile(config_file):
+        return None
+
+    config = ConfigParser.ConfigParser()
+    config.read(config_file)
+    if not config.has_option("General", "url"):
+        return None
+
+    return config.get("General", "url")
+
+def detect_repository():
+    root = get_repository_root()
+    if not root:
+        print "Could not find repository root"
+        exit(1)
+
+    url = get_sync_url(os.path.join(root, ROOT_CONFIG_NAME))
+    if not url:
+        print "Could not find sync url for {0}".format(root)
+        exit(1)
+
+    return root, url
+
 def get_timestamp_from_package_config(file_name):
     if not os.path.isfile(file_name):
         return None
@@ -73,17 +105,6 @@ def update_package_timestamp(path, timestamp = None):
 
     with open(file_name, "w") as file:
         config.write(file)
-
-def sync_url(config_file):
-    if not os.path.isfile(config_file):
-        return None
-
-    config = ConfigParser.ConfigParser()
-    config.read(config_file)
-    if not config.has_option("General", "url"):
-        return None
-
-    return config.get("General", "url")
 
 SYNC_NOT_FOUND = 0
 SYNC_FAILED = 1
@@ -215,7 +236,9 @@ def upload_package(root, url, target, package):
     print "Done {0}".format(package)
     return True
 
-def upload_packages(root, url, target, packages, debug):
+def upload_packages(target, packages, debug = False):
+    root, url = detect_repository()
+
     success = True
 
     if not packages:
@@ -233,8 +256,8 @@ def upload_packages(root, url, target, packages, debug):
 def package_config_path(path):
     return os.path.join(path, PACKAGE_CONFIG_NAME)
 
-def locate_package(package, target, debug = False):
-    root = get_repository_root()
+def locate_package(target, package, debug = False):
+    root, _ = detect_repository()
 
     if debug:
         path = os.path.join(root, target, package + DEBUG_SUFFIX)
@@ -258,15 +281,9 @@ def locate_package(package, target, debug = False):
 
     return None
 
-def get_repository_root():
-    root = find_root(ROOT_CONFIG_NAME)
-    if not root:
-        root = os.getenv("NX_REPOSITORY", "")
-    if not root:
-        root = os.path.join(script_dir, 'packages')
-    return root
+def fetch_packages(target, packages, debug = False, force = False):
+    root, url = detect_repository()
 
-def fetch_packages(root, url, target, packages, debug = False, force = False):
     print "Ready to work on {0}".format(target)
     print "Repository root dir: {0}".format(root)
 
@@ -280,11 +297,13 @@ def fetch_packages(root, url, target, packages, debug = False, force = False):
     exit(0)
 
 def print_path(target, packages, debug):
-    for package in packages:
-        path = locate_package(package, target, debug)
-        if not path:
-            exit(1)
-        print(path)
+    if not packages or len(packages) != 1:
+        exit(1)
+
+    path = locate_package(target, packages[0], debug)
+    if not path:
+        exit(1)
+    print(path)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -302,16 +321,6 @@ def main():
     if not target in supported_targets and target != ANY_KEYWORD:
         print "Unsupported target {0}".format(target)
         print "Supported targets:\n{0}".format("\n".join(supported_targets))
-        exit(1)
-
-    root = get_repository_root()
-    if not root:
-        print "Could not fine repository root"
-        exit(1)
-
-    url = sync_url(os.path.join(root, ROOT_CONFIG_NAME))
-    if not url:
-        print "Could not find sync url for {0}".format(root)
         exit(1)
 
     packages = args.packages
@@ -334,9 +343,9 @@ def main():
     if args.print_path:
         print_path(target, packages, args.debug)
     elif args.upload:
-        upload_packages(root, url, target, packages, args.debug)
+        upload_packages(target, packages, args.debug)
     else:
-        fetch_packages(root, url, target, packages, args.debug, args.force)
+        fetch_packages(target, packages, args.debug, args.force)
 
 if __name__ == "__main__":
     main()
