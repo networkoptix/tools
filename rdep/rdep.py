@@ -405,8 +405,11 @@ def main():
 
         prefix = get_prefix(platform, arch, box)
         root = get_repository_root()
+        url = sync_url(os.path.join(root, ROOT_CONFIG_NAME))
+
         if not upload_packages(root, url, prefix, packages, args.debug):
             exit(1)
+
         print "Uploaded successfully"
         exit(0)
 
