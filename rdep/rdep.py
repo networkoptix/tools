@@ -118,38 +118,36 @@ def posix_path(path):
 
     return path
 
-def fetch_package_timestamp(url):
-    file_name = tempfile.mktemp()
+def fetch_package_config(url, file_name):
     command = list(RSYNC)
     command.append(url)
     command.append(posix_path(file_name))
 
     verbose_rsync(command)
 
-    timestamp = None
-
     with open(os.devnull, "w") as fnull:
-        if subprocess.call(command, stderr = fnull) == 0:
-            timestamp = get_timestamp_from_package_config(file_name)
+        return subprocess.call(command, stderr = fnull) == 0
 
-    if os.path.isfile(file_name):
-        os.remove(file_name)
-
-    return timestamp
+    return False
 
 def try_sync(root, url, target, package, force):
     src = posixpath.join(url, target, package)
     dst = os.path.join(root, target, package)
-    config_src = posixpath.join(src, PACKAGE_CONFIG_NAME)
 
     verbose_message("root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}".format(root, url, target, package, src, dst))
 
-    newtime = fetch_package_timestamp(config_src)
+    config_file = tempfile.mktemp()
+    if not fetch_package_config(posixpath.join(src, PACKAGE_CONFIG_NAME), config_file):
+        return SYNC_NOT_FOUND
+
+    newtime = get_timestamp_from_package_config(config_file)
     if newtime == None:
+        os.remove(config_file)
         return SYNC_NOT_FOUND
 
     time = get_package_timestamp(dst)
     if newtime == time and not force:
+        os.remove(config_file)
         return SYNC_SUCCESS
 
     if not os.path.isdir(dst):
@@ -164,10 +162,12 @@ def try_sync(root, url, target, package, force):
     verbose_rsync(command)
 
     if subprocess.call(command) != 0:
+        os.remove(config_file)
         print "Could not sync {0}".format(package)
         return SYNC_FAILED
 
-    update_package_timestamp(dst, newtime)
+    verbose_message("Moving {0} to {1}".format(config_file, os.path.join(dst, PACKAGE_CONFIG_NAME)))
+    shutil.move(config_file, os.path.join(dst, PACKAGE_CONFIG_NAME))
 
     print "Done {0}".format(package)
     return SYNC_SUCCESS
