@@ -7,6 +7,7 @@ import ConfigParser
 import subprocess
 import shutil
 import tempfile
+import posixpath
 
 from platform_detection import *
 
@@ -88,12 +89,13 @@ SYNC_NOT_FOUND = 0
 SYNC_FAILED = 1
 SYNC_SUCCESS = 2
 
-def remote_path(path):
-    return path.replace(os.sep, '/')
+# Workaround against rsync bug: all paths with semicolon are counted as remote, so 'rsync rsync://server/path c:\test\path' won't work on windows
+def posix_path(path):
+    if len(path) > 1 and path[1] == ':':
+        drive_letter = path[0].lower()
+        return "/cygdrive/{0}{1}".format(drive_letter, path[2:].replace("\\", "/"))
 
-# Workaround against rsync bug: all paths with semicolon are counted as remote, so 'rsync rsync://server/path c:\test\path' will not start on windows
-def local_path(path):
-    return os.path.relpath(path, os.getcwd())
+    return path
 
 def fetch_package_timestamp(url):
     file_name = tempfile.mktemp()
@@ -115,9 +117,9 @@ def fetch_package_timestamp(url):
     return timestamp
 
 def try_sync(root, url, target, package, force):
-    src = remote_path(os.path.join(url, target, package))
-    dst = local_path(os.path.join(root, target, package))
-    config_src = src + "/" + PACKAGE_CONFIG_NAME
+    src = posixpath.join(url, target, package)
+    dst = posixpath.join(root, target, package)
+    config_src = posixpath.join(src, PACKAGE_CONFIG_NAME)
 
     verbose_message("root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}".format(root, url, target, package, src, dst))
 
@@ -135,7 +137,7 @@ def try_sync(root, url, target, package, force):
     command = list(RSYNC)
     command.append("--exclude")
     command.append(PACKAGE_CONFIG_NAME)
-    command.append(remote_path(src) + "/")
+    command.append(src + "/")
     command.append(dst)
 
     verbose_rsync(command)
@@ -187,8 +189,8 @@ def sync_packages(root, url, target, packages, debug, force):
 def upload_package(root, url, target, package):
     print "Uploading {0}...".format(package)
 
-    remote = os.path.join(url, target, package)
-    local = os.path.join(root, target, package)
+    remote = posixpath.join(url, target, package)
+    local = posixpath.join(posix_path(root), target, package)
 
     update_package_timestamp(local)
 
@@ -203,7 +205,7 @@ def upload_package(root, url, target, package):
         return False
 
     command = list(RSYNC)
-    command.append(os.path.join(local, PACKAGE_CONFIG_NAME))
+    command.append(posixpath.join(local, PACKAGE_CONFIG_NAME))
     command.append(remote)
 
     if subprocess.call(command) != 0:
@@ -264,7 +266,7 @@ def get_repository_root():
     return root
 
 def fetch_packages(url, target, packages, debug = False, force = False):
-    root = get_repository_root()
+    root = posix_path(get_repository_root())
 
     print "Ready to work on {0}".format(target)
     print "Repository root dir: {0}".format(root)
