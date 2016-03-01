@@ -11,6 +11,8 @@ from functest_util import JsonDiff, compareJson, get_server_guid
 
 MAIN_HOST = '192.168.109.12:7001'
 SEC_HOST = '192.168.109.13:7001'
+MAIN_HOST = '192.168.109.8:7001'
+SEC_HOST = '192.168.110.3:7001'
 #FIXME USE CONFIG!!!!
 IDS = {}
 

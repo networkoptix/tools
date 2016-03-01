@@ -71,6 +71,7 @@ MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 
 VAG_DIR = "./vagrant"
+VAG_DIR_NAT = './v_nat'
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
@@ -84,6 +85,7 @@ VAGR_RUN = [VAGRANT, "up"]
 VAGR_STOP = [VAGRANT, "halt"]
 
 VG_BOXES_IP = ['192.168.109.12', '192.168.109.13']
+VG_NAT_BOXES_IP = ['192.168.109.8', '192.168.110.3']
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
 MEDIASERVER_PASS = '123'

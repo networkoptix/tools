@@ -22,6 +22,7 @@ from functest_util import *
 from generator import *
 from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
+from natcon_test import NatConnectionTest
 from testboxes import RunTests as RunBoxTests
 
 CONFIG_FNAME = "functest.cfg"
@@ -206,18 +207,7 @@ class ClusterTest(object):
             return "{%s}" % (uuid)
 
     # call this function after reading the clusterTestServerList
-    def _fetchClusterTestServerUUIDList(self):
-
-        server_id_list = []
-        for s in self.clusterTestServerList:
-            response = urllib2.urlopen("http://%s/ec2/testConnection?format=json" % (s))
-            if response.getcode() != 200:
-                return (False,"testConnection response with error code:%d" % (response.getcode()))
-            json_obj = SafeJsonLoads(response.read(), s, 'testConnection')
-            if json_obj is None:
-                return (False, "Wrong response")
-            server_id_list.append(self._patchUUID(json_obj["ecsGuid"]))
-            response.close()
+    def _fetchClusterTestServerNames(self):
 
         # We still need to get the server name since this is useful for
         # the SaveServerAttributeList test (required in its post data)
@@ -231,12 +221,12 @@ class ClusterTest(object):
         if json_obj is None:
             return (False, "Wrong response")
 
-        for uuid in server_id_list:
-            n = self._getServerName(json_obj,uuid)
+        for u in self.clusterTestServerUUIDList:
+            n = self._getServerName(json_obj,u[0])
             if n == None:
-                return (False,"Cannot fetch server name with UUID:%s" % (uuid))
+                return (False,"Cannot fetch server name with UUID:%s" % (u[0]))
             else:
-                self.clusterTestServerUUIDList.append((uuid,n))
+                u[1] = n
 
         response.close()
         return (True,"")
@@ -287,11 +277,11 @@ class ClusterTest(object):
     def _testConnection(self):
         print "==================================================\n"
         print "Test connection on each server in the server list "
+        server_id_list = []
         for s in self.clusterTestServerList:
             print "Try to connect to server: %s" % (s)
             request = urllib2.Request("http://%s/ec2/testConnection" % (s))
             try:
-                #response = urllib2.urlopen("http://%s/ec2/testConnection" % (s), timeout=5)
                 response = urllib2.urlopen(request, timeout=5)
             except urllib2.URLError , e:
                 print "The connection has been issued with a 5 seconds timeout"
@@ -303,7 +293,13 @@ class ClusterTest(object):
                 return False
 
             if response.getcode() != 200:
+                print "Server %s responds with code %s" % (s, response.getcode())
                 return False
+            json_obj = SafeJsonLoads(response.read(), s, 'testConnection')
+            if json_obj is None:
+                print "Wrong response data from server %s" % (s,)
+                return False
+            self.clusterTestServerUUIDList.append([self._patchUUID(json_obj["ecsGuid"]), ''])
             response.close()
             print "Connection test OK\n"
 
@@ -324,11 +320,10 @@ class ClusterTest(object):
                 print "-----------------------------------------"
 
     def _reportDiff(self,statusDict,methodName):
-        print "\n\n**************************************************\n\n"
-        print "Report each server status of method:%s\n" % (methodName)
-        print "The server will be categorized as group,each server within the \
-            same group has same status,while different groups have different status\n"
-        print "The total group number is:%d\n" % (len(statusDict))
+        print "\n\n**************************************************"
+        print "Report each server status of method: %s\n" % (methodName)
+        print "Groupping servers by the same status\n"
+        print "The total group number: %d\n" % (len(statusDict))
         if len(statusDict) == 1:
             print "The status check passed!\n"
         i = 1
@@ -341,7 +336,7 @@ class ClusterTest(object):
 
 
         self._reportDetailDiff(key_list)
-        print "\n\n**************************************************\n\n"
+        print "\n**************************************************\n"
 
     def _checkResultEqual(self,responseList,methodName):
         statusDict = dict()
@@ -367,54 +362,14 @@ class ClusterTest(object):
 
         return (True,"")
 
-    def _checkResultEqual_Deprecated(self,responseList,methodName):
-        print "------------------------------------------\n"
-        print "Test sync status on method:%s" % (methodName)
-        result = None
-        resultAddr = None
-        resultJsonObject = None
-
-        for entry in responseList:
-            response = entry[0]
-            address = entry[1]
-
-            if response.getcode() != 200:
-                return (False,"Server: %s method: %s HTTP request failed with code: %d" % (address,methodName,response.getcode()))
-            else:
-                content = response.read()
-                if result == None:
-                    result = content
-                    resultAddr = address
-                    resultJsonObject = SafeJsonLoads(result, resultAddr, methodName)
-                    if resultJsonObject is None:
-                        return (False, "Wrong response")
-                else:
-                    if content != result:
-                        print "Server:%s has different status with server:%s on method:%s" % (address,resultAddr,methodName)
-                        # Since the server could issue json object has different order which makes us
-                        # have to do deep comparison of json object internally. This deep comparison
-                        # is very slow and only performs on objects that has failed the naive comparison
-                        contentJsonObject = SafeJsonLoads(content, address, methodName)
-                        if contentJsonObject is None:
-                            return (False, "Wrong response")
-                        compareResult = compareJson(contentJsonObject, resultJsonObject)
-                        if compareResult.hasDiff():
-                            print "Server:%s has different status with server:%s on method:%s" % (address,resultAddr,methodName)
-                            print compareResult.errorInfo()
-                            return (False,"Failed to sync")
-            response.close()
-        print "Method:%s is sync in cluster" % (methodName)
-        print "\n------------------------------------------"
-        return (True,"")
 
     def _checkSingleMethodStatusConsistent(self,method):
             responseList = []
             for server in self.clusterTestServerList:
                 print "Connection to http://%s/ec2/%s" % (server, method)
                 responseList.append((urllib2.urlopen("http://%s/ec2/%s" % (server, method)),server))
-
             # checking the last response validation
-            return self._checkResultEqual_Deprecated(responseList,method)
+            return checkResultsEqual(responseList,method)
 
     # Checking transaction log
     # This checking will create file to store the transaction log since this
@@ -559,29 +514,28 @@ class ClusterTest(object):
     def init(self, short=False):
         self._loadConfig()
         self.setUpPassword()
+        return (True,"") if self._testConnection() else (False,"Connection test failed")
 
-        if not self._testConnection():
-            return (False,"Connection test failed")
 
+    def initial_tests(self):
         # ensure all the server are on the same page
         ret,reason = self._ensureServerListStates(self.clusterTestSleepTime)
 
         if ret == False:
             return (ret,reason)
 
-        ret,reason = self._fetchClusterTestServerUUIDList()
+        ret,reason = self._fetchClusterTestServerNames()
 
         if ret == False:
             return (ret,reason)
 
-        if not short:
-            ret,reason = self._callAllGetters()
-            if ret == False:
-                return (ret,reason)
+        ret,reason = self._callAllGetters()
+        if ret == False:
+            return (ret,reason)
 
         # do the rollback here
         self.unittestRollback = UnitTestRollback()
-        return (True,"")
+        (True,"")
 
 clusterTest = ClusterTest()
 
@@ -3890,73 +3844,83 @@ def CallTest(testClass):
     return RunBoxTests(testClass, clusterTest.getConfig())
 
 
+SingleTestKeys = {
+    '--timesync': TimeSyncTest,
+    '--bstorage': BackupStorageTest,
+    '--msarch': MultiserverArchiveTest,
+    '--natcon': NatConnectionTest,
+}
+
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
 
     argc = len(argv)
-    ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage', '--msarch')))
+    ret, reason = clusterTest.init()
     if ret == False:
         print "Failed to initialize the cluster test object: %s" % (reason)
-    elif argc == 2 and argv[1] == '--sync':
-        pass # done here, since we just need to test whether
-             # all the servers are on the same page
-    else:
-        if argc == 1:
-            the_test = unittest.main(exit=False, argv=argv[:1])
+        return
 
-            if the_test.result.wasSuccessful():
-                print "Main tests passed OK"
-                if MergeTest().test():
-                    SystemNameTest().run()
-            if not clusterTest.do_main_only:
-                if not clusterTest.skip_timesync:
-                    CallTest(TimeSyncTest)
-                if not clusterTest.skip_backup:
-                    CallTest(BackupStorageTest)
-                if not clusterTest.skip_mservarc:
-                    CallTest(MultiserverArchiveTest)
+    if argc == 2 and argv[1] in SingleTestKeys:
+        CallTest(SingleTestKeys[argv[1]])
+        return
 
-            print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
-            doCleanUp()
-            print "\nFunctest finnished\n"
+    ret, reason = clusterTest.initial_tests()
+    if ret == False:
+        print "The initial cluster test failed: %s" % (reason)
+        return
 
-        elif argc == 2 and argv[1] == '--timesync':
-            CallTest(TimeSyncTest)
+    if argc == 2 and argv[1] == '--sync':
+        return # done here, since we just need to test whether
+               # all the servers are on the same page
 
-        elif argc == 2 and argv[1] == '--bstorage':
-            CallTest(BackupStorageTest)
+    if argc == 1:
+        the_test = unittest.main(exit=False, argv=argv[:1])
 
-        elif argc == 2 and argv[1] == '--msarch':
-            CallTest(MultiserverArchiveTest)
+        if the_test.result.wasSuccessful():
+            print "Main tests passed OK"
+            if MergeTest().test():
+                SystemNameTest().run()
+        if not clusterTest.do_main_only:
+            if not clusterTest.skip_timesync:
+                CallTest(TimeSyncTest)
+            if not clusterTest.skip_backup:
+                CallTest(BackupStorageTest)
+            if not clusterTest.skip_mservarc:
+                CallTest(MultiserverArchiveTest)
 
-        elif (argc == 2 or argc == 3) and argv[1] == '--clear':
-            if argc == 3:
-                if argv[2] == '--fake':
-                    doClearAll(True)
-                else:
-                    print "Unknown option: %s in --clear" % (argv[2])
+        print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
+        doCleanUp()
+        print "\nFunctest finnished\n"
+
+    elif (argc == 2 or argc == 3) and argv[1] == '--clear':
+        if argc == 3:
+            if argv[2] == '--fake':
+                doClearAll(True)
             else:
-                doClearAll(False)
-            clusterTest.unittestRollback.removeRollbackDB()
-        elif argc == 2 and argv[1] == '--perf':
-            PerfTest().start()
-            doCleanUp()
+                print "Unknown option: %s in --clear" % (argv[2])
         else:
-            if argv[1] == '--merge-test':
-                MergeTest().test()
-                doCleanUp()
-            elif argv[1] == '--merge-admin':
-                MergeTest_AdminPassword().test()
-                clusterTest.unittestRollback.removeRollbackDB()
-            elif argv[1] == '--rtsp-test':
-                runRtspTest()
-            elif argv[1] == '--rtsp-perf':
-                runRtspPerf(argc == 3 and argv[2] == '--dump')
-            elif argc == 3 and argv[1] == '--perf':
-                runPerfTest()
-            else:
-                runMiscFunction(argc, argv)
+            doClearAll(False)
+        clusterTest.unittestRollback.removeRollbackDB()
+    elif argc == 2 and argv[1] == '--perf':
+        PerfTest().start()
+        doCleanUp()
+    else:
+        if argv[1] == '--merge-test':
+            MergeTest().test()
+            doCleanUp()
+        elif argv[1] == '--merge-admin':
+            MergeTest_AdminPassword().test()
+            clusterTest.unittestRollback.removeRollbackDB()
+        elif argv[1] == '--rtsp-test':
+            runRtspTest()
+        elif argv[1] == '--rtsp-perf':
+            runRtspPerf(argc == 3 and argv[2] == '--dump')
+        elif argc == 3 and argv[1] == '--perf':
+            runPerfTest()
+        else:
+            runMiscFunction(argc, argv)
 
 
 if __name__ == '__main__':

@@ -158,7 +158,7 @@ class FailTracker(object):
             cls.fails.discard(branch)
             cls.save()
             log_to_send('')
-            log_to_send("The branch %s is repaired after the previous errors and makes no errors now.", branch)
+            log_to_send("The branch %s is repaired after previous errors and makes no error now.", branch)
             if (branch in SKIP_TESTS and SKIP_TESTS[branch]) or SKIP_ALL:
                 log_to_send("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
                             ', '.join(SKIP_TESTS.get(branch, set()) | SKIP_ALL))
@@ -692,6 +692,42 @@ def run():
 
 
 #####################################
+def get_architecture():
+    #TODO move all paths into testconf.py !
+    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
+    av = 'arch='
+    with open(curconf_fn) as f:
+        for line in f:
+            if line.startswith(av):
+                return line[len(av):].rstrip()
+    return ''
+
+
+def get_server_package_name():
+    #TODO move all paths into testconf.py !
+    arch = get_architecture()
+
+    if arch == '':
+        raise FuncTestError("Can't find server package: architecture not found!")
+
+    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
+    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
+    fv = 'server.finalName='
+    debfn = ''
+    if not os.path.isfile(fn):
+        return None
+    with open(fn) as f:
+        for line in f:
+            if line.startswith(fv):
+                debfn = line[len(fv):].rstrip() + '.deb'
+                break
+
+    if debfn == '':
+        raise FuncTestError("Server package .deb file name not found!")
+
+    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
+
+
 def check_mediaserver_deb():
     # The same filename used for all versions here:
     # a) To remove (by override) any previous version automatically.
@@ -725,7 +761,7 @@ def start_boxes():
         log("Creating and starting vagrant boxes...")
         check_call(VAGR_RUN, shell=False, cwd=VAG_DIR)
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-        wait_servers_ready()
+        wait_servers_ready(VG_BOXES_IP)
     except FuncTestError as e:
         log("Virtual boxes start up failed: %s", e.message)
     except BaseException as e:
@@ -736,8 +772,8 @@ def start_boxes():
 
 #####################################
 # Functional tests block
-def wait_servers_ready():
-    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in VG_BOXES_IP]
+def wait_servers_ready(iplist):
+    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in iplist]
     not_ready = set(urls)
     # 1. Prepare authentication for http queries
     passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -770,38 +806,6 @@ def wait_servers_ready():
                     not_ready.discard(url)
 
 
-def get_server_package_name():
-    #TODO move all paths into testconf.py !
-    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
-    av = 'arch='
-    arch=''
-    with open(curconf_fn) as f:
-        for line in f:
-            if line.startswith(av):
-                arch=line[len(av):].rstrip()
-                break
-
-    if arch == '':
-        raise FuncTestError("Can't find server package: architecture not found!")
-
-    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
-    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
-    fv = 'server.finalName='
-    debfn = ''
-    if not os.path.isfile(fn):
-        return None
-    with open(fn) as f:
-        for line in f:
-            if line.startswith(fv):
-                debfn = line[len(fv):].rstrip() + '.deb'
-                break
-
-    if debfn == '':
-        raise FuncTestError("Server package .deb file name not found!")
-
-    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
-
-
 def mk_functest_cmd(to_skip):
     only_test = ''
     cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
@@ -811,6 +815,9 @@ def mk_functest_cmd(to_skip):
     elif Args.msarch:
         cmd.append("--msarch")
         only_test = "msarch"
+#    elif Args.natcon:
+#        cmd.append("--natcon")
+#        only_test = "natcon"
     else:
         if 'time' in to_skip:
             cmd.append("--skiptime")
@@ -820,6 +827,10 @@ def mk_functest_cmd(to_skip):
             cmd.append('--skipmsa')
     log("Running functional tests: %s", cmd)
     return cmd, only_test
+
+
+def perform_nat_connection_test():
+    pass
 
 
 def perform_func_test(to_skip):
@@ -862,8 +873,7 @@ def perform_func_test(to_skip):
             url = "%s:%s" % (VG_BOXES_IP[0], MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
-            #TODO add the host address and port
-            #TODO add -T value to config
+            #TODO add -threads value to config
             #TODO add the test duration and a server hang timeout
             log("Running http stress test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
@@ -889,6 +899,9 @@ def perform_func_test(to_skip):
 
 
 class FunctestParser(object):
+    """
+    FSM that parses the functional tests output and controls their results.
+    """
 
     def __init__(self):
         self.collector = []
@@ -1264,6 +1277,7 @@ def read_misctest_output(proc, reader, name):
 
 #####################################
 
+# which options are allowed to be used with --nobox
 NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress', 'msarch'))
 
 def parse_args():
@@ -1281,6 +1295,7 @@ def parse_args():
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
+    parser.add_argument("--natcon", action="store_true", help="Create virtual boxes for NAT connection test and run this test only.")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings

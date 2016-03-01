@@ -104,6 +104,7 @@ class TimeSyncTest(FuncTestCase):
             'PrimaryFollowsSystemTime',
         ])
     )
+    _test_name = "TimeSync"
     _init_time = []
     _primary = None
     _secondary = None
@@ -111,8 +112,6 @@ class TimeSyncTest(FuncTestCase):
 
     @classmethod
     def setUpClass(cls):
-        print "========================================="
-        print "TimeSync Test Start: %s" % cls.testset
         if cls.testset == 'InetTimeSyncTests':
             if not check_inet_time():
                 raise unittest.SkipTest("Internet time servers aren't sccessible")
@@ -134,8 +133,6 @@ class TimeSyncTest(FuncTestCase):
                 if p.wait() != 0:
                     print "ERROR: Failed to start external interface for box %s" % (b,)
         super(TimeSyncTest, cls).tearDownClass()
-        print "TimeSync Test End"
-        print "========================================="
 
     def setUp(self):
         self.times = [EMPTY_TIME.copy() for _ in xrange(self.num_serv)]

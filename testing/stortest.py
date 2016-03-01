@@ -6,13 +6,10 @@ Storages functional tests:
 Both imported and called by functest.py
 """
 __author__ = 'Danil Lavrentyuk'
+import os, os.path, sys, time
 #import urllib2
 import subprocess
 #import traceback
-import time
-import sys
-import os
-import os.path
 import uuid
 from pipes import quote as shquote
 
@@ -76,7 +73,6 @@ class BackupStorageTestError(FuncTestError):
 class StorageBasedTest(FuncTestCase):
     """ Some common logic for storage tests.
     """
-    _test_name = '<UNNAMED!>'
     num_serv_t = 0
     _storages = dict()
     _fill_storage_script = ''
@@ -137,11 +133,9 @@ class StorageBasedTest(FuncTestCase):
                 pass
         #print "Server %s: rebuildArchive done" % boxnum
 
-    @classmethod
-    def setUpClass(cls):
-        print "========================================="
-        print "%s Test Start" % cls._test_name
-        super(StorageBasedTest, cls).setUpClass()
+#    @classmethod
+#    def setUpClass(cls):
+        #super(StorageBasedTest, cls).setUpClass()
         #cls.test_camera_id = [0 for _ in xrange(cls.num_serv_t)]
         #cls.test_camera_physical_id = [0 for _ in xrange(cls.num_serv_t)]
 
@@ -152,8 +146,6 @@ class StorageBasedTest(FuncTestCase):
                 print "Remotely calling %s at box %s" % (cls._clear_storage_script, num)
                 cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_storage_script, cls._storages[num][0]['url'], TMP_STORAGE)
         super(StorageBasedTest, cls).tearDownClass()
-        print "%s Test End" % cls._test_name
-        print "========================================="
 
     def _init_cameras(self):
         pass

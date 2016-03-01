@@ -1,4 +1,5 @@
 """Contains common tools to handle virtual boxes based mediaserver functional testing.
+Including FuncTestCase - the base class for all mediaserver functional test classes.
 """
 __author__ = 'Danil Lavrentyuk'
 import subprocess
@@ -29,7 +30,7 @@ def boxssh(box, command):
 
 class TestLoader(unittest.TestLoader):
 
-    def load(self, testclass, testset, config):
+    def load(self, testclass, testset, config, *args):
         testclass.config = config
         names = getattr(testclass, testset, None)
         if names is not None:
@@ -40,19 +41,20 @@ class TestLoader(unittest.TestLoader):
             print "ERROR: No test set '%s' found!" % testset
 
 
-def RunTests(testclass, config):
+def RunTests(testclass, config, *args):
     #print "DEBUG: run test class %s" % testclass
     testclass.init_suits()
     return all( [
             unittest.TextTestRunner(verbosity=2, failfast=True).run(
-                TestLoader().load(testclass, suit_name, config)
+                TestLoader().load(testclass, suit_name, config, *args)
             ).wasSuccessful()
             for suit_name in testclass.iter_suits()
         ] )
 
 
 class FuncTestCase(unittest.TestCase):
-    """A base class for mediaserver functional tests using virtual boxes
+    # TODO: describe this class logic!
+    """A base class for mediaserver functional tests using virtual boxes.
     """
     config = None
     num_serv = NUM_SERV
@@ -64,24 +66,30 @@ class FuncTestCase(unittest.TestCase):
     _suits = ()
     _init_suits_done = False
     _serv_version = None  # here I suppose that all servers being created from the same image have the same version
-    before_2_5 = False
+    before_2_5 = False # TODO remove it!
+    _test_name = '<UNNAMED!>'
+
 
     @classmethod
     def setUpClass(cls):
+        print "========================================="
+        print "%s Test Start" % cls._test_name
+        # cls.config should be assigned in TestLoader.load()
         if cls.config is None:
             raise FuncTestError("%s hasn't been configured" % cls.__name__)
         if cls.num_serv is None:
             raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
         if not cls._configured:
+            # this lines should be executed once per class
             cls.sl = cls.config.get("General","serverList").split(',')
             cls._worker = ClusterLongWorker(cls.num_serv)
+            if len(cls.sl) < cls.num_serv:
+                raise FuncTestError("not enough servers configured to run %s tests" % cls._test_name)
+            if len(cls.sl) > cls.num_serv:
+                cls.sl[cls.num_serv:] = []
+            cls.hosts = [addr.split(':')[0] for addr in cls.sl]
+            print "Server list: %s" % cls.sl
             cls._configured = True
-        if len(cls.sl) < cls.num_serv:
-            raise FuncTestError("not enough servers configured to test time synchronization")
-        if len(cls.sl) > cls.num_serv:
-            cls.sl[cls.num_serv:] = []
-        cls.hosts = [addr.split(':')[0] for addr in cls.sl]
-        print "Server list: %s" % cls.sl
         cls._worker.startThreads()
 
     @classmethod
@@ -92,9 +100,11 @@ class FuncTestCase(unittest.TestCase):
             cls.class_call_box(host, 'start', 'networkoptix-mediaserver')
         cls._stopped.clear()
         cls._worker.stopWork()
+        print "%s Test End" % cls._test_name
+        print "========================================="
 
     ################################################################################
-
+    # These 3 methods used in a caller (see the RunTests and functest.CallTest funcions)
     @classmethod
     def _check_suits(cls):
         if not cls._suits:
@@ -107,6 +117,7 @@ class FuncTestCase(unittest.TestCase):
 
     @classmethod
     def init_suits(cls):
+        "Called by RunTests, prepares attributes with suits names contaning test cases names"
         if cls._init_suits_done:
             return
         cls._check_suits()

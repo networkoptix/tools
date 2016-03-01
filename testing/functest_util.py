@@ -6,6 +6,7 @@ import urllib2
 from ConfigParser import RawConfigParser
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
+           'checkResultsEqual',
            'ClusterWorker', 'ClusterLongWorker', 'parse_size',
            'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
@@ -329,6 +330,50 @@ def compareJson(lhs,rhs):
     #FIXME check if lhs neither list nor dit!
 
     return result
+
+
+def checkResultsEqual(responseList, methodName):
+    """responseList - is a list of pairs (response, address).
+    The function compares that all responces are ok and their json contents are equal.
+    Returns a tupple of a boolean success indicator and a string fail reason.
+    """
+    print "------------------------------------------"
+    print "Test sync status on method: %s" % (methodName)
+    result = None
+    resultAddr = None
+    resultJsonObject = None
+
+    for entry in responseList:
+        response, address = entry[0:2]
+
+        if response.getcode() != 200:
+            return (False,"Server: %s method: %s HTTP request failed with code: %d" % (address,methodName,response.getcode()))
+        else:
+            content = response.read()
+            if result == None:
+                result = content
+                resultAddr = address
+                resultJsonObject = SafeJsonLoads(result, resultAddr, methodName)
+                if resultJsonObject is None:
+                    return (False, "Wrong response from %s" % resultAddr)
+            else:
+                if content != result:
+                    # Since the server could issue json object has different order which makes us
+                    # have to do deep comparison of json object internally. This deep comparison
+                    # is very slow and only performs on objects that has failed the naive comparison
+                    contentJsonObject = SafeJsonLoads(content, address, methodName)
+                    if contentJsonObject is None:
+                        return (False, "Wrong response from %s" % address)
+                    compareResult = compareJson(contentJsonObject, resultJsonObject)
+                    if compareResult.hasDiff():
+                        print "Server %s has different status with server %s on method %s" % (address,resultAddr,methodName)
+                        print compareResult.errorInfo()
+                        return (False,"Failed to sync")
+        response.close()
+    print "Method:%s is synced in cluster" % (methodName)
+    print "------------------------------------------"
+    return (True,"")
+
 
 
 # ---------------------------------------------------------------------
