@@ -91,6 +91,7 @@ SYNC_SUCCESS = 2
 def remote_path(path):
     return path.replace(os.sep, '/')
 
+# Workaround against rsync bug: all paths with semicolon are counted as remote, so 'rsync rsync://server/path c:\test\path' will not start on windows
 def local_path(path):
     return os.path.relpath(path, os.getcwd())
 
@@ -113,12 +114,12 @@ def fetch_package_timestamp(url):
 
     return timestamp
 
-def try_sync(root, url, prefix, package, force):
-    src = remote_path(os.path.join(url, prefix, package))
-    dst = local_path(os.path.join(root, prefix, package))
+def try_sync(root, url, target, package, force):
+    src = remote_path(os.path.join(url, target, package))
+    dst = local_path(os.path.join(root, target, package))
     config_src = src + "/" + PACKAGE_CONFIG_NAME
 
-    verbose_message("root {0}\nurl {1}\nprefix {2}\npackage {3}\nsrc {4}\ndst {5}".format(root, url, prefix, package, src, dst))
+    verbose_message("root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}".format(root, url, target, package, src, dst))
 
     newtime = fetch_package_timestamp(config_src)
     if newtime == None:
@@ -148,22 +149,22 @@ def try_sync(root, url, prefix, package, force):
     print "Done {0}".format(package)
     return SYNC_SUCCESS
 
-def sync_package(root, url, prefix, package, debug, force):
+def sync_package(root, url, target, package, debug, force):
     print "Synching {0}...".format(package)
 
     ret = SYNC_NOT_FOUND
     if debug:
-        ret = try_sync(root, url, prefix, package + DEBUG_SUFFIX, force)
+        ret = try_sync(root, url, target, package + DEBUG_SUFFIX, force)
     if ret == SYNC_NOT_FOUND:
-        ret = try_sync(root, url, prefix, package, force)
+        ret = try_sync(root, url, target, package, force)
 
     if ret == SYNC_NOT_FOUND:
-        any_prefix = ANY_KEYWORD
+        any_target = ANY_KEYWORD
 
         if debug:
-            ret = try_sync(root, url, any_prefix, package + DEBUG_SUFFIX, force)
+            ret = try_sync(root, url, any_target, package + DEBUG_SUFFIX, force)
         if ret == SYNC_NOT_FOUND:
-            ret = try_sync(root, url, any_prefix, package, force)
+            ret = try_sync(root, url, any_target, package, force)
 
     if ret == SYNC_NOT_FOUND:
         print "Could not find {0}".format(package)
@@ -174,20 +175,20 @@ def sync_package(root, url, prefix, package, debug, force):
 
     return True
 
-def sync_packages(root, url, prefix, packages, debug, force):
+def sync_packages(root, url, target, packages, debug, force):
     success = True
 
     for package in packages:
-        if not sync_package(root, url, prefix, package, debug, force):
-            success = false
+        if not sync_package(root, url, target, package, debug, force):
+            success = False
 
     return success
 
-def upload_package(root, url, prefix, package):
+def upload_package(root, url, target, package):
     print "Uploading {0}...".format(package)
 
-    remote = os.path.join(url, prefix, package)
-    local = os.path.join(root, prefix, package)
+    remote = os.path.join(url, target, package)
+    local = os.path.join(root, target, package)
 
     update_package_timestamp(local)
 
@@ -212,7 +213,7 @@ def upload_package(root, url, prefix, package):
     print "Done {0}".format(package)
     return True
 
-def upload_packages(root, url, prefix, packages, debug):
+def upload_packages(root, url, target, packages, debug):
     success = True
 
     if not packages:
@@ -221,7 +222,7 @@ def upload_packages(root, url, prefix, packages, debug):
 
     for package in packages:
         package_name = package + DEBUG_SUFFIX if debug else package
-        success = success and upload_package(root, url, prefix, package_name)
+        success = success and upload_package(root, url, target, package_name)
 
     print "Uploaded successfully"
     exit(0 if success else 1)
@@ -229,45 +230,30 @@ def upload_packages(root, url, prefix, packages, debug):
 def package_config_path(path):
     return os.path.join(path, PACKAGE_CONFIG_NAME)
 
-def locate_package(root, prefix, package, debug):
+def locate_package(package, target, debug = False):
+    root = get_repository_root()
+
     if debug:
-        path = os.path.join(root, prefix, package + DEBUG_SUFFIX)
+        path = os.path.join(root, target, package + DEBUG_SUFFIX)
         if os.path.exists(package_config_path(path)):
             return path
 
-    path = os.path.join(root, prefix, package)
+    path = os.path.join(root, target, package)
     if os.path.exists(package_config_path(path)):
         return path
 
-    any_prefix = ANY_KEYWORD
+    any_target = ANY_KEYWORD
 
     if debug:
-        path = os.path.join(root, any_prefix, package + DEBUG_SUFFIX)
+        path = os.path.join(root, any_target, package + DEBUG_SUFFIX)
         if os.path.exists(package_config_path(path)):
             return path
 
-    path = os.path.join(root, any_prefix, package)
+    path = os.path.join(root, any_target, package)
     if os.path.exists(package_config_path(path)):
         return path
 
     return None
-
-def copy_packages(root, prefix, packages, debug, target_dir):
-    for package in packages:
-        print "Copying package {0} into {1}".format(package, target_dir)
-        path = locate_package(root, prefix, package, debug)
-        if not path:
-            print "Could not locate {0}".format(package)
-            exit(1)
-
-        for dirname, dirnames, filenames in os.walk(path):
-            rel_dir = os.path.relpath(dirname, path)
-            dir = os.path.abspath(os.path.join(target_dir, rel_dir))
-            if not os.path.isdir(dir):
-                os.makedirs(dir)
-            for filename in filenames:
-                entry = os.path.join(dirname, filename)
-                shutil.copy(entry, dir)
 
 def get_repository_root():
     root = find_root(ROOT_CONFIG_NAME)
@@ -277,7 +263,9 @@ def get_repository_root():
         root = os.path.join(script_dir, 'packages')
     return root
 
-def fetch_packages(root, url, target, packages, debug = False, force = False):
+def fetch_packages(url, target, packages, debug = False, force = False):
+    root = get_repository_root()
+
     print "Ready to work on {0}".format(target)
     print "Repository root dir: {0}".format(root)
 
@@ -288,20 +276,14 @@ def fetch_packages(root, url, target, packages, debug = False, force = False):
     if not sync_packages(root, url, target, packages, debug, force):
         exit(1)
 
-#    if args.copy_to:
-#        copy_packages(root, prefix, packages, debug, args.copy_to)
     exit(0)
 
-def print_path(root, target, packages, debug):
-    if not packages or len(packages) != 1:
-        exit(1)
-
-    path = locate_package(root, target, packages[0], debug)
-    if not path:
-        exit(1)
-
-    print path
-    exit(0)
+def print_path(target, packages, debug):
+    for package in packages:
+        path = locate_package(package, target, debug)
+        if not path:
+            exit(1)
+        print(path)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -349,11 +331,11 @@ def main():
         verbose = True
 
     if args.print_path:
-        print_path(root, target, packages, args.debug)
+        print_path(target, packages, args.debug)
     elif args.upload:
         upload_packages(root, url, target, packages, args.debug)
     else:
-        fetch_packages(root, url, target, packages, args.debug, args.force)
+        fetch_packages(url, target, packages, args.debug, args.force)
 
 if __name__ == "__main__":
     main()
