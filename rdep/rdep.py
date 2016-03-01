@@ -175,10 +175,23 @@ def sync_package(root, url, target, package, debug, force):
 
     ret = try_sync(root, url, target, package, force)
     if ret == SYNC_NOT_FOUND:
+        path = os.path.join(root, target, package)
+        if os.path.isdir(path):
+            print "Removing local {0}".format(path)
+            shutil.rmtree(path)
+
         target = ANY_KEYWORD
+    elif ret == SYNC_FAILED:
+        print "Could not find {0}".format(package)
+        return False
 
     ret = try_sync(root, url, target, package, force)
     if ret == SYNC_NOT_FOUND:
+        path = os.path.join(root, target, package)
+        if os.path.isdir(path):
+            print "Removing local {0}".format(path)
+            shutil.rmtree(path)
+
         print "Could not find {0}".format(package)
         return False
 
@@ -189,7 +202,12 @@ def sync_package(root, url, target, package, debug, force):
     if debug:
         ret = try_sync(root, url, target, package + DEBUG_SUFFIX, force)
 
-        if ret == SYNC_FAILED:
+        if ret == SYNC_NOT_FOUND:
+            path = os.path.join(root, target, package)
+            if os.path.isdir(path):
+                print "Removing local {0}".format(path)
+                shutil.rmtree(path)
+        elif ret == SYNC_FAILED:
             print "Sync failed for {0}".format(package + DEBUG_SUFFIX)
             return False
 
