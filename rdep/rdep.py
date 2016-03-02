@@ -15,7 +15,7 @@ ROOT_CONFIG_NAME = ".rdep"
 PACKAGE_CONFIG_NAME = ".rdpack"
 ANY_KEYWORD = "any"
 DEBUG_SUFFIX = "-debug"
-RSYNC = [ "rsync", "--archive", "--delete" ]
+RSYNC = [ "rsync", "--archive", "--delete", "--progress" ]
 if detect_platform() == "windows":
     RSYNC.append("--chmod=ugo=rwx")
 
