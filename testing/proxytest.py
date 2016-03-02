@@ -9,10 +9,8 @@ import json
 import time
 from functest_util import JsonDiff, compareJson, get_server_guid
 
-MAIN_HOST = '192.168.109.12:7001'
-SEC_HOST = '192.168.109.13:7001'
 MAIN_HOST = '192.168.109.8:7001'
-SEC_HOST = '192.168.110.3:7001'
+SEC_HOST = '192.168.109.9:7001'
 #FIXME USE CONFIG!!!!
 IDS = {}
 
@@ -47,6 +45,12 @@ def perform_request(peer, redirect_to=None):
     #print "Resulting data len: %s" % len(data)
 
 def proxy_test():
+    global MAIN_HOST, SEC_HOST
+    try:
+        MAIN_HOST = sys.argv[1]
+        SEC_HOST = sys.argv[2]
+    except IndexError:
+        pass
     try:
         prepare_loader()
         for h in (MAIN_HOST, SEC_HOST):

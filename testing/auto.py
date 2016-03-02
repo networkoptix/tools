@@ -843,18 +843,22 @@ def wait_servers_ready(iplist):
             time.sleep(1)
 
 
+BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py", "--autorollback"]
+NATCON_ARGS = ["--natcon", '--config', 'nattest.cfg']
+
+
 def mk_functest_cmd(to_skip):
     only_test = ''
-    cmd = [sys.executable, "-u", "functest.py", "--autorollback"]
+    cmd = BASE_FUNCTEST_CMD[:]
     if Args.timetest:
         cmd.append("--timesync")
         only_test = "timesync"
     elif Args.msarch:
         cmd.append("--msarch")
         only_test = "msarch"
-#    elif Args.natcon:
-#        cmd.append("--natcon")
-#        only_test = "natcon"
+    elif Args.natcon:
+        cmd.extend(NATCON_ARGS)
+        only_test = "natcon"
     else:
         if 'time' in to_skip:
             cmd.append("--skiptime")
@@ -866,10 +870,6 @@ def mk_functest_cmd(to_skip):
     return cmd, only_test
 
 
-def perform_nat_connection_test():
-    pass
-
-
 def perform_func_test(to_skip):
     if os.name != 'posix':
         print "\nFunctional tests require POSIX-compatible OS. Skipped."
@@ -878,7 +878,7 @@ def perform_func_test(to_skip):
     reader = proc = None
     try:
         if not Args.nobox:
-            start_boxes()
+            start_boxes('box1' if Args.natcon else 'box1,box2')
             need_stop = True
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
@@ -891,23 +891,37 @@ def perform_func_test(to_skip):
         if not Args.httpstress:
             unreg = True
             cmd, only_test = mk_functest_cmd(to_skip)
-            proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
-            reader.register(proc)
-            read_functest_output(proc, reader, only_test)
-
-            if not only_test and 'proxy' not in to_skip:
-                reader.unregister()
-                cmd = [sys.executable, "-u", "proxytest.py"]
-                log("Running server proxy test: %s", cmd)
+            if only_test != 'natcon':
                 proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
-                #TODO make it a part of the functest.py
-                read_misctest_output(proc, reader, "server proxy")
+                read_functest_output(proc, reader, only_test)
 
-        if not only_test and 'httpstress' not in to_skip:
+                if not only_test and 'proxy' not in to_skip:
+                    reader.unregister()
+                    cmd = [sys.executable, "-u", "proxytest.py",
+                           ("%s:%s" % (BOX_IP['box1'], MEDIASERVER_PORT)),
+                           ("%s:%s" % (BOX_IP['box2'], MEDIASERVER_PORT))]
+                    log("Running server proxy test: %s", cmd)
+                    proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+                    reader.register(proc)
+                    #TODO make it a part of the functest.py
+                    read_misctest_output(proc, reader, "server proxy")
+
+            if (not only_test or only_test == 'natcon') and 'natcon' not in to_skip:
+                if not only_test:
+                    cmd = BASE_FUNCTEST_CMD + NATCON_ARGS
+                    reader.unregister()
+                stop_boxes('box2')
+                start_boxes('boxnat,boxbehind', keep=True)
+                log("Running connection behind NAT test: %s", cmd)
+                proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+                reader.register(proc)
+                read_misctest_output(proc, reader, "connection behind NAT ")
+
+        if not only_test and not Args.natcon and 'httpstress' not in to_skip:
             if unreg:
                 reader.unregister()
-            url = "%s:%s" % (VG_BOXES_IP[0], MEDIASERVER_PORT)
+            url = "%s:%s" % (BOX_IP['box1'], MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
             #TODO add -threads value to config
@@ -915,6 +929,7 @@ def perform_func_test(to_skip):
             log("Running http stress test: %s", cmd)
             proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
+            unreg = True
             #TODO make it a part of the functest.py
             read_misctest_output(proc, reader, "http stress")
 
@@ -1534,7 +1549,7 @@ def main():
     if Args.auto:
         run_auto_loop()
 
-    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch: # virtual boxes functest only
+    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch or Args.natcon: # virtual boxes functest only
         ToSend[:] = []
         perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
