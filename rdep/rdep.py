@@ -204,7 +204,7 @@ def sync_package(root, url, target, package, debug, force):
         ret = try_sync(root, url, target, package + DEBUG_SUFFIX, force)
 
         if ret == SYNC_NOT_FOUND:
-            path = os.path.join(root, target, package)
+            path = os.path.join(root, target, package + DEBUG_SUFFIX)
             if os.path.isdir(path):
                 print "Removing local {0}".format(path)
                 shutil.rmtree(path)
