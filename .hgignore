@@ -1,4 +1,5 @@
 subinclude:apidoctool/.hgignore
+subinclude:rdep/.hgignore
 
 syntax: glob
 .idea
