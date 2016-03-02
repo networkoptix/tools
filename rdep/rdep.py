@@ -15,7 +15,7 @@ ROOT_CONFIG_NAME = ".rdep"
 PACKAGE_CONFIG_NAME = ".rdpack"
 ANY_KEYWORD = "any"
 DEBUG_SUFFIX = "-debug"
-RSYNC = [ "rsync", "--archive", "--delete", "--progress" ]
+RSYNC = [ "rsync", "--archive", "--delete" ]
 if detect_platform() == "windows":
     RSYNC.append("--chmod=ugo=rwx")
 
@@ -154,6 +154,7 @@ def try_sync(root, url, target, package, force):
         os.makedirs(dst)
 
     command = list(RSYNC)
+    command.append("--progress")
     command.append("--exclude")
     command.append(PACKAGE_CONFIG_NAME)
     command.append(src + "/")
