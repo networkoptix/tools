@@ -40,11 +40,9 @@ class NatConnectionTest(FuncTestCase):
 
     def VMPreparation(self):
         "Join servers into one system"
-        url = """
-        http://192.168.110.3:7001/api/mergeSystems?url=http://192.168.109.8:7001&password=123&currentPassword=123&takeRemoteSetting=false&oneServer=false&ignoreIncompatible=false
-        """
-        #FIXME - this request should've be done before the initial functest's requests
-        #
+        func = "api/mergeSystems?url=http://%s&password=123&currentPassword=123&takeRemoteSetting=false&oneServer=false&ignoreIncompatible=false" % self.sl[0]
+        self._server_request(1, func)
+        time.sleep(1)
         # get server's IDs
         self._wait_servers_up()
 

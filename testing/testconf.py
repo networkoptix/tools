@@ -46,6 +46,7 @@ MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
 MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 SELF_RESTART_TIMEOUT = 10 # seconds
+SLEEP_AFTER_BOX_START = 1 # seconds
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
@@ -71,7 +72,7 @@ MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 
 VAG_DIR = "./vagrant"
-VAG_DIR_NAT = './v_nat'
+VAG_DIR_NAT = './v-nat'
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
@@ -83,8 +84,22 @@ HG_BRANCH = [HG, "branch"]
 VAGR_DESTROY = [VAGRANT, "destroy", "-f"]
 VAGR_RUN = [VAGRANT, "up"]
 VAGR_STOP = [VAGRANT, "halt"]
+VAGR_STAT = [VAGRANT, "status"]
 
-VG_BOXES_IP = ['192.168.109.12', '192.168.109.13']
+BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes without mediaserver are skipped
+    'box1': '192.168.109.8',
+    'box2': '192.168.109.9',
+    'boxnat': '192.168.109.8',
+    'boxbehind': '192.168.110.3',
+}
+
+CHECK_BOX_UP = frozenset(['box1', 'box2', 'boxbehind'])
+
+BOX_POST_START = {
+    'boxbehind': 'post-create-behind-nat.sh'
+}
+
+VG_BOXES_IP = ['192.168.109.8', '192.168.109.9']
 VG_NAT_BOXES_IP = ['192.168.109.8', '192.168.110.3']
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'

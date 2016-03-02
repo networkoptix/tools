@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 
 from testconf import *
 import pipereader
+from testboxes import boxssh
 
 __version__ = '1.1.1'
 
@@ -189,7 +190,7 @@ class FailTracker(object):
             cls.fails = eval(data)
         except Exception, e:
             log("Failed branches list parsing: %s", e)
-        debug("Failed branches list loaded: %s", ', '.join(cls.fails))
+        debug("Failed branches list loaded: %s", ', '.join(FailTracker.fails))
 
     @classmethod
     def save(cls):
@@ -751,19 +752,49 @@ def check_mediaserver_deb():
 #            log("%s is up to date", dest)
 
 
-def start_boxes():
+def start_boxes(boxes, keep = False):
     try:
         # 1. Get the .deb file
         check_mediaserver_deb()
         # 2. Start virtual boxes
-        log("Removing old vargant boxes..")
-        check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
-        log("Creating and starting vagrant boxes...")
-        check_call(VAGR_RUN, shell=False, cwd=VAG_DIR)
+        if not keep:
+            log("Removing old vargant boxes...")
+            check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
+        if not boxes:
+            log("Creating and starting vagrant boxes...")
+        else:
+            log("Creating and starting vagrant boxes: %s...", boxes)
+        boxlist = boxes.split(',') if len(boxes) else []
+        check_call(VAGR_RUN + boxlist, shell=False, cwd=VAG_DIR)
+        failed = [b[0] for b in get_boxes_status() if b[0]in boxes and b[1] != 'running']
+        if failed:
+            log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
+            return False
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-        wait_servers_ready(VG_BOXES_IP)
+        to_check = [b for b in boxlist if b in CHECK_BOX_UP] if boxlist else CHECK_BOX_UP
+        wait_servers_ready([BOX_IP[b] for b in to_check])
+        for box in (boxlist or BOX_POST_START.iterkeys()):
+            if box in BOX_POST_START:
+                boxssh(BOX_IP[box], ['/vagrant/' + BOX_POST_START[box]])
+        time.sleep(SLEEP_AFTER_BOX_START)
+        return True
     except FuncTestError as e:
         log("Virtual boxes start up failed: %s", e.message)
+        return False
+    except BaseException as e:
+        log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
+        if not isinstance(e, Exception):
+            raise # it wont be catched and will allow the script to terminate
+
+
+def stop_boxes(boxes):
+    try:
+        if not boxes:
+            log("Removing vargant boxes...")
+        else:
+            log("Removing vargant boxes: %s...", boxes)
+        boxlist = boxes.split(',') if len(boxes) else []
+        check_call(VAGR_DESTROY + boxlist, shell=False, cwd=VAG_DIR)
     except BaseException as e:
         log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
         if not isinstance(e, Exception):
@@ -774,6 +805,7 @@ def start_boxes():
 # Functional tests block
 def wait_servers_ready(iplist):
     urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in iplist]
+    print "wait_servers_ready: urls: %s" % (urls,)
     not_ready = set(urls)
     # 1. Prepare authentication for http queries
     passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -792,18 +824,23 @@ def wait_servers_ready(iplist):
                     jdata = urllib2.urlopen(url, timeout=START_CHECK_TIMEOUT).read()
                     # Check response for 'status' field (Online/Offline) for all servers
                 except Exception, e:
+                    print "wait_servers_ready(%s): urlopen error: %s" % (url, e,)
                     continue # wait for good response or for global timeout
                 try:
                     data = json.loads(jdata)
                 except ValueError, e:
+                    print "wait_servers_ready(%s): json.loads error: %s" % (url, e,)
                     continue # just ignore wrong answer, wait for correct
                 count = 0
-                for server in data:
-                    if server.get('status', '') == 'Online':
-                        count += 1
-                if count == len(urls):
-                    debug("Ready response from %s", url)
-                    not_ready.discard(url)
+                #for server in data:
+                #    s = {k: server[k] for k in ('id', 'status', 'url', 'networkAddresses') if k in server}
+                #    if server.get('status', '') == 'Online':
+                #        count += 1
+                #if count == len(urls):
+                #    debug("Ready response from %s", url)
+                #    not_ready.discard(url)
+                not_ready.discard(url)
+            time.sleep(1)
 
 
 def mk_functest_cmd(to_skip):
@@ -1274,6 +1311,41 @@ def read_misctest_output(proc, reader, name):
             log_to_send("[ %s TESTS' RETURN CODE = %s ]" % (name.upper(), proc.returncode))
         has_errors = True  #FIXME? what os ot for?
 
+#####################################
+
+def get_boxes_status():
+    try:
+        data = check_output(VAGR_STAT, stderr=STDOUT, universal_newlines=True, cwd=VAG_DIR, shell=False)
+        step = 0
+        rx = re.compile(r"(\S+)\s+([^(]+)")
+        info = []
+        for line in data.split("\n"):
+            if step == 0:
+                if line.rstrip() == "Current machine states:":
+                    step = 1 # skip one empty line
+            elif step == 1:
+                step = 2
+            elif step == 2:
+                if line.rstrip() == '':
+                    break
+                m = rx.search(line)
+                if m:
+                    info.append([m.group(1), m.group(2).rstrip()])
+        return info
+    except CalledProcessError, e:
+        log("ERROR: `%s` call returns %s code. Output:\n%s", ' '.join(VAGR_STAT), e.returncode, e.output)
+        return []
+
+
+def show_boxes():
+    "Print out vargant boxes status."
+    info = get_boxes_status()
+    if not info:
+        print "Empty vagrant reply!"
+        return
+    namelen = max(len(b[0]) for b in info)
+    for box in info:
+        print "%s  [%s]" % (box[0].ljust(namelen), box[1])
 
 #####################################
 
@@ -1310,7 +1382,10 @@ def parse_args():
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
     # utillity actions
-    parser.add_argument("--boxes", "--box", action="store_true", help="Only start virtual boxes and wait the mediaserver comes up.")
+    parser.add_argument("--boxes", "--box", help="Start virtual boxes and wait the mediaserver comes up.", nargs='?', const="")
+    parser.add_argument('--add', action='store_true', help='Start new boxes without closing existing boxes')
+    parser.add_argument("--boxoff", "--b0", help="Stop virtual boxes and wait the mediaserver comes up.", nargs='?', const="")
+    parser.add_argument("--showboxes", '--sb', action="store_true", help="Check and show vagrant boxes states")
 
     global Args
     Args = parser.parse_args()
@@ -1318,7 +1393,10 @@ def parse_args():
         print "ERROR: --full-build-log option requires --stdout!\n"
         exit(1)
     if Args.nobox and not any(getattr(Args, opt) for opt in NOBOX_ALLOWED):
-        print "ERROR: --nobox is only allowed with options: %s\n" % ", ".join("--"+opt for opt in NOBOX_ALLOWED)
+        print "ERROR: --nobox is allowed only with options: %s\n" % ", ".join("--"+opt for opt in NOBOX_ALLOWED)
+        exit(1)
+    if Args.add and Args.boxes is None:
+        print "ERROR: --add is usable only with --boxes"
         exit(1)
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
@@ -1413,6 +1491,21 @@ def show_conf():
     print "MVN_THREADS = %s" % MVN_THREADS
 
 
+def run_auto_loop():
+    "Runs check-build-test sequence for all branches repeatedly."
+    while True:
+        t = time.time()
+        log("Checking...")
+        run()
+        t = max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t))
+        log("Sleeping %s secs...", t)
+        wake_time = time.time() + t
+        while time.time() < wake_time:
+            time.sleep(1)
+            check_control_flags()
+    log("Finishing...")
+
+
 def main():
     drop_flag(RESTART_FLAG)
     drop_flag(STOP_FLAG)
@@ -1422,22 +1515,24 @@ def main():
 
     if Args.conf:
         show_conf() # changes done by other options are shown here
-        exit(0)
+        return
+
+    if Args.showboxes:
+        show_boxes()
+        return
+
+    if Args.boxes is not None:
+        start_boxes(Args.boxes, keep=Args.add)
+        return
+
+    if Args.boxoff is not None:
+        stop_boxes(Args.boxoff)
+        return
 
     FailTracker.load()
 
     if Args.auto:
-        while True:
-            t = time.time()
-            log("Checking...")
-            run()
-            t = max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t))
-            log("Sleeping %s secs...", t)
-            wake_time = time.time() + t
-            while time.time() < wake_time:
-                time.sleep(1)
-                check_control_flags()
-        log("Finishing...")
+        run_auto_loop()
 
     elif Args.functest or Args.timetest or Args.httpstress or Args.msarch: # virtual boxes functest only
         ToSend[:] = []
@@ -1450,9 +1545,6 @@ def main():
                 "multiserver archive" if Args.msarch else
                 "UNKNOWN!!!"),
             ToSend)
-
-    elif Args.boxes:
-        start_boxes()
 
     else:
         run()

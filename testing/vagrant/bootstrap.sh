@@ -5,8 +5,11 @@ echo Installing $SERV_DEB
 DEBIAN_FRONTEND=noninteractive dpkg -i --force-depends "$SERV_DEB"
 #apt-get install -f --yes --allow-unauthenticated
 
-# We need it stopped for some tests
-service ntp stop
+if [ "$2" == "nontp" ]; then
+    # We need it stopped for some tests
+    echo '*** STOPPING NTPD ***'
+    service ntp stop
+fi
 
 stop networkoptix-mediaserver
 #echo '...Before:'
