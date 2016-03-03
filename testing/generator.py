@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """The generator utility classes for functional tests.
 (Only those simple generators which don't depend on clusterTest object data etc.)
@@ -36,7 +37,8 @@ class BasicGenerator():
         else:
             return "true"
 
-    def generateRandomString(self,length):
+    @staticmethod
+    def generateRandomString(length):
         chars = string.ascii_uppercase + string.digits
         return ''.join(random.choice(chars) for _ in xrange(length))
 

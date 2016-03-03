@@ -228,7 +228,7 @@ class FuncTestCase(unittest.TestCase):
     def _server_request(self, host, func, data=None, headers=None, timeout=None):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
-        print "DEBUG: requesting: %s" % url
+        #print "DEBUG: requesting: %s" % url
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except urllib2.URLError , e:

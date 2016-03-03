@@ -1,25 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys, time
 import unittest
 import urllib2
 import urllib
-import time
 import threading
 import json
 import random
 import md5
-import sys
 import socket
 import os.path
 import signal
-import sys
-import time
 import select
 import errno
 import traceback
 
 from functest_util import *
 from generator import *
+from sysname_test import SystemNameTest
 from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
 from natcon_test import NatConnectionTest
@@ -132,6 +130,7 @@ class ClusterTest(object):
     clusterTestServerList = []
     clusterTestSleepTime = None
     clusterTestServerUUIDList = []
+    clusterTestServerObjs = dict()
     configFname = CONFIG_FNAME
     config = None
     argv = []
@@ -194,7 +193,7 @@ class ClusterTest(object):
         print "======================================"
         return (True,"Server:%s test for all getter pass" % (s))
 
-    def _getServerName(self,obj,uuid):
+    def _getServerName(self, obj, uuid):
         for s in obj:
             if s["id"] == uuid:
                 return s["name"]
@@ -206,16 +205,15 @@ class ClusterTest(object):
         else:
             return "{%s}" % (uuid)
 
-    # call this function after reading the clusterTestServerList
+    # call this function after reading the clusterTestServerList!
     def _fetchClusterTestServerNames(self):
-
         # We still need to get the server name since this is useful for
         # the SaveServerAttributeList test (required in its post data)
 
         response = urllib2.urlopen("http://%s/ec2/getMediaServersEx?format=json" % (self.clusterTestServerList[0]))
 
         if response.getcode() != 200:
-            return (False,"getMediaServersEx resposne with error code:%d" % (response.getcode()))
+            return (False,"getMediaServersEx returned error code: %d" % (response.getcode()))
 
         json_obj = SafeJsonLoads(response.read(), self.clusterTestServerList[0], 'getMediaServersEx')
         if json_obj is None:
@@ -275,36 +273,38 @@ class ClusterTest(object):
                 return
 
     def _testConnection(self):
-        print "==================================================\n"
-        print "Test connection on each server in the server list "
-        server_id_list = []
+        print "=================================================="
+        print "Test connection with each server in the server list "
+        timeout = 5
+        failed = False
         for s in self.clusterTestServerList:
-            print "Try to connect to server: %s" % (s)
+            print "Try to connect to server: %s" % (s),
             request = urllib2.Request("http://%s/ec2/testConnection" % (s))
             try:
-                response = urllib2.urlopen(request, timeout=5)
+                response = urllib2.urlopen(request, timeout=timeout)
             except urllib2.URLError , e:
-                print "The connection has been issued with a 5 seconds timeout"
+                print "\nFAIL: error connecting to %s with a %s seconds timeout:" % (s,timeout),
                 if isinstance(e, urllib2.HTTPError):
-                    print "However connection failed with HTTP error: (%s) %s" % (e.code, e.reason)
+                    print "HTTP error: (%s) %s" % (e.code, e.reason)
                 else:
-                    print "However connection failed with error: %s" % (e.reason)
-                print "Connection test failed"
-                return False
+                    print str(e.reason)
+                failed = True
+                continue
 
             if response.getcode() != 200:
-                print "Server %s responds with code %s" % (s, response.getcode())
-                return False
+                print "\nFAIL: Server %s responds with code %s" % (s, response.getcode())
+                continue
             json_obj = SafeJsonLoads(response.read(), s, 'testConnection')
             if json_obj is None:
-                print "Wrong response data from server %s" % (s,)
-                return False
+                print "\nFAIL: Wrong response data from server %s" % (s,)
+                continue
+            self.clusterTestServerObjs[s] = json_obj
             self.clusterTestServerUUIDList.append([self._patchUUID(json_obj["ecsGuid"]), ''])
             response.close()
-            print "Connection test OK\n"
+            print "- OK"
 
-        print "Connection Test Pass"
-        print "\n==================================================="
+        print "Connection Test %s" % ("FAILED" if failed else "passed.")
+        print "=================================================="
         return True
 
     # This checkResultEqual function will categorize the return value from each
@@ -535,7 +535,7 @@ class ClusterTest(object):
 
         # do the rollback here
         self.unittestRollback = UnitTestRollback()
-        (True,"")
+        return (True,"")
 
 clusterTest = ClusterTest()
 
@@ -1258,7 +1258,7 @@ class ClusterTestBase(unittest.TestCase):
 
         workerQueue = ClusterWorker(clusterTest.threadNumber,len(postDataList))
 
-        print "===================================\n"
+        print "\n===================================\n"
         print "Test:%s start!\n" % (self._getMethodName())
 
         for test in postDataList:
@@ -1529,13 +1529,12 @@ class MergeTestBase:
     # This function is used to generate unique system name but random.  It
     # will gaurantee that the generated name is UNIQUE inside of the system
     def _generateRandomSystemName(self):
-        gen = BasicGenerator()
         ret = []
         s = set()
         for i in xrange(len(clusterTest.clusterTestServerList)):
             length = random.randint(16,30)
             while True:
-                name = gen.generateRandomString(length)
+                name = BasicGenerator.generateRandomString(length)
                 if name in s or name == self._mergeTestSystemName:
                     continue
                 else:
@@ -1661,7 +1660,6 @@ class PrepareServerStatus(BasicGenerator):
 
 # This class is used to control the whole merge test
 class MergeTest_Resource(MergeTestBase):
-    _gen = BasicGenerator()
     _lock = threading.Lock()
 
     def _prolog(self):
@@ -1774,10 +1772,9 @@ class MergeTest_AdminPassword(MergeTestBase):
     def _generateUniquePassword(self):
         ret = []
         s = set()
-        gen = BasicGenerator()
         for server in clusterTest.clusterTestServerList:
             # Try to generate a unique password
-            pwd = gen.generateRandomString(20)
+            pwd = BasicGenerator.generateRandomString(20)
             if pwd in s:
                 continue
             else:
@@ -3660,157 +3657,6 @@ def runPerfTest(argv):
     doCleanUp()
 
 
-class SystemNameTest:
-    _serverList = []
-    _guidDict = dict()
-    _oldSystemName = None
-    _syncTime = 2
-
-    def _setUpAuth(self,user,pwd):
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        for s in self._serverList:
-            ManagerAddPassword(passman, s, user, pwd)
-
-        urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
-
-    def _doGet(self,addr,methodName):
-        ret = None
-        response = None
-        print "Connection to http://%s/ec2/%s" % (addr,methodName)
-        response = urllib2.urlopen("http://%s/ec2/%s" % (addr,methodName))
-
-        if response.getcode() != 200:
-            response.close()
-            return None
-        else:
-            ret = response.read()
-            response.close()
-            return ret
-
-    def _doPost(self,addr,methodName,d):
-        response = None
-        req = urllib2.Request("http://%s/ec2/%s" % (addr,methodName), data=d,
-                              headers={'Content-Type': 'application/json'})
-
-        print "Connection to http://%s/ec2/%s" % (addr,methodName)
-        response = urllib2.urlopen(req)
-
-        if response.getcode() != 200:
-            response.close()
-            return False
-        else:
-            response.close()
-            return True
-
-    def _changeSystemName(self,addr,name):
-        response = urllib2.urlopen("http://%s/api/configure?%s" % (addr,urllib.urlencode({"systemName":name})))
-        if response.getcode() != 200:
-            response.close()
-            return False
-        else:
-            response.close()
-            return True
-
-    def _ensureServerSystemName(self):
-        systemName = None
-
-        for s in self._serverList:
-            ret = self._doGet(s,"testConnection")
-            if ret is None:
-                return (False,"Server:%s cannot perform testConnection REST call" % (s))
-            obj = SafeJsonLoads(ret, s, "testConnection")
-            if obj is None:
-                return  (False, "Server: %s returns wrong testConnection answer" % (s))
-
-            if systemName != None:
-                if systemName != obj["systemName"]:
-                    return (False,"Server: %s has systemName: %s which is different with others: %s" % (s,obj["systemName"],systemName))
-            else:
-                systemName = obj["systemName"]
-
-            #return (False, "SystemNameTest DEBUG FAIL: %s" % (s))
-
-            self._guidDict[s] = obj["ecsGuid"]
-
-        self._oldSystemName = systemName
-        return (True,"")
-
-
-    def _loadConfig(self):
-        configParser = clusterTest.getConfig()
-        username = configParser.get("General","username")
-        passwd = configParser.get("General","password")
-        sl = configParser.get("General","serverList")
-        self._serverList = sl.split(",")
-        self._syncTime = configParser.getint("General","clusterTestSleepTime")
-        return (username,passwd)
-
-
-    def _doSingleTest(self,s):
-        thisGUID = self._guidDict[s]
-        self._changeSystemName(s,BasicGenerator().generateRandomString(20))
-        # wait for the time to sync
-        time.sleep(self._syncTime)
-        # issue a getMediaServerEx request to test whether all the servers in
-        # the list has the expected offline/online status
-        ret = self._doGet(s,"getMediaServersEx")
-        if ret == None:
-            return (False,"Server:%s cannot doGet on getMediaServersEx" % (s))
-        obj = SafeJsonLoads(ret, s, "getMediaServersEx")
-        if obj is None:
-            return (False, "The server %s sends wrong response to getMediaServersEx" % (s,))
-        for ele in obj:
-            if ele["id"] == thisGUID:
-                if ele["status"] == "Offline":
-                    return (False,"This server:%s with GUID:%s should be Online" % (s,thisGUID))
-            else:
-                if ele["status"] == "Online":
-                    return (False,"The server that has IP address:%s and GUID:%s \
-                    should be Offline when login on Server:%s" % (ele["networkAddresses"],ele["id"],s))
-        return (True,"")
-
-    def _doTest(self):
-        for s in self._serverList:
-            ret,reason = self._doSingleTest(s)
-            if ret != True:
-                return (ret,reason)
-        return (True,"")
-
-    def _doRollback(self):
-        for s in self._serverList:
-            self._changeSystemName(s,self._oldSystemName)
-
-    def run(self):
-        print "========================================="
-        print "SystemName Test Start"
-
-        user,pwd = self._loadConfig()
-        self._setUpAuth(user,pwd)
-
-        ret,reason = self._ensureServerSystemName()
-
-        if ret:
-            print "-----------------------------------------"
-            print "Start to test SystemName for server lists"
-            ret,reason = self._doTest()
-            if not ret:
-                print "FAIL: %s" % reason
-            # DEBUG!
-            #elif random.randint(0,5) == 0:
-            #    ret = False
-            #    print "FAIL: JUST A DEBUG FAIL"
-
-            print "SystemName test finished"
-            print "Start SystemName test rollback"
-            self._doRollback()
-        else:
-            print "FAIL: %s" % reason
-
-        print "SystemName test rollback done%s" % ('' if ret else ": test FAILED")
-        print "========================================="
-        return ret
-
-
 def doCleanUp():
     selection = '' if clusterTest.auto_rollback else 'x'
     if not clusterTest.auto_rollback:
@@ -3837,14 +3683,18 @@ def print_tests(suit, shift='    '):
 
 
 def CallTest(testClass):
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
+    ###if not clusterTest.openerReady:
+    ###    clusterTest.setUpPassword()
     # this print is used by FunctestParser.parse_timesync_start
     print "%s suits: %s" % (testClass.__name__, ', '.join(testClass.iter_suits()))
     return RunBoxTests(testClass, clusterTest.getConfig())
 
 
-SingleTestKeys = {
+SimpleTestKeys = {
+   '--sys-name': SystemNameTest,
+}
+
+BoxTestKeys = {
     '--timesync': TimeSyncTest,
     '--bstorage': BackupStorageTest,
     '--msarch': MultiserverArchiveTest,
@@ -3862,9 +3712,13 @@ def DoTests(argv):
         print "Failed to initialize the cluster test object: %s" % (reason)
         return
 
-    if argc == 2 and argv[1] in SingleTestKeys:
-        CallTest(SingleTestKeys[argv[1]])
-        return
+    if argc == 2:
+        if argv[1] in BoxTestKeys:
+            CallTest(BoxTestKeys[argv[1]])
+            return
+        if argv[1] in SimpleTestKeys:
+            SimpleTestKeys[argv[1]](clusterTest).run()
+            return
 
     ret, reason = clusterTest.initial_tests()
     if ret == False:
@@ -3881,7 +3735,7 @@ def DoTests(argv):
         if the_test.result.wasSuccessful():
             print "Main tests passed OK"
             if MergeTest().test():
-                SystemNameTest().run()
+                SystemNameTest(clusterTest).run()
         if not clusterTest.do_main_only:
             if not clusterTest.skip_timesync:
                 CallTest(TimeSyncTest)
@@ -3890,7 +3744,7 @@ def DoTests(argv):
             if not clusterTest.skip_mservarc:
                 CallTest(MultiserverArchiveTest)
 
-        print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
+        print "\nALL AUTOMATIC TEST ARE DONE\n"
         doCleanUp()
         print "\nFunctest finnished\n"
 
@@ -3931,8 +3785,6 @@ if __name__ == '__main__':
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':
         UnitTestRollback().doRecover()
-    elif len(argv) == 2 and argv[1] == '--sys-name':
-        SystemNameTest().run()
     else:
         DoTests(argv)
 

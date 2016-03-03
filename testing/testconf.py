@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """
 The main configuration file for (auto-)test scripts.
@@ -72,7 +73,6 @@ MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 
 VAG_DIR = "./vagrant"
-VAG_DIR_NAT = './v-nat'
 
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
@@ -89,7 +89,7 @@ VAGR_STAT = [VAGRANT, "status"]
 BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes without mediaserver are skipped
     'box1': '192.168.109.8',
     'box2': '192.168.109.9',
-    'boxnat': '192.168.109.8',
+    'boxnat': '192.168.109.10',
     'boxbehind': '192.168.110.3',
 }
 
@@ -116,6 +116,7 @@ SKIP_TESTS = {
 #   'time' - to skip time synchronization test
 #   'backup' - to skip backup storage test
 #   'msarch' - to skip nultiserver archive test
+#   'natcon' - to skip connection behind NAT test
 #   'proxy' - to skip server proxy test
 }
 

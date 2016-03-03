@@ -44,6 +44,7 @@ def perform_request(peer, redirect_to=None):
     return (json.loads(data), content_len)
     #print "Resulting data len: %s" % len(data)
 
+
 def proxy_test():
     global MAIN_HOST, SEC_HOST
     try:
@@ -84,6 +85,7 @@ def proxy_test():
         print "FAIL: %s: %s:\n%s" % sys.exc_info()
         raise
     return True
+
 
 if __name__ == '__main__':
     if not proxy_test():

@@ -87,7 +87,7 @@ if os.name == 'posix':
         def _unregister(self):
             self.poller.unregister(self.fd)
 
-        def read_ch(self, timeout):
+        def read_ch(self, timeout=0):
             res = self.poller.poll(timeout)
             if res:
                 if res[0][1] & READY:
@@ -109,7 +109,7 @@ else:
             super(PipeReader, self).register(proc)
             self.osf = msvcrt.get_osfhandle(self.fd)
 
-        def read_ch(self, timeout):
+        def read_ch(self, timeout=0):
             endtime = (time.time() + timeout) if timeout > 0 else 0
             while self.proc.poll() is None:
                 try:
