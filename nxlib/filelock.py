@@ -2,7 +2,33 @@
 "File based interprocess Lock class."
 
 import time
-from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
+import os
+
+# needs win32all to work on Windows
+if os.name == 'nt':
+    import win32con, win32file, pywintypes
+    LOCK_EX = win32con.LOCKFILE_EXCLUSIVE_LOCK
+    LOCK_SH = 0 # the default
+    LOCK_NB = win32con.LOCKFILE_FAIL_IMMEDIATELY
+    _overlapped = pywintypes.OVERLAPPED()
+
+    def _lock(lockfile, flags):
+        hfile = win32file._get_osfhandle(lockfile.fileno())
+        win32file.LockFileEx(hfile, flags, 0, 0xffff0000, _overlapped)
+
+    def _unlock(lockfile):
+        hfile = win32file._get_osfhandle(file.fileno())
+        win32file.UnlockFileEx(hfile, 0, 0xffff0000, _overlapped)
+elif os.name == 'posix':
+    from fcntl import LOCK_EX, LOCK_SH, LOCK_NB, LOCK_UN, flock
+
+    def _lock(lockfile, flags):
+        flock(lockfile, flags)
+
+    def _unlock(lockfile):
+        flock(lockfile, LOCK_UN)
+else:
+    raise RuntimeError("PortaLocker only defined for nt and posix platforms")
 
 
 class Lock(object):
@@ -21,7 +47,7 @@ class Lock(object):
         """
         if timeout is None:
             try:
-               flock(self.handle, LOCK_EX)
+               _lock(self.handle, LOCK_EX)
             except Exception:
                return False
             return True
@@ -29,7 +55,7 @@ class Lock(object):
         end = 0 if timeout == 0 else time.time() + timeout
         while True:
             try:
-                flock(self.handle, LOCK_EX|LOCK_NB)
+                _lock(self.handle, LOCK_EX|LOCK_NB)
                 return True
             except IOError:
                 pass
@@ -38,8 +64,26 @@ class Lock(object):
             time.sleep(sleep_quantum)
         
     def release(self):
-        flock(self.handle, LOCK_UN)
+        _unlock(self.handle)
         
     def __del__(self):
         self.handle.close()
 
+if __name__ == '__main__':
+
+    lock = Lock("./lock.tmp")
+
+    if lock.acquire(timeout=5):
+        end = time.time() + 20
+        print "Sleep..."
+        while True:
+            time.sleep(1)
+            n = end - time.time()
+            if n <= 0:
+                break
+            print "%.1f" % n
+        #flock(lock_file , LOCK_UN)
+        #lock_file.close()
+        lock.release()
+    else:
+        print "Already locked!"
