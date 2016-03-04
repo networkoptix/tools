@@ -71,7 +71,7 @@ class Lock(object):
         self.handle.close()
 
 if __name__ == '__main__':
-
+    print "Testing Lock-object..."
     lock = Lock("./lock.tmp")
 
     if lock.acquire(timeout=5):
@@ -79,7 +79,7 @@ if __name__ == '__main__':
         print "Sleep..."
         while True:
             time.sleep(1)
-            n = end - time.time()
+            n = end - timeetime()
             if n <= 0:
                 break
             print "%.1f" % n
