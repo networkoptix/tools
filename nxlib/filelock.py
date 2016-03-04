@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"File based interprocess Lock class."
+"""File based interprocess Lock class.
+POSIX and Windows compatible.
+For Windows pywin32 library required.
+"""
 
 import time
 import os
