@@ -19,6 +19,8 @@ if os.name == 'nt':
     def _unlock(lockfile):
         hfile = win32file._get_osfhandle(lockfile.fileno())
         win32file.UnlockFileEx(hfile, 0, -0x10000, _overlapped)
+
+    _lockExc = pywintypes.error
 elif os.name == 'posix':
     from fcntl import LOCK_EX, LOCK_SH, LOCK_NB, LOCK_UN, flock
 
@@ -27,6 +29,8 @@ elif os.name == 'posix':
 
     def _unlock(lockfile):
         flock(lockfile, LOCK_UN)
+
+    _lockExc = IOError
 else:
     raise RuntimeError("PortaLocker only defined for nt and posix platforms")
 
@@ -46,10 +50,7 @@ class Lock(object):
            between checks.
         """
         if timeout is None:
-            try:
-               _lock(self.handle, LOCK_EX)
-            except Exception:
-               return False
+            _lock(self.handle, LOCK_EX)
             return True
 
         end = 0 if timeout == 0 else time.time() + timeout
@@ -57,7 +58,7 @@ class Lock(object):
             try:
                 _lock(self.handle, LOCK_EX|LOCK_NB)
                 return True
-            except IOError:
+            except _lockExc:
                 pass
             if end < time.time():
                 return False
