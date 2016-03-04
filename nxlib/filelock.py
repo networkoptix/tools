@@ -11,28 +11,29 @@ class Lock(object):
         # This will create it if it does not exist already
         self.handle = open(filename, 'w')
     
-    def acquire(self):
-        "Blocking lock acquire method."
-        flock(self.handle, LOCK_EX)
-        
-    def check(self, timeout=None, sleep_quantum=0.1):
+    def acquire(self, timeout=None, sleep_quantum=0.1):
         """Nonblocking lock acquire method.
-            timeout = None  - check and return immediately
-            timeout = 0     - wait endlessly
+            timeout = None  - wait endlessly
+            timeout = 0     - check and return immediately
             timeout > 0     - wait no more then timeout seconds
            If timeout is not None, sleep_quantum is a sleeping period
            between checks.
         """
-        end = time.time() if timeout is None else (
-                  0 if timeout == 0 else time.time() + timeout
-              )
+        if timeout is None:
+            try:
+               flock(self.handle, LOCK_EX)
+            except Exception:
+               return False
+            return True
+
+        end = 0 if timeout == 0 else time.time() + timeout
         while True:
             try:
                 flock(self.handle, LOCK_EX|LOCK_NB)
                 return True
             except IOError:
                 pass
-            if end > 0 and end < time.time():
+            if end < time.time():
                 return False
             time.sleep(sleep_quantum)
         
