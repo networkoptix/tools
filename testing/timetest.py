@@ -229,7 +229,7 @@ class TimeSyncTest(FuncTestCase):
         times = self._request_gettime(boxnum) #, False) -- return this after removing the next debug
         self.times[boxnum] = times
         #print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
-        print "!DEBUG: %s server times: " % boxnum,
+        #print "!DEBUG: %s server times: " % boxnum,
         pprint.pprint(times)
         return times['local'] - times['time']  # local time -- server's time
 

@@ -491,7 +491,8 @@ def check_new_commits(bundle_fn):
             # Specifying the current branch (.) turns off all other
             branches = ['.'] if BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
             if BRANCHES[0] != '.':
-                debug("Commits are found in branches: %s", branches)
+                log_to_send('')  # an empty line separator
+                log("Commits are found in branches: %s", branches)
             if branches:
                 Changesets.clear()
                 return [ b for b in branches if get_changesets(b, bundle_fn) ]
@@ -516,7 +517,7 @@ def current_branch_name():
 
 def update_repo(branches, bundle_fn):
     log("Pulling branches: %s" % (', '.join(branches)))
-    debug("Using bundle file %s", bundle_fn)
+    #debug("Using bundle file %s", bundle_fn)
     #try:
     check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
     #except CalledProcessError, e:
@@ -651,6 +652,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
 
 
 def prepare_branch(branch):
+    log_to_send('')  # an empty line separator
     if branch != '.':
         log("Switch to the branch %s" % branch)
     debug("Call %s", HG_PURGE)
