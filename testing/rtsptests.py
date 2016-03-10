@@ -363,7 +363,7 @@ class SingleServerRtspTestBase(object):
                 continue # Skip fake camera
             camera = Camera(c["physicalId"], c["id"], c["name"].encode('utf8'), c['status'])
             self._allCameraList.append(camera)
-            if camera.isOnline:
+            if camera.isOnline():
                 self._cameraList.append(camera)
                 # c['name'] is used for output only and some pseudo-OSes (like Windows) don't have UTF-8 consoles :(
             self._cameraInfoTable[c["id"]] = c
@@ -391,9 +391,9 @@ class SingleServerRtspTestBase(object):
                 self._log.writeFail("-------------------------------------------")
                 self._log.writeFail("RTSP request on Server %s failed" % (self._serverAddr))
                 self._log.writeFail("RTSP request URL %s issued" % (reply[1]))
-                self._log.writeFail("Camera name: %s" % (c[2]))
-                self._log.writeFail("Camera Physical Id: %s" % (c[0]))
-                self._log.writeFail("Camera Id: %s" % (c[1]))
+                self._log.writeFail("Camera name: %s" % (c.name))
+                self._log.writeFail("Camera Physical Id: %s" % (c.physicalId))
+                self._log.writeFail("Camera Id: %s" % (c.id))
                 self._log.writeFail("Detail RTSP reply protocol:\n\n%s" % (reply[0]))
                 self._log.flushFail()
                 ret = False
@@ -652,7 +652,6 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         self._threadNum = threadNum
         self._exitFlag = flag
         # Initialize the performance log
-        print "DEBUG: A: %s" % self._serverAddrPair
         self._perfLog = open("%s_%s.perf.rtsp.log" % tuple(self._serverAddrPair),"w+")
         # Order cameras to start recording and preserve a time gap for starting
         self._camerasReadyTime = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
