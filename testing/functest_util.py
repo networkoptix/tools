@@ -524,6 +524,26 @@ def SafeJsonLoads(text, serverAddr, methodName):
         return None
 
 
+def HttpRequest(serverAddr, methodName, params=None, printHttpError=False):
+    url = "http://%s/%s" % (serverAddr, methodName)
+    if params:
+        url += '?'+ ('&'.join("%s=%s" % (name, val) for name, val in params))
+    response = urllib2.urlopen(url)
+    if response.getcode() != 200:
+        if printHttpError:
+            if params:
+                err = "Error: url %s returns  %s HTTP code" % (url, response.getcode())
+            else:
+                err = "Error: server %s, method %s returns %s HTTP code" % (serverAddr, methodName, response.getcode())
+            if isinstance(printHttpError, Exception):
+                raise printHttpError(err)
+            print err
+        return None
+    obj = SafeJsonLoads(response.read(), serverAddr, 'testConnection')
+    response.close()
+    return obj
+
+
 
 import Queue
 import threading
@@ -625,6 +645,9 @@ def safe_request_json(req):
         print "FAIL: error requesting '%s': %s" % (req, e)
         return None
 
+
+def quote_guid(guid):
+    return guid if guid[0] == '{' else "{" + guid + "}"
 
 def unquote_guid(guid):
     return guid[1:-1] if guid[0] == '{' and guid[-1] == '}' else guid

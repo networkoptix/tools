@@ -5,7 +5,7 @@ Connection behind NAT test
 __author__ = 'Danil Lavrentyuk'
 
 import os, os.path, sys, time
-import subprocess
+#import subprocess
 import unittest
 
 import urllib2 # FIXME remove it
