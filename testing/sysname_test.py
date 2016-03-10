@@ -65,7 +65,7 @@ class SystemNameTest:
             if newName not in self._namesUsed:
                 self._namesUsed.add(newName)
                 break
-        self._changeSystemName(s,newName)
+        self._changeSystemName(s, newName)
         # wait for the time to sync
         time.sleep(self._syncTime)
         # issue a getMediaServerEx request to test whether all the servers in

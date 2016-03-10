@@ -9,8 +9,6 @@ import json
 import random
 import os.path
 import signal
-import select
-import errno
 import traceback
 
 from functest_util import *
