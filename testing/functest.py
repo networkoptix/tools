@@ -2676,18 +2676,20 @@ def CallTest(testClass):
     return RunBoxTests(testClass, clusterTest.getConfig())
 
 
+# These are the old legasy tests, just organized a bit
 SimpleTestKeys = {
     '--sys-name': SystemNameTest,
     '--rtsp-test': RtspTestSuit,
     '--rtsp-perf': RtspPerf,
 }
 
+# Tests to be run on the vargant boxes, separately or within the autotest sequence
 BoxTestKeys = {
     '--timesync': TimeSyncTest,
     '--bstorage': BackupStorageTest,
     '--msarch': MultiserverArchiveTest,
     '--natcon': NatConnectionTest,
-    '--stream': SreamingTest
+    '--stream': StreamingTest
 }
 
 
