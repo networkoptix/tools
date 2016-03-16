@@ -80,7 +80,7 @@ if run_mode == 'ms-gen':
     run_mode = 'multiserv'
     genfile = open("fill_stor_data_%s.dat" % special, 'w')
 
-if run_mode not in ['random', 'multiserv']:
+if run_mode not in ['random', 'multiserv', 'streaming']:
     print "Wrong mode: '%s'" % run_mode
     sys.exit(1)
 
@@ -91,6 +91,7 @@ if not generate_mode and not os.path.isdir(base_path):
 START_OFFSET = {
     'random': 10 * DAY,
     'multiserv': 3 * DAY,
+    'streaming': 3 * HOUR,
 } [run_mode]
 
 time_base =  mk_base_time(START_OFFSET)
@@ -108,6 +109,9 @@ RANDOM_FILL_PATHS = {k: [mk_rec_path(*p) for p in v] for k, v in (
         (5, 21), (5, 22), (5, 23),
         (6, 0),  (6, 1),  (6, 2),
     )),
+    ('streaming', (
+        (0, 1), (0, 2), (0, 3),
+    ))
 )}
 
 
@@ -261,7 +265,7 @@ if not generate_mode:
     mkpath(hi_path, False)
     mkpath(low_path, False)
 
-if run_mode == 'random':
+if run_mode in ('random', 'streaming'):
     if special not in RANDOM_FILL_PATHS.iterkeys():
         print "Wrong step value: %s. Allowed values: %s" % (special, ', '.join(RANDOM_FILL_PATHS.iterkeys()))
         sys.exit(3)

@@ -15,14 +15,13 @@ class SystemNameTest:
     _oldSystemName = None
     _syncTime = 2
 
-    def __init__(self, clusterTest):
+    def __init__(self, config):
         self._namesUsed = set()
         self._guidDict = dict()
         self._serverList = []
-        self._clusterTest = clusterTest
-        self._config = clusterTest.getConfig()
+        self._config = config
         sl = self._config.get("General","serverList")
-        self._serverList = sl.split(",")
+        self._serverList = self._config.rtget("ServerList")
         self._syncTime = self._config.getint("General","clusterTestSleepTime")
 
     def _doGet(self,addr,methodName):
@@ -46,8 +45,9 @@ class SystemNameTest:
 
     def _ensureServerSystemName(self):
         systemName = None
+
         for s in self._serverList:
-            obj = self._clusterTest.clusterTestServerObjs[s]
+            obj = self._config.rtget("ServerObjs")[s]
             if systemName != None:
                 if systemName != obj["systemName"]:
                     return (False,"Server: %s has systemName: %s which is different with others: %s" % (s,obj["systemName"],systemName))

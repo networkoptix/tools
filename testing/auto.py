@@ -1385,6 +1385,7 @@ def parse_args():
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
     parser.add_argument("--natcon", action="store_true", help="Create virtual boxes for NAT connection test and run this test only.")
+    parser.add_argument("--stream", action="store_true", help="Create virtual boxes and run Streaming tests only.")
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
     # change settings

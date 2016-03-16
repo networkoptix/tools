@@ -13,7 +13,7 @@ import traceback
 
 from functest_util import *
 from generator import *
-from rtsptests import RtspPerf, RtspTestSuit
+from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
 from sysname_test import SystemNameTest
 from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
@@ -188,12 +188,12 @@ class ClusterTest(object):
     def _loadConfig(self):
         parser = self.getConfig()
         self.clusterTestServerList = parser.get("General","serverList").split(",")
+        parser.rtset('ServerList', self.clusterTestServerList)
         self.clusterTestSleepTime = parser.getint("General","clusterTestSleepTime")
+        parser.rtset('SleepTime', self.clusterTestSleepTime)
         self.threadNumber = parser.getint("General","threadNumber")
-        try :
-            self.testCaseSize = parser.getint("General","testCaseSize")
-        except :
-            self.testCaseSize = 2
+        self.testCaseSize = parser.getint_safe("General","testCaseSize", 2)
+        parser.rtset('need_dump', self.need_dump)
 
     def setUpPassword(self):
         config = self.getConfig()
@@ -364,6 +364,8 @@ class ClusterTest(object):
             response.close()
             print "- OK"
 
+        self.config.rtset('ServerObjs', self.clusterTestServerObjs)
+        self.config.rtset('ServerUUIDList', self.clusterTestServerUUIDList)
         print "Connection Test %s" % ("FAILED" if failed else "passed.")
         print "=================================================="
         return True
@@ -2679,6 +2681,7 @@ SimpleTestKeys = {
     '--sys-name': SystemNameTest,
     '--rtsp-test': RtspTestSuit,
     '--rtsp-perf': RtspPerf,
+    '--rtsp-stream': RtspStreamTest,
 }
 
 # Tests to be run on the vargant boxes, separately or within the autotest sequence
@@ -2706,7 +2709,7 @@ def DoTests(argv):
             CallTest(BoxTestKeys[argv[1]])
             return
         if argv[1] in SimpleTestKeys:
-            SimpleTestKeys[argv[1]](clusterTest).run()
+            SimpleTestKeys[argv[1]](clusterTest.getConfig()).run()
             return
 
     ret, reason = clusterTest.initial_tests()

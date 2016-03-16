@@ -69,7 +69,6 @@ class FuncTestCase(unittest.TestCase):
     before_2_5 = False # TODO remove it!
     _test_name = '<UNNAMED!>'
 
-
     @classmethod
     def setUpClass(cls):
         print "========================================="
@@ -128,7 +127,7 @@ class FuncTestCase(unittest.TestCase):
     ################################################################################
 
     def _call_box(self, box, *command):
-        #print "%s: %s" % (box, ' '.join(command))
+        print "_call_box: %s: %s" % (box, ' '.join(command))
         try:
             return boxssh(box, command)
         except subprocess.CalledProcessError, e:

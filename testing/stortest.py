@@ -98,7 +98,7 @@ class StorageBasedTest(FuncTestCase):
         cls.test_camera_physical_id = data['physicalId']
         return data
 
-    def _add_test_camera(self, boxnum, camera=None, log_response=True):
+    def _add_test_camera(self, boxnum, camera=None, log_response=False):
         camera = self.new_test_camera() if camera is None else camera.copy()
         camera['parentId'] = self.guids[boxnum]
         self._server_request(boxnum, 'ec2/saveCamera', camera)
@@ -143,8 +143,9 @@ class StorageBasedTest(FuncTestCase):
     def tearDownClass(cls):
         if cls._clear_storage_script:
             for num in xrange(cls.num_serv_t):
-                print "Remotely calling %s at box %s" % (cls._clear_storage_script, num)
-                cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_storage_script, cls._storages[num][0]['url'], TMP_STORAGE)
+                if num in cls._storages:
+                    print "Remotely calling %s at box %s" % (cls._clear_storage_script, num)
+                    cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_storage_script, cls._storages[num][0]['url'], TMP_STORAGE)
         super(StorageBasedTest, cls).tearDownClass()
 
     def _init_cameras(self):
@@ -193,7 +194,6 @@ class BackupStorageTest(StorageBasedTest):
 
     def _init_cameras(self):
         self._add_test_camera(_WORK_HOST)
-
 
     def _create_backup_storage(self, boxnum):
         self._call_box(self.hosts[boxnum], "mkdir", '-p', TMP_STORAGE)

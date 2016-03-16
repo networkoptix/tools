@@ -2,6 +2,7 @@ __author__ = 'Danil Lavrentyuk'
 "This module contains some utility functions and classes for the functional tests script."
 import sys
 import json
+from urllib import urlencode
 import urllib2
 from ConfigParser import RawConfigParser
 
@@ -214,6 +215,10 @@ class JsonDiff:
 
 class FtConfigParser(RawConfigParser):
 
+    def __init__(self, *args, **kw_args):
+        RawConfigParser.__init__(self, *args, **kw_args)
+        self.runtime = dict()
+
     def get_safe(self, section, option, default=None):
         if not self.has_option(section, option):
             return default
@@ -228,6 +233,15 @@ class FtConfigParser(RawConfigParser):
         if not self.has_option(section, option):
             return default
         return self.getfloat(section, option)
+
+    def rtset(self, name, value):
+        self.runtime[name] = value
+
+    def rtget(self, name):
+        return self.runtime[name]
+
+    def rthas(self, name):
+        return name in self.runtime
 
 
 def _compareJsonObject(lhs,rhs,result):
@@ -514,6 +528,7 @@ def showHelp(argv):
 def ManagerAddPassword(passman, host, user, pwd):
     passman.add_password(None, "http://%s/ec2" % (host), user, pwd)
     passman.add_password(None, "http://%s/api" % (host), user, pwd)
+    passman.add_password(None, "http://%s/hls" % (host), user, pwd)
 
 
 def SafeJsonLoads(text, serverAddr, methodName):
@@ -524,24 +539,50 @@ def SafeJsonLoads(text, serverAddr, methodName):
         return None
 
 
-def HttpRequest(serverAddr, methodName, params=None, printHttpError=False):
+def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None, printHttpError=False, logURL=False):
     url = "http://%s/%s" % (serverAddr, methodName)
+    err = ""
     if params:
-        url += '?'+ ('&'.join("%s=%s" % (name, val) for name, val in params))
-    response = urllib2.urlopen(url)
-    if response.getcode() != 200:
+        url += '?'+ urlencode(params)
+    if logURL:
+        print "Requesting: " + url
+    req = urllib2.Request(url)
+    if headers:
+        for k, v in headers.iteritems():
+            req.add_header(k, v)
+    try:
+        response = urllib2.urlopen(req) if timeout is None else urllib2.urlopen(req, timeout=timeout)
+    except Exception as e:
+        err = "ends with exception %s" % e
+    else:
+        if response.getcode() != 200:
+            err = "returns %s HTTP code" % (response.getcode(),)
+    if err:
         if printHttpError:
             if params:
-                err = "Error: url %s returns  %s HTTP code" % (url, response.getcode())
+                err = "Error: url %s %s" % (url, err)
             else:
-                err = "Error: server %s, method %s returns %s HTTP code" % (serverAddr, methodName, response.getcode())
+                err = "Error: server %s, method %s %s" % (serverAddr, methodName, err)
             if isinstance(printHttpError, Exception):
                 raise printHttpError(err)
             print err
         return None
-    obj = SafeJsonLoads(response.read(), serverAddr, 'testConnection')
-    response.close()
-    return obj
+    data = response.read()
+    if len(data):
+        return SafeJsonLoads(data, serverAddr, methodName)
+    return True
+
+
+#def safe_request_json(req):
+#    try:
+#        return json.loads(urllib2.urlopen(req).read())
+#    except Exception as e:
+#        if isinstance(req, urllib2.Request):
+#            req = req.get_full_uri()
+#        print "FAIL: error requesting '%s': %s" % (req, e)
+#        return None
+
+
 
 
 
@@ -636,16 +677,6 @@ class ClusterLongWorker(ClusterWorker):
         self.enqueue(self._terminate, ()) # for other threads
 
 
-def safe_request_json(req):
-    try:
-        return json.loads(urllib2.urlopen(req).read())
-    except Exception, e:
-        if isinstance(req, urllib2.Request):
-            req = req.get_full_uri()
-        print "FAIL: error requesting '%s': %s" % (req, e)
-        return None
-
-
 def quote_guid(guid):
     return guid if guid[0] == '{' else "{" + guid + "}"
 
@@ -654,7 +685,7 @@ def unquote_guid(guid):
 
 
 def get_server_guid(host):
-    info = safe_request_json("http://%s/api/moduleInformation" % host)
+    info = HttpRequest(host, "api/moduleInformation", printHttpError=True)
     if info and (u'id' in info['reply']):
         return unquote_guid(info['reply'][u'id'])
     return None

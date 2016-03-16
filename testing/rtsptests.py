@@ -1,21 +1,30 @@
 # -*- coding: utf-8 -*-
 """ All RTSP tests and their additional classes, called from functest.py
 Initially moved out from functest.py
++ Also performs HTTP tstreaming test (using webm format)
 """
 __author__ = 'Danil Lavrentyuk'
-import random
-import errno, select, signal, socket, time, traceback
+import errno, json, random, re, select, signal, socket, sys, time, traceback
 import base64
 from hashlib import md5
 import urllib2
-import json
 import threading
-import re
 from collections import namedtuple
+from itertools import imap
 
 from functest_util import SafeJsonLoads, HttpRequest, parse_size, quote_guid, CAMERA_ATTR_EMPTY, FULL_SCHEDULE_TASKS
 
-DEFAULT_ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
+import pprint
+
+# RTSP performance test constants
+_DEFAULT_ARCHIVE_STREAM_RATE = 1024 * 1024 * 10 # 10 MB/Sec
+_DEFAULT_CAMERAS_START_GRACE = 5  # seconds
+_DEFAULT_THREAD_START_GAP = 0.001 # seconds
+_DEFAULT_SOCKET_CLOSE_GRACE = 0.01 # seconds
+_DEFAULT_LIVE_DATA_PART = 50  # percents, whole number
+# for streaming tests:
+_DEFAULT_TEST_THREADS = 10
+_DEFAULT_STREAMING_DURATION = 90
 
 
 _urlsub = re.compile(r'[:/?]')
@@ -27,6 +36,9 @@ def _urlsubfunc(m):
 def _buildUrlPath(url):
     return _urlsub.sub(_urlsubfunc, url) + '_' + ''.join(str(random.randint(0,9)) for _ in xrange(12))
 
+def RandomArchTime(_min, _max):
+    "Get random time from _max to _min minutes in the past. Returns as number of microseconds."
+    return int((time.time() - random.randint(60 * _min, 60 * _max)) * 1e6)
 
 class RtspLog:
     """ Controls two log files: for ok- and fail-messages.
@@ -56,8 +68,10 @@ class RtspLog:
         self._fileFail.close()
 
 
-class RtspStreamURLGenerator:
-    _streamURLTemplate = "rtsp://%s:%s/%s"
+HTTP_STREAM_FORMAT = 'webm'
+
+class StreamURLBase(object):
+    _streamURLTemplate = ''
     _server = None
     _port = None
     _mac = None
@@ -71,8 +85,16 @@ class RtspStreamURLGenerator:
         return self._streamURLTemplate % (self._server, self._port, self._mac)
 
 
-class RtspArchiveURLGenerator:
-    _archiveURLTemplate = "rtsp://%s:%s/%s?pos=%d"
+class RtspStreamURLGenerator(StreamURLBase):
+    _streamURLTemplate = "rtsp://%s:%s/%s"
+
+
+class HttpStreamURLGenerator(StreamURLBase):
+    _streamURLTemplate = "http://%s:%s/media/%s." + HTTP_STREAM_FORMAT + "?sfd=1"
+
+
+class ArchiveURLBase(object):
+    _archiveURLTemplate = ''
     _diffMax = 5
     _diffMin = 1
     _server = None
@@ -86,16 +108,21 @@ class RtspArchiveURLGenerator:
         self._port = port
         self._mac = mac
 
-    def _generateUTC(self):
-        return int((time.time() - random.randint(self._diffMin, self._diffMax) * 60) * 1e6)
-
     def generateURL(self):
-        return self._archiveURLTemplate % (self._server, self._port, self._mac, self._generateUTC())
+        return self._archiveURLTemplate % (self._server, self._port, self._mac, RandomArchTime(self._diffMin, self._diffMax))
+
+
+class RtspArchiveURLGenerator(ArchiveURLBase):
+    _archiveURLTemplate = "rtsp://%s:%s/%s?pos=%d"
+
+
+class HttpArchiveURLGenerator(ArchiveURLBase):
+    _archiveURLTemplate = "http://%s:%s/media/%s." + HTTP_STREAM_FORMAT + "?sfd=1&pos=%d"
 
 
 # RTSP global backoff timer, this is used to solve too many connection to server
 # which makes the server think it is suffering DOS attack
-class RtspBackOffTimer:
+class StreamingBackOffTimer:
     _timerLock = threading.Lock()
     _globalTimerTable= dict()
 
@@ -135,58 +162,42 @@ class DummyLock(object):
         pass
 
 
-class RtspTcpBasic(object):
+class StreamTcpBasic(object):
     _socket = None
-    _addr = None
-    _port = None
-    _data = None
-    _url = None
-    _cid = None
-    _sid = None
-    _mac = None
-    _uname = None
-    _pwd = None
-    _urlGen = None
     _resolution = None
-    _lock = None
-    _log  = None
 
-    _rtspBasicTemplate = "\r\n".join((
-        "PLAY %s RTSP/1.0",
+    _rtspTemplate = "\r\n".join((
+        "PLAY %(url)s RTSP/1.0",
         "CSeq: 2",
         "Range: npt=now-",
         "Scale: 1",
-        "x-guid: %s",
+        "x-guid: %(cid)s",
         "Session:",
         "User-Agent: Network Optix",
         "x-play-now: true",
-        "Authorization: Basic %s",
-        "x-server-guid: %s", '', '')) # two '' -- to add two '\r\n' at the end
+        "Authorization: %(auth)s",
+        "x-server-guid: %(sid)s", '', '')) # two '' -- to add two '\r\n' at the end
 
-    _rtspDigestTemplate = "\r\n".join((
-        "PLAY %s RTSP/1.0",
-        "CSeq: 2",
-        "Range: npt=now-",
-        "Scale: 1",
-        "x-guid: %s",
-        "Session:",
-        "User-Agent: Network Optix",
-        "x-play-now: true",
-        "%s",
-        "x-server-guid: %s", '' ''))
+    _httpTemplate = "\r\n".join((
+        "GET %(url)s HTTP/1.0",
+        "Authorization: %(auth)s",
+        "x-server-guid: %(sid)s", '', ''))
 
-    _digestAuthTemplate = 'Authorization:Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s",algorithm="MD5"'
+    _digestAuthTemplate = 'Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s",algorithm="MD5"'
 
     _skip_errno = [errno.EAGAIN, errno.EWOULDBLOCK] + ([errno.WSAEWOULDBLOCK] if hasattr(errno, 'WSAEWOULDBLOCK') else [])
     # There is no errno.WSAEWOULDBLOCK on Linux.
 
-    def __init__(self, (addr, port), (mac, cid), sid, uname, pwd, urlGen, lock=None, log=None, socket_reraise=False):
+    def __init__(self, proto, (addr, port), (mac, cid), sid, uname, pwd, urlGen, lock=None, log=None, socket_reraise=False):
         self._addr = addr
         self._port = int(port)
         self._urlGen = urlGen
         self._url = urlGen.generateURL()
-        self._basic_auth = base64.encodestring('%s:%s' % (uname, pwd)).rstrip()
-        self._data = self._rtspBasicTemplate % (self._url, cid, self._basic_auth, sid)
+        self._basic_auth = 'Basic ' + base64.encodestring('%s:%s' % (uname, pwd)).rstrip()
+        self._proto = proto
+        self._tpl = self._rtspTemplate if proto == 'rtsp' else self._httpTemplate
+        self._params = {'url': self._url, 'cid': cid, 'auth': self._basic_auth, 'sid': sid}
+        self._data = self._tpl % self._params
 
         self._cid = cid
         self._sid = sid
@@ -198,8 +209,9 @@ class RtspTcpBasic(object):
         self._socket_reraise = socket_reraise
 
     def add_prefered_resolution(self, resolution):
-        self._resolution = resolution
-        self._data = self._add_resolution_str(self._data)
+        if self._proto == 'rtsp': # FIXME reactor it to support HTTP case and use URL parameter 'resolution'
+            self._resolution = resolution
+            self._data = self._add_resolution_str(self._data)
 
     def _add_resolution_str(self, header):
         return ''.join((header[:-2], 'x-media-quality: ', self._resolution, "\r\n\r\n"))
@@ -259,11 +271,8 @@ class RtspTcpBasic(object):
         ret = self._parseRelamAndNonce(reply)
         if ret == False:
             return reply
-        auth = self._formatDigestHeader(ret[0],ret[1])
-        data = self._rtspDigestTemplate % (self._url,
-            self._cid,
-            auth,
-            self._sid)
+        self._params['auth'] = self._formatDigestHeader(ret[0],ret[1])
+        data = self._tpl % self._params
         if self._resolution:
             data = self._add_resolution_str(data)
         self._request(data)
@@ -286,13 +295,13 @@ class RtspTcpBasic(object):
             try:
                 data = self._socket.recv(256)
             except socket.error,e:
-                RtspBackOffTimer.increase("%s:%d"%(self._addr,self._port))
+                StreamingBackOffTimer.increase("%s:%d" % (self._addr, self._port))
                 self._logError("Socket errror %s on URL %s" % (e, self._url))
                 if self._socket_reraise:
                     raise
                 return "This is not RTSP error but socket error: %s"%(e)
 
-            RtspBackOffTimer.decrease("%s:%d"%(self._addr,self._port))
+            StreamingBackOffTimer.decrease("%s:%d" % (self._addr, self._port))
 
             if not data:
                 self._logError("Empty RSTP response on URL %s" % self._url)
@@ -314,6 +323,9 @@ class RtspTcpBasic(object):
     def __exit__(self,type,value,trace):
         self._socket.close()
 
+    def get_socket(self):
+        return self._socket
+
 
 Camera = namedtuple('Camera', ['physicalId', 'id', 'name', 'status'])
 Camera.isOnline = lambda self: self.status in ('Online', 'Recording')
@@ -324,7 +336,7 @@ class SingleServerRtspTestBase(object):
         _fetchCameraList() called from __init__()
         _checkRtspRequest() that checks reply for "200 OK', reporting to stdout and into the log
         _lock is used to avoid different streams' output intersection
-        _mkRtspStreamHandler and _mkRtspArchiveHandler - to simplify RtspTcpBasic object creation
+        _mkRtspStreamHandler and _mkRtspArchiveHandler - to simplify StreamTcpBasic object creation
     """
     _serverAddr = None
     _serverGUID = None
@@ -335,6 +347,13 @@ class SingleServerRtspTestBase(object):
     _archiveMin = 5
     _log = None
     _lock = None
+    _allowOffline = False
+    _streamingTest = False
+
+    OK_STATUSES = {
+        'rtsp': "RTSP/1.0 200 OK",
+        'http': "HTTP/1.0 200 OK",
+    }
 
     def __init__(self, archiveMax, archiveMin, serverAddr, serverGUID, uname, pwd, log, lock):
         self._archiveMax = archiveMax
@@ -346,6 +365,7 @@ class SingleServerRtspTestBase(object):
         self._password = pwd
         self._log = log
         self._lock = lock
+        self._allowOffline = self._streamingTest  # offline cameras are allowed only in this case
         self._fetchCameraList()
 
     def _fetchCameraList(self):
@@ -357,6 +377,7 @@ class SingleServerRtspTestBase(object):
         self._cameraInfoTable = dict()
         obj = HttpRequest(self._serverAddr, 'ec2/getCamerasEx', params={'id': self._serverGUID}, printHttpError=Exception)
         for c in obj:
+            #print "Camera found: %s" % (pprint.pformat(c))
             if c["typeId"] == "{1657647e-f6e4-bc39-d5e8-563c93cb5e1c}":
                 continue # Skip desktop
             if "name" in c and c["name"].startswith("ec2_test"):
@@ -367,21 +388,21 @@ class SingleServerRtspTestBase(object):
                 self._cameraList.append(camera)
                 # c['name'] is used for output only and some pseudo-OSes (like Windows) don't have UTF-8 consoles :(
             self._cameraInfoTable[c["id"]] = c
-        if not self._cameraList:
+        if not self._cameraList and not self._allowOffline:
             msg = "Error: no active cameras found on server %s" % (self._serverAddr,)
             with self._lock:
                 print msg
                 self._log.writeFail(msg)
 
-    def _checkReply(self, reply):
+    def _checkReply(self, reply, proto):
         idx = reply.find("\r\n")
-        return False if idx < 0 else ("RTSP/1.0 200 OK" == reply[:idx])
+        return False if idx < 0 else (self.OK_STATUSES[proto] == reply[:idx])
 
-    def _checkRtspRequest(self,c,reply):
+    def _checkRtspRequest(self, c, reply, proto='rtsp'):
         ret = None
         with self._lock:
             print "RTSP request on URL: %s issued!" % (reply[1])
-            if not self._checkReply(reply[0]):
+            if not self._checkReply(reply[0], proto):
                 print "RTSP request on Server %s failed" % (self._serverAddr)
                 print reply
                 print "Camera name: %s" % (c[2].encode('utf8'),)
@@ -401,25 +422,27 @@ class SingleServerRtspTestBase(object):
                 self._log.writeOK("-------------------------------------")
                 self._log.writeOK("RTSP request on Server %s with URL %s passed!" % (self._serverAddr, reply[1]))
                 self._log.flushOK()
-                print "Rtsp Test Passed!"
+                if not self._streamingTest:
+                    print "Rtsp Test Passed!"
                 ret = True
             print "-----------------------------------------------------"
             return ret
 
-    def _mkRtspHandler(self, camera, urlGenerator, log=None, socket_reraise=False):
-        return RtspTcpBasic(self._serverAddrPair, camera[0:2], self._serverGUID,
-                            self._username, self._password,
-                            urlGenerator, self._lock, log, socket_reraise)
+    def _mkStreamingHandler(self, proto, camera, urlGenerator, log=None, socket_reraise=False):
+        return StreamTcpBasic(proto, self._serverAddrPair, camera[0:2], self._serverGUID,
+                self._username, self._password,
+                urlGenerator, self._lock, log, socket_reraise)
 
-    def _mkRtspStreamHandler(self, camera, log=None, socket_reraise=False):
-        return self._mkRtspHandler(camera,
-            RtspStreamURLGenerator(self._serverAddrPair, camera.physicalId),
-            log, socket_reraise)
+    def _mkLiveStreamHandler(self, proto, camera, log=None, socket_reraise=False):
+        return self._mkStreamingHandler(proto, camera,
+                RtspStreamURLGenerator(self._serverAddrPair, camera.physicalId),
+                log, socket_reraise)
 
-    def _mkRtspArchiveHandler(self, camera, log=None, socket_reraise=False):
-        return self._mkRtspHandler(camera,
-            RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,self._serverAddrPair, camera.physicalId),
-            log, socket_reraise)
+    def _mkArchStreamHandler(self, proto, camera, log=None, socket_reraise=False):
+        genClass = RtspArchiveURLGenerator if proto == 'rtsp' else HttpArchiveURLGenerator
+        return self._mkStreamingHandler(proto, camera,
+                genClass(self._archiveMax,self._archiveMin,self._serverAddrPair, camera.physicalId),
+                log, socket_reraise)
 
     def run(self):
         raise NotImplementedError("ERROR: the abstract method SingleServerRtspTestBase.run isn't overriden in %s" % self.__class__)
@@ -441,11 +464,11 @@ class FiniteSingleServerRtspTest(SingleServerRtspTestBase):
         if self._cameraList:
             # Streaming version RTSP test
             c = random.choice(self._cameraList)
-            with self._mkRtspStreamHandler(c) as reply:
+            with self._mkLiveStreamHandler('rtsp', c) as reply:
                 self._checkRtspRequest(c, reply)
 
         c = random.choice(self._allCameraList)
-        with self._mkRtspArchiveHandler(c) as reply:
+        with self._mkArchStreamHandler('rtsp', c) as reply:
             self._checkRtspRequest(c, reply)
 
     def run(self):
@@ -457,8 +480,8 @@ class FiniteRtspTest(object):
     """ For each server perform FiniteSingleServerRtspTest
     """
 
-    def __init__(self, cluster, testSize, userName, passWord, archiveMax, archiveMin):
-        self._cluster = cluster
+    def __init__(self, config, testSize, userName, passWord, archiveMax, archiveMin):
+        self._config = config
         self._testCase = testSize
         self._username = userName
         self._password = passWord
@@ -472,8 +495,9 @@ class FiniteRtspTest(object):
         print "Finite RTSP test starts"
         print "The failed detail result will be logged in rtsp.log file"
 
-        for i, serverAddr in enumerate(self._cluster.clusterTestServerList):
-            serverAddrGUID = self._cluster.clusterTestServerUUIDList[i][0]
+        uuidList = self._config.rtget("ServerUUIDList")
+        for i, serverAddr in enumerate(self._config.rtget("ServerList")):
+            serverAddrGUID = uuidList[i][0]
             log = RtspLog(serverAddr)
 
             tar = FiniteSingleServerRtspTest(self._archiveMax, self._archiveMin, serverAddr, serverAddrGUID,
@@ -510,10 +534,10 @@ class InfiniteSingleServerRtspTest(SingleServerRtspTestBase):
             for c in self._allCameraList:
                 # Streaming version RTSP test
                 if c.isOnline():
-                    with self._mkRtspStreamHandler(c) as reply:
+                    with self._mkLiveStreamHandler('rtsp', c) as reply:
                         results[self._checkRtspRequest(c, reply)] += 1
 
-                with self._mkRtspArchiveHandler(c) as reply:
+                with self._mkArchStreamHandler('rtsp', c) as reply:
                     results[self._checkRtspRequest(c, reply)] += 1
 
         print "-----------------------------------"
@@ -522,8 +546,8 @@ class InfiniteSingleServerRtspTest(SingleServerRtspTestBase):
 
 
 class InfiniteRtspTest(object):
-    def __init__(self, cluster, userName, passWord, archiveMax, archiveMin):
-        self._cluster = cluster
+    def __init__(self, config, userName, passWord, archiveMax, archiveMin):
+        self._config = config
         self._username = userName
         self._password = passWord
         self._archiveMax = archiveMax # max difference
@@ -551,8 +575,9 @@ class InfiniteRtspTest(object):
         # Setup the interruption handler
         signal.signal(signal.SIGINT,self._onInterrupt)
 
-        for i, serverAddr in enumerate(self._cluster.clusterTestServerList):
-            serverAddrGUID = self._cluster.clusterTestServerUUIDList[i][0]
+        uuidList = self._config.rtget("ServerUUIDList")
+        for i, serverAddr in enumerate(self._config.rtget("ServerList")):
+            serverAddrGUID = uuidList[i][0]
             log = RtspLog(serverAddr)
 
             tar = InfiniteSingleServerRtspTest(self._archiveMax, self._archiveMin,
@@ -586,9 +611,8 @@ class InfiniteRtspTest(object):
 
 class RtspTestSuit(object):
 
-    def __init__(self, cluster):
-        self._cluster = cluster
-        self._config = cluster.getConfig()
+    def __init__(self, config):
+        self._config = config
         #if not self._cluster.unittestRollback:
         #    self._cluster.init_rollback()
 
@@ -600,9 +624,9 @@ class RtspTestSuit(object):
         diffMin = self._config.getint("Rtsp","archiveDiffMin")
 
         if testSize < 0 :
-            InfiniteRtspTest(self._cluster, username, password, diffMax, diffMin).test()
+            InfiniteRtspTest(self._config, username, password, diffMax, diffMin).test()
         else:
-            FiniteRtspTest(self._cluster, testSize, username, password, diffMax, diffMin).test()
+            FiniteRtspTest(self._config, testSize, username, password, diffMax, diffMin).test()
 
 
 # ================================================================================================
@@ -610,7 +634,8 @@ class RtspTestSuit(object):
 # ================================================================================================
 
 class SingleServerRtspPerf(SingleServerRtspTestBase):
-    _archiveStreamRate = DEFAULT_ARCHIVE_STREAM_RATE
+    _archiveStreamRate = _DEFAULT_ARCHIVE_STREAM_RATE
+    # _timeoutMin and _timeoutMax specify the borders of possible single request data dransmition duration
     _timeoutMax = 0 # whole number of milliseconds
     _timeoutMin = 0 # whole number of milliseconds
     _perfLog = None
@@ -629,14 +654,15 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _streamNumClose = 0
     _streamNumSocketError = 0
     _need_dump = False
-    _rtspTimeout = 3
+    _tcpTimeout = 3
     _httpTimeout = 5
-    _threadStartSpacing = 0
-    _socketCloseGrace = 0
-    _camerasStartGrace = 8
-    _liveDataPart = 50
+    _threadStartGap = _DEFAULT_THREAD_START_GAP  # a gap between new thread of requests starts
+    _socketCloseGrace = _DEFAULT_SOCKET_CLOSE_GRACE  # additional time for remote socket to close before open it again
+    _camerasStartGrace = _DEFAULT_CAMERAS_START_GRACE  # pause duration to allow all cameras to start recording
+    _liveDataPart = _DEFAULT_LIVE_DATA_PART  # a percentage of live data requests (another part are archive data requests)
 
     _startTime = 0
+    _logNameTpl = "%s_%s.perf.rtsp.log"
 
     @classmethod
     def set_global(cls, name, value):
@@ -652,7 +678,8 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         self._threadNum = threadNum
         self._exitFlag = flag
         # Initialize the performance log
-        self._perfLog = open("%s_%s.perf.rtsp.log" % tuple(self._serverAddrPair),"w+")
+        if self._logNameTpl:
+            self._perfLog = open(self._logNameTpl % tuple(self._serverAddrPair),"w+")
         # Order cameras to start recording and preserve a time gap for starting
         self._camerasReadyTime = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
 
@@ -672,7 +699,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                     "http://%s/ec2/saveCameraUserAttributesList" % (self._serverAddr),
                     data=json.dumps(cameras),
                     headers={'Content-Type': 'application/json'}),
-                    timeout=self._httpTimeout
+                timeout=self._httpTimeout
             )
             if response.getcode() != 200:
                 raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverAddr, response.getcode()))
@@ -713,9 +740,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     def _dumpArchiveHelper(self, c, tcp_rtsp, timeout, dump_file):
         self._startTime = time.time()
         finish = self._startTime + timeout
-        while time.time() < finish:
+        while time.time() < finish and self._exitFlag.isOn():
             try:
-                data = self._timeoutRecv(tcp_rtsp._socket, self._archiveStreamRate, self._rtspTimeout)
+                data = self._timeoutRecv(tcp_rtsp.get_socket(), self._archiveStreamRate, self._tcpTimeout)
                 if dump_file is not None:
                     dump_file.write(data)
                     dump_file.flush()
@@ -727,14 +754,14 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                         print "--------------------------------------------"
                         if data is None:
                             print "The RTSP url %s no archive data response for %s seconds" % (
-                                tcp_rtsp._url, self._rtspTimeout)
+                                tcp_rtsp._url, self._tcpTimeout)
                         else:
                             print "The RTSP url %s connection has been closed by server after %.2f seconds" % (
                                 tcp_rtsp._url, time.time() - self._startTime)
                         self._perfLog.write("--------------------------------------------\n")
                         if data is None:
                             self._perfLog.write("! The RTSP/RTP url %s no data response for %s seconds\n" % (
-                                tcp_rtsp._url, self._rtspTimeout))
+                                tcp_rtsp._url, self._tcpTimeout))
                         else:
                             self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (
                                 tcp_rtsp._url,))
@@ -751,14 +778,14 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                     return
         with self._lock:
             print "--------------------------------------------"
-            print "The %.3f seconds RTP sink finished on RTSP url %s" % (timeout,tcp_rtsp._url)
+            print "The %.3f seconds streaming from %s finished" % (timeout,tcp_rtsp._url)
 
     def _dumpStreamHelper(self, c, tcp_rtsp, timeout, dump_file):
         self._startTime = time.time()
         finish = self._startTime + timeout
-        while time.time() < finish:
+        while time.time() < finish and self._exitFlag.isOn():
             try:
-                data = self._timeoutRecv(tcp_rtsp._socket, -1, self._rtspTimeout)
+                data = self._timeoutRecv(tcp_rtsp.get_socket(), -1, self._tcpTimeout)
                 if dump_file is not None:
                     dump_file.write(data)
                     dump_file.flush()
@@ -770,14 +797,14 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                         print "--------------------------------------------"
                         if data is None:
                             print "The RTSP url %s no live data response for %s seconds" % (
-                                tcp_rtsp._url, self._rtspTimeout)
+                                tcp_rtsp._url, self._tcpTimeout)
                         else:
                             print "The RTSP url %s connection has been closed by server after %.2f seconds" % (
                                 tcp_rtsp._url, time.time() - self._startTime)
                         self._perfLog.write("--------------------------------------------\n")
                         if data is None:
                             self._perfLog.write("! The RTSP/RTP url %s no data response for %s seconds\n" % (
-                                tcp_rtsp._url, self._rtspTimeout))
+                                tcp_rtsp._url, self._tcpTimeout))
                         else:
                             self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (
                                 tcp_rtsp._url,))
@@ -808,13 +835,12 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
     # Represent a streaming TASK on the camera
     def _main_streaming(self, c):
-        obj = self._mkRtspStreamHandler(c, self._perfLog, socket_reraise=True)
-        obj.add_prefered_resolution(random.choice(['low', 'high']))
-
         try:
+            obj = self._mkLiveStreamHandler('rtsp', c, self._perfLog, socket_reraise=True)
+            obj.add_prefered_resolution(random.choice(['low', 'high']))
             with obj as reply:
                 # 1.  Check the reply here
-                if self._checkRtspRequest(c,reply):
+                if self._checkRtspRequest(c, reply, 'rtsp'):
                     self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpStreamHelper)
                     self._streamNumOK += 1
                 else:
@@ -823,14 +849,20 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             print "--------------------------------------------"
             print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
             self._streamNumSocketError += 1
+        except Exception:
+            print "--------------------------------------------"
+            print "A live streaming test fails with exception:\n%s" % (traceback.format_exc(), )
+            self._streamNumFail += 1
 
     def _main_archive(self, c):
-        obj = self._mkRtspArchiveHandler(c, self._perfLog, socket_reraise=True)
-        obj.add_prefered_resolution(random.choice(['low', 'high']))
         try:
+            proto = random.choice(('rtsp', 'http'))
+            obj = self._mkArchStreamHandler(proto, c, self._perfLog, socket_reraise=True)
+            if proto == 'rtsp':
+                obj.add_prefered_resolution(random.choice(['low', 'high']))
             with obj as reply:
                 # 1.  Check the reply here
-               if self._checkRtspRequest(c,reply):
+               if self._checkRtspRequest(c, reply, proto):
                    self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpArchiveHelper)
                    self._archiveNumOK += 1
                else:
@@ -839,11 +871,15 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             print "--------------------------------------------"
             print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
             self._archiveNumSocketError += 1
+        except Exception:
+            print "--------------------------------------------"
+            print "An archive streaming test fails with exception:\n%s" % (traceback.format_exc(), )
+            self._archiveNumFail += 1
 
     def _threadMain(self, num):
         while self._exitFlag.isOn():
             # choose a random camera in the server list
-            c = random.choice(self._cameraList)
+            c = random.choice(self._allCameraList if self._allowOffline else self._cameraList)
             if random.randint(1,100) <= self._liveDataPart:
                 self._main_streaming(c)
             else:
@@ -852,29 +888,38 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 time.sleep(self._socketCloseGrace)
 
     def join(self):
+        #print "*** Stack:"
+        #traceback.print_stack()
         for th in self._threadPool:
             th.join()
         self._perfLog.close()
         print "======================================="
         print "Server: %s" % (self._serverAddr)
         print "Number of threads: %s" % self._threadNum
-        print "rtspTimeout value: %s" % self._rtspTimeout
-        print "Archive Success Number: %d" % self._archiveNumOK
-        print "Archive Failed Number: %d" % self._archiveNumFail
-        print "Archive Timed Out Number: %d" % self._archiveNumTimeout
-        print "Archive Server Closed Number: %d" % self._archiveNumClose
-        print "Archive Socket Error Number: %d" % self._archiveNumSocketError
-        print "Stream Success Number:%d" % self._streamNumOK
-        print "Stream Failed Number:%d" % self._streamNumFail
-        print "Stream Timed Out Number: %d" % self._streamNumTimeout
-        print "Stream Server Closed Number: %d" % self._streamNumClose
-        print "Stream Socket Error Number: %d" % self._streamNumSocketError
+        print "tcpTimeout value: %s" % self._tcpTimeout
+        if self._liveDataPart < 100:
+            print "Archive Success Number: %d" % self._archiveNumOK
+            print "Archive Failed Number: %d" % self._archiveNumFail
+            print "Archive Timed Out Number: %d" % self._archiveNumTimeout
+            print "Archive Server Closed Number: %d" % self._archiveNumClose
+            print "Archive Socket Error Number: %d" % self._archiveNumSocketError
+        if self._liveDataPart > 0:
+            print "Stream Success Number:%d" % self._streamNumOK
+            print "Stream Failed Number:%d" % self._streamNumFail
+            print "Stream Timed Out Number: %d" % self._streamNumTimeout
+            print "Stream Server Closed Number: %d" % self._streamNumClose
+            print "Stream Socket Error Number: %d" % self._streamNumSocketError
         print "======================================="
+        # only archive results are interesting since it's for streaming tests only
+        return 0 == self._archiveNumFail + self._archiveNumTimeout + self._archiveNumClose + self._archiveNumSocketError
+
+    def isAlive(self):
+        return all(imap(threading.Thread.isAlive, self._threadPool))
 
     def run(self, need_dump=False):
-        if not self._cameraList:
+        if not self._cameraList and not self._allowOffline:
             if self._allCameraList:
-                print "All cameras on cerver %s are offline!" % (self._serverAddr,)
+                print "All cameras on server %s are offline!" % (self._serverAddr,)
             else:
                 print "The camera list on server: %s is empty!" % (self._serverAddr,)
             print "Do nothing and abort!"
@@ -889,37 +934,61 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             th = threading.Thread(target=self._threadMain, args=(_,))
             th.start()
             self._threadPool.append(th)
-            if self._threadStartSpacing:
-                time.sleep(self._threadStartSpacing)
+            if self._threadStartGap:
+                time.sleep(self._threadStartGap)
         return True
 
+    def getAddr(self):
+        return self._serverAddr
+
+
+# -----------------------------------------------
 
 class RtspPerf(object):
+    _cs = 'Rtsp'  # main config section
     _perfServer = []
     _lock = threading.Lock()
     _exit = False
+    _streamTest = False
+    _singleServerClass = SingleServerRtspPerf
 
-    def __init__(self, cluster):
-        self._cluster = cluster
-        self._config = config = cluster.getConfig()
-        self.threadNumbers = self._config.get("Rtsp","threadNumbers").split(",")
-        if len(self.threadNumbers) != len(cluster.clusterTestServerList):
-            self.run = self._cantRun # substitute the `run` method
-            return
+    def __init__(self, config):
+        self._config = config
+        self._need_dump = config.rtget("need_dump")
+        self._serverList = config.rtget("ServerList")
+        self._serverUUIDList = config.rtget("ServerUUIDList")
+        self._username = self._config.get("General", "username")
+        self._password = self._config.get("General", "password")
 
-        #RtspTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
-        SingleServerRtspPerf.set_global('timeoutMin', config.getint("Rtsp","timeoutMin") * 1000)
-        SingleServerRtspPerf.set_global('timeoutMax', config.getint("Rtsp","timeoutMax") * 1000)
-        SingleServerRtspPerf.set_global('rtspTimeout', config.getint_safe("Rtsp", "rtspTimeout", 3))
+        self.threadNumbers = config.get(self._cs,"threadNumbers").split(",")
+        if len(self.threadNumbers) != len(self._serverList):
+            if len(self.threadNumbers) == 1:
+                self.threadNumbers = self.threadNumbers * len(self._serverList)
+            else:
+                self.run = self._cantRun # substitute the `run` method
+                return
+
+        #StreamTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
+
+        SingleServerRtspPerf.set_global('timeoutMin', config.getint(self._cs,"timeoutMin") * 1000)
+        SingleServerRtspPerf.set_global('timeoutMax', config.getint(self._cs,"timeoutMax") * 1000)
+        SingleServerRtspPerf.set_global('tcpTimeout', config.getint_safe(self._cs, "tcpTimeout", 3))
         SingleServerRtspPerf.set_global('httpTimeout', config.getint_safe("Rtsp", "httpTimeout", 5))
-        SingleServerRtspPerf.set_global('camerasStartGrace', config.getint_safe("Rtsp", "camerasStartGrace", 5))
-        SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
-        SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
-        SingleServerRtspPerf.set_global('liveDataPart', config.getint_safe("Rtsp", "liveDataPart", 50))
+        SingleServerRtspPerf.set_global('camerasStartGrace',
+                                        config.getint_safe(self._cs, "camerasStartGrace", _DEFAULT_CAMERAS_START_GRACE))
+        SingleServerRtspPerf.set_global('threadStartGap',
+                                        config.getfloat_safe(self._cs, "threadStartGap", _DEFAULT_THREAD_START_GAP))
+        SingleServerRtspPerf.set_global('socketCloseGrace',
+                                        config.getfloat_safe("Rtsp", "socketCloseGrace", _DEFAULT_SOCKET_CLOSE_GRACE))
+        SingleServerRtspPerf.set_global('liveDataPart',
+                                        0 if self._streamTest else # FIXME parameter!
+                                        config.getint_safe("Rtsp", "liveDataPart", _DEFAULT_LIVE_DATA_PART))
 
         rate = config.get_safe("Rtsp", "archiveStreamRate", None)
-        if rate is not None:
-            SingleServerRtspPerf.set_global('archiveStreamRate', parse_size(rate))
+        SingleServerRtspPerf.set_global(
+            'archiveStreamRate', _DEFAULT_ARCHIVE_STREAM_RATE if rate is None else parse_size(rate) )
+
+        SingleServerRtspPerf.set_global('streamingTest', self._streamTest)
 
     def isOn(self):
         return not self._exit
@@ -931,60 +1000,167 @@ class RtspPerf(object):
         self.turnOff()
 
     def _cantRun(self):
-        print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
+        print "The threadNumbers list in %s section has size > 1 and doesn't match the size of the serverList" % (self._cs,)
         print "threadNumbers = %s" % self.threadNumbers
-        print "clusterTestServerList = %s" % self._cluster.clusterTestServerList
-        print "Every server MUST be assigned with a correct thread Numbers"
-        print "RTSP Pressure test failed"
+        print "ServerList = %s" % self._serverList
+        if self._streamTest:
+            print "Streaming test FAILED"
+        else:
+            print "RTSP Pressure test FAILED"
 
     def initTest(self):
-        archiveMax = self._config.getint("Rtsp","archiveDiffMax")
-        archiveMin = self._config.getint("Rtsp","archiveDiffMin")
-        username = self._config.get("General","username")
-        password = self._config.get("General","password")
+        archiveMin = self._config.getint(self._cs, "archiveDiffMin")
+        archiveMax = self._config.getint(self._cs, "archiveDiffMax")
 
         # Let's add those RtspSinglePerf
-        for i, serverAddr in enumerate(self._cluster.clusterTestServerList):
-            serverGUID = self._cluster.clusterTestServerUUIDList[i][0]
-            serverThreadNum = int(self.threadNumbers[i])
-
-            self._perfServer.append(SingleServerRtspPerf(
-                    archiveMax,archiveMin,
-                    serverAddr,serverGUID,
-                    username,password,
-                    serverThreadNum,self,self._lock))
-
+        self._perfServer = []
+        for i, serverAddr in enumerate(self._serverList):
+            self._perfServer.append(self._singleServerClass(
+                archiveMax, archiveMin,
+                serverAddr, self._serverUUIDList[i][0],
+                self._username, self._password,
+                int(self.threadNumbers[i]), self, self._lock,
+            ))
         return True
 
-    def run(self, need_dump=False):
+    def _mainSleep(self):
+        while self.isOn():
+            try:
+                time.sleep(1)
+                if not any(e.isAlive() for e in self._perfServer):
+                    if self.isOn():  # only print if threads are dead by their own will
+                        print "(All threads are finished. Stopping.)"
+                    break
+            except Exception:
+                break
+            except KeyboardInterrupt:
+                break
+        self.turnOff()  # in case of interruption
+
+    def run(self):
         self.initTest()
         print "---------------------------------------------"
-        print "Start to run RTSP pressure test now!"
-        print "Press CTRL+C to interrupt the test!"
-        print "The exceptional cases are stored inside of server_end_point.rtsp.perf.log"
+        if self._streamTest:
+            print "Start the streaming test."
+        else:
+            print "Start the RTSP pressure test now. Press CTRL+C to interrupt the test!"
+        print "The exceptional cases are stored inside of SERVER_ADRR.rtsp.perf.log"
 
         # Add the signal handler
         signal.signal(signal.SIGINT,self._onInterrupt)
 
         for e in self._perfServer:
-            if not e.run(need_dump):
+            if not e.run(self._need_dump):
                 return
 
-        while self.isOn():
-            try:
-                time.sleep(1)
-            except Exception:
-                break
-            except KeyboardInterrupt:
-                break
+        self._mainSleep()
 
         # all threads should stop since self.isOn() returns False
+        fail = False
         for e in self._perfServer:
-            e.join()
+            if not e.join() and self._streamTest:
+                print "FAIL: some requests are unseccessed on %s" % (e.getAddr(),)
+                fail = True
 
-        print "RTSP performance test done,see log for detail"
+        if self._streamTest:
+            print "Streaming test %s" % ("FAILED" if fail else "PASSED",)
+        else:
+            print "RTSP performance test done,see log for detail"
         print "---------------------------------------------"
+        return not fail
 
+
+class RtspStreamTest(RtspPerf):
+    _cs = 'Streaming'
+    def __init__(self, config):
+        self._streamTest = True
+        #self._multi = multiproto
+        RtspPerf.__init__(self, config)
+
+    def _finish(self):
+        print "...Finishing test.."
+        self.turnOff()
+
+    def _mainSleep(self):
+        tm = threading.Timer(
+            self._config.getint_safe(self._cs, "testDuration", _DEFAULT_STREAMING_DURATION),
+            self._finish)
+        tm.start()
+        super(RtspStreamTest, self)._mainSleep()
+        if tm and tm.isAlive():
+            tm.cancel()
+
+#-----------------------------------------------------------
+class SingleServerHlsTest(SingleServerRtspPerf):
+    _logNameTpl = "%s_%s.hls.log"
+
+    def _hlsRequest(self, url):
+        err = ""
+        try:
+            response = urllib2.urlopen(urllib2.Request(url, headers={'x-server-guid': self._serverGUID}),
+                timeout=self._httpTimeout)
+        except Exception as e:
+            err = "ERROR: url %s request raised exception %s" % (url, e)
+        else:
+            if response.getcode() != 200:
+                err = "ERROR: URL %s returned coed %s" % (url, response.getcode())
+        if err:
+            raise AssertionError(err)
+        return response.read()
+
+    def _getStartM3u(self, c, period):
+        pos = RandomArchTime(self._archiveMin, self._archiveMax)
+        url = "http://%s/hls/%s.m3u?pos=%s" % (self._serverAddr, c.physicalId, pos)
+        print "Requesting %s for %s sec." % (url, period)
+        return self._hlsRequest(url)
+
+    def _parseM3u(self, data, chooseOne=False):
+        "Parses initial m3u list and choses one of URIs (hi or lo)"
+        if data is None:
+            raise AssertionError("Empty m3u data from %s" % self._serverAddr)
+        uri = []
+        data = data.split("\n")
+        if data[0].strip() != "#EXTM3U":
+            raise AssertionError("Wrong m3u data (no #EXTM3U header) from %s" % self._serverAddr)
+        for line in data:
+            if line.startswith('/hls/'):
+                uri.append(line.rstrip())
+        if not uri:
+            raise AssertionError("No links found in n3u data from %s" % self._serverAddr)
+        return random.choice(uri) if chooseOne else uri
+
+    def _loadCunks(self, chunks):
+        for uri in chunks:
+            url = "http://%s%s" % (self._serverAddr, uri)
+            data = self._hlsRequest(url)
+            #print "Chunk %s: %s bytes received" % (url, len(data))
+
+    def _main_archive(self, c):
+        period = self._makeDataReceivePeriod()
+        finish = time.time() + period
+        m3u = self._getStartM3u(c, period)
+        uri = self._parseM3u(m3u, chooseOne=True)
+        #print "Choosen %s" % uri
+        url = "http://%s%s" % (self._serverAddr, uri)
+        while time.time() < finish:
+            chunks = self._parseM3u(self._hlsRequest(url))
+            self._loadCunks(chunks)
+        self._archiveNumOK += 1
+
+    def _threadMain(self, num):
+        self._liveDataPart = 0
+        try:
+            super(SingleServerHlsTest, self)._threadMain(num)
+        except Exception as e:
+            print traceback.format_exc()
+            self._archiveNumFail += 1
+
+
+class HlsStreamingTest(RtspStreamTest):
+    _singleServerClass = SingleServerHlsTest
+
+    def initTest(self):
+        super(HlsStreamingTest, self).initTest()
 
 if __name__ == '__main__':
     print "%s not supposed to be executed alone." % (__file__,)
