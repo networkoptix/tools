@@ -45,7 +45,8 @@ def RunTests(testclass, config, *args):
     #print "DEBUG: run test class %s" % testclass
     testclass.init_suits()
     return all( [
-            unittest.TextTestRunner(verbosity=2, failfast=True).run(
+            unittest.TextTestRunner(verbosity=2, failfast=testclass.isFailFast(suit_name))
+            .run(
                 TestLoader().load(testclass, suit_name, config, *args)
             ).wasSuccessful()
             for suit_name in testclass.iter_suits()
@@ -102,6 +103,11 @@ class FuncTestCase(unittest.TestCase):
         print "%s Test End" % cls._test_name
         print "========================================="
 
+    @classmethod
+    def isFailFast(cls, suit_name=""):
+        # it could depend on the specific suit
+        return True
+
     ################################################################################
     # These 3 methods used in a caller (see the RunTests and functest.CallTest funcions)
     @classmethod
@@ -127,7 +133,7 @@ class FuncTestCase(unittest.TestCase):
     ################################################################################
 
     def _call_box(self, box, *command):
-        print "_call_box: %s: %s" % (box, ' '.join(command))
+        #print "_call_box: %s: %s" % (box, ' '.join(command))
         try:
             return boxssh(box, command)
         except subprocess.CalledProcessError, e:

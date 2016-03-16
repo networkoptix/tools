@@ -27,18 +27,23 @@ class StreamingTest(StorageBasedTest):
     _fill_storage_script = 'fill_stor.py'
     _clear_storage_script = 'str_clear.sh'
     _need_copy = True
+    _initFailed = False
 
     def _get_init_script(self, boxnum):
         return ('/vagrant/str_init.sh',)
 
     @classmethod
+    def isFailFast(cls, suit_name=""):
+        return False
+
+    @classmethod
     def setUpClass(cls):
         super(StreamingTest, cls).setUpClass()
+        cls._initFailed = False
         if cls._need_copy:
             try:
                 cls.config = copy.copy(cls.config)
                 cls.config.runtime = cls.config.runtime.copy()
-                print "DEBUG: Server: %s" % (cls.sl[_WORK_HOST],)
                 cls.config.rtset("ServerList", [cls.sl[_WORK_HOST]])
                 cls._need_copy = False
             except Exception:
@@ -57,15 +62,23 @@ class StreamingTest(StorageBasedTest):
 
     def Initialisation(self):
         "Re-initialize with clear db, prepare a single camera data"
-        self._InitialRestartAndPrepare()
-        self._fill_storage('streaming', _WORK_HOST, "streaming")
+        try:
+            self._InitialRestartAndPrepare()
+            self._fill_storage('streaming', _WORK_HOST, "streaming")
+        except Exception:
+            type(self)._initFailed = True
+            raise
 
     def MultiProtoStreamingTest(self):
         "Check RTSP and HTTP streaming from server"
+        if self._initFailed:
+            self.skipTest("not initialized")
         self.assertTrue(RtspStreamTest(self.config).run(),
                         "Multi-proto streaming test failed")
 
     def HlsStreamingTest(self):
+        if self._initFailed:
+            self.skipTest("not initialized")
         "Check HLS streaming from server"
         self.assertTrue(HlsStreamingTest(self.config).run(),
                         "HLS streaing test failed")

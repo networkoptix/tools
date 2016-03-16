@@ -1041,7 +1041,7 @@ class RtspPerf(object):
         self.initTest()
         print "---------------------------------------------"
         if self._streamTest:
-            print "Start the streaming test."
+            print "Start the streaming test"
         else:
             print "Start the RTSP pressure test now. Press CTRL+C to interrupt the test!"
         print "The exceptional cases are stored inside of SERVER_ADRR.rtsp.perf.log"

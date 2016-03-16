@@ -858,6 +858,9 @@ def mk_functest_cmd(to_skip):
     elif Args.msarch:
         cmd.append("--msarch")
         only_test = "msarch"
+    elif Args.stream:
+        cmd.append("--stream")
+        only_test = "stream"
     elif Args.natcon:
         cmd.extend(NATCON_ARGS)
         only_test = "natcon"
@@ -868,6 +871,8 @@ def mk_functest_cmd(to_skip):
             cmd.append("--skipbak")
         if 'msarch' in to_skip:
             cmd.append('--skipmsa')
+        if "stream" in to_skip:
+            cmd.append("--skipstrm")
     log("Running functional tests: %s", cmd)
     return cmd, only_test
 
@@ -966,7 +971,7 @@ class FunctestParser(object):
     #@property
     #def parser(self):
     #    return self._parser
-    #
+
     #@parser.setter
     #def parser(self, value):
     #    self._parser = value
@@ -1182,17 +1187,11 @@ class FunctestParser(object):
 
     def parse_msarch_start(self, line):
         if line.startswith(self.MS_START):
-            self.ts_name = line[len(self.MS_START):].rstrip()
+            #self.ts_name = line[len(self.MS_START):].rstrip()
             self.stage = 'multiserver archive test'
             #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
             self.parser = self.parse_msarch
             self.collector[:] = [line]
-
-    def parse_msarch_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
-        log_to_send(line)
-        if line.startswith("FAILED (failures"):
-            log("Multiserver archive test done")
-            self.set_end()
 
     def parse_msarch(self, line):
         if line.startswith(self.MS_END):
@@ -1200,16 +1199,22 @@ class FunctestParser(object):
         elif not self._ms_check_fail(line):
             self.collector.append(line)
 
+    def parse_msarch_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
+        log_to_send(line)
+        if line.startswith("FAILED (failures"):
+            log("Multiserver archive test done")
+            self.parser = self.parse_stream_start
+
     def parse_msarch_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
         if not self._ms_check_fail(line) and line.startswith("OK"):
             log("Multiserver archive test done")
-            self.set_end()
+            self.parser = self.parse_stream_start
 
     def _ms_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
         if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
             return False
         self.has_errors = True
-        print ":::::" + line
+        #print ":::::" + line
         log_to_send("Multiserver archive test %s!",
                     "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
         for s in self.collector:
@@ -1219,6 +1224,47 @@ class FunctestParser(object):
         self.parser = self.parse_msarch_failed
         return True
 
+    STR_START = "Streaming Test Start"
+    STR_END = "Streaming Test End"
+
+    def parse_stream_start(self, line):
+        if line.startswith(self.STR_START):
+            #self.ts_name = line[len(self.STR_START):].rstrip()
+            self.stage = 'streaming test'
+            #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
+            self.parser = self.parse_stream
+            self.collector[:] = [line]
+
+    def parse_stream(self, line):
+        if line.startswith(self.STR_END):
+            self.parser = self.parse_stream_tail
+        elif not self._str_check_fail(line):
+            self.collector.append(line)
+
+    def parse_stream_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
+        log_to_send(line)
+        if line.startswith("FAILED (failures"):
+            log("Streaming test done")
+            self.set_end()
+
+    def parse_stream_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
+        if not self._str_check_fail(line) and line.startswith("OK"):
+            log("Streaming test done")
+            self.set_end()
+
+    def _str_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
+        if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
+            return False
+        self.has_errors = True
+        #print ":::::" + line
+        log_to_send("Streaming test %s!",
+                    "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
+        for s in self.collector:
+            log_to_send(s)
+        log_to_send(line)
+        del self.collector[:]
+        self.parser = self.parse_stream_failed
+        return True
     #
 
     def set_end(self):
@@ -1236,6 +1282,8 @@ def read_functest_output(proc, reader, from_test=''):
         p.parser = p.parse_timesync_start
     elif from_test == 'msarch':
         p.parser = p.parse_msarch_start
+    elif from_test == 'stream':
+        p.parser = p.parse_stream_start
     while reader.state == pipereader.PIPE_READY:
         line = reader.readline(FT_PIPE_TIMEOUT)
         if len(line) > 0:
@@ -1367,7 +1415,7 @@ def show_boxes():
 #####################################
 
 # which options are allowed to be used with --nobox
-NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress', 'msarch'))
+NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress', 'msarch', 'stream'))
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -1552,7 +1600,7 @@ def main():
     if Args.auto:
         run_auto_loop()
 
-    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch or Args.natcon: # virtual boxes functest only
+    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch or Args.natcon or Args.stream: # virtual boxes functest only
         ToSend[:] = []
         perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
@@ -1561,6 +1609,7 @@ def main():
                 "timesync" if Args.timetest else
                 "http-stress" if Args.httpstress else
                 "multiserver archive" if Args.msarch else
+                "streaming" if Args.stream else
                 "UNKNOWN!!!"),
             ToSend)
 

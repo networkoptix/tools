@@ -2727,7 +2727,7 @@ def DoTests(argv):
         if the_test.result.wasSuccessful():
             print "Main tests passed OK"
             if MergeTest().run():
-                SystemNameTest(clusterTest).run()
+                SystemNameTest(clusterTest.getConfig()).run()
         if not clusterTest.do_main_only:
             if not clusterTest.skip_timesync:
                 CallTest(TimeSyncTest)
