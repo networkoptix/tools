@@ -1447,7 +1447,7 @@ def parse_args():
     # Run mode
     # No args -- just build and test current project (could be modified by -p, -t, -u)
     parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
-    parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing unit tests again.")
+    parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing tests again (add --noft to skip functests.")
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
