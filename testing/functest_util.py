@@ -8,7 +8,7 @@ from ConfigParser import RawConfigParser
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'checkResultsEqual',
-           'ClusterWorker', 'ClusterLongWorker', 'parse_size',
+           'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str',
            'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
 
@@ -717,3 +717,5 @@ def parse_size(size_str):
     return int(size_str) * mult
 
 
+def args2str(args):
+    return '%s and %s' % (', '.join('--'+opt for opt in args[:-1]), '--'+args[-1])

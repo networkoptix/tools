@@ -18,8 +18,9 @@ import xml.etree.ElementTree as ET
 from testconf import *
 import pipereader
 from testboxes import boxssh
+from functest_util import args2str
 
-__version__ = '1.1.1'
+__version__ = '1.2.1'
 
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
@@ -411,7 +412,7 @@ def run_tests(branch):
                 lines.append('')
                 lines.extend(ToSend)
 
-    if not lines:
+    if not lines and not Args.no_functest:
         del ToSend[:]
         perform_func_test(to_skip)
         if ToSend:
@@ -1415,7 +1416,29 @@ def show_boxes():
 #####################################
 
 # which options are allowed to be used with --nobox
-NOBOX_ALLOWED = set(('functest', 'timetest', 'httpstress', 'msarch', 'stream'))
+FUNCTEST_ARGS = ('functest', 'timetest', 'httpstress', 'msarch', 'natcon', 'stream')
+ARGS_EXCLUSIVE = (
+    ('nobox', 'boxes', 'boxoff', 'add', 'showboxes'),
+) + tuple(('no_functest', opt) for opt in FUNCTEST_ARGS)
+
+
+def any_functest_arg():
+    return any(getattr(Args, opt) for opt in FUNCTEST_ARGS)
+
+def check_args_correct():
+    if Args.full_build_log and not Args.stdout:
+        print "ERROR: --full-build-log option requires --stdout!\n"
+        exit(1)
+    for block in ARGS_EXCLUSIVE:
+        if sum(1 if getattr(Args, opt, None) else 0 for opt in block) > 1:
+            print "Arguments %s are mutual exclusive!" % (args2str(block),)
+            exit(1)
+    if Args.nobox and not any_functest_arg():
+        print "ERROR: --nobox is allowed only with options %s\n" % (args2str(FUNCTEST_ARGS),)
+        exit(1)
+    if Args.add and Args.boxes is None:
+        print "ERROR: --add is usable only with --boxes"
+        exit(1)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -1429,6 +1452,7 @@ def parse_args():
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
+    parser.add_argument("--no-functest", "--noft", action="store_true", help="Only build the project and run unittests.")
     parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
@@ -1455,15 +1479,7 @@ def parse_args():
 
     global Args
     Args = parser.parse_args()
-    if Args.full_build_log and not Args.stdout:
-        print "ERROR: --full-build-log option requires --stdout!\n"
-        exit(1)
-    if Args.nobox and not any(getattr(Args, opt) for opt in NOBOX_ALLOWED):
-        print "ERROR: --nobox is allowed only with options: %s\n" % ", ".join("--"+opt for opt in NOBOX_ALLOWED)
-        exit(1)
-    if Args.add and Args.boxes is None:
-        print "ERROR: --add is usable only with --boxes"
-        exit(1)
+    check_args_correct()
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
     if Args.threads is not None:
@@ -1600,7 +1616,7 @@ def main():
     if Args.auto:
         run_auto_loop()
 
-    elif Args.functest or Args.timetest or Args.httpstress or Args.msarch or Args.natcon or Args.stream: # virtual boxes functest only
+    elif not Args.no_functest and any_functest_arg():  # virtual boxes functest only
         ToSend[:] = []
         perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
