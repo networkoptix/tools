@@ -87,7 +87,7 @@ class TimeSyncTest(FuncTestCase):
     _suits = (
         ('SyncTimeNoInetTests', [
             'InitialSynchronization',
-            'ChangePrimayServer',
+            'ChangePrimaryServer',
             'PrimarySystemTimeChange',
             'SecondarySystemTimeChange',
             'StopPrimary', 'RestartSecondaryWhilePrimaryOff', 'StartPrimary',
@@ -204,7 +204,7 @@ class TimeSyncTest(FuncTestCase):
             timediff = abs(timedata['time'] - timedata['boxtime'])
             if timediff > GRACE:
                 if must_synchronize:
-                    print "DEBUG: %s server time: %s, system time: %s. Diff = %.2f - too high" % (
+                    print "DEBUG (_check_systime_sync): %s server time: %s, system time: %s. Diff = %.2f - too high" % (
                         boxnum, timedata['time'], timedata['boxtime'], timediff)
                 time.sleep(0.5)
             else:
@@ -230,7 +230,7 @@ class TimeSyncTest(FuncTestCase):
         self.times[boxnum] = times
         #print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
         #print "!DEBUG: %s server times: " % boxnum,
-        pprint.pprint(times)
+        #pprint.pprint(times)
         return times['local'] - times['time']  # local time -- server's time
 
     def _get_secondary(self):
@@ -254,7 +254,7 @@ class TimeSyncTest(FuncTestCase):
         #self.debug_systime()
         #TODO add here flags check, what server has became the primary one
 
-    def ChangePrimayServer(self):
+    def ChangePrimaryServer(self):
         """Check mediaservers' time synchronization by the new primary server.
         """
         #self.debug_systime()
@@ -270,12 +270,12 @@ class TimeSyncTest(FuncTestCase):
         """Change system time on the primary servers' box, check if the servers have synchronized.
         """
         self.shortDescription()
-        self.debug_systime()
+        #self.debug_systime()
         primary = self._primary # they'll be compared later
         box = self.hosts[primary]
         print "Use primary box %s (%s)" % (primary, box)
         self.shift_box_time(box, 12345)
-        self.debug_systime()
+        #self.debug_systime()
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(primary)
         self._check_time_sync()
@@ -289,7 +289,7 @@ class TimeSyncTest(FuncTestCase):
         box = self.hosts[sec]
         print "Use secondary box %s (%s)" % (sec, box)
         self.shift_box_time(box, -12345)
-        self.debug_systime()
+        #self.debug_systime()
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(sec, False)
         self._check_time_sync()
@@ -299,7 +299,7 @@ class TimeSyncTest(FuncTestCase):
         """Check if stopping the primary server doesn't lead to the secondary's time change.
         """
         type(self)._secondary = self._get_secondary()
-        self._show_systime(self.hosts[self._primary])
+        #self._show_systime(self.hosts[self._primary])
         delta_before = self._serv_local_delta(self._secondary) # remember difference between seco9ndary server's time and the local time
         self._mediaserver_ctl(self.hosts[self._primary], 'stop')
         time.sleep(MINOR_SLEEP)
@@ -344,7 +344,6 @@ class TimeSyncTest(FuncTestCase):
         #self.debug_systime()
         self._check_time_sync(False)
 
-    @unittest.expectedFailure
     def PrimaryStillSynchronized(self):
         self._check_systime_sync(self._primary)
 
@@ -476,7 +475,7 @@ class TimeSyncTest(FuncTestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after both servers were restarted.")
 
-    @unittest.expectedFailure
+    #@unittest.expectedFailure
     def PrimaryFollowsSystemTime(self):
         """Check if the primary server changes time when it's system time has been changed.
         """

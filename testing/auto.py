@@ -853,7 +853,7 @@ NATCON_ARGS = ["--natcon", '--config', 'nattest.cfg']
 def mk_functest_cmd(to_skip):
     only_test = ''
     cmd = BASE_FUNCTEST_CMD[:]
-    if Args.timetest:
+    if Args.timesync:
         cmd.append("--timesync")
         only_test = "timesync"
     elif Args.msarch:
@@ -876,6 +876,21 @@ def mk_functest_cmd(to_skip):
             cmd.append("--skipstrm")
     log("Running functional tests: %s", cmd)
     return cmd, only_test
+
+FUNCTEST_TBL = (
+    ('timesync', ),
+    ('bstorage', ),
+    ('msarch', ),
+    ('stream', ),
+    ('natcon', ),
+)
+
+def perform_func_test_new(to_skip):
+    if os.name != 'posix':
+        print "\nFunctional tests require POSIX-compatible OS. Skipped."
+        return
+    need_stop = False
+    reader = proc = None
 
 
 def perform_func_test(to_skip):
@@ -1045,7 +1060,7 @@ class FunctestParser(object):
         log("Merge Server test done.")
 
     # Sysname test
-    SYSNAME_END = "SystemName test rollback done"
+    SYSNAME_END = "SystemName test finished"
 
     def parse_sysname_start(self, line):  # FT_SYSNAME
         if line.startswith("SystemName Test Start"):
@@ -1416,9 +1431,9 @@ def show_boxes():
 #####################################
 
 # which options are allowed to be used with --nobox
-FUNCTEST_ARGS = ('functest', 'timetest', 'httpstress', 'msarch', 'natcon', 'stream')
+FUNCTEST_ARGS = ('functest', 'timesync', 'httpstress', 'msarch', 'natcon', 'stream')
 ARGS_EXCLUSIVE = (
-    ('nobox', 'boxes', 'boxoff', 'add', 'showboxes'),
+    ('nobox', 'boxes', 'boxoff', 'showboxes'),
 ) + tuple(('no_functest', opt) for opt in FUNCTEST_ARGS)
 
 
@@ -1436,7 +1451,7 @@ def check_args_correct():
     if Args.nobox and not any_functest_arg():
         print "ERROR: --nobox is allowed only with options %s\n" % (args2str(FUNCTEST_ARGS),)
         exit(1)
-    if Args.add and Args.boxes is None:
+    if Args.add and (Args.boxes is None):
         print "ERROR: --add is usable only with --boxes"
         exit(1)
 
@@ -1453,7 +1468,7 @@ def parse_args():
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--no-functest", "--noft", action="store_true", help="Only build the project and run unittests.")
-    parser.add_argument("--timetest", "--tt", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
+    parser.add_argument("--timesync", "--ts", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
     parser.add_argument("--natcon", action="store_true", help="Create virtual boxes for NAT connection test and run this test only.")
@@ -1622,7 +1637,7 @@ def main():
         if ToSend:
             email_notify("Debug %s tests" % (
                 "func" if Args.functest else
-                "timesync" if Args.timetest else
+                "timesync" if Args.timesync else
                 "http-stress" if Args.httpstress else
                 "multiserver archive" if Args.msarch else
                 "streaming" if Args.stream else

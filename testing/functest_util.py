@@ -5,6 +5,7 @@ import json
 from urllib import urlencode
 import urllib2
 from ConfigParser import RawConfigParser
+import traceback
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'checkResultsEqual',
@@ -582,10 +583,6 @@ def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None,
 #        print "FAIL: error requesting '%s': %s" % (req, e)
 #        return None
 
-
-
-
-
 import Queue
 import threading
 
@@ -607,15 +604,21 @@ class ClusterWorker(object):
         self._queue = Queue.Queue(element_size)
         self._threadList = []
         self._working = False
+        self._oks = []
 
     def _do_work(self):
         return not self._queue.empty()
 
     def _worker(self, num):
         while self._do_work():
-            t,a = self._queue.get(True)
+            func, args = self._queue.get(True)
             try:
-                t(*a)
+                func(*args)
+            except Exception:
+                print "ERROR: ClusterWorker call to %s got an Exception: %s" % (func.__name__, traceback.format_exc())
+                self._oks.append(False)
+            else:
+                self._oks.append(True)
             finally:
                 self._queue.task_done()
 
@@ -646,6 +649,13 @@ class ClusterWorker(object):
 
     def enqueue(self, task, args):
         self._queue.put((task, args), True)
+
+    def allOk(self):
+        return all(self._oks)
+
+    def clearOks(self):
+        self._oks = []
+
 
 
 class ClusterLongWorker(ClusterWorker):

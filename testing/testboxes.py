@@ -2,6 +2,7 @@
 Including FuncTestCase - the base class for all mediaserver functional test classes.
 """
 __author__ = 'Danil Lavrentyuk'
+import sys
 import subprocess
 import unittest
 import urllib
@@ -42,15 +43,25 @@ class TestLoader(unittest.TestLoader):
 
 
 def RunTests(testclass, config, *args):
+    """
+    Runs all test suits from the testclass which is derived from FuncTestCase
+    :type testclass: FuncTestCase
+    :type config: FtConfigParser
+    """
     #print "DEBUG: run test class %s" % testclass
     testclass.init_suits()
-    return all( [
-            unittest.TextTestRunner(verbosity=2, failfast=testclass.isFailFast(suit_name))
-            .run(
-                TestLoader().load(testclass, suit_name, config, *args)
-            ).wasSuccessful()
-            for suit_name in testclass.iter_suits()
-        ] )
+    try:
+        return all( [
+                unittest.TextTestRunner(verbosity=2, failfast=testclass.isFailFast(suit_name))
+                .run(
+                    TestLoader().load(testclass, suit_name, config, *args)
+                ).wasSuccessful()
+                for suit_name in testclass.iter_suits()
+            ] )
+    finally:
+        if testclass._worker:
+            testclass._worker.stopWork()
+
 
 
 class FuncTestCase(unittest.TestCase):
@@ -81,7 +92,7 @@ class FuncTestCase(unittest.TestCase):
             raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
         if not cls._configured:
             # this lines should be executed once per class
-            cls.sl = cls.config.get("General","serverList").split(',')
+            cls.sl = cls.config.rtget("ServerList")
             cls._worker = ClusterLongWorker(cls.num_serv)
             if len(cls.sl) < cls.num_serv:
                 raise FuncTestError("not enough servers configured to run %s tests" % cls._test_name)
@@ -154,18 +165,20 @@ class FuncTestCase(unittest.TestCase):
         return () # the default is no script to run
 
     def _stop_and_init(self, box, num):
-        print "Stopping box %s" % box
-        self._mediaserver_ctl(box, 'stop')
+        sys.stdout.write("Stopping box %s\n" % box)
+        self._mediaserver_ctl(box, 'safe-stop')
         time.sleep(0)
         init_script = self._get_init_script(num)
         if init_script:
             self._call_box(box, *init_script)
-        print "Box %s stopped and ready" % box
+        sys.stdout.write("Box %s stopped and ready\n" % box)
 
     def _prepare_test_phase(self, method):
+        self._worker.clearOks()
         for num, box in enumerate(self.hosts):
             self._worker.enqueue(method, (box, num))
         self._worker.joinQueue()
+        self.assertTrue(self._worker.allOk(), "Failed to prepare test phase")
         self._servers_th_ctl('start')
         self._wait_servers_up()
         if self._serv_version is None:
@@ -176,8 +189,12 @@ class FuncTestCase(unittest.TestCase):
 
     def _mediaserver_ctl(self, box, cmd):
         "Perform a service control command for a mediaserver on one of boxes"
-        self._call_box(box, cmd, 'networkoptix-mediaserver')
-        if cmd == 'stop':
+        if cmd == 'safe-stop':
+            rcmd = '/vagrant/safestop.sh'
+        else:
+            rcmd = cmd
+        self._call_box(box, rcmd, 'networkoptix-mediaserver')
+        if cmd in ('stop', 'safe-stop'):
             self._stopped.add(box)
         elif cmd in ('start', 'restart'): # for 'restart' - just in case it was off unexpectedly
             self._stopped.discard(box)

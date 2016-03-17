@@ -20,23 +20,13 @@ class SystemNameTest:
         self._guidDict = dict()
         self._serverList = []
         self._config = config
-        sl = self._config.get("General","serverList")
         self._serverList = self._config.rtget("ServerList")
-        self._syncTime = self._config.getint("General","clusterTestSleepTime")
+        self._syncTime = self._config.rtget("SleepTime")
 
     def _doGet(self,addr,methodName):
         print "Connection to http://%s/ec2/%s" % (addr,methodName)
         response = urllib2.urlopen("http://%s/ec2/%s" % (addr,methodName))
         return response.read() if response.getcode() == 200 else None
-
-    #def _doPost(self,addr,methodName,d):
-    #    print "POST to http://%s/ec2/%s" % (addr,methodName)
-    #    req = urllib2.Request("http://%s/ec2/%s" % (addr,methodName), data=d,
-    #                          headers={'Content-Type': 'application/json'})
-    #
-    #    print "Connection to http://%s/ec2/%s" % (addr,methodName)
-    #    response = urllib2.urlopen(req)
-    #    return response.getcode() == 200
 
     def _changeSystemName(self,addr,name):
         #print "Changing system %s name to %s" % (addr, name)

@@ -514,10 +514,10 @@ class ClusterTest(object):
                 return (ret,reason)
         return self._checkTransactionLog()
 
-    def init(self, short=False):
+    def init(self, notest=False):
         self._loadConfig()
         self.setUpPassword()
-        return (True,"") if self._testConnection() else (False,"Connection test failed")
+        return (True,"") if notest or self._testConnection() else (False,"Connection test failed")
 
     def init_rollback(self):
         self.unittestRollback = UnitTestRollback()
@@ -2699,18 +2699,22 @@ def DoTests(argv):
     # initialize cluster test environment
 
     argc = len(argv)
+
+    if argc == 2 and argv[1] in BoxTestKeys:
+        # box-tests can run without complete clusterTest.init(), since they reinitialize mediaserver
+        clusterTest.init(notest=True)
+        CallTest(BoxTestKeys[argv[1]])
+        return
+
     ret, reason = clusterTest.init()
-    if ret == False:
+    if not ret:
         print "Failed to initialize the cluster test object: %s" % (reason)
         return
 
-    if argc == 2:
-        if argv[1] in BoxTestKeys:
-            CallTest(BoxTestKeys[argv[1]])
-            return
-        if argv[1] in SimpleTestKeys:
-            SimpleTestKeys[argv[1]](clusterTest.getConfig()).run()
-            return
+    if argc == 2 and argv[1] in SimpleTestKeys:
+        SimpleTestKeys[argv[1]](clusterTest.getConfig()).run()
+        return
+
 
     ret, reason = clusterTest.initial_tests()
     if ret == False:
