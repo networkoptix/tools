@@ -2690,7 +2690,8 @@ BoxTestKeys = {
     '--bstorage': BackupStorageTest,
     '--msarch': MultiserverArchiveTest,
     '--natcon': NatConnectionTest,
-    '--stream': StreamingTest
+    '--stream': StreamingTest,
+    '--boxtests': None,
 }
 
 
@@ -2703,7 +2704,13 @@ def DoTests(argv):
     if argc == 2 and argv[1] in BoxTestKeys:
         # box-tests can run without complete clusterTest.init(), since they reinitialize mediaserver
         clusterTest.init(notest=True)
-        CallTest(BoxTestKeys[argv[1]])
+        if argv[1] == '--boxtests':
+            CallTest(TimeSyncTest)
+            #CallTest(BackupStorageTest)
+            CallTest(MultiserverArchiveTest)
+            CallTest(StreamingTest)
+        else:
+            CallTest(BoxTestKeys[argv[1]])
         return
 
     ret, reason = clusterTest.init()
@@ -2732,6 +2739,7 @@ def DoTests(argv):
             print "Main tests passed OK"
             if MergeTest().run():
                 SystemNameTest(clusterTest.getConfig()).run()
+        doCleanUp()
         if not clusterTest.do_main_only:
             if not clusterTest.skip_timesync:
                 CallTest(TimeSyncTest)
@@ -2743,8 +2751,7 @@ def DoTests(argv):
                 CallTest(StreamingTest)
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
-        doCleanUp()
-        print "\nFunctest finnished\n"
+        #print "\nFunctest finnished\n"
 
     elif (argc == 2 or argc == 3) and argv[1] == '--clear':
         if argc == 3:

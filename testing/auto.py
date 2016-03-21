@@ -1511,8 +1511,6 @@ def check_debug_mode():
         DEBUG = False
     elif not DEBUG and Args.debug:
         DEBUG = True
-    if DEBUG and not Args.conf:
-        print "Debug mode ON"
 
 
 def set_paths():
@@ -1617,6 +1615,9 @@ def main():
     if Args.showboxes:
         show_boxes()
         return
+
+    if DEBUG:
+        print "Debug mode ON"
 
     if Args.boxes is not None:
         start_boxes(Args.boxes, keep=Args.add)

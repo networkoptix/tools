@@ -199,16 +199,16 @@ class BackupStorageTest(StorageBasedTest):
         self._call_box(self.hosts[boxnum], "mkdir", '-p', TMP_STORAGE)
         data = self._server_request(boxnum, 'ec2/getStorages?id=' + self.guids[boxnum])
         self.assertIsNotNone(data, 'ec2/getStorages returned empty data')
-        print "DEBUG: Storages: "
-        pprint.pprint(data)
+        #print "DEBUG: Storages: "
+        #pprint.pprint(data)
         data = data[0]
         data['id'] = new_id = str(uuid.uuid4())
         data['isBackup'] = True
         data['url'] = TMP_STORAGE
         self._server_request(boxnum, 'ec2/saveStorage', data=data)
         data = self._server_request(boxnum, 'ec2/getStorages?id=' + self.guids[boxnum])
-        print "DEBUG: New storage list:"
-        pprint.pprint(data)
+        #print "DEBUG: New storage list:"
+        #pprint.pprint(data)
         t = time.time() + BACKUP_STORAGE_READY_TIMEOUT
         new_id = '{' + new_id + '}'
         while True:

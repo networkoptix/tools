@@ -9,6 +9,7 @@ import unittest
 #from testboxes import *
 from rtsptests import RtspStreamTest, HlsStreamingTest
 from stortest import StorageBasedTest, TEST_CAMERA_DATA
+from functest_util import quote_guid
 
 _NUM_STREAM_SERV = 1
 _WORK_HOST = 0
@@ -50,11 +51,17 @@ class StreamingTest(StorageBasedTest):
                 cls.tearDownClass()
                 raise
 
+    #@classmethod
+    #def tearDownClass(cls):
+    #    time.sleep(30)
+    #    super(StreamingTest, cls).tearDownClass()
+
     def _init_cameras(self):
         name = TEST_CAMERA_DATA['name']
         answer = self._server_request(_WORK_HOST, 'ec2/getCameras')
         for c in answer:
-            if c['name'] == name:
+            print "Found camera '%s' at server %s" % (c['name'], c['parentId'])
+            if c['name'] == name and c['parentId'] == self.guids[_WORK_HOST]:
                 self.test_camera_id = c['id']
                 self.test_camera_physical_id = c['physicalId']
                 return
@@ -64,6 +71,7 @@ class StreamingTest(StorageBasedTest):
         "Re-initialize with clear db, prepare a single camera data"
         try:
             self._InitialRestartAndPrepare()
+            self.config.rtset("ServerUUIDList", self.guids[:]) # [quote_guid(guid) for guid in self.guids]
             self._fill_storage('streaming', _WORK_HOST, "streaming")
         except Exception:
             type(self)._initFailed = True
@@ -73,6 +81,7 @@ class StreamingTest(StorageBasedTest):
         "Check RTSP and HTTP streaming from server"
         if self._initFailed:
             self.skipTest("not initialized")
+        #self.skipTest("DEBUG")
         self.assertTrue(RtspStreamTest(self.config).run(),
                         "Multi-proto streaming test failed")
 

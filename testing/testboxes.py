@@ -71,7 +71,7 @@ class FuncTestCase(unittest.TestCase):
     config = None
     num_serv = NUM_SERV
     testset = None
-    guids = {}
+    guids = None
     _configured = False
     _stopped = set()
     _worker = None
@@ -98,6 +98,7 @@ class FuncTestCase(unittest.TestCase):
                 raise FuncTestError("not enough servers configured to run %s tests" % cls._test_name)
             if len(cls.sl) > cls.num_serv:
                 cls.sl[cls.num_serv:] = []
+            cls.guids = ['' for _ in cls.sl]
             cls.hosts = [addr.split(':')[0] for addr in cls.sl]
             print "Server list: %s" % cls.sl
             cls._configured = True

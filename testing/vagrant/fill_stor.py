@@ -37,13 +37,16 @@ def mkpath(path, log=False):
         os.makedirs(path)
 
 
-def mk_base_time(offset):
+def mk_base_time(offset, h_align=False):
     """ Finds the moment in the past by offset from the current moment,
     then truncate down to the nearest hour border.
     """
     t = int(time.time())
     gt = time.gmtime(t)
-    return t - gt.tm_sec - gt.tm_min * 60 - offset
+    if h_align:
+        # hour border alignment
+        t -= gt.tm_sec + gt.tm_min * 60
+    return t - offset
 
 
 def time2path(dt):
@@ -94,7 +97,7 @@ START_OFFSET = {
     'streaming': 3 * HOUR,
 } [run_mode]
 
-time_base =  mk_base_time(START_OFFSET)
+time_base =  mk_base_time(START_OFFSET, run_mode != 'streaming')
 time_dir_fmt = os.path.join("%s","%02d","%02d","%02d")
 
 RANDOM_FILL_PATHS = {k: [mk_rec_path(*p) for p in v] for k, v in (
@@ -110,7 +113,7 @@ RANDOM_FILL_PATHS = {k: [mk_rec_path(*p) for p in v] for k, v in (
         (6, 0),  (6, 1),  (6, 2),
     )),
     ('streaming', (
-        (0, 1), (0, 2), (0, 3),
+        (0, 0), (0, 1), (0, 2),
     ))
 )}
 
@@ -125,13 +128,20 @@ def create_datepaths_short(base): # a shorten debug version
         mkpath(os.path.join(base, p))
 
 
-def fill_data_random():
+def fill_data_random(mode):
     start = 0
+    end = 0
+    if mode == 'random':
+        counter = lambda: xrange(random.randint(1, int((end-start)/65.0)))
+    elif mode == 'streaming':
+        counter = lambda: xrange(60)
+    else:
+        raise ValueError("fill_data_random: unknown mode '%s'" % mode)
     for tm, path in RANDOM_FILL_PATHS[special]:
         end = tm+HOUR
         start = max(start, tm) + max(0, (random.random() * 60) - 15)
         #print "Start: %s, end %s, d %s" % (start, end, end-start)
-        for i in xrange(random.randint(1, int((end-start)/65.0))):
+        for i in counter():
             start += max(0, (random.random()-0.5)*3)
             if start >= end:
                 break
@@ -271,7 +281,7 @@ if run_mode in ('random', 'streaming'):
         sys.exit(3)
     create_datepaths(hi_path)
     create_datepaths(low_path)
-    fill_data_random()
+    fill_data_random(run_mode)
 elif run_mode == 'multiserv':
     verify_timestamp_mark()
     if special not in MULTISERV_FILL_TEMPALTE:

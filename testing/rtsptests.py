@@ -641,7 +641,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
     _perfLog = None
     _threadNum = 0
     _exitFlag = None
-    _threadPool = []
+    _threadPool = None
 
     _archiveNumOK = 0
     _archiveNumFail = 0
@@ -914,7 +914,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         return 0 == self._archiveNumFail + self._archiveNumTimeout + self._archiveNumClose + self._archiveNumSocketError
 
     def isAlive(self):
-        return all(imap(threading.Thread.isAlive, self._threadPool))
+        return any(imap(threading.Thread.isAlive, self._threadPool))
 
     def run(self, need_dump=False):
         if not self._cameraList and not self._allowOffline:
@@ -930,6 +930,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             time.sleep(dt)
 
         self._need_dump = need_dump
+        self._threadPool = []
         for _ in xrange(self._threadNum):
             th = threading.Thread(target=self._threadMain, args=(_,))
             th.start()
@@ -940,7 +941,6 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
 
     def getAddr(self):
         return self._serverAddr
-
 
 # -----------------------------------------------
 
@@ -957,6 +957,8 @@ class RtspPerf(object):
         self._need_dump = config.rtget("need_dump")
         self._serverList = config.rtget("ServerList")
         self._serverUUIDList = config.rtget("ServerUUIDList")
+        if type(self._serverUUIDList[0]) == list:
+            self._serverUUIDList = [s[0] for s in self._serverUUIDList]
         self._username = self._config.get("General", "username")
         self._password = self._config.get("General", "password")
 
@@ -1017,7 +1019,7 @@ class RtspPerf(object):
         for i, serverAddr in enumerate(self._serverList):
             self._perfServer.append(self._singleServerClass(
                 archiveMax, archiveMin,
-                serverAddr, self._serverUUIDList[i][0],
+                serverAddr, self._serverUUIDList[i],
                 self._username, self._password,
                 int(self.threadNumbers[i]), self, self._lock,
             ))
@@ -1078,7 +1080,7 @@ class RtspStreamTest(RtspPerf):
         RtspPerf.__init__(self, config)
 
     def _finish(self):
-        print "...Finishing test.."
+        print "[%s] ...Finishing test.." % (int(time.time()),)
         self.turnOff()
 
     def _mainSleep(self):
