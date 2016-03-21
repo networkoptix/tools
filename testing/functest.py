@@ -429,8 +429,12 @@ class ClusterTest(object):
     def _checkSingleMethodStatusConsistent(self,method):
             responseList = []
             for server in self.clusterTestServerList:
-                print "Connection to http://%s/ec2/%s" % (server, method)
-                responseList.append((urllib2.urlopen("http://%s/ec2/%s" % (server, method)),server))
+                url = "http://%s/ec2/%s" % (server, method)
+                print "Connection to " + url
+                try:
+                    responseList.append((urllib2.urlopen(url),server))
+                except urllib2.URLError as err:
+                    return False, "Failed to request %s: %s" % (url, err)
             # checking the last response validation
             return checkResultsEqual(responseList,method)
 
@@ -510,7 +514,7 @@ class ClusterTest(object):
         time.sleep(sleep_timeout)
         for method in self._getterAPIList:
             ret,reason = self._checkSingleMethodStatusConsistent(method)
-            if ret == False:
+            if not ret:
                 return (ret,reason)
         return self._checkTransactionLog()
 

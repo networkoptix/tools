@@ -608,7 +608,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = SUBPROC_ARGS.copy()
 
-    cmd = [MVN, "package", "-e"]
+    cmd = [MVN, "package", "-e", "-Dbuild.configuration=release"]
     if MVN_THREADS and not no_threads:
         cmd.extend(["-T", "%d" % MVN_THREADS])
     elif no_threads:
