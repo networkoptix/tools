@@ -700,10 +700,14 @@ def get_architecture():
     #TODO move all paths into testconf.py !
     curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
     av = 'arch='
-    with open(curconf_fn) as f:
-        for line in f:
-            if line.startswith(av):
-                return line[len(av):].rstrip()
+    try:
+        with open(curconf_fn) as f:
+            for line in f:
+                if line.startswith(av):
+                    return line[len(av):].rstrip()
+    except IOError as err:
+        if err.errno == errno.ENOENT:
+            pass
     return ''
 
 
@@ -736,7 +740,12 @@ def check_mediaserver_deb():
     # The same filename used for all versions here:
     # a) To remove (by override) any previous version automatically.
     # b) To use fixed name in the bootstrap.sh script
-    src = get_server_package_name()
+    try:
+        src = get_server_package_name()
+    except FuncTestError as err:
+        print err
+        print "Try to use the previously built deb-package (it could have a diferent version!)."
+        src = None
     dest = os.path.join(VAG_DIR, 'networkoptix-mediaserver.deb')
 #    debug("Src: %s\nDest: %s", src, dest)
     dest_stat = os.stat(dest) if os.path.isfile(dest) else None

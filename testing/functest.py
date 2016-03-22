@@ -2710,7 +2710,7 @@ def DoTests(argv):
         clusterTest.init(notest=True)
         if argv[1] == '--boxtests':
             CallTest(TimeSyncTest)
-            #CallTest(BackupStorageTest)
+            CallTest(BackupStorageTest)
             CallTest(MultiserverArchiveTest)
             CallTest(StreamingTest)
         else:

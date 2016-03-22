@@ -76,7 +76,6 @@ class StorageBasedTest(FuncTestCase):
     num_serv_t = 0
     _storages = dict()
     _fill_storage_script = ''
-    _clear_storage_script = ''
     test_camera_id = 0
     test_camera_physical_id = 0
 
@@ -131,21 +130,15 @@ class StorageBasedTest(FuncTestCase):
                 state = answer["reply"]["state"]
             except Exception:
                 pass
-        #print "Server %s: rebuildArchive done" % boxnum
 
-#    @classmethod
-#    def setUpClass(cls):
-        #super(StorageBasedTest, cls).setUpClass()
-        #cls.test_camera_id = [0 for _ in xrange(cls.num_serv_t)]
-        #cls.test_camera_physical_id = [0 for _ in xrange(cls.num_serv_t)]
 
     @classmethod
     def tearDownClass(cls):
-        if cls._clear_storage_script:
+        if cls._clear_script:
             for num in xrange(cls.num_serv_t):
                 if num in cls._storages:
-                    print "Remotely calling %s at box %s" % (cls._clear_storage_script, num)
-                    cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_storage_script, cls._storages[num][0]['url'], TMP_STORAGE)
+                    print "Remotely calling %s at box %s" % (cls._clear_script, num)
+                    cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_script, cls._storages[num][0]['url'], TMP_STORAGE)
         super(StorageBasedTest, cls).tearDownClass()
 
     def _init_cameras(self):
@@ -169,7 +162,7 @@ class BackupStorageTest(StorageBasedTest):
     _test_name = "Backup Storage"
     num_serv_t = _NUM_SERV_BAK
     _fill_storage_script = 'fill_stor.py'
-    _clear_storage_script = 'bs_clear.sh'
+    _clear_script = 'bs_clear.sh'
 
     _suits = (
         ('BackupStartTests', [
@@ -301,7 +294,7 @@ class MultiserverArchiveTest(StorageBasedTest):
     _test_name = "Multiserver Archive"
     num_serv_t = _NUM_SERV_MARCH
     _fill_storage_script = 'fill_stor.py'
-    _clear_storage_script = 'ms_clear.sh'
+    _clear_script = 'ms_clear.sh'
     time_periods_single = []
     time_periods_joined = []
 

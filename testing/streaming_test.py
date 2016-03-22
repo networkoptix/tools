@@ -26,7 +26,7 @@ class StreamingTest(StorageBasedTest):
     num_serv = _NUM_STREAM_SERV   # the 1st server should be "before" NAT, the 2nd - behind NAT
     num_serv_t = _NUM_STREAM_SERV # the 1st server should be "before" NAT, the 2nd - behind NAT
     _fill_storage_script = 'fill_stor.py'
-    _clear_storage_script = 'str_clear.sh'
+    _clear_script = 'str_clear.sh'
     _need_copy = True
     _initFailed = False
 

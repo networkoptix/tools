@@ -80,6 +80,7 @@ class FuncTestCase(unittest.TestCase):
     _serv_version = None  # here I suppose that all servers being created from the same image have the same version
     before_2_5 = False # TODO remove it!
     _test_name = '<UNNAMED!>'
+    _clear_script = ''
 
     @classmethod
     def setUpClass(cls):
@@ -109,7 +110,7 @@ class FuncTestCase(unittest.TestCase):
         # and test if they work in parallel!
         for host in cls._stopped:
             print "Restoring mediaserver on %s" % host
-            cls.class_call_box(host, 'start', 'networkoptix-mediaserver')
+            cls.class_call_box(host, '/vagrant/safestart.sh', 'networkoptix-mediaserver')
         cls._stopped.clear()
         cls._worker.stopWork()
         print "%s Test End" % cls._test_name
