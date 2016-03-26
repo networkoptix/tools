@@ -6,13 +6,13 @@ echo configuring inet sync
 ifdown $EXT_IF > /dev/null
 date --set=@$1
 
-edconf removeDbOnStartup 1
+nxedconf removeDbOnStartup 1
 
 # values should be equal to INET_SYNC_TIMEOUT in timetest.py
-edconf ecInternetSyncTimePeriodSec 15
-edconf ecMaxInternetTimeSyncRetryPeriodSec 15
+nxedconf ecInternetSyncTimePeriodSec 15
+nxedconf ecMaxInternetTimeSyncRetryPeriodSec 15
 
 # we have to set the password each time!
-setpw
+#setpw
 
 #cat $SERVCONF
