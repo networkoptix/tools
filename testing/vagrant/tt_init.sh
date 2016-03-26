@@ -2,9 +2,10 @@
 # Time test initialisation. $1 has to be unix timestamp
 . /vagrant/conf.sh
 
+rm ${SERVDIR}/var/*.sqlite
 edconf removeDbOnStartup 1
 # we have to set the password each time!
-setpw
+#setpw
 
 ###edconf logLevel DEBUG2
 
