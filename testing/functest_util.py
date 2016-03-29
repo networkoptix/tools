@@ -9,7 +9,7 @@ import traceback
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'checkResultsEqual',
-           'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str',
+           'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str', 'real_caps',
            'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
 
@@ -432,7 +432,7 @@ _helpMenu = {
         "Usage: python main.py --rtsp-test \n\n"
         "This command is used to run RTSP Test test.It means it will issue RTSP play command,\n"
         "and wait for the reply to check the status code.\n"
-        "User needs to set up section in ec2_tests.cfg file: [Rtsp]\ntestSize=40\n"
+        "User needs to set up section in functest.cfg file: [Rtsp]\ntestSize=40\n"
         "The testSize is configuration parameter that tell rtsp the number that it needs to perform \n"
         "RTSP test on _EACH_ server. Therefore, the above example means 40 random RTSP test on each server.\n")),
     "add":("Resource creation",(
@@ -483,7 +483,7 @@ _helpMenu = {
         "archiveDiffMin       The time difference lower bound for archive request, in minutes \n"
         "timeoutMax           The timeout upper bound for each RTP receiving, in seconds. \n"
         "timeoutMin           The timeout lower bound for each RTP receiving, in seconds. \n"
-        "Notes: All the above parameters needs to be specified in configuration file:ec2_tests.cfg under \n"
+        "Notes: All the above parameters needs to be specified in configuration file: functest.cfg under \n"
         "section Rtsp.\nEg:\n[Rtsp]\nthreadNumbers=10,2\narchiveDiffMax=..\nardchiveDiffMin=....\n"
         )),
     "sys-name":("System name test",(
@@ -729,3 +729,7 @@ def parse_size(size_str):
 
 def args2str(args):
     return '%s and %s' % (', '.join('--'+opt for opt in args[:-1]), '--'+args[-1])
+
+def real_caps(str):
+    "String's method capitalize makes lower all chars except the first. If it isn't desired - use real_caps."
+    return (str[0].upper() + str[1:]) if len(str) else str

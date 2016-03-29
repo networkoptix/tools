@@ -7,6 +7,6 @@ echo Disabling eth0
 ifdown eth0
 route add default gw 192.168.110.2
 
-setpw
+#setpw
 start networkoptix-mediaserver
 

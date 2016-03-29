@@ -1,0 +1,179 @@
+#!/bin/bash
+# Pre- and post-test mediaserver control script.
+# Restarts server, changes it's config, clear unnecessary data and so on
+# $1 - test name
+# $2 - mode (init, clear, ...)
+. /vagrant/conf.sh
+testName=$1
+mode=$2
+shift 2
+
+echo STARTED: ctl.sh $testName $mode $@
+
+debugLevel=
+# possible values -- names of log level
+
+#:set -x
+
+function setLogLevel {
+    case "$1" in
+        0)
+            level=
+            ;;
+        1)
+            level=DEBUG
+            ;;
+        2)
+            level=DEBUG2
+            ;;
+        *)
+            level=$1
+    esac
+    nxedconf logLevel "$level"
+    nxedconf http-log-level "$level"
+}
+
+function legacy_ctl {
+    case "$mode" in
+        clear)
+            nxcleardb
+    esac
+}
+
+function timesync_ctl {
+    case "$mode" in
+        init)
+            echo '*** STOPPING NTPD ***'
+            service ntp stop
+            nxcleardb
+            setLogLevel $debugLevel
+            ifdown $EXT_IF > /dev/null
+            date --set=@$1
+            ;;
+        clear)
+            chmod +x /etc/network/if-up.d/ntpdate
+            /etc/network/if-up.d/ntpdate
+            date --set=@$1
+            nxcleardb
+            ;;
+        prepare_isync)
+            safestop "$SERVICE"
+            echo configuring inet sync
+            ifdown $EXT_IF > /dev/null
+            date --set=@$1
+            nxcleardb
+            # values should be less than INET_SYNC_TIMEOUT in timetest.py
+            nxedconf ecInternetSyncTimePeriodSec 15
+            nxedconf ecMaxInternetTimeSyncRetryPeriodSec 15
+            safestart "$SERVICE"
+            ;;
+        iup)
+            # make it non-executable to disable ntpd start when eth0 goes up
+            chmod -x /etc/network/if-up.d/ntpdate
+            ifup $EXT_IF > /dev/null
+            ;;
+        *) echo "Unknown mode '${mode}' for timesync test control"
+    esac
+}
+
+function bstorage_ctl {
+    case "$mode" in
+        init)
+            nxcleardb
+            setLogLevel 2
+            ;;
+        clear)
+            # Clears the main and the backaup storages, passed as $1 and $2
+            nxrmbase "$1"
+            nxrmbase "$2"
+            nxcleardb
+            ;;
+        rmstorage)
+            nxrmbase "$1"
+            ;;
+        *) echo "Unknown mode '${mode}' for bstorage test control"
+    esac
+}
+
+function msarch_ctl {
+    case "$mode" in
+        init)
+            nxcleardb
+            setLogLevel 2
+            ;;
+        clear)
+            # Clears the main storage, passed as $1, and restore the system name
+            nxrmbase "$1"
+            nxcleardb
+            edconf systemName "$MAIN_SYS_NAME"
+            ;;
+        *) echo "Unknown mode '${mode}' for msarch test control"
+    esac
+}
+
+function stream_ctl {
+    case "$mode" in
+        init)
+            nxcleardb
+            setLogLevel 2
+            ;;
+        clear)
+            # Clears the main storage, passed as $1, and restore the system name
+            nxrmbase "$1"
+            nxcleardb
+            ;;
+        *) echo "Unknown mode '${mode}' for stream test control"
+    esac
+}
+
+function natcon_ctl {
+    case "$mode" in
+        init)
+            nxcleardb
+            ;;
+        clear)
+            nxcleardb
+            ;;
+        *) echo "Unknown mode '${mode}' for natcon test control"
+    esac
+}
+
+case "$mode" in
+    init)
+        test -e "${SERVCONF}.orig" && cp "${SERVCONF}.orig" "$SERVCONF"
+        ;;
+    clear)
+        safestop "$SERVICE"
+        ;;
+esac
+
+case "$testName" in
+    legacy)
+        legacy_ctl "$@"
+        ;;
+    timesync)
+        timesync_ctl "$@"
+        ;;
+    bstorage)
+        bstorage_ctl "$@"
+        ;;
+    msarch)
+        msarch_ctl "$@"
+        ;;
+    stream)
+        stream_ctl "$@"
+        ;;
+    natcon)
+        natcon_ctl "$@"
+        ;;
+    *)
+        echo Unknown test name "$testName"
+        exit 1
+esac
+
+case "$mode" in
+    init)
+        safestart "$SERVICE"
+        ;;
+esac
+

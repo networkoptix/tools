@@ -16,6 +16,7 @@ _WORK_HOST = 0
 
 class StreamingTest(StorageBasedTest):
     _test_name = "Streaming"
+    _test_key = "stream"
     _suits = (
         ('StreamingTests', [
             'Initialisation',
@@ -24,14 +25,9 @@ class StreamingTest(StorageBasedTest):
          ]),
     )
     num_serv = _NUM_STREAM_SERV   # the 1st server should be "before" NAT, the 2nd - behind NAT
-    num_serv_t = _NUM_STREAM_SERV # the 1st server should be "before" NAT, the 2nd - behind NAT
     _fill_storage_script = 'fill_stor.py'
-    _clear_script = 'str_clear.sh'
     _need_copy = True
     _initFailed = False
-
-    def _get_init_script(self, boxnum):
-        return ('/vagrant/str_init.sh',)
 
     @classmethod
     def isFailFast(cls, suit_name=""):

@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 from testconf import *
 import pipereader
 from testboxes import boxssh
-from functest_util import args2str
+from functest_util import args2str, real_caps
 
 __version__ = '1.2.1'
 
@@ -660,7 +660,7 @@ def prepare_branch(branch):
     check_call(HG_PURGE, **SUBPROC_ARGS)
     debug("Call %s", HG_UP if branch == '.' else (HG_UP + ['--rev', branch]))
     check_call(HG_UP if branch == '.' else (HG_UP + ['--rev', branch]), **SUBPROC_ARGS)
-    debug("Going to call maven...")
+    #debug("Going to call maven...")
     return call_maven_build(branch) and call_maven_build(branch, unit_tests=True)
 
 
@@ -783,8 +783,8 @@ def start_boxes(boxes, keep = False):
             log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
             return False
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
-        to_check = [b for b in boxlist if b in CHECK_BOX_UP] if boxlist else CHECK_BOX_UP
-        wait_servers_ready([BOX_IP[b] for b in to_check])
+        #to_check = [b for b in boxlist if b in CHECK_BOX_UP] if boxlist else CHECK_BOX_UP
+        #wait_servers_ready([BOX_IP[b] for b in to_check])
         for box in (boxlist or BOX_POST_START.iterkeys()):
             if box in BOX_POST_START:
                 boxssh(BOX_IP[box], ['/vagrant/' + BOX_POST_START[box]])
@@ -799,14 +799,15 @@ def start_boxes(boxes, keep = False):
             raise # it wont be catched and will allow the script to terminate
 
 
-def stop_boxes(boxes):
+def stop_boxes(boxes, destroy=False):
     try:
         if not boxes:
             log("Removing vargant boxes...")
         else:
             log("Removing vargant boxes: %s...", boxes)
         boxlist = boxes.split(',') if len(boxes) else []
-        check_call(VAGR_DESTROY + boxlist, shell=False, cwd=VAG_DIR)
+        cmd = VAGR_DESTROY if destroy else VAGR_STOP
+        check_call(cmd + boxlist, shell=False, cwd=VAG_DIR)
     except BaseException as e:
         log_to_send("Exception during virtual boxes start up:\n%s", traceback.format_exc())
         if not isinstance(e, Exception):
@@ -855,7 +856,7 @@ def wait_servers_ready(iplist):
             time.sleep(1)
 
 
-BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py", "--autorollback"]
+BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py"]
 NATCON_ARGS = ["--natcon", '--config', 'nattest.cfg']
 
 
@@ -928,31 +929,23 @@ def perform_func_test(to_skip):
                 reader.register(proc)
                 read_functest_output(proc, reader, only_test)
 
-                if not only_test and 'proxy' not in to_skip:
-                    reader.unregister()
-                    cmd = [sys.executable, "-u", "proxytest.py",
-                           ("%s:%s" % (BOX_IP['box1'], MEDIASERVER_PORT)),
-                           ("%s:%s" % (BOX_IP['box2'], MEDIASERVER_PORT))]
-                    log("Running server proxy test: %s", cmd)
-                    proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
-                    reader.register(proc)
-                    #TODO make it a part of the functest.py
-                    read_misctest_output(proc, reader, "server proxy")
-
             if (not only_test or only_test == 'natcon') and 'natcon' not in to_skip:
                 if not only_test:
                     cmd = BASE_FUNCTEST_CMD + NATCON_ARGS
                     reader.unregister()
-                stop_boxes('box2')
-                start_boxes('boxnat,boxbehind', keep=True)
+                if not Args.nobox:
+                    stop_boxes('box2')
+                    start_boxes('boxnat,boxbehind', keep=True)
                 log("Running connection behind NAT test: %s", cmd)
                 proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
-                read_misctest_output(proc, reader, "connection behind NAT ")
+                read_misctest_output(proc, reader, "connection behind NAT")
 
         if not only_test and not Args.natcon and 'httpstress' not in to_skip:
             if unreg:
                 reader.unregister()
+                unreg = False
+            boxssh(BOX_IP['box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
             url = "%s:%s" % (BOX_IP['box1'], MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
@@ -975,7 +968,7 @@ def perform_func_test(to_skip):
             #log(s)
             raise # it wont be catched and will allow the script to terminate
     finally:
-        if reader and proc:
+        if reader and proc and unreg:
             reader.unregister()
         if need_stop:
             log("Stopping vagrant boxes...")
@@ -986,28 +979,28 @@ class FunctestParser(object):
     """
     FSM that parses the functional tests output and controls their results.
     """
-
     def __init__(self):
         self.collector = []
         self.has_errors = False
         self.stage = 'Main functional tests'
         self.parser = self.parse_main
 
-    #@property
-    #def parser(self):
-    #    return self._parser
+    if False:
+        @property
+        def parser(self):
+            return self._parser
 
-    #@parser.setter
-    #def parser(self, value):
-    #    self._parser = value
-    #    print "Assigned parser: %s" % value
+        @parser.setter
+        def parser(self, value):
+            self._parser = value
+            print "* Set parser: %s" % value
 
     FAIL_MARK = "FAIL:"
     ERROR_MARK = "ERROR:"
 
     # Tests structure:
     # The merge test runs only if the main test was successful.
-    # The system name test runs only if the merge tests were successful.
+    # The system name test runs only if the main tests was successful.
     # The time synchronization tests run unconditionally.
     # (See functest.DoTests for detals.)
     # I.e. self.has_errors will never be true in the beginning of the merge test of the systen bane test,
@@ -1031,8 +1024,8 @@ class FunctestParser(object):
         log_to_send(line)
         if line.startswith("FAILED (failures"):
             ToSend.append('')
-            self.parser = self.parse_timesync_start  # skip merge and sysname tests
-            self.stage = 'wait for timesync test'
+            self.parser = self.parse_proxy_start  # skip merge and sysname tests
+            self.stage = 'wait for server proxy test'
 
     # Merge test
     MERGE_END = "Server Merge Test: Resource End"
@@ -1045,7 +1038,7 @@ class FunctestParser(object):
 
     def parse_merge(self, line):  # FT_MERGE_IN
         if line.startswith(self.MERGE_END):
-            self._merge_test_end(True)
+            self._merge_test_end()
         elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
             self.has_errors = True
             is_fail = line.startswith(self.FAIL_MARK)
@@ -1061,11 +1054,11 @@ class FunctestParser(object):
     def parse_merge_failed(self, line):  # FT_MERGE_FAILED
         log_to_send(line)
         if line.startswith(self.MERGE_END):
-            self._merge_test_end(False)
+            self._merge_test_end()
 
-    def _merge_test_end(self, success):
-        self.parser = self.parse_sysname_start if success else self.parse_timesync_start
-        self.stage = 'wait for ' + ('SystemName' if success else 'timesync') + ' test'
+    def _merge_test_end(self):
+        self.parser = self.parse_sysname_start #if success else self.parse_proxy_start
+        self.stage = 'wait for SystemName test'
         log("Merge Server test done.")
 
     # Sysname test
@@ -1099,8 +1092,42 @@ class FunctestParser(object):
 
     def _sysname_test_end(self):
         log("SystemName test done.")
-        self.stage = "wait for timesync test"
-        self.parser = self.parse_timesync_start
+        self.stage = "wait for server proxy test"
+        self.parser = self.parse_proxy_start
+
+    # Server proxy test
+    PROXY_END = "Test complete."
+
+    def parse_proxy_start(self, line):
+        if line.startswith("Proxy Test Start"):
+            self.parser = self.parse_proxy
+            self.stage = 'Server proxy test'
+            self.collector[:] = [line]
+
+    def parse_proxy(self, line):  # FT_MERGE_IN
+        if line.startswith(self.PROXY_END):
+            self._proxy_test_end()
+        elif line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
+            self.has_errors = True
+            is_fail = line.startswith(self.FAIL_MARK)
+            log_to_send("Functional test %s on Server Proxy test!", "failed" if is_fail else "reports an error")
+            for s in self.collector:
+                log_to_send(s)
+            log_to_send(line)
+            del self.collector[:]
+            self.parser = self.parse_proxy_failed
+        else:
+            self.collector.append(line)
+
+    def parse_proxy_failed(self, line):  # FT_MERGE_FAILED
+        log_to_send(line)
+        if line.startswith(self.PROXY_END):
+            self._proxy_test_end()
+
+    def _proxy_test_end(self):
+        self.parser = self.parse_timesync_start  #if success else self.parse_proxy_start
+        self.stage = 'wait for timesync test'
+        log("Server Proxy test done.")
 
     # Time synchronization tests
     TS_PARTS = [] #it should be filled!
@@ -1314,6 +1341,7 @@ def read_functest_output(proc, reader, from_test=''):
         if len(line) > 0:
             last_lines.append(line)
             #debug("FT: %s", line.lstrip())
+            #debug("FT: %s", line.lstrip())
             if line.startswith("ALL AUTOMATIC TEST ARE DONE"):
                 p.set_end()
             else:
@@ -1371,15 +1399,13 @@ def read_misctest_output(proc, reader, name):
                 reading = False
 
     if has_errors:
-        log_to_send("%s test failed:\n%s", name.capitalize(), "\n".join(collector))
+        log_to_send("%s test failed:\n%s", real_caps(name), "\n".join(collector))
         collector = []
 
     if reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR):
         log_to_send(
             ("[ %s test has TIMED OUT ]" % name) if reader.state == pipereader.PIPE_HANG else
             ("[ PIPE ERROR reading %s test's output ]" % name))
-        if collector:
-            log_to_send("Test's output:\n%s", "\n".join(collector))
         has_errors = True
 
     if proc.poll() is None:
@@ -1399,7 +1425,11 @@ def read_misctest_output(proc, reader, name):
                 log_to_send("[ %s TEST HAVE BEEN INTERRUPTED by signal %s%s ]" % (name.upper(), -proc.returncode, signames))
         else:
             log_to_send("[ %s TESTS' RETURN CODE = %s ]" % (name.upper(), proc.returncode))
-        has_errors = True  #FIXME? what os ot for?
+        has_errors = True
+
+    if has_errors and collector:
+        log_to_send("Test's output:\n%s", "\n".join(collector))
+
 
 #####################################
 
@@ -1633,7 +1663,7 @@ def main():
         return
 
     if Args.boxoff is not None:
-        stop_boxes(Args.boxoff)
+        stop_boxes(Args.boxoff, True)
         return
 
     FailTracker.load()
@@ -1645,12 +1675,13 @@ def main():
         ToSend[:] = []
         perform_func_test(get_to_skip(BRANCHES[0]))
         if ToSend:
-            email_notify("Debug %s tests" % (
+            email_notify("Debug %s" % (
                 "func" if Args.functest else
                 "timesync" if Args.timesync else
                 "http-stress" if Args.httpstress else
                 "multiserver archive" if Args.msarch else
                 "streaming" if Args.stream else
+                "NAT-connection" if Args.natcon else
                 "UNKNOWN!!!"),
             ToSend)
 

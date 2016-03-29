@@ -19,7 +19,8 @@ from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
 from streaming_test import StreamingTest
 from natcon_test import NatConnectionTest
-from testboxes import RunTests as RunBoxTests
+from testboxes import RunTests as RunBoxTests, LegacyTestWrapper
+from proxytest import ProxyTest
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -66,7 +67,7 @@ class UnitTestRollback:
         response.close()
         return True
 
-    def doRollback(self, quiet=False):
+    def doRollback(self):
         recoverList = []
         failed = False
         # set the cursor for the file to the file beg
@@ -79,16 +80,12 @@ class UnitTestRollback:
             if self._doSingleRollback(l[0],l[1],l[2]) == False:
                 failed = True
                 # failed for this rollback
-                print ("Cannot rollback for transaction:(MethodName:%s;ServerAddress:%s;ResourceId:%s\n)") % (l[0],l[1],l[2])
+                print "Cannot rollback for transaction:(MethodName:%s;ServerAddress:%s;ResourceId:%s" % (l[0],l[1],l[2])
                 print  "Or you could run recover later when all the rollback done\n"
                 recoverList.append("%s,%s,%s\n" % (l[0],l[1],l[2]))
             else:
-                if quiet:
-                    print '+',
-                else:
-                    print "..rollback done.."
-        if quiet:
-            print
+                print '+',
+        print
 
         self._rollbackFile.close()
         os.remove(".rollback")
@@ -368,7 +365,7 @@ class ClusterTest(object):
         self.config.rtset('ServerUUIDList', self.clusterTestServerUUIDList)
         print "Connection Test %s" % ("FAILED" if failed else "passed.")
         print "=================================================="
-        return True
+        return not failed
 
     # This checkResultEqual function will categorize the return value from each
     # server
@@ -2657,7 +2654,7 @@ def doCleanUp():
 
     if len(selection) == 0 or selection[0] != 'x':
         print "Now do the rollback, do not close the program!"
-        clusterTest.unittestRollback.doRollback(quiet=clusterTest.auto_rollback)
+        clusterTest.unittestRollback.doRollback()
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
@@ -2699,6 +2696,61 @@ BoxTestKeys = {
 }
 
 
+def RunByAutotest(arg0):
+    clusterTest.auto_rollback = True
+    #config = clusterTest.getConfig()
+    need_rollback = True
+    try:
+        ret, reason = clusterTest.init(notest=True)
+        if not ret:
+            print "Failed to initialize the cluster test object: %s" % (reason)
+            return
+        config = clusterTest.getConfig()
+        with LegacyTestWrapper(config):
+            if not clusterTest._testConnection():
+                print "Connection test failed"
+                return
+            ret, reason = clusterTest.initial_tests()
+            if ret == False:
+                print "The initial cluster test failed: %s" % (reason)
+                return
+            the_test = unittest.main(exit=False, argv=[arg0])
+            if the_test.result.wasSuccessful():
+                print "Main tests passed OK"
+                MergeTest().run()
+                SystemNameTest(config).run()
+            ProxyTest(*config.rtget('ServerList')[0:2])
+            if clusterTest.unittestRollback:
+                doCleanUp()
+                need_rollback = False
+    except Exception as err:
+        print "FAIL: the main functests failed wit error: %s" % (err,)
+    finally:
+        if need_rollback and clusterTest.unittestRollback:
+            doCleanUp()
+    if not clusterTest.do_main_only:
+        if not clusterTest.skip_timesync:
+            CallTest(TimeSyncTest)
+        if not clusterTest.skip_backup:
+            CallTest(BackupStorageTest)
+        if not clusterTest.skip_mservarc:
+            CallTest(MultiserverArchiveTest)
+        if not clusterTest.skip_streming:
+            CallTest(StreamingTest)
+    print "\nALL AUTOMATIC TEST ARE DONE\n"
+
+
+def BoxTestsRun(key):
+    clusterTest.init(notest=True)
+    if key == '--boxtests':
+        CallTest(TimeSyncTest)
+        CallTest(BackupStorageTest)
+        CallTest(MultiserverArchiveTest)
+        CallTest(StreamingTest)
+    else:
+        CallTest(BoxTestKeys[key])
+
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
@@ -2707,14 +2759,7 @@ def DoTests(argv):
 
     if argc == 2 and argv[1] in BoxTestKeys:
         # box-tests can run without complete clusterTest.init(), since they reinitialize mediaserver
-        clusterTest.init(notest=True)
-        if argv[1] == '--boxtests':
-            CallTest(TimeSyncTest)
-            CallTest(BackupStorageTest)
-            CallTest(MultiserverArchiveTest)
-            CallTest(StreamingTest)
-        else:
-            CallTest(BoxTestKeys[argv[1]])
+        BoxTestsRun(argv[1])
         return
 
     ret, reason = clusterTest.init()
@@ -2726,7 +2771,6 @@ def DoTests(argv):
         SimpleTestKeys[argv[1]](clusterTest.getConfig()).run()
         return
 
-
     ret, reason = clusterTest.initial_tests()
     if ret == False:
         print "The initial cluster test failed: %s" % (reason)
@@ -2736,7 +2780,7 @@ def DoTests(argv):
         return # done here, since we just need to test whether
                # all the servers are on the same page
 
-    if argc == 1:
+    if argc == 2 and argv[1] == '--main':
         the_test = unittest.main(exit=False, argv=argv[:1])
 
         if the_test.result.wasSuccessful():
@@ -2744,15 +2788,7 @@ def DoTests(argv):
             if MergeTest().run():
                 SystemNameTest(clusterTest.getConfig()).run()
         doCleanUp()
-        if not clusterTest.do_main_only:
-            if not clusterTest.skip_timesync:
-                CallTest(TimeSyncTest)
-            if not clusterTest.skip_backup:
-                CallTest(BackupStorageTest)
-            if not clusterTest.skip_mservarc:
-                CallTest(MultiserverArchiveTest)
-            if not clusterTest.skip_streming:
-                CallTest(StreamingTest)
+        ProxyTest(*clusterTest.getConfig().rtget('ServerList')[0:2])
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
         #print "\nFunctest finnished\n"
@@ -2785,7 +2821,9 @@ if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
     argv = clusterTest.preparseArgs(sys.argv)
-    if len(argv) >= 2 and argv[1] in ('--help', '-h'):
+    if len(argv) == 1:  # called from auto.py, using boxes which are created, but servers not started
+        RunByAutotest(argv[0])
+    elif len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':
         UnitTestRollback().doRecover()

@@ -99,11 +99,9 @@ BOX_POST_START = {
     'boxbehind': 'post-create-behind-nat.sh'
 }
 
-#VG_BOXES_IP = ['192.168.109.8', '192.168.109.9']
-#VG_NAT_BOXES_IP = ['192.168.109.8', '192.168.110.3']
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
-MEDIASERVER_PASS = '123'
+MEDIASERVER_PASS = 'admin'
 
 START_CHECK_TIMEOUT = 30 # seconds
 ALL_START_TIMEOUT_BASE = 120 # seconds, per server

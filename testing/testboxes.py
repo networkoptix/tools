@@ -16,7 +16,7 @@ from functest_util import ClusterLongWorker, unquote_guid, Version
 NUM_SERV=2
 SERVER_UP_TIMEOUT = 20 # seconds, timeout for server to start to respond requests
 
-__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests']
+__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests', 'LegacyTestWrapper']
 
 class FuncTestError(AssertionError):
     pass
@@ -32,7 +32,6 @@ def boxssh(box, command):
 class TestLoader(unittest.TestLoader):
 
     def load(self, testclass, testset, config, *args):
-        testclass.config = config
         names = getattr(testclass, testset, None)
         if names is not None:
             print "[Preparing %s tests]" % testset
@@ -49,8 +48,12 @@ def RunTests(testclass, config, *args):
     :type config: FtConfigParser
     """
     #print "DEBUG: run test class %s" % testclass
-    testclass.init_suits()
     try:
+        try:
+            testclass.globalInit(config)
+        except Exception as err:
+            print "FAIL: %s initialization failed: %s!" % (testclass.__name__, err)
+            return
         return all( [
                 unittest.TextTestRunner(verbosity=2, failfast=testclass.isFailFast(suit_name))
                 .run(
@@ -59,8 +62,7 @@ def RunTests(testclass, config, *args):
                 for suit_name in testclass.iter_suits()
             ] )
     finally:
-        if testclass._worker:
-            testclass._worker.stopWork()
+        testclass.globalFinalise()
 
 
 
@@ -71,7 +73,7 @@ class FuncTestCase(unittest.TestCase):
     config = None
     num_serv = NUM_SERV
     testset = None
-    guids = None
+    _initialised = False
     _configured = False
     _stopped = set()
     _worker = None
@@ -80,39 +82,63 @@ class FuncTestCase(unittest.TestCase):
     _serv_version = None  # here I suppose that all servers being created from the same image have the same version
     before_2_5 = False # TODO remove it!
     _test_name = '<UNNAMED!>'
-    _clear_script = ''
+    _test_key = 'NONE'  # a name to pass as an argument to commands
+    _init_script = 'ctl.sh'  # clear it in a subclass to disable
+    _clear_script = ''  # clear it in a subclass to disable
+    _global_clear_script = 'ctl.sh'  # called only after all test suits of this class performed
+    sl = []
+    hosts = []
+    guids = []
+
+    @classmethod
+    def globalInit(cls, config):
+        print "========================================="
+        print
+        if config is None:
+            raise FuncTestError("%s can't be configured, config is None!" % cls.__name__)
+        cls.config = config
+        cls.init_suits()
+        if not cls.num_serv:
+            raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
+        cls._worker = ClusterLongWorker(cls.num_serv)
+        cls._worker.startThreads()
+        # this lines should be executed once per class
+        cls.sl = cls.config.rtget("ServerList")[:]
+        if len(cls.sl) < cls.num_serv:
+            raise FuncTestError("not enough servers configured to run %s tests.\n(num_serv=%s, list=%s)" % (
+                cls._test_name, cls.num_serv, cls.sl))
+        if len(cls.sl) > cls.num_serv:
+            cls.sl[cls.num_serv:] = []
+        cls.guids = ['' for _ in cls.sl]
+        cls.hosts = [addr.split(':')[0] for addr in cls.sl]
+        #print "Server list: %s" % cls.sl
+        cls._configured = True
+
+    @classmethod
+    def globalFinalise(cls):
+        cls._clear_box(cls._global_clear_script, cls._global_clear_script_args)
+        if cls._worker:
+            cls._worker.stopWork()
+            cls._worker = None
 
     @classmethod
     def setUpClass(cls):
         print "========================================="
-        print "%s Test Start" % cls._test_name
+        if cls.testset:
+            print "%s Test Start: %s" % (cls._test_name, cls.testset)
+        else:
+            print "%s Test Start" % cls._test_name
         # cls.config should be assigned in TestLoader.load()
-        if cls.config is None:
-            raise FuncTestError("%s hasn't been configured" % cls.__name__)
-        if cls.num_serv is None:
-            raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
-        if not cls._configured:
-            # this lines should be executed once per class
-            cls.sl = cls.config.rtget("ServerList")
-            cls._worker = ClusterLongWorker(cls.num_serv)
-            if len(cls.sl) < cls.num_serv:
-                raise FuncTestError("not enough servers configured to run %s tests" % cls._test_name)
-            if len(cls.sl) > cls.num_serv:
-                cls.sl[cls.num_serv:] = []
-            cls.guids = ['' for _ in cls.sl]
-            cls.hosts = [addr.split(':')[0] for addr in cls.sl]
-            print "Server list: %s" % cls.sl
-            cls._configured = True
-        cls._worker.startThreads()
 
     @classmethod
     def tearDownClass(cls):
         # and test if they work in parallel!
-        for host in cls._stopped:
+        if cls._clear_script:
+            cls._clear_box(cls._clear_script, cls._clear_script_args)
+        for host in cls._stopped:  # do we need it?
             print "Restoring mediaserver on %s" % host
             cls.class_call_box(host, '/vagrant/safestart.sh', 'networkoptix-mediaserver')
         cls._stopped.clear()
-        cls._worker.stopWork()
         print "%s Test End" % cls._test_name
         print "========================================="
 
@@ -146,7 +172,7 @@ class FuncTestCase(unittest.TestCase):
     ################################################################################
 
     def _call_box(self, box, *command):
-        #print "_call_box: %s: %s" % (box, ' '.join(command))
+        #sys.stdout.write("_call_box: %s: %s\n" % (box, ' '.join(command)))
         try:
             return boxssh(box, command)
         except subprocess.CalledProcessError, e:
@@ -162,18 +188,47 @@ class FuncTestCase(unittest.TestCase):
                       (box, ' '.join(command), e.returncode, e.output))
             return ''
 
-    def _get_init_script(self, boxnum):
-        "Return init script's name and arguments for it. It should return a tupple."
-        return () # the default is no script to run
+    @classmethod
+    def _clear_box(cls, script, args_method):
+        if script:
+            for num in xrange(cls.num_serv):
+                try:
+                    if cls._need_clear_box(num):
+                        args = args_method(num)
+                        print "Remotely calling at box %s: %s %s" % (num, script, ' '.join(args))
+                        cls.class_call_box(cls.hosts[num], '/vagrant/' + script, *args)
+                except Exception as err:
+                    print "ERROR: _clear_box with %s for box %s: %s" % (script, num, err)
+
+    @classmethod
+    def _need_clear_box(cls, num):
+        return len(cls.hosts) > num  # since it could be called with initialization incomplete
+
+    @classmethod
+    def _clear_script_args(cls, num):
+        return (str(num), )
+
+    @classmethod
+    def _global_clear_extra_args(cls, num):
+        return ()
+
+    @classmethod
+    def _global_clear_script_args(cls, num):
+        return (cls._test_key, 'clear') + cls._global_clear_extra_args(num)
+
+    def _init_script_args(self, boxnum):
+        "Return init script's arguments as a tupple, to add after the first two: self._test_key and 'init'"
+        return ()
+
+    #def _call_init_script(self, box, num):
 
     def _stop_and_init(self, box, num):
         sys.stdout.write("Stopping box %s\n" % box)
         self._mediaserver_ctl(box, 'safe-stop')
         time.sleep(0)
-        init_script = self._get_init_script(num)
-        if init_script:
-            self._call_box(box, *init_script)
-        sys.stdout.write("Box %s stopped and ready\n" % box)
+        if self._init_script:
+            self._call_box(box, '/vagrant/' + self._init_script,  self._test_key, 'init', *self._init_script_args(num))
+        sys.stdout.write("Box %s is ready\n" % box)
 
     def _prepare_test_phase(self, method):
         self._worker.clearOks()
@@ -181,7 +236,6 @@ class FuncTestCase(unittest.TestCase):
             self._worker.enqueue(method, (box, num))
         self._worker.joinQueue()
         self.assertTrue(self._worker.allOk(), "Failed to prepare test phase")
-        self._servers_th_ctl('start')
         self._wait_servers_up()
         if self._serv_version is None:
             self._get_version()
@@ -193,12 +247,14 @@ class FuncTestCase(unittest.TestCase):
         "Perform a service control command for a mediaserver on one of boxes"
         if cmd == 'safe-stop':
             rcmd = '/vagrant/safestop.sh'
+        elif cmd == 'safe-start':
+            rcmd = '/vagrant/safestart.sh'
         else:
             rcmd = cmd
         self._call_box(box, rcmd, 'networkoptix-mediaserver')
         if cmd in ('stop', 'safe-stop'):
             self._stopped.add(box)
-        elif cmd in ('start', 'restart'): # for 'restart' - just in case it was off unexpectedly
+        elif cmd in ('start', 'safe-stop', 'restart'): # for 'restart' - just in case it was off unexpectedly
             self._stopped.discard(box)
 
     def _servers_th_ctl(self, cmd):
@@ -231,6 +287,25 @@ class FuncTestCase(unittest.TestCase):
                 headers = {'Content-Type': 'application/json'}
             return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
+    def _server_request(self, host, func, data=None, headers=None, timeout=None):
+        req = self._prepare_request(host, func, data, headers)
+        url = req.get_full_url()
+        print "DEBUG: requesting: %s" % url
+        try:
+            response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
+        except urllib2.URLError , e:
+            self.fail("%s request failed with %s" % (url, e))
+        except Exception, e:
+            self.fail("%s request failed with exception:\n%s\n\n" % (url, traceback.format_exc()))
+        self.assertEqual(response.getcode(), 200, "%s request returns error code %d" % (url, response.getcode()))
+        answer = self._json_loads(response.read(), url)
+        #TODO make more intelegent check, now some requests return [], not {}
+        #if answer is not None and answer.get("error", '') not in ['', '0', 0]:
+        #    print "Answer: %s" % (answer,)
+        #    self.fail("%s request returned API error %s: %s" % (url, answer["error"], answer.get("errorString","")))
+        return answer
+
+    #FIXME combine these two similar methods in one!
     def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None, with_debug=False):
         "Sends request that don't fail on exception or non-200 return code."
         req = self._prepare_request(host, func, data)
@@ -246,22 +321,10 @@ class FuncTestCase(unittest.TestCase):
             return None
         # but it could fail here since with code == 200 the response must be parsable or empty
         answer = self._json_loads(response.read(), req.get_full_url())
-        response.close()
-        return answer
-
-    def _server_request(self, host, func, data=None, headers=None, timeout=None):
-        req = self._prepare_request(host, func, data, headers)
-        url = req.get_full_url()
-        #print "DEBUG: requesting: %s" % url
-        try:
-            response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
-        except urllib2.URLError , e:
-            self.fail("%s request failed with %s" % (url, e))
-        except Exception, e:
-            self.fail("%s request failed with exception:\n%s\n\n" % (url, traceback.format_exc()))
-        self.assertEqual(response.getcode(), 200, "%s request returns error code %d" % (url, response.getcode()))
-        answer = self._json_loads(response.read(), url)
-        response.close()
+        #TODO make more intelegent check, now some requests return [], not {}
+        #if answer is not None and answer.get("error", '') not in ['', '0', 0] and with_debug:
+        #    print "Answer: %s" % (answer,)
+        #    print "Host %s, call %s returned API error %s: %s" % (host, func, answer["error"], answer.get("errorString",""))
         return answer
 
     def _wait_servers_up(self, servers=None):
@@ -302,3 +365,36 @@ class FuncTestCase(unittest.TestCase):
         print
     #    print "*** Setting up: %s" % self._testMethodName  # may be used for debug ;)
     ####################################################
+
+class LegacyTestWrapper(FuncTestCase):
+    """
+    Provides an object to use virtual box control methods
+    """
+    _suits = "dummy"
+    _test_key = "legacy"
+
+    def __init__(self, config):
+        self.globalInit(config)
+
+    def __enter__(self):
+        print "Entering TestBoxHandler"
+        self._servers_th_ctl('safe-start')
+        self._wait_servers_up()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print "Exitting TestBoxHandler"
+        try:
+            self._servers_th_ctl('safe-stop')
+            self.globalFinalise()
+        except Exception as err:
+            print "Error finalizing tests: $s" % (err,)
+
+    def __del__(self):
+        if self._worker:
+            self._worker.stopWork()
+
+    @classmethod
+    def init_suits(cls):
+        "A dummy method since the original one will fail in globalInit()"
+        pass

@@ -22,9 +22,11 @@ mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
 multiserv_interfals_fname = os.path.join(mypath, "multiserv_intervals.py")
 
 BACKUP_STORAGE_READY_TIMEOUT = 60  # seconds
+BACKUP_START_TIMEOUT = 20  # seconds
+BACKUP_MAX_DURATION = 60  #seconds
 
 _NUM_SERV_BAK = 1
-_NUM_SERV_MARCH = 2
+_NUM_SERV_MSARCH = 2
 _WORK_HOST = 0
 
 TEST_CAMERA_TYPE_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
@@ -73,7 +75,7 @@ class BackupStorageTestError(FuncTestError):
 class StorageBasedTest(FuncTestCase):
     """ Some common logic for storage tests.
     """
-    num_serv_t = 0
+    num_serv = 0
     _storages = dict()
     _fill_storage_script = ''
     test_camera_id = 0
@@ -81,7 +83,7 @@ class StorageBasedTest(FuncTestCase):
 
     def _load_storage_info(self):
         "Get servers' storage space data"
-        for num in xrange(self.num_serv_t):
+        for num in xrange(self.num_serv):
             resp = self._server_request(num, 'api/storageSpace')
             self._storages[num] = [s for s in resp["reply"]["storages"] if s['storageType'] == 'local']
             #print "[DEBUG] Storages found:"
@@ -114,11 +116,12 @@ class StorageBasedTest(FuncTestCase):
         if log_response:
             print "getCamerasEx(%s) response: '%s'" % (boxnum, answer)
 
-    def _fill_storage(self, mode, boxnum, *args):
+    def _fill_storage(self, mode, boxnum, arg):
         print "Server %s: Filling the main storage with the test data." % boxnum
         self._call_box(self.hosts[boxnum], "python", shquote("/vagrant/" + self._fill_storage_script), mode,
-                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id, *args)
+                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id, arg)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
+        #print "rebuildArchive start: %s" %(answer,)
         try:
             state = answer["reply"]["state"]
         except Exception:
@@ -126,20 +129,19 @@ class StorageBasedTest(FuncTestCase):
         while state != 'RebuildState_None':
             time.sleep(0.5)
             answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
+            #print "rebuildArchive: %s" %(answer,)
             try:
                 state = answer["reply"]["state"]
             except Exception:
                 pass
 
+    @classmethod
+    def _need_clear_box(cls, num):
+        return super(StorageBasedTest, cls)._need_clear_box(num) and num in cls._storages
 
     @classmethod
-    def tearDownClass(cls):
-        if cls._clear_script:
-            for num in xrange(cls.num_serv_t):
-                if num in cls._storages:
-                    print "Remotely calling %s at box %s" % (cls._clear_script, num)
-                    cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_script, cls._storages[num][0]['url'], TMP_STORAGE)
-        super(StorageBasedTest, cls).tearDownClass()
+    def _global_clear_extra_args(cls, num):
+        return (cls._storages[num][0]['url'], TMP_STORAGE)
 
     def _init_cameras(self):
         pass
@@ -160,9 +162,9 @@ class BackupStorageTest(StorageBasedTest):
     Creates a backup storage and tries to start the backup procedure both manually and scheduled.
     """
     _test_name = "Backup Storage"
-    num_serv_t = _NUM_SERV_BAK
+    _test_key = 'bstorage'
+    num_serv = _NUM_SERV_BAK
     _fill_storage_script = 'fill_stor.py'
-    _clear_script = 'bs_clear.sh'
 
     _suits = (
         ('BackupStartTests', [
@@ -171,17 +173,6 @@ class BackupStorageTest(StorageBasedTest):
             'BackupByRequestTest',
         ]),
     )
-
-    def _get_init_script(self, boxnum):
-        return ('/vagrant/bs_init.sh',)
-
-    #@classmethod
-    #def setUpClass(cls):
-    #    super(BackupStorageTest, cls).setUpClass()
-
-    #@classmethod
-    #def tearDownClass(cls):
-    #    super(BackupStorageTest, cls).tearDownClass()
 
     ################################################################
 
@@ -220,37 +211,45 @@ class BackupStorageTest(StorageBasedTest):
                 pass
 
     def _wait_backup_start(self):
-        while True:
+        end = time.time() + BACKUP_START_TIMEOUT
+        while time.time() < end:
+            data = self._server_request(_WORK_HOST, 'api/backupControl/')
+            try:
+                if data['reply']['state'] != "BackupState_None":
+                    return
+            except Exception:
+                pass
+            time.sleep(0.5)
+        self.fail("Backup didn't started for %s seconds (or was ended before the first check)" % BACKUP_START_TIMEOUT)
+
+    def _wait_backup_end(self):
+        end = time.time() + BACKUP_MAX_DURATION
+        while time.time() < end:
+            time.sleep(0.5)
             data = self._server_request(_WORK_HOST, 'api/backupControl/')
             #print "backupControl: %s" % data
             try:
-                if data['reply']['state'] != "BackupState_None":
-                    break
-            except Exception:
-                pass
-            time.sleep(0.5)
-
-    def _wait_backup_end(self):
-        while True:
-            time.sleep(0.5)
-            data = self._server_request(_WORK_HOST, 'api/backupControl/')
-            # print "backupControl: %s" % data
-            try:
                 if data['reply']['state'] == "BackupState_None":
-                    break
+                    return
             except Exception:
                 pass
+        self.fail("Backup goes too log, more then %s seconds" % BACKUP_MAX_DURATION)
 
     def _check_backup_result(self):
         try:
             boxssh(self.hosts[_WORK_HOST], ('/vagrant/diffbak.sh', self._storages[_WORK_HOST][0]['url'], TMP_STORAGE))
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as err:
             DIFF_FAIL_CODE = 1
             DIFF_FAIL_MSG = "DIFFERENT"
-            if e.returncode == DIFF_FAIL_CODE and e.output.strip() == DIFF_FAIL_MSG:
-                self.fail("The main storage and the backup storage contents are different")
+            if err.returncode == DIFF_FAIL_CODE:
+                if err.output.strip() == DIFF_FAIL_MSG:
+                    self.fail("The main storage and the backup storage contents are different")
+                else:
+                    print "ERROR: Backup content check returned code %s. It's output:\n%s" % (err.returncode, err.output)
+                    self.fail("The main storage and the backup storage contents are possibly different")
             else:
-                raise
+                print "ERROR: Backup content check returned code %s. It's output:\n%s" % (err.returncode, err.output)
+                self.fail("Backup content check failed with code %s and output:\n%s" % (err.returncode, err.output))
 
     ################################################################
 
@@ -266,10 +265,15 @@ class BackupStorageTest(StorageBasedTest):
         data['backupType'] = 'BackupManual'
         self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
         time.sleep(0.1)
+        self._call_box(self.hosts[_WORK_HOST], "/vagrant/ctl.sh", "bstorage", "rmstorage",
+                       shquote(self._storages[_WORK_HOST][0]['url']))
         self._fill_storage('random', _WORK_HOST, "step1")
         data['backupType'] = 'BackupSchedule'
         time.sleep(0.1)
+        #print "DEBUG: ec2/saveServerUserAttributesList: %s" % (data,)
+        #answer =
         self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        #print "saveServerUserAttributesList: %s" % (answer,)
         self._wait_backup_start()
         #print "Scheduled backup started"
         self._wait_backup_end()
@@ -284,17 +288,17 @@ class BackupStorageTest(StorageBasedTest):
         self._fill_storage('random', _WORK_HOST, "step2")
         time.sleep(1)
         data = self._server_request(_WORK_HOST, 'api/backupControl/?action=start')
-        #print "backupControl start: %s" % data
+        print "backupControl start: %s" % data
         self._wait_backup_end()
-        time.sleep(1)
+        time.sleep(0.1)
         self._check_backup_result()
 
 
 class MultiserverArchiveTest(StorageBasedTest):
     _test_name = "Multiserver Archive"
-    num_serv_t = _NUM_SERV_MARCH
+    _test_key = "msarch"
+    num_serv = _NUM_SERV_MSARCH
     _fill_storage_script = 'fill_stor.py'
-    _clear_script = 'ms_clear.sh'
     time_periods_single = []
     time_periods_joined = []
 
@@ -306,22 +310,11 @@ class MultiserverArchiveTest(StorageBasedTest):
         ]),
     )
 
-    def _get_init_script(self, boxnum):
-        return ('/vagrant/ms_init.sh', )
-
-    #@classmethod
-    #def setUpClass(cls):
-    #    super(MultiserverArchiveTest, cls).setUpClass()
-
-    #@classmethod
-    #def tearDownClass(cls):
-    #    super(MultiserverArchiveTest, cls).tearDownClass()
-
     ################################################################
 
     def _init_cameras(self):
         c = self.new_test_camera()
-        for num in xrange(_NUM_SERV_MARCH):
+        for num in xrange(_NUM_SERV_MSARCH):
             self._worker.enqueue(self._add_test_camera, (num, c, False))
             #self._add_test_camera(num, c)
         self._worker.joinQueue()
@@ -361,7 +354,7 @@ class MultiserverArchiveTest(StorageBasedTest):
         "Re-initialize with clear db, prepare a single camera data and fill the storage with video data"
         self._InitialRestartAndPrepare()
         print "Filling archives with data..."
-        for num in xrange(_NUM_SERV_MARCH):
+        for num in xrange(_NUM_SERV_MSARCH):
             self._fill_storage('multiserv', num, str(num))
         print "Done. Wait a bit..."
         tmp = {}
@@ -372,7 +365,7 @@ class MultiserverArchiveTest(StorageBasedTest):
 
     def CheckArchiveMultiserv(self):
         "Checks recorded time periods for both servers joined into one system."
-        answer = [self._getRecordedTime(num) for num in xrange(self.num_serv_t)]
+        answer = [self._getRecordedTime(num) for num in xrange(self.num_serv)]
         for a in answer:
             self.assertTrue(a["error"] == '0' and a["errorString"] == '',
                 "ec2/recordedTimePeriods request to the box %s returns error %s: %s" % (num, a["error"], a["errorString"]))
@@ -419,5 +412,3 @@ class MultiserverArchiveTest(StorageBasedTest):
         #print "Join servers back"
         #self._change_system_name(1, sysname)  # it's done by _clear_storage_script 'ms_clear.sh'
         time.sleep(0.1)
-
-

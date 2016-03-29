@@ -15,7 +15,7 @@ from collections import deque
 from subprocess import Popen, PIPE
 
 DEFAULT_THREADS = 10
-AUTH = ('admin', '123')
+AUTH = ('admin', 'admin')
 URI = "/api/gettime" # "/ec2/getCurrentTime", /api/moduleInformation, /api/ping, /api/statistics,
 # /ec2/getSettings, /api/moduleInformation, /api/logLevel, /api/iflist, /api/systemSettings
 URI_HEAVY = "/ec2/getResourceTypes" # /ec2/getFullInfo

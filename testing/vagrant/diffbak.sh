@@ -23,6 +23,7 @@ BAK="$2"
 find "$MAIN" -name '*.mkv' -printf '%P %s\n' > "$MAIN_LIST"
 find "$BAK" -name '*.mkv' -printf '%P %s\n' > "$BAK_LIST"
 if diff -q "$MAIN_LIST" "$BAK_LIST" > /dev/null; then
+#if diff -q "$MAIN_LIST" "$BAK_LIST"; then
 	echo OK
 	RC=0
 else
