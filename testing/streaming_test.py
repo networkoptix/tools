@@ -3,12 +3,12 @@
 HLS, WEBM and RTSP sreaming test (to use in the autotest sequence)
 """
 __author__ = 'Danil Lavrentyuk'
-import copy, time
-import unittest
+#import time
+#import unittest
 
 #from testboxes import *
 from rtsptests import RtspStreamTest, HlsStreamingTest
-from stortest import StorageBasedTest, TEST_CAMERA_DATA
+from stortest import StorageBasedTest  #, TEST_CAMERA_DATA
 from functest_util import quote_guid
 
 _NUM_STREAM_SERV = 1
@@ -26,7 +26,6 @@ class StreamingTest(StorageBasedTest):
     )
     num_serv = _NUM_STREAM_SERV   # the 1st server should be "before" NAT, the 2nd - behind NAT
     _fill_storage_script = 'fill_stor.py'
-    _need_copy = True
     _initFailed = False
 
     @classmethod
@@ -34,33 +33,17 @@ class StreamingTest(StorageBasedTest):
         return False
 
     @classmethod
+    def globalInit(cls, config):
+        super(StreamingTest, cls).globalInit(config)
+        cls._duplicateConfig()
+        cls.config.rtset("ServerList", [cls.sl[_WORK_HOST]])
+
+    @classmethod
     def setUpClass(cls):
         super(StreamingTest, cls).setUpClass()
         cls._initFailed = False
-        if cls._need_copy:
-            try:
-                cls.config = copy.copy(cls.config)
-                cls.config.runtime = cls.config.runtime.copy()
-                cls.config.rtset("ServerList", [cls.sl[_WORK_HOST]])
-                cls._need_copy = False
-            except Exception:
-                cls.tearDownClass()
-                raise
-
-    #@classmethod
-    #def tearDownClass(cls):
-    #    time.sleep(30)
-    #    super(StreamingTest, cls).tearDownClass()
 
     def _init_cameras(self):
-        name = TEST_CAMERA_DATA['name']
-        answer = self._server_request(_WORK_HOST, 'ec2/getCameras')
-        for c in answer:
-            print "Found camera '%s' at server %s" % (c['name'], c['parentId'])
-            if c['name'] == name and c['parentId'] == self.guids[_WORK_HOST]:
-                self.test_camera_id = c['id']
-                self.test_camera_physical_id = c['physicalId']
-                return
         self._add_test_camera(_WORK_HOST)
 
     def Initialisation(self):
@@ -77,13 +60,12 @@ class StreamingTest(StorageBasedTest):
         "Check RTSP and HTTP streaming from server"
         if self._initFailed:
             self.skipTest("not initialized")
-        #self.skipTest("DEBUG")
         self.assertTrue(RtspStreamTest(self.config).run(),
                         "Multi-proto streaming test failed")
 
     def HlsStreamingTest(self):
+        "Check HLS streaming from server"
         if self._initFailed:
             self.skipTest("not initialized")
-        "Check HLS streaming from server"
         self.assertTrue(HlsStreamingTest(self.config).run(),
                         "HLS streaing test failed")

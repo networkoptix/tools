@@ -530,6 +530,7 @@ def ManagerAddPassword(passman, host, user, pwd):
     passman.add_password(None, "http://%s/ec2" % (host), user, pwd)
     passman.add_password(None, "http://%s/api" % (host), user, pwd)
     passman.add_password(None, "http://%s/hls" % (host), user, pwd)
+    passman.add_password(None, "http://%s/proxy" % (host), user, pwd)
 
 
 def SafeJsonLoads(text, serverAddr, methodName):

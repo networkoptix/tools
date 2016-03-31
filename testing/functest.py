@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+""" The main entry point for almost all functional tests for networkoptix mediaserver.
+Contains a set of 'legacy' tests (i.e. tests being written by a previous author,
+most of them are not analyzed and not refactored yet) and calls to new (or refactored)
+tests which are put into sep[arate modules.
+"""
+
 import sys, time
 import unittest
 import urllib2

@@ -4,9 +4,10 @@ Storages functional tests:
 1. Backup storage test
 2. Multiarchive storage test
 Both imported and called by functest.py
+Their common base class StorageBasedTest also used in other tests.
 """
 __author__ = 'Danil Lavrentyuk'
-import os, os.path, sys, time
+import os, os.path, copy, sys, time
 #import urllib2
 import subprocess
 #import traceback
@@ -78,8 +79,15 @@ class StorageBasedTest(FuncTestCase):
     num_serv = 0
     _storages = dict()
     _fill_storage_script = ''
-    test_camera_id = 0
-    test_camera_physical_id = 0
+    test_camera_id = None
+    test_camera_physical_id = None
+
+
+    @classmethod
+    def globalInit(cls, config):
+        super(StorageBasedTest, cls).globalInit(config)
+        cls.test_camera_id = [0 for _ in xrange(cls.num_serv)]
+        cls.test_camera_physical_id = cls.test_camera_id[:]
 
     def _load_storage_info(self):
         "Get servers' storage space data"
@@ -91,35 +99,46 @@ class StorageBasedTest(FuncTestCase):
             #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
 
     @classmethod
-    def new_test_camera(cls):
+    def _duplicateConfig(cls):
+        cls.config = copy.copy(cls.config)
+        cls.config.runtime = cls.config.runtime.copy()
+
+    @classmethod
+    def new_test_camera(cls, boxnum, camData=TEST_CAMERA_DATA):
         "Creates initial dict of camera data."
-        data = TEST_CAMERA_DATA.copy()
+        data = camData.copy()
         data['id'] = str(uuid.uuid4())
-        cls.test_camera_id = data['id']
-        cls.test_camera_physical_id = data['physicalId']
+        cls.test_camera_id[boxnum] = data['id']
+        cls.test_camera_physical_id[boxnum] = data['physicalId']
         return data
 
-    def _add_test_camera(self, boxnum, camera=None, log_response=False):
-        camera = self.new_test_camera() if camera is None else camera.copy()
+    @classmethod
+    def _duplicateConfig(cls):
+        cls.config = copy.copy(cls.config)
+        cls.config.runtime = cls.config.runtime.copy()
+
+    def _add_test_camera(self, boxnum, camera=None, log_response=False, cameraAttr=TEST_CAMERA_ATTR):
+        camera = self.new_test_camera(boxnum) if camera is None else camera.copy()
         camera['parentId'] = self.guids[boxnum]
         self._server_request(boxnum, 'ec2/saveCamera', camera)
         answer = self._server_request(boxnum, 'ec2/getCameras')
         if log_response:
-            print "getCameras(%s) response: '%s'" % (boxnum, answer)
+            print "_add_test_camera: getCameras(%s) response: '%s'" % (boxnum, answer)
         for c in answer:
             if c['parentId'] == self.guids[boxnum]:
-                self.assertEquals(unquote_guid(c['id']), self.test_camera_id, "Failed to assign a test camera to to a server")
-        attr_data = [TEST_CAMERA_ATTR.copy()]
-        attr_data[0]['cameraID'] = self.test_camera_id
+                self.assertEquals(unquote_guid(c['id']), self.test_camera_id[boxnum], "Failed to assign a test camera to to a server")
+        attr_data = [cameraAttr.copy()]
+        attr_data[0]['cameraID'] = self.test_camera_id[boxnum]
         self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
         answer = self._server_request(boxnum, 'ec2/getCamerasEx')
         if log_response:
-            print "getCamerasEx(%s) response: '%s'" % (boxnum, answer)
+            print "_add_test_camera: getCamerasEx(%s) response: '%s'" % (boxnum, answer)
+
 
     def _fill_storage(self, mode, boxnum, arg):
         print "Server %s: Filling the main storage with the test data." % boxnum
         self._call_box(self.hosts[boxnum], "python", shquote("/vagrant/" + self._fill_storage_script), mode,
-                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id, arg)
+                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id[boxnum], arg)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
         #print "rebuildArchive start: %s" %(answer,)
         try:
@@ -154,6 +173,18 @@ class StorageBasedTest(FuncTestCase):
         self._prepare_test_phase(self._stop_and_init)
         self._load_storage_info()
         self._init_cameras()
+
+    #def _has_camera(self, host, cameraName):
+    #    "Checks if the host has already got a camera with such name"
+    #    answer = self._server_request(host, 'ec2/getCameras')
+    #    for c in answer:
+    #        #print "Found camera '%s' at server %s" % (c['name'], c['parentId'])
+    #        if c['name'] == cameraName and c['parentId'] == self.guids[host]:
+    #            self.test_camera_id = c['id']
+    #            self.test_camera_physical_id = c['physicalId']  # TODO change for a list of ids
+    #            return True
+    #    return False
+
 
 
 class BackupStorageTest(StorageBasedTest):
@@ -313,14 +344,16 @@ class MultiserverArchiveTest(StorageBasedTest):
     ################################################################
 
     def _init_cameras(self):
-        c = self.new_test_camera()
+        c = self.new_test_camera(0)
         for num in xrange(_NUM_SERV_MSARCH):
+            if num > 0:
+                self.test_camera_id[num] = self.test_camera_id[0]
+                self.test_camera_physical_id[num] = self.test_camera_physical_id[0]
             self._worker.enqueue(self._add_test_camera, (num, c, False))
-            #self._add_test_camera(num, c)
         self._worker.joinQueue()
 
     def _getRecordedTime(self, boxnum, flat=True):
-        req = 'ec2/recordedTimePeriods?physicalId=%s' % self.test_camera_physical_id
+        req = 'ec2/recordedTimePeriods?physicalId=%s' % self.test_camera_physical_id[boxnum]
         if flat:
             req += '&flat' # ! it's not bool parameter, it's existance is it's value
         return self._server_request(boxnum, req)
@@ -390,11 +423,11 @@ class MultiserverArchiveTest(StorageBasedTest):
     def CheckArchivesSeparated(self):
         self._splitSystems()
         answer = [[], []]
-        uri = 'ec2/recordedTimePeriods?physicalId=%s&flat' % self.test_camera_physical_id
+        uri = ['ec2/recordedTimePeriods?physicalId=%s&flat' % self.test_camera_physical_id[n] for n in xrange(self.num_serv)]
         for atempt_count in xrange(10):
-            answer[0] = self._server_request(0, uri)['reply'][:]
+            answer[0] = self._server_request(0, uri[0])['reply'][:]
             time.sleep(0.2)
-            answer[1] = self._server_request(1, uri)['reply'][:]
+            answer[1] = self._server_request(1, uri[1])['reply'][:]
             #print "0: %s, %s..." % (id(answer[0]), answer[0][:10])
             #print "1: %s, %s..." % (id(answer[1]), answer[1][:10])
             if answer[0] != answer[1]:

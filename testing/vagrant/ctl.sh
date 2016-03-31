@@ -130,8 +130,10 @@ function natcon_ctl {
     case "$mode" in
         init)
             nxcleardb
-            ;;
+            setLogLevel 2
+           ;;
         clear)
+            nxrmbase "$1"
             nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for natcon test control"

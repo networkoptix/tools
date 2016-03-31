@@ -10,18 +10,53 @@ import unittest
 
 import urllib2 # FIXME remove it
 
-from functest_util import checkResultsEqual
+from functest_util import checkResultsEqual, HttpRequest
 from testboxes import *
+from stortest import StorageBasedTest, TEST_CAMERA_ATTR, TEST_CAMERA_DATA
+from rtsptests import SingleServerRtspPerf, RtspStreamTest, SingleServerHlsTest, HlsStreamingTest #, Camera
 
 NUM_NAT_SERV = 2  # 2 mediaservers are used: 1st before NAT, 2rd - behind NAT
                   # there is no mediaserver on the box with NAT
 HOST_BEFORE_NAT = 0
 HOST_BEHIND_NAT = 1
 
+TEST_NATCAMERA_DATA = TEST_CAMERA_DATA.copy()
+TEST_NATCAMERA_DATA['physicalId'] = TEST_NATCAMERA_DATA['mac'] = '11:22:33:33:22:11'
+TEST_NATCAMERA_DATA['url'] = '192.168.109.62'
+
+TEST_NATCAMERA_ATTR = TEST_CAMERA_ATTR.copy()
+TEST_NATCAMERA_ATTR['cameraName'] = 'nat-camera'
+
 class NatConnectionTestError(FuncTestError):
     pass
 
-class NatConnectionTest(FuncTestCase):
+
+class NatSingleStreamingPerf(SingleServerRtspPerf):
+    def _addCamera(self, c):
+        #print "DEBUG: _addCamera server %s, guid %s, camera:\n%s" % (self._serverAddr, self._serverGUID, c)
+        if c['parentId'] == self._serverGUID:  # this is the guid of the another server!
+            super(SingleServerRtspPerf, self)._addCamera(c)
+
+
+class NatRtspStreamTest(RtspStreamTest):
+    _singleServerClass = NatSingleStreamingPerf
+
+
+class NatSingleHlsPerf(SingleServerHlsTest):
+    def _checkLineUrl(self, line):
+        return line.startswith('/proxy/') and '/hls/' in line
+
+    def _addCamera(self, c):
+        #print "DEBUG: _addCamera server %s, guid %s, camera:\n%s" % (self._serverAddr, self._serverGUID, c)
+        if c['parentId'] == self._serverGUID:  # this is the guid of the another server!
+            super(SingleServerRtspPerf, self)._addCamera(c)
+
+
+class NatHlsStreamingTest(HlsStreamingTest):
+    _singleServerClass = NatSingleHlsPerf
+
+
+class NatConnectionTest(StorageBasedTest):  # (FuncTestCase):
 
     _test_name = "NAT Connection"
     _test_key = "natcon"
@@ -29,11 +64,26 @@ class NatConnectionTest(FuncTestCase):
         ('NatConnectionTests', [
             'VMPreparation',
             'TestDataSynchronization',
-            'TestRTSP',
             'TestHTTPForwarding',
+            'TestRtspHttp',
          ]),
     )
     num_serv = NUM_NAT_SERV # the 1st server should be "before" NAT, the 2nd - behind NAT
+    _fill_storage_script = 'fill_stor.py'
+    _prepared = False
+
+
+    ################################################################
+
+    def _init_cameras(self):
+        self._add_test_camera(HOST_BEFORE_NAT, log_response=0)
+        self._add_test_camera(HOST_BEHIND_NAT,
+            camera=self.new_test_camera(HOST_BEHIND_NAT, TEST_NATCAMERA_DATA),
+            cameraAttr=TEST_NATCAMERA_ATTR, log_response=0)
+
+    @classmethod
+    def isFailFast(cls, suit_name=""):
+        return False
 
     ################################################################
 
@@ -52,10 +102,13 @@ class NatConnectionTest(FuncTestCase):
         time.sleep(1)
         # get server's IDs
         self._wait_servers_up()
+        self._prepared = True
 
     _sync_test_requests = ["getResourceParams", "getMediaServersEx", "getCamerasEx", "getUsers"]
 
     def TestDataSynchronization(self):
+        if self._prepared:
+            self.skipTest("Test suite preparatoin failed")
         for method in self._sync_test_requests:
             responseList = []
             for server in self.sl:
@@ -65,14 +118,11 @@ class NatConnectionTest(FuncTestCase):
             ret, reason = checkResultsEqual(responseList, method)
             self.assertTrue(ret, "%s method test failed: %s" % (method, reason))
 
-    #TODO implement it leter
-    @unittest.skip("Not implememted")
-    def TestRTSP(self):
-        pass
-
     _func_to_forward = 'api/moduleInformation'
 
     def TestHTTPForwarding(self):
+        if self._prepared:
+            self.skipTest("Test suite preparatoin failed")
         "Uses request, returning different data for diаferent servers. Checks direct and proxied requests."
         direct_answer1 = self._server_request(1, self._func_to_forward)
         fwd_answer1 = self._server_request(0, self._func_to_forward, headers={'X-server-guid': self.guids[1]})
@@ -81,5 +131,21 @@ class NatConnectionTest(FuncTestCase):
         fwd_answer2 = self._server_request(1, self._func_to_forward, headers={'X-server-guid': self.guids[0]})
         self.assertEqual(direct_answer2, fwd_answer2, "Request outer server through inner returns different result then direct request")
         self.assertNotEqual(direct_answer1, direct_answer2, "Both servers return the same moduleInformation data")
+
+    def TestRtspHttp(self):
+        if self._prepared:
+            self.skipTest("Test suite preparatoin failed")
+        self._load_storage_info()
+        self._init_cameras()
+        guids = self.guids[0:2]
+        guids.reverse()  # to ask another server's data from each server
+        self.config.rtset("ServerUUIDList", guids) # [quote_guid(guid) for guid in self.guids]
+        self._fill_storage('streaming', HOST_BEFORE_NAT, "streaming")
+        self._fill_storage('streaming', HOST_BEHIND_NAT, "streaming")
+        self.assertTrue(NatRtspStreamTest(self.config).run(),
+                "Multi-proto streaming test failed")
+        self.assertTrue(NatHlsStreamingTest(self.config).run(),
+                "HLS streaing test failed")
+
 
 
