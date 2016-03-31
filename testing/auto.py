@@ -20,7 +20,7 @@ import pipereader
 from testboxes import boxssh
 from functest_util import args2str, real_caps
 
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 
 SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK = '[  FAILED  ]'
