@@ -17,7 +17,7 @@ from pipes import quote as shquote
 import pprint
 
 from functest_util import ClusterLongWorker, get_server_guid, unquote_guid, CAMERA_ATTR_EMPTY
-from testboxes import *
+from testbase import *
 
 mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
 multiserv_interfals_fname = os.path.join(mypath, "multiserv_intervals.py")

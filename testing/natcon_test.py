@@ -11,7 +11,7 @@ import unittest
 import urllib2 # FIXME remove it
 
 from functest_util import checkResultsEqual, HttpRequest
-from testboxes import *
+from testbase import *
 from stortest import StorageBasedTest, TEST_CAMERA_ATTR, TEST_CAMERA_DATA
 from rtsptests import SingleServerRtspPerf, RtspStreamTest, SingleServerHlsTest, HlsStreamingTest #, Camera
 

@@ -25,7 +25,7 @@ from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
 from streaming_test import StreamingTest
 from natcon_test import NatConnectionTest
-from testboxes import RunTests as RunBoxTests, LegacyTestWrapper
+from testbase import RunTests as RunBoxTests, LegacyTestWrapper
 from proxytest import ProxyTest
 
 CONFIG_FNAME = "functest.cfg"
@@ -2794,7 +2794,7 @@ def DoTests(argv):
             if MergeTest().run():
                 SystemNameTest(clusterTest.getConfig()).run()
         doCleanUp()
-        ProxyTest(*clusterTest.getConfig().rtget('ServerList')[0:2])
+        ProxyTest(*clusterTest.getConfig().rtget('ServerList')[0:2]).run()
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
         #print "\nFunctest finnished\n"

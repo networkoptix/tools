@@ -12,7 +12,7 @@ import struct
 import pprint
 
 from functest_util import ClusterLongWorker, get_server_guid
-from testboxes import *
+from testbase import *
 
 GRACE = 1.0 # max time difference between responses to say that times are equal
 INET_GRACE = 3.0 # max time difference between a mediaserver time and the internet time

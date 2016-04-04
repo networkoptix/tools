@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 
 from testconf import *
 import pipereader
-from testboxes import boxssh
+from testbase import boxssh
 from functest_util import args2str, real_caps
 
 __version__ = '1.2.2'

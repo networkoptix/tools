@@ -203,11 +203,7 @@ class JsonDiff:
         return self._hasDiff
 
     def errorInfo(self):
-        if self._hasDiff:
-            return self._errorInfo
-        else:
-            return "<no diff>"
-
+        return self._errorInfo if self._hasDiff else "<no diff>"
 
     def resetDiff(self):
         self._hasDiff = False
@@ -342,7 +338,6 @@ def compareJson(lhs,rhs):
             result.leave()
         else:
             return result.typeNotSame(lhs,rhs)
-    #FIXME check if lhs neither list nor dit!
 
     return result
 

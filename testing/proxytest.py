@@ -7,8 +7,10 @@ import urllib2
 from httplib import HTTPException
 import json
 import time
-from functest_util import JsonDiff, compareJson, get_server_guid
+from collections import namedtuple
 import traceback
+from functest_util import JsonDiff, compareJson, get_server_guid, real_caps
+from testbase import FuncTestError
 
 _MAIN_HOST = '192.168.109.8:7001'
 _SEC_HOST = '192.168.109.9:7001'
@@ -28,65 +30,102 @@ def _prepareLoader(hosts):
             passman.add_password(None, "http://%s/api" % h, _USER, _PWD)
         urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
     except Exception:
-        print "FAIL: can't install a password manager: %s" % (traceback.format_exc(),)
-        return False
-    return True
-
-def _performRequest(peer, redirectToID=None):
-    if redirectToID:
-        print "Requesting %s with redirect to %s" % (peer, redirectToID)
-    else:
-        print "Requesting %s" % (peer,)
-    req = urllib2.Request('http://%s/ec2/getResourceParams' % peer)
-    if redirectToID:
-        req.add_header('X-server-guid', redirectToID)
-    response = urllib2.urlopen(req)
-    data = response.read()
-    content_len = int(response.info()['Content-Length'])
-    if content_len != len(data):
-        print "FAIL: Resulting data len: %s. Content-Length: %s" % (len(data), content_len)
-    return (json.loads(data), content_len)
-    #print "Resulting data len: %s" % len(data)
+        raise FuncTestError("can't install a password manager: %s" % (traceback.format_exc(),))
 
 
-def ProxyTest(mainHost, secHost):
-    ids = {}
-    print "\n======================================="
-    print "Proxy Test Start"
-    try:
-        for h in (mainHost, secHost):
+Result = namedtuple('Result', ['func', 'server', 'redirect', 'data', 'length'])
+def _req_str(self):
+    return (
+        "direct request to %s" % self.server
+    ) if self.redirect is None else (
+        "request to %s through %s" % (self.redirect, self.server)
+    )
+Result.req_str = _req_str
+
+
+def compareResults(a, b):
+    """
+    :param a: Result
+    :param b: Result
+    """
+    if a.func != b.func:
+        raise AssertionError("The test is broken! Trying to compare different functions results: %s and %s" %
+                             (a.funcm, b.func))
+    if a.length != b.length:
+        raise FuncTestError("Function %s. Different data lengths returned by %s (%s) and %s (%s)" %
+                            (a.func, a.req_str(), a.length, b.req_str(), b.length))
+    diff = compareJson(a.data, b.data)
+    if diff.hasDiff():
+        raise FuncTestError("Function %s. Diferent responses for %s and %s: %s" %
+                            (a.func, a.req_str(), b.req_str(), diff.errorInfo()))
+
+
+class ProxyTest(object):
+
+    def __init__(self, mainHost, secHost):
+        self.mainHost = mainHost
+        self.secHost = secHost
+        self.uids = {}
+
+    def getUids(self):
+        for h in (self.mainHost, self.secHost):
             guid = get_server_guid(h)
             if guid is not None:
-                ids[h] = guid
+                self.uids[h] = guid
                 print "%s - %s" % (h, guid)
             else:
-                print "FAIL: Can't get server %s guid!" % h
-                return False
-        time.sleep(1)
+                raise FuncTestError("Can't get server %s guid!" % h)
+
+    def _performRequest(self, func, peer, redirectTo=None):  # :type : Result
+        action = "requesting %s from %s" % (func, peer if not redirectTo else ("%s through %s" % (redirectTo, peer)))
+        print real_caps(action)
         try:
-            (data1, len1) = _performRequest(mainHost)
+            req = urllib2.Request('http://%s/%s' % (peer, func))
+            if redirectTo:
+                req.add_header('X-server-guid', self.uids[redirectTo])
+            response = urllib2.urlopen(req)
+            data = response.read()
+            content_len = int(response.info()['Content-Length'])
+            if content_len != len(data):
+                raise FuncTestError(
+                    "Wrong result %s: resulting data len: %s. Content-Length: %s" % (action, len(data), content_len))
+            return Result(func, peer, redirectTo, json.loads(data), content_len)
         except HTTPException:
-            print "FAIL: error requesting %s: %s" % (mainHost, traceback.format_exc())
-            return False
-        time.sleep(1)
+            raise FuncTestError("error " + action)
+
+    def run(self):
+        print "\n======================================="
+        print "Proxy Test Start"
         try:
-            (data2, len2) = _performRequest(mainHost, ids[secHost])
-        except HTTPException:
-            print "FAIL: error requesting %s through %s: %s" % (secHost, mainHost, traceback.format_exc())
-            return False
-        diff = compareJson(data1, data2)
-        if len1 != len2:
-            print "FAIL: Different data lengths: %s and %s" % (len1, len2)
-        elif diff.hasDiff():
-            print "FAIL: Diferent responses: %s" % diff.errorInfo()
-        else:
+            self.getUids()
+            func = 'ec2/getResourceParams'
+            time.sleep(0.1)
+            res1 = self._performRequest(func, self.mainHost)
+            time.sleep(1)
+            res2 = self._performRequest(func, self.mainHost, self.secHost)
+            compareResults(res1, res2)
+            time.sleep(0.1)
+            res3 = self._performRequest(func, self.secHost)
+            compareResults(res2, res3)
+            func = 'api/moduleInformation'
+            res1 = self._performRequest(func, self.secHost)
+            time.sleep(0.1)
+            res2 = self._performRequest(func, self.mainHost, self.secHost)
+            compareResults(res1, res2)
+            time.sleep(1)
+            #res2 = self._performRequest(func, self.mainHost)
+            #if res1.length == res2.length:
+            #    diff = compareJson(res1.data, res2.data)
+            #    if not diff.hasDiff():
+            #        raise FuncTestError("")
             print "Test complete. Responses are the same."
             return True
-    except Exception:
-        print "FAIL: %s: %s:\n%s" % sys.exc_info()
-    finally:
-        print "======================================="
-    return False
+        except FuncTestError:
+            raise
+        except Exception:
+            raise FuncTestError(traceback.format_exc())
+        finally:
+            print "======================================="
 
 
 if __name__ == '__main__':
@@ -95,9 +134,9 @@ if __name__ == '__main__':
         _SEC_HOST = sys.argv[2]
     except IndexError:
         pass
-    if not _prepareLoader((_MAIN_HOST, _SEC_HOST)):
-        exit(1)
-    if not ProxyTest(_MAIN_HOST, _SEC_HOST):
-        exit(1)
-
+    try:
+        _prepareLoader((_MAIN_HOST, _SEC_HOST))
+        ProxyTest(_MAIN_HOST, _SEC_HOST).run()
+    except FuncTestError as err:
+        print "FAIL: %s" % err.message
 
