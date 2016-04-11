@@ -131,12 +131,29 @@ function natcon_ctl {
         init)
             nxcleardb
             setLogLevel 2
-           ;;
+            ;;
         clear)
             nxrmbase "$1"
             nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for natcon test control"
+    esac
+}
+
+function dbup_ctl {
+    case "$mode" in
+        init)
+            cp "/vagrant/$1" "$SERVDIR/var/ecs.sqlite"
+            nxedconf removeDbOnStartup 0  `# we DO NOT need to clear DB on startup, so make sure it do not`
+            nxedconf serverGuid "$2"
+            nxedconf guidIsHWID no
+            cp "$SERVCONF" "$SERVCONF.copy"
+            setLogLevel 2
+            ;;
+        clear)
+            nxcleardb
+            ;;
+        *) echo "Unknown mode '${mode}' for dbup test control"
     esac
 }
 
@@ -167,6 +184,9 @@ case "$testName" in
         ;;
     natcon)
         natcon_ctl "$@"
+        ;;
+    dbup)
+        dbup_ctl "$@"
         ;;
     *)
         echo Unknown test name "$testName"

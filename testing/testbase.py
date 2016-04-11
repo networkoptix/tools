@@ -2,21 +2,27 @@
 Including FuncTestCase - the base class for all mediaserver functional test classes.
 """
 __author__ = 'Danil Lavrentyuk'
-import sys
+import sys, os
 import subprocess
 import unittest
-import urllib
-import urllib2
+import urllib, urllib2
 import time
 import json
 import traceback
 
-from functest_util import ClusterLongWorker, unquote_guid, Version
+from functest_util import ClusterLongWorker, unquote_guid, Version, FtConfigParser, checkResultsEqual, ManagerAddPassword, SafeJsonLoads
+
+CONFIG_FNAME = "functest.cfg"
 
 NUM_SERV=2
 SERVER_UP_TIMEOUT = 20 # seconds, timeout for server to start to respond requests
 
-__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests', 'LegacyTestWrapper']
+__all__ = ['boxssh', 'FuncTestCase', 'FuncTestError', 'RunTests',
+           'LegacyTestWrapper', 'UnitTestRollback', 'FuncTestMaster', 'getTestMaster']
+
+
+_testMaster = None  # type: FuncTestMaster
+
 
 class FuncTestError(AssertionError):
     pass
@@ -63,7 +69,6 @@ def RunTests(testclass, config, *args):
             ] )
     finally:
         testclass.globalFinalise()
-
 
 
 class FuncTestCase(unittest.TestCase):
@@ -398,3 +403,500 @@ class LegacyTestWrapper(FuncTestCase):
     def init_suits(cls):
         "A dummy method since the original one will fail in globalInit()"
         pass
+
+# Rollback support
+class UnitTestRollback:
+    "Legacy: Now it only removes resources, recorded in the eollback file."
+    _rollbackFile = None
+
+    def __init__(self):
+        if os.path.isfile(".rollback"):
+            selection = 'r' if _testMaster.auto_rollback else ''
+            if not _testMaster.auto_rollback:
+                try :
+                    print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
+                    print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
+                    print "Do you want to run Recover NOW?\n"
+                    selection = raw_input("Press r to RUN RECOVER at first or press Enter to SKIP RECOVER and run the test")
+                except Exception:
+                    pass
+
+            if len(selection) != 0 and selection[0] in ('r', 'R'):
+                self.doRecover()
+
+        self._rollbackFile = open(".rollback","w+")
+
+    def addOperations(self,methodName,serverAddress,resourceId):
+        #for s in _testMaster.clusterTestServerList:
+        self._rollbackFile.write(("%s,%s,%s\n") % (methodName,serverAddress,resourceId))
+        self._rollbackFile.flush()
+
+    def _doSingleRollback(self,methodName,serverAddress,resourceId):
+        # this function will do a single rollback
+        req = urllib2.Request("http://%s/ec2/removeResource" % (serverAddress,),
+            data='{ "id":"%s" }' % (resourceId), headers={'Content-Type': 'application/json'})
+        #response = None
+        try:
+            response = urllib2.urlopen(req)
+        except:
+            return False
+        if response.getcode() != 200:
+            response.close()
+            return False
+        response.close()
+        return True
+
+    def doRollback(self):
+        recoverList = []
+        # set the cursor for the file to the file beg
+        self._rollbackFile.seek(0,0)
+        for line in self._rollbackFile:
+            if line == '\n':
+                continue
+            l = line.rstrip('\n').split(',')
+            # now we have method,serverAddress,resourceId
+            if not self._doSingleRollback(l[0],l[1],l[2]):
+                # failed for this rollback
+                print "Failed rollback transaction: Method:%s; Server:%s; ResourceId:%s (you could recover it later)" % (l[0],l[1],l[2])
+                recoverList.append(line)
+            else:
+                print '+',
+        print
+
+        self._rollbackFile.close()
+        os.remove(".rollback")
+
+        if recoverList:
+            recoverFile = open(".rollback","w+")
+            for line in recoverList:
+                recoverFile.write(line)
+            recoverFile.close()
+
+    def doRecover(self):
+        if not os.path.isfile(".rollback") :
+            print "Nothing needs to be recovered"
+            return
+        print "Start to recover from previous failed rollback transaction"
+        self._rollbackFile = open(".rollback","r")
+        self.doRollback()
+        print "Recover done..."
+
+    def removeRollbackDB(self):
+        self._rollbackFile.close()
+        os.remove(".rollback")
+
+
+class FuncTestMaster(object):
+    """
+    The main service class to run legacy functional tests.
+    """
+    clusterTestServerList = []
+    clusterTestSleepTime = None
+    clusterTestServerUUIDList = []
+    clusterTestServerObjs = dict()
+    configFname = CONFIG_FNAME
+    config = None
+    argv = []
+    openerReady = False
+    threadNumber = 16
+    testCaseSize = 2
+    unittestRollback = None
+    CHUNK_SIZE=4*1024*1024 # 4 MB
+    TRANSACTION_LOG="__transaction.log"
+    auto_rollback = False
+    skip_timesync = False
+    skip_backup = False
+    skip_mservarc = False
+    skip_streming = False
+    skip_dbup = False
+    do_main_only = False
+    need_dump = False
+
+    _argFlags = {
+        '--autorollback': 'auto_rollback',
+        '--arb': 'auto_rollback', # an alias for the previous
+        '--skiptime': 'skip_timesync',
+        '--skipbak': 'skip_backup',
+        '--skipmsa': 'skip_mservarc',
+        '--skipstrm': 'skip_streming',
+        '--skipdbup': 'skip_dbup',
+        '--mainonly': 'do_main_only',
+        '--dump': 'need_dump',
+    }
+
+    _getterAPIList = ["getResourceParams",
+        "getMediaServersEx",
+        "getCamerasEx",
+        "getUsers"]
+
+    _ec2GetRequests = ["getResourceTypes",
+        "getResourceParams",
+        "getMediaServers",
+        "getMediaServersEx",
+        "getCameras",
+        "getCamerasEx",
+        "getCameraHistoryItems",
+        "getCameraBookmarkTags",
+        "getBusinessRules",
+        "getUsers",
+        "getVideowalls",
+        "getLayouts",
+        "listDirectory",
+        "getStoredFile",
+        "getSettings",
+        "getCurrentTime",
+        "getFullInfo",
+        "getLicenses"]
+
+    def getConfig(self):
+        if self.config is None:
+            self.config = FtConfigParser()
+            self.config.read(self.configFname)
+        return self.config
+
+    def _loadConfig(self):
+        parser = self.getConfig()
+        self.clusterTestServerList = parser.get("General","serverList").split(",")
+        parser.rtset('ServerList', self.clusterTestServerList)
+        self.clusterTestSleepTime = parser.getint("General","clusterTestSleepTime")
+        parser.rtset('SleepTime', self.clusterTestSleepTime)
+        self.threadNumber = parser.getint("General","threadNumber")
+        self.testCaseSize = parser.getint_safe("General","testCaseSize", 2)
+        parser.rtset('need_dump', self.need_dump)
+
+    def setUpPassword(self):
+        config = self.getConfig()
+        pwd = config.get("General","password")
+        un = config.get("General","username")
+        # configure different domain password strategy
+        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        for s in self.clusterTestServerList:
+            ManagerAddPassword(passman, s, un, pwd)
+
+        urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+        self.openerReady = True
+#        urllib2.install_opener(urllib2.build_opener(AuthH(passman)))
+
+    def check_flags(self, argv):
+        "Checks flag options and remove them from argv"
+        #FIXME not used now. remove it?
+        g = globals()
+        found = False
+        for arg in argv:
+            if arg in self._argFlags:
+                g[self._argFlags[arg]] = True
+                found = True
+        if found:
+            argv[:] = [arg for arg in argv if arg not in self._argFlags]
+
+    def preparseArgs(self, argv):
+        other = [argv[0]]
+        config_next = False
+        for arg in argv[1:]:
+            if config_next:
+                self.configFname = arg
+                config_next = False
+                print "Use config", self.configFname
+            elif arg in self._argFlags:
+                setattr(self, self._argFlags[arg], True)
+            elif arg == '--config':
+                config_next = True
+            elif arg.startswith('--config='):
+                self.configFname = arg[len('--config='):]
+                print "Use config", self.configFname
+            else:
+                other.append(arg)
+        self.argv = other
+        return other
+
+    def _callAllGetters(self):
+        print "======================================"
+        print "Test all ec2 get request status"
+        for s in self.clusterTestServerList:
+            for reqName in self._ec2GetRequests:
+                print "Connection to http://%s/ec2/%s" % (s,reqName)
+                response = urllib2.urlopen("http://%s/ec2/%s" % (s,reqName))
+                if response.getcode() != 200:
+                    return (False,"%s failed with statusCode %d" % (reqName,response.getcode()))
+                response.close()
+        print "All ec2 get requests work well"
+        print "======================================"
+        return (True,"Server:%s test for all getter pass" % (s))
+
+    def _getServerName(self, obj, uuid):
+        for s in obj:
+            if s["id"] == uuid:
+                return s["name"]
+        return None
+
+    def _patchUUID(self,uuid):
+        if uuid[0] == '{' :
+            return uuid
+        else:
+            return "{%s}" % (uuid)
+
+    # call this function after reading the clusterTestServerList!
+    def _fetchClusterTestServerNames(self):
+        # We still need to get the server name since this is useful for
+        # the SaveServerAttributeList test (required in its post data)
+
+        response = urllib2.urlopen("http://%s/ec2/getMediaServersEx?format=json" % (self.clusterTestServerList[0]))
+
+        if response.getcode() != 200:
+            return (False,"getMediaServersEx returned error code: %d" % (response.getcode()))
+
+        json_obj = SafeJsonLoads(response.read(), self.clusterTestServerList[0], 'getMediaServersEx')
+        if json_obj is None:
+            return (False, "Wrong response")
+
+        for u in self.clusterTestServerUUIDList:
+            n = self._getServerName(json_obj,u[0])
+            if n == None:
+                return (False,"Cannot fetch server name with UUID:%s" % (u[0]))
+            else:
+                u[1] = n
+
+        response.close()
+        return (True,"")
+
+    def _dumpDiffStr(self,str,i):
+        if len(str) == 0:
+            print "<empty string>"
+        else:
+            start = max(0,i - 64)
+            end = min(64,len(str) - i) + i
+            comp1 = str[start:i]
+            # FIX: the i can be index that is the length which result in index out of range
+            comp2 = "<EOF>" if i >= len(str) else str[i]
+            comp3 = "<EOF>" if i + 1 >= len(str) else str[i + 1:end]
+            print "%s^^^%s^^^%s\n" % (comp1,comp2,comp3)
+
+
+    def _seeDiff(self,lhs,rhs,offset=0):
+        if len(rhs) == 0 or len(lhs) == 0:
+            print "The difference is showing bellow:\n"
+            print "<empty string>" if len(lhs) == 0 else rhs[0:min(128,len(rhs))]
+            print "<empty string>" if len(rhs) == 0 else rhs[0:min(128,len(rhs))]
+            print "One of the string is empty!"
+            return
+
+        for i in xrange(max(len(rhs),len(lhs))):
+            if i >= len(rhs) or i >= len(lhs) or lhs[i] != rhs[i]:
+                print "The difference is showing bellow:"
+                self._dumpDiffStr(lhs,i)
+                self._dumpDiffStr(rhs,i)
+                print "The first different character is at location:%d" % (i + 1+offset)
+                return
+
+    def _testConnection(self):
+        print "=================================================="
+        print "Test connection with each server in the server list "
+        timeout = 5
+        failed = False
+        for s in self.clusterTestServerList:
+            print "Try to connect to server: %s" % (s),
+            request = urllib2.Request("http://%s/ec2/testConnection" % (s))
+            try:
+                response = urllib2.urlopen(request, timeout=timeout)
+            except urllib2.URLError , e:
+                print "\nFAIL: error connecting to %s with a %s seconds timeout:" % (s,timeout),
+                if isinstance(e, urllib2.HTTPError):
+                    print "HTTP error: (%s) %s" % (e.code, e.reason)
+                else:
+                    print str(e.reason)
+                failed = True
+                continue
+
+            if response.getcode() != 200:
+                print "\nFAIL: Server %s responds with code %s" % (s, response.getcode())
+                continue
+            json_obj = SafeJsonLoads(response.read(), s, 'testConnection')
+            if json_obj is None:
+                print "\nFAIL: Wrong response data from server %s" % (s,)
+                continue
+            self.clusterTestServerObjs[s] = json_obj
+            self.clusterTestServerUUIDList.append([self._patchUUID(json_obj["ecsGuid"]), ''])
+            response.close()
+            print "- OK"
+
+        self.config.rtset('ServerObjs', self.clusterTestServerObjs)
+        self.config.rtset('ServerUUIDList', self.clusterTestServerUUIDList)
+        print "Connection Test %s" % ("FAILED" if failed else "passed.")
+        print "=================================================="
+        return not failed
+
+    # This checkResultEqual function will categorize the return value from each
+    # server
+    # and report the difference status of this
+
+    def _reportDetailDiff(self,key_list):
+        for i in xrange(len(key_list)):
+            for k in xrange(i + 1,len(key_list)):
+                print "-----------------------------------------"
+                print "Group %d compared with Group %d\n" % (i + 1,k + 1)
+                self._seeDiff(key_list[i],key_list[k])
+                print "-----------------------------------------"
+
+    def _reportDiff(self,statusDict,methodName):
+        print "\n\n**************************************************"
+        print "Report each server status of method: %s\n" % (methodName)
+        print "Groupping servers by the same status\n"
+        print "The total group number: %d\n" % (len(statusDict))
+        if len(statusDict) == 1:
+            print "The status check passed!\n"
+        i = 1
+        key_list = []
+        for key in statusDict:
+            list = statusDict[key]
+            print "Group %d:(%s)\n" % (i,','.join(list))
+            i = i + 1
+            key_list.append(key)
+
+        self._reportDetailDiff(key_list)
+        print "\n**************************************************\n"
+
+    def _checkResultEqual(self,responseList,methodName):
+        statusDict = dict()
+
+        for entry in responseList:
+            response = entry[0]
+            address = entry[1]
+
+            if response.getcode() != 200:
+                return(False,"Server:%s method:%s http request failed with code:%d" % (address,methodName,response.getcode()))
+            else:
+                content = response.read()
+                if content in statusDict:
+                    statusDict[content].append(address)
+                else:
+                    statusDict[content] = [address]
+                response.close()
+
+        self._reportDiff(statusDict,methodName)
+
+        if len(statusDict) > 1:
+            return (False,"")
+
+        return (True,"")
+
+    def _checkSingleMethodStatusConsistent(self,method):
+            responseList = []
+            for server in self.clusterTestServerList:
+                url = "http://%s/ec2/%s" % (server, method)
+                print "Connection to " + url
+                try:
+                    responseList.append((urllib2.urlopen(url),server))
+                except urllib2.URLError as err:
+                    return False, "Failed to request %s: %s" % (url, err)
+            # checking the last response validation
+            return checkResultsEqual(responseList,method)
+
+    # Checking transaction log
+    # This checking will create file to store the transaction log since this
+    # log could be very large which cause urllib2 silently drop data and get
+    # partial read. In order to compare such large data file, we only compare
+    # one chunk at a time .The target transaction log will be stored inside
+    # of a temporary file and all the later comparison will be based on small
+    # chunk.
+
+    def _checkTransactionLog(self):
+
+        first_hit = False
+        serverAddr= None
+        for s in self.clusterTestServerList:
+            print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
+            # check if we have that transactionLog
+            if not first_hit:
+                first_hit = True
+                serverAddr = s
+                with open(self.TRANSACTION_LOG,"w+") as f:
+                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
+                    while True:
+                        data = req.read( self.CHUNK_SIZE )
+                        if data is None or len(data) == 0:
+                            break
+                        f.write(data)
+                # for the very first transactionLog, just skip
+                continue
+            else:
+                assert os.path.isfile(self.TRANSACTION_LOG), \
+                    "The internal temporary file is not found, it means a external program has deleted it"
+                with open(self.TRANSACTION_LOG,"r") as f:
+                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
+                    pos = 0
+                    if req.getcode() != 200:
+                        print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
+                        return (False,"")
+
+                    while True:
+                        data = f.read(self.CHUNK_SIZE)
+                        pack = req.read(self.CHUNK_SIZE)
+
+                        if data is None or len(data) == 0:
+                            if pack is None or len(pack) == 0:
+                                break
+                            else:
+                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
+                                print "Server:%s has data but server:%s runs out of its transaction log"%(
+                                    s,serverAddr)
+                                return (False,"")
+                        else:
+                            if pack is None or len(pack) == 0:
+                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
+                                print "Server:%s has data but server:%s runs out of its transaction log"%(
+                                    serverAddr,s)
+                                return (False,"")
+                            else:
+                                if data != pack:
+                                    print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
+                                    self._seeDiff(data,pack,pos)
+                                    return (False,"")
+                                pos += len(pack)
+                    req.close()
+        os.remove(self.TRANSACTION_LOG)
+        return (True,"")
+
+    def checkMethodStatusConsistent(self,method):
+            ret,reason = self._checkSingleMethodStatusConsistent(method)
+            if ret:
+                return self._checkTransactionLog()
+            else:
+                return (ret,reason)
+
+    def _ensureServerListStates(self,sleep_timeout):
+        time.sleep(sleep_timeout)
+        for method in self._getterAPIList:
+            ret,reason = self._checkSingleMethodStatusConsistent(method)
+            if not ret:
+                return (ret,reason)
+        return self._checkTransactionLog()
+
+    def init(self, notest=False):
+        self._loadConfig()
+        self.setUpPassword()
+        return (True,"") if notest or self._testConnection() else (False,"Connection test failed")
+
+    def init_rollback(self):
+        self.unittestRollback = UnitTestRollback()
+
+    def initial_tests(self):
+        # ensure all the server are on the same page
+        ret,reason = self._ensureServerListStates(self.clusterTestSleepTime)
+        if not ret: return (ret,reason)
+
+        ret,reason = self._fetchClusterTestServerNames()
+        if not ret: return (ret,reason)
+
+        ret,reason = self._callAllGetters()
+        if not ret:return (ret,reason)
+
+        # do the rollback here
+        self.init_rollback()
+        return (True,"")
+
+
+def getTestMaster():  # type: FuncTestMaster
+    global _testMaster
+    if _testMaster is None:
+        _testMaster = FuncTestMaster()
+    return _testMaster

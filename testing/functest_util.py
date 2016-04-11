@@ -6,6 +6,8 @@ from urllib import urlencode
 import urllib2
 from ConfigParser import RawConfigParser
 import traceback
+import Queue
+import threading
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'checkResultsEqual',
@@ -293,7 +295,6 @@ def _compareJsonList(lhs,rhs,result):
 
 
 def _compareJsonLeaf(lhs,rhs,result):
-    lhs_type = type(lhs)
     if isinstance(rhs,type(lhs)):
         if rhs != lhs:
             return result.leafValueNotSame(lhs,rhs)
@@ -318,7 +319,7 @@ def _compareJson(lhs,rhs,result):
             return _compareJsonLeaf(lhs,rhs,result)
 
 
-def compareJson(lhs,rhs):
+def compareJson(lhs,rhs):  # :type: JsonDiff
     result = JsonDiff()
     # An outer most JSON element must be an array or dict
     if isinstance(lhs,list):
@@ -579,8 +580,6 @@ def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None,
 #        print "FAIL: error requesting '%s': %s" % (req, e)
 #        return None
 
-import Queue
-import threading
 
 # Thread queue for multi-task.  This is useful since if the user
 # want too many data to be sent to the server, then there maybe
