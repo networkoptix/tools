@@ -725,6 +725,7 @@ def parse_size(size_str):
 def args2str(args):
     return '%s and %s' % (', '.join('--'+opt for opt in args[:-1]), '--'+args[-1])
 
+
 def real_caps(str):
     "String's method capitalize makes lower all chars except the first. If it isn't desired - use real_caps."
     return (str[0].upper() + str[1:]) if len(str) else str

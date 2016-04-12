@@ -292,7 +292,7 @@ class FuncTestCase(unittest.TestCase):
                 headers = {'Content-Type': 'application/json'}
             return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
-    def _server_request(self, host, func, data=None, headers=None, timeout=None):
+    def _server_request(self, host, func, data=None, headers=None, timeout=None, unparsed=False):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
         print "DEBUG: requesting: %s" % url
@@ -303,12 +303,13 @@ class FuncTestCase(unittest.TestCase):
         except Exception, e:
             self.fail("%s request failed with exception:\n%s\n\n" % (url, traceback.format_exc()))
         self.assertEqual(response.getcode(), 200, "%s request returns error code %d" % (url, response.getcode()))
-        answer = self._json_loads(response.read(), url)
+        data = response.read()
+        answer = self._json_loads(data, url)
         #TODO make more intelegent check, now some requests return [], not {}
         #if answer is not None and answer.get("error", '') not in ['', '0', 0]:
         #    print "Answer: %s" % (answer,)
         #    self.fail("%s request returned API error %s: %s" % (url, answer["error"], answer.get("errorString","")))
-        return answer
+        return (answer, data) if unparsed else answer
 
     #FIXME combine these two similar methods in one!
     def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None, with_debug=False):

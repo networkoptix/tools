@@ -1276,6 +1276,8 @@ class FunctestParser(object):
         self.parser = self.parse_msarch_failed
         return True
 
+    # streaming test
+
     STR_START = "Streaming Test Start"
     STR_END = "Streaming Test End"
 
@@ -1297,12 +1299,12 @@ class FunctestParser(object):
         log_to_send(line)
         if line.startswith("FAILED (failures"):
             log("Streaming test done")
-            self.set_end()
+            self.parser = self.parse_dbup_start
 
     def parse_stream_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
         if not self._str_check_fail(line) and line.startswith("OK"):
             log("Streaming test done")
-            self.set_end()
+            self.parser = self.parse_dbup_start
 
     def _str_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
         if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
@@ -1316,6 +1318,50 @@ class FunctestParser(object):
         log_to_send(line)
         del self.collector[:]
         self.parser = self.parse_stream_failed
+        return True
+
+    # dbup (DB migration on server upgrade) test
+
+    DBUP_START = "DB Upgrade Start"
+    DBUP_END = "DB Upgrade Test End"
+
+    def parse_dbup_start(self, line):
+        if line.startswith(self.DBUP_START):
+            #self.ts_name = line[len(self.STR_START):].rstrip()
+            self.stage = 'db upgrade test'
+            #if self.ts_name == self.TS_PARTS[self.current_ts_part]:
+            self.parser = self.parse_dbup
+            self.collector[:] = [line]
+
+    def parse_dbup(self, line):
+        if line.startswith(self.DBUP_END):
+            self.parser = self.parse_dbup_tail
+        elif not self._dbup_check_fail(line):
+            self.collector.append(line)
+
+    def parse_dbup_failed(self, line): # TODO: it's similar to parse_timesync_failed, refactor it!
+        log_to_send(line)
+        if line.startswith("FAILED (failures"):
+            log("DB Upgrade test done")
+            self.set_end()
+
+    def parse_dbup_tail(self, line): # TODO: it's similar to parse_timesync_tail, refactor it!
+        if not self._dbup_check_fail(line) and line.startswith("OK"):
+            log("DB Upgrade test done")
+            self.set_end()
+
+    def _dbup_check_fail(self, line): # TODO: it's similar to _ts_check_fail, refactor it!
+        if not (line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK)):
+            return False
+        self.has_errors = True
+        #print ":::::" + line
+        log_to_send("DB Upgrade test %s!",
+                    "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
+        for s in self.collector:
+            log_to_send(s)
+        log_to_send(line)
+        del self.collector[:]
+        self.parser = self.parse_dbup_failed
         return True
     #
 
