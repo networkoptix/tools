@@ -18,7 +18,7 @@ LIB_PATH = ''    # the path to the unit tests' dynamic libraries; live it '' to 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
 
-def fix_paths():
+def _fix_paths(override=False):
     global TEMP, PROJECT_ROOT, TARGET_PATH, BIN_PATH, LIB_PATH
     if TEMP == '':
         TEMP = os.getcwd()
@@ -29,11 +29,11 @@ def fix_paths():
     PROJECT_ROOT = os.path.abspath(PROJECT_ROOT)
     SUBPROC_ARGS['cwd'] = PROJECT_ROOT
 
-    if TARGET_PATH == '':
+    if override or TARGET_PATH == '':
         TARGET_PATH = os.path.join(PROJECT_ROOT, "build_environment/target")
-    if BIN_PATH == '':
+    if override or BIN_PATH == '':
         BIN_PATH = os.path.join(TARGET_PATH, "bin/release")
-    if LIB_PATH == '':
+    if override or LIB_PATH == '':
         LIB_PATH = os.path.join(TARGET_PATH, "lib/release")
 
 
@@ -41,9 +41,10 @@ HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consum
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 UT_PIPE_TIMEOUT = 10 * 1000  # milliseconds. Unit tests' pipe timeout
 FT_PIPE_TIMEOUT = 60 * 1000  # ... Functional tests' pipe timeout
+TEST_TERMINATION_WAIT = 5 # seconds, how long to wait for test process teermination before kill it
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
-FUNCTEST_LAST_LINES = 30 # Lines to show if the functional tests hang.
-MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
+FUNCTEST_LAST_LINES = 50 # Lines to show if the functional tests hang.
+MVN_TERMINATION_WAIT = 15 # seconds, how long to wait for mvn return code
 MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 SELF_RESTART_TIMEOUT = 10 # seconds
@@ -130,4 +131,4 @@ try:
 except ImportError:
     pass
 
-fix_paths()
+_fix_paths()

@@ -48,7 +48,6 @@ class PipeReaderBase(object):
     def readline(self, timeout=0):
         if self.state != PIPE_READY:
             return None
-#        while self.proc.poll() is None:
         while True:
             ch = self.read_ch(timeout)
             if ch is None or ch == '':
@@ -57,7 +56,6 @@ class PipeReaderBase(object):
                 return self.buf
             if ch == '\n' or ch == '\r': # use all three: \n, \r\n, \r
                 if len(self.buf) > 0:
-                    #debug('::'+self.buf)
                     try:
                         return self.buf
                     finally:
