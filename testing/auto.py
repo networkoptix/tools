@@ -319,7 +319,6 @@ def check_repeats(repeats):
 
 def read_unittest_output(proc, reader):
     last_suit_line = ''
-    has_errors = False
     has_stranges = False
     repeats = 0 # now many times the same 'strange' line repeats
     running_test_name = ''
@@ -343,7 +342,6 @@ def read_unittest_output(proc, reader):
                         ToSend.flush()
                         ToSend.append(line)
                         running_test_name = ''
-                        has_errors = True
                     elif line.startswith(OKMARK):
                         if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
                             if to_send_count < ToSend.count():
@@ -374,7 +372,6 @@ def read_unittest_output(proc, reader):
                 "[ test suit has TIMED OUT on test %s ]" if reader.state == pipereader.PIPE_HANG else
                 "[ PIPE ERROR reading test suit output on test %s ]") % running_test_name)
             FailedTests.append(running_test_name)
-            has_errors = True
 
         if proc.poll() is None:
             if not state_error:
@@ -385,27 +382,31 @@ def read_unittest_output(proc, reader):
         if proc.returncode != 0:
             ToSend.flush()
             if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-                ToSend.append("[ Test %s interrupted abnormally ]" % running_test_name)
+                ToSend.append("[ Test %s interrupted abnormally ]", running_test_name)
                 FailedTests.append(running_test_name)
             if proc.returncode < 0:
                 if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                     signames = SignalNames.get(-proc.returncode, [])
                     signames = ' (%s)' % (','.join(signames),) if signames else ''
-                    ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
+                    ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s during test %s]", -proc.returncode, signames, running_test_name)
             else:
                 ToSend.append("[ TEST SUIT'S RETURN CODE = %s ]" % proc.returncode)
-            has_errors = True
-
-        if has_stranges and not has_errors:
-            ToSend.append("[ Tests passed OK, but has some output. ]")
+            if FailedTests:
+                ToSend.append("Failed tests: %s", FailedTests)
+            else:
+                FailedTests.append('(unknown)')
 
     finally:
         if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
             debug("Test %s final result not found!", running_test_name)
             FailedTests.append(running_test_name)
+        if has_stranges and not FailedTests:
+            ToSend.append("[ Tests passed OK, but has some output. ]")
 
 
 def call_test(testname, reader):
+    ToSend.clear()
+    del FailedTests[:]
     ToSend.log("[ Calling %s test suit ]", testname)
     old_coount = ToSend.count()
     proc = None
@@ -429,7 +430,7 @@ def call_test(testname, reader):
         #print "Test is started with PID", proc.pid
         reader.register(proc)
         read_unittest_output(proc, reader)
-    except BaseException, e:
+    except BaseException as e:
         tstr = traceback.format_exc()
         print tstr
         if isinstance(e, Exception):
@@ -478,12 +479,9 @@ def run_tests(branch):
     if 'all_ut' not in to_skip:
         for name in get_ut_names():
             if name in to_skip: continue
-            ToSend.clear()
-            del FailedTests[:]
-            call_test(name, reader)
+            call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
                 failed = True
-                debug("Failed tests: %s", FailedTests)
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
@@ -1882,6 +1880,7 @@ if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
     if not main():
+        debug("Something isn't OK, returning code 1")
         sys.exit(1)
 
 # TODO: with -o turn off output lines accumulator, just print 'em
