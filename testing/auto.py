@@ -317,7 +317,7 @@ def check_repeats(repeats):
             ToSend.lastLineAppend("   [ REPEATS %s TIMES ]" % repeats)
 
 
-def read_unittest_output(proc, reader):
+def read_unittest_output(proc, reader, suitname):
     last_suit_line = ''
     has_stranges = False
     repeats = 0 # now many times the same 'strange' line repeats
@@ -373,24 +373,33 @@ def read_unittest_output(proc, reader):
                 "[ PIPE ERROR reading test suit output on test %s ]") % running_test_name)
             FailedTests.append(running_test_name)
 
+        before = time.time()
+        stop = before + TEST_TERMINATION_WAIT # wait a bit
+        while proc.poll() is None and time.time() < stop:
+            time.sleep(0.05)
         if proc.poll() is None:
             if not state_error:
-                debug("The unittest %s hasn't finished for %.1f seconds", running_test_name, TEST_TERMINATION_WAIT)
+                debug("The unittest %s hasn't finished for %.1f seconds", suitname, TEST_TERMINATION_WAIT)
             kill_proc(proc, sudo=True)
             proc.wait()
+        else:
+            delta = time.time() - before
+            if delta >= 0.01:
+                debug("The unittest %s finnishing takes %.2f seconds", suitname, delta)
 
         if proc.returncode != 0:
             ToSend.flush()
             if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-                ToSend.append("[ Test %s interrupted abnormally ]", running_test_name)
+                ToSend.append("[ Test %s of %s suit interrupted abnormally ]", running_test_name, suitname)
                 FailedTests.append(running_test_name)
             if proc.returncode < 0:
                 if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                     signames = SignalNames.get(-proc.returncode, [])
                     signames = ' (%s)' % (','.join(signames),) if signames else ''
-                    ToSend.append("[ TEST SUIT HAS BEEN INTERRUPTED by signal %s%s during test %s]", -proc.returncode, signames, running_test_name)
+                    ToSend.append("[ TEST SUIT %s HAS BEEN INTERRUPTED by signal %s%s during test %s]",
+                                  suitname, -proc.returncode, signames, running_test_name)
             else:
-                ToSend.append("[ TEST SUIT'S RETURN CODE = %s ]" % proc.returncode)
+                ToSend.append("[ %s TEST SUIT'S RETURN CODE = %s ]", suitname, proc.returncode)
             if FailedTests:
                 ToSend.append("Failed tests: %s", FailedTests)
             else:
@@ -404,14 +413,14 @@ def read_unittest_output(proc, reader):
             ToSend.append("[ Tests passed OK, but has some output. ]")
 
 
-def call_test(testname, reader):
+def call_test(suitname, reader):
     ToSend.clear()
     del FailedTests[:]
-    ToSend.log("[ Calling %s test suit ]", testname)
+    ToSend.log("[ Calling %s test suit ]", suitname)
     old_coount = ToSend.count()
     proc = None
     try:
-        testpath = os.path.join(BIN_PATH, testname)
+        testpath = os.path.join(BIN_PATH, suitname)
         if not os.access(testpath, os.F_OK):
             FailedTests.append('(all)')
             ToSend.flush()
@@ -429,7 +438,7 @@ def call_test(testname, reader):
         proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
         #print "Test is started with PID", proc.pid
         reader.register(proc)
-        read_unittest_output(proc, reader)
+        read_unittest_output(proc, reader, suitname)
     except BaseException as e:
         tstr = traceback.format_exc()
         print tstr
@@ -445,7 +454,7 @@ def call_test(testname, reader):
             reader.unregister()
         if ToSend.count() == old_coount:
             if not Args.stdout and not FailedTests:
-                debug("No interesting output from %s tests", testname)
+                debug("No interesting output from %s tests", suitname)
             #ToSend.cutLastLine()
         else:
             ToSend.append('')
@@ -475,16 +484,17 @@ def run_tests(branch):
     failed = False
     to_skip = get_tests_to_skip(branch)
     reader = pipereader.PipeReader()
+    all_fails = []
 
     if 'all_ut' not in to_skip:
         for name in get_ut_names():
             if name in to_skip: continue
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
-                failed = True
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
+                all_fails.append((name, FailedTests[:]))
                 if Args.stdout:
                     ToSend.flush()
                     logPrint('')
@@ -495,7 +505,18 @@ def run_tests(branch):
                     lines.append(failedStr)
                     lines.extend(ToSend.lines)
 
-    if not failed and not Args.no_functest:
+    if all_fails:
+        failed = True
+        if len(all_fails) > 1:
+            failsum = "Failed unitests summary:\n" + "\n".join(
+                        ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
+                        for fail in all_fails
+                    )
+            if Args.stdout:
+                log(failsum)
+            else:
+                lines.append(failsum)
+    elif not Args.no_functest:
         ToSend.clear()
         if not perform_func_test(to_skip):
             failed = True
@@ -1516,9 +1537,9 @@ def read_functest_output(proc, reader, from_test=''):
         ToSend.log("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
         success = False
 
-    t = time.time() + TEST_TERMINATION_WAIT # wait a bit
-    while proc.poll() is None and time.time() < t:
-        time.sleep(0.1)
+    stop = time.time() + TEST_TERMINATION_WAIT # wait a bit
+    while proc.poll() is None and time.time() < stop:
+        time.sleep(0.05)
 
     if proc.poll() is None:
         if not state_error:
