@@ -1889,7 +1889,7 @@ def main():
                 "streaming" if Args.stream else
                 "NAT-connection" if Args.natcon else
                 "UNKNOWN!!!"),
-            ToSend)
+            ToSend.lines)
             return False
         return True
 
