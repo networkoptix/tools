@@ -454,11 +454,7 @@ def call_test(suitname, reader):
     finally:
         if proc:
             reader.unregister()
-        if ToSend.count() == old_coount:
-            if not Args.stdout and not FailedTests:
-                debug("No interesting output from %s tests", suitname)
-            #ToSend.cutLastLine()
-        else:
+        if ToSend.count() >= old_coount:
             ToSend.append('')
 
 
@@ -1096,7 +1092,7 @@ def perform_func_test(to_skip):
         if need_stop:
             log("Stopping vagrant boxes...")
             check_call(VAGR_STOP, shell=False, cwd=VAG_DIR)
-    return not success
+    return success
 
 #TODO
 # record structure:
@@ -1587,8 +1583,9 @@ def read_functest_output(proc, reader, from_test=''):
             debug("Functional test hasn't finished for %.1f seconds after the %s stage", TEST_TERMINATION_WAIT, p.stage)
         kill_proc(proc)
         proc.wait()
-        debug("The last test stage was %s. Last %s lines are:\n%s" %
-              (p.stage, len(last_lines), "\n".join(last_lines)))
+        if not state_error:
+            debug("The last test stage was %s. Last %s lines are:\n%s" %
+                  (p.stage, len(last_lines), "\n".join(last_lines)))
         success = False
 
     if proc.returncode != 0:
@@ -1920,17 +1917,17 @@ def main():
 
     elif (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
         ToSend.clear()
-        perform_func_test(get_tests_to_skip(BRANCHES[0]))
-        if ToSend.count() and not Args.stdout:
-            email_notify("Debug %s" % (
-                "func" if Args.functest else
-                "timesync" if Args.timesync else
-                "http-stress" if Args.httpstress else
-                "multiserver archive" if Args.msarch else
-                "streaming" if Args.stream else
-                "NAT-connection" if Args.natcon else
-                "UNKNOWN!!!"),
-            ToSend.lines)
+        if not perform_func_test(get_tests_to_skip(BRANCHES[0])):
+            if ToSend.count() and not Args.stdout:
+                email_notify("Debug %s" % (
+                    "func" if Args.functest else
+                    "timesync" if Args.timesync else
+                    "http-stress" if Args.httpstress else
+                    "multiserver archive" if Args.msarch else
+                    "streaming" if Args.stream else
+                    "NAT-connection" if Args.natcon else
+                    "UNKNOWN!!!"),
+                ToSend.lines)
             return False
         return True
 
