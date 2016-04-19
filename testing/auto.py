@@ -3,7 +3,7 @@
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output, call as subcall
-from collections import deque
+from collections import deque, namedtuple
 import errno
 import traceback
 import argparse
@@ -118,8 +118,9 @@ class ToSend(object):
 
     @classmethod
     def flush(cls):
-        cls.flushed = True
-        if Args.stdout:  # used only with -o mode
+        # used only with -o mode
+        if Args.stdout and not cls.flushed:
+            cls.flushed = True
             for text in cls.lines:
                 logPrint(text)
             del cls.lines[:]
@@ -491,6 +492,7 @@ def run_tests(branch):
             if name in to_skip: continue
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
+                debug("Test %s has some fails: %s", name, FailedTests)
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
@@ -1011,24 +1013,6 @@ def mk_functest_cmd(to_skip):
     debug("Running functional tests: %s", cmd)
     return cmd, only_test
 
-#TODO
-FUNCTEST_TBL = (
-    ('timesync', ),
-    ('bstorage', ),
-    ('msarch', ),
-    ('stream', ),
-    ('natcon', ),
-)
-
-#TODO
-def perform_func_test_new(to_skip):
-    if os.name != 'posix':
-        logPrint("\nFunctional tests require POSIX-compatible OS. Skipped.")
-        return
-    need_stop = False
-    reader = proc = None
-#TODO
-
 
 def perform_func_test(to_skip):
     if os.name != 'posix':
@@ -1106,6 +1090,56 @@ def perform_func_test(to_skip):
             log("Stopping vagrant boxes...")
             check_call(VAGR_STOP, shell=False, cwd=VAG_DIR)
     return not success
+
+#TODO
+# record structure:
+# * test symbolic id
+#
+FuncTestDesc = namedtuple("FuncTestDesc",(
+    "name", "title",
+    "startMark",  # if it's None - the start marker is: "%s Test Start" % title
+    "endMark",  # if it's None - the start marker is: "%s Test Start" % title
+))
+FUNCTEST_TBL = (
+    FuncTestDesc('basic', "Basic functional", None, None),
+    FuncTestDesc('merge', "Server Merge", None, None),
+    FuncTestDesc('sysname', "SystemName", None, None),
+    FuncTestDesc('proxy', "Server proxy", None, None),
+    FuncTestDesc('timesync', "TimeSync", None, None), # class: TimeSyncTest
+    FuncTestDesc('bstorage', "Backup Storage", None, None),
+    FuncTestDesc('msarch', "Multiserver Archive", None, None),
+    FuncTestDesc('stream', "Streaming", None, None),
+    FuncTestDesc('dbup', "DB Upgrade", None, None),
+    FuncTestDesc('natcon', "Connection behind NAT", None, None),
+)
+
+#TODO
+def perform_func_test_new(to_skip):
+    if os.name != 'posix':
+        logPrint("\nFunctional tests require POSIX-compatible OS. Skipped.")
+        return
+    need_stop = False
+    reader = proc = None
+#TODO
+
+
+class NewFunctestParser(object):
+
+    # Что хочется:
+    # - распзнавать тестсюит по стартовой фразе (чтобы не зависеть от порядка),
+    #   при этом контролировать случайный повтор одного тестсюита
+    # - распознавать произвольный неописанный тестсюит, если он начинается фразой стандартного формата,
+    #   и для него тоже контролировать повор
+    # - собирать результаты (хотя бы успех или фэйл) по каждому тестсюиту, выводить саммари в конце
+    #   (хорошо бы ещё, по возможности, перечислить конкретные упавшие тесты)х
+
+    def __init__(self):
+        self.current = None
+        self.parser = self.parse_start
+        pass
+
+    def parse_start(self, line):
+        pass
 
 
 class FunctestParser(object):
