@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [[ "$@" == *help ]] || [[ "$@" == -h ]]
+if [[ "$1" == *help ]] || [[ "$1" == -h ]]
 then
 cat <<END
-Runs VMS binaries in terminal.
+Runs VMS binaries in console
 Usage: [OPTION=VALUE ...] run.sh [--help] <binary-name> [<binary-args>]
 Options:
     R   relese, use 1 for release
@@ -52,7 +52,7 @@ fi
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
 export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH"
-for LIB_PATH in $(find "$PWD/../buildenv/rdep/packages/" -name lib | grep linux-$ARCH_GREP)
+for LIB_PATH in $(find "$PWD/../buildenv/packages/" -name lib -o -name platforms | grep linux-$ARCH_GREP)
 do
     LD_LIBRARY_PATH="$LIB_PATH:$LD_LIBRARY_PATH"
 done

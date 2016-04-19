@@ -15,7 +15,7 @@ fi
 set -x -e
 
 ID=${1:-0}
-DIR=${DIR:-$HOME/develop/mediaserver$1}
+DIR=${DIR:-$HOME/develop/mediaserver$ID}
 SYS=${SYS:-muskov}
 
 rm -rf $DIR
@@ -34,7 +34,7 @@ publicIPEnabled=1
 removeDbOnStartup=0
 secureAppserverConnection=1
 separateGuidForRemoteEC=1
-serverGuid={0000000$N-8aeb-7d56-2bc7-67afae00335c}
+serverGuid={0000000$ID-8aeb-7d56-2bc7-67afae00335c}
 systemName=$SYS
 
 EOF

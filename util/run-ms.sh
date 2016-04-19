@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [[ "$@" == *help ]] || [[ "$@" == -h ]]
+if [[ "$1" == *help ]] || [[ "$1" == -h ]]
 then
 cat <<END
-Run mediaserver with comfiguration over run.sh
+Runs Mediaserver with comfiguration over run.sh
 Usage: [OPTION=VALUE ...] run-ms.sh [<hex-id>] [ms-extra-args]
 Options:
     DIR config directory to use, default $HOME/develop/mediaserver<hex-id>
@@ -16,7 +16,7 @@ set -e -x
 ID=${1:-0}
 if [ $1 ]; then shift; fi
 
-DIR=${DIR:-$HOME/develop/mediaserver$1}
+DIR=${DIR:-$HOME/develop/mediaserver$ID}
 RUN=$(dirname "${BASH_SOURCE[0]}")/run.sh
 
 $RUN mediaserver -e $@ \
