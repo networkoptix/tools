@@ -41,6 +41,8 @@ RESTART_BY_EXEC = True
 
 FAIL_FILE = './fails.py' # where to save failed branches list
 
+RESULT = []
+
 def get_signals():
     d = {}
     for name in dir(signal):
@@ -151,7 +153,8 @@ def debug(text, *args):
     if DEBUG:
         if args:
             text = text % args
-        logPrint("DEBUG: " + text)
+        text = "DEBUG: " + text
+        logPrint(text)
         ToSend.debug(text)
 
 def email_send(mailfrom, mailto, cc, msg):
@@ -489,6 +492,7 @@ def run_tests(branch):
             if name in to_skip: continue
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
+                RESULT.append(('ut:'+name, False))
                 debug("Test suit %s has some fails: %s", name, FailedTests)
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
@@ -504,6 +508,7 @@ def run_tests(branch):
                     output.append(failedStr)
                     output.extend(ToSend.lines)
             else:
+                RESULT.append(('ut:'+name, True))
                 debug("Test suit %s has NO fails", name)
 
     ToSend.clear()
@@ -520,13 +525,16 @@ def run_tests(branch):
                 output.append(failsum)
     elif not Args.no_functest:
         if not perform_func_test(to_skip):
+            RESULT.append(('functests', False))
             failed = True
             if Args.stdout:
                 output.append('')
                 output.extend(ToSend.lines)
             else:
                 ToSend.flush()
-            ToSend.clear()
+        else:
+            RESULT.append(('functests', True))
+
 
     if failed:
         if Args.full:
@@ -536,6 +544,7 @@ def run_tests(branch):
     else:
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
+            ToSend.clear()
             FailTracker.mark_success(branch)
             if ToSend:  # it's not empty if mark_success() really removed previous test-fail status.
                 if not Args.stdout:
@@ -816,9 +825,21 @@ def run():
             return rc
         if Args.test_only:
             log("Test only run...")
-        if Args.test_only or (
-                (Args.build_ut_only or call_maven_build(BRANCHES[0])) and call_maven_build(BRANCHES[0], unit_tests=True)):
-            return run_tests(BRANCHES[0])
+        if not Args.test_only:
+            if not Args.build_ut_only:
+                if not call_maven_build(BRANCHES[0]):
+                    RESULT.append(('build', False))
+                    return False
+                else:
+                    RESULT.append(('build', True))
+            if not call_maven_build(BRANCHES[0], unit_tests=True):
+                RESULT.append(('build-ut', False))
+                return False
+            else:
+                RESULT.append(('build-ut', True))
+        rc = run_tests(BRANCHES[0])
+        RESULT.append(('run_tests', rc))
+        return rc
     except Exception:
         traceback.print_exc()
         return False
@@ -1044,6 +1065,9 @@ def perform_func_test(to_skip):
                 reader.register(proc)
                 if not read_functest_output(proc, reader, only_test):
                     success = False
+                    RESULT.append(('main-call-functests', False))
+                else:
+                    RESULT.append(('main-call-functests', True))
 
             if (not only_test or only_test == 'natcon') and 'natcon' not in to_skip:
                 if not only_test:
@@ -1057,6 +1081,9 @@ def perform_func_test(to_skip):
                 reader.register(proc)
                 if not read_misctest_output(proc, reader, "connection behind NAT"):
                     success = False
+                    RESULT.append(('functest:natcon', False))
+                else:
+                    RESULT.append(('functest:natcon', True))
 
         if not only_test and not Args.natcon and 'httpstress' not in to_skip:
             if unreg:
@@ -1075,6 +1102,9 @@ def perform_func_test(to_skip):
             #TODO make it a part of the functest.py
             if not read_misctest_output(proc, reader, "http stress"):
                 success = False
+                RESULT.append(('functest:httpstress', False))
+            else:
+                RESULT.append(('functest:httpstress', True))
 
     except FuncTestError, e:
         ToSend.log("Functional test aborted: %s", e.message)
@@ -1940,7 +1970,10 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
     if not main():
         debug("Something isn't OK, returning code 1")
+        debug("Results: %s", RESULT)
         sys.exit(1)
+    else:
+        debug("Results: %s", RESULT)
 
 # TODO: with -o turn off output lines accumulator, just print 'em
 # Check . branch processing in full test
