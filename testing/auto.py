@@ -225,6 +225,7 @@ class FailTracker(object):
     @classmethod
     def mark_success(cls, branch):
         if branch in cls.fails:
+            debug("Removing failed-test-mark from branch %s", branch)
             cls.fails.discard(branch)
             cls.save()
             ToSend.log('')
@@ -268,7 +269,7 @@ class FailTracker(object):
             with open(FAIL_FILE, "w") as f:
                 print >>f, repr(cls.fails)
         except Exception, e:
-            log("Error saving failed branches list: %s", e)
+            ToSend.log("Error saving failed branches list: %s", e)
 
 
 def check_restart():
@@ -481,7 +482,7 @@ def get_tests_to_skip(branch):
 
 def run_tests(branch):
     log("Running unit tests for branch %s" % branch)
-    lines = []
+    output = []
     failed = False
     to_skip = get_tests_to_skip(branch)
     reader = pipereader.PipeReader()
@@ -492,7 +493,7 @@ def run_tests(branch):
             if name in to_skip: continue
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
-                debug("Test %s has some fails: %s", name, FailedTests)
+                debug("Test suit %s has some fails: %s", name, FailedTests)
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
@@ -502,11 +503,14 @@ def run_tests(branch):
                     logPrint('')
                     log(failedStr)
                 else:
-                    if lines:
-                        lines.append('')
-                    lines.append(failedStr)
-                    lines.extend(ToSend.lines)
+                    if output:
+                        output.append('')
+                    output.append(failedStr)
+                    output.extend(ToSend.lines)
+            else:
+                debug("Test suit %s has NO fails", name)
 
+    ToSend.clear()
     if all_fails:
         failed = True
         if len(all_fails) > 1:
@@ -517,28 +521,31 @@ def run_tests(branch):
             if Args.stdout:
                 log(failsum)
             else:
-                lines.append(failsum)
+                output.append(failsum)
     elif not Args.no_functest:
-        ToSend.clear()
         if not perform_func_test(to_skip):
             failed = True
             if Args.stdout:
-                lines.append('')
-                lines.extend(ToSend.lines)
+                output.append('')
+                output.extend(ToSend.lines)
             else:
                 ToSend.flush()
             ToSend.clear()
 
     if failed:
-        FailTracker.mark_fail(branch)
+        if Args.full:
+            FailTracker.mark_fail(branch)
         if not Args.stdout:
-            email_notify(branch, lines)
+            email_notify(branch, output)
     else:
-        FailTracker.mark_success(branch)
-        if ToSend:
-            if not not Args.stdout:
-                email_notify(branch, ToSend.lines)
-            ToSend.clear()
+        debug("Branch %s -- SUCCESS!", branch)
+        if Args.full:
+            FailTracker.mark_success(branch)
+            if ToSend:  # it's not empty if mark_success() really removed previous test-fail status.
+                if not Args.stdout:
+                    debug("Sending successful test notification.")
+                    email_notify(branch, ToSend.lines)
+                ToSend.clear()
 
     return not failed
 
