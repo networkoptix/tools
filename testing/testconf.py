@@ -1,41 +1,31 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """
-The main configuration file for (auto-)test scripts.
+The main configuration file for autotest scripts.
+Note, this file is just an initial values source for the main script,
+which could (and will) modify some values according to command line options
+and an environment.
+So if you import it from other modules, don't use it's values before the main script
+fixes them (see set_paths and set_branches methods in auto.py).
 """
-import os, os.path
+import os.path
 
 DEBUG = True
 
 TEMP = '' # temporary files directory, leave it '' for the process' current directory
+# FIXME check if it's used where it should be!
 
 PROJECT_ROOT = "~/develop/netoptix_vms"
 
-TARGET_PATH = '' # the default common base for BIN_PATH and LIB_PATH; live it '' to make fix_path() assign it
-BIN_PATH = ''    # the path to the unit tests' binaries; live it '' to fix_path() assign it
-LIB_PATH = ''    # the path to the unit tests' dynamic libraries; live it '' to fix_path() assign it
-
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
+FAIL_FILE = './fails.py' # where to save failed branches list
+RESTART_FLAG = './.restart'
+STOP_FLAG = './.stop'
+RESTART_BY_EXEC = True
 
-def _fix_paths(override=False):
-    global TEMP, PROJECT_ROOT, TARGET_PATH, BIN_PATH, LIB_PATH
-    if TEMP == '':
-        TEMP = os.getcwd()
-
-    if PROJECT_ROOT.startswith('~'):
-        PROJECT_ROOT = os.path.expanduser(PROJECT_ROOT)
-
-    PROJECT_ROOT = os.path.abspath(PROJECT_ROOT)
-    SUBPROC_ARGS['cwd'] = PROJECT_ROOT
-
-    if override or TARGET_PATH == '':
-        TARGET_PATH = os.path.join(PROJECT_ROOT, "build_environment/target")
-    if override or BIN_PATH == '':
-        BIN_PATH = os.path.join(TARGET_PATH, "bin/release")
-    if override or LIB_PATH == '':
-        LIB_PATH = os.path.join(TARGET_PATH, "lib/release")
-
+BUILD_CONF_SUBPATH = os.path.join("build_variables", "target", "current_config.py")
+BUILD_CONF_PATH = ''
 
 HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consumed by check, builds and tests
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
@@ -122,13 +112,13 @@ SKIP_TESTS = {
 # Skip these test for all branches
 SKIP_ALL = set() # {'msarch'}
 
+SUDO_REQUIRED = set(('mediaserver_core_ut',))  # set of unittests that require sudo to call
+
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
+
+#------------------------------------------------------------------
 
 try:
     from testconf_local import *
-    if "update_configuration" in locals():
-        update_configuration() # it could be useful since during importing it's difficult to access importer's namespace
 except ImportError:
     pass
-
-_fix_paths()

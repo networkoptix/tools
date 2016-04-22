@@ -20,7 +20,7 @@ rundir = os.path.dirname(sys.argv[0])
 if rundir not in ('', '.') and rundir != os.getcwd():
     os.chdir(rundir)
 
-from testconf import *
+import testconf as conf
 import pipereader
 from testbase import boxssh
 from functest_util import args2str, real_caps
@@ -35,13 +35,8 @@ OKMARK = '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
-RESTART_FLAG = './.restart'
-STOP_FLAG = './.stop'
-RESTART_BY_EXEC = True
-
-FAIL_FILE = './fails.py' # where to save failed branches list
-
 RESULT = []
+
 
 def get_signals():
     d = {}
@@ -59,11 +54,46 @@ SignalNames = get_signals()
 class FuncTestError(RuntimeError):
     pass
 
-
 FailedTests = []
 Changesets = {}
 Env = os.environ.copy()
 Args = {}
+
+
+class Build(object): #  contains some build-dependent global variables
+    arch = ''
+    bin_path = ''
+    target_path = ''
+
+    @classmethod
+    def load_vars(cls, safe=False):
+        vars = dict()
+        try:
+            execfile(conf.BUILD_CONF_PATH, vars)
+        except IOError as err:
+            if safe and err.errno == errno.ENOENT:
+                return
+            print "ERROR: Can't load build variables file: " + err
+            sys.exit(1)
+        except Exception:
+            print "ERROR: Failed to load build variables: " + traceback.format_exc()
+            sys.exit(1)
+        vars['add_lib_path'](Env)
+        cls.arch = vars['ARCH']
+        cls.target_path = vars['TARGET_DIR']
+        cls.bin_path = vars['BIN_PATH']
+
+
+class Process(Popen):
+    "subprocess.Popen extension"
+    _sleep_reiod = 0.05
+
+    def limited_wait(self, timeout):
+        "@param timeout: float"
+        stop = time.time() + timeout
+        while self.poll() is None:
+            time.sleep(self._sleep_reiod)
+            if time.time() < stop: break
 
 
 def logPrint(s):
@@ -150,7 +180,7 @@ class ToSend(object):
 
 
 def debug(text, *args):
-    if DEBUG:
+    if conf.DEBUG:
         if args:
             text = text % args
         text = "DEBUG: " + text
@@ -165,11 +195,11 @@ def email_send(mailfrom, mailto, cc, msg):
             cc = [cc]
         mailto = [mailto] + cc
         msg['Cc'] = ','.join(cc)
-    smtp = SMTP(SMTP_ADDR)
-    if SMTP_LOGIN:
+    smtp = SMTP(conf.SMTP_ADDR)
+    if conf.SMTP_LOGIN:
         smtp.ehlo()
         smtp.starttls()
-        smtp.login(SMTP_LOGIN, SMTP_PASS)
+        smtp.login(conf.SMTP_LOGIN, conf.SMTP_PASS)
     #smtp.set_debuglevel(1)
     smtp.sendmail(mailfrom, mailto, msg.as_string())
     smtp.quit()
@@ -193,7 +223,7 @@ def email_notify(branch, lines):
     )
     msg = MIMEText.MIMEText(text)
     msg['Subject'] = "Autotest run results on %s platform" % get_platform()
-    email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO.get(branch, []), msg)
+    email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
 
 
 def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
@@ -217,7 +247,7 @@ def email_build_error(branch, loglines, unit_tests, crash=False, single_project=
     else:
         msg = MIMEText.MIMEText(text)
         msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
-        email_send(MAIL_FROM, MAIL_TO, BRANCH_CC_TO.get(branch, []), msg)
+        email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
 
 
 #####################################
@@ -233,9 +263,9 @@ class FailTracker(object):
             cls.save()
             ToSend.log('')
             ToSend.log("The branch %s is repaired after previous errors and makes no error now.", branch)
-            if (branch in SKIP_TESTS and SKIP_TESTS[branch]) or SKIP_ALL:
+            if (branch in conf.SKIP_TESTS and conf.SKIP_TESTS[branch]) or conf.SKIP_ALL:
                 ToSend.log("Note, that some tests have been skipped due to configuration.\nSkipped tests: %s",
-                            ', '.join(SKIP_TESTS.get(branch, set()) | SKIP_ALL))
+                            ', '.join(conf.SKIP_TESTS.get(branch, set()) | conf.SKIP_ALL))
 
     @classmethod
     def mark_fail(cls, branch):
@@ -248,10 +278,10 @@ class FailTracker(object):
     def load(cls):
         data = ''
         cls.fails =  set()
-        if not os.path.isfile(FAIL_FILE):
+        if not os.path.isfile(conf.FAIL_FILE):
             return
         try:
-            with open(FAIL_FILE) as f:
+            with open(conf.FAIL_FILE) as f:
                 data = ' '.join(f.readlines()).strip()
         except IOError, e:
             log("Failed branches list file load error: %s", e) #TODO some another log is required to easily find such messages
@@ -269,25 +299,25 @@ class FailTracker(object):
     def save(cls):
         debug("FailTracker.save: %s", cls.fails)
         try:
-            with open(FAIL_FILE, "w") as f:
+            with open(conf.FAIL_FILE, "w") as f:
                 print >>f, repr(cls.fails)
         except Exception, e:
             ToSend.log("Error saving failed branches list: %s", e)
 
 
 def check_restart():
-    if os.path.isfile(RESTART_FLAG):
+    if os.path.isfile(conf.RESTART_FLAG):
         log("Restart flag founnd. Calling: %s", ([sys.executable] + sys.argv,))
         try:
-            if RESTART_BY_EXEC:
+            if conf.RESTART_BY_EXEC:
                 sys.stdout.flush()
                 sys.stderr.flush()
                 os.execv(sys.executable, [sys.executable] + sys.argv)
             else:
-                proc = Popen([sys.executable] + sys.argv, shell=False)
+                proc = Process([sys.executable] + sys.argv, shell=False)
                 log("New copy of %s started with PID %s", sys.argv[0], proc.pid)
-                timeout = time.time() + SELF_RESTART_TIMEOUT
-                while os.path.isfile(RESTART_FLAG):
+                timeout = time.time() + conf.SELF_RESTART_TIMEOUT
+                while os.path.isfile(conf.RESTART_FLAG):
                     if time.time() > timeout:
                         raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % SELF_RESTART_TIMEOUT)
                     time.sleep(0.1)
@@ -295,14 +325,14 @@ def check_restart():
                 sys.exit(0)
         except Exception:
             log("Failed to restart: %s", traceback.format_exc())
-            drop_flag(RESTART_FLAG)
+            drop_flag(conf.RESTART_FLAG)
 
 
 def check_control_flags():
     check_restart()
-    if os.path.isfile(STOP_FLAG):
+    if os.path.isfile(conf.STOP_FLAG):
         log("Stop flag found. Exiting...")
-        os.remove(STOP_FLAG)
+        os.remove(conf.STOP_FLAG)
         sys.exit(0)
 
 
@@ -331,7 +361,7 @@ def read_unittest_output(proc, reader, suitname):
     to_send_count = 0
     try:
         while reader.state == pipereader.PIPE_READY:
-            line = reader.readline(UT_PIPE_TIMEOUT)
+            line = reader.readline(conf.UT_PIPE_TIMEOUT)
             if not complete and len(line) > 0:
                 #debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
@@ -373,18 +403,18 @@ def read_unittest_output(proc, reader, suitname):
         state_error = reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR)
         if state_error:
             ToSend.flush()
-            ToSend.append((
-                "[ test suit has TIMED OUT on test %s ]" if reader.state == pipereader.PIPE_HANG else
-                "[ PIPE ERROR reading test suit output on test %s ]") % running_test_name)
+            ToSend.append(
+                ("[ test suit has TIMED OUT (more than %s seconds) on test %s ]" % (conf.UT_PIPE_TIMEOUT, running_test_name))
+                if reader.state == pipereader.PIPE_HANG else
+                ("[ PIPE ERROR reading test suit output on test %s ]" % running_test_name))
             FailedTests.append(running_test_name)
 
         before = time.time()
-        stop = before + TEST_TERMINATION_WAIT # wait a bit
-        while proc.poll() is None and time.time() < stop:
-            time.sleep(0.05)
+        proc.limited_wait(conf.TEST_TERMINATION_WAIT)
+
         if proc.poll() is None:
             if not state_error:
-                debug("The unittest %s hasn't finished for %.1f seconds", suitname, TEST_TERMINATION_WAIT)
+                debug("The unittest %s hasn't finished for %.1f seconds", suitname, conf.TEST_TERMINATION_WAIT)
             kill_proc(proc, sudo=True)
             proc.wait()
         else:
@@ -418,6 +448,32 @@ def read_unittest_output(proc, reader, suitname):
             ToSend.append("[ Tests passed OK, but has some output. ]")
 
 
+if os.name == 'posix':
+    def exec_unittest(testpath):
+        if os.path.basename(testpath) in conf.SUDO_REQUIRED:
+            cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath]
+        else:
+            cmd = [testpath]
+        return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
+else:
+    def exec_unittest(testpath):
+        return Process([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
+
+
+def validate_testpath(testpath):
+    if not os.access(testpath, os.F_OK):
+        FailedTests.append('(all)')
+        ToSend.flush()
+        ToSend.append("Testsuit '%s' not found!" % testpath)
+        return False
+    if not os.access(testpath, os.R_OK|os.X_OK):
+        FailedTests.append('(all)')
+        ToSend.flush()
+        ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
+        return False
+    return True
+
+
 def call_test(suitname, reader):
     ToSend.clear()
     del FailedTests[:]
@@ -425,23 +481,13 @@ def call_test(suitname, reader):
     old_coount = ToSend.count()
     proc = None
     try:
-        testpath = os.path.join(BIN_PATH, suitname)
-        if not os.access(testpath, os.F_OK):
-            FailedTests.append('(all)')
-            ToSend.flush()
-            ToSend.append("Testsuit '%s' not found!" % testpath)
-            return
-        if not os.access(testpath, os.R_OK|os.X_OK):
-            FailedTests.append('(all)')
-            ToSend.flush()
-            ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
+        testpath = os.path.join(Build.bin_path, suitname)
+        if not validate_testpath(testpath):
             return
         #debug("Calling %s", testpath)
         # sudo is required since some unittest start server
         # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
-        #FIXME! Make it windows compatible! sudo and LD_LIBRARY_PATH iren't for Windows
-        proc = Popen(['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **SUBPROC_ARGS)
-        #print "Test is started with PID", proc.pid
+        proc = exec_unittest(testpath)
         reader.register(proc)
         read_unittest_output(proc, reader, suitname)
     except BaseException as e:
@@ -473,8 +519,8 @@ def kill_proc(proc, sudo=False, what="test"):
 
 def get_tests_to_skip(branch):
     to_skip = set()
-    if (branch in SKIP_TESTS) or SKIP_ALL:
-        to_skip = SKIP_TESTS.get(branch, set()) | SKIP_ALL
+    if (branch in conf.SKIP_TESTS) or conf.SKIP_ALL:
+        to_skip = conf.SKIP_TESTS.get(branch, set()) | conf.SKIP_ALL
         log("Configured to skip tests: %s", ', '.join(to_skip))
     return to_skip
 
@@ -560,7 +606,7 @@ def filter_branch_names(branches):
     # The problem is `hg in --branch` takes all branches with names beginning with --branch value. :(
     filtered = []
     for name in branches:
-        if name in BRANCHES and not name in filtered:
+        if name in conf.BRANCHES and not name in filtered:
             filtered.append(name)
             # hope it wont be used for huge BRANCHES list
     return filtered
@@ -583,8 +629,9 @@ def format_changesets(branch):
 
 
 def get_changesets(branch, bundle_fn):
-    debug("Run: " + (' '.join(HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
-    proc = Popen(HG_REVLIST + ["--branch=%s" % branch, bundle_fn], bufsize=1, stdout=PIPE, stderr=STDOUT, **SUBPROC_ARGS)
+    debug("Run: " + (' '.join(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
+    proc = Process(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn],
+                   bufsize=1, stdout=PIPE, stderr=STDOUT, **conf.SUBPROC_ARGS)
     (outdata, errdata) = proc.communicate()
     if proc.returncode == 0:
         Changesets[branch] = [
@@ -609,13 +656,13 @@ def check_new_commits(bundle_fn):
     "Check the repository for new commits in the controlled branches"
     log("Check for new commits")
     try:
-        cmd = HG_IN + [ "--branch=%s" % b for b in BRANCHES ] + ['--bundle', bundle_fn]
+        cmd = conf.HG_IN + [ "--branch=%s" % b for b in conf.BRANCHES ] + ['--bundle', bundle_fn]
         debug("Run: %s", ' '.join(cmd))
-        ready_branches = check_output(cmd, stderr=STDOUT, **SUBPROC_ARGS)
+        ready_branches = check_output(cmd, stderr=STDOUT, **conf.SUBPROC_ARGS)
         if ready_branches:
             # Specifying the current branch (.) turns off all other
-            branches = ['.'] if BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
-            if BRANCHES[0] != '.':
+            branches = ['.'] if conf.BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
+            if conf.BRANCHES[0] != '.':
                 ToSend.log('')  # an empty line separator
                 log("Commits are found in branches: %s", branches)
             if branches:
@@ -626,7 +673,7 @@ def check_new_commits(bundle_fn):
             log("ERROR: `hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
             raise
     if Args.rebuild:
-        return BRANCHES
+        return conf.BRANCHES
     log("No new commits found for controlled branches.")
     return []
 
@@ -634,7 +681,7 @@ def check_new_commits(bundle_fn):
 def current_branch_name():
     try:
 #        branch_name = check_output(HG_BRANCH, stderr=STDOUT, **SUBPROC_ARGS)
-        branch_name = check_output(HG_BRANCH, stderr=None, **SUBPROC_ARGS)
+        branch_name = check_output(conf.HG_BRANCH, stderr=None, **conf.SUBPROC_ARGS)
         return branch_name.split("\n")[0]
     except CalledProcessError, e:
         if e.returncode != 1:
@@ -643,7 +690,7 @@ def current_branch_name():
 
 
 def check_mvn_exit(proc, last_lines):
-    stop = time.time() + MVN_TERMINATION_WAIT
+    stop = time.time() + conf.MVN_TERMINATION_WAIT
     while proc.poll() is None and time.time() < stop:
         time.sleep(0.2)
     if proc.returncode is None:
@@ -686,10 +733,10 @@ def get_failed_project(last_lines):
 def execute_maven(cmd, kwargs, last_lines):
     if Args.full_build_log:
         kwargs.pop('universal_newlines')
-        proc = Popen(cmd, **kwargs)
+        proc = Process(cmd, **kwargs)
         proc.wait()
     else:
-        proc = Popen(cmd, bufsize=MVN_BUFFER, stdout=PIPE, stderr=STDOUT, **kwargs)
+        proc = Process(cmd, bufsize=conf.MVN_BUFFER, stdout=PIPE, stderr=STDOUT, **kwargs)
         for line in proc.stdout:
             last_lines.append(line)
         check_mvn_exit(proc, last_lines)
@@ -702,7 +749,7 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
         project_name = project
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
     if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
-        # Project dependencies  error! Report but go on.
+        #! Project dependencies  error! Report but go on.
         email_build_error(branch, last_lines, unit_tests, dep_error=project_name)
         return True
     else:
@@ -721,13 +768,13 @@ def failed_project_single_build(last_lines, branch, unit_tests):
 
 
 def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
-    last_lines = deque(maxlen=BUILD_LOG_LINES)
+    last_lines = deque(maxlen=conf.BUILD_LOG_LINES)
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
-    kwargs = SUBPROC_ARGS.copy()
+    kwargs = conf.SUBPROC_ARGS.copy()
 
-    cmd = [MVN, "package", "-e", "-Dbuild.configuration=release"]
-    if MVN_THREADS and not no_threads:
-        cmd.extend(["-T", "%d" % MVN_THREADS])
+    cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=release"]
+    if conf.MVN_THREADS and not no_threads:
+        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
     elif no_threads:
         cmd.extend(["-T", "1"])
     if single_project is not None:
@@ -735,7 +782,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
 
     if unit_tests:
-        kwargs['cwd'] = os.path.join(kwargs["cwd"], UT_SUBDIR)
+        kwargs['cwd'] = os.path.join(kwargs["cwd"], conf.UT_SUBDIR)
     debug("MVN: %s", cmd); time.sleep(1.5)
 
     try:
@@ -769,17 +816,35 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     return True
 
 
+def build_branch(branch):
+    if not Args.build_ut_only:
+        if not call_maven_build(branch):
+            debug("BUILD FAILED!!!")
+            RESULT.append(('build', False))
+            return False
+        else:
+            debug("BUILD SUCCESS!!!")
+            RESULT.append(('build', True))
+    if not call_maven_build(branch, unit_tests=True):
+        debug("UT BUILD FAILED!!!")
+        RESULT.append(('build-ut', False))
+        return False
+    else:
+        debug("UT BUILD SUCCESS!!!")
+        RESULT.append(('build-ut', True))
+    return True
+
 def prepare_branch(branch):
     "Prepare the branch for testing, i.e. build the project and unit tests"
     ToSend.log('')  # an empty line separator
     if branch != '.':
         log("Switch to the branch %s" % branch)
-    debug("Call %s", HG_PURGE)
-    check_call(HG_PURGE, **SUBPROC_ARGS)
-    debug("Call %s", HG_UP if branch == '.' else (HG_UP + ['--rev', branch]))
-    check_call(HG_UP if branch == '.' else (HG_UP + ['--rev', branch]), **SUBPROC_ARGS)
+    debug("Call %s", conf.HG_PURGE)
+    check_call(conf.HG_PURGE, **conf.SUBPROC_ARGS)
+    debug("Call %s", conf.HG_UP if branch == '.' else (conf.HG_UP + ['--rev', branch]))
+    check_call(conf.HG_UP if branch == '.' else (conf.HG_UP + ['--rev', branch]), **conf.SUBPROC_ARGS)
     #debug("Going to call maven...")
-    return call_maven_build(branch) and call_maven_build(branch, unit_tests=True)
+    return build_branch(branch)
 
 
 def update_repo(branches, bundle_fn):
@@ -792,7 +857,7 @@ def update_repo(branches, bundle_fn):
     log("Pulling branches: %s" % (', '.join(branches)))
     #debug("Using bundle file %s", bundle_fn)
     #try:
-    check_call(HG_PULL + [bundle_fn], **SUBPROC_ARGS)
+    check_call(conf.HG_PULL + [bundle_fn], **conf.SUBPROC_ARGS)
     #except CalledProcessError, e:
     #    print e
     #    sys.exit(1)
@@ -800,13 +865,14 @@ def update_repo(branches, bundle_fn):
 
 def check_hg_updates():
     "Check for repository updates, get'em, build and test"
-    bundle_fn = os.path.join(TEMP, "in.hg")
+    bundle_fn = os.path.join(conf.TEMP, "in.hg")
     branches = check_new_commits(bundle_fn)
     rc = True
     if branches and not Args.hg_only:
         update_repo(branches, bundle_fn)
         for branch in branches:
             if prepare_branch(branch):
+                Build.load_vars()
                 rc = run_tests(branch) and rc
             else:
                 FailTracker.mark_fail(branch)
@@ -826,18 +892,10 @@ def run():
         if Args.test_only:
             log("Test only run...")
         if not Args.test_only:
-            if not Args.build_ut_only:
-                if not call_maven_build(BRANCHES[0]):
-                    RESULT.append(('build', False))
-                    return False
-                else:
-                    RESULT.append(('build', True))
-            if not call_maven_build(BRANCHES[0], unit_tests=True):
-                RESULT.append(('build-ut', False))
+            if not build_branch(conf.BRANCHES[0]):
                 return False
-            else:
-                RESULT.append(('build-ut', True))
-        rc = run_tests(BRANCHES[0])
+        Build.load_vars()
+        rc = run_tests(conf.BRANCHES[0])
         RESULT.append(('run_tests', rc))
         return rc
     except Exception:
@@ -846,46 +904,6 @@ def run():
 
 
 #####################################
-def get_architecture():
-    #TODO move all paths into testconf.py !
-    curconf_fn = os.path.join(PROJECT_ROOT, 'build_variables/target/current_config')
-    av = 'arch='
-    try:
-        with open(curconf_fn) as f:
-            for line in f:
-                if line.startswith(av):
-                    return line[len(av):].rstrip()
-    except IOError as err:
-        if err.errno == errno.ENOENT:
-            pass
-    return ''
-
-
-def get_server_package_name():
-    #TODO move all paths into testconf.py !
-    arch = get_architecture()
-
-    if arch == '':
-        raise FuncTestError("Can't find server package: architecture not found!")
-
-    deb_path = os.path.join('debsetup', 'mediaserver-deb', arch)
-    fn = os.path.join(PROJECT_ROOT, deb_path, 'finalname-server.properties')
-    fv = 'server.finalName='
-    debfn = ''
-    if not os.path.isfile(fn):
-        return None
-    with open(fn) as f:
-        for line in f:
-            if line.startswith(fv):
-                debfn = line[len(fv):].rstrip() + '.deb'
-                break
-
-    if debfn == '':
-        raise FuncTestError("Server package .deb file name not found!")
-
-    return os.path.join(PROJECT_ROOT, deb_path, 'deb', debfn)
-
-
 def check_mediaserver_deb():
     # The same filename used for all versions here:
     # a) To remove (by override) any previous version automatically.
@@ -896,7 +914,7 @@ def check_mediaserver_deb():
         ToSend.log(err)
         ToSend.log("Try to use the previously built deb-package (it could have a diferent version!).")
         src = None
-    dest = os.path.join(VAG_DIR, 'networkoptix-mediaserver.deb')
+    dest = os.path.join(conf.VAG_DIR, 'networkoptix-mediaserver.deb')
 #    debug("Src: %s\nDest: %s", src, dest)
     dest_stat = os.stat(dest) if os.path.isfile(dest) else None
     if src is None or not os.path.isfile(src):
@@ -907,7 +925,7 @@ def check_mediaserver_deb():
     else:
         src_stat = os.stat(src)
         if dest_stat is None or (src_stat.st_mtime > dest_stat.st_mtime or src_stat.st_size != dest_stat.st_size):
-#            log("%s -> %s", src, dest)
+            debug("Using new server package from %s", src)
             shutil.copy(src, dest) # put this name into config
         else:
             pass
@@ -923,13 +941,13 @@ def start_boxes(boxes, keep = False):
         # 2. Start virtual boxes
         if not keep:
             debug("Removing old vargant boxes...")
-            check_call(VAGR_DESTROY, shell=False, cwd=VAG_DIR)
+            check_call(conf.VAGR_DESTROY, shell=False, cwd=conf.VAG_DIR)
         if not boxes:
             log("Creating and starting vagrant boxes...")
         else:
             log("Creating and starting vagrant boxes: %s...", boxes)
         boxlist = boxes.split(',') if len(boxes) else []
-        check_call(VAGR_RUN + boxlist, shell=False, cwd=VAG_DIR)
+        check_call(conf.VAGR_RUN + boxlist, shell=False, cwd=conf.VAG_DIR)
         failed = [b[0] for b in get_boxes_status() if b[0]in boxes and b[1] != 'running']
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
@@ -937,10 +955,10 @@ def start_boxes(boxes, keep = False):
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
         #to_check = [b for b in boxlist if b in CHECK_BOX_UP] if boxlist else CHECK_BOX_UP
         #wait_servers_ready([BOX_IP[b] for b in to_check])
-        for box in (boxlist or BOX_POST_START.iterkeys()):
-            if box in BOX_POST_START:
-                boxssh(BOX_IP[box], ['/vagrant/' + BOX_POST_START[box]])
-        time.sleep(SLEEP_AFTER_BOX_START)
+        for box in (boxlist or conf.BOX_POST_START.iterkeys()):
+            if box in conf.BOX_POST_START:
+                boxssh(conf.BOX_IP[box], ['/vagrant/' + conf.BOX_POST_START[box]])
+        time.sleep(conf.SLEEP_AFTER_BOX_START)
         return True
     except FuncTestError as e:
         ToSend.log("Virtual boxes start up failed: %s", e.message)
@@ -958,8 +976,8 @@ def stop_boxes(boxes, destroy=False):
         else:
             log("Removing vargant boxes: %s...", boxes)
         boxlist = boxes.split(',') if len(boxes) else []
-        cmd = VAGR_DESTROY if destroy else VAGR_STOP
-        check_call(cmd + boxlist, shell=False, cwd=VAG_DIR)
+        cmd = conf.VAGR_DESTROY if destroy else conf.VAGR_STOP
+        check_call(cmd + boxlist, shell=False, cwd=conf.VAG_DIR)
     except BaseException as e:
         ToSend.log("Exception during virtual boxes start up:\n%s", traceback.format_exc())
         if not isinstance(e, Exception):
@@ -967,24 +985,24 @@ def stop_boxes(boxes, destroy=False):
 
 
 def wait_servers_ready(iplist):
-    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, MEDIASERVER_PORT) for ip in iplist]
+    urls = ['http://%s:%s/ec2/getMediaServersEx' % (ip, conf.MEDIASERVER_PORT) for ip in iplist]
     debug("wait_servers_ready: urls: %s", urls)
     not_ready = set(urls)
     # 1. Prepare authentication for http queries
     passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
     for u in urls:
-        passman.add_password(None, u, MEDIASERVER_USER, MEDIASERVER_PASS)
+        passman.add_password(None, u, conf.MEDIASERVER_USER, conf.MEDIASERVER_PASS)
     urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
     # 2. Wait for responses for query
     # For each URL check number of servers online
-    too_slow = time.time() + len(urls) * ALL_START_TIMEOUT_BASE
+    too_slow = time.time() + len(urls) * conf.ALL_START_TIMEOUT_BASE
     while not_ready:
         for url in urls:
             if time.time() > too_slow:
                 raise FuncTestError("Server start timed out! Functional tests wasn't performed.")
             if url in not_ready:
                 try:
-                    jdata = urllib2.urlopen(url, timeout=START_CHECK_TIMEOUT).read()
+                    jdata = urllib2.urlopen(url, timeout=conf.START_CHECK_TIMEOUT).read()
                     # Check response for 'status' field (Online/Offline) for all servers
                 except Exception, e:
                     #debug("wait_servers_ready(%s): urlopen error: %s", url, e,)
@@ -1053,7 +1071,7 @@ def perform_func_test(to_skip):
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
         reader = pipereader.PipeReader()
-        sub_args = {k: v for k, v in SUBPROC_ARGS.iteritems() if k != 'cwd'}
+        sub_args = {k: v for k, v in conf.SUBPROC_ARGS.iteritems() if k != 'cwd'}
         unreg = False
 
         only_test = ''
@@ -1061,7 +1079,7 @@ def perform_func_test(to_skip):
             unreg = True
             cmd, only_test = mk_functest_cmd(to_skip)
             if only_test != 'natcon':
-                proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+                proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
                 if not read_functest_output(proc, reader, only_test):
                     success = False
@@ -1077,7 +1095,7 @@ def perform_func_test(to_skip):
                     stop_boxes('box2')
                     start_boxes('boxnat,boxbehind', keep=True)
                 debug("Running connection behind NAT test: %s", cmd)
-                proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+                proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
                 if not read_misctest_output(proc, reader, "connection behind NAT"):
                     success = False
@@ -1089,14 +1107,14 @@ def perform_func_test(to_skip):
             if unreg:
                 reader.unregister()
                 unreg = False
-            boxssh(BOX_IP['box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
-            url = "%s:%s" % (BOX_IP['box1'], MEDIASERVER_PORT)
+            boxssh(conf.BOX_IP['box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
+            url = "%s:%s" % (conf.BOX_IP['box1'], conf.MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
             #TODO add -threads value to config
             #TODO add the test duration and a server hang timeout
             ToSend.log("Running http stress test: %s", cmd)
-            proc = Popen(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
+            proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
             reader.register(proc)
             unreg = True
             #TODO make it a part of the functest.py
@@ -1121,18 +1139,24 @@ def perform_func_test(to_skip):
             reader.unregister()
         if need_stop:
             log("Stopping vagrant boxes...")
-            check_call(VAGR_STOP, shell=False, cwd=VAG_DIR)
+            check_call(conf.VAGR_STOP, shell=False, cwd=conf.VAG_DIR)
     return success
 
 #TODO
 # record structure:
 # * test symbolic id
 #
-FuncTestDesc = namedtuple("FuncTestDesc",(
-    "name", "title",
-    "startMark",  # if it's None - the start marker is: "%s Test Start" % title
-    "endMark",  # if it's None - the start marker is: "%s Test Start" % title
-))
+class FuncTestDesc(object):
+
+    def __init__(self, name, title, startMark=None, endMark=None):
+        # if startMark is None - the start marker is: "%s Test Start" % title
+        # if endMark is None - the end marker is: "%s Test End" % title
+        self.name = name
+        self.title = title
+        self.startMark = ("%s Test Start" % title) if startMark is None else startMark
+        self.endMark = ("%s Test End" % title) if endMark is None else endMark
+
+
 FUNCTEST_TBL = (
     FuncTestDesc('basic', "Basic functional", None, None),
     FuncTestDesc('merge', "Server Merge", None, None),
@@ -1158,6 +1182,9 @@ def perform_func_test_new(to_skip):
 
 class NewFunctestParser(object):
 
+    FAIL_MARK = "FAIL:"
+    ERROR_MARK = "ERROR:"
+
     # Что хочется:
     # - распзнавать тестсюит по стартовой фразе (чтобы не зависеть от порядка),
     #   при этом контролировать случайный повтор одного тестсюита
@@ -1166,13 +1193,53 @@ class NewFunctestParser(object):
     # - собирать результаты (хотя бы успех или фэйл) по каждому тестсюиту, выводить саммари в конце
     #   (хорошо бы ещё, по возможности, перечислить конкретные упавшие тесты)х
 
-    def __init__(self):
-        self.current = None
+    def __init__(self, first=None):
+        """
+        @type first: FuncTestDesc
+        """
+        self.current = first
         self.parser = self.parse_start
-        pass
+        self.collector = []
+        self.has_errors = False
+
+    _stage_names = {
+        'start' : 'waiting for %s',
+        'test'  : '%s test'
+    }
+
+    def get_stage(self):
+        parser_name = self.parser.im_func.func_name
+        assert parser_name.startswith('parse_'), "Wrong %s.parser value: %s" % (self.__class__.__name__, self.parser)
+        parser_name = parser_name[6:]
+        try:
+            return self._stage_names.get[parser_name]
+        except KeyError:
+            print "WARNING: %s.get_stage: unknown test log parsing stage: %s" % (self.__class__.__name__, parser_name)
+            return "test %s, phase " + parser_name
+
 
     def parse_start(self, line):
+        if line.startswith(self.current.startMark):
+            self.parser = self.parse_test
+            self.collector[:] = [line]
         pass
+
+    def parse_test(self, line):
+        if line.startswith(self.FAIL_MARK) or line.startswith(self.ERROR_MARK):
+            self.has_errors = True
+            self.parser = self.parse_failed
+            is_fail = line.startswith(self.FAIL_MARK)
+            ToSend.log("%s test %s!", self.current.title, "failed" if is_fail else "reports an error")
+            ToSend.log(line)
+        elif line.startswith("Basic functional tests end"):
+            ToSend.log("Basic functional tests done.")
+            self.parser = self.parse_merge_start
+            self.stage = 'wait for Merge server test'
+
+    def parse_failed(self, line):
+        pass
+
+
 
 
 class FunctestParser(object):
@@ -1215,8 +1282,8 @@ class FunctestParser(object):
             is_fail = line.startswith(self.FAIL_MARK)
             ToSend.log("Functional test %s!", "failed" if is_fail else "reports an error")
             ToSend.log(line)
-        elif line.startswith("Main tests passed OK"):
-            ToSend.log("Main functest done.")
+        elif line.startswith("Basic functional tests end"):
+            ToSend.log("Basic functional tests done.")
             self.parser = self.parse_merge_start
             self.stage = 'wait for Merge server test'
 
@@ -1574,7 +1641,13 @@ class FunctestParser(object):
 
 
 def read_functest_output(proc, reader, from_test=''):
-    last_lines = deque(maxlen=FUNCTEST_LAST_LINES)
+    """
+    :param proc: Process
+    :param reader: pipereader.PipeReader
+    :param from_test: str
+    :return: bool
+    """
+    last_lines = deque(maxlen=conf.FUNCTEST_LAST_LINES)
     success = True
     p = FunctestParser()
     if from_test == 'timesync':
@@ -1583,18 +1656,18 @@ def read_functest_output(proc, reader, from_test=''):
         p.parser = p.parse_msarch_start
     elif from_test == 'stream':
         p.parser = p.parse_stream_start
+
     while reader.state == pipereader.PIPE_READY:
-        line = reader.readline(FT_PIPE_TIMEOUT)
+        line = reader.readline(conf.FT_PIPE_TIMEOUT)
         if len(line) > 0:
             last_lines.append(line)
-            #debug("FT: %s", line.lstrip())
             #debug("FT: %s", line.lstrip())
             if line.startswith("ALL AUTOMATIC TEST ARE DONE"):
                 p.set_end()
             else:
                 p.parser(line)
-    else: # end reading
-        pass
+    #else: # end reading
+    #    pass
 
     state_error = reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR)
     if state_error:
@@ -1604,13 +1677,11 @@ def read_functest_output(proc, reader, from_test=''):
         ToSend.log("Last %s lines:\n%s", len(last_lines), "\n".join(last_lines))
         success = False
 
-    stop = time.time() + TEST_TERMINATION_WAIT # wait a bit
-    while proc.poll() is None and time.time() < stop:
-        time.sleep(0.05)
+    proc.limited_wait(conf.TEST_TERMINATION_WAIT)
 
     if proc.poll() is None:
         if not state_error:
-            debug("Functional test hasn't finished for %.1f seconds after the %s stage", TEST_TERMINATION_WAIT, p.stage)
+            debug("Functional test hasn't finished for %.1f seconds after the %s stage", conf.TEST_TERMINATION_WAIT, p.stage)
         kill_proc(proc)
         proc.wait()
         if not state_error:
@@ -1640,7 +1711,7 @@ def read_misctest_output(proc, reader, name):
     success = True
     reading = True
     while reader.state == pipereader.PIPE_READY:
-        line = reader.readline(FT_PIPE_TIMEOUT)
+        line = reader.readline(conf.FT_PIPE_TIMEOUT)
         #print ":DEBUG: " + line.rstrip()
         if reading and len(line) > 0:
             collector.append(line)
@@ -1662,12 +1733,11 @@ def read_misctest_output(proc, reader, name):
             ("[ PIPE ERROR reading %s test's output ]" % name))
         success = False
 
-    stop = time.time() + TEST_TERMINATION_WAIT
-    while proc.poll() is None and time.time() < stop:
-        time.sleep(0.05)
+    proc.limited_wait(conf.TEST_TERMINATION_WAIT)
+
     if proc.returncode is None:
         if not state_error:
-            debug("The functional test %s hasn't finished for %.1f seconds", name, TEST_TERMINATION_WAIT)
+            debug("The functional test %s hasn't finished for %.1f seconds", name, conf.TEST_TERMINATION_WAIT)
         kill_proc(proc)
         proc.wait()
 
@@ -1690,7 +1760,7 @@ def read_misctest_output(proc, reader, name):
 
 def get_boxes_status():
     try:
-        data = check_output(VAGR_STAT, stderr=STDOUT, universal_newlines=True, cwd=VAG_DIR, shell=False)
+        data = check_output(conf.VAGR_STAT, stderr=STDOUT, universal_newlines=True, cwd=conf.VAG_DIR, shell=False)
         step = 0
         rx = re.compile(r"(\S+)\s+([^(]+)")
         info = []
@@ -1708,7 +1778,7 @@ def get_boxes_status():
                     info.append([m.group(1), m.group(2).rstrip()])
         return info
     except CalledProcessError, e:
-        log("ERROR: `%s` call returns %s code. Output:\n%s", ' '.join(VAGR_STAT), e.returncode, e.output)
+        log("ERROR: `%s` call returns %s code. Output:\n%s", ' '.join(conf.VAGR_STAT), e.returncode, e.output)
         return []
 
 
@@ -1735,6 +1805,15 @@ def any_functest_arg():
     return any(getattr(Args, opt) for opt in FUNCTEST_ARGS)
 
 
+def check_debug_mode():
+    if conf.DEBUG and Args.prod:
+        conf.DEBUG = False
+    elif not conf.DEBUG and Args.debug:
+        conf.DEBUG = True
+    if conf.DEBUG:
+        logPrint("Debug mode ON")
+
+
 def check_args_correct():
     if Args.full_build_log and not Args.stdout:
         logPrint("ERROR: --full-build-log option requires --stdout!\n")
@@ -1751,14 +1830,74 @@ def check_args_correct():
         sys.exit(2)
 
 
-def fix_project_root():
-    import testconf
-    testconf.PROJECT_ROOT = Args.path
-    testconf._fix_paths(override=True)
-    vars = globals()
-    for name in ('PROJECT_ROOT', 'TARGET_PATH', 'BIN_PATH', 'LIB_PATH', 'SUBPROC_ARGS'):
-        vars[name] = getattr(testconf, name)
-    debug("Using project root at %s", PROJECT_ROOT)
+#def get_architecture():
+#    #TODO move all paths into testconf.py !
+#    curconf_fn = os.path.join(conf.PROJECT_ROOT, 'build_variables', 'target', 'current_config')
+#    av = 'arch='
+#    try:
+#        with open(curconf_fn) as f:
+#            for line in f:
+#                if line.startswith(av):
+#                    return line[len(av):].rstrip()
+#    except IOError as err:
+#        if err.errno == errno.ENOENT:
+#            pass
+#    return ''
+
+
+def get_server_package_name():
+    #TODO move all paths into testconf.py !
+    if Build.arch == '':
+        Build.load_vars(safe=True)
+
+    if Build.arch == '':
+        raise FuncTestError("Can't find server package: architecture not found!")
+
+    deb_path = os.path.join('debsetup', 'mediaserver-deb', Build.arch)
+    fn = os.path.join(conf.PROJECT_ROOT, deb_path, 'finalname-server.properties')
+    fv = 'server.finalName='
+    debfn = ''
+    if not os.path.isfile(fn):
+        return None
+    with open(fn) as f:
+        for line in f:
+            if line.startswith(fv):
+                debfn = line[len(fv):].rstrip() + '.deb'
+                break
+
+    if debfn == '':
+        raise FuncTestError("Server package .deb file name not found!")
+
+    return os.path.join(conf.PROJECT_ROOT, deb_path, 'deb', debfn)
+
+#def fix_project_root():
+#    import testconf
+#    testconf.PROJECT_ROOT = Args.path
+#    testconf._fix_paths(override=True)
+#    vars = globals()
+#    for name in ('PROJECT_ROOT', 'TARGET_PATH', 'BIN_PATH', 'LIB_PATH', 'SUBPROC_ARGS'):
+#        vars[name] = getattr(testconf, name)
+#    debug("Using project root at %s", PROJECT_ROOT)
+
+
+def set_paths():
+    if conf.TEMP == '':
+        conf.TEMP = os.getcwd()
+
+    if Args.path is not None:
+        conf.PROJECT_ROOT = Args.path
+    if conf.PROJECT_ROOT.startswith('~'):
+        conf.PROJECT_ROOT = os.path.expanduser(conf.PROJECT_ROOT)
+    conf.PROJECT_ROOT = os.path.abspath(conf.PROJECT_ROOT)
+    conf.SUBPROC_ARGS['cwd'] = conf.PROJECT_ROOT
+
+    if not os.path.isdir(conf.PROJECT_ROOT):
+        raise EnvironmentError(errno.ENOENT, "The project root directory %s isn't found", conf.PROJECT_ROOT)
+    if not os.access(conf.PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
+        raise IOError(errno.EACCES, "Full access to the project root directory required", conf.PROJECT_ROOT)
+    debug("Using project root at %s", conf.PROJECT_ROOT)
+
+    conf.BUILD_CONF_PATH = os.path.join(conf.PROJECT_ROOT, conf.BUILD_CONF_SUBPATH)
 
 
 def parse_args():
@@ -1805,53 +1944,26 @@ def parse_args():
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
     if Args.threads is not None:
-        global MVN_THREADS
         MVN_THREADS = Args.threads
     check_debug_mode()
-    if Args.path is not None:
-        fix_project_root()
-    if Args.auto:
-        log("Starting...")
-
-
-def check_debug_mode():
-    global DEBUG
-    if DEBUG and Args.prod:
-        DEBUG = False
-    elif not DEBUG and Args.debug:
-        DEBUG = True
-
-
-def set_paths():
-    if not os.path.isdir(PROJECT_ROOT):
-        raise EnvironmentError(errno.ENOENT, "The project root directory not found", PROJECT_ROOT)
-    if not os.access(PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
-        raise IOError(errno.EACCES, "Full access to the project root directory required", PROJECT_ROOT)
-    if Env.get('LD_LIBRARY_PATH'):
-        Env['LD_LIBRARY_PATH'] += os.pathsep + LIB_PATH
-    else:
-        Env['LD_LIBRARY_PATH'] = LIB_PATH
-    #debug("LD_LIBRARY_PATH=%s",Env['LD_LIBRARY_PATH'])
 
 
 def set_branches():
-    global BRANCHES
     if Args.branch:
         change_branch_list()
     elif not Args.full:
-        BRANCHES = ['.']
-    if BRANCHES[0] == '.':
-        BRANCHES[0] = current_branch_name()
+        conf.BRANCHES = ['.']
+    if conf.BRANCHES[0] == '.':
+        conf.BRANCHES[0] = current_branch_name()
     if Args.full and not Args.branch:
-        log("Watched branches: " + ','.join(BRANCHES))
+        log("Watched branches: " + ','.join(conf.BRANCHES))
 
 
 def change_branch_list():
-    global BRANCHES
-    BRANCHES = Args.branch
-    if '.' in BRANCHES and len(BRANCHES) > 1:
+    conf.BRANCHES = Args.branch
+    if '.' in conf.BRANCHES and len(conf.BRANCHES) > 1:
         log("WARNING: there is '.' branch in the branch list -- ALL other branches will be skipped!")
-        BRANCHES = ['.']
+        conf.BRANCHES = ['.']
 
 
 #def get_pom_modules
@@ -1861,7 +1973,7 @@ def get_ut_names():
     Parses unit_tests/pom.xml finding unittests modules names.
     If it fails, returns global TESTS.
     """
-    path = os.path.join(PROJECT_ROOT, UT_SUBDIR, "pom.xml")
+    path = os.path.join(conf.PROJECT_ROOT, conf.UT_SUBDIR, "pom.xml")
     #ns = 'http://maven.apache.org/POM/4.0.0'
     try:
         tree = ET.parse(path)
@@ -1877,26 +1989,26 @@ def get_ut_names():
             # and go further to the end of the function
     except Exception, e:
         log("Error loading %s: %s", path, e)
-    log("Use default unittest names: %s", TESTS)
-    return TESTS
+    log("Use default unittest names: %s", conf.TESTS)
+    return conf.TESTS
 
 
 def show_conf():
-    # TODO undate it!
+    # TODO update it!
     print "(Warning: this function is outdated a bit.)"
     print "Configuration parameters used:"
-    print "DEBUG = %s" % DEBUG
-    print "PROJECT_ROOT = %s" % PROJECT_ROOT
-    print "TARGET_PATH = %s" % TARGET_PATH
-    print "BIN_PATH = %s" % BIN_PATH
-    print "LIB_PATH = %s" % LIB_PATH
-    print "BRANCHES = %s" % (', '.join(BRANCHES),)
-    print "TESTS = %s" % (', '.join(TESTS),)
-    print "HG_CHECK_PERIOD = %s milliseconds" % HG_CHECK_PERIOD
-    print "UT_PIPE_TIMEOUT = %s" % UT_PIPE_TIMEOUT
-    print "FT_PIPE_TIMEOUT = %s" % FT_PIPE_TIMEOUT
-    print "BUILD_LOG_LINES = %s" % BUILD_LOG_LINES
-    print "MVN_THREADS = %s" % MVN_THREADS
+    print "DEBUG = %s" % conf.DEBUG
+    print "PROJECT_ROOT = %s" % conf.PROJECT_ROOT
+    #print "TARGET_PATH = %s" % TARGET_PATH
+    #print "BIN_PATH = %s" % BIN_PATH
+    #print "LIB_PATH = %s" % LIB_PATH
+    print "BRANCHES = %s" % (', '.join(conf.BRANCHES),)
+    print "TESTS = %s" % (', '.join(conf.TESTS),)
+    print "HG_CHECK_PERIOD = %s" % conf.HG_CHECK_PERIOD
+    print "UT_PIPE_TIMEOUT = %s" % conf.UT_PIPE_TIMEOUT
+    print "FT_PIPE_TIMEOUT = %s" % conf.FT_PIPE_TIMEOUT
+    print "BUILD_LOG_LINES = %s" % conf.BUILD_LOG_LINES
+    print "MVN_THREADS = %s" % conf.MVN_THREADS
 
 
 def run_auto_loop():
@@ -1905,7 +2017,7 @@ def run_auto_loop():
         t = time.time()
         log("Checking...")
         run()
-        t = max(MIN_SLEEP, HG_CHECK_PERIOD - (time.time() - t))
+        t = max(conf.MIN_SLEEP, conf.HG_CHECK_PERIOD - (time.time() - t))
         log("Sleeping %s secs...", t)
         wake_time = time.time() + t
         while time.time() < wake_time:
@@ -1914,10 +2026,25 @@ def run_auto_loop():
     log("Finishing...")
 
 
+class RunTime(object):
+    start = None
+    @classmethod
+    def go(cls):
+        cls.start = time.time()
+
+    @classmethod
+    def report(cls):
+        if cls.start is not None:
+            spend = time.time() - cls.start
+            hr = int(spend / 3600)
+            mn = int((spend - hr*3600) / 60)
+            ms = ("%.2f" % spend).split('.')[1]
+            print "Execution time: %02d:%02d:%02d.%s" % (hr, mn, int(spend % 60), ms)
+
 def main():
     parse_args()
-    drop_flag(RESTART_FLAG)
-    drop_flag(STOP_FLAG)
+    drop_flag(conf.RESTART_FLAG)
+    drop_flag(conf.STOP_FLAG)
     set_paths()
     set_branches()
 
@@ -1929,9 +2056,6 @@ def main():
         show_boxes()
         return True
 
-    if DEBUG:
-        logPrint("Debug mode ON")
-
     if Args.boxes is not None:
         start_boxes(Args.boxes, keep=Args.add)
         return True
@@ -1940,6 +2064,11 @@ def main():
         stop_boxes(Args.boxoff, True)
         return True
 
+    if Args.auto:
+        log("Starting...")
+    else:
+        RunTime.go()
+
     FailTracker.load()
 
     if Args.auto:
@@ -1947,7 +2076,7 @@ def main():
 
     elif (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
         ToSend.clear()
-        if not perform_func_test(get_tests_to_skip(BRANCHES[0])):
+        if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
             if ToSend.count() and not Args.stdout:
                 email_notify("Debug %s" % (
                     "func" if Args.functest else
@@ -1968,12 +2097,15 @@ def main():
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
-    if not main():
-        debug("Something isn't OK, returning code 1")
-        debug("Results: %s", RESULT)
-        sys.exit(1)
-    else:
-        debug("Results: %s", RESULT)
+    try:
+        if not main():
+            debug("Something isn't OK, returning code 1")
+            debug("Results: %s", RESULT)
+            sys.exit(1)
+        else:
+            debug("Results: %s", RESULT)
+    finally:
+        RunTime.report()
 
 # TODO: with -o turn off output lines accumulator, just print 'em
 # Check . branch processing in full test

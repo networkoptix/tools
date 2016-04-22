@@ -96,7 +96,7 @@ if os.name == 'posix':
                 self.state = PIPE_HANG
             return ''
 
-else:
+elif os.name == 'nt':
     import msvcrt
     import pywintypes
     import win32pipe
@@ -128,3 +128,6 @@ else:
 
     def check_poll_res(res):
         return bool(res)
+
+else:
+    raise EnvironmentError("Unsupported OS: %s" % os.name)

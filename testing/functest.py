@@ -1581,6 +1581,7 @@ def RunByAutotest(arg0):
     #config = testMaster.getConfig()
     need_rollback = True
     try:
+        print ""
         ret, reason = testMaster.init(notest=True)
         if not ret:
             print "Failed to initialize the cluster test object: %s" % (reason)
@@ -1594,11 +1595,14 @@ def RunByAutotest(arg0):
             if ret == False:
                 print "The initial cluster test failed: %s" % (reason)
                 return
+            print "Basic functional tests start"
             the_test = unittest.main(exit=False, argv=[arg0])
             if the_test.result.wasSuccessful():
-                print "Main tests passed OK"
+                print "Basic functional tests end"
                 MergeTest().run()
                 SystemNameTest(config).run()
+            else:
+                print "Basic functional test FAILED"
             ProxyTest(*config.rtget('ServerList')[0:2])
             if testMaster.unittestRollback:
                 doCleanUp()
