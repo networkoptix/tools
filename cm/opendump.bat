@@ -56,9 +56,8 @@ IF NOT "%DUMPFILE%" == "" (
             SET BUILDNUMBER=%%M
             SET CUSTOMIZATION=%%O
         )    
-        ECHO Customization = !CUSTOMIZATION!
+        ECHO Customization with PID = !CUSTOMIZATION!
         FOR /F "delims=" %%A IN ('cscript //nologo StripToken.vbs "!CUSTOMIZATION!" "_" 1') DO SET CUSTOMIZATION=%%A
-        ECHO PID = !lastPart!
         ECHO Build Number = !BUILDNUMBER!
         ECHO Customization = !CUSTOMIZATION!
 
