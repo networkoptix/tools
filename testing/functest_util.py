@@ -2,11 +2,16 @@ __author__ = 'Danil Lavrentyuk'
 "This module contains some utility functions and classes for the functional tests script."
 import sys
 import json
+from urllib import urlencode
 import urllib2
 from ConfigParser import RawConfigParser
+import traceback
+import Queue
+import threading
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
-           'ClusterWorker', 'ClusterLongWorker', 'parse_size',
+           'checkResultsEqual',
+           'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str', 'real_caps',
            'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
 
@@ -200,11 +205,7 @@ class JsonDiff:
         return self._hasDiff
 
     def errorInfo(self):
-        if self._hasDiff:
-            return self._errorInfo
-        else:
-            return "<no diff>"
-
+        return self._errorInfo if self._hasDiff else "<no diff>"
 
     def resetDiff(self):
         self._hasDiff = False
@@ -212,6 +213,10 @@ class JsonDiff:
 
 
 class FtConfigParser(RawConfigParser):
+
+    def __init__(self, *args, **kw_args):
+        RawConfigParser.__init__(self, *args, **kw_args)
+        self.runtime = dict()
 
     def get_safe(self, section, option, default=None):
         if not self.has_option(section, option):
@@ -227,6 +232,15 @@ class FtConfigParser(RawConfigParser):
         if not self.has_option(section, option):
             return default
         return self.getfloat(section, option)
+
+    def rtset(self, name, value):
+        self.runtime[name] = value
+
+    def rtget(self, name):
+        return self.runtime[name]
+
+    def rthas(self, name):
+        return name in self.runtime
 
 
 def _compareJsonObject(lhs,rhs,result):
@@ -281,7 +295,6 @@ def _compareJsonList(lhs,rhs,result):
 
 
 def _compareJsonLeaf(lhs,rhs,result):
-    lhs_type = type(lhs)
     if isinstance(rhs,type(lhs)):
         if rhs != lhs:
             return result.leafValueNotSame(lhs,rhs)
@@ -306,7 +319,7 @@ def _compareJson(lhs,rhs,result):
             return _compareJsonLeaf(lhs,rhs,result)
 
 
-def compareJson(lhs,rhs):
+def compareJson(lhs,rhs):  # :type: JsonDiff
     result = JsonDiff()
     # An outer most JSON element must be an array or dict
     if isinstance(lhs,list):
@@ -326,9 +339,52 @@ def compareJson(lhs,rhs):
             result.leave()
         else:
             return result.typeNotSame(lhs,rhs)
-    #FIXME check if lhs neither list nor dit!
 
     return result
+
+
+def checkResultsEqual(responseList, methodName):
+    """responseList - is a list of pairs (response, address).
+    The function compares that all responces are ok and their json contents are equal.
+    Returns a tupple of a boolean success indicator and a string fail reason.
+    """
+    print "------------------------------------------"
+    print "Test sync status on method: %s" % (methodName)
+    result = None
+    resultAddr = None
+    resultJsonObject = None
+
+    for entry in responseList:
+        response, address = entry[0:2]
+
+        if response.getcode() != 200:
+            return (False,"Server: %s method: %s HTTP request failed with code: %d" % (address,methodName,response.getcode()))
+        else:
+            content = response.read()
+            if result == None:
+                result = content
+                resultAddr = address
+                resultJsonObject = SafeJsonLoads(result, resultAddr, methodName)
+                if resultJsonObject is None:
+                    return (False, "Wrong response from %s" % resultAddr)
+            else:
+                if content != result:
+                    # Since the server could issue json object has different order which makes us
+                    # have to do deep comparison of json object internally. This deep comparison
+                    # is very slow and only performs on objects that has failed the naive comparison
+                    contentJsonObject = SafeJsonLoads(content, address, methodName)
+                    if contentJsonObject is None:
+                        return (False, "Wrong response from %s" % address)
+                    compareResult = compareJson(contentJsonObject, resultJsonObject)
+                    if compareResult.hasDiff():
+                        print "Server %s has different status with server %s on method %s" % (address,resultAddr,methodName)
+                        print compareResult.errorInfo()
+                        return (False,"Failed to sync")
+        response.close()
+    print "Method:%s is synced in cluster" % (methodName)
+    print "------------------------------------------"
+    return (True,"")
+
 
 
 # ---------------------------------------------------------------------
@@ -372,7 +428,7 @@ _helpMenu = {
         "Usage: python main.py --rtsp-test \n\n"
         "This command is used to run RTSP Test test.It means it will issue RTSP play command,\n"
         "and wait for the reply to check the status code.\n"
-        "User needs to set up section in ec2_tests.cfg file: [Rtsp]\ntestSize=40\n"
+        "User needs to set up section in functest.cfg file: [Rtsp]\ntestSize=40\n"
         "The testSize is configuration parameter that tell rtsp the number that it needs to perform \n"
         "RTSP test on _EACH_ server. Therefore, the above example means 40 random RTSP test on each server.\n")),
     "add":("Resource creation",(
@@ -423,7 +479,7 @@ _helpMenu = {
         "archiveDiffMin       The time difference lower bound for archive request, in minutes \n"
         "timeoutMax           The timeout upper bound for each RTP receiving, in seconds. \n"
         "timeoutMin           The timeout lower bound for each RTP receiving, in seconds. \n"
-        "Notes: All the above parameters needs to be specified in configuration file:ec2_tests.cfg under \n"
+        "Notes: All the above parameters needs to be specified in configuration file: functest.cfg under \n"
         "section Rtsp.\nEg:\n[Rtsp]\nthreadNumbers=10,2\narchiveDiffMax=..\nardchiveDiffMin=....\n"
         )),
     "sys-name":("System name test",(
@@ -469,6 +525,8 @@ def showHelp(argv):
 def ManagerAddPassword(passman, host, user, pwd):
     passman.add_password(None, "http://%s/ec2" % (host), user, pwd)
     passman.add_password(None, "http://%s/api" % (host), user, pwd)
+    passman.add_password(None, "http://%s/hls" % (host), user, pwd)
+    passman.add_password(None, "http://%s/proxy" % (host), user, pwd)
 
 
 def SafeJsonLoads(text, serverAddr, methodName):
@@ -479,9 +537,49 @@ def SafeJsonLoads(text, serverAddr, methodName):
         return None
 
 
+def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None, printHttpError=False, logURL=False):
+    url = "http://%s/%s" % (serverAddr, methodName)
+    err = ""
+    if params:
+        url += '?'+ urlencode(params)
+    if logURL:
+        print "Requesting: " + url
+    req = urllib2.Request(url)
+    if headers:
+        for k, v in headers.iteritems():
+            req.add_header(k, v)
+    try:
+        response = urllib2.urlopen(req) if timeout is None else urllib2.urlopen(req, timeout=timeout)
+    except Exception as e:
+        err = "ends with exception %s" % e
+    else:
+        if response.getcode() != 200:
+            err = "returns %s HTTP code" % (response.getcode(),)
+    if err:
+        if printHttpError:
+            if params:
+                err = "Error: url %s %s" % (url, err)
+            else:
+                err = "Error: server %s, method %s %s" % (serverAddr, methodName, err)
+            if isinstance(printHttpError, Exception):
+                raise printHttpError(err)
+            print err
+        return None
+    data = response.read()
+    if len(data):
+        return SafeJsonLoads(data, serverAddr, methodName)
+    return True
 
-import Queue
-import threading
+
+#def safe_request_json(req):
+#    try:
+#        return json.loads(urllib2.urlopen(req).read())
+#    except Exception as e:
+#        if isinstance(req, urllib2.Request):
+#            req = req.get_full_uri()
+#        print "FAIL: error requesting '%s': %s" % (req, e)
+#        return None
+
 
 # Thread queue for multi-task.  This is useful since if the user
 # want too many data to be sent to the server, then there maybe
@@ -501,15 +599,21 @@ class ClusterWorker(object):
         self._queue = Queue.Queue(element_size)
         self._threadList = []
         self._working = False
+        self._oks = []
 
     def _do_work(self):
         return not self._queue.empty()
 
     def _worker(self, num):
         while self._do_work():
-            t,a = self._queue.get(True)
+            func, args = self._queue.get(True)
             try:
-                t(*a)
+                func(*args)
+            except Exception:
+                print "ERROR: ClusterWorker call to %s got an Exception: %s" % (func.__name__, traceback.format_exc())
+                self._oks.append(False)
+            else:
+                self._oks.append(True)
             finally:
                 self._queue.task_done()
 
@@ -541,6 +645,13 @@ class ClusterWorker(object):
     def enqueue(self, task, args):
         self._queue.put((task, args), True)
 
+    def allOk(self):
+        return all(self._oks)
+
+    def clearOks(self):
+        self._oks = []
+
+
 
 class ClusterLongWorker(ClusterWorker):
 
@@ -571,22 +682,15 @@ class ClusterLongWorker(ClusterWorker):
         self.enqueue(self._terminate, ()) # for other threads
 
 
-def safe_request_json(req):
-    try:
-        return json.loads(urllib2.urlopen(req).read())
-    except Exception, e:
-        if isinstance(req, urllib2.Request):
-            req = req.get_full_uri()
-        print "FAIL: error requesting '%s': %s" % (req, e)
-        return None
-
+def quote_guid(guid):
+    return guid if guid[0] == '{' else "{" + guid + "}"
 
 def unquote_guid(guid):
     return guid[1:-1] if guid[0] == '{' and guid[-1] == '}' else guid
 
 
 def get_server_guid(host):
-    info = safe_request_json("http://%s/api/moduleInformation" % host)
+    info = HttpRequest(host, "api/moduleInformation", printHttpError=True)
     if info and (u'id' in info['reply']):
         return unquote_guid(info['reply'][u'id'])
     return None
@@ -618,3 +722,10 @@ def parse_size(size_str):
     return int(size_str) * mult
 
 
+def args2str(args):
+    return '%s and %s' % (', '.join('--'+opt for opt in args[:-1]), '--'+args[-1])
+
+
+def real_caps(str):
+    "String's method capitalize makes lower all chars except the first. If it isn't desired - use real_caps."
+    return (str[0].upper() + str[1:]) if len(str) else str

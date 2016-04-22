@@ -1,122 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+""" The main entry point for almost all functional tests for networkoptix mediaserver.
+Contains a set of 'legacy' tests (i.e. tests being written by a previous author,
+most of them are not analyzed and not refactored yet) and calls to new (or refactored)
+tests which are put into sep[arate modules.
+"""
+
+import sys, time
 import unittest
 import urllib2
 import urllib
-import time
 import threading
 import json
 import random
-import md5
-import sys
-import socket
 import os.path
 import signal
-import sys
-import time
-import select
-import errno
 import traceback
 
 from functest_util import *
 from generator import *
-import timetest, stortest
-from testboxes import RunTests as RunBoxTests
-
-CONFIG_FNAME = "functest.cfg"
-
-DEFAULT_ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
-
-
-# Rollback support
-class UnitTestRollback:
-    _rollbackFile = None
-    _removeTemplate = '{ "id":"%s" }'
-
-    def __init__(self):
-        if os.path.isfile(".rollback"):
-            selection = 'r' if clusterTest.auto_rollback else ''
-            if not clusterTest.auto_rollback:
-                try :
-                    print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
-                    print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
-                    print "Do you want to run Recover NOW?\n"
-                    selection = raw_input("Press r to RUN RECOVER at first or press Enter to SKIP RECOVER and run the test")
-                except Exception:
-                    pass
-
-            if len(selection) != 0 and selection[0] in ('r', 'R'):
-                self.doRecover()
-
-        self._rollbackFile = open(".rollback","w+")
-
-    def addOperations(self,methodName,serverAddress,resourceId):
-        for s in clusterTest.clusterTestServerList:
-            self._rollbackFile.write(("%s,%s,%s\n") % (methodName,s,resourceId)) #FIXME Is it OK - ignore serverAddress and record operation for ALL SERVERS?!
-        self._rollbackFile.flush()
-
-    def _doSingleRollback(self,methodName,serverAddress,resourceId):
-        # this function will do a single rollback
-        req = urllib2.Request("http://%s/ec2/%s" % (serverAddress,"removeResource"),
-            data=self._removeTemplate % (resourceId), headers={'Content-Type': 'application/json'})
-        response = None
-        try:
-            response = urllib2.urlopen(req)
-        except:
-            return False
-        if response.getcode() != 200:
-            response.close()
-            return False
-        response.close()
-        return True
-
-    def doRollback(self, quiet=False):
-        recoverList = []
-        failed = False
-        # set the cursor for the file to the file beg
-        self._rollbackFile.seek(0,0)
-        for line in self._rollbackFile:
-            if line == '\n':
-                continue
-            l = line.rstrip('\n').split(',')
-            # now we have method,serverAddress,resourceId
-            if self._doSingleRollback(l[0],l[1],l[2]) == False:
-                failed = True
-                # failed for this rollback
-                print ("Cannot rollback for transaction:(MethodName:%s;ServerAddress:%s;ResourceId:%s\n)") % (l[0],l[1],l[2])
-                print  "Or you could run recover later when all the rollback done\n"
-                recoverList.append("%s,%s,%s\n" % (l[0],l[1],l[2]))
-            else:
-                if quiet:
-                    print '+',
-                else:
-                    print "..rollback done.."
-        if quiet:
-            print
-
-        self._rollbackFile.close()
-        os.remove(".rollback")
-
-        if failed:
-            recoverFile = open(".rollback","w+")
-            for line in recoverList:
-                recoverFile.write(line)
-            recoverFile.close()
-
-    def doRecover(self):
-        if not os.path.isfile(".rollback") :
-            print "Nothing needs to be recovered"
-            return
-        else:
-            print "Start to recover from previous failed rollback transaction"
-        # Do the rollback here
-        self._rollbackFile = open(".rollback","r")
-        self.doRollback()
-        print "Recover done..."
-
-    def removeRollbackDB(self):
-        self._rollbackFile.close()
-        os.remove(".rollback")
+from testbase import RunTests as RunBoxTests, LegacyTestWrapper, FuncTestMaster, getTestMaster, UnitTestRollback
+from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
+from sysname_test import SystemNameTest
+from timetest import TimeSyncTest
+from stortest import BackupStorageTest, MultiserverArchiveTest
+from streaming_test import StreamingTest
+from natcon_test import NatConnectionTest
+from dbuptest import DBUpgradeTest
+from proxytest import ProxyTest
 
 
 #class AuthH(urllib2.HTTPDigestAuthHandler):
@@ -125,1087 +36,13 @@ class UnitTestRollback:
 #        print "Req: %s" % req
 #        return urllib2.HTTPDigestAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
 
-
-class ClusterTest(object):
-    clusterTestServerList = []
-    clusterTestSleepTime = None
-    clusterTestServerUUIDList = []
-    configFname = CONFIG_FNAME
-    config = None
-    argv = []
-    openerReady = False
-    threadNumber = 16
-    testCaseSize = 2
-    unittestRollback = None
-    CHUNK_SIZE=4*1024*1024 # 4 MB
-    TRANSACTION_LOG="__transaction.log"
-    auto_rollback = False
-    skip_timesync = False
-    skip_backup = False
-    skip_mservarc = False
-    do_main_only = False
-
-    _argFlags = {
-        '--autorollback': 'auto_rollback',
-        '--arb': 'auto_rollback', # an alias for the previous
-        '--skiptime': 'skip_timesync',
-        '--skipbak': 'skip_backup',
-        '--skipmsa': 'skip_mservarc',
-        '--mainonly': 'do_main_only',
-    }
-
-    _getterAPIList = ["getResourceParams",
-        "getMediaServersEx",
-        "getCamerasEx",
-        "getUsers"]
-
-    _ec2GetRequests = ["getResourceTypes",
-        "getResourceParams",
-        "getMediaServers",
-        "getMediaServersEx",
-        "getCameras",
-        "getCamerasEx",
-        "getCameraHistoryItems",
-        "getCameraBookmarkTags",
-        "getBusinessRules",
-        "getUsers",
-        "getVideowalls",
-        "getLayouts",
-        "listDirectory",
-        "getStoredFile",
-        "getSettings",
-        "getCurrentTime",
-        "getFullInfo",
-        "getLicenses"]
-
-    def _callAllGetters(self):
-        print "======================================"
-        print "Test all ec2 get request status"
-        for s in clusterTest.clusterTestServerList:
-            for reqName in self._ec2GetRequests:
-                print "Connection to http://%s/ec2/%s" % (s,reqName)
-                response = urllib2.urlopen("http://%s/ec2/%s" % (s,reqName))
-                if response.getcode() != 200:
-                    return (False,"%s failed with statusCode %d" % (reqName,response.getcode()))
-                response.close()
-        print "All ec2 get requests work well"
-        print "======================================"
-        return (True,"Server:%s test for all getter pass" % (s))
-
-    def _getServerName(self,obj,uuid):
-        for s in obj:
-            if s["id"] == uuid:
-                return s["name"]
-        return None
-
-    def _patchUUID(self,uuid):
-        if uuid[0] == '{' :
-            return uuid
-        else:
-            return "{%s}" % (uuid)
-
-    # call this function after reading the clusterTestServerList
-    def _fetchClusterTestServerUUIDList(self):
-
-        server_id_list = []
-        for s in self.clusterTestServerList:
-            response = urllib2.urlopen("http://%s/ec2/testConnection?format=json" % (s))
-            if response.getcode() != 200:
-                return (False,"testConnection response with error code:%d" % (response.getcode()))
-            json_obj = SafeJsonLoads(response.read(), s, 'testConnection')
-            if json_obj is None:
-                return (False, "Wrong response")
-            server_id_list.append(self._patchUUID(json_obj["ecsGuid"]))
-            response.close()
-
-        # We still need to get the server name since this is useful for
-        # the SaveServerAttributeList test (required in its post data)
-
-        response = urllib2.urlopen("http://%s/ec2/getMediaServersEx?format=json" % (self.clusterTestServerList[0]))
-
-        if response.getcode() != 200:
-            return (False,"getMediaServersEx resposne with error code:%d" % (response.getcode()))
-
-        json_obj = SafeJsonLoads(response.read(), self.clusterTestServerList[0], 'getMediaServersEx')
-        if json_obj is None:
-            return (False, "Wrong response")
-
-        for uuid in server_id_list:
-            n = self._getServerName(json_obj,uuid)
-            if n == None:
-                return (False,"Cannot fetch server name with UUID:%s" % (uuid))
-            else:
-                self.clusterTestServerUUIDList.append((uuid,n))
-
-        response.close()
-        return (True,"")
-
-    def _dumpDiffStr(self,str,i):
-        if len(str) == 0:
-            print "<empty string>"
-        else:
-            start = max(0,i - 64)
-            end = min(64,len(str) - i) + i
-            comp1 = str[start:i]
-            # FIX: the i can be index that is the length which result in index out of range
-            if i >= len(str):
-                comp2 = "<EOF>"
-            else:
-                comp2 = str[i]
-            comp3 = ""
-            if i + 1 >= len(str):
-                comp3 = "<EOF>"
-            else:
-                comp3 = str[i + 1:end]
-            print "%s^^^%s^^^%s\n" % (comp1,comp2,comp3)
-
-
-    def _seeDiff(self,lhs,rhs,offset=0):
-        if len(rhs) == 0 or len(lhs) == 0:
-            print "The difference is showing bellow:\n"
-            if len(lhs) == 0:
-                print "<empty string>"
-            else:
-                print rhs[0:min(128,len(rhs))]
-            if len(rhs) == 0:
-                print "<empty string>"
-            else:
-                print rhs[0:min(128,len(rhs))]
-
-            print "One of the string is empty!"
-            return
-
-        for i in xrange(max(len(rhs),len(lhs))):
-            if i >= len(rhs) or i >= len(lhs) or lhs[i] != rhs[i]:
-                print "The difference is showing bellow:"
-                self._dumpDiffStr(lhs,i)
-                self._dumpDiffStr(rhs,i)
-                print "The first different character is at location:%d" % (i + 1+offset)
-                return
-
-    def _testConnection(self):
-        print "==================================================\n"
-        print "Test connection on each server in the server list "
-        for s in self.clusterTestServerList:
-            print "Try to connect to server: %s" % (s)
-            request = urllib2.Request("http://%s/ec2/testConnection" % (s))
-            try:
-                #response = urllib2.urlopen("http://%s/ec2/testConnection" % (s), timeout=5)
-                response = urllib2.urlopen(request, timeout=5)
-            except urllib2.URLError , e:
-                print "The connection has been issued with a 5 seconds timeout"
-                if isinstance(e, urllib2.HTTPError):
-                    print "However connection failed with HTTP error: (%s) %s" % (e.code, e.reason)
-                else:
-                    print "However connection failed with error: %s" % (e.reason)
-                print "Connection test failed"
-                return False
-
-            if response.getcode() != 200:
-                return False
-            response.close()
-            print "Connection test OK\n"
-
-        print "Connection Test Pass"
-        print "\n==================================================="
-        return True
-
-    # This checkResultEqual function will categorize the return value from each
-    # server
-    # and report the difference status of this
-
-    def _reportDetailDiff(self,key_list):
-        for i in xrange(len(key_list)):
-            for k in xrange(i + 1,len(key_list)):
-                print "-----------------------------------------"
-                print "Group %d compared with Group %d\n" % (i + 1,k + 1)
-                self._seeDiff(key_list[i],key_list[k])
-                print "-----------------------------------------"
-
-    def _reportDiff(self,statusDict,methodName):
-        print "\n\n**************************************************\n\n"
-        print "Report each server status of method:%s\n" % (methodName)
-        print "The server will be categorized as group,each server within the \
-            same group has same status,while different groups have different status\n"
-        print "The total group number is:%d\n" % (len(statusDict))
-        if len(statusDict) == 1:
-            print "The status check passed!\n"
-        i = 1
-        key_list = []
-        for key in statusDict:
-            list = statusDict[key]
-            print "Group %d:(%s)\n" % (i,','.join(list))
-            i = i + 1
-            key_list.append(key)
-
-
-        self._reportDetailDiff(key_list)
-        print "\n\n**************************************************\n\n"
-
-    def _checkResultEqual(self,responseList,methodName):
-        statusDict = dict()
-
-        for entry in responseList:
-            response = entry[0]
-            address = entry[1]
-
-            if response.getcode() != 200:
-                return(False,"Server:%s method:%s http request failed with code:%d" % (address,methodName,response.getcode()))
-            else:
-                content = response.read()
-                if content in statusDict:
-                    statusDict[content].append(address)
-                else:
-                    statusDict[content] = [address]
-                response.close()
-
-        self._reportDiff(statusDict,methodName)
-
-        if len(statusDict) > 1:
-            return (False,"")
-
-        return (True,"")
-
-    def _checkResultEqual_Deprecated(self,responseList,methodName):
-        print "------------------------------------------\n"
-        print "Test sync status on method:%s" % (methodName)
-        result = None
-        resultAddr = None
-        resultJsonObject = None
-
-        for entry in responseList:
-            response = entry[0]
-            address = entry[1]
-
-            if response.getcode() != 200:
-                return (False,"Server: %s method: %s HTTP request failed with code: %d" % (address,methodName,response.getcode()))
-            else:
-                content = response.read()
-                if result == None:
-                    result = content
-                    resultAddr = address
-                    resultJsonObject = SafeJsonLoads(result, resultAddr, methodName)
-                    if resultJsonObject is None:
-                        return (False, "Wrong response")
-                else:
-                    if content != result:
-                        print "Server:%s has different status with server:%s on method:%s" % (address,resultAddr,methodName)
-                        # Since the server could issue json object has different order which makes us
-                        # have to do deep comparison of json object internally. This deep comparison
-                        # is very slow and only performs on objects that has failed the naive comparison
-                        contentJsonObject = SafeJsonLoads(content, address, methodName)
-                        if contentJsonObject is None:
-                            return (False, "Wrong response")
-                        compareResult = compareJson(contentJsonObject, resultJsonObject)
-                        if compareResult.hasDiff():
-                            print "Server:%s has different status with server:%s on method:%s" % (address,resultAddr,methodName)
-                            print compareResult.errorInfo()
-                            return (False,"Failed to sync")
-            response.close()
-        print "Method:%s is sync in cluster" % (methodName)
-        print "\n------------------------------------------"
-        return (True,"")
-
-    def _checkSingleMethodStatusConsistent(self,method):
-            responseList = []
-            for server in self.clusterTestServerList:
-                print "Connection to http://%s/ec2/%s" % (server, method)
-                responseList.append((urllib2.urlopen("http://%s/ec2/%s" % (server, method)),server))
-
-            # checking the last response validation
-            return self._checkResultEqual_Deprecated(responseList,method)
-
-    # Checking transaction log
-    # This checking will create file to store the transaction log since this
-    # log could be very large which cause urllib2 silently drop data and get
-    # partial read. In order to compare such large data file, we only compare
-    # one chunk at a time .The target transaction log will be stored inside
-    # of a temporary file and all the later comparison will be based on small
-    # chunk.
-
-    def _checkTransactionLog(self):
-
-        first_hit = False
-        serverAddr= None
-        for s in self.clusterTestServerList:
-            print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
-            # check if we have that transactionLog
-            if not first_hit:
-                first_hit = True
-                serverAddr = s
-                with open(self.TRANSACTION_LOG,"w+") as f:
-                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
-                    while True:
-                        data = req.read( self.CHUNK_SIZE )
-                        if data is None or len(data) == 0:
-                            break
-                        f.write(data)
-                # for the very first transactionLog, just skip
-                continue
-            else:
-                assert os.path.isfile(self.TRANSACTION_LOG), \
-                    "The internal temporary file is not found, it means a external program has deleted it"
-                with open(self.TRANSACTION_LOG,"r") as f:
-                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
-                    pos = 0
-                    if req.getcode() != 200:
-                        print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
-                        return (False,"")
-
-                    while True:
-                        data = f.read(self.CHUNK_SIZE)
-                        pack = req.read(self.CHUNK_SIZE)
-
-                        if data is None or len(data) == 0:
-                            if pack is None or len(pack) == 0:
-                                break
-                            else:
-                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                print "Server:%s has data but server:%s runs out of its transaction log"%(
-                                    s,serverAddr)
-                                return (False,"")
-                        else:
-                            if pack is None or len(pack) == 0:
-                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                print "Server:%s has data but server:%s runs out of its transaction log"%(
-                                    serverAddr,s)
-                                return (False,"")
-                            else:
-                                if data != pack:
-                                    print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                    self._seeDiff(data,pack,pos)
-                                    return (False,"")
-                                pos += len(pack)
-                    req.close()
-        os.remove(self.TRANSACTION_LOG)
-        return (True,"")
-
-    def checkMethodStatusConsistent(self,method):
-            ret,reason = self._checkSingleMethodStatusConsistent(method)
-            if ret:
-                return self._checkTransactionLog()
-            else:
-                return (ret,reason)
-
-    def _ensureServerListStates(self,sleep_timeout):
-        time.sleep(sleep_timeout)
-        for method in self._getterAPIList:
-            ret,reason = self._checkSingleMethodStatusConsistent(method)
-            if ret == False:
-                return (ret,reason)
-        return self._checkTransactionLog()
-
-    def getConfig(self):
-        if self.config is None:
-            self.config = FtConfigParser()
-            self.config.read(self.configFname)
-        return self.config
-
-    def _loadConfig(self):
-        parser = self.getConfig()
-        self.clusterTestServerList = parser.get("General","serverList").split(",")
-        self.clusterTestSleepTime = parser.getint("General","clusterTestSleepTime")
-        self.threadNumber = parser.getint("General","threadNumber")
-        try :
-            self.testCaseSize = parser.getint("General","testCaseSize")
-        except :
-            self.testCaseSize = 2
-
-    def setUpPassword(self):
-        config = self.getConfig()
-        pwd = config.get("General","password")
-        un = config.get("General","username")
-        # configure different domain password strategy
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        for s in self.clusterTestServerList:
-            ManagerAddPassword(passman, s, un, pwd)
-
-        urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
-        self.openerReady = True
-#        urllib2.install_opener(urllib2.build_opener(AuthH(passman)))
-
-    def check_flags(self, argv):
-        "Checks flag options and remove them from argv"
-        g = globals()
-        found = False
-        for arg in argv:
-            if arg in self._argFlags:
-                g[self._argFlags[arg]] = True
-                found = True
-        if found:
-            argv[:] = [arg for arg in argv if arg not in self._argFlags]
-
-    def preparseArgs(self, argv):
-        other = [argv[0]]
-        config_next = False
-        for arg in argv[1:]:
-            if config_next:
-                self.configFname = arg
-                config_next = False
-                print "Use config", self.configFname
-            elif arg in self._argFlags:
-                setattr(self, self._argFlags[arg], True)
-            elif arg == '--config':
-                config_next = True
-            elif arg.startswith('--config='):
-                self.configFname = arg[len('--config='):]
-                print "Use config", self.configFname
-            else:
-                other.append(arg)
-        self.argv = other
-        return other
-
-    def init(self, short=False):
-        self._loadConfig()
-        self.setUpPassword()
-
-        if not self._testConnection():
-            return (False,"Connection test failed")
-
-        # ensure all the server are on the same page
-        ret,reason = self._ensureServerListStates(self.clusterTestSleepTime)
-
-        if ret == False:
-            return (ret,reason)
-
-        ret,reason = self._fetchClusterTestServerUUIDList()
-
-        if ret == False:
-            return (ret,reason)
-
-        if not short:
-            ret,reason = self._callAllGetters()
-            if ret == False:
-                return (ret,reason)
-
-        # do the rollback here
-        self.unittestRollback = UnitTestRollback()
-        return (True,"")
-
-clusterTest = ClusterTest()
-
-####################################################################################################
-## Some more generators, a bit complex than classes from generator.py
-####################################################################################################
-
-class CameraDataGenerator(BasicGenerator):
-    _template = """[
-        {
-            "audioEnabled": %s,
-            "controlEnabled": %s,
-            "dewarpingParams": "",
-            "groupId": "",
-            "groupName": "",
-            "id": "%s",
-            "mac": "%s",
-            "manuallyAdded": false,
-            "maxArchiveDays": 0,
-            "minArchiveDays": 0,
-            "model": "%s",
-            "motionMask": "",
-            "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
-            "scheduleEnabled": false,
-            "scheduleTasks": [ ],
-            "secondaryStreamQuality": "SSQualityLow",
-            "status": "Unauthorized",
-            "statusFlags": "CSF_NoFlags",
-            "typeId": "{7d2af20d-04f2-149f-ef37-ad585281e3b7}",
-            "url": "%s",
-            "vendor": "%s"
-        }
-    ]"""
-
-    def _generateCameraId(self,mac):
-        return self.generateUUIdFromMd5(mac)
-
-    def _getServerUUID(self,addr):
-        if addr == None:
-            return "{2571646a-7313-4324-8308-c3523825e639}"
-        i = 0
-
-        for s in  clusterTest.clusterTestServerList:
-            if addr == s:
-                break
-            else:
-                i = i + 1
-
-        return clusterTest.clusterTestServerUUIDList[i][0]
-
-    def generateCameraData(self,number,mediaServer):
-        ret = []
-        for i in xrange(number):
-            mac = self.generateMac()
-            id = self._generateCameraId(mac)
-            name_and_model = self.generateCameraName()
-            ret.append((self._template % (self.generateTrueFalse(),
-                    self.generateTrueFalse(),
-                    id,
-                    mac,
-                    name_and_model,
-                    name_and_model,
-                    self._getServerUUID(mediaServer),
-                    mac,
-                    self.generateIpV4(),
-                    self.generateRandomString(4)),id))
-
-        return ret
-
-    def generateUpdateData(self,id,mediaServer):
-        mac = self.generateMac()
-        name_and_model = self.generateCameraName()
-        return (self._template % (self.generateTrueFalse(),
-                self.generateTrueFalse(),
-                id,
-                mac,
-                name_and_model,
-                name_and_model,
-                self._getServerUUID(mediaServer),
-                mac,
-                self.generateIpV4(),
-                self.generateRandomString(4)),id)
-
-
-# This class serves as an in-memory data base.  Before doing the confliction
-# test,
-# we begining by creating some sort of resources and then start doing the
-# confliction
-# test.  These data is maintained in a separate dictionary and once everything
-# is done
-# it will be rollback.
-class ConflictionDataGenerator(BasicGenerator):
-    conflictCameraList = []
-    conflictUserList = []
-    conflictMediaServerList = []
-    _lock = threading.Lock()
-    _listLock = threading.Lock()
-
-    def _prepareData(self,dataList,methodName,l):
-        worker = ClusterWorker(8,len(clusterTest.clusterTestServerList) * len(dataList))
-
-        for d in dataList:
-            for s in clusterTest.clusterTestServerList:
-
-                def task(lock,list,list_lock,post_data,server):
-
-                    req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
-                      data=post_data[0], headers={'Content-Type': 'application/json'})
-
-                    response = None
-
-                    with lock:
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        response.close()
-                        print "Failed to connect to http://%s/ec2/%s" % (server,methodName)
-                    else:
-                        clusterTest.unittestRollback.addOperations(methodName,server,post_data[1])
-                        with list_lock:
-                            list.append(post_data[0])
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,d,s,))
-
-        worker.join()
-        return True
-
-    def _prepareCameraData(self,op,num,methodName,l):
-        worker = ClusterWorker(8,len(clusterTest.clusterTestServerList) * num)
-
-        for _ in xrange(num):
-            for s in clusterTest.clusterTestServerList:
-                d = op(1,s)[0]
-
-                def task(lock,list,list_lock,post_data,server):
-                    req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
-                          data=post_data[0], headers={'Content-Type': 'application/json'})
-
-                    response = None
-
-                    with lock:
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        # failed
-                        response.close()
-                        print "Failed to connect to http://%s/ec2/%s" % (server,methodName)
-                    else:
-                        clusterTest.unittestRollback.addOperations(methodName,server,post_data[1])
-                        with list_lock:
-                            list.append(d[0])
-
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,d,s,))
-
-        worker.join()
-        return True
-
-    def prepare(self,num):
-        return \
-            self._prepareCameraData(CameraDataGenerator().generateCameraData,num,"saveCameras",self.conflictCameraList) and \
-            self._prepareData(UserDataGenerator().generateUserData(num),"saveUser",self.conflictUserList) and \
-            self._prepareData(MediaServerGenerator().generateMediaServerData(num),"saveMediaServer",self.conflictMediaServerList)
-
-
-class ResourceDataGenerator(BasicGenerator):
-
-    _ec2ResourceGetter = ["getCameras",
-        "getMediaServersEx",
-        "getUsers"]
-
-    _resourceParEntryTemplate = """
-        {
-            "name":"%s",
-            "resourceId":"%s",
-            "value":"%s"
-        }
+testMaster = getTestMaster()
+
+class LegacyFuncTestBase(unittest.TestCase):
+    """Base class for test classes, called by unittest.main().
+    Legacy from the first generation of functests.
     """
-
-    _resourceRemoveTemplate = '{ "id":"%s" }'
-
-    # this list contains all the existed resource that I can find.
-    # The method for finding each resource is based on the API in
-    # the list _ec2ResourceGetter.  What's more , the parentId, typeId
-    # and resource name will be recorded (Can be None).
-    _existedResourceList = []
-
-    # this function is used to retrieve the resource list on the
-    # server side.  We just retrieve the resource list from the
-    # very first server since each server has exact same resource
-    def _retrieveResourceUUIDList(self,num):
-        gen = ConflictionDataGenerator()
-        if not gen.prepare(num):
-            return False
-
-        # cameras
-        for entry in gen.conflictCameraList:
-            obj = json.loads(entry)[0]
-            self._existedResourceList.append((obj["id"],obj["parentId"],obj["typeId"]))
-        # users
-        for entry in gen.conflictUserList:
-            obj = json.loads(entry)
-            self._existedResourceList.append((obj["id"],obj["parentId"],obj["typeId"]))
-        # media server
-        for entry in gen.conflictMediaServerList:
-            obj = json.loads(entry)
-            self._existedResourceList.append((obj["id"],obj["parentId"],obj["typeId"]))
-
-        return True
-
-    def __init__(self,num):
-        ret = self._retrieveResourceUUIDList(num)
-        if ret == False:
-            raise Exception("cannot retrieve resources list on server side")
-
-    def _generateKeyValue(self,uuid):
-        key_len = random.randint(4,12)
-        val_len = random.randint(24,512)
-        return self._resourceParEntryTemplate % (self.generateRandomString(key_len),
-            uuid,
-            self.generateRandomString(val_len))
-
-    def _getRandomResourceUUID(self):
-        idx = random.randint(0,len(self._existedResourceList) - 1)
-        return self._existedResourceList[idx][0]
-
-    def _generateOneResourceParams(self):
-        uuid = self._getRandomResourceUUID()
-        kv_list = ["["]
-        num = random.randint(2,20)
-        for i in xrange(num - 1):
-            num = random.randint(2,20)
-            kv_list.append(self._generateKeyValue(uuid))
-            kv_list.append(",")
-
-        kv_list.append(self._generateKeyValue(uuid))
-        kv_list.append("]")
-
-        return ''.join(kv_list)
-
-    def generateResourceParams(self,number):
-        ret = []
-        for i in xrange(number):
-            ret.append(self._generateOneResourceParams())
-        return ret
-
-    def generateRemoveResource(self,number):
-        ret = []
-        for i in xrange(number):
-            ret.append(self._resourceRemoveTemplate % (self._getRandomResourceUUID()))
-        return ret
-
-# This class is used to generate data for simulating resource confliction
-
-# Currently we don't have general method to _UPDATE_ an existed record in db,
-# so I implement it through creation routine since this routine is the only way
-# to modify the existed record now.
-class CameraConflictionDataGenerator(BasicGenerator):
-    #(id,mac,model,parentId,typeId,url,vendor)
-    _existedCameraList = []
-    # For simplicity , we just modify the name of this camera
-    _updateTemplate = \
-    """
-        [{
-            "groupId": "",
-            "groupName": "",
-            "id": "%s",
-            "mac": "%s",
-            "manuallyAdded": false,
-            "maxArchiveDays": 0,
-            "minArchiveDays": 0,
-            "model": "%s",
-            "motionMask": "",
-            "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
-            "scheduleEnabled": false,
-            "scheduleTasks": [ ],
-            "secondaryStreamQuality": "SSQualityLow",
-            "status": "Unauthorized",
-            "statusFlags": "CSF_NoFlags",
-            "typeId": "%s",
-            "url": "%s",
-            "vendor": "%s"
-        }]
-    """
-
-    _removeTemplate = '{ "id":"%s" }'
-
-    def _fetchExistedCameras(self,dataGen):
-        for entry in dataGen.conflictCameraList:
-            obj = json.loads(entry)[0]
-            self._existedCameraList.append((obj["id"],obj["mac"],obj["model"],obj["parentId"],
-                 obj["typeId"],obj["url"],obj["vendor"]))
-        return True
-
-    def __init__(self,dataGen):
-        if self._fetchExistedCameras(dataGen) == False:
-            raise Exception("Cannot get existed camera list")
-
-    def _generateModify(self,camera):
-        name = self.generateRandomString(random.randint(8,12))
-        return self._updateTemplate % (camera[0],
-            camera[1],
-            camera[2],
-            name,
-            camera[3],
-            camera[1],
-            camera[4],
-            camera[5],
-            camera[6])
-
-    def _generateRemove(self,camera):
-        return self._removeTemplate % (camera[0])
-
-    def generateData(self):
-        camera = self._existedCameraList[random.randint(0,len(self._existedCameraList) - 1)]
-
-        return (self._generateModify(camera),self._generateRemove(camera))
-
-
-class UserConflictionDataGenerator(BasicGenerator):
-    _updateTemplate = """
-    {
-        "digest": "%s",
-        "email": "%s",
-        "hash": "%s",
-        "id": "%s",
-        "isAdmin": false,
-        "name": "%s",
-        "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "permissions": "%s",
-        "typeId": "{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}",
-        "url": ""
-    }
-    """
-
-    _removeTemplate = '{ "id":"%s" }'
-
-    _existedUserList = []
-
-    def _fetchExistedUser(self,dataGen):
-        for entry in dataGen.conflictUserList:
-            obj = json.loads(entry)
-            if obj["isAdmin"] == True:
-                continue # skip admin
-            self._existedUserList.append((obj["digest"],obj["email"],obj["hash"],
-                                          obj["id"],obj["permissions"]))
-        return True
-
-    def __init__(self,dataGen):
-        if self._fetchExistedUser(dataGen) == False:
-            raise Exception("Cannot get existed user list")
-
-    def _generateModify(self,user):
-        name = self.generateRandomString(random.randint(8,20))
-
-        return self._updateTemplate % (user[0],
-            user[1],
-            user[2],
-            user[3],
-            name,
-            user[4])
-
-    def _generateRemove(self,user):
-        return self._removeTemplate % (user[3])
-
-
-    def generateData(self):
-        user = self._existedUserList[random.randint(0,len(self._existedUserList) - 1)]
-
-        return(self._generateModify(user),self._generateRemove(user))
-
-
-class MediaServerConflictionDataGenerator(BasicGenerator):
-    _updateTemplate = """
-    {
-        "apiUrl": "%s",
-        "authKey": "%s",
-        "flags": "SF_HasPublicIP",
-        "id": "%s",
-        "name": "%s",
-        "networkAddresses": "192.168.0.1;10.0.2.141;192.168.88.1;95.31.23.214",
-        "panicMode": "PM_None",
-        "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "systemInfo": "windows x64 win78",
-        "systemName": "%s",
-        "typeId": "{be5d1ee0-b92c-3b34-86d9-bca2dab7826f}",
-        "url": "%s",
-        "version": "2.3.0.0"
-    }
-    """
-
-    _removeTemplate = '{ "id":"%s" }'
-
-    _existedMediaServerList = []
-
-    def _fetchExistedMediaServer(self,dataGen):
-        for server in dataGen.conflictMediaServerList:
-            obj = json.loads(server)
-            self._existedMediaServerList.append((obj["apiUrl"],obj["authKey"],obj["id"],
-                                                 obj["systemName"],obj["url"]))
-
-        return True
-
-
-    def __init__(self,dataGen):
-        if self._fetchExistedMediaServer(dataGen) == False:
-            raise Exception("Cannot fetch media server list")
-
-
-    def _generateModify(self,server):
-        name = self.generateRandomString(random.randint(8,20))
-
-        return self._updateTemplate % (server[0],server[1],server[2],name,
-            server[3],server[4])
-
-    def _generateRemove(self,server):
-        return self._removeTemplate % (server[2])
-
-    def generateData(self):
-        server = self._existedMediaServerList[random.randint(0,len(self._existedMediaServerList) - 1)]
-        return (self._generateModify(server),self._generateRemove(server))
-
-
-class CameraUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
-        [
-            {
-                "audioEnabled": %s,
-                "cameraID": "%s",
-                "cameraName": "%s",
-                "controlEnabled": %s,
-                "dewarpingParams": "%s",
-                "maxArchiveDays": -30,
-                "minArchiveDays": -1,
-                "motionMask": "5,0,0,44,32:5,0,0,44,32:5,0,0,44,32:5,0,0,44,32",
-                "motionType": "MT_SoftwareGrid",
-                "preferedServerId": "%s",
-                "scheduleEnabled": %s,
-                "scheduleTasks": [ ],
-                "secondaryStreamQuality": "SSQualityMedium"
-            }
-        ]
-        """
-
-    _dewarpingTemplate = "{ \\\"enabled\\\":%s,\\\"fovRot\\\":%s,\
-            \\\"hStretch\\\":%s,\\\"radius\\\":%s, \\\"viewMode\\\":\\\"VerticalDown\\\",\
-            \\\"xCenter\\\":%s,\\\"yCenter\\\":%s}"
-
-    _existedCameraUUIDList = []
-
-    _lock = threading.Lock()
-    _listLock = threading.Lock()
-
-    def __init__(self,prepareNum):
-        if self._fetchExistedCameraUUIDList(prepareNum) == False:
-            raise Exception("Cannot initialize camera list attribute test data")
-
-    def _prepareData(self,op,num,methodName,l):
-        worker = ClusterWorker(8,num * len(clusterTest.clusterTestServerList))
-
-        for _ in xrange(num):
-            for s in clusterTest.clusterTestServerList:
-
-                def task(lock,list,listLock,server,mname,oper):
-
-                    with lock:
-                        d = oper(1,s)[0]
-                        req = urllib2.Request("http://%s/ec2/%s" % (server,mname),
-                                data=d[0], headers={'Content-Type': 'application/json'})
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        print "Failed to connect http://%s/ec2/%s" % (server,mname)
-                        return
-                    else:
-                        clusterTest.unittestRollback.addOperations(mname,server,d[1])
-                        with listLock:
-                            list.append(d[0])
-
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,s,methodName,op,))
-
-        worker.join()
-        return True
-
-    def _fetchExistedCameraUUIDList(self,num):
-        # We could not use existed camera list since if we do so we may break
-        # the existed
-        # database on the server side.  What we gonna do is just create new
-        # fake cameras and
-        # then do the test by so.
-        json_list = []
-
-        if not self._prepareData(CameraDataGenerator().generateCameraData,num,"saveCameras",json_list):
-            return False
-
-        for entry in json_list:
-            obj = json.loads(entry)[0]
-            self._existedCameraUUIDList.append((obj["id"],obj["name"]))
-
-        return True
-
-    def _getRandomServerId(self):
-        idx = random.randint(0,len(clusterTest.clusterTestServerUUIDList) - 1)
-        return clusterTest.clusterTestServerUUIDList[idx][0]
-
-    def _generateNormalizeRange(self):
-        return str(random.random())
-
-    def _generateDewarpingPar(self):
-        return self._dewarpingTemplate % (self.generateTrueFalse(),
-            self._generateNormalizeRange(),
-            self._generateNormalizeRange(),
-            self._generateNormalizeRange(),
-            self._generateNormalizeRange(),
-            self._generateNormalizeRange())
-
-    def _getRandomCameraUUIDAndName(self):
-        return self._existedCameraUUIDList[random.randint(0,len(self._existedCameraUUIDList) - 1)]
-
-    def generateCameraUserAttribute(self,number):
-        ret = []
-
-        for i in xrange(number):
-            uuid , name = self._getRandomCameraUUIDAndName()
-            ret.append(self._template % (self.generateTrueFalse(),
-                    uuid,name,
-                    self.generateTrueFalse(),
-                    self._generateDewarpingPar(),
-                    self._getRandomServerId(),
-                    self.generateTrueFalse()))
-
-        return ret
-
-
-class ServerUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
-    [
-        {
-            "allowAutoRedundancy": %s,
-            "maxCameras": %s,
-            "serverID": "%s",
-            "serverName": "%s"
-        }
-    ]
-    """
-
-    _existedFakeServerList = []
-
-    _lock = threading.Lock()
-    _listLock = threading.Lock()
-
-    def _prepareData(self,dataList,methodName,l):
-        worker = ClusterWorker(8,len(dataList) * len(clusterTest.clusterTestServerList))
-
-        for d in dataList:
-            for s in clusterTest.clusterTestServerList:
-
-                def task(lock,list,listLock,post_data,mname,server):
-                    req = urllib2.Request("http://%s/ec2/%s" % (server,mname),
-                        data=post_data[0], headers={'Content-Type': 'application/json'})
-
-                    with lock:
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        print "Failed to connect http://%s/ec2/%s" % (server,mname)
-                        return
-                    else:
-                        clusterTest.unittestRollback.addOperations(methodName,server,post_data[1])
-                        with listLock:
-                            list.append(d[0])
-
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,d,methodName,s,))
-
-        worker.join()
-        return True
-
-
-    def _generateFakeServer(self,num):
-        json_list = []
-
-        if not self._prepareData(MediaServerGenerator().generateMediaServerData(num),"saveMediaServer",json_list):
-            return False
-
-        for entry in json_list:
-            obj = json.loads(entry)
-            self._existedFakeServerList.append((obj["id"],obj["name"]))
-
-        return True
-
-    def __init__(self,num):
-        if not self._generateFakeServer(num) :
-            raise Exception("Cannot initialize server list attribute test data")
-
-    def _getRandomServer(self):
-        idx = random.randint(0,len(self._existedFakeServerList) - 1)
-        return self._existedFakeServerList[idx]
-
-    def generateServerUserAttributesList(self,number):
-        ret = []
-        for i in xrange(number):
-            uuid,name = self._getRandomServer()
-            ret.append(self._template % (self.generateTrueFalse(),
-                    random.randint(0,200),
-                    uuid,name))
-        return ret
-
-####################################################################################################
-
-class ClusterTestBase(unittest.TestCase):
-    _Lock = threading.Lock()
+    _Lock = threading.Lock()  # Note: this lock is commin for all ancestor classes!
 
     def _generateModifySeq(self):
         return None
@@ -1216,19 +53,19 @@ class ClusterTestBase(unittest.TestCase):
     def _getObserverName(self):
         pass
 
-    def _defaultModifySeq(self,fakeData):
+    def _defaultModifySeq(self, fakeData):
         ret = []
         for f in fakeData:
             # pick up a server randomly
-            ret.append((f,clusterTest.clusterTestServerList[random.randint(0,len(clusterTest.clusterTestServerList) - 1)]))
+            ret.append((f, testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]))
         return ret
 
     def _defaultCreateSeq(self,fakeData):
         ret = []
         for f in fakeData:
-            serverName = clusterTest.clusterTestServerList[random.randint(0,len(clusterTest.clusterTestServerList) - 1)]
+            serverName = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
             # add rollback cluster operations
-            clusterTest.unittestRollback.addOperations(self._getMethodName(),serverName,f[1])
+            testMaster.unittestRollback.addOperations(self._getMethodName(), serverName, f[1])
             ret.append((f[0],serverName))
 
         return ret
@@ -1241,7 +78,6 @@ class ClusterTestBase(unittest.TestCase):
     def _sendRequest(self,methodName,d,server):
         req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
             data=d, headers={'Content-Type': 'application/json'})
-        response = None
 
         with self._Lock:
             print "Connection to http://%s/ec2/%s" % (server,methodName)
@@ -1250,9 +86,7 @@ class ClusterTestBase(unittest.TestCase):
         # Do a sligtly graceful way to dump the sample of failure
         if response.getcode() != 200:
             self._dumpFailedRequest(d,methodName)
-
-        self.assertTrue(response.getcode() == 200,
-            "%s failed with statusCode %d" % (methodName,response.getcode()))
+            self.fail("%s failed with statusCode %d" % (methodName, response. getcode()))
 
         response.close()
 
@@ -1301,9 +135,9 @@ class ClusterTestBase(unittest.TestCase):
         if postDataList == None:
             return
 
-        workerQueue = ClusterWorker(clusterTest.threadNumber,len(postDataList))
+        workerQueue = ClusterWorker(testMaster.threadNumber, len(postDataList))
 
-        print "===================================\n"
+        print "\n===================================\n"
         print "Test:%s start!\n" % (self._getMethodName())
 
         for test in postDataList:
@@ -1311,15 +145,15 @@ class ClusterTestBase(unittest.TestCase):
 
         workerQueue.join()
 
-        time.sleep(clusterTest.clusterTestSleepTime)
+        time.sleep(testMaster.clusterTestSleepTime)
         observer = self._getObserverName()
 
         if isinstance(observer,(list)):
             for m in observer:
-                ret,reason = clusterTest.checkMethodStatusConsistent(m)
+                ret,reason = testMaster.checkMethodStatusConsistent(m)
                 self.assertTrue(ret,reason)
         else:
-            ret , reason = clusterTest.checkMethodStatusConsistent(observer)
+            ret , reason = testMaster.checkMethodStatusConsistent(observer)
             self.assertTrue(ret,reason)
 
         #DEBUG
@@ -1329,24 +163,24 @@ class ClusterTestBase(unittest.TestCase):
         print "===================================\n"
 
 
-class CameraTest(ClusterTestBase):
+class CameraTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = CameraDataGenerator()
 
 
     def _generateModifySeq(self):
         ret = []
         for _ in xrange(self._testCase):
-            s = clusterTest.clusterTestServerList[random.randint(0,len(clusterTest.clusterTestServerList) - 1)]
+            s = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
             data = self._gen.generateCameraData(1,s)[0]
-            clusterTest.unittestRollback.addOperations(self._getMethodName(),s,data[1])
+            testMaster.unittestRollback.addOperations(self._getMethodName(), s, data[1])
             ret.append((data[0],s))
         return ret
 
@@ -1357,15 +191,15 @@ class CameraTest(ClusterTestBase):
         return "getCameras?format=json"
 
 
-class UserTest(ClusterTestBase):
+class UserTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = UserDataGenerator()
 
     def _generateModifySeq(self):
@@ -1378,15 +212,15 @@ class UserTest(ClusterTestBase):
         return "getUsers?format=json"
 
 
-class MediaServerTest(ClusterTestBase):
+class MediaServerTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = MediaServerGenerator()
 
     def _generateModifySeq(self):
@@ -1399,15 +233,15 @@ class MediaServerTest(ClusterTestBase):
         return "getMediaServersEx?format=json"
 
 
-class ResourceParaTest(ClusterTestBase):
+class ResourceParaTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = ResourceDataGenerator(self._testCase * 2)
 
     def _generateModifySeq(self):
@@ -1420,15 +254,15 @@ class ResourceParaTest(ClusterTestBase):
         return "getResourceParams?format=json"
 
 
-class ResourceRemoveTest(ClusterTestBase):
+class ResourceRemoveTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = ResourceDataGenerator(self._testCase * 2)
 
     def _generateModifySeq(self):
@@ -1443,15 +277,15 @@ class ResourceRemoveTest(ClusterTestBase):
                 "getCameras?format=json"]
 
 
-class CameraUserAttributeListTest(ClusterTestBase):
+class CameraUserAttributeListTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = CameraUserAttributesListDataGenerator(self._testCase * 2)
 
     def _generateModifySeq(self):
@@ -1464,15 +298,15 @@ class CameraUserAttributeListTest(ClusterTestBase):
         return "getCameraUserAttributes"
 
 
-class ServerUserAttributesListDataTest(ClusterTestBase):
+class ServerUserAttributesListDataTest(LegacyFuncTestBase):
     _gen = None
-    _testCase = clusterTest.testCaseSize
+    _testCase = testMaster.testCaseSize
 
     def setTestCase(self,num):
         self._testCase = num
 
     def setUp(self):
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._gen = ServerUserAttributesListDataGenerator(self._testCase * 2)
 
     def _generateModifySeq(self):
@@ -1486,8 +320,8 @@ class ServerUserAttributesListDataTest(ClusterTestBase):
 
 # The following test will issue the modify and remove on different servers to
 # trigger confliction resolving.
-class ResourceConflictionTest(ClusterTestBase):
-    _testCase = clusterTest.testCaseSize
+class ResourceConflictionTest(LegacyFuncTestBase):
+    _testCase = testMaster.testCaseSize
     _conflictList = []
 
     def setTestCase(self,num):
@@ -1497,23 +331,23 @@ class ResourceConflictionTest(ClusterTestBase):
         dataGen = ConflictionDataGenerator()
 
         print "Start confliction data preparation, this will generate Cameras/Users/MediaServers"
-        dataGen.prepare(clusterTest.testCaseSize)
+        dataGen.prepare(testMaster.testCaseSize)
         print "Confilication data generation done"
 
-        self._testCase = clusterTest.testCaseSize
+        self._testCase = testMaster.testCaseSize
         self._conflictList = [("removeResource","saveMediaServer",MediaServerConflictionDataGenerator(dataGen)),
             ("removeResource","saveUser",UserConflictionDataGenerator(dataGen)),
             ("removeResource","saveCameras",CameraConflictionDataGenerator(dataGen))]
 
     def _generateRandomServerPair(self):
         # generate first server here
-        s1 = clusterTest.clusterTestServerList[random.randint(0,len(clusterTest.clusterTestServerList) - 1)]
+        s1 = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
         s2 = None
-        if len(clusterTest.clusterTestServerList) == 1:
+        if len(testMaster.clusterTestServerList) == 1:
             s2 = s1
         else:
             while True:
-                s2 = clusterTest.clusterTestServerList[random.randint(0,len(clusterTest.clusterTestServerList) - 1)]
+                s2 = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
                 if s2 != s1:
                     break
         return (s1,s2)
@@ -1526,16 +360,16 @@ class ResourceConflictionTest(ClusterTestBase):
             "getUsers?format=json",
             "getCameras?format=json"]
 
-        time.sleep(clusterTest.clusterTestSleepTime)
+        time.sleep(testMaster.clusterTestSleepTime)
         for api in  apiList:
-            ret , reason = clusterTest.checkMethodStatusConsistent(api)
+            ret , reason = testMaster.checkMethodStatusConsistent(api)
             self.assertTrue(ret,reason)
 
 
     # Overwrite the test function since the base method doesn't work here
 
     def test(self):
-        workerQueue = ClusterWorker(clusterTest.threadNumber,self._testCase * 2)
+        workerQueue = ClusterWorker(testMaster.threadNumber, self._testCase * 2)
 
         print "===================================\n"
         print "Test:ResourceConfliction start!\n"
@@ -1569,18 +403,17 @@ class MergeTestBase:
     _mergeTestTimeout = 1
 
     def __init__(self):
-        self._mergeTestTimeout = clusterTest.getConfig().getint("General","mergeTestTimeout")
+        self._mergeTestTimeout = testMaster.getConfig().getint("General", "mergeTestTimeout")
 
     # This function is used to generate unique system name but random.  It
     # will gaurantee that the generated name is UNIQUE inside of the system
     def _generateRandomSystemName(self):
-        gen = BasicGenerator()
         ret = []
         s = set()
-        for i in xrange(len(clusterTest.clusterTestServerList)):
+        for i in xrange(len(testMaster.clusterTestServerList)):
             length = random.randint(16,30)
             while True:
-                name = gen.generateRandomString(length)
+                name = BasicGenerator.generateRandomString(length)
                 if name in s or name == self._mergeTestSystemName:
                     continue
                 else:
@@ -1592,7 +425,7 @@ class MergeTestBase:
     # This function is used to store the old system name of each server in
     # the clusters
     def _storeClusterOldSystemName(self):
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             print "Connection to http://%s/ec2/testConnection" % (s)
             response = urllib2.urlopen("http://%s/ec2/testConnection" % (s))
             if response.getcode() != 200:
@@ -1617,16 +450,16 @@ class MergeTestBase:
         # Store the old system name here
         self._storeClusterOldSystemName()
         testList = self._generateRandomSystemName()
-        for i in xrange(len(clusterTest.clusterTestServerList)):
-            self._setSystemName(clusterTest.clusterTestServerList[i],testList[i])
+        for i in xrange(len(testMaster.clusterTestServerList)):
+            self._setSystemName(testMaster.clusterTestServerList[i], testList[i])
 
     def _setClusterToMerge(self):
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             self._setSystemName(s,self._mergeTestSystemName)
 
     def _rollbackSystemName(self):
-        for i in xrange(len(clusterTest.clusterTestServerList)):
-            self._setSystemName(clusterTest.clusterTestServerList[i],self._oldSystemName[i])
+        for i in xrange(len(testMaster.clusterTestServerList)):
+            self._setSystemName(testMaster.clusterTestServerList[i], self._oldSystemName[i])
 
 
 # This class represents a single server with a UNIQUE system name.
@@ -1694,7 +527,7 @@ class PrepareServerStatus(BasicGenerator):
                 ret,reason = self._sendRequest(addr,api[0],data[0])
                 if ret == False:
                     return (ret,reason)
-                clusterTest.unittestRollback.addOperations(api[0],addr,data[1])
+                testMaster.unittestRollback.addOperations(api[0], addr, data[1])
 
         return (True,"")
 
@@ -1706,7 +539,6 @@ class PrepareServerStatus(BasicGenerator):
 
 # This class is used to control the whole merge test
 class MergeTest_Resource(MergeTestBase):
-    _gen = BasicGenerator()
     _lock = threading.Lock()
 
     def _prolog(self):
@@ -1715,7 +547,7 @@ class MergeTest_Resource(MergeTestBase):
         oldSystemNameAddr = None
 
         # Testing whether all the cluster server has identical system name
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             print "Connection to http://%s/ec2/testConnection" % (s)
             response = urllib2.urlopen("http://%s/ec2/testConnection" % (s))
             if response.getcode() != 200:
@@ -1753,9 +585,9 @@ class MergeTest_Resource(MergeTestBase):
         self._setClusterSystemRandom()
 
         # 2.  Start to generate server status and data
-        worker = ClusterWorker(clusterTest.threadNumber,len(clusterTest.clusterTestServerList))
+        worker = ClusterWorker(testMaster.threadNumber, len(testMaster.clusterTestServerList))
 
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             worker.enqueue(PrepareServerStatus(self).main,(s,))
 
         worker.join()
@@ -1770,7 +602,7 @@ class MergeTest_Resource(MergeTestBase):
         time.sleep(self._mergeTestTimeout)
         # Do the status checking of _ALL_ API
         for api in PrepareServerStatus.getterAPI:
-            ret , reason = clusterTest.checkMethodStatusConsistent("%s?format=json" % (api))
+            ret , reason = testMaster.checkMethodStatusConsistent("%s?format=json" % (api))
             if ret == False:
                 return (ret,reason)
         print "Merge test phase2 done"
@@ -1812,17 +644,16 @@ class MergeTest_AdminPassword(MergeTestBase):
 
     def __init__(self):
         # load the configuration file for username and oldClusterPassword
-        config_parser = clusterTest.getConfig()
+        config_parser = testMaster.getConfig()
         self._oldClusterPassword = config_parser.get("General","password")
         self._username = config_parser.get("General","username")
 
     def _generateUniquePassword(self):
         ret = []
         s = set()
-        gen = BasicGenerator()
-        for server in clusterTest.clusterTestServerList:
+        for server in testMaster.clusterTestServerList:
             # Try to generate a unique password
-            pwd = gen.generateRandomString(20)
+            pwd = BasicGenerator.generateRandomString(20)
             if pwd in s:
                 continue
             else:
@@ -1842,7 +673,7 @@ class MergeTest_AdminPassword(MergeTestBase):
 
     def _setUpClusterAuthentication(self, password):
         passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             ManagerAddPassword(passman, s, self._username, password)
         urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
 
@@ -1857,7 +688,7 @@ class MergeTest_AdminPassword(MergeTestBase):
         print "Password:%s that initially modified on server:%s can log on to server:%s in new cluster"%(pwd,old_server,login_server)
         print "Notes,the above server can be the same one, however since this test is after merge, it still makes sense"
         print "Now test whether it works on the cluster"
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             if s == login_server:
                 continue
             else:
@@ -1881,7 +712,7 @@ class MergeTest_AdminPassword(MergeTestBase):
             pwd = self._newPasswordList[entry]
             # Set Up the Authencation here
             self._setUpClusterAuthentication(pwd)
-            for server in clusterTest.clusterTestServerList:
+            for server in testMaster.clusterTestServerList:
                 response = None
                 try:
                     response = urllib2.urlopen("http://%s/ec2/testConnection"%(server))
@@ -1911,7 +742,7 @@ class MergeTest_AdminPassword(MergeTestBase):
     def _checkAllServerStatus(self):
         self._setUpClusterAuthentication(self._clusterSharedPassword)
         # Now we need to set up the check
-        ret,reason = clusterTest.checkMethodStatusConsistent("getMediaServersEx?format=json")
+        ret,reason = testMaster.checkMethodStatusConsistent("getMediaServersEx?format=json")
         if not ret:
             print reason
             return False
@@ -1936,11 +767,11 @@ class MergeTest_AdminPassword(MergeTestBase):
     def _checkAllOnline(self):
         uidSet = set()
         # Set up the UID set for each registered server
-        for uid in clusterTest.clusterTestServerUUIDList:
+        for uid in testMaster.clusterTestServerUUIDList:
             uidSet.add(uid[0])
 
         # For each server test whether they work or not
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             print "Connection to http://%s/ec2/getMediaServersEx?format=json"%(s)
             response = urllib2.urlopen("http://%s/ec2/getMediaServersEx?format=json"%(s))
             if response.getcode() != 200:
@@ -1952,7 +783,7 @@ class MergeTest_AdminPassword(MergeTestBase):
         return True
 
     def _fetchAdmin(self):
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             response = urllib2.urlopen("http://%s/ec2/getUsers"%(s))
             obj = SafeJsonLoads(response.read(), s, 'getUsers')
             if obj is None:
@@ -2023,7 +854,7 @@ class MergeTest_AdminPassword(MergeTestBase):
     def _rollback(self):
         # rollback the password to the old states
         self._rollbackPartialPasswordChange(
-            [(s,self._oldClusterPassword) for s in clusterTest.clusterTestServerList])
+            [(s,self._oldClusterPassword) for s in testMaster.clusterTestServerList])
 
         # rollback the system name
         self._rollbackSystemName()
@@ -2036,12 +867,12 @@ class MergeTest_AdminPassword(MergeTestBase):
 
         for server in self._newPasswordList:
             pwd = self._newPasswordList[server]
-            authList = [(s,pwd) for s in clusterTest.clusterTestServerList]
+            authList = [(s,pwd) for s in testMaster.clusterTestServerList]
             self._setUpNewAuthentication(authList)
 
             # Now try to login on to the server and then set back the admin
             check = False
-            for ser in clusterTest.clusterTestServerList:
+            for ser in testMaster.clusterTestServerList:
                 if ser in addrSet:
                     continue
                 check = True
@@ -2053,12 +884,12 @@ class MergeTest_AdminPassword(MergeTestBase):
             if not check:
                 return True
 
-        if len(addrSet) != len(clusterTest.clusterTestServerList):
+        if len(addrSet) != len(testMaster.clusterTestServerList):
             print "There're some server's admin password I cannot prob and rollback"
             print "Since it is a failover rollback,I cannot guarantee that I can rollback the whole cluster"
             print "There're possible bugs in the cluster that make the automatic rollback impossible"
             print "The following server has _UNKNOWN_ password now"
-            for ser in clusterTest.clusterTestServerList:
+            for ser in testMaster.clusterTestServerList:
                 if ser not in addrSet:
                     print "The server:%s has _UNKNOWN_ password for admin"%(ser)
             return False
@@ -2121,1049 +952,31 @@ class MergeTest_AdminPassword(MergeTestBase):
         print "==========================================="
         return True
 
-class MergeTest:
-    def test(self):
-        if not MergeTest_Resource().test():
-            return False
-        # The following merge test ALWAYS fail and I don't know it is my problem or not
-        # Current it is disabled and you could use a seperate command line to run it
-        #MergeTest_AdminPassword().test()
 
-        return True
+class MergeTest(object):
 
-# ===================================
-# RTSP test
-# ===================================
-class RtspStreamURLGenerator:
-    _streamURLTemplate = "rtsp://%s:%d/%s"
-    _server = None
-    _port = None
-    _mac = None
+    def __init__(self, needCleanUp=False):
+        self._CleanUp = needCleanUp
 
-    def __init__(self,server,port,mac):
-        self._server = server
-        self._port = port
-        self._mac = mac
-
-    def generateURL(self):
-        return self._streamURLTemplate % (self._server,self._port,self._mac)
-
-
-class RtspArchiveURLGenerator:
-    _archiveURLTemplate = "rtsp://%s:%d/%s?pos=%d"
-    _diffMax = 5
-    _diffMin = 1
-    _server = None
-    _port = None
-    _mac = None
-
-    def __init__(self,max,min,server,port,mac):
-        self._diffMax = max
-        self._diffMin = min
-        self._server = server
-        self._port = port
-        self._mac = mac
-
-    def _generateUTC(self):
-        return int((time.time() - random.randint(self._diffMin,self._diffMax) * 60) * 1e6)
-
-    def generateURL(self):
-        return self._archiveURLTemplate % (self._server, self._port, self._mac, self._generateUTC())
-
-
-# RTSP global backoff timer, this is used to solve too many connection to server
-# which makes the server think it is suffering DOS attack
-class RtspBackOffTimer:
-    _timerLock = threading.Lock()
-    _globalTimerTable= dict()
-
-    MAX_TIMEOUT = 4.0
-    MIN_TIMEOUT = 0.01
-
-    def increase(self,url):
-        with self._timerLock:
-            if url in self._globalTimerTable:
-                self._globalTimerTable[url] *= 2.0
-                if self._globalTimerTable[url] >= self.MAX_TIMEOUT:
-                    self._globalTimerTable[url] = self.MAX_TIMEOUT
-                time.sleep(self._globalTimerTable[url])
-            else:
-                self._globalTimerTable[url] = 0.01
-                time.sleep(0.01)
-
-    def decrease(self,url):
-        with self._timerLock:
-            if url not in self._globalTimerTable:
-                return
-            else:
-                if self._globalTimerTable[url] <= self.MIN_TIMEOUT:
-                    self._globalTimerTable[url] = self.MIN_TIMEOUT
-                    return
-                else:
-                    self._globalTimerTable[url] /= 2.0
-
-
-_rtspBackOffTimer = RtspBackOffTimer()
-
-class RRRtspTcpBasic:
-    _socket = None
-    _addr = None
-    _port = None
-    _data = None
-    _url = None
-    _cid = None
-    _sid = None
-    _mac = None
-    _uname = None
-    _pwd = None
-    _urlGen = None
-    _resolution = None
-
-    _rtspBasicTemplate = "\r\n".join((
-        "PLAY %s RTSP/1.0",
-        "CSeq: 2",
-        "Range: npt=now-",
-        "Scale: 1",
-        "x-guid: %s",
-        "Session:",
-        "User-Agent: Network Optix",
-        "x-play-now: true",
-        "Authorization: Basic %s",
-        "x-server-guid: %s", '', '')) # two '' -- to add two '\r\n' at the end
-
-    _rtspDigestTemplate = "\r\n".join((
-        "PLAY %s RTSP/1.0",
-        "CSeq: 2",
-        "Range: npt=now-",
-        "Scale: 1",
-        "x-guid: %s",
-        "Session:",
-        "User-Agent: Network Optix",
-        "x-play-now: true",
-        "%s",
-        "x-server-guid: %s", '' ''))
-
-    _digestAuthTemplate = 'Authorization:Digest username="%s",realm="%s",nonce="%s",uri="%s",response="%s",algorithm="MD5"'
-
-    _lock = None
-    _log  = None
-
-    _skip_errno = [errno.EAGAIN, errno.EWOULDBLOCK] + ([errno.WSAEWOULDBLOCK] if hasattr(errno, 'WSAEWOULDBLOCK') else [])
-    # There is no errno.WSAEWOULDBLOCK on Linux.
-
-    def __init__(self, (addr, port), (mac, cid), sid, uname, pwd, urlGen, lock=None,log=None, socket_reraise=False):
-        self._addr = addr
-        self._port = int(port)
-        self._urlGen = urlGen
-        self._url = urlGen.generateURL()
-        self._basic_auth = urllib2.base64.encodestring('%s:%s' % (uname, pwd)).rstrip()
-        self._data = self._rtspBasicTemplate % (self._url, cid, self._basic_auth, sid)
-
-        self._cid = cid
-        self._sid = sid
-        self._mac = mac
-        self._uname = uname
-        self._pwd = pwd
-        self._lock = lock
-        self._log = log
-        self._socket_reraise = socket_reraise
-
-    def add_prefered_resolution(self, resolution):
-        self._resolution = resolution
-        self._data = self._add_resolution_str(self._data)
-
-    def _add_resolution_str(self, header):
-        return ''.join((header[:-2], 'x-media-quality: ', self._resolution, "\r\n\r\n"))
-
-    def _checkEOF(self,data):
-        return data.find("\r\n\r\n") > 0
-
-    def _parseRelamAndNonce(self, reply):
-        idx = reply.find("WWW-Authenticate")
-        if idx < 0:
-            return False
-        # realm is fixed for our server - NO! it's chhanged already!
-        realm = "NetworkOptix" #FIXME get the realm from the reply!
-
-        # find the Nonce
-        idx = reply.find("nonce=",idx)
-        if idx < 0:
-            return False
-        idx_start = idx + 6
-        idx_end = reply.find(",",idx)
-        if idx_end < 0:
-            idx_end = reply.find("\r\n",idx)
-            if idx_end < 0:
+    def run(self):
+        try:
+            if not MergeTest_Resource().test():
                 return False
-        nonce = reply[idx_start + 1:idx_end - 1]
-
-        return (realm,nonce)
-
-    # This function only calcuate the digest response
-    # not the specific header field.  So another format
-    # is required to format the header into the target
-    # HTTP digest authentication
-
-    def _generateMD5String(self,m):
-        return ''.join('%02x' % ord(i) for i in m)
-
-    def _calDigest(self,realm,nonce):
-        m = md5.new() #FIXME the module is obsolete
-        m.update("%s:%s:%s" % (self._uname,realm,self._pwd))
-        part1 = m.digest()
-
-        m = md5.new()
-        m.update("PLAY:/%s" % (self._mac))
-        part2 = m.digest()
-
-        m = md5.new()
-        m.update("%s:%s:%s" % (self._generateMD5String(part1),nonce,self._generateMD5String(part2)))
-        resp = m.digest()
-
-        # represent the final digest as ANSI printable code
-        return self._generateMD5String(resp)
-
-
-    def _formatDigestHeader(self,realm,nonce):
-        resp = self._calDigest(realm,nonce)
-        return self._digestAuthTemplate % (self._uname,
-            realm,
-            nonce,
-            "/%s" % (self._mac),
-            resp)
-
-    def _requestWithDigest(self,reply):
-        realm = None
-        nonce = None
-        ret = self._parseRelamAndNonce(reply)
-        if ret == False:
-            return reply
-        else:
-            realm = ret[0]
-            nonce = ret[1]
-        auth = self._formatDigestHeader(realm,nonce)
-        data = self._rtspDigestTemplate % (self._url,
-            self._cid,
-            auth,
-            self._sid)
-        if self._resolution:
-            data = self._add_resolution_str(data)
-        self._request(data)
-        return self._response()
-
-    def _checkAuthorization(self,data):
-        return data.find("Unauthorized") < 0
-
-
-    def _request(self,data):
-        while True:
-            sz = self._socket.send(data)
-            if sz == len(data):
-                return
-            else:
-                data = data[sz:]
-
-    def _response(self):
-        global _rtspBackOffTimer
-
-        ret = ""
-        while True:
-            try:
-                data = self._socket.recv(256)
-            except socket.error,e:
-                _rtspBackOffTimer.increase("%s:%d"%(self._addr,self._port))
-                with self._lock:
-                    print "Socket errror %s on URL %s" % (e, self._url)
-                if self._socket_reraise:
-                    raise
-                return "This is not RTSP error but socket error:%s"%(e)
-
-            _rtspBackOffTimer.decrease("%s:%d"%(self._addr,self._port))
-
-            if not data:
-                with self._lock:
-                    print "Empty RSTP response on URL %s" % self._url
-                return ret
-            else:
-                ret += data
-                if self._checkEOF(ret):
-                    return ret
-
-    def __enter__(self):
-        self._socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self._socket.connect((self._addr,self._port))
-        self._request(self._data)
-        reply = self._response()
-        if not self._checkAuthorization(reply):
-            return (self._requestWithDigest(reply),self._url)
-        else:
-            return (reply,self._url)
-
-    def __exit__(self,type,value,trace):
-        # Do graceful closing here
-        #self._gracefulShutdown()
-        self._socket.close()
-
-
-class SingleServerRtspTestBase:
-    _serverEndpoint = None
-    _serverGUID = None
-    _cameraList = []
-    _cameraInfoTable = dict()
-    _testCase = 0
-    _username = None
-    _password = None
-    _archiveMax = 1
-    _archiveMin = 5
-    _log = None
-    _lock = None
-
-
-    def __init__(self,archiveMax,archiveMin,serverEndpoint,serverGUID,uname,pwd,log,lock):
-        self._archiveMax = archiveMax
-        self._archiveMin = archiveMin
-        self._serverEndpoint = serverEndpoint
-        self._serverGUID = serverGUID
-        self._username = uname
-        self._password = pwd
-        self._log = log
-        self._lock = lock
-
-        self._fetchCameraList()
-
-    def _getServerGUID(self):
-        response = urllib2.urlopen("http://%s/ec2/testConnection"%(self._serverEndpoint))
-        if response.getcode() != 200:
-            return False
-        obj = SafeJsonLoads(response.read(), self._serverEndpoint, 'testConnection')
-        response.close()
-        if obj is None:
-            return False
-        guid = obj["ecsGuid"]
-        if guid[0] == '{':
-            return guid
-        else:
-            return "{" + obj["ecsGuid"] + "}"
-
-    def _fetchCameraList(self):
-        # Get this server's GUID and filter out the only cameras that should be used on this server
-        guid = self._getServerGUID()
-        response = urllib2.urlopen("http://%s/ec2/getCamerasEx?id=%s" % (self._serverEndpoint,guid))
-
-        if response.getcode() != 200:
-            raise Exception("Cannot connect to server:%s using getCamerasEx" % (self._serverEndpoint))
-        json_obj = SafeJsonLoads(response.read(), self._serverEndpoint, 'getCamerasEx')
-        response.close()
-
-        for c in json_obj:
-            if c["typeId"] == "{1657647e-f6e4-bc39-d5e8-563c93cb5e1c}":
-                continue # Skip desktop
-            if "name" in c and c["name"].startswith("ec2_test"):
-                continue # Skip fake camera
-            if c['status'] in ('Online', 'Recording'):
-                self._cameraList.append((c["physicalId"],c["id"],c["name"].encode('utf8'),c['status']))
-                # c['name'] is used for output only and some pseudo-OSes (like Windows) don't have UTF-8 consoles :(
-                self._cameraInfoTable[c["id"]] = c
-
-    def _checkReply(self,reply):
-        idx = reply.find("\r\n")
-        if idx < 0:
-            return False
-        else:
-            return "RTSP/1.0 200 OK" == reply[:idx]
-
-    def _checkRtspRequest(self,c,reply):
-        ret = None
-        with self._lock:
-            print "RTSP request on URL:%s issued!" % (reply[1])
-            if not self._checkReply(reply[0]):
-                print "RTSP request on Server %s failed" % (self._serverEndpoint)
-                print reply
-                print "Camera name: %s" % (c[2].encode('utf8'),)
-                print "Camera Physical Id: %s" % (c[0])
-                print "Camera Id: %s" % (c[1])
-
-                self._log.writeFail("-------------------------------------------")
-                self._log.writeFail("RTSP request on Server:%s failed" % (self._serverEndpoint))
-                self._log.writeFail("RTSP request URL:%s issued" % (reply[1]))
-                self._log.writeFail("Camera name:%s" % (c[2]))
-                self._log.writeFail("Camera Physical Id:%s" % (c[0]))
-                self._log.writeFail("Camera Id:%s" % (c[1]))
-                self._log.writeFail("Detail RTSP reply protocol:\n\n%s" % (reply[0]))
-                self._log.flushFail()
-                ret = False
-            else:
-                self._log.writeOK("-------------------------------------")
-                self._log.writeOK("RTSP request on Server:%s with URL:%s passed!" % (self._serverEndpoint,reply[1]))
-                self._log.flushOK()
-                print "Rtsp Test Passed!"
-                ret = True
-            print "-----------------------------------------------------"
-            return ret
-
-    def run(self):
-        pass
-
-
-class FiniteSingleServerRtspTest(SingleServerRtspTestBase):
-    _log = None
-    _testCase = 0
-    def __init__(self,archiveMax,archiveMin,serverEndpoint,serverGUID,testCase,uname,pwd,log,lock):
-        self._testCase = testCase
-        SingleServerRtspTestBase.__init__(self,
-            archiveMax,
-            archiveMin,
-            serverEndpoint,
-            serverGUID,
-            uname,
-            pwd,
-            log,
-            lock)
-
-    def _testMain(self):
-        c = self._cameraList[random.randint(0,len(self._cameraList) - 1)]
-        l = self._serverEndpoint.split(":")
-
-        # Streaming version RTSP test
-        with RRRtspTcpBasic(l[0:2], c[0:2],
-                     self._serverGUID,
-                     self._username,
-                     self._password,
-                     RtspStreamURLGenerator(l[0],int(l[1]),c[0])) as reply:
-            self._checkRtspRequest(c,reply)
-
-
-        with RRRtspTcpBasic(l[0:2], c[0:2],
-                     self._serverGUID,
-                     self._username,
-                     self._password,
-                     RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,l[0],int(l[1]),c[0])) as reply:
-            self._checkRtspRequest(c,reply)
-
-
-    def run(self):
-        for _ in xrange(self._testCase):
-            self._testMain()
-
-
-class RtspLog:
-    _fileOK = None
-    _fileFail = None
-
-    def __init__(self,serverAddr):
-        l = serverAddr.split(":")
-        self._fileOK = open("%s_%s.rtsp.ok.log" % (l[0],l[1]),"w+")
-        self._fileFail = open("%s_%s.rtsp.fail.log" % (l[0],l[1]),"w+")
-
-    def writeOK(self,msg):
-        self._fileOK.write("%s\n" % (msg))
-
-    def writeFail(self,msg):
-        self._fileFail.write("%s\n" % (msg))
-
-    def flushOK(self):
-        self._fileOK.flush()
-
-    def flushFail(self):
-        self._fileFail.flush()
-
-    def close(self):
-        self._fileOK.close()
-        self._fileFail.close()
-
-
-class FiniteRtspTest:
-    _testCase = 0
-    _username = None
-    _password = None
-    _archiveMax = 360
-    _archiveMin = 60
-    _lock = threading.Lock()
-
-    def __init__(self,testSize,userName,passWord,archiveMax,archiveMin):
-        self._testCase = testSize
-        self._username = userName
-        self._password = passWord
-        self._archiveMax = archiveMax # max difference
-        self._archiveMin = archiveMin # min difference
-
-    def test(self):
-        thPool = []
-        print "-----------------------------------"
-        print "Finite RTSP test starts"
-        print "The failed detail result will be logged in rtsp.log file"
-
-        for i in xrange(len(clusterTest.clusterTestServerList)):
-            serverAddr = clusterTest.clusterTestServerList[i]
-            serverAddrGUID = clusterTest.clusterTestServerUUIDList[i][0]
-            log = RtspLog(serverAddr)
-
-            tar = FiniteSingleServerRtspTest(self._archiveMax,self._archiveMin,serverAddr,serverAddrGUID,self._testCase,
-                                             self._username,self._password,log,self._lock)
-
-            th = threading.Thread(target = tar.run)
-            th.start()
-            thPool.append((th,log))
-
-        # Join the thread
-        for t in thPool:
-            t[0].join()
-            t[1].close()
-
-        print "Finite RTSP test ends"
-        print "-----------------------------------"
-
-
-class InfiniteSingleServerRtspTest(SingleServerRtspTestBase):
-    _flag = None
-    _negative = 0
-    _positive = 0
-
-    def __init__(self,archiveMax,archiveMin,serverEndpoint,serverGUID,uname,pwd,log,lock,flag):
-        SingleServerRtspTestBase.__init__(self,
-            archiveMax,
-            archiveMin,
-            serverEndpoint,
-            serverGUID,
-            uname,
-            pwd,
-            log,
-            lock)
-
-        self._flag = flag
-
-    def run(self):
-        l = self._serverEndpoint.split(":")
-        while self._flag.isOn():
-            for c in self._cameraList:
-                # Streaming version RTSP test
-                with RRRtspTcpBasic(l[0:2], c[0:2],
-                             self._serverGUID,
-                             self._username,
-                             self._password,
-                             RtspStreamURLGenerator(l[0],int(l[1]),c[0])) as reply:
-                    if self._checkRtspRequest(c,reply):
-                        self._positive = self._positive + 1
-                    else:
-                        self._negative = self._negative + 1
-
-                with RRRtspTcpBasic(l[0:2], c[0:2],
-                             self._serverGUID,
-                             self._username,
-                             self._password,
-                             RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,l[0],int(l[1]),c[0])) as reply:
-                    if self._checkRtspRequest(c,reply):
-                        self._positive = self._positive + 1
-                    else:
-                        self._negative = self._negative + 1
-
-        print "-----------------------------------"
-        print "On server:%s\nRTSP Passed:%d\nRTSP Failed:%d" % (self._serverEndpoint,self._positive,self._negative)
-        print "-----------------------------------\n"
-
-
-class InfiniteRtspTest:
-    _username = None
-    _password = None
-    _archiveMax = 360
-    _archiveMin = 60
-    _flag = True
-    _lock = threading.Lock()
-
-    def __init__(self,userName,passWord,archiveMax,archiveMin):
-        self._username = userName
-        self._password = passWord
-        self._archiveMax = archiveMax # max difference
-        self._archiveMin = archiveMin # min difference
-
-    def isOn(self):
-        return self._flag
-
-    def _onInterrupt(self,a,b):
-        self._flag = False
-
-    def test(self):
-        thPool = []
-
-        print "-------------------------------------------"
-        print "Infinite RTSP test starts"
-        print "You can press CTRL+C to interrupt the tests"
-        print "The failed detail result will be logged in rtsp.log file"
-
-        # Setup the interruption handler
-        signal.signal(signal.SIGINT,self._onInterrupt)
-
-        for i in xrange(len(clusterTest.clusterTestServerList)):
-
-            serverAddr = clusterTest.clusterTestServerList[i]
-            serverAddrGUID = clusterTest.clusterTestServerUUIDList[i][0]
-            log = RtspLog(serverAddr)
-
-            tar = InfiniteSingleServerRtspTest(self._archiveMax,
-                                               self._archiveMin,
-                                               serverAddr,
-                                               serverAddrGUID,
-                                               self._username,
-                                               self._password,
-                                               log,
-                                               self._lock,
-                                               self)
-
-            th = threading.Thread(target=tar.run)
-            th.start()
-            thPool.append((th,log))
-
-
-        # This is a UGLY work around that to allow python get the interruption
-        # while execution.  If I block into the join, python seems never get
-        # interruption there.
-        while self.isOn():
-            try:
-                time.sleep(1)
-            except:
-                break
-
-        # Afterwards join them
-        for t in thPool:
-            t[0].join()
-            t[1].close()
-
-        print "Infinite RTSP test ends"
-        print "-------------------------------------------"
-
-
-def runRtspTest():
-    config_parser = clusterTest.getConfig()
-    username = config_parser.get("General","username")
-    password = config_parser.get("General","password")
-    testSize = config_parser.getint("Rtsp","testSize")
-    diffMax = config_parser.getint("Rtsp","archiveDiffMax")
-    diffMin = config_parser.getint("Rtsp","archiveDiffMin")
-
-    if testSize < 0 :
-        InfiniteRtspTest(username,password,diffMax,diffMin).test()
-    else:
-        FiniteRtspTest(testSize,username,password,diffMax,diffMin).test()
-
-    # We don't need it
-    clusterTest.unittestRollback.removeRollbackDB()
-
-# ======================================================
-# RTSP performance Operations
-# ======================================================
-class SingleServerRtspPerf(SingleServerRtspTestBase):
-    _archiveStreamRate = DEFAULT_ARCHIVE_STREAM_RATE
-    _timeoutMax = 0 # whole number of milliseconds
-    _timeoutMin = 0 # whole number of milliseconds
-    _lock = None
-    _perfLog = None
-    _threadNum = 0
-    _exitFlag = None
-    _threadPool = []
-
-    _archiveNumOK = 0
-    _archiveNumFail = 0
-    _archiveNumTimeout = 0
-    _archiveNumClose = 0
-    _archiveNumSocketError = 0
-    _streamNumOK = 0
-    _streamNumFail = 0
-    _streamNumTimeout = 0
-    _streamNumClose = 0
-    _streamNumSocketError = 0
-    _need_dump = False
-    _rtspTimeout = 3
-    _httpTimeout = 5
-    _threadStartSpacing = 0
-    _socketCloseGrace = 0
-    _camerasStartGrace = 8
-    _liveDataPart = 50
-
-    _startTime = 0
-
-
-    def __init__(self,archiveMax,archiveMin,serverEndpoint,guid,username,password,threadNum,flag,lock):
-        SingleServerRtspTestBase.__init__(self,
-                                          archiveMax,
-                                          archiveMin,
-                                          serverEndpoint,
-                                          guid,
-                                          username,
-                                          password,
-                                          RtspLog(serverEndpoint),
-                                          lock)
-        self._threadNum = threadNum
-        self._exitFlag = flag
-        self._lock = lock
-        # Initialize the performance log
-        l = serverEndpoint.split(":")
-        self._perfLog = open("%s_%s.perf.rtsp.log" % (l[0],l[1]),"w+")
-        self._camerasReady = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
-
-    def _startRecording(self):
-        "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
-        cameras = []
-        for ph_id, id, name, status in self._cameraList:
-            if status != 'Recording':
-                attr_data = CAMERA_ATTR_EMPTY.copy()
-                attr_data['cameraID'] = id
-                attr_data['scheduleEnabled'] = True
-                attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
-                cameras.append(attr_data)
-
-        response = urllib2.urlopen(urllib2.Request(
-                "http://%s/ec2/saveCameraUserAttributesList" % (self._serverEndpoint),
-                data=json.dumps(cameras),
-                headers={'Content-Type': 'application/json'}),
-            timeout=self._httpTimeout
-        )
-        if response.getcode() != 200:
-            raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverEndpoint, response.getcode()))
-        response.close()
-        return len(cameras) > 0
-
-
-    @classmethod
-    def set_global(cls, name, value):
-        setattr(cls, '_'+name, value)
-
-    # Read some bytes from the socket, no more then RATE, no longer then TIMEOUT
-    # If RATE == -1, just read one portion of data
-    def _timeoutRecv(self, socket, rate_limit, timeout):
-        socket.setblocking(0)
-        buf = []
-        total_size = 0
-        finish = time.time() + timeout
-
-        try:
-            while time.time() < finish:
-                # recording the time for fetching an event
-                ready = select.select([socket], [], [], timeout)
-                if ready[0]:
-                    data = socket.recv(1024*16) if rate_limit < 0 else socket.recv(rate_limit)
-                    if rate_limit == -1:
-                        return data
-                    buf.append(data)
-                    total_size += len(data)
-                    if total_size > rate_limit:
-                        extra = total_size - rate_limit * (time.time() - self._startTime)
-                        if extra > 0:
-                            time.sleep(extra/rate_limit) # compensate the rate of packet size here
-                        return ''.join(buf)
-                else:
-                    # timeout reached
-                    return None
-            # time limit reached
-            return ''.join(buf)
+            # The following merge test ALWAYS fail and I don't know it is my problem or not
+            # Current it is disabled and you could use a seperate command line to run it
+            #MergeTest_AdminPassword().test()
+            return True
         finally:
-            socket.setblocking(1)
-
-    def _dumpArchiveHelper(self, c, tcp_rtsp, timeout, dump_file):
-        self._startTime = time.time()
-        finish = self._startTime + timeout
-
-        while time.time() < finish:
-            try:
-                data = self._timeoutRecv(tcp_rtsp._socket, self._archiveStreamRate, self._rtspTimeout)
-                if dump_file is not None:
-                    dump_file.write(data)
-                    dump_file.flush()
-            except Exception:
-                traceback.print_exc()
-            else:
-                if data == None:
-                    with self._lock:
-                        print "--------------------------------------------"
-                        print "The RTSP url %s no archive data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.write("! The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
-                        self._perfLog.write("Camera name:%s\n" % (c[2]).encode('utf8'))
-                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.flush()
-                    self._archiveNumTimeout += 1
-                    self._archiveNumOK -= 1
-                    return
-                elif data == '':
-                    with self._lock:
-                        print "--------------------------------------------"
-                        print "The RTSP url %s connection has been closed by server after %.2f seconds" % (tcp_rtsp._url,
-                                                                                                           time.time() - self._startTime)
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (tcp_rtsp._url))
-                        self._perfLog.write("Camera name:%s\n" % (c[2]))
-                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.flush()
-                    self._archiveNumClose += 1
-                    self._archiveNumOK -= 1
-                    return
-
-        with self._lock:
-            print "--------------------------------------------"
-            print "The %.3f seconds RTP sink finished on RTSP url %s" % (timeout,tcp_rtsp._url)
-
-    def _dumpStreamHelper(self, c, tcp_rtsp, timeout, dump_file):
-        finish = time.time() + timeout
-        while time.time() < finish:
-            try:
-                data = self._timeoutRecv(tcp_rtsp._socket, -1, self._rtspTimeout)
-                if dump_file is not None:
-                    dump_file.write(data)
-                    dump_file.flush()
-            except Exception:
-                traceback.print_exc()
-            else:
-                if data == None:
-                    with self._lock:
-                        print "--------------------------------------------"
-                        print "The RTSP url %s no live data response for %s seconds" % (tcp_rtsp._url, self._rtspTimeout)
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.write("! The RTSP/RTP url %s no data response for %s seconds\n" % (tcp_rtsp._url, self._rtspTimeout))
-                        self._perfLog.write("Camera name:%s\n" % (c[2]))
-                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.flush()
-                    self._streamNumTimeout += 1
-                    self._streamNumOK -= 1
-                    return
-                elif data == '':
-                    with self._lock:
-                        print "--------------------------------------------"
-                        print "The RTSP url %s connection has been closed by server after %.2f seconds" % (tcp_rtsp._url, time.time() - self._startTime)
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.write("! The RTSP/RTP url %s connection has been CLOSED by server\n" % (tcp_rtsp._url))
-                        self._perfLog.write("Camera name:%s\n" % (c[2]))
-                        self._perfLog.write("Camera Physical Id:%s\n" % (c[0]))
-                        self._perfLog.write("Camera Id:%s\n" % (c[1]))
-                        self._perfLog.write("--------------------------------------------\n")
-                        self._perfLog.flush()
-                    self._streamNumClose += 1
-                    self._streamNumOK -= 1
-                    return
-
-        with self._lock:
-            print "--------------------------------------------"
-            print "The %.3f seconds RTP sink finished on RTSP url %s" % (timeout, tcp_rtsp._url)
-
-    def _buildUrlPath(self,url):
-        l = len(url)
-        buf = []
-        for i in xrange(l):
-            if url[i] == ':':
-                buf.append('$')
-            elif url[i] == '/':
-                buf.append('%')
-            elif url[i] == '?':
-                buf.append('#')
-            else:
-                buf.append(url[i])
-
-        # generate a random postfix
-        buf.append("_")
-        for _ in xrange(12):
-            buf.append(str(random.randint(0,9)))
-
-        return ''.join(buf)
-
-    def _dump(self,c, tcp_rtsp, timeout, helper):
-        if self._need_dump:
-            with open(self._buildUrlPath(tcp_rtsp._url),"w+") as f:
-                helper(c, tcp_rtsp, timeout, f)
-        else:
-            helper(c, tcp_rtsp, timeout, None)
-
-    def _makeDataReceivePeriod(self):
-        return random.randint(self._timeoutMin, self._timeoutMax) / 1000.0
-
-    # Represent a streaming TASK on the camera
-    def _main_streaming(self, c):
-        l = self._serverEndpoint.split(':')
-        obj = RRRtspTcpBasic(l[0:2], c[0:2],
-                     self._serverGUID,
-                     self._username, self._password,
-                     RtspStreamURLGenerator(l[0],int(l[1]),c[0]),
-                     self._lock, self._perfLog, socket_reraise=True)
-        obj.add_prefered_resolution(random.choice(['low', 'high']))
-
-        try:
-            with obj as reply:
-                # 1.  Check the reply here
-                if self._checkRtspRequest(c,reply):
-                    self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpStreamHelper)
-                    self._streamNumOK += 1
-                else:
-                    self._streamNumFail += 1
-        except socket.error:
-            print "--------------------------------------------"
-            print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
-            self._streamNumSocketError += 1
-
-    def _main_archive(self, c):
-        l = self._serverEndpoint.split(':')
-        obj = RRRtspTcpBasic(l[0:2], c[0:2],
-                             self._serverGUID,
-                             self._username, self._password,
-                             RtspArchiveURLGenerator(self._archiveMax,self._archiveMin,l[0],int(l[1]),c[0]),
-                             self._lock, self._perfLog, socket_reraise=True)
-        obj.add_prefered_resolution(random.choice(['low', 'high']))
-        try:
-            with obj as reply:
-                # 1.  Check the reply here
-               if self._checkRtspRequest(c,reply):
-                   self._dump(c, tcp_rtsp=obj, timeout=self._makeDataReceivePeriod(), helper=self._dumpArchiveHelper)
-                   self._archiveNumOK += 1
-               else:
-                   self._archiveNumFail += 1
-        except socket.error:
-            print "--------------------------------------------"
-            print "The RTSP url %s test fails with the socket error %s" % (obj._url, sys.exc_info() )
-            self._archiveNumSocketError += 1
-
-    def _threadMain(self, num):
-        while self._exitFlag.isOn():
-            # choose a random camera in the server list
-            c = random.choice(self._cameraList)
-            if random.randint(1,100) <= self._liveDataPart:
-                self._main_streaming(c)
-            else:
-                self._main_archive(c)
-            if self._socketCloseGrace:
-                time.sleep(self._socketCloseGrace)
-
-    def join(self):
-        for th in self._threadPool:
-            th.join()
-        self._perfLog.close()
-        print "======================================="
-        print "Server: %s" % (self._serverEndpoint)
-        print "Number of threads: %s" % self._threadNum
-        print "rtspTimeout value: %s" % self._rtspTimeout
-        print "Archive Success Number: %d" % self._archiveNumOK
-        print "Archive Failed Number: %d" % self._archiveNumFail
-        print "Archive Timed Out Number: %d" % self._archiveNumTimeout
-        print "Archive Server Closed Number: %d" % self._archiveNumClose
-        print "Archive Socket Error Number: %d" % self._archiveNumSocketError
-        print "Stream Success Number:%d" % self._streamNumOK
-        print "Stream Failed Number:%d" % self._streamNumFail
-        print "Stream Timed Out Number: %d" % self._streamNumTimeout
-        print "Stream Server Closed Number: %d" % self._streamNumClose
-        print "Stream Socket Error Number: %d" % self._streamNumSocketError
-        print "======================================="
-
-    def run(self, need_dump=False):
-        if len(self._cameraList) == 0:
-            print "The camera list on server:%s is empty!"%(self._serverEndpoint)
-            print "Do nothing and abort!"
-            return False
-        dt = self._camerasReady - time.time()
-        if dt > 0:
-            print "DEBUG: cameras could be unready, sleep %.2f seconds" % dt
-            time.sleep(dt)
-
-        self._need_dump = need_dump
-        for _ in xrange(self._threadNum):
-            th = threading.Thread(target=self._threadMain, args=(_,))
-            th.start()
-            self._threadPool.append(th)
-            if self._threadStartSpacing:
-                time.sleep(self._threadStartSpacing)
-
-        return True
-
-class RtspPerf:
-    _perfServer = []
-    _lock = threading.Lock()
-    _exit = False
-
-    def isOn(self):
-        return not self._exit
-
-    def _onInterrupt(self,a,b):
-        self._exit = True
-
-    def _loadConfig(self):
-        config = clusterTest.getConfig()
-        threadNumbers = config.get("Rtsp","threadNumbers").split(",")
-        if len(threadNumbers) != len(clusterTest.clusterTestServerList):
-            print "The threadNumbers in Rtsp section doesn't match the size of the servers in serverList"
-            print "threadNumbers = %s" % threadNumbers
-            print "clusterTestServerList = %s" % clusterTest.clusterTestServerList
-            print "Every server MUST be assigned with a correct thread Numbers"
-            print "RTSP Pressure test failed"
-            return False
-
-        archiveMax = config.getint("Rtsp","archiveDiffMax")
-        archiveMin = config.getint("Rtsp","archiveDiffMin")
-        username = config.get("General","username")
-        password = config.get("General","password")
-
-        #RRRtspTcpBasic.set_close_timeout_global(config.getint_safe("Rtsp", "rtspCloseTimeout", 5))
-        SingleServerRtspPerf.set_global('timeoutMin', config.getint("Rtsp","timeoutMin") * 1000)
-        SingleServerRtspPerf.set_global('timeoutMax', config.getint("Rtsp","timeoutMax") * 1000)
-        SingleServerRtspPerf.set_global('rtspTimeout', config.getint_safe("Rtsp", "rtspTimeout", 3))
-        SingleServerRtspPerf.set_global('httpTimeout', config.getint_safe("Rtsp", "httpTimeout", 5))
-        SingleServerRtspPerf.set_global('camerasStartGrace', config.getint_safe("Rtsp", "camerasStartGrace", 5))
-        SingleServerRtspPerf.set_global('threadStartSpacing', config.getfloat_safe("Rtsp", "threadStartSpacing", 0))
-        SingleServerRtspPerf.set_global('socketCloseGrace', config.getfloat_safe("Rtsp", "socketCloseGrace", 0))
-        SingleServerRtspPerf.set_global('liveDataPart', config.getint_safe("Rtsp", "liveDataPart", 50))
-
-        rate = config.get_safe("Rtsp", "archiveStreamRate", None)
-        if rate is not None:
-            SingleServerRtspPerf.set_global('archiveStreamRate', parse_size(rate))
-
-        # Let's add those RtspSinglePerf
-        for i in xrange(len(clusterTest.clusterTestServerList)):
-            serverAddr = clusterTest.clusterTestServerList[i]
-            serverGUID = clusterTest.clusterTestServerUUIDList[i][0]
-            serverThreadNum = int(threadNumbers[i])
-
-            self._perfServer.append(SingleServerRtspPerf(archiveMax,archiveMin,serverAddr,serverGUID,username,password,
-                    serverThreadNum,self,self._lock))
-
-        return True
-
-    def run(self, need_dump=False):
-        if not self._loadConfig():
-            return False
-        else:
-            print "---------------------------------------------"
-            print "Start to run RTSP pressure test now!"
-            print "Press CTRL+C to interrupt the test!"
-            print "The exceptional cases are stored inside of server_end_point.rtsp.perf.log"
-
-            # Add the signal handler
-            signal.signal(signal.SIGINT,self._onInterrupt)
-
-            for e in self._perfServer:
-                if not e.run(need_dump):
-                    return
-
-            while self.isOn():
-                try:
-                    time.sleep(1)
-                except Exception:
-                    break
-                except KeyboardInterrupt:
-                    break
-
-            for e in self._perfServer:
-                e.join()
-
-            print "RTSP performance test done,see log for detail"
-            print "---------------------------------------------"
+            if self._CleanUp:
+                doCleanUp()
 
 
 
-def runRtspPerf(need_dump):
-    RtspPerf().run(need_dump)
-    clusterTest.unittestRollback.removeRollbackDB()
-
+# ===================================
 # Performance test function
 # only support add/remove ,value can only be user and media server
+# ===================================
+
 class PerformanceOperation():
     _lock = threading.Lock()
 
@@ -3195,7 +1008,7 @@ class PerformanceOperation():
 
     def _getUUIDList(self,methodName):
         ret = []
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             data = []
 
             response = urllib2.urlopen("http://%s/ec2/%s?format=json" % (s,methodName))
@@ -3223,7 +1036,7 @@ class PerformanceOperation():
 
     def _getFakeUUIDList(self,methodName):
         ret = []
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             data = []
 
             response = urllib2.urlopen("http://%s/ec2/%s?format=json" % (s,methodName))
@@ -3244,7 +1057,7 @@ class PerformanceOperation():
         return ret
 
     def _sendOp(self,methodName,dataList,addr):
-        worker = ClusterWorker(clusterTest.threadNumber,len(dataList))
+        worker = ClusterWorker(testMaster.threadNumber, len(dataList))
         for d in dataList:
             worker.enqueue(self._sendRequest,(methodName,d,addr))
 
@@ -3269,7 +1082,7 @@ class PerformanceOperation():
 class UserOperation(PerformanceOperation):
     def add(self,num):
         gen = UserDataGenerator()
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             self._sendOp("saveUser",
                          self._filterOutId(gen.generateUserData(num)),s)
 
@@ -3297,7 +1110,7 @@ class UserOperation(PerformanceOperation):
 class MediaServerOperation(PerformanceOperation):
     def add(self,num):
         gen = MediaServerGenerator()
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             self._sendOp("saveMediaServer",
                          self._filterOutId(gen.generateMediaServerData(num)),s)
         return True
@@ -3324,7 +1137,7 @@ class MediaServerOperation(PerformanceOperation):
 class CameraOperation(PerformanceOperation):
     def add(self,num):
         gen = CameraDataGenerator()
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             self._sendOp("saveCameras",
                          self._filterOutId(gen.generateCameraData(num,s)),s)
         return True
@@ -3472,7 +1285,7 @@ class SingleResourcePerfTest:
             return False
         else:
             response.close()
-            clusterTest.unittestRollback.addOperations("saveCameras",self._serverAddr,d[1])
+            testMaster.unittestRollback.addOperations("saveCameras", self._serverAddr, d[1])
             with self._lock:
                 self._resourceList.append(d[1])
                 return True
@@ -3606,7 +1419,7 @@ class PerfTest:
         self._exit = True
 
     def _initPerfList(self,type):
-        for s in clusterTest.clusterTestServerList:
+        for s in testMaster.clusterTestServerList:
             if type[0] :
                 self._perfList.append((s,SingleResourcePerfTest(self._globalLock,UserPerfResourceGen(),s)))
 
@@ -3673,7 +1486,7 @@ class PerfTest:
         print "======================================"
         print "Performance Test Start"
         print "Hit CTRL+C to interrupt it"
-        self._initThreadPool(clusterTest.threadNumber)
+        self._initThreadPool(testMaster.threadNumber)
         # Waiting for the user to stop us
         signal.signal(signal.SIGINT,self._onInterrupt)
         while not self._exit:
@@ -3705,160 +1518,9 @@ def runPerfTest(argv):
     doCleanUp()
 
 
-class SystemNameTest:
-    _serverList = []
-    _guidDict = dict()
-    _oldSystemName = None
-    _syncTime = 2
-
-    def _setUpAuth(self,user,pwd):
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        for s in self._serverList:
-            ManagerAddPassword(passman, s, user, pwd)
-
-        urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
-
-    def _doGet(self,addr,methodName):
-        ret = None
-        response = None
-        print "Connection to http://%s/ec2/%s" % (addr,methodName)
-        response = urllib2.urlopen("http://%s/ec2/%s" % (addr,methodName))
-
-        if response.getcode() != 200:
-            response.close()
-            return None
-        else:
-            ret = response.read()
-            response.close()
-            return ret
-
-    def _doPost(self,addr,methodName,d):
-        response = None
-        req = urllib2.Request("http://%s/ec2/%s" % (addr,methodName), data=d,
-                              headers={'Content-Type': 'application/json'})
-
-        print "Connection to http://%s/ec2/%s" % (addr,methodName)
-        response = urllib2.urlopen(req)
-
-        if response.getcode() != 200:
-            response.close()
-            return False
-        else:
-            response.close()
-            return True
-
-    def _changeSystemName(self,addr,name):
-        response = urllib2.urlopen("http://%s/api/configure?%s" % (addr,urllib.urlencode({"systemName":name})))
-        if response.getcode() != 200:
-            response.close()
-            return False
-        else:
-            response.close()
-            return True
-
-    def _ensureServerSystemName(self):
-        systemName = None
-
-        for s in self._serverList:
-            ret = self._doGet(s,"testConnection")
-            if ret is None:
-                return (False,"Server:%s cannot perform testConnection REST call" % (s))
-            obj = SafeJsonLoads(ret, s, "testConnection")
-            if obj is None:
-                return  (False, "Server: %s returns wrong testConnection answer" % (s))
-
-            if systemName != None:
-                if systemName != obj["systemName"]:
-                    return (False,"Server: %s has systemName: %s which is different with others: %s" % (s,obj["systemName"],systemName))
-            else:
-                systemName = obj["systemName"]
-
-            #return (False, "SystemNameTest DEBUG FAIL: %s" % (s))
-
-            self._guidDict[s] = obj["ecsGuid"]
-
-        self._oldSystemName = systemName
-        return (True,"")
-
-
-    def _loadConfig(self):
-        configParser = clusterTest.getConfig()
-        username = configParser.get("General","username")
-        passwd = configParser.get("General","password")
-        sl = configParser.get("General","serverList")
-        self._serverList = sl.split(",")
-        self._syncTime = configParser.getint("General","clusterTestSleepTime")
-        return (username,passwd)
-
-
-    def _doSingleTest(self,s):
-        thisGUID = self._guidDict[s]
-        self._changeSystemName(s,BasicGenerator().generateRandomString(20))
-        # wait for the time to sync
-        time.sleep(self._syncTime)
-        # issue a getMediaServerEx request to test whether all the servers in
-        # the list has the expected offline/online status
-        ret = self._doGet(s,"getMediaServersEx")
-        if ret == None:
-            return (False,"Server:%s cannot doGet on getMediaServersEx" % (s))
-        obj = SafeJsonLoads(ret, s, "getMediaServersEx")
-        if obj is None:
-            return (False, "The server %s sends wrong response to getMediaServersEx" % (s,))
-        for ele in obj:
-            if ele["id"] == thisGUID:
-                if ele["status"] == "Offline":
-                    return (False,"This server:%s with GUID:%s should be Online" % (s,thisGUID))
-            else:
-                if ele["status"] == "Online":
-                    return (False,"The server that has IP address:%s and GUID:%s \
-                    should be Offline when login on Server:%s" % (ele["networkAddresses"],ele["id"],s))
-        return (True,"")
-
-    def _doTest(self):
-        for s in self._serverList:
-            ret,reason = self._doSingleTest(s)
-            if ret != True:
-                return (ret,reason)
-        return (True,"")
-
-    def _doRollback(self):
-        for s in self._serverList:
-            self._changeSystemName(s,self._oldSystemName)
-
-    def run(self):
-        print "========================================="
-        print "SystemName Test Start"
-
-        user,pwd = self._loadConfig()
-        self._setUpAuth(user,pwd)
-
-        ret,reason = self._ensureServerSystemName()
-
-        if ret:
-            print "-----------------------------------------"
-            print "Start to test SystemName for server lists"
-            ret,reason = self._doTest()
-            if not ret:
-                print "FAIL: %s" % reason
-            # DEBUG!
-            #elif random.randint(0,5) == 0:
-            #    ret = False
-            #    print "FAIL: JUST A DEBUG FAIL"
-
-            print "SystemName test finished"
-            print "Start SystemName test rollback"
-            self._doRollback()
-        else:
-            print "FAIL: %s" % reason
-
-        print "SystemName test rollback done%s" % ('' if ret else ": test FAILED")
-        print "========================================="
-        return ret
-
-
 def doCleanUp():
-    selection = '' if clusterTest.auto_rollback else 'x'
-    if not clusterTest.auto_rollback:
+    selection = '' if testMaster.auto_rollback else 'x'
+    if not testMaster.auto_rollback:
         try :
             selection = raw_input("Press Enter to continue ROLLBACK or press x to SKIP it...")
         except:
@@ -3866,7 +1528,7 @@ def doCleanUp():
 
     if len(selection) == 0 or selection[0] != 'x':
         print "Now do the rollback, do not close the program!"
-        clusterTest.unittestRollback.doRollback(quiet=clusterTest.auto_rollback)
+        testMaster.unittestRollback.doRollback()
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
@@ -3881,104 +1543,172 @@ def print_tests(suit, shift='    '):
             print "DEBUG:%s%s" % (shift, test)
 
 
-def CallTimesyncTest():
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
-    print "TimeSyncTest suits: %s" % (','.join(timetest.TimeSyncTest.iter_suits()))
-    return RunBoxTests(timetest.TimeSyncTest, clusterTest.getConfig())
+def CallTest(testClass):
+    ###if not testMaster.openerReady:
+    ###    testMaster.setUpPassword()
+    # this print is used by FunctestParser.parse_timesync_start
+    print "%s suits: %s" % (testClass.__name__, ', '.join(testClass.iter_suits()))
+    return RunBoxTests(testClass, testMaster.getConfig())
 
 
-def CallBackupStorageTest():
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
-    print "BackupStorage suits: %s" % (','.join(stortest.BackupStorageTest.iter_suits()))
-    return RunBoxTests(stortest.BackupStorageTest, clusterTest.getConfig())
+# These are the old legasy tests, just organized a bit
+SimpleTestKeys = {
+    '--sys-name': SystemNameTest,
+    '--rtsp-test': RtspTestSuit,
+    '--rtsp-perf': RtspPerf,
+    '--rtsp-stream': RtspStreamTest,
+}
 
-def CallMultiservArchTest():
-    if not clusterTest.openerReady:
-        clusterTest.setUpPassword()
-    print "BackupStorage suits: %s" % (','.join(stortest.MultiserverArchiveTest.iter_suits()))
-    return RunBoxTests(stortest.MultiserverArchiveTest, clusterTest.getConfig())
+# Tests to be run on the vargant boxes, separately or within the autotest sequence
+BoxTestKeys = {
+    '--timesync': TimeSyncTest,
+    '--bstorage': BackupStorageTest,
+    '--msarch': MultiserverArchiveTest,
+    '--natcon': NatConnectionTest,
+    '--stream': StreamingTest,
+    '--dbup': DBUpgradeTest,
+    '--boxtests': None,
+}
+
+
+def RunByAutotest(arg0):
+    """
+    Used when this script is called by the autotesting script sauto.py
+    :param arg0: str
+    It is passed to unittest.main() to avoid automatical usage of sys.argv
+    """
+    testMaster.auto_rollback = True
+    #config = testMaster.getConfig()
+    need_rollback = True
+    try:
+        ret, reason = testMaster.init(notest=True)
+        if not ret:
+            print "Failed to initialize the cluster test object: %s" % (reason)
+            return
+        config = testMaster.getConfig()
+        with LegacyTestWrapper(config):
+            if not testMaster._testConnection():
+                print "Connection test failed"
+                return
+            ret, reason = testMaster.initial_tests()
+            if ret == False:
+                print "The initial cluster test failed: %s" % (reason)
+                return
+            the_test = unittest.main(exit=False, argv=[arg0])
+            if the_test.result.wasSuccessful():
+                print "Main tests passed OK"
+                MergeTest().run()
+                SystemNameTest(config).run()
+            ProxyTest(*config.rtget('ServerList')[0:2])
+            if testMaster.unittestRollback:
+                doCleanUp()
+                need_rollback = False
+    except Exception as err:
+        print "FAIL: the main functests failed wit error: %s" % (err,)
+    finally:
+        if need_rollback and testMaster.unittestRollback:
+            doCleanUp()
+    if not testMaster.do_main_only:
+        if not testMaster.skip_timesync:
+            CallTest(TimeSyncTest)
+        if not testMaster.skip_backup:
+            CallTest(BackupStorageTest)
+        if not testMaster.skip_mservarc:
+            CallTest(MultiserverArchiveTest)
+        if not testMaster.skip_streming:
+            CallTest(StreamingTest)
+        if not testMaster.skip_dbup:
+            CallTest(DBUpgradeTest)
+    print "\nALL AUTOMATIC TEST ARE DONE\n"
+
+
+def BoxTestsRun(key):
+    testMaster.init(notest=True)
+    if key == '--boxtests':
+        CallTest(TimeSyncTest)
+        CallTest(BackupStorageTest)
+        CallTest(MultiserverArchiveTest)
+        CallTest(StreamingTest)
+        CallTest(DBUpgradeTest)
+    else:
+        CallTest(BoxTestKeys[key])
+
 
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
 
     argc = len(argv)
-    ret, reason = clusterTest.init(short = (argc > 1 and argv[1] in ('--timesync', '--bstorage', '--msarch')))
-    if ret == False:
+
+    if argc == 2 and argv[1] in BoxTestKeys:
+        # box-tests can run without complete testMaster.init(), since they reinitialize mediaserver
+        BoxTestsRun(argv[1])
+        return
+
+    ret, reason = testMaster.init()
+    if not ret:
         print "Failed to initialize the cluster test object: %s" % (reason)
-    elif argc == 2 and argv[1] == '--sync':
-        pass # done here, since we just need to test whether
-             # all the servers are on the same page
-    else:
-        if argc == 1:
-            the_test = unittest.main(exit=False, argv=argv[:1])
+        return
 
-            if the_test.result.wasSuccessful():
-                print "Main tests passed OK"
-                if MergeTest().test():
-                    SystemNameTest().run()
-            if not clusterTest.do_main_only:
-                if not clusterTest.skip_timesync:
-                    CallTimesyncTest()
-                if not clusterTest.skip_backup:
-                    CallBackupStorageTest()
-                if not clusterTest.skip_mservarc:
-                    CallMultiservArchTest()
+    if argc == 2 and argv[1] in SimpleTestKeys:
+        SimpleTestKeys[argv[1]](testMaster.getConfig()).run()
+        return
 
-            print "\n\nALL AUTOMATIC TEST ARE DONE\n\n"
-            doCleanUp()
-            print "\nFunctest finnished\n"
+    ret, reason = testMaster.initial_tests()
+    if ret == False:
+        print "The initial cluster test failed: %s" % (reason)
+        return
 
-        elif argc == 2 and argv[1] == '--timesync':
-            CallTimesyncTest()
+    if argc == 2 and argv[1] == '--sync':
+        return # done here, since we just need to test whether
+               # all the servers are on the same page
 
-        elif argc == 2 and argv[1] == '--bstorage':
-            CallBackupStorageTest()
+    if argc == 2 and argv[1] == '--main':
+        the_test = unittest.main(exit=False, argv=argv[:1])
 
-        elif argc == 2 and argv[1] == '--msarch':
-            CallMultiservArchTest()
+        if the_test.result.wasSuccessful():
+            print "Main tests passed OK"
+            if MergeTest().run():
+                SystemNameTest(testMaster.getConfig()).run()
+        doCleanUp()
+        ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
 
-        elif (argc == 2 or argc == 3) and argv[1] == '--clear':
-            if argc == 3:
-                if argv[2] == '--fake':
-                    doClearAll(True)
-                else:
-                    print "Unknown option: %s in --clear" % (argv[2])
+        print "\nALL AUTOMATIC TEST ARE DONE\n"
+        #print "\nFunctest finnished\n"
+
+    elif (argc == 2 or argc == 3) and argv[1] == '--clear':
+        if argc == 3:
+            if argv[2] == '--fake':
+                doClearAll(True)
             else:
-                doClearAll(False)
-            clusterTest.unittestRollback.removeRollbackDB()
-        elif argc == 2 and argv[1] == '--perf':
-            PerfTest().start()
-            doCleanUp()
+                print "Unknown option: %s in --clear" % (argv[2])
         else:
-            if argv[1] == '--merge-test':
-                MergeTest().test()
-                doCleanUp()
-            elif argv[1] == '--merge-admin':
-                MergeTest_AdminPassword().test()
-                clusterTest.unittestRollback.removeRollbackDB()
-            elif argv[1] == '--rtsp-test':
-                runRtspTest()
-            elif argv[1] == '--rtsp-perf':
-                runRtspPerf(argc == 3 and argv[2] == '--dump')
-            elif argc == 3 and argv[1] == '--perf':
-                runPerfTest()
-            else:
-                runMiscFunction(argc, argv)
+            doClearAll(False)
+        testMaster.unittestRollback.removeRollbackDB()
+    elif argc == 2 and argv[1] == '--perf':
+        PerfTest().start()
+        doCleanUp()
+    else:
+        if argv[1] == '--merge-test':
+            MergeTest(True).run()
+        elif argv[1] == '--merge-admin':
+            MergeTest_AdminPassword().test()
+            testMaster.unittestRollback.removeRollbackDB()
+        elif argc == 3 and argv[1] == '--perf':
+            runPerfTest()
+        else:
+            runMiscFunction(argc, argv)
 
 
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
-    argv = clusterTest.preparseArgs(sys.argv)
-    if len(argv) >= 2 and argv[1] in ('--help', '-h'):
+    argv = testMaster.preparseArgs(sys.argv)
+    if len(argv) == 1:  # called from auto.py, using boxes which are created, but servers not started
+        RunByAutotest(argv[0])
+    elif len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':
         UnitTestRollback().doRecover()
-    elif len(argv) == 2 and argv[1] == '--sys-name':
-        SystemNameTest().run()
     else:
         DoTests(argv)
-

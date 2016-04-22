@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """Test inter-server redirects."""
 
@@ -6,78 +7,136 @@ import urllib2
 from httplib import HTTPException
 import json
 import time
-from functest_util import JsonDiff, compareJson, get_server_guid
+from collections import namedtuple
+import traceback
+from functest_util import JsonDiff, compareJson, get_server_guid, real_caps
+from testbase import FuncTestError
 
-MAIN_HOST = '192.168.109.12:7001'
-SEC_HOST = '192.168.109.13:7001'
-IDS = {}
+_MAIN_HOST = '192.168.109.8:7001'
+_SEC_HOST = '192.168.109.9:7001'
+#FIXME USE CONFIG!!!!
 
-CHECK_URI = ''
+#CHECK_URI = ''
 
-USER = 'admin'
-PWD = '123'
-
-
-def prepare_loader():
-    passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    for h in (MAIN_HOST, SEC_HOST):
-        passman.add_password(None, "http://%s/ec2" % h, USER, PWD)
-        passman.add_password(None, "http://%s/api" % h, USER, PWD)
-    urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+_USER = 'admin'
+_PWD = 'admin'
 
 
-def perform_request(peer, redirect_to=None):
-    if redirect_to:
-        print "Requesting %s with redirect to %s" % (peer, redirect_to)
-    else:
-        print "Requesting %s" % (peer,)
-    req = urllib2.Request('http://%s/ec2/getResourceParams' % peer)
-    if redirect_to:
-        req.add_header('X-server-guid', IDS[redirect_to])
-    response = urllib2.urlopen(req)
-    data = response.read()
-    content_len = int(response.info()['Content-Length'])
-    if content_len != len(data):
-        print "FAIL: Resulting data len: %s. Content-Length: %s" % (len(data), content_len)
-    return (json.loads(data), content_len)
-    #print "Resulting data len: %s" % len(data)
-
-def proxy_test():
+def _prepareLoader(hosts):
     try:
-        prepare_loader()
-        for h in (MAIN_HOST, SEC_HOST):
+        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        for h in (hosts):
+            passman.add_password(None, "http://%s/ec2" % h, _USER, _PWD)
+            passman.add_password(None, "http://%s/api" % h, _USER, _PWD)
+        urllib2.install_opener(urllib2.build_opener(urllib2.HTTPDigestAuthHandler(passman)))
+    except Exception:
+        raise FuncTestError("can't install a password manager: %s" % (traceback.format_exc(),))
+
+
+Result = namedtuple('Result', ['func', 'server', 'redirect', 'data', 'length'])
+def _req_str(self):
+    return (
+        "direct request to %s" % self.server
+    ) if self.redirect is None else (
+        "request to %s through %s" % (self.redirect, self.server)
+    )
+Result.req_str = _req_str
+
+
+def compareResults(a, b):
+    """
+    :param a: Result
+    :param b: Result
+    """
+    if a.func != b.func:
+        raise AssertionError("The test is broken! Trying to compare different functions results: %s and %s" %
+                             (a.funcm, b.func))
+    if a.length != b.length:
+        raise FuncTestError("Function %s. Different data lengths returned by %s (%s) and %s (%s)" %
+                            (a.func, a.req_str(), a.length, b.req_str(), b.length))
+    diff = compareJson(a.data, b.data)
+    if diff.hasDiff():
+        raise FuncTestError("Function %s. Diferent responses for %s and %s: %s" %
+                            (a.func, a.req_str(), b.req_str(), diff.errorInfo()))
+
+
+class ProxyTest(object):
+
+    def __init__(self, mainHost, secHost):
+        self.mainHost = mainHost
+        self.secHost = secHost
+        self.uids = {}
+
+    def getUids(self):
+        for h in (self.mainHost, self.secHost):
             guid = get_server_guid(h)
             if guid is not None:
-                IDS[h] = guid
+                self.uids[h] = guid
                 print "%s - %s" % (h, guid)
             else:
-                print "FAIL: Can't get server %s guid!" % h
-        time.sleep(1)
+                raise FuncTestError("Can't get server %s guid!" % h)
+
+    def _performRequest(self, func, peer, redirectTo=None):  # :type : Result
+        action = "requesting %s from %s" % (func, peer if not redirectTo else ("%s through %s" % (redirectTo, peer)))
+        print real_caps(action)
         try:
-            (data1, len1) = perform_request(MAIN_HOST)
-        except HTTPException, e:
-            print "FAIL: error requesting %s: %s: %s" % ((MAIN_HOST,) + sys.exc_info()[0:2])
-            return False
-        time.sleep(1)
+            req = urllib2.Request('http://%s/%s' % (peer, func))
+            if redirectTo:
+                req.add_header('X-server-guid', self.uids[redirectTo])
+            response = urllib2.urlopen(req)
+            data = response.read()
+            content_len = int(response.info()['Content-Length'])
+            if content_len != len(data):
+                raise FuncTestError(
+                    "Wrong result %s: resulting data len: %s. Content-Length: %s" % (action, len(data), content_len))
+            return Result(func, peer, redirectTo, json.loads(data), content_len)
+        except HTTPException:
+            raise FuncTestError("error " + action)
+
+    def run(self):
+        print "\n======================================="
+        print "Proxy Test Start"
         try:
-            (data2, len2) = perform_request(MAIN_HOST, SEC_HOST)
-        except HTTPException, e:
-            print "FAIL: error requesting %s through %s: %s: %s" % ((SEC_HOST, MAIN_HOST) + sys.exc_info()[0:2])
-            return False
-        diff = compareJson(data1, data2)
-        if len1 != len2:
-            print "FAIL: Different data lengths: %s and %s" % (len1, len2)
-        elif diff.hasDiff():
-            print "FAIL: Diferent responses: %s" % diff.errorInfo()
-        else:
+            self.getUids()
+            func = 'ec2/getResourceParams'
+            time.sleep(0.1)
+            res1 = self._performRequest(func, self.mainHost)
+            time.sleep(1)
+            res2 = self._performRequest(func, self.mainHost, self.secHost)
+            compareResults(res1, res2)
+            time.sleep(0.1)
+            res3 = self._performRequest(func, self.secHost)
+            compareResults(res2, res3)
+            func = 'api/moduleInformation'
+            res1 = self._performRequest(func, self.secHost)
+            time.sleep(0.1)
+            res2 = self._performRequest(func, self.mainHost, self.secHost)
+            compareResults(res1, res2)
+            time.sleep(1)
+            #res2 = self._performRequest(func, self.mainHost)
+            #if res1.length == res2.length:
+            #    diff = compareJson(res1.data, res2.data)
+            #    if not diff.hasDiff():
+            #        raise FuncTestError("")
             print "Test complete. Responses are the same."
-    except:
-        print "FAIL: %s: %s:\n%s" % sys.exc_info()
-        raise
-    return True
+            return True
+        except FuncTestError:
+            raise
+        except Exception:
+            raise FuncTestError(traceback.format_exc())
+        finally:
+            print "======================================="
+
 
 if __name__ == '__main__':
-    if not proxy_test():
-        exit(1)
-
+    try:
+        _MAIN_HOST = sys.argv[1]
+        _SEC_HOST = sys.argv[2]
+    except IndexError:
+        pass
+    try:
+        _prepareLoader((_MAIN_HOST, _SEC_HOST))
+        ProxyTest(_MAIN_HOST, _SEC_HOST).run()
+    except FuncTestError as err:
+        print "FAIL: %s" % err.message
 

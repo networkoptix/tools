@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 """
 The main configuration file for (auto-)test scripts.
@@ -17,7 +18,7 @@ LIB_PATH = ''    # the path to the unit tests' dynamic libraries; live it '' to 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
 
-def fix_paths():
+def _fix_paths(override=False):
     global TEMP, PROJECT_ROOT, TARGET_PATH, BIN_PATH, LIB_PATH
     if TEMP == '':
         TEMP = os.getcwd()
@@ -28,24 +29,26 @@ def fix_paths():
     PROJECT_ROOT = os.path.abspath(PROJECT_ROOT)
     SUBPROC_ARGS['cwd'] = PROJECT_ROOT
 
-    if TARGET_PATH == '':
+    if override or TARGET_PATH == '':
         TARGET_PATH = os.path.join(PROJECT_ROOT, "build_environment/target")
-    if BIN_PATH == '':
+    if override or BIN_PATH == '':
         BIN_PATH = os.path.join(TARGET_PATH, "bin/release")
-    if LIB_PATH == '':
+    if override or LIB_PATH == '':
         LIB_PATH = os.path.join(TARGET_PATH, "lib/release")
 
 
 HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consumed by check, builds and tests
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
-UT_PIPE_TIMEOUT = 10 * 1000  # milliseconds. Unit tests' pipe timeout
-FT_PIPE_TIMEOUT = 60 * 1000  # ... Functional tests' pipe timeout
+UT_PIPE_TIMEOUT = 60 * 1000  # milliseconds. Unit tests' pipe timeout
+FT_PIPE_TIMEOUT = 90 * 1000  # ... Functional tests' pipe timeout
+TEST_TERMINATION_WAIT = 7 # seconds, how long to wait for test process teermination before kill it
 BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
-FUNCTEST_LAST_LINES = 30 # Lines to show if the functional tests hang.
-MVN_TERMINATION_WAIT = 15 # seconds, how long to wait mvn return code
+FUNCTEST_LAST_LINES = 50 # Lines to show if the functional tests hang.
+MVN_TERMINATION_WAIT = 15 # seconds, how long to wait for mvn return code
 MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 SELF_RESTART_TIMEOUT = 10 # seconds
+SLEEP_AFTER_BOX_START = 1 # seconds
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
@@ -70,6 +73,8 @@ HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 
+VAG_DIR = "./vagrant"
+
 HG_IN = [HG, "incoming", "--quiet", "--template={branch},"]
 HG_REVLIST = [HG, "incoming", "--quiet", "--template={branch};{author};{node|short};{date|isodatesec};{desc|tabindent}\n"]
 HG_PULL = [HG, "pull", "--quiet"]
@@ -80,11 +85,24 @@ HG_BRANCH = [HG, "branch"]
 VAGR_DESTROY = [VAGRANT, "destroy", "-f"]
 VAGR_RUN = [VAGRANT, "up"]
 VAGR_STOP = [VAGRANT, "halt"]
+VAGR_STAT = [VAGRANT, "status"]
 
-VG_BOXES_IP = ['192.168.109.12', '192.168.109.13']
+BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes without mediaserver are skipped
+    'box1': '192.168.109.8',
+    'box2': '192.168.109.9',
+    'boxnat': '192.168.109.10',
+    'boxbehind': '192.168.110.3',
+}
+
+CHECK_BOX_UP = frozenset(['box1', 'box2', 'boxbehind'])
+
+BOX_POST_START = {
+    'boxbehind': 'post-create-behind-nat.sh'
+}
+
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
-MEDIASERVER_PASS = '123'
+MEDIASERVER_PASS = 'admin'
 
 START_CHECK_TIMEOUT = 30 # seconds
 ALL_START_TIMEOUT_BASE = 120 # seconds, per server
@@ -97,11 +115,12 @@ SKIP_TESTS = {
 #   'time' - to skip time synchronization test
 #   'backup' - to skip backup storage test
 #   'msarch' - to skip nultiserver archive test
+#   'natcon' - to skip connection behind NAT test
 #   'proxy' - to skip server proxy test
 }
 
 # Skip these test for all branches
-SKIP_ALL = {'msarch'}
+SKIP_ALL = set() # {'msarch'}
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
@@ -112,4 +131,4 @@ try:
 except ImportError:
     pass
 
-fix_paths()
+_fix_paths()

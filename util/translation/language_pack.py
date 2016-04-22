@@ -15,7 +15,7 @@ sys.path.pop(0)
 
 verbose = False
 targetFolder = None
-kMinFileSize = 112
+kMinFileSize = 120
 
 def copyFiles(project, filesByLang):
     for lang, files in filesByLang.items():

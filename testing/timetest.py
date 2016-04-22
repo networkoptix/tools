@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 import urllib2
 import unittest
@@ -11,7 +12,7 @@ import struct
 import pprint
 
 from functest_util import ClusterLongWorker, get_server_guid
-from testboxes import *
+from testbase import *
 
 GRACE = 1.0 # max time difference between responses to say that times are equal
 INET_GRACE = 3.0 # max time difference between a mediaserver time and the internet time
@@ -21,7 +22,7 @@ SERVER_SYNC_TIMEOUT = 10 # seconds
 MINOR_SLEEP = 1 # seconds
 SYSTEM_TIME_SYNC_SLEEP = 10.5 # seconds, a bit greater than server's systime check period (10 seconds)
 SYSTEM_TIME_NOTSYNC_SURE = 30 # seconds, how long wait to shure server hasn't synced with system time
-INET_SYNC_TIMEOUT = 15 * 2 # twice as bigger than the value in tt_setisync.sh
+INET_SYNC_TIMEOUT = 15 * 2 # twice as bigger than the value in ctl.sh in prepare_isync case
 
 IF_EXT = 'eth0'
 
@@ -63,20 +64,6 @@ EMPTY_TIME = dict(
     syncTimeFlags='',
 )
 
-
-class ___TestLoader(unittest.TestLoader):
-
-    def load(self, testclass, testset, config):
-        TimeSyncTest.config = config
-        names = getattr(TimeSyncTest, testset, None)
-        if names is not None:
-            print "[Preparing %s tests]" % testset
-            TimeSyncTest.testset = testset
-            return self.suiteClass(map(TimeSyncTest, names))
-        else:
-            print "ERROR: No test set '%s' found!" % testset
-
-
 ###########
 ## NOTE:
 ## Really it's a sequence of tests where most of tests depend on the previous test result.
@@ -87,7 +74,7 @@ class TimeSyncTest(FuncTestCase):
     _suits = (
         ('SyncTimeNoInetTests', [
             'InitialSynchronization',
-            'ChangePrimayServer',
+            'ChangePrimaryServer',
             'PrimarySystemTimeChange',
             'SecondarySystemTimeChange',
             'StopPrimary', 'RestartSecondaryWhilePrimaryOff', 'StartPrimary',
@@ -104,6 +91,8 @@ class TimeSyncTest(FuncTestCase):
             'PrimaryFollowsSystemTime',
         ])
     )
+    _test_name = "TimeSync"
+    _test_key = 'timesync'
     _init_time = []
     _primary = None
     _secondary = None
@@ -111,8 +100,6 @@ class TimeSyncTest(FuncTestCase):
 
     @classmethod
     def setUpClass(cls):
-        print "========================================="
-        print "TimeSync Test Start: %s" % cls.testset
         if cls.testset == 'InetTimeSyncTests':
             if not check_inet_time():
                 raise unittest.SkipTest("Internet time servers aren't sccessible")
@@ -134,16 +121,26 @@ class TimeSyncTest(FuncTestCase):
                 if p.wait() != 0:
                     print "ERROR: Failed to start external interface for box %s" % (b,)
         super(TimeSyncTest, cls).tearDownClass()
-        print "TimeSync Test End"
-        print "========================================="
 
     def setUp(self):
         self.times = [EMPTY_TIME.copy() for _ in xrange(self.num_serv)]
 
+    @classmethod
+    def globalFinalise(cls):
+        for num in xrange(cls.num_serv):
+#            cls.class_call_box(cls.hosts[num], 'date', '--set=@%d' % int(time.time()))
+            cls.class_call_box(cls.hosts[num], '/vagrant/ctl.sh', 'timesync', 'clear', str(int(time.time())))
+        super(TimeSyncTest, cls).globalFinalise()
+
+
     ################################################################
 
-    def _get_init_script(self, boxnum):
-        return '/vagrant/tt_init.sh', self._init_time[boxnum]
+    def _init_script_args(self, boxnum):
+        return (self._init_time[boxnum],)
+
+    @classmethod
+    def _global_clear_extra_args(cls, num):
+        return (str(int(time.time())),)
 
     def _show_systime(self, box):
         print "OS time for %s: %s " % (box, self.get_box_time(box))
@@ -207,7 +204,7 @@ class TimeSyncTest(FuncTestCase):
             timediff = abs(timedata['time'] - timedata['boxtime'])
             if timediff > GRACE:
                 if must_synchronize:
-                    print "DEBUG: %s server time: %s, system time: %s. Diff = %.2f - too high" % (
+                    print "DEBUG (_check_systime_sync): %s server time: %s, system time: %s. Diff = %.2f - too high" % (
                         boxnum, timedata['time'], timedata['boxtime'], timediff)
                 time.sleep(0.5)
             else:
@@ -232,8 +229,8 @@ class TimeSyncTest(FuncTestCase):
         times = self._request_gettime(boxnum) #, False) -- return this after removing the next debug
         self.times[boxnum] = times
         #print "DEBUG: %s server time %s, system time %s, local time %s" % (boxnum, times['time'], times['boxtime'], times['local'])
-        print "!DEBUG: %s server times: " % boxnum,
-        pprint.pprint(times)
+        #print "!DEBUG: %s server times: " % boxnum,
+        #pprint.pprint(times)
         return times['local'] - times['time']  # local time -- server's time
 
     def _get_secondary(self):
@@ -257,7 +254,7 @@ class TimeSyncTest(FuncTestCase):
         #self.debug_systime()
         #TODO add here flags check, what server has became the primary one
 
-    def ChangePrimayServer(self):
+    def ChangePrimaryServer(self):
         """Check mediaservers' time synchronization by the new primary server.
         """
         #self.debug_systime()
@@ -273,12 +270,12 @@ class TimeSyncTest(FuncTestCase):
         """Change system time on the primary servers' box, check if the servers have synchronized.
         """
         self.shortDescription()
-        self.debug_systime()
+        #self.debug_systime()
         primary = self._primary # they'll be compared later
         box = self.hosts[primary]
         print "Use primary box %s (%s)" % (primary, box)
         self.shift_box_time(box, 12345)
-        self.debug_systime()
+        #self.debug_systime()
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(primary)
         self._check_time_sync()
@@ -292,7 +289,7 @@ class TimeSyncTest(FuncTestCase):
         box = self.hosts[sec]
         print "Use secondary box %s (%s)" % (sec, box)
         self.shift_box_time(box, -12345)
-        self.debug_systime()
+        #self.debug_systime()
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_systime_sync(sec, False)
         self._check_time_sync()
@@ -302,7 +299,7 @@ class TimeSyncTest(FuncTestCase):
         """Check if stopping the primary server doesn't lead to the secondary's time change.
         """
         type(self)._secondary = self._get_secondary()
-        self._show_systime(self.hosts[self._primary])
+        #self._show_systime(self.hosts[self._primary])
         delta_before = self._serv_local_delta(self._secondary) # remember difference between seco9ndary server's time and the local time
         self._mediaserver_ctl(self.hosts[self._primary], 'stop')
         time.sleep(MINOR_SLEEP)
@@ -347,7 +344,6 @@ class TimeSyncTest(FuncTestCase):
         #self.debug_systime()
         self._check_time_sync(False)
 
-    @unittest.expectedFailure
     def PrimaryStillSynchronized(self):
         self._check_systime_sync(self._primary)
 
@@ -374,10 +370,8 @@ class TimeSyncTest(FuncTestCase):
     ###################################################################
 
     def _prepare_inet_test(self, box, num):
-        print "Stopping box %s" % box
-        self._mediaserver_ctl(box, 'stop')
         time.sleep(0)
-        self._call_box(box, '/vagrant/tt_setisync.sh', self._init_time[num])
+        self._call_box(box, '/vagrant/ctl.sh', 'timesync', 'prepare_isync', self._init_time[num])
 
     ###################################################################
 
@@ -389,7 +383,7 @@ class TimeSyncTest(FuncTestCase):
         self._setPrimaryServer(self._primary)
         self._check_time_sync(False)
         type(self)._secondary = self._get_secondary()
-        self._call_box(self.hosts[self._secondary], '/vagrant/tt_iup.sh')
+        self._call_box(self.hosts[self._secondary], '/vagrant/ctl.sh', 'timesync', 'iup')
         time.sleep(INET_SYNC_TIMEOUT)
         itime_str = check_inet_time()
         self.assertTrue(itime_str, "Internet time request failed!")
@@ -479,7 +473,7 @@ class TimeSyncTest(FuncTestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after both servers were restarted.")
 
-    @unittest.expectedFailure
+    #@unittest.expectedFailure
     def PrimaryFollowsSystemTime(self):
         """Check if the primary server changes time when it's system time has been changed.
         """

@@ -89,8 +89,6 @@ def get_pro_files(modules, filt=None):
         pro = find_pro(module, filt)
         if pro:
             result[module] = pro
-        else:
-            return None
 
     return result
 
@@ -109,11 +107,15 @@ def main():
         pro_file.write('SUBDIRS = \\\n')
 
         for module in dep_tree:
-            pro_file.write('    {0} \\\n'.format(normalized(module)))
+            if module in pro_files:
+                pro_file.write('    {0} \\\n'.format(normalized(module)))
 
         pro_file.write('\n')
 
         for module in dep_tree:
+            if not module in pro_files:
+                continue
+
             deps = dep_tree[module]
             if deps:
                 pro_file.write('{0}.depends = {1}\n'.format(
@@ -122,7 +124,8 @@ def main():
         pro_file.write('\n')
 
         for module in dep_tree:
-            pro_file.write('{0}.file = {1}\n'.format(normalized(module), pro_files[module]))
+            if module in pro_files:
+                pro_file.write('{0}.file = {1}\n'.format(normalized(module), pro_files[module]))
 
         pro_file.write('\n')
     print('Output is written to {0}'.format(args.output))

@@ -15,7 +15,7 @@ from collections import deque
 from subprocess import Popen, PIPE
 
 DEFAULT_THREADS = 10
-AUTH = ('admin', '123')
+AUTH = ('admin', 'admin')
 URI = "/api/gettime" # "/ec2/getCurrentTime", /api/moduleInformation, /api/ping, /api/statistics,
 # /ec2/getSettings, /api/moduleInformation, /api/logLevel, /api/iflist, /api/systemSettings
 URI_HEAVY = "/ec2/getResourceTypes" # /ec2/getFullInfo
@@ -59,7 +59,7 @@ class BaseWorker(object):
 
     def __init__(self, master, num):
         self._id = num
-        self._master = master
+        self._master = master  # type: StressTestRunner
         self.fails = _init_fails() # failures, groupped by error message
 
     def getId(self):
@@ -70,6 +70,12 @@ class BaseWorker(object):
             self.fails[result] += 1
         else:
             self.fails[result] = 1
+
+    def _output(self, msg):
+        if self._master.need_logexc():
+            sys.stdout.write(msg)
+        if logfile:
+            print >>logfile, msg
 
     def _req(self):
         raise NotImplementedError()
@@ -110,10 +116,10 @@ class RequestWorker(BaseWorker):
             else:
                 return 'Code: %s' % res.status_code
         except RequestException, e:
-            print "%s: %s\n" % (type(e).__name__, e.message),
+            self._output("%s: %s\n" % (type(e).__name__, e.message))
             return type(e).__name__
         except Exception, e:
-            print "Exception: %s\n" % (TB.format_exc(),),
+            self._output("Exception: %s\n" % (TB.format_exc(),))
             return type(e).__name__
 
 
@@ -153,7 +159,7 @@ class InteruptingWorker(BaseWorker):
                 return "RC=%s" % (proc.returncode,)
             return None
         except Exception, e:
-            print "Exception: %s\n" % (TB.format_exc(),),
+            self._output("Exception: %s\n" % (TB.format_exc(),))
             return type(e).__name__
 
 
@@ -175,7 +181,11 @@ class StressTestRunner(object):
         self._hang = False
         self._nostat = False
         self._full = args.full
+        self._logexc = args.logexc
         signal.signal(signal.SIGINT,self._onInterrupt)
+
+    def need_logexc(self):
+        return self._logexc
 
     def _createWorkers(self):
         if self._drop:
@@ -213,7 +223,7 @@ class StressTestRunner(object):
         oks = fails[None]
         return "Success %d/%d (%.1f%%), avg. %.1f req/sec.%s" % (oks, total,
             ((oks * 100.0)/total) if total else 0, (total/passed) if passed else 0,
-            (" Fails: " + ', '.join("%s %s" % (k, v) for k, v in fails.iteritems() if k is not None)) if len(fails) > 1 else ''
+            ("\nFails: " + ', '.join("%s %s" % (k, v) for k, v in fails.iteritems() if k is not None)) if len(fails) > 1 else ''
         )
 
     def print_totals(self):
@@ -346,6 +356,7 @@ def parse_args():
     parser.add_argument('-l', '--log', action='store_true', help="Write a log file")
     parser.add_argument('-b', '--batch', type=int, help="Batch testing mode. Optional value - testing duration, whole seconds. Default is %s" % BATCH_PERIOD, nargs='?', const=BATCH_PERIOD)
     parser.add_argument('-f', '--full', help="Full 2-step test with drop-phase", nargs='?', const="")
+    parser.add_argument('-e', '--logexc', action='store_true', help="Log to console every request exception. Without it exceptions are counted only")
     #TODO: add print exception option (don't print request exceptions withot it)
     #TODO: add option to set HANG_GRACE and calculate the minimal FAILS_TAIL from it
     #TODO: also check that HANG_GRACE is less than BATCH_PERIOD

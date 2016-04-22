@@ -55,6 +55,11 @@ def checkSymbol(symbol, source, target, context, out):
     
 def checkText(source, target, context, result, index, hasNumerusForm):
 
+    if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
+        if target != source:
+            err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
+            result.error += 1
+
     if not hasNumerusForm:
         for symbol in numerus:
             if source.count(symbol):
@@ -103,7 +108,6 @@ def validateXml(root, name):
             translation = message.find('translation')
             if translation.get('type') == 'unfinished':
                 result.unfinished += 1
-                continue
             
             if translation.get('type') == 'obsolete':
                 continue
@@ -120,6 +124,14 @@ def validateXml(root, name):
                 if not numerusform.text:
                     continue;
                 result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
+                
+            if hasNumerusForm:
+                forms = [numerusform for numerusform in translation.iter('numerusform') if numerusform.text]
+                filled = len([numerusform for numerusform in translation.iter('numerusform') if numerusform.text])
+                if filled > 0 and filled != index:
+                    result.error += 1
+                    err(u'Incomplete numerus translation:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
+                    err(u'Filled {0} of {1} numerus forms'.format(filled, index))
                 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)

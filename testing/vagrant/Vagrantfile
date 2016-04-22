@@ -1,0 +1,68 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20150911.box"
+  config.ssh.forward_agent = true
+
+  #config.vm.provision :shell, :path => "bootstrap.sh"
+  #config.vm.provision :shell, :path => "bootstrap.sh", :args => "u14m1"
+  
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 512
+    vb.cpus = 1
+    vb.gui = false
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+    #vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--vram", "32"]
+    vb.customize ["setextradata", :id, "VBoxInternal/Devices/VMMDev/0/Config/GetHostTimeDisabled", 1]
+  end
+
+  config.vm.define "box1" do |box1|
+    box1.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--name", "box1"]
+#       vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    end
+    box1.vm.box = "box1"
+#    box1.vm.network "public_network", bridge: "eth0"
+    box1.vm.network :private_network, ip: "192.168.109.8"
+    box1.vm.provision :shell, :path => "bootstrap.sh", :args => ["box1", "nontp"] # , :name => "box1"
+  end
+
+  config.vm.define "box2" do |box2|
+    box2.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--name", "box2"]
+#        vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    end
+    box2.vm.box = "box2"
+#    box2.vm.network "public_network", bridge: "eth0"
+    box2.vm.network :private_network, ip: "192.168.109.9"
+    box2.vm.provision :shell, :path => "bootstrap.sh", :args => ["box2", "nontp"] # , :name => "box2"
+  end
+
+  config.vm.define "boxnat" do |boxnat|
+    boxnat.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--name", "boxnat"]
+        vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    end
+    boxnat.vm.box = "boxnat"
+    boxnat.vm.network :private_network, ip: "192.168.109.10"
+    boxnat.vm.network :private_network, ip: "192.168.110.2"
+    # note: no mediaserver installation, this box is just a NAT
+    boxnat.vm.provision :shell, :path => "btr_nat.sh", :args => "boxnat"
+  end
+
+  config.vm.define "boxbehind" do |boxbehind|
+    boxbehind.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--name", "boxbehind"]
+    end
+    boxbehind.vm.box = "boxbehind"
+    boxbehind.vm.network :private_network, ip: "192.168.110.3"
+    # note: no mediaserver installation, only after eth0 goes down
+    boxbehind.vm.provision :shell, :path => "bootstrap.sh", :args => "boxbehind"
+  end
+
+
+
+end

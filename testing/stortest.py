@@ -1,27 +1,33 @@
+# -*- coding: utf-8 -*-
+"""
+Storages functional tests:
+1. Backup storage test
+2. Multiarchive storage test
+Both imported and called by functest.py
+Their common base class StorageBasedTest also used in other tests.
+"""
 __author__ = 'Danil Lavrentyuk'
-import urllib2
+import os, os.path, copy, sys, time
+#import urllib2
 import subprocess
-import traceback
-import time
-import sys
-import os
-import os.path
-import json
+#import traceback
 import uuid
 from pipes import quote as shquote
 
 import pprint
 
 from functest_util import ClusterLongWorker, get_server_guid, unquote_guid, CAMERA_ATTR_EMPTY
-from testboxes import *
+from testbase import *
 
 mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
 multiserv_interfals_fname = os.path.join(mypath, "multiserv_intervals.py")
 
-BACKUP_STORAGE_READY_TIMEOUT = 60 # seconds
+BACKUP_STORAGE_READY_TIMEOUT = 60  # seconds
+BACKUP_START_TIMEOUT = 20  # seconds
+BACKUP_MAX_DURATION = 60  #seconds
 
 _NUM_SERV_BAK = 1
-_NUM_SERV_MARCH = 2
+_NUM_SERV_MSARCH = 2
 _WORK_HOST = 0
 
 TEST_CAMERA_TYPE_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
@@ -60,21 +66,32 @@ SERVER_USER_ATTR = {
     'backupBitrate': -1,
 }
 
-TMP_STORAGE = '/tmp/bstorage'
+TMP_STORAGE = '/tmp/bstorage'  # directory path on the server side to create backup storage in
+
 
 class BackupStorageTestError(FuncTestError):
     pass
 
+
 class StorageBasedTest(FuncTestCase):
-    num_serv_t = 0
+    """ Some common logic for storage tests.
+    """
+    num_serv = 0
     _storages = dict()
     _fill_storage_script = ''
-    _clear_storage_script = ''
-    test_camera_id = 0
-    test_camera_physical_id = 0
+    test_camera_id = None
+    test_camera_physical_id = None
+
+
+    @classmethod
+    def globalInit(cls, config):
+        super(StorageBasedTest, cls).globalInit(config)
+        cls.test_camera_id = [0 for _ in xrange(cls.num_serv)]
+        cls.test_camera_physical_id = cls.test_camera_id[:]
 
     def _load_storage_info(self):
-        for num in xrange(self.num_serv_t):
+        "Get servers' storage space data"
+        for num in xrange(self.num_serv):
             resp = self._server_request(num, 'api/storageSpace')
             self._storages[num] = [s for s in resp["reply"]["storages"] if s['storageType'] == 'local']
             #print "[DEBUG] Storages found:"
@@ -82,35 +99,48 @@ class StorageBasedTest(FuncTestCase):
             #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
 
     @classmethod
-    def new_test_camera(cls):
-        data = TEST_CAMERA_DATA.copy()
+    def _duplicateConfig(cls):
+        cls.config = copy.copy(cls.config)
+        cls.config.runtime = cls.config.runtime.copy()
+
+    @classmethod
+    def new_test_camera(cls, boxnum, camData=TEST_CAMERA_DATA):
+        "Creates initial dict of camera data."
+        data = camData.copy()
         data['id'] = str(uuid.uuid4())
-        cls.test_camera_id = data['id']
-        cls.test_camera_physical_id = data['physicalId']
+        cls.test_camera_id[boxnum] = data['id']
+        cls.test_camera_physical_id[boxnum] = data['physicalId']
         return data
 
-    def _add_test_camera(self, boxnum, camera=None, log_response=True):
-        camera = self.new_test_camera() if camera is None else camera.copy()
+    @classmethod
+    def _duplicateConfig(cls):
+        cls.config = copy.copy(cls.config)
+        cls.config.runtime = cls.config.runtime.copy()
+
+    def _add_test_camera(self, boxnum, camera=None, log_response=False, cameraAttr=TEST_CAMERA_ATTR):
+        camera = self.new_test_camera(boxnum) if camera is None else camera.copy()
         camera['parentId'] = self.guids[boxnum]
         self._server_request(boxnum, 'ec2/saveCamera', camera)
         answer = self._server_request(boxnum, 'ec2/getCameras')
         if log_response:
-            print "getCameras(%s) response: '%s'" % (boxnum, answer)
+            print "_add_test_camera: getCameras(%s) response: '%s'" % (boxnum, answer)
         for c in answer:
             if c['parentId'] == self.guids[boxnum]:
-                self.assertEquals(unquote_guid(c['id']), self.test_camera_id, "Failed to assign a test camera to to a server")
-        attr_data = [TEST_CAMERA_ATTR.copy()]
-        attr_data[0]['cameraID'] = self.test_camera_id
+                self.assertEquals(unquote_guid(c['id']), self.test_camera_id[boxnum], "Failed to assign a test camera to to a server")
+        attr_data = [cameraAttr.copy()]
+        attr_data[0]['cameraID'] = self.test_camera_id[boxnum]
         self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
         answer = self._server_request(boxnum, 'ec2/getCamerasEx')
         if log_response:
-            print "getCamerasEx(%s) response: '%s'" % (boxnum, answer)
+            print "_add_test_camera: getCamerasEx(%s) response: '%s'" % (boxnum, answer)
 
-    def _fill_storage(self, mode, boxnum, *args):
-        print "Filling the main storage with the test data."
+
+    def _fill_storage(self, mode, boxnum, arg):
+        print "Server %s: Filling the main storage with the test data." % boxnum
         self._call_box(self.hosts[boxnum], "python", shquote("/vagrant/" + self._fill_storage_script), mode,
-                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id, *args)
+                       shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id[boxnum], arg)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
+        #print "rebuildArchive start: %s" %(answer,)
         try:
             state = answer["reply"]["state"]
         except Exception:
@@ -118,41 +148,54 @@ class StorageBasedTest(FuncTestCase):
         while state != 'RebuildState_None':
             time.sleep(0.5)
             answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
+            #print "rebuildArchive: %s" %(answer,)
             try:
                 state = answer["reply"]["state"]
             except Exception:
                 pass
-        print "Server %s: rebuildArchive done" % boxnum
 
     @classmethod
-    def setUpClass(cls):
-        super(StorageBasedTest, cls).setUpClass()
-        #cls.test_camera_id = [0 for _ in xrange(cls.num_serv_t)]
-        #cls.test_camera_physical_id = [0 for _ in xrange(cls.num_serv_t)]
-
+    def _need_clear_box(cls, num):
+        return super(StorageBasedTest, cls)._need_clear_box(num) and num in cls._storages
 
     @classmethod
-    def tearDownClass(cls):
-        if cls._clear_storage_script:
-            for num in xrange(cls.num_serv_t):
-                print "Remotely calling %s at box %s" % (cls._clear_storage_script, num)
-                cls.class_call_box(cls.hosts[num], '/vagrant/' + cls._clear_storage_script, cls._storages[num][0]['url'], TMP_STORAGE)
-        super(StorageBasedTest, cls).tearDownClass()
+    def _global_clear_extra_args(cls, num):
+        return (cls._storages[num][0]['url'], TMP_STORAGE)
 
     def _init_cameras(self):
         pass
 
     def _InitialRestartAndPrepare(self):
-        "Re-initialize with clear db, prepare a single camera data."
+        """
+        Common initial preparatioin code for subclasses
+        Re-initialize with clear db, prepare a single camera data.
+        """
         self._prepare_test_phase(self._stop_and_init)
         self._load_storage_info()
         self._init_cameras()
 
+    #def _has_camera(self, host, cameraName):
+    #    "Checks if the host has already got a camera with such name"
+    #    answer = self._server_request(host, 'ec2/getCameras')
+    #    for c in answer:
+    #        #print "Found camera '%s' at server %s" % (c['name'], c['parentId'])
+    #        if c['name'] == cameraName and c['parentId'] == self.guids[host]:
+    #            self.test_camera_id = c['id']
+    #            self.test_camera_physical_id = c['physicalId']  # TODO change for a list of ids
+    #            return True
+    #    return False
+
+
 
 class BackupStorageTest(StorageBasedTest):
-    num_serv_t = _NUM_SERV_BAK
+    """
+    The test for backup storage functionality.
+    Creates a backup storage and tries to start the backup procedure both manually and scheduled.
+    """
+    _test_name = "Backup Storage"
+    _test_key = 'bstorage'
+    num_serv = _NUM_SERV_BAK
     _fill_storage_script = 'fill_stor.py'
-    _clear_storage_script = 'bs_clear.sh'
 
     _suits = (
         ('BackupStartTests', [
@@ -162,41 +205,25 @@ class BackupStorageTest(StorageBasedTest):
         ]),
     )
 
-    def _get_init_script(self, boxnum):
-        return ('/vagrant/bs_init.sh',)
-
-    @classmethod
-    def setUpClass(cls):
-        print "========================================="
-        print "Backup Storage Test Start"
-        super(BackupStorageTest, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(BackupStorageTest, cls).tearDownClass()
-        print "Backup Storage Test End"
-        print "========================================="
-
     ################################################################
 
     def _init_cameras(self):
         self._add_test_camera(_WORK_HOST)
 
-
     def _create_backup_storage(self, boxnum):
         self._call_box(self.hosts[boxnum], "mkdir", '-p', TMP_STORAGE)
         data = self._server_request(boxnum, 'ec2/getStorages?id=' + self.guids[boxnum])
         self.assertIsNotNone(data, 'ec2/getStorages returned empty data')
-        print "DEBUG: Storages: "
-        pprint.pprint(data)
+        #print "DEBUG: Storages: "
+        #pprint.pprint(data)
         data = data[0]
         data['id'] = new_id = str(uuid.uuid4())
         data['isBackup'] = True
         data['url'] = TMP_STORAGE
         self._server_request(boxnum, 'ec2/saveStorage', data=data)
         data = self._server_request(boxnum, 'ec2/getStorages?id=' + self.guids[boxnum])
-        print "DEBUG: New storage list:"
-        pprint.pprint(data)
+        #print "DEBUG: New storage list:"
+        #pprint.pprint(data)
         t = time.time() + BACKUP_STORAGE_READY_TIMEOUT
         new_id = '{' + new_id + '}'
         while True:
@@ -215,37 +242,45 @@ class BackupStorageTest(StorageBasedTest):
                 pass
 
     def _wait_backup_start(self):
-        while True:
+        end = time.time() + BACKUP_START_TIMEOUT
+        while time.time() < end:
+            data = self._server_request(_WORK_HOST, 'api/backupControl/')
+            try:
+                if data['reply']['state'] != "BackupState_None":
+                    return
+            except Exception:
+                pass
+            time.sleep(0.5)
+        self.fail("Backup didn't started for %s seconds (or was ended before the first check)" % BACKUP_START_TIMEOUT)
+
+    def _wait_backup_end(self):
+        end = time.time() + BACKUP_MAX_DURATION
+        while time.time() < end:
+            time.sleep(0.5)
             data = self._server_request(_WORK_HOST, 'api/backupControl/')
             #print "backupControl: %s" % data
             try:
-                if data['reply']['state'] != "BackupState_None":
-                    break
-            except Exception:
-                pass
-            time.sleep(0.5)
-
-    def _wait_backup_end(self):
-        while True:
-            time.sleep(0.5)
-            data = self._server_request(_WORK_HOST, 'api/backupControl/')
-            # print "backupControl: %s" % data
-            try:
                 if data['reply']['state'] == "BackupState_None":
-                    break
+                    return
             except Exception:
                 pass
+        self.fail("Backup goes too log, more then %s seconds" % BACKUP_MAX_DURATION)
 
     def _check_backup_result(self):
         try:
             boxssh(self.hosts[_WORK_HOST], ('/vagrant/diffbak.sh', self._storages[_WORK_HOST][0]['url'], TMP_STORAGE))
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as err:
             DIFF_FAIL_CODE = 1
             DIFF_FAIL_MSG = "DIFFERENT"
-            if e.returncode == DIFF_FAIL_CODE and e.output.strip() == DIFF_FAIL_MSG:
-                self.fail("The main storage and the backup storage contents are different")
+            if err.returncode == DIFF_FAIL_CODE:
+                if err.output.strip() == DIFF_FAIL_MSG:
+                    self.fail("The main storage and the backup storage contents are different")
+                else:
+                    print "ERROR: Backup content check returned code %s. It's output:\n%s" % (err.returncode, err.output)
+                    self.fail("The main storage and the backup storage contents are possibly different")
             else:
-                raise
+                print "ERROR: Backup content check returned code %s. It's output:\n%s" % (err.returncode, err.output)
+                self.fail("Backup content check failed with code %s and output:\n%s" % (err.returncode, err.output))
 
     ################################################################
 
@@ -261,10 +296,15 @@ class BackupStorageTest(StorageBasedTest):
         data['backupType'] = 'BackupManual'
         self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
         time.sleep(0.1)
+        self._call_box(self.hosts[_WORK_HOST], "/vagrant/ctl.sh", "bstorage", "rmstorage",
+                       shquote(self._storages[_WORK_HOST][0]['url']))
         self._fill_storage('random', _WORK_HOST, "step1")
         data['backupType'] = 'BackupSchedule'
         time.sleep(0.1)
+        #print "DEBUG: ec2/saveServerUserAttributesList: %s" % (data,)
+        #answer =
         self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        #print "saveServerUserAttributesList: %s" % (answer,)
         self._wait_backup_start()
         #print "Scheduled backup started"
         self._wait_backup_end()
@@ -279,16 +319,17 @@ class BackupStorageTest(StorageBasedTest):
         self._fill_storage('random', _WORK_HOST, "step2")
         time.sleep(1)
         data = self._server_request(_WORK_HOST, 'api/backupControl/?action=start')
-        #print "backupControl start: %s" % data
+        print "backupControl start: %s" % data
         self._wait_backup_end()
-        time.sleep(1)
+        time.sleep(0.1)
         self._check_backup_result()
 
 
 class MultiserverArchiveTest(StorageBasedTest):
-    num_serv_t = _NUM_SERV_MARCH
+    _test_name = "Multiserver Archive"
+    _test_key = "msarch"
+    num_serv = _NUM_SERV_MSARCH
     _fill_storage_script = 'fill_stor.py'
-    #_clear_storage_script = 'ms_clear.sh'
     time_periods_single = []
     time_periods_joined = []
 
@@ -300,32 +341,19 @@ class MultiserverArchiveTest(StorageBasedTest):
         ]),
     )
 
-    def _get_init_script(self, boxnum):
-        return ('/vagrant/ms_init.sh', )
-
-    @classmethod
-    def setUpClass(cls):
-        print "========================================="
-        print "Multiserver Archive Test Start"
-        super(MultiserverArchiveTest, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(MultiserverArchiveTest, cls).tearDownClass()
-        print "Multiserver Archive Test End"
-        print "========================================="
-
     ################################################################
 
     def _init_cameras(self):
-        c = self.new_test_camera()
-        for num in xrange(_NUM_SERV_MARCH):
+        c = self.new_test_camera(0)
+        for num in xrange(_NUM_SERV_MSARCH):
+            if num > 0:
+                self.test_camera_id[num] = self.test_camera_id[0]
+                self.test_camera_physical_id[num] = self.test_camera_physical_id[0]
             self._worker.enqueue(self._add_test_camera, (num, c, False))
-            #self._add_test_camera(num, c)
         self._worker.joinQueue()
 
     def _getRecordedTime(self, boxnum, flat=True):
-        req = 'ec2/recordedTimePeriods?physicalId=%s' % self.test_camera_physical_id
+        req = 'ec2/recordedTimePeriods?physicalId=%s' % self.test_camera_physical_id[boxnum]
         if flat:
             req += '&flat' # ! it's not bool parameter, it's existance is it's value
         return self._server_request(boxnum, req)
@@ -359,7 +387,7 @@ class MultiserverArchiveTest(StorageBasedTest):
         "Re-initialize with clear db, prepare a single camera data and fill the storage with video data"
         self._InitialRestartAndPrepare()
         print "Filling archives with data..."
-        for num in xrange(_NUM_SERV_MARCH):
+        for num in xrange(_NUM_SERV_MSARCH):
             self._fill_storage('multiserv', num, str(num))
         print "Done. Wait a bit..."
         tmp = {}
@@ -370,7 +398,7 @@ class MultiserverArchiveTest(StorageBasedTest):
 
     def CheckArchiveMultiserv(self):
         "Checks recorded time periods for both servers joined into one system."
-        answer = [self._getRecordedTime(num) for num in xrange(self.num_serv_t)]
+        answer = [self._getRecordedTime(num) for num in xrange(self.num_serv)]
         for a in answer:
             self.assertTrue(a["error"] == '0' and a["errorString"] == '',
                 "ec2/recordedTimePeriods request to the box %s returns error %s: %s" % (num, a["error"], a["errorString"]))
@@ -379,50 +407,29 @@ class MultiserverArchiveTest(StorageBasedTest):
         #for chunk in answer[0]['reply'][:10]:
         #    print chunk
         type(self).base_time = int(answer[0]['reply'][0]['startTimeMs'])
-        print "DEBUG: base = %s" % self.base_time
+        #print "DEBUG: base = %s" % self.base_time
         self._compare_chunks(None, answer[0]['reply'], self.time_periods_joined)
-        #
-        #fail_count = 0
-        #i = 0
-        #for chunk in answer[0]['reply']:
-        #    if i >= len(self.time_periods_joined):
-        #        print "FAIL: Extra data in server's answer at position %s: %s" % (i, chunk)
-        #        fail_count += 1
-        #    elif int(chunk['startTimeMs']) != self.time_periods_joined[i]['start'] + self.base_time:
-        #        print "FAIL: Chunk %s start time differs: prepared %s, server's %s" % (
-        #            i, int(chunk['startTimeMs']), self.time_periods_joined[i]['start'] + self.base_time)
-        #        fail_count += 1
-        #    elif int(chunk['durationMs']) != self.time_periods_joined[i]['duration']:
-        #        print "FAIL: Chunk %s duration differs: prepared %s, server's %s" % (
-        #            i, chunk['durationMs'], self.time_periods_joined[i]['duration'])
-        #        fail_count += 1
-        #    if fail_count >= 10:
-        #        break
-        #    i += 1
-        #if fail_count < 10 and i < len(self.time_periods_joined):
-        #    print "FAIL: Server anser shorter then prepared data (%s vs %s)" % (i, len(self.time_periods_joined))
-        #self.assertEqual(fail_count, 0, "Servers report chunk list different from the prepared one.")
+
+    def _splitSystems(self):
+        print "Split servers into two systems"
+        newname = "anothername"
+        self._change_system_name(1, newname)
+        time.sleep(1)
+        info0 = self._server_request(0, 'api/moduleInformation')
+        info1 = self._server_request(1, 'api/moduleInformation')
+        self.assertEqual(info1['reply']['systemName'], newname, "Failed to give server 1 new system name")
+        self.assertNotEqual(info0['reply']['systemName'], newname, "Server 0 system name also has changed")
 
     def CheckArchivesSeparated(self):
-        print "Split servers into two systems"
-        self._change_system_name(1, "anothername")
-        info = self._server_request(0, 'api/moduleInformation')
-        print "New server 0 system name: %s" % info['reply']['systemName']
-        info = self._server_request(1, 'api/moduleInformation')
-        print "New server 1 system name: %s" % info['reply']['systemName']
-        time.sleep(15)
-        #[self._getRecordedTime(num) for num in xrange(self.num_serv_t)]
-        #time.sleep(1)
-        #[self._getRecordedTime(num) for num in xrange(self.num_serv_t)]
+        self._splitSystems()
         answer = [[], []]
-        uri = 'ec2/recordedTimePeriods?physicalId=%s&flat' % self.test_camera_physical_id
+        uri = ['ec2/recordedTimePeriods?physicalId=%s&flat' % self.test_camera_physical_id[n] for n in xrange(self.num_serv)]
         for atempt_count in xrange(10):
-            answer[0] = self._server_request(0, uri)['reply'][:]
-            time.sleep(1)
-            answer[1] = self._server_request(1, uri)['reply'][:]
-        #answer = [self._getRecordedTime(num) for num in xrange(self.num_serv_t)]
-            print "0: %s, %s..." % (id(answer[0]), answer[0][:10])
-            print "1: %s, %s..." % (id(answer[1]), answer[1][:10])
+            answer[0] = self._server_request(0, uri[0])['reply'][:]
+            time.sleep(0.2)
+            answer[1] = self._server_request(1, uri[1])['reply'][:]
+            #print "0: %s, %s..." % (id(answer[0]), answer[0][:10])
+            #print "1: %s, %s..." % (id(answer[1]), answer[1][:10])
             if answer[0] != answer[1]:
                 break
             print "Attempt %s failed!" % atempt_count
@@ -431,15 +438,10 @@ class MultiserverArchiveTest(StorageBasedTest):
             if answer[0][i] == answer[1][i]:
                 print "Separated servers report the same chunk: %s, %s" % (answer[0][i], answer[1][i])
         self.assertFalse(answer[0] == answer[1], "Separated servers report the same chunk list")
-        print "Server 0"
-        for chunk in answer[0][:4]:
-            print chunk
+        #print "Server 0\n" + "\n".join(str(chunk) for chunk in answer[0][:4])
         self._compare_chunks(0, answer[0], self.time_periods_single[0])
-        print "Server 1"
-        for chunk in answer[1][:4]:
-            print chunk
+        #print "Server 1\n" + "\n".join(str(chunk) for chunk in answer[1][:4])
         self._compare_chunks(1, answer[1], self.time_periods_single[1])
-
-
-        
-
+        #print "Join servers back"
+        #self._change_system_name(1, sysname)  # it's done by _clear_storage_script 'ms_clear.sh'
+        time.sleep(0.1)
