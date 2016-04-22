@@ -1,5 +1,9 @@
 @ECHO OFF
 
+REM If not storing vbs as separate file
+REM Create vbs on the fly (need to escape ampersands)
+> StripToken.vbs echo A=Split(wscript.arguments(0),wscript.arguments(1)):B=A(0):for j=1 to (Ubound(A)-wscript.arguments(2)):B=B^&wscript.arguments(1)^&A(j):next:wscript.echo B
+
 SET WGET=%ENVIRONMENT%\bin\wget
 
 SET DUMPFILE=%1
@@ -52,11 +56,12 @@ IF NOT "%DUMPFILE%" == "" (
             SET BUILDNUMBER=%%M
             SET CUSTOMIZATION=%%O
         )    
-        FOR /F "tokens=1 delims=_" %%I IN ("!CUSTOMIZATION!") DO (
-            SET CUSTOMIZATION=%%I
-        )    
+        ECHO Customization = !CUSTOMIZATION!
+        FOR /F "delims=" %%A IN ('cscript //nologo StripToken.vbs "!CUSTOMIZATION!" "_" 1') DO SET CUSTOMIZATION=%%A
+        ECHO PID = !lastPart!
         ECHO Build Number = !BUILDNUMBER!
         ECHO Customization = !CUSTOMIZATION!
+
         IF "!EXECUTABLE!" == "mediaserver" (
             SET INSTALLTYPE=server
         ) ELSE (
@@ -71,6 +76,8 @@ IF NOT "%DUMPFILE%" == "" (
             EXIT /B 1
         )    
         ECHO Build Branch = !BUILDBRANCH!
+
+        if exist StripToken.vbs del StripToken.vbs        
         
         %WGET% -qO - http://beta.networkoptix.com/beta-builds/daily/!BUILDBRANCH!/!CUSTOMIZATION!/windows/ | findstr !BUILDNUMBER! | findstr !INSTALLTYPE!-only | findstr x64 > temp.txt 
         FOR /F delims^=^"^ tokens^=2 %%I IN (temp.txt) DO SET INSTALLER_FILENAME=%%I
