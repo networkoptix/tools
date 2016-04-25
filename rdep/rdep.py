@@ -375,6 +375,10 @@ def main():
     rdep.verbose = args.verbose
     rdep.debug = args.debug
 
+    if not rdep.target:
+        print >> sys.stderr, "The default target is not set"
+        return False
+
     packages = args.packages
     if root:
         detected_target, package = rdep.detect_package_and_target(os.getcwd())
