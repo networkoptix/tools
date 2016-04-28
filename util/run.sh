@@ -12,7 +12,7 @@ Options:
     L   use 1 for ulimit -c unlimited
     C   path to core dump for gdb
     D   use 1 for gdb run
-    S   use 1 for strace run
+    ST  use 1 for strace run
     V   valgrind args, empty means no valgrind
 Example:
     run.sh mediaserver -e   # run mediaserver
@@ -71,7 +71,7 @@ then
 elif [ "$DS" ]
 then
     gdbserver :$DS $@
-elif [ "$S" ]
+elif [ "$ST" ]
 then
     strace $@
 elif [ "$V" ]
