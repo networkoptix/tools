@@ -26,7 +26,7 @@ import nxjira
 
 from crashmonconf import *
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 filt_path = "/usr/bin/c++filt"
 
