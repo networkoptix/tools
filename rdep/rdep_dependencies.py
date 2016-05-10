@@ -188,8 +188,8 @@ def get_dependencies(target, packages, target_dir, debug = False, deps_file = "q
     config = rdep_config.RepositoryConfig(REPOSITORY_PATH)
     if not config.get_url():
         config.set_url(SYNC_URL)
-    if not config.get_push_url():
-        config.set_url(PUSH_URL)
+    if not config.get_push_url(None):
+        config.set_push_url(PUSH_URL)
 
     if not os.path.isdir(target_dir):
         os.makedirs(target_dir)

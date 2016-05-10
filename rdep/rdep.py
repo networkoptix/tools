@@ -222,7 +222,7 @@ class Rdep:
 
         print "Uploading {0}...".format(package)
 
-        url = self._repo_config.get_push_url()
+        url = self._repo_config.get_push_url(self._repo_config.get_url())
         remote = posixpath.join(url, self.targets[0], package)
         local = os.path.join(self.root, self.targets[0], package)
 
