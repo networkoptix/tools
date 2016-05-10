@@ -226,7 +226,11 @@ class Rdep:
         remote = posixpath.join(url, self.targets[0], package)
         local = os.path.join(self.root, self.targets[0], package)
 
-        PackageConfig(local).update_timestamp()
+        config = PackageConfig(local)
+        config.update_timestamp()
+        uploader_name = self._config.get_name()
+        if uploader_name:
+            config.set_uploader(uploader_name)
 
         command = self._get_rsync_command(
                 _cygwin_path(local) + "/",

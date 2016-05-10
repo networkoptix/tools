@@ -45,7 +45,7 @@ class RdepConfig(ConfigHelper):
         ConfigHelper.__init__(self, file_name)
 
     def get_name(self):
-        return sef.get_value("General", "name")
+        return self.get_value("General", "name")
     def set_name(self, name):
         self.set_value("General", "name", name)
 
@@ -91,6 +91,11 @@ class PackageConfig(ConfigHelper):
         return None if timestamp == None else int(timestamp)
     def update_timestamp(self):
         self.set_value("General", "time", int(time.time()))
+
+    def get_uploader(self):
+        return self.get_value("General", "uploader")
+    def set_uploader(self, name):
+        self.set_value("General", "uploader", name)
 
     def get_copy_list(self):
         if not self.has_section("Copy"):
