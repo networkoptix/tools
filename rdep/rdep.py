@@ -272,15 +272,22 @@ class Rdep:
         return None
 
     def list_packages(self):
+        if not self.targets:
+            print >> sys.stderr, "Please specify target"
+        elif len(self.targets) > 1:
+            print >> sys.stderr, "Please specify only one target to list"
+
+        target = self.targets[0]
+
         url = self._repo_config.get_url()
-        url = posixpath.join(url, self.target) + "/"
+        url = posixpath.join(url, target) + "/"
 
         command = [ self._config.get_rsync(), "--list-only", url ]
         self._verbose_rsync(command)
         try:
             output = subprocess.check_output(command)
         except:
-            print "Could not list packages for {0}".format(self.target)
+            print "Could not list packages for {0}".format(target)
             return False
 
         for line in output.split('\n'):
