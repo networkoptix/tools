@@ -10,9 +10,8 @@ import posixpath
 import platform
 
 from rdep_config import RdepConfig, RepositoryConfig, PackageConfig
-from fsutil import copy_recursive
 
-OS_IS_WINDOWS = platform.system() == "Windows"
+OS_IS_WINDOWS = sys.platform.startswith("win32") or sys.platform.startswith("cygwin")
 
 # Workaround against rsync bug:
 # all paths with semicolon are counted as remote,
@@ -179,7 +178,7 @@ class Rdep:
 
         return self.SYNC_SUCCESS
 
-    def sync_package(self, package, force):
+    def sync_package(self, package, force = False):
         print "Synching {0}...".format(package)
 
         to_remove = []
@@ -265,15 +264,10 @@ class Rdep:
     def locate_package(self, package):
         package_config_path = (lambda path: os.path.join(path, PackageConfig.FILE_NAME))
 
-        path = os.path.join(self.root, self.target, package)
-        if os.path.exists(package_config_path(path)):
-            return path
-
-        any_target = self.ANY_KEYWORD
-
-        path = os.path.join(self.root, any_target, package)
-        if os.path.exists(package_config_path(path)):
-            return path
+        for target in self.targets:
+            path = os.path.join(self.root, target, package)
+            if os.path.exists(package_config_path(path)):
+                return path
 
         return None
 
@@ -305,38 +299,6 @@ class Rdep:
             print >> sys.stderr, "Package {0} not found.".format(package)
         print path
 
-    def copy_package(self, package, destination):
-        package_dir = self.locate_package(package)
-        if not package_dir:
-            print >> sys.stderr, "Could not locate package {0}".format(package)
-            return False
-
-        config = PackageConfig(os.path.join(package_dir, self.PACKAGE_CONFIG_NAME))
-        copy_list = config.get_copy_list()
-
-        for dst, sources in copy_list.items():
-            if dst in [ "bin", "lib" ]:
-                dst = os.path.join(dst, "debug" if debug else "release")
-            dst_dir = os.path.join(destination, dst)
-
-            for src in sources:
-                src = os.path.join(package_dir, src)
-                print "Copying {0} to {1}".format(src, dst_dir)
-                if not os.path.isdir(dst_dir):
-                    os.makedirs(dst_dir)
-                copy_recursive(src, dst_dir)
-
-        return True
-
-    def copy_packages(self, packages, destination):
-        success = True
-
-        for package in packages:
-            if not copy_package(root, target, package, destination, debug):
-                return False
-
-        return success
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root",               help="Repository root.")
@@ -345,7 +307,6 @@ def main():
     parser.add_argument("-v", "--verbose",      help="Additional debug output.",            action="store_true")
     parser.add_argument("-l", "--list",         help="List packages for target.",           action="store_true")
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
-    parser.add_argument("--copy", metavar="DIR", help="Copy package resources")
     parser.add_argument("--init", metavar="URL", help="Init repository in the current dir with the specified URL.")
     parser.add_argument("-t", "--targets", nargs='*',  help="Targets to check.")
     parser.add_argument("-p", "--packages", nargs='*',  help="Packages to sync.")
@@ -379,8 +340,6 @@ def main():
         return rdep.print_path(packages[0])
     elif args.upload:
         return rdep.upload_packages(packages)
-    elif args.copy:
-        return rdep.copy_packages(packages, args.copy)
     elif args.list:
         return rdep.list_packages()
     else:

@@ -17,6 +17,12 @@ class ConfigHelper:
     def get_file_name(self):
         return self.__file_name
 
+    def has_section(self, section):
+        return self.__config.has_section(section)
+
+    def get_items(self, section):
+        return self.__config.items(section)
+
     def get_value(self, section, option, default_value = None):
         if not self.__config.has_option(section, option):
             return default_value
@@ -86,15 +92,15 @@ class PackageConfig(ConfigHelper):
     def __init__(self, file_name):
         ConfigHelper.__init__(self, file_name)
 
-    def get_timestamp(self):
-        return self.get_value("General", "time", 0)
+    def get_timestamp(self, default_value = 0):
+        return self.get_value("General", "time", default_value)
     def update_timestamp(self):
         self.set_value("General", "time", int(time.time()))
 
     def get_copy_list(self):
-        if self.__config.has_section("Copy"):
+        if not self.has_section("Copy"):
             return { "bin": [ "bin/*" ], "lib": [ "lib/*.so*", "lib/*.dylib" ] }
         result = {}
-        for key, value in self.__config.items("Copy"):
+        for key, value in self.items("Copy"):
             result[key] = value.split()
         return result
