@@ -152,6 +152,7 @@ def get_package_for_configuration(rdep, package, target_dir, debug):
 
 def get_package(rdep, target, package, target_dir, debug = False):
     lock_file = os.path.join(tempfile.gettempdir(), "rdep.lock")
+    pack = None
 
     with filelock.Lock(lock_file) as lock:
         for pack in package.split("|"):
@@ -159,7 +160,7 @@ def get_package(rdep, target, package, target_dir, debug = False):
             rdep.targets = [ explicit_target ] if explicit_target else [ target ] + platform_detection.get_alternative_targets(target)
 
             found_target = get_package_for_configuration(rdep, pack, target_dir, False)
-            if not target:
+            if not found_target:
                 continue
 
     if not found_target:
@@ -168,7 +169,11 @@ def get_package(rdep, target, package, target_dir, debug = False):
     if debug:
         rdep.targets = [ found_target ]
         if not get_package_for_configuration(rdep, pack + "-debug", target_dir, True):
-            if not get_package_for_configuration(rdep, pack, target_dir, True):
+            if get_package_for_configuration(rdep, pack, target_dir, True):
+                ts = get_package_timestamp(target_dir, pack)
+                set_package_synctime(target_dir, pack + "-debug", ts, False)
+                set_package_synctime(target_dir, pack + "-debug", ts, True)
+            else:
                 return False
 
     return True
