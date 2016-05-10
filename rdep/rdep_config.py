@@ -70,7 +70,8 @@ class RepositoryConfig(ConfigHelper):
         self.set_value("General", "url", url)
 
     def get_push_url(self):
-        return self.get_value("General", "push_url")
+        url = self.get_value("General", "push_url")
+        return url if url else self.get_url()
     def set_push_url(self, push_url):
         self.set_value("General", "push_url", push_url)
 

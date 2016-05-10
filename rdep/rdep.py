@@ -7,9 +7,12 @@ import shutil
 import subprocess
 import tempfile
 import posixpath
+import platform
 
 from rdep_config import RdepConfig, RepositoryConfig, PackageConfig
 from fsutil import copy_recursive
+
+OS_IS_WINDOWS = platform.system() == "Windows"
 
 # Workaround against rsync bug:
 # all paths with semicolon are counted as remote,
@@ -19,6 +22,15 @@ def _cygwin_path(path):
         drive_letter = path[0].lower()
         return "/cygdrive/{0}{1}".format(drive_letter, path[2:].replace("\\", "/"))
     return path
+
+def _is_remote_url(url):
+    return ':' in url
+
+def _is_rsync_url(url):
+    return url.startswith("rsync://")
+
+def _is_ssh_url(url):
+    return _is_remote_url(url) and not _is_rsync_url(url)
 
 def _find_root(path, file_name):
     while not os.path.isfile(os.path.join(path, file_name)):
@@ -31,8 +43,6 @@ def _find_root(path, file_name):
     return path
 
 class Rdep:
-    ANY_KEYWORD = "any"
-    DEBUG_SUFFIX = "-debug"
     SYNC_NOT_FOUND = 0
     SYNC_FAILED = 1
     SYNC_SUCCESS = 2
@@ -58,13 +68,12 @@ class Rdep:
 
         return True
 
-    def __init__(self, root, target = None):
+    def __init__(self, root):
         self._config = RdepConfig(os.path.join(os.path.expanduser("~"), ".rdeprc"))
         self._repo_config = RepositoryConfig(os.path.join(root, ".rdep"))
 
         self.root = root
         self.verbose = False
-        self.target = target if target else self._config.get_default_target()
 
     def _verbose_message(self, message):
         if self.verbose:
@@ -100,10 +109,13 @@ class Rdep:
         command.append("-rlt")
         command.append("--delete")
 
+        if OS_IS_WINDOWS:
+            command.append("--chmod=ugo=rwx")
+
         if show_progress:
             command.append("--progress")
 
-        if not source.startswith("rsync://") and not destination.startswith("rsync://"):
+        if _is_ssh_url(source) or _is_ssh_url(destination):
             ssh = self._repo_config.get_ssh()
             if not ssh:
                 ssh = self._config.get_ssh()
@@ -170,48 +182,29 @@ class Rdep:
     def sync_package(self, package, force):
         print "Synching {0}...".format(package)
 
-        to_remove = None
-        target = self.target
+        to_remove = []
 
-        ret = self._try_sync(target, package, force)
-        if ret == self.SYNC_NOT_FOUND:
-            path = os.path.join(self.root, target, package)
-            if os.path.isdir(path):
-                to_remove = path
-
-            target = self.ANY_KEYWORD
-
+        for target in self.targets:
             ret = self._try_sync(target, package, force)
             if ret == self.SYNC_NOT_FOUND:
                 path = os.path.join(self.root, target, package)
-                print >> sys.stderr, "Could not find {0}".format(package)
-                return False
-
-        if to_remove:
-            print "Removing local {0}".format(to_remove)
-            shutil.rmtree(to_remove)
-            to_remove = None
+                if os.path.isdir(path):
+                    to_remove.append(path)
+            else:
+                break
 
         if ret == self.SYNC_FAILED:
             print >> sys.stderr, "Sync failed for {0}".format(package)
             return False
+        elif ret == self.SYNC_NOT_FOUND:
+            print >> sys.stderr, "Could not find {0}".format(package)
+            return False
 
-        if self.debug:
-            ret = self._try_sync(target, package + self.DEBUG_SUFFIX, force)
+        for path in to_remove:
+            print "Removing local {0}".format(path)
+            shutil.rmtree(path)
 
-            if ret == self.SYNC_NOT_FOUND:
-                path = os.path.join(self.root, target, package + self.DEBUG_SUFFIX)
-                if os.path.isdir(path):
-                    to_remove = path
-            elif ret == self.SYNC_FAILED:
-                print >> sys.stderr, "Sync failed for {0}".format(package + self.DEBUG_SUFFIX)
-                return False
-
-        if to_remove:
-            print "Removing local {0}".format(to_remove)
-            shutil.rmtree(to_remove)
-
-        print "Done {0}".format(package)
+        print "Package {0} downloaded for target {1}".format(package, target)
         return True
 
     def sync_packages(self, packages, force):
@@ -221,11 +214,18 @@ class Rdep:
         return True
 
     def upload_package(self, package):
+        if len(self.targets) != 1:
+            if len(self.targets) > 1:
+                print >> sys.stderr, "Multiple targets for upload is not supported."
+            else:
+                print >> sys.stderr, "Please specify target for upload."
+            return False
+
         print "Uploading {0}...".format(package)
 
-        url = self._repo_config.get_url()
-        remote = posixpath.join(url, self.target, package)
-        local = os.path.join(self.root, self.target, package)
+        url = self._repo_config.get_push_url()
+        remote = posixpath.join(url, self.targets[0], package)
+        local = os.path.join(self.root, self.targets[0], package)
 
         PackageConfig(local).update_timestamp()
 
@@ -258,29 +258,18 @@ class Rdep:
 
     def upload_packages(self, packages):
         for package in packages:
-            package_name = package + self.DEBUG_SUFFIX if self.debug else package
-            if not self.upload_package(package_name):
+            if not self.upload_package(package):
                 return False
         return True
 
     def locate_package(self, package):
         package_config_path = (lambda path: os.path.join(path, PackageConfig.FILE_NAME))
 
-        if self.debug:
-            path = os.path.join(self.root, self.target, package + self.DEBUG_SUFFIX)
-            if os.path.exists(package_config_path(path)):
-                return path
-
         path = os.path.join(self.root, self.target, package)
         if os.path.exists(package_config_path(path)):
             return path
 
         any_target = self.ANY_KEYWORD
-
-        if self.debug:
-            path = os.path.join(self.root, any_target, package + DEBUG_SUFFIX)
-            if os.path.exists(package_config_path(path)):
-                return path
 
         path = os.path.join(self.root, any_target, package)
         if os.path.exists(package_config_path(path)):
@@ -350,9 +339,7 @@ class Rdep:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target",       help="Target classifier.")
     parser.add_argument("--root",               help="Repository root.")
-    parser.add_argument("-d", "--debug",        help="Sync debug version.",                 action="store_true")
     parser.add_argument("-f", "--force",        help="Force sync.",                         action="store_true")
     parser.add_argument("-u", "--upload",       help="Upload package to the repository.",   action="store_true")
     parser.add_argument("-v", "--verbose",      help="Additional debug output.",            action="store_true")
@@ -360,7 +347,8 @@ def main():
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
     parser.add_argument("--copy", metavar="DIR", help="Copy package resources")
     parser.add_argument("--init", metavar="URL", help="Init repository in the current dir with the specified URL.")
-    parser.add_argument("packages", nargs='*',  help="Packages to sync.",   default="")
+    parser.add_argument("-t", "--targets", nargs='*',  help="Targets to check.")
+    parser.add_argument("-p", "--packages", nargs='*',  help="Packages to sync.")
 
     args = parser.parse_args()
 
@@ -371,21 +359,21 @@ def main():
     if not root:
         root = _find_root(os.getcwd(), RepositoryConfig.FILE_NAME)
 
-    rdep = Rdep(root, args.target)
+    rdep = Rdep(root)
     rdep.verbose = args.verbose
-    rdep.debug = args.debug
-
-    if not rdep.target:
-        print >> sys.stderr, "The default target is not set"
-        return False
+    rdep.targets = args.targets
 
     packages = args.packages
-    if root:
+    if root and (not rdep.targets or not packages):
         detected_target, package = rdep.detect_package_and_target(os.getcwd())
-        if detected_target:
-            rdep.target = detected_target
-        if not packages and package:
+        if detected_target and not rdep.targets:
+            rdep.targets = [ detected_target ]
+        if package and not packages:
             packages = [ package ]
+
+    if not rdep.targets:
+        print >> sys.stderr, "Please specify target."
+        return False
 
     if args.print_path:
         return rdep.print_path(packages[0])
