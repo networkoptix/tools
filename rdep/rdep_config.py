@@ -59,11 +59,6 @@ class RdepConfig(ConfigHelper):
     def set_rsync(self, rsync):
         self.set_value("General", "rsync", rsync)
 
-    def get_default_target(self):
-        return self.get_value("General", "default_target")
-    def set_default_target(self, default_target):
-        self.set_value("General", "default_target", default_target)
-
 class RepositoryConfig(ConfigHelper):
     FILE_NAME = ".rdep"
 
