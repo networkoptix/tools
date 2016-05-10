@@ -101,6 +101,6 @@ class PackageConfig(ConfigHelper):
         if not self.has_section("Copy"):
             return { "bin": [ "bin/*" ], "lib": [ "lib/*.so*", "lib/*.dylib" ] }
         result = {}
-        for key, value in self.items("Copy"):
+        for key, value in self.get_items("Copy"):
             result[key] = value.split()
         return result
