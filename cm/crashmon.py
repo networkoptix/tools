@@ -55,6 +55,13 @@ def get_lock(process_name):
     return True
 
 
+def isHotfix(version):
+    if version is None:
+        return False
+    lastBuild = RELEASE_BUILDS.get(tuple(version[:3]), None)
+    res = lastBuild is not None and version[3] > lastBuild
+    return res
+
 def get_crashes(crtype, mark):
     print "Getting %s data" % crtype
     url = crash_list_url(crtype)
@@ -74,7 +81,8 @@ def get_crashes(crtype, mark):
             if cp[0] not in ('mediaserver', 'mediaserver-bin', 'client-bin', 'client.bin'):
                 print "WARNING: unexpected the first crash dump path element: %s", cp[0]
             m = rx.match(cp[1])
-            crash["version"] = [int(n) for n in m.group(0).split('.')[:3]] if m else None
+            crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
+            crash["isHotfix"] = isHotfix(crash["version"])
 
         print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
         return sorted(crashes, key=lambda v: (v['upload'],v['path']))
@@ -346,6 +354,11 @@ class CrashMonitor(object):
                 if crash['new']:
                     # only new crashes can increase counter
                     if crash['calls']:
+                        # NOTE: faults[key][0] counts crashes in this call of load_crash_dump() only
+                        # i.e. it counts only crashes currently stored on crash server
+                        # (according to it's rotation period)
+                        # i.e. too rare crashes are ignored
+                        # It's Misha Uskov's idea, approved by Roma
                         i = find_priority(len(faults[key][0]))
                         if i > 0:
                             issue = self._known.crashes[key]
@@ -357,7 +370,7 @@ class CrashMonitor(object):
                                     issue = None
                             if issue:
                                 if issue_data.ok:
-                                    if self.can_change(issue_data, crash['version']):
+                                    if self.can_change(issue_data, crash['version'], crash["isHotfix"]):
                                         # 1. Attach the new crash dump
                                         _, counted = nxjira.count_attachments(issue_data, predicat=attachment_filter)
                                         while counted >= MAX_ATTACHMENTS:
@@ -445,11 +458,11 @@ class CrashMonitor(object):
             email_priority_fail(key, issue, pold, pnew, e)
             return None
 
-    def can_change(self, issue_data, crashed_version): # TODO why not to move int into the JireReply class?
+    def can_change(self, issue_data, crashed_version, is_hotfix): # TODO why not to move it into the JiraReply class?
         if issue_data.is_done(): # it's a readon not to add more dumps and increase priority
             if issue_data.is_closed(): # hmm...
                 print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (issue_data.data['key'], issue_data.smallest_fixversion(), crashed_version)
-                if crashed_version > issue_data.smallest_fixversion():
+                if crashed_version is None or crashed_version[:3] > issue_data.smallest_fixversion() or is_hotfix:
                     if issue_data.reopen():
                         print "Issue %s reopened" % (issue_data.data['key'],)
                         return True

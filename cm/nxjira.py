@@ -303,6 +303,7 @@ def _test_get_fixVersion(key):
         ) if m]
         print sorted(versions)
 
+
 def _test_trans(key, trans):
     key, result = get_issue(key)
     if result.ok:

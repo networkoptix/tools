@@ -10,6 +10,15 @@ DUMP_BASE = "http://stats.networkoptix.com/crash_dumps"
 CRASH_EXT = ('crash', 'gdb-bt')
 AUTH = ("statlord", "razdvatri")
 
+# the last relese build per branch (builds after that number are hotfixes for that branch)
+# it's important to configure this dict for every released version so
+# that closed bugs for this version reopen, if reappear in hotfix builds,
+# but not reopen if appear in earlier builds (i.e. in release)
+RELEASE_BUILDS = {
+    # (x, y, z) => build, where all values are ints
+    (2, 5, 0): 11500,
+}
+
 LASTS_FILE = "last-crash" #
 KNOWN_FAULTS_FILE = "known-faults.list"
 
