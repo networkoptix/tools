@@ -59,8 +59,7 @@ def isHotfix(version):
     if version is None:
         return False
     lastBuild = RELEASE_BUILDS.get(tuple(version[:3]), None)
-    res = lastBuild is not None and version[3] > lastBuild
-    return res
+    return lastBuild is not None and version[3] > lastBuild
 
 def get_crashes(crtype, mark):
     print "Getting %s data" % crtype
