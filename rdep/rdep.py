@@ -68,8 +68,8 @@ class Rdep:
         return True
 
     def __init__(self, root):
-        self._config = RdepConfig(os.path.join(os.path.expanduser("~"), ".rdeprc"))
-        self._repo_config = RepositoryConfig(os.path.join(root, ".rdep"))
+        self._config = RdepConfig()
+        self._repo_config = RepositoryConfig(root)
 
         self.root = root
         self.verbose = False
