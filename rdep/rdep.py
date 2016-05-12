@@ -221,6 +221,12 @@ class Rdep:
                 print >> sys.stderr, "Please specify target for upload."
             return False
 
+        uploader_name = self._config.get_name()
+        if not uploader_name:
+            print >> sys.stderr, "Please specify your name in {0}".format(self._config.get_file_name())
+            print >> sys.stderr, "Add \"name = Nx User <nxuser@networkoptix.com>\" to the section [General]."
+            return False
+
         print "Uploading {0}...".format(package)
 
         url = self._repo_config.get_push_url(self._repo_config.get_url())
@@ -229,9 +235,7 @@ class Rdep:
 
         config = PackageConfig(local)
         config.update_timestamp()
-        uploader_name = self._config.get_name()
-        if uploader_name:
-            config.set_uploader(uploader_name)
+        config.set_uploader(uploader_name)
 
         command = self._get_rsync_command(
                 _cygwin_path(local) + "/",
