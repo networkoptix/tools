@@ -1,26 +1,25 @@
 #!/usr/bin/python
 '''Automatic windows dump analyser tool
 
-Generates test report (cdb-bt) based on dump (dmp). Binaries and debug 
-information gets automatically from jenkins. Takes about a minute to analyse 
+Generates test report (cdb-bt) based on dump (dmp). Binaries and debug
+information gets automatically from jenkins. Takes about a minute to analyse
 (several more if debug information is required).
 
 Dependencies:
     msiexec - standart windows tool (comes with windows)
     7x - zip extracter (comes with buildenv/_setenv.bat)
     cdb - windows debugger (comes with Windows SDK)
-    
+
 Usage (module):
     > import dumptool
-    > print dumptool.DumpAnalizer.report('dump.dmp', customization)
+    > print dumptool.analyseDump('dump.dmp', customization)
     dump.cdb-bt
-    
+
 Usage (console):
     > python dumptool.py dump.dmp [customization]
     dump.cdb-bt
 '''
 
-import argparse
 import os
 import re
 import string
@@ -55,18 +54,21 @@ class Cdb(object):
         '''
         cmd = [CONFIG['cdb_path'], '-z', dump]
         if debug: cmd += ['-i', debug]
-        self.cdb = subprocess.Popen(cmd,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            self.cdb = subprocess.Popen(cmd,
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        except OSError as e:
+            raise Error('Cannot start %s - %s' % (cmd, e))
         self.execute()
         if debug: self.execute('.reload /f')
 
-    def __enter__(self, *a):            
+    def __enter__(self, *a):
         return self
-    
+
     def __exit__(self, *a):
         try: self.cdb.communicate('q\n')
         except: pass
-        
+
     def execute(self, command = None):
         '''Executes cdb :command and returns collected output
         '''
@@ -78,7 +80,7 @@ class Cdb(object):
         while self.cdb.stdout.read(1) != '>': # read prompt
             pass
         return out[1:-3] # cut of prompt
-        
+
     def main_module(self):
         '''Finds executable name (without extension)
         '''
@@ -92,7 +94,7 @@ class Cdb(object):
             if line.find(key) != -1:
                 return line.split(':')[1].strip()
         raise Error("Attribute '%s' is not found" % key)
-        
+
     def report(self):
         '''Generates text crash report (cdb-bt)
         '''
@@ -102,29 +104,13 @@ class Cdb(object):
             self.execute('kc'), # Error stack
             self.execute('~*kc'), # all threads stacks
         ])
-        
-class DumpAnalizer(object):
+
+class DumpAnalyzer(object):
     '''Provides ability to analize windows DMP dumps
     '''
-    
-    @staticmethod
-    def report(*args, **kwargs):
-        '''Generated cdb-bt report based on dmp file
-        Note: Returns right away in case if dump is already analized
-        Returns: cdb-bt report path
-        '''
-        dump = DumpAnalizer(*args, **kwargs)
-        report = dump.report_name()
-        if os.path.isfile(report):
-            dump.log('Already processed: ' + report)
-            return report
-        dump.get_dump_information()
-        dump.fetch_urls()
-        dump.download_dists()
-        return dump.generate_report()
-    
+
     def __init__(
-        self, path, customization='default', 
+        self, path, customization='default',
         version=None, build=None, verbose=0):
         '''Initializes analizer with dump :path and :customization
         '''
@@ -133,13 +119,13 @@ class DumpAnalizer(object):
         self.version = version
         self.build = build
         self.verbose = verbose
-    
+
     def log(self, message, level=0):
         '''Logs data in case of verbose mode
         '''
-        if level < int(self.verbose): 
+        if level < int(self.verbose):
             sys.stderr.write('> %s\n' % message)
-    
+
     def get_dump_information(self):
         '''Gets initial information from dump
         '''
@@ -155,22 +141,21 @@ class DumpAnalizer(object):
         self.build = self.build or self.version.split('.')[-1]
         if self.build == '0':
             raise Error('Build 0 is not supported')
-    
-    @staticmethod
-    def fetch_url_data(url, regexps):
+
+    def fetch_url_data(self, url, regexps):
         '''Fetches data from :url by :regexp (must contain single group!)
         '''
         try:
             page = urllib2.urlopen(url).read().replace('\n', '')
-        except urllib2.HTTPError, e:
-            raise Error('%s, url: %s' % (e.message, url))
+        except urllib2.HTTPError as e:
+            raise Error('%s, url: %s' % (e, url))
         result = []
         for regexp in regexps:
             m = re.match('.+%s.+' % regexp, page)
             if m: result.append(m.group(1))
             else: self.log("Warning: canot find '%s' in %s" % (regexp, url))
         return result
-    
+
     def fetch_urls(self):
         '''Fetches URLs of required resourses
         '''
@@ -184,17 +169,19 @@ class DumpAnalizer(object):
         self.dist_urls = list(os.path.join(build_url, e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'], build_path)
         self.target_path = os.path.join(self.build_path, 'target')
-        if not os.path.isdir(self.target_path): 
+        if not os.path.isdir(self.target_path):
             os.makedirs(self.target_path)
-    
+
     @staticmethod
-    def download_url_data(url, local, processor = lambda x: None):
+    def download_url_data(url, local, processor = lambda path: None):
+        '''Downloads file from :url to :local directory, apply :processor if any
+        '''
         file = os.path.join(local, os.path.basename(url))
         if not os.path.isfile(file):
-            with open(file, 'wb') as f: 
+            with open(file, 'wb') as f:
                 f.write(urllib2.urlopen(url).read())
             processor(file)
-    
+
     def find_file(self, name):
         '''Searches file :name in build directory
         '''
@@ -202,20 +189,25 @@ class DumpAnalizer(object):
             if name in files:
                 return os.path.join(root, name)
         raise Error("No such file '%s' in '%s'" % (name, path))
-    
+
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
         '''
+        def run(*cmd):
+            try:
+                return subprocess.check_output(cmd)
+            except IOError as e:
+                raise Error('Cannot run %s - %s' % (cmd, e))
         if path.endswith('.msi'):
-            return subprocess.check_output([
-                'msiexec', '-a', path.replace('/', '\\'), 
-                '/qb', 'TARGETDIR=' + self.target_path.replace('/', '\\')])
+            return run(
+                'msiexec', '-a', path.replace('/', '\\'),
+                '/qb', 'TARGETDIR=' + self.target_path.replace('/', '\\'))
         if path.endswith('.zip'):
             self.module_dir = os.path.dirname(
                 self.find_file(self.module + '.exe'))
-            return subprocess.check_output([
-                '7z', 'x', path, '-o' + self.module_dir, '-y'])
-    
+            return run(
+                '7z', 'x', path, '-o' + self.module_dir, '-y')
+
     def download_dists(self):
         '''Downloads required distributives
         '''
@@ -223,7 +215,7 @@ class DumpAnalizer(object):
             self.log('Download: ' + url)
             self.download_url_data(url, self.build_path, self.extract_dist)
         self.module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
-    
+
     def report_name(self):
         '''Generates report name based on dump name
         '''
@@ -232,8 +224,8 @@ class DumpAnalizer(object):
             raise Error('Only *%s dumps are supported' % dump_ext)
         report_ext = '.' + CONFIG['ext']['report']
         return self.dump_path[:-len(dump_ext)] + report_ext
-        
-    
+
+
     def generate_report(self):
         '''Generates report using cdb with debug information
         '''
@@ -244,15 +236,36 @@ class DumpAnalizer(object):
             with open(report_path, 'w') as report:
                 report.write(cdb.report())
         return report_path
-            
+
+def analyseDump(*args, **kwargs):
+    '''Generated cdb-bt report based on dmp file
+    Note: Returns right away in case if dump is already analized
+    Returns: cdb-bt report path
+    '''
+    dump = DumpAnalyzer(*args, **kwargs)
+    report = dump.report_name()
+    if os.path.isfile(report):
+        dump.log('Already processed: ' + report)
+        return report
+    dump.get_dump_information()
+    dump.fetch_urls()
+    dump.download_dists()
+    return dump.generate_report()
+
 def main():
     args, kwargs = list(), dict()
     for arg in sys.argv[1:]:
         s = arg.split('=', 2)
         if len(s) == 1: args.append(s[0])
         else: kwargs[s[0]] = s[1]
-    print DumpAnalizer.report(*args, **kwargs)
-            
+    try:
+        print analyseDump(*args, **kwargs)
+    except Error as e:
+        sys.stderr.write('Error: %s\n' % e)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        sys.stderr.write('Interrupted\n')
+
 if __name__ == '__main__':
     main()
-    
+
