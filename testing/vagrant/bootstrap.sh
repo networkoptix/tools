@@ -24,6 +24,8 @@ cp "$SERVCONF" "${SERVCONF}.orig"
 #cat "$SERVCONF"
 #start networkoptix-mediaserver
 
-cp /vagrant/{testcamera,tc.sh} ${SERVDIR}/bin
-chmod +x ${SERVDIR}/bin/testcamera
-chmod +x ${SERVDIR}/bin/tc.sh
+if [ -e /vagrant/testcamera ]; then
+    cp /vagrant/{testcamera,tc.sh} ${SERVDIR}/bin
+    chmod +x ${SERVDIR}/bin/testcamera
+    chmod +x ${SERVDIR}/bin/tc.sh
+fi
