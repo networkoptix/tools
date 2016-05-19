@@ -26,7 +26,7 @@ from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
 from streaming_test import StreamingTest
 from natcon_test import NatConnectionTest
-from dbuptest import DBUpgradeTest
+from dbtest import DBTest
 from proxytest import ProxyTest
 
 
@@ -1566,7 +1566,7 @@ BoxTestKeys = {
     '--msarch': MultiserverArchiveTest,
     '--natcon': NatConnectionTest,
     '--stream': StreamingTest,
-    '--dbup': DBUpgradeTest,
+    '--dbup': DBTest,
     '--boxtests': None,
 }
 
@@ -1581,7 +1581,7 @@ def RunByAutotest(arg0):
     #config = testMaster.getConfig()
     need_rollback = True
     try:
-        print ""
+        print "" # FIXME add startubg message
         ret, reason = testMaster.init(notest=True)
         if not ret:
             print "Failed to initialize the cluster test object: %s" % (reason)
@@ -1603,7 +1603,7 @@ def RunByAutotest(arg0):
                 SystemNameTest(config).run()
             else:
                 print "Basic functional test FAILED"
-            ProxyTest(*config.rtget('ServerList')[0:2])
+            ProxyTest(*config.rtget('ServerList')[0:2]).run()
             if testMaster.unittestRollback:
                 doCleanUp()
                 need_rollback = False
@@ -1622,20 +1622,22 @@ def RunByAutotest(arg0):
         if not testMaster.skip_streming:
             CallTest(StreamingTest)
         if not testMaster.skip_dbup:
-            CallTest(DBUpgradeTest)
+            CallTest(DBTest)
     print "\nALL AUTOMATIC TEST ARE DONE\n"
 
 
 def BoxTestsRun(key):
     testMaster.init(notest=True)
     if key == '--boxtests':
-        CallTest(TimeSyncTest)
-        CallTest(BackupStorageTest)
-        CallTest(MultiserverArchiveTest)
-        CallTest(StreamingTest)
-        CallTest(DBUpgradeTest)
+        ok = True
+        if not CallTest(TimeSyncTest): ok = False
+        if not CallTest(BackupStorageTest): ok = False
+        if not CallTest(MultiserverArchiveTest): ok = False
+        if not CallTest(StreamingTest): ok = False
+        if not CallTest(DBTest): ok = False
+        return ok
     else:
-        CallTest(BoxTestKeys[key])
+        return CallTest(BoxTestKeys[key])
 
 
 def DoTests(argv):
@@ -1646,25 +1648,23 @@ def DoTests(argv):
 
     if argc == 2 and argv[1] in BoxTestKeys:
         # box-tests can run without complete testMaster.init(), since they reinitialize mediaserver
-        BoxTestsRun(argv[1])
-        return
+        return BoxTestsRun(argv[1])
 
     ret, reason = testMaster.init()
     if not ret:
         print "Failed to initialize the cluster test object: %s" % (reason)
-        return
+        return False
 
     if argc == 2 and argv[1] in SimpleTestKeys:
-        SimpleTestKeys[argv[1]](testMaster.getConfig()).run()
-        return
+        return SimpleTestKeys[argv[1]](testMaster.getConfig()).run()
 
     ret, reason = testMaster.initial_tests()
     if ret == False:
         print "The initial cluster test failed: %s" % (reason)
-        return
+        return False
 
     if argc == 2 and argv[1] == '--sync':
-        return # done here, since we just need to test whether
+        return True # done here, since we just need to test whether
                # all the servers are on the same page
 
     if argc == 2 and argv[1] == '--main':
@@ -1678,6 +1678,7 @@ def DoTests(argv):
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
+        #FIXME no result code returning!
         #print "\nFunctest finnished\n"
 
     elif (argc == 2 or argc == 3) and argv[1] == '--clear':
@@ -1689,9 +1690,11 @@ def DoTests(argv):
         else:
             doClearAll(False)
         testMaster.unittestRollback.removeRollbackDB()
+        #FIXME no result code returning!
     elif argc == 2 and argv[1] == '--perf':
         PerfTest().start()
         doCleanUp()
+        #FIXME no result code returning!
     else:
         if argv[1] == '--merge-test':
             MergeTest(True).run()
@@ -1702,6 +1705,7 @@ def DoTests(argv):
             runPerfTest()
         else:
             runMiscFunction(argc, argv)
+        #FIXME no result code returning!
 
 
 if __name__ == '__main__':
@@ -1715,4 +1719,5 @@ if __name__ == '__main__':
     elif len(argv) == 2 and argv[1] == '--recover':
         UnitTestRollback().doRecover()
     else:
-        DoTests(argv)
+        if not DoTests(argv):
+            sys.exit(1)

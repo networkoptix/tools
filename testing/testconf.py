@@ -15,7 +15,7 @@ DEBUG = True
 TEMP = '' # temporary files directory, leave it '' for the process' current directory
 # FIXME check if it's used where it should be!
 
-PROJECT_ROOT = "~/develop/netoptix_vms"
+PROJECT_ROOT = "~/develop/nx_vms"
 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
@@ -77,18 +77,30 @@ VAGR_RUN = [VAGRANT, "up"]
 VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
 
-BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes without mediaserver are skipped
-    'box1': '192.168.109.8',
-    'box2': '192.168.109.9',
-    'boxnat': '192.168.109.10',
-    'boxbehind': '192.168.110.3',
+MVN_BUILD_CONFIG = 'release'
+TEST_CAMERA_SUBPATH = "build_environment/target/bin/debug/testcamera"
+
+BOX_NAMES = {
+    "Box1": "box1",
+    "Box2": "box2",
+    "Nat": "nat",
+    "Behind": "behind",
 }
 
-CHECK_BOX_UP = frozenset(['box1', 'box2', 'boxbehind'])
+BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes without mediaserver are skipped
+    'Box1': '192.168.109.8',
+    'Box2': '192.168.109.9',
+    'Nat': '192.168.109.10',
+    'Behind': '192.168.110.3',
+}
+
+CHECK_BOX_UP = frozenset(['Box1', 'Box2', 'Behind'])
 
 BOX_POST_START = {
-    'boxbehind': 'post-create-behind-nat.sh'
+    'Behind': 'post-create-behind-nat.sh'
 }
+
+BOXES_NAMES_FILE = os.path.join(VAG_DIR, 'boxes.rb')
 
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
@@ -119,6 +131,7 @@ SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 #------------------------------------------------------------------
 
 try:
+    import testconf_local # we need itself to access it's file name
     from testconf_local import *
 except ImportError:
     pass

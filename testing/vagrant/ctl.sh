@@ -140,7 +140,7 @@ function natcon_ctl {
     esac
 }
 
-function dbup_ctl {
+function db_ctl {
     case "$mode" in
         init)
             cp "/vagrant/$1" "$SERVDIR/var/ecs.sqlite"
@@ -185,8 +185,8 @@ case "$testName" in
     natcon)
         natcon_ctl "$@"
         ;;
-    dbup)
-        dbup_ctl "$@"
+    db)
+        db_ctl "$@"
         ;;
     *)
         echo Unknown test name "$testName"

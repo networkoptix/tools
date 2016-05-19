@@ -128,6 +128,13 @@ class JsonDiff:
     _anchorStr=None
     _currentRecursionSize=0
     _anchorStack = []
+    _switched = False
+
+    def switchSides(self):
+        self._switched = not self._switched
+
+    def isSwitched(self):
+        return self._switched
 
     def keyNotExisted(self,lhs,rhs,key):
         """ format the error information based on key lost """
@@ -147,12 +154,12 @@ class JsonDiff:
         self._hasDiff = True
         return self
 
-    def arrayIndexNotFound(self,lhs,idx):
+    def listIndexNotFound(self, lhs, idx):
         """ format the error information based on the array index lost"""
-        self._errorInfo= ("CurrentPosition:{anchor}\n"
-                    "The element in array at index:{i} cannot be found in other objects\n"
+        self._errorInfo= ("CurrentPosition: {anchor}\n"
+                    "The element in a {side} list at index:{i} cannot be found in other objects\n"
                     "Element: {e}"
-            ).format(anchor=self._anchorStr, i=idx, e=lhs[idx])
+            ).format(anchor=self._anchorStr, i=idx, e=lhs[idx], side='right' if self._switched else 'left')
         self._hasDiff = True
         return self
 
@@ -264,32 +271,44 @@ def _compareJsonObject(lhs,rhs,result):
     return result
 
 
-def _compareJsonList(lhs,rhs,result):
+def _compareJsonList(lhs, rhs, result):
     assert isinstance(lhs,list),"The lhs object _MUST_ be a list"
     assert isinstance(rhs,list),"The rhs object _MUST_ be a list"
 
-    # The comparison of list should be ignore the element's order. A
+    # The list comparison should ignore element's order. A
     # naive O(n*n) comparison is used here. For each element P in lhs,
-    # it will try to match one element in rhs , if not failed, otherwise
-    # passed.
+    # it tries to find an element in rhs. If not found -- fail.
+    # Then it checks if there is no any element in rhs that
+    # isn't already checked by lhs.
+
+    if len(lhs) < len(rhs):
+        switched = True
+        result.switchSides()
+        (lhs, rhs) = (rhs, lhs)
+    else:
+        switched = False
 
     tabooSet = set()
 
-    for lhs_idx,lhs_ele in enumerate(lhs):
-        notFound = True
-        for idx,val in enumerate(rhs):
-            if idx in tabooSet:
-                continue
-            # now checking if this value has same value with the lhs_ele
-            if not _compareJson(lhs_ele,val,result).hasDiff():
-                tabooSet.add(idx)
-                notFound = False
-                break
-            else:
-                result.resetDiff()
+    try:
+        for lhs_idx,lhs_ele in enumerate(lhs):
+            notFound = True
+            for idx,val in enumerate(rhs):
+                if idx in tabooSet:
+                    continue
+                # now checking if this value has same value with the lhs_ele
+                if not _compareJson(lhs_ele, val, result).hasDiff():
+                    tabooSet.add(idx)
+                    notFound = False
+                    break
+                else:
+                    result.resetDiff()
 
-        if notFound:
-            return result.arrayIndexNotFound(lhs,lhs_idx)
+            if notFound:
+                return result.listIndexNotFound(lhs, lhs_idx)
+    finally:
+        if switched:
+            result.switchSides()
 
     return result
 
@@ -323,23 +342,16 @@ def compareJson(lhs,rhs):  # :type: JsonDiff
     result = JsonDiff()
     # An outer most JSON element must be an array or dict
     if isinstance(lhs,list):
-        if isinstance(rhs,list):
-            result.enter("<root>")
-            if _compareJson(lhs,rhs,result).hasDiff():
-                return result
-            result.leave()
-
-        else:
+        if not isinstance(rhs,list):
             return result.typeNotSame(lhs,rhs)
     else:
-        if isinstance(rhs,dict):
-            result.enter("<root>")
-            if _compareJson(lhs,rhs,result).hasDiff():
-                return result
-            result.leave()
-        else:
+        if not isinstance(rhs,dict):
             return result.typeNotSame(lhs,rhs)
 
+    result.enter("<root>")
+    if _compareJson(lhs,rhs,result).hasDiff():
+        return result
+    result.leave()
     return result
 
 

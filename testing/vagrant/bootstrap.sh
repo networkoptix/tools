@@ -18,9 +18,12 @@ stop networkoptix-mediaserver
 nxedconf appserverPassword ''
 nxedconf systemName functesting
 nxedconf removeDbOnStartup 1
+nxedconf noSetupWizard 1
 cp "$SERVCONF" "${SERVCONF}.orig"
 #echo '...After:'
 #cat "$SERVCONF"
 #start networkoptix-mediaserver
 
-
+cp /vagrant/{testcamera,tc.sh} ${SERVDIR}/bin
+chmod +x ${SERVDIR}/bin/testcamera
+chmod +x ${SERVDIR}/bin/tc.sh

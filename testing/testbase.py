@@ -171,6 +171,8 @@ class FuncTestCase(unittest.TestCase):
             return
         cls._check_suits()
         for name, tests in cls._suits:
+            if hasattr(cls, name):
+                raise AssertionError("Test suite naming error: class %s already has attrinute %s" % (cls.__name__, name))
             setattr(cls, name, tests)
         cls._init_suits_done = True
 
@@ -303,7 +305,9 @@ class FuncTestCase(unittest.TestCase):
         except Exception, e:
             self.fail("%s request failed with exception:\n%s\n\n" % (url, traceback.format_exc()))
         self.assertEqual(response.getcode(), 200, "%s request returns error code %d" % (url, response.getcode()))
+        print "DBUG2: response"
         data = response.read()
+        print "DBUG2: " + data
         answer = self._json_loads(data, url)
         #TODO make more intelegent check, now some requests return [], not {}
         #if answer is not None and answer.get("error", '') not in ['', '0', 0]:

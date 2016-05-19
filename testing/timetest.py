@@ -198,9 +198,10 @@ class TimeSyncTest(FuncTestCase):
     def _check_systime_sync(self, boxnum, must_synchronize=True):
         tt = time.time() + (1 if must_synchronize else SYSTEM_TIME_NOTSYNC_SURE)
         timediff = 0
+        print "DEBUG2: %s checking for sync until %s" % (int(time.time()), int(tt))
         while time.time() < tt:
             timedata = self._request_gettime(boxnum)
-            #print "DEBUG: server time: %s, system time: %s" % (timedata['time'], timedata['boxtime'])
+            print "DEBUG: server time: %s, system time: %s" % (timedata['time'], timedata['boxtime'])
             timediff = abs(timedata['time'] - timedata['boxtime'])
             if timediff > GRACE:
                 if must_synchronize:
@@ -281,6 +282,7 @@ class TimeSyncTest(FuncTestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "Time was synchronized by secondary server")
 
+    #@unittest.skip("Debugging....")
     def SecondarySystemTimeChange(self):
         """Change system time on the secondary servers' box, check if the servers have ignored it.
         """

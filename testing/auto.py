@@ -205,6 +205,22 @@ def email_send(mailfrom, mailto, cc, msg):
     smtp.quit()
 
 
+class RunTime(object):
+    start = None
+    @classmethod
+    def go(cls):
+        cls.start = time.time()
+
+    @classmethod
+    def report(cls):
+        if cls.start is not None:
+            spend = time.time() - cls.start
+            hr = int(spend / 3600)
+            mn = int((spend - hr*3600) / 60)
+            ms = ("%.2f" % spend).split('.')[1]
+            print "Execution time: %02d:%02d:%02d.%s" % (hr, mn, int(spend % 60), ms)
+
+
 def get_platform():
     if os.name == 'posix':
         return 'POSIX'
@@ -293,7 +309,7 @@ class FailTracker(object):
             cls.fails = eval(data)
         except Exception, e:
             log("Failed branches list parsing: %s", e)
-        debug("Failed branches list loaded: %s", ', '.join(FailTracker.fails))
+        #debug("Failed branches list loaded: %s", ', '.join(FailTracker.fails))
 
     @classmethod
     def save(cls):
@@ -327,6 +343,19 @@ def check_restart():
             log("Failed to restart: %s", traceback.format_exc())
             drop_flag(conf.RESTART_FLAG)
 
+
+def get_file_time(fname):
+    """
+    Gets the file last modification time or 0 on any file access errors
+    :param fname: string
+    :return: int
+    """
+    try:
+        if not os.path.isfile(fname):
+            return 0
+        return os.stat(fname).st_mtime
+    except OSError:
+        return 0
 
 def check_control_flags():
     check_restart()
@@ -539,7 +568,7 @@ def run_tests(branch):
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
                 RESULT.append(('ut:'+name, False))
-                debug("Test suit %s has some fails: %s", name, FailedTests)
+                #debug("Test suit %s has some fails: %s", name, FailedTests)
                 failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
@@ -772,7 +801,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = conf.SUBPROC_ARGS.copy()
 
-    cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=release"]
+    cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG]
     if conf.MVN_THREADS and not no_threads:
         cmd.extend(["-T", "%d" % conf.MVN_THREADS])
     elif no_threads:
@@ -916,15 +945,15 @@ def check_mediaserver_deb():
         src = None
     dest = os.path.join(conf.VAG_DIR, 'networkoptix-mediaserver.deb')
 #    debug("Src: %s\nDest: %s", src, dest)
-    dest_stat = os.stat(dest) if os.path.isfile(dest) else None
+    dest_time = get_file_time(dest)
     if src is None or not os.path.isfile(src):
-        if dest_stat is None:
+        if dest_time == 0:
             raise FuncTestError("ERROR: networkoptix-mediaserver deb-package isn't found!")
 #        else:
 #            debug("No newly made mediaserver package found, using the old one.")
     else:
-        src_stat = os.stat(src)
-        if dest_stat is None or (src_stat.st_mtime > dest_stat.st_mtime or src_stat.st_size != dest_stat.st_size):
+        src_time = get_file_time(src)
+        if src_time > dest_time:
             debug("Using new server package from %s", src)
             shutil.copy(src, dest) # put this name into config
         else:
@@ -932,12 +961,30 @@ def check_mediaserver_deb():
 #            log("%s is up to date", dest)
 
 
+def check_testcamera_bin():
+    src = get_testcamera_path()
+    dest = os.path.join(conf.VAG_DIR, 'testcamera')
+    dest_time = get_file_time(dest)
+    if not os.path.isfile(src):
+        if dest_time == 0:
+            log("Testcamera executable file is unavailable. Functests depending on it will be skipped!")
+            return None
+    else:
+        src_time = get_file_time(src)
+        if src_time > dest_time:
+            debug("Using new testcamera from %s", src)
+            shutil.copy(src, dest)
+        else:
+            debug("Using old testcamera at %s", dest)
+        return True
+
 #####################################
 # Functional tests block
 def start_boxes(boxes, keep = False):
     try:
-        # 1. Get the .deb file
+        # 1. Get the .deb file and testcamera
         check_mediaserver_deb()
+        check_testcamera_bin()
         # 2. Start virtual boxes
         if not keep:
             debug("Removing old vargant boxes...")
@@ -947,7 +994,7 @@ def start_boxes(boxes, keep = False):
         else:
             log("Creating and starting vagrant boxes: %s...", boxes)
         boxlist = boxes.split(',') if len(boxes) else []
-        check_call(conf.VAGR_RUN + boxlist, shell=False, cwd=conf.VAG_DIR)
+        check_call(conf.VAGR_RUN + [conf.BOX_NAMES[b] for b in boxlist], shell=False, cwd=conf.VAG_DIR)
         failed = [b[0] for b in get_boxes_status() if b[0]in boxes and b[1] != 'running']
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
@@ -975,7 +1022,7 @@ def stop_boxes(boxes, destroy=False):
             log("Removing vargant boxes...")
         else:
             log("Removing vargant boxes: %s...", boxes)
-        boxlist = boxes.split(',') if len(boxes) else []
+        boxlist = [conf.BOX_NAMES[b] for b in boxes.split(',')] if len(boxes) else []
         cmd = conf.VAGR_DESTROY if destroy else conf.VAGR_STOP
         check_call(cmd + boxlist, shell=False, cwd=conf.VAG_DIR)
     except BaseException as e:
@@ -1065,7 +1112,7 @@ def perform_func_test(to_skip):
     success = True
     try:
         if not Args.nobox:
-            start_boxes('box1' if Args.natcon else 'box1,box2')
+            start_boxes('Box1' if Args.natcon else 'Box1,Box2')
             need_stop = True
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
@@ -1092,8 +1139,8 @@ def perform_func_test(to_skip):
                     cmd = BASE_FUNCTEST_CMD + NATCON_ARGS
                     reader.unregister()
                 if not Args.nobox:
-                    stop_boxes('box2')
-                    start_boxes('boxnat,boxbehind', keep=True)
+                    stop_boxes('Box2')
+                    start_boxes('Nat,Behind', keep=True)
                 debug("Running connection behind NAT test: %s", cmd)
                 proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
@@ -1107,8 +1154,8 @@ def perform_func_test(to_skip):
             if unreg:
                 reader.unregister()
                 unreg = False
-            boxssh(conf.BOX_IP['box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
-            url = "%s:%s" % (conf.BOX_IP['box1'], conf.MEDIASERVER_PORT)
+            boxssh(conf.BOX_IP['Box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
+            url = "%s:%s" % (conf.BOX_IP['Box1'], conf.MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
             #TODO add -threads value to config
@@ -1870,6 +1917,11 @@ def get_server_package_name():
 
     return os.path.join(conf.PROJECT_ROOT, deb_path, 'deb', debfn)
 
+
+def get_testcamera_path():
+    return os.path.join(conf.PROJECT_ROOT, 'build_environment', 'target', 'bin', conf.MVN_BUILD_CONFIG, 'testcamera')
+
+
 #def fix_project_root():
 #    import testconf
 #    testconf.PROJECT_ROOT = Args.path
@@ -2009,6 +2061,30 @@ def show_conf():
     print "FT_PIPE_TIMEOUT = %s" % conf.FT_PIPE_TIMEOUT
     print "BUILD_LOG_LINES = %s" % conf.BUILD_LOG_LINES
     print "MVN_THREADS = %s" % conf.MVN_THREADS
+    print "Boxes names used:", ", ".join(conf.BOX_NAMES[name] for name in ('Box1', 'Box2', 'Nat', 'Behind'))
+
+
+def updateBoxesNames():
+    dest = conf.BOXES_NAMES_FILE
+    rbTime = get_file_time(dest)
+    confTime = max(
+        get_file_time(conf.__file__),
+        get_file_time(conf.testconf_local.__file__) if hasattr(conf, 'testconf_local') else 0
+    )
+    if rbTime < confTime:
+        if os.path.exists(conf.BOXES_NAMES_FILE):
+            os.rename(conf.BOXES_NAMES_FILE, conf.BOXES_NAMES_FILE + '.bak')
+        with open(conf.BOXES_NAMES_FILE, "wt") as out:
+            print >>out, """# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# AUTOGENERATED FILE, DON'T MODIFY!
+# Change the BOX_NAMES dict in the testconf.py or, better, testconf_local.py instead
+module Boxes"""
+            for name, value in conf.BOX_NAMES.iteritems():
+                print >>out, '    %s = "%s"' % (name, value)
+            print >>out, "end"
+            print >>out, "# Created at %s" % (time.asctime())
+
 
 
 def run_auto_loop():
@@ -2026,21 +2102,6 @@ def run_auto_loop():
     log("Finishing...")
 
 
-class RunTime(object):
-    start = None
-    @classmethod
-    def go(cls):
-        cls.start = time.time()
-
-    @classmethod
-    def report(cls):
-        if cls.start is not None:
-            spend = time.time() - cls.start
-            hr = int(spend / 3600)
-            mn = int((spend - hr*3600) / 60)
-            ms = ("%.2f" % spend).split('.')[1]
-            print "Execution time: %02d:%02d:%02d.%s" % (hr, mn, int(spend % 60), ms)
-
 def main():
     parse_args()
     drop_flag(conf.RESTART_FLAG)
@@ -2051,6 +2112,8 @@ def main():
     if Args.conf:
         show_conf() # changes done by other options are shown here
         return True
+
+    updateBoxesNames()
 
     if Args.showboxes:
         show_boxes()
