@@ -13,6 +13,8 @@ PIPE_READY = 1
 PIPE_EOF = 2
 PIPE_HANG = 3
 PIPE_ERROR = 4
+PIPE_TOOLONG = 5  # it's not realy a pipe state, but one of test termination conditions
+ERROR_STATES = (PIPE_HANG, PIPE_ERROR, PIPE_TOOLONG)
 
 class PipeReaderBase(object):
     def __init__(self):
