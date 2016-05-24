@@ -27,11 +27,11 @@ from functest_util import args2str, real_caps
 
 __version__ = '1.2.2'
 
-SUITMARK = '[' # all messages from a testsuit starts with it, other are tests' internal messages
-FAILMARK = '[  FAILED  ]'
+SUITMARK =  '[' # all messages from a testsuit starts with it, other are tests' internal messages
+FAILMARK =  '[  FAILED  ]'
 STARTMARK = '[ RUN      ]'
-BARMARK = '[==========]'
-OKMARK = '[       OK ]'
+BARMARK =   '[==========]'
+OKMARK =    '[       OK ]'
 
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
@@ -86,14 +86,17 @@ class Build(object): #  contains some build-dependent global variables
 
 class Process(Popen):
     "subprocess.Popen extension"
-    _sleep_reiod = 0.05
+    _sleep_reiod = 0.01
 
     def limited_wait(self, timeout):
-        "@param timeout: float"
+        """@param timeout: float
+        Returns True if timed out
+        """
         stop = time.time() + timeout
         while self.poll() is None:
+            if time.time() > stop: return True
             time.sleep(self._sleep_reiod)
-            if time.time() < stop: break
+        return False
 
 
 def logPrint(s):
@@ -146,7 +149,7 @@ class ToSend(object):
     def debug(cls, text):
         if not (Args.stdout and cls.flushed):
             cls.last_line_src = text
-            cls.lines.append(logStr("[dup] " + text))
+            cls.lines.append(logStr(text))
 
     @classmethod
     def flush(cls):
@@ -177,6 +180,11 @@ class ToSend(object):
     def cutLastLine(cls):
         if cls.lines:
             del cls.lines[-1]
+
+    @classmethod
+    def cutTail(cls, pos):
+        if len(cls.lines) > pos:
+            del cls.lines[pos:]
 
 
 def debug(text, *args):
@@ -380,26 +388,41 @@ def check_repeats(repeats):
         if repeats > 1:
             ToSend.lastLineAppend("   [ REPEATS %s TIMES ]" % repeats)
 
+def ut_fail_state_msg(state, suitename, testname):
+    if state == pipereader.PIPE_HANG:
+        return "[ %s has TIMED OUT (more than %.1f seconds) on test %s ]" % (suitename, conf.UT_PIPE_TIMEOUT/1000, testname)
+    elif state == pipereader.PIPE_TOOLONG:
+        return "[ %s execution takes more than %s minutes, the testsuite will be terminated ]" % (suitename, conf.UT_TIME_LIMIT/60)
+    else:
+        return "[ PIPE ERROR reading test suite output on test %s ]" % testname
 
-def read_unittest_output(proc, reader, suitname):
-    last_suit_line = ''
-    has_stranges = False
+def read_unittest_output(proc, reader, suitename):
+    #last_suit_line = ''
     repeats = 0 # now many times the same 'strange' line repeats
     running_test_name = ''
     complete = False
-    to_send_count = 0
+    start_position = 0
+    ut_start_time = time.time()
+    control_time = ut_start_time + conf.UT_TIME_LIMIT
+    # if a unittest doesn't finish before the control_time, it will be terminated
+    ut_time = None
     try:
         while reader.state == pipereader.PIPE_READY:
+            if time.time() > control_time:
+                reader.state = pipereader.PIPE_TOOLONG
+                break
             line = reader.readline(conf.UT_PIPE_TIMEOUT)
             if not complete and len(line) > 0:
                 #debug("Line: %s", line.lstrip())
                 if line.startswith(SUITMARK):
                     check_repeats(repeats)
                     repeats = 1
-                    last_suit_line = line
+                    #last_suit_line = line
                     if line.startswith(STARTMARK):
                         running_test_name = get_name(line) # remember to print OK test result and for abnormal termination case
-                        to_send_count = ToSend.count()
+                        start_position = ToSend.count()
+                        ToSend.flushed = False
+                        ToSend.append(line)
                     elif line.startswith(FAILMARK) and not complete:
                         #debug("Appending: %s", line.rstrip())
                         FailedTests.append(get_name(line))
@@ -408,34 +431,35 @@ def read_unittest_output(proc, reader, suitname):
                         running_test_name = ''
                     elif line.startswith(OKMARK):
                         if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
-                            if to_send_count < ToSend.count():
-                                ToSend.append(line)
+                            ToSend.cutTail(start_position)  # cut off all output if no error
                         else:
+                            ToSend.append(line)
                             ToSend.log("WARNING!!! running_test_name != get_name(line): %s; %s", running_test_name, line.rstrip())
                         running_test_name = ''
                     elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
+                        ToSend.append(line)
                         complete = True
+                    else:
+                        ToSend.append(line)
                 else: # gather test's messages
-                    if last_suit_line != '':
-                        ToSend.append(last_suit_line)
-                        last_suit_line = ''
+                    #if last_suit_line != '':
+                    #    ToSend.append(last_suit_line)
+                    #    last_suit_line = ''
                     if ToSend.count() and (line == ToSend.last_line_src):
                         repeats += 1
                     else:
                         check_repeats(repeats)
                         repeats = 1
                         ToSend.append(line)
-                    has_stranges = True
         else: # end reading
             check_repeats(repeats)
 
-        state_error = reader.state in (pipereader.PIPE_HANG, pipereader.PIPE_ERROR)
+        ut_time = time.time() - ut_start_time
+
+        state_error = reader.state in pipereader.ERROR_STATES
         if state_error:
             ToSend.flush()
-            ToSend.append(
-                ("[ test suit has TIMED OUT (more than %s seconds) on test %s ]" % (conf.UT_PIPE_TIMEOUT, running_test_name))
-                if reader.state == pipereader.PIPE_HANG else
-                ("[ PIPE ERROR reading test suit output on test %s ]" % running_test_name))
+            ToSend.append(ut_fail_state_msg(reader.state, suitename, running_test_name))
             FailedTests.append(running_test_name)
 
         before = time.time()
@@ -443,38 +467,41 @@ def read_unittest_output(proc, reader, suitname):
 
         if proc.poll() is None:
             if not state_error:
-                debug("The unittest %s hasn't finished for %.1f seconds", suitname, conf.TEST_TERMINATION_WAIT)
+                debug("The unittest %s hasn't finished for %.1f seconds", suitename, conf.TEST_TERMINATION_WAIT)
             kill_proc(proc, sudo=True)
-            proc.wait()
+            proc.limited_wait(1)
         else:
             delta = time.time() - before
             if delta >= 0.01:
-                debug("The unittest %s finnishing takes %.2f seconds", suitname, delta)
+                debug("The unittest %s finnishing takes %.2f seconds", suitename, delta)
 
         if proc.returncode != 0:
             ToSend.flush()
             if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-                ToSend.append("[ Test %s of %s suit interrupted abnormally ]", running_test_name, suitname)
+                ToSend.append("[ Test %s of %s suit interrupted abnormally ]", running_test_name, suitename)
                 FailedTests.append(running_test_name)
             if proc.returncode < 0:
                 if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
                     signames = SignalNames.get(-proc.returncode, [])
                     signames = ' (%s)' % (','.join(signames),) if signames else ''
-                    ToSend.append("[ TEST SUIT %s HAS BEEN INTERRUPTED by signal %s%s during test %s]",
-                                  suitname, -proc.returncode, signames, running_test_name)
+                    ToSend.append("[ TEST SUITE %s WAS INTERRUPTED by signal %s%s during test %s]",
+                                  suitename, -proc.returncode, signames, running_test_name)
             else:
-                ToSend.append("[ %s TEST SUIT'S RETURN CODE = %s ]", suitname, proc.returncode)
+                ToSend.append("[ %s TEST SUITE'S RETURN CODE = %s ]", suitename, proc.returncode)
             if FailedTests:
                 ToSend.append("Failed tests: %s", FailedTests)
             else:
                 FailedTests.append('(unknown)')
 
     finally:
+        if ut_time is None:
+            ut_time = time.time() - ut_start_time
         if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
             debug("Test %s final result not found!", running_test_name)
             FailedTests.append(running_test_name)
-        if has_stranges and not FailedTests:
-            ToSend.append("[ Tests passed OK, but has some output. ]")
+        if not FailedTests:
+            ToSend.append("[ %s tests passed OK. ]" % suitename)
+        debug("%s tests runed for %.2f seconds.", suitename, ut_time)
 
 
 if os.name == 'posix':
@@ -506,7 +533,7 @@ def validate_testpath(testpath):
 def call_test(suitname, reader):
     ToSend.clear()
     del FailedTests[:]
-    ToSend.log("[ Calling %s test suit ]", suitname)
+    ToSend.log("[ Calling %s test suite ]", suitname)
     old_coount = ToSend.count()
     proc = None
     try:
@@ -568,8 +595,8 @@ def run_tests(branch):
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
                 RESULT.append(('ut:'+name, False))
-                #debug("Test suit %s has some fails: %s", name, FailedTests)
-                failedStr = "\n".join(("Tests, failed in the %s test suit:" % name,
+                #debug("Test suite %s has some fails: %s", name, FailedTests)
+                failedStr = "\n".join(("Tests, failed in the %s test suite:" % name,
                                        "\n".join("\t" + name for name in FailedTests),
                                       ''))
                 all_fails.append((name, FailedTests[:]))
@@ -584,7 +611,7 @@ def run_tests(branch):
                     output.extend(ToSend.lines)
             else:
                 RESULT.append(('ut:'+name, True))
-                debug("Test suit %s has NO fails", name)
+                debug("OK for the '%s' test suite", name)
 
     ToSend.clear()
     if all_fails:
@@ -802,10 +829,12 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     kwargs = conf.SUBPROC_ARGS.copy()
 
     cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG]
-    if conf.MVN_THREADS and not no_threads:
-        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
-    elif no_threads:
+    if (not conf.MVN_THREADS) or conf.MVN_THREADS == 1:
+        no_threads = True
+    if no_threads:
         cmd.extend(["-T", "1"])
+    else:
+        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
     if single_project is not None:
         cmd.extend(['-pl', single_project])
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
