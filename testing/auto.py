@@ -510,10 +510,11 @@ if os.name == 'posix':
             cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH'], testpath]
         else:
             cmd = [testpath]
+        cmd += ['--gtest_shuffle']
         return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
 else:
     def exec_unittest(testpath):
-        return Process([testpath], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
+        return Process([testpath, '--gtest_shuffle'], bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
 
 
 def validate_testpath(testpath):
