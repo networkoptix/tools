@@ -79,7 +79,7 @@ VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
 
 MVN_BUILD_CONFIG = 'release'
-TEST_CAMERA_SUBPATH = "build_environment/target/bin/debug/testcamera"
+TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
 
 BOX_NAMES = {
     "Box1": "box1",

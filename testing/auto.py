@@ -829,10 +829,12 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
     kwargs = conf.SUBPROC_ARGS.copy()
 
     cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG]
-    if conf.MVN_THREADS and not no_threads:
-        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
-    elif no_threads:
+    if (not conf.MVN_THREADS) or conf.MVN_THREADS == 1:
+        no_threads = True
+    if no_threads:
         cmd.extend(["-T", "1"])
+    else:
+        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
     if single_project is not None:
         cmd.extend(['-pl', single_project])
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
