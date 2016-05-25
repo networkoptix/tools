@@ -29,7 +29,7 @@ BUILD_CONF_PATH = ''
 
 HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consumed by check, builds and tests
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
-UT_PIPE_TIMEOUT = 90 * 1000  # milliseconds. Unit tests' pipe timeout
+UT_PIPE_TIMEOUT = 100 * 1000  # milliseconds. Unit tests' pipe timeout
 FT_PIPE_TIMEOUT = 90 * 1000  # ... Functional tests' pipe timeout
 UT_TIME_LIMIT = 10 * 60 # Maximum time for each one unittest to run.
 TEST_TERMINATION_WAIT = 7 # seconds, how long to wait for test process teermination before kill it
@@ -40,6 +40,8 @@ MVN_BUFFER = 50000        # maven output pipe buffer size
 MVN_THREADS = 8 # Number of threads to be used by maven (mvn -T)
 SELF_RESTART_TIMEOUT = 10 # seconds
 SLEEP_AFTER_BOX_START = 1 # seconds
+
+ULIMIT_NOFILE_REQUIRED = 4096
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check

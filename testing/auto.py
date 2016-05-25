@@ -21,7 +21,12 @@ if rundir not in ('', '.') and rundir != os.getcwd():
     os.chdir(rundir)
 
 import testconf as conf
-import pipereader
+
+if os.name == 'posix':
+    import autotest.posix
+    autotest.posix.fix_ulimit(conf.ULIMIT_NOFILE_REQUIRED)
+
+import autotest.pipereader as pipereader
 from testbase import boxssh
 from functest_util import args2str, real_caps
 
@@ -152,11 +157,11 @@ class ToSend(object):
             cls.lines.append(logStr(text))
 
     @classmethod
-    def flush(cls):
+    def flush(cls, pos=0):
         # used only with -o mode
         if Args.stdout and not cls.flushed:
             cls.flushed = True
-            for text in cls.lines:
+            for text in cls.lines[pos:]:
                 logPrint(text)
             del cls.lines[:]
 
@@ -426,7 +431,7 @@ def read_unittest_output(proc, reader, suitename):
                     elif line.startswith(FAILMARK) and not complete:
                         #debug("Appending: %s", line.rstrip())
                         FailedTests.append(get_name(line))
-                        ToSend.flush()
+                        ToSend.flush(start_position)
                         ToSend.append(line)
                         running_test_name = ''
                     elif line.startswith(OKMARK):
@@ -508,6 +513,7 @@ def exec_unittest(testpath):
     cmd = [testpath, '--gtest_shuffle']
     if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
         cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
+    debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), Env['LD_LIBRARY_PATH'])
     return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
 
 
@@ -583,9 +589,15 @@ def run_tests(branch):
     to_skip = get_tests_to_skip(branch)
     reader = pipereader.PipeReader()
     all_fails = []
+    if Args.single_ut and Args.single_ut in to_skip:
+        to_skip.remove(Args.single_ut)
+        to_skip.discard('all_ut')
 
     if 'all_ut' not in to_skip:
-        for name in get_ut_names():
+        existed_ut_names = get_ut_names()
+        if Args.single_ut:
+            existed_ut_names = (Args.single_ut,) if Args.single_ut in existed_ut_names else ()
+        for name in existed_ut_names:
             if name in to_skip: continue
             call_test(name, reader)  # it clears ToSend and FailedTests on start
             if FailedTests:
@@ -942,8 +954,12 @@ def run():
             if Args.hg_only:
                 log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
             return rc
-        if Args.test_only:
+
+        if Args.single_ut:
+            log("%s test only run..." % Args.single_ut)
+        elif Args.test_only:
             log("Test only run...")
+
         if not Args.test_only:
             if not build_branch(conf.BRANCHES[0]):
                 return False
@@ -1984,6 +2000,7 @@ def parse_args():
     # No args -- just build and test current project (could be modified by -p, -t, -u)
     parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing tests again (add --noft to skip functests.")
+    parser.add_argument("--single-ut", help="Run specified unit test only.")
     parser.add_argument("-r", "--rebuild", action='store_true', help="(Re)build even if no new commits found.")
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
@@ -2160,8 +2177,13 @@ def main():
 
     if Args.auto:
         run_auto_loop()
+        return True
 
-    elif (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
+    if Args.single_ut:
+        Args.no_functest = True
+        Args.test_only = True
+
+    if (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
         ToSend.clear()
         if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
             if ToSend.count() and not Args.stdout:
