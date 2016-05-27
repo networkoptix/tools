@@ -520,23 +520,29 @@ def read_unittest_output(proc, reader, suitename):
         debug("%s tests runed for %.2f seconds.", suitename, ut_time)
 
 
-def clear_temp_dir():
+def check_temp_dir():
     if not os.path.exists(conf.UT_TEMP_DIR):
         os.mkdir(conf.UT_TEMP_DIR, 0750)
-        return
+        # if it did not exist before, it's really safe
+        conf.UT_TEMP_DIR_SAFE = True
+        return False
     if not os.path.isdir(conf.UT_TEMP_DIR):
         raise EnvironmentError("ERROR: UT_TEMP_FILE %s isn't a directory!" % conf.UT_TEMP_DIR)
         # will be catched in call_test()
-    # now clear it
-    if os.name == 'posix':
-        check_call([conf.SUDO, 'rm', '-rf', os.path.join(conf.UT_TEMP_DIR,'*')])
-    else:
-        for entry in os.listdir(conf.UT_TEMP_DIR):
-            epath = os.path.join(conf.UT_TEMP_DIR, entry)
-            if os.path.isdir(epath):
-                shutil.rmtree(epath, ignore_errors=True)
-            else:
-                os.remove(epath)
+    return True
+
+
+def clear_temp_dir():
+    if conf.UT_TEMP_DIR_SAFE:
+        if os.name == 'posix':
+            check_call([conf.SUDO, conf.RM, '-rf', os.path.join(conf.UT_TEMP_DIR,'*')])
+        else:
+            for entry in os.listdir(conf.UT_TEMP_DIR):
+                epath = os.path.join(conf.UT_TEMP_DIR, entry)
+                if os.path.isdir(epath):
+                    shutil.rmtree(epath, ignore_errors=True)
+                else:
+                    os.remove(epath)
 
 
 def exec_unittest(testpath):
@@ -545,7 +551,8 @@ def exec_unittest(testpath):
         ToSend.log("WARNING! UT_TEMP_FILE is not set!")
     else:
         cmd += ['--tmp=' + conf.UT_TEMP_DIR]
-        clear_temp_dir()
+        if check_temp_dir():
+            clear_temp_dir()
     if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
         cmd = [conf.SUDO, '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
     debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), Env['LD_LIBRARY_PATH'])
@@ -2285,8 +2292,11 @@ if __name__ == '__main__':
             debug("Results: %s", RESULT)
     finally:
         if conf.UT_TEMP_DIR_PID_USED:
-            shutil.rmtree(conf.UT_TEMP_DIR, ignore_errors=True)
-        elif conf.UT_TEMP_DIR_SAFE:
+            if os.name == 'posix':
+                check_call([conf.SUDO, conf.RM, '-rf', conf.UT_TEMP_DIR])
+            else:
+                shutil.rmtree(conf.UT_TEMP_DIR, ignore_errors=True)
+        else:
             clear_temp_dir()
         RunTime.report()
 

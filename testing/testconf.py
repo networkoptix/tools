@@ -35,7 +35,6 @@ UT_TEMP_DIR = '/var/tmp/autotest.$'
 UT_TEMP_DIR_PID_USED = True  # it realy doesn't matter since set_paths() set the correct value here
 UT_TEMP_DIR_SAFE = False  # set it to False if don't use PID and UT_TEMP_DIR points to some common directory
                           # if it's True, script will clear it contents even if PID not used
-                          #
 
 
 BUILD_CONF_SUBPATH = os.path.join("build_variables", "target", "current_config.py")
@@ -80,6 +79,7 @@ HG = "/usr/bin/hg"
 MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 SUDO = "/usr/bin/sudo"
+RM = "/bin/rm"
 
 VAG_DIR = "./vagrant"
 
