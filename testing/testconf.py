@@ -24,6 +24,17 @@ RESTART_FLAG = './.restart'
 STOP_FLAG = './.stop'
 RESTART_BY_EXEC = True
 
+# Usage of UT_TEMP_DIR: leading '/' means abs.path, leading './' rel.path based on the script's dir,
+# otherwise it's a rel.path based on PROJECT_ROOT
+# it shouldn't be any common 'temporary' directory itself, but could be a subdirectory there
+# also you can end path with '$' which will make the script to add it's PID to the path
+# instead of '$'
+# Never should two or more processes of the script share the same UT_TEMP_DIR since both of them
+# clear it before starting of any unittest (usage of PID helps here).
+UT_TEMP_DIR = '/var/tmp/autotest.$'
+UT_TEMP_DIR_PID_USED = True  # it realy doesn't matter since set_paths() set the correct value here
+
+
 BUILD_CONF_SUBPATH = os.path.join("build_variables", "target", "current_config.py")
 BUILD_CONF_PATH = ''
 
@@ -48,9 +59,9 @@ ULIMIT_NOFILE_REQUIRED = 4096
 BRANCHES = ('dev_2.5',)
 TESTS = ('common_ut', 'mediaserver_core_ut', 'client_ut') # unit tests' binary files names
 
-SMTP_ADDR = 'smtp.gmail.com:587'
-SMTP_LOGIN = 'service@networkoptix.com'
-SMTP_PASS = 'kbnUk06boqBkwU'
+SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
+SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
+SMTP_PASS = 'AlYDnddPk8mWorQFVogh8sqkQX6Nv01JwxxfMoYJAFeC'
 
 
 MAIL_FROM = '"AutoTest System" <autotest@networkoptix.com>'

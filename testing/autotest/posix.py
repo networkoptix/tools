@@ -17,6 +17,6 @@ def fix_ulimit(new_limit):
         print "WARNING! Configured open files limit (%s) is greater than the current hard limit (%s)" % (new_limit, val[1])
         new_limit = val[1]
     resource.setrlimit(resource.RLIMIT_NOFILE, (new_limit, val[1]))
-    print "DEBUG: fix_ulimit: new RLIMIT_NOFILE: %s" % (resource.getrlimit(resource.RLIMIT_NOFILE),)
+    #print "DEBUG: fix_ulimit: new RLIMIT_NOFILE: %s" % (resource.getrlimit(resource.RLIMIT_NOFILE),)
 
 

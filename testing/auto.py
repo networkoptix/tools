@@ -30,7 +30,7 @@ import autotest.pipereader as pipereader
 from testbase import boxssh
 from functest_util import args2str, real_caps
 
-__version__ = '1.2.2'
+__version__ = '1.2.3'
 
 SUITMARK =  '[' # all messages from a testsuit starts with it, other are tests' internal messages
 FAILMARK =  '[  FAILED  ]'
@@ -41,6 +41,17 @@ OKMARK =    '[       OK ]'
 NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
 
 RESULT = []
+
+def check_conf():
+    """ Configuration values sanity check.
+    """
+    #TODO make more cheks!
+    names = set(conf.BOX_NAMES.itervalues())
+    if len(names) < len(conf.BOX_NAMES):
+        keymap = (p for p in ((name, [k for k, v in conf.BOX_NAMES.iteritems() if v == name]) for name in names)
+                  if len(p[1]) > 1)
+        logPrint("ERROR: duplicated virtual box name in configuration: %s" % ( '; '.join("%s: %s" % (k, ', '.join(v)) for k, v in keymap) ))
+        sys.exit(3)
 
 
 def get_signals():
@@ -509,11 +520,33 @@ def read_unittest_output(proc, reader, suitename):
         debug("%s tests runed for %.2f seconds.", suitename, ut_time)
 
 
+def clear_temp_dir():
+    if not os.path.exists(conf.UT_TEMP_DIR):
+        os.mkdir(conf.UT_TEMP_DIR, 0750)
+        return
+    if not os.path.isdir(conf.UT_TEMP_DIR):
+        raise EnvironmentError("ERROR: UT_TEMP_FILE %s isn't a directory!" % conf.UT_TEMP_DIR)
+        # will be catched in call_test()
+    # now clear it
+    for entry in os.listdir(conf.UT_TEMP_DIR):
+        epath = os.path.join(conf.UT_TEMP_DIR, entry)
+        if os.path.isdir(epath):
+            shutil.rmtree(epath, ignore_errors=True)
+        else:
+            os.remove(epath)
+
+
 def exec_unittest(testpath):
     cmd = [testpath, '--gtest_shuffle']
+    if not conf.UT_TEMP_DIR:
+        ToSend.log("WARNING! UT_TEMP_FILE is not set!")
+    else:
+        cmd += ['--tmp=' + conf.UT_TEMP_DIR]
+        clear_temp_dir()
     if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
         cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
     debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), Env['LD_LIBRARY_PATH'])
+    #debug("Command line: %s", cmd)
     return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
 
 
@@ -1020,7 +1053,7 @@ def check_testcamera_bin():
 
 #####################################
 # Functional tests block
-def start_boxes(boxes, keep = False):
+def start_boxes(boxlist, keep = False):
     try:
         # 1. Get the .deb file and testcamera
         check_mediaserver_deb()
@@ -1029,13 +1062,12 @@ def start_boxes(boxes, keep = False):
         if not keep:
             debug("Removing old vargant boxes...")
             check_call(conf.VAGR_DESTROY, shell=False, cwd=conf.VAG_DIR)
-        if not boxes:
+        if not boxlist:
             log("Creating and starting vagrant boxes...")
         else:
-            log("Creating and starting vagrant boxes: %s...", boxes)
-        boxlist = boxes.split(',') if len(boxes) else []
+            log("Creating and starting vagrant boxes: %s...", ', '.join(boxlist))
         check_call(conf.VAGR_RUN + [conf.BOX_NAMES[b] for b in boxlist], shell=False, cwd=conf.VAG_DIR)
-        failed = [b[0] for b in get_boxes_status() if b[0]in boxes and b[1] != 'running']
+        failed = [b[0] for b in get_boxes_status() if b[0] in boxlist and b[1] != 'running']
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
             return False
@@ -1152,7 +1184,7 @@ def perform_func_test(to_skip):
     success = True
     try:
         if not Args.nobox:
-            start_boxes('Box1' if Args.natcon else 'Box1,Box2')
+            start_boxes(['Box1'] if Args.natcon else ['Box1','Box2'])
             need_stop = True
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
@@ -1180,7 +1212,7 @@ def perform_func_test(to_skip):
                     reader.unregister()
                 if not Args.nobox:
                     stop_boxes('Box2')
-                    start_boxes('Nat,Behind', keep=True)
+                    start_boxes(['Nat','Behind'], keep=True)
                 debug("Running connection behind NAT test: %s", cmd)
                 proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
@@ -1915,6 +1947,15 @@ def check_args_correct():
     if Args.add and (Args.boxes is None):
         logPrint("ERROR: --add is usable only with --boxes")
         sys.exit(2)
+    elif Args.boxes is not None:
+        fail = False
+        for name in Args.boxes.split(','):
+            if name not in conf.BOX_NAMES.values():
+                logPrint("ERROR: unknown virtual box name: %s" % name)
+                fail = True
+        if fail:
+            sys.exit(2)
+
 
 
 #def get_architecture():
@@ -1990,6 +2031,20 @@ def set_paths():
     debug("Using project root at %s", conf.PROJECT_ROOT)
 
     conf.BUILD_CONF_PATH = os.path.join(conf.PROJECT_ROOT, conf.BUILD_CONF_SUBPATH)
+
+    if conf.UT_TEMP_DIR and not conf.UT_TEMP_DIR.startswith('/'):
+        if conf.UT_TEMP_DIR.startswith('./') or conf.UT_TEMP_DIR.startswith('.\\'):
+            conf.UT_TEMP_DIR = os.path.join(os.getcwd(), conf.UT_TEMP_DIR[2:])
+        else:
+            conf.UT_TEMP_DIR = os.path.join(conf.PROJECT_ROOT, conf.UT_TEMP_DIR)
+    if conf.UT_TEMP_DIR.endswith('$'):
+        conf.UT_TEMP_DIR = conf.UT_TEMP_DIR[:-1] + str(os.getpid())
+        conf.UT_TEMP_DIR_PID_USED = True
+    else:
+        conf.UT_TEMP_DIR_PID_USED = False
+    if os.path.exists(conf.UT_TEMP_DIR) and not os.path.isdir(conf.UT_TEMP_DIR):
+        logPrint("FATAL: UT_TEMP_FILE %s exists but isn't a directory!" % conf.UT_TEMP_DIR)
+        sys.exit(3)
 
 
 def parse_args():
@@ -2161,7 +2216,12 @@ def main():
         return True
 
     if Args.boxes is not None:
-        start_boxes(Args.boxes, keep=Args.add)
+        if Args.boxes:
+            nameset = set(Args.boxes.split(','))
+            boxes = [k for k, v in conf.BOX_NAMES.iteritems() if v in nameset]
+        else:
+            boxes = []
+        start_boxes(boxes, keep=Args.add)
         return True
 
     if Args.boxoff is not None:
@@ -2206,6 +2266,7 @@ def main():
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
+    check_conf()
     try:
         if not main():
             debug("Something isn't OK, returning code 1")
@@ -2214,6 +2275,8 @@ if __name__ == '__main__':
         else:
             debug("Results: %s", RESULT)
     finally:
+        if conf.UT_TEMP_DIR_PID_USED:
+            shutil.rmtree(conf.UT_TEMP_DIR, ignore_errors=True)
         RunTime.report()
 
 # TODO: with -o turn off output lines accumulator, just print 'em
