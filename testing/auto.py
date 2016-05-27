@@ -89,7 +89,7 @@ class Build(object): #  contains some build-dependent global variables
         except IOError as err:
             if safe and err.errno == errno.ENOENT:
                 return
-            print "ERROR: Can't load build variables file: " + err
+            print "ERROR: Can't load build variables file: %s" % (err,)
             sys.exit(1)
         except Exception:
             print "ERROR: Failed to load build variables: " + traceback.format_exc()
@@ -528,12 +528,15 @@ def clear_temp_dir():
         raise EnvironmentError("ERROR: UT_TEMP_FILE %s isn't a directory!" % conf.UT_TEMP_DIR)
         # will be catched in call_test()
     # now clear it
-    for entry in os.listdir(conf.UT_TEMP_DIR):
-        epath = os.path.join(conf.UT_TEMP_DIR, entry)
-        if os.path.isdir(epath):
-            shutil.rmtree(epath, ignore_errors=True)
-        else:
-            os.remove(epath)
+    if os.name == 'posix':
+        check_call([conf.SUDO, 'rm', '-rf', os.path.join(conf.UT_TEMP_DIR,'*')])
+    else:
+        for entry in os.listdir(conf.UT_TEMP_DIR):
+            epath = os.path.join(conf.UT_TEMP_DIR, entry)
+            if os.path.isdir(epath):
+                shutil.rmtree(epath, ignore_errors=True)
+            else:
+                os.remove(epath)
 
 
 def exec_unittest(testpath):
@@ -544,7 +547,7 @@ def exec_unittest(testpath):
         cmd += ['--tmp=' + conf.UT_TEMP_DIR]
         clear_temp_dir()
     if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
-        cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
+        cmd = [conf.SUDO, '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
     debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), Env['LD_LIBRARY_PATH'])
     #debug("Command line: %s", cmd)
     return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
@@ -2032,7 +2035,12 @@ def set_paths():
 
     conf.BUILD_CONF_PATH = os.path.join(conf.PROJECT_ROOT, conf.BUILD_CONF_SUBPATH)
 
-    if conf.UT_TEMP_DIR and not conf.UT_TEMP_DIR.startswith('/'):
+    if not conf.UT_TEMP_DIR:
+        logPrint("FATAL: UT_TEMP_DIR must be configured!")
+        sys.exit(3)
+    if conf.UT_TEMP_DIR.startswith('/'):
+        conf.UT_TEMP_DIR_SAFE = False  # absolut paths are unsafe because directory will be cleared with root privileges
+    else:
         if conf.UT_TEMP_DIR.startswith('./') or conf.UT_TEMP_DIR.startswith('.\\'):
             conf.UT_TEMP_DIR = os.path.join(os.getcwd(), conf.UT_TEMP_DIR[2:])
         else:
@@ -2040,6 +2048,7 @@ def set_paths():
     if conf.UT_TEMP_DIR.endswith('$'):
         conf.UT_TEMP_DIR = conf.UT_TEMP_DIR[:-1] + str(os.getpid())
         conf.UT_TEMP_DIR_PID_USED = True
+        conf.UT_TEMP_DIR_SAFE = True
     else:
         conf.UT_TEMP_DIR_PID_USED = False
     if os.path.exists(conf.UT_TEMP_DIR) and not os.path.isdir(conf.UT_TEMP_DIR):
@@ -2277,6 +2286,8 @@ if __name__ == '__main__':
     finally:
         if conf.UT_TEMP_DIR_PID_USED:
             shutil.rmtree(conf.UT_TEMP_DIR, ignore_errors=True)
+        elif conf.UT_TEMP_DIR_SAFE:
+            clear_temp_dir()
         RunTime.report()
 
 # TODO: with -o turn off output lines accumulator, just print 'em
