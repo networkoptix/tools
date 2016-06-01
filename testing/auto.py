@@ -971,6 +971,10 @@ def update_repo(branches, bundle_fn):
     #    sys.exit(1)
 
 
+def build_only_msg(branch):
+    log("Branch %s is configured as BUILD-ONLY. Skipping all tests" % branch)
+
+
 def check_hg_updates():
     "Check for repository updates, get'em, build and test"
     bundle_fn = os.path.join(conf.TEMP, "in.hg")
@@ -980,8 +984,12 @@ def check_hg_updates():
         update_repo(branches, bundle_fn)
         for branch in branches:
             if prepare_branch(branch):
-                Build.load_vars()
-                rc = run_tests(branch) and rc
+                if branch in conf.BUILD_ONLY_BRANCHES:
+                    build_only_msg(branch)
+                    # don't change rc - keep it True if it still is True
+                else:
+                    Build.load_vars()
+                    rc = run_tests(branch) and rc
             else:
                 FailTracker.mark_fail(branch)
                 rc = False
@@ -1006,6 +1014,9 @@ def run():
         if not Args.test_only:
             if not build_branch(conf.BRANCHES[0]):
                 return False
+            if conf.BRANCHES[0] in conf.BUILD_ONLY_BRANCHES:
+                build_only_msg(conf.BRANCHES[0])
+                return True
         Build.load_vars()
         rc = run_tests(conf.BRANCHES[0])
         RESULT.append(('run_tests', rc))

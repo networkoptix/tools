@@ -144,6 +144,9 @@ SKIP_ALL = set() # {'msarch'}
 
 SUDO_REQUIRED = set(('mediaserver_core_ut',))  # set of unittests that require sudo to call
 
+# Build only this branches, don't perform any testing
+BUILD_ONLY_BRANCHES = set(('dev_3.0.0', ))
+
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
 #------------------------------------------------------------------
