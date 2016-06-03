@@ -35,7 +35,7 @@ CONFIG = dict(
         dump = 'dmp',
         report = 'cdb-bt',
     ),
-    msi_suffix = 'x64-%s-only.msi',
+    msi_suffix = 'x64[a-z\-]+-%s-only.msi',
     pdb_suffixes = [
         'x64-windows-pdb-all.zip',
         'x64-windows-pdb-apps.zip',
@@ -132,10 +132,7 @@ class DumpAnalyzer(object):
         with Cdb(self.dump_path) as cdb:
             self.module = cdb.main_module()
             self.version = self.version or cdb.module_info(self.module, 'version')
-        if self.module.find('server') != -1:
-            self.msi = CONFIG['msi_suffix'] % 'server'
-        else:
-            self.msi = CONFIG['msi_suffix'] % 'client'
+        self.msi = 'server' if self.module.find('server') != -1 else 'client'
         self.log('Dump information: %s (%s) %s %s ' % (
             self.module, self.msi, self.version, self.customization))
         self.build = self.build or self.version.split('.')[-1]
@@ -165,7 +162,7 @@ class DumpAnalyzer(object):
         build_url = os.path.join(CONFIG['dist_url'], build_path)
         out = self.fetch_url_data(
             build_url, ('''\"(.+\-%s)\"''' % r for r in [
-                self.msi] + CONFIG['pdb_suffixes']))
+                CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']))
         self.dist_urls = list(os.path.join(build_url, e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'], build_path)
         self.target_path = os.path.join(self.build_path, 'target')
@@ -188,7 +185,7 @@ class DumpAnalyzer(object):
         for root, dirs, files in os.walk(self.build_path):
             if name in files:
                 return os.path.join(root, name)
-        raise Error("No such file '%s' in '%s'" % (name, path))
+        raise Error("No such file '%s' in '%s'" % (name, self.build_path))
 
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
@@ -211,6 +208,8 @@ class DumpAnalyzer(object):
     def download_dists(self):
         '''Downloads required distributives
         '''
+        if not self.dist_urls:
+           raise Error('There are no any dist URLs avaliable')
         for url in self.dist_urls:
             self.log('Download: ' + url)
             self.download_url_data(url, self.build_path, self.extract_dist)
