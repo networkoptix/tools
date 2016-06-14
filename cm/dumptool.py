@@ -37,8 +37,8 @@ CONFIG = dict(
     ),
     msi_suffix = 'x64[a-z\-]+-%s-only.msi',
     pdb_suffixes = [
-        'x64-windows-pdb-all.zip',
-        'x64-windows-pdb-apps.zip',
+        'x64[a-z\\-]+windows-pdb-all.zip',
+        'x64[a-z\\-]+windows-pdb-apps.zip',
     ],
 )
 
@@ -139,31 +139,38 @@ class DumpAnalyzer(object):
         if self.build == '0':
             raise Error('Build 0 is not supported')
 
-    def fetch_url_data(self, url, regexps):
+    def fetch_url_data(self, url, regexps, subUrl=None):
         '''Fetches data from :url by :regexp (must contain single group!)
         '''
         try:
             page = urllib2.urlopen(url).read().replace('\n', '')
         except urllib2.HTTPError as e:
             raise Error('%s, url: %s' % (e, url))
-        result = []
+        results, failures = [], []
         for regexp in regexps:
             m = re.match('.+%s.+' % regexp, page)
-            if m: result.append(m.group(1))
-            else: self.log("Warning: canot find '%s' in %s" % (regexp, url))
-        return result
+            if m:
+                results.append((url, m.group(1)))
+            else:
+                failures.append(regexp)
+                self.log("Warning: canot find '%s' in %s" % (regexp, url))
+        if subUrl and len(failures):
+            results += self.fetch_url_data(subUrl, failures)
+        return results
 
     def fetch_urls(self):
         '''Fetches URLs of required resourses
         '''
         out = self.fetch_url_data(
             CONFIG['dist_url'], ['''(%s\-[^/]+)''' % self.build])
-        build_path = '%s/%s/windows/' % (out[0], self.customization)
+        build_path = '%s/%s/windows/' % (out[0][1], self.customization)
+        update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(CONFIG['dist_url'], build_path)
         out = self.fetch_url_data(
             build_url, ('''\"(.+\-%s)\"''' % r for r in [
-                CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']))
-        self.dist_urls = list(os.path.join(build_url, e) for e in out)
+                CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
+            os.path.join(CONFIG['dist_url'], update_path))
+        self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'], build_path)
         self.target_path = os.path.join(self.build_path, 'target')
         if not os.path.isdir(self.target_path):
