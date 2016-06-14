@@ -5,7 +5,7 @@ then
 cat <<END
 Runs Cloud Connectivity Test Utility
 Usage: [OPTION=VALUE ...] run-cctu.sh [flags] [extra args ...]
-Flags: l --listen, c --connect, e --echo
+Flags: l --listen, c --connect, e --echo, s --ssl
 END
 exit 0
 fi
@@ -35,7 +35,8 @@ else
     if [ $CC -gt 0 ]; then ARGS+=" --max-concurrent-connections=$CC"; fi
 fi
 
-if [[ "$FLAGS" == *e* ]]; then ARGS+=" --echo"; fi
+if [[ "$FLAGS" == *e* ]]; then ARGS+=" --ping"; fi
+if [[ "$FLAGS" == *s* ]]; then ARGS+=" --ssl"; fi
 if [ "$MEDIATOR" ]; then ARGS+=" --enforce-mediator=$MEDIATOR"; fi
 if [ "$LOG_LEVEL" ]; then ARGS+=" --log-level=$LOG_LEVEL"; fi
 
