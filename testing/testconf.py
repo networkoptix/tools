@@ -16,6 +16,7 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 # FIXME check if it's used where it should be!
 
 PROJECT_ROOT = "~/develop/nx_vms"
+#PROJECT_ROOT = "~/develop/nvms"
 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
@@ -35,7 +36,7 @@ UT_TEMP_DIR = '/var/tmp/autotest.$'
 UT_TEMP_DIR_PID_USED = True  # it realy doesn't matter since set_paths() set the correct value here
 UT_TEMP_DIR_SAFE = False  # set it to False if don't use PID and UT_TEMP_DIR points to some common directory
                           # if it's True, script will clear it contents even if PID not used
-
+UT_BRANCHES_NO_TEMP = set(('dev_2.5', 'prod_2.5'))  # what branches don't use --tmp for unittests
 
 BUILD_CONF_SUBPATH = os.path.join("build_variables", "target", "current_config.py")
 BUILD_CONF_PATH = ''
@@ -80,6 +81,7 @@ MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 SUDO = "/usr/bin/sudo"
 RM = "/bin/rm"
+DOCKER = "/usr/bin/docker"
 
 VAG_DIR = "./vagrant"
 
@@ -96,7 +98,17 @@ VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
 
 MVN_BUILD_CONFIG = 'release'
+MVN_BUILD_CONFIG = 'debug'
 TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
+
+# docker usage options
+UT_USE_DOCKER = True  # use diocker container for unittests
+DOCKER_REGISTRY = "la.hdw.mx:5000"
+DOCKER_IMAGE_NAME = "la.hdw.mx:5000/nxvms-ut:latest"
+#DOCKER_CONTAINER_NAME = "ut"
+DOCKER_COPIER = ""  # the path to script that copies all unittests binaries and libs into the container
+DOCKER_DIR = ""  # the container internal path where to put and run all unittests
+
 
 BOX_NAMES = {
     "Box1": "box1",
@@ -143,6 +155,10 @@ SKIP_TESTS = {
 SKIP_ALL = set() # {'msarch'}
 
 SUDO_REQUIRED = set(('mediaserver_core_ut',))  # set of unittests that require sudo to call
+NOSHUFFLE = (  # list of tupples (branch, ut), any part can be '*' which means 'any'
+    ('dev_2.5', 'mediaserver_core_ut'),
+    ('prod_2.5', 'mediaserver_core_ut'),
+)
 
 # Build only this branches, don't perform any testing
 BUILD_ONLY_BRANCHES = set(('dev_3.0.0', ))
