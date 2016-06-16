@@ -1,0 +1,19 @@
+export BOX=bpi
+export TOOLCHAIN_PATH=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
+export HOST=arm-linux-gnueabihf
+export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
+#export CROSS_PREFIX=/usr/local/codesourcery/arm-2013.11/bin/arm-none-linux-gnueabi-
+export ARCH=arm
+export ARCH_SPEC_SUFFIX=v7
+export TOOLCHAIN_NAME=linaro
+export TOOLCHAIN_VERSION=1.13.1
+
+export common_CXXFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
+export common_CFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
+
+export qt_CXXFLAGS="-fno-omit-frame-pointer"
+
+#export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
+export openssl_CFLAGS=-fPIC
+
+export ffmpeg_CONFIG_OPTIONS="--enable-armvfp --enable-neon --enable-decoder=mp3 --enable-encoder=aac --enable-encoder=pcm_mulaw --enable-encoder=g726 --enable-encoder=pcm_alaw --enable-demuxer=mp3"

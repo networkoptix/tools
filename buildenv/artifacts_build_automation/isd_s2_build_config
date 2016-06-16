@@ -1,0 +1,17 @@
+export BOX=isd_s2
+export TOOLCHAIN_PATH=/usr/local/linaro-multilib-2013.09
+export HOST=arm-linux-gnueabihf
+export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
+export ARCH=arm
+export ARCH_SPEC_SUFFIX=v7
+export TOOLCHAIN_NAME=linaro-multilib
+export TOOLCHAIN_VERSION=2013.09
+export MVN_ARTIFACT_COMPILER=$TOOLCHAIN_NAME-$TOOLCHAIN_VERSION
+
+#export common_CXXFLAGS="-arch=arm"
+#export common_CFLAGS="-arch=arm"
+
+openssl_VERSION=1.0.1f
+export openssl_CFLAGS=-fPIC
+
+export ffmpeg_CONFIG_OPTIONS="--arch=armv7"

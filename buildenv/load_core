@@ -1,0 +1,69 @@
+#!/bin/bash
+
+function printHelp()
+{
+    echo "Usage:"
+    echo "  $0 {options} core-file-path"
+}
+
+BOX=isd_s2
+FROM_SOURCES=
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ $i == "-s" -o $i == "--from-sources"  ] ; then
+        FROM_SOURCES=1
+    elif [[ "$i" =~ "--box=" ]] ; then
+        BOX="`echo $i | sed 's/--box=\(.*\)/\1/'`"
+    fi
+done
+
+if [ $# -eq 0 ]; then
+    echo "Specifiy core file"
+    exit 1
+fi
+
+CORE_FILE_PATH="${@: -1}"
+
+
+if [ "$BOX" == "isd" ]; then
+  CROSS_PREFIX=/usr/local/codesourcery/arm-2013.11/bin/arm-none-linux-gnueabi-
+  BOX_SYSROOT=/usr/local/jaguar-sysroot-2.7.0918
+elif [ "$BOX" == "isd_s2" ]; then
+  BOX_SYSROOT=/usr/local/s2-sysroot-2.8.1201
+  CROSS_PREFIX=/usr/local/linaro-multilib-2013.09/bin/arm-linux-gnueabihf-
+fi
+
+if [ ! -z "$FROM_SOURCES" ]; then
+  CONFIGURATION=release
+  BIN_ROOT=~/develop/netoptix_vms.arm/build_environment/target-$BOX
+else
+  BIN_ROOT=./usr/local/apps/networkoptix/mediaserver/
+fi
+
+echo "Using binaries at $BIN_ROOT"
+
+if [ ! -z "$CONFIGURATION" ]; then
+  BIN_DIR=$BIN_ROOT/bin/$CONFIGURATION
+  LIB_DIR=$BIN_ROOT/lib/$CONFIGURATION
+else
+  BIN_DIR=$BIN_ROOT/bin
+  LIB_DIR=$BIN_ROOT/lib
+fi
+
+BIN_PATH=$BIN_DIR/mediaserver
+
+read -d '' gdb_commands<<EOF
+set sysroot $BOX_SYSROOT
+file $BIN_PATH
+set solib-search-path $LIB_DIR
+set solib-search-path $BIN_DIR/plugins/
+set solib-search-path $LIB_DIR
+EOF
+
+echo "$gdb_commands" > gdb_cmd_file
+
+"$CROSS_PREFIX"gdb --command=gdb_cmd_file $BIN_PATH $CORE_FILE_PATH

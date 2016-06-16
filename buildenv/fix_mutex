@@ -1,0 +1,11 @@
+#!/bin/bash
+
+EXPR='s/SCOPED_MUTEX_LOCK(\s*\([_a-zA-Z0-9]*\)\s*\,\s*\([a-zA-Z0-9_&*>():.^-]*\)\s*)/QnMutexLocker \1( \2 )/g'
+
+#echo "SCOPED_MUTEX_LOCK( lock, *&m_mutex); blabsaldfgdfgf   SCOPED_MUTEX_LOCK( lock11, *&m_mutex); sdfsdfsdferwe" | sed 's/SCOPED_MUTEX_LOCK(\s*\([a-zA-Z0-9]*\)\s*\,\s*\([a-zA-Z0-9_&*]*\)\s*)/QnMutexLocker \1( \2 )/g'
+#echo "SCOPED_MUTEX_LOCK( lock, *d->m_mutex); blabsaldfgdfgf   SCOPED_MUTEX_LOCK( lock11, *&m_mutex); sdfsdfsdferwe" | sed "$EXPR"
+
+
+grep -lR SCOPED_MUTEX_LOCK * | xargs -ixxx sed -i "$EXPR" xxx
+
+#sed -i "$EXPR" appserver2/src/connection_factory.cpp

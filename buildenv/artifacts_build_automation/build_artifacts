@@ -1,0 +1,1700 @@
+#!/bin/bash
+
+
+openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
+onvif_VERSION=2.1.2-io2
+sigar_VERSION=1.7
+quazip_VERSION=0.7
+udt_VERSION=4.11
+qt_VERSION=5.2.1
+sasl2_VERSION=2.1.26
+openldap_VERSION=2.4.42
+#qt_VERSION=5.4.1
+
+LOG_FILE_NAME=build.log
+
+case $(uname) in
+    Linux)
+        JOB_COUNT=$(cat /proc/cpuinfo | grep "processor" | wc -l)
+        SCRIPT_DIR=$(dirname $(readlink -e $0))
+        ;;
+    Darwin)
+        JOB_COUNT=$(sysctl -n hw.ncpu)
+        SCRIPT_DIR=$(dirname $0)
+        ;;
+    *)
+        echo $(uname) in not supported by this script >&2
+        exit 1
+esac
+
+
+
+###############################################################
+###############################################################
+########### quazip functions
+###############################################################
+###############################################################
+
+# returns list of mirrors separated with ;
+function quazip_getMirrorList()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "http://downloads.sourceforge.net/project/quazip/quazip/$artifactVersion"
+    return 0
+}
+
+function quazip_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-$artifactVersion.zip"
+    return 0
+}
+
+function quazip_generate_config()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    #TODO #ak
+    if [ -z  "$qt_DIR" ]; then
+        echo "Qt >= 5.2.1 is required to build quazip. Try --artifacts=qt,quazip"
+        return 1
+    fi
+
+    quazip_DIR="$ARTIFACT_BUILD_DIR/$artifactName-$artifactVersion-$TOOLCHAIN_NAME-$ARCH-$TOOLCHAIN_VERSION"
+
+    #patching sourcs: quazip uses zlib.h from system, forcing it to use Qt's zlib
+    grep -lRe '\#include\s*[\<\"]*zlib[\<\"]*\.h' * | xargs sed -i "s/zlib\.h/QtZlib\/zlib\.h/"
+
+    pushd quazip
+    $qt_DIR/bin/qmake PREFIX=$quazip_DIR
+    local result=$?
+    popd
+
+    return $result
+}
+
+function quazip_build()
+{
+    pushd quazip
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+    make install >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+    popd
+
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function quazip_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    cp -rf $quazip_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $quazip_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $quazip_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### sasl2 functions
+###############################################################
+###############################################################
+
+sasl2_PRI_FILE="LIBS += -lsasl2"
+
+# returns list of mirrors separated with ;
+function sasl2_getMirrorList()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "ftp://ftp.cyrusimap.org/cyrus-sasl"
+    return 0
+}
+
+function sasl2_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "cyrus-sasl-$artifactVersion.tar.gz"
+    return 0
+}
+
+function sasl2_generate_config()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    sasl2_DIR="$ARTIFACT_BUILD_DIR/$artifactName-$artifactVersion-$TOOLCHAIN_NAME-$ARCH-$TOOLCHAIN_VERSION"
+
+    ln -sf lib $openssl_DIR/lib32
+    patch include/Makefile.in << "EOF"
+116,117c116,117
+< COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+< 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+---
+> COMPILE = $(HOSTCC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+> 	$(CPPFLAGS) $(AM_CFLAGS) $(HOSTCFLAGS)
+119c119
+< 	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+---
+> 	--mode=compile $(HOSTCC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+121c121
+< CCLD = $(CC)
+---
+> CCLD = $(HOSTCC)
+123c123
+< 	$(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+---
+> 	$(CCLD) $(AM_CFLAGS) $(HOSTCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+EOF
+
+    PATH=$TOOLCHAIN_PATH/bin:$PATH
+    ./configure HOSTCC=gcc CC=$HOST-gcc --host=$HOST --with-openssl=$openssl_DIR --prefix=$sasl2_DIR >>$LOG_FILE_PATH 2>&1
+    local result=$?
+
+    return $result
+}
+
+function sasl2_build()
+{
+    HOSTCC=gcc make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+    make install >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function sasl2_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    cp -rf $sasl2_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $sasl2_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $sasl2_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### udt functions
+###############################################################
+###############################################################
+
+udt_PRI_FILE="LIBS += -ludt"
+
+# returns list of mirrors separated with ;
+function udt_getMirrorList()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "http://downloads.sourceforge.net/project/udt/udt/$artifactVersion"
+    return 0
+}
+
+function udt_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "${artifactName}.sdk.${artifactVersion}.tar.gz"
+    return 0
+}
+
+function udt_generate_config()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    udt_DIR="$ARTIFACT_BUILD_DIR/$artifactName-$artifactVersion-$TOOLCHAIN_NAME-$ARCH-$TOOLCHAIN_VERSION"
+
+    pushd udt4
+        # inject cross compiler into Makefile
+        local makefile=$(tail -n+2 < src/Makefile)
+        echo "C++ = ${CROSS_PREFIX}g++" > src/Makefile
+        cat >> src/Makefile <<<"$makefile"
+
+        # apply propietary patch
+        local patchPath=$SCRIPT_DIR/patches/udt-4.11-nx.patch
+        patch -p1 < $patchPath >> $LOG_FILE_PATH 2>&1
+        local result=$?
+    popd
+    return $result
+}
+
+function udt_build()
+{
+    if [ $ARCH == x86_64 ]; then
+        local makeArch="IA64"
+    else
+        local makeArch="$ARCH"
+    fi
+
+    pushd udt4/src
+        # udt Makefile does not support multi-thread build
+        make -j 1 -e arch=$makeArch >>$LOG_FILE_PATH 2>&1
+        if [ $? != 0 ]; then
+            popd
+            return 1
+        fi
+    popd
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function udt_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    mkdir -p $mvnArtifactDir/include/udt
+    cp -rf udt4/src/*.h $mvnArtifactDir/include/udt
+    cp -rf udt4/src/*.so $mvnArtifactDir/lib/debug/
+    cp -rf udt4/src/*.so $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### openldap functions
+###############################################################
+###############################################################
+
+openldap_PRI_FILE="LIBS += -lldap -llber"
+
+# returns list of mirrors separated with ;
+function openldap_getMirrorList()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/"
+    return 0
+}
+
+function openldap_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-$artifactVersion.tgz"
+    return 0
+}
+
+function openldap_generate_config()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    if [ -z  "$openssl_DIR" -o -z "$sasl2_DIR" ]; then
+        echo "OpenSSL & SASL2 are required to build openldap Try --artifacts=openssl,sasl2,openldap"
+        return 1
+    fi
+
+    openldap_DIR="$ARTIFACT_BUILD_DIR/$artifactName-$artifactVersion-$TOOLCHAIN_NAME-$ARCH-$TOOLCHAIN_VERSION"
+
+    #patching sourcs: quazip uses zlib.h from system, forcing it to use Qt's zlib
+    sed -i 's/ac_cv_func_memcmp_working=no/ac_cv_func_memcmp_working=yes/g' configure
+    PATH=$TOOLCHAIN_PATH/bin:$TOOLCHAIN_PATH/$HOST/bin:$PATH
+    export CC=$HOST-gcc CPPFLAGS="-I$sasl2_DIR/include -I$openssl_DIR/include" LDFLAGS="-L$openssl_DIR/lib -L$sasl2_DIR/lib"
+    ./configure CC=${CROSS_PREFIX}gcc --host=$HOST \
+        --enable-bdb=no --enable-hdb=no --with-yielding_select=no --with-tls=openssl --with-cyrus-sasl --prefix=$openldap_DIR
+    unset CC CPPFLAGS LDFLAGS
+
+    local result=$?
+
+    return $result
+}
+
+function openldap_build()
+{
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+    make install >>$LOG_FILE_PATH 2>&1
+    if [ $? != 0 ]; then
+        popd
+        return 1
+    fi
+
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function openldap_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    mkdir $mvnArtifactDir/include/ldap
+    cp -rf $openldap_DIR/include/* $mvnArtifactDir/include/ldap
+    cp -rf $openldap_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $openldap_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### qt functions
+###############################################################
+###############################################################
+
+function qt_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-everywhere-opensource-src-${artifactVersion}.tar.gz"
+
+    return 0
+}
+
+# returns list of mirrors separated with ;
+function qt_getMirrorList()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    local shortVersion=$(echo $artifactVersion | cut -d. -f 1,2)
+
+    echo "http://download.qt-project.org/archive/qt/$shortVersion/$artifactVersion/single/"
+    return 0
+}
+
+function qt_generate_config()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    qt_DIR="$ARTIFACT_BUILD_DIR/qt-$artifactVersion-$TOOLCHAIN_NAME-$ARCH-$TOOLCHAIN_VERSION"
+
+    if [[ "$artifactVersion" =~ "5.4" ]] ; then
+read -d '' configQtScript<<EOF
+#!/bin/bash
+
+./configure -xplatform linux-arm-gnueabi-g++ -prefix $qt_DIR -opensource -release -no-dbus -nomake examples -qt-sql-sqlite -no-opengl -qt-zlib -no-icu -qt-libpng -qt-libjpeg -skip qtwebkit-examples -skip qtwebkit -skip qtquick1 -skip qtquickcontrols -skip qtscript -skip qtx11extras -audio-backend -confirm-license -no-widgets -no-c++11 -no-pch -qt-pcre -no-cups -no-xcb -no-directfb -no-linuxfb -no-kms -nomake tests -no-qml-debug -no-qpa-platform-guard -no-fontconfig -openssl-linked -v
+EOF
+    else
+read -d '' configQtScript<<EOF
+#!/bin/bash
+
+./configure -xplatform linux-arm-gnueabi-g++ -prefix $qt_DIR -opensource -release -no-dbus -nomake examples -qt-sql-sqlite -no-opengl -qt-zlib -no-icu -qt-libpng -qt-libjpeg -skip qtwebkit-examples -skip qtwebkit -skip qtquick1 -skip qtquickcontrols -skip qtscript -skip qtx11extras -audio-backend -confirm-license -no-widgets -no-c++11 -no-pch -qt-pcre -no-cups -no-xcb -no-directfb -no-linuxfb -no-kms -nomake tests -no-javascript-jit -no-qml-debug -no-qpa-platform-guard -openssl-linked -v
+EOF
+    fi
+
+    echo "$configQtScript" > config.qt || return 1
+    chmod u+x ./config.qt || return 2
+
+    local additionalQmakeConfOptions=
+
+    local opensslDirToUse=$openssl_DIR
+    if [ -z "$opensslDirToUse" ]; then
+        opensslDirToUse=$TMP_DIR/openssl.$openssl_VERSION/usr/local/ssl/
+    fi
+
+    additionalQmakeConfOptions+="
+QMAKE_INCDIR            += $opensslDirToUse/include/
+QMAKE_LIBDIR            += $opensslDirToUse/lib/
+
+"
+
+    if [ ! -z "$qt_CXXFLAGS" ]; then
+        additionalQmakeConfOptions+="
+QMAKE_CXXFLAGS          += $qt_CXXFLAGS
+QMAKE_CFLAGS            += $qt_CXXFLAGS
+
+"
+    fi
+
+    qt_LFLAGS+=" -lglib-2.0"
+    additionalQmakeConfOptions+="
+QMAKE_LFLAGS            += $qt_LFLAGS
+
+"
+
+read -d '' qmake_conf<<EOF
+#
+# qmake configuration for building with arm-linux-gnueabi-g++
+#
+
+MAKEFILE_GENERATOR      = UNIX
+CONFIG                 += incremental gdb_dwarf_index
+QMAKE_INCREMENTAL_STYLE = sublib
+
+include(../common/linux.conf)
+include(../common/gcc-base-unix.conf)
+include(../common/g++-unix.conf)
+
+# modifications to g++.conf
+QMAKE_CC                = ${CROSS_PREFIX}gcc
+QMAKE_CXX               = ${CROSS_PREFIX}g++
+QMAKE_LINK              = ${CROSS_PREFIX}g++
+QMAKE_LINK_SHLIB        = ${CROSS_PREFIX}g++
+
+# modifications to linux.conf
+QMAKE_AR                = ${CROSS_PREFIX}ar cqs
+QMAKE_OBJCOPY           = ${CROSS_PREFIX}objcopy
+QMAKE_STRIP             = ${CROSS_PREFIX}strip
+
+$additionalQmakeConfOptions
+
+load(qt_config)
+EOF
+
+    echo "$qmake_conf" > qtbase/mkspecs/linux-arm-gnueabi-g++/qmake.conf || return 3
+
+    ./config.qt >>$LOG_FILE_PATH 2>&1 || return 4
+
+    if [ "$(grep -E 'Glib \.+ no' $LOG_FILE_PATH 2>&1)" ]; then
+        echo ERROR: Qt has been configured without Glib >>$LOG_FILE_PATH
+        return 5
+    fi
+
+    return 0
+}
+
+function qt_build()
+{
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    make install >>$LOG_FILE_PATH 2>&1 || return 1
+
+    #TODO commenting openssl path, since it is included by application
+    sed -i "s/\(^.*usr\/local\/ssl.*$\)/#\1/g" $qt_DIR/mkspecs/linux-arm-gnueabi-g++/qmake.conf
+    echo "
+[Paths]
+Prefix=.. " > $qt_DIR/bin/qt.conf
+
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function qt_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    local qtDistrDirs=(bin doc include lib mkspecs plugins qml translations)
+    local i=0
+    for (( ; i<${#qtDistrDirs[@]}; i++ ))
+    do
+        cp -rf $qt_DIR/${qtDistrDirs[$i]} $mvnArtifactDir
+    done
+
+    #modifying pom.xml
+    local sedExpression="s/\.\/include \.\/bin \.\/lib/${qtDistrDirs[@]}/"
+    sed -i "$sedExpression" $mvnArtifactDir/pom.xml
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### openssl functions
+###############################################################
+###############################################################
+
+openssl_PRI_FILE="LIBS += -lssl -lcrypto"
+
+# returns list of mirrors separated with ;
+function openssl_getMirrorList()
+{
+    echo "https://www.openssl.org/source/"
+    return 0
+}
+
+function openssl_generate_config()
+{
+    ESCAPED_ARTIFACT_BUILD_DIR="`echo $ARTIFACT_BUILD_DIR | sed 's/\//\\\\\//g'`"
+    ESCAPED_ARTIFACT_BUILD_DIR="`echo $ESCAPED_ARTIFACT_BUILD_DIR | sed 's/\\\\/\\\\\\\\/g'`"
+
+    local compilerToUse=
+    if [ "$ARCH" = "arm" ]; then
+        compilerToUse="os/compiler:arm-none-linux-gnueabi-gcc"
+    fi
+
+    local configCommand="./config \$CFLAGS threads shared $compilerToUse"
+
+    local fixInstallPrefixCmd=
+    if [ "`uname -s`" = "Darwin" ]; then
+        fixInstallPrefixCmd="sed -i bak -e '1s/INSTALL_PREFIX=/INSTALL_PREFIX=$ESCAPED_ARTIFACT_BUILD_DIR/;t' -e '1,/INSTALL_PREFIX=/s//INSTALL_PREFIX=$ESCAPED_ARTIFACT_BUILD_DIR/' ./Makefile"
+        configCommand="./Configure \$CFLAGS darwin64-x86_64-cc enable-ec_nistp_64_gcc_128 threads shared"
+    else
+        fixInstallPrefixCmd="sed -i '0,/INSTALL_PREFIX=/{s/INSTALL_PREFIX=/INSTALL_PREFIX=$ESCAPED_ARTIFACT_BUILD_DIR/}' ./Makefile"
+    fi
+
+read -d '' buildOpensslScript<<EOF
+#!/bin/bash
+
+export CROSS=$CROSS_PREFIX
+export openssl_target_dir=/usr/local/openssl-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION/
+
+export CC=\${CROSS}gcc
+export LD=\${CROSS}ld
+export AS=\${CROSS}as
+export AR=\${CROSS}ar
+
+export CFLAGS="$openssl_CFLAGS"
+
+$configCommand
+$fixInstallPrefixCmd
+make build_libs -j $JOB_COUNT
+make -j $JOB_COUNT
+EOF
+
+    echo "$buildOpensslScript" > ./build.openssl
+    chmod u+x ./build.openssl
+
+    openssl_DIR=$ARTIFACT_BUILD_DIR/usr/local/ssl
+
+    return 0
+}
+
+function openssl_build()
+{
+    ./build.openssl >>$LOG_FILE_PATH 2>&1 || return 1
+    make install_sw >>$LOG_FILE_PATH 2>&1 || return 1
+    #openssl is installed to /tmp/usr/local/ssl/
+    return 0
+}
+
+#copies necessary file from source dir to mvn artifact dir
+function openssl_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    cp -rf $openssl_DIR/include/openssl $mvnArtifactDir/include/
+    cp -rf $openssl_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $openssl_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### ffmpeg functions
+###############################################################
+###############################################################
+
+ffmpeg_VERSION=0.11.5
+ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswscale -lpostproc"
+
+# returns list of mirrors separated with ;
+function ffmpeg_getMirrorList()
+{
+    echo "https://www.ffmpeg.org/releases/"
+    return 0
+}
+
+function ffmpeg_generate_config()
+{
+    local artifactVersion=$2
+
+    ffmpeg_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    ffmpeg_DECODERS=(pcm_s16be pcm_s16le pcm_s16le_planar pcm_s8 pcm_s8_planar pcm_u16be pcm_u16le pcm_u8)
+
+    ffmpeg_DECODERS_STR=
+    for (( i=0; i<${#ffmpeg_DECODERS[@]}; i++ ))
+    do
+        local decoder=${ffmpeg_DECODERS[$i]}
+        ffmpeg_DECODERS_STR+="--enable-decoder=$decoder "
+    done
+
+
+read -d '' configureFfmpegScript<<EOF
+#!/bin/bash
+
+./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
+--enable-cross-compile --cross-prefix=$CROSS_PREFIX \
+--arch=arm --target-os=linux --disable-debug --enable-dct --enable-asm \
+--disable-everything \
+--enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
+--enable-decoder=pcm_mulaw --enable-decoder=pcm_alaw --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
+--enable-encoder=mjpeg --enable-encoder=png \
+--enable-muxer=matroska --enable-muxer=mpegts --enable-muxer=mpjpeg --enable-muxer=rtp --enable-muxer=rtsp \
+--enable-demuxer=matroska --enable-demuxer=h264 \
+--enable-parser=h264 --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
+--enable-protocol=rtp \
+--enable-filter=copy --enable-filter=mp --enable-filter=null \
+--enable-bsf=h264_mp4toannexb $ffmpeg_CONFIG_OPTIONS
+EOF
+
+    echo "$configureFfmpegScript" > ./config.ffmpeg
+    chmod u+x ./config.ffmpeg
+
+    return 0
+}
+
+function ffmpeg_build()
+{
+    ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    return 0
+}
+
+function ffmpeg_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$ffmpeg_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### gtest functions
+###############################################################
+###############################################################
+
+gtest_VERSION=1.7.0
+gtest_PRI_FILE="LIBS += -lgtest -lgtest_main"
+
+# returns list of mirrors separated with ;
+function gtest_getMirrorList()
+{
+    echo "https://googletest.googlecode.com/files/"
+    return 0
+}
+
+function gtest_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-$artifactVersion.zip"
+    return 0
+}
+
+function gtest_generate_config()
+{
+    gtest_DIR=$ARTIFACT_BUILD_DIR/gtest-$gtest_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    gtest_SRC=$PWD
+
+    if [ $ARCH == x64 ]; then
+        local hostArch=
+    else
+        local hostArch="--host=$ARCH"
+    fi
+
+read -d '' configureGtestScript<<EOF
+#!/bin/bash
+
+./configure --prefix=$gtest_DIR $hostArch \
+    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gtest_CONFIG_OPTIONS \
+    CFLAGS="$gtest_CFLAGS" CXXFLAGS="$gtest_CXXFLAGS"
+EOF
+
+    echo "$configureGtestScript" > ./config.gtest
+    chmod u+x ./config.gtest
+
+    return 0
+}
+
+function gtest_build()
+{
+    local INSTALL_DIR=$ARTIFACT_BUILD_DIR/gtest-$gtest_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    ./config.gtest >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    #make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+
+    mkdir -p $INSTALL_DIR/lib/
+    cp -rf ./include $INSTALL_DIR
+    cp -rf ./lib/.libs/libgtest.a $INSTALL_DIR/lib/
+    cp -rf ./lib/.libs/libgtest_main.a $INSTALL_DIR/lib/
+    return 0
+}
+
+function gtest_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/gtest-$gtest_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### gmock functions
+###############################################################
+###############################################################
+
+gmock_VERSION=1.7.0
+gmock_PRI_FILE="LIBS += -lgmock -lgmock_main"
+
+# returns list of mirrors separated with ;
+function gmock_getMirrorList()
+{
+    echo "https://googlemock.googlecode.com/files/"
+    return 0
+}
+
+function gmock_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-$artifactVersion.zip"
+    return 0
+}
+
+function gmock_generate_config()
+{
+    gmock_DIR=$ARTIFACT_BUILD_DIR/gmock-$gmock_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    if [ $ARCH == x64 ]; then
+        local hostArch=
+    else
+        local hostArch="--host=$ARCH"
+    fi
+
+read -d '' configureGtestScript<<EOF
+#!/bin/bash
+
+./configure --prefix=$gmock_DIR $hostArch --with-gtest=$gtest_SRC \
+    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gmock_CONFIG_OPTIONS \
+    CFLAGS="$gmock_CFLAGS" CXXFLAGS="$gmock_CXXFLAGS"
+EOF
+
+    echo "$configureGtestScript" > ./config.gmock
+    chmod u+x ./config.gmock
+
+    return 0
+}
+
+function gmock_build()
+{
+    local INSTALL_DIR=$ARTIFACT_BUILD_DIR/gmock-$gmock_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    ./config.gmock >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    #make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+
+    mkdir -p $INSTALL_DIR/lib/
+    cp -rf ./include $INSTALL_DIR
+    cp -rf ./lib/.libs/libgmock.a $INSTALL_DIR/lib/
+    cp -rf ./lib/.libs/libgmock_main.a $INSTALL_DIR/lib/
+    return 0
+}
+
+function gmock_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/gmock-$gmock_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### onvif functions
+###############################################################
+###############################################################
+
+function onvif_getMirrorList()
+{
+    return 0
+}
+
+function onvif_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    #Generating onvif tar.gz
+    mkdir ./$artifactName-$artifactVersion 2>/dev/null
+    cp -rf $THIRD_PARTY_SRC_DIR/libonvif/* ./$artifactName-$artifactVersion || return 2
+    tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+
+    return 0
+}
+
+function onvif_generate_config()
+{
+    local artifactVersion=$2
+    # assuming, we've built openssl previously
+    CONFIGURE_OPTIONS="--target-arch=$ARCH --cross-prefix=$CROSS_PREFIX --cxxflags=$onvif_CXXFLAGS"
+    if [ ! -z "$openssl_DIR" ]; then
+        CONFIGURE_OPTIONS+=" --with-openssl=$openssl_DIR"
+    fi
+    ./configure $CONFIGURE_OPTIONS || return 1
+
+    return 0
+}
+
+function onvif_build()
+{
+    make -j $JOB_COUNT debug >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT release >>$LOG_FILE_PATH 2>&1 || return 2
+    return 0
+}
+
+function onvif_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    cp ./.build/$ARCH/debug/libonvif.a $mvnArtifactDir/lib/debug/ || return 1
+    cp ./.build/$ARCH/release/libonvif.a $mvnArtifactDir/lib/release/ || return 2
+    mkdir -p $mvnArtifactDir/include/onvif 2>/dev/null
+    FILES=( `find ./src/ -name "*.h"` `find ./src/ -name "*.nsmap"` )
+    local i=0
+    for (( ; i<${#FILES[@]}; i++ ))
+    do
+        cp -f ${FILES[$i]} $mvnArtifactDir/include/onvif/
+    done
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### sigar functions
+###############################################################
+###############################################################
+
+function sigar_getMirrorList()
+{
+    return 0
+}
+
+function sigar_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    git clone https://github.com/hyperic/sigar.git
+    mv ./sigar ./$artifactName-$artifactVersion
+    tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+
+    return 0
+}
+
+function sigar_generate_config()
+{
+    local artifactVersion=$2
+
+read -d '' configureSigarScript<<EOF
+#!/bin/bash
+
+cmake -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_COMPILER="$CROSS_PREFIX"gcc -DCMAKE_CXX_COMPILER="$CROSS_PREFIX"g++ -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=Release ..
+EOF
+
+    mkdir build
+    pushd ./build
+    echo "$configureSigarScript" > config.sigar
+    chmod u+x ./config.sigar
+    ./config.sigar
+    local result=$?
+    popd
+    return $result
+}
+
+function sigar_build()
+{
+    pushd ./build
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1
+    local result=$?
+    popd
+    return $result
+}
+
+function sigar_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    cp ./build/build-src/libsigar.so $mvnArtifactDir/lib/debug/ || return 1
+    cp ./build/build-src/libsigar.so $mvnArtifactDir/lib/release/ || return 2
+    mkdir -p $mvnArtifactDir/include/sigar 2>/dev/null
+    cp -rf ./include/*.h $mvnArtifactDir/include/sigar/ || return 3
+
+    return 0
+}
+
+
+
+###############################################################
+###############################################################
+########### common functions
+###############################################################
+###############################################################
+
+# params:
+# 1. artifact version
+# return source tarball name
+function common_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+    return 0
+}
+
+# params:
+# 1. tarball name
+# 2. list of mirrors where to look for tarball
+# 3. (optional) output directory. By default, current directory
+# returns local path to tarball
+function get_source_tar()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameters, but $# were given" >&2
+        return 2
+    fi
+
+    local sourceTarballName=$1
+    local mirrorList=$2
+    local outputDir=
+    if [ "$#" -gt 2 ]; then
+        outputDir=$3
+    fi
+
+    if [ -e "$outputDir$sourceTarballName" ]; then
+        echo "$outputDir$sourceTarballName"
+        return 0
+    fi
+
+    echo "Retrieving source tarball $sourceTarballName..." >&2
+
+    local mirrors=()
+    IFS=';' read -a mirrors <<< "$mirrorList"
+    for mirrorUrl in "${mirrors[@]}"
+    do
+        echo "$mirrorUrl" >&2
+        echo -n "    Trying $mirrorUrl              " >&2
+        wget $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
+        if [ -e "$outputDir$sourceTarballName" ]; then
+            #success
+            echo "$outputDir$sourceTarballName"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Unpacks to current directory
+# params:
+# 1. path to tar ball
+# returns local directory tarball has been unpacked to
+function unpack_source_tar()
+{
+    if [ "$#" -lt 1 ]; then
+        echo "$FUNCNAME function accepts one parameter, but $# were given"
+        return 2
+    fi
+
+    local filename=$1
+
+    if [[ "$filename" =~ .*tar.gz || "$filename" =~ .*tgz ]]; then
+        if [ "`uname -s`" = "Darwin" ]; then
+            echo "`tar -v -zxf $1 2>&1 | cut -d/ -f1 | cut -d' ' -f2 | uniq`"
+        else
+            echo "`tar -v -zxf $1 | cut -d/ -f1 | uniq`"
+        fi
+    elif [[ "$filename" =~ .*zip ]]; then
+        echo "`unzip -o $filename | tail -n +2 | cut -d: -f 2- | cut -d/ -f1 | uniq | xargs basename`"
+    else
+        echo "File $filename has unsupported format"
+        return 1
+    fi
+
+    return 0
+}
+
+function common_build_artifact()
+{
+    ./config || return 1
+    make -j $JOB_COUNT || return 2
+    sudo make install || return 3
+}
+
+function set_pom_xml_param()
+{
+    local pomXmlPath=$1
+    local paramName=$2
+    local paramValue=$3
+
+    if [ "`uname -s`" = "Darwin" ]; then
+        sed -i bak -e "1s/<$paramName>\(.*\)<\/$paramName>/<$paramName>$paramValue<\/$paramName>/;t" -e "1,/<$paramName>\(.*\)<\/$paramName>/s//<$paramName>$paramValue<\/$paramName>/" $pomXmlPath
+    else
+        sed -i "0,/<$paramName>\(.*\)<\/$paramName>/{s/<$paramName>\(.*\)<\/$paramName>/<$paramName>$paramValue<\/$paramName>/}" $pomXmlPath
+    fi
+
+    #sed -i bak -e '1s/INSTALL_PREFIX=/INSTALL_PREFIX=$ESCAPED_ARTIFACT_BUILD_DIR/;t' -e '1,/INSTALL_PREFIX=/s//INSTALL_PREFIX=$ESCAPED_ARTIFACT_BUILD_DIR/' ./Makefile
+}
+
+function mvn_deploy_artifact()
+{
+    if [ "$#" -lt 3 ]; then
+        echo "$FUNCNAME function accepts two parameters, but $# were given"
+        return 2
+    fi
+
+    local artifactGroup=$1
+    local artifactName=$2
+    local artifactVersion=$3
+
+    #preparing mvn deploy directory (copying it from buildenv)
+    MVN_ARTF_DIR=$ARTIFACT_BUILD_DIR/mvn_artifact_dir
+    rm -rf $MVN_ARTF_DIR 2>/dev/null
+    mkdir -p $MVN_ARTF_DIR
+    if [ $? -ne 0 ]; then
+        echo "Failed to create directory $MVN_ARTF_DIR"
+        return 1
+    fi
+    cp -rf $THIRD_PARTY_SRC_DIR/_deployment/linux/arm/* $MVN_ARTF_DIR/ || return 1
+    if [ $? -ne 0 ]; then
+        echo "Failed to copy mvn artifact structure to $MVN_ARTF_DIR"
+        return 2
+    fi
+    find $MVN_ARTF_DIR -type f | grep -v pom.xml | xargs rm -rf
+    rm -rf $MVN_ARTF_DIR/include/*
+    rm -rf $MVN_ARTF_DIR/lib/debug/*
+    rm -rf $MVN_ARTF_DIR/lib/release/*
+
+    #setting up parameters in pom.xml
+    set_pom_xml_param $MVN_ARTF_DIR/pom.xml groupId $artifactGroup
+    set_pom_xml_param $MVN_ARTF_DIR/pom.xml artifactId $artifactName
+    set_pom_xml_param $MVN_ARTF_DIR/pom.xml version $artifactVersion-SNAPSHOT
+    if [ "`uname -s`" = "Darwin" ]; then
+        set_pom_xml_param $MVN_ARTF_DIR/pom.xml platform macosx
+    fi
+    set_pom_xml_param $MVN_ARTF_DIR/pom.xml arch $ARCH
+    #using BOX instead of compiler to allow have same artifact build with same toolchain but different compile options
+    set_pom_xml_param $MVN_ARTF_DIR/pom.xml compiler $MVN_ARTIFACT_COMPILER #TOOLCHAIN_NAME-$TOOLCHAIN_VERSION
+
+    #filling directory with files
+    prepareMvnArtifactFunc=${artifactName}_prepareMvnArtifact
+    if [ -z "`type $prepareMvnArtifactFunc | grep 'is a function'`" ]; then
+        echo "Please, define function $prepareMvnArtifactFunc"
+        return 3
+    fi
+    eval $prepareMvnArtifactFunc $artifactName $artifactVersion $MVN_ARTF_DIR
+    if [ $? -ne 0 ]; then
+        echo "Failed to prepare mvn artifact $artifactName-$artifactVersion for deploying"
+        return 4
+    fi
+
+    #creating .pri file
+    priVarName=${artifactName}_PRI_FILE
+    echo "${!priVarName}" > $MVN_ARTF_DIR/${artifactName}.pri
+
+    #deploying
+    pushd $MVN_ARTF_DIR
+    MVN_DEPLOY_RESULT=0
+    if [ $DO_MVN_DEPLOY -gt 0 ]; then
+        mvn deploy
+        MVN_DEPLOY_RESULT=$?
+    fi
+    popd
+    if [ $MVN_DEPLOY_RESULT -ne 0 ]; then
+        echo "Failed to deploy artifact $artifactName-$artifactVersion"
+        return 5
+    fi
+
+    return 0
+}
+
+function rdep_deploy_artifact()
+{
+    if [ "$#" -lt 3 ]; then
+        echo "$FUNCNAME function accepts two parameters, but $# were given"
+        return 2
+    fi
+
+    local artifactGroup=$1
+    local artifactName=$2
+    local artifactVersion=$3
+
+    #search for rdep and it's package dir
+    RDEP=$(find "$VMS_SRC_DIR/" -name rdep.py)
+    if [ ! "$RDEP" ]; then
+        echo "Cant find rdep.py in $VMS_SRC_DIR"
+        return 3
+    fi
+
+    PKG_DIR="$NETOPTIX_DEV_DIR/buildenv/packages"
+    if [ ! -d "$PKG_DIR" ]; then
+        echo "Rdep packages dir does not exist: $PKG_DIR"
+        return 4
+    fi
+    if [[ $ARCH == "arm" ]]; then
+        PLATFORM=/$BOX
+    else
+        PLATFORM=/linux-$ARCH
+    fi
+
+    RDEP_ARTF_DIR="$PKG_DIR/$PLATFORM/$artifactName-$artifactVersion"
+    rm -rf $RDEP_ARTF_DIR
+    mkdir -p $RDEP_ARTF_DIR/include $RDEP_ARTF_DIR/lib/debug $RDEP_ARTF_DIR/lib/release
+    if [ $? -ne 0 ]; then
+        echo "Failed to create directory $RDEP_ARTF_DIR"
+        return 5
+    fi
+
+    #filling directory with files
+    prepareMvnArtifactFunc=${artifactName}_prepareMvnArtifact
+    if [ -z "`type $prepareMvnArtifactFunc | grep 'is a function'`" ]; then
+        echo "Please, define function $prepareMvnArtifactFunc"
+        return 6
+    fi
+    eval $prepareMvnArtifactFunc $artifactName $artifactVersion $RDEP_ARTF_DIR
+    if [ $? -ne 0 ]; then
+        echo "Failed to prepare mvn artifact $artifactName-$artifactVersion for deploying"
+        return 7
+    fi
+
+    #rdep does not provide release+debug like maven does, so remove debug (TODO: fix when it's changed)
+    rm -rf $RDEP_ARTF_DIR/lib/debug
+    mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
+    rm -r $RDEP_ARTF_DIR/lib/release
+
+    echo "[General]" > $RDEP_ARTF_DIR/.rdpack
+
+    #generate pri file
+    cat > $RDEP_ARTF_DIR/$artifactName.pri <<EOF
+${artifactName^^}_DIR = \$\$PWD
+
+INCLUDEPATH += \$\$${artifactName^^}_DIR/include
+LIBS += -L\$\$${artifactName^^}_DIR/lib
+LIBS += $(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
+        basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+    done | xargs echo)
+EOF
+
+    #generate cmake file
+    cat > $RDEP_ARTF_DIR/$artifactName.cmake <<EOF
+set(${artifactName^^}_FOUND TRUE)
+set(${artifactName^^}_DIR \${CMAKE_CURRENT_LIST_DIR})
+set(${artifactName^^}_INCLUDE \${${artifactName^^}_DIR}/include)
+set(${artifactName^^}_LIB $(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
+        echo \${${artifactName^^}_DIR}/lib/$(basename $lib)
+    done | xargs echo))
+EOF
+
+    #upload
+    pushd $RDEP_ARTF_DIR
+    $RDEP --upload
+    if [ $? -gt 0 ]; then
+        echo "Rdep upload $RDEP_ARTF_DIR has failed: $?"
+        return 8
+    fi
+    popd
+}
+
+# params:
+# 1. artifact name
+# 2. artifact version
+function build_artifact()
+{
+    if [ "$#" -lt 3 ]; then
+        echo "$FUNCNAME function accepts three parameters, but $# were given"
+        return 2
+    fi
+
+    local artifactGroup=$1
+    local artifactName=$2
+    local artifactVersion=$3
+
+    echo "======================================================================================"
+    echo "======================================================================================"
+    echo "======== Building $artifactGroup/$artifactName-$artifactVersion                       "
+    echo "======================================================================================"
+    echo "======================================================================================"
+
+
+    #setting up environment
+    #CXXFLAGS
+    if [ ! -z "$common_CXXFLAGS" ]; then
+        local varName=${artifactName}_CXXFLAGS
+        export $varName="${!varName} $common_CXXFLAGS"
+    fi
+
+    #CFLAGS
+    if [ ! -z "$common_CFLAGS" ]; then
+        local varName=${artifactName}_CFLAGS
+        export $varName="${!varName} $common_CFLAGS"
+    fi
+
+
+    #creating temporary directory for building artifact
+    ARTIFACT_BUILD_DIR=$TMP_DIR/${artifactName}.${artifactVersion}/
+    if [ $SKIP_ACTUAL_BUILD -eq 0 ]; then
+        rm -rf $ARTIFACT_BUILD_DIR
+    fi
+    mkdir -p $ARTIFACT_BUILD_DIR
+    if [ $? != 0 ]; then
+        echo "Could not create directory $ARTIFACT_BUILD_DIR"
+        return 2
+    fi
+
+    if [ ! -e $TMP_DIR/sources/ ]; then
+        mkdir -p $TMP_DIR/sources/ || return 1
+    fi
+    cd $TMP_DIR/sources/
+
+    #generating source tarball name
+    generateTarballNameFunc=${artifactName}_generateTarballName
+    if [ -z "`type $generateTarballNameFunc 2>&1 | grep 'is a function'`" ]; then
+        generateTarballNameFunc="common_generateTarballName"
+    fi
+    local sourceTarballName=$(${generateTarballNameFunc} $artifactName $artifactVersion)
+    if [ $? != 0 ]; then
+        echo "Could not generate $artifaceName-$artifactVersion tarball name"
+        return 3
+    fi
+
+    #getting source tarball
+    getMirrorListFunc="$artifactName"_getMirrorList
+    if [ -z "`type $getMirrorListFunc | grep 'is a function'`" ]; then
+        echo "Please, define function $getMirrorListFunc"
+        return 4
+    fi
+    local mirrorList=$(${getMirrorListFunc} $artifactName $artifactVersion)
+
+    local srcTarballPath=$(get_source_tar $sourceTarballName "$mirrorList")
+    if [ ! -e "$srcTarballPath" ]; then
+        echo "Failed to get $sourceTarballName. You can download it by hand and place to the current directory"
+        return 5
+    fi
+
+    #unpacking
+    local srcDir=$(unpack_source_tar $srcTarballPath)
+    if [ -e "$srcDir" ]; then
+        echo "$artifactName-$artifactVersion source has been unpacked to $srcDir"
+    else
+        echo "Could not unpack $srcTarballPath"
+        return 6
+    fi
+
+    #generating configure parameters, preparing custom configure script and/or custom build script
+    pushd $srcDir
+
+    generateConfigFunc="$artifactName"_generate_config
+    if [ -z "`type $generateConfigFunc | grep 'is a function'`" ]; then
+        echo "Please, define function $generateConfigFunc"
+        return 5
+    fi
+
+    eval ${generateConfigFunc} $artifactName $artifactVersion
+    if [ $? != 0 ]; then
+        echo "Failed to configure $artifactName-$artifactVersion"
+        return 6
+    fi
+
+    if [ $SKIP_ACTUAL_BUILD -eq 0 ]; then
+        #building
+        buildFunc=${artifactName}_build
+        echo "Executing ${buildFunc}"
+        if [ -z "`type $buildFunc | grep 'is a function'`" ]; then
+            buildFunc="common_build_artifact"
+        fi
+
+        eval ${buildFunc}
+        if [ $? != 0 ]; then
+            echo "Failed to build $artifactName-$artifactVersion"
+            return 7
+        fi
+    fi
+
+    #deploying
+    if [ $DO_MVN_DEPLOY -gt 0 ]; then
+        mvn_deploy_artifact $artifactGroup $artifactName $artifactVersion
+        if [ $? != 0 ]; then
+            echo "Failed to deploy $artifactName-$artifactVersion to maven"
+            return 8
+        fi
+    fi
+    if [ $DO_RDEP_DEPLOY -gt 0 ]; then
+        rdep_deploy_artifact $artifactGroup $artifactName $artifactVersion
+        if [ $? != 0 ]; then
+            echo "Failed to deploy $artifactName-$artifactVersion to rdep"
+            return 9
+        fi
+    fi
+
+    popd
+
+    return 0
+}
+
+function printHelp()
+{
+    echo "
+    --conf={configuration file}                         Build configuration file. By default, `pwd`/$CONFIG_FILE
+    --start-over-with={artifact_name}                   Resume building with specified artifact
+    --artifacts={comma separated artifact list}         Build only specified artifacts. By default all artifacts are built (${ALL_ARTIFACTS[@]})
+    --buildenv={netoptix_buildenv_dir}                  Directory where networkoptix buildenv can be found. By default, $NETOPTIX_DEV_DIR
+    --netoptix_src={path to nx_vms repository}          By default $VMS_SRC_DIR
+    --third_party_src={path to third_party repository}  By default $THIRD_PARTY_SRC_DIR
+    --log={log file path}                               By default $LOG_FILE_PATH
+    --[no-]mvn-deploy                                   Turn mvn deploy on/off. By default, $DO_MVN_DEPLOY
+    --[no-]rdev-deploy                                  Turn mvn deploy on/off. By default, $DO_RDEP_DEPLOY
+    --skip-actual-build                                 Skip build function call.
+    --build-dir={path to build directory}               Set directory where build result and prepared mvn artifacts will be placed. By default /tmp/\${BOX}_artifact
+"
+}
+
+#building artifacts
+function build_all_artifacts()
+{
+    echo "Building artifacts ${ARTIFACTS_TO_BUILD[@]}"
+
+    local i=0
+    for (( ; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
+    do
+        artifactGroup="`echo ${ARTIFACTS_TO_BUILD[$i]} | cut -d/ -f1`"
+        artifactName="`echo ${ARTIFACTS_TO_BUILD[$i]} | cut -d/ -f2`"
+        artifact_version_var_name="$artifactName"_VERSION
+        if [ -z "${!artifact_version_var_name}" ]; then
+            echo "You have to define variable $artifact_version_var_name";
+            exit 1
+        fi
+
+        build_artifact $artifactGroup $artifactName ${!artifact_version_var_name}
+        if [ $? != 0 ]; then
+            echo "Failed to build artifact $artifactName"
+            echo "You can call $0 --start-over-with=$artifactName to try once again"
+            exit 2
+        fi
+    done
+}
+
+
+
+ALL_ARTIFACTS=(                 \
+        org.openssl/openssl     \
+        org.cyrus/sasl2         \
+        org.openldap/openldap   \
+        com.digia/qt            \
+        org/onvif               \
+        org.hyperic/sigar       \
+        org.ffmpeg/ffmpeg       \
+        net.sourceforge/quazip  \
+        net.sourceforge/udt     \
+        com.google/gtest        \
+        com.google/gmock        \
+)
+
+ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
+CONFIG_FILE=hdw_cross_build_params
+NETOPTIX_DEV_DIR=$HOME/develop
+VMS_SRC_DIR=$NETOPTIX_DEV_DIR/nx_vms
+THIRD_PARTY_SRC_DIR=$NETOPTIX_DEV_DIR/third_party
+LOG_FILE_PATH=`pwd`/$LOG_FILE_NAME
+TMP_DIR=
+
+#if non-zero, mvn deploy is called
+DO_MVN_DEPLOY=0
+DO_RDEP_DEPLOY=0
+SKIP_ACTUAL_BUILD=0
+
+
+function contains()
+{
+    local searchedVal=$1
+    local arr=$2
+
+    for val in "${@:2}"
+    do
+        if [ $searchedVal == $val ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+#analyzing command-line arguments
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ "$i" == "--debug" ] ; then
+        DEBUG_ON=1
+    elif [[ "$i" =~ "--start-over-with=" ]] ; then
+        ARTIFACT_TO_START_WITH="`echo $i | sed 's/--start-over-with=\(.*\)/\1/'`"
+
+        for (( i=0; i<${#ALL_ARTIFACTS[@]}; i++ ))
+        do
+            if [ "$ARTIFACT_TO_START_WITH" != "${ALL_ARTIFACTS[$i]}" ]; then
+                ARTIFACTS_TO_BUILD=("${ARTIFACTS_TO_BUILD[@]:1}")
+            else
+                break
+            fi
+        done
+    elif [[ "$i" =~ "--artifacts=" ]] ; then
+        artifactsStr="`echo $i | sed 's/--artifacts=\(.*\)/\1/'`"
+        ARTIFACTS_TO_BUILD=()
+        IFS=',' read -a ARTIFACTS_TO_BUILD <<< "$artifactsStr"
+        for (( i=0; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
+        do
+            for knownArtifact in ${ALL_ARTIFACTS[@]}
+            do
+                if [[ $knownArtifact == */${ARTIFACTS_TO_BUILD[$i]} ]]; then
+                    ARTIFACTS_TO_BUILD[$i]=$knownArtifact
+                    break
+                fi
+            done
+        done
+        for artifact in "${ARTIFACTS_TO_BUILD[@]}"
+        do
+            contains $artifact ${ALL_ARTIFACTS[@]}
+            if [ $? != 0 ]; then
+                echo "Requested artifact $artifact not recognized
+Following are supported: ${ALL_ARTIFACTS[@]}"
+                exit 1
+            fi
+        done
+    elif [[ "$i" =~ "--conf=" ]] ; then
+        CONFIG_FILE="`echo $i | sed 's/--conf=\(.*\)/\1/'`"
+        if [ ! -f "$CONFIG_FILE" ]; then
+            CONFIG_FILE+=_build_config
+        fi
+    elif [[ "$i" =~ "--log=" ]] ; then
+        LOG_FILE_PATH="`echo $i | sed 's/--log=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--mvn-deploy" ]] ; then
+        DO_MVN_DEPLOY=1
+    elif [[ "$i" =~ "--no-mvn-deploy" ]] ; then
+        DO_MVN_DEPLOY=0
+    elif [[ "$i" =~ "--rdep-deploy" ]] ; then
+        DO_RDEP_DEPLOY=1
+    elif [[ "$i" =~ "--no-rdep-deploy" ]] ; then
+        DO_RDEP_DEPLOY=0
+    elif [[ "$i" =~ "--skip-actual-build" ]] ; then
+        SKIP_ACTUAL_BUILD=1
+    elif [[ "$i" =~ "--build-dir=" ]] ; then
+        TMP_DIR="`echo $i | sed 's/--build-dir=\(.*\)/\1/'`"
+    fi
+done
+
+
+#loading config file
+if [ ! -e $CONFIG_FILE ]; then
+    echo "Mandatory build configuration file $CONFIG_FILE not found. Specify path to file with --conf="
+    exit 1
+fi
+
+source $CONFIG_FILE || { echo "Failed to load $CONFIG_FILE file"; exit 1; }
+
+#checking that all required variables are defined
+mandatory_variables=( BOX TOOLCHAIN_PATH HOST CROSS_PREFIX ARCH TOOLCHAIN_NAME TOOLCHAIN_VERSION )
+for (( i=0; i<${#mandatory_variables[@]}; i++ ))
+do
+    varName=${mandatory_variables[$i]}
+    if [ -z ${!varName} ]; then
+        echo "Required variable $varName is not defined!. Define it in file $CONFIG_FILE"
+        exit 1
+    fi
+done
+
+if [ -z "$TMP_DIR" ]; then
+    TMP_DIR=/tmp/${BOX}_artifacts
+fi
+
+if [ -z "$MVN_ARTIFACT_COMPILER" ]; then
+    MVN_ARTIFACT_COMPILER=$BOX
+fi
+
+#checking that buildenv can be found at NETOPTIX_DEV_DIR
+if [ $DO_MVN_DEPLOY -gt 0 ]; then
+    FILE="$THIRD_PARTY_SRC_DIR/_deployment/linux/arm/pom.xml"
+    if [ ! -e "$FILE" ]; then
+        FILE=/buildenv/contrib/maven-artifacts-deploy/linux/arm/pom.xml
+        echo "File $FILE was not found"
+        exit 1
+    fi
+fi
+
+contains "org/onvif" ${ARTIFACTS_TO_BUILD[@]}
+if [ $? = 0 ]; then
+    if [ ! -e "$THIRD_PARTY_SRC_DIR/libonvif" ]; then
+        echo "Directory $THIRD_PARTY_SRC_DIR/libonvif was not found"
+        exit 1
+    fi
+fi
+
+
+
+rm -rf $LOG_FILE_PATH
+
+build_all_artifacts
+

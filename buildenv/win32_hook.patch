@@ -1,0 +1,61 @@
+diff -r 562b4d7f3164 mediaserver/src/main.cpp
+--- a/mediaserver/src/main.cpp	Wed Jul 23 23:46:38 2014 +0400
++++ b/mediaserver/src/main.cpp	Wed Jul 23 23:47:20 2014 +0400
+@@ -1673,9 +1673,57 @@
+ static void printVersion();
+ 
+ 
++
++
++
++#include <Winternl.h>
++#include <stdio.h>
++#pragma warning(disable: 4005)
++#include <ntstatus.h>
++#pragma warning(default: 4005)
++#include "easyhook.h"
++
++#pragma comment (lib, "easyhook64.lib")
++#pragma comment (lib, "psapi")
++
++extern QMutex allSocketsMutex;
++extern std::set<SOCKET> allSockets;
++
++typedef int (WINAPI * Fn_closesocket)(SOCKET s);
++int WINAPI Mine_closesocket(SOCKET s)
++{
++    static int (WINAPI * Real_closesocket)(SOCKET s) = (Fn_closesocket) GetProcAddress(GetModuleHandle(L"ws2_32"), "closesocket");
++    {
++    QMutexLocker lk( &allSocketsMutex );
++    if( allSockets.find( s ) != allSockets.end() )
++        int x = 0;
++    }
++    qWarning()<<"Mine_closesocket "<<s;
++    int rv = Real_closesocket(s);
++    return rv;
++}
++
++//EASYHOOK_BOOL_EXPORT EasyHook_Init(HMODULE hModule);
++
+ int main(int argc, char* argv[])
+ {
+ 
++    HOOK_TRACE_INFO hook = {0};
++
++    //EasyHook_Init(GetModuleHandle(0));
++
++    NTSTATUS status = LhInstallHook(closesocket, Mine_closesocket, (PVOID)0x12345678, &hook);
++    printf("LhInstallHook=%08X\n", status);
++    if (status == STATUS_SUCCESS)
++    {
++        ULONG acl;
++        status = LhSetExclusiveACL(&acl, 0, &hook);
++        printf("LhSetExclusiveACL=%08X\n", status);
++    }
++
++
++
++
+ #if 0
+ #if defined(__GNUC__)
+ # if defined(__i386__)

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+ulimit -n 4096
+
+function printHelp()
+{
+    echo "-----"
+    echo 
+}
+
+CONFIGURATION=debug
+#CONFIGURATION=release
+BRANCH_NAME=
+#if [ $# -ge 1 ]; then
+#    BRANCH_NAME="$1"
+#fi
+
+BINARY_NAME=./mediaserver
+MSERVER_ARGS=
+LAUNCH_CMD=
+
+#TODO read --smth= arguments (e.g., BRANCH_NAME)
+
+#for i in "$@"
+#do
+#    if [ $i == "-h" -o $i == "--help"  ] ; then
+#        printHelp
+#        exit 0
+#    elif [[ "$i" =~ "--bin=" ]] ; then
+#        BINARY_NAME="`echo $i | sed 's/--bin=\(.*\)/\1/'`"
+#    fi
+#done
+
+if [ $# -ge 1 ]; then
+    BINARY_NAME=$1
+fi
+if [ $# -ge 2 ]; then
+    MSERVER_ARGS=${@:2}
+fi
+
+TARGET_ROOT="`pwd`"
+if [[ $TARGET_ROOT =~ (.*/build_environment/target).* ]]; then
+    TARGET_ROOT="${BASH_REMATCH[1]}"
+    #auto-detecting branch (not hg branch, but netoptix_vms dir suffix)
+    if [[ $TARGET_ROOT =~ .*netoptix_vms(.*)/build_environment/target ]]; then
+        BRANCH_NAME="${BASH_REMATCH[1]}"
+    fi
+else
+    TARGET_ROOT=$HOME/develop/netoptix_vms$BRANCH_NAME/build_environment/target
+fi
+PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/linux-x64/
+
+BIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/
+
+if [ "`uname -s`" = "Darwin" ]; then
+    export DYLD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.0/lib
+else
+    export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.0/lib
+fi
+export VMS_PLUGIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/plugins/
+
+LOG_FILE=valgrind.log
+ROOT_DIR=$HOME/mserver.data$BRANCH_NAME/
+#ROOT_DIR=$HOME/mserver.data$BRANCH_NAME/
+
+if [ "$BINARY_NAME" == "./mediaserver" ]; then
+    if [ -z "$MSERVER_ARGS" ]; then
+        MSERVER_ARGS="-e --conf-file=$ROOT_DIR/etc/mediaserver.conf --runtime-conf-file=$ROOT_DIR/etc/running_time.conf --log-level=DEBUG --msg-log-level=DEBUG"
+    fi
+fi
+
+cd $BIN_DIR
+
+LAUNCH_CMD="$BINARY_NAME $MSERVER_ARGS"
+
+COMMON_VALGRIND_ARGS="--num-callers=32 --error-limit=no --log-file=$LOG_FILE $LAUNCH_CMD"
+
+#valgrind --leak-check=full --show-leak-kinds=all --vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS
+#valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
+#valgrind $COMMON_VALGRIND_ARGS
+#valgrind --tool=exp-dhat --show-top-n=10000 --sort-by=max-blocks-live $COMMON_VALGRIND_ARGS
+#valgrind --tool=exp-dhat --show-top-n=100 $COMMON_VALGRIND_ARGS
+#valgrind --tool=massif $COMMON_VALGRIND_ARGS
+#valgrind --tool=drd --exclusive-threshold=100 $COMMON_VALGRIND_ARGS
+#valgrind --tool=callgrind $LAUNCH_CMD
+$LAUNCH_CMD
+#gdb --args ./$BINARY_NAME $MSERVER_ARGS

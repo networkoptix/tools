@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#CONFIGURATION=release
+CONFIGURATION=debug
+CUSTOMIZATION=networkoptix
+#CUSTOMIZATION=digitalwatchdog
+MODULE_NAME=cloud_db
+VERSION=300
+
+libsToUpload=(
+libcommon.so.$VERSION.0.0
+libcloud_db.so.$VERSION.0.0
+libcloud_db_client.so.$VERSION.0.0
+libnx_email.so.$VERSION.0.0
+libnx_network.so.$VERSION.0.0
+libnx_streaming.so.$VERSION.0.0
+libnx_utils.so.$VERSION.0.0
+libudt.so.$VERSION.0.0
+)
+
+binToUpload=(
+cloud_db
+)
+
+if [ -L "${BASH_SOURCE[0]}" ]; then
+    scriptDir="$( cd "$( dirname "`readlink -f ${BASH_SOURCE[0]}`" )" && pwd )"
+else
+    scriptDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+fi
+
+source $scriptDir/upload_cloud_module
