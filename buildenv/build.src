@@ -90,13 +90,19 @@ do
     fi
 done
 
+MODULES=()
+MODULE_BIN_PATH=()
+if [[ ! "$VERSION" < "2.6" ]]; then
+    MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_fusion.so.$LIBVERSION.0.0)
+fi
 
-MODULES=(common)
-MODULE_BIN_PATH=(lib/$CONFIGURATION/libcommon.so.$LIBVERSION.0.0)
+MODULES+=(common)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so.$LIBVERSION.0.0)
 
 if [[ ! "$VERSION" < "2.6" ]]; then
-    MODULES+=(common_libs/nx_utils common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speach_synthesizer)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_streaming.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libudt.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_network.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libcloud_db_client.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_speach_synthesizer.a)
+    MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speach_synthesizer)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libudt.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_network.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libcloud_db_client.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_speach_synthesizer.a)
 fi
 
 MODULES+=(appserver2)
