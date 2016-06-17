@@ -74,12 +74,14 @@ class Build(object): #  contains some build-dependent global variables
     arch = ''
     bin_path = ''
     target_path = ''
+    lib_path = ''
+    qt_lib = ''
 
     @classmethod
     def load_vars(cls, conf, env, safe=False):
-        vars = dict()
+        _vars = dict()
         try:
-            execfile(conf.BUILD_CONF_PATH, vars)
+            execfile(conf.BUILD_CONF_PATH, _vars)
         except IOError as err:
             if safe and err.errno == errno.ENOENT:
                 return
@@ -88,9 +90,11 @@ class Build(object): #  contains some build-dependent global variables
         except Exception:
             print "ERROR: Failed to load build variables: " + traceback.format_exc()
             sys.exit(1)
-        vars['add_lib_path'](env) # used in exec_unittest only. FIXME !!!!
-        cls.arch = vars['ARCH']
-        cls.target_path = vars['TARGET_DIR']
-        cls.bin_path = vars['BIN_PATH']
+        _vars['add_lib_path'](env) # used in exec_unittest only.
+        cls.arch = _vars['ARCH']
+        cls.target_path = _vars['TARGET_DIR']
+        cls.bin_path = _vars['BIN_PATH']
+        cls.lib_path = _vars['LIB_PATH']
+        cls.qt_lib = _vars['QT_LIB']
 
 

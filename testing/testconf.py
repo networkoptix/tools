@@ -16,7 +16,7 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 # FIXME check if it's used where it should be!
 
 PROJECT_ROOT = "~/develop/nx_vms"
-#PROJECT_ROOT = "~/develop/nvms"
+PROJECT_ROOT = "~/develop/nvms"
 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
@@ -106,8 +106,9 @@ UT_USE_DOCKER = True  # use diocker container for unittests
 DOCKER_REGISTRY = "la.hdw.mx:5000"
 DOCKER_IMAGE_NAME = "la.hdw.mx:5000/nxvms-ut:latest"
 #DOCKER_CONTAINER_NAME = "ut"
-DOCKER_COPIER = ""  # the path to script that copies all unittests binaries and libs into the container
-DOCKER_DIR = ""  # the container internal path where to put and run all unittests
+DOCKER_COPIER = "./cp2cont.sh"  # the path to script that copies all unittests binaries and libs into the container
+DOCKER_DIR = "/opt"  # the container internal path where to put and run all unittests
+DOCKER_UT_WRAPPER = DOCKER_DIR + "/" + "runut.sh"  # a shell script to execute a unittest in the container
 
 
 BOX_NAMES = {
@@ -155,13 +156,15 @@ SKIP_TESTS = {
 SKIP_ALL = set() # {'msarch'}
 
 SUDO_REQUIRED = set(('mediaserver_core_ut',))  # set of unittests that require sudo to call
+# NOTE: SUDO_REQUIRED not used when the docker used since in a container all test executed by root
+
 NOSHUFFLE = (  # list of tupples (branch, ut), any part can be '*' which means 'any'
     ('dev_2.5', 'mediaserver_core_ut'),
     ('prod_2.5', 'mediaserver_core_ut'),
 )
 
 # Build only this branches, don't perform any testing
-BUILD_ONLY_BRANCHES = set(('dev_3.0.0', ))
+BUILD_ONLY_BRANCHES = set(('', ))
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 

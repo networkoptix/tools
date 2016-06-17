@@ -9,6 +9,8 @@ import sys
 import docker
 import docker.errors
 from docker.utils import Ulimit
+from subprocess import check_call, call as subcall
+
 
 # TODO: catch and process all docker.errors.APIError and docker.errors.DockerException
 
@@ -37,12 +39,13 @@ class UtContainer(object):
             print "DEBUG(utdocker): " + text
 
     @classmethod
-    def init(cls):
+    def init(cls, buildVars):
         if cls.client is None:
             cls.client = docker.Client()  # base_url='unix://var/run/docker.sock'
             cls.hostConfig = cls.client.create_host_config(ulimits=[Ulimit(name='core', soft=-1, hard=-1)])
         cls._prepare_image()
         cls._create_container()
+        cls._fill_container(buildVars)
 
     @classmethod
     def done(cls):
@@ -90,12 +93,23 @@ class UtContainer(object):
         cls.client.start(cls.container['Id'])
 
     @classmethod
+    def _fill_container(cls, buildVars):
+        check_call([
+            conf.DOCKER_COPIER, cls.container['Id'], conf.DOCKER_DIR, buildVars.bin_path, buildVars.lib_path, buildVars.qt_lib
+        ])
+
+    @classmethod
     def cmdPrefix(cls):
         return [conf.DOCKER, 'exec', cls.container['Id']]
 
     @classmethod
     def makeCmd(cls, *cmd):
         return [conf.DOCKER, 'exec', cls.container['Id']] + (cmd[0] if cmd and type(cmd[0]) == list else list(cmd))
+
+    @classmethod
+    def containerId(cls):
+        return cls.container['Id']
+
 
 
 #TODO: Think about exception strategy! Handle texceptions here or just allow ut.iterate_unittests/ut.call_unittest do it?

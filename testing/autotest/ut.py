@@ -19,10 +19,10 @@ __all__ = []  # avoid import *
 main = sys.modules['__main__']
 conf = main.conf
 
-#if conf.UT_USE_DOCKER:
-#    from .utdocker import UtContainer
-#else:
-#    UtContainer = None
+if conf.UT_USE_DOCKER:
+    from .utdocker import UtContainer
+else:
+    UtContainer = None
 
 
 FailedTests = []
@@ -226,21 +226,30 @@ def exec_unittest(testpath, branch, use_shuffle):
     """
     Creates a child process executing the unittest.
     :param testpath: str
+    :param branch: str
+    :param use_shuffle: bool
     :return: Process
     """
-    cmd = [testpath, '--gtest_shuffle'] if use_shuffle else [testpath]
+    cmd = [testpath]
     if branch not in conf.UT_BRANCHES_NO_TEMP:
         if not conf.UT_TEMP_DIR:
             ToSend.log("WARNING! UT_TEMP_FILE is not set!")
         else:
-            cmd += ['--tmp=' + conf.UT_TEMP_DIR]
+            cmd.append('--tmp=' + conf.UT_TEMP_DIR)
             if check_temp_dir():
                 clear_temp_dir()
-    if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
+    elif UtContainer:  # in container we pass 'notmp' to runut.sh to not use --tmp
+        cmd.append('notmp')
+    if use_shuffle:
+        cmd.append('--gtest_shuffle')
+    if UtContainer:
+        cmd = UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, *cmd)
+    elif os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
         # sudo is required since some unittest start server
         # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
         cmd = [conf.SUDO, '-E', 'LD_LIBRARY_PATH=%s' % main.Env['LD_LIBRARY_PATH']] + cmd
-    debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), main.Env['LD_LIBRARY_PATH'])
+    if not UtContainer:
+        debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), main.Env['LD_LIBRARY_PATH'])
     debug("Command line: %s", cmd)
     return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=main.Env, **conf.SUBPROC_ARGS)
 
@@ -251,10 +260,13 @@ def call_unittest(suitname, reader, branch):
     old_coount = ToSend.count()
     proc = None
     try:
-        testpath = os.path.join(Build.bin_path, suitname)
-        if not validate_testpath(testpath):
-            FailedTests.append('(all -- not executed)')
-            return
+        if UtContainer:
+            testpath = suitname
+        else:
+            testpath = os.path.join(Build.bin_path, suitname)
+            if not validate_testpath(testpath):
+                FailedTests.append('(all -- not executed)')
+                return
         #debug("Calling %s", testpath)
         proc = exec_unittest(testpath, branch, (branch, suitname) not in conf.NOSHUFFLE)
         reader.register(proc)
@@ -283,8 +295,8 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
 
     if ut_names:
         try:
-            #if UtContainer:
-            #    UtContainer.init()
+            if UtContainer:
+                UtContainer.init(Build)
             for name in get_list(to_skip):
                 del FailedTests[:]
                 call_unittest(name, reader, branch)  # it clears ToSend on start
@@ -309,10 +321,13 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
         #TODO add some `except`s?
         finally:
             pass
-            #if UtContainer:
-            #    UtContainer.done()
+            if UtContainer:
+                UtContainer.done()
     else:
         output.append("Warning: No unittests to run! Are the skipped all?")
         ToSend.log(output[-1])
     return output
 
+
+#def _cp2cont(srcFn, dstFn):
+#    cmd = [ conf.DOCKER, 'cp', srcFn, "%s/%s" % (UtContainer.containerId(),

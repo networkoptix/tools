@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output, call as subcall
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
 from collections import deque, namedtuple
 import errno
 import traceback
