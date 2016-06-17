@@ -9,6 +9,7 @@ udt_VERSION=4.11
 qt_VERSION=5.2.1
 sasl2_VERSION=2.1.26
 openldap_VERSION=2.4.42
+festival_VERSION=2.1x
 #qt_VERSION=5.4.1
 
 LOG_FILE_NAME=build.log
@@ -1084,6 +1085,91 @@ function sigar_prepareMvnArtifact()
 
 
 
+
+###############################################################
+###############################################################
+########### festival functions
+###############################################################
+###############################################################
+
+function festival_getMirrorList()
+{
+    return 0
+}
+
+function festival_generateTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName=$1
+    local artifactVersion=$2
+
+    #Generating onvif tar.gz
+    mkdir ./$artifactName-$artifactVersion 2>/dev/null
+    cp -rf $THIRD_PARTY_SRC_DIR/speech_synthesis/2.1/* \
+        ./$artifactName-$artifactVersion || return 2
+    tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+
+    return 0
+}
+
+function festival_generate_config()
+{
+    local artifactVersion=$2
+    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++ CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+
+    cd speech_tools
+    ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 1
+    cd -
+
+    cd festival
+    ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 2
+    cd -
+
+    unset CC CXX CC_OTHER_FLAGS
+    return 0
+}
+
+function festival_build()
+{
+    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++ CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+
+    cd speech_tools
+    make -j1 >>$LOG_FILE_PATH 2>&1 || return 1
+    cd -
+
+    cd festival
+    make -j1 >>$LOG_FILE_PATH 2>&1 || return 2
+    cd -
+
+    unset CC CXX CC_OTHER_FLAGS
+    return 0
+}
+
+function festival_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    find . -name '*.a' -exec cp {} $mvnArtifactDir/lib/debug/ \; || return 1
+    find . -name '*.a' -exec cp {} $mvnArtifactDir/lib/release/ \; || return 2
+
+    mkdir -p $mvnArtifactDir/include/festival 2>/dev/null
+    for DIR in $(find -name include); do
+        cp -r $DIR/* $mvnArtifactDir/include/festival/ || return 3
+    done
+
+    return 0
+}
+
+
+
+
 ###############################################################
 ###############################################################
 ########### common functions
@@ -1552,6 +1638,7 @@ ALL_ARTIFACTS=(                 \
         net.sourceforge/udt     \
         com.google/gtest        \
         com.google/gmock        \
+        org/festival            \
 )
 
 ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
