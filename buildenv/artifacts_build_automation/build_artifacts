@@ -1163,7 +1163,7 @@ function festival_prepareMvnArtifact()
 
     mkdir -p $mvnArtifactDir/include/festival 2>/dev/null
     for DIR in $(find -name include); do
-        cp -r $DIR/* $mvnArtifactDir/include/festival/ || return 3
+        cp -r $DIR/* $mvnArtifactDir/include/festival/ || true
     done
 
     return 0
