@@ -1121,7 +1121,8 @@ function festival_generateTarballName()
 function festival_generate_config()
 {
     local artifactVersion=$2
-    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++ CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
+    export CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
 
     cd speech_tools
     ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1137,7 +1138,8 @@ function festival_generate_config()
 
 function festival_build()
 {
-    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++ CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
+    export CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
 
     cd speech_tools
     make -j1 >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1166,6 +1168,9 @@ function festival_prepareMvnArtifact()
 
     return 0
 }
+
+festival_extraInclude="festival"
+festival_libFiles="-lFestival -lestools -leststring -lestbase" # order is important
 
 
 
@@ -1389,7 +1394,7 @@ function rdep_deploy_artifact()
     fi
 
     RDEP_ARTF_DIR="$PKG_DIR/$PLATFORM/$artifactName-$artifactVersion"
-    rm -rf $RDEP_ARTF_DIR
+    #rm -rf $RDEP_ARTF_DIR
     mkdir -p $RDEP_ARTF_DIR/include $RDEP_ARTF_DIR/lib/debug $RDEP_ARTF_DIR/lib/release
     if [ $? -ne 0 ]; then
         echo "Failed to create directory $RDEP_ARTF_DIR"
@@ -1413,27 +1418,44 @@ function rdep_deploy_artifact()
     mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
     rm -r $RDEP_ARTF_DIR/lib/release
 
-    echo "[General]" > $RDEP_ARTF_DIR/.rdpack
+    if [ ! -f $RDEP_ARTF_DIR/.rdpack ]; then
+        echo "[General]" > $RDEP_ARTF_DIR/.rdpack
+    fi
+
+    extraIncludeVar=${artifactName}_extraInclude
+    libFilesVar=${artifactName}_libFiles
+    libFiles=${!libFilesVar}
+    if [ -z "$libFiles" ]; then
+        libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
+            basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+        done | xargs echo)
+    fi
 
     #generate pri file
     cat > $RDEP_ARTF_DIR/$artifactName.pri <<EOF
 ${artifactName^^}_DIR = \$\$PWD
 
-INCLUDEPATH += \$\$${artifactName^^}_DIR/include
-LIBS += -L\$\$${artifactName^^}_DIR/lib
-LIBS += $(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
-        basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+INCLUDEPATH += $(for EI in '' ${!extraIncludeVar}; do
+        echo \$\$${artifactName^^}_DIR/include/$EI
     done | xargs echo)
+
+LIBS += -L\$\$${artifactName^^}_DIR/lib $libFiles
 EOF
 
     #generate cmake file
     cat > $RDEP_ARTF_DIR/$artifactName.cmake <<EOF
 set(${artifactName^^}_FOUND TRUE)
 set(${artifactName^^}_DIR \${CMAKE_CURRENT_LIST_DIR})
-set(${artifactName^^}_INCLUDE \${${artifactName^^}_DIR}/include)
-set(${artifactName^^}_LIB $(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
-        echo \${${artifactName^^}_DIR}/lib/$(basename $lib)
-    done | xargs echo))
+
+set(${artifactName^^}_INCLUDE
+$(for EI in '' ${!extraIncludeVar}; do
+    echo "    \${${artifactName^^}_DIR}/include/$EI"
+done))
+
+set(${artifactName^^}_LIB
+$(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
+    echo "    \${${artifactName^^}_DIR}/lib/$(basename $lib)"
+done))
 EOF
 
     #upload
