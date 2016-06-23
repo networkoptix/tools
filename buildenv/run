@@ -5,7 +5,7 @@ ulimit -n 4096
 function printHelp()
 {
     echo "-----"
-    echo 
+    echo "run [run-options] [binary] [binary options]"
 }
 
 CONFIGURATION=debug
@@ -19,6 +19,7 @@ BINARY_NAME=./mediaserver
 MSERVER_ARGS=
 LAUNCH_CMD=
 LOOP=
+RUN_ARGS_SPECIFIED=0
 
 for i in "$@"
 do
@@ -27,9 +28,12 @@ do
         exit 0
     elif [ "$i" == "--run-loop" ] ; then
         LOOP=1
+        RUN_ARGS_SPECIFIED=$((RUN_ARGS_SPECIFIED+1))
     fi
 done
 
+TOTAL_ARGS_SPECIFIED=$#
+ARGS_LEFT=$((TOTAL_ARGS_SPECIFIED-RUN_ARGS_SPECIFIED))
 
 #TODO read --smth= arguments (e.g., BRANCH_NAME)
 
@@ -43,12 +47,20 @@ done
 #    fi
 #done
 
-if [ $# -ge 1 ]; then
-    BINARY_NAME=$1
+BINARY_NAME_POS=$((RUN_ARGS_SPECIFIED+1))
+if [ $ARGS_LEFT -ge 1 ]; then
+    BINARY_NAME=${@:BINARY_NAME_POS:1}
 fi
-if [ $# -ge 2 ]; then
-    MSERVER_ARGS=${@:2}
+BINARY_NAME_POS=$((BINARY_NAME_POS+1))
+if [ $ARGS_LEFT -ge 2 ]; then
+    MSERVER_ARGS=${@:BINARY_NAME_POS}
 fi
+
+#echo "TOTAL_ARGS_SPECIFIED $TOTAL_ARGS_SPECIFIED"
+#echo "RUN_ARGS_SPECIFIED $RUN_ARGS_SPECIFIED"
+#echo "ARGS_LEFT $ARGS_LEFT"
+#echo "BINARY_NAME $BINARY_NAME"
+#echo "MSERVER_ARGS $MSERVER_ARGS"
 
 TARGET_ROOT="`pwd`"
 if [[ $TARGET_ROOT =~ (.*/build_environment/target).* ]]; then
