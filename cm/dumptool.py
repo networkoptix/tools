@@ -35,7 +35,7 @@ CONFIG = dict(
         dump = 'dmp',
         report = 'cdb-bt',
     ),
-    msi_suffix = 'x64[a-z\-]+-%s-only.msi',
+    msi_suffix = 'x64[a-z\-]+%s-only.msi',
     pdb_suffixes = [
         'x64[a-z\\-]+windows-pdb-all.zip',
         'x64[a-z\\-]+windows-pdb-apps.zip',
@@ -75,10 +75,13 @@ class Cdb(object):
         if command:
             self.cdb.stdin.write('%s\n' % command)
         out = ''
-        while not out.endswith('\n0:'):
-            out += self.cdb.stdout.read(1)
-        while self.cdb.stdout.read(1) != '>': # read prompt
-            pass
+        def read_ch():
+            c = self.cdb.stdout.read(1)
+            if not c: raise Error(
+                "Cdb command: %s\nUnexpected eof: %s" % (command, out))
+            return c
+        while not out.endswith('\n0:'): out += read_ch()
+        while self.cdb.stdout.read(1) != '>': pass
         return out[1:-3] # cut of prompt
 
     def main_module(self):
@@ -269,8 +272,8 @@ def main():
     except Error as e:
         sys.stderr.write('Error: %s\n' % e)
         sys.exit(1)
-    except KeyboardInterrupt:
-        sys.stderr.write('Interrupted\n')
+#    except KeyboardInterrupt:
+#        sys.stderr.write('Interrupted\n')
 
 if __name__ == '__main__':
     main()
