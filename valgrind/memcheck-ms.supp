@@ -200,3 +200,11 @@
     fun:_ZN7QThread5startENS_8PriorityE
     ...
 }
+{
+    festival_initialize
+    Memcheck:Leak
+    match-leak-kinds: all
+    ...
+    fun:_Z19festival_initializeii
+    ...
+}
