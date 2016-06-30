@@ -219,7 +219,7 @@ def read_unittest_output(proc, reader, suitename):
             FailedTests.append(running_test_name)
         if not FailedTests:
             ToSend.append("[ %s tests passed OK. ]" % suitename)
-        debug("%s tests runed for %.2f seconds.", suitename, ut_time)
+        debug("%s tests run for %.2f seconds.", suitename, ut_time)
 
 
 def exec_unittest(testpath, branch, use_shuffle):

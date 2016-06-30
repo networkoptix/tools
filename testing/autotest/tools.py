@@ -70,6 +70,21 @@ def get_platform():
         return os.name
 
 
+def get_file_time(fname):
+    """
+    Gets the file last modification time or 0 on any file access errors
+    :param fname: string
+    :return: int
+    """
+    try:
+        if not os.path.isfile(fname):
+            return 0
+        return os.stat(fname).st_mtime
+    except OSError:
+        return 0
+
+
+
 class Build(object): #  contains some build-dependent global variables
     arch = ''
     bin_path = ''

@@ -7,8 +7,6 @@ from collections import deque, namedtuple
 import errno
 import traceback
 import argparse
-from smtplib import SMTP
-from email import MIMEText
 import signal
 import shutil
 import urllib2
@@ -28,7 +26,8 @@ if os.name == 'posix':
 import autotest.pipereader as pipereader
 import autotest.ut as ut
 from autotest.logger import raw_log, log, debug, set_debug, ToSend
-from autotest.tools import Process, kill_proc, RunTime, get_platform, SignalNames, Build
+from autotest.mailer import emailTestResult, emailBuildError, read_changesets, log_changesets
+from autotest.tools import Process, kill_proc, RunTime, SignalNames, Build, get_file_time
 from testbase import boxssh
 from functest_util import args2str, real_caps
 
@@ -50,64 +49,8 @@ class FuncTestError(RuntimeError):
     pass
 
 RESULT = []
-Changesets = {}
 Env = os.environ.copy()
 Args = {}
-
-
-def email_send(mailfrom, mailto, cc, msg):
-    msg['From'] = mailfrom
-    msg['To'] = mailto
-    if cc:
-        if isinstance(cc, basestring):
-            cc = [cc]
-        mailto = [mailto] + cc
-        msg['Cc'] = ','.join(cc)
-    smtp = SMTP(conf.SMTP_ADDR)
-    if conf.SMTP_LOGIN:
-        smtp.ehlo()
-        smtp.starttls()
-        smtp.login(conf.SMTP_LOGIN, conf.SMTP_PASS)
-    #smtp.set_debuglevel(1)
-    smtp.sendmail(mailfrom, mailto, msg.as_string())
-    smtp.quit()
-
-
-def email_notify(branch, lines):
-    text = (
-        ("Branch %s tests run report.\n\n" % branch) +
-        "\n".join(lines) +
-        ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) + "\n" +
-        format_changesets(branch) + "\n"
-    )
-    msg = MIMEText.MIMEText(text)
-    msg['Subject'] = "Autotest run results on %s platform" % get_platform()
-    email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
-
-
-def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
-    bstr = ("%s unit tests" % branch) if unit_tests else branch
-    cause = ("Error building branch " + bstr) if not crash else (("Branch %s build crashes!" % bstr) + crash)
-    if single_project:
-        special = 'Failed build was restarted for the single failed project: %s\n\n' % single_project
-    elif dep_error:
-        special = ("DEPENDENCY ERROR DETECTED!\n"
-                   "Multithread build has failed on '%s', but singlethreaded has succeeded." % dep_error)
-    else:
-        special = ''
-    text = (
-        format_changesets(branch) + "\n\n" +
-        special +
-        ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
-        "".join(loglines) + "\n"
-    )
-    if Args.stdout:
-        print text
-    else:
-        msg = MIMEText.MIMEText(text)
-        msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
-        email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
-
 
 #####################################
 
@@ -178,7 +121,7 @@ def check_restart():
                 timeout = time.time() + conf.SELF_RESTART_TIMEOUT
                 while os.path.isfile(conf.RESTART_FLAG):
                     if time.time() > timeout:
-                        raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % SELF_RESTART_TIMEOUT)
+                        raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % conf.SELF_RESTART_TIMEOUT)
                     time.sleep(0.1)
                 log("The old proces goes away.")
                 sys.exit(0)
@@ -186,19 +129,6 @@ def check_restart():
             log("Failed to restart: %s", traceback.format_exc())
             drop_flag(conf.RESTART_FLAG)
 
-
-def get_file_time(fname):
-    """
-    Gets the file last modification time or 0 on any file access errors
-    :param fname: string
-    :return: int
-    """
-    try:
-        if not os.path.isfile(fname):
-            return 0
-        return os.stat(fname).st_mtime
-    except OSError:
-        return 0
 
 def check_control_flags():
     check_restart()
@@ -246,10 +176,10 @@ def run_tests(branch):
             RESULT.append(('functests', False))
             failed = True
             if Args.stdout:
+                ToSend.flush()
+            else:
                 output.append('')
                 output.extend(ToSend.lines)
-            else:
-                ToSend.flush()
         else:
             RESULT.append(('functests', True))
 
@@ -258,7 +188,7 @@ def run_tests(branch):
         if Args.full:
             FailTracker.mark_fail(branch)
         if not Args.stdout:
-            email_notify(branch, output)
+            emailTestResult(branch, output)
     else:
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
@@ -267,7 +197,7 @@ def run_tests(branch):
             if ToSend:  # it's not empty if mark_success() really removed previous test-fail status.
                 if not Args.stdout:
                     debug("Sending successful test notification.")
-                    email_notify(branch, ToSend.lines)
+                    emailTestResult(branch, ToSend.lines)
                 ToSend.clear()
 
     return not failed
@@ -284,46 +214,6 @@ def filter_branch_names(branches):
     return filtered
 
 
-def chs_str(changeset):
-    try:
-        return "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % changeset
-    except KeyError, e:
-        return "WARNING: no %s key in changeset dict: %s!" % (e.args[0], changeset)
-
-
-def format_changesets(branch):
-    chs = Changesets.get(branch, [])
-    if chs and isinstance(chs[0], dict):
-        return "Changesets:\n" + "\n".join(
-                ("\t%s" % v['line']) if 'line' in v else chs_str(v) for v in chs)
-    else:
-        return "\n".join(chs)
-
-
-def get_changesets(branch, bundle_fn):
-    debug("Run: " + (' '.join(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
-    proc = Process(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn],
-                   bufsize=1, stdout=PIPE, stderr=STDOUT, **conf.SUBPROC_ARGS)
-    (outdata, errdata) = proc.communicate()
-    if proc.returncode == 0:
-        Changesets[branch] = [
-            ({"line": line.lstrip()} if line.startswith("\t") else
-            dict(zip(['branch','author','node','date','desc'], line.split(';',4))))
-            for line in outdata.splitlines()
-        ]
-        return True
-    elif proc.returncode == 1:
-        debug("No changes found for branch %s", branch)
-    else:
-        Changesets[branch] = [
-            "Error getting changeset list info.",
-            "hg return code = %s" % proc.returncode,
-            "STDOUT: %s" % outdata,
-            "STDERR: %s" % errdata,
-            '']
-    return False
-
-
 def check_new_commits(bundle_fn):
     "Check the repository for new commits in the controlled branches"
     log("Check for new commits")
@@ -338,8 +228,7 @@ def check_new_commits(bundle_fn):
                 ToSend.log('')  # an empty line separator
                 log("Commits are found in branches: %s", branches)
             if branches:
-                Changesets.clear()
-                return [ b for b in branches if get_changesets(b, bundle_fn) ]
+                return read_changesets(branches, bundle_fn)
     except CalledProcessError, e:
         if e.returncode != 1:
             log("ERROR: `hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
@@ -422,7 +311,7 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
     if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
         #! Project dependencies  error! Report but go on.
-        email_build_error(branch, last_lines, unit_tests, dep_error=project_name)
+        emailBuildError(branch, last_lines, unit_tests, dep_error=project_name)
         return True
     else:
         # Other errors - already reported
@@ -475,7 +364,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
                     #    if failed_project_single_build(last_lines, branch, unit_tests):
                     #        # on success it reports from the recursive call call_maven_build(), so we can return here
                     #        return False
-                email_build_error(branch, last_lines, unit_tests, single_project=(project_name if single_project else None))
+                emailBuildError(branch, last_lines, unit_tests, single_project=(project_name if single_project else None))
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
@@ -483,7 +372,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
             raw_log("".join(last_lines))
-            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=(project_name if single_project else None))
+            emailBuildError(branch, last_lines, unit_tests, crash=tb, single_project=(project_name if single_project else None))
         return False
     if no_threads and (project_name is not None):
         pass
@@ -574,7 +463,7 @@ def run():
         if Args.full:
             rc = check_hg_updates()
             if Args.hg_only:
-                log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
+                log_changesets()
             return rc
 
         if Args.single_ut:
@@ -1771,6 +1660,17 @@ def run_auto_loop():
     log("Finishing...")
 
 
+def nameFunctest():
+    if Args.functest:
+        return "all functests"
+    else:
+        return "%s functest" % ("timesync" if Args.timesync else
+            "http-stress" if Args.httpstress else
+            "multiserver archive" if Args.msarch else
+            "streaming" if Args.stream else
+            "NAT-connection" if Args.natcon else
+            "UNKNOWN!!!",)
+
 def main():
     parse_args()
     drop_flag(conf.RESTART_FLAG)
@@ -1820,15 +1720,7 @@ def main():
         ToSend.clear()
         if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
             if ToSend.count() and not Args.stdout:
-                email_notify("Debug %s" % (
-                    "func" if Args.functest else
-                    "timesync" if Args.timesync else
-                    "http-stress" if Args.httpstress else
-                    "multiserver archive" if Args.msarch else
-                    "streaming" if Args.stream else
-                    "NAT-connection" if Args.natcon else
-                    "UNKNOWN!!!"),
-                ToSend.lines)
+                emailTestResult(None, ToSend.lines, testName=nameFunctest())
             return False
         return True
 

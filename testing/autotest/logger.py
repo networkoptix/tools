@@ -128,3 +128,4 @@ class ToSend(object):
         else:
             cls.check_repeats()
             cls.append(line)
+

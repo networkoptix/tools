@@ -61,6 +61,7 @@ def isHotfix(version):
     lastBuild = RELEASE_BUILDS.get(tuple(version[:3]), None)
     return lastBuild is not None and version[3] > lastBuild
 
+
 def get_crashes(crtype, mark):
     print "Getting %s data" % crtype
     url = crash_list_url(crtype)
