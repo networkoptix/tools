@@ -31,7 +31,7 @@ from autotest.tools import Process, kill_proc, RunTime, SignalNames, Build, get_
 from testbase import boxssh
 from functest_util import args2str, real_caps
 
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 
 def check_conf():
     """ Configuration values sanity check.
@@ -156,6 +156,7 @@ def run_tests(branch):
     failed = False
     to_skip = get_tests_to_skip(branch)
     all_fails = []
+    ft_was_called = False
 
     output = ut.iterate_unittests(branch, to_skip, RESULT, all_fails)
 
@@ -172,6 +173,7 @@ def run_tests(branch):
             else:
                 output.append(failsum)
     elif not Args.no_functest:
+        ft_was_called = True
         if not perform_func_test(to_skip):
             RESULT.append(('functests', False))
             failed = True
@@ -188,7 +190,9 @@ def run_tests(branch):
         if Args.full:
             FailTracker.mark_fail(branch)
         if not Args.stdout:
-            emailTestResult(branch, output)
+            emailTestResult(branch, output,
+                            fail=('functional tests' if ft_was_called else 'unittests'),
+                            testName=(Args.single_ut or ''))
     else:
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
@@ -1455,7 +1459,7 @@ def check_args_correct():
 
 
 def get_server_package_name():
-    #TODO move all paths into testconf.py !
+    #TODO: move all paths into testconf.py !
     if Build.arch == '':
         Build.load_vars(conf, Env, safe=True)
 
@@ -1651,6 +1655,11 @@ def run_auto_loop():
         t = time.time()
         log("Checking...")
         run()
+        # restore some values
+        Build.clear()
+        global Env
+        Env = os.environ.copy()
+        #
         t = max(conf.MIN_SLEEP, conf.HG_CHECK_PERIOD - (time.time() - t))
         log("Sleeping %s secs...", t)
         wake_time = time.time() + t
@@ -1720,7 +1729,7 @@ def main():
         ToSend.clear()
         if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
             if ToSend.count() and not Args.stdout:
-                emailTestResult(None, ToSend.lines, testName=nameFunctest())
+                emailTestResult(conf.BRANCHES[0], ToSend.lines, testName=nameFunctest())
             return False
         return True
 

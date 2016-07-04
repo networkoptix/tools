@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from subprocess import PIPE, STDOUT
 
 from .logger import debug, log, ToSend
-from .tools import Process, get_platform
+from .tools import Process, Build
 
 main = sys.modules['__main__']
 conf = main.conf
@@ -50,6 +50,7 @@ def log_changesets():
     log("Changesets:\n %s",
         "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
 
+
 def _chs_str(changeset):
     try:
         return "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % changeset
@@ -84,17 +85,26 @@ def email_send(mailfrom, mailto, cc, msg):
     smtp.quit()
 
 
-def emailTestResult(branch, lines, testName=False):
-    #debug("emailTestResult called for %s with %s lines of log", branch, len(lines))
-    parts = ["Branch %s tests run report.\n" % branch] if not testName else ["Debug %s run report.\n"]
+def emailTestResult(branch, lines, testName='', fail=''):
+    branchStr = "Branch " + branch
+    if testName:
+        branchStr  += ", " + testName + " only"
+    else:
+        branchStr  += " autotests"
+    resultStr = (fail + " failed") if fail else 'success'
+    parts = [
+        "%s run report. Platform %s, arch %s." % (branchStr.capitalize(), Build.platform, Build.arch),
+        "Result: " + resultStr,
+    ]
     attach = ''
+    lines.extend(('',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"), ''))
     if len(lines) >= conf.MAX_LOG_NO_ATTACH:
         parts.append("See log file (%s lines) attached." % len(lines))
         attach = MIMEText("\n".join(lines))
-        attach.add_header('Content-Disposition', 'attachment', filename=('test_fail_%s.log' % branch.replace(' ', '_')))
+        attach.add_header('Content-Disposition', 'attachment',
+                          filename=('test_fail_%s.log' % branch.replace(' ', '_')))
     else:
         parts.extend(lines)
-    parts.extend(('','',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"), ''))
     if branch:
         parts.append(format_changesets(branch))
     text = '\n'.join(parts)
@@ -104,12 +114,12 @@ def emailTestResult(branch, lines, testName=False):
         msg.attach(attach)
     else:
         msg = MIMEText(text)
-    msg['Subject'] = "Autotest run results on %s platform" % get_platform()
+    onlyTest = (" (%s only)" % testName) if testName else ''
+    msg['Subject'] = "Autotest%s: %s (%s, %s, %s)" % (onlyTest, resultStr, branch, Build.platform, Build.arch)
     email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
 
 
 def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None, dep_error=None):
-    #debug("emailBuildError called for %s with %s lines of lig", branch, len(loglines))
     bstr = ("%s unit tests" % branch) if unit_tests else branch
     cause = ("Error building branch " + bstr) if not crash else (("Branch %s build crashes!" % bstr) + crash)
     attach = ''
@@ -140,7 +150,7 @@ def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None,
             msg.attach(attach)
         else:
             msg = MIMEText(text)
-        msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
+        msg['Subject'] = "Autotest: build failed - branch %s, platform %s, arch %s" % (bstr, Build.platform, Build.arch)
         email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
 
 

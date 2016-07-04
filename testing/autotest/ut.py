@@ -297,7 +297,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
         try:
             if UtContainer:
                 UtContainer.init(Build)
-            for name in get_list(to_skip):
+            for name in ut_names:
                 del FailedTests[:]
                 call_unittest(name, reader, branch)  # it clears ToSend on start
                 if FailedTests:
