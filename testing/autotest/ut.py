@@ -320,7 +320,6 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                     debug("OK for the '%s' test suite", name)
         #TODO add some `except`s?
         finally:
-            pass
             if UtContainer:
                 UtContainer.done()
     else:

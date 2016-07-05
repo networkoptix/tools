@@ -85,7 +85,11 @@ def email_send(mailfrom, mailto, cc, msg):
     smtp.quit()
 
 
-def emailTestResult(branch, lines, testName='', fail=''):
+def _time4LogName(tmStruct):
+    return time.strftime("%y%m%d-%H%M%S", tmStruct)
+
+
+def emailTestResult(branch, lines, testName='', fail='', summary=''):
     branchStr = "Branch " + branch
     if testName:
         branchStr  += ", " + testName + " only"
@@ -97,12 +101,15 @@ def emailTestResult(branch, lines, testName='', fail=''):
         "Result: " + resultStr,
     ]
     attach = ''
-    lines.extend(('',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)"), ''))
+    now = time.gmtime()
+    lines.extend(('',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S GMT", now), ''))
     if len(lines) >= conf.MAX_LOG_NO_ATTACH:
-        parts.append("See log file (%s lines) attached." % len(lines))
+        if summary:
+            parts.extend(('',summary,''))
+        parts.append("See log file (%s lines) attached for details." % len(lines))
         attach = MIMEText("\n".join(lines))
-        attach.add_header('Content-Disposition', 'attachment',
-                          filename=('test_fail_%s.log' % branch.replace(' ', '_')))
+        attach.add_header('Content-Disposition', 'attachment', filename=('test_fail_%s_%s.log' % (
+            branch.replace(' ', '_'), _time4LogName(now))))
     else:
         parts.extend(lines)
     if branch:
@@ -135,7 +142,8 @@ def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None,
     if not ToSend.stdout and len(loglines) > conf.MAX_LOG_NO_ATTACH:  # TODO remove attchament code partial duplidation with emailTestResult!
         msglines.append("See the last %d lines of the build log in the file attached." % len(loglines))
         attach = MIMEText("\n".join(log_iter))
-        attach.add_header('Content-Disposition', 'attachment', filename=('build_fail_%s.log' % branch))
+        attach.add_header('Content-Disposition', 'attachment', filename=('build_fail_%s_%s.log' % (
+            branch, _time4LogName(time.gmtime()))))
     else:
         msglines.append("The build log last %d lines are:" % len(loglines))
         msglines.extend(log_iter)
@@ -152,5 +160,3 @@ def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None,
             msg = MIMEText(text)
         msg['Subject'] = "Autotest: build failed (%s, %s, %s)" % (bstr, Build.platform, Build.arch)
         email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
-
-

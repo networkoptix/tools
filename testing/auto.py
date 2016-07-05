@@ -161,6 +161,7 @@ def run_tests(branch):
     output = ut.iterate_unittests(branch, to_skip, RESULT, all_fails)
 
     ToSend.clear()
+    failsum = ''
     if all_fails:
         failed = True
         if len(all_fails) > 1:
@@ -192,7 +193,8 @@ def run_tests(branch):
         if not Args.stdout:
             emailTestResult(branch, output,
                             fail=('functional tests' if ft_was_called else 'unittests'),
-                            testName=(Args.single_ut or ''))
+                            testName=(Args.single_ut or ''),
+                            summary=failsum)
     else:
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
@@ -483,7 +485,8 @@ def run():
             if conf.BRANCHES[0] in conf.BUILD_ONLY_BRANCHES:
                 build_only_msg(conf.BRANCHES[0])
                 return True
-        # Build.load_vars(conf, Env) -- loaded afe build
+        if Build.arch == '':
+            Build.load_vars(conf, Env)
         rc = run_tests(conf.BRANCHES[0])
         RESULT.append(('run_tests', rc))
         return rc
