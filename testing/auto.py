@@ -60,7 +60,7 @@ class FailTracker(object):
     @classmethod
     def mark_success(cls, branch):
         if branch in cls.fails:
-            debug("Removing failed-test-mark from branch %s", branch)
+            #debug("Removing failed-test-mark from branch %s", branch)
             cls.fails.discard(branch)
             cls.save()
             ToSend.log('')
@@ -322,14 +322,14 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
         return False
 
 
-def failed_project_single_build(last_lines, branch, unit_tests):
-    project, project_name = get_failed_project(last_lines)
-    if project == '':
-        last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
-        return False
-    log("[ Restarting maven to re-build '%s' ]", project_name)
-    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, project_name=project_name)
-    return True
+#def failed_project_single_build(last_lines, branch, unit_tests):
+#    project, project_name = get_failed_project(last_lines)
+#    if project == '':
+#        last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
+#        return False
+#    log("[ Restarting maven to re-build '%s' ]", project_name)
+#    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, project_name=project_name)
+#    return True
 
 
 def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
@@ -354,6 +354,8 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
 
     try:
         retcode = execute_maven(cmd, kwargs, last_lines)
+        if not unit_tests:
+            Build.load_vars(conf, Env, safe=True)
         if retcode != 0:
             log("Error calling maven: ret.code = %s" % retcode)
             if not Args.full_build_log:
@@ -372,7 +374,7 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
-        log("maven call has failed: %s" % tb)
+        log("maven call failed: %s" % tb)
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
             raw_log("".join(last_lines))
@@ -452,7 +454,7 @@ def check_hg_updates():
                     build_only_msg(branch)
                     # don't change rc - keep it True if it still is True
                 else:
-                    Build.load_vars(conf, Env)
+                    #Build.load_vars(conf, Env) - loaded after build
                     rc = run_tests(branch) and rc
             else:
                 FailTracker.mark_fail(branch)
@@ -481,7 +483,7 @@ def run():
             if conf.BRANCHES[0] in conf.BUILD_ONLY_BRANCHES:
                 build_only_msg(conf.BRANCHES[0])
                 return True
-        Build.load_vars(conf, Env)
+        # Build.load_vars(conf, Env) -- loaded afe build
         rc = run_tests(conf.BRANCHES[0])
         RESULT.append(('run_tests', rc))
         return rc

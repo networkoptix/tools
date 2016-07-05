@@ -133,7 +133,7 @@ def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None,
     msglines = [format_changesets(branch), '', special, '', cause]
     log_iter = (s.rstrip() for s in loglines)  # to be shure with newlines style
     if not ToSend.stdout and len(loglines) > conf.MAX_LOG_NO_ATTACH:  # TODO remove attchament code partial duplidation with emailTestResult!
-        msglines.append("The build log last %d lines are in the attachment" % len(loglines))
+        msglines.append("See the last %d lines of the build log in the file attached." % len(loglines))
         attach = MIMEText("\n".join(log_iter))
         attach.add_header('Content-Disposition', 'attachment', filename=('build_fail_%s.log' % branch))
     else:
@@ -150,7 +150,7 @@ def emailBuildError(branch, loglines, unit_tests, crash='', single_project=None,
             msg.attach(attach)
         else:
             msg = MIMEText(text)
-        msg['Subject'] = "Autotest: build failed - branch %s, platform %s, arch %s" % (bstr, Build.platform, Build.arch)
+        msg['Subject'] = "Autotest: build failed (%s, %s, %s)" % (bstr, Build.platform, Build.arch)
         email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
 
 

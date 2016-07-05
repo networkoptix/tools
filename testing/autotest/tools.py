@@ -75,7 +75,6 @@ def get_file_time(fname):
         return 0
 
 
-
 class Build(object): #  contains some build-dependent global variables
     arch = ''
     platform = ''
