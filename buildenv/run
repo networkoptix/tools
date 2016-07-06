@@ -20,15 +20,26 @@ MSERVER_ARGS=
 LAUNCH_CMD=
 LOOP=
 RUN_ARGS_SPECIFIED=0
+STRACE=
+STRACE_LOG=strace.log
 
 for i in "$@"
 do
+    if [[ $i =~ --run-.* ]]; then
+        RUN_ARGS_SPECIFIED=$((RUN_ARGS_SPECIFIED+1))
+    fi
+
     if [ $i == "-h" -o $i == "--help"  ] ; then
         printHelp
         exit 0
     elif [ "$i" == "--run-loop" ] ; then
         LOOP=1
-        RUN_ARGS_SPECIFIED=$((RUN_ARGS_SPECIFIED+1))
+    elif [ "$i" == "--run-release" ] ; then
+        CONFIGURATION=release
+    elif [ "$i" == "--run-debug" ] ; then
+        CONFIGURATION=debug
+    elif [ "$i" == "--run-strace" ] ; then
+        STRACE=1
     fi
 done
 
@@ -96,11 +107,16 @@ fi
 cd $BIN_DIR
 
 LAUNCH_CMD="$BINARY_NAME $MSERVER_ARGS"
+if [ ! -z "$STRACE" ]; then
+    LAUNCH_CMD="strace -o $STRACE_LOG $LAUNCH_CMD"
+fi
 
 COMMON_VALGRIND_ARGS="--num-callers=32 --error-limit=no --log-file=$LOG_FILE $LAUNCH_CMD"
 
 while :
 do
+    echo "Running command '$LAUNCH_CMD'"
+
     #valgrind --leak-check=full --show-leak-kinds=all --vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS
     #valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
     #valgrind $COMMON_VALGRIND_ARGS
