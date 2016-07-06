@@ -231,15 +231,16 @@ def exec_unittest(testpath, branch, use_shuffle):
     :return: Process
     """
     cmd = [testpath]
-    if branch not in conf.UT_BRANCHES_NO_TEMP:
-        if not conf.UT_TEMP_DIR:
-            ToSend.log("WARNING! UT_TEMP_FILE is not set!")
-        else:
-            cmd.append('--tmp=' + conf.UT_TEMP_DIR)
-            if check_temp_dir():
-                clear_temp_dir()
+    if (branch not in conf.UT_BRANCHES_NO_TEMP):
+        if not UtContainer:
+            if not conf.UT_TEMP_DIR:
+                ToSend.log("WARNING! UT_TEMP_FILE is not set!")
+            else:
+                cmd.append('--tmp=' + conf.UT_TEMP_DIR)
+                if check_temp_dir():
+                    clear_temp_dir()
     elif UtContainer:  # in container we pass 'notmp' to runut.sh to not use --tmp
-        cmd.append('notmp')
+        cmd.append('notmp')  # it must be the first arg after the unittest name!
     if use_shuffle:
         cmd.append('--gtest_shuffle')
     if UtContainer:

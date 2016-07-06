@@ -164,11 +164,11 @@ def run_tests(branch):
     failsum = ''
     if all_fails:
         failed = True
+        failsum = "Failed unitests summary:\n" + "\n".join(
+                    ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
+                    for fail in all_fails
+                )
         if len(all_fails) > 1:
-            failsum = "Failed unitests summary:\n" + "\n".join(
-                        ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
-                        for fail in all_fails
-                    )
             if Args.stdout:
                 log(failsum)
             else:
