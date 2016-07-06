@@ -17,6 +17,7 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 
 PROJECT_ROOT = "~/develop/nx_vms"
 PROJECT_ROOT = "~/develop/nvms"
+PROJECT_ROOT = "~/develop/nx_vms_tmp"
 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
@@ -45,9 +46,10 @@ HG_CHECK_PERIOD = 5 * 60 # seconds, complete check period, including time consum
 MIN_SLEEP = 60 # seconds, minimal sleep time after one perform before another
 UT_PIPE_TIMEOUT = 100 * 1000  # milliseconds. Unit tests' pipe timeout
 FT_PIPE_TIMEOUT = 90 * 1000  # ... Functional tests' pipe timeout
-UT_TIME_LIMIT = 10 * 60 # Maximum time for each one unittest to run.
-TEST_TERMINATION_WAIT = 7 # seconds, how long to wait for test process teermination before kill it
-BUILD_LOG_LINES = 250 # How may last lines are saved to report build process failure
+UT_TIME_LIMIT = 10 * 60  # Maximum time for each one unittest to run.
+TEST_TERMINATION_WAIT = 7  # seconds, how long to wait for test process teermination before kill it
+BUILD_LOG_LINES = 500  # How may last lines are saved to report build process failure
+MAX_LOG_NO_ATTACH = 50  #  If log is longer, send it in an attachment
 FUNCTEST_LAST_LINES = 50 # Lines to show if the functional tests hang.
 MVN_TERMINATION_WAIT = 15 # seconds, how long to wait for mvn return code
 MVN_BUFFER = 50000        # maven output pipe buffer size
@@ -98,7 +100,7 @@ VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
 
 MVN_BUILD_CONFIG = 'release'
-MVN_BUILD_CONFIG = 'debug'
+#MVN_BUILD_CONFIG = 'debug'
 TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
 
 # docker usage options

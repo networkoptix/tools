@@ -61,17 +61,23 @@ class RunTime(object):
             print "Execution time: %02d:%02d:%02d.%s" % (hr, mn, int(spend % 60), ms)
 
 
-def get_platform():
-    if os.name == 'posix':
-        return 'POSIX'
-    elif os.name == 'nt':
-        return 'Windows'
-    else:
-        return os.name
+def get_file_time(fname):
+    """
+    Gets the file last modification time or 0 on any file access errors
+    :param fname: string
+    :return: int
+    """
+    try:
+        if not os.path.isfile(fname):
+            return 0
+        return os.stat(fname).st_mtime
+    except OSError:
+        return 0
 
 
 class Build(object): #  contains some build-dependent global variables
     arch = ''
+    platform = ''
     bin_path = ''
     target_path = ''
     lib_path = ''
@@ -92,9 +98,19 @@ class Build(object): #  contains some build-dependent global variables
             sys.exit(1)
         _vars['add_lib_path'](env) # used in exec_unittest only.
         cls.arch = _vars['ARCH']
+        cls.platform = _vars['PLATFORM']
         cls.target_path = _vars['TARGET_DIR']
         cls.bin_path = _vars['BIN_PATH']
         cls.lib_path = _vars['LIB_PATH']
         cls.qt_lib = _vars['QT_LIB']
+
+    @classmethod
+    def clear(cls):
+        cls.arch = ''
+        cls.platform = ''
+        cls.bin_path = ''
+        cls.target_path = ''
+        cls.lib_path = ''
+        cls.qt_lib = ''
 
 

@@ -219,7 +219,7 @@ def read_unittest_output(proc, reader, suitename):
             FailedTests.append(running_test_name)
         if not FailedTests:
             ToSend.append("[ %s tests passed OK. ]" % suitename)
-        debug("%s tests runed for %.2f seconds.", suitename, ut_time)
+        debug("%s tests run for %.2f seconds.", suitename, ut_time)
 
 
 def exec_unittest(testpath, branch, use_shuffle):
@@ -231,15 +231,16 @@ def exec_unittest(testpath, branch, use_shuffle):
     :return: Process
     """
     cmd = [testpath]
-    if branch not in conf.UT_BRANCHES_NO_TEMP:
-        if not conf.UT_TEMP_DIR:
-            ToSend.log("WARNING! UT_TEMP_FILE is not set!")
-        else:
-            cmd.append('--tmp=' + conf.UT_TEMP_DIR)
-            if check_temp_dir():
-                clear_temp_dir()
+    if (branch not in conf.UT_BRANCHES_NO_TEMP):
+        if not UtContainer:
+            if not conf.UT_TEMP_DIR:
+                ToSend.log("WARNING! UT_TEMP_FILE is not set!")
+            else:
+                cmd.append('--tmp=' + conf.UT_TEMP_DIR)
+                if check_temp_dir():
+                    clear_temp_dir()
     elif UtContainer:  # in container we pass 'notmp' to runut.sh to not use --tmp
-        cmd.append('notmp')
+        cmd.append('notmp')  # it must be the first arg after the unittest name!
     if use_shuffle:
         cmd.append('--gtest_shuffle')
     if UtContainer:
@@ -297,7 +298,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
         try:
             if UtContainer:
                 UtContainer.init(Build)
-            for name in get_list(to_skip):
+            for name in ut_names:
                 del FailedTests[:]
                 call_unittest(name, reader, branch)  # it clears ToSend on start
                 if FailedTests:
@@ -320,7 +321,6 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                     debug("OK for the '%s' test suite", name)
         #TODO add some `except`s?
         finally:
-            pass
             if UtContainer:
                 UtContainer.done()
     else:

@@ -8,6 +8,7 @@ Their common base class StorageBasedTest also used in other tests.
 """
 __author__ = 'Danil Lavrentyuk'
 import os, os.path, copy, sys, time
+import hashlib
 #import urllib2
 import subprocess
 #import traceback
@@ -32,11 +33,13 @@ _WORK_HOST = 0
 
 TEST_CAMERA_TYPE_ID = "f9c03047-72f1-4c04-a929-8538343b6642"
 
+_CameraMAC = '11:22:33:44:55:66'
+
 TEST_CAMERA_DATA = {
     'id': '',
     'parentId': '',# put the server guid here
-    'mac': '11:22:33:44:55:66',
-    'physicalId': '11:22:33:44:55:66',
+    'mac': _CameraMAC,
+    'physicalId': _CameraMAC,
     'manuallyAdded': False,
     'model': 'test-camera',
     'groupId': '',
@@ -73,6 +76,10 @@ class BackupStorageTestError(FuncTestError):
     pass
 
 
+def _mk_id(uniqId):
+    h = hashlib.md5(uniqId).hexdigest()
+    return '-'.join((h[:8],h[8:12],h[12:16],h[16:20],h[20:]))
+
 class StorageBasedTest(FuncTestCase):
     """ Some common logic for storage tests.
     """
@@ -107,7 +114,7 @@ class StorageBasedTest(FuncTestCase):
     def new_test_camera(cls, boxnum, camData=TEST_CAMERA_DATA):
         "Creates initial dict of camera data."
         data = camData.copy()
-        data['id'] = str(uuid.uuid4())
+        data['id'] = _mk_id(data['physicalId'])
         cls.test_camera_id[boxnum] = data['id']
         cls.test_camera_physical_id[boxnum] = data['physicalId']
         return data
