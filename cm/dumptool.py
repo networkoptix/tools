@@ -35,10 +35,10 @@ CONFIG = dict(
         dump = 'dmp',
         report = 'cdb-bt',
     ),
-    msi_suffix = 'x64-%s-only.msi',
+    msi_suffix = 'x64[a-z\-]+%s-only.msi',
     pdb_suffixes = [
-        'x64-windows-pdb-all.zip',
-        'x64-windows-pdb-apps.zip',
+        'x64[a-z\\-]+windows-pdb-all.zip',
+        'x64[a-z\\-]+windows-pdb-apps.zip',
     ],
 )
 
@@ -75,10 +75,13 @@ class Cdb(object):
         if command:
             self.cdb.stdin.write('%s\n' % command)
         out = ''
-        while not out.endswith('\n0:'):
-            out += self.cdb.stdout.read(1)
-        while self.cdb.stdout.read(1) != '>': # read prompt
-            pass
+        def read_ch():
+            c = self.cdb.stdout.read(1)
+            if not c: raise Error(
+                "Cdb command: %s\nUnexpected eof: %s" % (command, out))
+            return c
+        while not out.endswith('\n0:'): out += read_ch()
+        while self.cdb.stdout.read(1) != '>': pass
         return out[1:-3] # cut of prompt
 
     def main_module(self):
@@ -132,41 +135,45 @@ class DumpAnalyzer(object):
         with Cdb(self.dump_path) as cdb:
             self.module = cdb.main_module()
             self.version = self.version or cdb.module_info(self.module, 'version')
-        if self.module.find('server') != -1:
-            self.msi = CONFIG['msi_suffix'] % 'server'
-        else:
-            self.msi = CONFIG['msi_suffix'] % 'client'
+        self.msi = 'server' if self.module.find('server') != -1 else 'client'
         self.log('Dump information: %s (%s) %s %s ' % (
             self.module, self.msi, self.version, self.customization))
         self.build = self.build or self.version.split('.')[-1]
         if self.build == '0':
             raise Error('Build 0 is not supported')
 
-    def fetch_url_data(self, url, regexps):
+    def fetch_url_data(self, url, regexps, subUrl=None):
         '''Fetches data from :url by :regexp (must contain single group!)
         '''
         try:
             page = urllib2.urlopen(url).read().replace('\n', '')
         except urllib2.HTTPError as e:
             raise Error('%s, url: %s' % (e, url))
-        result = []
+        results, failures = [], []
         for regexp in regexps:
             m = re.match('.+%s.+' % regexp, page)
-            if m: result.append(m.group(1))
-            else: self.log("Warning: canot find '%s' in %s" % (regexp, url))
-        return result
+            if m:
+                results.append((url, m.group(1)))
+            else:
+                failures.append(regexp)
+                self.log("Warning: canot find '%s' in %s" % (regexp, url))
+        if subUrl and len(failures):
+            results += self.fetch_url_data(subUrl, failures)
+        return results
 
     def fetch_urls(self):
         '''Fetches URLs of required resourses
         '''
         out = self.fetch_url_data(
             CONFIG['dist_url'], ['''(%s\-[^/]+)''' % self.build])
-        build_path = '%s/%s/windows/' % (out[0], self.customization)
+        build_path = '%s/%s/windows/' % (out[0][1], self.customization)
+        update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(CONFIG['dist_url'], build_path)
         out = self.fetch_url_data(
             build_url, ('''\"(.+\-%s)\"''' % r for r in [
-                self.msi] + CONFIG['pdb_suffixes']))
-        self.dist_urls = list(os.path.join(build_url, e) for e in out)
+                CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
+            os.path.join(CONFIG['dist_url'], update_path))
+        self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'], build_path)
         self.target_path = os.path.join(self.build_path, 'target')
         if not os.path.isdir(self.target_path):
@@ -188,7 +195,7 @@ class DumpAnalyzer(object):
         for root, dirs, files in os.walk(self.build_path):
             if name in files:
                 return os.path.join(root, name)
-        raise Error("No such file '%s' in '%s'" % (name, path))
+        raise Error("No such file '%s' in '%s'" % (name, self.build_path))
 
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
@@ -211,6 +218,8 @@ class DumpAnalyzer(object):
     def download_dists(self):
         '''Downloads required distributives
         '''
+        if not self.dist_urls:
+           raise Error('There are no any dist URLs avaliable')
         for url in self.dist_urls:
             self.log('Download: ' + url)
             self.download_url_data(url, self.build_path, self.extract_dist)
@@ -263,8 +272,8 @@ def main():
     except Error as e:
         sys.stderr.write('Error: %s\n' % e)
         sys.exit(1)
-    except KeyboardInterrupt:
-        sys.stderr.write('Interrupted\n')
+#    except KeyboardInterrupt:
+#        sys.stderr.write('Interrupted\n')
 
 if __name__ == '__main__':
     main()

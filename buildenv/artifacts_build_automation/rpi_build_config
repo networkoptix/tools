@@ -1,0 +1,18 @@
+export BOX=rpi
+export TOOLCHAIN_PATH=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
+export HOST=arm-linux-gnueabihf
+export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
+export ARCH=arm
+export ARCH_SPEC_SUFFIX=v6l
+export TOOLCHAIN_NAME=linaro
+export TOOLCHAIN_VERSION=1.13.1
+
+export common_CXXFLAGS="-mfloat-abi=hard"
+export common_CFLAGS="-mfloat-abi=hard"
+
+#TODO qt params (additional paths)
+
+#export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
+export openssl_CFLAGS=-fPIC
+
+export ffmpeg_CONFIG_OPTIONS="--disable-armv6t2 --disable-armvfp --disable-neon"

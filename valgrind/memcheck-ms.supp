@@ -58,3 +58,153 @@
    fun:getpwuid
    ...
 }
+{
+   dl_init
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:call_init
+   fun:_dl_init
+   ...
+}
+{
+   initSSLEngine
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZN2nx7network9SslSocket13initSSLEngineERK10QByteArray
+   ...
+}
+{
+   QEventDispatcherGlib
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZN27QEventDispatcherGlibPrivateC1EP13_GMainContext
+   fun:_ZN20QEventDispatcherGlibC1EP7QObject
+   ...
+}
+{
+   generateSslCertificate
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_Z22generateSslCertificatePKcS0_S0_S0_
+   ...
+}
+{
+   generateSslCertificateCond
+   Memcheck:Cond
+   ...
+   fun:_Z22generateSslCertificatePKcS0_S0_S0_
+   ...
+}
+{
+   QString18toLocal8Bit
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_ZN10QTextCodec14codecForLocaleEv
+   fun:_ZN7QString18toLocal8Bit_helperEPK5QChari
+   ...
+}
+{
+   bn_mul4x_mont
+   Memcheck:Value8
+   fun:bn_mul4x_*
+   ...
+}
+{
+   UDPSocket_sendTo
+   Memcheck:Param
+   socketcall.sendto(msg)
+   ...
+   fun:_ZN2nx7network9UDPSocket6sendToEPKvi
+   fun:_ZN2nx7network9UDPSocket6sendToEPKvjRK13SocketAddress
+   ...
+}
+{
+    RSA_generate_key_ex
+    Memcheck:Cond
+    ...
+    fun:RSA_generate_key_ex
+    ...
+}
+{
+    RSA_private_decrypt
+    Memcheck:Cond
+    ...
+    fun:RSA_private_decrypt
+    ...
+}
+{
+    RSA_generate_key_ex_V8
+    Memcheck:Value8
+    ...
+    fun:RSA_generate_key_ex
+    ...
+}
+{
+    RSA_free
+    Memcheck:Cond
+    ...
+    fun:RSA_free
+    ...
+}
+{
+    ssl_sh512
+    Memcheck:Cond
+    fun:sha512_block_data_order_avx
+    ...
+}
+{
+    SHA512_Update
+    Memcheck:Cond
+    ...
+    fun:SHA512_Update
+    ...
+}
+{
+    PEM_write_bio
+    Memcheck:Value8
+    ...
+    fun:PEM_write_bio
+    ...
+}
+{
+   bn_sqr8x_internal
+   Memcheck:Value8
+   fun:bn_sqr8x_internal
+   obj:*
+}
+{
+    SSL_load_error_strings
+    Memcheck:Leak
+    ...
+    fun:SSL_load_error_strings
+    ...
+}
+{
+    qrand
+    Memcheck:Leak
+    match-leak-kinds: definite
+    ...
+    fun:_Z5qrandv
+    ...
+}
+{
+    QThread_start
+    Memcheck:Leak
+    match-leak-kinds: possible
+    ...
+    fun:_ZN7QThread5startENS_8PriorityE
+    ...
+}
+{
+    festival_initialize
+    Memcheck:Leak
+    match-leak-kinds: all
+    ...
+    fun:_Z19festival_initializeii
+    ...
+}

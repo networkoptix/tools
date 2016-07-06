@@ -1,0 +1,14 @@
+export BOX=bpi
+export CROSS_PREFIX=/usr/local/codesourcery/arm-2013.11/bin/arm-none-linux-gnueabi-
+export ARCH=arm
+export ARCH_SPEC_SUFFIX=v7
+export TOOLCHAIN_NAME=codesourcery
+export TOOLCHAIN_VERSION=2013.11
+
+export common_CXXFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+export common_CFLAGS="-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+
+export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
+export openssl_CFLAGS=-fPIC
+
+export ffmpeg_CONFIG_OPTIONS="--enable-armvfp --enable-neon"

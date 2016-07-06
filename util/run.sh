@@ -51,11 +51,9 @@ else
 fi
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
-export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH"
-for LIB_PATH in $(find "$PWD/../buildenv/packages/" -name lib -o -name platforms | grep linux-$ARCH_GREP)
-do
-    LD_LIBRARY_PATH="$LIB_PATH:$LD_LIBRARY_PATH"
-done
+export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(
+    find "$PWD/../buildenv/packages/" -name lib -o -name platforms |\
+    grep linux-$ARCH_GREP | while read L; do echo -n ":${L}"; done)"
 
 if [ "$L" ]
 then

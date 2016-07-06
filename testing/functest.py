@@ -1667,7 +1667,11 @@ def DoTests(argv):
         return True # done here, since we just need to test whether
                # all the servers are on the same page
 
-    if argc == 2 and argv[1] == '--main':
+    if argc == 2 and argv[1] == '--proxy':
+        ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
+        #FIXME no result code returning!
+
+    elif argc == 2 and argv[1] == '--main':
         the_test = unittest.main(exit=False, argv=argv[:1])
 
         if the_test.result.wasSuccessful():
@@ -1679,7 +1683,6 @@ def DoTests(argv):
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
         #FIXME no result code returning!
-        #print "\nFunctest finnished\n"
 
     elif (argc == 2 or argc == 3) and argv[1] == '--clear':
         if argc == 3:

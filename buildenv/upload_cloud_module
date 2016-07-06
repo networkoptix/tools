@@ -1,0 +1,108 @@
+#!/bin/bash
+
+REMOTE_HOST=cloud-demo.hdw.mx
+REMOTE_USER=root
+REMOTE_PASSWORD=VhhK4l1SwbMTHlLIWlBNXHLIBv0S1SNA
+if [ -z "$SOURCE" ]; then
+    SOURCE=/home/ak/develop/netoptix_vms_3.0.0
+fi
+LOCAL_ROOT=$SOURCE/build_environment/target/
+if [ -z "$STRIP" ]; then
+    STRIP=1
+fi
+if [ -z "$FORCE" ]; then
+    FORCE=0
+fi
+
+
+printHelp()
+{
+    echo "Updates NX mediaserver installation from remote server (by default, $REMOTE_ROOT)"
+    echo "  Supproted arguments:"
+    echo "    -h, --help           This help message"
+    echo "    -f, --force          Do not compare md5 hash of existing and remote files. Always upload"
+}
+
+PARAM_TO_READ=
+for i in "$@"
+do
+    if [ ! -z "$PARAM_TO_READ" ] ; then
+        if [ "$PARAM_TO_READ" = "-b" ] ; then
+            BOX=$i
+        fi
+        PARAM_TO_READ=
+        continue
+    fi
+
+    if [ $i = "-h" -o $i = "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ $i = "-f" -o "$i" = "--force" ] ; then
+        FORCE=1
+    elif [ "$i" == "--strip" ] ; then
+        STRIP=1
+    elif [ "$i" == "--no-strip" ] ; then
+        STRIP=0
+    elif [ "$i" = "-b" ] ; then
+        PARAM_TO_READ="-b"
+    elif [ "$i" = "-d" ] ; then
+        CONFIGURATION="debug"
+    elif [ "$i" = "-r" ] ; then
+        CONFIGURATION="release"
+    fi
+done
+
+#REMOTE_ROOT=$REMOTE_USER@$REMOTE_HOST:/opt/$CUSTOMIZATION/$MODULE_NAME
+REMOTE_ROOT=/opt/$CUSTOMIZATION/$MODULE_NAME
+
+echo "Uploading $MODULE_NAME to $REMOTE_HOST:$REMOTE_ROOT"
+
+updateModule()
+{
+    local originalLocal=$1
+
+    local localPath=$1
+    if [ $STRIP -eq 1 ]; then
+        TMP_FILE_NAME=/tmp/$MODULE_NAME.upload.tmp
+        cp -f $localPath $TMP_FILE_NAME
+        strip $TMP_FILE_NAME
+        localPath=$TMP_FILE_NAME
+    fi
+
+    local remotePath=$2
+    local REMOTE_MD5_HASH=`sshpass -p $REMOTE_PASSWORD ssh $REMOTE_USER@$REMOTE_HOST "if [ -e $remotePath ]; then md5sum $remotePath; else echo notfound; fi" | cut -d " " -f 1`
+    local LOCAL_MD5_HASH="`md5sum $localPath | cut -d " " -f 1`"
+
+    if [ "$REMOTE_MD5_HASH" = "$LOCAL_MD5_HASH" ]; then
+        echo "No need to upload $originalLocal"
+        return 0
+    fi
+
+    echo "Uploading $originalLocal ..."
+    
+    sshpass -p $REMOTE_PASSWORD scp $localPath $REMOTE_USER@$REMOTE_HOST:$remotePath
+}
+
+updateLib()
+{
+    updateModule $LOCAL_ROOT/lib/$CONFIGURATION/$1 $REMOTE_ROOT/lib/$1
+}
+
+updateBin()
+{
+    updateModule $LOCAL_ROOT/bin/$CONFIGURATION/$1 $REMOTE_ROOT/bin/$1
+}
+
+sshpass -p $REMOTE_PASSWORD ssh $REMOTE_USER@$REMOTE_HOST "stop $CUSTOMIZATION-$MODULE_NAME"
+
+for (( i=0; i<${#libsToUpload[@]}; i++ ))
+do
+    updateLib ${libsToUpload[$i]}
+done
+
+for (( i=0; i<${#binToUpload[@]}; i++ ))
+do
+    updateBin ${binToUpload[$i]}
+done
+
+sshpass -p $REMOTE_PASSWORD ssh $REMOTE_USER@$REMOTE_HOST "start $CUSTOMIZATION-$MODULE_NAME"

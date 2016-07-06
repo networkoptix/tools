@@ -2,18 +2,15 @@
 # -*- coding: utf-8 -*-
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output, call as subcall
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
 from collections import deque, namedtuple
 import errno
 import traceback
 import argparse
-from smtplib import SMTP
-from email import MIMEText
 import signal
 import shutil
 import urllib2
 import json
-import xml.etree.ElementTree as ET
 
 # Always chdir to the scripts directory
 rundir = os.path.dirname(sys.argv[0])
@@ -21,258 +18,39 @@ if rundir not in ('', '.') and rundir != os.getcwd():
     os.chdir(rundir)
 
 import testconf as conf
-import pipereader
+
+if os.name == 'posix':
+    import autotest.posix
+    autotest.posix.fix_ulimit(conf.ULIMIT_NOFILE_REQUIRED)
+
+import autotest.pipereader as pipereader
+import autotest.ut as ut
+from autotest.logger import raw_log, log, debug, set_debug, ToSend
+from autotest.mailer import emailTestResult, emailBuildError, read_changesets, log_changesets
+from autotest.tools import Process, kill_proc, RunTime, SignalNames, Build, get_file_time
 from testbase import boxssh
 from functest_util import args2str, real_caps
 
-__version__ = '1.2.2'
+__version__ = '1.3.1'
 
-SUITMARK =  '[' # all messages from a testsuit starts with it, other are tests' internal messages
-FAILMARK =  '[  FAILED  ]'
-STARTMARK = '[ RUN      ]'
-BARMARK =   '[==========]'
-OKMARK =    '[       OK ]'
+def check_conf():
+    """ Configuration values sanity check.
+    """
+    #TODO make more cheks!
+    names = set(conf.BOX_NAMES.itervalues())
+    if len(names) < len(conf.BOX_NAMES):
+        keymap = (p for p in ((name, [k for k, v in conf.BOX_NAMES.iteritems() if v == name]) for name in names)
+                  if len(p[1]) > 1)
+        raw_log("ERROR: duplicated virtual box name in configuration: %s" % ('; '.join("%s: %s" % (k, ', '.join(v)) for k, v in keymap)))
+        sys.exit(3)
 
-NameRx = re.compile(r'\[[^\]]+\]\s(\S+)')
-
-RESULT = []
-
-
-def get_signals():
-    d = {}
-    for name in dir(signal):
-        if name.startswith('SIG') and name[3] != '_':
-            value = getattr(signal, name)
-            if value in d:
-                d[value].append(name)
-            else:
-                d[value] = [name]
-    return d
-
-SignalNames = get_signals()
 
 class FuncTestError(RuntimeError):
     pass
 
-FailedTests = []
-Changesets = {}
+RESULT = []
 Env = os.environ.copy()
 Args = {}
-
-
-class Build(object): #  contains some build-dependent global variables
-    arch = ''
-    bin_path = ''
-    target_path = ''
-
-    @classmethod
-    def load_vars(cls, safe=False):
-        vars = dict()
-        try:
-            execfile(conf.BUILD_CONF_PATH, vars)
-        except IOError as err:
-            if safe and err.errno == errno.ENOENT:
-                return
-            print "ERROR: Can't load build variables file: " + err
-            sys.exit(1)
-        except Exception:
-            print "ERROR: Failed to load build variables: " + traceback.format_exc()
-            sys.exit(1)
-        vars['add_lib_path'](Env)
-        cls.arch = vars['ARCH']
-        cls.target_path = vars['TARGET_DIR']
-        cls.bin_path = vars['BIN_PATH']
-
-
-class Process(Popen):
-    "subprocess.Popen extension"
-    _sleep_reiod = 0.01
-
-    def limited_wait(self, timeout):
-        """@param timeout: float
-        Returns True if timed out
-        """
-        stop = time.time() + timeout
-        while self.poll() is None:
-            if time.time() > stop: return True
-            time.sleep(self._sleep_reiod)
-        return False
-
-
-def logPrint(s):
-    print s
-
-
-def logStr(text, *args):
-    return "[%s] %s" % (time.strftime("%Y.%m.%d %X %Z"), ((text % args) if args else text))
-
-
-def log(text, *args):
-    text = logStr(text, *args)
-    logPrint(text)
-    return text
-
-
-class ToSend(object):
-    "Logs accumulator, singleton-class (no objects created)."
-    lines = []
-    last_line_src = ''
-    empty = True
-    flushed = False
-
-    @classmethod
-    def append(cls, text, *args):
-        cls.last_line_src = text
-        if text != '':
-            text = logStr(text, *args)
-        cls.empty = False
-        if Args.stdout and cls.flushed:
-            logPrint(text)
-        else:
-            cls.lines.append(text)
-
-    @classmethod
-    def count(cls):
-        return len(cls.lines)
-
-    @classmethod
-    def log(cls, text, *args):
-        cls.last_line_src = text
-        if text != '':
-            text = logStr(text, *args)
-        logPrint(text)
-        cls.empty = False
-        if not Args.stdout:
-            cls.lines.append(text)
-
-    @classmethod
-    def debug(cls, text):
-        if not (Args.stdout and cls.flushed):
-            cls.last_line_src = text
-            cls.lines.append(logStr(text))
-
-    @classmethod
-    def flush(cls):
-        # used only with -o mode
-        if Args.stdout and not cls.flushed:
-            cls.flushed = True
-            for text in cls.lines:
-                logPrint(text)
-            del cls.lines[:]
-
-    @classmethod
-    def clear(cls):
-        del cls.lines[:]
-        cls.empty = True
-        cls.flushed = False
-        cls.last_line_src= ''
-
-    @classmethod
-    def lastLineAppend(cls, text):
-        if cls.lines:
-            cls.lines[-1] += text
-        else:
-            cls.log("INTERNAL ERROR: tried to append text to the last line when no lines collected.\n"
-                    "Text to append: " + text + "\n"
-                    "Called from: " + traceback.format_stack())
-
-    @classmethod
-    def cutLastLine(cls):
-        if cls.lines:
-            del cls.lines[-1]
-
-    @classmethod
-    def cutTail(cls, pos):
-        if len(cls.lines) > pos:
-            del cls.lines[pos:]
-
-
-def debug(text, *args):
-    if conf.DEBUG:
-        if args:
-            text = text % args
-        text = "DEBUG: " + text
-        logPrint(text)
-        ToSend.debug(text)
-
-def email_send(mailfrom, mailto, cc, msg):
-    msg['From'] = mailfrom
-    msg['To'] = mailto
-    if cc:
-        if isinstance(cc, basestring):
-            cc = [cc]
-        mailto = [mailto] + cc
-        msg['Cc'] = ','.join(cc)
-    smtp = SMTP(conf.SMTP_ADDR)
-    if conf.SMTP_LOGIN:
-        smtp.ehlo()
-        smtp.starttls()
-        smtp.login(conf.SMTP_LOGIN, conf.SMTP_PASS)
-    #smtp.set_debuglevel(1)
-    smtp.sendmail(mailfrom, mailto, msg.as_string())
-    smtp.quit()
-
-
-class RunTime(object):
-    start = None
-    @classmethod
-    def go(cls):
-        cls.start = time.time()
-
-    @classmethod
-    def report(cls):
-        if cls.start is not None:
-            spend = time.time() - cls.start
-            hr = int(spend / 3600)
-            mn = int((spend - hr*3600) / 60)
-            ms = ("%.2f" % spend).split('.')[1]
-            print "Execution time: %02d:%02d:%02d.%s" % (hr, mn, int(spend % 60), ms)
-
-
-def get_platform():
-    if os.name == 'posix':
-        return 'POSIX'
-    elif os.name == 'nt':
-        return 'Windows'
-    else:
-        return os.name
-
-
-def email_notify(branch, lines):
-    text = (
-        ("Branch %s tests run report.\n\n" % branch) +
-        "\n".join(lines) +
-        ("\n\n[Finished at: %s]\n" % time.strftime("%Y.%m.%d %H:%M:%S (%Z)")) + "\n" +
-        format_changesets(branch) + "\n"
-    )
-    msg = MIMEText.MIMEText(text)
-    msg['Subject'] = "Autotest run results on %s platform" % get_platform()
-    email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
-
-
-def email_build_error(branch, loglines, unit_tests, crash=False, single_project=None, dep_error=None):
-    bstr = ("%s unit tests" % branch) if unit_tests else branch
-    cause = ("Error building branch " + bstr) if not crash else (("Branch %s build crashes!" % bstr) + crash)
-    if single_project:
-        special = 'Failed build was restarted for the single failed project: %s\n\n' % single_project
-    elif dep_error:
-        special = ("DEPENDENCY ERROR DETECTED!\n"
-                   "Multithread build has failed on '%s', but singlethreaded has succeeded." % dep_error)
-    else:
-        special = ''
-    text = (
-        format_changesets(branch) + "\n\n" +
-        special +
-        ("%s\nThe build log last %d lines are:\n" % (cause, len(loglines))) +
-        "".join(loglines) + "\n"
-    )
-    if Args.stdout:
-        print text
-    else:
-        msg = MIMEText.MIMEText(text)
-        msg['Subject'] = "Autotest scriprt fails to build the branch %s on %s platform" % (bstr, get_platform())
-        email_send(conf.MAIL_FROM, conf.MAIL_TO, conf.BRANCH_CC_TO.get(branch, []), msg)
-
 
 #####################################
 
@@ -282,7 +60,7 @@ class FailTracker(object):
     @classmethod
     def mark_success(cls, branch):
         if branch in cls.fails:
-            debug("Removing failed-test-mark from branch %s", branch)
+            #debug("Removing failed-test-mark from branch %s", branch)
             cls.fails.discard(branch)
             cls.save()
             ToSend.log('')
@@ -343,7 +121,7 @@ def check_restart():
                 timeout = time.time() + conf.SELF_RESTART_TIMEOUT
                 while os.path.isfile(conf.RESTART_FLAG):
                     if time.time() > timeout:
-                        raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % SELF_RESTART_TIMEOUT)
+                        raise RuntimeError("Can't start the new copy of process: restart flag hasn't been deleted for %s seconds" % conf.SELF_RESTART_TIMEOUT)
                     time.sleep(0.1)
                 log("The old proces goes away.")
                 sys.exit(0)
@@ -351,19 +129,6 @@ def check_restart():
             log("Failed to restart: %s", traceback.format_exc())
             drop_flag(conf.RESTART_FLAG)
 
-
-def get_file_time(fname):
-    """
-    Gets the file last modification time or 0 on any file access errors
-    :param fname: string
-    :return: int
-    """
-    try:
-        if not os.path.isfile(fname):
-            return 0
-        return os.stat(fname).st_mtime
-    except OSError:
-        return 0
 
 def check_control_flags():
     check_restart()
@@ -378,196 +143,6 @@ def drop_flag(flag):
         os.remove(flag)
 
 
-def get_name(line):
-    m = NameRx.match(line)
-    return m.group(1) if m else ''
-
-
-def check_repeats(repeats):
-    if not Args.stdout:
-        if repeats > 1:
-            ToSend.lastLineAppend("   [ REPEATS %s TIMES ]" % repeats)
-
-def ut_fail_state_msg(state, suitename, testname):
-    if state == pipereader.PIPE_HANG:
-        return "[ %s has TIMED OUT (more than %.1f seconds) on test %s ]" % (suitename, conf.UT_PIPE_TIMEOUT/1000, testname)
-    elif state == pipereader.PIPE_TOOLONG:
-        return "[ %s execution takes more than %s minutes, the testsuite will be terminated ]" % (suitename, conf.UT_TIME_LIMIT/60)
-    else:
-        return "[ PIPE ERROR reading test suite output on test %s ]" % testname
-
-def read_unittest_output(proc, reader, suitename):
-    #last_suit_line = ''
-    repeats = 0 # now many times the same 'strange' line repeats
-    running_test_name = ''
-    complete = False
-    start_position = 0
-    ut_start_time = time.time()
-    control_time = ut_start_time + conf.UT_TIME_LIMIT
-    # if a unittest doesn't finish before the control_time, it will be terminated
-    ut_time = None
-    try:
-        while reader.state == pipereader.PIPE_READY:
-            if time.time() > control_time:
-                reader.state = pipereader.PIPE_TOOLONG
-                break
-            line = reader.readline(conf.UT_PIPE_TIMEOUT)
-            if not complete and len(line) > 0:
-                #debug("Line: %s", line.lstrip())
-                if line.startswith(SUITMARK):
-                    check_repeats(repeats)
-                    repeats = 1
-                    #last_suit_line = line
-                    if line.startswith(STARTMARK):
-                        running_test_name = get_name(line) # remember to print OK test result and for abnormal termination case
-                        start_position = ToSend.count()
-                        ToSend.flushed = False
-                        ToSend.append(line)
-                    elif line.startswith(FAILMARK) and not complete:
-                        #debug("Appending: %s", line.rstrip())
-                        FailedTests.append(get_name(line))
-                        ToSend.flush()
-                        ToSend.append(line)
-                        running_test_name = ''
-                    elif line.startswith(OKMARK):
-                        if running_test_name == get_name(line): # print it out only if there were any 'strange' lines
-                            ToSend.cutTail(start_position)  # cut off all output if no error
-                        else:
-                            ToSend.append(line)
-                            ToSend.log("WARNING!!! running_test_name != get_name(line): %s; %s", running_test_name, line.rstrip())
-                        running_test_name = ''
-                    elif line.startswith(BARMARK) and not line[len(BARMARK):].startswith(" Running"):
-                        ToSend.append(line)
-                        complete = True
-                    else:
-                        ToSend.append(line)
-                else: # gather test's messages
-                    #if last_suit_line != '':
-                    #    ToSend.append(last_suit_line)
-                    #    last_suit_line = ''
-                    if ToSend.count() and (line == ToSend.last_line_src):
-                        repeats += 1
-                    else:
-                        check_repeats(repeats)
-                        repeats = 1
-                        ToSend.append(line)
-        else: # end reading
-            check_repeats(repeats)
-
-        ut_time = time.time() - ut_start_time
-
-        state_error = reader.state in pipereader.ERROR_STATES
-        if state_error:
-            ToSend.flush()
-            ToSend.append(ut_fail_state_msg(reader.state, suitename, running_test_name))
-            FailedTests.append(running_test_name)
-
-        before = time.time()
-        proc.limited_wait(conf.TEST_TERMINATION_WAIT)
-
-        if proc.poll() is None:
-            if not state_error:
-                debug("The unittest %s hasn't finished for %.1f seconds", suitename, conf.TEST_TERMINATION_WAIT)
-            kill_proc(proc, sudo=True)
-            proc.limited_wait(1)
-        else:
-            delta = time.time() - before
-            if delta >= 0.01:
-                debug("The unittest %s finnishing takes %.2f seconds", suitename, delta)
-
-        if proc.returncode != 0:
-            ToSend.flush()
-            if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-                ToSend.append("[ Test %s of %s suit interrupted abnormally ]", running_test_name, suitename)
-                FailedTests.append(running_test_name)
-            if proc.returncode < 0:
-                if not (proc.returncode == -signal.SIGTERM and reader.state == pipereader.PIPE_HANG): # do not report signal if it was ours kill result
-                    signames = SignalNames.get(-proc.returncode, [])
-                    signames = ' (%s)' % (','.join(signames),) if signames else ''
-                    ToSend.append("[ TEST SUITE %s WAS INTERRUPTED by signal %s%s during test %s]",
-                                  suitename, -proc.returncode, signames, running_test_name)
-            else:
-                ToSend.append("[ %s TEST SUITE'S RETURN CODE = %s ]", suitename, proc.returncode)
-            if FailedTests:
-                ToSend.append("Failed tests: %s", FailedTests)
-            else:
-                FailedTests.append('(unknown)')
-
-    finally:
-        if ut_time is None:
-            ut_time = time.time() - ut_start_time
-        if running_test_name and (len(FailedTests) == 0 or FailedTests[-1] != running_test_name):
-            debug("Test %s final result not found!", running_test_name)
-            FailedTests.append(running_test_name)
-        if not FailedTests:
-            ToSend.append("[ %s tests passed OK. ]" % suitename)
-        debug("%s tests runed for %.2f seconds.", suitename, ut_time)
-
-
-def exec_unittest(testpath):
-    cmd = [testpath, '--gtest_shuffle']
-    if os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
-        cmd = ['/usr/bin/sudo', '-E', 'LD_LIBRARY_PATH=%s' % Env['LD_LIBRARY_PATH']] + cmd
-    return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=Env, **conf.SUBPROC_ARGS)
-
-
-def validate_testpath(testpath):
-    if not os.access(testpath, os.F_OK):
-        FailedTests.append('(all)')
-        ToSend.flush()
-        ToSend.append("Testsuit '%s' not found!" % testpath)
-        return False
-    if not os.access(testpath, os.R_OK|os.X_OK):
-        FailedTests.append('(all)')
-        ToSend.flush()
-        ToSend.append("Testsuit '%s' isn't accessible!" % testpath)
-        return False
-    return True
-
-
-def call_test(suitname, reader):
-    ToSend.clear()
-    del FailedTests[:]
-    ToSend.log("[ Calling %s test suite ]", suitname)
-    old_coount = ToSend.count()
-    proc = None
-    try:
-        testpath = os.path.join(Build.bin_path, suitname)
-        if not validate_testpath(testpath):
-            return
-        #debug("Calling %s", testpath)
-        # sudo is required since some unittest start server
-        # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
-        proc = exec_unittest(testpath)
-        reader.register(proc)
-        read_unittest_output(proc, reader, suitname)
-    except BaseException as e:
-        tstr = traceback.format_exc()
-        print tstr
-        if isinstance(e, Exception):
-            ToSend.flush()
-            ToSend.append("[[ Tests call error:\n%s\n]]", tstr)
-        else:
-            ToSend.flush()
-            ToSend.log("[[ Tests has been interrupted:\n%s\n]]", tstr)
-            raise # it wont be catched and will allow the script to terminate
-    finally:
-        if proc:
-            reader.unregister()
-        if ToSend.count() >= old_coount:
-            ToSend.append('')
-
-
-def kill_proc(proc, sudo=False, what="test"):
-    "Kills subproces under sudo"
-    debug("Killing %s process %s", what, proc.pid)
-    if sudo and os.name == 'posix':
-        subcall(['/usr/bin/sudo', 'kill', str(proc.pid)], shell=False)
-    else:
-        os.kill(proc.pid, signal.SIGTERM)
-        #subcall(['kill', str(proc.pid)], shell=False)
-
-
 def get_tests_to_skip(branch):
     to_skip = set()
     if (branch in conf.SKIP_TESTS) or conf.SKIP_ALL:
@@ -577,58 +152,37 @@ def get_tests_to_skip(branch):
 
 
 def run_tests(branch):
-    log("Running unit tests for branch %s" % branch)
-    output = []
+    log("Running unit tests for branch %s", branch)
     failed = False
     to_skip = get_tests_to_skip(branch)
-    reader = pipereader.PipeReader()
     all_fails = []
+    ft_was_called = False
 
-    if 'all_ut' not in to_skip:
-        for name in get_ut_names():
-            if name in to_skip: continue
-            call_test(name, reader)  # it clears ToSend and FailedTests on start
-            if FailedTests:
-                RESULT.append(('ut:'+name, False))
-                #debug("Test suite %s has some fails: %s", name, FailedTests)
-                failedStr = "\n".join(("Tests, failed in the %s test suite:" % name,
-                                       "\n".join("\t" + name for name in FailedTests),
-                                      ''))
-                all_fails.append((name, FailedTests[:]))
-                if Args.stdout:
-                    ToSend.flush()
-                    logPrint('')
-                    log(failedStr)
-                else:
-                    if output:
-                        output.append('')
-                    output.append(failedStr)
-                    output.extend(ToSend.lines)
-            else:
-                RESULT.append(('ut:'+name, True))
-                debug("OK for the '%s' test suite", name)
+    output = ut.iterate_unittests(branch, to_skip, RESULT, all_fails)
 
     ToSend.clear()
+    failsum = ''
     if all_fails:
         failed = True
+        failsum = "Failed unitests summary:\n" + "\n".join(
+                    ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
+                    for fail in all_fails
+                )
         if len(all_fails) > 1:
-            failsum = "Failed unitests summary:\n" + "\n".join(
-                        ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
-                        for fail in all_fails
-                    )
             if Args.stdout:
                 log(failsum)
             else:
                 output.append(failsum)
     elif not Args.no_functest:
+        ft_was_called = True
         if not perform_func_test(to_skip):
             RESULT.append(('functests', False))
             failed = True
             if Args.stdout:
+                ToSend.flush()
+            else:
                 output.append('')
                 output.extend(ToSend.lines)
-            else:
-                ToSend.flush()
         else:
             RESULT.append(('functests', True))
 
@@ -637,7 +191,10 @@ def run_tests(branch):
         if Args.full:
             FailTracker.mark_fail(branch)
         if not Args.stdout:
-            email_notify(branch, output)
+            emailTestResult(branch, output,
+                            fail=('functional tests' if ft_was_called else 'unittests'),
+                            testName=(Args.single_ut or ''),
+                            summary=failsum)
     else:
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
@@ -646,7 +203,7 @@ def run_tests(branch):
             if ToSend:  # it's not empty if mark_success() really removed previous test-fail status.
                 if not Args.stdout:
                     debug("Sending successful test notification.")
-                    email_notify(branch, ToSend.lines)
+                    emailTestResult(branch, ToSend.lines)
                 ToSend.clear()
 
     return not failed
@@ -663,46 +220,6 @@ def filter_branch_names(branches):
     return filtered
 
 
-def chs_str(changeset):
-    try:
-        return "[%(branch)s] %(node)s: %(author)s, %(date)s\n\t%(desc)s" % changeset
-    except KeyError, e:
-        return "WARNING: no %s key in changeset dict: %s!" % (e.args[0], changeset)
-
-
-def format_changesets(branch):
-    chs = Changesets.get(branch, [])
-    if chs and isinstance(chs[0], dict):
-        return "Changesets:\n" + "\n".join(
-                ("\t%s" % v['line']) if 'line' in v else chs_str(v) for v in chs)
-    else:
-        return "\n".join(chs)
-
-
-def get_changesets(branch, bundle_fn):
-    debug("Run: " + (' '.join(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
-    proc = Process(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn],
-                   bufsize=1, stdout=PIPE, stderr=STDOUT, **conf.SUBPROC_ARGS)
-    (outdata, errdata) = proc.communicate()
-    if proc.returncode == 0:
-        Changesets[branch] = [
-            ({"line": line.lstrip()} if line.startswith("\t") else
-            dict(zip(['branch','author','node','date','desc'], line.split(';',4))))
-            for line in outdata.splitlines()
-        ]
-        return True
-    elif proc.returncode == 1:
-        debug("No changes found for branch %s", branch)
-    else:
-        Changesets[branch] = [
-            "Error getting changeset list info.",
-            "hg return code = %s" % proc.returncode,
-            "STDOUT: %s" % outdata,
-            "STDERR: %s" % errdata,
-            '']
-    return False
-
-
 def check_new_commits(bundle_fn):
     "Check the repository for new commits in the controlled branches"
     log("Check for new commits")
@@ -717,8 +234,7 @@ def check_new_commits(bundle_fn):
                 ToSend.log('')  # an empty line separator
                 log("Commits are found in branches: %s", branches)
             if branches:
-                Changesets.clear()
-                return [ b for b in branches if get_changesets(b, bundle_fn) ]
+                return read_changesets(branches, bundle_fn)
     except CalledProcessError, e:
         if e.returncode != 1:
             log("ERROR: `hg in` call returns %s code. Output:\n%s", e.returncode, e.output)
@@ -801,21 +317,21 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
     if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
         #! Project dependencies  error! Report but go on.
-        email_build_error(branch, last_lines, unit_tests, dep_error=project_name)
+        emailBuildError(branch, last_lines, unit_tests, dep_error=project_name)
         return True
     else:
         # Other errors - already reported
         return False
 
 
-def failed_project_single_build(last_lines, branch, unit_tests):
-    project, project_name = get_failed_project(last_lines)
-    if project == '':
-        last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
-        return False
-    log("[ Restarting maven to re-build '%s' ]", project_name)
-    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, project_name=project_name)
-    return True
+#def failed_project_single_build(last_lines, branch, unit_tests):
+#    project, project_name = get_failed_project(last_lines)
+#    if project == '':
+#        last_lines.append("ERROR: Can't figure failed project '%s'" % project_name)
+#        return False
+#    log("[ Restarting maven to re-build '%s' ]", project_name)
+#    call_maven_build(branch, unit_tests, no_threads=True, single_project=project, project_name=project_name)
+#    return True
 
 
 def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
@@ -840,11 +356,13 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
 
     try:
         retcode = execute_maven(cmd, kwargs, last_lines)
+        if not unit_tests:
+            Build.load_vars(conf, Env, safe=True)
         if retcode != 0:
             log("Error calling maven: ret.code = %s" % retcode)
             if not Args.full_build_log:
                 log("The last %d log lines:" % len(last_lines))
-                logPrint("".join(last_lines))
+                raw_log("".join(last_lines))
                 last_lines = list(last_lines)
                 last_lines.append("Maven return code = %s" % retcode)
                 if not single_project:
@@ -854,15 +372,15 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
                     #    if failed_project_single_build(last_lines, branch, unit_tests):
                     #        # on success it reports from the recursive call call_maven_build(), so we can return here
                     #        return False
-                email_build_error(branch, last_lines, unit_tests, single_project=(project_name if single_project else None))
+                emailBuildError(branch, last_lines, unit_tests, single_project=(project_name if single_project else None))
             return False
     except CalledProcessError:
         tb = traceback.format_exc()
-        log("maven call has failed: %s" % tb)
+        log("maven call failed: %s" % tb)
         if not Args.full_build_log:
             log("The last %d log lines:" % len(last_lines))
-            logPrint("".join(last_lines))
-            email_build_error(branch, last_lines, unit_tests, crash=tb, single_project=(project_name if single_project else None))
+            raw_log("".join(last_lines))
+            emailBuildError(branch, last_lines, unit_tests, crash=tb, single_project=(project_name if single_project else None))
         return False
     if no_threads and (project_name is not None):
         pass
@@ -892,10 +410,15 @@ def prepare_branch(branch):
     ToSend.log('')  # an empty line separator
     if branch != '.':
         log("Switch to the branch %s" % branch)
+    if branch in conf.BUILD_ONLY_BRANCHES:
+        debug("The branch %s configured build-only." % branch)
     debug("Call %s", conf.HG_PURGE)
     check_call(conf.HG_PURGE, **conf.SUBPROC_ARGS)
-    debug("Call %s", conf.HG_UP if branch == '.' else (conf.HG_UP + ['--rev', branch]))
-    check_call(conf.HG_UP if branch == '.' else (conf.HG_UP + ['--rev', branch]), **conf.SUBPROC_ARGS)
+    cmd = conf.HG_UP[:]
+    if branch != '.':
+        cmd.append(branch)
+    debug("Call %s", cmd)
+    check_call(cmd, **conf.SUBPROC_ARGS)
     #debug("Going to call maven...")
     return build_branch(branch)
 
@@ -916,6 +439,10 @@ def update_repo(branches, bundle_fn):
     #    sys.exit(1)
 
 
+def build_only_msg(branch):
+    log("Branch %s is configured as BUILD-ONLY. Skipping all tests" % branch)
+
+
 def check_hg_updates():
     "Check for repository updates, get'em, build and test"
     bundle_fn = os.path.join(conf.TEMP, "in.hg")
@@ -925,8 +452,12 @@ def check_hg_updates():
         update_repo(branches, bundle_fn)
         for branch in branches:
             if prepare_branch(branch):
-                Build.load_vars()
-                rc = run_tests(branch) and rc
+                if branch in conf.BUILD_ONLY_BRANCHES:
+                    build_only_msg(branch)
+                    # don't change rc - keep it True if it still is True
+                else:
+                    #Build.load_vars(conf, Env) - loaded after build
+                    rc = run_tests(branch) and rc
             else:
                 FailTracker.mark_fail(branch)
                 rc = False
@@ -940,14 +471,22 @@ def run():
         if Args.full:
             rc = check_hg_updates()
             if Args.hg_only:
-                log("Changesets:\n %s", "\n".join("%s\n%s" % (br, "\n".join("\t%s" % ch for ch in chs)) for br, chs in Changesets.iteritems()))
+                log_changesets()
             return rc
-        if Args.test_only:
+
+        if Args.single_ut:
+            log("%s test only run..." % Args.single_ut)
+        elif Args.test_only:
             log("Test only run...")
+
         if not Args.test_only:
             if not build_branch(conf.BRANCHES[0]):
                 return False
-        Build.load_vars()
+            if conf.BRANCHES[0] in conf.BUILD_ONLY_BRANCHES:
+                build_only_msg(conf.BRANCHES[0])
+                return True
+        if Build.arch == '':
+            Build.load_vars(conf, Env)
         rc = run_tests(conf.BRANCHES[0])
         RESULT.append(('run_tests', rc))
         return rc
@@ -1004,7 +543,7 @@ def check_testcamera_bin():
 
 #####################################
 # Functional tests block
-def start_boxes(boxes, keep = False):
+def start_boxes(boxlist, keep = False):
     try:
         # 1. Get the .deb file and testcamera
         check_mediaserver_deb()
@@ -1013,13 +552,12 @@ def start_boxes(boxes, keep = False):
         if not keep:
             debug("Removing old vargant boxes...")
             check_call(conf.VAGR_DESTROY, shell=False, cwd=conf.VAG_DIR)
-        if not boxes:
+        if not boxlist:
             log("Creating and starting vagrant boxes...")
         else:
-            log("Creating and starting vagrant boxes: %s...", boxes)
-        boxlist = boxes.split(',') if len(boxes) else []
+            log("Creating and starting vagrant boxes: %s...", ', '.join(boxlist))
         check_call(conf.VAGR_RUN + [conf.BOX_NAMES[b] for b in boxlist], shell=False, cwd=conf.VAG_DIR)
-        failed = [b[0] for b in get_boxes_status() if b[0]in boxes and b[1] != 'running']
+        failed = [b[0] for b in get_boxes_status() if b[0] in boxlist and b[1] != 'running']
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
             return False
@@ -1129,14 +667,14 @@ def mk_functest_cmd(to_skip):
 
 def perform_func_test(to_skip):
     if os.name != 'posix':
-        logPrint("\nFunctional tests require POSIX-compatible OS. Skipped.")
+        raw_log("\nFunctional tests require POSIX-compatible OS. Skipped.")
         return
     need_stop = False
     reader = proc = None
     success = True
     try:
         if not Args.nobox:
-            start_boxes('Box1' if Args.natcon else 'Box1,Box2')
+            start_boxes(['Box1'] if Args.natcon else ['Box1','Box2'])
             need_stop = True
         # 4. Call functest/main.py (what about imoirt it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
@@ -1164,7 +702,7 @@ def perform_func_test(to_skip):
                     reader.unregister()
                 if not Args.nobox:
                     stop_boxes('Box2')
-                    start_boxes('Nat,Behind', keep=True)
+                    start_boxes(['Nat','Behind'], keep=True)
                 debug("Running connection behind NAT test: %s", cmd)
                 proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
@@ -1244,7 +782,7 @@ FUNCTEST_TBL = (
 #TODO
 def perform_func_test_new(to_skip):
     if os.name != 'posix':
-        logPrint("\nFunctional tests require POSIX-compatible OS. Skipped.")
+        raw_log("\nFunctional tests require POSIX-compatible OS. Skipped.")
         return
     need_stop = False
     reader = proc = None
@@ -1857,11 +1395,11 @@ def show_boxes():
     "Print out vargant boxes status."
     info = get_boxes_status()
     if not info:
-        logPrint("Empty vagrant reply!")
+        raw_log("Empty vagrant reply!")
         return
     namelen = max(len(b[0]) for b in info)
     for box in info:
-        logPrint("%s  [%s]" % (box[0].ljust(namelen), box[1]))
+        raw_log("%s  [%s]" % (box[0].ljust(namelen), box[1]))
 
 #####################################
 
@@ -1882,23 +1420,32 @@ def check_debug_mode():
     elif not conf.DEBUG and Args.debug:
         conf.DEBUG = True
     if conf.DEBUG:
-        logPrint("Debug mode ON")
+        set_debug(True)
 
 
 def check_args_correct():
     if Args.full_build_log and not Args.stdout:
-        logPrint("ERROR: --full-build-log option requires --stdout!\n")
+        raw_log("ERROR: --full-build-log option requires --stdout!\n")
         sys.exit(2)
     for block in ARGS_EXCLUSIVE:
         if sum(1 if getattr(Args, opt, None) else 0 for opt in block) > 1:
-            logPrint("Arguments %s are mutual exclusive!" % (args2str(block),))
+            raw_log("Arguments %s are mutual exclusive!" % (args2str(block),))
             sys.exit(2)
     if Args.nobox and not any_functest_arg():
-        logPrint("ERROR: --nobox is allowed only with options %s\n" % (args2str(FUNCTEST_ARGS),))
+        raw_log("ERROR: --nobox is allowed only with options %s\n" % (args2str(FUNCTEST_ARGS),))
         sys.exit(2)
     if Args.add and (Args.boxes is None):
-        logPrint("ERROR: --add is usable only with --boxes")
+        raw_log("ERROR: --add is usable only with --boxes")
         sys.exit(2)
+    elif Args.boxes is not None:
+        fail = False
+        for name in Args.boxes.split(','):
+            if name not in conf.BOX_NAMES.values():
+                raw_log("ERROR: unknown virtual box name: %s" % name)
+                fail = True
+        if fail:
+            sys.exit(2)
+
 
 
 #def get_architecture():
@@ -1917,9 +1464,9 @@ def check_args_correct():
 
 
 def get_server_package_name():
-    #TODO move all paths into testconf.py !
+    #TODO: move all paths into testconf.py !
     if Build.arch == '':
-        Build.load_vars(safe=True)
+        Build.load_vars(conf, Env, safe=True)
 
     if Build.arch == '':
         raise FuncTestError("Can't find server package: architecture not found!")
@@ -1975,6 +1522,26 @@ def set_paths():
 
     conf.BUILD_CONF_PATH = os.path.join(conf.PROJECT_ROOT, conf.BUILD_CONF_SUBPATH)
 
+    if not conf.UT_TEMP_DIR:
+        raw_log("FATAL: UT_TEMP_DIR must be configured!")
+        sys.exit(3)
+    if conf.UT_TEMP_DIR.startswith('/'):
+        conf.UT_TEMP_DIR_SAFE = False  # absolut paths are unsafe because directory will be cleared with root privileges
+    else:
+        if conf.UT_TEMP_DIR.startswith('./') or conf.UT_TEMP_DIR.startswith('.\\'):
+            conf.UT_TEMP_DIR = os.path.join(os.getcwd(), conf.UT_TEMP_DIR[2:])
+        else:
+            conf.UT_TEMP_DIR = os.path.join(conf.PROJECT_ROOT, conf.UT_TEMP_DIR)
+    if conf.UT_TEMP_DIR.endswith('$'):
+        conf.UT_TEMP_DIR = conf.UT_TEMP_DIR[:-1] + str(os.getpid())
+        conf.UT_TEMP_DIR_PID_USED = True
+        conf.UT_TEMP_DIR_SAFE = True
+    else:
+        conf.UT_TEMP_DIR_PID_USED = False
+    if os.path.exists(conf.UT_TEMP_DIR) and not os.path.isdir(conf.UT_TEMP_DIR):
+        raw_log("FATAL: UT_TEMP_FILE %s exists but isn't a directory!" % conf.UT_TEMP_DIR)
+        sys.exit(3)
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -1984,6 +1551,7 @@ def parse_args():
     # No args -- just build and test current project (could be modified by -p, -t, -u)
     parser.add_argument("-a", "--auto", action="store_true", help="Continuos full autotest mode.")
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing tests again (add --noft to skip functests.")
+    parser.add_argument("--single-ut", help="Run specified unit test only.")
     parser.add_argument("-r", "--rebuild", action='store_true', help="(Re)build even if no new commits found.")
     parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
@@ -2016,11 +1584,13 @@ def parse_args():
 
     global Args
     Args = parser.parse_args()
+    if Args.stdout:
+        ToSend.stdout = True
     check_args_correct()
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
     if Args.threads is not None:
-        MVN_THREADS = Args.threads
+        conf.MVN_THREADS = Args.threads
     check_debug_mode()
 
 
@@ -2040,33 +1610,6 @@ def change_branch_list():
     if '.' in conf.BRANCHES and len(conf.BRANCHES) > 1:
         log("WARNING: there is '.' branch in the branch list -- ALL other branches will be skipped!")
         conf.BRANCHES = ['.']
-
-
-#def get_pom_modules
-
-def get_ut_names():
-    """
-    Parses unit_tests/pom.xml finding unittests modules names.
-    If it fails, returns global TESTS.
-    """
-    path = os.path.join(conf.PROJECT_ROOT, conf.UT_SUBDIR, "pom.xml")
-    #ns = 'http://maven.apache.org/POM/4.0.0'
-    try:
-        tree = ET.parse(path)
-        # extract the default namespace, the root element of pom.xml should be 'project' from this namespace
-        m = re.match("(\{[^}]+\}).+", tree.getroot().tag)
-        # unfortunately, xml.etree.ElementTree adds namespace to all tags and there is no way to use clear tag names
-        pomtests = [el.text.strip() for el in tree.findall('{0}modules/{0}module'.format(m.group(1) if m else ''))]
-        if pomtests:
-            debug("ut list found: %s", pomtests)
-            return pomtests
-        else:
-            log("WARBING: No <module>s found in %s" % path)
-            # and go further to the end of the function
-    except Exception, e:
-        log("Error loading %s: %s", path, e)
-    log("Use default unittest names: %s", conf.TESTS)
-    return conf.TESTS
 
 
 def show_conf():
@@ -2117,6 +1660,11 @@ def run_auto_loop():
         t = time.time()
         log("Checking...")
         run()
+        # restore some values
+        Build.clear()
+        global Env
+        Env = os.environ.copy()
+        #
         t = max(conf.MIN_SLEEP, conf.HG_CHECK_PERIOD - (time.time() - t))
         log("Sleeping %s secs...", t)
         wake_time = time.time() + t
@@ -2125,6 +1673,17 @@ def run_auto_loop():
             check_control_flags()
     log("Finishing...")
 
+
+def nameFunctest():
+    if Args.functest:
+        return "all functests"
+    else:
+        return "%s functest" % ("timesync" if Args.timesync else
+            "http-stress" if Args.httpstress else
+            "multiserver archive" if Args.msarch else
+            "streaming" if Args.stream else
+            "NAT-connection" if Args.natcon else
+            "UNKNOWN!!!",)
 
 def main():
     parse_args()
@@ -2144,7 +1703,12 @@ def main():
         return True
 
     if Args.boxes is not None:
-        start_boxes(Args.boxes, keep=Args.add)
+        if Args.boxes:
+            nameset = set(Args.boxes.split(','))
+            boxes = [k for k, v in conf.BOX_NAMES.iteritems() if v in nameset]
+        else:
+            boxes = []
+        start_boxes(boxes, keep=Args.add)
         return True
 
     if Args.boxoff is not None:
@@ -2160,20 +1724,17 @@ def main():
 
     if Args.auto:
         run_auto_loop()
+        return True
 
-    elif (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
+    if Args.single_ut:
+        Args.no_functest = True
+        Args.test_only = True
+
+    if (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
         ToSend.clear()
         if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
             if ToSend.count() and not Args.stdout:
-                email_notify("Debug %s" % (
-                    "func" if Args.functest else
-                    "timesync" if Args.timesync else
-                    "http-stress" if Args.httpstress else
-                    "multiserver archive" if Args.msarch else
-                    "streaming" if Args.stream else
-                    "NAT-connection" if Args.natcon else
-                    "UNKNOWN!!!"),
-                ToSend.lines)
+                emailTestResult(conf.BRANCHES[0], ToSend.lines, testName=nameFunctest())
             return False
         return True
 
@@ -2184,6 +1745,7 @@ def main():
 if __name__ == '__main__':
     reload(sys)
     sys.setdefaultencoding('utf8')
+    check_conf()
     try:
         if not main():
             debug("Something isn't OK, returning code 1")
@@ -2192,6 +1754,13 @@ if __name__ == '__main__':
         else:
             debug("Results: %s", RESULT)
     finally:
+        if conf.UT_TEMP_DIR_PID_USED:
+            if os.name == 'posix':
+                check_call([conf.SUDO, conf.RM, '-rf', conf.UT_TEMP_DIR])
+            else:
+                shutil.rmtree(conf.UT_TEMP_DIR, ignore_errors=True)
+        else:
+            ut.clear_temp_dir()
         RunTime.report()
 
 # TODO: with -o turn off output lines accumulator, just print 'em

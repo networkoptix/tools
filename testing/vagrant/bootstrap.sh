@@ -15,6 +15,7 @@ stop networkoptix-mediaserver
 #echo '...Before:'
 #cat "$SERVCONF"
 #setpw
+cp "$SERVCONF" "${SERVCONF}.base"
 nxedconf appserverPassword ''
 nxedconf systemName functesting
 nxedconf removeDbOnStartup 1

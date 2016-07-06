@@ -1,0 +1,142 @@
+#!/bin/sh
+
+FORCE=0
+CONFIGURATION=release
+#CONFIGURATION=debug
+CUSTOMIZATION=networkoptix
+#CUSTOMIZATION=digitalwatchdog
+
+BOX_TYPE="`uname -a | cut -d ' ' -f 2`"
+case "$BOX_TYPE" in
+    ISDcam)
+        BOX="isd"
+        ;;
+    DWcam)
+        BOX="isd"
+        ;;
+    ISDcam4K)
+        BOX="isd_s2"
+        ;;
+    *)
+        ;;
+esac
+
+#REMOTE_HOST=192.168.0.1
+REMOTE_HOST=10.0.2.220
+#TODO #ak arch auto-detection
+ARCH=arm
+#ARCH=x64
+VERSION=232
+
+#IP_ADDRS="`ifconfig | grep 'inet addr' | cut -d: -f 2 | cut -d' ' -f 1`"
+#for addr in $IP_ADDRS
+#do
+#done
+
+printHelp()
+{
+    echo "Updates NX mediaserver installation from remote server (by default, $REMOTE_ROOT)"
+    echo "  Supproted arguments:"
+    echo "    -h, --help           This help message"
+    echo "    -b                   Set box type (by default, $BOX)"
+    echo "    -f, --force          Do not compare md5 hash of existing and remote files. Always download"
+}
+
+PARAM_TO_READ=
+for i in "$@"
+do
+    if [ ! -z "$PARAM_TO_READ" ] ; then
+        if [ "$PARAM_TO_READ" = "-b" ] ; then
+            BOX=$i
+        fi
+        PARAM_TO_READ=
+        continue
+    fi
+
+    if [ $i = "-h" -o $i = "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ $i = "-f" -o "$i" = "--force" ] ; then
+        FORCE=1
+    elif [ "$i" = "-b" ] ; then
+        PARAM_TO_READ="-b"
+    elif [ "$i" = "-d" ] ; then
+        CONFIGURATION="debug"
+    elif [ "$i" = "-r" ] ; then
+        CONFIGURATION="release"
+    fi
+done
+
+if [ "$ARCH" = "arm" ]; then
+    if [ -z "$BOX" ]; then
+        echo "Failed to auto-detect box type. Set variable BOX to required value"
+        exit 1
+    fi
+fi
+
+if [ -z "$BOX" ]; then
+    REMOTE_ROOT=http://$REMOTE_HOST/$ARCH/
+else
+    REMOTE_ROOT=http://$REMOTE_HOST/$ARCH-$BOX/
+fi
+
+case "$BOX" in
+    isd|isd_s2)
+        LOCAL_ROOT=/usr/local/apps/$CUSTOMIZATION/mediaserver
+        ;;
+    bpi|rpi|"")
+        LOCAL_ROOT=/opt/$CUSTOMIZATION/mediaserver
+        ;;
+    *)
+        echo "Set local root manually with -l switch"
+        ;;
+esac
+    
+echo "Updating $ARCH-$BOX from $REMOTE_ROOT"
+
+updateModule()
+{
+    local remotePath=$1
+    local localPath=$2
+    local REMOTE_MD5_HASH=`wget $remotePath.md5 -q -O - | cut -d " " -f 1`
+    local LOCAL_MD5_HASH=
+    if [ -e "$localPath.md5" ]; then
+        LOCAL_MD5_HASH=`cat "$localPath.md5"`
+    elif [ -e "$localPath" ]; then
+        LOCAL_MD5_HASH=`md5sum $localPath | cut -d " " -f 1`
+    fi
+    local needUpdate=0
+    if [ "$REMOTE_MD5_HASH" != "$LOCAL_MD5_HASH" ]; then
+        needUpdate=1
+    fi
+    if [ $FORCE -gt 0 ]; then
+        needUpdate=1
+    fi
+    if [ $needUpdate -gt 0 ]; then
+        echo "Updating $2"
+        wget $remotePath -O $localPath
+        echo "$REMOTE_MD5_HASH" > "$localPath.md5"
+        chmod u+x $localPath
+    fi
+}
+
+updateLib()
+{
+    updateModule $REMOTE_ROOT/lib/$CONFIGURATION/$1 $LOCAL_ROOT/lib/$1
+}
+
+updateBin()
+{
+    updateModule $REMOTE_ROOT/bin/$CONFIGURATION/$1 $LOCAL_ROOT/bin/$1
+}
+
+updateLib libappserver2.so.$VERSION.0.0
+updateLib libcommon.so.$VERSION.0.0
+updateLib libmediaserver_core.so.$VERSION.0.0
+if [ "$BOX" = "isd" ]; then
+    updateLib libcreateprocess.so
+fi
+updateBin mediaserver
+if [ "$BOX" = "isd" -o "$BOX" = "isd_s2" ]; then
+    updateBin plugins/libisd_native_plugin.so
+fi

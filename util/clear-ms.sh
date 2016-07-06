@@ -18,8 +18,8 @@ ID=${1:-0}
 DIR=${DIR:-$HOME/develop/mediaserver$ID}
 SYS=${SYS:-muskov}
 
-rm -rf $DIR
 mkdir -p $DIR
+rm -rf $DIR/*
 cd $DIR
 
 cat > $DIR/mediaserver.conf <<EOF

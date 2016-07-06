@@ -1,0 +1,288 @@
+#!/bin/bash
+
+function get_var()
+{
+    #VERSION_H_PATH="`find $2/mediaserver/ -name version.h -printf '%A@ %p\n' | sort -r | head -n 1 | cut -d ' ' -f 2`"
+    #local h="`grep -R $1 $VERSION_H_PATH | sed 's/.*"\(.*\)".*/\1/'`"
+    CURRENT_CONFIG_PATH="$2/build_variables/target/current_config"
+    local h="`grep -R $1 $CURRENT_CONFIG_PATH | sed 's/\(.*\)=\(.*\)/\2/'`"
+    if [[ "$1" == "QN_CUSTOMIZATION_NAME" && "$h" == "default" ]]; then
+        h=networkoptix
+    fi
+    echo "$h"
+}
+
+if [ "`uname -s`" = "Darwin" ]; then
+    JOB_COUNT=`sysctl -n machdep.cpu.core_count`
+else
+    JOB_COUNT=`cat /proc/cpuinfo | grep "processor" | wc -l`
+fi
+
+SRC_ROOT="`pwd`"
+
+CONFIGURATION=$(get_var "configuration" $SRC_ROOT)
+ARCH=$(get_var "arch" $SRC_ROOT)
+
+CONF_PARAM_SET=0
+if [ "$ARCH" == "arm" ]; then
+    CONF_PARAM_SET=1
+elif [ "$ARCH" == "x64" ]; then
+    CONF_PARAM_SET=0
+fi
+
+WITH_MSERVER=1
+WITH_TEST=0
+
+STRIP=
+CLEAN=
+DO_EXT_DEBUG=
+BOX=
+WITH_CLIENT=0
+VERSION="`cat ./pom.xml | grep version | head -n 1 | sed 's/.*<version>\([0-9.]*\).*/\1/g'`"
+LIBVERSION="`echo $VERSION | sed 's/\\.//g'`"
+
+if [ ${#LIBVERSION} -lt 3 ]; then
+    LIBVERSION="$LIBVERSION"0
+fi
+
+
+function printHelp()
+{
+    echo "Options:"
+    echo "  --clean"
+    echo "  --cleandist"
+    echo
+}
+
+
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ "$i" == "--clean" ] ; then
+        CLEAN=1
+    elif [ "$i" == "--strip" ] ; then
+        STRIP=1
+    elif [ "$i" == "--no-strip" ] ; then
+        STRIP=0
+    elif [ "$i" == "--ext-debug" ] ; then
+        DO_EXT_DEBUG=1
+    elif [ "$i" == "--no-ext-debug" ] ; then
+        DO_EXT_DEBUG=0
+    elif [ "$i" == "--cleandist" ] ; then
+        CLEANDIST=1
+    elif [ "$i" == "--debug" ] ; then
+        CONFIGURATION=debug
+    elif [ "$i" == "--with-test" ] ; then
+        WITH_TEST=1
+    elif [ "$i" == "--with-client" ] ; then
+        WITH_CLIENT=1
+    elif [ "$i" == "--with-mserver" ] ; then
+        WITH_MSERVER=1
+    elif [ "$i" == "--without-mserver" ] ; then
+        WITH_MSERVER=0
+    elif [[ "$i" =~ "--jobs=" ]] ; then
+        JOB_COUNT="`echo $i | sed 's/--jobs=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--box=" ]] ; then
+        BOX="`echo $i | sed 's/--box=\(.*\)/\1/'`"
+    fi
+done
+
+MODULES=()
+MODULE_BIN_PATH=()
+if [[ ! "$VERSION" < "2.6" ]]; then
+    MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_fusion.so.$LIBVERSION.0.0)
+fi
+
+MODULES+=(common)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so.$LIBVERSION.0.0)
+
+if [[ ! "$VERSION" < "2.6" ]]; then
+    MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speach_synthesizer)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libudt.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_network.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libcloud_db_client.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_speach_synthesizer.a)
+fi
+
+MODULES+=(appserver2)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so.$LIBVERSION.0.0)
+
+if [ "$CONF_PARAM_SET" == 1 ]; then
+    if [ -z "$BOX" ]; then
+        BOX=$(get_var "box" $SRC_ROOT)
+    fi
+
+    #TODO set CROSS_PREFIX correctly
+    if [[ $BOX =~ isd.* ]]; then
+        MODULES+=( plugins/isd_native_plugin )
+        CROSS_PREFIX=/usr/local/codesourcery/arm-2013.11/bin/arm-none-linux-gnueabi-
+        MODULE_BIN_PATH+=( bin/$CONFIGURATION/plugins/libisd_native_plugin.so )
+    fi
+    if [[ "$BOX" == "rpi" || "$BOX" == "bpi" ]]; then
+        CROSS_PREFIX=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
+        MODULES+=( plugins/genericrtspplugin )
+        MODULE_BIN_PATH+=( bin/$CONFIGURATION/plugins/libgenericrtspplugin.so )
+        if [ -z "$STRIP" ]; then
+            STRIP=0
+        fi
+        if [ -z "$DO_EXT_DEBUG" ]; then
+            DO_EXT_DEBUG=0
+        fi
+    fi
+    if [ -z "$STRIP" ]; then
+        STRIP=1
+    fi
+    if [ -z "$DO_EXT_DEBUG" ]; then
+        DO_EXT_DEBUG=1
+    fi
+    ARCH=arm-$BOX
+    CALC_MD5=1
+elif [ "$CONF_PARAM_SET" == 0 ]; then
+    #x64
+    if [ "`uname -s`" = "Darwin" ]; then
+        WITH_MSERVER=0
+    fi
+
+    if [ $WITH_MSERVER -eq 1 ]; then
+        MODULES+=(plugins/genericrtspplugin/ plugins/mjpg_link)
+        MODULE_BIN_PATH+=( \
+            bin/$CONFIGURATION/plugins/libgenericrtspplugin.so \
+            bin/$CONFIGURATION/plugins/libmjpg_link.so
+        )
+    fi
+    
+    if [ -z "$DO_EXT_DEBUG" ]; then
+        DO_EXT_DEBUG=0
+    fi
+    ARCH=x64
+    CALC_MD5=1
+fi
+
+if [ $WITH_MSERVER -eq 1 ]; then
+    if [[ ! "$VERSION" < "2.6" ]]; then
+        MODULES+=( common_libs/nx_email )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_email.so.$LIBVERSION.0.0 )
+    elif [[ ! "$VERSION" < "2.5" ]]; then
+        MODULES+=( common_libs/nxemail )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnxemail.so.$LIBVERSION.0.0 )
+    fi
+
+    if [[ ! "$VERSION" < "2.4" ]]; then
+        MODULES+=( mediaserver_core )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libmediaserver_core.so.$LIBVERSION.0.0 )
+    fi
+fi
+
+if [[ ! "$VERSION" < "2.6" ]]; then
+    MODULES+=(nx_cloud/libconnection_mediator nx_cloud/cloud_connect_test_util)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so.$LIBVERSION.0.0 bin/$CONFIGURATION/cloud_connect_test_util)
+fi
+
+if [ "$CONF_PARAM_SET" == 0 ]; then
+    if [[ ! "$VERSION" < "2.6" ]]; then
+        MODULES+=(nx_cloud/libcloud_db nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/libvms_gateway nx_cloud/vms_gateway)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so.$LIBVERSION.0.0 bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator lib/$CONFIGURATION/libvms_gateway.so.$LIBVERSION.0.0 bin/$CONFIGURATION/vms_gateway)
+    fi
+fi
+
+if [ "$WITH_TEST" == 1 ]; then
+    MODULES+=( unit_tests/common_ut )
+    MODULE_BIN_PATH+=( bin/$CONFIGURATION/common_ut )
+    if [[ ! "$VERSION" < "2.6" ]]; then
+        if [ "$CONF_PARAM_SET" == 0 ]; then
+            MODULES+=(unit_tests/cloud_db_ut unit_tests/connection_mediator_ut)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db_ut bin/$CONFIGURATION/connection_mediator_ut)
+        else
+            MODULES+=(nx_cloud/libconnection_mediator)
+            MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so.$LIBVERSION.0.0)
+        fi
+        MODULES+=(unit_tests/nx_network_ut unit_tests/cloud_connectivity_ut unit_tests/utils_ut)
+        MODULE_BIN_PATH+=(bin/$CONFIGURATION/nx_network_ut bin/$CONFIGURATION/cloud_connectivity_ut bin/$CONFIGURATION/utils_ut)
+    fi
+fi
+
+if [ $WITH_MSERVER -eq 1 ]; then
+    MODULES+=( mediaserver )
+    MODULE_BIN_PATH+=( bin/$CONFIGURATION/mediaserver )
+fi
+
+if [ "$CONF_PARAM_SET" == 0 ]; then
+    if [ "$WITH_CLIENT" == 1 ]; then
+        if [[ ! "$VERSION" < "2.4" ]]; then # >= 2.4
+            MODULES+=( client.core )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.core.so.$LIBVERSION.0.0 )
+            MODULES+=( client )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so.$LIBVERSION.0.0 )
+            MODULES+=( client.bin )
+            MODULE_BIN_PATH+=( bin/$CONFIGURATION/client.bin )
+        else  # < 2.4
+            MODULES+=( client )
+            MODULE_BIN_PATH+=( bin/$CONFIGURATION/client )
+        fi
+    fi
+fi
+
+if [ "`uname -s`" = "Darwin" ]; then
+    #fixing library names for macosx
+    for (( i=0; i<${#MODULE_BIN_PATH[@]}; i++ ))
+    do
+        libName=${MODULE_BIN_PATH[$i]}
+        if [[ "$libName" =~ .*\.so.* ]]; then
+            libNameShort=`echo $libName | sed "s/\(.*\)\.so.*/\1/g"`
+            libVersion=`echo "$libName" | sed "s/\(.*\)\.so[\.]*\(.*\)/\2/g"`
+            libName=${libNameShort}.${libVersion}.dylib
+            MODULE_BIN_PATH[$i]=$libName
+        fi
+    done
+fi
+
+echo "Building source (version $VERSION) at $SRC_ROOT for arch $ARCH, box $BOX, configuration $CONFIGURATION"
+
+if [ ! -z "$CLEAN" ]; then
+    for (( i=0; i<${#MODULES[@]}; i++ ))
+    do
+        echo "Cleaning ${MODULES[$i]}"
+        cd $SRC_ROOT/${MODULES[$i]}/$ARCH
+        make -f Makefile.$CONFIGURATION -j $JOB_COUNT clean || exit 0
+    done
+
+    exit 0
+fi
+
+if [ "$CLEANDIST" == "1" ]; then
+    for (( i=0; i<${#MODULE_BIN_PATH[@]}; i++ ))
+    do
+        echo "Cleaning $SRC_ROOT/build_environment/target-$BOX/${MODULE_BIN_PATH[$i]}"
+        rm -rf $SRC_ROOT/build_environment/target-$BOX/${MODULE_BIN_PATH[$i]}*
+    done
+
+    exit 0
+fi
+
+for (( i=0; i<${#MODULES[@]}; i++ ))
+do
+    if [ ! -z "$BOX" ]; then
+        BINARY=$SRC_ROOT/build_environment/target-$BOX/${MODULE_BIN_PATH[$i]}
+    else
+        BINARY=$SRC_ROOT/build_environment/target/${MODULE_BIN_PATH[$i]}
+    fi
+
+    cd $SRC_ROOT/${MODULES[$i]}/$ARCH
+    make -f Makefile.$CONFIGURATION -j $JOB_COUNT || exit 0
+    if [ "$DO_EXT_DEBUG" == "1" ]; then
+        make -f Makefile.$CONFIGURATION ext_debug || exit 0
+    fi
+    if [ "$STRIP" == 1 ]; then
+        echo "Stripping $BINARY..."
+        "$CROSS_PREFIX"strip $BINARY || exit 0
+    fi
+    if [ "$CALC_MD5" == "1" ]; then
+        if [ "`uname -s`" = "Darwin" ]; then
+            md5 $BINARY | cut -d " " -f 4 > $BINARY.md5
+        else
+            md5sum $BINARY | cut -d " " -f 1 > $BINARY.md5
+        fi
+    fi
+done
+
