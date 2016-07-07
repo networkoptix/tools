@@ -110,7 +110,6 @@ DOCKER_COPIER = "./cp2cont.sh"  # the path to script that copies all unittests b
 DOCKER_DIR = "/opt"  # the container internal path where to put and run all unittests
 DOCKER_UT_WRAPPER = DOCKER_DIR + "/" + "runut.sh"  # a shell script to execute a unittest in the container
 
-
 BOX_NAMES = {
     "Box1": "box1",
     "Box2": "box2",
@@ -168,6 +167,7 @@ BUILD_ONLY_BRANCHES = set(('', ))
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
+FT_AFTER_FAILED_UT = True  # Run func.tests even if unittests failed
 #------------------------------------------------------------------
 
 try:
