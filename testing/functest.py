@@ -1608,7 +1608,7 @@ def RunByAutotest(arg0):
                 doCleanUp()
                 need_rollback = False
     except Exception as err:
-        print "FAIL: the main functests failed wit error: %s" % (err,)
+        print "FAIL: the main functests failed with error: %s" % (err,)
     finally:
         if need_rollback and testMaster.unittestRollback:
             doCleanUp()
