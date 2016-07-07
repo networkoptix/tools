@@ -16,8 +16,6 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 # FIXME check if it's used where it should be!
 
 PROJECT_ROOT = "~/develop/nx_vms"
-PROJECT_ROOT = "~/develop/nvms"
-PROJECT_ROOT = "~/develop/nx_vms_tmp"
 
 UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
 
