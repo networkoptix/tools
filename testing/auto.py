@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
+from subprocess import PIPE, STDOUT, CalledProcessError, check_call, check_output, list2cmdline
 from collections import deque, namedtuple
 import errno
 import traceback
@@ -153,49 +153,51 @@ def get_tests_to_skip(branch):
 
 def run_tests(branch):
     log("Running unit tests for branch %s", branch)
-    failed = False
     to_skip = get_tests_to_skip(branch)
-    all_fails = []
-    ft_was_called = False
-
-    output = ut.iterate_unittests(branch, to_skip, RESULT, all_fails)
-
-    ToSend.clear()
+    ut_fails = []
     failsum = ''
-    if all_fails:
-        failed = True
+    ft_failed = False
+
+    def _emailResult(what):
+        emailTestResult(branch, output, fail=what, testName=(Args.single_ut or ''), summary=failsum)
+
+    output = ut.iterate_unittests(branch, to_skip, RESULT, ut_fails)
+    # all ToSend.lines should be in the output now
+    ToSend.clear()
+    if ut_fails:
         failsum = "Failed unitests summary:\n" + "\n".join(
                     ("* %s:\n        %s" % (fail[0], ','.join(fail[1])))
-                    for fail in all_fails
+                    for fail in ut_fails
                 )
-        if len(all_fails) > 1:
+        if len(ut_fails) > 1:
             if Args.stdout:
                 log(failsum)
             else:
                 output.append(failsum)
-    elif not Args.no_functest:
-        ft_was_called = True
+        if Args.full:
+            FailTracker.mark_fail(branch)
+        if not Args.stdout:
+            _emailResult('unittests')
+            failsum = ''
+        output = []
+
+    if not Args.no_functest and (conf.FT_AFTER_FAILED_UT or not ut_fails):
         if not perform_func_test(to_skip):
             RESULT.append(('functests', False))
-            failed = True
+            ft_failed = True
             if Args.stdout:
                 ToSend.flush()
             else:
                 output.append('')
                 output.extend(ToSend.lines)
+            if Args.full:
+                FailTracker.mark_fail(branch)
+            if not Args.stdout:
+                _emailResult('functional tests')
         else:
             RESULT.append(('functests', True))
 
-
-    if failed:
-        if Args.full:
-            FailTracker.mark_fail(branch)
-        if not Args.stdout:
-            emailTestResult(branch, output,
-                            fail=('functional tests' if ft_was_called else 'unittests'),
-                            testName=(Args.single_ut or ''),
-                            summary=failsum)
-    else:
+    if not (ut_fails or ft_failed):
         debug("Branch %s -- SUCCESS!", branch)
         if Args.full:
             ToSend.clear()
@@ -205,8 +207,9 @@ def run_tests(branch):
                     debug("Sending successful test notification.")
                     emailTestResult(branch, ToSend.lines)
                 ToSend.clear()
+        return True
 
-    return not failed
+    return False
 
 
 def filter_branch_names(branches):
@@ -1407,6 +1410,7 @@ def show_boxes():
 FUNCTEST_ARGS = ('functest', 'timesync', 'httpstress', 'msarch', 'natcon', 'stream')
 ARGS_EXCLUSIVE = (
     ('nobox', 'boxes', 'boxoff', 'showboxes'),
+    ('ft_if_ut', 'ft_always'),
 ) + tuple(('no_functest', opt) for opt in FUNCTEST_ARGS)
 
 
@@ -1558,6 +1562,8 @@ def parse_args():
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
     parser.add_argument("--no-functest", "--noft", action="store_true", help="Only build the project and run unittests.")
+    parser.add_argument("--ft-if-ut", action="store_true", help="Run functests only if no fails in unitests.")
+    parser.add_argument("--ft-always", action="store_true", help="Run functests even if there are any fails ib unitests.")
     parser.add_argument("--timesync", "--ts", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
     parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
     parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
@@ -1581,6 +1587,7 @@ def parse_args():
     parser.add_argument('--add', action='store_true', help='Start new boxes without closing existing boxes')
     parser.add_argument("--boxoff", "--b0", help="Stop virtual boxes and wait the mediaserver comes up.", nargs='?', const="")
     parser.add_argument("--showboxes", '--sb', action="store_true", help="Check and show vagrant boxes states")
+    parser.add_argument('--utcont', action="store_true", help="Just creates unittest container and displays the sample command line.")
 
     global Args
     Args = parser.parse_args()
@@ -1589,6 +1596,10 @@ def parse_args():
     check_args_correct()
     if Args.auto or Args.hg_only or Args.branch:
         Args.full = True # to simplify checks in run()
+    if Args.ft_if_ut:
+        conf.FT_AFTER_FAILED_UT = False
+    elif Args.ft_always:
+        conf.FT_AFTER_FAILED_UT = True
     if Args.threads is not None:
         conf.MVN_THREADS = Args.threads
     check_debug_mode()
@@ -1696,7 +1707,17 @@ def main():
         show_conf() # changes done by other options are shown here
         return True
 
-    updateBoxesNames()
+    if Args.utcont:
+        debug("Just creating a docker container for unittests")
+        from autotest.utdocker import UtContainer
+        Build.load_vars(conf, Env)
+        UtContainer.init(Build)
+        print "Use this command to run unittests:"
+        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR','TEST', 'COMMAND'))
+        return True
+
+    if not Args.no_functest:
+        updateBoxesNames()
 
     if Args.showboxes:
         show_boxes()

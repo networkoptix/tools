@@ -68,4 +68,4 @@ class StreamingTest(StorageBasedTest):
         if self._initFailed:
             self.skipTest("not initialized")
         self.assertTrue(HlsStreamingTest(self.config).run(),
-                        "HLS streaing test failed")
+                        "HLS streaming test failed")

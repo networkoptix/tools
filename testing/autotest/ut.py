@@ -306,6 +306,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                     failedStr = "\n".join(("Tests, failed in the %s test suite:" % name,
                                            "\n".join("\t" + name for name in FailedTests),
                                           ''))
+                    debug("FAILED in %s: %s", name, ", ".join(FailedTests))
                     all_fails.append((name, FailedTests[:]))
                     if main.Args.stdout:
                         ToSend.flush()
