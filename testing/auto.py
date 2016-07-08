@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #TODO: ADD THE DESCRIPTION!!!
 import sys, os, os.path, time, re
-from subprocess import Popen, PIPE, STDOUT, CalledProcessError, check_call, check_output
+from subprocess import PIPE, STDOUT, CalledProcessError, check_call, check_output, list2cmdline
 from collections import deque, namedtuple
 import errno
 import traceback
@@ -178,6 +178,7 @@ def run_tests(branch):
             FailTracker.mark_fail(branch)
         if not Args.stdout:
             _emailResult('unittests')
+            failsum = ''
         output = []
 
     if not Args.no_functest and (conf.FT_AFTER_FAILED_UT or not ut_fails):
@@ -1586,6 +1587,7 @@ def parse_args():
     parser.add_argument('--add', action='store_true', help='Start new boxes without closing existing boxes')
     parser.add_argument("--boxoff", "--b0", help="Stop virtual boxes and wait the mediaserver comes up.", nargs='?', const="")
     parser.add_argument("--showboxes", '--sb', action="store_true", help="Check and show vagrant boxes states")
+    parser.add_argument('--utcont', action="store_true", help="Just creates unittest container and displays the sample command line.")
 
     global Args
     Args = parser.parse_args()
@@ -1705,7 +1707,17 @@ def main():
         show_conf() # changes done by other options are shown here
         return True
 
-    updateBoxesNames()
+    if Args.utcont:
+        debug("Just creating a docker container for unittests")
+        from autotest.utdocker import UtContainer
+        Build.load_vars(conf, Env)
+        UtContainer.init(Build)
+        print "Use this command to run unittests:"
+        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR','TEST', 'COMMAND'))
+        return True
+
+    if not Args.no_functest:
+        updateBoxesNames()
 
     if Args.showboxes:
         show_boxes()

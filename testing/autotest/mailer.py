@@ -108,8 +108,9 @@ def emailTestResult(branch, lines, testName='', fail='', summary=''):
             parts.extend(('',summary,''))
         parts.append("See log file (%s lines) attached for details." % len(lines))
         attach = MIMEText("\n".join(lines))
-        attach.add_header('Content-Disposition', 'attachment', filename=('test_fail_%s_%s.log' % (
-            branch.replace(' ', '_'), _time4LogName(now))))
+        preifix = 'unittest' if fail.startswith('unit') else 'functest'
+        attach.add_header('Content-Disposition', 'attachment', filename=('%s_fail_%s_%s.log' % (
+            preifix, branch.replace(' ', '_'), _time4LogName(now))))
     else:
         parts.extend(lines)
     if branch:
