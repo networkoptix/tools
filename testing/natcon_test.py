@@ -145,7 +145,7 @@ class NatConnectionTest(StorageBasedTest):  # (FuncTestCase):
         self.assertTrue(NatRtspStreamTest(self.config).run(),
                 "Multi-proto streaming test failed")
         self.assertTrue(NatHlsStreamingTest(self.config).run(),
-                "HLS streaing test failed")
+                "HLS streaming test failed")
 
 
 

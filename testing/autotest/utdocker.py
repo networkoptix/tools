@@ -55,6 +55,8 @@ class UtContainer(object):
             c_id = cls.container.get('Id')
             if c_id:
                 cls.client.stop(c_id)
+                # FIXME: should wait here or check
+                # posibly should pass time parameter to stop if it possible
                 cls.client.remove_container(c_id)
         cls.client = None
         cls.hostConfig = None
