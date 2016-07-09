@@ -691,12 +691,71 @@ function openssl_prepareMvnArtifact()
 
 ###############################################################
 ###############################################################
+########### lame functions
+###############################################################
+###############################################################
+
+lame_VERSION=3.99.5
+lame_PRI_FILE="LIBS += -lmp3lame"
+
+# returns list of mirrors separated with ;
+function lame_getMirrorList()
+{
+# /lame-3.99.5.tar.gz
+    echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
+    return 0
+}
+
+function lame_generate_config()
+{
+    local artifactVersion=$2
+
+    lame_DIR=$ARTIFACT_BUILD_DIR/lame-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    read -d '' configureFfmpegScript<<EOF
+#!/bin/bash
+
+./configure --disable-shared --enable-static --prefix=$lame_DIR \
+--with-pic --disable-debug --disable-frontend \
+$lame_CONFIG_OPTIONS
+EOF
+
+    echo "$configureFfmpegScript" > ./config.lame
+    chmod u+x ./config.lame
+
+    return 0
+}
+
+function lame_build()
+{
+    ./config.lame >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    return 0
+}
+
+function lame_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/lame-$lame_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    return 0
+}
+
+###############################################################
+###############################################################
 ########### ffmpeg functions
 ###############################################################
 ###############################################################
 
 ffmpeg_VERSION=3.1.1
-ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswscale -lpostproc"
+ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswscale"
 
 # returns list of mirrors separated with ;
 function ffmpeg_getMirrorList()
@@ -715,35 +774,51 @@ function ffmpeg_generate_config()
         local makeArch="$ARCH"
     fi
 
-    ffmpeg_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
-    ffmpeg_DECODERS=(pcm_s16be pcm_s16le pcm_s16le_planar pcm_s8 pcm_s8_planar pcm_u16be pcm_u16le pcm_u8)
+    ffmpeg_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION${DEBUG_ON:+-debug}
 
-    ffmpeg_DECODERS_STR=
-    for (( i=0; i<${#ffmpeg_DECODERS[@]}; i++ ))
-    do
-        local decoder=${ffmpeg_DECODERS[$i]}
-        ffmpeg_DECODERS_STR+="--enable-decoder=$decoder "
-    done
+    if [ $ARCH = arm ]; then
+        ffmpeg_DECODERS=(pcm_s16be pcm_s16le pcm_s16le_planar pcm_s8 pcm_s8_planar pcm_u16be pcm_u16le pcm_u8)
 
+        ffmpeg_DECODERS_STR=
+        for (( i=0; i<${#ffmpeg_DECODERS[@]}; i++ ))
+        do
+            local decoder=${ffmpeg_DECODERS[$i]}
+            ffmpeg_DECODERS_STR+="--enable-decoder=$decoder "
+        done
 
-read -d '' configureFfmpegScript<<EOF
+        read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
 ./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
 --enable-cross-compile --cross-prefix=$CROSS_PREFIX \
---arch=$makeArch --target-os=linux --disable-debug --enable-dct --enable-asm \
+--arch=arm --target-os=linux --disable-debug --enable-dct --enable-asm \
 --disable-everything \
---enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=hevc \
---enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
+--enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
 --enable-decoder=pcm_mulaw --enable-decoder=pcm_alaw --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
 --enable-encoder=mjpeg --enable-encoder=png \
 --enable-muxer=matroska --enable-muxer=mpegts --enable-muxer=mpjpeg --enable-muxer=rtp --enable-muxer=rtsp \
---enable-demuxer=matroska --enable-demuxer=h264 --enable-demuxer=hevc \
---enable-parser=h264 --enable-parser=hevc --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
+--enable-demuxer=matroska --enable-demuxer=h264 \
+--enable-parser=h264 --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
 --enable-protocol=rtp \
 --enable-filter=copy --enable-filter=mp --enable-filter=null \
 --enable-bsf=h264_mp4toannexb $ffmpeg_CONFIG_OPTIONS
 EOF
+    else
+        if [ -n "$DEBUG_ON" ]; then
+            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --enable-debug=3 --disable-optimizations"
+        else
+            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --disable-debug --enable-optimizations"
+        fi
+
+        read -d '' configureFfmpegScript<<EOF
+#!/bin/bash
+
+./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
+--arch=$makeArch --enable-libmp3lame \
+--extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib \
+$ffmpeg_CONFIG_OPTIONS
+EOF
+    fi
 
     echo "$configureFfmpegScript" > ./config.ffmpeg
     chmod u+x ./config.ffmpeg
@@ -764,11 +839,15 @@ function ffmpeg_prepareMvnArtifact()
     local version=$2
     local mvnArtifactDir=$3
 
-    INSTALL_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$ffmpeg_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$ffmpeg_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION${DEBUG_ON:+-debug}
 
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
-    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
-    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+
+    if [ -n "$DEBUG_ON" ]; then
+        cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+    else
+        cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+    fi
 
     return 0
 }
@@ -1622,8 +1701,9 @@ function printHelp()
     --third_party_src={path to third_party repository}  By default $THIRD_PARTY_SRC_DIR
     --log={log file path}                               By default $LOG_FILE_PATH
     --[no-]mvn-deploy                                   Turn mvn deploy on/off. By default, $DO_MVN_DEPLOY
-    --[no-]rdev-deploy                                  Turn mvn deploy on/off. By default, $DO_RDEP_DEPLOY
+    --[no-]rdep-deploy                                  Turn rdep deploy on/off. By default, $DO_RDEP_DEPLOY
     --skip-actual-build                                 Skip build function call.
+    --debug                                             Build with debug information.
     --build-dir={path to build directory}               Set directory where build result and prepared mvn artifacts will be placed. By default /tmp/\${BOX}_artifact
 "
 }
@@ -1662,6 +1742,7 @@ ALL_ARTIFACTS=(                 \
         com.digia/qt            \
         org/onvif               \
         org.hyperic/sigar       \
+        org.lame/lame     \
         org.ffmpeg/ffmpeg       \
         net.sourceforge/quazip  \
         net.sourceforge/udt     \
