@@ -695,7 +695,7 @@ function openssl_prepareMvnArtifact()
 ###############################################################
 ###############################################################
 
-ffmpeg_VERSION=0.11.5
+ffmpeg_VERSION=3.1.1
 ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswscale -lpostproc"
 
 # returns list of mirrors separated with ;
@@ -708,6 +708,12 @@ function ffmpeg_getMirrorList()
 function ffmpeg_generate_config()
 {
     local artifactVersion=$2
+
+    if [ $ARCH == x64 ]; then
+        local makeArch="x86_64"
+    else
+        local makeArch="$ARCH"
+    fi
 
     ffmpeg_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
     ffmpeg_DECODERS=(pcm_s16be pcm_s16le pcm_s16le_planar pcm_s8 pcm_s8_planar pcm_u16be pcm_u16le pcm_u8)
@@ -725,14 +731,15 @@ read -d '' configureFfmpegScript<<EOF
 
 ./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
 --enable-cross-compile --cross-prefix=$CROSS_PREFIX \
---arch=arm --target-os=linux --disable-debug --enable-dct --enable-asm \
+--arch=$makeArch --target-os=linux --disable-debug --enable-dct --enable-asm \
 --disable-everything \
---enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
+--enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=hevc \
+--enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
 --enable-decoder=pcm_mulaw --enable-decoder=pcm_alaw --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
 --enable-encoder=mjpeg --enable-encoder=png \
 --enable-muxer=matroska --enable-muxer=mpegts --enable-muxer=mpjpeg --enable-muxer=rtp --enable-muxer=rtsp \
---enable-demuxer=matroska --enable-demuxer=h264 \
---enable-parser=h264 --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
+--enable-demuxer=matroska --enable-demuxer=h264 --enable-demuxer=hevc \
+--enable-parser=h264 --enable-parser=hevc --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
 --enable-protocol=rtp \
 --enable-filter=copy --enable-filter=mp --enable-filter=null \
 --enable-bsf=h264_mp4toannexb $ffmpeg_CONFIG_OPTIONS
