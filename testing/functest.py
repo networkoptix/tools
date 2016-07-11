@@ -365,7 +365,6 @@ class ResourceConflictionTest(LegacyFuncTestBase):
             ret , reason = testMaster.checkMethodStatusConsistent(api)
             self.assertTrue(ret,reason)
 
-
     # Overwrite the test function since the base method doesn't work here
 
     def test(self):
@@ -376,7 +375,7 @@ class ResourceConflictionTest(LegacyFuncTestBase):
 
         for _ in xrange(self._testCase):
             conf = self._generateResourceConfliction()
-            s1,s2 = self._generateRandomServerPair()
+            s1, s2 = self._generateRandomServerPair()
             data = conf[2].generateData()
 
             # modify the resource
