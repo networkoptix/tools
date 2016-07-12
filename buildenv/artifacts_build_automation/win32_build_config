@@ -1,0 +1,9 @@
+export BOX=msvc
+export TOOLCHAIN_PATH=/usr
+export HOST=local
+export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/
+export ARCH=x86
+export ARCH_SPEC_SUFFIX=
+export TOOLCHAIN_NAME=msvc
+export TOOLCHAIN_VERSION=2015
+

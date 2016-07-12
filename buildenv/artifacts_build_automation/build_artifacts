@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 
 openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
@@ -10,24 +10,31 @@ qt_VERSION=5.2.1
 sasl2_VERSION=2.1.26
 openldap_VERSION=2.4.42
 festival_VERSION=2.1x
+ffmpeg_VERSION=3.1.1
 #qt_VERSION=5.4.1
 
 LOG_FILE_NAME=build.log
 
 case $(uname) in
     Linux)
+        OS=linux
         JOB_COUNT=$(cat /proc/cpuinfo | grep "processor" | wc -l)
         SCRIPT_DIR=$(dirname $(readlink -e $0))
         ;;
     Darwin)
+        OS=macos
         JOB_COUNT=$(sysctl -n hw.ncpu)
         SCRIPT_DIR=$(dirname $0)
+        ;;
+    MINGW32_NT-6.2)
+        OS=windows
+        JOB_COUNT=$((NUMBER_OF_PROCESSORS+1))
+        SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
         ;;
     *)
         echo $(uname) in not supported by this script >&2
         exit 1
 esac
-
 
 
 ###############################################################
@@ -180,22 +187,22 @@ function sasl2_generate_config()
     patch include/Makefile.in << "EOF"
 116,117c116,117
 < COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-< 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+<   $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 ---
 > COMPILE = $(HOSTCC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-> 	$(CPPFLAGS) $(AM_CFLAGS) $(HOSTCFLAGS)
+>   $(CPPFLAGS) $(AM_CFLAGS) $(HOSTCFLAGS)
 119c119
-< 	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+<   --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 ---
-> 	--mode=compile $(HOSTCC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+>   --mode=compile $(HOSTCC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 121c121
 < CCLD = $(CC)
 ---
 > CCLD = $(HOSTCC)
 123c123
-< 	$(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+<   $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 ---
-> 	$(CCLD) $(AM_CFLAGS) $(HOSTCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+>   $(CCLD) $(AM_CFLAGS) $(HOSTCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 EOF
 
     PATH=$TOOLCHAIN_PATH/bin:$PATH
@@ -701,7 +708,6 @@ lame_PRI_FILE="LIBS += -lmp3lame"
 # returns list of mirrors separated with ;
 function lame_getMirrorList()
 {
-# /lame-3.99.5.tar.gz
     echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
     return 0
 }
@@ -710,27 +716,47 @@ function lame_generate_config()
 {
     local artifactVersion=$2
 
-    lame_DIR=$ARTIFACT_BUILD_DIR/lame-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    lame_DIR=$ARTIFACT_BUILD_DIR/lame-$artifactVersion-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
-    read -d '' configureFfmpegScript<<EOF
+    if [ $OS = "windows" ]
+    then
+        if [ ! -f .patched ]
+        then
+            /bin/patch -p1 < $SCRIPT_DIR/patches/lame-3.99.5.patch >>$LOG_FILE_PATH 2>&1 || return 1
+            touch .patched
+        fi
+    else
+        read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
-./configure --disable-shared --enable-static --prefix=$lame_DIR \
+./configure --disable-static --enable-shared --prefix=$lame_DIR \
 --with-pic --disable-debug --disable-frontend \
 $lame_CONFIG_OPTIONS
 EOF
 
-    echo "$configureFfmpegScript" > ./config.lame
-    chmod u+x ./config.lame
+        echo "$configureFfmpegScript" > ./config.lame
+        chmod u+x ./config.lame
+    fi
 
     return 0
 }
 
 function lame_build()
 {
-    ./config.lame >>$LOG_FILE_PATH 2>&1 || return 1
-    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
-    make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    if [ $OS = "windows" ]
+    then
+        MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH vc_solution/vc9_libmp3lame_dll.vcxproj >>$LOG_FILE_PATH 2>&1 || return 1
+
+        mkdir -p $lame_DIR/include/lame $lame_DIR/lib
+
+        cp -rf include/lame.h $lame_DIR/include/lame
+        cp -rf output/Release/libmp3lame.dll $lame_DIR/lib/mp3lame.dll
+        cp -rf output/Release/libmp3lame.lib $lame_DIR/lib/mp3lame.lib
+    else
+        ./config.lame >>$LOG_FILE_PATH 2>&1 || return 1
+        make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+        make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    fi
     return 0
 }
 
@@ -739,7 +765,7 @@ function lame_prepareMvnArtifact()
     local version=$2
     local mvnArtifactDir=$3
 
-    INSTALL_DIR=$ARTIFACT_BUILD_DIR/lame-$lame_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/lame-$lame_VERSION-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
@@ -754,13 +780,12 @@ function lame_prepareMvnArtifact()
 ###############################################################
 ###############################################################
 
-ffmpeg_VERSION=3.1.1
 ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -lswscale"
 
 # returns list of mirrors separated with ;
 function ffmpeg_getMirrorList()
 {
-    echo "https://www.ffmpeg.org/releases/"
+    echo "https://ffmpeg.org/releases/"
     return 0
 }
 
@@ -804,18 +829,31 @@ function ffmpeg_generate_config()
 --enable-bsf=h264_mp4toannexb $ffmpeg_CONFIG_OPTIONS
 EOF
     else
+        if [ $OS = "windows" ]
+        then
+            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --toolchain=msvc"
+
+            lame_DIR=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
+            ffmpeg_EXTRA_CFLAGS="-I${lame_DIR}\\\\\\\\include"
+            ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${lame_DIR}\\\\\\\\lib"
+            ffmpeg_LAME_OPTIONS="--extra-cflags=$ffmpeg_EXTRA_CFLAGS --extra-ldflags=$ffmpeg_EXTRA_LDFLAGS"
+        else
+            ffmpeg_LAME_OPTIONS="--extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib"
+        fi
+
         if [ -n "$DEBUG_ON" ]; then
             ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --enable-debug=3 --disable-optimizations"
         else
             ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --disable-debug --enable-optimizations"
         fi
 
+        echo $ffmpeg_LAME_OPTIONS
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
 ./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
 --arch=$makeArch --enable-libmp3lame \
---extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib \
+$ffmpeg_LAME_OPTIONS \
 $ffmpeg_CONFIG_OPTIONS
 EOF
     fi
@@ -828,9 +866,10 @@ EOF
 
 function ffmpeg_build()
 {
+    # mingw's make h3.81 angs with -j 
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
-    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
-    make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make V=1 >>$LOG_FILE_PATH 2>&1 || return 1
+    make install >>$LOG_FILE_PATH 2>&1 || return 1
     return 0
 }
 
@@ -1316,7 +1355,7 @@ function get_source_tar()
     do
         echo "$mirrorUrl" >&2
         echo -n "    Trying $mirrorUrl              " >&2
-        wget $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
+        wget --no-check-certificate $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
         if [ -e "$outputDir$sourceTarballName" ]; then
             #success
             echo "$outputDir$sourceTarballName"
@@ -1462,7 +1501,7 @@ function rdep_deploy_artifact()
     local artifactVersion=$3
 
     #search for rdep and it's package dir
-    RDEP=$(find "$VMS_SRC_DIR/" -name rdep.py)
+    RDEP=$(find "$VMS_SRC_DIR/" -path "$VMS_SRC_DIR/.hg" -prune -o -name rdep.py -print)
     if [ ! "$RDEP" ]; then
         echo "Cant find rdep.py in $VMS_SRC_DIR"
         return 3
@@ -1476,7 +1515,7 @@ function rdep_deploy_artifact()
     if [[ $ARCH == "arm" ]]; then
         PLATFORM=/$BOX
     else
-        PLATFORM=/linux-$ARCH
+        PLATFORM=/$OS-$ARCH
     fi
 
     RDEP_ARTF_DIR="$PKG_DIR/$PLATFORM/$artifactName-$artifactVersion"
@@ -1517,30 +1556,31 @@ function rdep_deploy_artifact()
         done | xargs echo)
     fi
 
+    artifactNameUpper=$(echo $artifactName | tr [:lower:] [:upper:])
     #generate pri file
     cat > $RDEP_ARTF_DIR/$artifactName.pri <<EOF
-${artifactName^^}_DIR = \$\$PWD
+${artifactNameUpper}_DIR = \$\$PWD
 
 INCLUDEPATH += $(for EI in '' ${!extraIncludeVar}; do
-        echo \$\$${artifactName^^}_DIR/include/$EI
+        echo \$\$${artifactNameUpper}_DIR/include/$EI
     done | xargs echo)
 
-LIBS += -L\$\$${artifactName^^}_DIR/lib $libFiles
+LIBS += -L\$\$${artifactNameUpper}_DIR/lib $libFiles
 EOF
 
     #generate cmake file
     cat > $RDEP_ARTF_DIR/$artifactName.cmake <<EOF
-set(${artifactName^^}_FOUND TRUE)
-set(${artifactName^^}_DIR \${CMAKE_CURRENT_LIST_DIR})
+set(${artifactNameUpper}_FOUND TRUE)
+set(${artifactNameUpper}_DIR \${CMAKE_CURRENT_LIST_DIR})
 
-set(${artifactName^^}_INCLUDE
+set(${artifactNameUpper}_INCLUDE
 $(for EI in '' ${!extraIncludeVar}; do
-    echo "    \${${artifactName^^}_DIR}/include/$EI"
+    echo "    \${${artifactNameUpper}_DIR}/include/$EI"
 done))
 
-set(${artifactName^^}_LIB
+set(${artifactNameUpper}_LIB
 $(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
-    echo "    \${${artifactName^^}_DIR}/lib/$(basename $lib)"
+    echo "    \${${artifactNameUpper}_DIR}/lib/$(basename $lib)"
 done))
 EOF
 
