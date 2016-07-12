@@ -337,6 +337,7 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
     project, project_name = get_failed_project(last_lines)
     if not project_name:
         project_name = project
+    log("[ Calling mvn clean ]")
     clean_res = call_maven_clean(unit_tests)
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
     if call_maven_build(branch, unit_tests,
@@ -385,7 +386,8 @@ def call_maven_build(branch,
         if retcode != 0:
             log("Error calling maven: ret.code = %s" % retcode)
             if not Args.full_build_log:
-                log("The last %d log lines:" % len(last_lines))
+                if single_project or no_threads:
+                    log("The last %d log lines:" % len(last_lines))
                 raw_log("".join(last_lines))
                 last_lines = list(last_lines)
                 last_lines.append("Maven return code = %s" % retcode)
