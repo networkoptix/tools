@@ -26,7 +26,7 @@ case $(uname) in
         JOB_COUNT=$(sysctl -n hw.ncpu)
         SCRIPT_DIR=$(dirname $0)
         ;;
-    MINGW32_NT-6.2)
+    MINGW32_*)
         OS=windows
         JOB_COUNT=$((NUMBER_OF_PROCESSORS+1))
         SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -795,6 +795,8 @@ function ffmpeg_generate_config()
 
     if [ $ARCH == x64 ]; then
         local makeArch="x86_64"
+    elif [ $ARCH = x86 ]; then
+        local makeArch="x86_32"
     else
         local makeArch="$ARCH"
     fi
@@ -831,7 +833,7 @@ EOF
     else
         if [ $OS = "windows" ]
         then
-            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --toolchain=msvc"
+            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --toolchain=msvc --arch=$makeArch"
 
             lame_DIR=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
             ffmpeg_EXTRA_CFLAGS="-I${lame_DIR}\\\\\\\\include"
