@@ -313,12 +313,34 @@ def execute_maven(cmd, kwargs, last_lines):
     return proc.returncode
 
 
+def mvn_cmd(cmd, *args):
+    return [conf.MVN, cmd, "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG] + list(args)
+
+
+def call_maven_clean(unit_tests):
+    cmd = mvn_cmd("clean")
+    kwargs = conf.SUBPROC_ARGS.copy()
+    if unit_tests:
+        kwargs['cwd'] = os.path.join(kwargs["cwd"], conf.UT_SUBDIR)
+    try:
+        check_output(cmd, stderr=STDOUT, **kwargs)
+        return None
+    except CalledProcessError as err:
+        raw_log(err.output)
+        msg = "WARNING: 'mvn clean' call failed with code %s!" % err.returncode
+        log(msg)
+        return "\n".join((err.output, msg))
+
+
+
 def nothreads_rebuild(last_lines, branch, unit_tests):
     project, project_name = get_failed_project(last_lines)
     if not project_name:
         project_name = project
+    clean_res = call_maven_clean(unit_tests)
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
-    if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
+    if call_maven_build(branch, unit_tests,
+                        no_threads=True, project_name=project_name, preOutput=clean_res):
         #! Project dependencies  error! Report but go on.
         emailBuildError(branch, last_lines, unit_tests, dep_error=project_name)
         return True
@@ -337,18 +359,17 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
 #    return True
 
 
-def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
+def call_maven_build(branch,
+        unit_tests=False, no_threads=False, single_project=None, project_name=None, preOutput=''):
     last_lines = deque(maxlen=conf.BUILD_LOG_LINES)
+    if preOutput:
+        last_lines.extend(preOutput.split("\n"))
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = conf.SUBPROC_ARGS.copy()
 
-    cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG]
     if (not conf.MVN_THREADS) or conf.MVN_THREADS == 1:
         no_threads = True
-    if no_threads:
-        cmd.extend(["-T", "1"])
-    else:
-        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
+    cmd = mvn_cmd("package", "-e", "-T", "1" if no_threads else str(conf.MVN_THREADS))
     if single_project is not None:
         cmd.extend(['-pl', single_project])
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])

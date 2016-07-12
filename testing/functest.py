@@ -1639,6 +1639,16 @@ def BoxTestsRun(key):
         return CallTest(BoxTestKeys[key])
 
 
+def LegacyTests(only = False):
+    the_test = unittest.main(exit=False, argv=argv[:1])
+
+    if the_test.result.wasSuccessful():
+        print "Main tests passed OK"
+        if (not only) and MergeTest().run():
+            SystemNameTest(testMaster.getConfig()).run()
+    doCleanUp()
+
+
 def DoTests(argv):
     print "The automatic test starts, please wait for checking cluster status, test connection and APIs and do proper rollback..."
     # initialize cluster test environment
@@ -1670,14 +1680,12 @@ def DoTests(argv):
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
         #FIXME no result code returning!
 
-    elif argc == 2 and argv[1] == '--main':
-        the_test = unittest.main(exit=False, argv=argv[:1])
+    if argc in (2, 3) and argv[1] == '--legacy':
+        LegacyTests(argv[2] == '--only' if argc == 3 else False)
+        #FIXME no result code returning!
 
-        if the_test.result.wasSuccessful():
-            print "Main tests passed OK"
-            if MergeTest().run():
-                SystemNameTest(testMaster.getConfig()).run()
-        doCleanUp()
+    elif argc == 2 and argv[1] == '--main':
+        rc = LegacyTests()
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"
