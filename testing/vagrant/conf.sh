@@ -30,7 +30,7 @@ function nxrmbase {
 }
 
 function nxcleardb {
-    rm ${SERVDIR}/var/*.sqlite
+    rm ${SERVDIR}/var/*sqlite* &> /dev/null
     nxedconf removeDbOnStartup 1
 }
 

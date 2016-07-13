@@ -109,11 +109,13 @@ class UserDataGenerator(BasicGenerator):
         "isAdmin": %s,
         "name": "%s",
         "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "permissions": "255",
+        "permissions": "247",
         "typeId": "{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}",
         "url": ""
     }
     """
+    # about permissions value: 0x08 flag removed since it's internal use only,
+    # see common/src/common/common_globals.h, GlobalPermission enum
 
     def generateUserData(self,number):
         ret = []
@@ -121,9 +123,10 @@ class UserDataGenerator(BasicGenerator):
             id = self.generateRandomId()
             un,pwd,digest = self.generateUsernamePasswordAndDigest(self.generateUserName)
             ret.append((self._template % (digest,
-                self.generateEmail(),
-                self.generatePasswordHash(pwd),
-                id,"false",un),id))
+                    self.generateEmail(),
+                    self.generatePasswordHash(pwd),
+                    id, "false", un),
+                id))
 
         return ret
 
@@ -314,23 +317,23 @@ class MediaServerConflictionDataGenerator(BasicGenerator):
 
     _existedMediaServerList = []
 
-    def _fetchExistedMediaServer(self,dataGen):
+    def _fetchExistedMediaServer(self, dataGen):
         for server in dataGen.conflictMediaServerList:
             obj = json.loads(server)
             self._existedMediaServerList.append((obj["apiUrl"],obj["authKey"],obj["id"],
                                                  obj["systemName"],obj["url"]))
         return True
 
-    def __init__(self,dataGen):
+    def __init__(self, dataGen):
         if self._fetchExistedMediaServer(dataGen) == False:
             raise Exception("Cannot fetch media server list")
 
-    def _generateModify(self,server):
+    def _generateModify(self, server):
         name = self.generateRandomString(random.randint(8,20))
         return self._updateTemplate % (server[0],server[1],server[2],name,
             server[3],server[4])
 
-    def _generateRemove(self,server):
+    def _generateRemove(self, server):
         return self._removeTemplate % (server[2])
 
     def generateData(self):
@@ -441,19 +444,19 @@ class ConflictionDataGenerator(BasicGenerator):
         worker.join()
         return True
 
-    def _prepareCameraData(self,op,num,methodName,l):
+    def _prepareCameraData(self, op, num, methodName, l):
         worker = ClusterWorker(8, len(testMaster.clusterTestServerList) * num)
         for _ in xrange(num):
             for s in testMaster.clusterTestServerList:
-                worker.enqueue(self.dataTask,(self._lock, l, op(1,s)[0], s, methodName))
+                worker.enqueue(self.dataTask, (self._lock, l, op(1,s)[0], s, methodName))
         worker.join()
         return True
 
     def prepare(self,num):
         return (
-            self._prepareCameraData(CameraDataGenerator().generateCameraData,num,"saveCameras",self.conflictCameraList) and
-            self._prepareData(UserDataGenerator().generateUserData(num),"saveUser",self.conflictUserList) and
-            self._prepareData(MediaServerGenerator().generateMediaServerData(num),"saveMediaServer",self.conflictMediaServerList)
+            self._prepareCameraData(CameraDataGenerator().generateCameraData, num, "saveCameras", self.conflictCameraList) and
+            self._prepareData(UserDataGenerator().generateUserData(num), "saveUser", self.conflictUserList) and
+            self._prepareData(MediaServerGenerator().generateMediaServerData(num), "saveMediaServer", self.conflictMediaServerList)
         )
 
 
