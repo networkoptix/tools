@@ -833,7 +833,7 @@ EOF
     else
         if [ $OS = "windows" ]
         then
-            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --toolchain=msvc --arch=$makeArch"
+            ffmpeg_CONFIG_OPTIONS+=" --toolchain=msvc --arch=$makeArch"
 
             lame_DIR=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
             ffmpeg_EXTRA_CFLAGS="-I${lame_DIR}\\\\\\\\include"
@@ -844,9 +844,9 @@ EOF
         fi
 
         if [ -n "$DEBUG_ON" ]; then
-            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --enable-debug=3 --disable-optimizations"
+            ffmpeg_CONFIG_OPTIONS+=" --enable-debug=3 --disable-optimizations"
         else
-            ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS --disable-debug --enable-optimizations"
+            ffmpeg_CONFIG_OPTIONS+=" --disable-debug --enable-optimizations"
         fi
 
         echo $ffmpeg_LAME_OPTIONS
@@ -885,9 +885,13 @@ function ffmpeg_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
 
     if [ -n "$DEBUG_ON" ]; then
+        cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
+        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
     else
+        cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
     fi
 
     return 0
@@ -1522,7 +1526,7 @@ function rdep_deploy_artifact()
 
     RDEP_ARTF_DIR="$PKG_DIR/$PLATFORM/$artifactName-$artifactVersion"
     #rm -rf $RDEP_ARTF_DIR
-    mkdir -p $RDEP_ARTF_DIR/include $RDEP_ARTF_DIR/lib/debug $RDEP_ARTF_DIR/lib/release
+    mkdir -p $RDEP_ARTF_DIR/include $RDEP_ARTF_DIR/{bin,lib}/{debug,release}
     if [ $? -ne 0 ]; then
         echo "Failed to create directory $RDEP_ARTF_DIR"
         return 5
@@ -1545,6 +1549,10 @@ function rdep_deploy_artifact()
     mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
     rm -r $RDEP_ARTF_DIR/lib/release
 
+    rm -rf $RDEP_ARTF_DIR/bin/debug
+    mv $RDEP_ARTF_DIR/bin/release/* $RDEP_ARTF_DIR/bin
+    rm -r $RDEP_ARTF_DIR/bin/release
+
     if [ ! -f $RDEP_ARTF_DIR/.rdpack ]; then
         echo "[General]" > $RDEP_ARTF_DIR/.rdpack
     fi
@@ -1553,8 +1561,12 @@ function rdep_deploy_artifact()
     libFilesVar=${artifactName}_libFiles
     libFiles=${!libFilesVar}
     if [ -z "$libFiles" ]; then
-        libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
+        libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | sort -u | while read lib; do
             basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+        done | xargs echo)
+
+        libFiles+=" "$(ls $RDEP_ARTF_DIR/{bin,lib}/*.lib | grep -v "^lib" | while read lib; do
+            basename $lib | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
         done | xargs echo)
     fi
 
