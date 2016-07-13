@@ -18,12 +18,12 @@ LOG_FILE_NAME=build.log
 case $(uname) in
     Linux)
         OS=linux
-        JOB_COUNT=$(cat /proc/cpuinfo | grep "processor" | wc -l)
+        JOB_COUNT=$(($(cat /proc/cpuinfo | grep "^processor" | wc -l)+1))
         SCRIPT_DIR=$(dirname $(readlink -e $0))
         ;;
     Darwin)
         OS=macos
-        JOB_COUNT=$(sysctl -n hw.ncpu)
+        JOB_COUNT=$(($(sysctl -n hw.ncpu)+1))
         SCRIPT_DIR=$(dirname $0)
         ;;
     MINGW32_*)
@@ -870,9 +870,13 @@ EOF
 
 function ffmpeg_build()
 {
+    local makeFlags="-j$JOB_COUNT"
+
+    [ $OS = windows ] && makeFlags=""
+
     # mingw's make h3.81 angs with -j 
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
-    CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make V=1 >>$LOG_FILE_PATH 2>&1 || return 1
+    CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make $makeFlags >>$LOG_FILE_PATH 2>&1 || return 1
     make install >>$LOG_FILE_PATH 2>&1 || return 1
     return 0
 }
