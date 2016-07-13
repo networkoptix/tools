@@ -708,7 +708,8 @@ lame_PRI_FILE="LIBS += -lmp3lame"
 # returns list of mirrors separated with ;
 function lame_getMirrorList()
 {
-    echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
+# echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
+    echo "http://la.hdw.mx/sources/lame"
     return 0
 }
 
@@ -785,7 +786,8 @@ ffmpeg_PRI_FILE="LIBS += -lavcodec -lavdevice -lavfilter -lavformat -lavutil -ls
 # returns list of mirrors separated with ;
 function ffmpeg_getMirrorList()
 {
-    echo "https://ffmpeg.org/releases/"
+    echo "http://la.hdw.mx/sources/ffmpeg"
+# echo "https://ffmpeg.org/releases/"
     return 0
 }
 
@@ -1361,7 +1363,7 @@ function get_source_tar()
     do
         echo "$mirrorUrl" >&2
         echo -n "    Trying $mirrorUrl              " >&2
-        wget --no-check-certificate $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
+        wget $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
         if [ -e "$outputDir$sourceTarballName" ]; then
             #success
             echo "$outputDir$sourceTarballName"
