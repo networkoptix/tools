@@ -15,4 +15,4 @@ export common_CFLAGS="-mfloat-abi=hard"
 #export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
 export openssl_CFLAGS=-fPIC
 
-export ffmpeg_CONFIG_OPTIONS="--disable-armv6t2 --disable-armvfp --disable-neon"
+export ffmpeg_CONFIG_OPTIONS="--disable-vfp --disable-armv6t2 --disable-neon"

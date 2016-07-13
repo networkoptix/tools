@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 
 openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
@@ -842,7 +842,7 @@ EOF
             ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${lame_DIR}\\\\\\\\lib"
             ffmpeg_LAME_OPTIONS="--extra-cflags=$ffmpeg_EXTRA_CFLAGS --extra-ldflags=$ffmpeg_EXTRA_LDFLAGS"
         else
-            ffmpeg_LAME_OPTIONS="--extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib"
+            [ -n "$lame_DIR" ] && ffmpeg_LAME_OPTIONS="--extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib"
         fi
 
         if [ -n "$DEBUG_ON" ]; then
@@ -891,18 +891,16 @@ function ffmpeg_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
 
     if [ -n "$DEBUG_ON" ]; then
-        if [ $OS = windows ]; then
-            cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
-        else
-            cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/debug
+        if [ -n "$lame_DIR" ]; then
+            [ $OS = "windows" ] && cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
+            [ $OS != "windows" ] && cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/debug
         fi
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
     else
-        if [ $OS = windows ]; then
-            cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
-        else
-            cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
+        if [ -n "$lame_DIR" ]; then
+            [ $OS = "windows" ] && cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
+            [ $OS != "windows" ] && cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
         fi
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
