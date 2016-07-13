@@ -876,7 +876,7 @@ function ffmpeg_build()
 
     # mingw's make h3.81 angs with -j 
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
-    CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make $makeFlags >>$LOG_FILE_PATH 2>&1 || return 1
+    CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make $makeFlags V=1 >>$LOG_FILE_PATH 2>&1 || return 1
     make install >>$LOG_FILE_PATH 2>&1 || return 1
     return 0
 }
@@ -891,11 +891,19 @@ function ffmpeg_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
 
     if [ -n "$DEBUG_ON" ]; then
-        cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
+        if [ $OS = windows ]; then
+            cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
+        else
+            cp -rf $lame_DIR/lib/* $mvnArtifactDir/bin/debug
+        fi
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
     else
-        cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
+        if [ $OS = windows ]; then
+            cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
+        else
+            cp -rf $lame_DIR/lib/* $mvnArtifactDir/bin/release
+        fi
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
     fi
@@ -1570,11 +1578,11 @@ function rdep_deploy_artifact()
         if [ $OS = windows ]; then
             libFiles=$(ls $RDEP_ARTF_DIR/{bin,lib}/*.lib | while read lib; do
                 basename $lib | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
-            done | xargs echo)
+            done | sort -u | xargs echo)
         else
-            libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | sort -u | while read lib; do
+            libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
                 basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
-            done | xargs echo)
+            done | sort -u | xargs echo)
         fi
     fi
 
