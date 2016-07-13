@@ -1563,13 +1563,15 @@ function rdep_deploy_artifact()
     libFilesVar=${artifactName}_libFiles
     libFiles=${!libFilesVar}
     if [ -z "$libFiles" ]; then
-        libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | sort -u | while read lib; do
-            basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
-        done | xargs echo)
-
-        libFiles+=" "$(ls $RDEP_ARTF_DIR/{bin,lib}/*.lib | grep -v "^lib" | while read lib; do
-            basename $lib | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
-        done | xargs echo)
+        if [ $OS = windows ]; then
+            libFiles=$(ls $RDEP_ARTF_DIR/{bin,lib}/*.lib | while read lib; do
+                basename $lib | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
+            done | xargs echo)
+        else
+            libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | sort -u | while read lib; do
+                basename $lib | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+            done | xargs echo)
+        fi
     fi
 
     artifactNameUpper=$(echo $artifactName | tr [:lower:] [:upper:])
