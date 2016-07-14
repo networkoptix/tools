@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 
 openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
@@ -750,11 +750,14 @@ function libogg_build()
     then
         MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH win32/VS2015/libogg_dynamic.sln >>$LOG_FILE_PATH 2>&1 || return 1
 
+        local makeArch=$ARCH
+        [ $ARCH = x86 ] && makeArch=Win32
+
         mkdir -p $libogg_DIR/{include/ogg,lib,bin}
 
         cp -rf include/ogg/*.h $libogg_DIR/include/ogg
-        cp -rf win32/VS2015/$ARCH/Release/libogg.lib $libogg_DIR/lib/ogg.lib
-        cp -rf win32/VS2015/$ARCH/Release/libogg.dll $libogg_DIR/bin/ogg.dll
+        cp -rf win32/VS2015/$makeArch/Release/libogg.lib $libogg_DIR/lib/ogg.lib
+        cp -rf win32/VS2015/$makeArch/Release/libogg.dll $libogg_DIR/bin/ogg.dll
     else
         ./config.libogg >>$LOG_FILE_PATH 2>&1 || return 1
         make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
@@ -832,14 +835,17 @@ function libvorbis_build()
         local libogg_SRC_PATH_NATIVE=$(cygpath -w -a $libogg_SRC_PATH | sed 's/\\/\\\\/g')
         MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH //property:LIBOGG_VERSION=$libogg_VERSION win32/VS2015/vorbis_dynamic.sln //property:LIBOGG_PATH=$libogg_SRC_PATH_NATIVE >>$LOG_FILE_PATH 2>&1 || return 1
 
+        local makeArch=$ARCH
+        [ $ARCH = x86 ] && makeArch=Win32
+
         mkdir -p $libvorbis_DIR/{include/vorbis,lib,bin}
 
         cp -rf include/vorbis/*.h $libvorbis_DIR/include/vorbis
-        cp -rf win32/VS2015/$ARCH/Release/libvorbis.lib $libvorbis_DIR/lib/vorbis.lib
-        cp -rf win32/VS2015/$ARCH/Release/libvorbisfile.lib $libvorbis_DIR/lib/vorbisfile.lib
+        cp -rf win32/VS2015/$makeArch/Release/libvorbis.lib $libvorbis_DIR/lib/vorbis.lib
+        cp -rf win32/VS2015/$makeArch/Release/libvorbisfile.lib $libvorbis_DIR/lib/vorbisfile.lib
 
-        cp -rf win32/VS2015/$ARCH/Release/libvorbis.dll $libvorbis_DIR/bin/vorbis.dll
-        cp -rf win32/VS2015/$ARCH/Release/libvorbisfile.dll $libvorbis_DIR/bin/vorbisfile.dll
+        cp -rf win32/VS2015/$makeArch/Release/libvorbis.dll $libvorbis_DIR/bin/vorbis.dll
+        cp -rf win32/VS2015/$makeArch/Release/libvorbisfile.dll $libvorbis_DIR/bin/vorbisfile.dll
     else
         ./config.libvorbis >>$LOG_FILE_PATH 2>&1 || return 1
         make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1051,7 +1057,7 @@ function ffmpeg_build()
 {
     local makeFlags="-j$JOB_COUNT"
 
-    [ $OS = windows ] && makeFlags=""
+    [ $OS = "windows" ] && makeFlags=""
 
     # mingw's make h3.81 angs with -j 
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1080,8 +1086,8 @@ function ffmpeg_prepareMvnArtifact()
         cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
     fi
 
-    if [ $OS = windows ]; then
-        cp -rf $INSTALL_DIR/lib/*.lib $mvnArtifactDir/lib/release/
+    if [ $OS = "windows" ]; then
+        cp -rf $INSTALL_DIR/bin/*.lib $mvnArtifactDir/lib/release/
         cp -rf $INSTALL_DIR/bin/*.{dll,exe} $mvnArtifactDir/bin/release/
     else
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
@@ -1719,7 +1725,7 @@ function rdep_deploy_artifact()
     fi
 
     RDEP_ARTF_DIR="$PKG_DIR/$PLATFORM/$artifactName-$artifactVersion"
-    #rm -rf $RDEP_ARTF_DIR
+    rm -rf $RDEP_ARTF_DIR
     mkdir -p $RDEP_ARTF_DIR/include $RDEP_ARTF_DIR/{bin,lib}/{debug,release}
     if [ $? -ne 0 ]; then
         echo "Failed to create directory $RDEP_ARTF_DIR"
@@ -1755,8 +1761,8 @@ function rdep_deploy_artifact()
     libFilesVar=${artifactName}_libFiles
     libFiles=${!libFilesVar}
     if [ -z "$libFiles" ]; then
-        if [ $OS = windows ]; then
-            libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | grep "\.lib$" | while read lib; do
+        if [ $OS = "windows" ]; then
+            libFiles=$(find $RDEP_ARTF_DIR/lib -maxdepth 1 -name '*.lib' | while read lib; do
                 name=$(basename $lib)
                 if [[ $name == lib* ]]; then
                     echo $name | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
