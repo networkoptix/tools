@@ -1,6 +1,6 @@
 diff -uNr libogg-1.3.2/win32/VS2015/libogg_dynamic.sln libogg/win32/VS2015/libogg_dynamic.sln
 --- libogg-1.3.2/win32/VS2015/libogg_dynamic.sln	1969-12-31 16:00:00 -0800
-+++ libogg/win32/VS2015/libogg_dynamic.sln	2016-07-13 14:09:47 -0700
++++ libogg/win32/VS2015/libogg_dynamic.sln	2016-07-13 18:29:47 -0700
 @@ -0,0 +1,28 @@
 +﻿
 +Microsoft Visual Studio Solution File, Format Version 12.00
@@ -11,20 +11,20 @@ diff -uNr libogg-1.3.2/win32/VS2015/libogg_dynamic.sln libogg/win32/VS2015/libog
 +EndProject
 +Global
 +	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-+		Debug|Win32 = Debug|Win32
 +		Debug|x64 = Debug|x64
-+		Release|Win32 = Release|Win32
++		Debug|x86 = Debug|x86
 +		Release|x64 = Release|x64
++		Release|x86 = Release|x86
 +	EndGlobalSection
 +	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-+		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|Win32.ActiveCfg = Debug|Win32
-+		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|Win32.Build.0 = Debug|Win32
 +		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|x64.ActiveCfg = Debug|x64
 +		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|x64.Build.0 = Debug|x64
-+		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|Win32.ActiveCfg = Release|Win32
-+		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|Win32.Build.0 = Release|Win32
++		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|x86.ActiveCfg = Debug|Win32
++		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Debug|x86.Build.0 = Debug|Win32
 +		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|x64.ActiveCfg = Release|x64
 +		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|x64.Build.0 = Release|x64
++		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|x86.ActiveCfg = Release|Win32
++		{15CBFEFF-7965-41F5-B4E2-21E8795C9159}.Release|x86.Build.0 = Release|Win32
 +	EndGlobalSection
 +	GlobalSection(SolutionProperties) = preSolution
 +		HideSolutionNode = FALSE

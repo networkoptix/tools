@@ -1080,8 +1080,13 @@ function ffmpeg_prepareMvnArtifact()
         cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
     fi
 
-    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
-    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
+    if [ $OS = windows ]; then
+        cp -rf $INSTALL_DIR/lib/*.lib $mvnArtifactDir/lib/release/
+        cp -rf $INSTALL_DIR/bin/*.{dll,exe} $mvnArtifactDir/bin/release/
+    else
+        cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
+    fi
 
     return 0
 }
