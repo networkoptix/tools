@@ -817,7 +817,7 @@ function libvorbis_generate_config()
 #!/bin/bash
 
 ./configure --disable-static --enable-shared --prefix=$libvorbis_DIR \
---with-pic --disable-debug --disable-frontend \
+--with-ogg=$libogg_DIR --with-pic --disable-debug \
 $libvorbis_CONFIG_OPTIONS
 EOF
 
@@ -951,8 +951,11 @@ function lame_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
-    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
-    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
+
+    if [ -d $INSTALL_DIR/bin -a $(ld -A $INSTALL_DIR/bin) ]; then
+        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
+        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
+    fi
 
     return 0
 }
@@ -1038,7 +1041,7 @@ EOF
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
-sed -i'' 's/-lvorbisenc//g' configure 2> /dev/null
+[ $OS = "windows" ] && sed -i'' 's/-lvorbisenc//g' configure 2> /dev/null
 
 ./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
 --arch=$makeArch --enable-libmp3lame --enable-libvorbis \
@@ -1807,7 +1810,7 @@ EOF
 
     #upload
     pushd $RDEP_ARTF_DIR
-    $RDEP --upload
+    $RDEP -f --upload
     if [ $? -gt 0 ]; then
         echo "Rdep upload $RDEP_ARTF_DIR has failed: $?"
         return 8
