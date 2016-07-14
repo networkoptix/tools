@@ -7,3 +7,4 @@ export ARCH_SPEC_SUFFIX=
 export TOOLCHAIN_NAME=msvc
 export TOOLCHAIN_VERSION=2015
 
+export ffmpeg_CONFIG_OPTIONS="--toolchain=$TOOLCHAIN_NAME"

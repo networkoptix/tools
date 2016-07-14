@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 
 openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
@@ -698,6 +698,180 @@ function openssl_prepareMvnArtifact()
 
 ###############################################################
 ###############################################################
+########### libogg functions
+###############################################################
+###############################################################
+
+libogg_VERSION=1.3.2
+libogg_PRI_FILE="LIBS += -logg"
+
+# returns list of mirrors separated with ;
+function libogg_getMirrorList()
+{
+# echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
+    echo "http://la.hdw.mx/sources/libogg"
+    return 0
+}
+
+function libogg_generate_config()
+{
+    local artifactVersion=$2
+
+    libogg_DIR=$ARTIFACT_BUILD_DIR/libogg-$artifactVersion-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    if [ $OS = "windows" ]
+    then
+        if [ ! -f .patched ]
+        then
+            /bin/patch -p1 < $SCRIPT_DIR/patches/libogg-${libogg_VERSION}.patch >>$LOG_FILE_PATH 2>&1 || return 1
+            touch .patched
+        fi
+    else
+        read -d '' configureFfmpegScript<<EOF
+#!/bin/bash
+
+./configure --disable-static --enable-shared --prefix=$libogg_DIR \
+--with-pic --disable-debug --disable-frontend \
+$lame_CONFIG_OPTIONS
+EOF
+
+        echo "$configureFfmpegScript" > ./config.libogg
+        chmod u+x ./config.libogg
+    fi
+
+    return 0
+}
+
+function libogg_build()
+{
+    libogg_SRC_PATH=$PWD
+
+    if [ $OS = "windows" ]
+    then
+        MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH win32/VS2015/libogg_dynamic.sln >>$LOG_FILE_PATH 2>&1 || return 1
+
+        mkdir -p $libogg_DIR/{include/ogg,lib,bin}
+
+        cp -rf include/ogg/*.h $libogg_DIR/include/ogg
+        cp -rf win32/VS2015/$ARCH/Release/libogg.lib $libogg_DIR/lib/ogg.lib
+        cp -rf win32/VS2015/$ARCH/Release/libogg.dll $libogg_DIR/bin/ogg.dll
+    else
+        ./config.libogg >>$LOG_FILE_PATH 2>&1 || return 1
+        make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+        make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    fi
+    return 0
+}
+
+function libogg_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/libogg-$libogg_VERSION-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+    cp -rf $INSTALL_DIR/lib/ogg.lib $mvnArtifactDir/lib/debug/libogg.lib
+    cp -rf $INSTALL_DIR/lib/ogg.lib $mvnArtifactDir/lib/release/libogg.lib
+    cp -rf $INSTALL_DIR/bin/ogg.dll $mvnArtifactDir/bin/debug/libogg.dll
+    cp -rf $INSTALL_DIR/bin/ogg.dll $mvnArtifactDir/bin/release/libogg.dll
+
+    return 0
+}
+
+###############################################################
+###############################################################
+########### libvorbis functions
+###############################################################
+###############################################################
+
+libvorbis_VERSION=1.3.5
+libvorbis_PRI_FILE="LIBS += -lvorbis"
+
+# returns list of mirrors separated with ;
+function libvorbis_getMirrorList()
+{
+# echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
+    echo "http://la.hdw.mx/sources/libvorbis"
+    return 0
+}
+
+function libvorbis_generate_config()
+{
+    local artifactVersion=$2
+
+    libvorbis_DIR=$ARTIFACT_BUILD_DIR/libvorbis-$artifactVersion-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    if [ $OS = "windows" ]
+    then
+        if [ ! -f .patched ]
+        then
+            /bin/patch -p1 < $SCRIPT_DIR/patches/libvorbis-${libvorbis_VERSION}.patch >>$LOG_FILE_PATH 2>&1 || return 1
+            touch .patched
+        fi
+    else
+        read -d '' configureVorbisScript<<EOF
+#!/bin/bash
+
+./configure --disable-static --enable-shared --prefix=$libvorbis_DIR \
+--with-pic --disable-debug --disable-frontend \
+$libvorbis_CONFIG_OPTIONS
+EOF
+
+        echo "$configureVorbisScript" > ./config.libvorbis
+        chmod u+x ./config.libvorbis
+    fi
+
+    return 0
+}
+
+function libvorbis_build()
+{
+    if [ $OS = "windows" ]
+    then
+        local libogg_SRC_PATH_NATIVE=$(cygpath -w -a $libogg_SRC_PATH | sed 's/\\/\\\\/g')
+        MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH //property:LIBOGG_VERSION=$libogg_VERSION win32/VS2015/vorbis_dynamic.sln //property:LIBOGG_PATH=$libogg_SRC_PATH_NATIVE >>$LOG_FILE_PATH 2>&1 || return 1
+
+        mkdir -p $libvorbis_DIR/{include/vorbis,lib,bin}
+
+        cp -rf include/vorbis/*.h $libvorbis_DIR/include/vorbis
+        cp -rf win32/VS2015/$ARCH/Release/libvorbis.lib $libvorbis_DIR/lib/vorbis.lib
+        cp -rf win32/VS2015/$ARCH/Release/libvorbisfile.lib $libvorbis_DIR/lib/vorbisfile.lib
+
+        cp -rf win32/VS2015/$ARCH/Release/libvorbis.dll $libvorbis_DIR/bin/vorbis.dll
+        cp -rf win32/VS2015/$ARCH/Release/libvorbisfile.dll $libvorbis_DIR/bin/vorbisfile.dll
+    else
+        ./config.libvorbis >>$LOG_FILE_PATH 2>&1 || return 1
+        make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+        make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    fi
+    return 0
+}
+
+function libvorbis_prepareMvnArtifact()
+{
+    local version=$2
+    local mvnArtifactDir=$3
+
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/libvorbis-$libvorbis_VERSION-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+
+    cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
+
+    cp -rf $INSTALL_DIR/lib/vorbis.lib $mvnArtifactDir/lib/debug/libvorbis.lib
+    cp -rf $INSTALL_DIR/lib/vorbisfile.lib $mvnArtifactDir/lib/debug/libvorbisfile.lib
+    cp -rf $INSTALL_DIR/lib/vorbis.lib $mvnArtifactDir/lib/release/libvorbis.lib
+    cp -rf $INSTALL_DIR/lib/vorbisfile.lib $mvnArtifactDir/lib/release/libvorbisfile.lib
+
+    cp -rf $INSTALL_DIR/bin/vorbis.dll $mvnArtifactDir/bin/debug/libvorbis.dll
+    cp -rf $INSTALL_DIR/bin/vorbisfile.dll $mvnArtifactDir/bin/debug/libvorbisfile.dll
+    cp -rf $INSTALL_DIR/bin/vorbis.dll $mvnArtifactDir/bin/release/libvorbis.dll
+    cp -rf $INSTALL_DIR/bin/vorbisfile.dll $mvnArtifactDir/bin/release/libvorbisfile.dll
+
+    return 0
+}
+
+###############################################################
+###############################################################
 ########### lame functions
 ###############################################################
 ###############################################################
@@ -748,10 +922,10 @@ function lame_build()
     then
         MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH vc_solution/vc9_libmp3lame_dll.vcxproj >>$LOG_FILE_PATH 2>&1 || return 1
 
-        mkdir -p $lame_DIR/include/lame $lame_DIR/lib
+        mkdir -p $lame_DIR/{include/lame,bin,lib}
 
         cp -rf include/lame.h $lame_DIR/include/lame
-        cp -rf output/Release/libmp3lame.dll $lame_DIR/lib/mp3lame.dll
+        cp -rf output/Release/libmp3lame.dll $lame_DIR/bin/mp3lame.dll
         cp -rf output/Release/libmp3lame.lib $lame_DIR/lib/mp3lame.lib
     else
         ./config.lame >>$LOG_FILE_PATH 2>&1 || return 1
@@ -771,6 +945,8 @@ function lame_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
+    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
 
     return 0
 }
@@ -835,14 +1011,15 @@ EOF
     else
         if [ $OS = "windows" ]
         then
-            ffmpeg_CONFIG_OPTIONS+=" --toolchain=msvc --arch=$makeArch"
+            lame_DIR_NATIVE=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
+            libogg_DIR_NATIVE=$(cygpath.exe -w $libogg_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
+            libvorbis_DIR_NATIVE=$(cygpath.exe -w $libvorbis_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
 
-            lame_DIR=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
-            ffmpeg_EXTRA_CFLAGS="-I${lame_DIR}\\\\\\\\include"
-            ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${lame_DIR}\\\\\\\\lib"
-            ffmpeg_LAME_OPTIONS="--extra-cflags=$ffmpeg_EXTRA_CFLAGS --extra-ldflags=$ffmpeg_EXTRA_LDFLAGS"
+            ffmpeg_EXTRA_CFLAGS="-I${lame_DIR_NATIVE}\\\\\\\\include -I${libogg_DIR_NATIVE}\\\\\\\\include -I${libvorbis_DIR_NATIVE}\\\\\\\\include"
+            ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${lame_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libogg_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libvorbis_DIR_NATIVE}\\\\\\\\lib"
+            ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"$ffmpeg_EXTRA_CFLAGS\" --extra-ldflags=\"$ffmpeg_EXTRA_LDFLAGS\""
         else
-            [ -n "$lame_DIR" ] && ffmpeg_LAME_OPTIONS="--extra-cflags=-I$lame_DIR/include --extra-ldflags=-L$lame_DIR/lib"
+            [ -n "$lame_DIR" ] && ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"-I$lame_DIR/include -I$libogg_DIR/include -I$libvorbis_DIR/include\" --extra-ldflags=\"-L$lame_DIR/lib -L$libogg_DIR/lib -L$libvorbis_DIR/lib\""
         fi
 
         if [ -n "$DEBUG_ON" ]; then
@@ -855,9 +1032,11 @@ EOF
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
+sed -i'' 's/-lvorbisenc//g' configure 2> /dev/null
+
 ./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
---arch=$makeArch --enable-libmp3lame \
-$ffmpeg_LAME_OPTIONS \
+--arch=$makeArch --enable-libmp3lame --enable-libvorbis \
+$ffmpeg_EXTRA_OPTIONS \
 $ffmpeg_CONFIG_OPTIONS
 EOF
     fi
@@ -886,25 +1065,23 @@ function ffmpeg_prepareMvnArtifact()
     local version=$2
     local mvnArtifactDir=$3
 
-    INSTALL_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$ffmpeg_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION${DEBUG_ON:+-debug}
+    INSTALL_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$ffmpeg_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
 
-    if [ -n "$DEBUG_ON" ]; then
-        if [ -n "$lame_DIR" ]; then
-            [ $OS = "windows" ] && cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/debug/libmp3lame.dll
-            [ $OS != "windows" ] && cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/debug
-        fi
-        cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
-        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
+    if [ $ARCH != arm ]; then
+        cp -rf $lame_DIR/bin/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
+        cp -rf $libogg_DIR/bin/ogg.dll $mvnArtifactDir/bin/release/libogg.dll
+        cp -rf $libvorbis_DIR/bin/vorbis.dll $mvnArtifactDir/bin/release/libvorbis.dll
+        cp -rf $libvorbis_DIR/bin/vorbisfile.dll $mvnArtifactDir/bin/release/libvorbisfile.dll
     else
-        if [ -n "$lame_DIR" ]; then
-            [ $OS = "windows" ] && cp -rf $lame_DIR/lib/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
-            [ $OS != "windows" ] && cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
-        fi
-        cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
-        cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
+        cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
+        cp -rf $libogg_DIR/lib/* $mvnArtifactDir/lib/release
+        cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
     fi
+
+    cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
+    cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
 
     return 0
 }
@@ -1559,11 +1736,11 @@ function rdep_deploy_artifact()
     #rdep does not provide release+debug like maven does, so remove debug (TODO: fix when it's changed)
     rm -rf $RDEP_ARTF_DIR/lib/debug
     mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
-    rm -r $RDEP_ARTF_DIR/lib/release
+    rm -rf $RDEP_ARTF_DIR/lib/release
 
     rm -rf $RDEP_ARTF_DIR/bin/debug
-    mv $RDEP_ARTF_DIR/bin/release/* $RDEP_ARTF_DIR/bin
-    rm -r $RDEP_ARTF_DIR/bin/release
+    [ -d $RDEP_ARTF_DIR/bin/release -a "$(ls -A $RDEP_ARTF_DIR/bin/release)" ] && mv $RDEP_ARTF_DIR/bin/release/* $RDEP_ARTF_DIR/bin
+    rm -rf $RDEP_ARTF_DIR/bin/release
 
     if [ ! -f $RDEP_ARTF_DIR/.rdpack ]; then
         echo "[General]" > $RDEP_ARTF_DIR/.rdpack
@@ -1574,8 +1751,13 @@ function rdep_deploy_artifact()
     libFiles=${!libFilesVar}
     if [ -z "$libFiles" ]; then
         if [ $OS = windows ]; then
-            libFiles=$(ls $RDEP_ARTF_DIR/{bin,lib}/*.lib | while read lib; do
-                basename $lib | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
+            libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | grep "\.lib$" | while read lib; do
+                name=$(basename $lib)
+                if [[ $name == lib* ]]; then
+                    echo $name | awk ' {print " -l" substr($1, 4, index($1, ".") - 4) }'
+                else
+                    echo $name | awk ' {print " -l" substr($1, 1, index($1, ".") - 1) }'
+                fi
             done | sort -u | xargs echo)
         else
             libFiles=$(ls $RDEP_ARTF_DIR/lib/lib* | while read lib; do
@@ -1810,7 +1992,9 @@ ALL_ARTIFACTS=(                 \
         com.digia/qt            \
         org/onvif               \
         org.hyperic/sigar       \
-        org.lame/lame     \
+        org.lame/lame           \
+        org.xiph/libogg         \
+        org.xiph/libvorbis      \
         org.ffmpeg/ffmpeg       \
         net.sourceforge/quazip  \
         net.sourceforge/udt     \
