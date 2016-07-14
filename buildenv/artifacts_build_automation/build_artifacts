@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 
 openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
@@ -1078,21 +1078,19 @@ function ffmpeg_prepareMvnArtifact()
 
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
 
-    if [ $ARCH != arm ]; then
+    if [ $OS = "windows" ]; then
         cp -rf $lame_DIR/bin/mp3lame.dll $mvnArtifactDir/bin/release/libmp3lame.dll
         cp -rf $libogg_DIR/bin/ogg.dll $mvnArtifactDir/bin/release/libogg.dll
         cp -rf $libvorbis_DIR/bin/vorbis.dll $mvnArtifactDir/bin/release/libvorbis.dll
         cp -rf $libvorbis_DIR/bin/vorbisfile.dll $mvnArtifactDir/bin/release/libvorbisfile.dll
+
+        cp -rf $INSTALL_DIR/bin/*.lib $mvnArtifactDir/lib/release/
+        cp -rf $INSTALL_DIR/bin/*.{dll,exe} $mvnArtifactDir/bin/release/
     else
         cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
         cp -rf $libogg_DIR/lib/* $mvnArtifactDir/lib/release
         cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
-    fi
 
-    if [ $OS = "windows" ]; then
-        cp -rf $INSTALL_DIR/bin/*.lib $mvnArtifactDir/lib/release/
-        cp -rf $INSTALL_DIR/bin/*.{dll,exe} $mvnArtifactDir/bin/release/
-    else
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
     fi
