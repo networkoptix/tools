@@ -221,7 +221,7 @@ class DumpAnalyzer(object):
         if not self.dist_urls:
            raise Error('There are no any dist URLs avaliable')
         for url in self.dist_urls:
-            self.log('Download: ' + url)
+            self.log('Download: %s to %s' % (url, self.build_path))
             self.download_url_data(url, self.build_path, self.extract_dist)
         self.module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
 
