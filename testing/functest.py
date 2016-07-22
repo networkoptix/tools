@@ -24,7 +24,7 @@ from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
 from sysname_test import SystemNameTest
 from timetest import TimeSyncTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
-from streaming_test import StreamingTest
+from streaming_test import StreamingTest, HlsOnlyTest
 from natcon_test import NatConnectionTest
 from dbtest import DBTest
 from proxytest import ProxyTest
@@ -444,7 +444,7 @@ class MergeTestBase:
         response.close()
         return (True,"")
 
-    # This function is used to set the system name to randome
+    # This function is used to set the system name to random
     def _setClusterSystemRandom(self):
         # Store the old system name here
         self._storeClusterOldSystemName()
@@ -461,11 +461,12 @@ class MergeTestBase:
             self._setSystemName(testMaster.clusterTestServerList[i], self._oldSystemName[i])
 
 
-# This class represents a single server with a UNIQUE system name.
-# After we initialize this server, we will make it executes certain
-# type of random data generation, after such generation, the server
-# will have different states with other servers
 class PrepareServerStatus(BasicGenerator):
+    """ Represents a single server with an UNIQUE system name.
+    After we initialize this server, we will make it executes certain
+    type of random data generation, after such generation, the server
+    will have different states with other servers
+    """
     _minData = 10
     _maxData = 20
 
@@ -560,9 +561,9 @@ class MergeTest_Resource(MergeTestBase):
             else:
                 systemName = jobj["systemName"]
                 if systemName != oldSystemName:
-                    print "The merge test cannot start!"
-                    print "Server:%s has system name:%s" % (oldSystemName,oldSystemNameAddr)
-                    print "Server:%s has system name:%s" % (s,jobj["systemName"])
+                    print "The merge test cannot start: different system names!"
+                    print "Server %s - '%s'; server %s - '%s'" % (
+                        oldSystemName, oldSystemNameAddr, s, jobj["systemName"])
                     print "Please make all the server has identical system name before running merge test"
                     return False
             response.close()
@@ -1517,7 +1518,7 @@ def runPerfTest(argv):
     doCleanUp()
 
 
-def doCleanUp():
+def doCleanUp(reinit=False):
     selection = '' if testMaster.auto_rollback else 'x'
     if not testMaster.auto_rollback:
         try :
@@ -1531,6 +1532,8 @@ def doCleanUp():
         print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
     else:
         print "Skip ROLLBACK,you could use --recover to perform manually rollback"
+    if reinit:
+        testMaster.init_rollback()
 
 
 def print_tests(suit, shift='    '):
@@ -1565,6 +1568,7 @@ BoxTestKeys = {
     '--msarch': MultiserverArchiveTest,
     '--natcon': NatConnectionTest,
     '--stream': StreamingTest,
+    '--hlso': HlsOnlyTest,
     '--dbup': DBTest,
     '--boxtests': None,
 }
@@ -1598,14 +1602,17 @@ def RunByAutotest(arg0):
             the_test = unittest.main(exit=False, argv=[arg0])
             if the_test.result.wasSuccessful():
                 print "Basic functional tests end"
+                if testMaster.unittestRollback:
+                    doCleanUp(reinit=True)
                 MergeTest().run()
                 SystemNameTest(config).run()
             else:
                 print "Basic functional test FAILED"
-            ProxyTest(*config.rtget('ServerList')[0:2]).run()
             if testMaster.unittestRollback:
                 doCleanUp()
                 need_rollback = False
+            time.sleep(4)
+            ProxyTest(*config.rtget('ServerList')[0:2]).run()
     except Exception as err:
         print "FAIL: the main functests failed with error: %s" % (err,)
     finally:
@@ -1641,6 +1648,7 @@ def BoxTestsRun(key):
 
 def LegacyTests(only = False):
     the_test = unittest.main(exit=False, argv=argv[:1])
+    doCleanUp(reinit=True)
 
     if the_test.result.wasSuccessful():
         print "Main tests passed OK"
@@ -1686,6 +1694,7 @@ def DoTests(argv):
 
     elif argc == 2 and argv[1] == '--main':
         rc = LegacyTests()
+        time.sleep(3)
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
 
         print "\nALL AUTOMATIC TEST ARE DONE\n"

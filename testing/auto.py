@@ -332,7 +332,6 @@ def call_maven_clean(unit_tests):
         return "\n".join((err.output, msg))
 
 
-
 def nothreads_rebuild(last_lines, branch, unit_tests):
     project, project_name = get_failed_project(last_lines)
     if not project_name:
@@ -431,7 +430,7 @@ def build_branch(branch):
         RESULT.append(('build-ut', True))
     return True
 
-def prepare_branch(branch):
+def prepare_and_build(branch):
     "Prepare the branch for testing, i.e. build the project and unit tests"
     ToSend.log('')  # an empty line separator
     if branch != '.':
@@ -469,7 +468,7 @@ def build_only_msg(branch):
     log("Branch %s is configured as BUILD-ONLY. Skipping all tests" % branch)
 
 
-def check_hg_updates():
+def check_and_build():
     "Check for repository updates, get'em, build and test"
     bundle_fn = os.path.join(conf.TEMP, "in.hg")
     branches = check_new_commits(bundle_fn)
@@ -477,10 +476,12 @@ def check_hg_updates():
     if branches and not Args.hg_only:
         update_repo(branches, bundle_fn)
         for branch in branches:
-            if prepare_branch(branch):
+            if prepare_and_build(branch):
                 if branch in conf.BUILD_ONLY_BRANCHES:
                     build_only_msg(branch)
                     # don't change rc - keep it True if it still is True
+                elif Args.build_only:
+                    pass
                 else:
                     #Build.load_vars(conf, Env) - loaded after build
                     rc = run_tests(branch) and rc
@@ -495,7 +496,7 @@ def check_hg_updates():
 def run():
     try:
         if Args.full:
-            rc = check_hg_updates()
+            rc = check_and_build()
             if Args.hg_only:
                 log_changesets()
             return rc
@@ -1580,7 +1581,8 @@ def parse_args():
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing tests again (add --noft to skip functests.")
     parser.add_argument("--single-ut", help="Run specified unit test only.")
     parser.add_argument("-r", "--rebuild", action='store_true', help="(Re)build even if no new commits found.")
-    parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
+    parser.add_argument("--build-only", "--bo", action="store_true", help="Build only, don't test.")
+    parser.add_argument("--build-ut-only", "--uo", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")

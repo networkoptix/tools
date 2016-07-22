@@ -5,6 +5,7 @@ Then it tries to change systemName of each mediaserver and checks
 if that name is changed and that the server is no more in the same
 system with the others.
 """
+import sys
 import time, traceback
 import urllib, urllib2
 
@@ -25,12 +26,17 @@ class SystemNameTest:
 
     def _doGet(self,addr,methodName):
         print "Connection to http://%s/ec2/%s" % (addr,methodName)
-        response = urllib2.urlopen("http://%s/ec2/%s" % (addr,methodName))
-        return response.read() if response.getcode() == 200 else None
+        try:
+            response = urllib2.urlopen("http://%s/ec2/%s" % (addr,methodName))
+            return response.read() if response.getcode() == 200 else None
+        except Exception as err:
+            print "Exception: %s, %s" % sys.exc_info()[0:2]
+            return None
 
     def _changeSystemName(self,addr,name):
-        #print "Changing system %s name to %s" % (addr, name)
-        response = urllib2.urlopen("http://%s/api/configure?%s" % (addr,urllib.urlencode({"systemName":name})))
+        url = "http://%s/api/configure?%s" % (addr,urllib.urlencode({"systemName":name}))
+        print "Request:", url
+        response = urllib2.urlopen(url)
         return response.getcode() == 200
 
     def _ensureServerSystemName(self):
@@ -60,9 +66,9 @@ class SystemNameTest:
         time.sleep(self._syncTime)
         # issue a getMediaServerEx request to test whether all the servers in
         # the list has the expected offline/online status
-        ret = self._doGet(s,"getMediaServersEx")
-        if ret == None:
-            return (False,"Server:%s cannot doGet on getMediaServersEx" % (s))
+        ret = self._doGet(s, "getMediaServersEx")
+        if ret is None:
+            return (False,"doGet failed on server %s with getMediaServersEx" % (s))
         obj = SafeJsonLoads(ret, s, "getMediaServersEx")
         if obj is None:
             return (False, "The server %s sends wrong response to getMediaServersEx" % (s,))
@@ -85,8 +91,8 @@ class SystemNameTest:
 
     def _doTest(self):
         for s in self._serverList:
-            ret,reason = self._doSingleTest(s)
-            if ret != True:
+            ret, reason = self._doSingleTest(s)
+            if not ret:
                 return (ret,reason)
         return (True,"")
 

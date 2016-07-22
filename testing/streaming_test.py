@@ -69,3 +69,13 @@ class StreamingTest(StorageBasedTest):
             self.skipTest("not initialized")
         self.assertTrue(HlsStreamingTest(self.config).run(),
                         "HLS streaming test failed")
+
+class HlsOnlyTest(StreamingTest):
+    _test_name = "HLS-only streaming"
+    _test_key = "hlso"
+    _suits = (
+        ('HlsOnlyTest', [
+            'Initialisation',
+            'HlsStreamingTest'
+         ]),
+    )

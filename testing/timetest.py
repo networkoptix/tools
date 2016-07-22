@@ -198,7 +198,7 @@ class TimeSyncTest(FuncTestCase):
     def _check_systime_sync(self, boxnum, must_synchronize=True):
         tt = time.time() + (1 if must_synchronize else SYSTEM_TIME_NOTSYNC_SURE)
         timediff = 0
-        print "DEBUG2: %s checking for sync until %s" % (int(time.time()), int(tt))
+        print "DEBUG: now %s, checking for sync until %s" % (int(time.time()), int(tt))
         while time.time() < tt:
             timedata = self._request_gettime(boxnum)
             print "DEBUG: server time: %s, system time: %s" % (timedata['time'], timedata['boxtime'])

@@ -339,7 +339,7 @@ class FuncTestCase(unittest.TestCase):
         endtime = time.time() + SERVER_UP_TIMEOUT
         tocheck = servers or set(range(self.num_serv))
         while tocheck and time.time() < endtime:
-            #print "_wait_servers_up: %s, %s" % (endtime - time.time(), str(tocheck))
+            print "_wait_servers_up: %s, %s" % (endtime - time.time(), str(tocheck))
             for num in tocheck.copy():
                 data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=False)
                 if data is None:
@@ -350,6 +350,7 @@ class FuncTestCase(unittest.TestCase):
                 time.sleep(0.5)
         if tocheck:
             self.fail("Servers startup timed out: %s" % (', '.join(map(str, tocheck))))
+            #TODO: Report the last error on each unready server!
 
     def _get_version(self):
         """ Returns mediaserver version as reported in api/moduleInformation.

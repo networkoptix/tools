@@ -10,8 +10,8 @@ shift 2
 
 echo STARTED: ctl.sh $testName $mode $@
 
-debugLevel=
-# possible values -- names of log level
+debugLevel=DEBUG
+# possible values -- names of log level or number for case in setLogLevel function
 
 #:set -x
 
@@ -179,7 +179,7 @@ case "$testName" in
     msarch)
         msarch_ctl "$@"
         ;;
-    stream)
+    stream|hlso)
         stream_ctl "$@"
         ;;
     natcon)

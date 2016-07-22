@@ -6,24 +6,41 @@ Checks if both servers start and merge their data correctly.
 """
 __author__ = 'Danil Lavrentyuk'
 
-import time
-from functest_util import compareJson, checkResultsEqual
+import os, time
+from functest_util import compareJson, checkResultsEqual, textdiff
 #from testbase import FuncTestCase
 from stortest import StorageBasedTest
-import difflib
 
 NUM_SERV=2
-SERVERS_MERGE_WAIT=10
+SERVERS_MERGE_WAIT=20
 BACKUP_RESTORE_TIMEOUT=40
-
-
-def _textdiff(data0, data1, src0, src1):
-    ud = difflib.unified_diff(data0.splitlines(True), data1.splitlines(True), src0, src1, n=5)
-    return ''.join(ud)
+#BACKUP_DB_FILE="BackupRestoreTest.db"
+BACKUP_DB_FILE=""
+DUMP_BEFORE="data-before"
+DUMP_AFTER="data-after"
 
 def _sleep(n):
     print "Sleep %s..." % n
     time.sleep(n)
+
+
+def _clearDumps():
+    for name in (DUMP_BEFORE, DUMP_AFTER, BACKUP_DB_FILE):
+        try:
+            if name is not None and name != '':
+                os.remove(name)
+        except Exception:
+            pass
+
+
+def _saveDump(name, data, mode = "t"):
+    if name is not None and name != '':
+        try:
+            with open(name, "w"+mode) as f:
+                print >>f, data
+        except Exception as err:
+            print "WARNING: failed to store FullInfo dump into file %s: %r" % (name, err)
+
 
 class DBTest(StorageBasedTest):
 
@@ -44,6 +61,12 @@ class DBTest(StorageBasedTest):
         '{88b807ab-0a0f-800e-e2c3-b640b31f3a1c}',
     ]
 
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._stopped.clear() # do not start at the end
+        super(DBTest, cls).tearDownClass()
+
     @classmethod
     def _global_clear_extra_args(cls, num):
         return ()
@@ -62,18 +85,19 @@ class DBTest(StorageBasedTest):
         answers = [self._server_request(n, func, unparsed=True) for n in xrange(self.num_serv)]
         diff = compareJson(answers[0][0], answers[1][0])
         if diff.hasDiff():
-            textdiff = _textdiff(answers[0][1], answers[1][1], self.sl[0], self.sl[1])
-            self.fail("Servers responses on %s are different: %s\nTextual diff results:\n%s" % (func, diff.errorInfo(), textdiff))
+            diffresult = textdiff(answers[0][1], answers[1][1], self.sl[0], self.sl[1])
+            self.fail("Servers responses on %s are different: %s\nTextual diff results:\n%s" % (func, diff.errorInfo(), diffresult))
 
     def BackupRestoreTest(self):
         """ Check if backup/restore preserve all necessary data. """
+        _clearDumps()
         getInfoFunc = 'ec2/getFullInfo?extraFormatting'
         fulldataBefore = self._server_request(0, getInfoFunc, unparsed=True)
-        with open("data-before", "w") as f:
-            print >>f, fulldataBefore[1]
+        _saveDump(DUMP_BEFORE, fulldataBefore[1])
         resp = self._server_request(0, 'ec2/dumpDatabase?format=json')
         #print "DEBUG: Returned data size: %s" % len(resp['data'])
         backup = resp['data']
+        _saveDump(BACKUP_DB_FILE, backup, "b")
         _sleep(15)
         # Now change DB data -- add a camera
         #self._add_test_camera(0)
@@ -98,11 +122,10 @@ class DBTest(StorageBasedTest):
                 time.sleep(1)
                 continue
             break
-        with open("data-after", "w") as f:
-            print >>f, fulldataAfter[1]
+        _saveDump(DUMP_AFTER, fulldataAfter[1])
         if diff.hasDiff():
             print "DEBUG: compareJson has found differences: %s" % (diff.errorInfo(),)
-            textdiff = _textdiff(fulldataBefore[1], fulldataAfter[1], "Before", "After")
-            self.fail("Servers responses on %s are different:\n%s" % (getInfoFunc, textdiff))
+            diffresult = textdiff(fulldataBefore[1], fulldataAfter[1], "Before", "After")
+            self.fail("Servers responses on %s are different:\n%s" % (getInfoFunc, diffresult))
         else:
             print "Success after %.1f seconds" % (time.time() - start,)

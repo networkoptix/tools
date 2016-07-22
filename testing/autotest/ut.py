@@ -319,7 +319,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                         output.extend(ToSend.lines)
                 else:
                     result_list.append(('ut:'+name, True))
-                    debug("OK for the '%s' test suite", name)
+                    log("OK for the '%s' test suite", name)
         #TODO add some `except`s?
         finally:
             if UtContainer:

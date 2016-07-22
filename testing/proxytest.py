@@ -9,7 +9,7 @@ import json
 import time
 from collections import namedtuple
 import traceback
-from functest_util import JsonDiff, compareJson, get_server_guid, real_caps
+from functest_util import JsonDiff, compareJson, get_server_guid, real_caps, textdiff
 from testbase import FuncTestError
 
 _MAIN_HOST = '192.168.109.8:7001'
@@ -33,7 +33,7 @@ def _prepareLoader(hosts):
         raise FuncTestError("can't install a password manager: %s" % (traceback.format_exc(),))
 
 
-Result = namedtuple('Result', ['func', 'server', 'redirect', 'data', 'length'])
+Result = namedtuple('Result', ['func', 'server', 'redirect', 'rawdata', 'data', 'length'])
 def _req_str(self):
     return (
         "direct request to %s" % self.server
@@ -52,12 +52,14 @@ def compareResults(a, b):
         raise AssertionError("The test is broken! Trying to compare different functions results: %s and %s" %
                              (a.funcm, b.func))
     if a.length != b.length:
-        raise FuncTestError("Function %s. Different data lengths returned by %s (%s) and %s (%s)" %
+        print ("Function %s. Different data lengths returned by %s (%s) and %s (%s)" %
                             (a.func, a.req_str(), a.length, b.req_str(), b.length))
+        # dont raise because we want to show diff
     diff = compareJson(a.data, b.data)
     if diff.hasDiff():
-        raise FuncTestError("Function %s. Diferent responses for %s and %s: %s" %
-                            (a.func, a.req_str(), b.req_str(), diff.errorInfo()))
+        diffresult = textdiff(a.rawdata, b.rawdata, a.req_str(), b.req_str())
+        raise FuncTestError("Function %s. Diferent responses for %s and %s: %s\nText diff:\n%s" %
+                            (a.func, a.req_str(), b.req_str(), diff.errorInfo(), diffresult))
 
 
 class ProxyTest(object):
@@ -89,9 +91,9 @@ class ProxyTest(object):
             if content_len != len(data):
                 raise FuncTestError(
                     "Wrong result %s: resulting data len: %s. Content-Length: %s" % (action, len(data), content_len))
-            return Result(func, peer, redirectTo, json.loads(data), content_len)
-        except HTTPException:
-            raise FuncTestError("error " + action)
+            return Result(func, peer, redirectTo, data, json.loads(data), content_len)
+        except HTTPException as err:
+            raise FuncTestError("error " + action, err)
 
     def run(self):
         print "\n======================================="
