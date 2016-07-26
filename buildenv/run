@@ -88,9 +88,9 @@ PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/linux-x64/
 BIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/
 
 if [ "`uname -s`" = "Darwin" ]; then
-    export DYLD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.0/lib
+    export DYLD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.1/lib
 else
-    export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.0/lib
+    export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.1/lib
 fi
 export VMS_PLUGIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/plugins/
 
@@ -131,4 +131,5 @@ do
     if [ -z "$LOOP" ] ; then
         break
     fi
+    sleep 1
 done
