@@ -65,7 +65,7 @@ def RunTests(testclass, config, *args):
                 .run(
                     TestLoader().load(testclass, suit_name, config, *args)
                 ).wasSuccessful()
-                for suit_name in testclass.iter_suits()
+                for suit_name in testclass.iter_suites()
             ] )
     finally:
         testclass.globalFinalise()
@@ -83,7 +83,7 @@ class FuncTestCase(unittest.TestCase):
     _stopped = set()
     _worker = None
     _suits = ()
-    _init_suits_done = False
+    _init_suites_done = False
     _serv_version = None  # here I suppose that all servers being created from the same image have the same version
     before_2_5 = False # TODO remove it!
     _test_name = '<UNNAMED!>'
@@ -102,7 +102,7 @@ class FuncTestCase(unittest.TestCase):
         if config is None:
             raise FuncTestError("%s can't be configured, config is None!" % cls.__name__)
         cls.config = config
-        cls.init_suits()
+        cls.init_suites()
         if not cls.num_serv:
             raise FuncTestError("%s hasn't got a correct num_serv value" % cls.__name__)
         cls._worker = ClusterLongWorker(cls.num_serv)
@@ -155,26 +155,26 @@ class FuncTestCase(unittest.TestCase):
     ################################################################################
     # These 3 methods used in a caller (see the RunTests and functest.CallTest funcions)
     @classmethod
-    def _check_suits(cls):
+    def _check_suites(cls):
         if not cls._suits:
             raise RuntimeError("%s's test suits list is empty!" % cls.__name__)
 
     @classmethod
-    def iter_suits(cls):
-        cls._check_suits()
+    def iter_suites(cls):
+        cls._check_suites()
         return (s[0] for s in cls._suits)
 
     @classmethod
-    def init_suits(cls):
+    def init_suites(cls):
         "Called by RunTests, prepares attributes with suits names contaning test cases names"
-        if cls._init_suits_done:
+        if cls._init_suites_done:
             return
-        cls._check_suits()
+        cls._check_suites()
         for name, tests in cls._suits:
             if hasattr(cls, name):
                 raise AssertionError("Test suite naming error: class %s already has attrinute %s" % (cls.__name__, name))
             setattr(cls, name, tests)
-        cls._init_suits_done = True
+        cls._init_suites_done = True
 
     ################################################################################
 
@@ -375,6 +375,7 @@ class FuncTestCase(unittest.TestCase):
     #    print "*** Setting up: %s" % self._testMethodName  # may be used for debug ;)
     ####################################################
 
+
 class LegacyTestWrapper(FuncTestCase):
     """
     Provides an object to use virtual box control methods
@@ -404,7 +405,7 @@ class LegacyTestWrapper(FuncTestCase):
             self._worker.stopWork()
 
     @classmethod
-    def init_suits(cls):
+    def init_suites(cls):
         "A dummy method since the original one will fail in globalInit()"
         pass
 

@@ -14,6 +14,7 @@ import subprocess
 #import traceback
 import uuid
 from pipes import quote as shquote
+from functools import wraps
 
 import pprint
 
@@ -23,9 +24,11 @@ from testbase import *
 mypath = os.path.dirname(os.path.abspath(sys.argv[0]))
 multiserv_interfals_fname = os.path.join(mypath, "multiserv_intervals.py")
 
+
 BACKUP_STORAGE_READY_TIMEOUT = 60  # seconds
 BACKUP_START_TIMEOUT = 20  # seconds
 BACKUP_MAX_DURATION = 60  #seconds
+STORAGE_INIT_TIMEOUT=5
 
 _NUM_SERV_BAK = 1
 _NUM_SERV_MSARCH = 2
@@ -80,6 +83,20 @@ def _mk_id(uniqId):
     h = hashlib.md5(uniqId).hexdigest()
     return '-'.join((h[:8],h[8:12],h[12:16],h[16:20],h[20:]))
 
+
+def checkInit(meth):
+    @wraps(meth)
+    def w(self, *args, **kwargs):
+        if self._initFailed:
+            self.skipTest("not initialized")
+        return meth(self, *args, **kwargs)
+    return w
+
+
+def _parseStoreages(response):
+    return [s for s in response["reply"]["storages"] if s['storageType'] == 'local']
+
+
 class StorageBasedTest(FuncTestCase):
     """ Some common logic for storage tests.
     """
@@ -88,7 +105,7 @@ class StorageBasedTest(FuncTestCase):
     _fill_storage_script = ''
     test_camera_id = None
     test_camera_physical_id = None
-
+    _initFailed = False
 
     @classmethod
     def globalInit(cls, config):
@@ -96,11 +113,16 @@ class StorageBasedTest(FuncTestCase):
         cls.test_camera_id = [0 for _ in xrange(cls.num_serv)]
         cls.test_camera_physical_id = cls.test_camera_id[:]
 
-    def _load_storage_info(self):
+    def _load_storage_info(self, timeout=0):
         "Get servers' storage space data"
+        until = time.time() + timeout if timeout > 0 else 0
         for num in xrange(self.num_serv):
-            resp = self._server_request(num, 'api/storageSpace')
-            self._storages[num] = [s for s in resp["reply"]["storages"] if s['storageType'] == 'local']
+            st = None
+            while not st:
+                st = _parseStoreages(self._server_request(num, 'api/storageSpace'))
+                if not st and until and time.time() > until:
+                    raise AssertionError("No storages reroprted from server %s during %s seconds" % (num, timeout))
+            self._storages[num] = st
             #print "[DEBUG] Storages found:"
             #for s in self._storages[num]:
             #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
@@ -172,14 +194,28 @@ class StorageBasedTest(FuncTestCase):
     def _init_cameras(self):
         pass
 
-    def _InitialRestartAndPrepare(self):
+    def Initialization(self):
         """
         Common initial preparatioin code for subclasses
         Re-initialize with clear db, prepare a single camera data.
         """
-        self._prepare_test_phase(self._stop_and_init)
-        self._load_storage_info()
-        self._init_cameras()
+        try:
+            self._prepare_test_phase(self._stop_and_init)
+            self._load_storage_info(STORAGE_INIT_TIMEOUT)
+            self._init_cameras()
+            self._other_inits()
+        except Exception:
+            type(self)._initFailed = True
+            raise
+
+    def _other_inits(self):
+        "Specific initialization code for subclasses to be call under InitialRestartAndPrepare's try"
+        pass
+
+    def _checkInit(self):
+        if self._initFailed:
+            self.skipTest("not initialized")
+
 
     #def _has_camera(self, host, cameraName):
     #    "Checks if the host has already got a camera with such name"
@@ -206,7 +242,7 @@ class BackupStorageTest(StorageBasedTest):
 
     _suits = (
         ('BackupStartTests', [
-            'InitialRestartAndPrepare',
+            'Initialization',
             'ScheduledBackupTest',
             'BackupByRequestTest',
         ]),
@@ -291,11 +327,10 @@ class BackupStorageTest(StorageBasedTest):
 
     ################################################################
 
-    def InitialRestartAndPrepare(self):
-        "Re-initialize with clear db, prepare a single camera data and add a backup storage"
-        self._InitialRestartAndPrepare()
+    def _other_inits(self):
         self._create_backup_storage(_WORK_HOST)
 
+    @checkInit
     def ScheduledBackupTest(self):
         "In fact it tests that scheduling backup for a some moment before the current initiates backup immidiately."
         data = SERVER_USER_ATTR.copy()
@@ -317,6 +352,7 @@ class BackupStorageTest(StorageBasedTest):
         self._wait_backup_end()
         self._check_backup_result()
 
+    @checkInit
     def BackupByRequestTest(self):
         data = SERVER_USER_ATTR.copy()
         data['serverID'] = self.guids[_WORK_HOST]
@@ -342,7 +378,7 @@ class MultiserverArchiveTest(StorageBasedTest):
 
     _suits = (
         ('MultiserverArchiveTest', [
-            'InitialRestartAndPrepare',
+            'Initialization',
             'CheckArchiveMultiserv',
             'CheckArchivesSeparated',
         ]),
@@ -390,9 +426,7 @@ class MultiserverArchiveTest(StorageBasedTest):
 
     ################################################################
 
-    def InitialRestartAndPrepare(self):
-        "Re-initialize with clear db, prepare a single camera data and fill the storage with video data"
-        self._InitialRestartAndPrepare()
+    def _other_inits(self):
         print "Filling archives with data..."
         for num in xrange(_NUM_SERV_MSARCH):
             self._fill_storage('multiserv', num, str(num))
@@ -403,6 +437,7 @@ class MultiserverArchiveTest(StorageBasedTest):
         type(self).time_periods_joined = tmp['time_periods_joined']
         time.sleep(20)
 
+    @checkInit
     def CheckArchiveMultiserv(self):
         "Checks recorded time periods for both servers joined into one system."
         answer = [self._getRecordedTime(num) for num in xrange(self.num_serv)]
@@ -427,6 +462,7 @@ class MultiserverArchiveTest(StorageBasedTest):
         self.assertEqual(info1['reply']['systemName'], newname, "Failed to give server 1 new system name")
         self.assertNotEqual(info0['reply']['systemName'], newname, "Server 0 system name also has changed")
 
+    @checkInit
     def CheckArchivesSeparated(self):
         self._splitSystems()
         answer = [[], []]
