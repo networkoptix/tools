@@ -485,3 +485,13 @@ class TimeSyncTest(FuncTestCase):
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after the previous primary's system time changed.")
 
+
+class TimeSyncNoInetTest(TimeSyncTest):
+    "TimeSyncTest with only SyncTimeNoInetTests suite"
+    _suits = TimeSyncTest.filterSuites('SyncTimeNoInetTests')
+
+
+class TimeSyncWithInetTest(TimeSyncTest):
+    "TimeSyncTest with only InetTimeSyncTests suite"
+    _suits = TimeSyncTest.filterSuites('InetTimeSyncTests')
+

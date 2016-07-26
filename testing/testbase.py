@@ -375,6 +375,10 @@ class FuncTestCase(unittest.TestCase):
     #    print "*** Setting up: %s" % self._testMethodName  # may be used for debug ;)
     ####################################################
 
+    @classmethod
+    def filterSuites(cls, *names):
+        return tuple(sw for sw in cls._suits if sw[0] in names)
+
 
 class LegacyTestWrapper(FuncTestCase):
     """

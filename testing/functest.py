@@ -22,7 +22,7 @@ from generator import *
 from testbase import RunTests as RunBoxTests, LegacyTestWrapper, FuncTestMaster, getTestMaster, UnitTestRollback
 from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
 from sysname_test import SystemNameTest
-from timetest import TimeSyncTest
+from timetest import TimeSyncTest, TimeSyncNoInetTest, TimeSyncWithInetTest
 from stortest import BackupStorageTest, MultiserverArchiveTest
 from streaming_test import StreamingTest, HlsOnlyTest
 from natcon_test import NatConnectionTest
@@ -1564,6 +1564,8 @@ SimpleTestKeys = {
 # Tests to be run on the vargant boxes, separately or within the autotest sequence
 BoxTestKeys = {
     '--timesync': TimeSyncTest,
+    '--ts-noinet': TimeSyncNoInetTest,
+    '--ts-inet': TimeSyncWithInetTest,
     '--bstorage': BackupStorageTest,
     '--msarch': MultiserverArchiveTest,
     '--natcon': NatConnectionTest,
