@@ -29,7 +29,7 @@ do
         RUN_ARGS_SPECIFIED=$((RUN_ARGS_SPECIFIED+1))
     fi
 
-    if [ $i == "-h" -o $i == "--help"  ] ; then
+    if [ $i == "-rh" -o $i == "--run-help"  ] ; then
         printHelp
         exit 0
     elif [ "$i" == "--run-loop" ] ; then
