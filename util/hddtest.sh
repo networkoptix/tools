@@ -8,10 +8,10 @@ data_dir='test_data'
 test_file_prefix='test_file'
 
 function test_if_integer {
-    if ! [[ $1 =~ $num_re ]] ; then
-        return 0
+    if [[ $1 =~ $num_re ]] ; then
+        echo 1
     else
-        return 1
+        echo 0
     fi
 }
 
@@ -28,7 +28,7 @@ while test $# -gt 0; do
             ;;
         --block-size)
             shift
-            if test $# -gt 0 && ! test_if_integer $1; then
+            if test $# -gt 0 && [ $(test_if_integer $1) -eq 1 ] ; then
                 block_size=$1
             else
                 echo "block size not specified or in the wrong format"
@@ -38,7 +38,7 @@ while test $# -gt 0; do
             ;;
         --thread-count)
             shift
-            if test $# -gt 0 && ! test_if_integer $1; then
+            if test $# -gt 0 && [ $(test_if_integer $1) -eq 1 ] ; then
                 thread_count=$1
             else
                 echo "thread count not specified or in the wrong format"
@@ -48,7 +48,7 @@ while test $# -gt 0; do
             ;;
         --write-count)
             shift
-            if test $# -gt 0 && ! test_if_integer $1; then
+            if test $# -gt 0 && [ $(test_if_integer $1) -eq 1 ] ; then
                 write_count=$1
             else
                 echo "write count not specified or in the wrong format"
