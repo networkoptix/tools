@@ -14,10 +14,13 @@ from stortest import StorageBasedTest
 NUM_SERV=2
 SERVERS_MERGE_WAIT=20
 BACKUP_RESTORE_TIMEOUT=40
+REALM_FIX_TIMEOUT=10
 #BACKUP_DB_FILE="BackupRestoreTest.db"
 BACKUP_DB_FILE=""
 DUMP_BEFORE="data-before"
 DUMP_AFTER="data-after"
+
+EXPECTED_REALM="networkoptix"
 
 def _sleep(n):
     print "Sleep %s..." % n
@@ -80,6 +83,26 @@ class DBTest(StorageBasedTest):
         self._prepare_test_phase(self._stop_and_init)
         print "Wait %s seconds for server to upgrade DB and merge data..." % SERVERS_MERGE_WAIT
         time.sleep(SERVERS_MERGE_WAIT)
+        print "Ensure the old realm used..."
+        realmNotReady = set(xrange(self.num_serv))
+        until = time.time() + REALM_FIX_TIMEOUT
+        while realmNotReady:
+            for server in realmNotReady.copy():
+                data = self._server_request(server, "api/getNonce?userName=admin")
+                #print "Response: %s" % (data,)
+                try:
+                    realm = data['reply']['realm']
+                except Exception:
+                    continue
+                if realm == EXPECTED_REALM:
+                    realmNotReady.discard(server)
+            if realmNotReady:
+                if time.time() >= until:
+                    self.assertFalse(realmNotReady,
+                                     "Servers %s didn't fixed HTTP digest realm in %s seconds"
+                                      % (list(realmNotReady), REALM_FIX_TIMEOUT))
+                #print "Time to fix %.1f" % (until - time.time())
+                time.sleep(0.5)
         print "Now check the data"
         func = 'ec2/getFullInfo?extraFormatting'
         answers = [self._server_request(n, func, unparsed=True) for n in xrange(self.num_serv)]
