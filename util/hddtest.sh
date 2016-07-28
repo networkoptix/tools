@@ -1,3 +1,5 @@
+#!/bin/bash
+
 block_size='4096'
 write_count=10
 thread_count=10
