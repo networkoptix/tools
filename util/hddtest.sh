@@ -1,3 +1,5 @@
+#!/bin/bash
+
 block_size='4096'
 write_count=10
 thread_count=10
@@ -71,7 +73,10 @@ rm -rf ${data_dir}
 mkdir ${data_dir}
 
 for i in $(seq -w 1 $thread_count); do
-    { echo $(date +'%d%b%y:%H:%M:%S') $i; time dd if=/dev/zero of=${data_dir}/${test_file_prefix}$i bs=${block_size}k count=$write_count; } 2>&1 | paste -s -d " " | tr "\t" " " | tr -s " " | cut -d ' ' -f -1,11-17 >> $outfile &
+    { 
+        echo $(date +'%d%b%y:%H:%M:%S') $i; 
+        time dd if=/dev/zero of=${data_dir}/${test_file_prefix}$i bs=${block_size}k count=$write_count; 
+    } 2>&1 | paste -s -d " " | tr "\t" " " | tr -s " " | cut -d ' ' -f -1,11-17 >> $outfile &
 done
 wait
 
