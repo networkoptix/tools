@@ -7,7 +7,13 @@ import errno, os, shutil, signal, sys, time, traceback
 from subprocess import Popen, call as subcall, check_output, check_call, STDOUT
 
 from .logger import debug
-conf = sys.modules['__main__'].conf
+if hasattr(sys.modules['__main__'], 'conf'):
+    conf = sys.modules['__main__'].conf
+else:
+    class conf:  # just a substitution if tools imported not from auto.py run
+        SUDO = "/usr/bin/sudo"
+        RM = "/bin/rm"
+
 
 def _get_signals():
     d = {}
