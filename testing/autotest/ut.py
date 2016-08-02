@@ -5,12 +5,12 @@ __author__ = 'Danil Lavrentyuk'
 import os.path, re, sys, time
 import xml.etree.ElementTree as ET
 from subprocess import check_call, PIPE, STDOUT
-import shutil
+#import shutil
 import signal
 import traceback
 
 from .logger import debug, log, raw_log, ToSend
-from .tools import Process, kill_proc, SignalNames, Build
+from .tools import Process, kill_proc, clear_dir, SignalNames, Build
 
 from . import pipereader
 
@@ -20,7 +20,9 @@ main = sys.modules['__main__']
 conf = main.conf
 
 if conf.UT_USE_DOCKER:
-    from .utdocker import UtContainer
+    from .utdocker import UtDockerContainer as UtContainer
+elif conf.UT_USE_VAGRANT:
+    from .utvb import UtVirtualBox as UtContainer
 else:
     UtContainer = None
 
@@ -88,15 +90,7 @@ def check_temp_dir():
 
 def clear_temp_dir():
     if conf.UT_TEMP_DIR_SAFE:
-        if os.name == 'posix':
-            check_call([conf.SUDO, conf.RM, '-rf', os.path.join(conf.UT_TEMP_DIR,'*')])
-        else:
-            for entry in os.listdir(conf.UT_TEMP_DIR):
-                epath = os.path.join(conf.UT_TEMP_DIR, entry)
-                if os.path.isdir(epath):
-                    shutil.rmtree(epath, ignore_errors=True)
-                else:
-                    os.remove(epath)
+        clear_dir(conf.UT_TEMP_DIR)
 
 
 def validate_testpath(testpath):
@@ -231,6 +225,7 @@ def exec_unittest(testpath, branch, use_shuffle):
     :return: Process
     """
     cmd = [testpath]
+    kwargs = conf.SUBPROC_ARGS.copy()
     if (branch not in conf.UT_BRANCHES_NO_TEMP):
         if not UtContainer:
             if not conf.UT_TEMP_DIR:
@@ -239,12 +234,16 @@ def exec_unittest(testpath, branch, use_shuffle):
                 cmd.append('--tmp=' + conf.UT_TEMP_DIR)
                 if check_temp_dir():
                     clear_temp_dir()
-    elif UtContainer:  # in container we pass 'notmp' to runut.sh to not use --tmp
+    elif UtContainer.notmp:  # in container we pass 'notmp' to runut.sh to not use --tmp
         cmd.append('notmp')  # it must be the first arg after the unittest name!
     if use_shuffle:
         cmd.append('--gtest_shuffle')
     if UtContainer:
-        cmd = UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, *cmd)
+        cmd = UtContainer.makeCmd(UtContainer.getWrapper(), *cmd)
+        try:
+            del kwargs['cwd']
+        except KeyError:
+            pass
     elif os.name == 'posix' and (os.path.basename(testpath) in conf.SUDO_REQUIRED):
         # sudo is required since some unittest start server
         # also we're to pass LD_LIBRARY_PATH through command line because LD_* env varsn't passed to suid processes
@@ -252,7 +251,7 @@ def exec_unittest(testpath, branch, use_shuffle):
     if not UtContainer:
         debug("Calling %s with LD_LIBRARY_PATH=%s", os.path.basename(testpath), main.Env['LD_LIBRARY_PATH'])
     debug("Command line: %s", cmd)
-    return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=main.Env, **conf.SUBPROC_ARGS)
+    return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=main.Env, **kwargs)
 
 
 def call_unittest(suitname, reader, branch):

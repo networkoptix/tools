@@ -148,10 +148,10 @@ function db_ctl {
             nxedconf serverGuid "$2"
             nxedconf guidIsHWID no
             cp "$SERVCONF" "$SERVCONF.copy"
-            setLogLevel 2
+            setLogLevel $debugLevel
             ;;
         clear)
-            nxcleardb
+            # nxcleardb  # not used, this test doesn't call clear
             ;;
         *) echo "Unknown mode '${mode}' for dbup test control"
     esac

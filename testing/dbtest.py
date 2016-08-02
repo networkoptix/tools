@@ -15,7 +15,7 @@ NUM_SERV=2
 SERVERS_MERGE_WAIT=20
 BACKUP_RESTORE_TIMEOUT=40
 REALM_FIX_TIMEOUT=10
-#BACKUP_DB_FILE="BackupRestoreTest.db"
+#BACKUP_DB_FILE="BackupRestoreTest.db.sqlite"
 BACKUP_DB_FILE=""
 DUMP_BEFORE="data-before"
 DUMP_AFTER="data-after"
@@ -114,35 +114,38 @@ class DBTest(StorageBasedTest):
     def BackupRestoreTest(self):
         """ Check if backup/restore preserve all necessary data. """
         _clearDumps()
+        WORK_HOST = 0  # which server do we check with backup/restore
         getInfoFunc = 'ec2/getFullInfo?extraFormatting'
-        fulldataBefore = self._server_request(0, getInfoFunc, unparsed=True)
+        fulldataBefore = self._server_request(WORK_HOST, getInfoFunc, unparsed=True)
         _saveDump(DUMP_BEFORE, fulldataBefore[1])
-        resp = self._server_request(0, 'ec2/dumpDatabase?format=json')
+        #raw_input("Before dump...")
+        resp = self._server_request(WORK_HOST, 'ec2/dumpDatabase?format=json')
         #print "DEBUG: Returned data size: %s" % len(resp['data'])
         backup = resp['data']
         _saveDump(BACKUP_DB_FILE, backup, "b")
-        _sleep(15)
+        _sleep(5)
         # Now change DB data -- add a camera
-        #self._add_test_camera(0)
-        #_sleep(15)
+        self._add_test_camera(0)
+        _sleep(10)
         #
-        self._server_request(0, 'ec2/restoreDatabase', data={'data': backup})
+        #raw_input("Before restore...")
+        self._server_request(WORK_HOST, 'ec2/restoreDatabase', data={'data': backup})
         save_guids = self.guids[:]
         _sleep(15)
         self._wait_servers_up()
         self.assertSequenceEqual(save_guids, self.guids,
             "Server guids have changed after restore: %s -> %s" % (save_guids, self.guids))
-        _sleep(5)
+        _sleep(10)
         start = time.time()
         stop = start + BACKUP_RESTORE_TIMEOUT
         cnt = 1
         while True:
-            fulldataAfter = self._server_request(0, getInfoFunc, unparsed=True)
+            fulldataAfter = self._server_request(WORK_HOST, getInfoFunc, unparsed=True)
             diff = compareJson(fulldataBefore[0], fulldataAfter[0])
             if diff.hasDiff() and time.time() < stop:
                 print "Try %d failed" % cnt
                 cnt += 1
-                time.sleep(1)
+                time.sleep(1.5)
                 continue
             break
         _saveDump(DUMP_AFTER, fulldataAfter[1])

@@ -1,10 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require_relative 'boxes.rb'
+require_relative '../boxes.rb'
 
 Vagrant.configure("2") do |config|
-  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20160725.box"
+  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20160802.box"
   config.vm.box = "autotest"
   config.ssh.forward_agent = true
 
@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
 #       vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
     end
 #    box1.vm.network "public_network", bridge: "eth0"
-    box1.vm.network :private_network, ip: "192.168.109.8"
+    box1.vm.network :private_network, ip: IPs::Box1
     box1.vm.provision :shell, :path => "bootstrap.sh", :args => [Boxes::Box1, "nontp"] # , :name => Boxes::Box1
   end
 
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
 #        vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
     end
 #    box2.vm.network "public_network", bridge: "eth0"
-    box2.vm.network :private_network, ip: "192.168.109.9"
+    box2.vm.network :private_network, ip: IPs::Box2
     box2.vm.provision :shell, :path => "bootstrap.sh", :args => [Boxes::Box2, "nontp"] # , :name => Boxes::Box2
   end
 
@@ -48,8 +48,8 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--name", Boxes::Nat]
         vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
     end
-    boxnat.vm.network :private_network, ip: "192.168.109.10"
-    boxnat.vm.network :private_network, ip: "192.168.110.2"
+    boxnat.vm.network :private_network, ip: IPs::Nat
+    boxnat.vm.network :private_network, ip: IPs::Nat2
     # note: no mediaserver installation, this box is just a NAT
     boxnat.vm.provision :shell, :path => "btr_nat.sh", :args => Boxes::Nat
   end
@@ -58,7 +58,7 @@ Vagrant.configure("2") do |config|
     boxbehind.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--name", Boxes::Behind]
     end
-    boxbehind.vm.network :private_network, ip: "192.168.110.3"
+    boxbehind.vm.network :private_network, ip: IPs::Behind
     # note: no mediaserver installation, only after eth0 goes down
     boxbehind.vm.provision :shell, :path => "bootstrap.sh", :args => Boxes::Behind
   end

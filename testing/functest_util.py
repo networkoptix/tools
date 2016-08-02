@@ -699,6 +699,7 @@ class ClusterLongWorker(ClusterWorker):
 def quote_guid(guid):
     return guid if guid[0] == '{' else "{" + guid + "}"
 
+
 def unquote_guid(guid):
     return guid[1:-1] if guid[0] == '{' and guid[-1] == '}' else guid
 

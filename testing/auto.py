@@ -1685,6 +1685,14 @@ def updateBoxesNames():
 module Boxes"""
             for name, value in conf.BOX_NAMES.iteritems():
                 print >>out, '    %s = "%s"' % (name, value)
+            if hasattr(conf, "UT_BOX_NAME"):
+                print >>out, '    %s = "%s"' % (conf.UT_BOX_VAR, conf.UT_BOX_NAME)
+            print >>out, "end"
+            print >>out, "module IPs"
+            for name, value in conf.BOX_IP.iteritems():
+                print >>out, '    %s = "%s"' % (name, value)
+            if hasattr(conf, "UT_BOX_IP"):
+                print >>out, '    %s = "%s"' % (conf.UT_BOX_VAR, conf.UT_BOX_IP)
             print >>out, "end"
             print >>out, "# Created at %s" % (time.asctime())
 
@@ -1733,16 +1741,16 @@ def main():
         return True
 
     if Args.utcont:
+        #FIXME!!! cover vagrant case too!
         debug("Just creating a docker container for unittests")
-        from autotest.utdocker import UtContainer
+        from autotest.utdocker import UtDockerContainer as UtContainer
         Build.load_vars(conf, Env)
         UtContainer.init(Build)
         print "Use this command to run unittests:"
-        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR','TEST', 'COMMAND'))
+        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR', 'TEST', 'COMMAND'))
         return True
 
-    if not Args.no_functest:
-        updateBoxesNames()
+    updateBoxesNames()
 
     if Args.showboxes:
         show_boxes()

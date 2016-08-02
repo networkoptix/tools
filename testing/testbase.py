@@ -10,7 +10,10 @@ import time
 import json
 import traceback
 
-from functest_util import ClusterLongWorker, unquote_guid, Version, FtConfigParser, checkResultsEqual, ManagerAddPassword, SafeJsonLoads
+from autotest.tools import boxssh
+
+from functest_util import ClusterLongWorker, unquote_guid, Version, FtConfigParser,\
+                          checkResultsEqual, ManagerAddPassword, SafeJsonLoads
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -26,13 +29,6 @@ _testMaster = None  # type: FuncTestMaster
 
 class FuncTestError(AssertionError):
     pass
-
-
-def boxssh(box, command):
-    return subprocess.check_output(
-        ['./vssh.sh', box, 'sudo'] + list(command),
-        shell=False, stderr=subprocess.STDOUT
-    )
 
 
 class TestLoader(unittest.TestLoader):

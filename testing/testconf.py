@@ -102,13 +102,16 @@ MVN_BUILD_CONFIG = 'release'
 TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
 
 # docker usage options
-UT_USE_DOCKER = True  # use diocker container for unittests
+UT_USE_DOCKER = False  # use diocker container for unittests
 DOCKER_REGISTRY = "la.hdw.mx:5000"
 DOCKER_IMAGE_NAME = "la.hdw.mx:5000/nxvms-ut:latest"
 #DOCKER_CONTAINER_NAME = "ut"
 DOCKER_COPIER = "./cp2cont.sh"  # the path to script that copies all unittests binaries and libs into the container
 DOCKER_DIR = "/opt"  # the container internal path where to put and run all unittests
-DOCKER_UT_WRAPPER = DOCKER_DIR + "/" + "runut.sh"  # a shell script to execute a unittest in the container
+UT_WRAPPER = "runut.sh"  # script used to run _ut both in docker and vagrant
+DOCKER_UT_WRAPPER = DOCKER_DIR + "/" + UT_WRAPPER  # a shell script to execute a unittest in the container
+
+UT_USE_VAGRANT = True
 
 BOX_NAMES = {
     "Box1": "box1",
@@ -121,8 +124,17 @@ BOX_IP = { # IPs to check if mediaserver is up after a box goes up (boxes withou
     'Box1': '192.168.109.8',
     'Box2': '192.168.109.9',
     'Nat': '192.168.109.10',
+    'Nat2': '192.168.110.2',  # the seconary iface of the Nat vm
     'Behind': '192.168.110.3',
 }
+
+UT_BOX_VAR = "Ut"  # used in BOXES_NAMES_FILE
+UT_BOX_NAME = "utbox"
+UT_BOX_IP = '192.168.101.2'
+UT_VAG_DIR = "./vagrant_ut"
+UT_VAG_UT_SUBDIR = "ut"
+#UT_VAG_TEMPDIR = UT_TEMP_DIR
+UT_BOX_TTL = 60 * 60 * 24 * 7  # How long the ut vm could run until it's restarted
 
 CHECK_BOX_UP = frozenset(['Box1', 'Box2', 'Behind'])
 
@@ -130,7 +142,7 @@ BOX_POST_START = {
     'Behind': 'post-create-behind-nat.sh'
 }
 
-BOXES_NAMES_FILE = os.path.join(VAG_DIR, 'boxes.rb')
+BOXES_NAMES_FILE = './boxes.rb'  # os.path.join(VAG_DIR, 'boxes.rb')
 
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
@@ -175,3 +187,7 @@ try:
     from testconf_local import *
 except ImportError:
     pass
+
+# Some SELF-checks
+if UT_USE_DOCKER and UT_USE_VAGRANT:
+    raise AssertionError("BAD CONFIGURATION: both UT_USE_DOCKER and UT_USE_VAGRANT are True!")

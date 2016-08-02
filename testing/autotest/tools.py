@@ -3,10 +3,11 @@
 """
 __author__ = 'Danil Lavrentyuk'
 
-import errno, os, signal, sys, time, traceback
-from subprocess import Popen, call as subcall
+import errno, os, shutil, signal, sys, time, traceback
+from subprocess import Popen, call as subcall, check_output, check_call, STDOUT
 
 from .logger import debug
+conf = sys.modules['__main__'].conf
 
 def _get_signals():
     d = {}
@@ -84,8 +85,10 @@ class Build(object): #  contains some build-dependent global variables
     qt_lib = ''
 
     @classmethod
-    def load_vars(cls, conf, env, safe=False):
+    def load_vars(cls, conf, env=None, safe=False):
         _vars = dict()
+        if env is None:
+            env = os.environ.copy()
         try:
             execfile(conf.BUILD_CONF_PATH, _vars)
         except IOError as err:
@@ -113,4 +116,22 @@ class Build(object): #  contains some build-dependent global variables
         cls.lib_path = ''
         cls.qt_lib = ''
 
+
+def boxssh(box, command):
+    return check_output(
+        ['./vssh.sh', box, 'sudo'] + list(command),
+        shell=False, stderr=STDOUT
+    )
+
+
+def clear_dir(path):
+    if os.name == 'posix':
+        check_call([conf.SUDO, conf.RM, '-rfv', os.path.join(path,'*')], shell=False)
+    else:
+        for entry in os.listdir(path):
+            epath = os.path.join(path, entry)
+            if os.path.isdir(epath):
+                shutil.rmtree(epath, ignore_errors=True)
+            else:
+                os.remove(epath)
 
