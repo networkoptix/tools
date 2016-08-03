@@ -131,13 +131,10 @@ def boxssh(box, command):
 
 
 def clear_dir(path):
-    if os.name == 'posix':
-        check_call([conf.SUDO, conf.RM, '-rfv', os.path.join(path,'*')], shell=False)
-    else:
-        for entry in os.listdir(path):
-            epath = os.path.join(path, entry)
-            if os.path.isdir(epath):
-                shutil.rmtree(epath, ignore_errors=True)
-            else:
-                os.remove(epath)
+    for entry in os.listdir(path):
+        epath = os.path.join(path, entry)
+        if os.path.isdir(epath):
+            shutil.rmtree(epath, ignore_errors=False)
+        else:
+            os.remove(epath)
 

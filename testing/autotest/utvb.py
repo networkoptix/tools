@@ -12,18 +12,14 @@ from subprocess import check_call, check_output #, call as subcall, CalledProces
 if __name__ == '__main__':
     from utcontainer import *
     from tools import clear_dir
+    from logger import debug, log, raw_log
     sys.path.append('.') #  just for debug runs
     import testconf as conf
 else:
     conf = sys.modules['__main__'].conf
     from .utcontainer import *
     from .tools import clear_dir
-
-
-def _copyLibs(libpath, dest):
-    for mask in ('*.so', '*.so.*'):
-        for fn in glob.iglob(os.path.join(libpath, mask)):
-            shutil.copy(fn, dest)
+    from .logger import debug, log, raw_log
 
 
 def _get_vm_uptime():
@@ -50,8 +46,8 @@ class UtVirtualBox(UtContainerBase):
             cls._subdir = os.path.join(conf.UT_VAG_DIR, conf.UT_VAG_UT_SUBDIR)
         if not os.path.isdir(cls._subdir):
             os.makedirs(cls._subdir)
-        _copyLibs(buildVars.lib_path, cls._subdir)
-        _copyLibs(buildVars.qt_lib, cls._subdir)
+        cls._copyLibs(buildVars.lib_path, cls._subdir)
+        cls._copyLibs(buildVars.qt_lib, cls._subdir)
         for fn in glob.iglob(os.path.join(buildVars.bin_path, "*_ut")):
             shutil.copy(fn, cls._subdir)
         shutil.copy(conf.UT_WRAPPER, cls._subdir)
@@ -60,6 +56,7 @@ class UtVirtualBox(UtContainerBase):
     @classmethod
     def done(cls):
         # 1. Clear _ut and libs
+        #debug("Clearing %s", cls._subdir)
         clear_dir(cls._subdir)
         # 2. ONCE A WEEK RESTART VM
         if _get_vm_uptime() > conf.UT_BOX_TTL:
@@ -67,8 +64,7 @@ class UtVirtualBox(UtContainerBase):
             try:
                 check_call(conf.VAGR_DESTROY + [conf.UT_BOX_NAME], shell=False, cwd=conf.UT_VAG_DIR)
             except Exception:
-                print "WARNING: failed to destroy VM: " + format_exc()
-
+                log("WARNING: failed to destroy VM: " + format_exc())
 
     @classmethod
     def _cmdPrefix(cls):
@@ -77,6 +73,20 @@ class UtVirtualBox(UtContainerBase):
     @classmethod
     def getWrapper(cls):
         return os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR, conf.UT_WRAPPER)
+
+    @classmethod
+    def _copyLibs(cls, libpath, dest):
+        vm_ut_dir = os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR)
+        for mask in ('*.so', '*.so.*'):
+            for fn in glob.iglob(os.path.join(libpath, mask)):
+                if os.path.islink(fn):
+                    check_call(cls._cmdPrefix() + ["ln", '-s',
+                        os.path.basename(os.readlink(fn)),
+                        os.path.join(vm_ut_dir, os.path.basename(fn))])
+                else:
+                    shutil.copyfile(fn, os.path.join(dest, os.path.basename(fn)))
+
+
 
 
 
