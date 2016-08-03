@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative '../boxes.rb'
+
+Vagrant.configure("2") do |config|
+  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20160802.box"
+  config.vm.box = "autotest"
+  config.ssh.forward_agent = true
+
+  #config.vm.provision :shell, :path => "bootstrap.sh"
+  #config.vm.provision :shell, :path => "bootstrap.sh", :args => "u14m1"
+  
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 512
+    vb.cpus = 4
+    vb.gui = false
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+    #vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--vram", "32"]
+  end
+
+  config.vm.define Boxes::Ut do |ut|
+    ut.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--name", Boxes::Ut]
+#       vb.customize ["modifyvm", :id, "--natnet1", "10.0.3/24"]
+    end
+#    ut.vm.network "public_network", bridge: "eth0"
+    ut.vm.network :private_network, ip: IPs::Ut
+    ut.vm.provision :shell, :path => "fix-hostname.sh", :args => Boxes::Ut
+  end
+
+end
