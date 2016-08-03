@@ -8,9 +8,11 @@ from ConfigParser import RawConfigParser
 import traceback
 import Queue
 import threading
+import difflib
 
 __all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
            'checkResultsEqual',
+           'textdiff',
            'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str', 'real_caps',
            'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
 
@@ -697,6 +699,7 @@ class ClusterLongWorker(ClusterWorker):
 def quote_guid(guid):
     return guid if guid[0] == '{' else "{" + guid + "}"
 
+
 def unquote_guid(guid):
     return guid[1:-1] if guid[0] == '{' and guid[-1] == '}' else guid
 
@@ -741,3 +744,9 @@ def args2str(args):
 def real_caps(str):
     "String's method capitalize makes lower all chars except the first. If it isn't desired - use real_caps."
     return (str[0].upper() + str[1:]) if len(str) else str
+
+
+def textdiff(data0, data1, src0, src1):
+    ud = difflib.unified_diff(data0.splitlines(True), data1.splitlines(True), src0, src1, n=5)
+    return ''.join(ud)
+

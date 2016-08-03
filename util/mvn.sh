@@ -26,7 +26,7 @@ if [[ "$1" = *c* ]]; then
     hg st -i | awk '{print$2}' | grep -Ev "\.pro\.user$" | xargs rm || true
 fi
 
-shift
+[[ "$@" ]] && shift
 mvn $ACTION -Dbuild.configuration=$CONF $OPTIONS $@
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")

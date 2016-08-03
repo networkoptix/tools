@@ -94,19 +94,19 @@ MODULES=()
 MODULE_BIN_PATH=()
 if [[ ! "$VERSION" < "2.6" ]]; then
     MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_fusion.so.$LIBVERSION.0.0)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so lib/$CONFIGURATION/libnx_fusion.so)
 fi
 
 MODULES+=(common)
-MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so.$LIBVERSION.0.0)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
 
 if [[ ! "$VERSION" < "2.6" ]]; then
     MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speech_synthesizer)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libudt.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_network.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libcloud_db_client.so.$LIBVERSION.0.0 lib/$CONFIGURATION/libnx_speech_synthesizer.a)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so lib/$CONFIGURATION/libudt.so lib/$CONFIGURATION/libnx_network.so lib/$CONFIGURATION/libcloud_db_client.so lib/$CONFIGURATION/libnx_speech_synthesizer.a)
 fi
 
 MODULES+=(appserver2)
-MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so.$LIBVERSION.0.0)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so)
 
 if [ "$CONF_PARAM_SET" == 1 ]; then
     if [ -z "$BOX" ]; then
@@ -162,27 +162,27 @@ fi
 if [ $WITH_MSERVER -eq 1 ]; then
     if [[ ! "$VERSION" < "2.6" ]]; then
         MODULES+=( common_libs/nx_email )
-        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_email.so.$LIBVERSION.0.0 )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_email.so )
     elif [[ ! "$VERSION" < "2.5" ]]; then
         MODULES+=( common_libs/nxemail )
-        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnxemail.so.$LIBVERSION.0.0 )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnxemail.so )
     fi
 
     if [[ ! "$VERSION" < "2.4" ]]; then
         MODULES+=( mediaserver_core )
-        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libmediaserver_core.so.$LIBVERSION.0.0 )
+        MODULE_BIN_PATH+=( lib/$CONFIGURATION/libmediaserver_core.so )
     fi
 fi
 
 if [[ ! "$VERSION" < "2.6" ]]; then
     MODULES+=(nx_cloud/libconnection_mediator nx_cloud/cloud_connect_test_util)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so.$LIBVERSION.0.0 bin/$CONFIGURATION/cloud_connect_test_util)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so bin/$CONFIGURATION/cloud_connect_test_util)
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [[ ! "$VERSION" < "2.6" ]]; then
         MODULES+=(nx_cloud/libcloud_db nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/libvms_gateway nx_cloud/vms_gateway)
-        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so.$LIBVERSION.0.0 bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator lib/$CONFIGURATION/libvms_gateway.so.$LIBVERSION.0.0 bin/$CONFIGURATION/vms_gateway)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator lib/$CONFIGURATION/libvms_gateway.so bin/$CONFIGURATION/vms_gateway)
     fi
 fi
 
@@ -195,7 +195,7 @@ if [ "$WITH_TEST" == 1 ]; then
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db_ut bin/$CONFIGURATION/connection_mediator_ut)
         else
             MODULES+=(nx_cloud/libconnection_mediator)
-            MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so.$LIBVERSION.0.0)
+            MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so)
         fi
         MODULES+=(unit_tests/nx_network_ut unit_tests/cloud_connectivity_ut unit_tests/utils_ut)
         MODULE_BIN_PATH+=(bin/$CONFIGURATION/nx_network_ut bin/$CONFIGURATION/cloud_connectivity_ut bin/$CONFIGURATION/utils_ut)
@@ -215,9 +215,9 @@ if [ "$CONF_PARAM_SET" == 0 ]; then
     if [ "$WITH_CLIENT" == 1 ]; then
         if [[ ! "$VERSION" < "2.4" ]]; then # >= 2.4
             MODULES+=( client.core )
-            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.core.so.$LIBVERSION.0.0 )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.core.so )
             MODULES+=( client )
-            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so.$LIBVERSION.0.0 )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so )
             MODULES+=( client.bin )
             MODULE_BIN_PATH+=( bin/$CONFIGURATION/client.bin )
         else  # < 2.4

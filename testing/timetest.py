@@ -198,7 +198,7 @@ class TimeSyncTest(FuncTestCase):
     def _check_systime_sync(self, boxnum, must_synchronize=True):
         tt = time.time() + (1 if must_synchronize else SYSTEM_TIME_NOTSYNC_SURE)
         timediff = 0
-        print "DEBUG2: %s checking for sync until %s" % (int(time.time()), int(tt))
+        print "DEBUG: now %s, checking for sync until %s" % (int(time.time()), int(tt))
         while time.time() < tt:
             timedata = self._request_gettime(boxnum)
             print "DEBUG: server time: %s, system time: %s" % (timedata['time'], timedata['boxtime'])
@@ -484,4 +484,14 @@ class TimeSyncTest(FuncTestCase):
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         self._check_time_sync()
         self.assertEqual(primary, self._primary, "The primary server changed after the previous primary's system time changed.")
+
+
+class TimeSyncNoInetTest(TimeSyncTest):
+    "TimeSyncTest with only SyncTimeNoInetTests suite"
+    _suits = TimeSyncTest.filterSuites('SyncTimeNoInetTests')
+
+
+class TimeSyncWithInetTest(TimeSyncTest):
+    "TimeSyncTest with only InetTimeSyncTests suite"
+    _suits = TimeSyncTest.filterSuites('InetTimeSyncTests')
 

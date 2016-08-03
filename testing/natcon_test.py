@@ -12,7 +12,7 @@ import urllib2 # FIXME remove it
 
 from functest_util import checkResultsEqual, HttpRequest
 from testbase import *
-from stortest import StorageBasedTest, TEST_CAMERA_ATTR, TEST_CAMERA_DATA
+from stortest import StorageBasedTest, TEST_CAMERA_ATTR, TEST_CAMERA_DATA, STORAGE_INIT_TIMEOUT
 from rtsptests import SingleServerRtspPerf, RtspStreamTest, SingleServerHlsTest, HlsStreamingTest #, Camera
 
 NUM_NAT_SERV = 2  # 2 mediaservers are used: 1st before NAT, 2rd - behind NAT
@@ -135,7 +135,7 @@ class NatConnectionTest(StorageBasedTest):  # (FuncTestCase):
     def TestRtspHttp(self):
         if self._prepared:
             self.skipTest("Test suite preparatoin failed")
-        self._load_storage_info()
+        self._load_storage_info(STORAGE_INIT_TIMEOUT)
         self._init_cameras()
         guids = self.guids[0:2]
         guids.reverse()  # to ask another server's data from each server
