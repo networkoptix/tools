@@ -16,4 +16,4 @@ export qt_CXXFLAGS="-fno-omit-frame-pointer"
 #export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
 export openssl_CFLAGS=-fPIC
 
-export ffmpeg_CONFIG_OPTIONS="--enable-armvfp --enable-neon --enable-decoder=mp3 --enable-encoder=aac --enable-encoder=pcm_mulaw --enable-encoder=g726 --enable-encoder=pcm_alaw --enable-demuxer=mp3"
+export ffmpeg_CONFIG_OPTIONS="--enable-neon --enable-decoder=mp3 --enable-encoder=aac --enable-encoder=pcm_mulaw --enable-encoder=g726 --enable-encoder=pcm_alaw --enable-demuxer=mp3  --enable-vdpau --enable-hwaccel=h264_vdpau --enable-decoder=h264_vdpau --extra-cflags=-I$HOME/develop/third_party/bpi"
