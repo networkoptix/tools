@@ -22,7 +22,7 @@ case $(uname) in
         SCRIPT_DIR=$(dirname $(readlink -e $0))
         ;;
     Darwin)
-        OS=macos
+        OS=macosx
         JOB_COUNT=$(($(sysctl -n hw.ncpu)+1))
         SCRIPT_DIR=$(dirname $0)
         ;;
@@ -952,7 +952,7 @@ function lame_prepareMvnArtifact()
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/debug/
     cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
 
-    if [ -d $INSTALL_DIR/bin -a $(ld -A $INSTALL_DIR/bin) ]; then
+    if [ -d $INSTALL_DIR/bin -a $(ls -A $INSTALL_DIR/bin) ]; then
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/debug/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
     fi
@@ -1746,13 +1746,10 @@ function rdep_deploy_artifact()
     fi
 
     #rdep does not provide release+debug like maven does, so remove debug (TODO: fix when it's changed)
-    rm -rf $RDEP_ARTF_DIR/lib/debug
-    mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
-    rm -rf $RDEP_ARTF_DIR/lib/release
-
-    rm -rf $RDEP_ARTF_DIR/bin/debug
-    [ -d $RDEP_ARTF_DIR/bin/release -a "$(ls -A $RDEP_ARTF_DIR/bin/release)" ] && mv $RDEP_ARTF_DIR/bin/release/* $RDEP_ARTF_DIR/bin
-    rm -rf $RDEP_ARTF_DIR/bin/release
+    rm -rf $RDEP_ARTF_DIR/{bin,lib}/debug
+    [ -d $RDEP_ARTF_DIR/lib/release ] && mv $RDEP_ARTF_DIR/lib/release/* $RDEP_ARTF_DIR/lib
+    [ -d $RDEP_ARTF_DIR/bin/release ] && mv $RDEP_ARTF_DIR/bin/release/* $RDEP_ARTF_DIR/bin
+    rm -r $RDEP_ARTF_DIR/{bin,lib}/release
 
     if [ ! -f $RDEP_ARTF_DIR/.rdpack ]; then
         echo "[General]" > $RDEP_ARTF_DIR/.rdpack
