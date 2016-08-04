@@ -1743,11 +1743,11 @@ def main():
     if Args.utcont:
         #FIXME!!! cover vagrant case too!
         debug("Just creating a docker container for unittests")
-        from autotest.utdocker import UtDockerContainer as UtContainer
+        UtContainer = ut.UtContainer
         Build.load_vars(conf, Env)
         UtContainer.init(Build)
         print "Use this command to run unittests:"
-        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR', 'TEST', 'COMMAND'))
+        print list2cmdline(UtContainer.makeCmd(UtContainer.getWrapper(), 'YOUR', 'TEST', 'COMMAND'))
         return True
 
     updateBoxesNames()
