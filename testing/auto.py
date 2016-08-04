@@ -313,12 +313,34 @@ def execute_maven(cmd, kwargs, last_lines):
     return proc.returncode
 
 
+def mvn_cmd(cmd, *args):
+    return [conf.MVN, cmd, "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG] + list(args)
+
+
+def call_maven_clean(unit_tests):
+    cmd = mvn_cmd("clean")
+    kwargs = conf.SUBPROC_ARGS.copy()
+    if unit_tests:
+        kwargs['cwd'] = os.path.join(kwargs["cwd"], conf.UT_SUBDIR)
+    try:
+        check_output(cmd, stderr=STDOUT, **kwargs)
+        return None
+    except CalledProcessError as err:
+        raw_log(err.output)
+        msg = "WARNING: 'mvn clean' call failed with code %s!" % err.returncode
+        log(msg)
+        return "\n".join((err.output, msg))
+
+
 def nothreads_rebuild(last_lines, branch, unit_tests):
     project, project_name = get_failed_project(last_lines)
     if not project_name:
         project_name = project
+    log("[ Calling mvn clean ]")
+    clean_res = call_maven_clean(unit_tests)
     log("[ Restarting maven in single thread mode after fail on '%s']", project_name)
-    if call_maven_build(branch, unit_tests, no_threads=True, project_name=project_name):
+    if call_maven_build(branch, unit_tests,
+                        no_threads=True, project_name=project_name, preOutput=clean_res):
         #! Project dependencies  error! Report but go on.
         emailBuildError(branch, last_lines, unit_tests, dep_error=project_name)
         return True
@@ -337,18 +359,17 @@ def nothreads_rebuild(last_lines, branch, unit_tests):
 #    return True
 
 
-def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=None, project_name=None):
+def call_maven_build(branch,
+        unit_tests=False, no_threads=False, single_project=None, project_name=None, preOutput=''):
     last_lines = deque(maxlen=conf.BUILD_LOG_LINES)
+    if preOutput:
+        last_lines.extend(preOutput.split("\n"))
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = conf.SUBPROC_ARGS.copy()
 
-    cmd = [conf.MVN, "package", "-e", "-Dbuild.configuration=%s" % conf.MVN_BUILD_CONFIG]
     if (not conf.MVN_THREADS) or conf.MVN_THREADS == 1:
         no_threads = True
-    if no_threads:
-        cmd.extend(["-T", "1"])
-    else:
-        cmd.extend(["-T", "%d" % conf.MVN_THREADS])
+    cmd = mvn_cmd("package", "-e", "-T", "1" if no_threads else str(conf.MVN_THREADS))
     if single_project is not None:
         cmd.extend(['-pl', single_project])
     #cmd.extend(['--projects', 'nx_sdk,nx_storage_sdk,mediaserver_core'])
@@ -364,7 +385,8 @@ def call_maven_build(branch, unit_tests=False, no_threads=False, single_project=
         if retcode != 0:
             log("Error calling maven: ret.code = %s" % retcode)
             if not Args.full_build_log:
-                log("The last %d log lines:" % len(last_lines))
+                if single_project or no_threads:
+                    log("The last %d log lines:" % len(last_lines))
                 raw_log("".join(last_lines))
                 last_lines = list(last_lines)
                 last_lines.append("Maven return code = %s" % retcode)
@@ -408,7 +430,7 @@ def build_branch(branch):
         RESULT.append(('build-ut', True))
     return True
 
-def prepare_branch(branch):
+def prepare_and_build(branch):
     "Prepare the branch for testing, i.e. build the project and unit tests"
     ToSend.log('')  # an empty line separator
     if branch != '.':
@@ -446,7 +468,7 @@ def build_only_msg(branch):
     log("Branch %s is configured as BUILD-ONLY. Skipping all tests" % branch)
 
 
-def check_hg_updates():
+def check_and_build():
     "Check for repository updates, get'em, build and test"
     bundle_fn = os.path.join(conf.TEMP, "in.hg")
     branches = check_new_commits(bundle_fn)
@@ -454,10 +476,12 @@ def check_hg_updates():
     if branches and not Args.hg_only:
         update_repo(branches, bundle_fn)
         for branch in branches:
-            if prepare_branch(branch):
+            if prepare_and_build(branch):
                 if branch in conf.BUILD_ONLY_BRANCHES:
                     build_only_msg(branch)
                     # don't change rc - keep it True if it still is True
+                elif Args.build_only:
+                    pass
                 else:
                     #Build.load_vars(conf, Env) - loaded after build
                     rc = run_tests(branch) and rc
@@ -472,7 +496,7 @@ def check_hg_updates():
 def run():
     try:
         if Args.full:
-            rc = check_hg_updates()
+            rc = check_and_build()
             if Args.hg_only:
                 log_changesets()
             return rc
@@ -1557,7 +1581,8 @@ def parse_args():
     parser.add_argument("-t", "--test-only", action='store_true', help="Just run existing tests again (add --noft to skip functests.")
     parser.add_argument("--single-ut", help="Run specified unit test only.")
     parser.add_argument("-r", "--rebuild", action='store_true', help="(Re)build even if no new commits found.")
-    parser.add_argument("-u", "--build-ut-only", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
+    parser.add_argument("--build-only", "--bo", action="store_true", help="Build only, don't test.")
+    parser.add_argument("--build-ut-only", "--uo", action="store_true", help="Build and run unit tests only, don't (re-)build the project itself.")
     parser.add_argument("-g", "--hg-only", action='store_true', help="Only checks if there any new changes to get.")
     parser.add_argument("-f", "--full", action="store_true", help="Full test for all configured branches. (Not required with -b)")
     parser.add_argument("--functest", "--ft", action="store_true", help="Create virtual boxes and run functional test on them.")
@@ -1660,6 +1685,14 @@ def updateBoxesNames():
 module Boxes"""
             for name, value in conf.BOX_NAMES.iteritems():
                 print >>out, '    %s = "%s"' % (name, value)
+            if hasattr(conf, "UT_BOX_NAME"):
+                print >>out, '    %s = "%s"' % (conf.UT_BOX_VAR, conf.UT_BOX_NAME)
+            print >>out, "end"
+            print >>out, "module IPs"
+            for name, value in conf.BOX_IP.iteritems():
+                print >>out, '    %s = "%s"' % (name, value)
+            if hasattr(conf, "UT_BOX_IP"):
+                print >>out, '    %s = "%s"' % (conf.UT_BOX_VAR, conf.UT_BOX_IP)
             print >>out, "end"
             print >>out, "# Created at %s" % (time.asctime())
 
@@ -1708,16 +1741,16 @@ def main():
         return True
 
     if Args.utcont:
+        #FIXME!!! cover vagrant case too!
         debug("Just creating a docker container for unittests")
-        from autotest.utdocker import UtContainer
+        UtContainer = ut.UtContainer
         Build.load_vars(conf, Env)
         UtContainer.init(Build)
         print "Use this command to run unittests:"
-        print list2cmdline(UtContainer.makeCmd(conf.DOCKER_UT_WRAPPER, 'YOUR','TEST', 'COMMAND'))
+        print list2cmdline(UtContainer.makeCmd(UtContainer.getWrapper(), 'YOUR', 'TEST', 'COMMAND'))
         return True
 
-    if not Args.no_functest:
-        updateBoxesNames()
+    updateBoxesNames()
 
     if Args.showboxes:
         show_boxes()

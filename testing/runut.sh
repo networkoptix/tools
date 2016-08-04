@@ -1,7 +1,7 @@
 #!/bin/bash
 TMP=/tmp/test
 mkdir -p $TMP
-BASE=`dirname "$0"`
+BASE=`realpath $(dirname "$0")`
 cd "$BASE"
 ut="$1"
 shift
@@ -13,7 +13,7 @@ else
     echo Temp arg: $tmparg
 fi
 
-echo Args: "$@"
+#echo Args: "$@"
 LD_LIBRARY_PATH="$BASE" ./$ut "$tmparg" "$@"
 RC=$?
 if [ -n "$tmparg" ]; then

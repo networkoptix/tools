@@ -1,0 +1,3443 @@
+Files lame-3.99.5.orig/vc_solution/.vs/vc9_lame/v14/.suo and lame-3.99.5/vc_solution/.vs/vc9_lame/v14/.suo differ
+diff -Nur lame-3.99.5.orig/vc_solution/Backup/vc9_lame.sln lame-3.99.5/vc_solution/Backup/vc9_lame.sln
+--- lame-3.99.5.orig/vc_solution/Backup/vc9_lame.sln	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/Backup/vc9_lame.sln	2011-09-28 12:11:12 -0700
+@@ -0,0 +1,91 @@
++﻿
++Microsoft Visual Studio Solution File, Format Version 10.00
++# Visual C++ Express 2008
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app lame", "vc9_lame_lame.vcproj", "{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}"
++	ProjectSection(ProjectDependencies) = postProject
++		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib encoder LAME", "vc9_libmp3lame.vcproj", "{20536101-3B0E-43EF-94F9-080D595DAC57}"
++	ProjectSection(ProjectDependencies) = postProject
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8} = {E2DAB91A-8248-4625-8A85-2C2C2A390DD8}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll lame", "vc9_libmp3lame_dll.vcproj", "{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}"
++	ProjectSection(ProjectDependencies) = postProject
++		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib decoder HIP", "vc9_mpglib.vcproj", "{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3rtp", "vc9_lame_mp3rtp.vcproj", "{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}"
++	ProjectSection(ProjectDependencies) = postProject
++		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3x", "vc9_lame_mp3x.vcproj", "{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}"
++	ProjectSection(ProjectDependencies) = postProject
++		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
++	EndProjectSection
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Win32 = Debug|Win32
++		Release|Win32 = Release|Win32
++		ReleaseNASM|Win32 = ReleaseNASM|Win32
++		ReleaseSSE2|Win32 = ReleaseSSE2|Win32
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|Win32.ActiveCfg = Debug|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|Win32.Build.0 = Debug|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|Win32.ActiveCfg = Release|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|Win32.Build.0 = Release|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.ActiveCfg = Debug|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.Build.0 = Debug|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.ActiveCfg = Release|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.Build.0 = Release|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|Win32.ActiveCfg = Debug|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|Win32.Build.0 = Debug|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|Win32.ActiveCfg = Release|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|Win32.Build.0 = Release|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.ActiveCfg = Debug|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.Build.0 = Debug|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.ActiveCfg = Release|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.Build.0 = Release|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|Win32.ActiveCfg = Debug|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|Win32.Build.0 = Debug|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|Win32.ActiveCfg = Release|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|Win32.Build.0 = Release|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|Win32.ActiveCfg = Debug|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|Win32.Build.0 = Debug|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|Win32.ActiveCfg = Release|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|Win32.Build.0 = Release|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++EndGlobal
+Files lame-3.99.5.orig/vc_solution/UpgradeLog.htm and lame-3.99.5/vc_solution/UpgradeLog.htm differ
+diff -Nur lame-3.99.5.orig/vc_solution/arch_nasm.props lame-3.99.5/vc_solution/arch_nasm.props
+--- lame-3.99.5.orig/vc_solution/arch_nasm.props	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/arch_nasm.props	2016-07-11 14:28:01 -0700
+@@ -0,0 +1,15 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ImportGroup Label="PropertySheets">
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup>
++    <ClCompile>
++      <PreprocessorDefinitions>TAKEHIRO_IEEE754_HACK;HAVE_NASM;MMX_choose_table;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++  </ItemDefinitionGroup>
++  <ItemGroup />
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/arch_sse2.props lame-3.99.5/vc_solution/arch_sse2.props
+--- lame-3.99.5.orig/vc_solution/arch_sse2.props	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/arch_sse2.props	2016-07-11 14:28:02 -0700
+@@ -0,0 +1,17 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ImportGroup Label="PropertySheets">
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup>
++    <ClCompile>
++      <PreprocessorDefinitions>HAVE_XMMINTRIN_H;MIN_ARCH_SSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
++      <FloatingPointModel>Fast</FloatingPointModel>
++    </ClCompile>
++  </ItemDefinitionGroup>
++  <ItemGroup />
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/arch_x87.props lame-3.99.5/vc_solution/arch_x87.props
+--- lame-3.99.5.orig/vc_solution/arch_x87.props	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/arch_x87.props	2016-07-11 14:28:01 -0700
+@@ -0,0 +1,15 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ImportGroup Label="PropertySheets">
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup>
++    <ClCompile>
++      <PreprocessorDefinitions>TAKEHIRO_IEEE754_HACK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++  </ItemDefinitionGroup>
++  <ItemGroup />
++</Project>
+\ No newline at end of file
+Files lame-3.99.5.orig/vc_solution/vc9_lame.VC.db and lame-3.99.5/vc_solution/vc9_lame.VC.db differ
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame.sln lame-3.99.5/vc_solution/vc9_lame.sln
+--- lame-3.99.5.orig/vc_solution/vc9_lame.sln	2011-09-28 12:11:12 -0700
++++ lame-3.99.5/vc_solution/vc9_lame.sln	2016-07-11 16:05:45 -0700
+@@ -1,91 +1,130 @@
+-﻿
+-Microsoft Visual Studio Solution File, Format Version 10.00
+-# Visual C++ Express 2008
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app lame", "vc9_lame_lame.vcproj", "{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
+-	EndProjectSection
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib encoder LAME", "vc9_libmp3lame.vcproj", "{20536101-3B0E-43EF-94F9-080D595DAC57}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8} = {E2DAB91A-8248-4625-8A85-2C2C2A390DD8}
+-	EndProjectSection
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dll lame", "vc9_libmp3lame_dll.vcproj", "{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
+-	EndProjectSection
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lib decoder HIP", "vc9_mpglib.vcproj", "{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}"
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3rtp", "vc9_lame_mp3rtp.vcproj", "{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
+-	EndProjectSection
+-EndProject
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3x", "vc9_lame_mp3x.vcproj", "{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}"
+-	ProjectSection(ProjectDependencies) = postProject
+-		{20536101-3B0E-43EF-94F9-080D595DAC57} = {20536101-3B0E-43EF-94F9-080D595DAC57}
+-	EndProjectSection
+-EndProject
+-Global
+-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+-		Debug|Win32 = Debug|Win32
+-		Release|Win32 = Release|Win32
+-		ReleaseNASM|Win32 = ReleaseNASM|Win32
+-		ReleaseSSE2|Win32 = ReleaseSSE2|Win32
+-	EndGlobalSection
+-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|Win32.Build.0 = Debug|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|Win32.ActiveCfg = Release|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|Win32.Build.0 = Release|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|Win32.Build.0 = Debug|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.ActiveCfg = Release|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|Win32.Build.0 = Release|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|Win32.Build.0 = Debug|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|Win32.ActiveCfg = Release|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|Win32.Build.0 = Release|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|Win32.Build.0 = Debug|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.ActiveCfg = Release|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|Win32.Build.0 = Release|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|Win32.Build.0 = Debug|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|Win32.ActiveCfg = Release|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|Win32.Build.0 = Release|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|Win32.ActiveCfg = Debug|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|Win32.Build.0 = Debug|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|Win32.ActiveCfg = Release|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|Win32.Build.0 = Release|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|Win32.ActiveCfg = ReleaseNASM|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|Win32.Build.0 = ReleaseNASM|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|Win32.ActiveCfg = ReleaseSSE2|Win32
+-		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|Win32.Build.0 = ReleaseSSE2|Win32
+-	EndGlobalSection
+-	GlobalSection(SolutionProperties) = preSolution
+-		HideSolutionNode = FALSE
+-	EndGlobalSection
+-EndGlobal
++﻿
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio 14
++VisualStudioVersion = 14.0.25420.1
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app lame", "vc9_lame_lame.vcxproj", "{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmp3lame-static", "vc9_libmp3lame.vcxproj", "{20536101-3B0E-43EF-94F9-080D595DAC57}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmp3lame", "vc9_libmp3lame_dll.vcxproj", "{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmpghip-static", "vc9_mpglib.vcxproj", "{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3rtp", "vc9_lame_mp3rtp.vcxproj", "{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "app mp3x", "vc9_lame_mp3x.vcxproj", "{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}"
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|x64 = Debug|x64
++		Debug|x86 = Debug|x86
++		Release|x64 = Release|x64
++		Release|x86 = Release|x86
++		ReleaseNASM|x64 = ReleaseNASM|x64
++		ReleaseNASM|x86 = ReleaseNASM|x86
++		ReleaseSSE2|x64 = ReleaseSSE2|x64
++		ReleaseSSE2|x86 = ReleaseSSE2|x86
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|x64.ActiveCfg = Debug|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|x64.Build.0 = Debug|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|x86.ActiveCfg = Debug|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Debug|x86.Build.0 = Debug|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|x64.ActiveCfg = Release|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|x64.Build.0 = Release|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|x86.ActiveCfg = Release|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.Release|x86.Build.0 = Release|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|x64.ActiveCfg = Debug|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|x64.Build.0 = Debug|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|x86.ActiveCfg = Debug|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Debug|x86.Build.0 = Debug|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|x64.ActiveCfg = Release|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|x64.Build.0 = Release|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|x86.ActiveCfg = Release|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.Release|x86.Build.0 = Release|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{20536101-3B0E-43EF-94F9-080D595DAC57}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|x64.ActiveCfg = Debug|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|x64.Build.0 = Debug|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|x86.ActiveCfg = Debug|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Debug|x86.Build.0 = Debug|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|x64.ActiveCfg = Release|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|x64.Build.0 = Release|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|x86.ActiveCfg = Release|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.Release|x86.Build.0 = Release|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|x64.ActiveCfg = Debug|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|x64.Build.0 = Debug|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|x86.ActiveCfg = Debug|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Debug|x86.Build.0 = Debug|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|x64.ActiveCfg = Release|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|x64.Build.0 = Release|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|x86.ActiveCfg = Release|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.Release|x86.Build.0 = Release|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|x64.ActiveCfg = Debug|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|x64.Build.0 = Debug|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|x86.ActiveCfg = Debug|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Debug|x86.Build.0 = Debug|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|x64.ActiveCfg = Release|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|x64.Build.0 = Release|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|x86.ActiveCfg = Release|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.Release|x86.Build.0 = Release|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|x64.ActiveCfg = Debug|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|x64.Build.0 = Debug|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|x86.ActiveCfg = Debug|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Debug|x86.Build.0 = Debug|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|x64.ActiveCfg = Release|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|x64.Build.0 = Release|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|x86.ActiveCfg = Release|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.Release|x86.Build.0 = Release|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|x64.ActiveCfg = ReleaseNASM|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|x64.Build.0 = ReleaseNASM|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|x86.ActiveCfg = ReleaseNASM|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseNASM|x86.Build.0 = ReleaseNASM|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|x64.ActiveCfg = ReleaseSSE2|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|x64.Build.0 = ReleaseSSE2|x64
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|x86.ActiveCfg = ReleaseSSE2|Win32
++		{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}.ReleaseSSE2|x86.Build.0 = ReleaseSSE2|Win32
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++EndGlobal
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_config.props lame-3.99.5/vc_solution/vc9_lame_config.props
+--- lame-3.99.5.orig/vc_solution/vc9_lame_config.props	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_config.props	2016-07-11 14:28:01 -0700
+@@ -0,0 +1,32 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ImportGroup Label="PropertySheets">
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++    <OutDir>$(SolutionDir)..\output\$(Configuration)\</OutDir>
++    <IntDir>$(SolutionDir)..\obj\$(Configuration)\$(ProjectName)\</IntDir>
++    <LinkIncremental>false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup>
++    <Bscmake>
++      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
++    </Bscmake>
++    <ClCompile>
++      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
++      <BrowseInformation>true</BrowseInformation>
++      <WarningLevel>Level4</WarningLevel>
++      <DisableSpecificWarnings>4995;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++    </ClCompile>
++    <Link>
++      <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
++      <OptimizeReferences>true</OptimizeReferences>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup />
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_lame.vcxproj lame-3.99.5/vc_solution/vc9_lame_lame.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_lame_lame.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_lame.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,341 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>app lame</ProjectName>
++    <ProjectGuid>{EEF5B49E-DBD1-4E1B-8B86-C5D64FCBAD38}</ProjectGuid>
++    <RootNamespace>lame</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/lame.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/lame.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/lame.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../;../mpglib;../libmp3lame;../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/lame.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../;../mpglib;../libmp3lame;../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/lame.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/lame.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/lame.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/lame.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)lame.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c" />
++    <ClCompile Include="..\frontend\console.c" />
++    <ClCompile Include="..\frontend\get_audio.c" />
++    <ClCompile Include="..\frontend\lametime.c" />
++    <ClCompile Include="..\frontend\lame_main.c" />
++    <ClCompile Include="..\frontend\main.c" />
++    <ClCompile Include="..\frontend\parse.c" />
++    <ClCompile Include="..\frontend\timestatus.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\frontend\brhist.h" />
++    <ClInclude Include="..\frontend\console.h" />
++    <ClInclude Include="..\frontend\get_audio.h" />
++    <ClInclude Include="..\frontend\lametime.h" />
++    <ClInclude Include="..\frontend\main.h" />
++    <ClInclude Include="..\frontend\parse.h" />
++    <ClInclude Include="..\frontend\timestatus.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc" />
++  </ItemGroup>
++  <ItemGroup>
++    <ProjectReference Include="vc9_libmp3lame.vcxproj">
++      <Project>{20536101-3b0e-43ef-94f9-080d595dac57}</Project>
++      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++    </ProjectReference>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_lame.vcxproj.filters lame-3.99.5/vc_solution/vc9_lame_lame.vcxproj.filters
+--- lame-3.99.5.orig/vc_solution/vc9_lame_lame.vcxproj.filters	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_lame.vcxproj.filters	2016-07-11 14:28:03 -0700
+@@ -0,0 +1,67 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Source Files">
++      <UniqueIdentifier>{89714d74-3775-4728-b93f-573f9254996e}</UniqueIdentifier>
++      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
++    </Filter>
++    <Filter Include="Header Files">
++      <UniqueIdentifier>{a6f879ef-c400-4a33-a5f4-81ba36260d66}</UniqueIdentifier>
++      <Extensions>h;hpp;hxx;hm;inl</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\console.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\get_audio.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\lame_main.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\lametime.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\main.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\parse.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\timestatus.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\frontend\brhist.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\console.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\get_audio.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\lametime.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\main.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\parse.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\timestatus.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc">
++      <Filter>Source Files</Filter>
++    </ResourceCompile>
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_mp3rtp.vcxproj lame-3.99.5/vc_solution/vc9_lame_mp3rtp.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_lame_mp3rtp.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_mp3rtp.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,351 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>app mp3rtp</ProjectName>
++    <ProjectGuid>{C04BA4EA-F719-456D-A332-6C3AF92D7BEA}</ProjectGuid>
++    <RootNamespace>mp3rtp</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../;../mpglib;../libmp3lame;../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../;../mpglib;../libmp3lame;../include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3rtp.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>..;../mpglib;../libmp3lame;../include;../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WIN32;_CONSOLE;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>wsock32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3rtp.exe</OutputFile>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c" />
++    <ClCompile Include="..\frontend\console.c" />
++    <ClCompile Include="..\frontend\get_audio.c" />
++    <ClCompile Include="..\frontend\lametime.c" />
++    <ClCompile Include="..\frontend\main.c" />
++    <ClCompile Include="..\frontend\mp3rtp.c" />
++    <ClCompile Include="..\frontend\parse.c" />
++    <ClCompile Include="..\frontend\rtp.c" />
++    <ClCompile Include="..\frontend\timestatus.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\frontend\brhist.h" />
++    <ClInclude Include="..\frontend\console.h" />
++    <ClInclude Include="..\frontend\get_audio.h" />
++    <ClInclude Include="..\frontend\lametime.h" />
++    <ClInclude Include="..\frontend\main.h" />
++    <ClInclude Include="..\frontend\parse.h" />
++    <ClInclude Include="..\frontend\rtp.h" />
++    <ClInclude Include="..\frontend\timestatus.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc" />
++  </ItemGroup>
++  <ItemGroup>
++    <ProjectReference Include="vc9_libmp3lame.vcxproj">
++      <Project>{20536101-3b0e-43ef-94f9-080d595dac57}</Project>
++      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++    </ProjectReference>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_mp3rtp.vcxproj.filters lame-3.99.5/vc_solution/vc9_lame_mp3rtp.vcxproj.filters
+--- lame-3.99.5.orig/vc_solution/vc9_lame_mp3rtp.vcxproj.filters	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_mp3rtp.vcxproj.filters	2016-07-11 14:28:12 -0700
+@@ -0,0 +1,73 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Source Files">
++      <UniqueIdentifier>{3635d2c3-a4e3-447b-9d0c-0452164d56f6}</UniqueIdentifier>
++      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
++    </Filter>
++    <Filter Include="Header Files">
++      <UniqueIdentifier>{a7f48660-d84a-4552-bca3-b863afe1045a}</UniqueIdentifier>
++      <Extensions>h;hpp;hxx;hm;inl</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\console.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\get_audio.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\lametime.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\main.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\mp3rtp.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\parse.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\rtp.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\timestatus.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\frontend\brhist.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\console.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\get_audio.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\lametime.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\main.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\parse.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\rtp.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\timestatus.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc">
++      <Filter>Source Files</Filter>
++    </ResourceCompile>
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_mp3x.vcxproj lame-3.99.5/vc_solution/vc9_lame_mp3x.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_lame_mp3x.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_mp3x.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,384 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>app mp3x</ProjectName>
++    <ProjectGuid>{E745EB1A-070A-45ED-B8BD-D9F794E23CFA}</ProjectGuid>
++    <RootNamespace>mp3x</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\ReleaseNASM\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;_APP=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\ReleaseNASM\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>LAMESNDFILE;BRHIST;_DEBUG;WIN32;_CONSOLE;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>LAMESNDFILE;BRHIST;_DEBUG;WIN32;_CONSOLE;HAVE_MPGLIB;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\Release\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\Release\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseSSE2/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\ReleaseSSE2\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseSSE2/mp3x.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>./WinGTK/gtk-plus;./WinGTK/glib-1.2;./WinGtk/src/gtk+;./WinGtk/src/glib;./WinGtk/src/gtk+/gdk;../include;../libmp3lame;../mp3x;../frontend;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;LAMEPARSE;WIN32;_CONSOLE;HAVE_MPGLIB;LAMESNDFILE;BRHIST;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>odbc32.lib;odbccp32.lib;gdk-1.3.lib;gtk-1.3.lib;glib-1.3.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <OutputFile>$(OutDir)mp3x.exe</OutputFile>
++      <AdditionalLibraryDirectories>./WinGtk/src/gtk+/gtk;./WinGtk/src/gtk+/gdk;./WinGtk/src/glib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
++      <GenerateMapFile>true</GenerateMapFile>
++      <MapFileName>..\obj\ReleaseSSE2\frontend/mp3x.map</MapFileName>
++      <SubSystem>Console</SubSystem>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c" />
++    <ClCompile Include="..\frontend\console.c" />
++    <ClCompile Include="..\frontend\get_audio.c" />
++    <ClCompile Include="..\frontend\gpkplotting.c" />
++    <ClCompile Include="..\frontend\gtkanal.c" />
++    <ClCompile Include="..\frontend\lametime.c" />
++    <ClCompile Include="..\frontend\main.c" />
++    <ClCompile Include="..\frontend\mp3x.c" />
++    <ClCompile Include="..\frontend\parse.c" />
++    <ClCompile Include="..\frontend\timestatus.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\configMS.h" />
++    <ClInclude Include="..\frontend\brhist.h" />
++    <ClInclude Include="..\frontend\console.h" />
++    <ClInclude Include="..\frontend\get_audio.h" />
++    <ClInclude Include="..\frontend\gpkplotting.h" />
++    <ClInclude Include="..\frontend\lametime.h" />
++    <ClInclude Include="..\frontend\main.h" />
++    <ClInclude Include="..\frontend\parse.h" />
++    <ClInclude Include="..\frontend\timestatus.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc" />
++  </ItemGroup>
++  <ItemGroup>
++    <None Include="..\README.WINGTK" />
++  </ItemGroup>
++  <ItemGroup>
++    <ProjectReference Include="vc9_libmp3lame.vcxproj">
++      <Project>{20536101-3b0e-43ef-94f9-080d595dac57}</Project>
++      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++    </ProjectReference>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_lame_mp3x.vcxproj.filters lame-3.99.5/vc_solution/vc9_lame_mp3x.vcxproj.filters
+--- lame-3.99.5.orig/vc_solution/vc9_lame_mp3x.vcxproj.filters	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_lame_mp3x.vcxproj.filters	2016-07-11 14:28:14 -0700
+@@ -0,0 +1,80 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Source">
++      <UniqueIdentifier>{10a4286f-9c31-4efb-b671-c32badb9eb21}</UniqueIdentifier>
++      <Extensions>c</Extensions>
++    </Filter>
++    <Filter Include="Include">
++      <UniqueIdentifier>{342b1187-62a8-49fe-933a-d2da231f4915}</UniqueIdentifier>
++      <Extensions>h</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\frontend\brhist.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\console.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\get_audio.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\gpkplotting.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\gtkanal.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\lametime.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\main.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\mp3x.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\parse.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\frontend\timestatus.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\frontend\brhist.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\configMS.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\console.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\get_audio.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\gpkplotting.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\lametime.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\main.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\parse.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\frontend\timestatus.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc" />
++  </ItemGroup>
++  <ItemGroup>
++    <None Include="..\README.WINGTK" />
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_libmp3lame.vcxproj lame-3.99.5/vc_solution/vc9_libmp3lame.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_libmp3lame.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_libmp3lame.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,443 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>libmp3lame-static</ProjectName>
++    <ProjectGuid>{20536101-3B0E-43EF-94F9-080D595DAC57}</ProjectGuid>
++    <RootNamespace>libmp3lame</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++    <Import Project="vc9_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;HAVE_NASM;MMX_choose_table;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmp3lame-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\libmp3lame\bitstream.c" />
++    <ClCompile Include="..\libmp3lame\encoder.c" />
++    <ClCompile Include="..\libmp3lame\fft.c" />
++    <ClCompile Include="..\libmp3lame\gain_analysis.c" />
++    <ClCompile Include="..\libmp3lame\id3tag.c" />
++    <ClCompile Include="..\libmp3lame\lame.c" />
++    <ClCompile Include="..\libmp3lame\mpglib_interface.c" />
++    <ClCompile Include="..\libmp3lame\newmdct.c" />
++    <ClCompile Include="..\libmp3lame\presets.c" />
++    <ClCompile Include="..\libmp3lame\psymodel.c" />
++    <ClCompile Include="..\libmp3lame\quantize.c" />
++    <ClCompile Include="..\libmp3lame\quantize_pvt.c" />
++    <ClCompile Include="..\libmp3lame\reservoir.c" />
++    <ClCompile Include="..\libmp3lame\set_get.c" />
++    <ClCompile Include="..\libmp3lame\tables.c">
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Level1</WarningLevel>
++      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level1</WarningLevel>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\takehiro.c" />
++    <ClCompile Include="..\libmp3lame\util.c" />
++    <ClCompile Include="..\libmp3lame\vbrquantize.c" />
++    <ClCompile Include="..\libmp3lame\VbrTag.c" />
++    <ClCompile Include="..\libmp3lame\vector\xmm_quantize_sub.c">
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../libmp3lame;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\version.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <CustomBuild Include="..\configMS.h">
++      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\config.h;%(Outputs)</Outputs>
++    </CustomBuild>
++    <ClInclude Include="..\include\lame.h" />
++    <ClInclude Include="..\libmp3lame\bitstream.h" />
++    <ClInclude Include="..\libmp3lame\encoder.h" />
++    <ClInclude Include="..\libmp3lame\fft.h" />
++    <ClInclude Include="..\libmp3lame\gain_analysis.h" />
++    <ClInclude Include="..\libmp3lame\id3tag.h" />
++    <ClInclude Include="..\libmp3lame\l3side.h" />
++    <ClInclude Include="..\libmp3lame\lame-analysis.h" />
++    <ClInclude Include="..\libmp3lame\lameerror.h" />
++    <ClInclude Include="..\libmp3lame\lame_global_flags.h" />
++    <ClInclude Include="..\libmp3lame\machine.h" />
++    <ClInclude Include="..\libmp3lame\newmdct.h" />
++    <ClInclude Include="..\libmp3lame\psymodel.h" />
++    <ClInclude Include="..\libmp3lame\quantize.h" />
++    <ClInclude Include="..\libmp3lame\quantize_pvt.h" />
++    <ClInclude Include="..\libmp3lame\reservoir.h" />
++    <ClInclude Include="..\libmp3lame\set_get.h" />
++    <ClInclude Include="..\libmp3lame\tables.h" />
++    <ClInclude Include="..\libmp3lame\util.h" />
++    <ClInclude Include="..\libmp3lame\vbrquantize.h" />
++    <ClInclude Include="..\libmp3lame\VbrTag.h" />
++    <ClInclude Include="..\libmp3lame\vector\lame_intrin.h" />
++    <ClInclude Include="..\libmp3lame\version.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <NASM Include="..\libmp3lame\i386\choose_table.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\cpu_feat.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fft.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fft3dn.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fftfpu.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fftsse.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\ffttbl.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\scalar.nas">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </NASM>
++  </ItemGroup>
++  <ItemGroup>
++    <ProjectReference Include="vc9_mpglib.vcxproj">
++      <Project>{e2dab91a-8248-4625-8a85-2c2c2a390dd8}</Project>
++      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++    </ProjectReference>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++    <Import Project="vc9_nasm.targets" />
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_libmp3lame.vcxproj.filters lame-3.99.5/vc_solution/vc9_libmp3lame.vcxproj.filters
+--- lame-3.99.5.orig/vc_solution/vc9_libmp3lame.vcxproj.filters	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_libmp3lame.vcxproj.filters	2016-07-11 14:28:05 -0700
+@@ -0,0 +1,184 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Source">
++      <UniqueIdentifier>{5ba4deaa-507f-41cd-adfb-b8293c0cd7d2}</UniqueIdentifier>
++      <Extensions>c</Extensions>
++    </Filter>
++    <Filter Include="Include">
++      <UniqueIdentifier>{946d1710-6125-4e09-a07d-b4d16845e10b}</UniqueIdentifier>
++      <Extensions>h</Extensions>
++    </Filter>
++    <Filter Include="Asm">
++      <UniqueIdentifier>{f775271d-2580-476a-af8c-f3b079240910}</UniqueIdentifier>
++      <Extensions>.nas</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\libmp3lame\bitstream.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\encoder.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\fft.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\gain_analysis.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\id3tag.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\lame.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\mpglib_interface.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\newmdct.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\presets.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\psymodel.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\quantize.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\quantize_pvt.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\reservoir.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\set_get.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\tables.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\takehiro.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\util.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\vbrquantize.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\VbrTag.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\version.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\libmp3lame\vector\xmm_quantize_sub.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\libmp3lame\bitstream.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\encoder.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\fft.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\gain_analysis.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\id3tag.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\l3side.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\lame-analysis.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\lame_global_flags.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\vector\lame_intrin.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\lameerror.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\machine.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\newmdct.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\psymodel.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\quantize.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\quantize_pvt.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\reservoir.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\set_get.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\tables.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\util.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\vbrquantize.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\VbrTag.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\libmp3lame\version.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\include\lame.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <NASM Include="..\libmp3lame\i386\choose_table.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\cpu_feat.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fft.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fft3dn.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fftfpu.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\fftsse.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\ffttbl.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++    <NASM Include="..\libmp3lame\i386\scalar.nas">
++      <Filter>Asm</Filter>
++    </NASM>
++  </ItemGroup>
++  <ItemGroup>
++    <CustomBuild Include="..\configMS.h">
++      <Filter>Include</Filter>
++    </CustomBuild>
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_libmp3lame_dll.vcxproj lame-3.99.5/vc_solution/vc9_libmp3lame_dll.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_libmp3lame_dll.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_libmp3lame_dll.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,368 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>libmp3lame</ProjectName>
++    <ProjectGuid>{92BD50AA-04D6-4FBF-ACE1-468FAF6778F2}</ProjectGuid>
++    <RootNamespace>libmp3lameDLL</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++    <Import Project="vc9_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\ReleaseNASM/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Debug/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <ProjectReference>
++      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
++    </ProjectReference>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName />
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <Midl>
++      <TypeLibraryName>..\output\Release/libmp3lame_dll.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../;../mpglib;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;_DLL=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <OutputFile>$(OutDir)libmp3lame.dll</OutputFile>
++      <ModuleDefinitionFile>..\include\lame.def</ModuleDefinitionFile>
++      <ImportLibrary>$(OutDir)libmp3lame.lib</ImportLibrary>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <CustomBuild Include="..\include\lame.def">
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
++      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
++    </CustomBuild>
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\libmp3lame\lame.rc" />
++  </ItemGroup>
++  <ItemGroup>
++    <ProjectReference Include="vc9_libmp3lame.vcxproj">
++      <Project>{20536101-3b0e-43ef-94f9-080d595dac57}</Project>
++      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
++    </ProjectReference>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++    <Import Project="vc9_nasm.targets" />
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_mpglib.vcxproj lame-3.99.5/vc_solution/vc9_mpglib.vcxproj
+--- lame-3.99.5.orig/vc_solution/vc9_mpglib.vcxproj	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_mpglib.vcxproj	2016-07-11 14:29:12 -0700
+@@ -0,0 +1,319 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|Win32">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseNASM|x64">
++      <Configuration>ReleaseNASM</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|Win32">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="ReleaseSSE2|x64">
++      <Configuration>ReleaseSSE2</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>libmpghip-static</ProjectName>
++    <ProjectGuid>{E2DAB91A-8248-4625-8A85-2C2C2A390DD8}</ProjectGuid>
++    <RootNamespace>libmpghip</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <PlatformToolset>v140</PlatformToolset>
++    <UseOfMfc>false</UseOfMfc>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_sse2.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_x87.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="vc9_lame_config.props" />
++    <Import Project="arch_nasm.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>14.0.25420.1</_ProjectFileVersion>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_LAYER_2;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_LAYER_2;HAVE_MPGLIB;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">
++    <ClCompile>
++      <Optimization>Full</Optimization>
++      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
++      <AdditionalIncludeDirectories>../libmp3lame;../include;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;HAVE_MPGLIB;_WINDOWS;USE_LAYER_2;WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++    <ResourceCompile>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Lib>
++      <OutputFile>$(OutDir)libmpghip-static.lib</OutputFile>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\mpglib\common.c" />
++    <ClCompile Include="..\mpglib\dct64_i386.c" />
++    <ClCompile Include="..\mpglib\decode_i386.c" />
++    <ClCompile Include="..\mpglib\interface.c" />
++    <ClCompile Include="..\mpglib\layer1.c" />
++    <ClCompile Include="..\mpglib\layer2.c" />
++    <ClCompile Include="..\mpglib\layer3.c" />
++    <ClCompile Include="..\mpglib\tabinit.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <CustomBuild Include="..\configMS.h">
++      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseNASM|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='ReleaseSSE2|x64'">..\config.h;%(Outputs)</Outputs>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Custom Build Step on %(Filename)</Message>
++      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Performing Custom Build Step on %(Filename)</Message>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy ..\configMS.h ..\config.h
++</Command>
++      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">copy ..\configMS.h ..\config.h
++</Command>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\config.h;%(Outputs)</Outputs>
++      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\config.h;%(Outputs)</Outputs>
++    </CustomBuild>
++    <ClInclude Include="..\mpglib\common.h" />
++    <ClInclude Include="..\mpglib\dct64_i386.h" />
++    <ClInclude Include="..\mpglib\decode_i386.h" />
++    <ClInclude Include="..\mpglib\huffman.h" />
++    <ClInclude Include="..\mpglib\interface.h" />
++    <ClInclude Include="..\mpglib\l2tables.h" />
++    <ClInclude Include="..\mpglib\layer1.h" />
++    <ClInclude Include="..\mpglib\layer2.h" />
++    <ClInclude Include="..\mpglib\layer3.h" />
++    <ClInclude Include="..\mpglib\mpg123.h" />
++    <ClInclude Include="..\mpglib\mpglib.h" />
++    <ClInclude Include="..\mpglib\tabinit.h" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_mpglib.vcxproj.filters lame-3.99.5/vc_solution/vc9_mpglib.vcxproj.filters
+--- lame-3.99.5.orig/vc_solution/vc9_mpglib.vcxproj.filters	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_mpglib.vcxproj.filters	2016-07-11 14:28:10 -0700
+@@ -0,0 +1,82 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <Filter Include="Source">
++      <UniqueIdentifier>{c60092c2-dedb-4e08-baf6-487c3a3b0d7d}</UniqueIdentifier>
++      <Extensions>c</Extensions>
++    </Filter>
++    <Filter Include="Include">
++      <UniqueIdentifier>{810a9721-770c-4114-876c-2acfc2788724}</UniqueIdentifier>
++      <Extensions>h</Extensions>
++    </Filter>
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\mpglib\common.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\dct64_i386.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\decode_i386.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\interface.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\layer1.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\layer2.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\layer3.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++    <ClCompile Include="..\mpglib\tabinit.c">
++      <Filter>Source</Filter>
++    </ClCompile>
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\mpglib\common.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\dct64_i386.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\decode_i386.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\huffman.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\interface.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\l2tables.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\layer1.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\layer2.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\layer3.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\mpg123.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\mpglib.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++    <ClInclude Include="..\mpglib\tabinit.h">
++      <Filter>Include</Filter>
++    </ClInclude>
++  </ItemGroup>
++  <ItemGroup>
++    <CustomBuild Include="..\configMS.h">
++      <Filter>Include</Filter>
++    </CustomBuild>
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_nasm.props lame-3.99.5/vc_solution/vc9_nasm.props
+--- lame-3.99.5.orig/vc_solution/vc9_nasm.props	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_nasm.props	2016-07-11 14:28:03 -0700
+@@ -0,0 +1,24 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <PropertyGroup
++    Condition="'$(NASMBeforeTargets)' == '' and '$(NASMAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
++    <NASMBeforeTargets>Midl</NASMBeforeTargets>
++    <NASMAfterTargets>CustomBuild</NASMAfterTargets>
++  </PropertyGroup>
++  <PropertyGroup>
++    <NASMDependsOn
++      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(NASMDependsOn)</NASMDependsOn>
++  </PropertyGroup>
++  <ItemDefinitionGroup>
++    <NASM>
++      <OutFile>$(IntDir)%(Filename).obj</OutFile>
++      <BinFormat>win32</BinFormat>
++      <IncludeDir>%(RootDir)%(Directory)</IncludeDir>
++      <Defines>WIN32</Defines>
++      <CommandLineTemplate>nasmw [BinFormat] [IncludeDir] [Defines] -o [OutFile] %(FullPath)</CommandLineTemplate>
++      <Outputs>[OutFile]</Outputs>
++      <ExecutionDescription>Assembling %(Filename)...</ExecutionDescription>
++      <ShowOnlyRuleProperties>false</ShowOnlyRuleProperties>
++    </NASM>
++  </ItemDefinitionGroup>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_nasm.targets lame-3.99.5/vc_solution/vc9_nasm.targets
+--- lame-3.99.5.orig/vc_solution/vc9_nasm.targets	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_nasm.targets	2016-07-11 14:28:03 -0700
+@@ -0,0 +1,86 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup>
++    <PropertyPageSchema
++      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
++    <AvailableItemName
++      Include="NASM">
++      <Targets>_NASM</Targets>
++    </AvailableItemName>
++  </ItemGroup>
++  <UsingTask
++    TaskName="NASM"
++    TaskFactory="XamlTaskFactory"
++    AssemblyName="Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
++    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
++  </UsingTask>
++  <Target
++    Name="_NASM"
++    BeforeTargets="$(NASMBeforeTargets)"
++    AfterTargets="$(NASMAfterTargets)"
++    Condition="'@(NASM)' != ''"
++    DependsOnTargets="$(NASMDependsOn);ComputeNASMOutput"
++    Outputs="@(NASM-&gt;Metadata('Outputs')-&gt;Distinct())"
++    Inputs="@(NASM);%(NASM.AdditionalDependencies);$(MSBuildProjectFile)">
++    <ItemGroup
++      Condition="'@(SelectedFiles)' != ''">
++      <NASM
++        Remove="@(NASM)"
++        Condition="'%(Identity)' != '@(SelectedFiles)'" />
++    </ItemGroup>
++    <ItemGroup>
++      <NASM_tlog
++        Include="%(NASM.Outputs)"
++        Condition="'%(NASM.Outputs)' != '' and '%(NASM.ExcludedFromBuild)' != 'true'">
++        <Source>@(NASM, '|')</Source>
++      </NASM_tlog>
++    </ItemGroup>
++    <Message
++      Importance="High"
++      Text="%(NASM.ExecutionDescription)" />
++    <WriteLinesToFile
++      Condition="'@(NASM_tlog)' != '' and '%(NASM_tlog.ExcludedFromBuild)' != 'true'"
++      File="$(TLogLocation)$(ProjectName).write.1u.tlog"
++      Lines="^%(NASM_tlog.Source);@(NASM_tlog-&gt;'%(Fullpath)')"
++      Encoding="Unicode" />
++    <NASM
++      Condition="'@(NASM)' != '' and '%(NASM.ExcludedFromBuild)' != 'true'"
++      CommandLineTemplate="%(NASM.CommandLineTemplate)"
++      OutFile="%(NASM.OutFile)"
++      BinFormat="%(NASM.BinFormat)"
++      IncludeDir="%(NASM.IncludeDir)"
++      Defines="%(NASM.Defines)"
++      AdditionalOptions="%(NASM.AdditionalOptions)"
++      Inputs="@(NASM)" />
++  </Target>
++  <PropertyGroup>
++    <ComputeLinkInputsTargets>
++            $(ComputeLinkInputsTargets);
++            ComputeNASMOutput;
++          </ComputeLinkInputsTargets>
++    <ComputeLibInputsTargets>
++            $(ComputeLibInputsTargets);
++            ComputeNASMOutput;
++          </ComputeLibInputsTargets>
++  </PropertyGroup>
++  <Target
++    Name="ComputeNASMOutput"
++    Condition="'@(NASM)' != ''">
++    <ItemGroup>
++      <NASMDirsToMake
++        Condition="'@(NASM)' != '' and '%(NASM.ExcludedFromBuild)' != 'true'"
++        Include="%(NASM.Outputs)" />
++      <Link
++        Include="%(NASMDirsToMake.Identity)"
++        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
++      <Lib
++        Include="%(NASMDirsToMake.Identity)"
++        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
++      <ImpLib
++        Include="%(NASMDirsToMake.Identity)"
++        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
++    </ItemGroup>
++    <MakeDir
++      Directories="@(NASMDirsToMake-&gt;'%(RootDir)%(Directory)')" />
++  </Target>
++</Project>
+\ No newline at end of file
+diff -Nur lame-3.99.5.orig/vc_solution/vc9_nasm.xml lame-3.99.5/vc_solution/vc9_nasm.xml
+--- lame-3.99.5.orig/vc_solution/vc9_nasm.xml	1969-12-31 16:00:00 -0800
++++ lame-3.99.5/vc_solution/vc9_nasm.xml	2016-07-11 14:28:03 -0700
+@@ -0,0 +1,149 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:transformCallback="Microsoft.Cpp.Dev10.ConvertPropertyCallback">
++  <Rule
++    Name="NASM"
++    PageTemplate="tool"
++    DisplayName="NASM"
++    Order="200">
++    <Rule.DataSource>
++      <DataSource
++        Persistence="ProjectFile"
++        ItemType="NASM" />
++    </Rule.DataSource>
++    <Rule.Categories>
++      <Category
++        Name="General">
++        <Category.DisplayName>
++          <sys:String>General</sys:String>
++        </Category.DisplayName>
++      </Category>
++      <Category
++        Name="Command Line"
++        Subtype="CommandLine">
++        <Category.DisplayName>
++          <sys:String>Command Line</sys:String>
++        </Category.DisplayName>
++      </Category>
++    </Rule.Categories>
++    <StringListProperty
++      Name="Inputs"
++      Category="Command Line"
++      IsRequired="true"
++      Switch=" ">
++      <StringListProperty.DataSource>
++        <DataSource
++          Persistence="ProjectFile"
++          ItemType="NASM"
++          SourceType="Item" />
++      </StringListProperty.DataSource>
++    </StringListProperty>
++    <StringProperty
++      Name="OutFile"
++      HelpContext="0"
++      DisplayName="output file path"
++      Switch="[value]" />
++    <StringProperty
++      Name="BinFormat"
++      HelpContext="0"
++      DisplayName="Binary format"
++      Switch="-f [value]" />
++    <StringListProperty
++      Name="IncludeDir"
++      HelpContext="0"
++      DisplayName="Additional include directories"
++      Separator=";"
++      Switch="-i [value]" />
++    <StringListProperty
++      Name="Defines"
++      HelpContext="0"
++      DisplayName="Defines"
++      Separator=" ;,"
++      Switch="-D[value]" />
++    <StringProperty
++      Name="CommandLineTemplate"
++      DisplayName="Command Line"
++      Visible="False"
++      IncludeInCommandLine="False" />
++    <DynamicEnumProperty
++      Name="NASMBeforeTargets"
++      Category="General"
++      EnumProvider="Targets"
++      IncludeInCommandLine="False">
++      <DynamicEnumProperty.DisplayName>
++        <sys:String>Execute Before</sys:String>
++      </DynamicEnumProperty.DisplayName>
++      <DynamicEnumProperty.Description>
++        <sys:String>Specifies the targets for the build customization to run before.</sys:String>
++      </DynamicEnumProperty.Description>
++      <DynamicEnumProperty.ProviderSettings>
++        <NameValuePair
++          Name="Exclude"
++          Value="^NASMBeforeTargets|^Compute" />
++      </DynamicEnumProperty.ProviderSettings>
++      <DynamicEnumProperty.DataSource>
++        <DataSource
++          Persistence="ProjectFile"
++          HasConfigurationCondition="true" />
++      </DynamicEnumProperty.DataSource>
++    </DynamicEnumProperty>
++    <DynamicEnumProperty
++      Name="NASMAfterTargets"
++      Category="General"
++      EnumProvider="Targets"
++      IncludeInCommandLine="False">
++      <DynamicEnumProperty.DisplayName>
++        <sys:String>Execute After</sys:String>
++      </DynamicEnumProperty.DisplayName>
++      <DynamicEnumProperty.Description>
++        <sys:String>Specifies the targets for the build customization to run after.</sys:String>
++      </DynamicEnumProperty.Description>
++      <DynamicEnumProperty.ProviderSettings>
++        <NameValuePair
++          Name="Exclude"
++          Value="^NASMAfterTargets|^Compute" />
++      </DynamicEnumProperty.ProviderSettings>
++      <DynamicEnumProperty.DataSource>
++        <DataSource
++          Persistence="ProjectFile"
++          ItemType=""
++          HasConfigurationCondition="true" />
++      </DynamicEnumProperty.DataSource>
++    </DynamicEnumProperty>
++    <StringListProperty
++      Name="Outputs"
++      DisplayName="Outputs"
++      Visible="False"
++      IncludeInCommandLine="False" />
++    <StringProperty
++      Name="ExecutionDescription"
++      DisplayName="Execution Description"
++      Visible="False"
++      IncludeInCommandLine="False" />
++    <StringListProperty
++      Name="AdditionalDependencies"
++      DisplayName="Additional Dependencies"
++      IncludeInCommandLine="False"
++      Visible="true" />
++    <StringProperty
++      Subtype="AdditionalOptions"
++      Name="AdditionalOptions"
++      Category="Command Line">
++      <StringProperty.DisplayName>
++        <sys:String>Additional Options</sys:String>
++      </StringProperty.DisplayName>
++      <StringProperty.Description>
++        <sys:String>Additional Options</sys:String>
++      </StringProperty.Description>
++    </StringProperty>
++  </Rule>
++  <ItemType
++    Name="NASM"
++    DisplayName="NASM" />
++  <FileExtension
++    Name="*.nas"
++    ContentType="NASM" />
++  <ContentType
++    Name="NASM"
++    DisplayName="NASM"
++    ItemType="NASM" />
++</ProjectSchemaDefinitions>
+\ No newline at end of file

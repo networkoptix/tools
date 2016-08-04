@@ -52,7 +52,7 @@ fi
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
 export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(
-    find "$PWD/../buildenv/packages/" -name lib -o -name platforms |\
+    find "$PWD/../buildenv/packages/" -name lib -o -name platforms | sort -r |\
     grep linux-$ARCH_GREP | while read L; do echo -n ":${L}"; done)"
 
 if [ "$L" ]

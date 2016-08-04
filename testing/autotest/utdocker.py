@@ -5,12 +5,14 @@
 """
 __author__ = 'Danil Lavrentyuk'
 
+import os.path
 import sys
 import docker
 import docker.errors
 from docker.utils import Ulimit
 from subprocess import check_call, call as subcall
 
+from .utcontainer import *
 
 # TODO: catch and process all docker.errors.APIError and docker.errors.DockerException
 
@@ -18,25 +20,15 @@ if __name__ == '__main__':
     sys.path.append('..') #  just for debug runs
     import testconf as conf
 else:
-    main = sys.modules['__main__']
-    conf = main.conf
+    conf = sys.modules['__main__'].conf
 
-class ContainerError(RuntimeError):
-    pass
-
-class UtContainer(object):
-    mode = 'prod'
+class UtDockerContainer(UtContainerBase):
+    notmp = True
+    _debug_prefix = "DEBUG(utdocker): "
     client = None  # type: docker.Client
     hostConfig = None  # type:
     imageInfo = None
     container = None
-
-    @classmethod
-    def _debug(cls, text, *args):
-        if cls.mode == 'debug':
-            if args:
-                text = text % args
-            print "DEBUG(utdocker): " + text
 
     @classmethod
     def init(cls, buildVars):
@@ -101,30 +93,29 @@ class UtContainer(object):
         ])
 
     @classmethod
-    def cmdPrefix(cls):
+    def _cmdPrefix(cls):
         return [conf.DOCKER, 'exec', cls.container['Id']]
-
-    @classmethod
-    def makeCmd(cls, *cmd):
-        return [conf.DOCKER, 'exec', cls.container['Id']] + (cmd[0] if cmd and type(cmd[0]) == list else list(cmd))
 
     @classmethod
     def containerId(cls):
         return cls.container['Id']
 
+    @classmethod
+    def getWrapper(cls):
+        return os.path.join(conf.DOCKER_DIR, conf.UT_WRAPPER)
+
 
 
 #TODO: Think about exception strategy! Handle texceptions here or just allow ut.iterate_unittests/ut.call_unittest do it?
 
-
 if __name__ == '__main__':
     import subprocess
-    UtContainer.mode = 'debug'
-    UtContainer.init()
-    print "Containeer: %s" % UtContainer.container
-    print "Image: %s" % UtContainer.imageInfo
+    UtDockerContainer.mode = 'debug'
+    UtDockerContainer.init()
+    print "Containeer: %s" % UtDockerContainer.container
+    print "Image: %s" % UtDockerContainer.imageInfo
     cmd = ['ls', '-l']
     print "Calling command `%s` in container:" % ' '.join(cmd)
-    subprocess.call(UtContainer.makeCmd(cmd))
+    subprocess.call(UtDockerContainer.makeCmd(cmd))
     print "Finishing..."
-    UtContainer.done()
+    UtDockerContainer.done()

@@ -229,20 +229,20 @@ class StreamTcpBasic(object):
     def _parseRelamAndNonce(self, reply):
         idx = reply.find("WWW-Authenticate")
         if idx < 0:
-            return False
+            return None
         # realm is fixed for our server - NO! it's chhanged already!
         realm = "NetworkOptix" #FIXME get the realm from the reply!
 
         # find the Nonce
         idx = reply.find("nonce=",idx)
         if idx < 0:
-            return False
+            return None
         idx_start = idx + 6
         idx_end = reply.find(",",idx)
         if idx_end < 0:
             idx_end = reply.find("\r\n",idx)
             if idx_end < 0:
-                return False
+                return None
         nonce = reply[idx_start + 1:idx_end - 1]
 
         return (realm,nonce)
@@ -269,7 +269,7 @@ class StreamTcpBasic(object):
 
     def _requestWithDigest(self,reply):
         ret = self._parseRelamAndNonce(reply)
-        if ret == False:
+        if ret is None:
             return reply
         self._params['auth'] = self._formatDigestHeader(ret[0],ret[1])
         data = self._tpl % self._params
