@@ -98,7 +98,6 @@ VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
 
 MVN_BUILD_CONFIG = 'release'
-#MVN_BUILD_CONFIG = 'debug'
 TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
 
 # docker usage options
@@ -163,7 +162,7 @@ NOSHUFFLE = (  # list of tupples (branch, ut), any part can be '*' which means '
 )
 
 # Build only this branches, don't perform any testing
-BUILD_ONLY_BRANCHES = set(('', ))
+BUILD_ONLY_BRANCHES = set()
 
 SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
 
