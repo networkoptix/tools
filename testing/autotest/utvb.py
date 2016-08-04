@@ -21,6 +21,7 @@ else:
     from .tools import clear_dir
     from .logger import debug, log, raw_log
 
+TOHOST = "%s:" % conf.UT_BOX_IP
 
 def _get_vm_uptime():
     try:
@@ -42,22 +43,33 @@ class UtVirtualBox(UtContainerBase):
         # The main idea is: virtual box is always on
         # vargant up does nothing if the box already up
         check_call(conf.VAGR_RUN + [conf.UT_BOX_NAME], shell=False, cwd=conf.UT_VAG_DIR)
-        if cls._subdir == '':
-            cls._subdir = os.path.join(conf.UT_VAG_DIR, conf.UT_VAG_UT_SUBDIR)
-        if not os.path.isdir(cls._subdir):
-            os.makedirs(cls._subdir)
+        #if cls._subdir == '':
+        #    cls._subdir = os.path.join(conf.UT_VAG_DIR, conf.UT_VAG_UT_SUBDIR)
+        #if not os.path.isdir(cls._subdir):
+        #    os.makedirs(cls._subdir)
+        log("Copy tests and libs into the box...")
         cls._copyLibs(buildVars.lib_path, cls._subdir)
         cls._copyLibs(buildVars.qt_lib, cls._subdir)
+        toCopy = []
         for fn in glob.iglob(os.path.join(buildVars.bin_path, "*_ut")):
-            shutil.copy(fn, cls._subdir)
-        shutil.copy(conf.UT_WRAPPER, cls._subdir)
+            toCopy.append(fn)
+            if len(toCopy) > 4:
+                debug("Copy: %s", toCopy)
+                cls._copy2box(*toCopy)
+                toCopy = []
+            #shutil.copy(fn, cls._subdir)
+        if len(toCopy) > 0:
+            debug("Copy: %s", toCopy)
+            cls._copy2box(*toCopy)
+        cls._copy2box(conf.UT_WRAPPER)
+        #check_call(cls._cmdPrefix() + ['ls', '-l'])
         # remember, that UT_WRAPPER also clears the temporary directory at the vm
 
     @classmethod
     def done(cls):
         # 1. Clear _ut and libs
-        #debug("Clearing %s", cls._subdir)
-        clear_dir(cls._subdir)
+        check_call(cls._cmdPrefix() + ['rm', '*_ut', '*.so*'])
+        #clear_dir(cls._subdir)
         # 2. ONCE A WEEK RESTART VM
         if _get_vm_uptime() > conf.UT_BOX_TTL:
             #FIXME: move this part into init(), but it will need to check is the VM is created now!
@@ -71,20 +83,33 @@ class UtVirtualBox(UtContainerBase):
         return ['./vssh.sh',  conf.UT_BOX_IP, 'sudo']
 
     @classmethod
+    def _copy2box(cls, *files):
+        check_call(['./vscpto.sh', TOHOST] + list(files))
+
+
+    @classmethod
     def getWrapper(cls):
-        return os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR, conf.UT_WRAPPER)
+        #return os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR, conf.UT_WRAPPER)
+        return os.path.join('.', conf.UT_WRAPPER)
 
     @classmethod
     def _copyLibs(cls, libpath, dest):
-        vm_ut_dir = os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR)
+        #vm_ut_dir = os.path.join('/vagrant', conf.UT_VAG_UT_SUBDIR)
+        toCopy = []
         for mask in ('*.so', '*.so.*'):
             for fn in glob.iglob(os.path.join(libpath, mask)):
                 if os.path.islink(fn):
                     check_call(cls._cmdPrefix() + ["ln", '-s',
                         os.path.basename(os.readlink(fn)),
-                        os.path.join(vm_ut_dir, os.path.basename(fn))])
+                        os.path.basename(fn)])
                 else:
-                    shutil.copyfile(fn, os.path.join(dest, os.path.basename(fn)))
+                    toCopy.append(fn)
+                    if len(toCopy) > 4:
+                        cls._copy2box(*toCopy)
+                        toCopy = []
+                    #shutil.copyfile(fn, os.path.join(dest, os.path.basename(fn)))
+        if len(toCopy) > 0:
+            cls._copy2box(*toCopy)
 
 
 
