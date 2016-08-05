@@ -48,6 +48,7 @@ class UtVirtualBox(UtContainerBase):
         #if not os.path.isdir(cls._subdir):
         #    os.makedirs(cls._subdir)
         log("Copy tests and libs into the box...")
+        cls._clear_files()
         cls._copyLibs(buildVars.lib_path, cls._subdir)
         cls._copyLibs(buildVars.qt_lib, cls._subdir)
         toCopy = []
@@ -68,7 +69,7 @@ class UtVirtualBox(UtContainerBase):
     @classmethod
     def done(cls):
         # 1. Clear _ut and libs
-        check_call(cls._cmdPrefix() + ['rm', '*_ut', '*.so*'])
+        cls._clear_files()
         #clear_dir(cls._subdir)
         # 2. ONCE A WEEK RESTART VM
         if _get_vm_uptime() > conf.UT_BOX_TTL:
@@ -77,6 +78,13 @@ class UtVirtualBox(UtContainerBase):
                 check_call(conf.VAGR_DESTROY + [conf.UT_BOX_NAME], shell=False, cwd=conf.UT_VAG_DIR)
             except Exception:
                 log("WARNING: failed to destroy VM: " + format_exc())
+
+    @classmethod
+    def _clear_files(cls):
+        try:
+            check_call(cls._cmdPrefix() + ['rm', '-f', '*_ut', '*.so*'])
+        except Exception:
+            pass #
 
     @classmethod
     def _cmdPrefix(cls):
