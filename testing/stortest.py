@@ -28,7 +28,7 @@ multiserv_interfals_fname = os.path.join(mypath, "multiserv_intervals.py")
 BACKUP_STORAGE_READY_TIMEOUT = 60  # seconds
 BACKUP_START_TIMEOUT = 20  # seconds
 BACKUP_MAX_DURATION = 60  #seconds
-STORAGE_INIT_TIMEOUT=5
+STORAGE_INIT_TIMEOUT = 10
 
 _NUM_SERV_BAK = 1
 _NUM_SERV_MSARCH = 2
@@ -94,7 +94,7 @@ def checkInit(meth):
 
 
 def _parseStoreages(response):
-    return [s for s in response["reply"]["storages"] if s['storageType'] == 'local']
+    return [s for s in response if s['storageType'] == 'local']
 
 
 class StorageBasedTest(FuncTestCase):
@@ -119,9 +119,10 @@ class StorageBasedTest(FuncTestCase):
         for num in xrange(self.num_serv):
             st = None
             while not st:
-                st = _parseStoreages(self._server_request(num, 'api/storageSpace'))
+                st = _parseStoreages(self._server_request(num, 'ec2/getStorages?id=%s' % self.guids[num]))
                 if not st and until and time.time() > until:
-                    raise AssertionError("No storages reroprted from server %s during %s seconds" % (num, timeout))
+                    raise AssertionError(
+                        "No storages reroprted from server %s during %s seconds" % (num, timeout))
             self._storages[num] = st
             #print "[DEBUG] Storages found:"
             #for s in self._storages[num]:
@@ -185,7 +186,7 @@ class StorageBasedTest(FuncTestCase):
 
     @classmethod
     def _need_clear_box(cls, num):
-        return super(StorageBasedTest, cls)._need_clear_box(num) and num in cls._storages
+        return super(StorageBasedTest, cls)._need_clear_box(num) and num in cls._storages.iterkeys()
 
     @classmethod
     def _global_clear_extra_args(cls, num):
