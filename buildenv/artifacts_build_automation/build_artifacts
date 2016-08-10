@@ -708,7 +708,6 @@ libvpx_PRI_FILE="LIBS += -lvpx"
 # returns list of mirrors separated with ;
 function libvpx_getMirrorList()
 {
-# echo "http://downloads.sourceforge.net/project/lame/lame/3.99"
     echo "http://la.hdw.mx/sources/libvpx"
     return 0
 }
@@ -716,28 +715,25 @@ function libvpx_getMirrorList()
 function libvpx_generate_config()
 {
     local artifactVersion=$2
+    local libvpx_CONFIG_OPTIONS="--disable-examples --disable-docs --disable-debug --disable-unit-tests --disable-debug-libs --enable-static-msvcrt"
 
     libvpx_DIR=$ARTIFACT_BUILD_DIR/libvpx-$artifactVersion-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
     if [ $OS = "windows" ]
     then
-        if [ ! -f .patched ]
-        then
-            /bin/patch -p1 < $SCRIPT_DIR/patches/libvpx-${libvpx_VERSION}.patch >>$LOG_FILE_PATH 2>&1 || return 1
-            touch .patched
-        fi
-    else
-        read -d '' configureFfmpegScript<<EOF
+        [ $ARCH = x64 ] && libvpx_CONFIG_OPTIONS+=" --target=x86_64-win64-vs14"
+        [ $ARCH = x86 ] && libvpx_CONFIG_OPTIONS+=" --target=x86-win32-vs14"
+    fi
+
+    read -d '' configureLibvpxScript<<EOF
 #!/bin/bash
 
-./configure --disable-static --enable-shared --prefix=$libvpx_DIR \
---enable-pic --disable-debug --disable-examples --disable-docs \
-$lame_CONFIG_OPTIONS
+./configure --prefix=$libvpx_DIR \
+$libvpx_CONFIG_OPTIONS
 EOF
 
-        echo "$configureFfmpegScript" > ./config.libvpx
-        chmod u+x ./config.libvpx
-    fi
+    echo "$configureLibvpxScript" > ./config.libvpx
+    chmod u+x ./config.libvpx
 
     return 0
 }
@@ -745,24 +741,25 @@ EOF
 function libvpx_build()
 {
     libvpx_SRC_PATH=$PWD
+    local makeArch=$ARCH
 
     if [ $OS = "windows" ]
     then
-        MSBuild.exe //t:Rebuild //p:Configuration=Release //property:Platform=$ARCH win32/VS2015/libvpx_dynamic.sln >>$LOG_FILE_PATH 2>&1 || return 1
-
-        local makeArch=$ARCH
         [ $ARCH = x86 ] && makeArch=Win32
 
-        mkdir -p $libvpx_DIR/{include/vpx,lib,bin}
-
-        cp -rf include/vpx/*.h $libvpx_DIR/include/vpx
-        cp -rf win32/VS2015/$makeArch/Release/libvpx.lib $libvpx_DIR/lib/vpx.lib
-        cp -rf win32/VS2015/$makeArch/Release/libvpx.dll $libvpx_DIR/bin/vpx.dll
-    else
-        ./config.libvpx >>$LOG_FILE_PATH 2>&1 || return 1
-        make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
-        make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+        # Buggy mingw make
+        JOB_COUNT=1
     fi
+
+    ./config.libvpx >>$LOG_FILE_PATH 2>&1 || return 1
+    make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+    make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
+
+    if [ $OS = "windows" ]
+    then
+        mv $libvpx_DIR/lib/$makeArch/vpxmt.lib $libvpx_DIR/lib/vpx.lib
+    fi
+
     return 0
 }
 
@@ -774,10 +771,8 @@ function libvpx_prepareMvnArtifact()
     INSTALL_DIR=$ARTIFACT_BUILD_DIR/libvpx-$libvpx_VERSION-$ARCH-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
     cp -rf $INSTALL_DIR/include/* $mvnArtifactDir/include/
-    cp -rf $INSTALL_DIR/lib/vpx.lib $mvnArtifactDir/lib/debug/libvpx.lib
-    cp -rf $INSTALL_DIR/lib/vpx.lib $mvnArtifactDir/lib/release/libvpx.lib
-    cp -rf $INSTALL_DIR/bin/vpx.dll $mvnArtifactDir/bin/debug/libvpx.dll
-    cp -rf $INSTALL_DIR/bin/vpx.dll $mvnArtifactDir/bin/release/libvpx.dll
+    cp -rf $INSTALL_DIR/lib/*lib $mvnArtifactDir/lib/debug/
+    cp -rf $INSTALL_DIR/lib/*.lib $mvnArtifactDir/lib/release/
 
     return 0
 }
@@ -817,8 +812,7 @@ function libogg_generate_config()
 #!/bin/bash
 
 ./configure --disable-static --enable-shared --prefix=$libogg_DIR \
---with-pic --disable-debug --disable-frontend \
-$lame_CONFIG_OPTIONS
+--with-pic --disable-debug --disable-frontend
 EOF
 
         echo "$configureFfmpegScript" > ./config.libogg
@@ -1106,12 +1100,13 @@ EOF
     else
         if [ $OS = "windows" ]
         then
+            libvpx_DIR_NATIVE=$(cygpath.exe -w $libvpx_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
             lame_DIR_NATIVE=$(cygpath.exe -w $lame_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
             libogg_DIR_NATIVE=$(cygpath.exe -w $libogg_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
             libvorbis_DIR_NATIVE=$(cygpath.exe -w $libvorbis_DIR | sed -e 's%/%\\%g' -e 's%\\%\\\\\\\\%g')
 
-            ffmpeg_EXTRA_CFLAGS="-I${lame_DIR_NATIVE}\\\\\\\\include -I${libogg_DIR_NATIVE}\\\\\\\\include -I${libvorbis_DIR_NATIVE}\\\\\\\\include"
-            ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${lame_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libogg_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libvorbis_DIR_NATIVE}\\\\\\\\lib"
+            ffmpeg_EXTRA_CFLAGS="-I${libvpx_DIR_NATIVE}\\\\\\\\include -I${lame_DIR_NATIVE}\\\\\\\\include -I${libogg_DIR_NATIVE}\\\\\\\\include -I${libvorbis_DIR_NATIVE}\\\\\\\\include"
+            ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${libvpx_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${lame_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libogg_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libvorbis_DIR_NATIVE}\\\\\\\\lib"
             ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"$ffmpeg_EXTRA_CFLAGS\" --extra-ldflags=\"$ffmpeg_EXTRA_LDFLAGS\""
         else
             [ -n "$lame_DIR" ] && ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"-I$libvpx_DIR/include -I$lame_DIR/include -I$libogg_DIR/include -I$libvorbis_DIR/include\" --extra-ldflags=\"-L$libvpx_DIR/lib -L$lame_DIR/lib -L$libogg_DIR/lib -L$libvorbis_DIR/lib\""
