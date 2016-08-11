@@ -772,7 +772,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                                     print "No chunks found!"
                                     self._archiveNumEmpty += 1
                                     return
-                            print "# %s bytes received. last_data: %r" % (dataCount, last_data)
+                            N = 256
+                            print "# %s bytes received. last_data %s bytes: %r" % (
+                                dataCount, N, last_data[-N:])
                         self._perfLog.write("--------------------------------------------\n")
                         if data is None:
                             self._perfLog.write("! URL %s no data response for %s seconds\n" % (
