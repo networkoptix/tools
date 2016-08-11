@@ -19,7 +19,7 @@ set -e -x
 [[ "$1" = *r* ]] && CONF=release || CONF=debug
 
 OPTIONS=
-[[ "$1" = *u* ]] && OPTIONS+=" -Dut"
+[[ "$1" = *u* ]] && OPTIONS+=" -Dutb"
 [[ "$1" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
 
 if [[ "$1" = *c* ]]; then
