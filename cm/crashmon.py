@@ -42,13 +42,13 @@ if os.name == 'posix':
 else:
     from filelock import FileLock, Timeout
     def get_lock():
-        lock = FileLock(sys.argv[0])
+        global lock
+        lock = FileLock(sys.argv[0]+'.lock')
         try:
             lock.acquire(timeout=0)
-        except Timeout:  # locked
-            del lock
+        except Timeout:  # already locked
             return False
-        return True    
+        return True
 
 
 def is_crash_dump_path(path):
