@@ -30,6 +30,26 @@ __version__ = '1.3'
 
 filt_path = "/usr/bin/c++filt"
 
+if os.name == 'posix':
+    def get_lock():
+        global lock_socket   # Without this our lock gets garbage collected
+        lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        try:
+            lock_socket.bind('\0' + PROCESS_NAME)
+        except socket.error:
+            return False
+        return True
+else:
+    from filelock import FileLock, Timeout
+    def get_lock():
+        lock = FileLock(sys.argv[0])
+        try:
+            lock.acquire(timeout=0)
+        except Timeout:  # locked
+            del lock
+            return False
+        return True    
+
 
 def is_crash_dump_path(path):
     return (path.startswith('mediaserver') or path.startswith('client')
@@ -43,17 +63,6 @@ def attachment_filter(attachment):
 
 def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
-
-
-def get_lock(process_name):
-    global lock_socket   # Without this our lock gets garbage collected
-    lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    try:
-        lock_socket.bind('\0' + process_name)
-    except socket.error:
-        return False
-    return True
-
 
 def isHotfix(version):
     if version is None:
@@ -494,18 +503,33 @@ class CrashMonitor(object):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--auto", action="store_true", help="automatically periodical check mode.")
-    parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time since end of one check to start of another), minutes, use with -a")
-    parser.add_argument("-t", "--time", action="store_true", help="log start and finish times (useful for scheduled runs).")
+    parser.add_argument("-a", "--auto", action="store_true",
+        help="automatically periodical check mode.")
+    parser.add_argument("-p", "--period", type=int,
+        help="new crashes check period (sleep time since end of one check to start of another), minutes, use with -a")
+    parser.add_argument("-t", "--time", action="store_true",
+        help="log start and finish times (useful for scheduled runs).")
+    parser.add_argument("--dummy", action="store_true", help="just run dummy loop, for debug")
     args = parser.parse_args()
 
     if args.time:
         print "[Start at %s]" % time.asctime()
 
-    if get_lock(PROCESS_NAME):
-        CrashMonitor(args).run()
+    if get_lock():
+        if args.dummy:
+            print "Running dummy loop..."
+            while True:
+                try:
+                    time.sleep(1)
+                except KeyboardInterrupt:
+                    break
+        else:
+            CrashMonitor(args).run()
     else:
-        print "Another copy of process found. Lock name: " + PROCESS_NAME
+        if os.name == 'posix':
+            print "Another copy of process found. Lock name: " + PROCESS_NAME
+        else:
+            print "Another copy of process found."
         sys.exit(1)
 
     if args.time:
