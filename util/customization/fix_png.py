@@ -14,6 +14,6 @@ def fix_image_files(root=os.curdir):
         for filename in filenames:
             if not filename.endswith('.png'):
                 continue
-            system_call("pngcrush -ow -rem allb -reduce {}".format(filename), dirname)
+            system_call("pngcrush -ow -rem allb -reduce \"{}\"".format(filename), dirname)
 
 fix_image_files()
