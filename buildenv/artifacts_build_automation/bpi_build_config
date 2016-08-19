@@ -16,4 +16,4 @@ export qt_CXXFLAGS="-fno-omit-frame-pointer"
 #export openssl_DIR=/tmp/arm_artifacts_kng234js/openssl.1.0.0j/usr/local/ssl/
 export openssl_CFLAGS=-fPIC
 
-export ffmpeg_CONFIG_OPTIONS="--enable-neon --enable-decoder=mp3 --enable-decoder=mp2 --enable-encoder=aac --enable-encoder=pcm_mulaw --enable-encoder=g726 --enable-encoder=pcm_alaw --enable-demuxer=mp3 --enable-demuxer=mp2 --enable-vdpau --enable-hwaccel=h264_vdpau --enable-decoder=h264_vdpau --extra-cflags=-I$HOME/develop/third_party/bpi"
+export ffmpeg_CONFIG_OPTIONS="--enable-neon --enable-decoder=mp3 --enable-decoder=mp2 --enable-encoder=aac --enable-encoder=pcm_mulaw --enable-encoder=g726 --enable-encoder=pcm_alaw --enable-demuxer=mp3 --enable-demuxer=mp2 --enable-vdpau --enable-hwaccel=h264_vdpau --enable-decoder=h264_vdpau --extra-cflags='-I$NETOPTIX_DEV_DIR/third_party/bpi -I$NETOPTIX_DEV_DIR/buildenv/packages/bpi/ffmpeg-build-deps/include' --extra-ldflags='-L$NETOPTIX_DEV_DIR/buildenv/packages/bpi/ffmpeg-build-deps/lib'"
