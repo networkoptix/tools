@@ -73,11 +73,11 @@ class BasicGenerator(object):
 
         return (un,pwd,''.join('%02x' % ord(i) for i in d))
 
-    def generateDigest(self,uname,pwd):
-        d = md5("%s:NetworkOptix:%s" % (uname,pwd)).digest()
+    def generateDigest(self, uname, pwd):
+        d = md5(':'.join((uname, 'NetworkOptix', pwd))).digest()
         return ''.join("%02x" % ord(i) for i in d)
 
-    def generatePasswordHash(self,pwd):
+    def generatePasswordHash(self, pwd):
         salt = "%x" % (random.randint(0,4294967295))
         d = md5(salt+pwd).digest()
         md5_digest = ''.join('%02x' % ord(i) for i in d)
@@ -117,7 +117,7 @@ class UserDataGenerator(BasicGenerator):
     # about permissions value: 0x08 flag removed since it's internal use only,
     # see common/src/common/common_globals.h, GlobalPermission enum
 
-    def generateUserData(self,number):
+    def generateUserData(self, number):
         ret = []
         for i in xrange(number):
             id = self.generateRandomId()
@@ -130,15 +130,15 @@ class UserDataGenerator(BasicGenerator):
 
         return ret
 
-    def generateUpdateData(self,id):
+    def generateUpdateData(self, id):
         un,pwd,digest = self.generateUsernamePasswordAndDigest(self.generateUserName)
         return (self._template % (digest,
                 self.generateEmail(),
                 self.generatePasswordHash(pwd),
-                id,"false",un),id)
+                id, "false", un), id)
 
-    def createManualUpdateData(self,id,username,password,admin,email):
-        digest = self.generateDigest(username,password)
+    def createManualUpdateData(self, id, username, password, admin, email):
+        digest = self.generateDigest(username, password)
         hash = self.generatePasswordHash(password)
         return self._template % (digest, email, hash, id, "true" if admin else "false", username)
 
@@ -173,16 +173,6 @@ class MediaServerGenerator(BasicGenerator):
                 id)
                 for id in (self.generateRandomId() for _ in xrange(number))
         ]
-        #for i in xrange(number):
-        #    id = self.generateRandomId()
-        #    ret.append((self._template % (self.generateIpV4Endpoint(),
-        #           self.generateRandomId(),
-        #           id,
-        #           self.generateMediaServerName(),
-        #           self.generateRandomString(random.randint(5,20)),
-        #           self.generateIpV4Endpoint()),
-        #        id))
-        #return ret
 
 
 # This class is used to generate data for simulating resource confliction
@@ -410,7 +400,7 @@ class CameraDataGenerator(BasicGenerator):
 
 
 # This class serves as an in-memory data base.
-# Before doing the confliction test, we begin by creating some sort of resources and then start doing the
+# Before doing the confliction test, we create some sort of resources and then start doing the
 # confliction test.
 # These data is maintained in a separate dictionary and when everything is done it will be rolled back.
 class ConflictionDataGenerator(BasicGenerator):
@@ -558,7 +548,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
                 "motionMask": "5,0,0,44,32:5,0,0,44,32:5,0,0,44,32:5,0,0,44,32",
                 "motionType": "MT_SoftwareGrid",
                 "preferedServerId": "%s",
-                "scheduleEnabled": %s,
+                "scheduleEnabled": false,
                 "scheduleTasks": [ ],
                 "secondaryStreamQuality": "SSQualityMedium"
             }
@@ -578,24 +568,28 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
         if self._fetchExistedCameraUUIDList(prepareNum) == False:
             raise Exception("Cannot initialize camera list attribute test data")
 
-    def _prepareData(self,op,num,methodName,l):
+    def _prepareData(self, op, num, methodName,l):
         worker = ClusterWorker(8, num * len(testMaster.clusterTestServerList))
 
         for _ in xrange(num):
             for s in testMaster.clusterTestServerList:
 
-                def task(lock,list,listLock,server,mname,oper):
+                def task(lock, list, listLock, server, mname, oper):
 
+                    url = "http://%s/ec2/%s" % (server, mname)
                     with lock:
                         d = oper(1,s)[0]
-                        req = urllib2.Request("http://%s/ec2/%s" % (server,mname),
-                                data=d[0], headers={'Content-Type': 'application/json'})
+                        #print "DEBUG: %s at %s with %s" % (mname, server, d[0])
+                        req = urllib2.Request(url, data=d[0], headers={'Content-Type': 'application/json'})
                         response = urllib2.urlopen(req)
 
                     if response.getcode() != 200:
-                        print "Failed to connect http://%s/ec2/%s" % (server,mname)
+                        print "Failed to connect %s" % (url,)
                         return
                     else:
+                        #print "DEBUG: %s response: %s" % (server, response.read())
+                        #with open("%s_data" % mname, "a") as f:
+                        #    f.write("%s\n" % d[0])
                         testMaster.unittestRollback.addOperations(mname, server, d[1])
                         with listLock:
                             list.append(d[0])
@@ -607,7 +601,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
         worker.join()
         return True
 
-    def _fetchExistedCameraUUIDList(self,num):
+    def _fetchExistedCameraUUIDList(self, num):
         # We could not use existed camera list since if we do so we may break
         # the existed
         # database on the server side.  What we gonna do is just create new
@@ -640,7 +634,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
             self._generateNormalizeRange())
 
     def _getRandomCameraUUIDAndName(self):
-        return self._existedCameraUUIDList[random.randint(0,len(self._existedCameraUUIDList) - 1)]
+        return random.choice(self._existedCameraUUIDList)
 
     def generateCameraUserAttribute(self,number):
         ret = []
@@ -651,8 +645,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
                     uuid, name,
                     self.generateBool(),
                     self._generateDewarpingPar(),
-                    self._getRandomServerId(),
-                    self.generateBool()))
+                    self._getRandomServerId()))
 
         return ret
 

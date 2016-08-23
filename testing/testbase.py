@@ -9,6 +9,7 @@ import urllib, urllib2
 import time
 import json
 import traceback
+import random
 
 from autotest.tools import boxssh
 
@@ -438,12 +439,14 @@ class UnitTestRollback:
 
     def _doSingleRollback(self,methodName,serverAddress,resourceId):
         # this function will do a single rollback
-        req = urllib2.Request("http://%s/ec2/removeResource" % (serverAddress,),
+        url = "http://%s/ec2/removeResource" % (serverAddress,)
+        req = urllib2.Request(url,
             data='{ "id":"%s" }' % (resourceId), headers={'Content-Type': 'application/json'})
         #response = None
         try:
             response = urllib2.urlopen(req)
-        except:
+        except Exception as err:
+            print "%s failed: %s" % (url, err)
             return False
         if response.getcode() != 200:
             response.close()
@@ -627,6 +630,9 @@ class FuncTestMaster(object):
         print "All ec2 get requests work well"
         print "======================================"
         return (True,"Server:%s test for all getter pass" % (s))
+
+    def getRandomServer(self):
+        return random.choice(self.clusterTestServerList)
 
     def _getServerName(self, obj, uuid):
         for s in obj:
