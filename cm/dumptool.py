@@ -63,7 +63,6 @@ def report_name(dump_path, safe=False):
 def clear_cache(cacheDir, keepFiles):
     print "Clearing cache dir %s" % (cacheDir,)
     existing = set(os.listdir(cacheDir))
-    raw_input("...")
     for fname in keepFiles:
         existing.discard(report_name(fname, True))
     # remove all files not mentioned in keepFiles
