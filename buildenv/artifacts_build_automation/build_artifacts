@@ -1175,7 +1175,7 @@ function ffmpeg_prepareMvnArtifact()
         [ -n "$libvpx_DIR" ] && cp -rf $libvpx_DIR/lib/* $mvnArtifactDir/lib/release
         [ -n "$lame_DIR" ] && cp -rf $lame_DIR/lib/* $mvnArtifactDir/lib/release
         [ -n "$libogg_DIR" ] && cp -rf $libogg_DIR/lib/* $mvnArtifactDir/lib/release
-        [ -n "$libvorbis_DIR" ] cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
+        [ -n "$libvorbis_DIR" ] && cp -rf $libvorbis_DIR/lib/* $mvnArtifactDir/lib/release
 
         cp -rf $INSTALL_DIR/lib/* $mvnArtifactDir/lib/release/
         cp -rf $INSTALL_DIR/bin/* $mvnArtifactDir/bin/release/
