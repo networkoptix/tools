@@ -11,8 +11,6 @@ from argparse import ArgumentParser
 root_path = "/home/danil/develop/devtools/ci"
 filt_path = "/usr/bin/c++filt"
 
-line_rx = re.compile("^([^\(]+)?(?:\(([^?]+)\))?\[([^\]]+)\]")
-
 Faults = dict() # crash-path -> [filepaths]
 NewPaths = dict() # filepath -> new_filepath
 faults_fname = "faults.list"
@@ -38,6 +36,22 @@ def demangle_names(names):
         return names
     return newnames
 
+line_rx = re.compile("^([^\(]+)?(?:\(([^?]+)\))?\[([^\]]+)\]")
+
+gdb_frame_rx = re.compile("^\#\d+\s+\w+ in (.+?) \(")
+gdb_frame_sgort_rx = re.compile("^\#\d+\s+(.+?) \(")
+
+crash_signal_rx = re.compile("^[^(]+\(\d+\)")
+
+GDB_MARK = "Program terminated with signal"
+GDB_MARK_LEN = len(GDB_MARK)
+
+CDB_EXC = "   ExceptionCode: "
+CDB_EXC_LEN = len(CDB_EXC)
+CDB_PREMARK = "  *** Stack trace for last set context"
+CDB_MARK = "Call Site"
+
+
 
 def parse_crash(f, fpath):
     try:
@@ -62,9 +76,6 @@ def parse_crash(f, fpath):
         if fn is not None and len(fn) > 0:
             call_file = fn
     return call_path if call_path else (['file:'+call_file,] if call_file != '' else [])
-
-gdb_frame_rx = re.compile("^\#\d+\s+\w+ in (.+?) \(")
-gdb_frame_sgort_rx = re.compile("^\#\d+\s+(.+?) \(")
 
 def parse_gdb(f, fpath):
     call_path = []
@@ -94,8 +105,24 @@ def parse_gdb(f, fpath):
                 call_path.append(name)
     return call_path
 
+def cdb_skip_to_stack(f):
+    for line in f:
+        if line.startswith(CDB_MARK):
+            return True
+    return False
 
-crash_signal_rx = re.compile("^[^(]+\(\d+\)")
+def parse_cdb(f, fpath):
+    if not cdb_skip_to_stack(f):
+        print "WARNING: No stack trace found in %s!" % fpath
+        return []
+    # here all lines from CDB_MARK to an emplty line is the calltstack
+    call_path = []
+    for line in f:
+        line = line.rstrip()
+        if line == '':
+            break
+        call_path.append(line)
+    return call_path
 
 def check_crash(line, stream):
     if line.strip() == '': # Search for the first empty line
@@ -107,10 +134,6 @@ def check_crash(line, stream):
         if m:
             return m.group(0)
     return None
-
-
-GDB_MARK = "Program terminated with signal"
-GDB_MARK_LEN = len(GDB_MARK)
 
 def check_gdb(line, stream):
     if line.startswith(GDB_MARK):
@@ -124,10 +147,16 @@ def check_gdb(line, stream):
             return "Unparsed signal %s (error %s)" % (signal, e)
     return None
 
+def check_cdb(line, stream):
+    if line.startswith(CDB_EXC):
+        return line[CDB_EXC_LEN:].strip()
+    if line.startswith(CDB_PREMARK):  # no exception line found!
+        return 'UNKNOWN'
+    return None
 
-FORMATS = ('crash', 'gdb-bt')
-CHECKER = dict(zip(FORMATS, (check_crash, check_gdb)))
-PARSER = dict(zip(FORMATS, (parse_crash, parse_gdb)))
+FORMATS = ('crash', 'gdb-bt', 'cdb-bt')
+CHECKER = dict(zip(FORMATS, (check_crash, check_gdb, check_cdb)))
+PARSER = dict(zip(FORMATS, (parse_crash, parse_gdb, parse_cdb)))
 
 
 def parse_dump(stream, fmt, path):

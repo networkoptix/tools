@@ -54,38 +54,39 @@ class LegacyFuncTestBase(unittest.TestCase):
         pass
 
     def _defaultModifySeq(self, fakeData):
-        ret = []
-        for f in fakeData:
-            # pick up a server randomly
-            ret.append((f, testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]))
-        return ret
+        # pick up a server randomly for each fakeData element
+        return [(f, testMaster.getRandomServer()) for f in fakeData]
 
     def _defaultCreateSeq(self,fakeData):
         ret = []
         for f in fakeData:
-            serverName = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
+            serverName = testMaster.getRandomServer()
             # add rollback cluster operations
             testMaster.unittestRollback.addOperations(self._getMethodName(), serverName, f[1])
-            ret.append((f[0],serverName))
-
+            ret.append((f[0], serverName))
         return ret
 
-    def _dumpFailedRequest(self,data,methodName):
+    def _dumpFailedRequest(self, data, methodName):
         f = open("%s.failed.%.json" % (methodName,threading.active_count()),"w")
         f.write(data)
         f.close()
 
-    def _sendRequest(self,methodName,d,server):
-        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
-            data=d, headers={'Content-Type': 'application/json'})
+    def _sendRequest(self, methodName, d, server):
+        url = "http://%s/ec2/%s" % (server, methodName)
+        req = urllib2.Request(url, data=d, headers={'Content-Type': 'application/json'})
 
-        with self._Lock:
-            print "Connection to http://%s/ec2/%s" % (server,methodName)
-            response = urllib2.urlopen(req)
+        try:
+            with self._Lock:
+                print "Connection to %s" % (url,)
+                response = urllib2.urlopen(req)
+        except urllib2.HTTPError as err:
+            print "ERROR %s in test %s on URL %s" % (err, self.__class__.__name__, url)
+            self._dump_post_data(d)
+            self.fail("%s failed!" % (methodName,))
 
         # Do a sligtly graceful way to dump the sample of failure
         if response.getcode() != 200:
-            self._dumpFailedRequest(d,methodName)
+            self._dumpFailedRequest(d, methodName)
             self.fail("%s failed with statusCode %d" % (methodName, response. getcode()))
 
         response.close()
@@ -98,9 +99,7 @@ class LegacyFuncTestBase(unittest.TestCase):
             #FIXME Refactor error handling!
             try:
                 self.setUp()
-            except KeyboardInterrupt:
-                raise
-            except:
+            except Exception:
                 result.addError(self, sys.exc_info())
                 return
 
@@ -111,22 +110,21 @@ class LegacyFuncTestBase(unittest.TestCase):
             except self.failureException:
                 result.addFailure(self, sys.exc_info())
                 result.stop()
-            except KeyboardInterrupt:
-                raise
-            except:
+            except Exception:
                 result.addError(self, sys.exc_info())
                 result.stop()
 
             try:
                 self.tearDown()
-            except KeyboardInterrupt:
-                raise
-            except:
+            except Exception:
                 result.addError(self, sys.exc_info())
                 ok = False
             if ok: result.addSuccess(self)
         finally:
             result.stopTest(self)
+
+    def _dump_post_data(self, data):
+        pass
 
     def test(self):
         postDataList = self._generateModifySeq()
@@ -141,7 +139,7 @@ class LegacyFuncTestBase(unittest.TestCase):
         print "Test:%s start!\n" % (self._getMethodName())
 
         for test in postDataList:
-            workerQueue.enqueue(self._sendRequest , (self._getMethodName(),test[0],test[1],))
+            workerQueue.enqueue(self._sendRequest , (self._getMethodName(), test[0], test[1],))
 
         workerQueue.join()
 
@@ -150,14 +148,11 @@ class LegacyFuncTestBase(unittest.TestCase):
 
         if isinstance(observer,(list)):
             for m in observer:
-                ret,reason = testMaster.checkMethodStatusConsistent(m)
-                self.assertTrue(ret,reason)
+                ret, reason = testMaster.checkMethodStatusConsistent(m)
+                self.assertTrue(ret, reason)
         else:
             ret , reason = testMaster.checkMethodStatusConsistent(observer)
             self.assertTrue(ret,reason)
-
-        #DEBUG
-        #self.assertNotEqual(0, 0, "DEBUG FAIL")
 
         print "Test:%s finish!\n" % (self._getMethodName())
         print "===================================\n"
@@ -296,6 +291,11 @@ class CameraUserAttributeListTest(LegacyFuncTestBase):
 
     def _getObserverName(self):
         return "getCameraUserAttributes"
+
+    #def _dump_post_data(self, data):
+        #print "CameraUserAttributeListTest data: %s" % (data,)
+        #with open("%s-fails" % self._getMethodName(), "a") as f:
+        #    f.write("%s\n" % data)
 
 
 class ServerUserAttributesListDataTest(LegacyFuncTestBase):
@@ -1649,7 +1649,9 @@ def BoxTestsRun(key):
 
 
 def LegacyTests(only = False):
-    the_test = unittest.main(exit=False, argv=argv[:1])
+    _argv = argv[:]
+    del _argv[1:(3 if only else 2)]
+    the_test = unittest.main(exit=False, argv=_argv)
     doCleanUp(reinit=True)
 
     if the_test.result.wasSuccessful():
@@ -1690,8 +1692,8 @@ def DoTests(argv):
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
         #FIXME no result code returning!
 
-    if argc in (2, 3) and argv[1] == '--legacy':
-        LegacyTests(argv[2] == '--only' if argc == 3 else False)
+    if argc >= 2 and argv[1] == '--legacy':
+        LegacyTests(argv[2] == '--only' if argc >= 3 else False)
         #FIXME no result code returning!
 
     elif argc == 2 and argv[1] == '--main':
