@@ -29,8 +29,9 @@ public final class SourceCodeGenerator
      * Generate C++ comments for those functions from the specified group which
      * can be found in C++ comments. Processed functions are removed from the
      * specified group.
+     * @return Number of API functions processed.
      */
-    public void insertCommentsForSystemApi(Apidoc.Group group)
+    public int insertCommentsForSystemApi(Apidoc.Group group)
         throws Error, SourceCodeEditor.Error, ApidocCommentParser.Error
     {
         Set<Apidoc.Function> processedFunctions =
@@ -61,6 +62,8 @@ public final class SourceCodeGenerator
         }
 
         logUnprocessedFunctions(processedFunctions, group);
+
+        return processedFunctions.size();
     }
 
     //--------------------------------------------------------------------------

@@ -16,7 +16,7 @@ public final class CodeToXmlExecutor
     public File outputApiXmlFile;
     public String sourceFileExtraSuffix = "";
 
-    public void execute()
+    public int execute()
         throws Exception
     {
         final File connectionFactoryCppFile = Utils.insertSuffix(
@@ -37,13 +37,18 @@ public final class CodeToXmlExecutor
 
         SourceCodeParser parser = new SourceCodeParser(reader);
 
-        Apidoc.Group generatedGroup = parser.parseCommentsFromSystemApi(
-            ApidocHandler.getGroupByName(apidoc, SYSTEM_API_GROUP_NAME));
+        final Apidoc.Group targetGroup = new Apidoc.Group();
+        final int processedFunctionsCount = parser.parseCommentsFromSystemApi(
+            ApidocHandler.getGroupByName(apidoc, SYSTEM_API_GROUP_NAME), targetGroup);
 
-        ApidocHandler.replaceFunctions(apidoc, generatedGroup);
+        ApidocHandler.replaceFunctions(apidoc, targetGroup);
+
+        System.out.println("Processed " + processedFunctionsCount + " API functions");
 
         XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
-        System.out.println("SUCCESS: Created .xml file:");
+        System.out.println("Created .xml file:");
         System.out.println("    " + outputApiXmlFile);
+
+        return processedFunctionsCount;
     }
 }

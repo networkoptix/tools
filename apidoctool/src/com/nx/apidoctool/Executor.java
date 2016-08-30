@@ -9,8 +9,9 @@ public abstract class Executor
     /**
      * Execute the task, using the object public fields as arguments - a kind of
      * named arguments design pattern.
+     * @return Number of items (e.g. API functions) processed (can be used for tests).
      */
-    public abstract void execute()
+    public abstract int execute()
         throws Exception;
 
     //--------------------------------------------------------------------------
