@@ -38,7 +38,7 @@ def execCommand(*command):
     return code
         
 def getChangelog(revision):
-    command = ['hg', 'log', '--template', '{desc}\n\n', '-r']
+    command = ['hg', 'log', '--template', '{desc|firstline}\n\n', '-r']
     changeset = ["(::{0} - ::{1})".format(revision, targetBranch)]
     command = command + changeset
     try:
