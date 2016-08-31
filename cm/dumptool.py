@@ -42,7 +42,8 @@ CONFIG = dict(
     ],
 )
 
-#CONFIG['cdb_path'] = 'C:/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe'
+CONFIG['7z_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
+CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
 
 class Error(Exception):
     pass
@@ -249,7 +250,7 @@ class DumpAnalyzer(object):
             self.module_dir = os.path.dirname(
                 self.find_file(self.module + '.exe'))
             return run(
-                '7z', 'x', path, '-o' + self.module_dir, '-y')
+                CONFIG['7z_path'], 'x', path, '-o' + self.module_dir, '-y')
 
     def download_dists(self):
         '''Downloads required distributives
