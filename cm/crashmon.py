@@ -257,7 +257,7 @@ def email_newcrash(crash, calls, jira_error=None):
     )
     msg.attach(text)
     att = MIMEText(crash['dump'])
-    att.add_header('Content-Disposition', 'attachment', filename=crash['path'].lstrip('/'))
+    att.add_header('Content-Disposition', 'attachment', filename=report_name(crash['path']).lstrip('/'))
     msg.attach(att)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
