@@ -37,6 +37,7 @@ class UtVirtualBox(UtContainerBase):
     """
     _debug_prefix = "DEBUG(utvb): "
     _subdir = ''
+    _libsCopied = set()
 
     @classmethod
     def init(cls, buildVars):
@@ -48,6 +49,10 @@ class UtVirtualBox(UtContainerBase):
         #if not os.path.isdir(cls._subdir):
         #    os.makedirs(cls._subdir)
         log("Copy tests and libs into the box...")
+        #debug("buildVars:\n%s", "\n".join(
+        #        "\t%s = %s" % (attr, getattr(buildVars, attr)) for attr in
+        #        ('lib_path', 'qt_lib', 'bin_path')
+        #    ))
         cls._clear_files()
         cls._copyLibs(buildVars.lib_path, cls._subdir)
         cls._copyLibs(buildVars.qt_lib, cls._subdir)
@@ -83,6 +88,7 @@ class UtVirtualBox(UtContainerBase):
     def _clear_files(cls):
         try:
             check_call(cls._cmdPrefix() + ['rm', '-f', '*_ut', '*.so*'])
+            cls._libsCopied.clear()
         except Exception:
             pass #
 
@@ -92,6 +98,7 @@ class UtVirtualBox(UtContainerBase):
 
     @classmethod
     def _copy2box(cls, *files):
+        #debug("_copy2box: %s", "\n\t".join(files))
         check_call(['./vscpto.sh', TOHOST] + list(files))
 
 
@@ -106,21 +113,23 @@ class UtVirtualBox(UtContainerBase):
         toCopy = []
         for mask in ('*.so', '*.so.*'):
             for fn in glob.iglob(os.path.join(libpath, mask)):
+                fnBase = os.path.basename(fn)
+                if fnBase in cls._libsCopied:
+                    #debug("Ignored already copied lib %s", fnBase)
+                    continue
                 if os.path.islink(fn):
+                    #debug("_copyLibs linking %s -> %s", os.path.basename(os.readlink(fn)), fnBase)
                     check_call(cls._cmdPrefix() + ["ln", '-s',
-                        os.path.basename(os.readlink(fn)),
-                        os.path.basename(fn)])
+                        os.path.basename(os.readlink(fn)), fnBase])
                 else:
                     toCopy.append(fn)
                     if len(toCopy) > 4:
                         cls._copy2box(*toCopy)
                         toCopy = []
                     #shutil.copyfile(fn, os.path.join(dest, os.path.basename(fn)))
+                cls._libsCopied.add(fnBase)
         if len(toCopy) > 0:
             cls._copy2box(*toCopy)
-
-
-
 
 
 if __name__ == '__main__':
