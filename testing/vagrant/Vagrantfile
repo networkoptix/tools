@@ -4,7 +4,7 @@
 require_relative '../boxes.rb'
 
 Vagrant.configure("2") do |config|
-  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20160803.box"
+  config.vm.box_url = "http://noptix.enk.me/vagrant-boxes/ubuntu-14-04-functest-20160906.box"
   config.vm.box = "autotest"
   config.ssh.forward_agent = true
 
