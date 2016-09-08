@@ -9,3 +9,6 @@ ci/crash
 ci/gdb-bt
 ci/links-gdb-bt
 *.pyo
+boxes.rb
+networkoptix-mediaserver.deb
+

@@ -7,8 +7,7 @@ Checks if both servers start and merge their data correctly.
 __author__ = 'Danil Lavrentyuk'
 
 import os, time
-from functest_util import compareJson, checkResultsEqual, textdiff
-#from testbase import FuncTestCase
+from functest_util import compareJson, textdiff
 from stortest import StorageBasedTest
 
 NUM_SERV=2
@@ -64,6 +63,7 @@ class DBTest(StorageBasedTest):
         '{88b807ab-0a0f-800e-e2c3-b640b31f3a1c}',
     ]
 
+    _doPause = False
 
     @classmethod
     def tearDownClass(cls):
@@ -111,14 +111,18 @@ class DBTest(StorageBasedTest):
             diffresult = textdiff(answers[0][1], answers[1][1], self.sl[0], self.sl[1])
             self.fail("Servers responses on %s are different: %s\nTextual diff results:\n%s" % (func, diff.errorInfo(), diffresult))
 
+    def _waitInput(self, msg):
+        if self._doPause:
+            raw_input(msg+"...")
+
     def BackupRestoreTest(self):
         """ Check if backup/restore preserve all necessary data. """
         _clearDumps()
         WORK_HOST = 0  # which server do we check with backup/restore
         getInfoFunc = 'ec2/getFullInfo?extraFormatting'
+        self._waitInput("Before dump")
         fulldataBefore = self._server_request(WORK_HOST, getInfoFunc, unparsed=True)
         _saveDump(DUMP_BEFORE, fulldataBefore[1])
-        #raw_input("Before dump...")
         resp = self._server_request(WORK_HOST, 'ec2/dumpDatabase?format=json')
         #print "DEBUG: Returned data size: %s" % len(resp['data'])
         backup = resp['data']
@@ -128,9 +132,10 @@ class DBTest(StorageBasedTest):
         self._add_test_camera(0)
         _sleep(10)
         #
-        #raw_input("Before restore...")
+        self._waitInput("Before restore")
         self._server_request(WORK_HOST, 'ec2/restoreDatabase', data={'data': backup})
         save_guids = self.guids[:]
+        self._waitInput("After restore")
         _sleep(15)
         self._wait_servers_up()
         self.assertSequenceEqual(save_guids, self.guids,

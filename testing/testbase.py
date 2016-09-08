@@ -2,19 +2,21 @@
 Including FuncTestCase - the base class for all mediaserver functional test classes.
 """
 __author__ = 'Danil Lavrentyuk'
+from collections import OrderedDict
+import json
+import random
 import sys, os
 import subprocess
+import time
+import traceback
 import unittest
 import urllib, urllib2
-import time
-import json
-import traceback
-import random
 
 from autotest.tools import boxssh
 
 from functest_util import ClusterLongWorker, unquote_guid, Version, FtConfigParser,\
-                          checkResultsEqual, ManagerAddPassword, SafeJsonLoads
+                          checkResultsEqual, ManagerAddPassword, SafeJsonLoads,\
+                          LegacyTestFailure, ServerCompareFailure
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -411,87 +413,153 @@ class LegacyTestWrapper(FuncTestCase):
         pass
 
 # Rollback support
-class UnitTestRollback:
-    "Legacy: Now it only removes resources, recorded in the eollback file."
+class UnitTestRollback(object):
+    """Legacy: Now it only removes resources, recorded in the rollback file.
+       An operation name, saved in the file, is for infomation and debug only.
+    """
     _rollbackFile = None
+    _savedIds = OrderedDict()
+    _auto = False
 
-    def __init__(self):
-        if os.path.isfile(".rollback"):
-            selection = 'r' if _testMaster.auto_rollback else ''
-            if not _testMaster.auto_rollback:
-                try :
-                    print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
-                    print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
-                    print "Do you want to run Recover NOW?\n"
-                    selection = raw_input("Press r to RUN RECOVER at first or press Enter to SKIP RECOVER and run the test")
-                except Exception:
-                    pass
+    def __init__(self, autorollback=False, nocreate=False):
+        # nocreate is used only for `functest.py --recover` call only that doesn't run any tests
+        self._auto = autorollback or _testMaster.auto_rollback
+        if os.path.isfile(".rollback") and self._askRollback():
+            self.doRecover(checkFile=False)
+        if not nocreate:
+            self._rollbackFile = open(".rollback","w+")
+            self._savedIds.clear()
+        self._fpos = None
 
-            if len(selection) != 0 and selection[0] in ('r', 'R'):
-                self.doRecover()
+    def __enter__(self, testName=''):  # may be, pass the caller test name here?
+        if self._fpos is not None:
+            raise Exception("Double entered UnitTestRollback")
+        self._fpos = self._rollbackFile.tell()
+        #print "DEBUG: UnitTestRollback._fpos == %s" % (self._fpos, )
+        if len(self._savedIds) > 0:
+            print "WARNING: UnitTestRollback.__enter__: non-empty _savedIds!"
+            self._savedIds.clear()
 
-        self._rollbackFile = open(".rollback","w+")
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        #print "DEBUG: exiting rollback-with. UnitTestRollback._fpos == %s"  % (self._fpos, )
+        if self._savedIds:
+            self.doRollback()
+        if self._rollbackFile.tell() != self._fpos:
+            self._truncRollbackFile()
+        self._fpos = None
 
-    def addOperations(self,methodName,serverAddress,resourceId):
-        #for s in _testMaster.clusterTestServerList:
-        self._rollbackFile.write(("%s,%s,%s\n") % (methodName,serverAddress,resourceId))
+    def inContext(self):
+        return self._fpos is not None
+
+    def _askRollback(self):
+        if os.stat('.rollback').st_size < 3:
+            return False
+        selection = ''
+        if not self._auto:
+            try :
+                print "+++++++++++++++++++++++++++++++++++++++++++WARNING!!!++++++++++++++++++++++++++++++++"
+                print "The .rollback file has been detected, if continues to run test the previous rollback information will be lost!\n"
+                selection = raw_input("Press <r> to RUN RECOVER at first, press <Enter> to SKIP RECOVER and run the test")
+            except Exception:
+                pass
+
+        return self._auto or selection.lower().startswith('r')
+
+    def _write2Rollback(self, resourceId, serverAddress, methodName):
+        self._rollbackFile.write(("%s,%s,%s\n") % (resourceId, serverAddress, methodName))
+
+    def addOperations(self, methodName, serverAddress, resourceId):
+        if resourceId in self._savedIds:  # skip duplicating ids
+            #print "WARNING: trying to add duplicated resourceId %s (op %s, server %s)" % (resourceId, methodName, serverAddress)
+            return
+        self._write2Rollback(resourceId, serverAddress, methodName)
         self._rollbackFile.flush()
+        self._savedIds[resourceId] = (serverAddress, methodName)
+        #print "DEBUG: added res %s at %s by %s" % (resourceId, serverAddress, methodName)
 
-    def _doSingleRollback(self,methodName,serverAddress,resourceId):
+    def takeOff(self, resourceId):
+        "If the resource was removed by a test itself, no need to keep its id here"
+        self._savedIds.pop(resourceId, None)
+
+    def _doSingleRollback(self, resourceId, serverAddress, methodName):
         # this function will do a single rollback
         url = "http://%s/ec2/removeResource" % (serverAddress,)
         req = urllib2.Request(url,
             data='{ "id":"%s" }' % (resourceId), headers={'Content-Type': 'application/json'})
         #response = None
+        fail = None
         try:
             response = urllib2.urlopen(req)
         except Exception as err:
-            print "%s failed: %s" % (url, err)
+            fail = err
+        else:
+            if response.getcode() != 200:
+                fail = "HTTP error code %s" % response.getcode()
+                response.close()
+        if fail is not None:
+            print "Failed rollback transaction: %s, method %s, id=%s - FAILED: %s" % (url, methodName, resourceId, fail)
             return False
-        if response.getcode() != 200:
-            response.close()
-            return False
-        response.close()
         return True
 
+    def _truncRollbackFile(self):
+        self._rollbackFile.seek(self._fpos)
+        self._rollbackFile.truncate()
+
     def doRollback(self):
-        recoverList = []
-        # set the cursor for the file to the file beg
-        self._rollbackFile.seek(0,0)
-        for line in self._rollbackFile:
-            if line == '\n':
-                continue
-            l = line.rstrip('\n').split(',')
-            # now we have method,serverAddress,resourceId
-            if not self._doSingleRollback(l[0],l[1],l[2]):
-                # failed for this rollback
-                print "Failed rollback transaction: Method:%s; Server:%s; ResourceId:%s (you could recover it later)" % (l[0],l[1],l[2])
-                recoverList.append(line)
+        failed = OrderedDict()
+        recovered = set()
+        for resId, info in self._savedIds.iteritems():
+            if resId in recovered:
+                print "\nWARNING: Duplicated resource %s in rollback list!" % resId
             else:
-                print '+',
-        print
+                if not self._doSingleRollback(resId, info[0], info[1]):
+                    failed[resId] = info
+                else:
+                    recovered.add(resId)
+                    print '+',
+        print  # newline after print '+',
+        if self._fpos is None:
+            self.removeRollbackDB()
+        else:
+            self._savedIds.clear()
+            self._truncRollbackFile()
 
-        self._rollbackFile.close()
-        os.remove(".rollback")
+        if failed and not self._auto:
+            if self._rollbackFile is None:
+                self._rollbackFile = open(".rollback","w+")
+                needClose = True
+            else:
+                needClose = False
+            # else it sould be end-positioned already
+            for redId, info in failed.iteritems():
+                self._write2Rollback(resId, info[0], info[1])
+            if needClose:
+                self._rollbackFile.close()
 
-        if recoverList:
-            recoverFile = open(".rollback","w+")
-            for line in recoverList:
-                recoverFile.write(line)
-            recoverFile.close()
-
-    def doRecover(self):
-        if not os.path.isfile(".rollback") :
+    def doRecover(self, checkFile=True):
+        if checkFile and not os.path.isfile(".rollback") :
             print "Nothing needs to be recovered"
             return
         print "Start to recover from previous failed rollback transaction"
+        #traceback.print_stack()
         self._rollbackFile = open(".rollback","r")
+        for line in self._rollbackFile:
+            line = line.strip()
+            if len(line) > 0:
+                try:
+                    resourceId, serverAddress, methodName = line.split(',')
+                except ValueError as err:
+                    print "Wrong line in .rollback file: %s" % err
+                else:
+                    self._savedIds[resourceId] = (serverAddress, methodName)
         self.doRollback()
         print "Recover done..."
 
     def removeRollbackDB(self):
         self._rollbackFile.close()
+        self._rollbackFile = None
         os.remove(".rollback")
+        self._savedIds.clear()
 
 
 class FuncTestMaster(object):
@@ -509,8 +577,8 @@ class FuncTestMaster(object):
     threadNumber = 16
     testCaseSize = 2
     unittestRollback = None
-    CHUNK_SIZE=4*1024*1024 # 4 MB
-    TRANSACTION_LOG="__transaction.log"
+    #CHUNK_SIZE=4*1024*1024 # 4 MB
+    #TRANSACTION_LOG="__transaction.log"
     auto_rollback = False
     skip_timesync = False
     skip_backup = False
@@ -634,6 +702,15 @@ class FuncTestMaster(object):
     def getRandomServer(self):
         return random.choice(self.clusterTestServerList)
 
+    def getAnotherRandomServer(self, first):
+        if len(self.clusterTestServerList) == 1:
+            return first
+        else:
+            while True:
+                second = self.getRandomServer()
+                if second != first:
+                    return second
+
     def _getServerName(self, obj, uuid):
         for s in obj:
             if s["id"] == uuid:
@@ -683,9 +760,9 @@ class FuncTestMaster(object):
             print "%s^^^%s^^^%s\n" % (comp1,comp2,comp3)
 
 
-    def _seeDiff(self,lhs,rhs,offset=0):
+    def _seeDiff(self, lhs, rhs, offset=0):
         if len(rhs) == 0 or len(lhs) == 0:
-            print "The difference is showing bellow:\n"
+            print "The difference is:"
             print "<empty string>" if len(lhs) == 0 else rhs[0:min(128,len(rhs))]
             print "<empty string>" if len(rhs) == 0 else rhs[0:min(128,len(rhs))]
             print "One of the string is empty!"
@@ -696,7 +773,7 @@ class FuncTestMaster(object):
                 print "The difference is showing bellow:"
                 self._dumpDiffStr(lhs,i)
                 self._dumpDiffStr(rhs,i)
-                print "The first different character is at location:%d" % (i + 1+offset)
+                print "The first different character is at position %d" % (i + 1+offset)
                 return
 
     def _testConnection(self):
@@ -790,17 +867,20 @@ class FuncTestMaster(object):
 
         return (True,"")
 
-    def _checkSingleMethodStatusConsistent(self,method):
+    def _checkSingleMethodStatusConsistent(self, method):
             responseList = []
+            if '?' in method:
+                print "WARNING: _checkSingleMethodStatusConsistent called with methid %s! '?' and params should be removed!"
+                method = method[:method.index('?')]
             for server in self.clusterTestServerList:
-                url = "http://%s/ec2/%s" % (server, method)
-                print "Connection to " + url
+                url = "http://%s/ec2/%s?format=json" % (server, method)
+                print "Requesting " + url
                 try:
                     responseList.append((urllib2.urlopen(url),server))
                 except urllib2.URLError as err:
-                    return False, "Failed to request %s: %s" % (url, err)
+                    raise LegacyTestFailure("Failed to request %s: %s" % (url, err))
             # checking the last response validation
-            return checkResultsEqual(responseList,method)
+            checkResultsEqual(responseList, method)
 
     # Checking transaction log
     # This checking will create file to store the transaction log since this
@@ -810,77 +890,47 @@ class FuncTestMaster(object):
     # of a temporary file and all the later comparison will be based on small
     # chunk.
 
+    def _loadTransactionLog(self, address):
+        url = "http://%s/ec2/%s" % (address, "getTransactionLog")
+        print "Requesting " + url
+        # check if we have that transactionLog
+        try:
+            return  urllib2.urlopen(url).read()
+        except urllib2.HTTPError as err:
+            raise LegacyTestFailure("Failed to load transaction log from %s: %s" % (address, err))
+
+    def _saveTransactionLogs(self, logs):
+        # for debug purpose
+        for addr, data in logs:
+            with open("%s.transaction.log" % addr, "w") as f:
+                f.write(data)
+
     def _checkTransactionLog(self):
+        #FIXME: rewrite using try/except around urllib2.urlopen() calls!
+        serverAddr = self.clusterTestServerList[0]
+        firstLog = self._loadTransactionLog(serverAddr)
+        for s in self.clusterTestServerList[1:]:
+            tranLog = self._loadTransactionLog(s)
+            if firstLog != tranLog:
+                print "Servers %s and %s return differen transaction logs:" % (serverAddr, s)
+                self._seeDiff(firstLog, tranLog, 0)
+                if len(firstLog) != len(tranLog):
+                    print "Also the lengths of transaction logs are different: %s and %s" % (
+                        len(firstLog), len(tranLog))
+                #self._saveTransactionLogs(((serverAddr, firstLog), (s, tranLog)))
+                raise ServerCompareFailure(
+                    "Different transaction logs on %s and %s" % (serverAddr, s))
 
-        first_hit = False
-        serverAddr= None
-        for s in self.clusterTestServerList:
-            print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
-            # check if we have that transactionLog
-            if not first_hit:
-                first_hit = True
-                serverAddr = s
-                with open(self.TRANSACTION_LOG,"w+") as f:
-                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
-                    while True:
-                        data = req.read( self.CHUNK_SIZE )
-                        if data is None or len(data) == 0:
-                            break
-                        f.write(data)
-                # for the very first transactionLog, just skip
-                continue
-            else:
-                assert os.path.isfile(self.TRANSACTION_LOG), \
-                    "The internal temporary file is not found, it means a external program has deleted it"
-                with open(self.TRANSACTION_LOG,"r") as f:
-                    req = urllib2.urlopen("http://%s/ec2/%s"%(s,"getTransactionLog"))
-                    pos = 0
-                    if req.getcode() != 200:
-                        print "Connection to http://%s/ec2/%s" %(s,"getTransactionLog")
-                        return (False,"")
-
-                    while True:
-                        data = f.read(self.CHUNK_SIZE)
-                        pack = req.read(self.CHUNK_SIZE)
-
-                        if data is None or len(data) == 0:
-                            if pack is None or len(pack) == 0:
-                                break
-                            else:
-                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                print "Server:%s has data but server:%s runs out of its transaction log"%(
-                                    s,serverAddr)
-                                return (False,"")
-                        else:
-                            if pack is None or len(pack) == 0:
-                                print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                print "Server:%s has data but server:%s runs out of its transaction log"%(
-                                    serverAddr,s)
-                                return (False,"")
-                            else:
-                                if data != pack:
-                                    print "Server:%s has different status with server:%s on method:%s" % (s,serverAddr,"getTransactionLog")
-                                    self._seeDiff(data,pack,pos)
-                                    return (False,"")
-                                pos += len(pack)
-                    req.close()
-        os.remove(self.TRANSACTION_LOG)
-        return (True,"")
-
-    def checkMethodStatusConsistent(self,method):
-            ret,reason = self._checkSingleMethodStatusConsistent(method)
-            if ret:
-                return self._checkTransactionLog()
-            else:
-                return (ret,reason)
+    def checkMethodStatusConsistent(self, methods):
+            for method in methods:
+                self._checkSingleMethodStatusConsistent(method)
+            self._checkTransactionLog()
 
     def _ensureServerListStates(self,sleep_timeout):
         time.sleep(sleep_timeout)
         for method in self._getterAPIList:
-            ret,reason = self._checkSingleMethodStatusConsistent(method)
-            if not ret:
-                return (ret,reason)
-        return self._checkTransactionLog()
+            self._checkSingleMethodStatusConsistent(method)
+        self._checkTransactionLog()
 
     def init(self, notest=False):
         self._loadConfig()
@@ -892,8 +942,11 @@ class FuncTestMaster(object):
 
     def initial_tests(self):
         # ensure all the server are on the same page
-        ret,reason = self._ensureServerListStates(self.clusterTestSleepTime)
-        if not ret: return (ret,reason)
+        try:  # FIXME: all methods should raise exceptions and they must be cought outside!
+            self._ensureServerListStates(self.clusterTestSleepTime)
+        except Exception as err:
+            traceback.print_exc()
+            return (False, str(err))
 
         ret,reason = self._fetchClusterTestServerNames()
         if not ret: return (ret,reason)
