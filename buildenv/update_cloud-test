@@ -1,7 +1,8 @@
 #!/bin/bash
 
 SRC=/home/ak/develop/nx_cloud_deploy
-CLOUD_MODULES=(cloud_db connection_mediator vms_gateway)
+ALL_ARTIFACTS=(cloud_db connection_mediator vms_gateway)
+ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
 PACK=1
 UPDATE=1
 CLOUD_INSTANCE=cloud-test
@@ -10,6 +11,20 @@ function printHelp()
 {
     echo "Options:"
     echo
+}
+
+function contains()
+{
+    local searchedVal=$1
+    local arr=$2
+
+    for val in "${@:2}"
+    do
+        if [ $searchedVal == $val ]; then
+            return 0
+        fi
+    done
+    return 1
 }
 
 for i in "$@"
@@ -21,13 +36,38 @@ do
         PACK=0
     elif [ "$i" == "--no-update" ] ; then
         UPDATE=0
+    elif [[ "$i" =~ "--artifacts=" ]] ; then
+        artifactsStr="`echo $i | sed 's/--artifacts=\(.*\)/\1/'`"
+        ARTIFACTS_TO_BUILD=()
+        IFS=',' read -a ARTIFACTS_TO_BUILD <<< "$artifactsStr"
+        for (( i=0; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
+        do
+            for knownArtifact in ${ALL_ARTIFACTS[@]}
+            do
+                if [[ $knownArtifact == */${ARTIFACTS_TO_BUILD[$i]} ]]; then
+                    ARTIFACTS_TO_BUILD[$i]=$knownArtifact
+                    break
+                fi
+            done
+        done
+        for artifact in "${ARTIFACTS_TO_BUILD[@]}"
+        do
+            contains $artifact ${ALL_ARTIFACTS[@]}
+            if [ $? != 0 ]; then
+                echo "
+Requested artifact $artifact not recognized
+Following are supported: ${ALL_ARTIFACTS[@]}"
+                exit 1
+            fi
+        done
+
     fi
 done
 
 if [ "$PACK" -gt 0 ]; then
-    for (( i=0; i<${#CLOUD_MODULES[@]}; i++ ))
+    for (( i=0; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
     do
-        moduleName=${CLOUD_MODULES[$i]}
+        moduleName=${ARTIFACTS_TO_BUILD[$i]}
         echo "
 ################################################################
 # Building $moduleName

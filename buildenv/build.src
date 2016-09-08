@@ -75,6 +75,8 @@ do
         CLEANDIST=1
     elif [ "$i" == "--debug" ] ; then
         CONFIGURATION=debug
+    elif [ "$i" == "--release" ] ; then
+        CONFIGURATION=release
     elif [ "$i" == "--with-test" ] ; then
         WITH_TEST=1
     elif [ "$i" == "--with-client" ] ; then
