@@ -1,0 +1,52 @@
+#!/bin/bash
+
+SRC=/home/ak/develop/nx_cloud_deploy
+CLOUD_MODULES=(cloud_db connection_mediator vms_gateway)
+PACK=1
+UPDATE=1
+CLOUD_INSTANCE=cloud-test
+
+function printHelp()
+{
+    echo "Options:"
+    echo
+}
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ "$i" == "--no-pack" ] ; then
+        PACK=0
+    elif [ "$i" == "--no-update" ] ; then
+        UPDATE=0
+    fi
+done
+
+if [ "$PACK" -gt 0 ]; then
+    for (( i=0; i<${#CLOUD_MODULES[@]}; i++ ))
+    do
+        moduleName=${CLOUD_MODULES[$i]}
+        echo "
+################################################################
+# Building $moduleName
+################################################################
+"
+        pushd $SRC/$moduleName
+        make stage pack
+        make push-ns
+        popd
+    done
+fi
+
+echo "
+################################################################
+# Updating $CLOUD_INSTANCE instance
+################################################################
+"
+if [ "$UPDATE" -gt 0 ]; then
+    pushd $SRC/locations/$CLOUD_INSTANCE
+    ./cloud.sh update
+    popd
+fi
