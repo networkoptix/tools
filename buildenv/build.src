@@ -97,6 +97,9 @@ MODULE_BIN_PATH=()
 if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so lib/$CONFIGURATION/libnx_fusion.so)
+else
+    MODULES+=(common_libs/nx_speach_synthesizer)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_speach_synthesizer.a)
 fi
 
 MODULES+=(common)
@@ -283,12 +286,23 @@ do
         echo "Stripping $BINARY..."
         "$CROSS_PREFIX"strip $BINARY || exit 0
     fi
+    
+    if [[ "$VERSION" = "2.6.0" ]]; then
+        if [[ $BINARY =~ .*\.so ]]; then
+            BINARY="$BINARY.$LIBVERSION.0.0"
+        fi
+    fi
+
     if [ "$CALC_MD5" == "1" ]; then
         if [ "`uname -s`" = "Darwin" ]; then
             md5 $BINARY | cut -d " " -f 4 > $BINARY.md5
         else
             md5sum $BINARY | cut -d " " -f 1 > $BINARY.md5
         fi
+    fi
+    if [[ $BINARY =~ .*\.a ]]; then
+        echo "Doing ranlib $BINARY..."
+        "$CROSS_PREFIX"ranlib $BINARY || exit 0
     fi
 done
 
