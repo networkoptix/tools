@@ -94,7 +94,7 @@ done
 
 MODULES=()
 MODULE_BIN_PATH=()
-if [[ ! "$VERSION" < "2.6" ]]; then
+if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so lib/$CONFIGURATION/libnx_fusion.so)
 fi
@@ -102,7 +102,7 @@ fi
 MODULES+=(common)
 MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
 
-if [[ ! "$VERSION" < "2.6" ]]; then
+if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speech_synthesizer)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so lib/$CONFIGURATION/libudt.so lib/$CONFIGURATION/libnx_network.so lib/$CONFIGURATION/libcloud_db_client.so lib/$CONFIGURATION/libnx_speech_synthesizer.a)
 fi
@@ -162,7 +162,7 @@ elif [ "$CONF_PARAM_SET" == 0 ]; then
 fi
 
 if [ $WITH_MSERVER -eq 1 ]; then
-    if [[ ! "$VERSION" < "2.6" ]]; then
+    if [[ ! "$VERSION" < "3.0" ]]; then
         MODULES+=( common_libs/nx_email )
         MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_email.so )
     elif [[ ! "$VERSION" < "2.5" ]]; then
@@ -176,13 +176,13 @@ if [ $WITH_MSERVER -eq 1 ]; then
     fi
 fi
 
-if [[ ! "$VERSION" < "2.6" ]]; then
+if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(nx_cloud/libconnection_mediator nx_cloud/cloud_connect_test_util)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so bin/$CONFIGURATION/cloud_connect_test_util)
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
-    if [[ ! "$VERSION" < "2.6" ]]; then
+    if [[ ! "$VERSION" < "3.0" ]]; then
         MODULES+=(nx_cloud/libcloud_db nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/libvms_gateway nx_cloud/vms_gateway)
         MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator lib/$CONFIGURATION/libvms_gateway.so bin/$CONFIGURATION/vms_gateway)
     fi
@@ -191,7 +191,7 @@ fi
 if [ "$WITH_TEST" == 1 ]; then
     MODULES+=( unit_tests/common_ut )
     MODULE_BIN_PATH+=( bin/$CONFIGURATION/common_ut )
-    if [[ ! "$VERSION" < "2.6" ]]; then
+    if [[ ! "$VERSION" < "3.0" ]]; then
         if [ "$CONF_PARAM_SET" == 0 ]; then
             MODULES+=(unit_tests/cloud_db_ut unit_tests/connection_mediator_ut)
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db_ut bin/$CONFIGURATION/connection_mediator_ut)
