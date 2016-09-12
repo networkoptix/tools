@@ -4,6 +4,7 @@ Including FuncTestCase - the base class for all mediaserver functional test clas
 __author__ = 'Danil Lavrentyuk'
 from collections import OrderedDict
 import json
+import pprint
 import random
 import sys, os
 import subprocess
@@ -297,6 +298,8 @@ class FuncTestCase(unittest.TestCase):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
         print "DEBUG: requesting: %s" % url
+        if data is not None:
+            print "DEBUG: with data %s" % (pprint.pformat(data),)
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except urllib2.URLError , e:

@@ -43,7 +43,7 @@ class StreamingTest(StorageBasedTest):
         cls._initFailed = False
 
     def _init_cameras(self):
-        self._add_test_camera(_WORK_HOST)
+        self._add_test_camera(_WORK_HOST, log_response=True)
 
     def _other_inits(self):
         "Prepare a single camera data"
@@ -62,12 +62,13 @@ class StreamingTest(StorageBasedTest):
         self.assertTrue(HlsStreamingTest(self.config).run(),
                         "HLS streaming test failed")
 
+
 class HlsOnlyTest(StreamingTest):
     _test_name = "HLS-only streaming"
     _test_key = "hlso"
     _suits = (
         ('HlsOnlyTest', [
-            'Initialisation',
+            'Initialization',
             'HlsStreamingTest'
          ]),
     )

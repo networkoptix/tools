@@ -56,7 +56,7 @@ TEST_CAMERA_DATA = {
 
 TEST_CAMERA_ATTR = CAMERA_ATTR_EMPTY.copy()
 TEST_CAMERA_ATTR.update({
-    'scheduleEnabled': True,
+    'scheduleEnabled': False,
     'backupType': "CameraBackup_HighQuality|CameraBackup_LowQuality",  # or CameraBackupBoth
     'cameraName': 'test-camera',
 })
@@ -126,7 +126,8 @@ class StorageBasedTest(FuncTestCase):
             self._storages[num] = st
             #print "[DEBUG] Storages found:"
             #for s in self._storages[num]:
-            #    print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
+            #    print s
+                #print "%s: %s, storageType %s, isBackup %s" % (s['storageId'], s['url'], s['storageType'], s['isBackup'])
 
     @classmethod
     def _duplicateConfig(cls):
@@ -158,7 +159,7 @@ class StorageBasedTest(FuncTestCase):
             if c['parentId'] == self.guids[boxnum]:
                 self.assertEquals(unquote_guid(c['id']), self.test_camera_id[boxnum], "Failed to assign a test camera to to a server")
         attr_data = [cameraAttr.copy()]
-        attr_data[0]['cameraID'] = self.test_camera_id[boxnum]
+        attr_data[0]['cameraId'] = self.test_camera_id[boxnum]
         self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
         answer = self._server_request(boxnum, 'ec2/getCamerasEx')
         if log_response:
@@ -202,9 +203,12 @@ class StorageBasedTest(FuncTestCase):
         """
         try:
             self._prepare_test_phase(self._stop_and_init)
+            time.sleep(0.5)
             self._load_storage_info(STORAGE_INIT_TIMEOUT)
             self._init_cameras()
+            time.sleep(0.5)
             self._other_inits()
+            time.sleep(0.1)
         except Exception:
             type(self)._initFailed = True
             raise
@@ -276,6 +280,7 @@ class BackupStorageTest(StorageBasedTest):
                 self.fail("Can't initialize the backup storage. It doesn't become ready. (Timed out)")
             data = self._server_request(boxnum, 'ec2/getStatusList?id=' + new_id)
             try:
+                print "DEBUG: data = %s" % (data,)
                 if data and data[0] and data[0]["id"] == new_id:
                     if data[0]["status"] == "Online":
                         print "Backup storage is ready for backup."

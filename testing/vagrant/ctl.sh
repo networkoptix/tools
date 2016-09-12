@@ -80,7 +80,7 @@ function bstorage_ctl {
     case "$mode" in
         init)
             nxcleardb
-            setLogLevel 2
+            setLogLevel $debugLevel
             ;;
         clear)
             # Clears the main and the backaup storages, passed as $1 and $2
@@ -99,7 +99,7 @@ function msarch_ctl {
     case "$mode" in
         init)
             nxcleardb
-            setLogLevel 2
+            setLogLevel $debugLevel
             ;;
         clear)
             # Clears the main storage, passed as $1, and restore the system name
@@ -115,7 +115,7 @@ function stream_ctl {
     case "$mode" in
         init)
             nxcleardb
-            setLogLevel 2
+            setLogLevel $debugLevel
             ;;
         clear)
             # Clears the main storage, passed as $1, and restore the system name
@@ -130,7 +130,7 @@ function natcon_ctl {
     case "$mode" in
         init)
             nxcleardb
-            setLogLevel 2
+            setLogLevel $debugLevel
             ;;
         clear)
             nxrmbase "$1"

@@ -7,6 +7,7 @@ __author__ = 'Danil Lavrentyuk'
 import errno, json, random, re, select, signal, socket, sys, time, traceback
 import base64
 from hashlib import md5
+import pprint
 import urllib2
 import threading
 from collections import namedtuple
@@ -688,10 +689,13 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         if self._logNameTpl:
             self._perfLog = open(self._logNameTpl % tuple(self._serverAddrPair),"w+")
         # Order cameras to start recording and preserve a time gap for starting
-        self._camerasReadyTime = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
+        self._camerasReadyTime = time.time() + (
+            self._camerasStartGrace if self._startRecording() else 0)
 
     def _startRecording(self):
-        "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
+        if self._liveDataPart == 0:
+            return False
+        print "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
         cameras = []
         for ph_id, id, name, status in self._cameraList:
             if status != 'Recording':
@@ -702,14 +706,17 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                 cameras.append(attr_data)
 
         if cameras:
-            response = urllib2.urlopen(urllib2.Request(
-                    "http://%s/ec2/saveCameraUserAttributesList" % (self._serverAddr),
-                    data=json.dumps(cameras),
-                    headers={'Content-Type': 'application/json'}),
-                timeout=self._httpTimeout
-            )
+            url = "http://%s/ec2/saveCameraUserAttributesList" % (self._serverAddr,)
+            try:
+                response = urllib2.urlopen(urllib2.Request(
+                        url, data=json.dumps(cameras), headers={'Content-Type': 'application/json'}),
+                    timeout=self._httpTimeout
+                )
+            except Exception as err:
+                print "DEBUG: _startRecording: saveCameraUserAttributesList: %s" % (pprint.pformat(cameras))
+                raise AssertionError("Error from %s: %s" % (url, str(err)))
             if response.getcode() != 200:
-                raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverAddr, response.getcode()))
+                raise AssertionError("Error %s: %s" % (url, response.getcode()))
         return len(cameras) > 0
 
     def _timeoutRecv(self, socket, rate_limit, timeout):
@@ -1097,10 +1104,10 @@ class RtspPerf(object):
 
 class RtspStreamTest(RtspPerf):
     _cs = 'Streaming'
-    def __init__(self, config):
-        self._streamTest = True
-        #self._multi = multiproto
-        RtspPerf.__init__(self, config)
+    _streamTest = True
+    #def __init__(self, config):
+    #    #self._multi = multiproto
+    #    RtspPerf.__init__(self, config)
 
     def _finish(self):
         print "[%s] ...Finishing test.." % (int(time.time()),)

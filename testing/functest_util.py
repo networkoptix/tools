@@ -36,7 +36,7 @@ class TestRequestError(AssertionError):
 
 # Empty camera's attributes structure
 CAMERA_ATTR_EMPTY = {
-    'cameraID': '',
+    'cameraId': '',
     'scheduleEnabled': '',
     'backupType': '',  # CameraBackup_HighQuality, CameraBackup_LowQuality or CameraBackupBoth
     'cameraName': '',
