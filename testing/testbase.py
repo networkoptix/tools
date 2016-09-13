@@ -311,7 +311,7 @@ class FuncTestCase(unittest.TestCase):
         return (answer, data) if unparsed else answer
 
     #FIXME combine these two similar methods in one!
-    def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None, with_debug=False):
+    def _server_request_nofail(self, host, func, data=None, headers=None, timeout=None, with_debug=True):
         "Sends request that don't fail on exception or non-200 return code."
         req = self._prepare_request(host, func, data)
         try:
@@ -326,6 +326,9 @@ class FuncTestCase(unittest.TestCase):
             return None
         # but it could fail here since with code == 200 the response must be parsable or empty
         answer = self._json_loads(response.read(), req.get_full_url())
+        if not answer:
+            if with_debug:
+                print "Host %s, call %s, HTTP code: %s" % (host, func, response.getcode())
         #TODO make more intelegent check, now some requests return [], not {}
         #if answer is not None and answer.get("error", '') not in ['', '0', 0] and with_debug:
         #    print "Answer: %s" % (answer,)
@@ -338,7 +341,7 @@ class FuncTestCase(unittest.TestCase):
         while tocheck and time.time() < endtime:
             print "_wait_servers_up: %s, %s" % (endtime - time.time(), str(tocheck))
             for num in tocheck.copy():
-                data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=False)
+                data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=True)
                 if data is None:
                     continue
                 self.guids[num] = unquote_guid(data['ecsGuid'])

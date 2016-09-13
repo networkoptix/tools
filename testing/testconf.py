@@ -35,7 +35,7 @@ UT_TEMP_DIR = '/var/tmp/autotest.$'
 UT_TEMP_DIR_PID_USED = True  # it realy doesn't matter since set_paths() set the correct value here
 UT_TEMP_DIR_SAFE = False  # set it to False if don't use PID and UT_TEMP_DIR points to some common directory
                           # if it's True, script will clear it contents even if PID not used
-UT_BRANCHES_NO_TEMP = set(('dev_2.5', 'prod_2.5'))  # what branches don't use --tmp for unittests
+UT_BRANCHES_NO_TEMP = set(('dev_3.0.0',))  # what branches don't use --tmp for unittests
 
 BUILD_CONF_SUBPATH = os.path.join("build_variables", "target", "current_config.py")
 BUILD_CONF_PATH = ''
@@ -59,7 +59,7 @@ ULIMIT_NOFILE_REQUIRED = 4096
 
 # Multiple branches example: BRANCHES = ('dev_2.4.0', 'dev_2.5', 'dev_2.4.0_gui')
 #  do not use '.' here except it is the only branch you check
-BRANCHES = ('dev_2.5',)
+BRANCHES = ('dev_3.0.0',)
 TESTS = ('common_ut', 'mediaserver_core_ut', 'client_ut') # unit tests' binary files names
 
 SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
@@ -72,12 +72,12 @@ MAIL_TO = 'test-results@networkoptix.com'
 BRANCH_CC_TO = dict() # additional addresses per branch
 
 #TODO
-ALERT_TO = 'dlavrentyuk@networkoptix.com' # to send mail about check process fails (such as hg call fails)
+ALERT_TO = 'anikitin@networkoptix.com' # to send mail about check process fails (such as hg call fails)
 
 #############################################
 
 HG = "/usr/bin/hg"
-MVN = "/home/danil/develop/buildenv/maven/bin/mvn"
+MVN = "/home/anikitin/develop/buildenv/maven/bin/mvn"
 VAGRANT = "/usr/bin/vagrant"
 SUDO = "/usr/bin/sudo"
 RM = "/bin/rm"
@@ -170,8 +170,8 @@ SUDO_REQUIRED = set(('mediaserver_core_ut',))  # set of unittests that require s
 # NOTE: SUDO_REQUIRED not used when the docker used since in a container all test executed by root
 
 NOSHUFFLE = (  # list of tupples (branch, ut), any part can be '*' which means 'any'
-    ('dev_2.5', 'mediaserver_core_ut'),
-    ('prod_2.5', 'mediaserver_core_ut'),
+    ('dev_3.0', 'mediaserver_core_ut'),
+    ('prod_3.0', 'mediaserver_core_ut'),
 )
 
 # Build only this branches, don't perform any testing

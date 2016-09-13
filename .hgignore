@@ -9,3 +9,5 @@ ci/crash
 ci/gdb-bt
 ci/links-gdb-bt
 *.pyo
+*.py~
+*.taskbot~
