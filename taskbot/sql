@@ -1,0 +1,122 @@
+-- -*- sql -*-
+
+CREATE TABLE branch (
+        id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        description TEXT NOT NULL         
+) ENGINE=InnoDB;
+
+CREATE UNIQUE INDEX branch_description ON branch (description(20));
+
+CREATE TABLE task (
+        id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+
+        root_task_id INTEGER UNSIGNED,
+        parent_task_id INTEGER UNSIGNED,
+        branch_id INTEGER UNSIGNED,
+
+        description TEXT NOT NULL,
+        is_command BOOL NOT NULL,
+        start DOUBLE NOT NULL,
+        finish DOUBLE NOT NULL,
+        error_message TINYTEXT,
+
+        FOREIGN KEY (root_task_id) REFERENCES task (id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (parent_task_id) REFERENCES task (id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (branch_id) REFERENCES branch (id)
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX task_description_root_task_id_parent_task_id
+        ON task (description(20), root_task_id, parent_task_id);
+
+
+CREATE TABLE command (
+        -- command inherits task.
+        task_id INTEGER UNSIGNED PRIMARY KEY,
+
+        stdout_gzipped BOOL NOT NULL,
+        stdout LONGBLOB NOT NULL,
+        stderr_gzipped BOOL NOT NULL,
+        stderr LONGBLOB NOT NULL,
+        exit_status INTEGER UNSIGNED,
+
+        FOREIGN KEY (task_id) REFERENCES task (id)
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+CREATE TABLE running_task (
+        -- running_task inherits task.
+        task_id INTEGER UNSIGNED PRIMARY KEY,
+
+        host VARCHAR(255) NOT NULL,
+        pid INTEGER UNSIGNED NOT NULL,
+        user VARCHAR(255) NOT NULL,
+
+        FOREIGN KEY (task_id) REFERENCES task (id)
+) ENGINE=InnoDB;
+
+CREATE INDEX running_task_host_pid ON running_task (host, pid);
+CREATE INDEX running_task_user_host ON running_task (user, host);
+
+CREATE TABLE history (
+        -- history inherits task.
+        task_id INTEGER UNSIGNED PRIMARY KEY,
+        link_task_id INTEGER UNSIGNED NOT NULL,
+
+        html_table_row TEXT NOT NULL,
+
+        FOREIGN KEY (task_id) REFERENCES task (id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (link_task_id) REFERENCES task (id)
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+CREATE TABLE report (
+        id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+
+        task_id INTEGER UNSIGNED default NULL,
+
+        gzipped BOOL NOT NULL,
+        html TEXT NOT NULL,
+
+        FOREIGN KEY (task_id) REFERENCES task (id)
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE view (
+  id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+
+  type VARCHAR(255) NOT NULL,
+  url TINYTEXT NOT NULL
+) ENGINE=InnoDB;
+
+CREATE UNIQUE INDEX view_url  ON view (url(255));
+
+CREATE TABLE report_view (
+  report_id INTEGER UNSIGNED NOT NULL,
+  view_id INTEGER UNSIGNED NOT NULL,
+
+  FOREIGN KEY (report_id) REFERENCES report (id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (view_id) REFERENCES view (id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE file (
+        id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+
+        task_id INTEGER UNSIGNED NOT NULL,
+
+        name TEXT NOT NULL,
+        fullpath TEXT NOT NULL,
+        content MEDIUMTEXT,
+        
+        FOREIGN KEY (task_id) REFERENCES task (id)
+            ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE INDEX file_name_task_id  ON file (name(70), task_id);

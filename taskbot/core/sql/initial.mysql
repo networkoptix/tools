@@ -1,0 +1,10 @@
+-- -*- sql -*-
+
+-- Create database
+CREATE DATABASE taskbot;
+
+-- Create users
+GRANT ALL PRIVILEGES ON *.* TO 'taskbot'@'%' IDENTIFIED BY 'taskbot';
+GRANT ALL PRIVILEGES ON *.* TO 'taskbot'@'localhost' IDENTIFIED BY 'taskbot';
+GRANT SELECT ON *.* TO 'taskbot_ro'@'%';
+GRANT SELECT ON *.* TO 'taskbot_ro'@'localhost';
