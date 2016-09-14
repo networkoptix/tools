@@ -10,7 +10,7 @@ import unittest
 
 import urllib2 # FIXME remove it
 
-from functest_util import checkResultsEqual, HttpRequest
+from functest_util import checkResultsEqual #, HttpRequest
 from testbase import *
 from stortest import StorageBasedTest, TEST_CAMERA_ATTR, TEST_CAMERA_DATA, STORAGE_INIT_TIMEOUT
 from rtsptests import SingleServerRtspPerf, RtspStreamTest, SingleServerHlsTest, HlsStreamingTest #, Camera
@@ -112,11 +112,10 @@ class NatConnectionTest(StorageBasedTest):  # (FuncTestCase):
         for method in self._sync_test_requests:
             responseList = []
             for server in self.sl:
-                print "Connection to http://%s/ec2/%s" % (server, method)
+                print "Request http://%s/ec2/%s" % (server, method)
                 responseList.append((urllib2.urlopen("http://%s/ec2/%s" % (server, method)),server))
             # checking the last response validation
-            ret, reason = checkResultsEqual(responseList, method)
-            self.assertTrue(ret, "%s method test failed: %s" % (method, reason))
+            checkResultsEqual(responseList, method)
 
     _func_to_forward = 'api/moduleInformation'
 

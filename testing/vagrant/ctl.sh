@@ -147,6 +147,7 @@ function db_ctl {
             nxedconf removeDbOnStartup 0  `# we DO NOT need to clear DB on startup, so make sure it do not`
             nxedconf serverGuid "$2"
             nxedconf guidIsHWID no
+            nxedconf tranLogLevel DEBUG
             cp "$SERVCONF" "$SERVCONF.copy"
             setLogLevel $debugLevel
             ;;
