@@ -4,7 +4,7 @@
 # Artem V. Nikitin
 # Core taskbot script
 
-import sys, os, importlib, re, subprocess, tempfile, time, zlib, threading
+import sys, os, importlib, re, subprocess, tempfile, time, zlib, threading, signal
 from optparse import OptionParser
 from Queue import Queue, Empty
 
@@ -18,7 +18,6 @@ DEFAULT_SHELL="/bin/bash"
 
 # Read config and initialize environment
 def read_config(config):
-
   try:
     directory, module_name = os.path.split(config)
     module_name = os.path.splitext(module_name)[0]
@@ -47,16 +46,7 @@ def init_environment(config, options):
     os.putenv('TASKBOT_OPTIONS', '')
   os.environ['TASKBOT_PARENT_PID'] = "%s" % os.getpid()
 
-# Get taskbot branch id
-def select_branch(db):
-  if os.environ.get('BRANCH_NAME'):
-    branch, = database.query(
-      MySQLDB.SELECT_BRANCH,
-      (os.environ['BRANCH_NAME'],))
-    return branch_id
-  return None
- 
-  
+
 # Strict output by max size
 class StrictOutput:
 
@@ -183,7 +173,7 @@ class TaskExecutor:
 
     self.__shell_process__ = \
       subprocess.Popen(
-      [shell],
+      [shell, '-s', '--'],
       preexec_fn = self.__before_exec,
       shell = False,
       stdin  = subprocess.PIPE,
@@ -194,6 +184,7 @@ class TaskExecutor:
     self.__err__ = OutputReader(self.__shell_process__.stderr)
     self.__status__ = StatusChecker(self.__rfdstatus__)
     os.close(self.__wfdstatus__)
+    self.closed = False
 
   # Get taskbot branch id
   def __select_branch(self):
@@ -215,7 +206,21 @@ class TaskExecutor:
     
 
   def __before_exec( self ):
+    os.setsid() # TODO. Need cross-platform solution to kill child processs
     os.close(self.__rfdstatus__)
+
+  def __check_get_status( self, status, task ):
+    if status:
+      if len(status) == 0: # shell was terminated
+        task.error_message = "non-zero exit status (execution terminated)"
+        return self.__shell_process__.returncode, True
+      status = int(status)
+      if status != 0:
+        task.error_message = "non-zero exit status"
+      return status, False
+    task.error_message = "command_timeout has expired"
+    return 1, True
+    
 
   def start_command(self, command):
     return self.start_task(command, True)
@@ -231,7 +236,7 @@ class TaskExecutor:
        (status, StrictOutput.strict(stdout),  StrictOutput.strict(stderr)))
       return status,  stderr, stdout
     return 0, "", ""
-    
+   
       
   def process_command(self, command, timeout = None):
     # To get shell line counting right we output comment lines,
@@ -254,18 +259,16 @@ class TaskExecutor:
 
   def finish_command(self, status, err, out):
     self.__db__.ping()
+
     task = self.__task_stack__[-1]
+    status, do_terminate = self.__check_get_status(status, task)
 
     self.__db__.execute(
       MySQLDB.FINISH_COMMAND,
       (task.task_id,) + Compressor.compress_maybe(out) + \
-      Compressor.compress_maybe(err) + (status or 1,))
+      Compressor.compress_maybe(err) + (status,))
 
-    if status and int(status) != 0:
-      task.error_message = "non-zero exit status"
-    elif status is None:
-      task.error_message = "command_timeout has expired"
-      # Finish shell & exit
+    if do_terminate:
       shutdown.set()
       self.close()
    
@@ -298,8 +301,12 @@ class TaskExecutor:
   def close(self):
     self.__status__.stop()
     self.__shell_process__.stdin.close()
+    # TODO. Need cross-platform solution to kill child processs
+    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.__shell_process__.kill()
     self.__shell_process__.terminate()
+    self.finish_tasks_to_level(0)
+    self.closed = True
 
   # Start new task
   def start_task(self, description, is_command=False):
@@ -381,15 +388,19 @@ def main():
 
   command = ''
   command_timeout = None
+  status = 0
   with open(script) as fp:
     for line in fp:
+      if executor.closed:
+        break
       m = re.search(CMD_HEADER_REGEX, line)
       level = var = value = None
       if m:
         (level, _, var, value) = m.group(1,2,3,4)
       if (re.search('^\s*$', value or line)):
-        executor.process_command(command,
-                                 command_timeout or global_timeout)
+        status = executor.process_command(
+          command,
+          command_timeout or global_timeout)
         command = ''
         command_timeout = None
       else:
@@ -406,11 +417,11 @@ def main():
 
     fp.close()
 
-  status = executor.process_command(
-    command,
-    command_timeout or global_timeout) or 1
-  executor.finish_tasks_to_level(0)
-  executor.close()
+  if not executor.closed:
+    status = executor.process_command(
+      command,
+      command_timeout or global_timeout)
+    executor.close()
     
   database.commit()
   database.close()

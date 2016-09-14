@@ -8,6 +8,6 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'environment' : {
-    'TASKBOT_COMMONS': '/home/anikitin/prj/src/devtools/testing/taskbot',
+    'TASKBOT_COMMONS': '/home/anikitin/prj/src/devtools/taskbot',
     'TASKBOT_REPO': 'ssh://hg@hdw.mx/netoptix_vms' }
   }

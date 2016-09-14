@@ -1,0 +1,12 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+"$TASKBOT" $ARGS "$TASKBOT_COMMONS"/instances/test/test.taskbot
+
+echo Test2
+
+# + !timeout=20
+sleep 100
