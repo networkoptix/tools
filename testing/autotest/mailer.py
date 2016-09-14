@@ -148,12 +148,17 @@ def emailTestResult(branch, lines, testName='', fail='', summary=''):
     ]
     attach = ''
     now = time.gmtime()
+    log("Creating email about %s with result %s", branchStr, resultStr)
     lines.extend(('',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S GMT", now), ''))
     if len(lines) >= conf.MAX_LOG_NO_ATTACH:
         if summary:
             parts.extend(('',summary,''))
         parts.append("See log file (%s lines) attached for details." % len(lines))
-        attach = MIMEText("\n".join(lines))
+        attach = MIMEText(prepareAttachmentData(lines))
+        try:
+            log("Attaching %s bytes of log", len(attach.as_string().encode('utf8')))
+        except UnicodeDecodeError as err:
+            log("Attaching %s characters of log", len(attach.as_string()))
         preifix = 'unittest' if fail.startswith('unit') else 'functest'
         attach.add_header('Content-Disposition', 'attachment', filename=('%s_fail_%s_%s.log' % (
             preifix, branch.replace(' ', '_'), _time4LogName(now))))
