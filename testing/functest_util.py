@@ -35,8 +35,9 @@ class TestRequestError(AssertionError):
             self.message += "\nPosted data was: %s" % (data,)
 
 # Empty camera's attributes structure
+CAMERA_ID_FIELD = 'cameraId'
 CAMERA_ATTR_EMPTY = {
-    'cameraId': '',
+    CAMERA_ID_FIELD: '',
     'scheduleEnabled': '',
     'backupType': '',  # CameraBackup_HighQuality, CameraBackup_LowQuality or CameraBackupBoth
     'cameraName': '',
@@ -135,6 +136,14 @@ FULL_SCHEDULE_TASKS = [
         "streamQuality": "highest"
     }
 ]
+
+def fixApi(api):
+    "Fixes some API names"
+    global CAMERA_ID_FIELD
+    if api.cameraId != CAMERA_ID_FIELD:
+        CAMERA_ATTR_EMPTY[api.cameraId] = CAMERA_ATTR_EMPTY.pop(CAMERA_ID_FIELD)
+        CAMERA_ID_FIELD = api.cameraId
+
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
@@ -759,8 +768,8 @@ def get_server_guid(host):
 class Version(object):
     value = []
 
-    def __init__(self, verstr=''):
-        self.value = verstr.split('.')
+    def __init__(self, verStr=''):
+        self.value = verStr.split('.')
 
     def __str__(self):
         return '.'.join(self.value)

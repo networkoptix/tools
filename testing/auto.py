@@ -157,6 +157,7 @@ def run_tests(branch):
     ut_fails = []
     failsum = ''
     ft_failed = False
+    output = []
 
     def _emailResult(what):
         emailTestResult(branch, output, fail=what, testName=(Args.single_ut or ''), summary=failsum)

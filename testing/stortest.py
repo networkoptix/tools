@@ -60,8 +60,10 @@ TEST_CAMERA_ATTR.update({
     'backupType': "CameraBackup_HighQuality|CameraBackup_LowQuality",  # or CameraBackupBoth
     'cameraName': 'test-camera',
 })
+
+_serverIdField = 'serverId'
 SERVER_USER_ATTR = {
-    'serverID': '', # put the server guid here
+    _serverIdField: '', # put the server guid here
     'maxCameras': 10,
     'isRedundancyEnabled': False,
     'serverName': '',
@@ -112,6 +114,16 @@ class StorageBasedTest(FuncTestCase):
         super(StorageBasedTest, cls).globalInit(config)
         cls.test_camera_id = [0 for _ in xrange(cls.num_serv)]
         cls.test_camera_physical_id = cls.test_camera_id[:]
+
+    @classmethod
+    def _configureVersion(cls, versionStr):
+        super(StorageBasedTest, cls)._configureVersion(versionStr)
+        global _serverIdField
+        if _serverIdField != cls.api.serverId:
+            SERVER_USER_ATTR[cls.api.serverId] = SERVER_USER_ATTR.pop(_serverIdField)
+            _serverIdField = cls.api.serverId
+
+
 
     def _load_storage_info(self, timeout=0):
         "Get servers' storage space data"
@@ -340,19 +352,19 @@ class BackupStorageTest(StorageBasedTest):
     def ScheduledBackupTest(self):
         "In fact it tests that scheduling backup for a some moment before the current initiates backup immidiately."
         data = SERVER_USER_ATTR.copy()
-        data['serverID'] = self.guids[_WORK_HOST]
+        data[_serverIdField] = self.guids[_WORK_HOST]
         data['backupType'] = 'BackupManual'
-        self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        self._server_request(_WORK_HOST, self.api.saveServerAttrList, data=[data])
         time.sleep(0.1)
         self._call_box(self.hosts[_WORK_HOST], "/vagrant/ctl.sh", "bstorage", "rmstorage",
                        shquote(self._storages[_WORK_HOST][0]['url']))
         self._fill_storage('random', _WORK_HOST, "step1")
         data['backupType'] = 'BackupSchedule'
         time.sleep(0.1)
-        #print "DEBUG: ec2/saveServerUserAttributesList: %s" % (data,)
+        #print "DEBUG: %s: %s" % (self.api.saveServerAttrList, data,)
         #answer =
-        self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
-        #print "saveServerUserAttributesList: %s" % (answer,)
+        self._server_request(_WORK_HOST, self.api.saveServerAttrList, data=[data])
+        #print "%s: %s" % (self.api.saveServerAttrList, answer,)
         self._wait_backup_start()
         #print "Scheduled backup started"
         self._wait_backup_end()
@@ -361,9 +373,9 @@ class BackupStorageTest(StorageBasedTest):
     @checkInit
     def BackupByRequestTest(self):
         data = SERVER_USER_ATTR.copy()
-        data['serverID'] = self.guids[_WORK_HOST]
+        data[_serverIdField] = self.guids[_WORK_HOST]
         data['backupType'] = 'BackupManual'
-        self._server_request(_WORK_HOST, 'ec2/saveServerUserAttributesList', data=[data])
+        self._server_request(_WORK_HOST, self.api.saveServerAttrList, data=[data])
         time.sleep(0.1)
         self._fill_storage('random', _WORK_HOST, "step2")
         time.sleep(1)

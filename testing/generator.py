@@ -514,25 +514,26 @@ class ResourceDataGenerator(BasicGenerator):
 
 
 class CameraUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
+    _metaTemplate = """
         [
             {
-                "audioEnabled": %s,
-                "cameraID": "%s",
-                "cameraName": "%s",
-                "controlEnabled": %s,
-                "dewarpingParams": "%s",
+                "audioEnabled": %%s,
+                "%s": "%%s",
+                "cameraName": "%%s",
+                "controlEnabled": %%s,
+                "dewarpingParams": "%%s",
                 "maxArchiveDays": -30,
                 "minArchiveDays": -1,
                 "motionMask": "5,0,0,44,32:5,0,0,44,32:5,0,0,44,32:5,0,0,44,32",
                 "motionType": "MT_SoftwareGrid",
-                "preferedServerId": "%s",
+                "preferedServerId": "%%s",
                 "scheduleEnabled": false,
                 "scheduleTasks": [ ],
                 "secondaryStreamQuality": "SSQualityMedium"
             }
         ]
         """
+    _template = None
 
     _dewarpingTemplate = '''{ \\"enabled\\":%s, \\"fovRot\\":%s,
             \\"hStretch\\":%s, \\"radius\\":%s, \\"viewMode\\":\\"VerticalDown\\",
@@ -543,6 +544,8 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
     _lock = threading.Lock()
 
     def __init__(self, prepareNum):
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (testMaster.api.cameraId,)
         if self._fetchExistedCameraUUIDList(prepareNum) == False:
             raise Exception("Cannot initialize camera list attribute test data")
 
@@ -603,16 +606,17 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
 
 
 class ServerUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
+    _metaTemplate = """
     [
         {
-            "allowAutoRedundancy": %s,
-            "maxCameras": %s,
-            "serverID": "%s",
-            "serverName": "%s"
+            "allowAutoRedundancy": %%s,
+            "maxCameras": %%s,
+            "%s": "%%s",
+            "serverName": "%%s"
         }
     ]
     """
+    _template = None
 
     _existedFakeServerList = []
 
@@ -641,6 +645,8 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
         return True
 
     def __init__(self,num):
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (testMaster.api.serverId,)
         if not self._generateFakeServer(num) :
             raise Exception("Cannot initialize server list attribute test data")
 

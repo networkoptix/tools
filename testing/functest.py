@@ -18,9 +18,11 @@ import signal
 import traceback
 
 from functest_util import *
+from testbase import RunTests as RunBoxTests, LegacyTestWrapper, getTestMaster, UnitTestRollback
+testMaster = getTestMaster()
+
 from generator import *
 import legacy_main
-from testbase import RunTests as RunBoxTests, LegacyTestWrapper, FuncTestMaster, getTestMaster, UnitTestRollback
 from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
 from sysname_test import SystemNameTest
 from timetest import TimeSyncTest, TimeSyncNoInetTest, TimeSyncWithInetTest
@@ -37,7 +39,6 @@ from proxytest import ProxyTest
 #        print "Req: %s" % req
 #        return urllib2.HTTPDigestAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
 
-testMaster = getTestMaster()
 
 ####################################################################################################
 
@@ -124,12 +125,16 @@ class PrepareServerStatus(BasicGenerator):
         "getMediaServersEx",
         "getCameras",
         "getUsers",
-        "getServerUserAttributes",
-        "getCameraUserAttributes"]
+    ]
+    _apiFixed = False
 
     _mergeTest = None
 
     def __init__(self,mt):
+        if not self._apiFixed:
+            self.getterAPI.append(testMaster.api.getServerAttr.split('/')[1])
+            self.getterAPI.append(testMaster.api.getCameraAttr.split('/')[1])
+            type(self)._apiFixed = True
         self._mergeTest = mt
 
     # Function to generate method and class matching
@@ -1182,13 +1187,13 @@ def CallTest(testClass):
     return RunBoxTests(testClass, testMaster.getConfig())
 
 
-# These are the old legasy tests, just organized a bit
 SimpleTestKeys = {
     '--sys-name': SystemNameTest,
     '--rtsp-test': RtspTestSuit,
     '--rtsp-perf': RtspPerf,
     '--rtsp-stream': RtspStreamTest,
 }
+# These are the old legasy tests, just organized a bit
 
 # Tests to be run on the vargant boxes, separately or within the autotest sequence
 BoxTestKeys = {
@@ -1222,7 +1227,7 @@ def RunByAutotest(arg0):
             return
         config = testMaster.getConfig()
         with LegacyTestWrapper(config):
-            if not testMaster._testConnection():
+            if not testMaster.testConnection():
                 print "Connection test failed"
                 return
             ret, reason = testMaster.initial_tests()

@@ -17,7 +17,7 @@ from autotest.tools import boxssh
 
 from functest_util import ClusterLongWorker, unquote_guid, Version, FtConfigParser,\
                           checkResultsEqual, ManagerAddPassword, SafeJsonLoads,\
-                          LegacyTestFailure, ServerCompareFailure
+                          LegacyTestFailure, ServerCompareFailure, fixApi as utilFixApi
 
 CONFIG_FNAME = "functest.cfg"
 
@@ -71,6 +71,30 @@ def RunTests(testclass, config, *args):
         testclass.globalFinalise()
 
 
+class ServerApi(object):
+    _fixed = False
+
+    @classmethod
+    def fix(cls, before_3_0):
+        if not cls._fixed:
+            cls._fixed = True
+            if before_3_0:
+                cls.getServerAttr = 'ec2/getServerUserAttributes'
+                cls.saveServerAttr = 'ec2/saveServerUserAttributes'
+                cls.saveServerAttrList = 'ec2/saveServerUserAttributesList'
+                cls.getCameraAttr = 'ec2/getCameraUserAttributes'
+                cls.cameraId = 'cameraID'
+                cls.serverId = 'serverID'
+            else:
+                cls.getServerAttr = 'ec2/getMediaServerUserAttributesList'
+                cls.saveServerAttr = 'ec2/saveMediaServerUserAttributes'
+                cls.saveServerAttrList = 'ec2/saveMediaServerUserAttributesList'
+                cls.getCameraAttr = 'ec2/getCameraUserAttributesList'
+                cls.cameraId = 'cameraId'
+                cls.serverId = 'serverId'
+            utilFixApi(cls)
+
+
 class FuncTestCase(unittest.TestCase):
     # TODO: describe this class logic!
     """A base class for mediaserver functional tests using virtual boxes.
@@ -86,6 +110,7 @@ class FuncTestCase(unittest.TestCase):
     _init_suites_done = False
     _serv_version = None  # here I suppose that all servers being created from the same image have the same version
     before_2_5 = False # TODO remove it!
+    before_3_0 = False
     _test_name = '<UNNAMED!>'
     _test_key = 'NONE'  # a name to pass as an argument to commands
     _init_script = 'ctl.sh'  # clear it in a subclass to disable
@@ -94,6 +119,7 @@ class FuncTestCase(unittest.TestCase):
     sl = []
     hosts = []
     guids = []
+    api = ServerApi
 
     @classmethod
     def globalInit(cls, config):
@@ -245,10 +271,27 @@ class FuncTestCase(unittest.TestCase):
         self.assertTrue(self._worker.allOk(), "Failed to prepare test phase")
         self._wait_servers_up()
         if self._serv_version is None:
-            self._get_version()
-            if self._serv_version < Version("2.5.0"):
-                type(self).before_2_5 = True
+            self._getVersion()
         print "Servers are ready. Server vervion = %s" % self._serv_version
+
+    def _getVersion(self):
+        """ Returns mediaserver version as reported in api/moduleInformation.
+        If it hasn't been get earlie, perform the 'api/moduleInformation' request
+        and set on a class level _serv_version, before_3_0 and before_2_5.
+        """
+        if self._serv_version is None:
+            data = self._server_request(0, 'api/moduleInformation')
+            self._configureVersion(data["reply"]["version"])
+        return self._serv_version
+
+    @classmethod
+    def _configureVersion(cls, versionStr):
+        cls._serv_version = Version(versionStr)
+        if cls._serv_version < Version("3.0.0"):
+            cls.before_3_0 = True
+            if cls._serv_version < Version("2.5.0"):
+                cls.before_2_5 = True
+        cls.api.fix(cls.before_3_0)
 
     def _mediaserver_ctl(self, box, cmd):
         "Perform a service control command for a mediaserver on one of boxes"
@@ -298,7 +341,8 @@ class FuncTestCase(unittest.TestCase):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
         print "DEBUG: requesting: %s" % url
-        if data is not None:
+        if data is not None and func != 'restoreDatabase':
+            # on restoreDatabase data is a large binary block, not interesting for debug
             print "DEBUG: with data %s" % (pprint.pformat(data),)
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
@@ -353,16 +397,6 @@ class FuncTestCase(unittest.TestCase):
         if tocheck:
             self.fail("Servers startup timed out: %s" % (', '.join(map(str, tocheck))))
             #TODO: Report the last error on each unready server!
-
-    def _get_version(self):
-        """ Returns mediaserver version as reported in api/moduleInformation.
-        If it hasn't been get earlie, perform the 'api/moduleInformation' request.
-
-        """
-        if self._serv_version is None:
-            data = self._server_request(0, 'api/moduleInformation')
-            type(self)._serv_version = Version(data["reply"]["version"])
-        return self._serv_version
 
     def _change_system_name(self, host, newName):
         res = self._server_request(host, 'api/configure?systemName='+urllib.quote_plus(newName))
@@ -590,6 +624,7 @@ class FuncTestMaster(object):
     skip_dbup = False
     do_main_only = False
     need_dump = False
+    api = ServerApi
 
     _argFlags = {
         '--autorollback': 'auto_rollback',
@@ -779,7 +814,7 @@ class FuncTestMaster(object):
                 print "The first different character is at position %d" % (i + 1+offset)
                 return
 
-    def _testConnection(self):
+    def testConnection(self):
         print "=================================================="
         print "Test connection with each server in the server list "
         timeout = 5
@@ -810,11 +845,28 @@ class FuncTestMaster(object):
             response.close()
             print "- OK"
 
-        self.config.rtset('ServerObjs', self.clusterTestServerObjs)
-        self.config.rtset('ServerUUIDList', self.clusterTestServerUUIDList)
+        if not failed:
+            self.config.rtset('ServerObjs', self.clusterTestServerObjs)
+            self.config.rtset('ServerUUIDList', self.clusterTestServerUUIDList)
+            failed = self._checkVersions()
         print "Connection Test %s" % ("FAILED" if failed else "passed.")
         print "=================================================="
         return not failed
+
+    def _checkVersions(self):
+        version = None
+        first = None
+        for addr, serv in self.clusterTestServerObjs.iteritems():
+            if version is None:
+                version = serv['version']
+                first = addr
+            else:
+                if serv['version'] != version:
+                    print "ERROR: Different server versions: %s at %s and %s at %s!" % (
+                        version, first, serv['version'], addr)
+                    return False
+        self.api.fix(Version(version) < Version("3.0.0"))
+
 
     # This checkResultEqual function will categorize the return value from each
     # server
@@ -938,7 +990,7 @@ class FuncTestMaster(object):
     def init(self, notest=False):
         self._loadConfig()
         self.setUpPassword()
-        return (True,"") if notest or self._testConnection() else (False,"Connection test failed")
+        return (True,"") if notest or self.testConnection() else (False, "Connection test failed")
 
     def init_rollback(self):
         self.unittestRollback = UnitTestRollback()

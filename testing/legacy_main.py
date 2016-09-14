@@ -273,7 +273,7 @@ class CameraUserAttributeListTest(_pvt.LegacyFuncTestBase):
         return "saveCameraUserAttributesList"
 
     def _getObserverNames(self):
-        return ["getCameraUserAttributes"]
+        return [testMaster.api.getCameraAttr.split('/')[1]]
 
     #def _dump_post_data(self, data):
         #print "CameraUserAttributeListTest data: %s" % (data,)
@@ -296,10 +296,10 @@ class ServerUserAttributesListDataTest(_pvt.LegacyFuncTestBase):
         return self._defaultModifySeq(self._gen.generateServerUserAttributesList(self._testCase))
 
     def _getMethodName(self):
-        return "saveServerUserAttributesList"
+        return testMaster.api.saveServerAttrList.split('/')[1]
 
     def _getObserverNames(self):
-        return ["getServerUserAttributes"]
+        return [testMaster.api.getServerAttr.split('/')[1]]
 
 # The following test will issue the modify and remove on different servers to
 # trigger confliction resolving.
@@ -332,10 +332,8 @@ class ResourceConflictionTest(_pvt.LegacyFuncTestBase):
         return random.choice(self._conflictList)
 
     def _checkStatus(self):
-        apiList = ["getMediaServersEx", "getUsers", "getCameras"]
         time.sleep(testMaster.clusterTestSleepTime)
-        for api in  apiList:
-            testMaster.checkMethodStatusConsistent(api)
+        testMaster.checkMethodStatusConsistent(["getMediaServersEx", "getUsers", "getCameras"])
 
     # Overwrite the test function since the base method doesn't work here
 

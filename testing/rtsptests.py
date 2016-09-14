@@ -13,7 +13,8 @@ import threading
 from collections import namedtuple
 from itertools import imap
 
-from functest_util import SafeJsonLoads, HttpRequest, parse_size, quote_guid, CAMERA_ATTR_EMPTY, FULL_SCHEDULE_TASKS
+from functest_util import SafeJsonLoads, HttpRequest, parse_size, quote_guid, \
+    CAMERA_ATTR_EMPTY, CAMERA_ID_FIELD, FULL_SCHEDULE_TASKS
 
 #import pprint
 
@@ -700,7 +701,7 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         for ph_id, id, name, status in self._cameraList:
             if status != 'Recording':
                 attr_data = CAMERA_ATTR_EMPTY.copy()
-                attr_data['cameraID'] = id
+                attr_data[CAMERA_ID_FIELD] = id
                 attr_data['scheduleEnabled'] = True
                 attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
                 cameras.append(attr_data)
