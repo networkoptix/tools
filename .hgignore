@@ -11,4 +11,5 @@ ci/links-gdb-bt
 *.pyo
 boxes.rb
 networkoptix-mediaserver.deb
+.vagrant
 
