@@ -10,7 +10,6 @@ CLOUD_INSTANCE=cloud-test
 
 function printHelp()
 {
-    echo "Builds docker images and updates running instanses"
     echo "Usage: update_cloud-test [options]"
     echo "Options:"
     echo "  -h, --help          This help message"
@@ -19,6 +18,7 @@ function printHelp()
     echo "  --no-push           Do not push built image to repository"
     echo "  --no-update         Do not update running containers"
     echo "  --artifacts=A[,...] Artifacts (all by default)"
+    echo "  --debug             Enable debug output"
     echo "Supported artifacts:"
     echo "  ${ALL_ARTIFACTS[@]}"
 }
@@ -40,6 +40,8 @@ function contains()
 for i in "$@"
 do
     if [ $i == "-h" -o $i == "--help"  ] ; then
+        echo "Builds docker images and updates running instanses."
+        echo
         printHelp
         exit 0
     elif [[ "$i" =~ "--instance=" ]]; then
@@ -74,7 +76,13 @@ Following are supported: ${ALL_ARTIFACTS[@]}"
                 exit 1
             fi
         done
-
+    elif [ "$i" == "--debug" ]; then
+        set -x
+    else
+        echo "Error: invalid option: $i" >&2
+        echo >&2
+        printHelp
+        exit 0
     fi
 done
 
@@ -101,8 +109,14 @@ if [ "$UPDATE" -gt 0 ]; then
 ################################################################
 "
     pushd $SRC/locations/$CLOUD_INSTANCE
+    [ "$PUSH" -eq 0 ] && cp docker-compose.yml docker-compose.yml.backup
+
     for ARTIFACT in ${ARTIFACTS_TO_BUILD[@]}; do
+        echo "### Update $ARTIFACT"
+        [ "$PUSH" -eq 0 ] && sed -i "s/la.hdw.mx:5000\/$ARTIFACT/$ARTIFACT/" docker-compose.yml
         ./cloud.sh --service=$ARTIFACT update
     done
+
+    [ "$PUSH" -eq 0 ] && mv docker-compose.yml.backup docker-compose.yml
     popd
 fi
