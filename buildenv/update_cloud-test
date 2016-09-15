@@ -1,16 +1,26 @@
 #!/bin/bash
 
-SRC=/home/ak/develop/nx_cloud_deploy
+SRC=~/develop/nx_cloud_deploy
 ALL_ARTIFACTS=(cloud_db connection_mediator vms_gateway)
 ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
 PACK=1
+PUSH=1
 UPDATE=1
 CLOUD_INSTANCE=cloud-test
 
 function printHelp()
 {
+    echo "Builds docker images and updates running instanses"
+    echo "Usage: update_cloud-test [options]"
     echo "Options:"
-    echo
+    echo "  -h, --help          This help message"
+    echo "  --instance=NAME     Cloud instnce (default: $CLOUD_INSTANCE)"
+    echo "  --no-pack           Do not build docker images"
+    echo "  --no-push           Do not push built image to repository"
+    echo "  --no-update         Do not update running containers"
+    echo "  --artifacts=A[,...] Artifacts (all by default)"
+    echo "Supported artifacts:"
+    echo "  ${ALL_ARTIFACTS[@]}"
 }
 
 function contains()
@@ -32,8 +42,12 @@ do
     if [ $i == "-h" -o $i == "--help"  ] ; then
         printHelp
         exit 0
+    elif [[ "$i" =~ "--instance=" ]]; then
+        CLOUD_INSTANCE=$(echo $i | sed 's/--instance=\(.*\)/\1/')
     elif [ "$i" == "--no-pack" ] ; then
         PACK=0
+    elif [ "$i" == "--no-push" ] ; then
+        PUSH=0
     elif [ "$i" == "--no-update" ] ; then
         UPDATE=0
     elif [[ "$i" =~ "--artifacts=" ]] ; then
@@ -74,19 +88,21 @@ if [ "$PACK" -gt 0 ]; then
 ################################################################
 "
         pushd $SRC/$moduleName
-        make stage pack
-        make push-ns
+        ./make.sh stage pack
+        [ "$PUSH" -gt 0 ] && ./make.sh push
         popd
     done
 fi
 
-echo "
+if [ "$UPDATE" -gt 0 ]; then
+    echo "
 ################################################################
 # Updating $CLOUD_INSTANCE instance
 ################################################################
 "
-if [ "$UPDATE" -gt 0 ]; then
     pushd $SRC/locations/$CLOUD_INSTANCE
-    ./cloud.sh update
+    for ARTIFACT in ${ARTIFACTS_TO_BUILD[@]}; do
+        ./cloud.sh --service=$ARTIFACT update
+    done
     popd
 fi
