@@ -10,6 +10,9 @@ Flags:
     b   NX1 (-Darch=arm -Dbox=bpi)
     c   clean up before run (e.g. hg purge --all)
     m   run makepro.py after maven
+    S   build mediaserver only
+    C   build desktop client only
+    D   build deb packages
 END
 exit 0
 fi
@@ -22,6 +25,12 @@ set -e -x
 OPTIONS=
 [[ "$1" = *u* ]] && OPTIONS+=" -Dutb"
 [[ "$1" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
+
+PROJECT=
+[[ "$1" = *S* ]] && PROJECT="mediaserver"
+[[ "$1" = *C* ]] && PROJECT="desktop-client"
+[[ "$1" = *D* ]] && PROJECT="debsetup/$PROJECT-deb"
+[[ "$PROJECT" ]] && OPTIONS+=" --projects $PROJECT --also-make"
 
 if [[ "$1" = *c* ]]; then
     hg st -i | awk '{print$2}' | grep -Ev "\.pro\.user$" | xargs rm || true
