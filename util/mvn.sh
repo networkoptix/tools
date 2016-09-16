@@ -9,6 +9,7 @@ Flags:
     u   build unit tests as well (-Dut)
     b   NX1 (-Darch=arm -Dbox=bpi)
     c   clean up before run (e.g. hg purge --all)
+    m   run makepro.py after maven
 END
 exit 0
 fi
@@ -30,4 +31,4 @@ fi
 mvn $ACTION -Dbuild.configuration=$CONF $OPTIONS $@
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
-$SCRIPT_DIR/makepro.py $OPTIONS
+[[ "$1" = *m* ]] $SCRIPT_DIR/makepro.py $OPTIONS
