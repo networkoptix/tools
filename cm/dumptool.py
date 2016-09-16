@@ -60,7 +60,9 @@ class Cdb(object):
         except OSError as e:
             raise Error('Cannot start %s - %s' % (cmd, e))
         self.execute()
-        if debug: self.execute('.reload /f')
+        if debug:
+            self.execute('.sympath+ "%s"' % debug)
+            self.execute('.reload /f')
 
     def __enter__(self, *a):
         return self
