@@ -1,5 +1,5 @@
 # $Id: MTValue.py 71579 2011-02-22 13:46:57Z artem_nikitin $
-# Fedorov Y. Vsevolod
+# Artem V. Nikitin
 # multi-thread-safe value and flag
 
 from Condition import Condition

@@ -8,44 +8,17 @@ import sys, os, importlib, re, subprocess, tempfile, time, zlib, threading, sign
 from optparse import OptionParser
 from Queue import Queue, Empty
 
-sys.path.insert(0, "../pycommons")
+pycommons = os.path.join(
+  os.path.dirname(os.path.realpath(__file__)),
+  '../pycommons')
+sys.path.insert(0, pycommons)
 from MTValue import MTFlag, MTValue
 from Shutdown import shutdown
 from MySQLDB import MySQLDB
+from Utils import *
 
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
 DEFAULT_SHELL="/bin/bash"
-
-# Read config and initialize environment
-def read_config(config):
-  try:
-    directory, module_name = os.path.split(config)
-    module_name = os.path.splitext(module_name)[0]
-    path = list(sys.path)
-    sys.path.insert(0, directory)
-    try:
-      config_module = __import__(module_name)
-      cfg = getattr(config_module, 'config')
-      return cfg
-    finally:
-      sys.path[:] = path
-  except ImportError, x:
-    print >> sys.stderr, "Cannot read config '%s': %s" % (config, x)
-    exit(1)
-    
-# Initialize environment
-def init_environment(config, options):
-  environment = config.get('environment', {})
-  for var, value in environment.items():
-    os.putenv(var, value)
-
-  os.putenv('TASKBOT', os.path.join(os.getcwd(), sys.argv[0]))
-  if options.trace:
-    os.putenv('TASKBOT_OPTIONS', '--trace')
-  else:
-    os.putenv('TASKBOT_OPTIONS', '')
-  os.environ['TASKBOT_PARENT_PID'] = "%s" % os.getpid()
-
 
 # Strict output by max size
 class StrictOutput:
@@ -145,6 +118,40 @@ class StatusChecker:
 # Taskbot script executor
 class TaskExecutor:
 
+  START_TASK = \
+    """INSERT INTO task (root_task_id, parent_task_id, branch_id, 
+    description, is_command, start, finish)
+    VALUES (%s, %s, %s, %s, %s, %s, 0)"""
+
+  FINISH_TASK = \
+    """UPDATE task SET finish = %s, error_message = %s
+    WHERE id = %s"""
+  
+  FINISH_COMMAND = \
+    """INSERT INTO command (task_id, stdout_gzipped, stdout,
+    stderr_gzipped, stderr, exit_status)
+    VALUES (%s, %s, %s, %s, %s, %s)"""
+
+  CREATE_RUNNING_TASK = \
+    """INSERT INTO running_task (task_id, host, pid, user)
+    VALUES (%s, %s, %s, %s)"""
+
+  DELETE_RUNNING_TASK = \
+    """DELETE FROM running_task
+    WHERE task_id = %s"""
+
+  SELECT_PARENT_TASK = \
+    """SELECT MAX(task_id) FROM running_task
+    WHERE host = %s AND pid = %s"""
+  
+  SELECT_ROOT_TASK = \
+    """SELECT root_task_id FROM task
+    WHERE id = %s"""
+
+  SELECT_BRANCH = \
+    """SELECT id FROM branch
+    WHERE description = %s"""
+
   class Task:
 
     def __init__(self, task_id, is_command):
@@ -190,7 +197,7 @@ class TaskExecutor:
   def __select_branch(self):
     if os.environ.get('BRANCH_NAME'):
       res = self.__db__.query(
-        MySQLDB.SELECT_BRANCH,
+        TaskExecutor.SELECT_BRANCH,
         (os.environ['BRANCH_NAME'],))
       if res:
         return res[0]
@@ -199,7 +206,7 @@ class TaskExecutor:
   def __select_root_task_id(self, parent_task_id):
     if parent_task_id:
       res =  self.__db__.query(
-          MySQLDB.SELECT_ROOT_TASK,
+          TaskExecutor.SELECT_ROOT_TASK,
           (parent_task_id,))
       if res: return res[0]
     return None
@@ -219,7 +226,7 @@ class TaskExecutor:
         task.error_message = "non-zero exit status"
       return status, False
     task.error_message = "command_timeout has expired"
-    return 1, True
+    return 10, True
     
 
   def start_command(self, command):
@@ -227,13 +234,16 @@ class TaskExecutor:
 
   def write_command(self, command, is_comment=False, timeout = None):
     self.__shell_process__.stdin.write(command)
+
     if not is_comment:
       status = self.__status__.wait(timeout)
       stdout = self.__out__.get()
       stderr = self.__err__.get()
     
-      Trace.trace("  STATUS:   %s\n  STDOT:\n    %s\n  STDERR:\n    %s" % \
-       (status, StrictOutput.strict(stdout),  StrictOutput.strict(stderr)))
+      Trace.trace("  STATUS(%s):   %s\n  STDOT(%s):\n    %s\n  STDERR(%s):\n    %s" % \
+       (self.__rfdstatus__, status, self.__shell_process__.stdout.fileno(),
+        StrictOutput.strict(stdout),  self.__shell_process__.stderr.fileno(),
+        StrictOutput.strict(stderr)))
       return status,  stderr, stdout
     return 0, "", ""
    
@@ -251,27 +261,29 @@ class TaskExecutor:
       self.write_command("{ %s\n/bin/echo $? >&%d; }\n" % \
         (command, self.__wfdstatus__), False, timeout)
 
+    status, do_terminate = self.__check_get_status(status, task)
+
     # Finish command
     self.finish_command(status, stderr, stdout)
     if status == '0':
       self.finish_tasks_to_level(0)
+    
+    if do_terminate:
+      shutdown.set()
+      self.close()
+      
     return status
 
   def finish_command(self, status, err, out):
     self.__db__.ping()
 
     task = self.__task_stack__[-1]
-    status, do_terminate = self.__check_get_status(status, task)
 
     self.__db__.execute(
-      MySQLDB.FINISH_COMMAND,
+      TaskExecutor.FINISH_COMMAND,
       (task.task_id,) + Compressor.compress_maybe(out) + \
       Compressor.compress_maybe(err) + (status,))
-
-    if do_terminate:
-      shutdown.set()
-      self.close()
-   
+  
     self.finish_task(True)
     
 
@@ -282,11 +294,11 @@ class TaskExecutor:
     task = self.__task_stack__.pop()
 
     self.__db__.execute(
-      MySQLDB.FINISH_TASK,
+      TaskExecutor.FINISH_TASK,
       (time.time(), task.error_message, task.task_id))
 
     self.__db__.execute(
-      MySQLDB.DELETE_RUNNING_TASK,
+      TaskExecutor.DELETE_RUNNING_TASK,
       (task.task_id,))
 
     if len(self.__task_stack__) > 1:
@@ -314,7 +326,7 @@ class TaskExecutor:
     if len(self.__task_stack__):
       parent_task_id = self.__task_stack__[-1].task_id
     task_id = self.__db__.execute(
-      MySQLDB.START_TASK,
+      TaskExecutor.START_TASK,
       (self.__root_task_id__, parent_task_id,  self.__branch_id__,
        description,  is_command, time.time()))
     
@@ -324,7 +336,7 @@ class TaskExecutor:
     self.__task_stack__.append(TaskExecutor.Task(task_id, is_command))
     
     self.__db__.execute(
-      MySQLDB.CREATE_RUNNING_TASK,
+      TaskExecutor.CREATE_RUNNING_TASK,
       (task_id, os.environ['HOSTNAME'], 
        os.getpid(), os.environ['USER']))
 
@@ -350,12 +362,11 @@ def main():
   (options, args) = parser.parse_args()
 
   if len(args) == 0 or \
-         (len(args) == 1 and not option.command):
+         (len(args) == 1 and not options.command):
     parser.print_help()
-    exit(1)
+    exit(2)
     
   config = args[0]
-  script = options.command or args[1]
 
   Trace.enable_trace = options.trace
 
@@ -373,7 +384,7 @@ def main():
 
     parent_task_id, = \
       database.query(
-        MySQLDB.SELECT_PARENT_TASK,
+        TaskExecutor.SELECT_PARENT_TASK,
         (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
 
   init_environment(config, options)
@@ -389,31 +400,35 @@ def main():
   command = ''
   command_timeout = None
   status = 0
-  with open(script) as fp:
-    for line in fp:
-      if executor.closed:
-        break
-      m = re.search(CMD_HEADER_REGEX, line)
-      level = var = value = None
-      if m:
-        (level, _, var, value) = m.group(1,2,3,4)
-      if (re.search('^\s*$', value or line)):
-        status = executor.process_command(
-          command,
-          command_timeout or global_timeout)
-        command = ''
-        command_timeout = None
-      else:
-        command+=line
-      if m:
-        if var == 'timeout':
-          # Set command timeout
-          command_timeout = float(value);
-        elif level:
-          executor.finish_tasks_to_level(
-            len(level) - 1 + \
-            (options.description and 1 or 0))
-          executor.start_task(value);
+  if options.command:
+    command = options.command
+  else:
+    script = args[1]    
+    with open(script) as fp:
+      for line in fp:
+        if executor.closed:
+          break
+        m = re.search(CMD_HEADER_REGEX, line)
+        level = var = value = None
+        if m:
+          (level, _, var, value) = m.group(1,2,3,4)
+        if (re.search('^\s*$', value or line)):
+          status = executor.process_command(
+            command,
+            command_timeout or global_timeout)
+          command = ''
+          command_timeout = None
+        else:
+          command+=line
+        if m:
+          if var == 'timeout':
+            # Set command timeout
+            command_timeout = float(value);
+          elif level:
+            executor.finish_tasks_to_level(
+              len(level) - 1 + \
+              (options.description and 1 or 0))
+            executor.start_task(value);
 
     fp.close()
 
@@ -426,8 +441,7 @@ def main():
   database.commit()
   database.close()
 
-  exit(status)
-    
+  sys.exit(status)
       
 if __name__ == "__main__":
   main()
