@@ -363,7 +363,7 @@ class BackupStorageTest(StorageBasedTest):
     @checkInit
     def ScheduledBackupTest(self):
         "In fact it tests that scheduling backup for a some moment before the current initiates backup immidiately."
-        raw_input("[Press ENTER to start ScheduledBackupTest]")
+        #raw_input("[Press ENTER to start ScheduledBackupTest]")
         data = SERVER_USER_ATTR.copy()
         data[_serverIdField] = self.guids[_WORK_HOST]
         data['backupType'] = 'BackupManual'
