@@ -83,3 +83,23 @@ class MTCounter(MTValue):
       return True
     finally:
       self._mutex.release()
+
+class MTBuffer:
+
+  def __init__(self, buf = '', mutex = None):
+   self._mutex = mutex or Lock()
+   self._buf = buf
+
+  def append(self, buf):
+    self._mutex.acquire()
+    self._buf += buf
+    self._mutex.release()
+
+  def get( self ):
+    self._mutex.acquire()
+    try:
+      buf = self._buf
+      self._buf = ''
+      return buf
+    finally:
+      self._mutex.release()

@@ -10,10 +10,12 @@ class Report:
 
   class Task:
     def __init__(self,
-                 task_id, description,
+                 task_id, parent_task_id,
+                 description,
                  is_command=False, start=None,
                  finish=None, error_message=None):
       self.id = task_id
+      self.parent_task_id = parent_task_id
       self.description = description
       self.is_command = is_command
       self.start = start
@@ -39,7 +41,9 @@ class Report:
     self.__db__.query("""SELECT MIN(task_id)
       FROM running_task
       WHERE host = %s AND pid = %s""",
-    (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']));
+    (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
+
+    print "Parent: %s" % parent_task_id
 
     while parent_task_id:
       res = \
@@ -47,13 +51,15 @@ class Report:
           is_command, start, finish, error_message
           FROM task
           WHERE id = %s""", (parent_task_id, ))
+      parent_task_id = res[1]
 
     return Report.Task(*res)
 
   def __find_task(self, parent_task_id, description):
     cursor = self.__db__.cursor
     cursor.execute(
-      """SELECT id, description, is_command, start, finish, error_message
+      """SELECT id, parent_task_id, description,
+      is_command, start, finish, error_message
       FROM task
       WHERE parent_task_id = %s AND description LIKE %s
       ORDER BY id""", (parent_task_id, description))
@@ -62,7 +68,8 @@ class Report:
   def __find_task_by_root(self, root_task_id, description):
     cursor = self.__db__.cursor
     cursor.execute(
-      """SELECT id, description, is_command, start, finish, error_message
+      """SELECT id, parent_task_id, description,
+      is_command, start, finish, error_message
       FROM task
       WHERE root_task_id = %s AND description LIKE %s
       ORDER BY id""", (root_task_id, description))
@@ -112,7 +119,8 @@ class Report:
       WHERE task_id = %s""",(task_id, ))
 
   def __prev_root_task(self, task):
-    prev_task = self.__db__.query("""SELECT id, description, is_command, start, finish, error_message
+    prev_task = self.__db__.query("""SELECT id, parent_task_id, description,
+      is_command, start, finish, error_message
       FROM task
       WHERE id = (SELECT MAX(h.task_id)
                   FROM history h

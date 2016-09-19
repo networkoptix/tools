@@ -6,13 +6,12 @@
 
 import sys, os, importlib, re, subprocess, tempfile, time, zlib, threading, signal
 from optparse import OptionParser
-from Queue import Queue, Empty
 
 pycommons = os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
   '../pycommons')
 sys.path.insert(0, pycommons)
-from MTValue import MTFlag, MTValue
+from MTValue import MTFlag, MTValue, MTBuffer
 from Shutdown import shutdown
 from MySQLDB import MySQLDB
 from Utils import *
@@ -58,7 +57,8 @@ class Trace:
   @classmethod
   def trace (cls, msg):
     if cls.enable_trace:
-      print "%s" %msg
+      sys.stdout.write(msg)
+      sys.stdout.flush()
 
 # Non-blocking read from stdout, stderr
 class OutputReader:
@@ -68,22 +68,19 @@ class OutputReader:
     self.__thread__ = threading.Thread(
       target = self.__read)
     self.__thread__.daemon = True
-    self.__queue__ = Queue()
+    self.__buffer__ = MTBuffer()
     self.__thread__.start()
 
   def __read(self):
-    for line in iter(self.__stream__.readline, b''):
-      if shutdown.get(): return
-      self.__queue__.put(line)
+    while True:
+      c = self.__stream__.read(1)
+      if not c:
+        break
+      self.__buffer__.append(c)
+
 
   def get(self):
-    strm = ''
-    while not shutdown.get():
-      try:
-        strm += self.__queue__.get_nowait()
-      except Empty:
-        return strm
-    return strm
+    return self.__buffer__.get()
 
 # Check status or timeout
 class StatusChecker:
@@ -107,13 +104,14 @@ class StatusChecker:
     self.__stopped__.set(True)
 
   def wait( self, timeout = None ):
-    try:
-      self.__ready__.wait(timeout)
+    self.__ready__.wait(timeout)
+    if self.__ready__.get():
       s = self.__status__.get()
-      return s
-    finally:
-      self.__ready__.set(False)
       self.__status__.set()
+      self.__ready__.set(False)
+      return s
+    return None
+
   
 # Taskbot script executor
 class TaskExecutor:
@@ -164,6 +162,9 @@ class TaskExecutor:
       if self.is_command:
         is_cmd = "command"
       return "Task#%d (%s)" % (self.task_id, is_cmd)
+
+    def __repr__(self):
+      return self.__str__()
 
   def __init__(self, db, shell, parent_task_id = None):
     self.__task_stack__ = []
@@ -235,15 +236,24 @@ class TaskExecutor:
   def write_command(self, command, is_comment=False, timeout = None):
     self.__shell_process__.stdin.write(command)
 
+    start = time.time()
+
+    status = None
+    stdout = stderr = ''
+
     if not is_comment:
-      status = self.__status__.wait(timeout)
-      stdout = self.__out__.get()
-      stderr = self.__err__.get()
+      while True:
+        status = self.__status__.wait(.1)
+        out = self.__out__.get()
+        err = self.__err__.get()
+        stdout += out
+        stderr += err
+        Trace.trace(out)
+        Trace.trace(err)
+
+        if status is not None or (timeout and  time.time() - start > timeout):
+          break
     
-      Trace.trace("  STATUS(%s):   %s\n  STDOT(%s):\n    %s\n  STDERR(%s):\n    %s" % \
-       (self.__rfdstatus__, status, self.__shell_process__.stdout.fileno(),
-        StrictOutput.strict(stdout),  self.__shell_process__.stderr.fileno(),
-        StrictOutput.strict(stderr)))
       return status,  stderr, stdout
     return 0, "", ""
    
@@ -256,7 +266,7 @@ class TaskExecutor:
       self.write_command(command + "\n", True)
       return
     task = self.start_command(command)
-    Trace.trace("%s:\n  %s" % (task, command))
+    Trace.trace("%s\n" % command)
     status, stderr, stdout = \
       self.write_command("{ %s\n/bin/echo $? >&%d; }\n" % \
         (command, self.__wfdstatus__), False, timeout)
