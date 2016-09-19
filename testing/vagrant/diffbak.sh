@@ -20,8 +20,8 @@ fi
 MAIN="$1"
 BAK="$2"
 
-find "$MAIN" -name '*.mkv' -printf '%P %s\n' > "$MAIN_LIST"
-find "$BAK" -name '*.mkv' -printf '%P %s\n' > "$BAK_LIST"
+find "$MAIN" -name '*.mkv' -printf '%P %s\n' |sort > "$MAIN_LIST"
+find "$BAK" -name '*.mkv' -printf '%P %s\n' |sort > "$BAK_LIST"
 if diff -q "$MAIN_LIST" "$BAK_LIST" > /dev/null; then
 #if diff -q "$MAIN_LIST" "$BAK_LIST"; then
 	echo OK

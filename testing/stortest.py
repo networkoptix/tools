@@ -79,7 +79,7 @@ SERVER_USER_ATTR = {
     'backupBitrate': -1,
 }
 
-TMP_STORAGE = '/vagrant/bstorage'  # directory path on the server side to create backup storage in
+TMP_STORAGE = '/tmp/bstorage'  # directory path on the server side to create backup storage in
 
 
 class BackupStorageTestError(FuncTestError):
@@ -303,7 +303,7 @@ class BackupStorageTest(StorageBasedTest):
                 self.fail("Can't initialize the backup storage. It doesn't become ready. (Timed out)")
             data = self._server_request(boxnum, 'ec2/getStatusList?id=' + new_id)
             try:
-                print "DEBUG: data = %s" % (data,)
+                #print "DEBUG: data = %s" % (data,)
                 if data and data[0] and data[0]["id"] == new_id:
                     if data[0]["status"] == "Online":
                         print "Backup storage is ready for backup."

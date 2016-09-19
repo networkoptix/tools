@@ -1229,7 +1229,7 @@ def RunByAutotest(arg0):
     #config = testMaster.getConfig()
     need_rollback = True
     try:
-        print "" # FIXME add startubg message
+        print "" # FIXME add startup message
         ret, reason = testMaster.init(notest=True)
         if not ret:
             print "Failed to initialize the cluster test object: %s" % (reason)
