@@ -1,6 +1,6 @@
 #!/bin/bash
-MAIN_LIST=.main-list
-BAK_LIST=.bak-list
+MAIN_LIST=main-list
+BAK_LIST=bak-list
 function usage() {
 	echo "Usage:"
 	echo "\t$0 MAIN-STORAGE-PATH BACKUP-STORAGE-PATH"

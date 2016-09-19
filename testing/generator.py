@@ -184,44 +184,47 @@ class CameraConflictionDataGenerator(BasicGenerator):
     #(id,mac,model,parentId,typeId,url,vendor)
     _existedCameraList = []
     # For simplicity , we just modify the name of this camera
-    _updateTemplate = \
-    """
+    _updateMetaTemplate = """
         [{
             "groupId": "",
             "groupName": "",
-            "id": "%s",
-            "mac": "%s",
+            "id": "%%s",
+            "mac": "%%s",
             "manuallyAdded": false,
             "maxArchiveDays": 0,
             "minArchiveDays": 0,
-            "model": "%s",
+            "model": "%%s",
             "motionMask": "",
             "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
+            "name": "%%s",
+            "parentId": "%%s",
+            "physicalId": "%%s",
+            "%s": "{00000000-0000-0000-0000-000000000000}",
             "scheduleEnabled": false,
             "scheduleTasks": [ ],
             "secondaryStreamQuality": "SSQualityLow",
             "status": "Unauthorized",
             "statusFlags": "CSF_NoFlags",
-            "typeId": "%s",
-            "url": "%s",
-            "vendor": "%s"
+            "typeId": "%%s",
+            "url": "%%s",
+            "vendor": "%%s"
         }]
     """
+    _updateTemplate = None
 
-    def _fetchExistedCameras(self,dataGen):
+    def __init__(self, dataGen):
+        if self._updateTemplate is None:
+            type(self)._updateTemplate = self._updateMetaTemplate % (
+                testMaster.api.preferredServerId)
+        if self._fetchExistedCameras(dataGen) == False:
+            raise Exception("Cannot get existed camera list")
+
+    def _fetchExistedCameras(self, dataGen):
         for entry in dataGen.conflictCameraList:
             obj = json.loads(entry)[0]
             self._existedCameraList.append((obj["id"],obj["mac"],obj["model"],obj["parentId"],
                  obj["typeId"],obj["url"],obj["vendor"]))
         return True
-
-    def __init__(self,dataGen):
-        if self._fetchExistedCameras(dataGen) == False:
-            raise Exception("Cannot get existed camera list")
 
     def _generateModify(self,camera):
         name = self.generateRandomString(random.randint(8,12))
@@ -345,35 +348,42 @@ def dataUpdateTask(lock, collector, data, server, method):
 
 class CameraDataGenerator(BasicGenerator):
     # depends on testMaster.clusterTestServerUUIDList and testMaster.clusterTestServerList
-    _template = """[
+    _metaTemplate = """[
         {
-            "audioEnabled": %s,
-            "controlEnabled": %s,
+            "audioEnabled": %%s,
+            "controlEnabled": %%s,
             "dewarpingParams": "",
             "groupId": "",
             "groupName": "",
-            "id": "%s",
-            "mac": "%s",
+            "id": "%%s",
+            "mac": "%%s",
             "manuallyAdded": false,
             "maxArchiveDays": 0,
             "minArchiveDays": 0,
-            "model": "%s",
+            "model": "%%s",
             "motionMask": "",
             "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
+            "name": "%%s",
+            "parentId": "%%s",
+            "physicalId": "%%s",
+            "%s": "{00000000-0000-0000-0000-000000000000}",
             "scheduleEnabled": false,
             "scheduleTasks": [ ],
             "secondaryStreamQuality": "SSQualityLow",
             "status": "Unauthorized",
             "statusFlags": "CSF_NoFlags",
             "typeId": "{7d2af20d-04f2-149f-ef37-ad585281e3b7}",
-            "url": "%s",
-            "vendor": "%s"
+            "url": "%%s",
+            "vendor": "%%s"
         }
     ]"""
+    _template = None
+
+    def __init__(self):
+        super(CameraDataGenerator, self).__init__()
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (testMaster.api.preferredServerId)
+
 
     def _generateCameraId(self,mac):
         return self.generateUUIdFromMd5(mac)
@@ -526,7 +536,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
                 "minArchiveDays": -1,
                 "motionMask": "5,0,0,44,32:5,0,0,44,32:5,0,0,44,32:5,0,0,44,32",
                 "motionType": "MT_SoftwareGrid",
-                "preferedServerId": "%%s",
+                "%s": "%%s",
                 "scheduleEnabled": false,
                 "scheduleTasks": [ ],
                 "secondaryStreamQuality": "SSQualityMedium"
@@ -545,7 +555,8 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
 
     def __init__(self, prepareNum):
         if self._template is None:
-            type(self)._template = self._metaTemplate % (testMaster.api.cameraId,)
+            type(self)._template = self._metaTemplate % (
+                testMaster.api.cameraId, testMaster.api.preferredServerId)
         if self._fetchExistedCameraUUIDList(prepareNum) == False:
             raise Exception("Cannot initialize camera list attribute test data")
 

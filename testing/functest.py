@@ -856,7 +856,7 @@ def runMiscFunction(argc, argv):
 # ===================================
 # Perf Test
 # ===================================
-class SingleResourcePerfGenerator:
+class SingleResourcePerfGenerator(object):
     def generateUpdate(self,id,parentId):
         pass
 
@@ -976,6 +976,7 @@ class SingleResourcePerfTest:
             else:
                 return True
 
+        #XXX not used!
         # Insert that resource _BACK_ to the list
         with self._lock:
             self._resourceList.append(id)
@@ -995,7 +996,11 @@ class SingleResourcePerfTest:
             return (self._remove(),"Remove")
 
 class CameraPerfResourceGen(SingleResourcePerfGenerator):
-    _gen = CameraDataGenerator()
+    _gen = None
+
+    def __init__(self):
+        if self._gen is None:
+            type(self)._gen = CameraDataGenerator()
 
     def generateUpdate(self,id,parentId):
         return self._gen.generateUpdateData(id,parentId)[0]
@@ -1016,7 +1021,11 @@ class CameraPerfResourceGen(SingleResourcePerfGenerator):
         return "Camera"
 
 class UserPerfResourceGen(SingleResourcePerfGenerator):
-    _gen = UserDataGenerator()
+    _gen = None
+
+    def __init__(self):
+        if self._gen is None:
+            type(self)._gen = UserDataGenerator()
 
     def generateUpdate(self,id,parentId):
         return self._gen.generateUpdateData(id)[0]

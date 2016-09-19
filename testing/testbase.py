@@ -85,6 +85,8 @@ class ServerApi(object):
                 cls.getCameraAttr = 'ec2/getCameraUserAttributes'
                 cls.cameraId = 'cameraID'
                 cls.serverId = 'serverID'
+                cls.preferredServerId = 'preferedServerId'
+                cls.getEventRules = 'getBusinessRules'
             else:
                 cls.getServerAttr = 'ec2/getMediaServerUserAttributesList'
                 cls.saveServerAttr = 'ec2/saveMediaServerUserAttributes'
@@ -92,6 +94,8 @@ class ServerApi(object):
                 cls.getCameraAttr = 'ec2/getCameraUserAttributesList'
                 cls.cameraId = 'cameraId'
                 cls.serverId = 'serverId'
+                cls.preferredServerId = 'preferredServerId'
+                cls.getEventRules = 'getEventRules'
             utilFixApi(cls)
 
 
@@ -337,11 +341,11 @@ class FuncTestCase(unittest.TestCase):
                 headers = {'Content-Type': 'application/json'}
             return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
-    def _server_request(self, host, func, data=None, headers=None, timeout=None, unparsed=False):
+    def _server_request(self, host, func, data=None, headers=None, timeout=None, unparsed=False, nodump=False):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
         print "DEBUG: requesting: %s" % url
-        if data is not None and func != 'restoreDatabase':
+        if data is not None and (not nodump):
             # on restoreDatabase data is a large binary block, not interesting for debug
             print "DEBUG: with data %s" % (pprint.pformat(data),)
         try:
@@ -385,7 +389,7 @@ class FuncTestCase(unittest.TestCase):
         endtime = time.time() + SERVER_UP_TIMEOUT
         tocheck = servers or set(range(self.num_serv))
         while tocheck and time.time() < endtime:
-            print "_wait_servers_up: %s, %s" % (endtime - time.time(), str(tocheck))
+            #print "_wait_servers_up: %s, unready %s" % (endtime - time.time(), str(tocheck))
             for num in tocheck.copy():
                 data = self._server_request_nofail(num, 'ec2/testConnection', timeout=1, with_debug=False)
                 if data is None:
@@ -651,7 +655,7 @@ class FuncTestMaster(object):
         "getCamerasEx",
         "getCameraHistoryItems",
         "getCameraBookmarkTags",
-        "getBusinessRules",
+        ".getEventRules",
         "getUsers",
         "getVideowalls",
         "getLayouts",
@@ -866,6 +870,10 @@ class FuncTestMaster(object):
                         version, first, serv['version'], addr)
                     return False
         self.api.fix(Version(version) < Version("3.0.0"))
+        for i, name in enumerate(self._ec2GetRequests):
+            if name.startswith('.'):
+                self._ec2GetRequests[i] = getattr(self.api, name[1:])
+                print "*** DEBUG0: substituted %s with %s" % (name, self._ec2GetRequests[i])
 
 
     # This checkResultEqual function will categorize the return value from each

@@ -54,12 +54,17 @@ TEST_CAMERA_DATA = {
     'typeId': TEST_CAMERA_TYPE_ID
 }
 
-TEST_CAMERA_ATTR = CAMERA_ATTR_EMPTY.copy()
-TEST_CAMERA_ATTR.update({
-    'scheduleEnabled': False,
-    'backupType': "CameraBackup_HighQuality|CameraBackup_LowQuality",  # or CameraBackupBoth
-    'cameraName': 'test-camera',
-})
+def _mkTestCameraAttr(emptyCameraAttr):
+    data = emptyCameraAttr.copy()
+    data.update({
+        'scheduleEnabled': False,
+    #    'backupType': "CameraBackupBoth",
+        'backupType': 3,
+        'cameraName': 'test-camera',
+    })
+    return data
+
+TEST_CAMERA_ATTR = _mkTestCameraAttr(CAMERA_ATTR_EMPTY)
 
 _serverIdField = 'serverId'
 SERVER_USER_ATTR = {
@@ -74,7 +79,7 @@ SERVER_USER_ATTR = {
     'backupBitrate': -1,
 }
 
-TMP_STORAGE = '/tmp/bstorage'  # directory path on the server side to create backup storage in
+TMP_STORAGE = '/vagrant/bstorage'  # directory path on the server side to create backup storage in
 
 
 class BackupStorageTestError(FuncTestError):
@@ -110,6 +115,11 @@ class StorageBasedTest(FuncTestCase):
     _initFailed = False
 
     @classmethod
+    def isFailFast(cls, suit_name=""):
+        # it could depend on the specific suit
+        return False
+
+    @classmethod
     def globalInit(cls, config):
         super(StorageBasedTest, cls).globalInit(config)
         cls.test_camera_id = [0 for _ in xrange(cls.num_serv)]
@@ -122,8 +132,8 @@ class StorageBasedTest(FuncTestCase):
         if _serverIdField != cls.api.serverId:
             SERVER_USER_ATTR[cls.api.serverId] = SERVER_USER_ATTR.pop(_serverIdField)
             _serverIdField = cls.api.serverId
-
-
+        TEST_CAMERA_ATTR.clear()
+        TEST_CAMERA_ATTR.update(_mkTestCameraAttr(CAMERA_ATTR_EMPTY))
 
     def _load_storage_info(self, timeout=0):
         "Get servers' storage space data"
@@ -155,15 +165,15 @@ class StorageBasedTest(FuncTestCase):
         cls.test_camera_physical_id[boxnum] = data['physicalId']
         return data
 
-    @classmethod
-    def _duplicateConfig(cls):
-        cls.config = copy.copy(cls.config)
-        cls.config.runtime = cls.config.runtime.copy()
+#    @classmethod
+#    def _duplicateConfig(cls):
+#        cls.config = copy.copy(cls.config)
+#        cls.config.runtime = cls.config.runtime.copy()
 
-    def _add_test_camera(self, boxnum, camera=None, log_response=False, cameraAttr=TEST_CAMERA_ATTR):
+    def _add_test_camera(self, boxnum, camera=None, log_response=False, cameraAttr=TEST_CAMERA_ATTR, nodump=False):
         camera = self.new_test_camera(boxnum) if camera is None else camera.copy()
         camera['parentId'] = self.guids[boxnum]
-        self._server_request(boxnum, 'ec2/saveCamera', camera)
+        self._server_request(boxnum, 'ec2/saveCamera', camera, nodump=nodump)
         answer = self._server_request(boxnum, 'ec2/getCameras')
         if log_response:
             print "_add_test_camera: getCameras(%s) response: '%s'" % (boxnum, answer)
@@ -171,8 +181,8 @@ class StorageBasedTest(FuncTestCase):
             if c['parentId'] == self.guids[boxnum]:
                 self.assertEquals(unquote_guid(c['id']), self.test_camera_id[boxnum], "Failed to assign a test camera to to a server")
         attr_data = [cameraAttr.copy()]
-        attr_data[0]['cameraId'] = self.test_camera_id[boxnum]
-        self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data) # return None
+        attr_data[0][self.api.cameraId] = self.test_camera_id[boxnum]
+        self._server_request(boxnum, 'ec2/saveCameraUserAttributesList', attr_data, nodump=nodump) # return None
         answer = self._server_request(boxnum, 'ec2/getCamerasEx')
         if log_response:
             print "_add_test_camera: getCamerasEx(%s) response: '%s'" % (boxnum, answer)
@@ -182,6 +192,7 @@ class StorageBasedTest(FuncTestCase):
         print "Server %s: Filling the main storage with the test data." % boxnum
         self._call_box(self.hosts[boxnum], "python", shquote("/vagrant/" + self._fill_storage_script), mode,
                        shquote(self._storages[boxnum][0]['url']), self.test_camera_physical_id[boxnum], arg)
+        time.sleep(0.5)
         answer = self._server_request(boxnum, 'api/rebuildArchive?action=start&mainPool=1')
         #print "rebuildArchive start: %s" %(answer,)
         try:
@@ -189,9 +200,9 @@ class StorageBasedTest(FuncTestCase):
         except Exception:
             state = ''
         while state != 'RebuildState_None':
-            time.sleep(0.5)
+            time.sleep(0.8)
             answer = self._server_request(boxnum, 'api/rebuildArchive?mainPool=1')
-            #print "rebuildArchive: %s" %(answer,)
+            print "rebuildArchive: %s" %(answer,)
             try:
                 state = answer["reply"]["state"]
             except Exception:
@@ -287,7 +298,7 @@ class BackupStorageTest(StorageBasedTest):
         t = time.time() + BACKUP_STORAGE_READY_TIMEOUT
         new_id = '{' + new_id + '}'
         while True:
-            time.sleep(0.5)
+            time.sleep(1)
             if time.time() > t:
                 self.fail("Can't initialize the backup storage. It doesn't become ready. (Timed out)")
             data = self._server_request(boxnum, 'ec2/getStatusList?id=' + new_id)
@@ -306,20 +317,21 @@ class BackupStorageTest(StorageBasedTest):
         end = time.time() + BACKUP_START_TIMEOUT
         while time.time() < end:
             data = self._server_request(_WORK_HOST, 'api/backupControl/')
+            print "DEBUG0: backupControl reply: %s" % (data,)
             try:
                 if data['reply']['state'] != "BackupState_None":
                     return
             except Exception:
                 pass
-            time.sleep(0.5)
+            time.sleep(1)
         self.fail("Backup didn't started for %s seconds (or was ended before the first check)" % BACKUP_START_TIMEOUT)
 
     def _wait_backup_end(self):
         end = time.time() + BACKUP_MAX_DURATION
         while time.time() < end:
-            time.sleep(0.5)
+            time.sleep(1)
             data = self._server_request(_WORK_HOST, 'api/backupControl/')
-            #print "backupControl: %s" % data
+            print "DEBUG0: backupControl reply: %s" % (data,)
             try:
                 if data['reply']['state'] == "BackupState_None":
                     return
@@ -351,27 +363,27 @@ class BackupStorageTest(StorageBasedTest):
     @checkInit
     def ScheduledBackupTest(self):
         "In fact it tests that scheduling backup for a some moment before the current initiates backup immidiately."
+        raw_input("[Press ENTER to start ScheduledBackupTest]")
         data = SERVER_USER_ATTR.copy()
         data[_serverIdField] = self.guids[_WORK_HOST]
         data['backupType'] = 'BackupManual'
         self._server_request(_WORK_HOST, self.api.saveServerAttrList, data=[data])
         time.sleep(0.1)
+        #print "DEBUG0: StorageSpace: %s" % (self._server_request(_WORK_HOST, 'api/storageSpace'))
         self._call_box(self.hosts[_WORK_HOST], "/vagrant/ctl.sh", "bstorage", "rmstorage",
                        shquote(self._storages[_WORK_HOST][0]['url']))
         self._fill_storage('random', _WORK_HOST, "step1")
         data['backupType'] = 'BackupSchedule'
         time.sleep(0.1)
         #print "DEBUG: %s: %s" % (self.api.saveServerAttrList, data,)
-        #answer =
         self._server_request(_WORK_HOST, self.api.saveServerAttrList, data=[data])
-        #print "%s: %s" % (self.api.saveServerAttrList, answer,)
         self._wait_backup_start()
-        #print "Scheduled backup started"
         self._wait_backup_end()
         self._check_backup_result()
 
     @checkInit
     def BackupByRequestTest(self):
+        #raw_input("[Press ENTER to start BackupByRequestTest]")
         data = SERVER_USER_ATTR.copy()
         data[_serverIdField] = self.guids[_WORK_HOST]
         data['backupType'] = 'BackupManual'
@@ -379,9 +391,11 @@ class BackupStorageTest(StorageBasedTest):
         time.sleep(0.1)
         self._fill_storage('random', _WORK_HOST, "step2")
         time.sleep(1)
+        #print "DEBUG0: StorageSpace: %s" % (self._server_request(_WORK_HOST, 'api/storageSpace'))
         data = self._server_request(_WORK_HOST, 'api/backupControl/?action=start')
         print "backupControl start: %s" % data
         self._wait_backup_end()
+        #raw_input("Press ENTER to continue...")
         time.sleep(0.1)
         self._check_backup_result()
 

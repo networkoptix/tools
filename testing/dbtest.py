@@ -115,16 +115,18 @@ class DBTest(StorageBasedTest):
             diffresult = textdiff(answers[0][1], answers[1][1], self.sl[0], self.sl[1])
             self.fail("Servers responses on %s are different: %s\nTextual diff results:\n%s" % (func, diff.errorInfo(), diffresult))
 
-    def _waitInput(self, msg):
+    def _waitOrInput(self, msg, sleep=0):
         if self._doPause:
             raw_input(msg+"...")
+        elif sleep > 0:
+            _sleep(sleep)
 
     def BackupRestoreTest(self):
         """ Check if backup/restore preserve all necessary data. """
         _clearDumps()
         WORK_HOST = 0  # which server do we check with backup/restore
         getInfoFunc = 'ec2/getFullInfo?extraFormatting'
-        self._waitInput("Before dump")
+        self._waitOrInput("Before dump")
         fulldataBefore = self._server_request(WORK_HOST, getInfoFunc, unparsed=True)
         _saveDump(DUMP_BEFORE, fulldataBefore[1])
         resp = self._server_request(WORK_HOST, 'ec2/dumpDatabase?format=json')
@@ -133,18 +135,16 @@ class DBTest(StorageBasedTest):
         _saveDump(BACKUP_DB_FILE, backup, "b")
         _sleep(5)
         # Now change DB data -- add a camera
-        self._add_test_camera(0)
-        _sleep(10)
+        self._add_test_camera(0, nodump=True)
         #
-        self._waitInput("Before restore")
-        self._server_request(WORK_HOST, 'ec2/restoreDatabase', data={'data': backup})
+        self._waitOrInput("Before restore", 10)
+        self._server_request(WORK_HOST, 'ec2/restoreDatabase', data={'data': backup}, nodump=True)
         save_guids = self.guids[:]
-        self._waitInput("After restore")
-        _sleep(15)
+        self._waitOrInput("After restore", 10)
         self._wait_servers_up()
         self.assertSequenceEqual(save_guids, self.guids,
             "Server guids have changed after restore: %s -> %s" % (save_guids, self.guids))
-        _sleep(10)
+        _sleep(5)
         start = time.time()
         stop = start + BACKUP_RESTORE_TIMEOUT
         cnt = 1

@@ -36,6 +36,7 @@ class TestRequestError(AssertionError):
 
 # Empty camera's attributes structure
 CAMERA_ID_FIELD = 'cameraId'
+PREFERRED_SERVER_ID_FIELD = "preferredServerId"
 CAMERA_ATTR_EMPTY = {
     CAMERA_ID_FIELD: '',
     'scheduleEnabled': '',
@@ -52,7 +53,7 @@ CAMERA_ATTR_EMPTY = {
     'dewarpingParams': '',
     'minArchiveDays': '',
     'maxArchiveDays': '',
-    'preferedServerId': '',
+    PREFERRED_SERVER_ID_FIELD: '',
     'failoverPriority': ''
 }
 
@@ -139,10 +140,13 @@ FULL_SCHEDULE_TASKS = [
 
 def fixApi(api):
     "Fixes some API names"
-    global CAMERA_ID_FIELD
+    global CAMERA_ID_FIELD, PREFERRED_SERVER_ID_FIELD
     if api.cameraId != CAMERA_ID_FIELD:
         CAMERA_ATTR_EMPTY[api.cameraId] = CAMERA_ATTR_EMPTY.pop(CAMERA_ID_FIELD)
         CAMERA_ID_FIELD = api.cameraId
+    if api.preferredServerId  != PREFERRED_SERVER_ID_FIELD:
+        CAMERA_ATTR_EMPTY[api.preferredServerId] = CAMERA_ATTR_EMPTY.pop(PREFERRED_SERVER_ID_FIELD)
+        PREFERRED_SERVER_ID_FIELD = api.preferredServerId
 
 
 # ---------------------------------------------------------------------
@@ -609,6 +613,7 @@ def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None,
             print err
         return None
     data = response.read()
+    print "DEBUG0: %s returned data: %s" % (url, repr(data))
     if len(data):
         return SafeJsonLoads(data, serverAddr, methodName)
     return True
