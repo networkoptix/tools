@@ -18,8 +18,11 @@ import signal
 import traceback
 
 from functest_util import *
+from testbase import RunTests as RunBoxTests, LegacyTestWrapper, getTestMaster, UnitTestRollback
+testMaster = getTestMaster()
+
 from generator import *
-from testbase import RunTests as RunBoxTests, LegacyTestWrapper, FuncTestMaster, getTestMaster, UnitTestRollback
+import legacy_main
 from rtsptests import RtspPerf, RtspTestSuit, RtspStreamTest
 from sysname_test import SystemNameTest
 from timetest import TimeSyncTest, TimeSyncNoInetTest, TimeSyncWithInetTest
@@ -36,359 +39,6 @@ from proxytest import ProxyTest
 #        print "Req: %s" % req
 #        return urllib2.HTTPDigestAuthHandler.http_error_401(self, req, fp, code, msg, hdrs)
 
-testMaster = getTestMaster()
-
-class LegacyFuncTestBase(unittest.TestCase):
-    """Base class for test classes, called by unittest.main().
-    Legacy from the first generation of functests.
-    """
-    _Lock = threading.Lock()  # Note: this lock is commin for all ancestor classes!
-
-    def _generateModifySeq(self):
-        return None
-
-    def _getMethodName(self):
-        pass
-
-    def _getObserverName(self):
-        pass
-
-    def _defaultModifySeq(self, fakeData):
-        ret = []
-        for f in fakeData:
-            # pick up a server randomly
-            ret.append((f, testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]))
-        return ret
-
-    def _defaultCreateSeq(self,fakeData):
-        ret = []
-        for f in fakeData:
-            serverName = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
-            # add rollback cluster operations
-            testMaster.unittestRollback.addOperations(self._getMethodName(), serverName, f[1])
-            ret.append((f[0],serverName))
-
-        return ret
-
-    def _dumpFailedRequest(self,data,methodName):
-        f = open("%s.failed.%.json" % (methodName,threading.active_count()),"w")
-        f.write(data)
-        f.close()
-
-    def _sendRequest(self,methodName,d,server):
-        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName),
-            data=d, headers={'Content-Type': 'application/json'})
-
-        with self._Lock:
-            print "Connection to http://%s/ec2/%s" % (server,methodName)
-            response = urllib2.urlopen(req)
-
-        # Do a sligtly graceful way to dump the sample of failure
-        if response.getcode() != 200:
-            self._dumpFailedRequest(d,methodName)
-            self.fail("%s failed with statusCode %d" % (methodName, response. getcode()))
-
-        response.close()
-
-    def run(self, result=None):
-        if result is None: result = self.defaultTestResult()
-        result.startTest(self)
-        testMethod = getattr(self, self._testMethodName)
-        try:
-            #FIXME Refactor error handling!
-            try:
-                self.setUp()
-            except KeyboardInterrupt:
-                raise
-            except:
-                result.addError(self, sys.exc_info())
-                return
-
-            ok = False
-            try:
-                testMethod()
-                ok = True
-            except self.failureException:
-                result.addFailure(self, sys.exc_info())
-                result.stop()
-            except KeyboardInterrupt:
-                raise
-            except:
-                result.addError(self, sys.exc_info())
-                result.stop()
-
-            try:
-                self.tearDown()
-            except KeyboardInterrupt:
-                raise
-            except:
-                result.addError(self, sys.exc_info())
-                ok = False
-            if ok: result.addSuccess(self)
-        finally:
-            result.stopTest(self)
-
-    def test(self):
-        postDataList = self._generateModifySeq()
-
-        # skip this class
-        if postDataList == None:
-            return
-
-        workerQueue = ClusterWorker(testMaster.threadNumber, len(postDataList))
-
-        print "\n===================================\n"
-        print "Test:%s start!\n" % (self._getMethodName())
-
-        for test in postDataList:
-            workerQueue.enqueue(self._sendRequest , (self._getMethodName(),test[0],test[1],))
-
-        workerQueue.join()
-
-        time.sleep(testMaster.clusterTestSleepTime)
-        observer = self._getObserverName()
-
-        if isinstance(observer,(list)):
-            for m in observer:
-                ret,reason = testMaster.checkMethodStatusConsistent(m)
-                self.assertTrue(ret,reason)
-        else:
-            ret , reason = testMaster.checkMethodStatusConsistent(observer)
-            self.assertTrue(ret,reason)
-
-        #DEBUG
-        #self.assertNotEqual(0, 0, "DEBUG FAIL")
-
-        print "Test:%s finish!\n" % (self._getMethodName())
-        print "===================================\n"
-
-
-class CameraTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = CameraDataGenerator()
-
-
-    def _generateModifySeq(self):
-        ret = []
-        for _ in xrange(self._testCase):
-            s = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
-            data = self._gen.generateCameraData(1,s)[0]
-            testMaster.unittestRollback.addOperations(self._getMethodName(), s, data[1])
-            ret.append((data[0],s))
-        return ret
-
-    def _getMethodName(self):
-        return "saveCameras"
-
-    def _getObserverName(self):
-        return "getCameras?format=json"
-
-
-class UserTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = UserDataGenerator()
-
-    def _generateModifySeq(self):
-        return self._defaultCreateSeq(self._gen.generateUserData(self._testCase))
-
-    def _getMethodName(self):
-        return "saveUser"
-
-    def _getObserverName(self):
-        return "getUsers?format=json"
-
-
-class MediaServerTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = MediaServerGenerator()
-
-    def _generateModifySeq(self):
-        return self._defaultCreateSeq(self._gen.generateMediaServerData(self._testCase))
-
-    def _getMethodName(self):
-        return "saveMediaServer"
-
-    def _getObserverName(self):
-        return "getMediaServersEx?format=json"
-
-
-class ResourceParaTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = ResourceDataGenerator(self._testCase * 2)
-
-    def _generateModifySeq(self):
-        return self._defaultModifySeq(self._gen.generateResourceParams(self._testCase))
-
-    def _getMethodName(self):
-        return "setResourceParams"
-
-    def _getObserverName(self):
-        return "getResourceParams?format=json"
-
-
-class ResourceRemoveTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = ResourceDataGenerator(self._testCase * 2)
-
-    def _generateModifySeq(self):
-        return self._defaultModifySeq(self._gen.generateRemoveResource(self._testCase))
-
-    def _getMethodName(self):
-        return "removeResource"
-
-    def _getObserverName(self):
-        return ["getMediaServersEx?format=json",
-                "getUsers?format=json",
-                "getCameras?format=json"]
-
-
-class CameraUserAttributeListTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = CameraUserAttributesListDataGenerator(self._testCase * 2)
-
-    def _generateModifySeq(self):
-        return self._defaultModifySeq(self._gen.generateCameraUserAttribute(self._testCase))
-
-    def _getMethodName(self):
-        return "saveCameraUserAttributesList"
-
-    def _getObserverName(self):
-        return "getCameraUserAttributes"
-
-
-class ServerUserAttributesListDataTest(LegacyFuncTestBase):
-    _gen = None
-    _testCase = testMaster.testCaseSize
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        self._testCase = testMaster.testCaseSize
-        self._gen = ServerUserAttributesListDataGenerator(self._testCase * 2)
-
-    def _generateModifySeq(self):
-        return self._defaultModifySeq(self._gen.generateServerUserAttributesList(self._testCase))
-
-    def _getMethodName(self):
-        return "saveServerUserAttributesList"
-
-    def _getObserverName(self):
-        return "getServerUserAttributes"
-
-# The following test will issue the modify and remove on different servers to
-# trigger confliction resolving.
-class ResourceConflictionTest(LegacyFuncTestBase):
-    _testCase = testMaster.testCaseSize
-    _conflictList = []
-
-    def setTestCase(self,num):
-        self._testCase = num
-
-    def setUp(self):
-        dataGen = ConflictionDataGenerator()
-
-        print "Start confliction data preparation, this will generate Cameras/Users/MediaServers"
-        dataGen.prepare(testMaster.testCaseSize)
-        print "Confilication data generation done"
-
-        self._testCase = testMaster.testCaseSize
-        self._conflictList = [("removeResource","saveMediaServer",MediaServerConflictionDataGenerator(dataGen)),
-            ("removeResource","saveUser",UserConflictionDataGenerator(dataGen)),
-            ("removeResource","saveCameras",CameraConflictionDataGenerator(dataGen))]
-
-    def _generateRandomServerPair(self):
-        # generate first server here
-        s1 = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
-        s2 = None
-        if len(testMaster.clusterTestServerList) == 1:
-            s2 = s1
-        else:
-            while True:
-                s2 = testMaster.clusterTestServerList[random.randint(0, len(testMaster.clusterTestServerList) - 1)]
-                if s2 != s1:
-                    break
-        return (s1,s2)
-
-    def _generateResourceConfliction(self):
-        return self._conflictList[random.randint(0,len(self._conflictList) - 1)]
-
-    def _checkStatus(self):
-        apiList = ["getMediaServersEx?format=json",
-            "getUsers?format=json",
-            "getCameras?format=json"]
-
-        time.sleep(testMaster.clusterTestSleepTime)
-        for api in  apiList:
-            ret , reason = testMaster.checkMethodStatusConsistent(api)
-            self.assertTrue(ret,reason)
-
-    # Overwrite the test function since the base method doesn't work here
-
-    def test(self):
-        workerQueue = ClusterWorker(testMaster.threadNumber, self._testCase * 2)
-
-        print "===================================\n"
-        print "Test:ResourceConfliction start!\n"
-
-        for _ in xrange(self._testCase):
-            conf = self._generateResourceConfliction()
-            s1, s2 = self._generateRandomServerPair()
-            data = conf[2].generateData()
-
-            # modify the resource
-            workerQueue.enqueue(self._sendRequest , (conf[1],data[0][0],s1,))
-            # remove the resource
-            workerQueue.enqueue(self._sendRequest , (conf[0],data[0][1],s2,))
-
-        workerQueue.join()
-
-        self._checkStatus()
-
-        print "Test:ResourceConfliction finish!\n"
-        print "===================================\n"
 
 ####################################################################################################
 
@@ -475,47 +125,40 @@ class PrepareServerStatus(BasicGenerator):
         "getMediaServersEx",
         "getCameras",
         "getUsers",
-        "getServerUserAttributes",
-        "getCameraUserAttributes"]
+    ]
+    _apiFixed = False
 
     _mergeTest = None
 
     def __init__(self,mt):
+        if not self._apiFixed:
+            self.getterAPI.append(testMaster.api.getServerAttr.split('/')[1])
+            self.getterAPI.append(testMaster.api.getCameraAttr.split('/')[1])
+            type(self)._apiFixed = True
         self._mergeTest = mt
 
     # Function to generate method and class matching
     def _generateDataAndAPIList(self,addr):
 
         def cameraFunc(num):
-            gen = CameraDataGenerator()
-            return gen.generateCameraData(num,addr)
+            return CameraDataGenerator().generateCameraData(num, addr)
 
         def userFunc(num):
-            gen = UserDataGenerator()
-            return gen.generateUserData(num)
+            return UserDataGenerator().generateUserData(num)
 
         def mediaServerFunc(num):
-            gen = MediaServerGenerator()
-            return gen.generateMediaServerData(num)
+            return MediaServerGenerator().generateMediaServerData(num)
 
         return [("saveCameras",cameraFunc),
                 ("saveUser",userFunc),
                 ("saveMediaServer",mediaServerFunc)]
 
     def _sendRequest(self,addr,method,d):
-        req = urllib2.Request("http://%s/ec2/%s" % (addr,method), \
-              data=d,
-              headers={'Content-Type': 'application/json'})
-
-        with self._mergeTest._lock:
-            print "Connection to http://%s/ec2/%s" % (addr,method)
-            response = urllib2.urlopen(req)
-
-        if response.getcode() != 200 :
-            return (False,"Cannot issue %s with HTTP code:%d to server:%s" % (method,response.getcode(),addr))
-
-        response.close()
-
+        url = "http://%s/ec2/%s" % (addr, method)
+        try:
+            sendRequest(self._mergeTest._lock, url, d, notify=True)
+        except TestRequestError as err:
+            return (False,"%s at %s failed with %s" % (method, addr, err.errMessage))
         return (True,"")
 
     def _generateRandomStates(self,addr):
@@ -524,17 +167,16 @@ class PrepareServerStatus(BasicGenerator):
             num = random.randint(self._minData,self._maxData)
             data_list = api[1](num)
             for data in data_list:
-                ret,reason = self._sendRequest(addr,api[0],data[0])
+                ret, reason = self._sendRequest(addr,api[0],data[0])
                 if ret == False:
-                    return (ret,reason)
+                    return (ret, reason)
                 testMaster.unittestRollback.addOperations(api[0], addr, data[1])
-
         return (True,"")
 
     def main(self,addr):
         ret,reason = self._generateRandomStates(addr)
         if ret == False:
-            raise Exception("Cannot generate random states:%s" % (reason))
+            raise Exception("Cannot generate random states: %s" % (reason))
 
 
 # This class is used to control the whole merge test
@@ -595,30 +237,31 @@ class MergeTest_Resource(MergeTestBase):
         time.sleep(self._mergeTestTimeout)
 
     def _phase2(self):
-        print "Merge test phase2: set ALL the servers with system name :mergeTest"
+        print "Merge test phase2: set ALL the servers with system name: %s" % self._mergeTestSystemName
         self._setClusterToMerge()
         print "Merge test phase2: wait %s seconds for sync" % self._mergeTestTimeout
         # Wait until the synchronization time out expires
         time.sleep(self._mergeTestTimeout)
         # Do the status checking of _ALL_ API
-        for api in PrepareServerStatus.getterAPI:
-            ret , reason = testMaster.checkMethodStatusConsistent("%s?format=json" % (api))
-            if ret == False:
-                return (ret,reason)
+        testMaster.checkMethodStatusConsistent(PrepareServerStatus.getterAPI)  # raises on errors
         print "Merge test phase2 done"
         return (True,"")
 
     def test(self):
         print "================================\n"
         print "Server Merge Test: Resource Start\n"
-        if not self._prolog():
-            print "FAIL: Merge Test: Resource prolog failed!"
-            return False
-        self._phase1()
-        ret,reason = self._phase2()
-        if not ret:
-            print "FAIL: %s" % reason
-        self._epilog()
+        try:
+            if not self._prolog():
+                print "FAIL: Merge Test: Resource prolog failed!"
+                return False
+            self._phase1()
+            ret,reason = self._phase2()
+            if not ret:
+                print "FAIL: %s" % reason
+            self._epilog()
+        except Exception as err:
+            print "FAIL: %s" % (err,)
+            ret = False
         print "Server Merge Test: Resource End%s\n" % ('' if ret else ": test FAILED")
         print "================================\n"
         return ret
@@ -740,14 +383,16 @@ class MergeTest_AdminPassword(MergeTestBase):
 
     # This function is used to test whether all the server gets the exactly same status
     def _checkAllServerStatus(self):
+        #FIXME: use exceptions instead of 'return False'
         self._setUpClusterAuthentication(self._clusterSharedPassword)
         # Now we need to set up the check
-        ret,reason = testMaster.checkMethodStatusConsistent("getMediaServersEx?format=json")
-        if not ret:
-            print reason
+        time.sleep(testMaster.clusterTestSleepTime)
+        try:
+            testMaster.checkMethodStatusConsistent(["getMediaServersEx"])
+        except Exception as err:
+            print "Fail: " + str(err)
             return False
-        else:
-            return True
+        return True
 
     def _checkOnline(self,uidset,responseObj,serverAddr):
         if responseObj is None:
@@ -987,24 +632,13 @@ class PerformanceOperation():
         return ret
 
     def _sendRequest(self,methodName,d,server):
-        req = urllib2.Request("http://%s/ec2/%s" % (server,methodName), data=d,
-                              headers={'Content-Type': 'application/json'})
-
-        response = None
-
-        with self._lock:
-            response = urllib2.urlopen(req)
-
-        # Do a sligtly graceful way to dump the sample of failure
-        if response.getcode() != 200:
-            self._dumpFailedRequest(d,methodName) #FIXME WTF?! looks like this was copy-pasted but the referred method wasn't!
-
-        if response.getcode() != 200:
-            print "%s failed with statusCode %d" % (methodName,response.getcode())
+        url = "http://%s/ec2/%s" % (server,methodName)
+        try:
+            sendRequest(self._lock, url, d)
+        except TestRequestError as err:
+            print "%s failed: %s" % (methodName, err.message)
         else:
-            print "%s OK\r\n" % (methodName)
-
-        response.close()
+            print "%s OK" % (methodName)
 
     def _getUUIDList(self,methodName):
         ret = []
@@ -1060,7 +694,6 @@ class PerformanceOperation():
         worker = ClusterWorker(testMaster.threadNumber, len(dataList))
         for d in dataList:
             worker.enqueue(self._sendRequest,(methodName,d,addr))
-
         worker.join()
 
     _resourceRemoveTemplate = """
@@ -1223,7 +856,7 @@ def runMiscFunction(argc, argv):
 # ===================================
 # Perf Test
 # ===================================
-class SingleResourcePerfGenerator:
+class SingleResourcePerfGenerator(object):
     def generateUpdate(self,id,parentId):
         pass
 
@@ -1343,6 +976,7 @@ class SingleResourcePerfTest:
             else:
                 return True
 
+        #XXX not used!
         # Insert that resource _BACK_ to the list
         with self._lock:
             self._resourceList.append(id)
@@ -1362,7 +996,11 @@ class SingleResourcePerfTest:
             return (self._remove(),"Remove")
 
 class CameraPerfResourceGen(SingleResourcePerfGenerator):
-    _gen = CameraDataGenerator()
+    _gen = None
+
+    def __init__(self):
+        if self._gen is None:
+            type(self)._gen = CameraDataGenerator()
 
     def generateUpdate(self,id,parentId):
         return self._gen.generateUpdateData(id,parentId)[0]
@@ -1383,7 +1021,11 @@ class CameraPerfResourceGen(SingleResourcePerfGenerator):
         return "Camera"
 
 class UserPerfResourceGen(SingleResourcePerfGenerator):
-    _gen = UserDataGenerator()
+    _gen = None
+
+    def __init__(self):
+        if self._gen is None:
+            type(self)._gen = UserDataGenerator()
 
     def generateUpdate(self,id,parentId):
         return self._gen.generateUpdateData(id)[0]
@@ -1526,16 +1168,17 @@ def doCleanUp(reinit=False):
         except:
             pass
 
-    if len(selection) == 0 or selection[0] != 'x':
-        print "Now do the rollback, do not close the program!"
+    if not selection.startswith('x'):
+        print "Starting rollback, do not interrupt!"
         testMaster.unittestRollback.doRollback()
-        print "++++++++++++++++++ROLLBACK DONE+++++++++++++++++++++++"
+        print "ROLLBACK DONE"
     else:
-        print "Skip ROLLBACK,you could use --recover to perform manually rollback"
+        print "Rollback skipped, you could use --recover to perform rollback later"
     if reinit:
         testMaster.init_rollback()
 
 
+#TODO: make use of it!
 def print_tests(suit, shift='    '):
     for test in suit:
         if isinstance(test, unittest.TestSuite):
@@ -1553,13 +1196,13 @@ def CallTest(testClass):
     return RunBoxTests(testClass, testMaster.getConfig())
 
 
-# These are the old legasy tests, just organized a bit
 SimpleTestKeys = {
     '--sys-name': SystemNameTest,
     '--rtsp-test': RtspTestSuit,
     '--rtsp-perf': RtspPerf,
     '--rtsp-stream': RtspStreamTest,
 }
+# These are the old legasy tests, just organized a bit
 
 # Tests to be run on the vargant boxes, separately or within the autotest sequence
 BoxTestKeys = {
@@ -1586,14 +1229,14 @@ def RunByAutotest(arg0):
     #config = testMaster.getConfig()
     need_rollback = True
     try:
-        print "" # FIXME add startubg message
+        print "" # FIXME add startup message
         ret, reason = testMaster.init(notest=True)
         if not ret:
             print "Failed to initialize the cluster test object: %s" % (reason)
             return
         config = testMaster.getConfig()
         with LegacyTestWrapper(config):
-            if not testMaster._testConnection():
+            if not testMaster.testConnection():
                 print "Connection test failed"
                 return
             ret, reason = testMaster.initial_tests()
@@ -1601,7 +1244,7 @@ def RunByAutotest(arg0):
                 print "The initial cluster test failed: %s" % (reason)
                 return
             print "Basic functional tests start"
-            the_test = unittest.main(exit=False, argv=[arg0])
+            the_test = unittest.main(module=legacy_main, exit=False, argv=[arg0])
             if the_test.result.wasSuccessful():
                 print "Basic functional tests end"
                 if testMaster.unittestRollback:
@@ -1649,14 +1292,21 @@ def BoxTestsRun(key):
 
 
 def LegacyTests(only = False):
-    the_test = unittest.main(exit=False, argv=argv[:1])
-    doCleanUp(reinit=True)
+    _argv = argv[:]
+    del _argv[1:(3 if only else 2)]
+    with testMaster.unittestRollback:
+        the_test = unittest.main(module=legacy_main, exit=False, argv=_argv)
+    #doCleanUp(reinit=True)
 
     if the_test.result.wasSuccessful():
         print "Main tests passed OK"
-        if (not only) and MergeTest().run():
-            SystemNameTest(testMaster.getConfig()).run()
-    doCleanUp()
+        if (not only):
+            with testMaster.unittestRollback:
+                mergeOk = MergeTest().run()
+            if mergeOk:
+                with testMaster.unittestRollback:
+                    SystemNameTest(testMaster.getConfig()).run()
+    #doCleanUp()
 
 
 def DoTests(argv):
@@ -1690,8 +1340,8 @@ def DoTests(argv):
         ProxyTest(*testMaster.getConfig().rtget('ServerList')[0:2]).run()
         #FIXME no result code returning!
 
-    if argc in (2, 3) and argv[1] == '--legacy':
-        LegacyTests(argv[2] == '--only' if argc == 3 else False)
+    if argc >= 2 and argv[1] == '--legacy':
+        LegacyTests(argv[2] == '--only' if argc >= 3 else False)
         #FIXME no result code returning!
 
     elif argc == 2 and argv[1] == '--main':
@@ -1712,10 +1362,12 @@ def DoTests(argv):
             doClearAll(False)
         testMaster.unittestRollback.removeRollbackDB()
         #FIXME no result code returning!
+
     elif argc == 2 and argv[1] == '--perf':
         PerfTest().start()
         doCleanUp()
         #FIXME no result code returning!
+
     else:
         if argv[1] == '--merge-test':
             MergeTest(True).run()
@@ -1738,7 +1390,7 @@ if __name__ == '__main__':
     elif len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':
-        UnitTestRollback().doRecover()
+        UnitTestRollback(autorollback=True, nocreate=True)
     else:
         if not DoTests(argv):
             sys.exit(1)

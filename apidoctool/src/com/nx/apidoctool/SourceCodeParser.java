@@ -39,14 +39,17 @@ public final class SourceCodeParser
         return sourceCode;
     }
 
-    public Apidoc.Group parseCommentsFromSystemApi(Apidoc.Group group)
+    /**
+     * @return Number of API functions processed.
+     */
+    public int parseCommentsFromSystemApi(
+        Apidoc.Group sourceGroup, Apidoc.Group targetGroup)
         throws Error, ApidocHandler.Error, ApidocCommentParser.Error,
         SourceCode.Error
     {
-        final Apidoc.Group targetGroup = new Apidoc.Group();
-        targetGroup.groupName = group.groupName;
-        targetGroup.urlPrefix = group.urlPrefix;
-        targetGroup.groupDescription = group.groupDescription;
+        targetGroup.groupName = sourceGroup.groupName;
+        targetGroup.urlPrefix = sourceGroup.urlPrefix;
+        targetGroup.groupDescription = sourceGroup.groupDescription;
 
         int line = 1;
         while (line < sourceCode.getLineCount())
@@ -72,7 +75,7 @@ public final class SourceCodeParser
         if (targetGroup.functions.isEmpty())
             System.out.println("WARNING: No functions were processed.");
 
-        return targetGroup;
+        return targetGroup.functions.size();
     }
 
     //--------------------------------------------------------------------------

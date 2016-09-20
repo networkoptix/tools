@@ -6,9 +6,14 @@ import os
 import argparse
 import difflib
 import xml.etree.ElementTree as ET
-from common_module import init_color,info,green,warn,err,separator
 
-projects = ['common', 'client', 'traytool']
+utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+sys.path.insert(0, utilDir)
+from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+from vms_projects import getTranslatableProjectsList
+
 verbose = False
 similarityLevel = 100
     
@@ -168,7 +173,7 @@ def main():
 
     rootDir = os.getcwd()
     
-    for project in projects:
+    for project in getTranslatableProjectsList():
         projectDir = os.path.join(rootDir, project)
         sourceProjectDir = os.path.join(args.source, project)
         

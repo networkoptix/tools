@@ -15,7 +15,7 @@ public final class XmlToCodeExecutor
     public File sourceApiXmlFile;
     public File outputApiXmlFile;
 
-    public void execute()
+    public int execute()
         throws Exception
     {
         final File connectionFactoryCppFile = new File(
@@ -37,15 +37,19 @@ public final class XmlToCodeExecutor
 
         final SourceCodeGenerator generator = new SourceCodeGenerator(editor);
 
-        generator.insertCommentsForSystemApi(
+        final int processedFunctionsCount = generator.insertCommentsForSystemApi(
             ApidocHandler.getGroupByName(apidoc, SYSTEM_API_GROUP_NAME));
 
+        System.out.println("Processed " + processedFunctionsCount + " API functions");
+
         editor.saveToFile(outputConnectionFactoryCppFile);
-        System.out.println("SUCCESS: Created .cpp file:");
+        System.out.println("Created .cpp file:");
         System.out.println("    " + outputConnectionFactoryCppFile);
 
         XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
-        System.out.println("SUCCESS: Created .xml file:");
+        System.out.println("Created .xml file:");
         System.out.println("    " + outputApiXmlFile);
+
+        return processedFunctionsCount;
     }
 }

@@ -38,7 +38,7 @@ def execCommand(*command):
     return code
         
 def getChangelog(revision):
-    command = ['hg', 'log', '--template', '{desc}\n\n', '-r']
+    command = ['hg', 'log', '--template', '{desc|firstline}\n\n', '-r']
     changeset = ["(::{0} - ::{1})".format(revision, targetBranch)]
     command = command + changeset
     try:
@@ -50,7 +50,7 @@ def getChangelog(revision):
         return ''
     changes = sorted(set(changelog.split('\n\n')))
     changes = [x.strip('\n').replace('"', '\'') for x in changes if 
-        x and not x.lower().startswith(mergeCommit)]
+        x and not x.lower().startswith(mergeCommit) and not x.lower().startswith('##')]
 
     if changes:
         changes.insert(0, getHeader(revision, targetBranch))

@@ -1,0 +1,46 @@
+# -*- sh -*-
+
+set -o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+if [ ! -d "$TASKBOT_VAR"/revision ]; then
+  mkdir -p "$TASKBOT_VAR"/revision
+fi
+
+if [ ! -d "$TASKBOT_VAR"/nx_vms ]; then 
+  cd "$TASKBOT_VAR"
+  hg clone "$TASKBOT_NX_VMS_REPO" nx_vms
+fi
+
+# Remember old revisions
+NX_VMS_OLD=$(cat "$TASKBOT_VAR"/revision/nx_vms 2>/dev/null || echo 0)
+DEVTOOLS_OLD=$(cat "$TASKBOT_VAR"/revision/devtools 2>/dev/null || echo 0)
+
+while true; do
+  echo devtools
+  cd "$TASKBOT_REPO" && hg pull && hg up
+  echo nx_vms
+  cd "$TASKBOT_VAR"/nx_vms && hg pull && hg up "$TASKBOT_NX_VMS_BRANCH"
+  DEVTOOLS_NEW=$(cd "$TASKBOT_REPO" && hg id -i | sed s'/\+$//')
+  NX_VMS_NEW=$(cd "$TASKBOT_VAR"/nx_vms && hg id -i | sed s'/\+$//')
+  # Test changes
+  if [ "$NX_VMS_OLD" != "$NX_VMS_NEW" ]; then
+    break
+  fi
+  if [ "$DEVTOOLS_OLD" != "$DEVTOOLS_NEW" ]; then
+    break
+  fi
+  # Wait loop
+  date +"%Y-%m-%d %H:%M:%S  No changes"
+  WAIT=300
+  while [ $WAIT -gt 0 ]; do
+    echo -n .
+    sleep 5
+    WAIT=$[$WAIT - 5]
+  done
+  echo
+done
+date +"%Y-%m-%d %H:%M:%S  Have changes"
+
+echo "$DEVTOOLS_NEW" >| "$TASKBOT_VAR"/revision/devtools
+echo "$NX_VMS_NEW" >| "$TASKBOT_VAR"/revision/nx_vms

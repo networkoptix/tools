@@ -1,0 +1,13 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+
+# + Remember revisions
+for repo in "$TASKBOT_REPO" \
+  "$TASKBOT_VAR"/nx_vms; do
+  cd $repo
+  repo_name=$(basename $repo)
+  "$TASKBOT" -d $repo_name $TASKBOT_OPTIONS $TASKBOT_CONFIG -c "hg id -i | sed s'/\+$//'" || true
+done
+
+echo $?

@@ -96,28 +96,28 @@ public final class MatchForRegisterHandler
         ".*[;\\[].*");
 
     private static final Pattern firstLineRegexForGetFunc = Pattern.compile(
-        "\\s*registerGetFuncHandler\\s*<.*");
+        "\\s*reg\\w*Get\\w*\\s*<.*");
 
     private static final Pattern groupRegexForGetFunc = Pattern.compile(
-        "\\s*registerGetFuncHandler\\s*<\\s*" +
+        "\\s*reg\\w*Get\\w*\\s*<\\s*" +
         "([a-zA-Z_0-9:]+)" +
         "\\s*,\\s*" +
         "(\\w+)" +
         "\\s*>.+ApiCommand\\s*::\\s*(\\w+).*");
 
     private static final Pattern firstLineRegexForUpdateFunc = Pattern.compile(
-        "\\s*registerUpdateFuncHandler\\s*<.*");
+        "\\s*reg\\w*Update\\w*\\s*<.*");
 
     private static final Pattern groupRegexForUpdateFunc = Pattern.compile(
-        "\\s*registerUpdateFuncHandler\\s*<\\s*" +
+        "\\s*reg\\w*Update\\w*\\s*<\\s*" +
         "([a-zA-Z_0-9:]+)" +
         "\\s*>.+ApiCommand\\s*::\\s*(\\w+).*");
 
     private static final Pattern firstLineRegexForFunctor = Pattern.compile(
-        "\\s*registerFunctorHandler\\s*<.*");
+        "\\s*reg\\w*Functor\\w*\\s*<.*");
 
     private static final Pattern groupRegexForFunctor = Pattern.compile(
-        "\\s*registerFunctorHandler\\s*<\\s*" +
+        "\\s*reg\\w*Functor\\w*\\s*<\\s*" +
             "([a-zA-Z_0-9:]+)" +
             "\\s*,\\s*" +
             "(\\w+)" +

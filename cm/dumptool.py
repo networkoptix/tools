@@ -42,8 +42,37 @@ CONFIG = dict(
     ],
 )
 
+CONFIG['7z_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
+CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
+
 class Error(Exception):
     pass
+
+
+def report_name(dump_path, safe=False):
+    '''Generates report name based on dump name
+    '''
+    dump_ext = '.' + CONFIG['ext']['dump']
+    if not dump_path.lower().endswith(dump_ext):
+        if safe:
+            return ''  # to calls where exceptions aren't wanted
+        raise Error('Only *%s dumps are supported' % dump_ext)
+    report_ext = '.' + CONFIG['ext']['report']
+    return dump_path[:-len(dump_ext)] + report_ext
+
+
+def clear_cache(cacheDir, keepFiles):
+    print "Clearing cache dir %s" % (cacheDir,)
+    existing = set(os.listdir(cacheDir))
+    for fname in keepFiles:
+        existing.discard(report_name(fname, True))
+    # remove all files not mentioned in keepFiles
+    for fname in existing:
+        try:
+            os.remove(os.path.join(cacheDir, fname))
+        except IOError:
+            pass
+
 
 class Cdb(object):
     '''Cdb programm driver to analize DMP files
@@ -136,7 +165,9 @@ class DumpAnalyzer(object):
         '''
         with Cdb(self.dump_path) as cdb:
             self.module = cdb.main_module()
+            self.log("DEBUG: CDB reports main module: " + self.module)
             self.version = self.version or cdb.module_info(self.module, 'version')
+            self.log("DEBUG: CDB reports version: " + self.version)
         self.msi = 'server' if self.module.find('server') != -1 else 'client'
         self.log('Dump information: %s (%s) %s %s ' % (
             self.module, self.msi, self.version, self.customization))
@@ -153,6 +184,7 @@ class DumpAnalyzer(object):
             raise Error('%s, url: %s' % (e, url))
         results, failures = [], []
         for regexp in regexps:
+            self.log("Trying regexp /%s/" % ('.+%s.+' % regexp,), level=1)
             m = re.match('.+%s.+' % regexp, page)
             if m:
                 results.append((url, m.group(1)))
@@ -168,6 +200,9 @@ class DumpAnalyzer(object):
         '''
         out = self.fetch_url_data(
             CONFIG['dist_url'], ['''(%s\-[^/]+)''' % self.build])
+        if len(out) == 0:
+            print "No distributive found for build %s. Dump analyze imposible" % self.build
+            return False
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(CONFIG['dist_url'], build_path)
@@ -176,10 +211,11 @@ class DumpAnalyzer(object):
                 CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
             os.path.join(CONFIG['dist_url'], update_path))
         self.dist_urls = list(os.path.join(*e) for e in out)
-        self.build_path = os.path.join(CONFIG['data_dir'], build_path)
+        self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
         self.target_path = os.path.join(self.build_path, 'target')
         if not os.path.isdir(self.target_path):
             os.makedirs(self.target_path)
+        return True
 
     @staticmethod
     def download_url_data(url, local, processor = lambda path: None):
@@ -202,6 +238,7 @@ class DumpAnalyzer(object):
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
         '''
+        self.log("Extracting %s ..." % (path,))
         def run(*cmd):
             try:
                 return subprocess.check_output(cmd)
@@ -215,7 +252,7 @@ class DumpAnalyzer(object):
             self.module_dir = os.path.dirname(
                 self.find_file(self.module + '.exe'))
             return run(
-                '7z', 'x', path, '-o' + self.module_dir, '-y')
+                CONFIG['7z_path'], 'x', path, '-o' + self.module_dir, '-y')
 
     def download_dists(self):
         '''Downloads required distributives
@@ -227,41 +264,38 @@ class DumpAnalyzer(object):
             self.download_url_data(url, self.build_path, self.extract_dist)
         self.module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
 
-    def report_name(self):
-        '''Generates report name based on dump name
-        '''
-        dump_ext = '.' + CONFIG['ext']['dump']
-        if not self.dump_path.lower().endswith(dump_ext):
-            raise Error('Only *%s dumps are supported' % dump_ext)
-        report_ext = '.' + CONFIG['ext']['report']
-        return self.dump_path[:-len(dump_ext)] + report_ext
-
-
-    def generate_report(self):
+    def generate_report(self, asString=False):
         '''Generates report using cdb with debug information
         '''
-        report_path = self.report_name()
+        report_path = report_name(self.dump_path)
         self.log('Loading debug information: ' + self.module_dir)
         with Cdb(self.dump_path, debug=self.module_dir) as cdb:
             self.log('Generating report: ' + report_path)
-            with open(report_path, 'w') as report:
-                report.write(cdb.report())
-        return report_path
+            report = cdb.report()
+            with open(report_path, 'w') as report_file:
+                report_file.write(report)
+        return report if asString else report_path
+
 
 def analyseDump(*args, **kwargs):
     '''Generated cdb-bt report based on dmp file
     Note: Returns right away in case if dump is already analized
     Returns: cdb-bt report path
     '''
+    asString = kwargs.pop('asString', False)
     dump = DumpAnalyzer(*args, **kwargs)
-    report = dump.report_name()
+    report = report_name(dump.dump_path)
     if os.path.isfile(report):
-        dump.log('Already processed: ' + report)
-        return report
+        if asString:
+            return open(report, 'r').read()
+        else:
+            dump.log('Already processed: ' + report)
+            return report
     dump.get_dump_information()
-    dump.fetch_urls()
+    if not dump.fetch_urls():
+        return ''
     dump.download_dists()
-    return dump.generate_report()
+    return dump.generate_report(asString)
 
 def main():
     args, kwargs = list(), dict()

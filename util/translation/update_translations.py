@@ -15,6 +15,8 @@ sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
 
+qt_path = 'c:\\develop\\buildenv\\packages\\windows-x64\\qt-5.6.1\\bin\\'
+
 ignored = [
             # QT files
             '/qstringbuilder.h', '/qstring.h', '/qmatrix.h', '/qaction.h', '/qnetworkcookiejar.h', '/qboxlayout.h', '/qgridlayout.h',
@@ -75,7 +77,7 @@ def update(project, suffix = '', filter = ' -locations none'):
         filename += suffix
     entries = calculateEntries(filename, translationDir)
 
-    command = 'c:\\develop\\buildenv\\qt5\\qtbase-x64\\bin\\lupdate.exe -no-obsolete -no-ui-lines'
+    command = qt_path + 'lupdate.exe -no-obsolete -no-ui-lines'
     if filter:
         command += filter
     command += ' ' + sourcesDir

@@ -7,7 +7,6 @@ PROCESS_NAME = "crashmon"
 CRASH_LIST_URL = "http://stats.networkoptix.com/crashserver/api/list?extension={0}"
 DUMP_BASE = "http://stats.networkoptix.com/crash_dumps"
 
-CRASH_EXT = ('crash', 'gdb-bt')
 AUTH = ("statlord", "razdvatri")
 
 # the last relese build per branch (builds after that number are hotfixes for that branch)

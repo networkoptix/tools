@@ -7,12 +7,14 @@ __author__ = 'Danil Lavrentyuk'
 import errno, json, random, re, select, signal, socket, sys, time, traceback
 import base64
 from hashlib import md5
+import pprint
 import urllib2
 import threading
 from collections import namedtuple
 from itertools import imap
 
-from functest_util import SafeJsonLoads, HttpRequest, parse_size, quote_guid, CAMERA_ATTR_EMPTY, FULL_SCHEDULE_TASKS
+from functest_util import SafeJsonLoads, HttpRequest, parse_size, quote_guid, \
+    CAMERA_ATTR_EMPTY, CAMERA_ID_FIELD, FULL_SCHEDULE_TASKS
 
 #import pprint
 
@@ -38,7 +40,11 @@ def _buildUrlPath(url):
 
 def RandomArchTime(_min, _max):
     "Get random time from _max to _min minutes in the past. Returns as number of microseconds."
-    return int((time.time() - random.randint(60 * _min, 60 * _max)) * 1e6)
+    now = time.time()
+    pos = now - random.randint(60 * _min, 60 * _max)
+    print "Generated time position %s, from now by %s m %s s" % (int(pos), int(pos - now)/60, int(pos - now)%60)
+    return int(pos * 1e6)
+    #return int((time.time() - random.randint(60 * _min, 60 * _max)) * 1e6)
 
 class RtspLog:
     """ Controls two log files: for ok- and fail-messages.
@@ -383,8 +389,8 @@ class SingleServerRtspTestBase(object):
         self._cameraList = []
         self._allCameraList = []
         self._cameraInfoTable = dict()
-        obj = HttpRequest(self._serverAddr, 'ec2/getCamerasEx', params={'id': self._serverGUID}, printHttpError=Exception)
-        #rint "\nDEBUG: server %s (use guid %s), getCamerasEx:\n%s" % (self._serverAddr, self._serverGUID, "\n".join(str(c) for c in obj))
+        obj = HttpRequest(self._serverAddr, 'ec2/getCamerasEx', params={'id': self._serverGUID.strip('{}')}, printHttpError=Exception)
+        print "\nDEBUG: server %s (use guid %s), getCamerasEx:\n%s" % (self._serverAddr, self._serverGUID, "\n".join(str(c) for c in obj))
         for c in obj:
             #print "Camera found: %s" % (pprint.pformat(c))
             if c["typeId"] == "{1657647e-f6e4-bc39-d5e8-563c93cb5e1c}":
@@ -393,11 +399,17 @@ class SingleServerRtspTestBase(object):
                 continue # Skip fake camera
             self._addCamera(c)
 
+        if not self._allCameraList:
+            msg = "Error: no cameras found on server %s"  % (self._serverAddr,)
+            with self._lock:
+                self._log.writeFail(msg)
+                raise AssertionError(msg)
+
         if not self._cameraList and not self._allowOffline:
             msg = "Error: no active cameras found on server %s" % (self._serverAddr,)
             with self._lock:
-                print msg
                 self._log.writeFail(msg)
+                raise AssertionError(msg)
         #print "DEBUG: server %s, use uid %s, _allCameraList:\n%s" % (self._serverAddr, self._serverGUID, self._allCameraList)
 
     def _checkReply(self, reply, proto):
@@ -688,28 +700,34 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         if self._logNameTpl:
             self._perfLog = open(self._logNameTpl % tuple(self._serverAddrPair),"w+")
         # Order cameras to start recording and preserve a time gap for starting
-        self._camerasReadyTime = time.time() + (self._camerasStartGrace if self._startRecording() else 0)
+        self._camerasReadyTime = time.time() + (
+            self._camerasStartGrace if self._startRecording() else 0)
 
     def _startRecording(self):
-        "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
+        if self._liveDataPart == 0:
+            return False
+        print "Start recording for all available cameras." #TODO probably it's good to place it into SingleServerRtspTestBase and call it there.
         cameras = []
         for ph_id, id, name, status in self._cameraList:
             if status != 'Recording':
                 attr_data = CAMERA_ATTR_EMPTY.copy()
-                attr_data['cameraID'] = id
+                attr_data[CAMERA_ID_FIELD] = id
                 attr_data['scheduleEnabled'] = True
                 attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
                 cameras.append(attr_data)
 
         if cameras:
-            response = urllib2.urlopen(urllib2.Request(
-                    "http://%s/ec2/saveCameraUserAttributesList" % (self._serverAddr),
-                    data=json.dumps(cameras),
-                    headers={'Content-Type': 'application/json'}),
-                timeout=self._httpTimeout
-            )
+            url = "http://%s/ec2/saveCameraUserAttributesList" % (self._serverAddr,)
+            try:
+                response = urllib2.urlopen(urllib2.Request(
+                        url, data=json.dumps(cameras), headers={'Content-Type': 'application/json'}),
+                    timeout=self._httpTimeout
+                )
+            except Exception as err:
+                print "DEBUG: _startRecording: saveCameraUserAttributesList: %s" % (pprint.pformat(cameras))
+                raise AssertionError("Error from %s: %s" % (url, str(err)))
             if response.getcode() != 200:
-                raise Exception("Error calling /ec2/saveCameraUserAttributesList at server %s: %s" % (self._serverAddr, response.getcode()))
+                raise AssertionError("Error %s: %s" % (url, response.getcode()))
         return len(cameras) > 0
 
     def _timeoutRecv(self, socket, rate_limit, timeout):
@@ -772,7 +790,9 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
                                     print "No chunks found!"
                                     self._archiveNumEmpty += 1
                                     return
-                            print "# %s bytes received. last_data: %r" % (dataCount, last_data)
+                            N = 256
+                            print "# %s bytes received. last_data %s bytes: %r" % (
+                                dataCount, N, last_data[-N:])
                         self._perfLog.write("--------------------------------------------\n")
                         if data is None:
                             self._perfLog.write("! URL %s no data response for %s seconds\n" % (
@@ -1067,7 +1087,7 @@ class RtspPerf(object):
             print "Start the streaming test"
         else:
             print "Start the RTSP pressure test now. Press CTRL+C to interrupt the test!"
-        print "The exceptional cases are stored inside of SERVER_ADRR.rtsp.perf.log"
+        print "The exceptional cases are stored into SERVER_ADRR.rtsp.perf.log"
 
         # Add the signal handler
         signal.signal(signal.SIGINT,self._onInterrupt)
@@ -1082,7 +1102,7 @@ class RtspPerf(object):
         fail = False
         for e in self._perfServer:
             if not e.join() and self._streamTest:
-                print "FAIL: some requests are unseccessed on %s" % (e.getAddr(),)
+                print "FAIL: some requests are unsuccessed on %s" % (e.getAddr(),)
                 fail = True
 
         if self._streamTest:
@@ -1095,10 +1115,10 @@ class RtspPerf(object):
 
 class RtspStreamTest(RtspPerf):
     _cs = 'Streaming'
-    def __init__(self, config):
-        self._streamTest = True
-        #self._multi = multiproto
-        RtspPerf.__init__(self, config)
+    _streamTest = True
+    #def __init__(self, config):
+    #    #self._multi = multiproto
+    #    RtspPerf.__init__(self, config)
 
     def _finish(self):
         print "[%s] ...Finishing test.." % (int(time.time()),)

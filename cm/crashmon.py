@@ -26,15 +26,71 @@ import nxjira
 
 from crashmonconf import *
 
-__version__ = '1.3'
+__version__ = '1.4'
 
-filt_path = "/usr/bin/c++filt"
+if os.name == 'posix':  # may be platform.system is better? ;)
+    dumptool = None
 
+    CRASH_EXT = ('crash', 'gdb-bt')
 
-def is_crash_dump_path(path):
-    return (path.startswith('mediaserver') or path.startswith('client')
-            ) and (
-            path.endswith('.crash') or path.endswith('.gdb-bt'))
+    def get_lock():
+        global lock_socket   # Without this our lock gets garbage collected
+        lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        try:
+            lock_socket.bind('\0' + PROCESS_NAME)
+        except socket.error:
+            return False
+        return True
+
+    def is_crash_dump_path(path):
+        return (path.startswith('mediaserver') or path.startswith('client')
+                ) and (
+                path.endswith('.crash') or path.endswith('.gdb-bt'))
+
+    filt_path = "/usr/bin/c++filt"
+
+    def demangle_names(names):
+        try:
+            p = Popen([filt_path], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate(input="\n".join(names))
+        except Exception:
+            print "WARNING: call %s failed: %s\nNames demangling SKIPPED!" % (filt_path, sys.exc_info())
+            return names
+        if p.returncode:
+            print "DEBUG: %s returned code %s. STDERR: %s\nNames demangling SKIPPED!" % (filt_path, p.returncode, err)
+            return names
+        return out.split("\n")
+
+    def report_name(fname):
+        return fname
+
+elif os.name == 'nt':
+    import dumptool
+
+    CRASH_EXT = ('dmp',)
+
+    from filelock import FileLock, Timeout
+    def get_lock():
+        global lock
+        lock = FileLock(sys.argv[0]+'.lock')
+        try:
+            lock.acquire(timeout=0)
+        except Timeout:  # already locked
+            return False
+        return True
+
+    def is_crash_dump_path(path):
+        return path.endswith('.cdb-bt')
+
+    def demangle_names(names):  # already processed
+        return names
+
+    def report_name(fname):
+        return dumptool.report_name(fname, True)
+
+else:
+    print "Unsupported OS: %s" % os.name
+    sys.exit(2)
 
 
 def attachment_filter(attachment):
@@ -45,16 +101,6 @@ def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
 
 
-def get_lock(process_name):
-    global lock_socket   # Without this our lock gets garbage collected
-    lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    try:
-        lock_socket.bind('\0' + process_name)
-    except socket.error:
-        return False
-    return True
-
-
 def isHotfix(version):
     if version is None:
         return False
@@ -62,7 +108,20 @@ def isHotfix(version):
     return lastBuild is not None and version[3] > lastBuild
 
 
+def is_crash_new(crash, mark):
+    return (
+        crash['upload'] > mark['time'] or
+        (crash['upload'] == mark['time'] and crash['path'] > mark['path'])
+    )
+
+
 def get_crashes(crtype, mark):
+    '''
+    Load crashes list from the stat-server. Return a list of crash dicts
+    :param crtype: str
+    :param mark: str
+    :return: list
+    '''
     print "Getting %s data" % crtype
     url = crash_list_url(crtype)
     try:
@@ -73,13 +132,13 @@ def get_crashes(crtype, mark):
         crashes = res.json()
         rx = re.compile(r"\d+\.\d+\.\d+(\.\d+)")
         for crash in crashes:
-            crash['new'] = crash['upload'] > mark['time'] or (
-                                crash['upload'] == mark['time'] and crash['path'] > mark['path']
-                           )
-
+            # 'new' means the crash upload timestamp is later than the last processed one
+            crash['new'] = is_crash_new(crash, mark)
             cp = crash['path'].lstrip('/').split('/')
-            if cp[0] not in ('mediaserver', 'mediaserver-bin', 'client-bin', 'client.bin'):
+            if (os.name == 'posix'  # on Windows we've got many different starting directories
+                and cp[0] not in ('mediaserver', 'mediaserver-bin', 'client-bin', 'client.bin')):
                 print "WARNING: unexpected the first crash dump path element: %s", cp[0]
+            crash['basename'] = cp[-1]
             m = rx.match(cp[1])
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
             crash["isHotfix"] = isHotfix(crash["version"])
@@ -91,24 +150,49 @@ def get_crashes(crtype, mark):
         return []
 
 
-def demangle_names(names):
-    try:
-        p = Popen([filt_path], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate(input="\n".join(names))
-    except Exception:
-        print "WARNING: call %s failed: %s\nNames demangling SKIPPED!" % (filt_path, sys.exc_info())
-        return names
-    if p.returncode:
-        print "DEBUG: %s returned code %s. STDERR: %s\nNames demangling SKIPPED!" % (filt_path, p.returncode, err)
-        return names
-    return out.split("\n")
-
-
 def dump_url(path):
     return ('' if path[0] == '/' else '/').join((DUMP_BASE, path))
 
+if dumptool is not None:
+    customization_rx = re.compile(r"\d+\.\d+\.\d+\.\d+\-\w+\-([^-]+)")
+    cacheDir = 'cdb-cache'
+
+    if not os.path.isdir(cacheDir):
+        os.makedirs(cacheDir)
+
+    def get_customization(uri):
+        parts = uri.split('/')
+        if parts[0] == '':
+            parts.pop(0)
+        m = customization_rx.match(parts[1])
+        if m:
+            cust = m.group(1)
+            print "Customization found: " + cust
+            return cust
+        print "WARNING: Failed to get customization, 'default' used."
+        return 'default'
+
+    def callDumptool(dump, crash):
+        fname = os.path.join(cacheDir, crash['basename'])
+        with open(fname, "wb") as f:
+            f.write(dump)
+            f.close()
+        try:
+            return dumptool.analyseDump(
+                fname, asString=True, customization=get_customization(crash['path']))
+        except Exception as err:
+            print "Dump analyse failed: " + traceback.format_exc()
+            return ''
+        finally:
+            try:
+                os.remove(fname)
+            except Exception as err:
+                print "Failed to remove %s: %s" % (fname, err.message)
+
 
 def load_crash_dump(crash_type, crash):
+    if crash_type == 'dmp':
+        crash_type = 'cdb-bt'
     url = dump_url(crash['path'])
     try:
         result = requests.get(url, auth=AUTH)
@@ -118,9 +202,18 @@ def load_crash_dump(crash_type, crash):
     except Exception:
         print "Error loading %s: %s" % (crash['path'], traceback.format_exc())
         return False
-    crash['dump'] = result.text
+    #
+    if dumptool is None:
+        crash['dump'] = result.text
+    else:
+        crash['dump'] = callDumptool(result.content, crash)
+        if crash['dump'] == '':
+            print "FAILED to analize dump %s" % crash['path']
+            #TODO send an email on it?
+            return False
+    #
     crash['url'] = url
-    crash['calls'] = parse_dump(iter(crash['dump'].split("\n")), crash_type, crash['path'])
+    crash['calls'] = parse_dump(iter(crash['dump'].splitlines()), crash_type, crash['path'])
     if crash['calls']:
         crash['calls'] = tuple(demangle_names(crash['calls']))
         crash['hash'] = KnowCrashDB.hash(crash['calls'])
@@ -151,7 +244,7 @@ def email_newcrash(crash, calls, jira_error=None):
             "New crash details:\n"
             % (jira_error.message, jira_error.reply)
         )
-        msg['Subject'] = "Failed to reate issue for a new crash!"
+        msg['Subject'] = "Failed to create issue for a new crash!"
     else:
         title = "A crash with a new trace path found.\n\n"
         msg['Subject'] = "Crash with a new trace path found!"
@@ -164,7 +257,7 @@ def email_newcrash(crash, calls, jira_error=None):
     )
     msg.attach(text)
     att = MIMEText(crash['dump'])
-    att.add_header('Content-Disposition', 'attachment', filename=crash['path'].lstrip('/'))
+    att.add_header('Content-Disposition', 'attachment', filename=report_name(crash['path']).lstrip('/'))
     msg.attach(att)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
@@ -315,6 +408,20 @@ class CrashMonitor(object):
     def _onInterrupt(self, _signum, _stack):
         self._stop = True
 
+    def _parseCalls(self, crash):
+        key = crash['calls']
+        formated_calls = format_calls(key)
+        if crash['new'] and not self._known.has(key):
+            if crash['hash'] in self._hashes:
+                self.report_hash_collision(crash['hash'], key)
+            else:
+                self._hashes[crash['hash']] = [key]
+            print "New crash found in %s" % crash['path']
+            if SEND_NEW_CRASHES:
+                email_newcrash(crash, formated_calls)
+            self._known.add(key)
+        return key, formated_calls
+
     def updateCrashes(self):
         "Loads crashes list from the crashserver, filters by last parsed crash times."
         next_summary = self._lasts['next_summary']
@@ -328,28 +435,25 @@ class CrashMonitor(object):
             mintime = min(crash_list[0]['upload'], mintime)
             maxtime = max(crash_list[-1]['upload'], maxtime)
 
+            if dumptool is not None:
+                dumptool.clear_cache(cacheDir, (crash['basename'] for crash in crash_list))
+
             for crash in crash_list:
                 if self._stop: break
+                if ct == 'dmp':
+                    raw_input("Debug pause. Press ENTER")
                 #
+                print "Processing: %s" % crash['path']
+                print "Crash info: %s" % crash
                 if not load_crash_dump(ct, crash): continue
                 # calls is empty when the crash trace function names and the signal haven't been found out
                 # if calls consists only of one element -- it should be the signal (and there is no function names)
-                if crash['calls']:
-                    key = crash['calls']
-                    formated_calls = format_calls(key)
-                    if crash['new'] and not self._known.has(key):
-                        if crash['hash'] in self._hashes:
-                            self.report_hash_collision(crash['hash'], key)
-                        else:
-                            self._hashes[crash['hash']] = [key]
-                        print "New crash found in %s" % crash['path']
-                        if SEND_NEW_CRASHES:
-                            email_newcrash(crash, formated_calls)
-                        self._known.add(key)
-                else:
-                    key, formated_calls = '<UNKNOWN>', ''
+                key, formated_calls = self._parseCalls(crash) if crash['calls'] else ('<UNKNOWN>', '')
+                print "Key: %s" % (key,)
+                print "Formatted calls: %s" % (formated_calls,)
 
-                faults.setdefault(key, ([], formated_calls, crash['hash']))[0].append((crash['url'], crash['path'], crash['dump']))
+                faults.setdefault(key, ([], formated_calls, crash['hash']))[0].append(
+                    (crash['url'], crash['path'], crash['dump']))
 
                 if crash['new']:
                     # only new crashes can increase counter
@@ -435,7 +539,7 @@ class CrashMonitor(object):
         return issue_key
 
     def add_attachment(self, issue, name, dump):
-        name = name.lstrip('/')
+        name = report_name(name.lstrip('/'))
         if not is_crash_dump_path(name):
             print "WARNING: Strange crash dump name: %s" % name
             print "POSSIBLY is_crash_dump_path() conditions are to be updated!"
@@ -461,7 +565,8 @@ class CrashMonitor(object):
     def can_change(self, issue_data, crashed_version, is_hotfix): # TODO why not to move it into the JiraReply class?
         if issue_data.is_done(): # it's a readon not to add more dumps and increase priority
             if issue_data.is_closed(): # hmm...
-                print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (issue_data.data['key'], issue_data.smallest_fixversion(), crashed_version)
+                print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (
+                    issue_data.data['key'], issue_data.smallest_fixversion(), crashed_version)
                 if crashed_version is None or crashed_version[:3] > issue_data.smallest_fixversion() or is_hotfix:
                     if issue_data.reopen():
                         print "Issue %s reopened" % (issue_data.data['key'],)
@@ -491,21 +596,46 @@ class CrashMonitor(object):
             self.updateCrashes()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--auto", action="store_true",
+        help="automatically periodical check mode.")
+    parser.add_argument("-p", "--period", type=int,
+        help="new crashes check period (sleep time since end of one check to start of another), minutes, use with -a")
+    parser.add_argument("-t", "--time", action="store_true",
+        help="log start and finish times (useful for scheduled runs).")
+    parser.add_argument("--dummy", action="store_true", help="just run dummy loop, for debug")
+    return parser.parse_args()
+
+
+def dummy_loop():  # for some debug
+    print "Running dummy loop..."
+    while True:
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--auto", action="store_true", help="automatically periodical check mode.")
-    parser.add_argument("-p", "--period", type=int, help="new crashes check period (sleep time since end of one check to start of another), minutes, use with -a")
-    parser.add_argument("-t", "--time", action="store_true", help="log start and finish times (useful for scheduled runs).")
-    args = parser.parse_args()
-
+    args = parse_args()
     if args.time:
         print "[Start at %s]" % time.asctime()
 
-    if get_lock(PROCESS_NAME):
-        CrashMonitor(args).run()
+    if get_lock():
+        if args.dummy:
+            dummy_loop()
+        else:
+            try:
+                CrashMonitor(args).run()
+            except BaseException:
+                traceback.print_exc()
+
     else:
-        print "Another copy of process found. Lock name: " + PROCESS_NAME
+        if os.name == 'posix':
+            print "Another copy of process found. Lock name: " + PROCESS_NAME
+        else:
+            print "Another copy of process found."
         sys.exit(1)
 
     if args.time:

@@ -1,0 +1,9 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Save update info
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/remember_revisions.taskbot
+
+"$TASKBOT_SHARE"/update_report.py "$TASKBOT_CONFIG"
