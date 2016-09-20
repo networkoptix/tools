@@ -1,0 +1,122 @@
+#!/bin/bash
+
+SRC=~/develop/nx_cloud_deploy
+ALL_ARTIFACTS=(cloud_db connection_mediator vms_gateway)
+ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
+PACK=1
+PUSH=1
+UPDATE=1
+CLOUD_INSTANCE=cloud-test
+
+function printHelp()
+{
+    echo "Usage: update_cloud-test [options]"
+    echo "Options:"
+    echo "  -h, --help          This help message"
+    echo "  --instance=NAME     Cloud instnce (default: $CLOUD_INSTANCE)"
+    echo "  --no-pack           Do not build docker images"
+    echo "  --no-push           Do not push built image to repository"
+    echo "  --no-update         Do not update running containers"
+    echo "  --artifacts=A[,...] Artifacts (all by default)"
+    echo "  --debug             Enable debug output"
+    echo "Supported artifacts:"
+    echo "  ${ALL_ARTIFACTS[@]}"
+}
+
+function contains()
+{
+    local searchedVal=$1
+    local arr=$2
+
+    for val in "${@:2}"
+    do
+        if [ $searchedVal == $val ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        echo "Builds docker images and updates running instanses."
+        echo
+        printHelp
+        exit 0
+    elif [[ "$i" =~ "--instance=" ]]; then
+        CLOUD_INSTANCE=$(echo $i | sed 's/--instance=\(.*\)/\1/')
+    elif [ "$i" == "--no-pack" ] ; then
+        PACK=0
+    elif [ "$i" == "--no-push" ] ; then
+        PUSH=0
+    elif [ "$i" == "--no-update" ] ; then
+        UPDATE=0
+    elif [[ "$i" =~ "--artifacts=" ]] ; then
+        artifactsStr="`echo $i | sed 's/--artifacts=\(.*\)/\1/'`"
+        ARTIFACTS_TO_BUILD=()
+        IFS=',' read -a ARTIFACTS_TO_BUILD <<< "$artifactsStr"
+        for (( i=0; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
+        do
+            for knownArtifact in ${ALL_ARTIFACTS[@]}
+            do
+                if [[ $knownArtifact == */${ARTIFACTS_TO_BUILD[$i]} ]]; then
+                    ARTIFACTS_TO_BUILD[$i]=$knownArtifact
+                    break
+                fi
+            done
+        done
+        for artifact in "${ARTIFACTS_TO_BUILD[@]}"
+        do
+            contains $artifact ${ALL_ARTIFACTS[@]}
+            if [ $? != 0 ]; then
+                echo "
+Requested artifact $artifact not recognized
+Following are supported: ${ALL_ARTIFACTS[@]}"
+                exit 1
+            fi
+        done
+    elif [ "$i" == "--debug" ]; then
+        set -x
+    else
+        echo "Error: invalid option: $i" >&2
+        echo >&2
+        printHelp
+        exit 0
+    fi
+done
+
+if [ "$PACK" -gt 0 ]; then
+    for (( i=0; i<${#ARTIFACTS_TO_BUILD[@]}; i++ ))
+    do
+        moduleName=${ARTIFACTS_TO_BUILD[$i]}
+        echo "
+################################################################
+# Building $moduleName
+################################################################
+"
+        pushd $SRC/$moduleName
+        ./make.sh stage pack
+        [ "$PUSH" -gt 0 ] && ./make.sh push
+        popd
+    done
+fi
+
+if [ "$UPDATE" -gt 0 ]; then
+    echo "
+################################################################
+# Updating $CLOUD_INSTANCE instance
+################################################################
+"
+    pushd $SRC/locations/$CLOUD_INSTANCE
+    [ "$PUSH" -eq 0 ] && cp docker-compose.yml docker-compose.yml.backup
+
+    for ARTIFACT in ${ARTIFACTS_TO_BUILD[@]}; do
+        echo "### Update $ARTIFACT"
+        [ "$PUSH" -eq 0 ] && sed -i "s/la.hdw.mx:5000\/$ARTIFACT/$ARTIFACT/" docker-compose.yml
+        ./cloud.sh --service=$ARTIFACT update
+    done
+
+    [ "$PUSH" -eq 0 ] && mv docker-compose.yml.backup docker-compose.yml
+    popd
+fi
