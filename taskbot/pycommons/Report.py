@@ -2,7 +2,7 @@
 # Artem V. Nikitin
 # Report base class
 
-import os, zlib
+import os, zlib, socket
 from MySQLDB import MySQLDB
 from Utils import *
 
@@ -252,7 +252,7 @@ class Report:
   def get_taskbot_link(self):
     host = os.environ.get(
       'TASKBOT_PUBLIC_HTML_HOST',
-      os.environ['HOSTNAME'])
+      socket.gethostbyname(socket.gethostname()))
     return "http://%s/taskbot/browse.cgi" % host
 
   def generate( self ):
