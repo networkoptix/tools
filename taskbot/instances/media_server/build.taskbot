@@ -1,0 +1,13 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+cd "$TASKBOT_VAR"/nx_vms
+
+# + Clean
+mvn clean
+hg purge .
+
+# + Build
+mvn package -e -T12 -Dbuild.configuration=release

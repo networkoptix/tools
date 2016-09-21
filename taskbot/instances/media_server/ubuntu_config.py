@@ -16,7 +16,6 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'environment' : {
-#    'TASKBOT_BUILD': '/home/anikitin/prj/src/devtools/taskbot',
     'TASKBOT_BRANCHNAME': BRANCH_NAME,
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            

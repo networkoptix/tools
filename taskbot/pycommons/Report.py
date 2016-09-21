@@ -32,7 +32,6 @@ class Report:
     self.__config__ = read_config(config)
     self.__db__ =  MySQLDB(self.__config__.get('db_config', None))
     self.__root_task__ = root_task or self.__find_root()
-    self.__history_count__ = 0
     self.__link_task_id__ = self.__root_task__.id;
 
   # Raw report SQL 
@@ -42,8 +41,6 @@ class Report:
       FROM running_task
       WHERE host = %s AND pid = %s""",
     (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
-
-    print "Parent: %s" % parent_task_id
 
     while parent_task_id:
       res = \
@@ -75,10 +72,12 @@ class Report:
       ORDER BY id""", (root_task_id, description))
     return [ Report.Task(*task) for task in cursor ]
 
-  def find_failed_task(self, parent_task_id):
-    return self.__db__.query("""SELECT id, description, is_command, start, finish, error_message
+  def __find_failed_task(self, parent_task_id):
+    cursor = self.__db__.cursor
+    cursor.execute("""SELECT id, description, is_command, start, finish, error_message
       FROM task
       WHERE parent_task_id = %s AND error_message IS NOT NULL""", (parent_task_id, ))
+    return [ Report.Task(*task) for task in cursor ]
 
   def insert_report(self, task_id, gzipped, html):
     self.__db__.execute("""INSERT INTO report (task_id, gzipped, html)
@@ -105,8 +104,8 @@ class Report:
 
   def __add_history(self, task_id, html_table_row):
      self.__db__.execute("""UPDATE history
-        SET html_table_row = html_table_row||%s
-        WHERE task_id = %s""", (html_table_row, task_id))
+        SET html_table_row = CONCAT(html_table_row, %s)
+        WHERE task_id = %s""", (html_table_row, task_id, ))
 
   def __get_stdout(self, task_id):
     return self.__db__.query("""SELECT stdout_gzipped, stdout
@@ -172,7 +171,7 @@ class Report:
     return tasks
     
 
-  def find_task(self, path, tasks):
+  def find_task(self, path, tasks = []):
     paths = path.split(' > ') + ['']
 
     if not tasks:
@@ -200,15 +199,14 @@ class Report:
     if color:
       html = "<td bgcolor=%s>%s</td>" % (color, html)
 
-    if not self.__history_count__:
-
-      self.__history_count__+=1
-      self.__db__.execute(
-        """INSERT INTO history (task_id, link_task_id, html_table_row)
-        VALUES (%s, %s, %s)""", (
-          self.__root_task__.id, self.__link_task_id__, html))
-      return
-    self.__add_history(html, self.__root_task__.id)
+    print "Add history"
+    ok, _ =self.__db__.safe_execute(
+      """INSERT INTO history (task_id, link_task_id, html_table_row)
+      VALUES (%s, %s, %s)""", (
+        self.__root_task__.id, self.__link_task_id__, html))
+    if not ok:
+      print "Append history#%s '%s'" % (self.__root_task__.id, html)
+      self.__add_history(self.__root_task__.id, html)
 
   def get_previous_run(self, task = None):
     return self.__prev_root_task(task or self.__root_task__)
@@ -223,6 +221,22 @@ class Report:
       return zlib.uncompress(stdout)
 
     return stdout
+
+  def find_failed(self, task):
+    result = None
+
+    while True:
+      tasks = self.__find_failed_task(task.id);
+      if tasks:
+        task = tasks.pop(0)
+        result = task
+      else:
+        break
+
+    return result
+
+  def task_href( self, task ):
+    return "?task=%s" % task.id;
 
   def generate( self ):
     self.__generate__()

@@ -218,7 +218,7 @@ class TaskExecutor:
     os.close(self.__rfdstatus__)
 
   def __check_get_status( self, status, task ):
-    if status:
+    if status is not None:
       if len(status) == 0: # shell was terminated
         task.error_message = "non-zero exit status (execution terminated)"
         return self.__shell_process__.returncode, True
@@ -227,7 +227,7 @@ class TaskExecutor:
         task.error_message = "non-zero exit status"
       return status, False
     task.error_message = "command_timeout has expired"
-    return 10, True
+    return 1, True
     
 
   def start_command(self, command):
@@ -251,7 +251,9 @@ class TaskExecutor:
         Trace.trace(out)
         Trace.trace(err)
 
-        if status is not None or (timeout and  time.time() - start > timeout):
+        if status is not None:
+          break
+        if (timeout and  time.time() - start > timeout):
           break
     
       return status,  stderr, stdout
@@ -285,7 +287,7 @@ class TaskExecutor:
     return status
 
   def finish_command(self, status, err, out):
-    self.__db__.ping()
+    self.__db__.ensure_connect()
 
     task = self.__task_stack__[-1]
 
@@ -299,7 +301,7 @@ class TaskExecutor:
 
   def finish_task(self, in_transaction = False):
     if not in_transaction:
-      self.__db__.ping()
+      self.__db__.ensure_connect()
 
     task = self.__task_stack__.pop()
 
@@ -333,6 +335,7 @@ class TaskExecutor:
   # Start new task
   def start_task(self, description, is_command=False):
     parent_task_id = None
+    self.__db__.ensure_connect()
     if len(self.__task_stack__):
       parent_task_id = self.__task_stack__[-1].task_id
     task_id = self.__db__.execute(
@@ -410,48 +413,53 @@ def main():
   command = ''
   command_timeout = None
   status = 0
-  if options.command:
-    command = options.command
-  else:
-    script = args[1]    
-    with open(script) as fp:
-      for line in fp:
-        if executor.closed:
-          break
-        m = re.search(CMD_HEADER_REGEX, line)
-        level = var = value = None
-        if m:
-          (level, _, var, value) = m.group(1,2,3,4)
-        if (re.search('^\s*$', value or line)):
-          status = executor.process_command(
-            command,
-            command_timeout or global_timeout)
-          command = ''
-          command_timeout = None
-        else:
-          command+=line
-        if m:
-          if var == 'timeout':
-            # Set command timeout
-            command_timeout = float(value);
-          elif level:
-            executor.finish_tasks_to_level(
-              len(level) - 1 + \
-              (options.description and 1 or 0))
-            executor.start_task(value);
+  try:
+    if options.command:
+      command = options.command
+    else:
+      script = args[1]    
+      with open(script) as fp:
+        for line in fp:
+          if executor.closed:
+            break
+          m = re.search(CMD_HEADER_REGEX, line)
+          level = var = value = None
+          if m:
+            (level, _, var, value) = m.group(1,2,3,4)
+          if (re.search('^\s*$', value or line)):
+            status = executor.process_command(
+              command,
+              command_timeout or global_timeout)
+            command = ''
+            command_timeout = None
+          else:
+            command+=line
+          if m:
+            if var == 'timeout':
+              # Set command timeout
+              command_timeout = float(value);
+            elif level:
+              executor.finish_tasks_to_level(
+                len(level) - 1 + \
+                (options.description and 1 or 0))
+              executor.start_task(value);
 
-    fp.close()
+        fp.close()
 
-  if not executor.closed:
-    status = executor.process_command(
-      command,
-      command_timeout or global_timeout)
-    executor.close()
+    if not executor.closed:
+      status = executor.process_command(
+        command,
+        command_timeout or global_timeout)
+      executor.close()
     
-  database.commit()
-  database.close()
+    database.commit()
+    database.close()
 
-  sys.exit(status)
+    sys.exit(status)
+  except Exception, x:
+    print >> sys.stderr, "%s execution error '%s'" % (sys.argv[0], x)
+    executor.close()
+    sys.exit(1)
       
 if __name__ == "__main__":
   main()

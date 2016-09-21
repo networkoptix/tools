@@ -7,3 +7,17 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 "$TASKBOT" $ARGS "$TASKBOT_SHARE"/remember_revisions.taskbot
 
 "$TASKBOT_SHARE"/update_report.py "$TASKBOT_CONFIG"
+RC=$?
+echo $RC
+
+# + Build product
+if [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE/"/build.taskbot
+  RC=$?
+  echo $RC
+fi
+
+"$TASKBOT_SHARE"/build_report.py "$TASKBOT_CONFIG"
+
+exit $RC
+

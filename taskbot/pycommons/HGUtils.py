@@ -68,9 +68,9 @@ def get_changes(repo, rev, prev_rev):
     print >> sys.stderr, "Can't process '%s' : %d, %s" % \
           (" ".join(hg_log_cmd), p.returncode, err)
     return None
-  print out
-  
-  return [ChangeSet(r, line.split('|')) for line in out.splitlines()]
+
+  changes =  [ChangeSet(r, line.split('|')) for line in out.splitlines()]
+  return filter(lambda c: c.rev != prev_rev, changes)
  
 
 def changes(report, since):
@@ -88,10 +88,11 @@ def changes(report, since):
        report.get_stdout(report.find_task('%', [repo_task])).strip()
      prev_revision = \
        report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
-     cs = get_changes(repo, revision, prev_revision)
-     if not cs:
-       return None
-     commits+=cs
+     if revision != prev_revision:
+       cs = get_changes(repo, revision, prev_revision)
+       if not cs:
+         return None
+       commits+=cs
   commits.sort(lambda x, y: x.timestamp > y.timestamp)
   return commits
 
