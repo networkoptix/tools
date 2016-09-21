@@ -38,6 +38,23 @@ class BuildReport(Report):
     self.add_history(color, history)
 
     # eMail notification
+
+    if failed:
+      import EmailNotify
+      prev_run = self.get_previous_run()
+      prev_build = None
+      while prev_run:
+        prev_builds = self.find_task('Build product > %build.taskbot% > %', [prev_run])
+        if prev_builds:
+          prev_build = prev_builds[-1]
+          break
+        prev_run = self.get_previous_run(prev_run)
+
+      print prev_build, prev_run
+      if (prev_build and not self.find_failed(prev_build)):
+        EmailNotify.notify(
+          self, prev_run, "build failed",
+          "The product is no longer builded.", debug=True)
     
     return 0
 

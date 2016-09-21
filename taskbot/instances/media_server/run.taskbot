@@ -5,10 +5,10 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Save update info
 "$TASKBOT" $ARGS "$TASKBOT_SHARE"/remember_revisions.taskbot
-
-"$TASKBOT_SHARE"/update_report.py "$TASKBOT_CONFIG"
 RC=$?
 echo $RC
+
+"$TASKBOT_SHARE"/update_report.py "$TASKBOT_CONFIG"
 
 # + Build product
 if [ $RC -eq 0 ]; then
