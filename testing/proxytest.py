@@ -93,6 +93,7 @@ class ProxyTest(object):
                     "Wrong result %s: resulting data len: %s. Content-Length: %s" % (action, len(data), content_len))
             return Result(func, peer, redirectTo, data, json.loads(data), content_len)
         except HTTPException as err:
+            print "Failed: " + action
             raise FuncTestError("error " + action, err)
 
     def run(self):

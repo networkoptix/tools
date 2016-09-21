@@ -1,0 +1,21 @@
+# -*- sh -*-
+
+set -o errexit -o nounset -o noclobber
+
+# + Test command
+echo $TASKBOT
+echo $TASKBOT_OPTIONS
+echo $TASKBOT_CONFIG
+echo $TASKBOT_PARENT_PID
+echo $TASKBOT_REPO
+echo $TASKBOT_PARENT_PID
+
+for i in `seq 1 10`;
+do
+   echo $i
+done
+
+#echo $ABRACADABRA
+/such/no
+
+echo Test

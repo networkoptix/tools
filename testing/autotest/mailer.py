@@ -89,6 +89,52 @@ def _time4LogName(tmStruct):
     return time.strftime("%y%m%d-%H%M%S", tmStruct)
 
 
+MAX_ATTACHMENT_SIZE = 7900000  # bytes
+SKIP_STR = "\n\n...\nThe log was too large. %d lines was skipped.\n...\n\n"
+
+
+def prepareAttachmentData(lines):
+    """ Checks if the attachment not exceed mail service's attachment size limits.
+    NOTE: No checks for multibyte characters performed. Build logs and test logs
+    are supposed to be ASCII-only.
+    :param lines: list
+    :return: str
+    """
+    total = sum(len(line)+1 for line in lines)
+    if total < MAX_ATTACHMENT_SIZE:
+        return "\n".join(lines)
+    firstPart = 0
+    firstLimit= MAX_ATTACHMENT_SIZE / 2
+    for line in lines:
+        firstLimit -= len(line) + 1
+        if firstLimit <= 0:
+            firstLimit += len(line) + 1
+            break
+        firstPart += 1
+
+    if firstPart == 0:
+        strippeed = lines[0][
+            :min(MAX_ATTACHMENT_SIZE / 2, len(lines[0]))] + "... [line was too long, cut]"
+        firstPart = 1
+        total -= len(lines[0]) - len(strippeed)
+        lines[0] = strippeed
+
+    toSkip = total + len(SKIP_STR) + 2 - MAX_ATTACHMENT_SIZE
+    count = 0
+    skipped = 0
+    for line in lines[firstPart:]:
+        skipped += len(line) + 1
+        count += 1
+        if skipped > toSkip:
+            break
+    print "DEBUG: the attachment was too large (%s), %s lines skipped" % (total, count)
+    return  ''.join((
+        ("\n".join(lines[:firstPart])),
+        (SKIP_STR % (count,)),
+        ("\n".join(lines[firstPart + count:]))
+    ))
+
+
 def emailTestResult(branch, lines, testName='', fail='', summary=''):
     branchStr = "Branch " + branch
     if testName:
@@ -102,12 +148,17 @@ def emailTestResult(branch, lines, testName='', fail='', summary=''):
     ]
     attach = ''
     now = time.gmtime()
+    log("Creating email about %s with result %s", branchStr, resultStr)
     lines.extend(('',"[Finished at: %s]" % time.strftime("%Y.%m.%d %H:%M:%S GMT", now), ''))
     if len(lines) >= conf.MAX_LOG_NO_ATTACH:
         if summary:
             parts.extend(('',summary,''))
         parts.append("See log file (%s lines) attached for details." % len(lines))
-        attach = MIMEText("\n".join(lines))
+        attach = MIMEText(prepareAttachmentData(lines))
+        try:
+            log("Attaching %s bytes of log", len(attach.as_string().encode('utf8')))
+        except UnicodeDecodeError as err:
+            log("Attaching %s characters of log", len(attach.as_string()))
         preifix = 'unittest' if fail.startswith('unit') else 'functest'
         attach.add_header('Content-Disposition', 'attachment', filename=('%s_fail_%s_%s.log' % (
             preifix, branch.replace(' ', '_'), _time4LogName(now))))

@@ -6,9 +6,8 @@ __author__ = 'Danil Lavrentyuk'
 import json, random, string
 from hashlib import md5
 import threading, urllib2
-from functest_util import ClusterWorker
+from functest_util import ClusterWorker, sendRequest, TestRequestError
 from testbase import getTestMaster
-
 
 __all__ = [
     'BasicGenerator', 'UserDataGenerator', 'MediaServerGenerator',
@@ -109,11 +108,12 @@ class UserDataGenerator(BasicGenerator):
         "isAdmin": %s,
         "name": "%s",
         "parentId": "{00000000-0000-0000-0000-000000000000}",
-        "permissions": "247",
+        "permissions": "GlobalAdminPermission",
         "typeId": "{774e6ecd-ffc6-ae88-0165-8f4a6d0eafa7}",
         "url": ""
     }
     """
+    # (ealier was permissions =  "247")
     # about permissions value: 0x08 flag removed since it's internal use only,
     # see common/src/common/common_globals.h, GlobalPermission enum
 
@@ -184,44 +184,47 @@ class CameraConflictionDataGenerator(BasicGenerator):
     #(id,mac,model,parentId,typeId,url,vendor)
     _existedCameraList = []
     # For simplicity , we just modify the name of this camera
-    _updateTemplate = \
-    """
+    _updateMetaTemplate = """
         [{
             "groupId": "",
             "groupName": "",
-            "id": "%s",
-            "mac": "%s",
+            "id": "%%s",
+            "mac": "%%s",
             "manuallyAdded": false,
             "maxArchiveDays": 0,
             "minArchiveDays": 0,
-            "model": "%s",
+            "model": "%%s",
             "motionMask": "",
             "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
+            "name": "%%s",
+            "parentId": "%%s",
+            "physicalId": "%%s",
+            "%s": "{00000000-0000-0000-0000-000000000000}",
             "scheduleEnabled": false,
             "scheduleTasks": [ ],
             "secondaryStreamQuality": "SSQualityLow",
             "status": "Unauthorized",
             "statusFlags": "CSF_NoFlags",
-            "typeId": "%s",
-            "url": "%s",
-            "vendor": "%s"
+            "typeId": "%%s",
+            "url": "%%s",
+            "vendor": "%%s"
         }]
     """
+    _updateTemplate = None
 
-    def _fetchExistedCameras(self,dataGen):
+    def __init__(self, dataGen):
+        if self._updateTemplate is None:
+            type(self)._updateTemplate = self._updateMetaTemplate % (
+                testMaster.api.preferredServerId)
+        if self._fetchExistedCameras(dataGen) == False:
+            raise Exception("Cannot get existed camera list")
+
+    def _fetchExistedCameras(self, dataGen):
         for entry in dataGen.conflictCameraList:
             obj = json.loads(entry)[0]
             self._existedCameraList.append((obj["id"],obj["mac"],obj["model"],obj["parentId"],
                  obj["typeId"],obj["url"],obj["vendor"]))
         return True
-
-    def __init__(self,dataGen):
-        if self._fetchExistedCameras(dataGen) == False:
-            raise Exception("Cannot get existed camera list")
 
     def _generateModify(self,camera):
         name = self.generateRandomString(random.randint(8,12))
@@ -327,7 +330,7 @@ class MediaServerConflictionDataGenerator(BasicGenerator):
         return self._removeTemplate % (server[2])
 
     def generateData(self):
-        server = self._existedMediaServerList[random.randint(0,len(self._existedMediaServerList) - 1)]
+        server = random.choice(self._existedMediaServerList)
         return (self._generateModify(server),self._generateRemove(server))
 
 ####################################################################################################
@@ -336,37 +339,51 @@ class MediaServerConflictionDataGenerator(BasicGenerator):
 
 testMaster = getTestMaster()
 
+def dataUpdateTask(lock, collector, data, server, method):
+    url = "http://%s/ec2/%s" % (server, method)
+    sendRequest(lock, url, data[0])  # it raises TestRequestError if not ok
+    testMaster.unittestRollback.addOperations(method, server, data[1])
+    collector.append(data[0])
+
+
 class CameraDataGenerator(BasicGenerator):
     # depends on testMaster.clusterTestServerUUIDList and testMaster.clusterTestServerList
-    _template = """[
+    _metaTemplate = """[
         {
-            "audioEnabled": %s,
-            "controlEnabled": %s,
+            "audioEnabled": %%s,
+            "controlEnabled": %%s,
             "dewarpingParams": "",
             "groupId": "",
             "groupName": "",
-            "id": "%s",
-            "mac": "%s",
+            "id": "%%s",
+            "mac": "%%s",
             "manuallyAdded": false,
             "maxArchiveDays": 0,
             "minArchiveDays": 0,
-            "model": "%s",
+            "model": "%%s",
             "motionMask": "",
             "motionType": "MT_Default",
-            "name": "%s",
-            "parentId": "%s",
-            "physicalId": "%s",
-            "preferedServerId": "{00000000-0000-0000-0000-000000000000}",
+            "name": "%%s",
+            "parentId": "%%s",
+            "physicalId": "%%s",
+            "%s": "{00000000-0000-0000-0000-000000000000}",
             "scheduleEnabled": false,
             "scheduleTasks": [ ],
             "secondaryStreamQuality": "SSQualityLow",
             "status": "Unauthorized",
             "statusFlags": "CSF_NoFlags",
             "typeId": "{7d2af20d-04f2-149f-ef37-ad585281e3b7}",
-            "url": "%s",
-            "vendor": "%s"
+            "url": "%%s",
+            "vendor": "%%s"
         }
     ]"""
+    _template = None
+
+    def __init__(self):
+        super(CameraDataGenerator, self).__init__()
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (testMaster.api.preferredServerId)
+
 
     def _generateCameraId(self,mac):
         return self.generateUUIdFromMd5(mac)
@@ -409,44 +426,27 @@ class ConflictionDataGenerator(BasicGenerator):
     conflictMediaServerList = []
     _lock = threading.Lock()
 
-    @staticmethod
-    def dataTask(lock, dlist, post_data, server, methodName):  # FIXME similar methods exist in some other generators! Generalize it!
-        url = "http://%s/ec2/%s" % (server, methodName)
-        req = urllib2.Request(url, data=post_data[0], headers={'Content-Type': 'application/json'})
-        try:
-            with lock:
-                response = urllib2.urlopen(req)
-        except Exception as err:
-            print "Failed to request %s: %s" % (url, err.message)
-            return
-        if response.getcode() != 200:
-            response.close()
-            print "Failed to connect to %s" % (url,)
-        else:
-            testMaster.unittestRollback.addOperations(methodName, server, post_data[1])
-            dlist.append(post_data[0])
-
-    def _prepareData(self, dataList, methodName, l):
-        worker = ClusterWorker(8, len(testMaster.clusterTestServerList) * len(dataList))
-        for d in dataList:
-            for s in testMaster.clusterTestServerList:
-                worker.enqueue(self.dataTask,(self._lock, l, d, s, methodName))
+    def _prepareData(self, op, num, methodName, objList):
+        worker = ClusterWorker(8, len(testMaster.clusterTestServerList) * num, doStart=True)
+        for _ in xrange(num):
+            for srv in testMaster.clusterTestServerList:
+                worker.enqueue(dataUpdateTask, (self._lock, objList, op(1)[0], srv, methodName))
         worker.join()
         return True
 
-    def _prepareCameraData(self, op, num, methodName, l):
+    def _prepareCameraData(self, op, num, methodName, objList):
         worker = ClusterWorker(8, len(testMaster.clusterTestServerList) * num)
         for _ in xrange(num):
-            for s in testMaster.clusterTestServerList:
-                worker.enqueue(self.dataTask, (self._lock, l, op(1,s)[0], s, methodName))
+            for srv in testMaster.clusterTestServerList:
+                worker.enqueue(dataUpdateTask, (self._lock, objList, op(1, srv)[0], srv, methodName))
         worker.join()
         return True
 
     def prepare(self,num):
         return (
             self._prepareCameraData(CameraDataGenerator().generateCameraData, num, "saveCameras", self.conflictCameraList) and
-            self._prepareData(UserDataGenerator().generateUserData(num), "saveUser", self.conflictUserList) and
-            self._prepareData(MediaServerGenerator().generateMediaServerData(num), "saveMediaServer", self.conflictMediaServerList)
+            self._prepareData(UserDataGenerator().generateUserData, num, "saveUser", self.conflictUserList) and
+            self._prepareData(MediaServerGenerator().generateMediaServerData, num, "saveMediaServer", self.conflictMediaServerList)
         )
 
 
@@ -504,56 +504,46 @@ class ResourceDataGenerator(BasicGenerator):
             self.generateRandomString(val_len))
 
     def _getRandomResourceUUID(self):
-        idx = random.randint(0,len(self._existedResourceList) - 1)
-        return self._existedResourceList[idx][0]
+        #FIXME: collisions possible!
+        return random.choice(self._existedResourceList)[0]
 
     def _generateOneResourceParams(self):
         uuid = self._getRandomResourceUUID()
-        kv_list = ["["]
-        num = random.randint(2,20)
-        for i in xrange(num - 1):
-            num = random.randint(2,20)
-            kv_list.append(self._generateKeyValue(uuid))
-            kv_list.append(",")
+        return "[" + ",".join([
+            self._generateKeyValue(uuid) for _ in xrange(random.randint(2,20))
+        ])  + "]"
 
-        kv_list.append(self._generateKeyValue(uuid))
-        kv_list.append("]")
+    def generateResourceParams(self, number):
+        return [self._generateOneResourceParams() for _ in xrange(number)]
 
-        return ''.join(kv_list)
+    def generateRemoveResourceIds(self, number):
+        return [res[0] for res in random.sample(self._existedResourceList, number)]
 
-    def generateResourceParams(self,number):
-        ret = []
-        for i in xrange(number):
-            ret.append(self._generateOneResourceParams())
-        return ret
-
-    def generateRemoveResource(self,number):
-        ret = []
-        for i in xrange(number):
-            ret.append(self._resourceRemoveTemplate % (self._getRandomResourceUUID()))
-        return ret
+    def generateRemoveResource(self, resId):
+        return self._resourceRemoveTemplate % resId
 
 
 class CameraUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
+    _metaTemplate = """
         [
             {
-                "audioEnabled": %s,
-                "cameraID": "%s",
-                "cameraName": "%s",
-                "controlEnabled": %s,
-                "dewarpingParams": "%s",
+                "audioEnabled": %%s,
+                "%s": "%%s",
+                "cameraName": "%%s",
+                "controlEnabled": %%s,
+                "dewarpingParams": "%%s",
                 "maxArchiveDays": -30,
                 "minArchiveDays": -1,
                 "motionMask": "5,0,0,44,32:5,0,0,44,32:5,0,0,44,32:5,0,0,44,32",
                 "motionType": "MT_SoftwareGrid",
-                "preferedServerId": "%s",
+                "%s": "%%s",
                 "scheduleEnabled": false,
                 "scheduleTasks": [ ],
                 "secondaryStreamQuality": "SSQualityMedium"
             }
         ]
         """
+    _template = None
 
     _dewarpingTemplate = '''{ \\"enabled\\":%s, \\"fovRot\\":%s,
             \\"hStretch\\":%s, \\"radius\\":%s, \\"viewMode\\":\\"VerticalDown\\",
@@ -562,41 +552,20 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
     _existedCameraUUIDList = []
 
     _lock = threading.Lock()
-    _listLock = threading.Lock()
 
-    def __init__(self,prepareNum):
+    def __init__(self, prepareNum):
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (
+                testMaster.api.cameraId, testMaster.api.preferredServerId)
         if self._fetchExistedCameraUUIDList(prepareNum) == False:
             raise Exception("Cannot initialize camera list attribute test data")
 
-    def _prepareData(self, op, num, methodName,l):
-        worker = ClusterWorker(8, num * len(testMaster.clusterTestServerList))
+    def _prepareData(self, func, num, methodName, collector):
+        worker = ClusterWorker(8, num * len(testMaster.clusterTestServerList), doStart=True)
 
         for _ in xrange(num):
-            for s in testMaster.clusterTestServerList:
-
-                def task(lock, list, listLock, server, mname, oper):
-
-                    url = "http://%s/ec2/%s" % (server, mname)
-                    with lock:
-                        d = oper(1,s)[0]
-                        #print "DEBUG: %s at %s with %s" % (mname, server, d[0])
-                        req = urllib2.Request(url, data=d[0], headers={'Content-Type': 'application/json'})
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        print "Failed to connect %s" % (url,)
-                        return
-                    else:
-                        #print "DEBUG: %s response: %s" % (server, response.read())
-                        #with open("%s_data" % mname, "a") as f:
-                        #    f.write("%s\n" % d[0])
-                        testMaster.unittestRollback.addOperations(mname, server, d[1])
-                        with listLock:
-                            list.append(d[0])
-
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,s,methodName,op,))
+            for srv in testMaster.clusterTestServerList:
+                worker.enqueue(dataUpdateTask, (self._lock, collector, func(1, srv)[0], srv, methodName))
 
         worker.join()
         return True
@@ -609,7 +578,7 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
         # then do the test by so.
         json_list = []
 
-        if not self._prepareData(CameraDataGenerator().generateCameraData,num,"saveCameras",json_list):
+        if not self._prepareData(CameraDataGenerator().generateCameraData, num, "saveCameras", json_list):
             return False
 
         for entry in json_list:
@@ -637,69 +606,47 @@ class CameraUserAttributesListDataGenerator(BasicGenerator):
         return random.choice(self._existedCameraUUIDList)
 
     def generateCameraUserAttribute(self,number):
-        ret = []
-
-        for i in xrange(number):
-            uuid , name = self._getRandomCameraUUIDAndName()
-            ret.append(self._template % (self.generateBool(),
-                    uuid, name,
-                    self.generateBool(),
-                    self._generateDewarpingPar(),
-                    self._getRandomServerId()))
-
-        return ret
+        return [ self._template % (self.generateBool(),
+            uuid, name,
+            self.generateBool(),
+            self._generateDewarpingPar(),
+            self._getRandomServerId()) for uuid , name in (
+                self._getRandomCameraUUIDAndName() for _ in xrange(number)
+            )
+        ]
 
 
 class ServerUserAttributesListDataGenerator(BasicGenerator):
-    _template = """
+    _metaTemplate = """
     [
         {
-            "allowAutoRedundancy": %s,
-            "maxCameras": %s,
-            "serverID": "%s",
-            "serverName": "%s"
+            "allowAutoRedundancy": %%s,
+            "maxCameras": %%s,
+            "%s": "%%s",
+            "serverName": "%%s"
         }
     ]
     """
+    _template = None
 
     _existedFakeServerList = []
 
     _lock = threading.Lock()
-    _listLock = threading.Lock()
 
-    def _prepareData(self,dataList,methodName,l):
-        worker = ClusterWorker(8, len(dataList) * len(testMaster.clusterTestServerList))
+    def _prepareData(self, dataList, methodName, jsonList):
+        worker = ClusterWorker(8, len(dataList) * len(testMaster.clusterTestServerList), doStart=True)
 
-        for d in dataList:
-            for s in testMaster.clusterTestServerList:
-
-                def task(lock,list,listLock,post_data,mname,server):
-                    req = urllib2.Request("http://%s/ec2/%s" % (server,mname),
-                        data=post_data[0], headers={'Content-Type': 'application/json'})
-
-                    with lock:
-                        response = urllib2.urlopen(req)
-
-                    if response.getcode() != 200:
-                        print "Failed to connect http://%s/ec2/%s" % (server,mname)
-                        return
-                    else:
-                        testMaster.unittestRollback.addOperations(methodName, server, post_data[1])
-                        with listLock:
-                            list.append(d[0])
-
-                    response.close()
-
-                worker.enqueue(task,(self._lock,l,self._listLock,d,methodName,s,))
+        for data in dataList:
+            for srv in testMaster.clusterTestServerList:
+                worker.enqueue(dataUpdateTask, (self._lock, jsonList, data, srv, methodName,))
 
         worker.join()
         return True
 
-
     def _generateFakeServer(self,num):
         json_list = []
 
-        if not self._prepareData(MediaServerGenerator().generateMediaServerData(num),"saveMediaServer",json_list):
+        if not self._prepareData(MediaServerGenerator().generateMediaServerData(num), "saveMediaServer", json_list):
             return False
 
         for entry in json_list:
@@ -709,6 +656,8 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
         return True
 
     def __init__(self,num):
+        if self._template is None:
+            type(self)._template = self._metaTemplate % (testMaster.api.serverId,)
         if not self._generateFakeServer(num) :
             raise Exception("Cannot initialize server list attribute test data")
 
@@ -719,7 +668,7 @@ class ServerUserAttributesListDataGenerator(BasicGenerator):
     def generateServerUserAttributesList(self,number):
         ret = []
         for i in xrange(number):
-            uuid,name = self._getRandomServer()
+            uuid, name = self._getRandomServer()
             ret.append(self._template % (self.generateBool(),
                     random.randint(0,200),
                     uuid,name))

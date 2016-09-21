@@ -1,4 +1,5 @@
 #!/bin/bash
+ulimit -c 10000000
 TMP=/tmp/test
 mkdir -p $TMP
 BASE=`realpath $(dirname "$0")`

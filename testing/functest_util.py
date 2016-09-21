@@ -10,16 +10,35 @@ import Queue
 import threading
 import difflib
 
-__all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword', 'SafeJsonLoads',
-           'checkResultsEqual',
+__all__ = ['JsonDiff', 'FtConfigParser', 'compareJson', 'showHelp', 'ManagerAddPassword',
+           'SafeJsonLoads', 'TestJsonLoads', 'checkResultsEqual',
            'textdiff',
            'ClusterWorker', 'ClusterLongWorker', 'parse_size', 'args2str', 'real_caps',
-           'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS']
+           'CAMERA_ATTR_EMPTY', 'FULL_SCHEDULE_TASKS',
+           'sendRequest', 'TestRequestError', 'LegacyTestFailure', 'ServerCompareFailure']
 
+class LegacyTestFailure(AssertionError):
+    pass
+
+class ServerCompareFailure(LegacyTestFailure):
+    pass
+
+
+class TestRequestError(AssertionError):
+
+    def __init__(self, url, errMessage, data=None):
+        super(TestRequestError, self).__init__(url, errMessage, data)
+        self.url = url
+        self.errMessage = errMessage
+        self.message = "Failed to request %s: %s" % (url, errMessage)
+        if data is not None:
+            self.message += "\nPosted data was: %s" % (data,)
 
 # Empty camera's attributes structure
+CAMERA_ID_FIELD = 'cameraId'
+PREFERRED_SERVER_ID_FIELD = "preferredServerId"
 CAMERA_ATTR_EMPTY = {
-    'cameraID': '',
+    CAMERA_ID_FIELD: '',
     'scheduleEnabled': '',
     'backupType': '',  # CameraBackup_HighQuality, CameraBackup_LowQuality or CameraBackupBoth
     'cameraName': '',
@@ -34,7 +53,7 @@ CAMERA_ATTR_EMPTY = {
     'dewarpingParams': '',
     'minArchiveDays': '',
     'maxArchiveDays': '',
-    'preferedServerId': '',
+    PREFERRED_SERVER_ID_FIELD: '',
     'failoverPriority': ''
 }
 
@@ -118,6 +137,17 @@ FULL_SCHEDULE_TASKS = [
         "streamQuality": "highest"
     }
 ]
+
+def fixApi(api):
+    "Fixes some API names"
+    global CAMERA_ID_FIELD, PREFERRED_SERVER_ID_FIELD
+    if api.cameraId != CAMERA_ID_FIELD:
+        CAMERA_ATTR_EMPTY[api.cameraId] = CAMERA_ATTR_EMPTY.pop(CAMERA_ID_FIELD)
+        CAMERA_ID_FIELD = api.cameraId
+    if api.preferredServerId  != PREFERRED_SERVER_ID_FIELD:
+        CAMERA_ATTR_EMPTY[api.preferredServerId] = CAMERA_ATTR_EMPTY.pop(PREFERRED_SERVER_ID_FIELD)
+        PREFERRED_SERVER_ID_FIELD = api.preferredServerId
+
 
 # ---------------------------------------------------------------------
 # A deep comparison of json object
@@ -363,7 +393,7 @@ def checkResultsEqual(responseList, methodName):
     Returns a tupple of a boolean success indicator and a string fail reason.
     """
     print "------------------------------------------"
-    print "Test sync status on method: %s" % (methodName)
+    print "Check sync status on method %s" % (methodName)
     result = None
     resultAddr = None
     resultJsonObject = None
@@ -372,33 +402,28 @@ def checkResultsEqual(responseList, methodName):
         response, address = entry[0:2]
 
         if response.getcode() != 200:
-            return (False,"Server: %s method: %s HTTP request failed with code: %d" % (address,methodName,response.getcode()))
-        else:
-            content = response.read()
-            if result == None:
-                result = content
-                resultAddr = address
-                resultJsonObject = SafeJsonLoads(result, resultAddr, methodName)
-                if resultJsonObject is None:
-                    return (False, "Wrong response from %s" % resultAddr)
-            else:
-                if content != result:
-                    # Since the server could issue json object has different order which makes us
-                    # have to do deep comparison of json object internally. This deep comparison
-                    # is very slow and only performs on objects that has failed the naive comparison
-                    contentJsonObject = SafeJsonLoads(content, address, methodName)
-                    if contentJsonObject is None:
-                        return (False, "Wrong response from %s" % address)
-                    compareResult = compareJson(contentJsonObject, resultJsonObject)
-                    if compareResult.hasDiff():
-                        print "Server %s has different status with server %s on method %s" % (address,resultAddr,methodName)
-                        print compareResult.errorInfo()
-                        return (False,"Failed to sync")
-        response.close()
-    print "Method:%s is synced in cluster" % (methodName)
-    print "------------------------------------------"
-    return (True,"")
+            raise LegacyTestFailure("Server: %s method: %s HTTP request failed with code: %d" %
+                                    (address, methodName, response.getcode()))
 
+        content = response.read()
+        if result is None:
+            result = content
+            resultAddr = address
+            resultJsonObject = TestJsonLoads(result, resultAddr, methodName)
+        else:
+            if content != result:
+                # Since the server could issue json object has different order which makes us
+                # have to do deep comparison of json object internally. This deep comparison
+                # is very slow and only performs on objects that has failed the naive comparison
+                contentJsonObject = TestJsonLoads(content, address, methodName)
+                compareResult = compareJson(contentJsonObject, resultJsonObject)
+                if compareResult.hasDiff():
+                    print "Method %s returns different results on server %s and %s" % (methodName, address, resultAddr)
+                    print compareResult.errorInfo()
+                    raise ServerCompareFailure("Servers %s and %s aren't synced on %s" % (address, resultAddr, methodName))
+        response.close()
+    print "Method %s is synced in cluster" % (methodName)
+    print "------------------------------------------"
 
 
 # ---------------------------------------------------------------------
@@ -550,6 +575,14 @@ def SafeJsonLoads(text, serverAddr, methodName):
         print "Error parsing server %s, method %s response: %s" % (serverAddr, methodName, e)
         return None
 
+def TestJsonLoads(text, serverAddr, methodName):
+    try:
+        data = json.loads(text)
+        if data is None:
+            raise ValueError()
+        return data
+    except ValueError:
+        raise LegacyTestFailure("Wrong response from %s on %s" % (serverAddr, methodName))
 
 def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None, printHttpError=False, logURL=False):
     url = "http://%s/%s" % (serverAddr, methodName)
@@ -580,6 +613,7 @@ def HttpRequest(serverAddr, methodName, params=None, headers=None, timeout=None,
             print err
         return None
     data = response.read()
+    print "DEBUG0: %s returned data: %s" % (url, repr(data))
     if len(data):
         return SafeJsonLoads(data, serverAddr, methodName)
     return True
@@ -603,26 +637,36 @@ class ClusterWorker(object):
     _queue = None
     _threadList = None
     _threadNum = 1
+    _prestarted = False
+    _working = False
 
-    def __init__(self, num, element_size=0):
+    def __init__(self, num, queue_size=0, doStart=False):
         self._threadNum = num
-        if element_size == 0:
-            element_size = num
-        elif element_size < num:
-            self._threadNum = element_size
-        self._queue = Queue.Queue(element_size)
+        if queue_size == 0:
+            queue_size = num
+        elif queue_size < num:
+            self._threadNum = queue_size
+        self._queue = Queue.Queue(queue_size)
         self._threadList = []
-        self._working = False
         self._oks = []
+        self._fails = []
+        if doStart:
+            self._prestarted = True
+            self.startThreads()
 
     def _do_work(self):
-        return not self._queue.empty()
+        return self._prestarted or not self._queue.empty()
 
     def _worker(self, num):
         while self._do_work():
             func, args = self._queue.get(True)
             try:
                 func(*args)
+            except LegacyTestFailure as err:
+                msg = "%s failed: %s"  % (func.__name__, err.message)
+                print "ERROR: ClusterWorker call " + msg
+                self._oks.append(False)
+                self._fails.append(msg)
             except Exception:
                 print "ERROR: ClusterWorker call to %s got an Exception: %s" % (func.__name__, traceback.format_exc())
                 self._oks.append(False)
@@ -649,9 +693,19 @@ class ClusterWorker(object):
 
     def join(self):
         # We delay the real operation until we call join
-        self.startThreads()
+        if self._prestarted:
+            self._prestarted = False
+        if not self._threadList:
+            self.startThreads()
+        alive = [th for th in self._threadList if th.isAlive()]
+        if len(alive) < len(self._threadList):
+            self._threadList[:] = alive
+        if not (alive) and self._queue.qsize() > 0:
+            print "WARNING: no alive threads but queue isn't empty! Starting threads again!"
+            self._threadList.clear()
+            self.startThreads()
         # Second we call queue join to join the queue
-        self._queue.join()
+        self.joinQueue()
         # Now we safely join the thread since the queue
         # will utimatly be empty after execution
         self.joinThreads()
@@ -665,13 +719,18 @@ class ClusterWorker(object):
     def clearOks(self):
         self._oks = []
 
+    def getFails(self):
+        return self._fails[:]
+
+    def getFailsMsg(self):
+        return 'Some worker tasks failed:' + (''.join('\n\t' + msg for msg in self._fails))
 
 
 class ClusterLongWorker(ClusterWorker):
 
-    def __init__(self, num, element_size=0):
-        print "ClusterLongWorker starting"
-        super(ClusterLongWorker, self).__init__(num, element_size)
+    def __init__(self, num, queue_size=0):
+        #print "ClusterLongWorker starting"
+        super(ClusterLongWorker, self).__init__(num, queue_size)
         self._working = False
 
     def _do_work(self):
@@ -714,8 +773,8 @@ def get_server_guid(host):
 class Version(object):
     value = []
 
-    def __init__(self, verstr=''):
-        self.value = verstr.split('.')
+    def __init__(self, verStr=''):
+        self.value = verStr.split('.')
 
     def __str__(self):
         return '.'.join(self.value)
@@ -749,4 +808,19 @@ def real_caps(str):
 def textdiff(data0, data1, src0, src1):
     ud = difflib.unified_diff(data0.splitlines(True), data1.splitlines(True), src0, src1, n=5)
     return ''.join(ud)
+
+
+def sendRequest(lock, url, data, notify=False):
+    req = urllib2.Request(url, data=data, headers={'Content-Type': 'application/json'})
+    try:
+        with lock:
+            if notify:
+                print "Requesting " + url
+            response = urllib2.urlopen(req)
+    except Exception as err:
+        raise TestRequestError(url, err.message or str(err), data)
+    if response.getcode() != 200:
+        raise TestRequestError(url, "HTTP error code %s" % (response.getcode(),), data)
+    response.close()
+
 

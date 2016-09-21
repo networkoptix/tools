@@ -249,7 +249,7 @@ def email_newcrash(crash, calls, jira_error=None):
             "New crash details:\n"
             % (jira_error.message, jira_error.reply)
         )
-        msg['Subject'] = "Failed to reate issue for a new crash!"
+        msg['Subject'] = "Failed to create issue for a new crash!"
     else:
         where = " (%s)" % crash['component'] if crash['component'] else ''
         title = "A crash with a new trace path found%s.\n\n" % where

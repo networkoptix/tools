@@ -8,7 +8,7 @@ import time
 command = ['pngcrush', '-ow', '-rem', 'allb', '-reduce']
 
 Processes = {}
-MaxProc = 20
+MaxProc = 1
 Quantum = 0.1
 
 

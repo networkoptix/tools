@@ -157,6 +157,7 @@ def run_tests(branch):
     ut_fails = []
     failsum = ''
     ft_failed = False
+    output = []
 
     def _emailResult(what):
         emailTestResult(branch, output, fail=what, testName=(Args.single_ut or ''), summary=failsum)
@@ -1170,7 +1171,7 @@ class FunctestParser(object):
             return False
         self.has_errors = True
         #print ":::::" + line
-        ToSend.log("Multiserver archive test %s!",
+        ToSend.log("Multiserver archive test %s! See it's log below:",
                     "failed" if line.startswith(self.FAIL_MARK) else "reports an error")
         for s in self.collector:
             ToSend.log(s)
@@ -1336,7 +1337,7 @@ def read_functest_output(proc, reader, from_test=''):
                         "The last test stage was %s. Last %s lines are:\n%s" %
                         (proc.returncode, p.stage, len(last_lines), "\n".join(last_lines)))
         success = False
-    return success
+    return success and not p.has_errors
 
 
 T_FAIL = 'FAIL: '
@@ -1787,6 +1788,7 @@ def main():
     if (not Args.no_functest) and any_functest_arg():  # virtual boxes functest only
         ToSend.clear()
         if not perform_func_test(get_tests_to_skip(conf.BRANCHES[0])):
+            print "*** Some of FUCTESTS failed! ***"
             if ToSend.count() and not Args.stdout:
                 emailTestResult(conf.BRANCHES[0], ToSend.lines, testName=nameFunctest())
             return False
