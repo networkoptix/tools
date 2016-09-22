@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 
 def methodNotImplemented( obj = None ):
   raise Exception('(%s) Abstract method call: method is not implemented' % obj)
@@ -30,9 +30,17 @@ def init_environment(config, options = None):
   for var, value in environment.items():
     os.environ[var] = value
 
-  os.putenv('TASKBOT', os.path.join(os.getcwd(), sys.argv[0]))
+  os.environ['TASKBOT'] = os.path.join(os.getcwd(), sys.argv[0])
   if options and options.trace:
     os.putenv('TASKBOT_OPTIONS', '--trace')
   else:
     os.putenv('TASKBOT_OPTIONS', '')
   os.environ['TASKBOT_PARENT_PID'] = "%s" % os.getpid()
+
+# Substitute environment variables
+def sub_environment(s):
+  def sub(m):
+    v = m.group(1)
+    return os.environ.get(v[1:], v)
+  return re.sub(
+    r'(\$[\w]+)', sub, s)

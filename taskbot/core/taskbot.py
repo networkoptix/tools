@@ -19,6 +19,44 @@ from Utils import *
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
 DEFAULT_SHELL="/bin/bash"
 
+class TimeOut:
+
+  def __init__(self, run_timeout, select_timeout):
+    self.__run_timeout__ = run_timeout
+    self.__select_timeout__ = select_timeout
+    self.__select_timeout_stored__ = select_timeout
+    self.__run_start__ = time.time()
+    self.__select_start__ = None
+
+  def __check_select(self):
+    return \
+      self.__select_timeout__ and \
+        self.__select_start__ and \
+          time.time() - self.__select_start__ > \
+            self.__select_timeout__
+
+  def __check_run(self, command_timeout):
+    timeout = command_timeout or self.__run_timeout__
+    return timeout and \
+      time.time() - self.__run_start__ > timeout
+
+  def start_command(self, command):
+    args = command.split()
+    self.__select_start__ =  time.time()
+   
+    if os.path.basename(
+      sub_environment(args[0]).strip('"')) ==  \
+      os.path.basename(sys.argv[0]):
+      self.__select_timeout__ = None
+
+  def finish_command(self):
+    self.__select_timeout__ = \
+      self.__select_timeout_stored__
+
+  def check( self, command_timeout = None ):
+    return self.__check_select() or \
+      self.__check_run(command_timeout)
+
 # Strict output by max size
 class StrictOutput:
 
@@ -166,9 +204,10 @@ class TaskExecutor:
     def __repr__(self):
       return self.__str__()
 
-  def __init__(self, db, shell, parent_task_id = None):
+  def __init__(self, db, shell, timeout, parent_task_id = None):
     self.__task_stack__ = []
     self.__db__ = db
+    self.__timeout__ = timeout
     self.__branch_id__ = self.__select_branch()
     
     self.__root_task_id__ = \
@@ -231,6 +270,7 @@ class TaskExecutor:
     
 
   def start_command(self, command):
+    self.__timeout__.start_command(command)
     return self.start_task(command, True)
 
   def write_command(self, command, is_comment=False, timeout = None):
@@ -253,9 +293,9 @@ class TaskExecutor:
 
         if status is not None:
           break
-        if (timeout and  time.time() - start > timeout):
+        if self.__timeout__.check(timeout):
           break
-    
+
       return status,  stderr, stdout
     return 0, "", ""
    
@@ -287,6 +327,7 @@ class TaskExecutor:
     return status
 
   def finish_command(self, status, err, out):
+    self.__timeout__.finish_command()
     self.__db__.ensure_connect()
 
     task = self.__task_stack__[-1]
@@ -325,10 +366,10 @@ class TaskExecutor:
   def close(self):
     self.__status__.stop()
     self.__shell_process__.stdin.close()
-    # TODO. Need cross-platform solution to kill child processs
-    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.__shell_process__.kill()
     self.__shell_process__.terminate()
+    # TODO. Need cross-platform solution to kill child processs
+    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.finish_tasks_to_level(0)
     self.closed = True
 
@@ -372,6 +413,11 @@ def main():
                     help="Execute COMMAND. This option is mutually " \
                     "exclusive with specifying SCRIPT.")
 
+  parser.add_option("-t", "--timeout", type="int",
+                    help="Run timeout in seconds.  " \
+                    "Zero (or negative) value means indefinite. "\
+                    "Overrides corresponding setting in config file..")
+
   (options, args) = parser.parse_args()
 
   if len(args) == 0 or \
@@ -388,7 +434,7 @@ def main():
   Compressor.gzip_threshold = config.get('gzip_threshold', 0)
   Compressor.gzip_ratio = config.get('gzip_ratio', 0)
   StrictOutput.max_output_size = config.get('max_output_size', 0)
-  global_timeout = config.get('run_timeout', None)
+    
   database = MySQLDB(config.get('db_config', None))
  
   # Detect parent task
@@ -402,9 +448,18 @@ def main():
 
   init_environment(config, options)
 
+  run_timeout = config.get('run_timeout', None)
+  if options.timeout is not None:
+    run_timeout = options.timeout
+
+  timeout = TimeOut(
+    run_timeout,
+    config.get('select_timeout', None))
+
   executor = TaskExecutor(
     database,
     shell = config.get('sh', DEFAULT_SHELL),
+    timeout = timeout,
     parent_task_id = parent_task_id)
 
   if options.description:
@@ -429,7 +484,7 @@ def main():
           if (re.search('^\s*$', value or line)):
             status = executor.process_command(
               command,
-              command_timeout or global_timeout)
+              command_timeout)
             command = ''
             command_timeout = None
           else:
@@ -449,7 +504,7 @@ def main():
     if not executor.closed:
       status = executor.process_command(
         command,
-        command_timeout or global_timeout)
+        command_timeout)
       executor.close()
     
     database.commit()
