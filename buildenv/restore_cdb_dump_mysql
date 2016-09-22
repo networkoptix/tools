@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DUMP_PATH=/home/ak/develop/netoptix_vms_3.0.0/unit_tests/cloud_db_ut/static-resources/clouddb.dump
+DB_NAME=clouddb
+CDB_USER=clouddb
+
+mysql -e "drop database $DB_NAME"
+mysql -e "create database $DB_NAME DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci"
+mysql -e "grant all on $DB_NAME.* to $CDB_USER"
+mysql $DB_NAME < $DUMP_PATH
