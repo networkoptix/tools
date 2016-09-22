@@ -178,8 +178,13 @@ if dumptool is not None:
             f.write(dump)
             f.close()
         try:
-            return dumptool.analyseDump(
-                fname, asString=True, customization=get_customization(crash['path']))
+            dump = dumptool.analyseDump(
+                fname, format='dict', customization=get_customization(crash['path']))
+            if not dump:
+                return False
+            crash['component'] = dump['component']
+            crash['dump'] = dump['dump']
+            return True
         except Exception as err:
             print "Dump analyse failed: " + traceback.format_exc()
             return ''
@@ -205,9 +210,9 @@ def load_crash_dump(crash_type, crash):
     #
     if dumptool is None:
         crash['dump'] = result.text
+        crash['component'] = 'server'
     else:
-        crash['dump'] = callDumptool(result.content, crash)
-        if crash['dump'] == '':
+        if not callDumptool(result.content, crash):
             print "FAILED to analize dump %s" % crash['path']
             #TODO send an email on it?
             return False
@@ -246,8 +251,9 @@ def email_newcrash(crash, calls, jira_error=None):
         )
         msg['Subject'] = "Failed to create issue for a new crash!"
     else:
-        title = "A crash with a new trace path found.\n\n"
-        msg['Subject'] = "Crash with a new trace path found!"
+        where = " (%s)" % crash['component'] if crash['component'] else ''
+        title = "A crash with a new trace path found%s.\n\n" % where
+        msg['Subject'] = "Crash with a new trace path found!%s" % where
     text = MIMEText(
         "%s"
         "Hash: %s\n"
@@ -440,8 +446,8 @@ class CrashMonitor(object):
 
             for crash in crash_list:
                 if self._stop: break
-                if ct == 'dmp':
-                    raw_input("Debug pause. Press ENTER")
+                #if ct == 'dmp':
+                #    raw_input("Debug pause. Press ENTER")
                 #
                 print "Processing: %s" % crash['path']
                 print "Crash info: %s" % crash
@@ -515,7 +521,6 @@ class CrashMonitor(object):
             self._lasts.set_summary()
 
     def create_jira_issue(self, crash, calls, priority, dumps):
-        name = "Crash detected: %s" % crash['hash']
         desc = (
             "Crash Monitor detected a crash with a new trace path\n\n"
             "Hash: %s\n"
@@ -528,7 +533,20 @@ class CrashMonitor(object):
             return
         if priority > len(ISSUE_LEVEL):
             priority = len(ISSUE_LEVEL)
-        issue_key, url = nxjira.create_issue(name, desc, ISSUE_LEVEL[priority-1][1])
+        if crash['component'] == 'server':
+            component = 'Server'
+            team = 'Server'
+        elif crash['component'] == 'client':
+            component = 'Client'
+            team = 'GUI'
+        else:
+            print "ERROR: create_jira_issue: unknown component value: %s" % (crash['component'],)
+            component = team = None
+        if component is None:
+            name = "Crash detected: %s" % crash['hash']
+        else:
+            name = "Crash detected in %s: %s" % (crash['component'], crash['hash'])
+        issue_key, url = nxjira.create_issue(name, desc, ISSUE_LEVEL[priority-1][1], component, team)
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         for _, path, dump in dumps:
