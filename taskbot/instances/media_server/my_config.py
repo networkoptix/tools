@@ -3,8 +3,9 @@
 import os
 
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
+BRANCH_NAME = 'Ubuntu'
 TASKBOT_VAR = os.path.join(TASKBOT_ROOT, BRANCH_NAME)
-TASKBOT_DEVTOOLS_ROOT = os.path.join(TASKBOT_VAR, 'devtools')
+TASKBOT_DEVTOOLS_ROOT = os.path.join(os.environ['HOME'], 'prj/src/devtools')
 
 config = {
   'sh': '/bin/bash',
@@ -14,6 +15,7 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'environment' : {
+    'TASKBOT_BRANCHNAME': BRANCH_NAME,
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/media_server'),

@@ -67,8 +67,6 @@ def notify(report, prev_run, subject, reason, debug=False):
   for c in commits:
     if not debug:
       to[c.author] = c.author_email
-    else:
-      to['Artem'] = 'avjerom@yandex.ru'
     cs.append("%-20s %-20s %s" % \
       (c.author, c.repo.name, c.description))
 
