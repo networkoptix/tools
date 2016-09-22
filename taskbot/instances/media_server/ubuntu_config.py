@@ -3,7 +3,7 @@
 import os
 
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
-TASKBOT_VAR = os.path.join(TASKBOT_ROOT, BRANCH_NAME)
+TASKBOT_VAR = os.path.join(TASKBOT_ROOT, os.environ.get('TASKBOT_BRANCHNAME', ''))
 TASKBOT_DEVTOOLS_ROOT = os.path.join(TASKBOT_VAR, 'devtools')
 
 config = {
