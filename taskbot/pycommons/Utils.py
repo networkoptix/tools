@@ -1,4 +1,4 @@
-import os, sys, re, socket, platform
+import os, sys, re, socket, platform, fcntl, struct
 
 def methodNotImplemented( obj = None ):
   raise Exception('(%s) Abstract method call: method is not implemented' % obj)
@@ -48,7 +48,7 @@ def sub_environment(s):
 def get_host_name():
   return os.environ.get(
     'HOSTNAME',
-    socket.gethostbyname(socket.gethostname()))
+    socket.gethostname())
 
 def get_platform():
   (system, node, release, version, machine, processor) = \

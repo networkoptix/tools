@@ -122,7 +122,6 @@ class OutputReader:
         break
       self.__buffer__.append(c)
 
-
   def get(self):
     return self.__buffer__.get()
 
@@ -291,7 +290,9 @@ class TaskExecutor:
   def __check_get_status( self, status, task ):
     if status is not None:
       if len(status) == 0: # shell was terminated
-        task.error_message = "non-zero exit status (execution terminated)"
+        status = self.__shell_process__.returncode
+        if status:
+          task.errormessage = "non-zero exit status (execution terminated)"
         return self.__shell_process__.returncode, True
       status = int(status)
       if status != 0:
