@@ -16,6 +16,7 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'environment' : {
+    'TASKBOT_PUBLIC_HTML_HOST': 'http://demo.networkoptix.com:3580' 
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/media_server'),

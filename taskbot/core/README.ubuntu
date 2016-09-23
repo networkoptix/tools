@@ -1,0 +1,33 @@
+Requirenments:
+
+1. UI 
+
+Packages:
+- apache2
+- mariadb
+
+Settings:
+APACHE
+- copy devtools/taskbot/core/conf/apache_taskbot.conf to /etc/apache2/sites-enabled and change:
+  * Change VirtualHost address & port or ServerName;
+  * Set ServiceAlias (optional);
+  * Set valid paths for logs & public_html
+- enable cgi module (sudo a2enmod cgi) & restart apache (service apache2 restart).
+- prepare public_html:
+          |-- commons (devtools/taskbot/commons)
+          |-- taskbot (devtools/taskbot/ui)
+
+MYSQL
+- Change /etc/mysql/my.cnf:
+  * max_allowed_packet	= 16M
+- Ensure that mysql service were started.
+- Create taskbot database:
+  * sudo -i mysql --user=root mysql < devtools/taskbot/core/sql/initial.mysql
+  * mysql --user=taskbot --password=taskbot taskbot <  devtools/taskbot/core/sql/schema.mysql
+
+2. Client
+Packages:
+- python mysql connector (apt-get install python-mysql.connector).
+- screen (apt-get install screen)(optional)
+
+
