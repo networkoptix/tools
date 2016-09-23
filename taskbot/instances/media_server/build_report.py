@@ -32,7 +32,7 @@ class BuildReport(Report):
       task_href = self.task_href(failed)
       result = "FAILED"
 
-    history = "Media server<br>%s<br>" % desc
+    history = "<br>%s<br>" % desc
     history += "<a href=\"%s\">%s</a>" % (task_href, result)
 
     self.add_history(color, history)

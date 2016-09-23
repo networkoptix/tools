@@ -1,4 +1,4 @@
-import os, sys, re
+import os, sys, re, socket, platform
 
 def methodNotImplemented( obj = None ):
   raise Exception('(%s) Abstract method call: method is not implemented' % obj)
@@ -44,3 +44,15 @@ def sub_environment(s):
     return os.environ.get(v[1:], v)
   return re.sub(
     r'(\$[\w]+)', sub, s)
+
+def get_host_name():
+  return os.environ.get(
+    'HOSTNAME',
+    socket.gethostbyname(socket.gethostname()))
+
+def get_platform():
+  (system, node, release, version, machine, processor) = \
+     platform.uname()
+  return os.environ.get(
+    'TASKBOT_PLATFORM',
+    "%s %s" % (machine, system))

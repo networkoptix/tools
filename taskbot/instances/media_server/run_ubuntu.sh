@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export TASKBOT_BRANCHNAME="Ubuntu"
+export TASKBOT_BRANCHNAME="dev_3.0.0"
+export TASKBOT_PLATFORM=`uname -ol`
 CONFIG="$HOME"/taskbot/"$TASKBOT_BRANCHNAME"/devtools/taskbot/instances/media_server/ubuntu_config.py
 BIN="$HOME"/taskbot/"$TASKBOT_BRANCHNAME"/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
@@ -19,7 +20,7 @@ while true; do
     fi
 
     if ! $TASKBOT \
-        --description "Poll for changes ($TASKBOT_BRANCHNAME)" \
+        --description "Poll for changes ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
         --trace \
         --timeout=0 \
         $CONFIG \

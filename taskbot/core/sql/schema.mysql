@@ -1,5 +1,13 @@
 -- -*- sql -*-
 
+CREATE TABLE platform (
+        id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        host VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL         
+) ENGINE=InnoDB;
+
+CREATE UNIQUE INDEX platform_host ON platform (host);
+
 CREATE TABLE branch (
         id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
         description TEXT NOT NULL         
@@ -12,8 +20,8 @@ CREATE TABLE task (
 
         root_task_id INTEGER UNSIGNED,
         parent_task_id INTEGER UNSIGNED,
-        branch_id INTEGER UNSIGNED,
-
+        branch_id INTEGER UNSIGNED NOT NULL,
+        platform_id INTEGER UNSIGNED NOT NULL,
         description TEXT NOT NULL,
         is_command BOOL NOT NULL,
         start DOUBLE NOT NULL,
@@ -25,6 +33,8 @@ CREATE TABLE task (
         FOREIGN KEY (parent_task_id) REFERENCES task (id)
             ON DELETE CASCADE,
         FOREIGN KEY (branch_id) REFERENCES branch (id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (platform_id) REFERENCES platform (id)
             ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

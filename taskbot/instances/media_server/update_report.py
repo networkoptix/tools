@@ -29,7 +29,7 @@ class UpdateReport(Report):
 
   def __generate__( self ):
     import HGUtils
-    type = "Media-server changes"
+    type = "Changes"
     
     commits = HGUtils.changes(self, self.get_previous_run());
     if commits is None:

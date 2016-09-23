@@ -219,7 +219,7 @@ sub back_ref {
 sub generate_list {
     my ($list, $count, $title, $generator, $other_list_ref) = @_;
 
-    $list->execute(@$params{ qw(branch branch offset limit) });
+    $list->execute(@$params{ qw(branch platform offset limit) });
 
     print $q->header(-type => 'text/html; charset=utf-8');
     print $q->start_html('Taskbot');
@@ -267,20 +267,32 @@ sub generate_history_list {
         LEFT JOIN task t3 ON h3.task_id = t3.id
         LEFT JOIN running_task r3 ON h3.task_id = r3.task_id
         WHERE h.task_id = h.link_task_id
-        AND (t.branch_id IN (SELECT id FROM branch where description=?) OR ? IS NULL)      
+        AND (t.branch_id IN (SELECT id FROM branch where description=?))
+        AND (t.platform_id IN (SELECT id FROM platform where host=?))
         ORDER BY h.task_id DESC
         LIMIT ?, ?
     ]);
+
+    my ($platform_dsc) = $dbh->selectrow_array(q[
+        SELECT description
+        FROM platform
+        WHERE host =?
+    ], undef, $params->{platform});
 
     my ($count) = $dbh->selectrow_array(q[
         SELECT COUNT(*)
         FROM history
         WHERE task_id = link_task_id
         AND (task_id IN (SELECT id FROM task WHERE branch_id IN
-             (SELECT id FROM branch where description=?)) OR ? IS NULL)
-    ], undef, $params->{branch}, $params->{branch});
+             (SELECT id FROM branch where description=?)))
+        AND (task_id IN (SELECT id FROM task WHERE platform_id IN
+             (SELECT id FROM platform where host=?)))
+    ], undef, $params->{branch}, $params->{platform});
 
-    generate_list($history, $count, "Run list (total $count)", \&history_list,
+    generate_list($history, $count, 
+                  "Platform: $platform_dsc ($params->{platform}), " .
+                  "Branch: $params->{branch}<br><br>" .
+                  "Run list (total $count)", \&history_list,
                   self_ref("Task list", tasks => 0));
 }
 
@@ -339,7 +351,8 @@ sub generate_task_list {
         FROM task t
         LEFT JOIN running_task r ON r.task_id = t.id
         WHERE t.parent_task_id IS NULL 
-        AND (t.branch_id IN (SELECT id FROM branch where description=?) OR ? IS NULL)
+        AND (t.branch_id IN (SELECT id FROM branch where description=?))
+        AND (t.platform_id IN (SELECT id FROM platform where host=?))
         ORDER BY t.id DESC
         LIMIT ?, ?
     ]);
@@ -348,8 +361,9 @@ sub generate_task_list {
         SELECT COUNT(*)
         FROM task
         WHERE parent_task_id IS NULL 
-        AND (branch_id IN (SELECT id FROM branch where description=?) OR ? IS NULL)
-    ], undef, $params->{branch}, $params->{branch});
+        AND (branch_id IN (SELECT id FROM branch where description=?))
+        AND (platform_id IN (SELECT id FROM platform where host=?))
+    ], undef, $params->{branch}, $params->{platform});
 
     generate_list($tasks, $count, "Task list (total $count)", \&task_list,
                   self_ref("History", history => 0));
@@ -455,9 +469,81 @@ sub generate_task_description {
     print $q->end_html;
 }
 
+sub generate_main {
+    if (!$q->param || !($q->param('platform') && $q->param('branch'))) {
+      print $q->header(-type => 'text/html; charset=utf-8');
+      print $q->start_html('Taskbot');
+      print $q->start_form;
+      print $q->h3("Select platform & branch");
+
+      print $q->br;
+
+      {
+        # Platform
+        my $select = $dbh->prepare(
+         q[SELECT host, description
+          FROM platform]);
+
+        $select->execute();
+
+        my %platform_hash;
+
+        while (my $row = $select->fetchrow_hashref) {
+          $platform_hash{$row->{host}} = 
+            "$row->{description} ($row->{host})";
+        }
+
+        my @platforms = keys %platform_hash;
+
+        print $q->label('Platform:');
+        print $q->popup_menu(
+                             -name=>'platform',
+                             -values=>\@platforms,
+                             -default=>$params->{platform} || $platforms[0],
+                             -labels=>\%platform_hash);
+      }
+
+      print $q->br;
+
+      {
+        # Branch
+        my $select = $dbh->prepare(
+          q[SELECT description FROM branch]);
+
+        $select->execute();
+        my @branches = ();
+        while (my $row = $select->fetchrow_hashref) {
+          push @branches, $row->{description};
+        }
+
+        print $q->label('Branch: ');
+        print $q->popup_menu(
+                             -name=>'branch',
+                             -values=>\@branches,
+                             -default=>$params->{branch} || $branches[0]);
+      }
+      print $q->br;
+      print $q->submit(-value=>'Select');
+      print $q->end_form;
+
+      print $q->end_html;
+    }
+    else {
+      $params->{platform} = $q->param('platform');
+      $params->{branch} = $q->param('branch');
+
+      generate_history_list;
+    }
+}
 
 if (exists $params->{history}) {
+  if (not (defined $params->{branch} && defined $params->{platform})) {
+    generate_main;
+  }
+  else
+  {
     generate_history_list;
+  }
 } elsif (exists $params->{tasks}) {
     generate_task_list;
 } elsif (exists $params->{report}) {

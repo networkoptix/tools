@@ -3,7 +3,9 @@
 import os
 
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
-TASKBOT_VAR = os.path.join(TASKBOT_ROOT, os.environ.get('TASKBOT_BRANCHNAME', ''))
+TASKBOT_VAR = os.path.join(
+  TASKBOT_ROOT,
+  os.environ['TASKBOT_BRANCHNAME'])
 TASKBOT_DEVTOOLS_ROOT = os.path.join(TASKBOT_VAR, 'devtools')
 
 config = {
@@ -19,7 +21,6 @@ config = {
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/media_server'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
-    'TASKBOT_NX_VMS_BRANCH': 'dev_3.0.0',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@enk.me/devtools',
     }
   }

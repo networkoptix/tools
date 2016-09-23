@@ -2,7 +2,7 @@
 # Artem V. Nikitin
 # Report base class
 
-import os, zlib, socket
+import os, zlib
 from MySQLDB import MySQLDB
 from Utils import *
 
@@ -33,14 +33,24 @@ class Report:
     self.__db__ =  MySQLDB(self.__config__.get('db_config', None)) # Takbot database
     self.__root_task__ = root_task or self.__find_root()
     self.__link_task_id__ = self.__root_task__.id
+    self.__platform__ = self.__find_platform()
+    self.__branch__ = self.__find_branch()
 
-  # Raw report SQL 
+  # Raw report SQL
+  def __find_platform(self):
+    return self.__db__.query("""SELECT id FROM platform
+      WHERE host = %s""", (get_host_name(), ))[0]
+
+  def __find_branch(self):
+    return self.__db__.query("""SELECT id FROM branch
+      WHERE description = %s""", (os.environ['TASKBOT_BRANCHNAME'], ))[0]
+  
   def __find_root(self):
     (parent_task_id, ) = \
     self.__db__.query("""SELECT MIN(task_id)
       FROM running_task
       WHERE host = %s AND pid = %s""",
-    (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
+    (get_host_name(), os.environ['TASKBOT_PARENT_PID']))
 
     while parent_task_id:
       res = \
@@ -125,7 +135,10 @@ class Report:
                   FROM history h
                   JOIN task t ON h.task_id = t.id
                   WHERE h.task_id < %s
-                  AND t.description = %s)""",(task.id, task.description))
+                  AND t.platform_id = %s
+                  AND t.branch_id = %s
+                  AND t.description = %s)""",
+      (task.id, self.__platform__, self.__branch__, task.description))
     if prev_task:
       return Report.Task(*prev_task)
     return None
@@ -252,9 +265,12 @@ class Report:
   def get_taskbot_link(self):
     host = os.environ.get(
       'TASKBOT_PUBLIC_HTML_HOST',
-      socket.gethostbyname(socket.gethostname()))
-    return "http://%s/taskbot/browse.cgi" % host
-
+      get_host_name())
+    return "http://%s/taskbot/browse.cgi?platform=%s&branch=%s" % \
+       (host,
+        urllib.quote(get_platform()),
+        urllib.quote(os.environ['TASKBOT_BRANCHNAME']))
+        
   def generate( self ):
     self.__generate__()
     self.__db__.commit()

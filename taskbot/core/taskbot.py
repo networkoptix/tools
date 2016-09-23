@@ -18,6 +18,8 @@ from Utils import *
 
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
 DEFAULT_SHELL="/bin/bash"
+DEFAULT_BRANCH='Test'
+DEFAULT_PLATFORM='Test'
 
 class TimeOut:
 
@@ -28,12 +30,16 @@ class TimeOut:
     self.__run_start__ = time.time()
     self.__select_start__ = None
 
-  def __check_select(self):
-    return \
-      self.__select_timeout__ and \
-        self.__select_start__ and \
-          time.time() - self.__select_start__ > \
-            self.__select_timeout__
+  def __check_select(self, selected):
+    if selected:
+      self.__select_timeout__ = time.time()
+      return False
+    else:
+      return \
+        self.__select_timeout__ and \
+          self.__select_start__ and \
+            time.time() - self.__select_start__ > \
+              self.__select_timeout__
 
   def __check_run(self, command_timeout):
     timeout = command_timeout or self.__run_timeout__
@@ -53,8 +59,8 @@ class TimeOut:
     self.__select_timeout__ = \
       self.__select_timeout_stored__
 
-  def check( self, command_timeout = None ):
-    return self.__check_select() or \
+  def check( self, command_timeout = None, selected = False ):
+    return self.__check_select(selected) or \
       self.__check_run(command_timeout)
 
 # Strict output by max size
@@ -156,8 +162,8 @@ class TaskExecutor:
 
   START_TASK = \
     """INSERT INTO task (root_task_id, parent_task_id, branch_id, 
-    description, is_command, start, finish)
-    VALUES (%s, %s, %s, %s, %s, %s, 0)"""
+    platform_id, description, is_command, start, finish)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, 0)"""
 
   FINISH_TASK = \
     """UPDATE task SET finish = %s, error_message = %s
@@ -188,6 +194,18 @@ class TaskExecutor:
     """SELECT id FROM branch
     WHERE description = %s"""
 
+  INSERT_BRANCH = \
+    """INSERT INTO branch (description)
+    VALUES (%s)"""
+
+  SELECT_PLATFORM = \
+    """SELECT id FROM platform
+    WHERE host = %s"""
+
+  INSERT_PLATFORM = \
+    """INSERT INTO platform (host, description)
+    VALUES (%s, %s)"""
+
   class Task:
 
     def __init__(self, task_id, is_command):
@@ -209,6 +227,7 @@ class TaskExecutor:
     self.__db__ = db
     self.__timeout__ = timeout
     self.__branch_id__ = self.__select_branch()
+    self.__platform_id__ = self.__select_platform()
     
     self.__root_task_id__ = \
       self.__select_root_task_id(parent_task_id)
@@ -235,13 +254,26 @@ class TaskExecutor:
 
   # Get taskbot branch id
   def __select_branch(self):
-    if os.environ.get('BRANCH_NAME'):
-      res = self.__db__.query(
-        TaskExecutor.SELECT_BRANCH,
-        (os.environ['BRANCH_NAME'],))
-      if res:
-        return res[0]
-    return None
+    branch = os.environ.get('TASKBOT_BRANCHNAME', DEFAULT_BRANCH)
+    res = self.__db__.query(
+      TaskExecutor.SELECT_BRANCH,
+      (branch,))
+    if res:
+      return res[0]
+    else:
+      return self.__db__.execute(
+        TaskExecutor.INSERT_BRANCH, (branch,))
+
+  def __select_platform(self):
+    host = get_host_name()
+    res = self.__db__.query(
+      TaskExecutor.SELECT_PLATFORM,
+      (host,))
+    if res:
+      return res[0]
+    else:
+      return self.__db__.execute(
+        TaskExecutor.INSERT_PLATFORM, (host, get_platform()))
 
   def __select_root_task_id(self, parent_task_id):
     if parent_task_id:
@@ -293,7 +325,8 @@ class TaskExecutor:
 
         if status is not None:
           break
-        if self.__timeout__.check(timeout):
+        if self.__timeout__.check(
+          timeout, bool(status or out or err)):
           break
 
       return status,  stderr, stdout
@@ -382,7 +415,7 @@ class TaskExecutor:
     task_id = self.__db__.execute(
       TaskExecutor.START_TASK,
       (self.__root_task_id__, parent_task_id,  self.__branch_id__,
-       description,  is_command, time.time()))
+       self.__platform_id__, description,  is_command, time.time()))
     
     if not self.__root_task_id__:
       self.__root_task_id__ = task_id
@@ -391,7 +424,7 @@ class TaskExecutor:
     
     self.__db__.execute(
       TaskExecutor.CREATE_RUNNING_TASK,
-      (task_id, os.environ['HOSTNAME'], 
+      (task_id, get_host_name(), 
        os.getpid(), os.environ['USER']))
 
     self.__db__.commit()
@@ -444,7 +477,7 @@ def main():
     parent_task_id, = \
       database.query(
         TaskExecutor.SELECT_PARENT_TASK,
-        (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
+        (get_host_name(), os.environ['TASKBOT_PARENT_PID']))
 
   init_environment(config, options)
 
