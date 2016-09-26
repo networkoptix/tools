@@ -1233,16 +1233,16 @@ def RunByAutotest(arg0):
         ret, reason = testMaster.init(notest=True)
         if not ret:
             print "Failed to initialize the cluster test object: %s" % (reason)
-            return
+            return False
         config = testMaster.getConfig()
         with LegacyTestWrapper(config):
             if not testMaster.testConnection():
                 print "Connection test failed"
-                return
+                return False
             ret, reason = testMaster.initial_tests()
             if ret == False:
                 print "The initial cluster test failed: %s" % (reason)
-                return
+                return False
             print "Basic functional tests start"
             the_test = unittest.main(module=legacy_main, exit=False, argv=[arg0])
             if the_test.result.wasSuccessful():
@@ -1386,7 +1386,8 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
     argv = testMaster.preparseArgs(sys.argv)
     if len(argv) == 1:  # called from auto.py, using boxes which are created, but servers not started
-        RunByAutotest(argv[0])
+        if not RunByAutotest(argv[0]):
+            sys.exit(1)
     elif len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':

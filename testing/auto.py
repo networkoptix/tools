@@ -661,13 +661,21 @@ def wait_servers_ready(iplist):
             time.sleep(1)
 
 
+FUNCTEST_CFG_TPL = 'functest.cfg.tpl'
+FUNCTEST_CFG_NAME = 'functest-tmp.cfg'
+NATTEST_CFG_NAME = 'nattest-tmp.cfg'
+
 BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py"]
-NATCON_ARGS = ["--natcon", '--config', 'nattest.cfg']
+COMMON_ARGS = ['--config', FUNCTEST_CFG_NAME]
+NATCON_ARGS = ["--natcon", '--config', NATTEST_CFG_NAME]
 
 
 def mk_functest_cmd(to_skip):
     only_test = ''
     cmd = BASE_FUNCTEST_CMD[:]
+    if not Args.natcon:
+        cmd += COMMON_ARGS
+
     if Args.timesync:
         cmd.append("--timesync")
         only_test = "timesync"
@@ -693,6 +701,22 @@ def mk_functest_cmd(to_skip):
     return cmd, only_test
 
 
+def prepare_functest_cfg(natcon=False):
+    if natcon:
+        name = NATTEST_CFG_NAME
+        boxList = ('Box1', 'Behind')
+    else:
+        name = FUNCTEST_CFG_NAME
+        boxList = ('Box1', 'Box2')
+    args = {
+        'serverList' : ','.join('%s:%s' % (
+            conf.BOX_IP[box], conf.MEDIASERVER_PORT) for box in boxList),
+        'username': conf.MEDIASERVER_USER,
+        'password': conf.MEDIASERVER_PASS,
+    }
+    file(name, "w").write(file(FUNCTEST_CFG_TPL).read() % args)
+
+
 def perform_func_test(to_skip):
     if os.name != 'posix':
         raw_log("\nFunctional tests require POSIX-compatible OS. Skipped.")
@@ -701,6 +725,7 @@ def perform_func_test(to_skip):
     reader = proc = None
     success = True
     try:
+        prepare_functest_cfg()
         if not Args.nobox:
             start_boxes(['Box1'] if Args.natcon else ['Box1','Box2'])
             need_stop = True
@@ -725,6 +750,7 @@ def perform_func_test(to_skip):
                     RESULT.append(('main-call-functests', True))
 
             if (not only_test or only_test == 'natcon') and 'natcon' not in to_skip:
+                prepare_functest_cfg(natcon=True)
                 if not only_test:
                     cmd = BASE_FUNCTEST_CMD + NATCON_ARGS
                     reader.unregister()
