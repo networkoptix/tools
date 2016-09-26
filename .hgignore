@@ -15,4 +15,6 @@ boxes.rb
 networkoptix-mediaserver.deb
 .vagrant
 sample.mkv
+*test-tmp.cfg
+*.*.*.*_*.*.log
 

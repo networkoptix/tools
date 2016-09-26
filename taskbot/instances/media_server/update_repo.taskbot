@@ -20,7 +20,7 @@ while true; do
   echo devtools
   cd "$TASKBOT_REPO" && hg pull && hg up
   echo nx_vms
-  cd "$TASKBOT_VAR"/nx_vms && hg pull && hg up "$TASKBOT_NX_VMS_BRANCH"
+  cd "$TASKBOT_VAR"/nx_vms && hg pull && hg up "$TASKBOT_BRANCHNAME"
   DEVTOOLS_NEW=$(cd "$TASKBOT_REPO" && hg id -i | sed s'/\+$//')
   NX_VMS_NEW=$(cd "$TASKBOT_VAR"/nx_vms && hg id -i | sed s'/\+$//')
   # Test changes

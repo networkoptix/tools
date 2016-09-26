@@ -15,6 +15,9 @@ do
    echo $i
 done
 
+# + ! timeout=2
+sleep 100
+
 #echo $ABRACADABRA
 /such/no
 

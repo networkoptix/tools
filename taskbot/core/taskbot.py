@@ -18,6 +18,50 @@ from Utils import *
 
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
 DEFAULT_SHELL="/bin/bash"
+DEFAULT_BRANCH='Test'
+DEFAULT_PLATFORM='Test'
+
+class TimeOut:
+
+  def __init__(self, run_timeout, select_timeout):
+    self.__run_timeout__ = run_timeout
+    self.__select_timeout__ = select_timeout
+    self.__select_timeout_stored__ = select_timeout
+    self.__run_start__ = time.time()
+    self.__select_start__ = None
+
+  def __check_select(self, selected):
+    if selected:
+      self.__select_timeout__ = time.time()
+      return False
+    else:
+      return \
+        self.__select_timeout__ and \
+          self.__select_start__ and \
+            time.time() - self.__select_start__ > \
+              self.__select_timeout__
+
+  def __check_run(self, command_timeout):
+    timeout = command_timeout or self.__run_timeout__
+    return timeout and \
+      time.time() - self.__run_start__ > timeout
+
+  def start_command(self, command):
+    args = command.split()
+    self.__select_start__ =  time.time()
+   
+    if os.path.basename(
+      sub_environment(args[0]).strip('"')) ==  \
+      os.path.basename(sys.argv[0]):
+      self.__select_timeout__ = None
+
+  def finish_command(self):
+    self.__select_timeout__ = \
+      self.__select_timeout_stored__
+
+  def check( self, command_timeout = None, selected = False ):
+    return self.__check_select(selected) or \
+      self.__check_run(command_timeout)
 
 # Strict output by max size
 class StrictOutput:
@@ -78,7 +122,6 @@ class OutputReader:
         break
       self.__buffer__.append(c)
 
-
   def get(self):
     return self.__buffer__.get()
 
@@ -118,8 +161,8 @@ class TaskExecutor:
 
   START_TASK = \
     """INSERT INTO task (root_task_id, parent_task_id, branch_id, 
-    description, is_command, start, finish)
-    VALUES (%s, %s, %s, %s, %s, %s, 0)"""
+    platform_id, description, is_command, start, finish)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, 0)"""
 
   FINISH_TASK = \
     """UPDATE task SET finish = %s, error_message = %s
@@ -150,6 +193,18 @@ class TaskExecutor:
     """SELECT id FROM branch
     WHERE description = %s"""
 
+  INSERT_BRANCH = \
+    """INSERT INTO branch (description)
+    VALUES (%s)"""
+
+  SELECT_PLATFORM = \
+    """SELECT id FROM platform
+    WHERE host = %s"""
+
+  INSERT_PLATFORM = \
+    """INSERT INTO platform (host, description)
+    VALUES (%s, %s)"""
+
   class Task:
 
     def __init__(self, task_id, is_command):
@@ -166,10 +221,12 @@ class TaskExecutor:
     def __repr__(self):
       return self.__str__()
 
-  def __init__(self, db, shell, parent_task_id = None):
+  def __init__(self, db, shell, timeout, parent_task_id = None):
     self.__task_stack__ = []
     self.__db__ = db
+    self.__timeout__ = timeout
     self.__branch_id__ = self.__select_branch()
+    self.__platform_id__ = self.__select_platform()
     
     self.__root_task_id__ = \
       self.__select_root_task_id(parent_task_id)
@@ -196,13 +253,26 @@ class TaskExecutor:
 
   # Get taskbot branch id
   def __select_branch(self):
-    if os.environ.get('BRANCH_NAME'):
-      res = self.__db__.query(
-        TaskExecutor.SELECT_BRANCH,
-        (os.environ['BRANCH_NAME'],))
-      if res:
-        return res[0]
-    return None
+    branch = os.environ.get('TASKBOT_BRANCHNAME', DEFAULT_BRANCH)
+    res = self.__db__.query(
+      TaskExecutor.SELECT_BRANCH,
+      (branch,))
+    if res:
+      return res[0]
+    else:
+      return self.__db__.execute(
+        TaskExecutor.INSERT_BRANCH, (branch,))
+
+  def __select_platform(self):
+    host = get_host_name()
+    res = self.__db__.query(
+      TaskExecutor.SELECT_PLATFORM,
+      (host,))
+    if res:
+      return res[0]
+    else:
+      return self.__db__.execute(
+        TaskExecutor.INSERT_PLATFORM, (host, get_platform()))
 
   def __select_root_task_id(self, parent_task_id):
     if parent_task_id:
@@ -218,19 +288,22 @@ class TaskExecutor:
     os.close(self.__rfdstatus__)
 
   def __check_get_status( self, status, task ):
-    if status:
+    if status is not None:
       if len(status) == 0: # shell was terminated
-        task.error_message = "non-zero exit status (execution terminated)"
+        status = self.__shell_process__.returncode
+        if status:
+          task.errormessage = "non-zero exit status (execution terminated)"
         return self.__shell_process__.returncode, True
       status = int(status)
       if status != 0:
         task.error_message = "non-zero exit status"
       return status, False
     task.error_message = "command_timeout has expired"
-    return 10, True
+    return 1, True
     
 
   def start_command(self, command):
+    self.__timeout__.start_command(command)
     return self.start_task(command, True)
 
   def write_command(self, command, is_comment=False, timeout = None):
@@ -251,9 +324,12 @@ class TaskExecutor:
         Trace.trace(out)
         Trace.trace(err)
 
-        if status is not None or (timeout and  time.time() - start > timeout):
+        if status is not None:
           break
-    
+        if self.__timeout__.check(
+          timeout, bool(status or out or err)):
+          break
+
       return status,  stderr, stdout
     return 0, "", ""
    
@@ -285,7 +361,8 @@ class TaskExecutor:
     return status
 
   def finish_command(self, status, err, out):
-    self.__db__.ping()
+    self.__timeout__.finish_command()
+    self.__db__.ensure_connect()
 
     task = self.__task_stack__[-1]
 
@@ -299,7 +376,7 @@ class TaskExecutor:
 
   def finish_task(self, in_transaction = False):
     if not in_transaction:
-      self.__db__.ping()
+      self.__db__.ensure_connect()
 
     task = self.__task_stack__.pop()
 
@@ -323,22 +400,23 @@ class TaskExecutor:
   def close(self):
     self.__status__.stop()
     self.__shell_process__.stdin.close()
-    # TODO. Need cross-platform solution to kill child processs
-    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.__shell_process__.kill()
     self.__shell_process__.terminate()
+    # TODO. Need cross-platform solution to kill child processs
+    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.finish_tasks_to_level(0)
     self.closed = True
 
   # Start new task
   def start_task(self, description, is_command=False):
     parent_task_id = None
+    self.__db__.ensure_connect()
     if len(self.__task_stack__):
       parent_task_id = self.__task_stack__[-1].task_id
     task_id = self.__db__.execute(
       TaskExecutor.START_TASK,
       (self.__root_task_id__, parent_task_id,  self.__branch_id__,
-       description,  is_command, time.time()))
+       self.__platform_id__, description,  is_command, time.time()))
     
     if not self.__root_task_id__:
       self.__root_task_id__ = task_id
@@ -347,7 +425,7 @@ class TaskExecutor:
     
     self.__db__.execute(
       TaskExecutor.CREATE_RUNNING_TASK,
-      (task_id, os.environ['HOSTNAME'], 
+      (task_id, get_host_name(), 
        os.getpid(), os.environ['USER']))
 
     self.__db__.commit()
@@ -369,6 +447,11 @@ def main():
                     help="Execute COMMAND. This option is mutually " \
                     "exclusive with specifying SCRIPT.")
 
+  parser.add_option("-t", "--timeout", type="int",
+                    help="Run timeout in seconds.  " \
+                    "Zero (or negative) value means indefinite. "\
+                    "Overrides corresponding setting in config file..")
+
   (options, args) = parser.parse_args()
 
   if len(args) == 0 or \
@@ -385,7 +468,7 @@ def main():
   Compressor.gzip_threshold = config.get('gzip_threshold', 0)
   Compressor.gzip_ratio = config.get('gzip_ratio', 0)
   StrictOutput.max_output_size = config.get('max_output_size', 0)
-  global_timeout = config.get('run_timeout', None)
+    
   database = MySQLDB(config.get('db_config', None))
  
   # Detect parent task
@@ -395,13 +478,22 @@ def main():
     parent_task_id, = \
       database.query(
         TaskExecutor.SELECT_PARENT_TASK,
-        (os.environ['HOSTNAME'], os.environ['TASKBOT_PARENT_PID']))
+        (get_host_name(), os.environ['TASKBOT_PARENT_PID']))
 
   init_environment(config, options)
+
+  run_timeout = config.get('run_timeout', None)
+  if options.timeout is not None:
+    run_timeout = options.timeout
+
+  timeout = TimeOut(
+    run_timeout,
+    config.get('select_timeout', None))
 
   executor = TaskExecutor(
     database,
     shell = config.get('sh', DEFAULT_SHELL),
+    timeout = timeout,
     parent_task_id = parent_task_id)
 
   if options.description:
@@ -410,48 +502,53 @@ def main():
   command = ''
   command_timeout = None
   status = 0
-  if options.command:
-    command = options.command
-  else:
-    script = args[1]    
-    with open(script) as fp:
-      for line in fp:
-        if executor.closed:
-          break
-        m = re.search(CMD_HEADER_REGEX, line)
-        level = var = value = None
-        if m:
-          (level, _, var, value) = m.group(1,2,3,4)
-        if (re.search('^\s*$', value or line)):
-          status = executor.process_command(
-            command,
-            command_timeout or global_timeout)
-          command = ''
-          command_timeout = None
-        else:
-          command+=line
-        if m:
-          if var == 'timeout':
-            # Set command timeout
-            command_timeout = float(value);
-          elif level:
-            executor.finish_tasks_to_level(
-              len(level) - 1 + \
-              (options.description and 1 or 0))
-            executor.start_task(value);
+  try:
+    if options.command:
+      command = options.command
+    else:
+      script = args[1]    
+      with open(script) as fp:
+        for line in fp:
+          if executor.closed:
+            break
+          m = re.search(CMD_HEADER_REGEX, line)
+          level = var = value = None
+          if m:
+            (level, _, var, value) = m.group(1,2,3,4)
+          if (re.search('^\s*$', value or line)):
+            status = executor.process_command(
+              command,
+              command_timeout)
+            command = ''
+            command_timeout = None
+          else:
+            command+=line
+          if m:
+            if var == 'timeout':
+              # Set command timeout
+              command_timeout = float(value);
+            elif level:
+              executor.finish_tasks_to_level(
+                len(level) - 1 + \
+                (options.description and 1 or 0))
+              executor.start_task(value);
 
-    fp.close()
+        fp.close()
 
-  if not executor.closed:
-    status = executor.process_command(
-      command,
-      command_timeout or global_timeout)
-    executor.close()
+    if not executor.closed:
+      status = executor.process_command(
+        command,
+        command_timeout)
+      executor.close()
     
-  database.commit()
-  database.close()
+    database.commit()
+    database.close()
 
-  sys.exit(status)
+    sys.exit(status)
+  except Exception, x:
+    print >> sys.stderr, "%s execution error '%s'" % (sys.argv[0], x)
+    executor.close()
+    sys.exit(1)
       
 if __name__ == "__main__":
   main()

@@ -34,8 +34,9 @@ def get_changes(repo, rev, prev_rev):
     def __init__(self, repo, cs):
       self.timestamp = cs[0]
       self.author = cs[1]
-      self.rev = cs[2]
-      self.description = urllib.unquote(cs[3])
+      self.author_email = cs[2]
+      self.rev = cs[3]
+      self.description = urllib.unquote(cs[4])
       self.repo = repo
       self.ui_rev = os.path.join(repo.ui, "revision/%s" % self.rev)
 
@@ -51,7 +52,7 @@ def get_changes(repo, rev, prev_rev):
     Repository(
       os.path.join(DEFAULT_VAR_PATH, repo)))
 
-  template = r"{date|isodate}|{author|person}|{node|short}|{desc|firstline|urlescape}\n"
+  template = r"{date|isodate}|{author|person}|{author|email}|{node|short}|{desc|firstline|urlescape}\n"
 
   hg_log_cmd = [
     "hg", "--cwd", r.path,
@@ -68,9 +69,9 @@ def get_changes(repo, rev, prev_rev):
     print >> sys.stderr, "Can't process '%s' : %d, %s" % \
           (" ".join(hg_log_cmd), p.returncode, err)
     return None
-  print out
-  
-  return [ChangeSet(r, line.split('|')) for line in out.splitlines()]
+
+  changes =  [ChangeSet(r, line.split('|')) for line in out.splitlines()]
+  return filter(lambda c: c.rev != prev_rev, changes)
  
 
 def changes(report, since):
@@ -88,23 +89,10 @@ def changes(report, since):
        report.get_stdout(report.find_task('%', [repo_task])).strip()
      prev_revision = \
        report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
-     cs = get_changes(repo, revision, prev_revision)
-     if not cs:
-       return None
-     commits+=cs
+     if revision != prev_revision:
+       cs = get_changes(repo, revision, prev_revision)
+       if not cs:
+         return None
+       commits+=cs
   commits.sort(lambda x, y: x.timestamp > y.timestamp)
   return commits
-
-
-
-                            
-
-     
-     
-     
-    
-                        
-                        
-
-
-            

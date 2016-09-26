@@ -277,25 +277,39 @@ class DumpAnalyzer(object):
         return report if asString else report_path
 
 
+FORMATS = {'path', 'str', 'dict'}
+
+def _resultDict(dump, text):
+    return dict(
+        component = dump.msi,
+        dump = text
+    )
+
 def analyseDump(*args, **kwargs):
     '''Generated cdb-bt report based on dmp file
     Note: Returns right away in case if dump is already analized
     Returns: cdb-bt report path
     '''
-    asString = kwargs.pop('asString', False)
+    format = kwargs.pop('format', 'path')  # possible values: path, str, dict
+    if not format in FORMATS:
+        raise Error("Wrong format value: %s" % format)
     dump = DumpAnalyzer(*args, **kwargs)
     report = report_name(dump.dump_path)
     if os.path.isfile(report):
-        if asString:
+        if format == 'dict':
+            dump.get_dump_information()
+            return _resultDict(dump, open(report, 'r').read())
+        elif format == 'str':
             return open(report, 'r').read()
         else:
             dump.log('Already processed: ' + report)
             return report
     dump.get_dump_information()
     if not dump.fetch_urls():
-        return ''
+        return dict() if format == 'dict' else ''
     dump.download_dists()
-    return dump.generate_report(asString)
+    reportText = dump.generate_report(format != 'path')
+    return _resultDict(dump, reportText) if format == 'dict' else reportText
 
 def main():
     args, kwargs = list(), dict()

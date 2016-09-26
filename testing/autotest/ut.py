@@ -26,7 +26,6 @@ elif conf.UT_USE_VAGRANT:
 else:
     UtContainer = None
 
-
 FailedTests = []
 SUITMARK =  '[' # all messages from a testsuit starts with it, other are tests' internal messages
 STARTMARK = '[ RUN      ]'
@@ -55,7 +54,7 @@ def _load_names():
         # unfortunately, xml.etree.ElementTree adds namespace to all tags and there is no way to use clear tag names
         pomtests = [el.text.strip() for el in tree.findall('{0}modules/{0}module'.format(m.group(1) if m else ''))]
         if pomtests:
-            debug("ut list found: %s", pomtests)
+            #debug("ut list found: %s", pomtests)
             return pomtests
         else:
             log("WARBING: No <module>s found in %s" % path)
@@ -212,8 +211,9 @@ def read_unittest_output(proc, reader, suitename):
             debug("Test %s final result not found!", running_test_name)
             FailedTests.append(running_test_name)
         if not FailedTests:
-            ToSend.append("[ %s tests passed OK. ]" % suitename)
-        debug("%s tests run for %.2f seconds.", suitename, ut_time)
+            ToSend.log("[ %s - OK. Time: %.2f seconds ]" % (suitename, ut_time))
+        else:
+            ToSend.log("%s tests run for %.2f seconds.", suitename, ut_time)
 
 
 def exec_unittest(testpath, branch, use_shuffle):
@@ -256,7 +256,7 @@ def exec_unittest(testpath, branch, use_shuffle):
 
 def call_unittest(suitname, reader, branch):
     ToSend.clear()
-    ToSend.log("[ Calling %s test suite ]", suitname)
+    ToSend.log("[ Executing: %s ]", suitname)
     old_coount = ToSend.count()
     proc = None
     try:
@@ -297,6 +297,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
         try:
             if UtContainer:
                 UtContainer.init(Build)
+            log("Unit test suites to run: %s", ', '.join(ut_names))
             for name in ut_names:
                 del FailedTests[:]
                 call_unittest(name, reader, branch)  # it clears ToSend on start
@@ -318,7 +319,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                         output.extend(ToSend.lines)
                 else:
                     result_list.append(('ut:'+name, True))
-                    log("OK for the '%s' test suite", name)
+                    #log("OK for the '%s' test suite", name)
         #TODO add some `except`s?
         finally:
             if UtContainer:

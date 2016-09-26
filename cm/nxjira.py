@@ -140,11 +140,15 @@ def browse_url(issue):
     return BROWSE + issue
 
 
-def create_issue(name, desc, priority="Medium"):
+def create_issue(name, desc, priority="Medium", component=None, team=None):
     issue = issue_data.copy()
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
     issue['fields']['priority']['name'] = priority
+    if component is not None:
+        issue['fields']['components'][0]['name'] = component
+    if team is not None:
+        issue['fields']['customfield_10200']['value'] = team
     result =  jirareq('POST', '', issue)
     if result.code != CODE_CREATED:
         print "Error creting JIRA issue: %s, %s" % (result.code, result.reason)
