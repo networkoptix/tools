@@ -23,7 +23,7 @@ def log(text, *args):
 def set_debug(value):
     global DEBUG
     DEBUG = value
-    raw_log("Debug mode " + ("ON" if value else "OFF"))
+    #raw_log("Debug mode " + ("ON" if value else "OFF"))
 
 
 def debug(text, *args):

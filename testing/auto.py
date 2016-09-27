@@ -48,7 +48,7 @@ def check_conf():
 class FuncTestError(RuntimeError):
     pass
 
-RESULT = []
+RESULT = None
 Env = os.environ.copy()
 Args = {}
 
@@ -182,12 +182,15 @@ def run_tests(branch):
             failsum = ''
         output = []
 
+    # now run functests
     if not Args.no_functest and (conf.FT_AFTER_FAILED_UT or not ut_fails):
         if not perform_func_test(to_skip):
             RESULT.append(('functests', False))
             ft_failed = True
-            if Args.stdout:
+            if Args.stdout and not ToSend.flushed and not ToSend.empty:
+                raw_log("--- post functest log tail flushing ---")
                 ToSend.flush()
+                raw_log("--- . ---")
             else:
                 output.append('')
                 output.extend(ToSend.lines)
@@ -563,10 +566,10 @@ def check_testcamera_bin():
     else:
         src_time = get_file_time(src)
         if src_time > dest_time:
-            debug("Using new testcamera from %s", src)
+            #debug("Using new testcamera from %s", src)
             shutil.copy(src, dest)
-        else:
-            debug("Using old testcamera at %s", dest)
+        #else:
+            #debug("Using old testcamera at %s", dest)
         return True
 
 #####################################
@@ -697,7 +700,6 @@ def mk_functest_cmd(to_skip):
             cmd.append('--skipmsa')
         if "stream" in to_skip:
             cmd.append("--skipstrm")
-    debug("Running functional tests: %s", cmd)
     return cmd, only_test
 
 
@@ -729,7 +731,7 @@ def perform_func_test(to_skip):
         if not Args.nobox:
             start_boxes(['Box1'] if Args.natcon else ['Box1','Box2'])
             need_stop = True
-        # 4. Call functest/main.py (what about imoirt it and call internally?)
+        # 4. Call functest/main.py (ToThink: what about import it and call internally?)
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
         reader = pipereader.PipeReader()
@@ -741,6 +743,7 @@ def perform_func_test(to_skip):
             unreg = True
             cmd, only_test = mk_functest_cmd(to_skip)
             if only_test != 'natcon':
+                debug("Running functional tests: %s", cmd)
                 proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
                 reader.register(proc)
                 if not read_functest_output(proc, reader, only_test):
@@ -901,8 +904,6 @@ class NewFunctestParser(object):
 
     def parse_failed(self, line):
         pass
-
-
 
 
 class FunctestParser(object):
@@ -1348,7 +1349,7 @@ def read_functest_output(proc, reader, from_test=''):
         kill_proc(proc)
         proc.wait()
         if not state_error:
-            debug("The last test stage was %s. Last %s lines are:\n%s" %
+            debug("The last test stage was: '%s'. Last %s lines are:\n%s\n----" %
                   (p.stage, len(last_lines), "\n".join(last_lines)))
         success = False
 
@@ -1360,7 +1361,7 @@ def read_functest_output(proc, reader, from_test=''):
                 ToSend.log("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
         else:
             ToSend.log("[ FUNCTIONAL TESTS' RETURN CODE = %s ]\n"
-                        "The last test stage was %s. Last %s lines are:\n%s" %
+                        "The last test stage was: '%s'. Last %s lines are:\n%s\n-----" %
                         (proc.returncode, p.stage, len(last_lines), "\n".join(last_lines)))
         success = False
     return success and not p.has_errors
@@ -1462,6 +1463,8 @@ FUNCTEST_ARGS = ('functest', 'timesync', 'httpstress', 'msarch', 'natcon', 'stre
 ARGS_EXCLUSIVE = (
     ('nobox', 'boxes', 'boxoff', 'showboxes'),
     ('ft_if_ut', 'ft_always'),
+    ('list', 'full'),
+    ('list', 'auto'),
 ) + tuple(('no_functest', opt) for opt in FUNCTEST_ARGS)
 
 
@@ -1573,7 +1576,7 @@ def set_paths():
         raise EnvironmentError(errno.ENOENT, "The project root directory %s isn't found", conf.PROJECT_ROOT)
     if not os.access(conf.PROJECT_ROOT, os.R_OK|os.W_OK|os.X_OK):
         raise IOError(errno.EACCES, "Full access to the project root directory required", conf.PROJECT_ROOT)
-    debug("Using project root at %s", conf.PROJECT_ROOT)
+    #debug("Using project root at %s", conf.PROJECT_ROOT)
 
     conf.BUILD_CONF_PATH = os.path.join(conf.PROJECT_ROOT, conf.BUILD_CONF_SUBPATH)
 
@@ -1598,6 +1601,23 @@ def set_paths():
         sys.exit(3)
 
 
+FTDesc = namedtuple('FTDesc', ('args', 'name'))
+
+SingleFuncTests = [
+    FTDesc(("--timesync", "--ts"), "time synchronization"),
+    FTDesc(("--httpstress", '--hst'), "HTTP stress"),
+    FTDesc(("--msarch",), "multiserver archive"),
+    FTDesc(("--natcon",), "connection behind NAT"),
+    FTDesc(("--stream",), "streaming"),
+]
+
+def addSingleFTArgs(parser):
+    for ft in SingleFuncTests:
+        parser.add_argument(
+            *ft.args, action="store_true", help=("Create virtual boxes and run %s test only." % ft.name)
+        )
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     #TODO: add parameters: usage, description
@@ -1616,13 +1636,12 @@ def parse_args():
     parser.add_argument("--no-functest", "--noft", action="store_true", help="Only build the project and run unittests.")
     parser.add_argument("--ft-if-ut", action="store_true", help="Run functests only if no fails in unitests.")
     parser.add_argument("--ft-always", action="store_true", help="Run functests even if there are any fails ib unitests.")
-    parser.add_argument("--timesync", "--ts", action="store_true", help="Create virtual boxes and run time synchronization functional test only.")
-    parser.add_argument("--httpstress", '--hst', action="store_true", help="Create virtual boxes and run HTTP stress test only.")
-    parser.add_argument("--msarch", action="store_true", help="Create virtual boxes and run multiserver archive test only.")
-    parser.add_argument("--natcon", action="store_true", help="Create virtual boxes for NAT connection test and run this test only.")
-    parser.add_argument("--stream", action="store_true", help="Create virtual boxes and run Streaming tests only.")
+
+    addSingleFTArgs(parser)
+
     parser.add_argument("--nobox", "--nb", action="store_true", help="Do not create and destroy virtual boxes. (For the development and debugging.)")
     parser.add_argument("--conf", action='store_true', help="Show configuration and exit.")
+    parser.add_argument("-l", "--list", action='store_true', help="List all unit- and functional tests for the branch. Don't run any.")
     # change settings
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
                                                                 "Use '.' for a current branch (it WILL update to the last commit of the branch, and it will ignore all other -b). ")
@@ -1630,7 +1649,7 @@ def parse_args():
     parser.add_argument("-T", "--threads", type=int, help="The number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override configured default and use maven's default.")
     # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
-    parser.add_argument("-l", "--full-build-log", action="store_true", help="Print full build log, immediate. Use with -o only.")
+    parser.add_argument("--full-build-log", "--fbl", action="store_true", help="Print full build log, immediate. Use with -o only.")
     parser.add_argument("-w", "--warnings", action='store_true', help="Treat warnings as error, report even if no errors but some strange output from tests")
     parser.add_argument("--debug", action='store_true', help="Run in debug mode (more messages)")
     parser.add_argument("--prod", action='store_true', help="Run in production mode (turn off debug messages)")
@@ -1724,7 +1743,6 @@ module Boxes"""
             print >>out, "# Created at %s" % (time.asctime())
 
 
-
 def run_auto_loop():
     "Runs check-build-test sequence for all branches repeatedly."
     while True:
@@ -1745,6 +1763,17 @@ def run_auto_loop():
     log("Finishing...")
 
 
+
+def printTestList():
+    print "Unittests:"
+    for name in ut.get_list(get_tests_to_skip(conf.BRANCHES[0])):
+        print '\t' + name
+    print "Functional tests:"
+    maxlen = max(len(ft.args[0]) for ft in SingleFuncTests)
+    for ft in SingleFuncTests:
+        print "\t%s   %s" % (ft.args[0].ljust(maxlen), ft.name)
+
+
 def nameFunctest():
     if Args.functest:
         return "all functests"
@@ -1758,13 +1787,15 @@ def nameFunctest():
 
 def main():
     parse_args()
-    drop_flag(conf.RESTART_FLAG)
-    drop_flag(conf.STOP_FLAG)
     set_paths()
     set_branches()
 
     if Args.conf:
         show_conf() # changes done by other options are shown here
+        return True
+
+    if Args.list:
+        printTestList()
         return True
 
     if Args.utcont:
@@ -1795,6 +1826,11 @@ def main():
     if Args.boxoff is not None:
         stop_boxes(Args.boxoff, True)
         return True
+
+    global RESULT
+    RESULT = []
+    drop_flag(conf.RESTART_FLAG)
+    drop_flag(conf.STOP_FLAG)
 
     if Args.auto:
         log("Starting...")
@@ -1833,7 +1869,7 @@ if __name__ == '__main__':
             debug("Something isn't OK, returning code 1")
             debug("Results: %s", RESULT)
             sys.exit(1)
-        else:
+        elif RESULT is not None:
             debug("Results: %s", RESULT)
     finally:
         if conf.UT_TEMP_DIR_PID_USED:

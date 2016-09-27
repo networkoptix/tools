@@ -378,7 +378,7 @@ class TimeSyncTest(FuncTestCase):
     ###################################################################
 
     def TurnInetOn(self):
-        self._prepare_test_phase(self._prepare_inet_test)
+        self._prepare_test_phase(self._prepare_inet_test, postUp=True)
         self._check_time_sync()
         #TODO check for primary, make it primary if not bn
         # until that, set it to be sure

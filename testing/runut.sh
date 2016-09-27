@@ -1,5 +1,6 @@
 #!/bin/bash
 ulimit -c 10000000
+ulimit -n 4096
 TMP=/tmp/test
 mkdir -p $TMP
 BASE=`realpath $(dirname "$0")`
