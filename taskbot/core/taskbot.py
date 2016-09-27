@@ -35,16 +35,24 @@ class TimeOut:
       self.__select_start__ = time.time()
       return False
     else:
-      return \
+      result = \
         self.__select_timeout__ and \
           self.__select_start__ and \
             time.time() - self.__select_start__ > \
               self.__select_timeout__
+      if result:
+        print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
+              (self.__select_timeout__, time.time() - self.__select_start__)
+      return result
 
   def __check_run(self, command_timeout):
     timeout = command_timeout or self.__run_timeout__
-    return timeout and \
+    result = timeout and \
       time.time() - self.__run_start__ > timeout
+    if result:
+      print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
+            (timeout, time.time() - self.__run_start__)
+    return result
 
   def start_command(self, command):
     args = command.split()
@@ -398,6 +406,8 @@ class TaskExecutor:
       self.finish_task()
 
   def close(self):
+    self.finish_tasks_to_level(0)
+    self.closed = True
     safe_call(self.__status__.stop)
     safe_call(self.__shell_process__.stdin.close)
     safe_call(self.__shell_process__.kill)
@@ -405,8 +415,6 @@ class TaskExecutor:
     # TODO. Need cross-platform solution to kill child processs
     pgid = safe_call(os.getpgid, self.__shell_process__.pid)
     safe_call(os.killpg, pgid, signal.SIGTERM)
-    self.finish_tasks_to_level(0)
-    self.closed = True
 
   # Start new task
   def start_task(self, description, is_command=False):
