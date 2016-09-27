@@ -38,6 +38,7 @@ class UtVirtualBox(UtContainerBase):
     _debug_prefix = "DEBUG(utvb): "
     _subdir = ''
     _libsCopied = set()
+    notmp = True
 
     @classmethod
     def init(cls, buildVars):
@@ -60,12 +61,11 @@ class UtVirtualBox(UtContainerBase):
         for fn in glob.iglob(os.path.join(buildVars.bin_path, "*_ut")):
             toCopy.append(fn)
             if len(toCopy) > 4:
-                debug("Copy: %s", toCopy)
+                #debug("Copy: %s", toCopy)
                 cls._copy2box(*toCopy)
                 toCopy = []
-            #shutil.copy(fn, cls._subdir)
         if len(toCopy) > 0:
-            debug("Copy: %s", toCopy)
+            #debug("Copy: %s", toCopy)
             cls._copy2box(*toCopy)
         cls._copy2box(conf.UT_WRAPPER)
         #check_call(cls._cmdPrefix() + ['ls', '-l'])

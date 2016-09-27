@@ -67,6 +67,7 @@ class ToSend(object):
         raw_log(text)
         cls.empty = False
         if not cls.stdout:
+            cls.empty = False
             cls.lines.append(text)
 
     @classmethod
