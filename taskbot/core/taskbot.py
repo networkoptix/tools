@@ -290,10 +290,10 @@ class TaskExecutor:
   def __check_get_status( self, status, task ):
     if status is not None:
       if len(status) == 0: # shell was terminated
-        status = self.__shell_process__.returncode
-        if status:
-          task.errormessage = "non-zero exit status (execution terminated)"
-        return self.__shell_process__.returncode, True
+        status = self.__shell_process__.wait()
+        if status != 0:
+          task.error_message = "non-zero exit status (execution terminated)"
+        return status, True
       status = int(status)
       if status != 0:
         task.error_message = "non-zero exit status"
@@ -398,12 +398,13 @@ class TaskExecutor:
       self.finish_task()
 
   def close(self):
-    self.__status__.stop()
-    self.__shell_process__.stdin.close()
-    self.__shell_process__.kill()
-    self.__shell_process__.terminate()
+    safe_call(self.__status__.stop)
+    safe_call(self.__shell_process__.stdin.close)
+    safe_call(self.__shell_process__.kill)
+    safe_call(self.__shell_process__.terminate)
     # TODO. Need cross-platform solution to kill child processs
-    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
+    pgid = safe_call(os.getpgid, self.__shell_process__.pid)
+    safe_call(os.killpg, pgid, signal.SIGTERM)
     self.finish_tasks_to_level(0)
     self.closed = True
 

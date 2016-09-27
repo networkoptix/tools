@@ -50,8 +50,9 @@ class BuildReport(Report):
           break
         prev_run = self.get_previous_run(prev_run)
 
-      print prev_build, prev_run
+      print prev_build, prev_run, self.find_failed(prev_build)
       if (prev_build and not self.find_failed(prev_build)):
+        print "Send email notification!"
         EmailNotify.notify(
           self, prev_run, "build failed",
           "The product is no longer builded.", debug=True)

@@ -2,7 +2,7 @@
 # Artem V. Nikitin
 # Report base class
 
-import os, zlib
+import os, zlib, urllib
 from MySQLDB import MySQLDB
 from Utils import *
 
@@ -27,6 +27,20 @@ class Report:
     
     def __repr__(self):
       return self.__str__()
+
+  class Platform:
+    def __init__(self, platform_id, host, description):
+      self.id = platform_id
+      self.host = host
+      self.description = description
+
+    def __str__(self):
+      return "Platform#%s: %s (%s)" % \
+             (self.id, self.host, self.description)
+    
+    def __repr__(self):
+      return self.__str__()
+    
       
   def __init__(self, config, root_task = None):
     self.__config__ = read_config(config) # Takbot config
@@ -38,8 +52,10 @@ class Report:
 
   # Raw report SQL
   def __find_platform(self):
-    return self.__db__.query("""SELECT id FROM platform
-      WHERE host = %s""", (get_host_name(), ))[0]
+    return Report.Platform(
+      *self.__db__.query(
+        """SELECT id, host, description FROM platform
+        WHERE host = %s""", (get_host_name(), )))
 
   def __find_branch(self):
     return self.__db__.query("""SELECT id FROM branch
@@ -138,7 +154,7 @@ class Report:
                   AND t.platform_id = %s
                   AND t.branch_id = %s
                   AND t.description = %s)""",
-      (task.id, self.__platform__, self.__branch__, task.description))
+      (task.id, self.__platform__.id, self.__branch__, task.description))
     if prev_task:
       return Report.Task(*prev_task)
     return None
@@ -268,7 +284,7 @@ class Report:
       get_host_name())
     return "http://%s/taskbot/browse.cgi?platform=%s&branch=%s" % \
        (host,
-        urllib.quote(get_platform()),
+        urllib.quote(self.__platform__.host),
         urllib.quote(os.environ['TASKBOT_BRANCHNAME']))
         
   def generate( self ):
