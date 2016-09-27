@@ -89,8 +89,10 @@ def changes(report, since):
        report.get_stdout(report.find_task('%', [repo_task])).strip()
      prev_revision = \
        report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
+     print revision, prev_revision
      if revision != prev_revision:
        cs = get_changes(repo, revision, prev_revision)
+       print "Changeset: %s" % cs
        if cs is None:
          return None
        commits+=cs
