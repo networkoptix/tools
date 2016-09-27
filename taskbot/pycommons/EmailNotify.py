@@ -11,7 +11,9 @@ SMTP_PASS = 'AlYDnddPk8mWorQFVogh8sqkQX6Nv01JwxxfMoYJAFeC'
 MAIL_FROM = '"Taskbot System" <autotest@networkoptix.com>'
 
 WATCHERS = {
-  'Artem Nikitin': 'anikitin@networkoptix.com' }
+  'Artem Nikitin': 'anikitin@networkoptix.com',
+  'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+  'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com'}
 
 class EmailNotify:
 

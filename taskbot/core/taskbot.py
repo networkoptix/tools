@@ -32,7 +32,7 @@ class TimeOut:
 
   def __check_select(self, selected):
     if selected:
-      self.__select_timeout__ = time.time()
+      self.__select_start__ = time.time()
       return False
     else:
       return \
