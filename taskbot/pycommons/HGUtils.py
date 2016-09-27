@@ -66,7 +66,7 @@ def get_changes(repo, rev, prev_rev):
     stderr = subprocess.PIPE)
   (out, err) = p.communicate()
   if p.returncode:
-    print >> sys.stderr, "Can't process '%s' : %d, %s" % \
+    print >> sys.stderr, "Can't process '%s' : %s, %s" % \
           (" ".join(hg_log_cmd), p.returncode, err)
     return None
 
@@ -89,9 +89,11 @@ def changes(report, since):
        report.get_stdout(report.find_task('%', [repo_task])).strip()
      prev_revision = \
        report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
+     print revision, prev_revision
      if revision != prev_revision:
        cs = get_changes(repo, revision, prev_revision)
-       if not cs:
+       print "Changeset: %s" % cs
+       if cs is None:
          return None
        commits+=cs
   commits.sort(lambda x, y: x.timestamp > y.timestamp)

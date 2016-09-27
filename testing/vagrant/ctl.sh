@@ -65,7 +65,7 @@ function timesync_ctl {
             # values should be less than INET_SYNC_TIMEOUT in timetest.py
             nxedconf ecInternetSyncTimePeriodSec 15
             nxedconf ecMaxInternetTimeSyncRetryPeriodSec 15
-            safestart "$SERVICE"
+            #safestart "$SERVICE"
             ;;
         iup)
             # make it non-executable to disable ntpd start when eth0 goes up

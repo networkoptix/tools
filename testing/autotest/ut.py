@@ -254,23 +254,23 @@ def exec_unittest(testpath, branch, use_shuffle):
     return Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, env=main.Env, **kwargs)
 
 
-def call_unittest(suitname, reader, branch):
+def call_unittest(suiteName, reader, branch):
     ToSend.clear()
-    ToSend.log("[ Executing: %s ]", suitname)
+    ToSend.log("[ Executing: %s ]", suiteName)
     old_coount = ToSend.count()
     proc = None
     try:
         if UtContainer:
-            testpath = suitname
+            testpath = suiteName
         else:
-            testpath = os.path.join(Build.bin_path, suitname)
+            testpath = os.path.join(Build.bin_path, suiteName)
             if not validate_testpath(testpath):
                 FailedTests.append('(all -- not executed)')
                 return
         #debug("Calling %s", testpath)
-        proc = exec_unittest(testpath, branch, (branch, suitname) not in conf.NOSHUFFLE)
+        proc = exec_unittest(testpath, branch, (branch, suiteName) not in conf.NOSHUFFLE)
         reader.register(proc)
-        read_unittest_output(proc, reader, suitname)
+        read_unittest_output(proc, reader, suiteName)
     except BaseException as e:
         tstr = traceback.format_exc()
         print tstr
@@ -292,6 +292,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
     reader = pipereader.PipeReader()
     output = []
     ut_names = get_list(to_skip)
+    failedIn = []
 
     if ut_names:
         try:
@@ -303,6 +304,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
                 call_unittest(name, reader, branch)  # it clears ToSend on start
                 if FailedTests:
                     result_list.append(('ut:'+name, False))
+                    failedIn.append(name)
                     failedStr = "\n".join(("Tests, failed in the %s test suite:" % name,
                                            "\n".join("\t" + name for name in FailedTests),
                                           ''))
@@ -324,6 +326,7 @@ def iterate_unittests(branch, to_skip, result_list, all_fails):
         finally:
             if UtContainer:
                 UtContainer.done()
+            log("Unit tests done. %s", "OK" if not failedIn else "Fails in: " + (', '.join(failedIn)) )
     else:
         output.append("Warning: No unittests to run! Are the skipped all?")
         ToSend.log(output[-1])

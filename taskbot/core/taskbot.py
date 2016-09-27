@@ -32,27 +32,43 @@ class TimeOut:
 
   def __check_select(self, selected):
     if selected:
-      self.__select_timeout__ = time.time()
+      self.__select_start__ = time.time()
       return False
     else:
-      return \
+      result = \
         self.__select_timeout__ and \
           self.__select_start__ and \
             time.time() - self.__select_start__ > \
               self.__select_timeout__
+      if result:
+        print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
+              (self.__select_timeout__, time.time() - self.__select_start__)
+      return result
 
   def __check_run(self, command_timeout):
     timeout = command_timeout or self.__run_timeout__
-    return timeout and \
+    result = timeout and \
       time.time() - self.__run_start__ > timeout
+    if result:
+      print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
+            (timeout, time.time() - self.__run_start__)
+    return result
+
 
   def start_command(self, command):
-    args = command.split()
     self.__select_start__ =  time.time()
-   
-    if os.path.basename(
-      sub_environment(args[0]).strip('"')) ==  \
-      os.path.basename(sys.argv[0]):
+    # It's very dirty select_timeout reset
+    # TODO. Child taskbot should have possibility
+    #       to reset parent select timeout
+    command = re.sub(r'"', '', command)
+    def process_arg(arg):
+      return os.path.basename(sub_environment(arg))
+    args = map(process_arg, command.split())
+    def cmp_arg(arg):
+      return arg == os.path.basename(sys.argv[0])
+    if  reduce(
+      lambda x, y: x or y,
+      map(cmp_arg, args), False):
       self.__select_timeout__ = None
 
   def finish_command(self):
@@ -290,10 +306,10 @@ class TaskExecutor:
   def __check_get_status( self, status, task ):
     if status is not None:
       if len(status) == 0: # shell was terminated
-        status = self.__shell_process__.returncode
-        if status:
-          task.errormessage = "non-zero exit status (execution terminated)"
-        return self.__shell_process__.returncode, True
+        status = self.__shell_process__.wait()
+        if status != 0:
+          task.error_message = "non-zero exit status (execution terminated)"
+        return status, True
       status = int(status)
       if status != 0:
         task.error_message = "non-zero exit status"
@@ -398,14 +414,15 @@ class TaskExecutor:
       self.finish_task()
 
   def close(self):
-    self.__status__.stop()
-    self.__shell_process__.stdin.close()
-    self.__shell_process__.kill()
-    self.__shell_process__.terminate()
-    # TODO. Need cross-platform solution to kill child processs
-    os.killpg(os.getpgid(self.__shell_process__.pid), signal.SIGTERM)
     self.finish_tasks_to_level(0)
     self.closed = True
+    safe_call(self.__status__.stop)
+    safe_call(self.__shell_process__.stdin.close)
+    safe_call(self.__shell_process__.kill)
+    safe_call(self.__shell_process__.terminate)
+    # TODO. Need cross-platform solution to kill child processs
+    pgid = safe_call(os.getpgid, self.__shell_process__.pid)
+    safe_call(os.killpg, pgid, signal.SIGTERM)
 
   # Start new task
   def start_task(self, description, is_command=False):

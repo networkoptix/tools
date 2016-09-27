@@ -33,6 +33,7 @@ class UpdateReport(Report):
     
     commits = HGUtils.changes(self, self.get_previous_run());
     if commits is None:
+      print >> sys.stderr, "There are no commits!"
       return 1
     
     history = "%s<br><table align=\"left\">\n" % type
@@ -45,6 +46,7 @@ class UpdateReport(Report):
 
     history += "</table>"
 
+    print "Add update report:\n%s" % history
     self.add_history('#f0f0f0', history);
     return 0
     

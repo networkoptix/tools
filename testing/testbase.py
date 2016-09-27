@@ -267,12 +267,15 @@ class FuncTestCase(unittest.TestCase):
             self._call_box(box, '/vagrant/' + self._init_script,  self._test_key, 'init', *self._init_script_args(num))
         sys.stdout.write("Box %s is ready\n" % box)
 
-    def _prepare_test_phase(self, method):
+    def _prepare_test_phase(self, method, postUp=False):
         self._worker.clearOks()
         for num, box in enumerate(self.hosts):
             self._worker.enqueue(method, (box, num))
         self._worker.joinQueue()
         self.assertTrue(self._worker.allOk(), "Failed to prepare test phase")
+        if postUp:
+            time.sleep(0.5)
+            self._servers_th_ctl('safe-start')
         self._wait_servers_up()
         if self._serv_version is None:
             self._getVersion()

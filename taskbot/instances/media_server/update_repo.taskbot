@@ -42,5 +42,7 @@ while true; do
 done
 date +"%Y-%m-%d %H:%M:%S  Have changes"
 
+echo "devtools: $DEVTOOLS_NEW vs $DEVTOOLS_OLD"
+echo "nx_vms: $NX_VMS_NEW vs $NX_VMS_OLD
 echo "$DEVTOOLS_NEW" >| "$TASKBOT_VAR"/revision/devtools
 echo "$NX_VMS_NEW" >| "$TASKBOT_VAR"/revision/nx_vms

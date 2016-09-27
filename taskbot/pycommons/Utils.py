@@ -56,3 +56,9 @@ def get_platform():
   return os.environ.get(
     'TASKBOT_PLATFORM',
     "%s %s" % (machine, system))
+
+def safe_call(fn, *args, **kw):
+  try:
+    return fn(*args, **kw)
+  except:
+    pass

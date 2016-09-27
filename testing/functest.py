@@ -1386,8 +1386,7 @@ if __name__ == '__main__':
     sys.setdefaultencoding('utf8')
     argv = testMaster.preparseArgs(sys.argv)
     if len(argv) == 1:  # called from auto.py, using boxes which are created, but servers not started
-        if not RunByAutotest(argv[0]):
-            sys.exit(1)
+        RunByAutotest(argv[0])
     elif len(argv) >= 2 and argv[1] in ('--help', '-h'):
         showHelp(argv)
     elif len(argv) == 2 and argv[1] == '--recover':
