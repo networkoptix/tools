@@ -473,7 +473,10 @@ sub generate_main {
     if (!$q->param || !($q->param('platform') && $q->param('branch'))) {
       print $q->header(-type => 'text/html; charset=utf-8');
       print $q->start_html('Taskbot');
-      print $q->start_form;
+      print $q->start_form(
+        -method  => 'GET',
+        -enctype => &CGI::URL_ENCODED);
+
       print $q->h3("Select platform & branch");
 
       print $q->br;
@@ -527,12 +530,6 @@ sub generate_main {
       print $q->end_form;
 
       print $q->end_html;
-    }
-    else {
-      $params->{platform} = $q->param('platform');
-      $params->{branch} = $q->param('branch');
-
-      generate_history_list;
     }
 }
 

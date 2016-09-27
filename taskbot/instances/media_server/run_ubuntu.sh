@@ -1,9 +1,14 @@
 #!/bin/bash
 
 export TASKBOT_BRANCHNAME="dev_3.0.0"
+
+if [ ! -z "$1" ]; then
+  export TASKBOT_BRANCHNAME="$1"  
+fi
+
 export TASKBOT_PLATFORM=`uname -oi`
-CONFIG="$HOME"/taskbot/"$TASKBOT_BRANCHNAME"/devtools/taskbot/instances/media_server/ubuntu_config.py
-BIN="$HOME"/taskbot/"$TASKBOT_BRANCHNAME"/devtools/taskbot/core/
+CONFIG="$HOME"/taskbot/devtools/taskbot/instances/media_server/ubuntu_config.py
+BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py
 PRNENV="$BIN"/prnenv.py

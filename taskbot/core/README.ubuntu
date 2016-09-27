@@ -27,7 +27,9 @@ MYSQL
 
 2. Client
 Packages:
-- python mysql connector (apt-get install python-mysql.connector).
+- python mysql connector:
+  * wget
+  * dpkg -
 - screen (apt-get install screen)(optional)
 
 

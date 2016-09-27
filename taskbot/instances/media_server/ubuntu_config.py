@@ -6,7 +6,7 @@ TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT,
   os.environ['TASKBOT_BRANCHNAME'])
-TASKBOT_DEVTOOLS_ROOT = os.path.join(TASKBOT_VAR, 'devtools')
+TASKBOT_DEVTOOLS_ROOT = os.path.join(TASKBOT_ROOT, 'devtools')
 
 config = {
   'sh': '/bin/bash',
