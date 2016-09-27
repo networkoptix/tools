@@ -24,15 +24,15 @@ while true; do
         break
     fi
 
-    if ! $TASKBOT \
-        --description "Poll for changes ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
-        --trace \
-        --timeout=0 \
-        $CONFIG \
-        update_repo.taskbot 
-    then
-      echo "Polling changes error" > /dev/stderr && exit 1
-    fi
+    # if ! $TASKBOT \
+    #     --description "Poll for changes ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
+    #     --trace \
+    #     --timeout=0 \
+    #     $CONFIG \
+    #     update_repo.taskbot 
+    # then
+    #   echo "Polling changes error" > /dev/stderr && exit 1
+    # fi
 
     $TASKBOT \
       --description "Media-server tests run ($TASKBOT_BRANCHNAME)" \
