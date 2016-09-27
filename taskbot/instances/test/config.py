@@ -2,8 +2,8 @@
 
 config = {
   'sh': '/bin/bash',
-  'run_timeout': 10,
-  'select_timeout': 5*60,
+  'run_timeout': 10*60,
+  'select_timeout': 5,
   'gzip_threshold': 128,
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,

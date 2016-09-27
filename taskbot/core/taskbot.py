@@ -46,13 +46,21 @@ class TimeOut:
     return timeout and \
       time.time() - self.__run_start__ > timeout
 
+
   def start_command(self, command):
-    args = command.split()
     self.__select_start__ =  time.time()
-   
-    if os.path.basename(
-      sub_environment(args[0]).strip('"')) ==  \
-      os.path.basename(sys.argv[0]):
+    # It's very dirty select_timeout reset
+    # TODO. Child taskbot should have possibility
+    #       to reset parent select timeout
+    command = re.sub(r'"', '', command)
+    def process_arg(arg):
+      return os.path.basename(sub_environment(arg))
+    args = map(process_arg, command.split())
+    def cmp_arg(arg):
+      return arg == os.path.basename(sys.argv[0])
+    if  reduce(
+      lambda x, y: x or y,
+      map(cmp_arg, args), False):
       self.__select_timeout__ = None
 
   def finish_command(self):
