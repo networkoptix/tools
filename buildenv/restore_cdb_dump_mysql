@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DUMP_PATH=/home/ak/develop/netoptix_vms_3.0.0/unit_tests/cloud_db_ut/static-resources/clouddb.dump
+DUMP_PATH=/home/ak/develop/netoptix_vms_3.0.0/unit_tests/cloud_db_ut/static-resources/cdb_mysql.dump
 DB_NAME=clouddb
 CDB_USER=clouddb
 
