@@ -288,9 +288,13 @@ class Report:
         urllib.quote(os.environ['TASKBOT_BRANCHNAME']))
         
   def generate( self ):
-    self.__generate__()
+    result = self.__generate__()
     self.__db__.commit()
+    return result
 
+  # Should return int for sys.exit:
+  #   0 - if report sucessfully generated,
+  #   or non-zero exit code.
   def __generate( self ):
     methodNotImplemented()
   
