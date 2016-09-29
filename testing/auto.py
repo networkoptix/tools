@@ -1360,7 +1360,10 @@ def read_functest_output(proc, reader, from_test=''):
                 signames = ' (%s)' % (','.join(signames),) if signames else ''
                 ToSend.log("[ FUNCTIONAL TESTS HAVE BEEN INTERRUPTED by signal %s%s ]" % (-proc.returncode, signames))
         else:
-            ToSend.log("[ FUNCTIONAL TESTS' RETURN CODE = %s ]\n"
+            if proc.returncode == 1 and p.has_errors:
+                ToSend.log("[ FUNCTIONAL TESTS' RETURN CODE = %s ]", proc.returncode)
+            else:
+                ToSend.log("[ FUNCTIONAL TESTS' RETURN CODE = %s ]\n"
                         "The last test stage was: '%s'. Last %s lines are:\n%s\n-----" %
                         (proc.returncode, p.stage, len(last_lines), "\n".join(last_lines)))
         success = False
@@ -1458,8 +1461,18 @@ def show_boxes():
 
 #####################################
 
+FTDesc = namedtuple('FTDesc', ('args', 'name'))
+
+SingleFuncTests = [
+    FTDesc(("--timesync", "--ts"), "time synchronization"),
+    FTDesc(("--httpstress", '--hst'), "HTTP stress"),
+    FTDesc(("--msarch",), "multiserver archive"),
+    FTDesc(("--natcon",), "connection behind NAT"),
+    FTDesc(("--stream",), "streaming"),
+]
+
 # which options are allowed to be used with --nobox
-FUNCTEST_ARGS = ('functest', 'timesync', 'httpstress', 'msarch', 'natcon', 'stream')
+FUNCTEST_ARGS = ('functest', ) + tuple(ft.args[0].lstrip('-') for ft in SingleFuncTests)
 ARGS_EXCLUSIVE = (
     ('nobox', 'boxes', 'boxoff', 'showboxes'),
     ('ft_if_ut', 'ft_always'),
@@ -1600,16 +1613,6 @@ def set_paths():
         raw_log("FATAL: UT_TEMP_FILE %s exists but isn't a directory!" % conf.UT_TEMP_DIR)
         sys.exit(3)
 
-
-FTDesc = namedtuple('FTDesc', ('args', 'name'))
-
-SingleFuncTests = [
-    FTDesc(("--timesync", "--ts"), "time synchronization"),
-    FTDesc(("--httpstress", '--hst'), "HTTP stress"),
-    FTDesc(("--msarch",), "multiserver archive"),
-    FTDesc(("--natcon",), "connection behind NAT"),
-    FTDesc(("--stream",), "streaming"),
-]
 
 def addSingleFTArgs(parser):
     for ft in SingleFuncTests:
@@ -1761,7 +1764,6 @@ def run_auto_loop():
             time.sleep(1)
             check_control_flags()
     log("Finishing...")
-
 
 
 def printTestList():

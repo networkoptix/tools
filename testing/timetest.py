@@ -10,6 +10,7 @@ import json
 import socket
 import struct
 import pprint
+import sys
 
 from functest_util import ClusterLongWorker, get_server_guid
 from testbase import *
@@ -29,7 +30,7 @@ IF_EXT = 'eth0'
 class TimeTestError(FuncTestError):
     pass
 
-time_servers = ('time.nist.gov', 'time.ien.it')
+time_servers = ('time.nist.gov', 'time-nw.nist.gov')
 TIME_PORT = 37
 TIME_SERVER_TIMEOUT = 10
 SHIFT_1900_1970 = 2208988800
@@ -115,7 +116,9 @@ class TimeSyncTest(FuncTestCase):
         with open(os.devnull, 'w') as FNULL:
             proc = [
                 #FIXME make the interface name the same with $EXT_IF fom conf.sh !!!
-                (box, subprocess.Popen(['./vssh.sh', box, 'sudo', 'ifup', IF_EXT], shell=False, stdout=FNULL, stderr=subprocess.STDOUT)) for box in cls.hosts
+                (box, subprocess.Popen(
+                    ['./vssh.sh', box, 'sudo', 'ifup', IF_EXT], shell=False, stdout=FNULL, stderr=subprocess.STDOUT)
+                 ) for box in cls.hosts
             ]
             for b, p in proc:
                 if p.wait() != 0:
@@ -152,7 +155,7 @@ class TimeSyncTest(FuncTestCase):
     def _request_gettime(self, boxnum, ask_box_time=True):
         "Request server's time and its system time. Also return current local time at moment response was received."
 #        answer = self._server_request(boxnum, 'api/gettime',)
-        answer = self._server_request(boxnum, 'ec2/getCurrentTime',)
+        answer = self._server_request(boxnum, 'ec2/getCurrentTime', nolog=True)
         answer['time'] = int(answer['value']) / 1000.0
         answer['local'] = time.time()
         answer['boxtime'] = self.get_box_time(self.hosts[boxnum]) if ask_box_time else 0
@@ -207,7 +210,7 @@ class TimeSyncTest(FuncTestCase):
                 if must_synchronize:
                     print "DEBUG (_check_systime_sync): %s server time: %s, system time: %s. Diff = %.2f - too high" % (
                         boxnum, timedata['time'], timedata['boxtime'], timediff)
-                time.sleep(0.5)
+                time.sleep(1)
             else:
                 break
         if must_synchronize:
@@ -373,11 +376,14 @@ class TimeSyncTest(FuncTestCase):
 
     def _prepare_inet_test(self, box, num):
         time.sleep(0)
+        #out =
         self._call_box(box, '/vagrant/ctl.sh', 'timesync', 'prepare_isync', self._init_time[num])
+        #sys.stdout.write("Box %s, output:\n%s\n" % (box, out))
 
     ###################################################################
 
     def TurnInetOn(self):
+        #raw_input("[Press ENTER to continue with Internet time sync test init...]")
         self._prepare_test_phase(self._prepare_inet_test, postUp=True)
         self._check_time_sync()
         #TODO check for primary, make it primary if not bn
@@ -385,22 +391,39 @@ class TimeSyncTest(FuncTestCase):
         self._setPrimaryServer(self._primary)
         self._check_time_sync(False)
         type(self)._secondary = self._get_secondary()
-        self._call_box(self.hosts[self._secondary], '/vagrant/ctl.sh', 'timesync', 'iup')
+        print "DEBUG: primary is %s, secondary is %s" % (self._primary, self._secondary)
+        #raw_input("[Press ENTER to turn Inet up on secondary...]")
+        #print self._call_box(self.hosts[self._secondary], '/vagrant/ctl.sh', 'timesync', 'iup')
+        self._call_box(self.hosts[self._secondary], '/sbin/ifup', IF_EXT)
         time.sleep(INET_SYNC_TIMEOUT)
         itime_str = check_inet_time()
         self.assertTrue(itime_str, "Internet time request failed!")
         itime = struct.unpack('!I', itime_str)[0] - SHIFT_1900_1970
         idelta = itime - time.time() # get the difference between local ant inet time to use it later
-        print "DEBUG: time from internet: %s, %s" % (itime, time.asctime(time.localtime(itime)))
+        print "DEBUG: time from internet: %s (%s); delta: %s" % (
+            itime, time.asctime(time.localtime(itime)), idelta)
+        #raw_input("[Press ENTER to continue...]")
 
+        fail = False
+        failed = []
         for boxnum in xrange(self.num_serv):
             btime = self._request_gettime(boxnum)
             itime = time.time() + idelta
             print "Server %s time %s; inet time %s" % (boxnum, btime['time'], itime)
-            self.assertAlmostEqual(itime, btime['time'], delta=INET_GRACE,
-                                   msg="Server at box %s hasn't sinchronized with Internet time in %s seconds. "
-                                       "Time delta %s, max delta allowed: %s, "%
-                                       (boxnum, INET_SYNC_TIMEOUT, abs(itime - btime['time']), INET_GRACE))
+            if abs(itime - btime['time']) > INET_GRACE:
+                fail = True
+                failed.append([boxnum])
+                print ("Server at box %s hasn't sinchronized with Internet time in %s seconds. "
+                    "Time delta %s, max delta allowed: %s, " %
+                    (boxnum, INET_SYNC_TIMEOUT, abs(itime - btime['time']), INET_GRACE))
+
+        self.assertFalse(fail, "Some of servers hasn't sinchronized with Internet time in %s seconds." % INET_SYNC_TIMEOUT)
+        return
+        #
+        #self.assertAlmostEqual(itime, btime['time'], delta=INET_GRACE,
+        #        msg="Server at box %s hasn't sinchronized with Internet time in %s seconds. "
+        #            "Time delta %s, max delta allowed: %s, "%
+        #            (boxnum, INET_SYNC_TIMEOUT, abs(itime - btime['time']), INET_GRACE))
 
     def ChangePrimarySystime(self):
         delta_before = self._serv_local_delta(self._primary)
@@ -408,8 +431,8 @@ class TimeSyncTest(FuncTestCase):
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         delta_after = self._serv_local_delta(self._primary)
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
-                               msg="Primary server's time changed (%s) after changing of it's system time" %
-                                   (delta_before - delta_after))
+            msg="Primary server's time changed (%s) after changing of it's system time" %
+                (delta_before - delta_after))
         self._check_time_sync(False)
 
     def KeepInetTimeAfterIfdown(self):
@@ -417,7 +440,7 @@ class TimeSyncTest(FuncTestCase):
         """
         delta_before = self._serv_local_delta(self._primary)
         print "Turn off the internet connection at the box %s" % self._secondary
-        self._call_box(self.hosts[self._secondary], 'ifdown', IF_EXT)
+        self._call_box(self.hosts[self._secondary], '/sbin/ifdown', IF_EXT)
         time.sleep(SYSTEM_TIME_SYNC_SLEEP)
         delta_after = self._serv_local_delta(self._primary)
         self.assertAlmostEqual(delta_before, delta_after, delta=DELTA_GRACE,
