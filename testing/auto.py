@@ -674,33 +674,33 @@ NATCON_ARGS = ["--natcon", '--config', NATTEST_CFG_NAME]
 
 
 def mk_functest_cmd(to_skip):
-    only_test = ''
+    # http stress test single call isn't processed here
     cmd = BASE_FUNCTEST_CMD[:]
     if not Args.natcon:
         cmd += COMMON_ARGS
 
-    if Args.timesync:
-        cmd.append("--timesync")
-        only_test = "timesync"
-    elif Args.msarch:
-        cmd.append("--msarch")
-        only_test = "msarch"
-    elif Args.stream:
-        cmd.append("--stream")
-        only_test = "stream"
-    elif Args.natcon:
+    if Args.mainft:
+        cmd.append('--main')
+        return cmd, 'mainft'
+
+    for test in ('timesync', 'bstorage', 'msarch', 'stream', 'dbup'):
+        if getattr(Args, test, False):
+            cmd.append('--' + test)
+            return cmd, test
+
+    if Args.natcon:
         cmd.extend(NATCON_ARGS)
-        only_test = "natcon"
-    else:
-        if 'time' in to_skip:
-            cmd.append("--skiptime")
-        if 'backup' in to_skip:
-            cmd.append("--skipbak")
-        if 'msarch' in to_skip:
-            cmd.append('--skipmsa')
-        if "stream" in to_skip:
-            cmd.append("--skipstrm")
-    return cmd, only_test
+        return cmd, "natcon"
+
+    if 'time' in to_skip:
+        cmd.append("--skiptime")
+    if 'backup' in to_skip:
+        cmd.append("--skipbak")
+    if 'msarch' in to_skip:
+        cmd.append('--skipmsa')
+    if "stream" in to_skip:
+        cmd.append("--skipstrm")
+    return cmd, ''
 
 
 def prepare_functest_cfg(natcon=False):
@@ -832,9 +832,43 @@ FUNCTEST_TBL = (
     FuncTestDesc('bstorage', "Backup Storage", None, None),
     FuncTestDesc('msarch', "Multiserver Archive", None, None),
     FuncTestDesc('stream', "Streaming", None, None),
+    FuncTestDesc('httpstress', "HTTP stress", None, None),
     FuncTestDesc('dbup', "DB Upgrade", None, None),
     FuncTestDesc('natcon', "Connection behind NAT", None, None),
 )
+
+#FIXME: combine these two tables
+
+FTDesc = namedtuple('FTDesc', ('args', 'name'))
+
+SingleFuncTests = [
+    FTDesc(("--mainft",), "main functests"),
+    FTDesc(("--timesync", "--ts"), "time synchronization"),
+    FTDesc(("--bstorage", "--bs"), "backup storage"),
+    FTDesc(("--httpstress", '--hst'), "HTTP stress"),
+    FTDesc(("--msarch",), "multiserver archive"),
+    FTDesc(("--natcon",), "connection behind NAT"),
+    FTDesc(("--stream",), "streaming"),
+    FTDesc(("--dbup",), "database migration on upgrade"),
+]
+
+
+def getFTDesc(test):
+    for ft in SingleFuncTests:
+        if test == ft.args[0][2:]:
+            return ft
+    return None
+
+
+def nameFunctest():
+    if Args.functest:
+        return "all functests"
+    else:
+        for ft in SingleFuncTests:
+            if getattr(Args, ft.args[0][2:], False):
+                return ft.name
+        return "UNKNOWN!!!"
+
 
 #TODO
 def perform_func_test_new(to_skip):
@@ -1461,16 +1495,6 @@ def show_boxes():
 
 #####################################
 
-FTDesc = namedtuple('FTDesc', ('args', 'name'))
-
-SingleFuncTests = [
-    FTDesc(("--timesync", "--ts"), "time synchronization"),
-    FTDesc(("--httpstress", '--hst'), "HTTP stress"),
-    FTDesc(("--msarch",), "multiserver archive"),
-    FTDesc(("--natcon",), "connection behind NAT"),
-    FTDesc(("--stream",), "streaming"),
-]
-
 # which options are allowed to be used with --nobox
 FUNCTEST_ARGS = ('functest', ) + tuple(ft.args[0].lstrip('-') for ft in SingleFuncTests)
 ARGS_EXCLUSIVE = (
@@ -1775,17 +1799,6 @@ def printTestList():
     for ft in SingleFuncTests:
         print "\t%s   %s" % (ft.args[0].ljust(maxlen), ft.name)
 
-
-def nameFunctest():
-    if Args.functest:
-        return "all functests"
-    else:
-        return "%s functest" % ("timesync" if Args.timesync else
-            "http-stress" if Args.httpstress else
-            "multiserver archive" if Args.msarch else
-            "streaming" if Args.stream else
-            "NAT-connection" if Args.natcon else
-            "UNKNOWN!!!",)
 
 def main():
     parse_args()
