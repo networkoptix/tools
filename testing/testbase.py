@@ -344,13 +344,15 @@ class FuncTestCase(unittest.TestCase):
                 headers = {'Content-Type': 'application/json'}
             return urllib2.Request(url, data=json.dumps(data), headers=headers)
 
-    def _server_request(self, host, func, data=None, headers=None, timeout=None, unparsed=False, nodump=False):
+    def _server_request(self, host, func, data=None, headers=None, timeout=None,
+                        unparsed=False, nolog=False, nodump=False):
         req = self._prepare_request(host, func, data, headers)
         url = req.get_full_url()
-        print "DEBUG: requesting: %s" % url
-        if data is not None and (not nodump):
-            # on restoreDatabase data is a large binary block, not interesting for debug
-            print "DEBUG: with data %s" % (pprint.pformat(data),)
+        if not nolog:
+            print "DEBUG: requesting: %s" % url
+            if data is not None and (not nodump):
+                # on restoreDatabase data is a large binary block, not interesting for debug
+                print "DEBUG: with data %s" % (pprint.pformat(data),)
         try:
             response = urllib2.urlopen(req, **({} if timeout is None else {'timeout': timeout}))
         except urllib2.URLError , e:

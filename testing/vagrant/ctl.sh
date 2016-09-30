@@ -46,8 +46,10 @@ function timesync_ctl {
             echo '*** STOPPING NTPD ***'
             service ntp stop
             nxcleardb
-            setLogLevel $debugLevel
-            ifdown $EXT_IF > /dev/null
+            setLogLevel DEBUG2
+            /sbin/ifdown $EXT_IF > /dev/null
+            # make it non-executable to disable ntpd start when eth0 goes up:
+            chmod -x /etc/network/if-up.d/ntpdate
             date --set=@$1
             ;;
         clear)
@@ -59,18 +61,13 @@ function timesync_ctl {
         prepare_isync)
             safestop "$SERVICE"
             echo configuring inet sync
-            ifdown $EXT_IF > /dev/null
+            /sbin/ifdown $EXT_IF > /dev/null
             date --set=@$1
             nxcleardb
             # values should be less than INET_SYNC_TIMEOUT in timetest.py
-            nxedconf ecInternetSyncTimePeriodSec 15
-            nxedconf ecMaxInternetTimeSyncRetryPeriodSec 15
+            nxedconf ecInternetSyncTimePeriodSec 12
+            nxedconf ecMaxInternetTimeSyncRetryPeriodSec 12
             #safestart "$SERVICE"
-            ;;
-        iup)
-            # make it non-executable to disable ntpd start when eth0 goes up
-            chmod -x /etc/network/if-up.d/ntpdate
-            ifup $EXT_IF > /dev/null
             ;;
         *) echo "Unknown mode '${mode}' for timesync test control"
     esac
@@ -157,6 +154,8 @@ function db_ctl {
         *) echo "Unknown mode '${mode}' for dbup test control"
     esac
 }
+
+################################################################################################
 
 case "$mode" in
     init)
