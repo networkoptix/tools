@@ -17,7 +17,7 @@ def add_jira_link(src):
 
 MAX_WIDTH = 25
 def strict_message(msg):
-  if msg > MAX_WIDTH:
+  if len(msg) > MAX_WIDTH:
     return msg[:MAX_WIDTH-3] + '...'
   return msg
   
@@ -38,8 +38,11 @@ class UpdateReport(Report):
     
     history = "%s<br><table align=\"left\">\n" % type
 
+    repo_name = None
     for c in commits:
-      # my $author = join ' ', map ucfirst, split '_', $c->{author};
+      if repo_name != c.repo.name:
+        repo_name = c.repo.name
+        history+="""<tr><td colspan="3" align="center"><b>%s#%s</b></td></tr>\n""" % (c.repo.name, c.rev)
       history+="<tr><td>%s</td>\n" % c.author
       history+="<td><a href=\"%s\">%s</a></td>\n" % (c.ui_rev, c.repo.name)
       history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(strict_message(c.description)))

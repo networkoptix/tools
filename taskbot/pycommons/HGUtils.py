@@ -56,7 +56,8 @@ def get_changes(repo, rev, prev_rev):
 
   hg_log_cmd = [
     "hg", "--cwd", r.path,
-    "log", "--rev", " %s..%s" % (prev_rev, rev), "--no-merges",
+    "log", "--rev", " %s..%s" % (prev_rev, rev),
+    # "--no-merges", 
     "--template", template,
     "--branch", "%s" % r.branch]
 

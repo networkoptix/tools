@@ -4,6 +4,7 @@
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
+import os
 
 SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
 SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
@@ -15,6 +16,10 @@ WATCHERS = {
   'Roman Vasilenko': 'rvasilenko@networkoptix.com',
   'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
   'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'}
+
+DEBUG_WATCHERS = {
+  'Artem Nikitin': 'anikitin@networkoptix.com'}
+
 
 class EmailNotify:
 
@@ -61,11 +66,13 @@ def email_commits(cs, reason):
 %s""" % (",\n  ".join(cs), reason)
   
 
-def notify(report, prev_run, subject, reason, debug=False):
+def notify(report, prev_run, subject, reason):
   import HGUtils
+  debug = os.environ.get('TASKBOT_DEBUG_MODE', '0') == '1'
   commits = HGUtils.changes(report, prev_run)
   to = WATCHERS
-
+  if debug:
+    to = DEBUG_WATCHERS
   cs = []
   for c in commits:
     if not debug:

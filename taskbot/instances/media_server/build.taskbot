@@ -6,8 +6,8 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 cd "$TASKBOT_VAR"/nx_vms
 
 # + Clean
-mvn clean
+mvn clean -Dutb
 hg purge .
 
 # + Build
-mvn package -e -T12 -Dbuild.configuration=release -Dutb
+mvn package -e -T12 -Dbuild.configuration=release -Dutb 2>&1

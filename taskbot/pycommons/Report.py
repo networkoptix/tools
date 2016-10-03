@@ -1,5 +1,5 @@
 # $Id$
-# Artem V. Nikitin
+# Arem V. Nikitin
 # Report base class
 
 import os, zlib, urllib
@@ -44,11 +44,13 @@ class Report:
       
   def __init__(self, config, root_task = None):
     self.__config__ = read_config(config) # Takbot config
+    Compressor.gzip_threshold = self.__config__.get('gzip_threshold', 0)
+    Compressor.gzip_ratio = self.__config__.get('gzip_ratio', 0)
     self.__db__ =  MySQLDB(self.__config__.get('db_config', None)) # Takbot database
-    self.__root_task__ = root_task or self.__find_root()
-    self.__link_task_id__ = self.__root_task__.id
     self.__platform__ = self.__find_platform()
     self.__branch__ = self.__find_branch()
+    self.__root_task__ = root_task or self.__find_root_by_pid() or self.__find_last_root()
+    self.__link_task_id__ = self.__root_task__.id
 
   # Raw report SQL
   def __find_platform(self):
@@ -60,8 +62,26 @@ class Report:
   def __find_branch(self):
     return self.__db__.query("""SELECT id FROM branch
       WHERE description = %s""", (os.environ['TASKBOT_BRANCHNAME'], ))[0]
+
+  def __find_last_root(self):
+    res = \
+        self.__db__.query("""SELECT id, parent_task_id, description,
+          is_command, start, finish, error_message
+          FROM task
+          WHERE id = (SELECT MAX(id)
+            FROM task
+            WHERE platform_id = %s
+            AND branch_id = %s
+            AND parent_task_id IS NULL)""",
+          (self.__platform__.id,  self.__branch__))
+    if res:
+      return Report.Task(*res)
+    return None
   
-  def __find_root(self):
+  def __find_root_by_pid(self):
+    if not os.environ.get('TASKBOT_PARENT_PID'):
+      return None
+   
     (parent_task_id, ) = \
     self.__db__.query("""SELECT MIN(task_id)
       FROM running_task
@@ -106,8 +126,9 @@ class Report:
     return [ Report.Task(*task) for task in cursor ]
 
   def __insert_report(self, task_id, gzipped, html):
-    self.__db__.execute("""INSERT INTO report (task_id, gzipped, html)
-      VALUES (%s, %s, %s)""", (task_id, gzipped, html));
+    return \
+           self.__db__.execute("""INSERT INTO report (task_id, gzipped, html)
+           VALUES (%s, %s, %s)""", (task_id, gzipped, html));
 
   def __get_report(self, task_id):
     return self.__db__.query("""SELECT id, gzipped, html
@@ -140,6 +161,11 @@ class Report:
 
   def __get_stderr(self, task_id):
     return self.__db__.query("""SELECT stderr_gzipped, stderr
+      FROM command
+      WHERE task_id = %s""",(task_id, ))
+
+  def __get_status(self, task_id):
+    return self.__db__.query("""SELECT exit_status
       FROM command
       WHERE task_id = %s""",(task_id, ))
 
@@ -187,6 +213,21 @@ class Report:
     return self.__db__.query("""SELECT content
       FROM file
       WHERE id = %s""",(file_id))
+
+  def __get_ouput(self, fn, task):
+    if isinstance(task, list):
+      task = task[0]
+
+    gzipped, out = fn(task.id)
+    out = str(out)
+
+    if not out:
+      return "(not a command)"
+
+    if gzipped:
+      return zlib.decompress(out)
+
+    return out
 
   # Find tasks in root by description (path)
   def find_task_by_root( self, path, root_task = None):
@@ -244,16 +285,20 @@ class Report:
     return self.__prev_root_task(task or self.__root_task__)
 
   # Get task command stdout
-  def get_stdout( self, tasks):
-    gzipped, stdout = self.__get_stdout(tasks[0].id)
+  def get_stdout( self, task):
+    return self.__get_ouput(self.__get_stdout, task)
 
-    if not stdout:
-      return "(not a command)"
+  def get_stderr( self, task):
+    return self.__get_ouput(self.__get_stderr, task)
 
-    if gzipped:
-      return zlib.uncompress(stdout)
-
-    return stdout
+  # Get task status
+  def get_status( self, task):
+    if isinstance(task, list):
+      task = task[0]
+    status =  self.__get_status(task.id)
+    if status:
+      return status[0]
+    return None
 
   # Get task command stderr
   def find_failed(self, task):
@@ -269,9 +314,25 @@ class Report:
 
     return result
 
+  # Add new report
+  def add_report(self, html):
+    gzipped, buf = Compressor.compress_maybe(html);
+
+    if (len(buf) > 65535): # size of MySQL Text
+      buffer = "Report size is too long ('%d').<br>" % len(buf)
+      gzipped = 0
+
+    return self.__insert_report(
+      self.__root_task__.id,
+      gzipped, buf)
+
   # Get task href
   def task_href( self, task ):
-    return "?task=%s" % task.id;
+    return "?task=%s" % task.id
+
+  # Get report href
+  def report_href (self, report_id):
+    return "?report=%s" % report_id
 
   @property
   def link_task_id(self):

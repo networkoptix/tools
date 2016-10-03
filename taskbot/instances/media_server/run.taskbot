@@ -12,12 +12,20 @@ echo $RC
 
 # + Build product
 if [ $RC -eq 0 ]; then
-  "$TASKBOT" $ARGS "$TASKBOT_SHARE/"/build.taskbot
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/build.taskbot
   RC=$?
   echo $RC
 fi
 
 "$TASKBOT_SHARE"/build_report.py "$TASKBOT_CONFIG"
 
-exit $RC
+# + Run unit tests
+if [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
+  RC=$?
+  echo $RC
+fi
 
+"$TASKBOT_SHARE"/unit_tests_report.py "$TASKBOT_CONFIG"
+
+exit $RC

@@ -1,4 +1,4 @@
-import os, sys, re, socket, platform, fcntl, struct
+import os, sys, re, socket, platform, fcntl, struct, zlib, StringIO
 
 def methodNotImplemented( obj = None ):
   raise Exception('(%s) Abstract method call: method is not implemented' % obj)
@@ -62,3 +62,20 @@ def safe_call(fn, *args, **kw):
     return fn(*args, **kw)
   except:
     pass
+
+# Compress output
+class Compressor:
+
+  gzip_threshold = None
+  gzip_ratio = None
+
+  @classmethod
+  def compress_maybe(cls, buf):
+    if Compressor.gzip_threshold and \
+       Compressor.gzip_ratio and \
+       len(buf) >= cls.gzip_threshold:
+      buf_gz = zlib.compress(buf)
+      if len(buf_gz) <= len(buf) * cls.gzip_ratio:
+        return (True, buf_gz)
+    return False, buf
+

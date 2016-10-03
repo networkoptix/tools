@@ -1,0 +1,42 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Run tests
+QT_SERVER_LIB_PATH=$(dirname `find "$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb -name 'libQt5*.so' -print | head -n 1`)
+QT_CLIENT_LIB_PATH=$(dirname `find "$TASKBOT_VAR"/nx_vms/debsetup/client-deb -name 'libQt5*.so' -print | head -n 1`)
+NX_VMS_LIB_PATH="$TASKBOT_VAR"/nx_vms/build_environment/target/lib
+export LD_LIBRARY_PATH=$QT_SERVER_LIB_PATH:$QT_CLIENT_LIB_PATH:$NX_VMS_LIB_PATH
+
+echo $LD_LIBRARY_PATH
+
+UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
+
+if [ ! -d "$UNIT_TESTS_RESULT_PATH" ]; then 
+  mkdir -p "$UNIT_TESTS_RESULT_PATH"
+else
+  rm -rf "$UNIT_TESTS_RESULT_PATH"/*
+fi
+
+cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
+
+for test in $(find . -name '*_ut' -type f)
+do
+  name=$(basename $test)
+  "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+     -c "$test  --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml" || true
+done
+
+# + Store results
+for xml in $(find "$UNIT_TESTS_RESULT_PATH" -name '*.xml' -type f)
+do
+ filename=$(basename $xml)
+ name=${filename%.*}
+ "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+   -c "cat $xml" --trace
+done
+
+
+
+

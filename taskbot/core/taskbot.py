@@ -4,7 +4,7 @@
 # Artem V. Nikitin
 # Core taskbot script
 
-import sys, os, importlib, re, subprocess, tempfile, time, zlib, threading, signal
+import sys, os, importlib, re, subprocess, tempfile, time, threading, signal
 from optparse import OptionParser
 
 pycommons = os.path.join(
@@ -92,23 +92,6 @@ class StrictOutput:
         " of the output\n\n..." % cls.max_output_size
     return buf
     
-
-# Compress output
-class Compressor:
-
-  gzip_threshold = None
-  gzip_ratio = None
-
-  @classmethod
-  def compress_maybe(cls, buf):
-    if Compressor.gzip_threshold and \
-       Compressor.gzip_ratio and \
-       len(buf) >= cls.gzip_threshold:
-      buf_gz = zlib.compress(buf)
-      if len(buf_gz) <= len(buf) * cls.gzip_ratio:
-        return (True, buf_gz)
-    return False, buf
-
 # Trace log
 class Trace:
 
@@ -129,6 +112,7 @@ class OutputReader:
       target = self.__read)
     self.__thread__.daemon = True
     self.__buffer__ = MTBuffer()
+    self.__ready__ = MTFlag()
     self.__thread__.start()
 
   def __read(self):
@@ -137,9 +121,14 @@ class OutputReader:
       if not c:
         break
       self.__buffer__.append(c)
+      self.__ready__.set(True)
 
   def get(self):
-    return self.__buffer__.get()
+    buf = ''
+    while self.__ready__.wait(.1):
+      buf+=self.__buffer__.get()
+      self.__ready__.set(False)
+    return buf
 
 # Check status or timeout
 class StatusChecker:
@@ -308,7 +297,7 @@ class TaskExecutor:
       if len(status) == 0: # shell was terminated
         status = self.__shell_process__.wait()
         if status != 0:
-          task.error_message = "non-zero exit status (execution terminated)"
+          task.error_message = "non-zero exit status"
         return status, True
       status = int(status)
       if status != 0:
@@ -322,6 +311,11 @@ class TaskExecutor:
     self.__timeout__.start_command(command)
     return self.start_task(command, True)
 
+  def __read_output(self, stream):
+    out = stream.get()
+    Trace.trace(out)
+    return out
+    
   def write_command(self, command, is_comment=False, timeout = None):
     self.__shell_process__.stdin.write(command)
 
@@ -333,12 +327,10 @@ class TaskExecutor:
     if not is_comment:
       while True:
         status = self.__status__.wait(.1)
-        out = self.__out__.get()
-        err = self.__err__.get()
+        out = self.__read_output(self.__out__)
+        err = self.__read_output(self.__err__)
         stdout += out
         stderr += err
-        Trace.trace(out)
-        Trace.trace(err)
 
         if status is not None:
           break

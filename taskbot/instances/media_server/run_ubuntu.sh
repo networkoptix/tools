@@ -7,14 +7,14 @@ if [ ! -z "$1" ]; then
 fi
 
 export TASKBOT_PLATFORM=`uname -oi`
-CONFIG="$HOME"/taskbot/devtools/taskbot/instances/media_server/ubuntu_config.py
+TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/media_server/ubuntu_config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py
 PRNENV="$BIN"/prnenv.py
 
 # Set taskbot environment
-eval $($PRNENV $CONFIG)
+eval $($PRNENV $TASKBOT_CONFIG)
 
 echo $TAKBOT_VAR
 
@@ -28,7 +28,7 @@ while true; do
         --description "Poll for changes ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
         --trace \
         --timeout=0 \
-        $CONFIG \
+        $TASKBOT_CONFIG \
         update_repo.taskbot 
     then
       echo "Polling changes error" > /dev/stderr && exit 1
@@ -36,7 +36,7 @@ while true; do
 
     $TASKBOT \
       --description "Media-server tests run ($TASKBOT_BRANCHNAME)" \
-      $CONFIG \
+      $TASKBOT_CONFIG \
       run.taskbot
 
     sleep 60

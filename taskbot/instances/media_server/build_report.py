@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # $Id$
 # Artem V. Nikitin
+# Build report
 
 import sys
 sys.path.insert(0, '../../pycommons')
@@ -16,7 +17,7 @@ class BuildReport(Report):
 
     if len(build_tasks) == 0:
       # Add absent error report
-      report.add_history('"RED"', "There is no build")
+      self.add_history('"RED"', "There is no build")
       print >> sys.stderr, "Cannot create build report (build task absent)" 
       return 1
 
@@ -55,7 +56,7 @@ class BuildReport(Report):
         print "Send email notification!"
         EmailNotify.notify(
           self, prev_run, "build failed",
-          "The product is no longer builded.", debug=True)
+          "The product is no longer builded.")
     
     return 0
 
