@@ -335,12 +335,44 @@ EOF;
 
     if ($gzipped) {
         use Compress::Zlib;
-        print uncompress($html) or "Cannot uncompress: $gzerrno<br>";
+        print uncompress($html);
     } else {
         print $html;
     }
 
     print $q->end_html;
+  }
+
+sub generate_raw {
+    my ($gzipped, $out);
+    if ($params->{report}) {
+      ($gzipped, $out) = $dbh->selectrow_array(q[
+          SELECT gzipped, html
+          FROM report
+          WHERE id = ?
+      ], undef, $params->{report});
+    } elsif ($params->{stderr}) {
+      ($gzipped, $out) = $dbh->selectrow_array(q[
+          SELECT stderr_gzipped, stderr
+          FROM command
+          WHERE task_id = ?
+      ], undef, $params->{stderr});
+    } elsif ($params->{stdout}) {
+      ($gzipped, $out) = $dbh->selectrow_array(q[
+          SELECT stdout_gzipped, stdout
+          FROM command
+          WHERE task_id = ?
+      ], undef, $params->{stdout});
+    }
+
+    if ($gzipped) {
+        use Compress::Zlib;
+        $out = uncompress($out);
+      }
+    my $type = $params->{type} or 'text/html';
+    print $q->header(-type => $type,
+                     -content_length => length($out));
+    print $out;
 }
 
 
@@ -542,9 +574,11 @@ if (exists $params->{history}) {
     generate_history_list;
   }
 } elsif (exists $params->{tasks}) {
-    generate_task_list;
+  generate_task_list;
+} elsif (exists $params->{raw}) {
+  generate_raw;
 } elsif (exists $params->{report}) {
-    generate_report;
+  generate_report;
 } elsif (exists $params->{task}) {
     generate_task_description;
 }

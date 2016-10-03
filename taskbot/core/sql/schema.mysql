@@ -91,7 +91,7 @@ CREATE TABLE report (
         task_id INTEGER UNSIGNED default NULL,
 
         gzipped BOOL NOT NULL,
-        html TEXT NOT NULL,
+        html LONGBLOB NOT NULL,
 
         FOREIGN KEY (task_id) REFERENCES task (id)
             ON DELETE CASCADE
