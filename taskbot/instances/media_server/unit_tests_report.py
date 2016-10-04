@@ -80,7 +80,7 @@ class UTReport(Report):
     if not unit_tests:
       # Add absent error report
       self.add_history('"RED"', "There are no unit-tests")
-      print >> sys.stderr, "Cannot create unit-tests report (build task absent)" 
+      print >> sys.stderr, "Cannot create unit-tests report (unit-tests task absent)" 
       return 1
 
     # Get previous tests result
@@ -107,6 +107,10 @@ class UTReport(Report):
     for name, info in OrderedDict(sorted(unit_tests.items())).iteritems():
       status, color = \
          info.status_and_color(unit_tests_prev.get(name))
+      if not info.xml:
+        self.add_history('"RED"', "There are no unit-tests")
+        print >> sys.stderr, "Cannot find xml for unit-test '%s'" % name 
+        return 1
       xml_report_id = self.add_report(info.xml)
       tests_report += """<tr>
         <td class="test_name">%s</td>

@@ -56,7 +56,7 @@ class BuildReport(Report):
         print "Send email notification!"
         EmailNotify.notify(
           self, prev_run, "build failed",
-          "The product is no longer builded.")
+          "The product is no longer being built.")
     
     return 0
 
