@@ -71,7 +71,15 @@ class UTReport(Report):
         print >> sys.stderr, "Cannot find results for test '%s'" % \
            test.description
     return unit_tests
-  
+
+  def _details(self, info):
+    if info.xml:
+      xml_report_id = self.add_report(info.xml)
+      report_link = "?report=%s&type=%s&raw" % \
+         (xml_report_id, urllib.quote("text/xml"))
+      return """<a href="%s">details</a>""" % report_link
+    else:
+      return "-"
 
   def __generate__( self ):
     
@@ -107,22 +115,16 @@ class UTReport(Report):
     for name, info in OrderedDict(sorted(unit_tests.items())).iteritems():
       status, color = \
          info.status_and_color(unit_tests_prev.get(name))
-      if not info.xml:
-        self.add_history('"RED"', "There are no unit-tests")
-        print >> sys.stderr, "Cannot find xml for unit-test '%s'" % name 
-        return 1
-      xml_report_id = self.add_report(info.xml)
       tests_report += """<tr>
         <td class="test_name">%s</td>
         <td class="test_status" bgcolor="%s">%s</td>
         <td class="test_exec_time">%s</td>
-        <td><a href="%s">details</a></td>
+        <td>%s</td>
         <td><a href="%s">log</a></td>
       </tr>""" % (name,  color, status,
                   info.exec_time(),
-                  "?report=%s&type=%s&raw" % (xml_report_id, urllib.quote("text/xml")),
+                  self._details(info),
                   self.task_href(info.task))
-                  
       
     tests_report += "</table>"
 

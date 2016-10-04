@@ -50,7 +50,7 @@ def email_body(report, text):
 
 %s
 
-Use following link for details
+Use the link for details:
 %s
 
 (task #%s)
@@ -59,7 +59,7 @@ Use following link for details
   taskbot""" % (text, report.get_taskbot_link(), report.link_task_id)
 
 def email_commits(cs, reason):
-  return """After following changes
+  return """After these changes:
 
   %s
 

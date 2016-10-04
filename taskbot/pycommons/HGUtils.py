@@ -24,7 +24,7 @@ REPOSITORIES = {
   'nx_vms': Repository(
     os.path.join(os.environ.get('TASKBOT_VAR', DEFAULT_VAR_PATH), 'nx_vms'),
     HG_UI_ROOT + 'nx-vms',
-    os.environ.get('BRANCH_NAME', 'dev_3.0.0')) }
+    os.environ.get('TASKBOT_BRANCHNAME', 'dev_3.0.0')) }
 
 
 def get_changes(repo, rev, prev_rev):
