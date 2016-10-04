@@ -318,10 +318,6 @@ class Report:
   def add_report(self, html, views = {}):
     gzipped, buf = Compressor.compress_maybe(html);
 
-    if (len(buf) > 65535): # size of MySQL Text
-      buffer = "Report size is too long ('%d').<br>" % len(buf)
-      gzipped = 0
-
     report_id = self.__insert_report(
       self.__root_task__.id, gzipped, buf)
 
