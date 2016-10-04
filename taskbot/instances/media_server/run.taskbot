@@ -26,6 +26,6 @@ if [ $RC -eq 0 ]; then
   echo $RC
 fi
 
-"$TASKBOT_SHARE"/unit_tests_report.py "$TASKBOT_CONFIG"
+TASKBOT_DEBUG_MODE=1 "$TASKBOT_SHARE"/unit_tests_report.py "$TASKBOT_CONFIG"
 
 exit $RC

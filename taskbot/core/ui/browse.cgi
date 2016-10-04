@@ -39,7 +39,7 @@ $params->{offset} = 0 unless defined $params->{offset};
 $params->{rows} = 20 unless defined $params->{rows};
 $params->{cols} = 160 unless defined $params->{cols};
 $params->{history} = 0
-  unless grep { exists $params->{$_} } qw(history tasks task report);
+  unless grep { exists $params->{$_} } qw(history tasks task report raw);
 
 
 sub time_str {

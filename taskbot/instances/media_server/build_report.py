@@ -3,14 +3,38 @@
 # Artem V. Nikitin
 # Build report
 
-import sys
+import sys, re
 sys.path.insert(0, '../../pycommons')
 from Report import Report
 
+MAX_OUTPUT_LINES = 2000
+
 class BuildReport(Report):
+
+  OUTPUT_CLASS = [
+    ( r'\[ERROR\]', 'error'),
+    ( r'FAILURE', 'error'),
+    ( r'\[WARNING\]', 'warning'),
+    ( r'SKIPPED', 'warning'),
+    ( r'SUCCESS', 'success') ]
+      
 
   def __init__(self, config):
     Report.__init__(self, config)
+
+  def __build_report( self, task ):
+    full_log_link = "?stdout=%s&type=%s&raw" % (task.id, "text/plain")
+    build_report = """<a href="%s">Full log</a><br>\n<br>\n""" % full_log_link
+    lines = self.get_stdout(task).split("\n")[-MAX_OUTPUT_LINES:]
+    def color_line(l):
+      for exp, c in self.OUTPUT_CLASS:
+        if re.search(exp, l):
+          return """<span class="%s">%s</span>""" % (c, l)
+      return l
+      
+    build_report += '<br>\n'.join(map(color_line, lines))
+    build_report_id = self.add_report(build_report, {'css': ['/reports/styles/ColoredOutput.css']})
+    return self.report_href(build_report_id)
 
   def __generate__( self ):
     build_tasks = self.find_task('Build product > %build.taskbot% > %')
@@ -22,7 +46,7 @@ class BuildReport(Report):
       return 1
 
     build = build_tasks[-1]
-    failed = self.find_failed(build);
+    failed = self.find_failed(build)
 
     color = '"GREEN"';
     desc = build.description
@@ -30,8 +54,14 @@ class BuildReport(Report):
     result = "OK"
     if failed:
       color = '"RED"'
-      task_href = self.task_href(failed)
+      task_href = self.__build_report(failed)
       result = "FAILED"
+    else:
+      # Get mvn task
+      mvn_task = self.find_task('%mvn package%', build_tasks)
+      if mvn_task:
+        task_href = self.__build_report(mvn_task[0])
+      
 
     history = "<br>%s<br>" % desc
     history += "<a href=\"%s\">%s</a>" % (task_href, result)

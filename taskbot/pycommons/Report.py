@@ -135,8 +135,8 @@ class Report:
       FROM report
       WHERE task_id = %s""", (task_id,))
 
-  def insert_view(self, type, url):
-    self.__db__.execute("""INSERT INTO view (type, url)
+  def __insert_view(self, type, url):
+    return self.__db__.execute("""INSERT INTO view (type, url)
       VALUES (%s, %s)""", (type, url))
 
   def __link_view(self, report_id, view_id):
@@ -315,16 +315,27 @@ class Report:
     return result
 
   # Add new report
-  def add_report(self, html):
+  def add_report(self, html, views = {}):
     gzipped, buf = Compressor.compress_maybe(html);
 
     if (len(buf) > 65535): # size of MySQL Text
       buffer = "Report size is too long ('%d').<br>" % len(buf)
       gzipped = 0
 
-    return self.__insert_report(
-      self.__root_task__.id,
-      gzipped, buf)
+    report_id = self.__insert_report(
+      self.__root_task__.id, gzipped, buf)
+
+    for view_type, urls in views.items():
+      for url in urls:
+        result = self.__db__.query(
+          """SELECT id FROM view WHERE url = %s""", (url,))
+        if result:
+          view_id = result[0]
+        else:
+          view_id = self.__insert_view(view_type, url)
+        self.__link_view(report_id, view_id)
+
+    return report_id
 
   # Get task href
   def task_href( self, task ):
