@@ -145,6 +145,7 @@ class UTReport(Report):
 
     if prev_run and new_fail:
       print "Send email notification!"
+      import EmailNotify
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "New fails detected in the unit-tests.")
