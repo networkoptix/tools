@@ -36,18 +36,19 @@ class UpdateReport(Report):
       print >> sys.stderr, "There are no commits!"
       return 1
     
-    history = "%s<br><table align=\"left\">\n" % type
+    history = "%s<br>" % type
 
     repo_name = None
-    for c in commits:
-      if repo_name != c.repo.name:
-        repo_name = c.repo.name
-        history+="""<tr><td colspan="3" align="center"><b>%s#%s</b></td></tr>\n""" % (c.repo.name, c.rev)
-      history+="<tr><td>%s</td>\n" % c.author
-      history+="<td><a href=\"%s\">%s</a></td>\n" % (c.ui_rev, c.repo.name)
-      history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(strict_message(c.description)))
-
-    history += "</table>"
+    for repo, commits in commits.items():
+      if commits:
+        history += """<b>%s#%s</b><br>\n""" % \
+          (repo, commits[0].rev)
+        history += """<table align="left">\n"""
+        for c in commits:
+          history+="<tr><td>%s</td>\n" % c.author
+          history+="<td><a href=\"%s\">%s</a></td>\n" % (c.ui_rev, c.repo.name)
+          history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(strict_message(c.description)))
+        history += "</table>"
 
     print "Add update report:\n%s" % history
     self.add_history('#f0f0f0', history);

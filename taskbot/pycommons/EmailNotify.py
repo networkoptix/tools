@@ -34,7 +34,7 @@ class EmailNotify:
     
   def send( self, to, subject, text):
     msg = MIMEText(text)
-    msg['Subject'] = subject
+    msg['Subject'] = "[Taskbot] %s" % subject
     msg['From'] = MAIL_FROM
     msg['To'] = ",".join(map(lambda t: "%s <%s>" % (t[0], t[1]), to.items()))
     # Debug
@@ -69,7 +69,8 @@ def email_commits(cs, reason):
 def notify(report, prev_run, subject, reason):
   import HGUtils
   debug = os.environ.get('TASKBOT_DEBUG_MODE', '0') == '1'
-  commits = HGUtils.changes(report, prev_run)
+  commits = HGUtils.changes(report, prev_run).values()
+  commits = reduce(lambda x, y: x + y, commits, [])
   to = WATCHERS
   if debug:
     to = DEBUG_WATCHERS

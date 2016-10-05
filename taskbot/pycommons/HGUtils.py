@@ -82,7 +82,7 @@ def changes(report, since):
   prev_revisions = \
      report.find_task_by_root('%remember_revisions.taskbot% > Remember revisions > %', since)
 
-  commits = []
+  commits = {}
 
   for repo_task in report.find_task('%', revisions):
      repo = repo_task.description
@@ -91,11 +91,12 @@ def changes(report, since):
      prev_revision = \
        report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
      print revision, prev_revision
+     cs = []
      if revision != prev_revision:
        cs = get_changes(repo, revision, prev_revision)
        print "Changeset: %s" % cs
        if cs is None:
          return None
-       commits+=cs
-  commits.sort(lambda x, y: x.timestamp > y.timestamp)
+       cs.sort(lambda x, y: x.timestamp > y.timestamp)
+     commits[repo] = cs
   return commits

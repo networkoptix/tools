@@ -86,8 +86,6 @@ class UTReport(Report):
     unit_tests = self.__get_test_info()
 
     if not unit_tests:
-      # Add absent error report
-      self.add_history('"RED"', "There are no unit-tests")
       print >> sys.stderr, "Cannot create unit-tests report (unit-tests task absent)" 
       return 1
 
