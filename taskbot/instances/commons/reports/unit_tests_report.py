@@ -57,7 +57,7 @@ class UTReport(Report):
     tasks = self.find_task('Run unit tests > %run_unit_tests.taskbot%', prev_run)
     if len(tasks) == 0:
       return None
-    run_tests = self.find_task('Run tests > for % > %', tasks)
+    run_tests = self.find_task('Run tests > %for % > %', tasks)
     test_results = self.find_task('Store results > %for % > %', tasks)
     for test in run_tests:
       unit_tests[test.description] = \
