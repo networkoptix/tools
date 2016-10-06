@@ -4,9 +4,12 @@
 # Artem V. Nikitin
 # Unit tests report
 
-import sys, urllib
+import sys, urllib, os
 from collections import OrderedDict
-sys.path.insert(0, '../../pycommons')
+pycommons = os.path.join(
+  os.path.dirname(os.path.realpath(__file__)),
+  '../../../pycommons')
+sys.path.insert(0, pycommons)
 from Report import Report
 
 def get_totals(unit_tests):

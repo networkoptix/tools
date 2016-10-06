@@ -3,18 +3,24 @@
 # Artem V. Nikitin
 # Build report
 
-import sys, re
-sys.path.insert(0, '../../pycommons')
+import sys, re, os
+
+pycommons = os.path.join(
+  os.path.dirname(os.path.realpath(__file__)),
+  '../../../pycommons')
+sys.path.insert(0, pycommons)
 from Report import Report
 
-MAX_OUTPUT_LINES = 2000
+MAX_OUTPUT_LINES = 500
 
 class BuildReport(Report):
 
   OUTPUT_CLASS = [
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
+    ( r':\d+:\d+:\s+error:', 'error'),
     ( r'\[WARNING\]', 'warning'),
+    ( r':\d+:\d+:\s+warning:', 'warning'),
     ( r'SKIPPED', 'warning'),
     ( r'SUCCESS', 'success') ]
       

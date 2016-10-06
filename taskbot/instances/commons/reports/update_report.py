@@ -4,8 +4,12 @@
 # Artem V. Nikitin
 # Update report
 
-import sys, re, cgi
-sys.path.insert(0, '../../pycommons')
+import sys, re, cgi, os
+
+pycommons = os.path.join(
+  os.path.dirname(os.path.realpath(__file__)),
+  '../../../pycommons')
+sys.path.insert(0, pycommons)
 from Report import Report
 
 JIRA_HREF = "https://networkoptix.atlassian.net/browse/"

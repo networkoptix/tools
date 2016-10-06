@@ -1,4 +1,7 @@
 # -*- python -*-
+# $Id$
+# Artem V. Nikitin
+# Windows config
 
 import os
 
@@ -19,9 +22,11 @@ config = {
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
-    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/media_server'),
+    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/windows'),
+    'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@enk.me/devtools',
     }
   }
+

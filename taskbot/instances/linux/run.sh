@@ -6,8 +6,9 @@ if [ ! -z "$1" ]; then
   export TASKBOT_BRANCHNAME="$1"  
 fi
 
-export TASKBOT_PLATFORM=`uname -oi`
-TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/media_server/ubuntu_config.py
+export TASKBOT_PLATFORM=$(uname -ms | sed -r's/CYGWIN_/WIN\//')
+
+TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py
@@ -29,13 +30,13 @@ while true; do
         --trace \
         --timeout=0 \
         $TASKBOT_CONFIG \
-        update_repo.taskbot 
+        "$TASKBOT_COMMONS"/scripts/update_repo.taskbot 
     then
       echo "Polling changes error" > /dev/stderr && exit 1
     fi
 
     $TASKBOT \
-      --description "Media-server tests run ($TASKBOT_BRANCHNAME)" \
+      --description "NX VMS build & tests ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
       $TASKBOT_CONFIG \
       run.taskbot
 

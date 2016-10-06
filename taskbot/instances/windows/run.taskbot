@@ -1,0 +1,20 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Save update info
+"$TASKBOT" $ARGS "$TASKBOT_COMMONS"/scripts/remember_revisions.taskbot
+RC=$?
+echo $RC
+
+"$TASKBOT_COMMONS"/reports/update_report.py "$TASKBOT_CONFIG"
+
+# + Build product
+if [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_COMMONS"/scripts/build.taskbot
+  RC=$?
+  echo $RC
+fi
+
+"$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
