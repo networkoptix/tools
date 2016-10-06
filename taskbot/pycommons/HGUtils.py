@@ -14,7 +14,8 @@ class Repository:
     self.ui = ui or HG_UI_ROOT + self.name
     self.branch = branch
 
-DEFAULT_VAR_PATH = os.path.join(os.environ['HOME'], 'develop')
+HOME_PATH = os.environ.get('TASKBOT_HOME', os.environ['HOME'])
+DEFAULT_VAR_PATH = os.path.join(HOME_PATH, 'develop')
 DEFAULT_DEVTOOLS_PATH = os.path.join(DEFAULT_VAR_PATH, 'devtools')
 
 REPOSITORIES = {

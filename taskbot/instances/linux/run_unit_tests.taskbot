@@ -3,8 +3,7 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-# + Run tests
-
+# + Prepare test environment
 QT_SERVER_LIB=`find "$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb -name 'libQt5*.so' -print | head -n 1`
 if [ -n "$QT_SERVER_LIB" ]; then
   QT_SERVER_LIB_PATH=$(dirname "$QT_SERVER_LIB")
@@ -30,8 +29,8 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
+# + Run tests
 cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
-
 for test in $(find . -name '*_ut' -type f)
 do
   name=$(basename $test)

@@ -17,4 +17,4 @@ if [ $RC -eq 0 ]; then
   echo $RC
 fi
 
-"$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
+TASKBOT_HOME=`cygpath -w $HOME` "$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"

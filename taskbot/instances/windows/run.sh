@@ -4,7 +4,7 @@ if [ ! -z "$1" ]; then
   export TASKBOT_BRANCHNAME="$1"  
 fi
 
-export TASKBOT_PLATFORM=$(uname -ms | sed -r's/CYGWIN_/WIN\//')
+export TASKBOT_PLATFORM=$(uname -ms | sed -r 's/CYGWIN_/WIN\
 TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/windows/config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
@@ -27,7 +27,7 @@ while true; do
         --trace \
         --timeout=0 \
         $TASKBOT_CONFIG \
-        "$TASKBOT_COMMONS"\scripts\update_repo.taskbot 
+        "$TASKBOT_COMMONS"/scripts/update_repo.taskbot 
     then
       echo "Polling changes error" > /dev/stderr && exit 1
     fi
