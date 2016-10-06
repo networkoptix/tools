@@ -47,12 +47,12 @@ class UpdateReport(Report):
       if commits:
         history += """<b>%s#%s</b><br>\n""" % \
           (repo, commits[0].rev)
-        history += """<table align="left">\n"""
+        history += """<div><table align="left">\n"""
         for c in commits:
           history+="<tr><td>%s</td>\n" % c.author
           history+="<td><a href=\"%s\">%s</a></td>\n" % (c.ui_rev, c.repo.name)
           history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(strict_message(c.description)))
-        history += "</table>"
+        history += "</table></div>"
 
     print "Add update report:\n%s" % history
     self.add_history('#f0f0f0', history);

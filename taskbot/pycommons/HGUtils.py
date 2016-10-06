@@ -55,25 +55,31 @@ def get_changes(repo, rev, prev_rev):
 
   template = r"{date|isodate}|{author|person}|{author|email}|{node|short}|{desc|firstline|urlescape}\n"
 
-  hg_log_cmd = [
-    "hg", "--cwd", r.path,
-    "log", "--rev", " %s..%s" % (prev_rev, rev),
-    # "--no-merges", 
-    "--template", template,
-    "--branch", "%s" % r.branch]
+  stored_path = os.getcwd()
+  try:
+    os.chdir(r.path)
+    
+    hg_log_cmd = [
+      "hg", "log",
+      "--rev", " %s..%s" % (prev_rev, rev),
+      # "--no-merges", 
+      "--template", template,
+      "--branch", "%s" % r.branch]
 
-  p = subprocess.Popen(
-    hg_log_cmd,
-    stdout = subprocess.PIPE,
-    stderr = subprocess.PIPE)
-  (out, err) = p.communicate()
-  if p.returncode:
-    print >> sys.stderr, "Can't process '%s' : %s, %s" % \
-          (" ".join(hg_log_cmd), p.returncode, err)
-    return None
+    p = subprocess.Popen(
+      hg_log_cmd,
+      stdout = subprocess.PIPE,
+      stderr = subprocess.PIPE)
+    (out, err) = p.communicate()
+    if p.returncode:
+      print >> sys.stderr, "Can't process '%s' : %s, %s" % \
+            (" ".join(hg_log_cmd), p.returncode, err)
+      return None
 
-  changes =  [ChangeSet(r, line.split('|')) for line in out.splitlines()]
-  return filter(lambda c: c.rev != prev_rev, changes)
+    changes =  [ChangeSet(r, line.split('|')) for line in out.splitlines()]
+    return filter(lambda c: c.rev != prev_rev, changes)
+  finally:
+    os.chdir(stored_path)
  
 
 def changes(report, since):
