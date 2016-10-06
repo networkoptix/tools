@@ -6,7 +6,7 @@ if [ ! -z "$1" ]; then
   export TASKBOT_BRANCHNAME="$1"  
 fi
 
-export TASKBOT_PLATFORM=$(uname -ms | sed -r's/CYGWIN_/WIN\//')
+export TASKBOT_PLATFORM=$(uname -oi)
 
 TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
