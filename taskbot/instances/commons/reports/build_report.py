@@ -19,7 +19,7 @@ class BuildReport(Report):
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
     ( r':\d+:\d+:\s+error:', 'error'),
-    ( r':\s+error\s[A-Z]+\d+\s:', 'warning'),
+    ( r':\s+error\s[A-Z]+\d+\s:', 'error'),
     ( r'\[WARNING\]', 'warning'),
     ( r':\d+:\d+:\s+warning:', 'warning'),
     ( r':\s+warning\s[A-Z]+\d+\s:', 'warning'),
