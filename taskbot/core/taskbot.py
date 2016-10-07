@@ -570,9 +570,11 @@ def main():
     database.close()
     sys.exit(status)
   except KeyboardInterrupt:
+    print >> sys.stderr
     print >> sys.stderr, "%s execution was terminated" % sys.argv[0]
     executor.close(terminated = True)
   except Exception, x:
+    print >> sys.stderr
     print >> sys.stderr, "%s execution error '%s'" % (sys.argv[0], x)
     executor.close()
     sys.exit(1)

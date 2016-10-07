@@ -1,20 +1,19 @@
-Requirenments:
+===UI installation & settings for Ubuntu===
 
-1. UI 
-
-Packages:
+Requred packages:
 - apache2
 - mariadb
 
 Settings:
+
 APACHE
-- copy devtools/taskbot/core/conf/apache_taskbot.conf to /etc/apache2/sites-enabled and change:
+- copy devtools/taskbot/core/conf/apache_taskbot.conf to /etc/apache2/sites-enabled and change it:
   * Change VirtualHost address & port or ServerName;
   * Set ServiceAlias (optional);
   * Set valid paths for logs & public_html
 - enable cgi module (sudo a2enmod cgi) & restart apache (service apache2 restart).
 - prepare public_html:
-          |-- commons (devtools/taskbot/commons)
+          |-- commons (devtools/taskbot/ui/commons)
           |-- taskbot (devtools/taskbot/ui)
 
 MYSQL
@@ -24,12 +23,5 @@ MYSQL
 - Create taskbot database:
   * sudo -i mysql --user=root mysql < devtools/taskbot/core/sql/initial.mysql
   * mysql --user=taskbot --password=taskbot taskbot <  devtools/taskbot/core/sql/schema.mysql
-
-2. Client
-Packages:
-- python mysql connector:
-  * wget
-  * dpkg -
-- screen (apt-get install screen)(optional)
 
 

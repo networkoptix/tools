@@ -1,0 +1,30 @@
+===Taskbot instance installation & settings===
+
+Required packages:
+- Python mysql connector (https://dev.mysql.com/doc/connector-python/en/connector-python-installation-binary.html):
+  * wget http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-python_2.1.4-1ubuntu14.04_all.deb (14.04 ubuntu)
+  * dpkg -i mysql-connector-python_2.1.4-1ubuntu14.04_all.deb
+- screen (apt-get screen)
+
+You have to prepare to run & build nx_vms projects:
+- https://networkoptix.atlassian.net/wiki/display/SD/Setup+Development+Environment+on+Linux
+
+Prepare to start:
+1. Create ~/.my.cnf file:
+   [mysql]
+   host=<TASKBOT UI HOST>
+   user=taskbot
+   database=taskbot
+   password=taskbot
+2. Create taskbot folder
+   mkdir ~/taskbot
+   cd ~/taskbot
+3. Get taskbot
+   hg clone ssh://hg@hdw.mx/devtools devtools
+4. Run screen.
+5. Create new screen for your run (Ctrl-A-C).
+6. Run taskbot instance
+   cd ~/taskbot/devtools/taskbot/instances/linux
+   ./run.sh [<NX_VMS_BRANCH>]
+7. [Optional]. Repeat pp. 5-6 for other branches 
+

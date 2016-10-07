@@ -26,6 +26,6 @@ config = {
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
-    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@enk.me/devtools',
+    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     }
   }
