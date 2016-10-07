@@ -16,6 +16,7 @@ from Shutdown import shutdown
 from MySQLDB import MySQLDB
 from Utils import *
 
+
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
 DEFAULT_SHELL="/bin/bash"
 DEFAULT_BRANCH='Test'
@@ -110,18 +111,21 @@ class OutputReader:
     self.__stream__ = stream
     self.__thread__ = threading.Thread(
       target = self.__read)
-    self.__thread__.daemon = True
+    #self.__thread__.daemon = True
     self.__buffer__ = MTBuffer()
     self.__ready__ = MTFlag()
     self.__thread__.start()
 
   def __read(self):
-    while True:
+    while not shutdown.get():
       c = self.__stream__.read(1)
       if not c:
         break
       self.__buffer__.append(c)
       self.__ready__.set(True)
+
+  def stop(self):
+    self.__thread__.join()
 
   def get(self):
     buf = ''
@@ -137,7 +141,6 @@ class StatusChecker:
     self.__status_fd__ = status_fd
     self.__thread__ = threading.Thread(
       target = self.__read)
-    self.__thread__.daemon = True
     self.__status__ = MTValue()
     self.__ready__ = MTFlag()
     self.__stopped__ = MTValue(False)
@@ -150,6 +153,7 @@ class StatusChecker:
 
   def stop( self ):
     self.__stopped__.set(True)
+    self.__thread__.join()
 
   def wait( self, timeout = None ):
     self.__ready__.wait(timeout)
@@ -363,7 +367,6 @@ class TaskExecutor:
       self.finish_tasks_to_level(0)
     
     if do_terminate:
-      shutdown.set()
       self.close()
       
     return status
@@ -397,7 +400,7 @@ class TaskExecutor:
       (task.task_id,))
 
     if len(self.__task_stack__) > 1:
-        self.__task_stack__[-1].error_message = task.error_message;
+      self.__task_stack__[-1].error_message = task.error_message
 
     self.__db__.commit()
     
@@ -405,16 +408,22 @@ class TaskExecutor:
     while len(self.__task_stack__) > level + 1:
       self.finish_task()
 
-  def close(self):
-    self.finish_tasks_to_level(0)
-    self.closed = True
-    safe_call(self.__status__.stop)
-    safe_call(self.__shell_process__.stdin.close)
-    safe_call(self.__shell_process__.kill)
-    safe_call(self.__shell_process__.terminate)
-    # TODO. Need cross-platform solution to kill child processs
-    pgid = safe_call(os.getpgid, self.__shell_process__.pid)
-    safe_call(os.killpg, pgid, signal.SIGTERM)
+  def close(self, terminated = False):
+    if not self.closed:
+      if terminated:
+        self.__task_stack__[-1].error_message = 'Terminated'
+      self.finish_tasks_to_level(0)
+      self.closed = True
+      safe_call(self.__shell_process__.stdin.close)
+      safe_call(self.__shell_process__.kill)
+      safe_call(self.__shell_process__.terminate)
+      # TODO. Need cross-platform solution to kill child processs
+      pgid = safe_call(os.getpgid, self.__shell_process__.pid)
+      safe_call(os.killpg, pgid, signal.SIGTERM)
+      shutdown.set()
+      safe_call(self.__status__.stop)
+      safe_call(self.__err__.stop)
+      safe_call(self.__out__.stop)
 
   # Start new task
   def start_task(self, description, is_command=False):
@@ -505,6 +514,13 @@ def main():
     timeout = timeout,
     parent_task_id = parent_task_id)
 
+  # Register signal handlers
+  def _shutdown( sigNum, frame ):
+    executor.close(terminated = True)
+  signal.signal(signal.SIGINT,  _shutdown)
+  signal.signal(signal.SIGTERM, _shutdown)
+
+
   if options.description:
     executor.start_task(options.description)
 
@@ -549,11 +565,13 @@ def main():
         command,
         command_timeout)
       executor.close()
-    
+
     database.commit()
     database.close()
-
     sys.exit(status)
+  except KeyboardInterrupt:
+    print >> sys.stderr, "%s execution was terminated" % sys.argv[0]
+    executor.close(terminated = True)
   except Exception, x:
     print >> sys.stderr, "%s execution error '%s'" % (sys.argv[0], x)
     executor.close()

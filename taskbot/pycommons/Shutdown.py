@@ -16,7 +16,7 @@ class Shutdown:
     self.conds = []
 
   def _raise( self ):
-    raise ShuttingDown('Server is shutting down')
+    raise ShuttingDown('The process is shutting down')
 
   def check( self ):
     if self.get(): self._raise()

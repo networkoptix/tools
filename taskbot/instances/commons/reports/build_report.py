@@ -19,8 +19,10 @@ class BuildReport(Report):
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
     ( r':\d+:\d+:\s+error:', 'error'),
+    ( r':\s+error\s[A-Z]+\d+\s:', 'warning'),
     ( r'\[WARNING\]', 'warning'),
     ( r':\d+:\d+:\s+warning:', 'warning'),
+    ( r':\s+warning\s[A-Z]+\d+\s:', 'warning'),
     ( r'SKIPPED', 'warning'),
     ( r'SUCCESS', 'success') ]
       
@@ -88,7 +90,8 @@ class BuildReport(Report):
         prev_run = self.get_previous_run(prev_run)
 
       print prev_build, prev_run, self.find_failed(prev_build)
-      if (prev_build and not self.find_failed(prev_build)):
+      if not prev_build or \
+         (prev_build and not self.find_failed(prev_build)):
         print "Send email notification!"
         EmailNotify.notify(
           self, prev_run, "build failed",
