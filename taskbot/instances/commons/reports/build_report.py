@@ -18,7 +18,7 @@ class BuildReport(Report):
   OUTPUT_CLASS = [
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
-    ( r':\d+:\d+:\s+error:', 'error'),
+    ( r':\d+:\d+:\s+(\S+\s+)?error:', 'error'),
     ( r':\s+error\s[A-Z]+\d+\s:', 'error'),
     ( r'\[WARNING\]', 'warning'),
     ( r':\d+:\d+:\s+warning:', 'warning'),
