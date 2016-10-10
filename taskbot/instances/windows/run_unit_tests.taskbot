@@ -8,10 +8,12 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare test environment
 QT_LIBS=`find "$TASKBOT_DEVELOP_PATH"/buildenv_admin/packages -name 'Qt5*.dll' -print | head -n 1`
-if [ -n "$QT_SERVER_LIB" ]; then
-  QT_LIB_PATH=$(dirname "$QT_LIB")
+if [ -n "$QT_LIBS" ]; then
+  QT_LIB_PATH=$(dirname "$QT_LIBS")
   export PATH=$PATH:$QT_LIB_PATH
 fi
+
+echo $PATH
 
 UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
 
