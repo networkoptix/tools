@@ -1,0 +1,10 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
+for core in $(find . -name 'core.*'); do
+    "$TASKBOT" -d "$core" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
+        "$TASKBOT_COMMONS/scripts"/examine_core.taskbot "$core" unit_tests
+done

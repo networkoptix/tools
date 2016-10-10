@@ -111,7 +111,6 @@ class OutputReader:
     self.__stream__ = stream
     self.__thread__ = threading.Thread(
       target = self.__read)
-    #self.__thread__.daemon = True
     self.__buffer__ = MTBuffer()
     self.__ready__ = MTFlag()
     self.__thread__.start()
@@ -230,7 +229,8 @@ class TaskExecutor:
     def __repr__(self):
       return self.__str__()
 
-  def __init__(self, db, shell, timeout, parent_task_id = None):
+  def __init__(self, db, shell, timeout, parent_task_id = None, args = []):
+      
     self.__task_stack__ = []
     self.__db__ = db
     self.__timeout__ = timeout
@@ -247,7 +247,7 @@ class TaskExecutor:
 
     self.__shell_process__ = \
       subprocess.Popen(
-      [shell, '-s', '--'],
+      [shell, '-s', '--'] + args,
       preexec_fn = self.__before_exec,
       shell = False,
       stdin  = subprocess.PIPE,
@@ -512,7 +512,8 @@ def main():
     database,
     shell = config.get('sh', DEFAULT_SHELL),
     timeout = timeout,
-    parent_task_id = parent_task_id)
+    parent_task_id = parent_task_id,
+    args=args[1 + int(not options.command):])
 
   # Register signal handlers
   def _shutdown( sigNum, frame ):

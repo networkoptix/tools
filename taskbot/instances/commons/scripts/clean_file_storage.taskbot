@@ -1,0 +1,14 @@
+# -*- sh -*-
+
+set -o errexit -o nounset -o noclobber
+STORAGE_DIR=$1
+MAX_KBYTES=5242880 # 5GB
+
+# Clean storage
+
+echo "Clean storage \"$STORAGE_DIR\""
+
+while [ $(du -s "$STORAGE_DIR" | awk '{ print $1 }') -gt $MAX_KBYTES ];
+do
+  rm -rfv $(ls -dtr "$STORAGE_DIR"/* | head -1)
+done

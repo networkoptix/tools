@@ -4,6 +4,6 @@ set +o errexit -o nounset -o noclobber
 
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-"$TASKBOT" $ARGS "$TASKBOT_COMMONS"/instances/test/test.taskbot --trace
+"$TASKBOT" $ARGS "$TASKBOT_COMMONS"/instances/test/test.taskbot "PARAM1" "PARAM2" --trace
 
 echo Test2

@@ -18,3 +18,14 @@ if [ $RC -eq 0 ]; then
 fi
 
 "$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
+
+# + Run unit tests
+if [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
+  RC=$?
+  echo $RC
+fi
+
+TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+
+exit $RC

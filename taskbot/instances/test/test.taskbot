@@ -1,6 +1,9 @@
 # -*- sh -*-
 
-set -o errexit -o nounset -o noclobber
+set -o errexit +o nounset -o noclobber
+
+echo $1
+echo $2
 
 # + Test command
 echo $TASKBOT

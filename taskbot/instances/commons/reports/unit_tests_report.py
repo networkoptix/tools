@@ -75,6 +75,17 @@ class UTReport(Report):
            test.description
     return unit_tests
 
+  def __get_cores(self):
+    tests = self.find_task('Run unit tests > %run_unit_tests.taskbot%')
+    cores_task = self.find_task(
+      'Process core files > % > %for %', tests)
+    print "CORE: ", cores_task
+    if cores_task:
+      cores =  self.find_task('%', cores_task)
+      cores_count = len(cores)
+      return cores_count, cores_task[0]
+    return 0, None
+
   def _details(self, info):
     if info.xml:
       xml_report_id = self.add_report(info.xml)
@@ -91,6 +102,8 @@ class UTReport(Report):
     if not unit_tests:
       print >> sys.stderr, "Cannot create unit-tests report (unit-tests task absent)" 
       return 1
+
+    cores_count, cores_task = self.__get_cores()
 
     # Get previous tests result
     prev_run = self.get_previous_run()
@@ -132,24 +145,32 @@ class UTReport(Report):
     tests_report_id = self.add_report(tests_report);
 
     color = '"GREEN"'
-    if total_fail:
+    if total_fail or cores_count:
       color = '"RED"'
+    cores_link = ""
+    if cores_count:
+      cores_link ="""<br>core files: <a href="%s">%d</a>""" % \
+        (self.task_href(cores_task), cores_count)
     history += """<br>PASS/FAIL: 
       <a href="%s">
       %d/%d (%d/%d)
-      </a>""" % (self.report_href(tests_report_id),
+      </a>%s""" % (self.report_href(tests_report_id),
                  total_pass, total_fail,
-                 new_pass,
-                 new_fail)
+                 new_pass, new_fail,
+                 cores_link)
       
     self.add_history(color, history)
 
     if prev_run and new_fail:
-      print "Send email notification!"
       import EmailNotify
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "New fails detected in the unit-tests.")
+    elif cores_count:
+      import EmailNotify
+      EmailNotify.notify(
+        self, prev_run, "unit-tests failed",
+        "%d core(s) detected after the unit-tests." % cores_count)
 
     return 0
    
