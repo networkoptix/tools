@@ -78,23 +78,22 @@ class BuildReport(Report):
 
     # eMail notification
     import EmailNotify
+    prev_run = self.get_previous_run()
+    prev_build = None
+    while prev_run:
+      prev_builds = self.find_task('Build product > %build.taskbot% > %', [prev_run])
+      if prev_builds:
+        prev_build = prev_builds[-1]
+        break
+      prev_run = self.get_previous_run(prev_run)
     if failed:
-      prev_run = self.get_previous_run()
-      prev_build = None
-      while prev_run:
-        prev_builds = self.find_task('Build product > %build.taskbot% > %', [prev_run])
-        if prev_builds:
-          prev_build = prev_builds[-1]
-          break
-        prev_run = self.get_previous_run(prev_run)
-
       error_msg = "The product is still failed to build."
       if not prev_build or \
          (prev_build and not self.find_failed(prev_build)):
        error_msg = "The product is no longer being built."
       EmailNotify.notify(
         self, prev_run, "build failed", error_msg)
-    elif prev_build and self.find_failed(prev_build)):
+    elif prev_build and self.find_failed(prev_build):
           EmailNotify.notify(
           self, prev_run, "success build",
           "The product built successfully.")

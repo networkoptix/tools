@@ -22,8 +22,8 @@ else
 fi
 
 # + Run tests
-cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
-for test in $(find . -name 'common_ut' -type f)
+cd "$TASKBOT_VAR"/nx_vms/build_environment/target/x64/bin/release
+for test in $(find . -name '*_ut.exe' -type f)
 do
   name=$(basename $test)
   "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
