@@ -77,9 +77,8 @@ class BuildReport(Report):
     self.add_history(color, history)
 
     # eMail notification
-
+    import EmailNotify
     if failed:
-      import EmailNotify
       prev_run = self.get_previous_run()
       prev_build = None
       while prev_run:
@@ -89,13 +88,16 @@ class BuildReport(Report):
           break
         prev_run = self.get_previous_run(prev_run)
 
-      print prev_build, prev_run, self.find_failed(prev_build)
+      error_msg = "The product is still failed to build."
       if not prev_build or \
          (prev_build and not self.find_failed(prev_build)):
-        print "Send email notification!"
-        EmailNotify.notify(
-          self, prev_run, "build failed",
-          "The product is no longer being built.")
+       error_msg = "The product is no longer being built."
+      EmailNotify.notify(
+        self, prev_run, "build failed", error_msg)
+    elif prev_build and self.find_failed(prev_build)):
+          EmailNotify.notify(
+          self, prev_run, "success build",
+          "The product built successfully.")
     
     return 0
 

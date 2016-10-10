@@ -34,7 +34,9 @@ class EmailNotify:
     
   def send( self, to, subject, text):
     msg = MIMEText(text)
-    msg['Subject'] = "[Taskbot] %s" % subject
+    
+    msg['Subject'] = "[Taskbot] [%s] %s" % \
+      (os.environ.get('TASKBOT_BRANCHNAME', ''), subject)
     msg['From'] = MAIL_FROM
     msg['To'] = ",".join(map(lambda t: "%s <%s>" % (t[0], t[1]), to.items()))
     # Debug

@@ -79,7 +79,6 @@ class UTReport(Report):
     tests = self.find_task('Run unit tests > %run_unit_tests.taskbot%')
     cores_task = self.find_task(
       'Process core files > % > %for %', tests)
-    print "CORE: ", cores_task
     if cores_task:
       cores =  self.find_task('%', cores_task)
       cores_count = len(cores)
