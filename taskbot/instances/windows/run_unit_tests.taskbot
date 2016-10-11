@@ -32,7 +32,7 @@ do
   filename=$(basename $test)
   name=${filename%.*}
   "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-     -c "$test  --gtest_output=xml:$UNIT_TESTS_WIN_PATH/$name.xml" || true
+     -c "$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\"" || true
 done
 
 # + Store results
