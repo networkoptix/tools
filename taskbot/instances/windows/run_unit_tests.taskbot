@@ -23,13 +23,16 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
+UNIT_TESTS_WIN_PATH=$(cygpath -w "$UNIT_TESTS_RESULT_PATH")
+
 # + Run tests
 cd "$TASKBOT_VAR"/nx_vms/build_environment/target/x64/bin/release
 for test in $(find . -name '*_ut.exe' -type f)
 do
-  name=$(basename $test)
+  filename=$(basename $test)
+  name=${filename%.*}
   "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-     -c "$test  --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml" || true
+     -c "$test  --gtest_output=xml:$UNIT_TESTS_WIN_PATH/$name.xml" || true
 done
 
 # + Store results
