@@ -38,7 +38,7 @@ for test in $(find . -name '*_ut' -type f)
 do
   name=$(basename $test)
   "$TASKBOT" -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-     -c "$test  --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml" || true
+     -c "$test --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml --gtest_filter=-NxCritical.All3" || true
 done
 
 # + Store results
