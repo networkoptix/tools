@@ -12,7 +12,7 @@ QT_DIR=$(grep qt_dir= "$TASKBOT_VAR"/nx_vms/build_variables/target/current_confi
 echo $QT_DIR
 
 if [ -n "$QT_DIR" ]; then
-  QT_CYGWIN_PATH=$(cygwin "$QT_DIR")
+  QT_CYGWIN_PATH=$(cygpath "$QT_DIR")
   export PATH=$PATH:$QT_CYGWIN_PATH/bin
 fi
 
