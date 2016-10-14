@@ -7,10 +7,13 @@ set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare test environment
-QT_LIBS=`find "$TASKBOT_BUILDENV_PATH"/packages -name 'Qt5*.dll' -print | head -n 1`
-if [ -n "$QT_LIBS" ]; then
-  QT_LIB_PATH=$(dirname "$QT_LIBS")
-  export PATH=$PATH:$QT_LIB_PATH
+QT_DIR=$(grep qt_dir= "$TASKBOT_VAR"/nx_vms/build_variables/target/current_config | sed -r 's/qt_dir=//')
+
+echo $QT_DIR
+
+if [ -n "$QT_DIR" ]; then
+  QT_CYGWIN_PATH=$(cygwin "$QT_DIR")
+  export PATH=$PATH:$QT_CYGWIN_PATH/bin
 fi
 
 echo $PATH
