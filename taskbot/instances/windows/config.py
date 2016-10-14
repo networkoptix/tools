@@ -25,7 +25,7 @@ config = {
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/windows'),
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
-    'TASKBOT_DEVELOP_PATH': '/cygdrive/c/develop/',
+    'TASKBOT_BUILDENV_PATH': '/cygdrive/c/develop/buildenv_admin',
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     }

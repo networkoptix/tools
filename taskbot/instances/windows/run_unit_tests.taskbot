@@ -7,7 +7,7 @@ set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare test environment
-QT_LIBS=`find "$TASKBOT_DEVELOP_PATH"/buildenv_admin/packages -name 'Qt5*.dll' -print | head -n 1`
+QT_LIBS=`find "$TASKBOT_BUILDENV_PATH"/packages -name 'Qt5*.dll' -print | head -n 1`
 if [ -n "$QT_LIBS" ]; then
   QT_LIB_PATH=$(dirname "$QT_LIBS")
   export PATH=$PATH:$QT_LIB_PATH
@@ -26,7 +26,7 @@ fi
 UNIT_TESTS_WIN_PATH=$(cygpath -w "$UNIT_TESTS_RESULT_PATH")
 
 # + Run tests
-cd "$TASKBOT_VAR"/nx_vms/build_environment/target/x64/bin/release
+cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
 for test in $(find . -name '*_ut.exe' -type f)
 do
   filename=$(basename $test)
