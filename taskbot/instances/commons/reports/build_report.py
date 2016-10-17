@@ -66,7 +66,7 @@ class BuildReport(Report):
       result = "FAILED"
     else:
       # Get mvn task
-      mvn_task = self.find_task('%mvn package%', build_tasks)
+      mvn_task = self.find_task('%mvn package%', [build])
       if mvn_task:
         task_href = self.__build_report(mvn_task[0])
       

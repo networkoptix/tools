@@ -4,9 +4,14 @@ set -o errexit +o nounset -o noclobber
 
 cd "$TASKBOT_VAR"/nx_vms
 
-# + Clean
-mvn clean -Dutb
-hg purge .
+# + Incremantal build
+mvn package -e -T2 -Dbuild.configuration=release -Dutb 2>&1
+RC=$?
+echo $RC
 
-# + Build
-mvn package -e -T8 -Dbuild.configuration=release -Dutb 2>&1
+# + Build from stratch
+if [ $RC -eq 0 ]; then
+  mvn clean -Dutb
+  hg purge .
+  mvn package -e -T2 -Dbuild.configuration=release -Dutb 2>&1
+fi
