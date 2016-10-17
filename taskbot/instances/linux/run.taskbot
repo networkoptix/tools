@@ -20,12 +20,14 @@ fi
 "$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
 
 # + Run unit tests
-if [ $RC -eq 0 ]; then
+if [ ! -z $TASKBOT_UNIT_TESTS ] && [ $TASKBOT_UNIT_TESTS = "true" ] && [ $RC -eq 0 ]; then
   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
   RC=$?
   echo $RC
 fi
 
-TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+if [ ! -z $TASKBOT_UNIT_TESTS ] && [ $TASKBOT_UNIT_TESTS = "true" ]; then
+  TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+fi
 
 exit $RC
