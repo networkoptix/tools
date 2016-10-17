@@ -52,12 +52,6 @@ function timesync_ctl {
             chmod -x /etc/network/if-up.d/ntpdate
             date --set=@$1
             ;;
-        clear)
-            chmod +x /etc/network/if-up.d/ntpdate
-            /etc/network/if-up.d/ntpdate
-            date --set=@$1
-            nxcleardb
-            ;;
         prepare_isync)
             safestop "$SERVICE"
             echo configuring inet sync
@@ -68,6 +62,12 @@ function timesync_ctl {
             nxedconf ecInternetSyncTimePeriodSec 12
             nxedconf ecMaxInternetTimeSyncRetryPeriodSec 12
             #safestart "$SERVICE"
+            ;;
+        clear)
+            chmod +x /etc/network/if-up.d/ntpdate
+            /etc/network/if-up.d/ntpdate
+            date --set=@$1
+            nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for timesync test control"
     esac

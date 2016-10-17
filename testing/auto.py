@@ -27,11 +27,10 @@ import autotest.pipereader as pipereader
 import autotest.ut as ut
 from autotest.logger import raw_log, log, debug, set_debug, ToSend
 from autotest.mailer import emailTestResult, emailBuildError, read_changesets, log_changesets
-from autotest.tools import Process, kill_proc, RunTime, SignalNames, Build, get_file_time
-from testbase import boxssh
-from functest_util import args2str, real_caps
+from autotest.tools import Process, kill_proc, RunTime, SignalNames, Build, get_file_time, \
+    real_caps, args2str, boxssh
 
-__version__ = '1.3.1'
+__version__ = '1.4.0'
 
 def check_conf():
     """ Configuration values sanity check.
@@ -1540,7 +1539,6 @@ def check_args_correct():
                 fail = True
         if fail:
             sys.exit(2)
-
 
 
 #def get_architecture():
