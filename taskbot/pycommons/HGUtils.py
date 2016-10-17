@@ -95,15 +95,17 @@ def changes(report, since):
      repo = repo_task.description
      revision = \
        report.get_stdout(report.find_task('%', [repo_task])).strip()
-     prev_revision = \
-       report.get_stdout(report.find_task(repo + ' > %' , prev_revisions)).strip()
-     print revision, prev_revision
-     cs = []
-     if revision != prev_revision:
-       cs = get_changes(repo, revision, prev_revision)
-       print "Changeset: %s" % cs
-       if cs is None:
-         return None
-       cs.sort(lambda x, y: x.timestamp > y.timestamp)
-     commits[repo] = cs
+     repo_tasks_prev = report.find_task(repo + ' > %' , prev_revisions)
+     if repo_tasks_prev:
+       prev_revision = \
+         report.get_stdout(repo_tasks_prev).strip()
+       print revision, prev_revision
+       cs = []
+       if revision != prev_revision:
+         cs = get_changes(repo, revision, prev_revision)
+         print "Changeset: %s" % cs
+         if cs is None:
+           return None
+         cs.sort(lambda x, y: x.timestamp > y.timestamp)
+       commits[repo] = cs
   return commits

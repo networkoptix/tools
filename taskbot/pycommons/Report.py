@@ -217,7 +217,10 @@ class Report:
 
   def __get_ouput(self, fn, task):
     if isinstance(task, list):
-      task = task[0]
+      if task:
+        task = task[0]
+      else:
+        return None
 
     gzipped, out = fn(task.id)
     out = str(out)
