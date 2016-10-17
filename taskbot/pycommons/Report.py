@@ -46,6 +46,7 @@ class Report:
     self.__config__ = read_config(config) # Takbot config
     Compressor.gzip_threshold = self.__config__.get('gzip_threshold', 0)
     Compressor.gzip_ratio = self.__config__.get('gzip_ratio', 0)
+    self.__watchers__ = self.__config__.get('watchers', None)
     self.__db__ =  MySQLDB(self.__config__.get('db_config', None)) # Takbot database
     self.__platform__ = self.__find_platform()
     self.__branch__ = self.__find_branch()
@@ -343,7 +344,11 @@ class Report:
 
   @property
   def link_task_id(self):
-    return self.__link_task_id__;
+    return self.__link_task_id__
+
+  @property
+  def watchers(self):
+    return self.__watchers__;
 
   # Get link to taskbot UI
   def get_taskbot_link(self):

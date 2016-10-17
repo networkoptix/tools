@@ -1,14 +1,17 @@
 #!/bin/bash
 
-export TASKBOT_BRANCHNAME="dev_3.0.0"
+CONFIG=$1
 
-if [ ! -z "$1" ]; then
-  export TASKBOT_BRANCHNAME="$1"  
+if [ "x$CONFIG" = "x" ]
+then
+    echo "Config file isn't defined" > /dev/stderr && exit 1
 fi
+
+TASKBOT_CONFIG=$(realpath $CONFIG)
 
 export TASKBOT_PLATFORM=$(uname -oi)
 
-TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config.py
+#TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py

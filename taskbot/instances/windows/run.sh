@@ -1,8 +1,13 @@
-export TASKBOT_BRANCHNAME="dev_3.0.0"
+#!/bin/bash
 
-if [ ! -z "$1" ]; then
-  export TASKBOT_BRANCHNAME="$1"  
+CONFIG=$1
+
+if [ "x$CONFIG" = "x" ]
+then
+    echo "Config file isn't defined" > /dev/stderr && exit 1
 fi
+
+TASKBOT_CONFIG=$(realpath $CONFIG)
 
 export TASKBOT_PLATFORM=$(uname -ms | sed -r 's/CYGWIN_/WIN\//')
 TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/windows/config.py

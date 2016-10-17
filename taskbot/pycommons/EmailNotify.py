@@ -11,15 +11,8 @@ SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
 SMTP_PASS = 'AlYDnddPk8mWorQFVogh8sqkQX6Nv01JwxxfMoYJAFeC'
 MAIL_FROM = '"Taskbot System" <autotest@networkoptix.com>'
 
-WATCHERS = {
-  'Artem Nikitin': 'anikitin@networkoptix.com',
-  'Roman Vasilenko': 'rvasilenko@networkoptix.com',
-  'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
-  'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'}
-
 DEBUG_WATCHERS = {
   'Artem Nikitin': 'anikitin@networkoptix.com'}
-
 
 class EmailNotify:
 
@@ -73,8 +66,8 @@ def notify(report, prev_run, subject, reason):
   debug = os.environ.get('TASKBOT_DEBUG_MODE', '0') == '1'
   commits = HGUtils.changes(report, prev_run).values()
   commits = reduce(lambda x, y: x + y, commits, [])
-  to = WATCHERS
-  if debug:
+  to = report.watchers
+  if debug or not to:
     to = DEBUG_WATCHERS
   cs = []
   for c in commits:
