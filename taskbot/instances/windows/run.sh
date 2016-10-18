@@ -10,7 +10,6 @@ fi
 TASKBOT_CONFIG=$(realpath $CONFIG)
 
 export TASKBOT_PLATFORM=$(uname -ms | sed -r 's/CYGWIN_/WIN\//')
-TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/windows/config.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py
