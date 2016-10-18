@@ -4,7 +4,7 @@ set +o errexit -o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 set +o nounset
-if [ ! -z $TASKBOT_UNIT_TESTS ]; then
+if [ -z $TASKBOT_UNIT_TESTS ]; then
    export TASKBOT_UNIT_TESTS="false"
 fi
 set -o nounset
