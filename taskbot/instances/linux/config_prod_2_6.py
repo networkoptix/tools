@@ -5,7 +5,7 @@
 
 import os
 
-TASKBOT_BRANCHNAME='prod_2.6',
+TASKBOT_BRANCHNAME='prod_2.6'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
