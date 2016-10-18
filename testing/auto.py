@@ -663,6 +663,7 @@ def wait_servers_ready(iplist):
             time.sleep(1)
 
 
+# these are only names, don't put paths there
 FUNCTEST_CFG_TPL = 'functest.cfg.tpl'
 FUNCTEST_CFG_NAME = 'functest-tmp.cfg'
 NATTEST_CFG_NAME = 'nattest-tmp.cfg'
@@ -702,20 +703,25 @@ def mk_functest_cmd(to_skip):
     return cmd, ''
 
 
-def prepare_functest_cfg(natcon=False):
+def prepare_functest_cfg(path="", natcon=False):
     if natcon:
         name = NATTEST_CFG_NAME
         boxList = ('Box1', 'Behind')
     else:
         name = FUNCTEST_CFG_NAME
         boxList = ('Box1', 'Box2')
+    if path:
+        name = os.path.join(path, name)
     args = {
         'serverList' : ','.join('%s:%s' % (
             conf.BOX_IP[box], conf.MEDIASERVER_PORT) for box in boxList),
         'username': conf.MEDIASERVER_USER,
         'password': conf.MEDIASERVER_PASS,
     }
-    file(name, "w").write(file(FUNCTEST_CFG_TPL).read() % args)
+    tpl = FUNCTEST_CFG_TPL
+    if path:
+        tpl = os.path.join(path, tpl)
+    file(name, "w").write(file(tpl).read() % args)
 
 
 def perform_func_test(to_skip):
@@ -1496,6 +1502,7 @@ def show_boxes():
 
 # which options are allowed to be used with --nobox
 FUNCTEST_ARGS = ('functest', ) + tuple(ft.args[0].lstrip('-') for ft in SingleFuncTests)
+# this list is incomlete, so, not all incompatible with each other args are checked now
 ARGS_EXCLUSIVE = (
     ('nobox', 'boxes', 'boxoff', 'showboxes'),
     ('ft_if_ut', 'ft_always'),
@@ -1683,7 +1690,8 @@ def parse_args():
     parser.add_argument('--add', action='store_true', help='Start new boxes without closing existing boxes')
     parser.add_argument("--boxoff", "--b0", help="Stop virtual boxes and wait the mediaserver comes up.", nargs='?', const="")
     parser.add_argument("--showboxes", '--sb', action="store_true", help="Check and show vagrant boxes states")
-    parser.add_argument('--utcont', action="store_true", help="Just creates unittest container and displays the sample command line.")
+    parser.add_argument('--utcont', action="store_true", help="Only creates unittest container and displays the sample command line.")
+    parser.add_argument('--ftconf', help="Only creates configs for functest.py and updates boxes.rb", nargs='?', const="")
 
     global Args
     Args = parser.parse_args()
@@ -1811,9 +1819,11 @@ def main():
         printTestList()
         return True
 
+    updateBoxesNames()
+
     if Args.utcont:
         #FIXME!!! cover vagrant case too!
-        debug("Just creating a docker container for unittests")
+        debug("Only creating a docker container for unittests")
         UtContainer = ut.UtContainer
         Build.load_vars(conf, Env)
         UtContainer.init(Build)
@@ -1821,7 +1831,14 @@ def main():
         print list2cmdline(UtContainer.makeCmd(UtContainer.getWrapper(), 'YOUR', 'TEST', 'COMMAND'))
         return True
 
-    updateBoxesNames()
+    if Args.ftconf is not None:
+        if Args.ftconf:
+            debug("Only creating configs for functest.py at %s", Args.ftconf)
+        else:
+            debug("Only creating configs for functest.py")
+        prepare_functest_cfg(path=Args.ftconf)
+        prepare_functest_cfg(path=Args.ftconf, natcon=True)
+        return True
 
     if Args.showboxes:
         show_boxes()
