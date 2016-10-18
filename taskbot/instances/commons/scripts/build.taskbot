@@ -4,7 +4,7 @@ set -o errexit +o nounset -o noclobber
 
 cd "$TASKBOT_VAR"/nx_vms
 
-# + Incremantal build
+# + Incremental build
 set +o errexit
 mvn package -e -T4 -Dbuild.configuration=release -Dutb -Dclean=false 2>&1
 RC=$?
