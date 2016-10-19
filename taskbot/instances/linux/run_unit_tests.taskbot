@@ -27,7 +27,7 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
-NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir=//')
+NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
 cd $NX_VMS_BIN_PATH
 
 # + Run tests
