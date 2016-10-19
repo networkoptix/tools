@@ -2,8 +2,17 @@
 
 set -o errexit +o nounset -o noclobber
 
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
 echo $1
 echo $2
+
+$TASKBOT_COMMONS/core/file.py \
+     $TASKBOT_CONFIG \
+    --path $TASKBOT_COMMONS \
+    --mask '*.taskbot' \
+    --mask '*.py' \
+    --exclude 'test*'
 
 # + Test command
 echo $TASKBOT
