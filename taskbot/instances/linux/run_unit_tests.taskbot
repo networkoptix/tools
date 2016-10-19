@@ -5,15 +5,16 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare test environment
 
-QT_DIR=$(grep qt_dir= "$TASKBOT_VAR"/nx_vms/build_variables/target/current_config | sed -r 's/qt_dir=//')
+CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
 
+QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed -r 's/qt_dir=//')
 QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
 if [ -n "$QT_LIB" ]; then
   QT_LIB_PATH=$(dirname "$QT_LIB")
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_PATH
 fi
 
-NX_VMS_LIB_PATH="$TASKBOT_VAR"/nx_vms/build_environment/target/lib
+NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed -r 's/linux_lib_dir=//')
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NX_VMS_LIB_PATH
 
 echo $LD_LIBRARY_PATH
@@ -26,8 +27,10 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
+NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir=//')
+cd $NX_VMS_BIN_PATH
+
 # + Run tests
-cd "$TASKBOT_VAR"/nx_vms/build_environment/target/bin/release
 for test in $(find . -name '*_ut' -type f)
 do
   name=$(basename $test)
