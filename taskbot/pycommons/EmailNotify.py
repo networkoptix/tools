@@ -32,7 +32,7 @@ class EmailNotify:
     msg['From'] = MAIL_FROM
     msg['To'] = ",".join(map(lambda t: "%s <%s>" % (t[0], t[1]), to.items()))
     # Debug
-    print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
+    # print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
     self.__smtp__.sendmail(MAIL_FROM, to.values(), msg.as_string())
     
   def __exit__(self, exc_type, exc_value, traceback):

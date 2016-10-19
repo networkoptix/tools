@@ -12,9 +12,12 @@ pycommons = os.path.join(
 sys.path.insert(0, pycommons)
 from Report import Report
 
+def get_failed(unit_tests):
+  return filter(
+    lambda x: x[1].failed, unit_tests.items())
+
 def get_totals(unit_tests):
-  total_fail = len(filter(
-    lambda x: x.failed, unit_tests.values()))
+  total_fail = len(get_failed(unit_tests))
   return len(unit_tests) - total_fail, total_fail
 
 def get_diff(current, prev):
@@ -26,6 +29,12 @@ def get_diff(current, prev):
     failed+=int((prev_info and not prev_info.failed and info.failed) or \
       (not prev_info and info.failed))
   return passed, failed
+
+def get_failed_text(tests):
+  if tests:
+    return "\n\nFailed tests:\n  " + "\n  ".join(tests)
+  else:
+    return ""
 
 class UTReport(Report):
 
@@ -95,7 +104,6 @@ class UTReport(Report):
       return "-"
 
   def __generate__( self ):
-    
     unit_tests = self.__get_test_info()
 
     if not unit_tests:
@@ -160,16 +168,21 @@ class UTReport(Report):
       
     self.add_history(color, history)
 
+    failed_tests = map(lambda x: x[0], get_failed(unit_tests))
+    failed_tests.sort()
+
     if prev_run and new_fail:
       import EmailNotify
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
-        "New fails detected in the unit-tests.")
+        "New fails detected in the unit-tests.%s" %
+        get_failed_text(failed_tests))
     elif cores_count:
       import EmailNotify
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
-        "%d core(s) detected after the unit-tests." % cores_count)
+        "%d core(s) detected after the unit-tests.%s" % \
+        (cores_count, get_failed_text(failed_tests)))
 
     return 0
    

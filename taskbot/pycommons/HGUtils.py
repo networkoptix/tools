@@ -62,7 +62,6 @@ def get_changes(repo, rev, prev_rev):
     hg_log_cmd = [
       "hg", "log",
       "--rev", " %s..%s" % (prev_rev, rev),
-      # "--no-merges", 
       "--template", template,
       "--branch", "%s" % r.branch]
 
@@ -105,7 +104,7 @@ def changes(report, since):
          cs = get_changes(repo, revision, prev_revision)
          print "Changeset: %s" % cs
          if cs is None:
-           return None
+           continue
          cs.sort(lambda x, y: x.timestamp > y.timestamp)
        commits[repo] = cs
   return commits
