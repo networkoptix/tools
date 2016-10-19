@@ -348,6 +348,10 @@ class Report:
   @property
   def link_task_id(self):
     return self.__link_task_id__
+  
+  @property
+  def platform(self):
+    return self.__platform__
 
   @property
   def watchers(self):

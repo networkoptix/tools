@@ -3,20 +3,14 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-set -o errexit +o nounset -o noclobber
-ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
-
 # + Prepare test environment
-QT_SERVER_LIB=`find "$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb -name 'libQt5*.so' -print | head -n 1`
-if [ -n "$QT_SERVER_LIB" ]; then
-  QT_SERVER_LIB_PATH=$(dirname "$QT_SERVER_LIB")
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_SERVER_LIB_PATH
-fi
 
-QT_CLIENT_LIB=`find "$TASKBOT_VAR"/nx_vms/debsetup/client-deb -name 'libQt5*.so' -print | head -n 1`
-if [ -n "$QT_CLIENT_LIB" ]; then
-  QT_CLIENT_LIB_PATH=$(dirname "$QT_CLIENT_LIB")
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_CLIENT_LIB_PATH
+QT_DIR=$(grep qt_dir= "$TASKBOT_VAR"/nx_vms/build_variables/target/current_config | sed -r 's/qt_dir=//')
+
+QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
+if [ -n "$QT_LIB" ]; then
+  QT_LIB_PATH=$(dirname "$QT_LIB")
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_PATH
 fi
 
 NX_VMS_LIB_PATH="$TASKBOT_VAR"/nx_vms/build_environment/target/lib

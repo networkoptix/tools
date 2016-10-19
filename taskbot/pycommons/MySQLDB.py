@@ -3,11 +3,23 @@
 # MySQL taskbot backend
 
 import mysql.connector as db
-import os
+import os, re
 
 MY_CNF_FILE=os.environ['HOME'] + '/.my.cnf'
 MY_CNF_GROUP='mysql'
 
+def get_db_hostname(config = None):
+  if config:
+    return config['host']
+  else:
+    with open(MY_CNF_FILE) as fcfg:
+      for line in fcfg:
+        m = re.search(r'^host=(.+)', line)
+        if m:
+          return m.group(1)
+      fcfg.close()
+  return 'localhost'
+ 
 class MySQLDB:
 
   def __init__(self, config):
@@ -16,7 +28,7 @@ class MySQLDB:
 
   def __reconnect(self):
     if self.__config__:
-      self.__conn__ = db.connect(self.__config__)
+      self.__conn__ = db.connect(**self.__config__)
     else:
       self.__conn__ = db.connect(
         option_files=MY_CNF_FILE,

@@ -25,7 +25,6 @@ def strict_message(msg):
     return msg[:MAX_WIDTH-3] + '...'
   return msg
   
-
 class UpdateReport(Report):
 
   def __init__(self, config):

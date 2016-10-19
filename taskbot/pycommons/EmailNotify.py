@@ -28,8 +28,7 @@ class EmailNotify:
   def send( self, to, subject, text):
     msg = MIMEText(text)
     
-    msg['Subject'] = "[Taskbot] [%s] %s" % \
-      (os.environ.get('TASKBOT_BRANCHNAME', ''), subject)
+    msg['Subject'] = subject
     msg['From'] = MAIL_FROM
     msg['To'] = ",".join(map(lambda t: "%s <%s>" % (t[0], t[1]), to.items()))
     # Debug
@@ -76,7 +75,11 @@ def notify(report, prev_run, subject, reason):
     cs.append("%-20s %-20s %s" % \
       (c.author, c.repo.name, c.description))
 
+  subject = "[Taskbot] [%s] [%s] %s" % \
+      (os.environ.get('TASKBOT_BRANCHNAME', ''),
+       report.platform.description, subject)
+
   with EmailNotify() as email_notify:
     email_notify.send(
-      to, subject,
+      to, subject, 
       email_body(report, email_commits(cs, reason)))
