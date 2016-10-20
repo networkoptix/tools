@@ -7,6 +7,9 @@ set +o nounset
 if [ -z $TASKBOT_UNIT_TESTS ]; then
    export TASKBOT_UNIT_TESTS="false"
 fi
+if [ -z $TASKBOT_FUNC_TESTS ]; then
+   export TASKBOT_FUNC_TESTS="false"
+fi
 set -o nounset
 
 # + Save update info
@@ -33,7 +36,14 @@ if [ $TASKBOT_UNIT_TESTS = "true" ] && [ $RC -eq 0 ]; then
 fi
 
 if [ $TASKBOT_UNIT_TESTS = "true" ]; then
-  TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+  "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
 fi
+
+# # + Run functional test
+# if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
+#   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
+#   RC=$?
+#   echo $RC
+# fi
 
 exit $RC
