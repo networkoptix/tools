@@ -119,7 +119,7 @@ class UtVirtualBox(UtContainerBase):
                     continue
                 if os.path.islink(fn):
                     #debug("_copyLibs linking %s -> %s", os.path.basename(os.readlink(fn)), fnBase)
-                    check_call(cls._cmdPrefix() + ["ln", '-s',
+                    check_call(cls._cmdPrefix() + ["ln", '-s', '-f',
                         os.path.basename(os.readlink(fn)), fnBase])
                 else:
                     toCopy.append(fn)

@@ -584,9 +584,11 @@ def start_boxes(boxlist, keep = False):
             check_call(conf.VAGR_DESTROY, shell=False, cwd=conf.VAG_DIR)
         if not boxlist:
             log("Creating and starting vagrant boxes...")
+            vagBoxlist = conf.BOX_NAMES.values()
         else:
             log("Creating and starting vagrant boxes: %s...", ', '.join(boxlist))
-        check_call(conf.VAGR_RUN + [conf.BOX_NAMES[b] for b in boxlist], shell=False, cwd=conf.VAG_DIR)
+            vagBoxlist = [conf.BOX_NAMES[b] for b in boxlist]
+        check_call(conf.VAGR_RUN + vagBoxlist, shell=False, cwd=conf.VAG_DIR)
         failed = [b[0] for b in get_boxes_status() if b[0] in boxlist and b[1] != 'running']
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
@@ -614,7 +616,7 @@ def stop_boxes(boxes, destroy=False):
             log("Removing vargant boxes...")
         else:
             log("Removing vargant boxes: %s...", boxes)
-        boxlist = [conf.BOX_NAMES[b] for b in boxes.split(',')] if len(boxes) else []
+        boxlist = [conf.BOX_NAMES[b] for b in boxes] if len(boxes) else []
         cmd = conf.VAGR_DESTROY if destroy else conf.VAGR_STOP
         check_call(cmd + boxlist, shell=False, cwd=conf.VAG_DIR)
     except BaseException as e:
@@ -666,19 +668,15 @@ def wait_servers_ready(iplist):
 # these are only names, don't put paths there
 FUNCTEST_CFG_TPL = 'functest.cfg.tpl'
 FUNCTEST_CFG_NAME = 'functest-tmp.cfg'
-NATTEST_CFG_NAME = 'nattest-tmp.cfg'
+#NATTEST_CFG_NAME = 'nattest-tmp.cfg'
 
-BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py"]
-COMMON_ARGS = ['--config', FUNCTEST_CFG_NAME]
-NATCON_ARGS = ["--natcon", '--config', NATTEST_CFG_NAME]
+BASE_FUNCTEST_CMD = [sys.executable, "-u", "functest.py", '--config', FUNCTEST_CFG_NAME]
+NATCON_ARGS = ["--natcon"]
 
 
 def mk_functest_cmd(to_skip):
     # http stress test single call isn't processed here
     cmd = BASE_FUNCTEST_CMD[:]
-    if not Args.natcon:
-        cmd += COMMON_ARGS
-
     if Args.mainft:
         cmd.append('--main')
         return cmd, 'mainft'
@@ -703,18 +701,17 @@ def mk_functest_cmd(to_skip):
     return cmd, ''
 
 
-def prepare_functest_cfg(path="", natcon=False):
-    if natcon:
-        name = NATTEST_CFG_NAME
-        boxList = ('Box1', 'Behind')
-    else:
-        name = FUNCTEST_CFG_NAME
-        boxList = ('Box1', 'Box2')
+def _confServerList(*servList):
+    return ','.join('%s:%s' % (conf.BOX_IP[box], conf.MEDIASERVER_PORT) for box in servList)
+
+
+def prepare_functest_cfg(path=""):
+    name = FUNCTEST_CFG_NAME
     if path:
         name = os.path.join(path, name)
     args = {
-        'serverList' : ','.join('%s:%s' % (
-            conf.BOX_IP[box], conf.MEDIASERVER_PORT) for box in boxList),
+        'serverList' : _confServerList('Box1', 'Box2'),
+        'natTestServerList': _confServerList('Box1', 'Behind'),
         'username': conf.MEDIASERVER_USER,
         'password': conf.MEDIASERVER_PASS,
     }
@@ -758,12 +755,11 @@ def perform_func_test(to_skip):
                     RESULT.append(('main-call-functests', True))
 
             if (not only_test or only_test == 'natcon') and 'natcon' not in to_skip:
-                prepare_functest_cfg(natcon=True)
                 if not only_test:
                     cmd = BASE_FUNCTEST_CMD + NATCON_ARGS
                     reader.unregister()
                 if not Args.nobox:
-                    stop_boxes('Box2')
+                    stop_boxes(['Box2'])
                     start_boxes(['Nat','Behind'], keep=True)
                 debug("Running connection behind NAT test: %s", cmd)
                 proc = Process(cmd, bufsize=0, stdout=PIPE, stderr=STDOUT, **sub_args)
@@ -1524,6 +1520,26 @@ def check_debug_mode():
         set_debug(True)
 
 
+def _fixBoxesArg(arg):
+    fail = False
+    if arg == '':
+        return conf.BOX_NAMES.keys()
+    else:
+        boxes = arg.split(',')
+        for i, name in enumerate(boxes):
+            if name not in conf.BOX_NAMES:
+                for k, v in conf.BOX_NAMES.iteritems():
+                    if name == v:
+                        boxes[i] = k
+                        break
+                else:
+                    raw_log("ERROR: unknown virtual box name: %s" % name)
+                    fail = True
+    if fail:
+        sys.exit(2)
+    return boxes
+
+
 def check_args_correct():
     if Args.full_build_log and not Args.stdout:
         raw_log("ERROR: --full-build-log option requires --stdout!\n")
@@ -1539,13 +1555,9 @@ def check_args_correct():
         raw_log("ERROR: --add is usable only with --boxes")
         sys.exit(2)
     elif Args.boxes is not None:
-        fail = False
-        for name in Args.boxes.split(','):
-            if name not in conf.BOX_NAMES.values():
-                raw_log("ERROR: unknown virtual box name: %s" % name)
-                fail = True
-        if fail:
-            sys.exit(2)
+        Args.boxes = _fixBoxesArg(Args.boxes)
+    elif Args.boxoff is not None:
+        Args.boxoff = _fixBoxesArg(Args.boxoff)
 
 
 #def get_architecture():
@@ -1837,7 +1849,6 @@ def main():
         else:
             debug("Only creating configs for functest.py")
         prepare_functest_cfg(path=Args.ftconf)
-        prepare_functest_cfg(path=Args.ftconf, natcon=True)
         return True
 
     if Args.showboxes:
@@ -1845,16 +1856,11 @@ def main():
         return True
 
     if Args.boxes is not None:
-        if Args.boxes:
-            nameset = set(Args.boxes.split(','))
-            boxes = [k for k, v in conf.BOX_NAMES.iteritems() if v in nameset]
-        else:
-            boxes = []
-        start_boxes(boxes, keep=Args.add)
+        start_boxes(Args.boxes, keep=Args.add)
         return True
 
     if Args.boxoff is not None:
-        stop_boxes(Args.boxoff, True)
+        stop_boxes(Args.boxoff, destroy=True)
         return True
 
     global RESULT
