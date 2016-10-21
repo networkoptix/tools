@@ -30,13 +30,13 @@ fi
 
 UNIT_TESTS_WIN_PATH=$(cygpath -w "$UNIT_TESTS_RESULT_PATH")
 
+NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
+cd $NX_VMS_BIN_PATH
+
 TEST_LIST=$TASKBOT_UNIT_TESTS
 if [ $TASKBOT_UNIT_TESTS = "all" ]; then
   TEST_LIST=$(find . -name '*_ut.exe' -type f -exec basename -s .exe {} \;)
 fi
-
-NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
-cd $NX_VMS_BIN_PATH
 
 # + Run tests
 for name in $TEST_LIST
