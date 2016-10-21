@@ -48,8 +48,9 @@ sub time_str {
     return $q->i("unknown") unless $time;
 
     use POSIX qw(strftime);
+    $ENV{TZ} = 'Europe/Moscow';
 
-    strftime("%Y-%m-%d %H:%M:%S", localtime($time))
+    strftime("%Y-%m-%d %Z %H:%M:%S", localtime($time))
       . sprintf("<font size=\"-1\">.%05d</font>",
                 int(($time - int($time)) * 10 ** 5));
 }
