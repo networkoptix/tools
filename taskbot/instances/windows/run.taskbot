@@ -5,7 +5,7 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 set +o nounset
 if [ -z $TASKBOT_UNIT_TESTS ]; then
-   export TASKBOT_UNIT_TESTS="false"
+   export TASKBOT_UNIT_TESTS="none"
 fi
 set -o nounset
 
@@ -26,13 +26,13 @@ fi
 "$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
 
 # + Run unit tests
-if [ $TASKBOT_UNIT_TESTS = "true" ] && [ $RC -eq 0 ]; then
+if [ $TASKBOT_UNIT_TESTS != "none" ] && [ $RC -eq 0 ]; then
   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
   RC=$?
   echo $RC
 fi
 
-if [ $TASKBOT_UNIT_TESTS = "true" ]; then
+if [ $TASKBOT_UNIT_TESTS != "none" ]; then
     TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
 fi
 

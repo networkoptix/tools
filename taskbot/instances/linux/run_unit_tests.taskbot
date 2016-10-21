@@ -27,16 +27,20 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
+TEST_LIST=$TASKBOT_UNIT_TESTS
+if [ $TASKBOT_UNIT_TESTS = "all" ]; then
+  TEST_LIST=$(find . -name '*_ut' -type f -exec basename {} \;)
+fi
+
 NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
 cd $NX_VMS_BIN_PATH
 
 # + Run tests
-for test in $(find . -name '*_ut' -type f)
+for test in $TEST_LIST
 do
-  name=$(basename $test)
   "$TASKBOT" \
-     -d $name $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-     -c "$test --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml --gtest_filter=-NxCritical.All3" \
+     -d $test $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+     -c "./$test --gtest_output=xml:$UNIT_TESTS_RESULT_PATH/$name.xml --gtest_filter=-NxCritical.All3" \
      -t 600 -s 100 || true
 done
 

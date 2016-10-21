@@ -171,14 +171,18 @@ class UTReport(Report):
     failed_tests = map(lambda x: x[0], get_failed(unit_tests))
     failed_tests.sort()
 
-    if prev_run and new_fail:
-      import EmailNotify
-      EmailNotify.notify(
-        self, prev_run, "unit-tests failed",
-        "New fails detected in the unit-tests.%s" %
-        get_failed_text(failed_tests))
+    import EmailNotify
+    if prev_run:
+      if new_fail:
+        EmailNotify.notify(
+          self, prev_run, "unit-tests failed",
+          "New fails detected in the unit-tests.%s" %
+          get_failed_text(failed_tests))
+      elif not total_fail and new_pass:
+        EmailNotify.notify(
+          self, prev_run, "unit-tests fixed",
+          "The product unit-tests executed successfully.")
     elif cores_count:
-      import EmailNotify
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "%d core(s) detected after the unit-tests.%s" % \
