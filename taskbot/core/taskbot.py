@@ -468,7 +468,13 @@ def main():
   parser.add_option("-t", "--timeout", type="int",
                     help="Run timeout in seconds.  " \
                     "Zero (or negative) value means indefinite. "\
-                    "Overrides corresponding setting in config file..")
+                    "Overrides corresponding setting in config file.")
+  
+  parser.add_option("-s", "--select", type="int",
+                    help="Select timeout in seconds.  " \
+                    "Zero (or negative) value means indefinite. "\
+                    "Overrides corresponding setting in config file.")
+
 
   (options, args) = parser.parse_args()
 
@@ -504,9 +510,13 @@ def main():
   if options.timeout is not None:
     run_timeout = options.timeout
 
+  select_timeout = config.get('select_timeout', None)
+  if options.select is not None:
+    select_timeout = options.select
+
   timeout = TimeOut(
     run_timeout,
-    config.get('select_timeout', None))
+    select_timeout)
 
   executor = TaskExecutor(
     database,
