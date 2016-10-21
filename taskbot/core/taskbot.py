@@ -24,6 +24,17 @@ DEFAULT_PLATFORM='Test'
 
 class TimeOut:
 
+  class XTimedOut(Exception):
+
+    def __init__(self, msg, timeout, duration):
+      self.msg = msg
+      self.timeout = timeout
+      self.duration = duration
+
+    def __str__(self):
+      return "%s (%d secs): wait %d secs" % \
+        (self.msg, self.timeout, self.duration)
+
   def __init__(self, run_timeout, select_timeout):
     self.__run_timeout__ = run_timeout
     self.__select_timeout__ = select_timeout
@@ -42,19 +53,22 @@ class TimeOut:
             time.time() - self.__select_start__ > \
               self.__select_timeout__
       if result:
-        print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
-              (self.__select_timeout__, time.time() - self.__select_start__)
-      return result
+        raise TimeOut.XTimedOut(
+          "select_timeout has expired",
+          self.__select_timeout__,
+          time.time() - self.__select_start__)
+    return result
 
   def __check_run(self, command_timeout):
     timeout = command_timeout or self.__run_timeout__
     result = timeout and \
       time.time() - self.__run_start__ > timeout
     if result:
-      print >> sys.stderr, 'Run timeout (%d secs): wait %d secs' % \
-            (timeout, time.time() - self.__run_start__)
+      raise TimeOut.XTimedOut(
+        "run_timeout has expired",
+        timeout,
+        time.time() - self.__run_start__)
     return result
-
 
   def start_command(self, command):
     self.__select_start__ =  time.time()
@@ -307,7 +321,8 @@ class TaskExecutor:
       if status != 0:
         task.error_message = "non-zero exit status"
       return status, False
-    task.error_message = "command_timeout has expired"
+    if not task.error_message:
+      task.error_message = "command_timeout has expired"
     return 1, True
     
 
@@ -320,7 +335,7 @@ class TaskExecutor:
     Trace.trace(out)
     return out
     
-  def write_command(self, command, is_comment=False, timeout = None):
+  def write_command(self, command, is_comment=False, timeout = None, task = None):
     self.__shell_process__.stdin.write(command)
 
     start = time.time()
@@ -338,8 +353,12 @@ class TaskExecutor:
 
         if status is not None:
           break
-        if self.__timeout__.check(
-          timeout, bool(status or out or err)):
+        try:
+          self.__timeout__.check(
+            timeout, bool(status or out or err))
+        except TimeOut.XTimedOut, x:
+          if task:
+            task.error_message = str(x)
           break
 
       return status,  stderr, stdout
@@ -357,7 +376,7 @@ class TaskExecutor:
     Trace.trace("%s\n" % command)
     status, stderr, stdout = \
       self.write_command("{ %s\n/bin/echo $? >&%d; }\n" % \
-        (command, self.__wfdstatus__), False, timeout)
+        (command, self.__wfdstatus__), False, timeout, task)
 
     status, do_terminate = self.__check_get_status(status, task)
 
