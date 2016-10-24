@@ -124,11 +124,11 @@ class Build(object): #  contains some build-dependent global variables
         cls.qt_lib = ''
 
 
-def boxssh(box, command):
-    return check_output(
-        ['./vssh.sh', box, 'sudo'] + list(command),
-        shell=False, stderr=STDOUT
-    )
+def boxssh(box, command, cwd=None):
+    kwargs = dict(shell=False, stderr=STDOUT)
+    if cwd is not None:
+        kwargs['cwd'] = cwd
+    return check_output(['./vssh.sh', box, 'sudo'] + list(command), **kwargs)
 
 
 def clear_dir(path):

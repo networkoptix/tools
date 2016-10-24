@@ -620,7 +620,7 @@ def start_boxes(boxlist=None, keep = False):
         #wait_servers_ready([BOX_IP[b] for b in to_check])
         for box in (boxlist or conf.BOX_POST_START.iterkeys()):
             if box in conf.BOX_POST_START:
-                boxssh(box, ['/vagrant/' + conf.BOX_POST_START[box]])
+                boxssh(box, ['/vagrant/' + conf.BOX_POST_START[box]], cwd=conf.FT_PATH)
         time.sleep(conf.SLEEP_AFTER_BOX_START)
         return True
     except CalledProcessError as err:
@@ -806,7 +806,7 @@ def perform_func_test(to_skip):
             if unreg:
                 reader.unregister()
                 unreg = False
-            boxssh(conf.BOX_IP['Box1'], ('/vagrant/safestart.sh', 'networkoptix-mediaserver'))  #FIXME rewrite using the generic way with ctl.sh
+            boxssh('Box1', ('/vagrant/safestart.sh', 'networkoptix-mediaserver'), cwd=conf.FT_PATH)  #FIXME rewrite using the generic way with ctl.sh
             url = "%s:%s" % (conf.BOX_IP['Box1'], conf.MEDIASERVER_PORT)
             cmd = [sys.executable, "-u", "stresst.py", "--host", url, "--full", "20,40,60", "--threads", "10"]
             #TODO add test durations to config
