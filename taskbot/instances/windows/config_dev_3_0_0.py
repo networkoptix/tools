@@ -33,7 +33,7 @@ config = {
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@la.hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@la.hdw.mx/devtools',
-    'TASKBOT_UNIT_TESTS': 'true'
+    'TASKBOT_UNIT_TESTS': 'all'
     }
   }
 
