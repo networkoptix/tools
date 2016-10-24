@@ -499,6 +499,7 @@ def main():
 
   if len(args) == 0 or \
          (len(args) == 1 and not options.command):
+    print >> sys.stderr, "%s invalid args: '%s'" % (sys.argv[0], args)
     parser.print_help()
     exit(2)
     
