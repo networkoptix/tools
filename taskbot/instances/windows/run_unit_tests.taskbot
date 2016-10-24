@@ -46,7 +46,7 @@ do
   test_win_tmp=$(cygpath -w "$test_tmp")
   test=$name.exe
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-      -d $name  \
+      -d "$name"  \
       -c "./$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\" --gtest_filter=-NxCritical.All3 --tmp=$test_win_tmp" \
       -t 600 -s 100 || true
 done
@@ -57,5 +57,5 @@ do
  filename=$(basename $xml)
  name=${filename%.*}
  "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-   -d $name -c "cat $xml" --trace
+   -d "$name" -c "cat $xml" --trace
 done
