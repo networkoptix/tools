@@ -52,10 +52,10 @@ do
 done
 
 # + Store results
-for xml in $(find "$UNIT_TESTS_RESULT_PATH" -name '*.xml' -type f)
+for xml in $(find "$UNIT_TESTS_RESULT_PATH" -maxdepth 1 -name '*.xml' -type f)
 do
  filename=$(basename $xml)
  name=${filename%.*}
  "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-   -d "$name" -c "cat $xml" --trace
+   -d "$name" -c "cat $xml"
 done
