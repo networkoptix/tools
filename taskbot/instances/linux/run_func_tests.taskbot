@@ -1,0 +1,72 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Prepare environment
+if [ -d "$TASKBOT_VAR"/var/testing ]; then 
+  rm -rf "$TASKBOT_VAR"/var/testing
+fi
+
+cp -r $TASKBOT_REPO/testing "$TASKBOT_VAR"/var/testing
+
+if [ -e "$TASKBOT_VAR"/var/testing/testconf_local.py ]; then 
+  rm -rf "$TASKBOT_VAR"/var/testing/testconf_local.py
+fi
+
+cd "$TASKBOT_VAR"/var/testing
+
+BOX_SUFFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
+BOX1="box1_$BOX_SUFFIX"
+BOX2="box2_$BOX_SUFFIX"
+NAT="nat_$BOX_SUFFIX"
+BEHIND="behind_$BOX_SUFFIX"
+
+cat << EOF > testconf_local.py
+BOX_NAMES = {
+    "Box1": "$BOX1",
+    "Box2": "$BOX2",
+    "Nat": "$NAT",
+    "Behind": "$BEHIND"
+}
+BOX_IP = {
+  'Box1': '192.168.109.$[$TASKBOT_BOX_BASE + 1]',
+  'Box2': '192.168.109.$[$TASKBOT_BOX_BASE + 2]',        
+  'Nat': '192.168.109.$[$TASKBOT_BOX_BASE + 3]',
+  'Nat2': '192.168.110.$[$TASKBOT_BOX_BASE + 1]',
+  'Behind': '192.168.110.$[$TASKBOT_BOX_BASE + 2]'
+  }
+EOF
+
+cat testconf_local.py
+
+./sync.sh
+
+# + Destroy virtual boxes
+cd "$TASKBOT_VAR"/var/testing/vagrant
+vagrant destroy -f
+
+# + Create test config
+cd "$TASKBOT_VAR"/var/testing
+./auto.py \
+  --path $TASKBOT_VAR/nx_vms \
+  --ftconf "$TASKBOT_VAR"/nx_vms/func_tests \
+
+# + Start virtual boxes
+./auto.py \
+  --path $TASKBOT_VAR/nx_vms \
+  --box Box1,Box2,Nat,Behind
+
+# + Run tests
+# ! timeout = 1200
+set +o errexit  
+cd "$TASKBOT_VAR"/nx_vms/func_tests
+./functest.py --config=functest-tmp.cfg 2>&1
+RC=$?
+set -o errexit
+
+# + Destroy virtual boxes
+cd "$TASKBOT_VAR"/var/testing/vagrant
+vagrant destroy -f
+
+exit $RC

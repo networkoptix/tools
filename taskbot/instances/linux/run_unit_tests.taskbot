@@ -31,7 +31,7 @@ NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"
 cd $NX_VMS_BIN_PATH
 
 TEST_LIST=$TASKBOT_UNIT_TESTS
-if [ $TASKBOT_UNIT_TESTS = "all" ]; then
+if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
   TEST_LIST=$(find . -name '*_ut' -type f -exec basename {} \;)
 fi
 echo $TEST_LIST
@@ -39,7 +39,7 @@ echo $TEST_LIST
 # + Run tests
 for test in $TEST_LIST
 do
-  test_tmp= $UNIT_TESTS_RESULT_PATH/$name 
+  test_tmp=$UNIT_TESTS_RESULT_PATH/$name 
   mkdir -p $test_tmp
   "$TASKBOT" \
      -d $test $TASKBOT_OPTIONS $TASKBOT_CONFIG \
