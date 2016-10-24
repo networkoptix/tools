@@ -582,12 +582,13 @@ def updateBoxShhConfig(box):
     with open(fname, "wt") as f:
         for line in out.splitlines():
             tokens = line.split()
-            if tokens[0] == 'HostName':
-                line = "  HostName %s" % (conf.BOX_IP[box],)
-            elif tokens[0] == 'Port':
-                line = "  Port 22"
-            elif tokens[0] == 'LogLevel':
-                line = "  LogLevel ERROR"
+            if tokens:
+                if tokens[0] == 'HostName':
+                    line = "  HostName %s" % (conf.BOX_IP[box],)
+                elif tokens[0] == 'Port':
+                    line = "  Port 22"
+                elif tokens[0] == 'LogLevel':
+                    line = "  LogLevel ERROR"
             print >>f, line
 
 
@@ -1535,6 +1536,7 @@ ARGS_EXCLUSIVE = (
     ('ft_if_ut', 'ft_always'),
     ('list', 'full'),
     ('list', 'auto'),
+    ('ftconf', 'boxes', 'boxoff', 'ftprepare'),
 ) + tuple(('no_functest', opt) for opt in FUNCTEST_ARGS)
 
 
