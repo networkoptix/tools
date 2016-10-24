@@ -36,8 +36,6 @@ if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
 fi
 echo $TEST_LIST
 
-ulimit -n 16384
-
 # + Run tests
 for test in $TEST_LIST
 do
