@@ -24,7 +24,7 @@ def main():
   config = read_config(sys.argv[1])
   environment = config.get('environment', {})
   for var, value in environment.items():
-    print "%s=%s" % (var, value)
+    print '%s="%s"' % (var, value)
 
 
 
