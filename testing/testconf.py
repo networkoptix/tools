@@ -17,7 +17,8 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 
 PROJECT_ROOT = "~/develop/nx_vms"
 
-UT_SUBDIR = "unit_tests" # ut sources subdirectory, relative to PROJECT_ROOT
+UT_SUBDIR = "unit_tests"  # ut sources subdirectory, relative to PROJECT_ROOT
+FT_PATH = "$NX/func_tests"  # if it starts with $NX, set_paths() will update it with PROJECT_ROOT used
 
 FAIL_FILE = './fails.py' # where to save failed branches list
 RESTART_FLAG = './.restart'
@@ -96,6 +97,7 @@ VAGR_DESTROY = [VAGRANT, "destroy", "-f"]
 VAGR_RUN = [VAGRANT, "up"]
 VAGR_STOP = [VAGRANT, "halt"]
 VAGR_STAT = [VAGRANT, "status"]
+VAGR_SSHCONF = [VAGRANT, "ssh-config"]
 
 MVN_BUILD_CONFIG = 'release'
 TEST_CAMERA_SUBPATH = "build_environment/target/bin/%s/testcamera" % MVN_BUILD_CONFIG
@@ -141,7 +143,7 @@ BOX_POST_START = {
     'Behind': 'post-create-behind-nat.sh'
 }
 
-BOXES_NAMES_FILE = './boxes.rb'  # os.path.join(VAG_DIR, 'boxes.rb')
+BOXES_NAMES_FILE = 'boxes.rb'  # os.path.join(VAG_DIR, 'boxes.rb')
 
 MEDIASERVER_PORT = 7001
 MEDIASERVER_USER = 'admin'
@@ -176,7 +178,7 @@ NOSHUFFLE = (  # list of tupples (branch, ut), any part can be '*' which means '
 # Build only this branches, don't perform any testing
 BUILD_ONLY_BRANCHES = set()
 
-SUBPROC_ARGS = dict(universal_newlines=True, cwd=PROJECT_ROOT, shell=False)
+SUBPROC_ARGS = dict(universal_newlines=True, shell=False)
 
 FT_AFTER_FAILED_UT = True  # Run func.tests even if unittests failed
 #------------------------------------------------------------------

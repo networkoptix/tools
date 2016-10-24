@@ -232,7 +232,7 @@ def check_new_commits(bundle_fn):
     try:
         cmd = conf.HG_IN + [ "--branch=%s" % b for b in conf.BRANCHES ] + ['--bundle', bundle_fn]
         debug("Run: %s", ' '.join(cmd))
-        ready_branches = check_output(cmd, stderr=STDOUT, **conf.SUBPROC_ARGS)
+        ready_branches = check_output(cmd, stderr=STDOUT, cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
         if ready_branches:
             # Specifying the current branch (.) turns off all other
             branches = ['.'] if conf.BRANCHES[0] == '.' else filter_branch_names(ready_branches.split(','))
@@ -254,7 +254,7 @@ def check_new_commits(bundle_fn):
 def current_branch_name():
     try:
 #        branch_name = check_output(HG_BRANCH, stderr=STDOUT, **SUBPROC_ARGS)
-        branch_name = check_output(conf.HG_BRANCH, stderr=None, **conf.SUBPROC_ARGS)
+        branch_name = check_output(conf.HG_BRANCH, stderr=None, cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
         return branch_name.split("\n")[0]
     except CalledProcessError, e:
         if e.returncode != 1:
@@ -323,6 +323,7 @@ def mvn_cmd(cmd, *args):
 def call_maven_clean(unit_tests):
     cmd = mvn_cmd("clean")
     kwargs = conf.SUBPROC_ARGS.copy()
+    kwargs['cwd'] = conf.PROJECT_ROOT
     if unit_tests:
         kwargs['cwd'] = os.path.join(kwargs["cwd"], conf.UT_SUBDIR)
     try:
@@ -369,6 +370,7 @@ def call_maven_build(branch,
         last_lines.extend(preOutput.split("\n"))
     log("Build %s (branch %s)...", "unit tests" if unit_tests else "netoptix_vms", branch)
     kwargs = conf.SUBPROC_ARGS.copy()
+    kwargs['cwd'] = conf.PROJECT_ROOT
 
     if (not conf.MVN_THREADS) or conf.MVN_THREADS == 1:
         no_threads = True
@@ -441,12 +443,12 @@ def prepare_and_build(branch):
     if branch in conf.BUILD_ONLY_BRANCHES:
         debug("The branch %s configured build-only." % branch)
     debug("Call %s", conf.HG_PURGE)
-    check_call(conf.HG_PURGE, **conf.SUBPROC_ARGS)
+    check_call(conf.HG_PURGE, cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
     cmd = conf.HG_UP[:]
     if branch != '.':
         cmd.append(branch)
     debug("Call %s", cmd)
-    check_call(cmd, **conf.SUBPROC_ARGS)
+    check_call(cmd, cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
     #debug("Going to call maven...")
     return build_branch(branch)
 
@@ -461,7 +463,7 @@ def update_repo(branches, bundle_fn):
     log("Pulling branches: %s" % (', '.join(branches)))
     #debug("Using bundle file %s", bundle_fn)
     #try:
-    check_call(conf.HG_PULL + [bundle_fn], **conf.SUBPROC_ARGS)
+    check_call(conf.HG_PULL + [bundle_fn], cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
     #except CalledProcessError, e:
     #    print e
     #    sys.exit(1)
@@ -573,7 +575,23 @@ def check_testcamera_bin():
 
 #####################################
 # Functional tests block
-def start_boxes(boxlist, keep = False):
+def updateBoxShhConfig(box):
+    out = check_output(conf.VAGR_SSHCONF + [conf.BOX_NAMES[box]],
+                       stderr=STDOUT, cwd=conf.VAG_DIR, **conf.SUBPROC_ARGS)
+    fname = os.path.join(conf.FT_PATH, 'ssh.' + box + '.conf')
+    with open(fname, "wt") as f:
+        for line in out.splitlines():
+            tokens = line.split()
+            if tokens[0] == 'HostName':
+                line = "  HostName %s" % (conf.BOX_IP[box],)
+            elif tokens[0] == 'Port':
+                line = "  Port 22"
+            elif tokens[0] == 'LogLevel':
+                line = "  LogLevel ERROR"
+            print >>f, line
+
+
+def start_boxes(boxlist=None, keep = False):
     try:
         # 1. Get the .deb file and testcamera
         check_mediaserver_deb()
@@ -584,6 +602,7 @@ def start_boxes(boxlist, keep = False):
             check_call(conf.VAGR_DESTROY, shell=False, cwd=conf.VAG_DIR)
         if not boxlist:
             log("Creating and starting vagrant boxes...")
+            boxlist = conf.BOX_NAMES.keys()
             vagBoxlist = conf.BOX_NAMES.values()
         else:
             log("Creating and starting vagrant boxes: %s...", ', '.join(boxlist))
@@ -593,6 +612,8 @@ def start_boxes(boxlist, keep = False):
         if failed:
             ToSend.log("ERROR: failed to start up the boxes: %s", ', '.join(failed))
             return False
+        for box in boxlist:
+            updateBoxShhConfig(box)
         # 3. Wait for all mediaservers become ready (use /ec2/getMediaServers
         #to_check = [b for b in boxlist if b in CHECK_BOX_UP] if boxlist else CHECK_BOX_UP
         #wait_servers_ready([BOX_IP[b] for b in to_check])
@@ -601,12 +622,18 @@ def start_boxes(boxlist, keep = False):
                 boxssh(conf.BOX_IP[box], ['/vagrant/' + conf.BOX_POST_START[box]])
         time.sleep(conf.SLEEP_AFTER_BOX_START)
         return True
-    except FuncTestError as e:
-        ToSend.log("Virtual boxes start up failed: %s", e.message)
+    except CalledProcessError as err:
+        ToSend.log("Failed to call command %s. Returned code %s. Mesage: '%s'",
+                   err.cmd, err.returncode, err.message)
+        if err.output:
+            ToSend.log("Collected output from the command:\n%s", err.output)
         return False
-    except BaseException as e:
+    except FuncTestError as err:
+        ToSend.log("Virtual boxes start up failed: %s", err.message)
+        return False
+    except BaseException as err:
         ToSend.log("Exception during virtual boxes start up:\n%s", traceback.format_exc())
-        if not isinstance(e, Exception):
+        if not isinstance(err, Exception):
             raise # it wont be catched and will allow the script to terminate
 
 
@@ -707,6 +734,8 @@ def _confServerList(*servList):
 
 def prepare_functest_cfg(path=""):
     name = FUNCTEST_CFG_NAME
+    if path is None or path == "":
+        path = conf.FT_PATH
     if path:
         name = os.path.join(path, name)
     args = {
@@ -737,7 +766,9 @@ def perform_func_test(to_skip):
         if os.path.isfile(".rollback"): # TODO: move to config or import from functest.py
             os.remove(".rollback")
         reader = pipereader.PipeReader()
-        sub_args = {k: v for k, v in conf.SUBPROC_ARGS.iteritems() if k != 'cwd'}
+        sub_args = conf.SUBPROC_ARGS.copy()
+        sub_args['cwd'] = conf.FT_PATH
+        debug("Running functests in %s", sub_args['cwd'])
         unreg = False
 
         only_test = ''
@@ -1624,7 +1655,13 @@ def set_paths():
     if conf.PROJECT_ROOT.startswith('~'):
         conf.PROJECT_ROOT = os.path.expanduser(conf.PROJECT_ROOT)
     conf.PROJECT_ROOT = os.path.abspath(conf.PROJECT_ROOT)
-    conf.SUBPROC_ARGS['cwd'] = conf.PROJECT_ROOT
+
+    if Args.ftpath is not None:
+        conf.FT_PATH = Args.ftpath
+    if conf.FT_PATH is None or conf.FT_PATH == '':
+        conf.FT_PATH = os.getcwd()
+    if conf.FT_PATH.startswith("$NX/"):
+        conf.FT_PATH = os.path.join(conf.PROJECT_ROOT, conf.FT_PATH[4:])
 
     if not os.path.isdir(conf.PROJECT_ROOT):
         raise EnvironmentError(errno.ENOENT, "The project root directory %s isn't found", conf.PROJECT_ROOT)
@@ -1690,6 +1727,7 @@ def parse_args():
     parser.add_argument("-b", "--branch", action='append', help="Branches to test (as with -f) instead of configured branch list. Multiple times accepted.\n"
                                                                 "Use '.' for a current branch (it WILL update to the last commit of the branch, and it will ignore all other -b). ")
     parser.add_argument("-p", "--path", help="Path to the project directory to use instead of the default one")
+    parser.add_argument('--ftpath', help="Path to the directory with the functional tests scripts")
     parser.add_argument("-T", "--threads", type=int, help="The number of threads to be used by maven (for -T mvn argument). Use '-T 0' to override configured default and use maven's default.")
     # output control
     parser.add_argument("-o", "--stdout", action="store_true", help="Don't send email, print resulting text to stdout.")
@@ -1704,6 +1742,7 @@ def parse_args():
     parser.add_argument("--showboxes", '--sb', action="store_true", help="Check and show vagrant boxes states")
     parser.add_argument('--utcont', action="store_true", help="Only creates unittest container and displays the sample command line.")
     parser.add_argument('--ftconf', help="Only creates configs for functest.py and updates boxes.rb", nargs='?', const="")
+    parser.add_argument('--ftprepare', action="store_true", help="Combine --box (for all boxes) and --ftconf")
 
     global Args
     Args = parser.parse_args()
@@ -1759,16 +1798,16 @@ def show_conf():
 
 
 def updateBoxesNames():
-    dest = conf.BOXES_NAMES_FILE
+    dest = os.path.join(conf.VAG_DIR, conf.BOXES_NAMES_FILE)
     rbTime = get_file_time(dest)
     confTime = max(
         get_file_time(conf.__file__),
         get_file_time(conf.testconf_local.__file__) if hasattr(conf, 'testconf_local') else 0
     )
     if rbTime < confTime:
-        if os.path.exists(conf.BOXES_NAMES_FILE):
-            os.rename(conf.BOXES_NAMES_FILE, conf.BOXES_NAMES_FILE + '.bak')
-        with open(conf.BOXES_NAMES_FILE, "wt") as out:
+        if os.path.exists(dest):
+            os.rename(dest, dest + '.bak')
+        with open(dest, "wt") as out:
             print >>out, """# -*- mode: ruby -*-
 # vi: set ft=ruby :
 # AUTOGENERATED FILE, DON'T MODIFY!
@@ -1786,6 +1825,9 @@ module Boxes"""
                 print >>out, '    %s = "%s"' % (conf.UT_BOX_VAR, conf.UT_BOX_IP)
             print >>out, "end"
             print >>out, "# Created at %s" % (time.asctime())
+    dest_ut = os.path.join(conf.UT_VAG_DIR, conf.BOXES_NAMES_FILE)
+    if get_file_time(dest_ut) < get_file_time(dest):
+        shutil.copy(dest, dest_ut)
 
 
 def run_auto_loop():
@@ -1856,12 +1898,15 @@ def main():
         return True
 
     if Args.boxes is not None:
-        start_boxes(Args.boxes, keep=Args.add)
-        return True
+        return start_boxes(Args.boxes, keep=Args.add)
 
     if Args.boxoff is not None:
         stop_boxes(Args.boxoff, destroy=True)
         return True
+
+    if Args.ftprepare:
+        prepare_functest_cfg()
+        return start_boxes()
 
     global RESULT
     RESULT = []
