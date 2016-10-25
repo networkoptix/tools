@@ -14,7 +14,7 @@ fi
 set -o errexit
 
 # + Clean
-mvn clean -Dutb
+mvn clean -Dutb -Dmaven.clean.failOnError=false
 hg purge .
 
 #+ Build from stratch

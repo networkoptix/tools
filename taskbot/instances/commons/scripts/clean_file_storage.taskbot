@@ -2,7 +2,7 @@
 
 set -o errexit -o nounset -o noclobber
 STORAGE_DIR=$1
-MAX_KBYTES=5242880 # 5GB
+MAX_KBYTES=1048576 # 1GB
 
 # Clean storage
 
