@@ -17,7 +17,8 @@ stop networkoptix-mediaserver
 #setpw
 cp "$SERVCONF" "${SERVCONF}.base"
 nxedconf appserverPassword ''
-nxedconf systemName functesting
+nxedconf systemName $MAIN_SYS_NAME
+nxedconf systemIdFromSystemName 1
 nxedconf removeDbOnStartup 1
 nxedconf noSetupWizard 1
 cp "$SERVCONF" "${SERVCONF}.orig"

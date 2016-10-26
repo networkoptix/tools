@@ -32,6 +32,8 @@ function nxrmbase {
 function nxcleardb {
     rm ${SERVDIR}/var/*sqlite* &> /dev/null
     nxedconf removeDbOnStartup 1
+    nxedconf systemName $MAIN_SYS_NAME
+    nxedconf systemIdFromSystemName 1
 }
 
 function safestop {
