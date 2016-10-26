@@ -20,7 +20,7 @@ Changesets = {}
 def get_changesets(branch, bundle_fn):
     debug("Run: " + (' '.join(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn])))
     proc = Process(conf.HG_REVLIST + ["--branch=%s" % branch, bundle_fn],
-                   bufsize=1, stdout=PIPE, stderr=STDOUT, **conf.SUBPROC_ARGS)
+               bufsize=1, stdout=PIPE, stderr=STDOUT, cwd=conf.PROJECT_ROOT, **conf.SUBPROC_ARGS)
     (outdata, errdata) = proc.communicate()
     if proc.returncode == 0:
         Changesets[branch] = [

@@ -1134,7 +1134,7 @@ class FunctestParser(object):
     # Time synchronization tests
     TS_PARTS = [] #it should be filled!
     current_ts_part = 0
-    TS_HEAD = "TimeSyncTest suits: "
+    TS_HEAD = "TimeSyncTest suites: "
     TS_START = "TimeSync Test Start: "
     TS_END = "TimeSync Test End"
 
