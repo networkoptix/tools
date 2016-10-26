@@ -4,8 +4,12 @@ set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare environment
-if [ -d "$TASKBOT_VAR"/var/testing ]; then 
-  rm -rf "$TASKBOT_VAR"/var/testing
+if [ -d "$TASKBOT_VAR"/var/testing ]; then
+  cd "$TASKBOT_VAR"/var/testing/vagrant
+  set +o errexit
+  vagrant destroy -f
+  set -o errexit
+  rm -rvf "$TASKBOT_VAR"/var/testing
 fi
 
 cp -r $TASKBOT_REPO/testing "$TASKBOT_VAR"/var/testing
@@ -42,31 +46,15 @@ cat testconf_local.py
 
 ./sync.sh
 
-# + Destroy virtual boxes
-cd "$TASKBOT_VAR"/var/testing/vagrant
-vagrant destroy -f
-
-# + Create test config
-cd "$TASKBOT_VAR"/var/testing
-./auto.py \
-  --path $TASKBOT_VAR/nx_vms \
-  --ftconf "$TASKBOT_VAR"/nx_vms/func_tests \
-
-# + Start virtual boxes
-./auto.py \
-  --path $TASKBOT_VAR/nx_vms \
-  --box Box1,Box2,Nat,Behind
-
 # + Run tests
-# ! timeout = 1200
-set +o errexit  
-cd "$TASKBOT_VAR"/nx_vms/func_tests
-./functest.py --config=functest-tmp.cfg 2>&1
-RC=$?
+cd "$TASKBOT_VAR"/var/testing
+set +o errexit
+"$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+     -d "FuncTests"  \
+     -c "./auto.py --path $TASKBOT_VAR/nx_vms --ft -o" \
+     -t 1200 -s 100
 set -o errexit
 
 # + Destroy virtual boxes
 cd "$TASKBOT_VAR"/var/testing/vagrant
 vagrant destroy -f
-
-exit $RC

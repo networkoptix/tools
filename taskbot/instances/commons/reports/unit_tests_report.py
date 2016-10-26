@@ -23,7 +23,9 @@ def get_totals(unit_tests):
 def get_diff(current, prev):
   passed = failed = 0
   for name, info in current.items():
-    prev_info = prev.get(name)
+    prev_info = None
+    if prev:
+      prev_info = prev.get(name)
     passed+=int((prev_info and prev_info.failed and not info.failed) or \
       (not prev_info and not info.failed))
     failed+=int((prev_info and not prev_info.failed and info.failed) or \

@@ -29,21 +29,28 @@ fi
 "$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
 
 # + Run unit tests
+UT_RC=0
 if [ "$TASKBOT_UNIT_TESTS" != "none" ] && [ $RC -eq 0 ]; then
   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
-  RC=$?
-  echo $RC
+  UT_RC=$?
 fi
 
 if [ "$TASKBOT_UNIT_TESTS" != "none" ]; then
   "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
 fi
 
-# # + Run functional test
-# if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
-#   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
-#   RC=$?
-#   echo $RC
-# fi
+# + Run functional test
+FT_RC=0
+if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
+  FT_RC=$?
+fi
+
+if [ $TASKBOT_FUNC_TESTS = "true" ]; then
+  TASKBOT_DEBUG_MODE=1 "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
+fi
+
+let "RC|=$UT_RC"
+let "RC|=$FT_RC"
 
 exit $RC

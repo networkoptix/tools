@@ -99,6 +99,16 @@ class Report:
 
     return Report.Task(*res)
 
+  def find_non_command_parent(self, task):
+    while task.parent_task_id and task.is_command:
+      res = \
+        self.__db__.query("""SELECT id, parent_task_id, description,
+          is_command, start, finish, error_message
+          FROM task
+          WHERE id = %s""", (task.parent_task_id, ))
+      task = Report.Task(*res)
+    return task
+
   def __find_task(self, parent_task_id, description):
     cursor = self.__db__.cursor
     cursor.execute(
@@ -121,7 +131,7 @@ class Report:
 
   def __find_failed_task(self, parent_task_id):
     cursor = self.__db__.cursor
-    cursor.execute("""SELECT id, description, is_command, start, finish, error_message
+    cursor.execute("""SELECT id, parent_task_id, description, is_command, start, finish, error_message
       FROM task
       WHERE parent_task_id = %s AND error_message IS NOT NULL""", (parent_task_id, ))
     return [ Report.Task(*task) for task in cursor ]
