@@ -52,7 +52,7 @@ set +o errexit
 "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "FuncTests"  \
      -c "./auto.py --path $TASKBOT_VAR/nx_vms --ft -o" \
-     -t 1200 -s 100
+     -t 1200
 set -o errexit
 
 # + Destroy virtual boxes

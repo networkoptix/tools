@@ -50,7 +50,7 @@ if [ $TASKBOT_FUNC_TESTS = "true" ]; then
   TASKBOT_DEBUG_MODE=1 "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
 fi
 
-let "RC|=$UT_RC"
-let "RC|=$FT_RC"
+let "RC|=$UT_RC" || true
+let "RC|=$FT_RC" || true
 
 exit $RC
