@@ -1012,11 +1012,15 @@ class FunctestParser(object):
             self.parser = self.parse_main_failed
             is_fail = line.startswith(self.FAIL_MARK)
             ToSend.log("Functional test %s!", "failed" if is_fail else "reports an error")
+            for s in self.collector:
+                ToSend.log(s)
             ToSend.log(line)
         elif line.startswith("Basic functional tests end"):
             ToSend.log("Basic functional tests done.")
             self.parser = self.parse_merge_start
             self.stage = 'wait for Merge server test'
+        else:
+            self.collector.append(line)
 
     def parse_main_failed(self, line):  # FT_MAIN_FAILED
         ToSend.log(line)
