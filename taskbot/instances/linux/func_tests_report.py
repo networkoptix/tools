@@ -11,6 +11,7 @@ pycommons = os.path.join(
 sys.path.insert(0, pycommons)
 from Report import Report
 
+TIME_REGEXP = r'\[\d{4}\.\d{2}\.\d{2}\s\d{2}:\d{2}:\d{2}\s[A-Z]{3}\]\s+'
 TEST_START_MARKERS = [
   r'^(FAIL|ERROR):\s+(\w+)\s+\(([^\)]+)\)$']
 
@@ -45,6 +46,7 @@ class FTReport(Report):
     stop_marker = 0
     result = None
     for line in output.split("\n"):
+      line = re.sub(TIME_REGEXP, '', line)
       if result:
         result.error+="\n" + line
         for exp in TEST_STOP_MARKERS:
