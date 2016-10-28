@@ -34,11 +34,11 @@ BOX_NAMES = {
     "Behind": "$BEHIND"
 }
 BOX_IP = {
-  'Box1': '192.168.109.$[$TASKBOT_BOX_BASE + 1]',
-  'Box2': '192.168.109.$[$TASKBOT_BOX_BASE + 2]',        
-  'Nat': '192.168.109.$[$TASKBOT_BOX_BASE + 3]',
-  'Nat2': '192.168.110.$[$TASKBOT_BOX_BASE + 1]',
-  'Behind': '192.168.110.$[$TASKBOT_BOX_BASE + 2]'
+  'Box1': '192.168.120.$[$TASKBOT_BOX_BASE + 1]',
+  'Box2': '192.168.120.$[$TASKBOT_BOX_BASE + 2]',        
+  'Nat': '192.168.120.$[$TASKBOT_BOX_BASE + 3]',
+  'Nat2': '192.168.121.$[$TASKBOT_BOX_BASE + 1]',
+  'Behind': '192.168.121.$[$TASKBOT_BOX_BASE + 2]'
   }
 EOF
 

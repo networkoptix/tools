@@ -64,10 +64,10 @@ class UTReport(Report):
     Report.__init__(self, config)
 
   def __get_test_info(self, prev_run = []):
-    unit_tests = {}
     tasks = self.find_task('Run unit tests > %run_unit_tests.taskbot%', prev_run)
     if len(tasks) == 0:
-      return None
+      return {}
+    unit_tests = {}
     run_tests = self.find_task('Run tests > %for % > %', tasks)
     test_results = self.find_task('Store results > %for % > %', tasks)
     for test in run_tests:
