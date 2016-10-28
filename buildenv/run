@@ -22,6 +22,7 @@ LOOP=
 RUN_ARGS_SPECIFIED=0
 STRACE=
 STRACE_LOG=strace.log
+WITH_GDB=
 
 for i in "$@"
 do
@@ -40,6 +41,8 @@ do
         CONFIGURATION=debug
     elif [ "$i" == "--run-strace" ] ; then
         STRACE=1
+    elif [ "$i" == "--run-gdb" ] ; then
+        WITH_GDB=1
     fi
 done
 
@@ -125,8 +128,11 @@ do
     #valgrind --tool=massif $COMMON_VALGRIND_ARGS
     #valgrind --tool=drd --exclusive-threshold=100 $COMMON_VALGRIND_ARGS
     #valgrind --tool=callgrind $LAUNCH_CMD
-    $LAUNCH_CMD
-    #gdb --args ./$BINARY_NAME $MSERVER_ARGS
+    if [ ! -z "$WITH_GDB" ]; then
+        gdb --args ./$BINARY_NAME $MSERVER_ARGS
+    else
+        $LAUNCH_CMD
+    fi
 
     if [ -z "$LOOP" ] ; then
         break
