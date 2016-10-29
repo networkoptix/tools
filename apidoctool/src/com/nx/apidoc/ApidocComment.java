@@ -13,6 +13,7 @@ public abstract class ApidocComment
     protected static final String TAG_APIDOC = "%apidoc";
     protected static final String TAG_PRIVATE = "%//";
     protected static final String TAG_CAPTION = "%caption";
+    protected static final String TAG_PERMISSIONS = "%permissions";
     protected static final String TAG_PARAM = "%param";
     protected static final String TAG_VALUE = "%value";
     protected static final String TAG_RETURN = "%return";

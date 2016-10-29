@@ -123,6 +123,7 @@ public final class Apidoc extends XmlSerializable
         public String name;
         public String caption; ///< optional
         public Description description; ///< optional
+        public String permissions; ///< optional
         public String method; ///< optional
         public List<Param> params; ///< optional
         public Result result; ///< optional
@@ -138,6 +139,7 @@ public final class Apidoc extends XmlSerializable
             name = readString(el, "name", Presence.REQUIRED);
             caption = readString(el, "caption", Presence.OPTIONAL);
             description = readObj(el, Description.class, Presence.OPTIONAL);
+            permissions = readString(el, "permissions", Presence.OPTIONAL);
             method = readString(el, "method", Presence.OPTIONAL);
             readObjList(el, "params", params, Param.class, Presence.OPTIONAL);
             result = readObj(el, Result.class, Presence.OPTIONAL);
@@ -149,6 +151,7 @@ public final class Apidoc extends XmlSerializable
             appendString(el, "name", name, Mode.PROHIBIT_EMPTY);
             appendString(el, "caption", caption, Mode.OMIT_EMPTY);
             appendObj(el, description, Mode.ALLOW_EMPTY);
+            appendString(el, "permissions", permissions, Mode.OMIT_EMPTY);
             appendString(el, "method", method, Mode.ALLOW_EMPTY);
             appendObjList(el, "params", params, Mode.ALLOW_EMPTY);
             appendObj(el, result, Mode.ALLOW_EMPTY);

@@ -45,6 +45,7 @@ public final class ApidocCommentParser
             return null;
 
         boolean captionParsed = false;
+        boolean permissionsParsed = false;
         boolean returnParsed = false;
         function.caption = "";
         function.result = new Apidoc.Result();
@@ -55,9 +56,15 @@ public final class ApidocCommentParser
         {
             if (TAG_CAPTION.equals(parser.getItem().getTag()))
             {
-                captionParsed = checkTagOnce(captionParsed, function.name);
+                captionParsed = checkTagOnce(captionParsed, function.name, TAG_CAPTION);
                 checkNoAttribute(parser, function.name);
                 function.caption = parser.getItem().getFullText();
+                parser.parseNextItem();
+            }
+            else if (TAG_PERMISSIONS.equals(parser.getItem().getTag()))
+            {
+                permissionsParsed = checkTagOnce(permissionsParsed, function.name, TAG_PERMISSIONS);
+                function.permissions = parser.getItem().getFullText();
                 parser.parseNextItem();
             }
             else if (TAG_PARAM.equals(parser.getItem().getTag()))
@@ -66,7 +73,7 @@ public final class ApidocCommentParser
             }
             else if (TAG_RETURN.equals(parser.getItem().getTag()))
             {
-                returnParsed = checkTagOnce(returnParsed, function.name);
+                returnParsed = checkTagOnce(returnParsed, function.name, TAG_RETURN);
                 parseFunctionResult(parser, function);
             }
             else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
@@ -362,12 +369,13 @@ public final class ApidocCommentParser
     /**
      * @return New value for the tagParsed flag.
      */
-    private static boolean checkTagOnce(boolean tagParsed, String functionName)
+    private static boolean checkTagOnce(
+        boolean tagParsed, String functionName, String tag)
         throws Error
     {
         if (tagParsed)
         {
-            throw new Error("More than one " + TAG_CAPTION + " found" +
+            throw new Error("More than one " + tag + " found" +
                 " in function " + functionName + ".");
         }
         return true;

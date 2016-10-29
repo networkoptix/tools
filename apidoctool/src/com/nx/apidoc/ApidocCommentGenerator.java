@@ -39,10 +39,10 @@ public final class ApidocCommentGenerator
             addTextToComment(lines, 0, 0, function.description.xml);
 
         if (!function.caption.isEmpty())
-        {
-            addTextToComment(lines, 0, INNER_INDENT,
-                TAG_CAPTION + " " + function.caption);
-        }
+            addTextToComment(lines, 0, INNER_INDENT, TAG_CAPTION + " " + function.caption);
+
+        if (!function.permissions.isEmpty())
+            addTextToComment(lines, 0, INNER_INDENT, TAG_PERMISSIONS + " " + function.permissions);
 
         addParamsToComment(lines, function);
 

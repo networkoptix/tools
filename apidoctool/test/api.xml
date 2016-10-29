@@ -1586,6 +1586,7 @@ object with that id or nothing, if there is no such object found.</caption>
                 <function>
                     <name>getStorages</name>
                     <description>Read the list of current storages.</description>
+                    <permissions>Admin status required.</permissions>
                     <method>GET</method>
                     <params>
                         <param>
@@ -3743,6 +3744,7 @@ when creating, keep the value when modifying.</description>
                 <function>
                     <name>restart</name>
                     <description>Restarts the server.</description>
+                    <permissions>Admin status is required.</permissions>
                     <method>GET</method>
                     <params/>
                     <result>

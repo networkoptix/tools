@@ -1,11 +1,11 @@
 @set PWD=%~p0
-@set API_XML=%CD%\mediaserver_core\x64\additional-resources\static\api.xml
+@set API_XML=%CD%\mediaserver_core\x64\resources\static\api.xml
 @set API_TEMPLATE_XML=%CD%\mediaserver_core\api\api_template.xml
 
 @if NOT exist %API_TEMPLATE_XML% (
-    @echo Run this script from "netoptix_vms" folder.
     @echo ERROR: Cannot open file:
     @echo %API_TEMPLATE_XML%
+    @echo Run this script from "nx_vms" folder.
     @pause
     exit 1
 )
