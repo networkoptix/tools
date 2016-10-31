@@ -136,6 +136,13 @@ class Report:
       WHERE parent_task_id = %s AND error_message IS NOT NULL""", (parent_task_id, ))
     return [ Report.Task(*task) for task in cursor ]
 
+  def __find_task_by_parent(self, parent_task_id):
+    cursor = self.__db__.cursor
+    cursor.execute("""SELECT id, parent_task_id, description, is_command, start, finish, error_message
+      FROM task
+      WHERE parent_task_id = %s""", (parent_task_id, ))
+    return [ Report.Task(*task) for task in cursor ]
+
   def __insert_report(self, task_id, gzipped, html):
     return \
            self.__db__.execute("""INSERT INTO report (task_id, gzipped, html)
@@ -319,7 +326,7 @@ class Report:
     result = None
 
     while True:
-      tasks = self.__find_failed_task(task.id);
+      tasks = self.__find_failed_task(task.id)
       if tasks:
         task = tasks.pop(0)
         result = task
@@ -327,6 +334,14 @@ class Report:
         break
 
     return result
+
+  def find_all_failed(self, tasks):
+    for task in tasks:
+      failed = \
+        self.find_failed(task) or \
+        self.find_all_failed(self.__find_task_by_parent(task.id))
+      if failed: return failed
+      
 
   # Add new report
   def add_report(self, html, views = {}):

@@ -78,7 +78,7 @@ class FTReport(Report):
     history = 'Func tests'
     tests_report = "<h1>Func test results</h1>"
     results = []
-    failed = self.find_failed(tasks[-1])
+    failed = self.find_all_failed(tasks)
     log_name = "FuncTests"
     if failed:
       log_href = self.task_href(failed)
@@ -114,8 +114,8 @@ class FTReport(Report):
 
     if results or failed:
       color = '"RED"'
-      history += """<br>FAIL: <a href="%s">%d</a>""" % \
-        (self.report_href(tests_report_id), len(results))
+      history += """<br>FAIL: <a href="%s">%s</a>""" % \
+        (self.report_href(tests_report_id), len(results) or 'Error')
     else:
       color = '"GREEN"'
       history += """<br><a href="%s">PASS</a>""" % \

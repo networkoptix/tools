@@ -27,6 +27,7 @@ NAT="nat_$BOX_SUFFIX"
 BEHIND="behind_$BOX_SUFFIX"
 
 cat << EOF > testconf_local.py
+SKIP_ALL = set({'mainft'})
 BOX_NAMES = {
     "Box1": "$BOX1",
     "Box2": "$BOX2",
@@ -55,6 +56,6 @@ set +o errexit
      -t 1200
 set -o errexit
 
-# + Destroy virtual boxes
+#+ Destroy virtual boxes
 cd "$TASKBOT_VAR"/var/testing/vagrant
 vagrant destroy -f
