@@ -193,9 +193,9 @@ case "$testName" in
         exit 1
 esac
 
-case "$mode" in
-    init)
-        safestart "$SERVICE"
-        ;;
-esac
+#case "$mode" in
+#    init)
+#        safestart "$SERVICE"
+#        ;;
+#esac
 

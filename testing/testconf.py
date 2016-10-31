@@ -162,6 +162,7 @@ SKIP_TESTS = {
 #   'msarch' - to skip nultiserver archive test
 #   'natcon' - to skip connection behind NAT test
 #   'proxy' - to skip server proxy test
+#   'legacy' - to skip legacy functests
 }
 
 # Skip these test for all branches

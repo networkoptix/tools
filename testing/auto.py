@@ -724,8 +724,10 @@ def mk_functest_cmd(to_skip):
         cmd.append("--skipbak")
     if 'msarch' in to_skip:
         cmd.append('--skipmsa')
-    if "stream" in to_skip:
+    if 'stream' in to_skip:
         cmd.append("--skipstrm")
+    if 'legacy' in to_skip or Args.skiplegacy:
+        cmd.append("--skiplegacy")
     return cmd, ''
 
 
@@ -1723,6 +1725,7 @@ def parse_args():
     parser.add_argument("--no-functest", "--noft", action="store_true", help="Only build the project and run unittests.")
     parser.add_argument("--ft-if-ut", action="store_true", help="Run functests only if no fails in unitests.")
     parser.add_argument("--ft-always", action="store_true", help="Run functests even if there are any fails ib unitests.")
+    parser.add_argument("--skiplegacy", action="store_true", help="Performing functests, skip legacy functests.")
 
     addSingleFTArgs(parser)
 
