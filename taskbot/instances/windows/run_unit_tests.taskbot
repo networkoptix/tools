@@ -41,13 +41,13 @@ fi
 # + Run tests
 for name in $TEST_LIST
 do
-  test_tmp=$UNIT_TESTS_RESULT_PATH/$test
+  test_tmp=$UNIT_TESTS_RESULT_PATH/$name
   mkdir -p $test_tmp
   test_win_tmp=$(cygpath -w "$test_tmp")
   test=$name.exe
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
       -d "$name"  \
-      -c "./$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\" --gtest_filter=-NxCritical.All3 --tmp=$test_win_tmp" \
+      -c "./$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\" --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
       -t 600 -s 100 || true
 done
 

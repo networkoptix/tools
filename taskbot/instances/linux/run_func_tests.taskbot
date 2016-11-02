@@ -27,7 +27,6 @@ NAT="nat_$BOX_SUFFIX"
 BEHIND="behind_$BOX_SUFFIX"
 
 cat << EOF > testconf_local.py
-SKIP_ALL = set({'legacy'})
 BOX_NAMES = {
     "Box1": "$BOX1",
     "Box2": "$BOX2",

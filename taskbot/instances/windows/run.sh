@@ -33,13 +33,13 @@ while true; do
         $TASKBOT_CONFIG \
         "$TASKBOT_COMMONS"/scripts/update_repo.taskbot 
     then
-      echo "Polling changes error" > /dev/stderr && exit 1
+      echo "Polling changes error" > /dev/stderr
+    else
+      $TASKBOT \
+        --description "NX VMS build & tests ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
+        $TASKBOT_CONFIG \
+        run.taskbot
     fi
-
-    $TASKBOT \
-      --description "NX VMS build & tests ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
-      $TASKBOT_CONFIG \
-      run.taskbot
 
     sleep 60
 done
