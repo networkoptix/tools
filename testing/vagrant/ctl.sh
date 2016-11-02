@@ -102,7 +102,7 @@ function msarch_ctl {
             # Clears the main storage, passed as $1, and restore the system name
             nxrmbase "$1"
             nxcleardb
-            edconf systemName "$MAIN_SYS_NAME"
+            nxedconf systemName "$MAIN_SYS_NAME"
             ;;
         *) echo "Unknown mode '${mode}' for msarch test control"
     esac
