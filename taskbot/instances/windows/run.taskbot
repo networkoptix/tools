@@ -33,7 +33,7 @@ if [ "$TASKBOT_UNIT_TESTS" != "none" ] && [ $RC -eq 0 ]; then
 fi
 
 if [ "$TASKBOT_UNIT_TESTS" != "none" ]; then
-    TASKBOT_DEBUG_MODE=1 "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+  "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
 fi
 
 exit $RC

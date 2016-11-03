@@ -22,7 +22,8 @@ config = {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
+    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Mikhail Uskov': 'muskov@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
