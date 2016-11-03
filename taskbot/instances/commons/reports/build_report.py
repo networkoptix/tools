@@ -24,8 +24,8 @@ class BuildReport(Report):
     ( r':\d+:\d+:\s+(\S+\s+)?error:', 'error'),
     ( r':\d+:\d+:\s+warning:', 'warning'),
     # Windows
-    ( r':\s+error\s[A-Z]+\d+\s:', 'error'),
-    ( r':\s+warning\s[A-Z]+\d+\s:', 'warning'),
+    ( r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:', 'error'),
+    ( r':\s+warning\s[A-Z]+\d+\s*:', 'warning'),
     # Common
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
