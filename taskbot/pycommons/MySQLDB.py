@@ -2,6 +2,7 @@
 # Artem V. Nikitin
 # MySQL taskbot backend
 
+from Shutdown import shutdown
 import mysql.connector as db
 import os, re
 
@@ -27,13 +28,22 @@ class MySQLDB:
     self.__reconnect()
 
   def __reconnect(self):
+    self.__disconnect()
     if self.__config__:
       self.__conn__ = db.connect(**self.__config__)
     else:
       self.__conn__ = db.connect(
         option_files=MY_CNF_FILE,
         option_groups=MY_CNF_GROUP)
-    self.__cursor__ = self.__conn__.cursor()
+      self.__cursor__ = self.__conn__.cursor()
+
+  def __disconnect(self):
+    self.__cursor__ = None
+    self.__conn__ = None
+
+  @property
+  def connected(self):
+    return self.__conn__ and self.__cursor__
 
   @property
   def cursor( self ):
@@ -65,11 +75,3 @@ class MySQLDB:
   def close(self):
     self.__cursor__.close()
     self.__conn__.close()
-
-    
-
-
-    
-
-  
-    

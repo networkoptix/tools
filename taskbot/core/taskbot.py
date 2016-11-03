@@ -431,7 +431,8 @@ class TaskExecutor:
     if not self.closed:
       if terminated:
         self.__task_stack__[-1].error_message = 'Terminated'
-      self.finish_tasks_to_level(0)
+      if self.__db__.connected:
+        safe_call(self.finish_tasks_to_level(0))
       self.closed = True
       safe_call(self.__shell_process__.stdin.close)
       safe_call(self.__shell_process__.kill)

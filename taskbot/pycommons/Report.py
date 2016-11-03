@@ -369,8 +369,8 @@ class Report:
 
   # Add content to report
   def add_to_report (self, report_id, html):
-    gzipped, buf = Compressor.compress_maybe(html);
-    self.__insert_to_report(report_id, gzipped, buf);
+    gzipped, buf = Compressor.compress_maybe(html)
+    self.__insert_to_report(report_id, gzipped, buf)
 
   # Get task href
   def task_href( self, task ):

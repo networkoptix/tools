@@ -78,6 +78,8 @@ def main():
   db_config = config.get('db_config', None)
   db = MySQLDB(db_config)
   db_hostname = get_db_hostname(db_config)
+  Compressor.gzip_threshold = config.get('gzip_threshold', 0)
+  Compressor.gzip_ratio = config.get('gzip_ratio', 0)
 
   (max_allowed_packet,) = db.query("SELECT @@global.max_allowed_packet", ());
 
@@ -101,11 +103,10 @@ def main():
             (sys.argv[0], file, size, max_allowed_packet)
       continue
     with open(file) as fp:
-      db.execute("""INSERT INTO file (task_id, name, fullpath, content)
-      VALUES (%s, %s, %s, %s)""", (
-        task_id, os.path.basename(file),
-        file,
-        fp.read()))
+      db.execute("""INSERT INTO file (task_id, name, fullpath, gzipped, content)
+      VALUES (%s, %s, %s, %s, %s)""", (task_id,
+        os.path.basename(file), file) +
+        Compressor.compress_maybe(fp.read()))
       
   db.commit()
 
