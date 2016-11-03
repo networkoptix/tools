@@ -10,19 +10,26 @@ pycommons = os.path.join(
   '../../../pycommons')
 sys.path.insert(0, pycommons)
 from Report import Report
+from cStringIO import StringIO
 
 MAX_OUTPUT_LINES = 500
+FILE_IMAGE='/commons/images/file-icon.png'
+ERROR_IMAGE='/commons/images/red.gif'
+WARNING_IMAGE='/commons/images/yellow.gif'
 
 class BuildReport(Report):
 
   OUTPUT_CLASS = [
+    # Linux
+    ( r':\d+:\d+:\s+(\S+\s+)?error:', 'error'),
+    ( r':\d+:\d+:\s+warning:', 'warning'),
+    # Windows
+    ( r':\s+error\s[A-Z]+\d+\s:', 'error'),
+    ( r':\s+warning\s[A-Z]+\d+\s:', 'warning'),
+    # Common
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
-    ( r':\d+:\d+:\s+(\S+\s+)?error:', 'error'),
-    ( r':\s+error\s[A-Z]+\d+\s:', 'error'),
     ( r'\[WARNING\]', 'warning'),
-    ( r':\d+:\d+:\s+warning:', 'warning'),
-    ( r':\s+warning\s[A-Z]+\d+\s:', 'warning'),
     ( r'SKIPPED', 'warning'),
     ( r'SUCCESS', 'success') ]
       
@@ -30,19 +37,74 @@ class BuildReport(Report):
   def __init__(self, config):
     Report.__init__(self, config)
 
+  def __add_build_report(self, report_id, reports, report_html):
+    html = """<div class="container">\n"""
+    html+= """<header><h1>Build report</h1></header>"""
+    html+= """<nav><ul>"""
+    for name, image, ref in reports:
+      html+= """<li><a href="%s"><img src="%s">%s</a></li>""" % (ref, image, name)
+    html+= """</ul></nav>"""
+    html+= """<div class="content">%s</div>""" % report_html
+    html+= """</div>"""
+    self.add_to_report(report_id, html)
+
   def __build_report( self, task ):
     full_log_link = "?stdout=%s&type=%s&raw" % (task.id, "text/plain")
-    build_report = """<a href="%s">Full log</a><br>\n<br>\n""" % full_log_link
-    lines = self.get_stdout(task).split("\n")[-MAX_OUTPUT_LINES:]
-    def color_line(l):
+    colored_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
+    errors_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
+    warnings_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
+
+    build_reports = [
+      ('Full output', FILE_IMAGE, full_log_link),
+      ('Parsed output', FILE_IMAGE, self.report_href(colored_report_id)),
+      ('Errors', ERROR_IMAGE,  self.report_href(errors_report_id)),
+      ('Warnings', WARNING_IMAGE,  self.report_href(warnings_report_id)) ]
+
+    lines = self.get_stdout(task).split("\n")
+    line_count=len(lines)
+    line_number=last_warning=last_error=0
+    colored_report = errors_report = warnings_report = ''
+    colored_report = StringIO()
+
+    def get_color_class(line):
       for exp, c in self.OUTPUT_CLASS:
-        if re.search(exp, l):
-          return """<span class="%s">%s</span>""" % (c, l)
-      return l
-      
-    build_report += '<br>\n'.join(map(color_line, lines))
-    build_report_id = self.add_report(build_report, {'css': ['/reports/styles/ColoredOutput.css']})
-    return self.report_href(build_report_id)
+        if re.search(exp, line):
+          return c
+      return None
+
+    def append_colored_report(buffer, line, color_class):
+      if line and not colored_report.tell():
+        print >> buffer, "...<br>\n"
+      if color_class and color_class == 'error':
+        print >> buffer, line
+        if line_number < line_count - MAX_OUTPUT_LINES:
+          print >> buffer, "...<br>"
+      elif line_number >= line_count - MAX_OUTPUT_LINES:
+        print >> buffer, line
+    
+    for line in lines:
+      color_class = get_color_class(line)
+      rpt_line = "%s<br>\n" % line
+      if color_class:
+        rpt_line = """<span class="%s">%s</span><br>\n""" % (color_class, line)
+        if color_class == 'error':
+          if last_error and line_number - last_error > 1:
+            errors_report  += """<span class="%s">...</span><br>\n""" % color_class
+          errors_report  += rpt_line
+          last_error = line_number
+        elif color_class == 'warning':
+          if last_warning and line_number - last_warning > 1:
+            warnings_report += """<span class="%s">...</span><br>\n""" % color_class
+          warnings_report += rpt_line
+          last_warning = line_number
+      append_colored_report(colored_report,
+                            rpt_line, color_class)
+      line_number+=1
+    self.__add_build_report(colored_report_id, build_reports, colored_report.getvalue())
+    self.__add_build_report(errors_report_id, build_reports, errors_report)
+    self.__add_build_report(warnings_report_id, build_reports, warnings_report)
+    colored_report.close()
+    return self.report_href(colored_report_id)
 
   def __generate__( self ):
     build_tasks = self.find_task('Build product > %build.taskbot% > %')

@@ -344,8 +344,13 @@ class Report:
       
 
   # Add new report
-  def add_report(self, html, views = {}):
-    gzipped, buf = Compressor.compress_maybe(html);
+  def add_report(self, html = None, views = {}):
+    
+    gzipped = False
+    buf = None
+    
+    if html:
+      gzipped, buf = Compressor.compress_maybe(html);
 
     report_id = self.__insert_report(
       self.__root_task__.id, gzipped, buf)
@@ -361,6 +366,11 @@ class Report:
         self.__link_view(report_id, view_id)
 
     return report_id
+
+  # Add content to report
+  def add_to_report (self, report_id, html):
+    gzipped, buf = Compressor.compress_maybe(html);
+    self.__insert_to_report(report_id, gzipped, buf);
 
   # Get task href
   def task_href( self, task ):
