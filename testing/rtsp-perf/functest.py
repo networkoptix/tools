@@ -3082,6 +3082,10 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
             print "DEBUG: cameras could be unready, sleep %.2f seconds" % dt
             time.sleep(dt)
 
+        print "Creating %s threads for server %s with cameras:\n%s" % (
+            self._threadNum, self._serverEndpoint, self._cameraList
+        )
+
         self._need_dump = need_dump
         for _ in xrange(self._threadNum):
             th = threading.Thread(target=self._threadMain, args=(_,))
