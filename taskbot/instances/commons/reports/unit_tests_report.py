@@ -174,22 +174,20 @@ class UTReport(Report):
     failed_tests.sort()
 
     import EmailNotify
-    if prev_run:
-      if new_fail:
-        EmailNotify.notify(
-          self, prev_run, "unit-tests failed",
-          "New fails detected in the unit-tests.%s" %
-          get_failed_text(failed_tests))
-      elif not total_fail and new_pass:
-        EmailNotify.notify(
-          self, prev_run, "unit-tests fixed",
-          "The product unit-tests executed successfully.")
+    if prev_run and not total_fail and new_pass:
+      EmailNotify.notify(
+        self, prev_run, "unit-tests fixed",
+        "The product unit-tests executed successfully.")
     elif cores_count:
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "%d core(s) detected after the unit-tests.%s" % \
         (cores_count, get_failed_text(failed_tests)))
-
+    elif total_fail:
+      EmailNotify.notify(
+        self, prev_run, "unit-tests failed",
+        "Fails detected in the unit-tests.%s" %
+        get_failed_text(failed_tests))
     return 0
    
 if __name__ == "__main__":
