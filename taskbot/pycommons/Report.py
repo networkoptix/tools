@@ -40,6 +40,21 @@ class Report:
     
     def __repr__(self):
       return self.__str__()
+
+  class File:
+    def __init__(self,
+                 file_id, task_id,
+                 name, fullpath):
+      self.id = file_id
+      self.task_id = task_id
+      self.name = name
+      self.fullpath = fullpath
+      
+    def __str__(self):
+      return "File#%s: %s" % (self.id, self.fullpath)
+    
+    def __repr__(self):
+      return self.__str__()
     
       
   def __init__(self, config, root_task = None):
@@ -204,9 +219,11 @@ class Report:
     return None
 
   def __files_list(self, task_id, path):
-    return self.__db__.query("""SELECT id, name, fullpath, task_id
+    cursor = self.__db__.cursor
+    cursor.execute("""SELECT id, task_id, name, fullpath
       FROM file
       WHERE task_id = %s AND fullpath LIKE %s""",(task_id, path))
+    return [ Report.File(*f) for f in cursor ]
 
   def __file_path_list(self, task_id):
     return self.__db__.query("""SELECT distinct fullpath
@@ -379,6 +396,11 @@ class Report:
   # Get report href
   def report_href (self, report_id):
     return "?report=%s" % report_id
+  
+  # Get file href
+  def file_href( self, f, need_header = False):
+    header = need_header and "&header_required=1" or ""
+    return "/taskbot/browse-file.cgi?id=%d%s" % (f.id, header)
 
   @property
   def link_task_id(self):
@@ -401,6 +423,9 @@ class Report:
        (host,
         urllib.quote(self.__platform__.host),
         urllib.quote(os.environ['TASKBOT_BRANCHNAME']))
+
+  def find_files_by_name(self, task, name):
+    return self.__files_list(task.id, "%%%s" % name)
         
   def generate( self ):
     result = self.__generate__()

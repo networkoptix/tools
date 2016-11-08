@@ -11,11 +11,9 @@ pycommons = os.path.join(
 sys.path.insert(0, pycommons)
 from Report import Report
 
-TIME_REGEXP = r'\[\d{4}\.\d{2}\.\d{2}\s\d{2}:\d{2}:\d{2}\s[A-Z]{3}\]\s+'
-TEST_START_MARKERS = [
-  r'^(FAIL|ERROR):\s+(\w+)\s+\(([^\)]+)\)$']
-
-TEST_STOP_MARKERS = [ r'^-+$', r'^=+$' ]
+FAILURE_REGEXP=r'\s+Failures:\s+\d+'
+SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
+TESTCASE_REGEXP=r'\s+(\w+)\.(\w+)'
 
 def get_failed_text(tests):
   if tests:
@@ -23,99 +21,135 @@ def get_failed_text(tests):
   else:
     return ""
 
+def get_test_color(test):
+  errs  = len(test.errors)
+  skips = len(test.skipped)
+  if test.failed or errs:
+    return 'RED', 'FAIL/SKIP: %d/%d' % (errs, skips)
+  if len(test.skipped):
+    return 'YELLOW', 'FAIL/SKIP: %d/%d' % (errs, skips)
+  return 'GREEN', 'PASS'
+
+def cases_to_table(cases, color, status):
+  buff = ''
+  for c in cases:
+    buff += """<tr class="Linked">
+      <td>%s</td>
+      <td bgcolor="%s">%s</td>
+      <td></td>
+      <td></td>
+      </tr>""" % (c, color, status)
+  return buff
+
 class FTReport(Report):
 
   class TestResult:
 
-    def __init__(self, name, etype, error = ''):
+    def __init__(self, name, task, logfile, failed, output):
       self.name = name
-      self.error = error
-      self.etype = etype
+      self.task = task
+      self.logfile = logfile and logfile[0] or None
+      self.failed = failed
+      self.skipped = []
+      self.errors = []
+      self.__parse_output(output)
+
+    def __append_errors(self, casename):
+      self.errors.append(casename)
+
+    def __append_skipped(self, casename):
+      self.skipped.append(casename)
+
+    def __parse_output(self, output):
+      append_fn = None
+      for line in output.split("\n"):
+        if re.search(FAILURE_REGEXP, line):
+          append_fn = self.__append_errors
+        elif re.search(SKIPPED_REGEXP, line):
+          append_fn = self.__append_skipped
+        else:
+          m = re.search(TESTCASE_REGEXP, line)
+          if append_fn and m:
+            suite, case = m.group(1,2)
+            append_fn(case)
 
     def __str__(self):
-      return "%s:\n  %s" % (self.name, self.error)
+      return "%s:\n  %s, %s" % (
+        self.name,
+        self.failed and 'FAIL' or 'PASS',
+        self.logfile or 'Logfile not found')
     
     def __repr__(self):
       return self.__str__()
 
+    def exec_time(self):
+      return self.task.finish - self.task.start
+
   def __init__(self, config):
     Report.__init__(self, config)
 
-  def _parse_output(self, output):
-    results = []
-    stop_marker = 0
-    result = None
-    for line in output.split("\n"):
-      line = re.sub(TIME_REGEXP, '', line)
-      if result:
-        result.error+="\n" + line
-        for exp in TEST_STOP_MARKERS:
-          if re.search(exp, line):
-            stop_marker += 1
-          if stop_marker == 2:
-            stop_marker = 0
-            results.append(result)
-            result = None
-      for exp in TEST_START_MARKERS:
-        m = re.search(exp, line)
-        if m:
-          etype, case, test = m.group(1,2,3)
-          result = self.TestResult("%s.%s" % (test, case), etype, line)
-          break
-    return results
-
-  def _error(self, error):
-    error_report = '<br>\n'.join(map(cgi.escape, error.split("\n")))
-    return self.report_href(self.add_report(error_report))
+  def _log(self, logfile):
+    if logfile:
+      return """<a href="%s">log</a>""" % self.file_href(logfile)
+    return "-"
            
   def __generate__( self ):
     prev_run = self.get_previous_run()
     tasks = self.find_task('Run functional test > %run_func_tests.taskbot%')
-    if not tasks:
+    tests = self.find_task('Run tests > %while % > %', tasks)
+    if not tests:
       print >> sys.stderr, "Cannot create func-tests report (func-tests task absent)" 
       return 1      
-    tests = self.find_task('Run tests > % > FuncTests > %', tasks)
+   
     history = 'Func tests'
     tests_report = "<h1>Func test results</h1>"
+    files = self.find_task('Store results > %file.py%', tasks)
     results = []
-    failed = self.find_all_failed(tasks)
-    log_name = "FuncTests"
-    if failed:
-      log_href = self.task_href(failed)
-      parent_task = self.find_non_command_parent(failed)
-      print parent_task
-      if not parent_task.is_command:
-        log_name = parent_task.description
-    if tests:
-      if not failed:    
-        log_href = self.task_href(tests[-1])
-      output = self.get_stdout(tests)
-      results = self._parse_output(output)
-    
-    tests_report += """<br>Full output: <a href="%s">%s</a><br>\n<br>\n""" % \
-      (log_href, log_name)
+    for test in tests:
+      testname = test.description
+      log_filename = "%s.log" % testname
+      ftest_run = self.find_task('%functest.py%', [test])
+      results.append(
+        self.TestResult(
+          testname,
+          test,
+          self.find_files_by_name(files[0], log_filename),
+          bool(self.find_failed(test)),
+          self.get_stdout(ftest_run)))
       
     if results:
-      tests_report += """<table class="tests_table">
-      <tr>
+      tests_report += """<table class="UTTable Expandable Zebra">
+      <thead><tr>
       <th>Test name</th>
       <th>Status</th>
-      <th>Error</th>
-      </tr>"""
+      <th>Execution time</th>
+      <th>Log</th>
+      </tr></thead><tbody>"""
       for t in results:
-        error_report_id = self.add_report(t.error)
+        color, status = get_test_color(t)
         tests_report += """<tr>
-          <td class="test_name">%s</td>
-          <td class="test_status" bgcolor="RED">%s</td>
-          <td><a href="%s">error</a></td>
-          </tr>""" % (t.name, t.etype, self._error(t.error))
-      tests_report += "</table>"
-    tests_report_id = self.add_report(tests_report)
+          <td>%s</td>
+          <td bgcolor="%s">%s</td>
+          <td>%s</td>
+          <td>%s</td>
+          </tr>""" % (t.name, color, status,
+                      t.exec_time(),
+                      self._log(t.logfile))
+        tests_report += cases_to_table(t.errors, 'RED', 'FAIL')
+        tests_report += cases_to_table(t.skipped, 'YELLOW', 'SKIP')
+      tests_report += "</tbody></table>"
+    tests_report_id = self.add_report(tests_report,
+      views = {
+        'css': ['/reports/styles/func_tests_report.css'],
+        'js': ['/commons/scripts/ExpandableTable.js',
+             '/commons/scripts/ZebraTable.js']})
 
-    if results or failed:
+    failures = filter(lambda t: t.failed or t.errors, results)
+
+    if failures:
       color = '"RED"'
       history += """<br>FAIL: <a href="%s">%s</a>""" % \
-        (self.report_href(tests_report_id), len(results) or 'Error')
+        (self.report_href(tests_report_id), len(failures))
     else:
       color = '"GREEN"'
       history += """<br><a href="%s">PASS</a>""" % \
@@ -128,7 +162,7 @@ class FTReport(Report):
       EmailNotify.notify(
         self, prev_run, "func-tests failed",
         "Fails detected in the func-tests.%s" %
-        get_failed_text(results))
+        get_failed_text(failures))
       
       
       

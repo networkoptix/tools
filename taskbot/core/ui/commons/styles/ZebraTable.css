@@ -1,0 +1,9 @@
+tr.OddRow
+{
+  background-color: #ffffff;
+}
+
+tr.EvenRow
+{
+  background-color: #f0f0f0;
+}

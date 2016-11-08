@@ -1,0 +1,15 @@
+.UTTable
+{
+  border-collapse:collapse;
+}
+
+.UTTable tr:nth-child(n+2) td:nth-child(3)
+{
+  border-top: 1px solid #f0f0f0;
+
+}
+
+.Selected
+{
+  background-color:#f0f0f0;
+}

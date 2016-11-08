@@ -46,15 +46,36 @@ cat testconf_local.py
 
 ./sync.sh
 
-# + Run tests
+# + Start virual boxes
 cd "$TASKBOT_VAR"/var/testing
-set +o errexit
-"$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-     -d "FuncTests"  \
-     -c "./auto.py --path $TASKBOT_VAR/nx_vms --ft -o" \
-     -t 1200
-set -o errexit
+./auto.py --boxes --path $TASKBOT_VAR/nx_vms
 
-#+ Destroy virtual boxes
+FUNC_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/ftests
+if [ ! -d "$FUNC_TESTS_RESULT_PATH" ]; then 
+  mkdir -p "$FUNC_TESTS_RESULT_PATH"
+else
+  rm -rf "$FUNC_TESTS_RESULT_PATH"/*
+fi
+
+# + Run tests
+cd $TASKBOT_VAR/nx_vms/func_tests
+./functest.py --list-auto-test | \
+while read line
+do
+ key=$(echo $line | sed -r 's|(--\w+)\s(.+)|\1|')
+ name=$(echo $line | sed -r 's|(--\w+)\s(.+)|\2|')
+ "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+   -d "$name"  \
+   -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$name.log\"" \
+   -t 600 || true
+done
+
+# + Store results
+$TASKBOT_BIN/file.py \
+     $TASKBOT_CONFIG \
+    --path $FUNC_TESTS_RESULT_PATH \
+    --mask '*.log'
+
+# + Destroy virtual boxes
 cd "$TASKBOT_VAR"/var/testing/vagrant
 vagrant destroy -f

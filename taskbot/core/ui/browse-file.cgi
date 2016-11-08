@@ -5,7 +5,7 @@ use warnings;
 use strict;
 
 
-my $config_file = '/home/anikitin/public_html/taskbot/browse.config';
+my $config_file = 'browse.config';
 
 
 use CGI;
@@ -45,7 +45,7 @@ if (defined $params->{id})
   my @files_list = split(/,\s*/, $params->{id});
 
   $stmt = $dbh->prepare(q[
-    SELECT id, task_id, name, fullpath, content
+    SELECT id, task_id, name, fullpath, gzipped, content
     FROM file
     WHERE id IN (]. join(',', ('?')x@files_list) .q[)]);
   $stmt->execute(@files_list);
@@ -53,7 +53,7 @@ if (defined $params->{id})
 elsif (defined $params->{task})
 {
   $stmt = $dbh->prepare(q[
-    SELECT id, task_id, name, fullpath, content
+    SELECT id, task_id, name, fullpath, gzipped, content
     FROM file
     WHERE task_id = ?]);
 
@@ -74,8 +74,15 @@ my @result = @{$stmt->fetchall_arrayref({})};
 
 
 if (scalar @result == 1)
-{
-    my $file_content = $result[0]->{content};
+  {
+    my $file_content;
+    if ($result[0]->{gzipped}) {
+      use Compress::Zlib;
+      $file_content =  uncompress($result[0]->{content});
+    } else {
+      $file_content =  $result[0]->{content};
+    }
+
     my $highlighted = 0;
 
     # use code highlighting if source-highlight installed

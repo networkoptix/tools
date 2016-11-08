@@ -1,0 +1,42 @@
+.Expandable td:first-child
+{
+  /*background-color: #f0f0f0;*/
+}
+
+.ExpandIcon
+{
+  background-repeat: no-repeat;
+  background-position: left center;
+  width: 10px;
+  height: 10px;
+}
+
+.Collapsed .ExpandIcon
+{
+  background-image: url('/commons/images/plus.png');
+}
+
+.Expanded .ExpandIcon
+{
+  background-image: url('/commons/images/minus.png');
+}
+
+.ExpandIcon:hover
+{
+  cursor: pointer;
+}
+
+.Linked
+{
+  background-color: #FAFBE9;
+}
+
+.Linked td:first-child
+{
+  background-color: white;
+}
+
+.Linked td:nth-child(2)
+{
+  padding-left: 20px;
+}
