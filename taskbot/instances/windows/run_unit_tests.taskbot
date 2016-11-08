@@ -48,7 +48,7 @@ do
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
       -d "$name"  \
       -c "./$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\" --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
-      -t 600 -s 100 || true
+      -t 900 -s 100 || true
 done
 
 # + Store results
