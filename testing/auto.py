@@ -620,7 +620,12 @@ def start_boxes(boxlist=None, keep = False):
         #wait_servers_ready([BOX_IP[b] for b in to_check])
         for box in (boxlist or conf.BOX_POST_START.iterkeys()):
             if box in conf.BOX_POST_START:
-                boxssh(box, ['/vagrant/' + conf.BOX_POST_START[box]], cwd=conf.FT_PATH)
+                post_start = conf.BOX_POST_START[box]
+                if type(post_start) in (list, tuple):
+                    pcmd = ['/vagrant/' + post_start[0]] + post_start[1](conf)
+                else:
+                    pcmd = ['/vagrant/' + post_start]
+                boxssh(box, pcmd, cwd=conf.FT_PATH)
         time.sleep(conf.SLEEP_AFTER_BOX_START)
         return True
     except CalledProcessError as err:

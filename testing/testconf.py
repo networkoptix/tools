@@ -139,9 +139,13 @@ UT_BOX_TTL = 60 * 60 * 24 * 7  # How long the ut vm could run until it's restart
 
 CHECK_BOX_UP = frozenset(['Box1', 'Box2', 'Behind'])
 
+def _boxBehindPostStartArgs(conf):
+    return [conf.BOX_IP['Nat2']]  # it should be a list, not a tupple
+
 BOX_POST_START = {
-    'Behind': 'post-create-behind-nat.sh'
+    'Behind': ('post-create-behind-nat.sh', _boxBehindPostStartArgs)
 }
+
 
 BOXES_NAMES_FILE = 'boxes.rb'  # os.path.join(VAG_DIR, 'boxes.rb')
 
