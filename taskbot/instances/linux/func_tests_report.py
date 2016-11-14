@@ -13,8 +13,8 @@ from Report import Report
 
 FAILURE_REGEXP=r'\s+Failures:\s+\d+'
 SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
-TESTCASE_COUNT_REGEXP=r'\s+Total\stests\srun:\s(\d+)'
-TESTCASE_REGEXP=r'\s+(\w+)\.(\w+)'
+TESTCASE_COUNT_REGEXP=r'\[(\w+)\]\s+\w+\s+Total\stests\srun:\s(\d+)'
+TESTCASE_REGEXP=r'(\w+)\.(\w+)'
 
 def get_failed_text(tests):
   if tests:
@@ -25,11 +25,12 @@ def get_failed_text(tests):
 def get_test_color(test):
   errs  = len(test.errors)
   skips = len(test.skipped)
+  suite_stat = '(%d/%d/%d)' % (test.case_count, errs, skips)
   if test.failed or errs:
-    return 'RED', 'FAIL (%d/%d/%d)' % (test.case_count, errs, skips)
+    return 'RED', 'FAIL %s' % suite_stat
   if len(test.skipped):
-    return '#C4A000', 'SKIP (%d/%d/%d)' % (test.case_count, errs, skips)
-  return 'GREEN', 'PASS'
+    return '#C4A000', 'SKIP %s' % suite_stat
+  return 'GREEN', 'PASS %s' % suite_stat
 
 def cases_to_table(cases, color, status):
   buff = ''
@@ -66,13 +67,22 @@ class FTReport(Report):
       self.skipped = []
       self.errors = []
       self.case_count = 0
+      self.current_suite = None
       self.__parse_output(output)
 
+    def __get_full_casename(self, casename):
+      if self.current_suite:
+        return "%s.%s" % (self.current_suite, casename)
+      return casename
+    
+
     def __append_errors(self, casename):
-      self.errors.append(casename)
+      name = self.__get_full_casename(casename)
+      self.errors.append(name)
 
     def __append_skipped(self, casename):
-      self.skipped.append(casename)
+      name = self.__get_full_casename(casename)
+      self.skipped.append(name)
 
     def __parse_output(self, output):
       append_fn = None
@@ -89,7 +99,8 @@ class FTReport(Report):
           else:
             m = re.search(TESTCASE_COUNT_REGEXP, line)
             if m:
-              self.case_count = int(m.group(1))        
+              self.current_suite=m.group(1)
+              self.case_count += int(m.group(2)) 
 
     def __str__(self):
       return "%s:\n  %s, %s" % (
@@ -147,9 +158,9 @@ class FTReport(Report):
       <th>SKIP</th>
       </tr></thead><tbody>"""
     
-    # Test suites
+    # Test units
     tests_report += get_summary_row(
-      "Test suites",
+      "Test units",
       len(results),
       len(filter(lambda x: x.failed, results)), 0)
 
