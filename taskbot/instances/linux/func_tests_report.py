@@ -13,6 +13,7 @@ from Report import Report
 
 FAILURE_REGEXP=r'\s+Failures:\s+\d+'
 SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
+TESTCASE_COUNT_REGEXP=r'\s+Total\stests\srun:\s(\d+)'
 TESTCASE_REGEXP=r'\s+(\w+)\.(\w+)'
 
 def get_failed_text(tests):
@@ -25,9 +26,9 @@ def get_test_color(test):
   errs  = len(test.errors)
   skips = len(test.skipped)
   if test.failed or errs:
-    return 'RED', 'FAIL/SKIP: %d/%d' % (errs, skips)
+    return 'RED', 'FAIL (%d/%d/%d)' % (test.case_count, errs, skips)
   if len(test.skipped):
-    return 'YELLOW', 'FAIL/SKIP: %d/%d' % (errs, skips)
+    return '#C4A000', 'SKIP (%d/%d/%d)' % (test.case_count, errs, skips)
   return 'GREEN', 'PASS'
 
 def cases_to_table(cases, color, status):
@@ -35,11 +36,23 @@ def cases_to_table(cases, color, status):
   for c in cases:
     buff += """<tr class="Linked">
       <td>%s</td>
-      <td bgcolor="%s">%s</td>
+      <td bgcolor="%s" align="center">%s</td>
+      <td></td>
       <td></td>
       <td></td>
       </tr>""" % (c, color, status)
   return buff
+
+def get_summary_row(title, total, errors, skipped):
+  return """<tr>
+      <td>%s</td>
+      <td class="total">%d</td>
+      <td class="pass">%d</td>
+      <td class ="error">%d</td>
+      <td class="skip">%d</td></tr>""" % (
+         title, total,
+         total - errors - skipped,
+         errors, skipped)
 
 class FTReport(Report):
 
@@ -52,6 +65,7 @@ class FTReport(Report):
       self.failed = failed
       self.skipped = []
       self.errors = []
+      self.case_count = 0
       self.__parse_output(output)
 
     def __append_errors(self, casename):
@@ -72,6 +86,10 @@ class FTReport(Report):
           if append_fn and m:
             suite, case = m.group(1,2)
             append_fn(case)
+          else:
+            m = re.search(TESTCASE_COUNT_REGEXP, line)
+            if m:
+              self.case_count = int(m.group(1))        
 
     def __str__(self):
       return "%s:\n  %s, %s" % (
@@ -102,7 +120,6 @@ class FTReport(Report):
       return 1      
    
     history = 'Func tests'
-    tests_report = "<h1>Func test results</h1>"
     files = self.find_task('Store results > %file.py%', tasks)
     results = []
     for test in tests:
@@ -112,31 +129,64 @@ class FTReport(Report):
       results.append(
         self.TestResult(
           testname,
-          test,
+          ftest_run[0],
           self.find_files_by_name(files[0], log_filename),
           bool(self.find_failed(test)),
           self.get_stdout(ftest_run)))
+
       
+    tests_report = "<h1>Func test results</h1>"
+
+    # Summary table
+    tests_report += """<table>
+      <thead><tr>
+      <th></th>
+      <th>TOTAL</th>
+      <th>PASS</th>
+      <th>FAIL</th>
+      <th>SKIP</th>
+      </tr></thead><tbody>"""
+    
+    # Test suites
+    tests_report += get_summary_row(
+      "Test suites",
+      len(results),
+      len(filter(lambda x: x.failed, results)), 0)
+
+    # Test cases
+    tests_report += get_summary_row(
+      "Test cases",
+      sum(map(lambda x: x.case_count, results)),
+      sum(map(lambda x: len(x.errors), results)),
+      sum(map(lambda x: len(x.skipped), results)))
+
+    tests_report += "</tbody></table>"
+
+    # Test results
     if results:
+      tests_report += "<br><br>"
       tests_report += """<table class="UTTable Expandable Zebra">
       <thead><tr>
       <th>Test name</th>
-      <th>Status</th>
+      <th>Status (TOTAL/FAIL/SKIP)</th>
       <th>Execution time</th>
       <th>Log</th>
+      <th>Out</th>
       </tr></thead><tbody>"""
       for t in results:
         color, status = get_test_color(t)
         tests_report += """<tr>
           <td>%s</td>
-          <td bgcolor="%s">%s</td>
+          <td bgcolor="%s" align="center">%s</td>
           <td>%s</td>
           <td>%s</td>
+          <td><a href="%s">out</a></td>
           </tr>""" % (t.name, color, status,
                       t.exec_time(),
-                      self._log(t.logfile))
+                      self._log(t.logfile),
+                      self.task_href(t.task))
         tests_report += cases_to_table(t.errors, 'RED', 'FAIL')
-        tests_report += cases_to_table(t.skipped, 'YELLOW', 'SKIP')
+        tests_report += cases_to_table(t.skipped, '#C4A000', 'SKIP')
       tests_report += "</tbody></table>"
     tests_report_id = self.add_report(tests_report,
       views = {

@@ -13,3 +13,28 @@
 {
   background-color:#f0f0f0;
 }
+
+/* colored classes */
+
+td.total {
+    font-weight: bold;
+    text-align: center;
+}
+
+td.error {
+    color: #CC0000;
+    font-weight: bold;
+    text-align: center;
+}
+
+td.skip {
+    color: #C4A000;
+    font-weight: bold;
+    text-align: center;
+}
+
+td.pass {
+    color: #006400;
+    font-weight: bold;
+    text-align: center;
+}
