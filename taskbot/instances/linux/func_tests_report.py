@@ -4,7 +4,8 @@
 # Artem V. Nikitin
 # Functional tests report
 
-import sys, os, re, cgi
+import sys, os, re, cgi, functools
+
 pycommons = os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
   '../../pycommons')
@@ -12,9 +13,11 @@ sys.path.insert(0, pycommons)
 from Report import Report
 
 FAILURE_REGEXP=r'\s+Failures:\s+\d+'
+ERROR_REGEXP=r'\s+Errors:\s+\d+'
+EXPECTED_FAILURE_REGEXP=r'\s+Expected failures:\s+\d+'
 SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
 TESTCASE_COUNT_REGEXP=r'\[(\w+)\]\s+\w+\s+Total\stests\srun:\s(\d+)'
-TESTCASE_REGEXP=r'(\w+)\.(\w+)'
+TESTCASE_REGEXP=r'(\w+)\s+\((\w+)\.(\w+)\)'
 
 def get_failed_text(tests):
   if tests:
@@ -23,12 +26,12 @@ def get_failed_text(tests):
     return ""
 
 def get_test_color(test):
-  errs  = len(test.errors)
-  skips = len(test.skipped)
+  errs  = len(test.errors) + len(test.fails)
+  skips = len(test.skips)
   suite_stat = '(%d/%d/%d)' % (test.case_count, errs, skips)
   if test.failed or errs:
     return 'RED', 'FAIL %s' % suite_stat
-  if len(test.skipped):
+  if len(test.skips):
     return '#C4A000', 'SKIP %s' % suite_stat
   return 'GREEN', 'PASS %s' % suite_stat
 
@@ -44,7 +47,7 @@ def cases_to_table(cases, color, status):
       </tr>""" % (c, color, status)
   return buff
 
-def get_summary_row(title, total, errors, skipped):
+def get_summary_row(title, total, errors, skips):
   return """<tr>
       <td>%s</td>
       <td class="total">%d</td>
@@ -52,8 +55,8 @@ def get_summary_row(title, total, errors, skipped):
       <td class ="error">%d</td>
       <td class="skip">%d</td></tr>""" % (
          title, total,
-         total - errors - skipped,
-         errors, skipped)
+         total - errors - skips,
+         errors, skips)
 
 class FTReport(Report):
 
@@ -64,37 +67,34 @@ class FTReport(Report):
       self.task = task
       self.logfile = logfile and logfile[0] or None
       self.failed = failed
-      self.skipped = []
+      self.skips = []
+      self.fails = []
+      self.expected_fails = []
       self.errors = []
       self.case_count = 0
       self.current_suite = None
       self.__parse_output(output)
 
-    def __get_full_casename(self, casename):
+    def __append_case(self, list, casename):
       if self.current_suite:
-        return "%s.%s" % (self.current_suite, casename)
-      return casename
-    
-
-    def __append_errors(self, casename):
-      name = self.__get_full_casename(casename)
-      self.errors.append(name)
-
-    def __append_skipped(self, casename):
-      name = self.__get_full_casename(casename)
-      self.skipped.append(name)
+        casename = "%s.%s" % (self.current_suite, casename)
+      list.append(casename)
 
     def __parse_output(self, output):
       append_fn = None
       for line in output.split("\n"):
         if re.search(FAILURE_REGEXP, line):
-          append_fn = self.__append_errors
+          append_fn = functools.partial(self.__append_case, self.fails)
+        elif re.search(ERROR_REGEXP, line):
+          append_fn = functools.partial(self.__append_case, self.errors)
         elif re.search(SKIPPED_REGEXP, line):
-          append_fn = self.__append_skipped
+          append_fn = functools.partial(self.__append_case, self.skips)
+        elif re.search(EXPECTED_FAILURE_REGEXP, line):
+          append_fn = functools.partial(self.__append_case, self.expected_fails)
         else:
           m = re.search(TESTCASE_REGEXP, line)
           if append_fn and m:
-            suite, case = m.group(1,2)
+            case, unit, suite = m.group(1,2, 3)
             append_fn(case)
           else:
             m = re.search(TESTCASE_COUNT_REGEXP, line)
@@ -154,7 +154,7 @@ class FTReport(Report):
       <th></th>
       <th>TOTAL</th>
       <th>PASS</th>
-      <th>FAIL</th>
+      <th>FAIL(ERROR)</th>
       <th>SKIP</th>
       </tr></thead><tbody>"""
     
@@ -168,8 +168,9 @@ class FTReport(Report):
     tests_report += get_summary_row(
       "Test cases",
       sum(map(lambda x: x.case_count, results)),
-      sum(map(lambda x: len(x.errors), results)),
-      sum(map(lambda x: len(x.skipped), results)))
+      sum(map(lambda x: len(x.fails), results)) + \
+        sum(map(lambda x: len(x.errors), results)),
+      sum(map(lambda x: len(x.skips), results)))
 
     tests_report += "</tbody></table>"
 
@@ -196,8 +197,9 @@ class FTReport(Report):
                       t.exec_time(),
                       self._log(t.logfile),
                       self.task_href(t.task))
-        tests_report += cases_to_table(t.errors, 'RED', 'FAIL')
-        tests_report += cases_to_table(t.skipped, '#C4A000', 'SKIP')
+        tests_report += cases_to_table(t.errors, 'RED', 'ERROR')
+        tests_report += cases_to_table(t.fails, 'RED', 'FAIL')
+        tests_report += cases_to_table(t.skips, '#C4A000', 'SKIP')
       tests_report += "</tbody></table>"
     tests_report_id = self.add_report(tests_report,
       views = {
