@@ -18,26 +18,29 @@ exit 0
 fi
 
 set -e -x
+FLAGS=$1
+[[ "$FLAGS" ]]; shift
 
-[[ "$1" = *p* ]] && ACTION=package || ACTION=compile
-[[ "$1" = *r* ]] && CONF=release || CONF=debug
+[[ "$FLAGS" = *p* ]] && ACTION=package || ACTION=compile
+[[ "$FLAGS" = *r* ]] && CONF=release || CONF=debug
 
 OPTIONS=
-[[ "$1" = *u* ]] && OPTIONS+=" -Dutb"
-[[ "$1" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
+[[ "$FLAGS" = *u* ]] && OPTIONS+=" -Dutb"
+[[ "$FLAGS" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
 
 PROJECT=
-[[ "$1" = *S* ]] && PROJECT="mediaserver"
-[[ "$1" = *C* ]] && PROJECT="desktop-client"
-[[ "$1" = *D* ]] && PROJECT="debsetup/$PROJECT-deb"
+[[ "$FLAGS" = *S* ]] && PROJECT="mediaserver"
+[[ "$FLAGS" = *C* ]] && PROJECT="desktop-client"
+[[ "$FLAGS" = *D* ]] && PROJECT="debsetup/$PROJECT-deb"
 [[ "$PROJECT" ]] && OPTIONS+=" --projects $PROJECT --also-make"
 
-if [[ "$1" = *c* ]]; then
+if [[ "$FLAGS" = *c* ]]; then
     hg st -i | awk '{print$2}' | grep -Ev "\.pro\.user$" | xargs rm || true
 fi
 
-[[ "$@" ]] && shift
 mvn $ACTION -Dbuild.configuration=$CONF $OPTIONS $@
 
-SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
-[[ "$1" = *m* ]] $SCRIPT_DIR/makepro.py $OPTIONS
+if [[ "$FLAGS" = *m* ]]; then
+    SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+    $SCRIPT_DIR/makepro.py $OPTIONS
+fi

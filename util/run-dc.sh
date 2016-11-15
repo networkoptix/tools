@@ -16,6 +16,9 @@ set -e -x
 LL=${LL-DEBUG2}
 ARGS="--log-level=$LL --http-log-level=$LL --ec2-tran-log-level=$LL"
 
+BINARY=desktop_client
+[[ "$PWD" == *2.* ]] && BINARY=client.bin
+
 echo logs: '".local/share/Network\ Optix/Network\ Optix\ HD\ Witness\ Client/log/log_file.log"'
-$(dirname "${BASH_SOURCE[0]}")/run.sh desktop_client $ARGS $@
+$(dirname "${BASH_SOURCE[0]}")/run.sh $BINARY $ARGS $@
 

@@ -50,10 +50,17 @@ else
     GDB=gdb
 fi
 
+function find_libs() {
+    set +x
+    find "$PWD/../buildenv/packages/" -name lib -o -name platforms |\
+        sort -r | grep linux-$ARCH_GREP |\
+        while read L; do echo -n ":${L}"; done
+    set -x
+}
+
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
-export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(
-    find "$PWD/../buildenv/packages/" -name lib -o -name platforms | sort -r |\
-    grep linux-$ARCH_GREP | while read L; do echo -n ":${L}"; done)"
+export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(find_libs)"
+
 
 if [ "$L" ]
 then
