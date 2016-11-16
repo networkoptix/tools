@@ -135,7 +135,7 @@ class FTReport(Report):
     results = []
     for test in tests:
       testname = test.description
-      log_filename = "%s.log" % testname
+      log_filename = "%s.log" % re.sub(r'\W', "_", testname)
       ftest_run = self.find_task('%functest.py%', [test])
       results.append(
         self.TestResult(

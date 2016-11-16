@@ -68,9 +68,10 @@ while read line
 do
  key=$(echo $line | sed -r 's|(--\w+)\s(.+)|\1|')
  name=$(echo $line | sed -r 's|(--\w+)\s(.+)|\2|')
+ filename=$(echo $name | sed -r 's|\W|_|g')
  "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
    -d "$name"  \
-   -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$name.log\"" \
+   -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$filename.log\"" \
    -t 600 || true
 done
 
