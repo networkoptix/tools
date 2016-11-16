@@ -34,11 +34,11 @@ BOX_NAMES = {
     "Behind": "$BEHIND"
 }
 BOX_IP = {
-  'Box1': '192.168.120.$[$TASKBOT_BOX_BASE + 1]',
-  'Box2': '192.168.120.$[$TASKBOT_BOX_BASE + 2]',        
-  'Nat': '192.168.120.$[$TASKBOT_BOX_BASE + 3]',
-  'Nat2': '192.168.121.$[$TASKBOT_BOX_BASE + 1]',
-  'Behind': '192.168.121.$[$TASKBOT_BOX_BASE + 2]'
+  'Box1': '192.168.$TASKBOT_NET_BASE.2',
+  'Box2': '192.168.$TASKBOT_NET_BASE.3',        
+  'Nat': '192.168.$TASKBOT_NET_BASE.4',
+  'Nat2': '192.168.$[$TASKBOT_NET_BASE + 1].2',
+  'Behind': '192.168.$[$TASKBOT_NET_BASE + 1].3'
   }
 EOF
 
@@ -46,9 +46,11 @@ cat testconf_local.py
 
 ./sync.sh
 
+rm -rfv $TASKBOT_VAR/nx_vms/func_tests/functest-tmp.cfg
+
 # + Start virual boxes
 cd "$TASKBOT_VAR"/var/testing
-./auto.py --boxes --path $TASKBOT_VAR/nx_vms
+./auto.py --ftprepare --path $TASKBOT_VAR/nx_vms
 
 FUNC_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/ftests
 if [ ! -d "$FUNC_TESTS_RESULT_PATH" ]; then 
@@ -56,6 +58,8 @@ if [ ! -d "$FUNC_TESTS_RESULT_PATH" ]; then
 else
   rm -rf "$FUNC_TESTS_RESULT_PATH"/*
 fi
+
+cat $TASKBOT_VAR/nx_vms/func_tests/functest-tmp.cfg
 
 # + Run tests
 cd $TASKBOT_VAR/nx_vms/func_tests

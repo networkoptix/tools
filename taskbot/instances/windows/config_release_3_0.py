@@ -1,11 +1,11 @@
 # -*- python -*-
 # $Id$
 # Artem V. Nikitin
-# Linux config
+# Windows config
 
 import os
 
-TASKBOT_BRANCHNAME='dev_3.0.0'
+TASKBOT_BRANCHNAME='release_3.0'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -22,19 +22,18 @@ config = {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
+    'Sergey Ivanov' : 'sivanov@networkoptix.com' },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
-    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/linux'),
+    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/windows'),
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
-    'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
-    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
-    'TASKBOT_UNIT_TESTS': 'all',
-    'TASKBOT_FUNC_TESTS': 'true',
-    'TASKBOT_NET_BASE': '120'
+    'TASKBOT_NX_VMS_REPO': 'ssh://hg@la.hdw.mx/nx_vms',
+    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@la.hdw.mx/devtools',
+    'TASKBOT_UNIT_TESTS': 'all'
     }
   }
+
