@@ -300,7 +300,7 @@ do
             md5sum $BINARY | cut -d " " -f 1 > $BINARY.md5
         fi
     fi
-    if [[ $BINARY =~ .*\.a ]]; then
+    if [[ $BINARY =~ .*\.a$ ]]; then
         echo "Doing ranlib $BINARY..."
         "$CROSS_PREFIX"ranlib $BINARY || exit 0
     fi
