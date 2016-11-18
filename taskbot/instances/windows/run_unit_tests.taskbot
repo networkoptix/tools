@@ -45,6 +45,6 @@ do
   test=$name.exe
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
       -d "$name"  \
-      -c "./$test  --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
+      -c "nice -n -20 ./$test  --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
       -t 900 -s 100 || true
 done
