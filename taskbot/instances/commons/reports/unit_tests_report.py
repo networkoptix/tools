@@ -266,6 +266,10 @@ class UTReport(Report):
         case_status, case_color = \
           case_info.status_and_color(prev_test_cases.get(case_name))
 
+        exec_time = "%s" % case_info.exec_time
+        if case_info.status == TERM_STATUS:
+          exec_time = "-"
+
         tests_report += """<tr class="Linked">
         <td>%s</td>
         <td bgcolor="%s" align="center">%s</td>
@@ -273,7 +277,7 @@ class UTReport(Report):
         <td>%s</td>
         <td></td>
         </tr>""" % (case_name,  case_color, case_status,
-           case_info.exec_time or "-", case_info.get_error(self))
+           exec_time, case_info.get_error(self))
       
     tests_report += "</table>"
 
