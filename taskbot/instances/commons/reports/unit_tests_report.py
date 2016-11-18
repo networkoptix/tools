@@ -4,7 +4,7 @@
 # Artem V. Nikitin
 # Unit tests report
 
-import sys, urllib, os
+import sys, urllib, os, re
 from collections import OrderedDict
 pycommons = os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
@@ -12,9 +12,24 @@ pycommons = os.path.join(
 sys.path.insert(0, pycommons)
 from Report import Report
 
+# Colors
+FAIL_COLOR = "RED"
+NEW_FAIL_COLOR = "#C25A7C"
+PASSED_COLOR = "GREEN"
+NEW_PASSED_COLOR = "LIGHTGREEN"
+
+# Statuses
+FAIL_STATUS = "FAIL"
+PASS_STATUS = "PASS"
+TERM_STATUS = "TERM"
+
 def get_failed(unit_tests):
   return filter(
     lambda x: x[1].failed, unit_tests.items())
+
+def get_failed_cases(test):
+  return filter(
+    lambda tc: tc[1].status != PASS_STATUS, test.testcases.items())
 
 def get_totals(unit_tests):
   total_fail = len(get_failed(unit_tests))
@@ -34,28 +49,107 @@ def get_diff(current, prev):
 
 def get_failed_text(tests):
   if tests:
-    return "\n\nFailed tests:\n  " + "\n  ".join(tests)
-  else:
-    return ""
+    buf = "\n\nFailed tests:"
+    for name, info in tests.iteritems():
+      buf+="\n  %s" % name
+      if info.testcases:
+        fails = map(lambda x: x[0], get_failed_cases(info))
+        fails.sort()
+        buf+="\n    " + "\n    ".join(fails)
+    return buf
+
+def get_summary_row(title, total, fails):
+  return """<tr>
+      <td>%s</td>
+      <td class="total">%d</td>
+      <td class="pass">%d</td>
+      <td class ="error">%d</td></tr>""" % (
+         title, total, total - fails, fails)
 
 class UTReport(Report):
 
-  class TestInfo:
+  class TestCase:
 
-    def __init__(self, task, failed):
-      self.task = task
-      self.failed = failed
-      self.xml = None
+    def __init__(self, status, error, exec_time):
+      self.status = status
+      self.error = error
+      self.exec_time = exec_time
 
     def status_and_color(self, prev):
-      if self.failed:
-        if prev and prev.failed:
-          return "FAILED", "RED"
-        return "NEW FAIL", "#C25A7C"
+      if self.status != PASS_STATUS :
+        if prev and prev.status != PASS_STATUS:
+          return self.status, FAIL_COLOR
+        return "NEW " + self.status, NEW_FAIL_COLOR
       else:
+        if prev and prev.status == PASS_STATUS:
+          return self.status, PASSED_COLOR
+        return "NEW " + self.status, NEW_PASSED_COLOR
+
+    def get_error(self, report):
+      if self.error:
+        error_report_id = report.add_report(self.error)
+        return """<a href="%s">log</a>""" % report.report_href(error_report_id)
+      return "-"
+
+  class TestInfo:
+
+    def __init__(self, task, failed, output):
+      self.task = task
+      self.failed = failed
+      self.testcases = {}
+      self.__parse_output(output)
+
+    def __add_case(self, m):
+      name = "%s.%s" % m.group(1,2)
+      self.testcases[name] = UTReport.TestCase(TERM_STATUS, "", 0)
+      return self.testcases[name]
+
+    def __set_pass(self, m):
+      name = "%s.%s" % m.group(1,2)
+      assert self.testcases.get(name)
+      self.testcases[name].status = PASS_STATUS
+      self.testcases[name].exec_time = float(m.group(3)) / 1000
+      return None
+
+    def __set_fail(self, m):
+      name = "%s.%s" % m.group(1,2)
+      assert self.testcases.get(name)
+      self.testcases[name].status = FAIL_STATUS
+      self.testcases[name].exec_time = float(m.group(3)) / 1000
+      return None
+      
+    def __parse_output(self, output):
+      RE_FN = [
+        (r'\[\s+RUN\s+\]\s+(\w+)\.(\w+)', self.__add_case ),
+        (r'\[\s+OK\s+\]\s+(\w+)\.(\w+)\s+\((\d+)\s+ms\)', self.__set_pass),
+        (r'\[\s+FAILED \s+\]\s+(\w+)\.(\w+)\s+\((\d+)\s+ms\)', self.__set_fail) ]
+      
+      current_case = None
+      for line in output.split("\n"):
+        re_matched = False
+        for r, fn in RE_FN:
+          m = re.search(r, line)
+          if m:
+            current_case = fn(m)
+            re_matched = True
+            break
+        if current_case and not re_matched and line:
+          current_case.error+="%s<br>\n" % line
+
+    def status_and_color(self, prev):
+      fails = len(get_failed_cases(self))
+      cases = len(self.testcases)
+      stats =  " (%d/%d)" % (cases, fails)
+      if self.failed:
+        status = FAIL_STATUS + stats
+        if prev and prev.failed:
+          return status, FAIL_COLOR
+        return "NEW " + status, NEW_FAIL_COLOR
+      else:
+        status = PASS_STATUS + stats
         if prev and not prev.failed:
-          return "PASSED", "GREEN"
-        return "NEW PASS", "LIGHTGREEN"
+          return status, PASSED_COLOR
+        return "NEW " + status, NEW_PASSED_COLOR
 
     def exec_time(self):
       return self.task.finish - self.task.start
@@ -69,23 +163,30 @@ class UTReport(Report):
       return {}
     unit_tests = {}
     run_tests = self.find_task('Run tests > %for % > %', tasks)
-    test_results = self.find_task('Store results > %for % > %', tasks)
     for test in run_tests:
+      test_task = self.find_task("%", [test])[0]
       unit_tests[test.description] = \
          UTReport.TestInfo(
-           self.find_task("%", [test])[0],
-           bool(self.find_failed(test)))
-    for test in test_results:
-      t = unit_tests.get(test.description)
-      command = self.find_task('%.xml', [test])
-      if t:
-        t.xml = """<?xml-stylesheet type='text/xsl' href='\commons\styles\unit_tests.xsl'?>\n""" + \
-          "\n".join(self.get_stdout(command).split("\n")[1:])
-      else:
-        print >> sys.stderr, "Cannot find results for test '%s'" % \
-           test.description
+           test_task,
+           bool(self.find_failed(test)),
+           self.get_stdout(test_task))
     return unit_tests
 
+  def __get_cores_cell(self, task, name):
+    result = []
+    if task:
+      cores = self.find_task('% > %Examine core file% > %', [task])
+      for core in cores:
+        for line in self.get_stdout(core).split("\n"):
+          regex = r'Core\swas\sgenerated\sby\W+%s' % name
+          if re.search(regex, line):
+            result.append(core)
+            break
+    return " ".join(
+      map(lambda c: """<a href="%s">%s</a>""" % \
+          (self.task_href(c),
+           self.find_non_command_parent(c, 1).description), result))
+      
   def __get_cores(self):
     tests = self.find_task('Run unit tests > %run_unit_tests.taskbot%')
     cores_task = self.find_task(
@@ -95,15 +196,6 @@ class UTReport(Report):
       cores_count = len(cores)
       return cores_count, cores_task[0]
     return 0, None
-
-  def _details(self, info):
-    if info.xml:
-      xml_report_id = self.add_report(info.xml)
-      report_link = "?report=%s&type=%s&raw" % \
-         (xml_report_id, urllib.quote("text/xml"))
-      return """<a href="%s">details</a>""" % report_link
-    else:
-      return "-"
 
   def __generate__( self ):
     unit_tests = self.__get_test_info()
@@ -126,32 +218,71 @@ class UTReport(Report):
     new_pass, new_fail = get_diff(unit_tests, unit_tests_prev)
 
     tests_report = "<h1>Unit test results</h1>"
-    tests_report += """<table class="tests_table">
+
+    # Summary table
+    tests_report += """<table>
+      <thead><tr>
+      <th></th>
+      <th>TOTAL</th>
+      <th>PASS</th>
+      <th>FAIL(ERROR)</th>
+      </tr></thead><tbody>"""
+
+    tests_report += get_summary_row('Test units', len(unit_tests), total_fail)
+    tests_report += get_summary_row('Test cases',
+       sum(map(lambda x: len(x.testcases), unit_tests.values())),
+       sum(map(lambda x: len(get_failed_cases(x)), unit_tests.values())))
+    
+    tests_report += "</tbody></table><br><br>"
+ 
+    # Test results
+    tests_report += """<table class="UTTable Expandable Zebra">
     <tr>
     <th>Test name</th>
-    <th>Status</th>
+    <th>Status (TOTAL/FAIL)</th>
     <th>Execution time</th>
-    <th>Details</th>
     <th>Log</th>
+    <th>Cores</th>
     </tr>"""
 
     for name, info in OrderedDict(sorted(unit_tests.items())).iteritems():
+      prev_test_result = unit_tests_prev.get(name)
       status, color = \
-         info.status_and_color(unit_tests_prev.get(name))
+         info.status_and_color(prev_test_result)
       tests_report += """<tr>
-        <td class="test_name">%s</td>
-        <td class="test_status" bgcolor="%s">%s</td>
-        <td class="test_exec_time">%s</td>
+        <td>%s</td>
+        <td bgcolor="%s" align="center">%s</td>
         <td>%s</td>
         <td><a href="%s">log</a></td>
-      </tr>""" % (name,  color, status,
+        <td>%s</td>
+        </tr>""" % (name,  color, status,
                   info.exec_time(),
-                  self._details(info),
-                  self.task_href(info.task))
+                  self.task_href(info.task),
+                  self.__get_cores_cell(cores_task, name))
+      for case_name, case_info in OrderedDict(sorted(get_failed_cases(info))).iteritems():
+        prev_test_cases = {}
+        if prev_test_result:
+          prev_test_cases = prev_test_result.testcases
+        case_status, case_color = \
+          case_info.status_and_color(prev_test_cases.get(case_name))
+
+        tests_report += """<tr class="Linked">
+        <td>%s</td>
+        <td bgcolor="%s" align="center">%s</td>
+        <td>%s</td>
+        <td>%s</td>
+        <td></td>
+        </tr>""" % (case_name,  case_color, case_status,
+           case_info.exec_time or "-", case_info.get_error(self))
       
     tests_report += "</table>"
 
-    tests_report_id = self.add_report(tests_report);
+    tests_report_id = self.add_report(
+      tests_report,
+      views = {
+      'css': ['/reports/styles/func_tests_report.css'],
+      'js': ['/commons/scripts/ExpandableTable.js',
+             '/commons/scripts/ZebraTable.js']})
 
     color = '"GREEN"'
     if total_fail or cores_count:
@@ -170,8 +301,7 @@ class UTReport(Report):
       
     self.add_history(color, history)
 
-    failed_tests = map(lambda x: x[0], get_failed(unit_tests))
-    failed_tests.sort()
+    failed_tests = OrderedDict(sorted(get_failed(unit_tests)))
 
     import EmailNotify
     if prev_run and not total_fail and new_pass:

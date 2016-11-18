@@ -49,6 +49,7 @@ class Report:
       self.task_id = task_id
       self.name = name
       self.fullpath = fullpath
+
       
     def __str__(self):
       return "File#%s: %s" % (self.id, self.fullpath)
@@ -114,14 +115,16 @@ class Report:
 
     return Report.Task(*res)
 
-  def find_non_command_parent(self, task):
-    while task.parent_task_id and task.is_command:
+  def find_non_command_parent(self, task, level=0):
+    l = 0
+    while task.parent_task_id and (task.is_command or l <= level):
       res = \
         self.__db__.query("""SELECT id, parent_task_id, description,
           is_command, start, finish, error_message
           FROM task
           WHERE id = %s""", (task.parent_task_id, ))
       task = Report.Task(*res)
+      l+=1
     return task
 
   def __find_task(self, parent_task_id, description):

@@ -28,8 +28,6 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
-UNIT_TESTS_WIN_PATH=$(cygpath -w "$UNIT_TESTS_RESULT_PATH")
-
 NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
 cd $NX_VMS_BIN_PATH
 
@@ -47,15 +45,6 @@ do
   test=$name.exe
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
       -d "$name"  \
-      -c "./$test  --gtest_output=\"xml:$UNIT_TESTS_WIN_PATH/$name.xml\" --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
+      -c "./$test  --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\"" \
       -t 900 -s 100 || true
-done
-
-# + Store results
-for xml in $(find "$UNIT_TESTS_RESULT_PATH" -maxdepth 1 -name '*.xml' -type f)
-do
- filename=$(basename $xml)
- name=${filename%.*}
- "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-   -d "$name" -c "cat $xml"
 done
