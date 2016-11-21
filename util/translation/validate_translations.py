@@ -6,11 +6,14 @@ import os
 import argparse
 import xml.etree.ElementTree as ET
 
-from vms_projects import getTranslatableProjectsList
-
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+sys.path.insert(0, projectDir)
+from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
 critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>']
@@ -208,10 +211,13 @@ def main():
         
     rootDir = os.getcwd()
     
-    for project in getTranslatableProjectsList():
-        projectDir = os.path.join(rootDir, project)
+    projects = getTranslatableProjects()   
+    for project in projects:
+        if verbose:
+            info("Updating project " + str(project))
+        projectDir = os.path.join(rootDir, project.path)
         translationDir = os.path.join(projectDir, 'translations')
-        validateProject(project, translationDir)
+        validateProject(project.name, translationDir)
        
     info("Validation finished.")
     
