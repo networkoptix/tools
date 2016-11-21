@@ -8,11 +8,14 @@ from multiprocessing import Process
 import threading
 import subprocess
 
-from vms_projects import getTranslatableProjects
-
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+sys.path.insert(0, projectDir)
+from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
 qt_path = 'c:\\develop\\buildenv\\packages\\windows-x64\\qt-5.6.1\\bin\\'
@@ -62,24 +65,18 @@ def calculateEntries(prefix, dir):
         entries.append(path)
     return entries
 
-def update(project, suffix = '', filter = ' -locations none'):
+def update(project):
     rootDir = os.getcwd()
-    projectDir = os.path.join(rootDir, project)
+    projectDir = os.path.join(rootDir, project.path)
     translationDir = os.path.join(projectDir, 'translations')
-    if suffix == 'qml':
-        sourcesDir = os.path.join(projectDir, 'static-resources')
-    else:
-        sourcesDir = os.path.join(projectDir, 'src')
-
-    filename = project
-    if suffix:
-        filename += '_'
-        filename += suffix
+    sourcesDir = os.path.join(projectDir, project.sources)
+    filename = project.name
+    
     entries = calculateEntries(filename, translationDir)
 
     command = qt_path + 'lupdate.exe -no-obsolete -no-ui-lines'
-    if filter:
-        command += filter
+    command += " -locations {}".format(project.locations)
+    command += " -extensions {}".format(project.extensions)
     command += ' ' + sourcesDir
     command += ' -ts'
     for path in entries:
@@ -87,15 +84,6 @@ def update(project, suffix = '', filter = ' -locations none'):
     log = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     global results
     results[project] = log
-
-def updateBase(project):
-    update(project, 'base',  ' -extensions cpp,h  -locations none')
-
-def updateUi(project):
-    update(project, 'ui',  ' -extensions ui -locations relative')
-
-def updateQml(project):
-    update(project, 'qml',  ' -extensions qml -locations none')
 
 def handleOutput(log):
     for line in log.split('\n'):
@@ -132,23 +120,12 @@ def main():
     if args.color:
         init_color()
 
-    projects = getTranslatableProjects()
+    projects = getTranslatableProjects()   
     threads = []
-    for project, targets in projects.items():
-        if not targets:
-            if verbose:
-                info("Updating default project " + project)
-            threads.append(updateThreaded(project, update))
-        else:
-            for target in targets:
-                info("Updating {0} project ".format(target) + project)
-
-                if target == 'base':
-                    threads.append(updateThreaded(project, updateBase))
-                elif target == 'ui':
-                    threads.append(updateThreaded(project, updateUi))
-                elif target == 'qml':
-                    threads.append(updateThreaded(project, updateQml))
+    for project in projects:
+        if verbose:
+            info("Updating project " + str(project))
+        threads.append(updateThreaded(project, update))
 
     for thread in threads:
         thread.join()
