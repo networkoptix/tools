@@ -146,7 +146,7 @@ def migrateProject(project, translationDir, sourceTranslationDir):
             continue
                 
         sourcePath = os.path.join(sourceTranslationDir, entry)
-        if (not os.path.isfile):
+        if (not os.path.isfile(sourcePath)):
             err("{0} not found in the source dir {1}".format(entry, sourceTranslationDir))
             continue
             
