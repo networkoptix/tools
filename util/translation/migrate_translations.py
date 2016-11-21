@@ -1,5 +1,5 @@
+#!/bin/python2
 # -*- coding: utf-8 -*-
-#/bin/python
 
 import sys
 import os
@@ -12,7 +12,10 @@ sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
 
-from vms_projects import getTranslatableProjectsList
+projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+sys.path.insert(0, projectDir)
+from vms_projects import getTranslatableProjects
+sys.path.pop(0)
 
 verbose = False
 similarityLevel = 100
@@ -153,7 +156,11 @@ def migrateProject(project, translationDir, sourceTranslationDir):
         migrateFile(path, sourcePath)
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='''
+    This script migrates existing translations from the version of code before the lupdate call.
+    To implement this you should have two copies of the repository. Target repo root is the call
+    folder. Source repo root is passed as the 'source' argument.
+    ''')
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-s', '--source', help="source path", required=True)
@@ -173,14 +180,17 @@ def main():
 
     rootDir = os.getcwd()
     
-    for project in getTranslatableProjectsList():
-        projectDir = os.path.join(rootDir, project)
-        sourceProjectDir = os.path.join(args.source, project)
+    projects = getTranslatableProjects()   
+    for project in projects:
+        if verbose:
+            info("Updating project " + str(project))
+        projectDir = os.path.join(rootDir, project.path)
+        sourceProjectDir = os.path.join(args.source, project.path)
         
         translationDir = os.path.join(projectDir, 'translations')
         sourceTranslationDir = os.path.join(sourceProjectDir, 'translations')
         
-        migrateProject(project, translationDir, sourceTranslationDir)
+        migrateProject(project.name, translationDir, sourceTranslationDir)
        
     if verbose:
         info("Migration finished.")
