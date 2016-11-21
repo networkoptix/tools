@@ -1,18 +1,24 @@
+#!/bin/python2
 # -*- coding: utf-8 -*-
-#/bin/python
 
 import sys
 import argparse
 import os
 from itertools import combinations
+
+utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
+sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+sys.path.insert(0, projectDir)
+from vms_projects import getCustomizableProjects
+sys.path.pop(0)
 
 class Project:
-    COMMON = 'common'
-    CLIENT = 'client'
-    ICONS = 'icons'
+    CLIENT = "client"
     INTRO = ["intro.mkv", "intro.avi", "intro.png", "intro.jpg", "intro.jpeg"]
-    ALL = [COMMON, CLIENT, ICONS]
 
 class Suffixes:
     HOVERED = '_hovered'
@@ -20,7 +26,8 @@ class Suffixes:
     PRESSED = '_pressed'
     DISABLED = '_disabled'
     CHECKED = '_checked'
-    ALL = [HOVERED, SELECTED, PRESSED, DISABLED, CHECKED]
+    ACCENTED = '_accented'
+    ALL = [HOVERED, SELECTED, PRESSED, DISABLED, CHECKED, ACCENTED]
 
     @staticmethod
     def baseName(fullname):
@@ -43,8 +50,12 @@ class Formats:
 
     @staticmethod
     def isImage(string):
+        if '%' in string:
+            return False
+        if '*' in string:
+            return False
         for format in Formats.IMAGES:
-            if format in string:
+            if format in string and string != format:                
                 return True
         return False
 
@@ -71,8 +82,7 @@ class Customization():
             self.lightPath = os.path.join(self.rootPath, 'resources', 'skin_light')
         else:
             self.basePath = self.rootPath
-            #self.darkPath = os.path.join(self.rootPath, 'resources', 'skin_dark')
-            #self.lightPath = os.path.join(self.rootPath, 'resources', 'skin_light')
+
         self.base = []
         self.dark = []
         self.light = []
@@ -128,6 +138,10 @@ class Customization():
         self.total = sorted(list(set(self.base + self.dark + self.light)))
         
     def isUnused(self, entry, requiredFiles):
+        if not requiredFiles:
+            return False
+        if '@2x' in entry:
+            return False
         if Suffixes.baseName(entry) in requiredFiles:
            return False
         if entry in Project.INTRO:
@@ -184,21 +198,18 @@ class Customization():
                 clean = False
                 warn('File %s in unused' % entry)
 
-        for entry in requiredFiles:
-            if entry in self.base or entry in self.dark or entry in self.light:
-                continue
-            clean = False
-            error = True
-            err("File %s is missing" % entry)
+        if requiredFiles:
+            for entry in requiredFiles:
+                if entry in self.base or entry in self.dark or entry in self.light:
+                    continue
+                clean = False
+                error = True
+                err("File %s is missing" % entry)
 
         if self.name == Customization.DEFAULT:
             for entry in self.total:
                 if not entry.endswith(Formats.PNG):
                     continue;
-                sourceAi = entry.replace(Formats.PNG, Formats.AI)
-                sourceSvg = entry.replace(Formats.PNG, Formats.SVG)
-                if not sourceAi in self.total and not sourceSvg in self.total:
-                    warn('Source file for %s is missing' % entry)
                 
         if clean:
             green('Success')
@@ -250,10 +261,6 @@ def parseFile(path):
         for line in file.readlines():
             linenumber += 1
             if not Formats.isImage(line):
-                continue
-            if not "skin" in line and not "Skin" in line:
-                if verbose:
-                    warn(line.strip())
                 continue
             result.extend(parseLine(line, extension, "%s:%s" % (path, linenumber)))
     return result
@@ -355,17 +362,22 @@ td.light { background-color: #D0D0D0; }
 
 def checkProject(rootDir, project):
     separator()
-    info('Checking project ' + project)
+    info("Validating project " + str(project))
     separator()
     customizations = {}
     roots = []
     children = []
     invalidInner = 0
-
-    sourcesDir = os.path.join(os.path.join(rootDir, project), 'src')
-    requiredFiles = parseSources(sourcesDir)
-
-    requiredSorted = sorted(list(set(requiredFiles)))
+    
+    if project.sources:
+        requiredFiles = []
+        for srcDir in project.sources:
+            sourcesDir = os.path.join(rootDir, srcDir)
+            requiredFiles += parseSources(sourcesDir)
+        requiredSorted = sorted(list(set(requiredFiles)))
+    else:
+        requiredSorted = None
+        
     customizationDir = os.path.join(rootDir, "customization")
 
     for entry in os.listdir(customizationDir):
@@ -374,7 +386,7 @@ def checkProject(rootDir, project):
         path = os.path.join(customizationDir, entry)
         if (not os.path.isdir(path)):
             continue
-        c = Customization(entry, path, project)
+        c = Customization(entry, path, project.name)
         c.populateFileList()
         if c.isRoot():     
             invalidInner += c.validateInner(requiredSorted)                   
@@ -391,7 +403,7 @@ def checkProject(rootDir, project):
 
     targetFiles = customizations[Customization.DEFAULT].total
 
-    printCustomizations(project, customizationDir, targetFiles, customizations, roots, children)
+    printCustomizations(project.name, customizationDir, targetFiles, customizations, roots, children)
     
     if invalidInner > 0:
         sys.exit(1)
@@ -402,7 +414,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
-    parser.add_argument('-p', '--project', default='', help="target project")
     args = parser.parse_args()
     if args.color:
         init_color()
@@ -410,13 +421,8 @@ def main():
     global verbose
     verbose = args.verbose
 
-    projects = []
-    if (args.project == Project.COMMON or args.project == Project.CLIENT):
-        projects.append(args.project)
-    else:
-        projects = Project.ALL
-
     rootDir = os.getcwd()
+    projects = getCustomizableProjects()   
     for project in projects:
         checkProject(rootDir, project)
 
