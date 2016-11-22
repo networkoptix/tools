@@ -182,11 +182,14 @@ class DumpAnalyzer(object):
             page = urllib2.urlopen(url).read().replace('\n', '')
         except urllib2.HTTPError as e:
             raise Error('%s, url: %s' % (e, url))
+        #print "DEBUG (PAGE): %s" % (page,)
         results, failures = [], []
         for regexp in regexps:
-            self.log("Trying regexp /%s/" % ('.+%s.+' % regexp,), level=1)
-            m = re.match('.+%s.+' % regexp, page)
+            rx = '.+%s.+' % regexp
+            self.log("Trying regexp /%s/" % (rx,), level=1)
+            m = re.match(rx, page)
             if m:
+		print "DEBUG: regexp /%s/ got url '%s'" % (rx, m.group(1))
                 results.append((url, m.group(1)))
             else:
                 failures.append(regexp)
@@ -199,13 +202,15 @@ class DumpAnalyzer(object):
         '''Fetches URLs of required resourses
         '''
         out = self.fetch_url_data(
-            CONFIG['dist_url'], ['''(%s\-[^/]+)''' % self.build])
+            CONFIG['dist_url'], ['''href="(%s\-[^/]+)"''' % self.build])
         if len(out) == 0:
             print "No distributive found for build %s. Dump analyze imposible" % self.build
             return False
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(CONFIG['dist_url'], build_path)
+        print "DEBUG: build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
+              build_url, CONFIG['dist_url'], build_path)
         out = self.fetch_url_data(
             build_url, ('''\"(.+\-%s)\"''' % r for r in [
                 CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
