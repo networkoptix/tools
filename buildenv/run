@@ -23,6 +23,7 @@ RUN_ARGS_SPECIFIED=0
 STRACE=
 STRACE_LOG=strace.log
 WITH_GDB=
+WITH_VALGRIND=
 
 for i in "$@"
 do
@@ -43,6 +44,8 @@ do
         STRACE=1
     elif [ "$i" == "--run-gdb" ] ; then
         WITH_GDB=1
+    elif [ "$i" == "--run-valgrind" ] ; then
+        WITH_VALGRIND=1
     fi
 done
 
@@ -120,15 +123,16 @@ while :
 do
     echo "Running command '$LAUNCH_CMD'"
 
-    #valgrind --leak-check=full --show-leak-kinds=all --vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS
-    #valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
-    #valgrind $COMMON_VALGRIND_ARGS
-    #valgrind --tool=exp-dhat --show-top-n=10000 --sort-by=max-blocks-live $COMMON_VALGRIND_ARGS
-    #valgrind --tool=exp-dhat --show-top-n=100 $COMMON_VALGRIND_ARGS
-    #valgrind --tool=massif $COMMON_VALGRIND_ARGS
-    #valgrind --tool=drd --exclusive-threshold=100 $COMMON_VALGRIND_ARGS
-    #valgrind --tool=callgrind $LAUNCH_CMD
-    if [ ! -z "$WITH_GDB" ]; then
+    if [ ! -z "$WITH_VALGRIND" ]; then
+        #valgrind --leak-check=full --show-leak-kinds=all --vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS
+        valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
+        #valgrind $COMMON_VALGRIND_ARGS
+        #valgrind --tool=exp-dhat --show-top-n=10000 --sort-by=max-blocks-live $COMMON_VALGRIND_ARGS
+        #valgrind --tool=exp-dhat --show-top-n=100 $COMMON_VALGRIND_ARGS
+        #valgrind --tool=massif $COMMON_VALGRIND_ARGS
+        #valgrind --tool=drd --exclusive-threshold=100 $COMMON_VALGRIND_ARGS
+        #valgrind --tool=callgrind $LAUNCH_CMD
+    elif [ ! -z "$WITH_GDB" ]; then
         gdb --args ./$BINARY_NAME $MSERVER_ARGS
     else
         $LAUNCH_CMD
