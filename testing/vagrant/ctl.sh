@@ -155,6 +155,20 @@ function db_ctl {
     esac
 }
 
+function merge_ctl {
+ case "$mode" in
+        init)
+            nxcleardb
+            nxrmconf systemName
+            nxrmconf systemIdFromSystemName
+            ;;
+        clear)
+            nxcleardb
+            ;;
+        *) echo "Unknown mode '${mode}' for merge test control"
+    esac
+}   
+
 ################################################################################################
 
 case "$mode" in
@@ -187,6 +201,9 @@ case "$testName" in
         ;;
     db)
         db_ctl "$@"
+        ;;
+    merge)
+        merge_ctl "$@"
         ;;
     *)
         echo Unknown test name "$testName"

@@ -17,6 +17,13 @@ function nxedconf {
 	fi
 }
 
+function nxrmconf {
+	var=$1
+	if grep -q "^$var" "$SERVCONF"; then
+            sed -i 's|^'"$var"'\s*=.*||' "$SERVCONF"
+	fi
+}
+
 #function setpw {
 #	sed -i 's/^appserverPassword\s*=.*/appserverPassword=123/' "$SERVCONF"
 #}
