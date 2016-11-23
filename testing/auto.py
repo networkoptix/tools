@@ -761,7 +761,7 @@ def prepare_functest_cfg(path=""):
 def perform_func_test(to_skip):
     if os.name != 'posix':
         raw_log("\nFunctional tests require POSIX-compatible OS. Skipped.")
-        return
+        return True
     need_stop = False
     reader = proc = None
     success = True

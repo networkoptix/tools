@@ -149,14 +149,15 @@ function db_ctl {
             setLogLevel $debugLevel
             ;;
         clear)
-            # nxcleardb  # not used, this test doesn't call clear
+            nxrestconf
+            nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for dbup test control"
     esac
 }
 
 function merge_ctl {
- case "$mode" in
+    case "$mode" in
         init)
             nxcleardb
             nxrmconf systemName
@@ -167,13 +168,24 @@ function merge_ctl {
             ;;
         *) echo "Unknown mode '${mode}' for merge test control"
     esac
-}   
+}
+
+function stress_ctl {
+    case "$mode" in
+        init)
+            #safestart "$SERVICE"
+            ;;
+        clear)
+            ;;
+        *) echo "Unknown mode '${mode}' for stress test control"
+    esac
+}
 
 ################################################################################################
 
 case "$mode" in
     init)
-        test -e "${SERVCONF}.orig" && cp "${SERVCONF}.orig" "$SERVCONF"
+        nxrestconf
         ;;
     clear)
         safestop "$SERVICE"
@@ -195,6 +207,9 @@ case "$testName" in
         ;;
     stream|hlso)
         stream_ctl "$@"
+        ;;
+    stress)
+        stress_ctl "$@"
         ;;
     natcon)
         natcon_ctl "$@"

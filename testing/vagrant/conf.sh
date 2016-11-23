@@ -51,3 +51,6 @@ function safestart {
     status "$1"|grep 'start' || start "$1"
 }
 
+function nxrestconf {
+    test -e "${SERVCONF}.orig" && cp "${SERVCONF}.orig" "$SERVCONF"
+}
