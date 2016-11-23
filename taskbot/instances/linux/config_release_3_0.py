@@ -23,6 +23,10 @@ config = {
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     'Sergey Ivanov' : 'sivanov@networkoptix.com' },
+  'ft_watchers': {
+    'Artem Nikitin': 'anikitin@networkoptix.com',
+    'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
+    'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',

@@ -115,7 +115,7 @@ class FTReport(Report):
       return self.task.finish - self.task.start
 
   def __init__(self, config):
-    Report.__init__(self, config)
+    Report.__init__(self, config, report_watchers='ft_watchers')
 
   def _log(self, logfile):
     if logfile:
@@ -225,7 +225,8 @@ class FTReport(Report):
       EmailNotify.notify(
         self, prev_run, "func-tests failed",
         "Fails detected in the func-tests.%s" %
-        get_failed_text(failures))
+        get_failed_text(failures),
+        notify_owner = False)
       
       
       

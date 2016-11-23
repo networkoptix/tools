@@ -58,11 +58,12 @@ class Report:
       return self.__str__()
     
       
-  def __init__(self, config, root_task = None):
+  def __init__(self, config, root_task = None, report_watchers=None):
     self.__config__ = read_config(config) # Takbot config
     Compressor.gzip_threshold = self.__config__.get('gzip_threshold', 0)
     Compressor.gzip_ratio = self.__config__.get('gzip_ratio', 0)
-    self.__watchers__ = self.__config__.get('watchers', None)
+    watchers = report_watchers and self.__config__.get(report_watchers, None) or None
+    self.__watchers__ = watchers or self.__config__.get('watchers', None)
     self.__db__ =  MySQLDB(self.__config__.get('db_config', None)) # Takbot database
     self.__platform__ = self.__find_platform()
     self.__branch__ = self.__find_branch()

@@ -155,7 +155,7 @@ class UTReport(Report):
       return self.task.finish - self.task.start
 
   def __init__(self, config):
-    Report.__init__(self, config)
+    Report.__init__(self, config, report_watchers='ut_watchers')
 
   def __get_test_info(self, prev_run = []):
     tasks = self.find_task('Run unit tests > %run_unit_tests.taskbot%', prev_run)

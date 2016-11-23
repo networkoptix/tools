@@ -35,7 +35,7 @@ class BuildReport(Report):
       
 
   def __init__(self, config):
-    Report.__init__(self, config)
+    Report.__init__(self, config, report_watchers='build_watchers')
 
   def __add_build_report(self, report_id, reports, report_html):
     html = """<div class="container">\n"""
