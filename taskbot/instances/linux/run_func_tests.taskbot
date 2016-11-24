@@ -61,8 +61,15 @@ fi
 
 cat $TASKBOT_VAR/nx_vms/func_tests/functest-tmp.cfg
 
-# + Run tests
+# + Check virtual boxes
 cd $TASKBOT_VAR/nx_vms/func_tests
+BOXES="Box1 Box2 Nat Behind"
+for box in $BOXES
+do
+  ./vssh.sh $box hostname
+done
+
+# + Run tests
 ./functest.py --list-auto-test | \
 while read line
 do
