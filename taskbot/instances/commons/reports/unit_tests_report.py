@@ -169,7 +169,7 @@ class UTReport(Report):
          UTReport.TestInfo(
            test_task,
            bool(self.find_failed(test)),
-           self.get_stdout(test_task))
+           self.get_stdout(test_task)) if test_task
     return unit_tests
 
   def __get_cores_cell(self, task, name):
