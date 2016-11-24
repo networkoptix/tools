@@ -1,0 +1,41 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+set +o nounset
+if [ -z $TASKBOT_UNIT_TESTS ]; then
+   export TASKBOT_UNIT_TESTS="none"
+fi
+if [ -z $TASKBOT_FUNC_TESTS ]; then
+   export TASKBOT_FUNC_TESTS="false"
+fi
+set -o nounset
+
+# + Save update info
+"$TASKBOT" $ARGS "$TASKBOT_COMMONS"/scripts/remember_revisions.taskbot
+RC=$?
+echo $RC
+
+"$TASKBOT_COMMONS"/reports/update_report.py "$TASKBOT_CONFIG"
+
+# + Build product
+if [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_COMMONS"/scripts/build.taskbot
+  RC=$?
+  echo $RC
+fi
+
+"$TASKBOT_COMMONS"/reports/build_report.py "$TASKBOT_CONFIG"
+
+# + Run unit tests
+if [ "$TASKBOT_UNIT_TESTS" != "none" ] && [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_unit_tests.taskbot
+  RC=$?
+fi
+
+if [ "$TASKBOT_UNIT_TESTS" != "none" ]; then
+  "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+fi
+
+exit $RC
