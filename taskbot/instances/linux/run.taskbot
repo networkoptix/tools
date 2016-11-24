@@ -47,7 +47,7 @@ if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
 fi
 
 if [ $TASKBOT_FUNC_TESTS = "true" ]; then
-  TASKBOT_DEBUG_MODE=1 "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
+  "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
 fi
 
 let "RC|=$UT_RC" || true
