@@ -7,7 +7,7 @@ if [ ! -z "$1" ]; then
 fi
 
 export TASKBOT_PLATFORM=`uname -oi`
-TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config_dev_3_0_0.py
+TASKBOT_CONFIG="$HOME"/taskbot/devtools/taskbot/instances/linux/config_release_3_0.py
 BIN="$HOME"/taskbot/devtools/taskbot/core/
 TASKBOT="$BIN"/taskbot.py
 ENVSH="$BIN"/envsh.py
