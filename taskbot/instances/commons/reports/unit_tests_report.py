@@ -165,11 +165,12 @@ class UTReport(Report):
     run_tests = self.find_task('Run tests > %for % > %', tasks)
     for test in run_tests:
       test_task = self.find_task("%", [test])[0]
-      unit_tests[test.description] = \
-         UTReport.TestInfo(
-           test_task,
-           bool(self.find_failed(test)),
-           self.get_stdout(test_task)) if test_task
+      if test_task:
+        unit_tests[test.description] = \
+          UTReport.TestInfo(
+            test_task,
+            bool(self.find_failed(test)),
+            self.get_stdout(test_task))
     return unit_tests
 
   def __get_cores_cell(self, task, name):
