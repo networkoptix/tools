@@ -59,7 +59,22 @@
 
 
     <xsl:template match="directory">
+        <xsl:variable name="dirPath" select="."></xsl:variable>
         <tr>
+            <xsl:choose>
+                <xsl:when test="contains($dirPath, 'default')">
+                    <td class="icon nx"/>
+                </xsl:when>
+                <xsl:when test="contains($dirPath, 'digitalwatchdog')">
+                    <td class="icon dw"/>
+                </xsl:when>
+                <xsl:when test="contains($dirPath, 'vmsdemo')">
+                    <td class="icon nx"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <td class="icon folder"/>
+                </xsl:otherwise>
+            </xsl:choose>
             <td class="n">
                 <a href="{current()}/">
                     <xsl:value-of select="."/>
@@ -75,15 +90,16 @@
     </xsl:template>
 
     <xsl:template match="file">
+        <xsl:variable name="filePath" select="."></xsl:variable>
         <tr>
             <xsl:choose>
-                <xsl:when test="contains({current()}, '.exe')">
+                <xsl:when test="contains($filePath, '.exe')">
                     <td class="icon nx"/>
                 </xsl:when>
-                <xsl:when test="contains({current()}, '.msi')">
+                <xsl:when test="contains($filePath, '.msi')">
                     <td class="icon msi"/>
                 </xsl:when>
-                <xsl:when test="contains({current()}, '.pdb')">
+                <xsl:when test="contains($filePath, '.pdb')">
                     <td class="icon pdb"/>
                 </xsl:when>
                 <xsl:otherwise>
