@@ -17,7 +17,7 @@ ERROR_REGEXP=r'\s+Errors:\s+\d+'
 EXPECTED_FAILURE_REGEXP=r'\s+Expected failures:\s+\d+'
 SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
 TESTCASE_COUNT_REGEXP=r'\[(\w+)\]\s+\w+\s+Total\stests\srun:\s(\d+)'
-TESTCASE_REGEXP=r'(\w+)\s+\((\w+)\.(\w+)\)'
+TESTCASE_REGEXP=r'^\s+(\w+)\s+\((\w+)\.(\w+)\)$'
 
 def get_failed_text(tests):
   if tests:
