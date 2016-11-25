@@ -102,6 +102,9 @@
                 <xsl:when test="contains($filePath, '.pdb')">
                     <td class="icon pdb"/>
                 </xsl:when>
+                <xsl:when test="contains($filePath, '-pdb')">
+                    <td class="icon pdb"/>
+                </xsl:when>
                 <xsl:otherwise>
                     <td class="icon"/>
                 </xsl:otherwise>
