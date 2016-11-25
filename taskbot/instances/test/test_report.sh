@@ -16,4 +16,4 @@ PRNENV="$BIN"/prnenv.py
 # Set taskbot environment
 eval $($PRNENV $TASKBOT_CONFIG)
 
-TASKBOT_DEBUG_MODE=1 TASKBOT_REPO="$TASKBOT_REPO" "$TASKBOT_REPO"/taskbot/instances/commons/reports/unit_tests_report.py "$TASKBOT_CONFIG"
+TASKBOT_DEBUG_MODE=1 TASKBOT_REPO="$TASKBOT_REPO" "$TASKBOT_REPO"/taskbot/instances/linux/func_tests_report.py "$TASKBOT_CONFIG"

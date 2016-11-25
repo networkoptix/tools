@@ -40,6 +40,9 @@ class BuildReport(Report):
   def __add_build_report(self, report_id, reports, report_html):
     html = """<div class="container">\n"""
     html+= """<header><h1>Build report</h1></header>"""
+    html+= """<h3>Branch: %s</h3>""" % self.branch
+    html+= """<h3>Platform: %s</h3>""" % self.platform.desc()
+    html+= """</header><br><br>"""
     html+= """<nav><ul>"""
     for name, image, ref in reports:
       html+= """<li><a href="%s"><img src="%s">%s</a></li>""" % (ref, image, name)

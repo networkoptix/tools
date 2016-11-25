@@ -218,7 +218,10 @@ class UTReport(Report):
     total_pass, total_fail = get_totals(unit_tests)
     new_pass, new_fail = get_diff(unit_tests, unit_tests_prev)
 
-    tests_report = "<h1>Unit test results</h1>"
+    tests_report = "<header><h1>Unit test results</h1>"
+    tests_report+= """<h3>Branch: %s</h3>""" % self.branch
+    tests_report+= """<h3>Platform: %s</h4>""" % self.platform.desc()
+    tests_report+= """</header><br><br>"""
 
     # Summary table
     tests_report += """<table>

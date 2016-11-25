@@ -37,9 +37,12 @@ class Report:
     def __str__(self):
       return "Platform#%s: %s (%s)" % \
              (self.id, self.host, self.description)
-    
+
     def __repr__(self):
       return self.__str__()
+
+    def desc(self):
+      return "%s (%s)" % (self.description, self.host)
 
   class File:
     def __init__(self,
@@ -71,6 +74,10 @@ class Report:
     self.__link_task_id__ = self.__root_task__.id
     # Root report id
     self.__report_id__ = None
+
+  @property
+  def branch(self):
+    return os.environ['TASKBOT_BRANCHNAME']
 
   # Raw report SQL
   def __find_platform(self):

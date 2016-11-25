@@ -146,7 +146,11 @@ class FTReport(Report):
           self.get_stdout(ftest_run)))
 
       
-    tests_report = "<h1>Func test results</h1>"
+    tests_report = "<header><h1>Func test results</h1>"
+    tests_report+= """<h3>Branch: %s</h3>""" % self.branch
+    tests_report+= """<h3>Platform: %s</h3>""" % self.platform.desc()
+    tests_report+= """</header><br><br>"""
+
 
     # Summary table
     tests_report += """<table>
