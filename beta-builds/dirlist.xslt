@@ -76,6 +76,21 @@
 
     <xsl:template match="file">
         <tr>
+            <xsl:choose>
+                <xsl:when test="contains({current()}, '.exe')">
+                    <td class="icon nx"/>
+                </xsl:when>
+                <xsl:when test="contains({current()}, '.msi')">
+                    <td class="icon msi"/>
+                </xsl:when>
+                <xsl:when test="contains({current()}, '.pdb')">
+                    <td class="icon pdb"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <td class="icon"/>
+                </xsl:otherwise>
+            </xsl:choose>
+
             <td class="n">
                 <a href="{current()}">
                     <xsl:value-of select="." />
@@ -109,7 +124,36 @@ th { font-weight: bold; padding-right: 14px; padding-bottom: 3px;}
 td {padding-right: 14px;}
 td.s, th.s {text-align: right;}
 div.list { background-color: white; border-top: 1px solid #646464; border-bottom: 1px solid #646464; padding-top: 10px; padding-bottom: 14px;}
-div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}</style>
+div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
+
+.icon { 
+    height: 16px;
+    width: 16px;
+    padding-bottom: 1px;
+    padding-top: 1px;
+}
+
+.folder { 
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxEAAAsRAX9kX5EAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAJMSURBVDhPfZJZTxNRAEb5b0oMGokhpg9CAa0bUaEBN0xQUCNUAzG+EGPiiylR00BBwqJIV0pb2lKg63RhBrpRxkKHabGl+DlcwpAL0YdzX745ZzKTWwWg6jc/jEJ6AGKiHwKrQT7eh3xMg63IK+TCL8AHu5H1d2Ez/AZCxiApIN4B5Cik+7FXHMX+3gbE7Hv8Wu1F1N2JcmEG+2WzTEmcQMbf+4/A7jgBqBDYhRb4bc9QzA2jUjJI2w+UxUkk3O3S/p/AYQSI2a9jyfgYyeUeIpaEUexu6bDmUh/MJwKpk4EKGGsTvLP3sb7YRcQCr8XOxkdwzlZpPxHYSb6W5VJBjz/7IoLGK/DMtIJzPSSikBzE9tpbrDrunA4I632yvJv/iko5A99PBdzTt8E61ETMxTXgmefSJ7QhG9XKEXJssy9lWeQ/oZi3Yfl7HRYmriJuayFiNvgEmZUOpLz3EJ27QQdy8R5Z3k5/AM+9g3eyFo6xekTNKllMuG+C53lELCo6wEe6KDkT0cAzfh72kctgDA1EXHc2g5uvJwHGfI0ObIQ6KTnh64Zr7BxsulqEZxREZOcUWLXUkUDY1EwH0r4HlMx6HsGpr4b1Sw1C0r84EOOmWoJyOoaQsZEOJJbUlBxztME5chbWz9UITh2KR9RoVxA0KOkA57lLyYz1FglYhs6cCsRMlxCd76ADqcAAwpYmBIxKBAyNEs0kYBq6AN+UQrpUjeStgdkGSW7HJkuu+3HgiE1uCoz9KVzfLsKqVyGyqENRSErT8TM0qPoLtCMvemXNEccAAAAASUVORK5CYII=') no-repeat;
+    }
+
+.msi { 
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxEAAAsRAX9kX5EAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAADBSURBVDhPjZDREcMgDEO9EzsxCjt0GwboP+O4yCBiKCFxTj6QrZdcRFW3SilpKeVWmIvIPgxhIcavho1QrwHYj9Uw1XP4PAAwoAxQTR+WEwAmawK4cIDR5wOAi1fO+QIs4b9/gAOLYQJ43mkAam58AQy/cBJ2JgDKA2y46DUAdxs01zqK8+kl8D2AYVtorvUp1IXhAHDIMwFc9gDY1BFArz1MoLsr2h0AZX596D0CCGE1UP+KJQy11oN+wXsUZ5dUfquDqPUgD9jhAAAAAElFTkSuQmCC') no-repeat;
+    }
+
+.pdb { 
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuOWwzfk4AAAIaSURBVDhPjZLLTxNRFMb757Agogvd6MK48y8gsNLg+xUTXTSkC4wskMZgg2AFtQZJa0HbpinFqhULGtqUdHgUrEWoVVKGSWxp6fQxHebzzB2UYtLak5w592a+73fPfegA6OLJDCJLCcyEv8I3E4XrbQQ2dxCW8QAGR/0YsvlJBqb9N9knwG2hqXUShy8t48TtDZzq3MRxquq8qdWLHrObZHUA/rkUms+EmKnNKODqoID2XoHBms+G0D3gJFkdgOfTD7Sc42hlnpmNYxpEnR86z6HL9IpkdQD29wlaKcg6UFe+MiCgraoDw/2XJKsDeDbxje31yMX9M1CrezrG0jEV/VvtbyKs/hkzgNM3hy/JApbWRXDxPPxhHq6pNWaqFYqi4OjpDuhCkRXYPLMwW73oGx6HwTiE64Y+XKN0fogyMeuT4qQ+hWM31tFyYRElaQ9gmwhi1PUZUkXBMN33ZrqMfosX8Y0i7D5Oc1aFLCsolHeRzcv7AHlXwd2Hr7GwJkJ/b4TVW91P8cI9u2fToroD/pekAZ47AjBZPOh97EDXAyv0PRbcvGPG5U4TntBLVEPdr9qhWJSRzlWQInMiVdIA9L9mPrK+IzMNaLZTkA90sJwo/B/QPzKJUllBVpQhbEv4KZSxSmezSLcVju00BtjOV7CVkZDkSwc6mF7INQbg0xK+kzmWLGJ+VURwJYeP81n4wpnGAKqodnbgN9+QCThpLtD8AAAAAElFTkSuQmCC') no-repeat;
+    }
+
+.nx { 
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABG0lEQVQ4y2PQtrCfDcR/gPg/iRikZz6Dqr7pP0Ut/f/kYJBeBqIU6xj910hq+K/bt++/spXbf63SWf+VDC3BcgzE22jwX7txDVDz7P+KeqZwcQZSnKwWmP5fd9IRuO0YBpjbO//XM7f+b2hp9z8qIeW/kZUdXE7J0OK/enz1f43kxv9axTNQDVDWMfzfM3Hy/79///6fNH3m//Wbtvw/c+78/7dv3/03tnEAOxmkSdnK/b+Sqf1/vWmn/qsFZ6G6QN/c5j8I1Le0g/maRmb/f/78+T+3uAyvt+AGgJwOAkmZOXDJT58+/69pah3qBtQ2E2lAR28/2ICVa9aBoy+vpALM33/o8H8zO2fCBpCLQQb8o9SA+WQaAtKzCACtBb3bG9yHzwAAAABJRU5ErkJggg==') no-repeat;
+    }
+
+.dw { 
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAACEElEQVQ4y22STUuUcRTFz7n/Z16c8RknGc0XVOiFVAzbFJS56wPUTkJaVJu+Q5+hTZuoVdC+L9HCDCKQoFIpB3Uy5kUdnXHmmed/WjhJomd1OFy4l3N/9N5DAgQQBARAIEmTPHTag5SE8ySJ5NmcPmr78i902jDHsKDDGtpHzBXYN6Tatupl5gaYH9ZuSfUKkml2aqXmiwe+vAEzNz6rqBmvLiXnH/U8edV4uRB9ep+4vZB59rb55mn7w7tg5p7xWGaQfOm7ZfIMkn63pKjly0XrCVXeUCfyuzsEbeiqAYA5tRru0s3E3UXFEVNZ1Stx6YcOKgrSqpf9zpoOq3DOjU4bAJDwHcvmU/efMzeIRBrNvXhtCe0mM6Fah/H6Mpr7SGZsdMqOGyHNR0egMR0y3at2w68vC3DDk/JxvPZR7QbDgl28Yic1EoCZ9v+wt19RO976SnM2cYMu4Te+qNW0wgT7BrsnyXumMnFxJf75mWGBgKpbDJLu2hzTWV/bYqdlI1OkdTewJxcXV45eP1ZzX1EL6SxApEM3PstwADSYc2Mzkkze67Cmxp5+r/rtb5B3YzOQVN1EkGBugGFB1U1FRzY6TTJgKpOYW9RBBUGK2XwwOW+XbzHb7ytFN36dUuLOQ+aHmLlgI5MAzmNJwj+KzhIVSEKXRHR/QoOPu5ya07EHYI5kAAA08GSekv5PTnngL96EEdx8DtahAAAAAElFTkSuQmCC') no-repeat;
+    }
+
+                </style>
                 <title>Index of <xsl:value-of select="$path"/>
                 </title>
             </head>
@@ -120,6 +164,7 @@ div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}</style>
                     <table summary="Directory Listing" cellpadding="0" cellspacing="0">
                         <thead>
                             <tr>
+                                <th class="icon"/>
                                 <th class="n">Name</th>
                                 <th class="m">Last Modified</th>
                                 <th class="s">Size</th>
@@ -143,6 +188,7 @@ div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}</style>
             -->
                         <tbody>
                             <tr>
+                                <td class="icon folder"/>
                                 <td class="n">
                                     <a href="../">Parent Directory</a>/</td>
                                 <td class="m">&nbsp;</td>
