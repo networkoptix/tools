@@ -2,6 +2,7 @@
 NUM=$1
 PIDFILE=mrtsp.pids
 LOGDIR=logs
+LOGDIR=${HOME}/TMPLOGS
 mkdir -p $LOGDIR
 test -e $PIDFILE && rm $PIDFILE
 DATE=`date +%Y-%m-%d-%H-%M`
@@ -11,10 +12,10 @@ for ((i=$NUM; i>0; i--)); do
         ./prep.sh $i
     fi
     cd $i
-    python -u ./functest.py --rtsp-perf --autorollback > ../$LOGDIR/RTSP-${DATE}_${i}.log &
+    python -u ./functest.py --rtsp-perf --autorollback > $LOGDIR/RTSP-${DATE}_${i}.log &
     lastpid=$!
     echo $lastpid
     cd ..
     echo $lastpid >> $PIDFILE
-    sleep 2
+    sleep 1.5
 done
