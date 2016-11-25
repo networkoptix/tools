@@ -201,7 +201,7 @@ class FTReport(Report):
         tests_report += cases_to_table(t.fails, 'RED', 'FAIL')
         tests_report += cases_to_table(t.skips, '#C4A000', 'SKIP')
       tests_report += "</tbody></table>"
-    tests_report_id = self.add_report(tests_report,
+      self.add_root_report(tests_report,
       views = {
         'css': ['/reports/styles/func_tests_report.css'],
         'js': ['/commons/scripts/ExpandableTable.js',
@@ -212,11 +212,11 @@ class FTReport(Report):
     if failures:
       color = '"RED"'
       history += """<br>FAIL: <a href="%s">%s</a>""" % \
-        (self.report_href(tests_report_id), len(failures))
+        (self.href(), len(failures))
     else:
       color = '"GREEN"'
       history += """<br><a href="%s">PASS</a>""" % \
-        (self.report_href(tests_report_id))
+        (self.href())
 
     self.add_history(color, history)
     

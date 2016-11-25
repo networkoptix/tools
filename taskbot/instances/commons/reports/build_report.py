@@ -50,7 +50,7 @@ class BuildReport(Report):
 
   def __build_report( self, task ):
     full_log_link = "?stdout=%s&type=%s&raw" % (task.id, "text/plain")
-    colored_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
+    colored_report_id = self.add_root_report(views = {'css': ['/reports/styles/build_report.css']})
     errors_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
     warnings_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
 
@@ -104,7 +104,6 @@ class BuildReport(Report):
     self.__add_build_report(errors_report_id, build_reports, errors_report)
     self.__add_build_report(warnings_report_id, build_reports, warnings_report)
     colored_report.close()
-    return self.report_href(colored_report_id)
 
   def __generate__( self ):
     build_tasks = self.find_task('Build product > %build.taskbot% > %')
@@ -120,21 +119,20 @@ class BuildReport(Report):
 
     color = '"GREEN"';
     desc = build.description
-    task_href = self.task_href(build)
     result = "OK"
     if failed:
       color = '"RED"'
-      task_href = self.__build_report(failed)
+      self.__build_report(failed)
       result = "FAILED"
     else:
       # Get mvn task
       mvn_task = self.find_task('%mvn package%', [build])
       if mvn_task:
-        task_href = self.__build_report(mvn_task[0])
+        self.__build_report(mvn_task[0])
       
 
     history = "<br>%s<br>" % desc
-    history += "<a href=\"%s\">%s</a>" % (task_href, result)
+    history += "<a href=\"%s\">%s</a>" % (self.href(), result)
 
     self.add_history(color, history)
 

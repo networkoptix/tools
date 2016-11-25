@@ -44,13 +44,15 @@ def email_body(report, text):
 
 %s
 
-Use the link for details:
-%s
+
+Use the links for details:
+  Report page: %s
+  Taskbot page: %s
 
 (task #%s)
 
 --
-  taskbot""" % (text, report.get_taskbot_link(), report.link_task_id)
+  taskbot""" % (text, report.href(True), report.get_taskbot_link(), report.link_task_id)
 
 def email_commits(cs, reason):
   return """After these changes:

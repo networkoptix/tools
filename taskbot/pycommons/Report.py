@@ -69,6 +69,8 @@ class Report:
     self.__branch__ = self.__find_branch()
     self.__root_task__ = root_task or self.__find_root_by_pid() or self.__find_last_root()
     self.__link_task_id__ = self.__root_task__.id
+    # Root report id
+    self.__report_id__ = None
 
   # Raw report SQL
   def __find_platform(self):
@@ -388,6 +390,10 @@ class Report:
 
     return report_id
 
+  def add_root_report(self, html = None, views = {}):
+    self.__report_id__ = self.add_report(html, views)
+    return self.__report_id__
+
   # Add content to report
   def add_to_report (self, report_id, html):
     gzipped, buf = Compressor.compress_maybe(html)
@@ -400,6 +406,17 @@ class Report:
   # Get report href
   def report_href (self, report_id):
     return "?report=%s" % report_id
+
+  # Get own href
+  def href (self, fullUrl = False):
+    assert(self.__report_id__)
+    if fullUrl:
+      host = os.environ.get(
+        'TASKBOT_PUBLIC_HTML_HOST',
+        get_host_name())
+      return "http://%s/taskbot/browse.cgi?report=%s" % \
+             (host, self.__report_id__)
+    return "?report=%s" % self.__report_id__
   
   # Get file href
   def file_href( self, f, need_header = False):

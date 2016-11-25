@@ -282,7 +282,7 @@ class UTReport(Report):
       
     tests_report += "</table>"
 
-    tests_report_id = self.add_report(
+    self.add_root_report(
       tests_report,
       views = {
       'css': ['/reports/styles/func_tests_report.css'],
@@ -299,7 +299,7 @@ class UTReport(Report):
     history += """<br>PASS/FAIL: 
       <a href="%s">
       %d/%d (%d/%d)
-      </a>%s""" % (self.report_href(tests_report_id),
+      </a>%s""" % (self.href(),
                  total_pass, total_fail,
                  new_pass, new_fail,
                  cores_link)
