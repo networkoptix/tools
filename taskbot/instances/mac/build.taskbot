@@ -25,6 +25,6 @@ mvn clean -Dutb -Dmaven.clean.failOnError=false
 hg purge .
 
 #+ Build from stratch
-mvn package -e -T4 -Dbuild.configuration=release -Dutb 2>&1
+mvn package -e -T4 -Dbuild.configuration=release 2>&1
 cd unit_tests
 mvn package -e -T4 -Dbuild.configuration=release -pl $UNIT_TESTS 2>&1
