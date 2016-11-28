@@ -3,7 +3,7 @@
 # Artem V. Nikitin
 # Build report
 
-import sys, re, os
+import sys, re, os, string
 
 pycommons = os.path.join(
   os.path.dirname(os.path.realpath(__file__)),
@@ -47,7 +47,10 @@ class BuildReport(Report):
     for name, image, ref in reports:
       html+= """<li><a href="%s"><img src="%s">%s</a></li>""" % (ref, image, name)
     html+= """</ul></nav>"""
-    html+= """<div class="content">%s</div>""" % report_html
+    # Unicode symbols break the build report
+    # TODO. Process unicode correctly
+    printable = set(string.printable)
+    html+= """<div class="content">%s</div>""" % filter(lambda x: x in printable, report_html)
     html+= """</div>"""
     self.add_to_report(report_id, html)
 
