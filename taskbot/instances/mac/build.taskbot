@@ -1,0 +1,30 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+
+cd "$TASKBOT_VAR"/nx_vms
+UNIT_TESTS="cloud_connectivity_ut,nx_network_ut,utils_ut,appserver2_ut,common_ut,vms_utils_ut,nx_media_ut,nx_fusion_ut"
+
+# + Incremental build
+set +o errexit
+mvn package -e -T4 -Dbuild.configuration=release -Dclean=false 2>&1
+RC=$?
+if [ $RC -eq 0 ]; then
+  cd unit_tests
+  mvn package -e -T4 -Dbuild.configuration=release -pl $UNIT_TESTS -Dclean=false 2>&1
+  RC=$?    
+fi
+if [ $RC -eq 0 ]; then
+    exit 0
+fi
+set -o errexit
+cd "$TASKBOT_VAR"/nx_vms
+
+# + Clean
+mvn clean -Dutb -Dmaven.clean.failOnError=false
+hg purge .
+
+#+ Build from stratch
+mvn package -e -T4 -Dbuild.configuration=release -Dutb 2>&1
+cd unit_tests
+mvn package -e -T4 -Dbuild.configuration=release -pl $UNIT_TESTS 2>&1
