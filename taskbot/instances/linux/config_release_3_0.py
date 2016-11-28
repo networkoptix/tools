@@ -22,10 +22,12 @@ config = {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
     'Sergey Ivanov' : 'sivanov@networkoptix.com' },
   'ft_watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
+    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
