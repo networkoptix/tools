@@ -78,6 +78,7 @@ function bstorage_ctl {
         init)
             nxcleardb
             setLogLevel $debugLevel
+            nxedconf minStorageSpace "1000000000"
             ;;
         clear)
             # Clears the main and the backaup storages, passed as $1 and $2
