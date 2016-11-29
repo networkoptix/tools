@@ -141,7 +141,7 @@ if [ "$CONF_PARAM_SET" == 1 ]; then
     if [ -z "$DO_EXT_DEBUG" ]; then
         DO_EXT_DEBUG=1
     fi
-    ARCH=arm-$BOX
+    ARCH=arm
     CALC_MD5=1
 elif [ "$CONF_PARAM_SET" == 0 ]; then
     #x64
