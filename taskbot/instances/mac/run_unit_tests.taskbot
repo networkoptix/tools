@@ -7,14 +7,14 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
 
-QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed -r 's/qt_dir=//')
+QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed 's/qt_dir=//')
 QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
 if [ -n "$QT_LIB" ]; then
   QT_LIB_PATH=$(dirname "$QT_LIB")
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_PATH
 fi
 
-NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed -r 's/linux_lib_dir=//')
+NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed 's/linux_lib_dir=//')
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NX_VMS_LIB_PATH
 
 echo $LD_LIBRARY_PATH
@@ -27,7 +27,7 @@ else
   rm -rf "$UNIT_TESTS_RESULT_PATH"/*
 fi
 
-NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
+NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed 's/bin_dir="?([^"]+)"?/\1/')
 cd $NX_VMS_BIN_PATH
 
 TEST_LIST=$TASKBOT_UNIT_TESTS
