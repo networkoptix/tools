@@ -3,6 +3,7 @@ SERVICE=networkoptix-mediaserver
 SERV_DEB=/vagrant/networkoptix-mediaserver.deb
 SERVDIR=/opt/networkoptix/mediaserver
 SERVCONF=${SERVDIR}/etc/mediaserver.conf
+OLDSTORLIST=${SERVDIR}/var/oldstor.list
 EXT_IF=eth0
 INT_IF=eth1
 MAIN_SYS_NAME=functesting
@@ -28,12 +29,28 @@ function nxrmconf {
 #	sed -i 's/^appserverPassword\s*=.*/appserverPassword=123/' "$SERVCONF"
 #}
 
-function nxrmbase {
+function markstorage {
     if [ -n "$1" -a -d "$1" ]; then
-        rm "$1"/*.sqlite
+        echo "$1" >> "$OLDSTORLIST"
+    fi
+}
+
+function nxclearstor {
+    if [ -n "$1" -a -d "$1" ]; then
+        rm "$1"/*.sqlite  &> /dev/null
         rm -rf "$1/hi_quality"
         rm -rf "$1/low_quality"
     fi
+}
+
+function nxclearoldstor {
+    if [ -f "$OLDSTORLIST" ]; then
+        cat "$OLDSTORLIST" | while read path; do
+            nxclearstor "$path"
+        done
+        rm "$OLDSTORLIST"
+    fi
+
 }
 
 function nxcleardb {
