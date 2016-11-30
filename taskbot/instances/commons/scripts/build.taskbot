@@ -15,7 +15,7 @@ set -o errexit
 
 # + Clean
 mvn clean -Dutb -Dmaven.clean.failOnError=false
-hg purge .
+hg purge . --all
 
 #+ Build from stratch
 mvn package -e -T4 -Dbuild.configuration=release -Dutb 2>&1

@@ -4,8 +4,8 @@ set -o errexit +o nounset -o noclobber
 
 cd "$TASKBOT_VAR"/nx_vms
 
-#UNIT_TESTS="appserver2_ut,cloud_connectivity_ut,cloud_db_ut,client_ut,connection_mediator_ut,common_ut,nx_fusion_ut,nx_network_ut,nx_media_ut,utils_ut,vms_gateway_ut,vms_utils_ut"
-UNIT_TESTS="client_ut,common_ut,vms_utils_ut,nx_fusion_ut"
+UNIT_TESTS="appserver2_ut,cloud_connectivity_ut,cloud_db_ut,client_ut,connection_mediator_ut,common_ut,nx_fusion_ut,nx_network_ut,nx_media_ut,utils_ut,vms_gateway_ut,vms_utils_ut"
+#UNIT_TESTS="client_ut,common_ut,vms_utils_ut,nx_fusion_ut"
 
 # + Incremental build
 set +o errexit

@@ -31,9 +31,8 @@ class EmailNotify:
     msg['Subject'] = subject
     msg['From'] = MAIL_FROM
     msg['To'] = ",".join(map(lambda t: '"%s" <%s>' % (t[0], t[1]), to.items()))
-    print msg['To']
     # Debug
-    # print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
+    print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
     self.__smtp__.sendmail(MAIL_FROM, to.values(), msg.as_string())
     
   def __exit__(self, exc_type, exc_value, traceback):
@@ -65,7 +64,10 @@ def email_commits(cs, reason):
 
 def notify(report, prev_run, subject, reason, notify_owner = True):
   import HGUtils
-  debug = os.environ.get('TASKBOT_DEBUG_MODE', '0') == '1'
+  debug_mode = os.environ.get('TASKBOT_DEBUG_MODE', '0')
+  if debug_mode == '2':
+    notify_owner = False
+  debug = debug_mode == '1'
   commits = HGUtils.changes(report, prev_run).values()
   commits = reduce(lambda x, y: x + y, commits, [])
   to = report.watchers
