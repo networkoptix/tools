@@ -11,13 +11,13 @@ QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed 's/qt_dir=//')
 QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
 if [ -n "$QT_LIB" ]; then
   QT_LIB_PATH=$(dirname "$QT_LIB")
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$QT_LIB_PATH
+  export LIBRARY_PATH=$QT_LIB_PATH
 fi
 
 NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed 's/linux_lib_dir=//')
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$NX_VMS_LIB_PATH
+LIBRARY_PATH=$LIBRARY_PATH:$NX_VMS_LIB_PATH
 
-echo $DYLD_LIBRARY_PATH
+echo $LIBRARY_PATH
 
 UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
 
@@ -43,6 +43,6 @@ do
   mkdir -p $test_tmp
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
-     -c "./$test --gtest_filter=-NxCritical.All3 --tmp=$test_tmp" \
+     -c "DYLD_LIBRARY_PATH=$LIBRARY_PATH ./$test --gtest_filter=-NxCritical.All3 --tmp=$test_tmp" \
      -t 600 -s 100 || true
 done
