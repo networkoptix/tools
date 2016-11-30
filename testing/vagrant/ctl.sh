@@ -36,7 +36,7 @@ function setLogLevel {
 function legacy_ctl {
     case "$mode" in
         clear)
-            nxcleardb
+            ;;
     esac
 }
 
@@ -45,7 +45,6 @@ function timesync_ctl {
         init)
             echo '*** STOPPING NTPD ***'
             service ntp stop
-            nxcleardb
             setLogLevel DEBUG2
             /sbin/ifdown $EXT_IF > /dev/null
             # make it non-executable to disable ntpd start when eth0 goes up:
@@ -67,7 +66,6 @@ function timesync_ctl {
             chmod +x /etc/network/if-up.d/ntpdate
             /etc/network/if-up.d/ntpdate
             date --set=@$1
-            nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for timesync test control"
     esac
@@ -76,18 +74,16 @@ function timesync_ctl {
 function bstorage_ctl {
     case "$mode" in
         init)
-            nxcleardb
-            setLogLevel $debugLevel
             nxedconf minStorageSpace "1000000000"
+
+            ;;
+        rmstorage)
+            nxclearstor "$1"
             ;;
         clear)
             # Clears the main and the backaup storages, passed as $1 and $2
-            nxrmbase "$1"
-            nxrmbase "$2"
-            nxcleardb
-            ;;
-        rmstorage)
-            nxrmbase "$1"
+            markstorage "$1"
+            markstorage "$2"
             ;;
         *) echo "Unknown mode '${mode}' for bstorage test control"
     esac
@@ -96,13 +92,10 @@ function bstorage_ctl {
 function msarch_ctl {
     case "$mode" in
         init)
-            nxcleardb
-            setLogLevel $debugLevel
             ;;
         clear)
             # Clears the main storage, passed as $1, and restore the system name
-            nxrmbase "$1"
-            nxcleardb
+            markstorage "$1"
             nxedconf systemName "$MAIN_SYS_NAME"
             ;;
         *) echo "Unknown mode '${mode}' for msarch test control"
@@ -112,13 +105,10 @@ function msarch_ctl {
 function stream_ctl {
     case "$mode" in
         init)
-            nxcleardb
-            setLogLevel $debugLevel
             ;;
         clear)
             # Clears the main storage, passed as $1, and restore the system name
-            nxrmbase "$1"
-            nxcleardb
+            markstorage "$1"
             ;;
         *) echo "Unknown mode '${mode}' for stream test control"
     esac
@@ -127,12 +117,9 @@ function stream_ctl {
 function natcon_ctl {
     case "$mode" in
         init)
-            nxcleardb
-            setLogLevel $debugLevel
             ;;
         clear)
-            nxrmbase "$1"
-            nxcleardb
+            markstorage "$1"
             ;;
         *) echo "Unknown mode '${mode}' for natcon test control"
     esac
@@ -151,7 +138,6 @@ function db_ctl {
             ;;
         clear)
             nxrestconf
-            nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for dbup test control"
     esac
@@ -160,12 +146,10 @@ function db_ctl {
 function merge_ctl {
     case "$mode" in
         init)
-            nxcleardb
             nxrmconf systemName
             nxrmconf systemIdFromSystemName
             ;;
         clear)
-            nxcleardb
             ;;
         *) echo "Unknown mode '${mode}' for merge test control"
     esac
@@ -186,10 +170,13 @@ function stress_ctl {
 
 case "$mode" in
     init)
+        safestop "$SERVICE"
         nxrestconf
+        setLogLevel $debugLevel
+        nxclearoldstor
+        nxcleardb
         ;;
     clear)
-        safestop "$SERVICE"
         ;;
 esac
 
