@@ -11,13 +11,13 @@ QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed 's/qt_dir=//')
 QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
 if [ -n "$QT_LIB" ]; then
   QT_LIB_PATH=$(dirname "$QT_LIB")
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QT_LIB_PATH
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$QT_LIB_PATH
 fi
 
 NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed 's/linux_lib_dir=//')
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$NX_VMS_LIB_PATH
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$NX_VMS_LIB_PATH
 
-echo $LD_LIBRARY_PATH
+echo $DYLD_LIBRARY_PATH
 
 UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
 
