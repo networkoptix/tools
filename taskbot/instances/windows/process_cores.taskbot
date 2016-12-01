@@ -1,0 +1,15 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+
+UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
+
+cd "$UNIT_TESTS_RESULT_PATH"
+
+for testname in $(find . -maxdepth 1 -type d -printf '%f\n'); do
+    for dump in $(find $testname -name '*.dmp' ); do
+     "$TASKBOT" -d "$dump" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
+        "$TASKBOT_SHARE"/examine_core.taskbot "$dump" "$testname"
+done

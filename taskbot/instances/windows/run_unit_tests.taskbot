@@ -47,4 +47,10 @@ do
       -d "$name"  \
       -c "nice -n -20 ./$test  --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\" --gtest_catch_exceptions=0" \
       -t 900 -s 100 || true
+  find "$LOCALAPPDATA" -name "*$name*.dmp" -exec mv '{}' $test_tmp \;
 done
+
+# + Process core files
+#"$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
+
+

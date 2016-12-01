@@ -1,0 +1,27 @@
+# -*- sh -*-
+
+# + Prepare variables
+set -o errexit -o nounset -o noclobber
+CORE=$1
+NAME=$2
+
+TASK_ID=$("$TASKBOT_COMMONS"/reports/task_report.py "$TASKBOT_CONFIG")
+[ "${CORE:0:1}" = "/" ] && CORE_PATH=$(dirname $CORE) || CORE_PATH="$PWD/$(dirname $CORE)"
+CORE_FILE=$(basename $CORE)
+CORE_STORAGE="$TASKBOT_VAR"/cores
+
+# + Remove old core files
+"$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+  "$TASKBOT_COMMONS/scripts"/clean_file_storage.taskbot "$CORE_STORAGE"
+
+mkdir -p "$CORE_STORAGE/$TASK_ID"
+mv "$CORE_PATH/$CORE_FILE" "$CORE_STORAGE/$TASK_ID"
+
+echo "Core file is stored at $CORE_STORAGE/$TASK_ID/$CORE_FILE"; echo
+CORE="$CORE_STORAGE/$TASK_ID/$CORE_FILE
+
+# + Examine core file
+# ! timeout = 20
+echo $(file $CORE); echo
+$TASKBOT_REPO/cm/opendump.bat $CORE
+
