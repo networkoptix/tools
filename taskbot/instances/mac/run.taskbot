@@ -21,7 +21,7 @@ echo $RC
 
 # + Build product
 if [ $RC -eq 0 ]; then
-  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/build.taskbot
+  "$TASKBOT" $ARGS "$TASKBOT_COMMONS"/scripts/build.taskbot
   RC=$?
   echo $RC
 fi
