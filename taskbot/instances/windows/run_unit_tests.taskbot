@@ -51,6 +51,4 @@ do
 done
 
 # + Process core files
-#"$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
-
-
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
