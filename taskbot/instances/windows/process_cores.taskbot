@@ -3,13 +3,15 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
+UT_PATH="$TASKBOT_VAR"/var/utests
 
-UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
-
-cd "$UNIT_TESTS_RESULT_PATH"
-
-for testname in $(find . -maxdepth 1 -type d -printf '%f\n'); do
-    for dump in $(find $testname -name '*.dmp' ); do
-     "$TASKBOT" -d "$dump" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
-        "$TASKBOT_SHARE"/examine_core.taskbot "$dump" "$testname"
+for testname in $(find "$UT_PATH" -maxdepth 1 -type d ! -path "$UT_PATH" -printf '%f\n'); do
+    i=0
+    echo $testname
+    for dump in $(find "$UT_PATH/$testname" -name '*.dmp'); do
+       "$TASKBOT" -d "$testname.$i.dmp" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
+          "$TASKBOT_SHARE"/examine_core.taskbot "$dump" "$testname" \
+        -t 30 || true
+        i=$(($i + 1))
+    done
 done
