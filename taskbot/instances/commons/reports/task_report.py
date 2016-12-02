@@ -17,7 +17,7 @@ class TaskReport(Report):
     Report.__init__(self, config)
 
   def __generate__( self ):
-    print self.__root_task__.id
+    print self.root_task.id
     return 0
 if __name__ == "__main__":
   sys.exit(TaskReport(sys.argv[1]).generate())

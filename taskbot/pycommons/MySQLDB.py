@@ -24,34 +24,34 @@ def get_db_hostname(config = None):
 class MySQLDB:
 
   def __init__(self, config):
-    self.__config__ = config
+    self.__config = config
     self.__reconnect()
 
   def __reconnect(self):
     self.__disconnect()
-    if self.__config__:
-      self.__conn__ = db.connect(**self.__config__)
+    if self.__config:
+      self.__conn = db.connect(**self.__config)
     else:
-      self.__conn__ = db.connect(
+      self.__conn = db.connect(
         option_files=MY_CNF_FILE,
         option_groups=MY_CNF_GROUP)
-      self.__cursor__ = self.__conn__.cursor()
+      self.__cursor = self.__conn.cursor()
 
   def __disconnect(self):
-    self.__cursor__ = None
-    self.__conn__ = None
+    self.__cursor = None
+    self.__conn = None
 
   @property
   def connected(self):
-    return self.__conn__ and self.__cursor__
+    return self.__conn and self.__cursor
 
   @property
   def cursor( self ):
-    return self.__cursor__
+    return self.__cursor
     
   def execute(self, query, values):
-    self.__cursor__.execute(query, values)
-    return self.__cursor__.lastrowid
+    self.__cursor.execute(query, values)
+    return self.__cursor.lastrowid
 
   def safe_execute(self, query, values):
     try:
@@ -60,18 +60,18 @@ class MySQLDB:
       return False, None
 
   def query(self, query, values):
-    self.__cursor__.execute(query, values)
-    return self.__cursor__.fetchone()
+    self.__cursor.execute(query, values)
+    return self.__cursor.fetchone()
 
   def ensure_connect(self):
     try:
-      self.__conn__.ping()
+      self.__conn.ping()
     except db.errors.Error:
       self.__reconnect()
 
   def commit(self):
-    self.__conn__.commit()
+    self.__conn.commit()
 
   def close(self):
-    self.__cursor__.close()
-    self.__conn__.close()
+    self.__cursor.close()
+    self.__conn.close()

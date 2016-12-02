@@ -2,8 +2,9 @@
 # Arem V. Nikitin
 # Report base class
 
-import os, zlib, urllib
+import os, zlib, urllib, traceback
 from MySQLDB import MySQLDB
+from EmailNotify import emergency
 from Utils import *
 
 class Report:
@@ -62,37 +63,41 @@ class Report:
     
       
   def __init__(self, config, root_task = None, report_watchers=None):
-    self.__config__ = read_config(config) # Takbot config
-    Compressor.gzip_threshold = self.__config__.get('gzip_threshold', 0)
-    Compressor.gzip_ratio = self.__config__.get('gzip_ratio', 0)
-    watchers = report_watchers and self.__config__.get(report_watchers, None) or None
-    self.__watchers__ = watchers or self.__config__.get('watchers', None)
-    self.__db__ =  MySQLDB(self.__config__.get('db_config', None)) # Takbot database
-    self.__platform__ = self.__find_platform()
-    self.__branch__ = self.__find_branch()
-    self.__root_task__ = root_task or self.__find_root_by_pid() or self.__find_last_root()
-    self.__link_task_id__ = self.__root_task__.id
+    self.__config = read_config(config) # Takbot config
+    Compressor.gzip_threshold = self.__config.get('gzip_threshold', 0)
+    Compressor.gzip_ratio = self.__config.get('gzip_ratio', 0)
+    watchers = report_watchers and self.__config.get(report_watchers, None) or None
+    self.__watchers = watchers or self.__config.get('watchers', None)
+    self.__db =  MySQLDB(self.__config.get('db_config', None)) # Takbot database
+    self.__platform = self.__find_platform()
+    self.__branch = self.__find_branch()
+    self.__root_task = root_task or self.__find_root_by_pid() or self.__find_last_root()
+    self.__link_task_id = self.__root_task.id
     # Root report id
-    self.__report_id__ = None
+    self.__report_id = None
 
   @property
   def branch(self):
     return os.environ['TASKBOT_BRANCHNAME']
 
+  @property
+  def root_task(self):
+    return self.__root_task
+
   # Raw report SQL
   def __find_platform(self):
     return Report.Platform(
-      *self.__db__.query(
+      *self.__db.query(
         """SELECT id, host, description FROM platform
         WHERE host = %s""", (get_host_name(), )))
 
   def __find_branch(self):
-    return self.__db__.query("""SELECT id FROM branch
+    return self.__db.query("""SELECT id FROM branch
       WHERE description = %s""", (os.environ['TASKBOT_BRANCHNAME'], ))[0]
 
   def __find_last_root(self):
     res = \
-        self.__db__.query("""SELECT id, parent_task_id, description,
+        self.__db.query("""SELECT id, parent_task_id, description,
           is_command, start, finish, error_message
           FROM task
           WHERE id = (SELECT MAX(id)
@@ -100,7 +105,7 @@ class Report:
             WHERE platform_id = %s
             AND branch_id = %s
             AND parent_task_id IS NULL)""",
-          (self.__platform__.id,  self.__branch__))
+          (self.__platform.id,  self.__branch))
     if res:
       return Report.Task(*res)
     return None
@@ -110,14 +115,14 @@ class Report:
       return None
    
     (parent_task_id, ) = \
-    self.__db__.query("""SELECT MIN(task_id)
+    self.__db.query("""SELECT MIN(task_id)
       FROM running_task
       WHERE host = %s AND pid = %s""",
     (get_host_name(), os.environ['TASKBOT_PARENT_PID']))
 
     while parent_task_id:
       res = \
-        self.__db__.query("""SELECT id, parent_task_id, description,
+        self.__db.query("""SELECT id, parent_task_id, description,
           is_command, start, finish, error_message
           FROM task
           WHERE id = %s""", (parent_task_id, ))
@@ -129,7 +134,7 @@ class Report:
     l = 0
     while task.parent_task_id and (task.is_command or l <= level):
       res = \
-        self.__db__.query("""SELECT id, parent_task_id, description,
+        self.__db.query("""SELECT id, parent_task_id, description,
           is_command, start, finish, error_message
           FROM task
           WHERE id = %s""", (task.parent_task_id, ))
@@ -138,7 +143,7 @@ class Report:
     return task
 
   def __find_task(self, parent_task_id, description):
-    cursor = self.__db__.cursor
+    cursor = self.__db.cursor
     cursor.execute(
       """SELECT id, parent_task_id, description,
       is_command, start, finish, error_message
@@ -148,7 +153,7 @@ class Report:
     return [ Report.Task(*task) for task in cursor ]
 
   def __find_task_by_root(self, root_task_id, description):
-    cursor = self.__db__.cursor
+    cursor = self.__db.cursor
     cursor.execute(
       """SELECT id, parent_task_id, description,
       is_command, start, finish, error_message
@@ -158,14 +163,14 @@ class Report:
     return [ Report.Task(*task) for task in cursor ]
 
   def __find_failed_task(self, parent_task_id):
-    cursor = self.__db__.cursor
+    cursor = self.__db.cursor
     cursor.execute("""SELECT id, parent_task_id, description, is_command, start, finish, error_message
       FROM task
       WHERE parent_task_id = %s AND error_message IS NOT NULL""", (parent_task_id, ))
     return [ Report.Task(*task) for task in cursor ]
 
   def __find_task_by_parent(self, parent_task_id):
-    cursor = self.__db__.cursor
+    cursor = self.__db.cursor
     cursor.execute("""SELECT id, parent_task_id, description, is_command, start, finish, error_message
       FROM task
       WHERE parent_task_id = %s""", (parent_task_id, ))
@@ -173,50 +178,50 @@ class Report:
 
   def __insert_report(self, task_id, gzipped, html):
     return \
-           self.__db__.execute("""INSERT INTO report (task_id, gzipped, html)
+           self.__db.execute("""INSERT INTO report (task_id, gzipped, html)
            VALUES (%s, %s, %s)""", (task_id, gzipped, html));
 
   def __get_report(self, task_id):
-    return self.__db__.query("""SELECT id, gzipped, html
+    return self.__db.query("""SELECT id, gzipped, html
       FROM report
       WHERE task_id = %s""", (task_id,))
 
   def __insert_view(self, type, url):
-    return self.__db__.execute("""INSERT INTO view (type, url)
+    return self.__db.execute("""INSERT INTO view (type, url)
       VALUES (%s, %s)""", (type, url))
 
   def __link_view(self, report_id, view_id):
-    self.__db__.execute("""
+    self.__db.execute("""
         INSERT INTO report_view (report_id, view_id)
         VALUES (%s, %s)""", (report_id, view_id))
 
 
   def __insert_to_report(self, report_id, gzipped, html):
-    self.__db__.execute("""UPDATE report set gzipped = %s, html = %s
+    self.__db.execute("""UPDATE report set gzipped = %s, html = %s
       WHERE id = %s""", (gzipped, html, report_id))
 
   def __add_history(self, task_id, html_table_row):
-     self.__db__.execute("""UPDATE history
+     self.__db.execute("""UPDATE history
         SET html_table_row = CONCAT(html_table_row, %s)
         WHERE task_id = %s""", (html_table_row, task_id, ))
 
   def __get_stdout(self, task_id):
-    return self.__db__.query("""SELECT stdout_gzipped, stdout
+    return self.__db.query("""SELECT stdout_gzipped, stdout
       FROM command
       WHERE task_id = %s""", (task_id,))
 
   def __get_stderr(self, task_id):
-    return self.__db__.query("""SELECT stderr_gzipped, stderr
+    return self.__db.query("""SELECT stderr_gzipped, stderr
       FROM command
       WHERE task_id = %s""",(task_id, ))
 
   def __get_status(self, task_id):
-    return self.__db__.query("""SELECT exit_status
+    return self.__db.query("""SELECT exit_status
       FROM command
       WHERE task_id = %s""",(task_id, ))
 
   def __prev_root_task(self, task):
-    prev_task = self.__db__.query("""SELECT id, parent_task_id, description,
+    prev_task = self.__db.query("""SELECT id, parent_task_id, description,
       is_command, start, finish, error_message
       FROM task
       WHERE id = (SELECT MAX(h.task_id)
@@ -226,25 +231,25 @@ class Report:
                   AND t.platform_id = %s
                   AND t.branch_id = %s
                   AND t.description = %s)""",
-      (task.id, self.__platform__.id, self.__branch__, task.description))
+      (task.id, self.__platform.id, self.__branch, task.description))
     if prev_task:
       return Report.Task(*prev_task)
     return None
 
   def __files_list(self, task_id, path):
-    cursor = self.__db__.cursor
+    cursor = self.__db.cursor
     cursor.execute("""SELECT id, task_id, name, fullpath
       FROM file
       WHERE task_id = %s AND fullpath LIKE %s""",(task_id, path))
     return [ Report.File(*f) for f in cursor ]
 
   def __file_path_list(self, task_id):
-    return self.__db__.query("""SELECT distinct fullpath
+    return self.__db.query("""SELECT distinct fullpath
       FROM file
       WHERE task_id = %s""", (task_id, ))
 
   def __file_history(self, filename, fullpath, task_id, min, max):
-    return self.__db__.query("""SELECT f.id as id, 
+    return self.__db.query("""SELECT f.id as id, 
       t.id as task_id,
       t.root_task_id as root_task_id,
       t.start as start,
@@ -258,7 +263,7 @@ class Report:
         LIMIT %s, %s""", (filename, fullpath, task_id, min, max))
 
   def __get_file_content(self, file_id):
-    return self.__db__.query("""SELECT content
+    return self.__db.query("""SELECT content
       FROM file
       WHERE id = %s""",(file_id))
 
@@ -285,7 +290,7 @@ class Report:
     paths = path.split(' > ')
 
     tasks = self.__find_task_by_root(
-      (root_task or self.__root_task__).id,
+      (root_task or self.__root_task).id,
       paths.pop(0))
    
     if tasks:
@@ -301,7 +306,7 @@ class Report:
       p = paths[0].strip()
       find_task_fn = self.__find_task_by_root
       if p == '%': find_task_fn = self.__find_task
-      tasks = find_task_fn(self.__root_task__.id, paths.pop(0))
+      tasks = find_task_fn(self.__root_task.id, paths.pop(0))
 
     task_queue = [None] +  tasks;
 
@@ -324,16 +329,16 @@ class Report:
     if color:
       html = "<td bgcolor=%s>%s</td>" % (color, html)
 
-    ok, _ =self.__db__.safe_execute(
+    ok, _ =self.__db.safe_execute(
       """INSERT INTO history (task_id, link_task_id, html_table_row)
       VALUES (%s, %s, %s)""", (
-        self.__root_task__.id, self.__link_task_id__, html))
+        self.__root_task.id, self.__link_task_id, html))
     if not ok:
-      self.__add_history(self.__root_task__.id, html)
+      self.__add_history(self.__root_task.id, html)
 
   # Get previous run of the task
   def get_previous_run(self, task = None):
-    return self.__prev_root_task(task or self.__root_task__)
+    return self.__prev_root_task(task or self.__root_task)
 
   # Get task command stdout
   def get_stdout( self, task):
@@ -383,11 +388,11 @@ class Report:
       gzipped, buf = Compressor.compress_maybe(html);
 
     report_id = self.__insert_report(
-      self.__root_task__.id, gzipped, buf)
+      self.__root_task.id, gzipped, buf)
 
     for view_type, urls in views.items():
       for url in urls:
-        result = self.__db__.query(
+        result = self.__db.query(
           """SELECT id FROM view WHERE url = %s""", (url,))
         if result:
           view_id = result[0]
@@ -398,8 +403,8 @@ class Report:
     return report_id
 
   def add_root_report(self, html = None, views = {}):
-    self.__report_id__ = self.add_report(html, views)
-    return self.__report_id__
+    self.__report_id = self.add_report(html, views)
+    return self.__report_id
 
   # Add content to report
   def add_to_report (self, report_id, html):
@@ -416,14 +421,14 @@ class Report:
 
   # Get own href
   def href (self, fullUrl = False):
-    assert(self.__report_id__)
+    assert(self.__report_id)
     if fullUrl:
       host = os.environ.get(
         'TASKBOT_PUBLIC_HTML_HOST',
         get_host_name())
       return "http://%s/taskbot/browse.cgi?report=%s" % \
-             (host, self.__report_id__)
-    return "?report=%s" % self.__report_id__
+             (host, self.__report_id)
+    return "?report=%s" % self.__report_id
   
   # Get file href
   def file_href( self, f, need_header = False):
@@ -432,15 +437,15 @@ class Report:
 
   @property
   def link_task_id(self):
-    return self.__link_task_id__
+    return self.__link_task_id
   
   @property
   def platform(self):
-    return self.__platform__
+    return self.__platform
 
   @property
   def watchers(self):
-    return self.__watchers__;
+    return self.__watchers
 
   # Get link to taskbot UI
   def get_taskbot_link(self):
@@ -449,16 +454,20 @@ class Report:
       get_host_name())
     return "http://%s/taskbot/browse.cgi?platform=%s&branch=%s" % \
        (host,
-        urllib.quote(self.__platform__.host),
+        urllib.quote(self.__platform.host),
         urllib.quote(os.environ['TASKBOT_BRANCHNAME']))
 
   def find_files_by_name(self, task, name):
     return self.__files_list(task.id, "%%%s" % name)
         
   def generate( self ):
-    result = self.__generate__()
-    self.__db__.commit()
-    return result
+    try:
+      result = self.__generate__()
+      self.__db.commit()
+      return result
+    except Exception, x:
+      emergency(self, self.__class__.__name__, traceback.format_exc())
+      raise
 
   # Should return int for sys.exit:
   #   0 - if report sucessfully generated,

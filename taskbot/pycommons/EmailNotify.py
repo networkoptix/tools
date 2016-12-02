@@ -2,9 +2,9 @@
 # Artem V. Nikitin
 # Email notifications for developers
 
-from smtplib import SMTP
+from smtplib import SMTP, SMTPException
 from email.mime.text import MIMEText
-import os
+import os, time
 
 SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
 SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
@@ -16,16 +16,19 @@ DEBUG_WATCHERS = {
 
 class EmailNotify:
 
+  RETRY_COUNT = 3
+  RESEND_TIMEOUT = 5 # seconds
+
   def __init__(self):
-    self.__smtp__ = SMTP(SMTP_ADDR)
-    self.__smtp__.ehlo()
-    self.__smtp__.starttls()
-    self.__smtp__.login(SMTP_LOGIN, SMTP_PASS)
+    self.__smtp = SMTP(SMTP_ADDR)
+    self.__smtp.ehlo()
+    self.__smtp.starttls()
+    self.__smtp.login(SMTP_LOGIN, SMTP_PASS)
 
   def __enter__(self):
     return self
     
-  def send( self, to, subject, text):
+  def send(self, to, subject, text):
     msg = MIMEText(text)
     
     msg['Subject'] = subject
@@ -33,10 +36,18 @@ class EmailNotify:
     msg['To'] = ",".join(map(lambda t: '"%s" <%s>' % (t[0], t[1]), to.items()))
     # Debug
     print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
-    self.__smtp__.sendmail(MAIL_FROM, to.values(), msg.as_string())
+    for i in range(EmailNotify.RETRY_COUNT):
+      try:
+        self.__smtp.sendmail(MAIL_FROM, to.values(), msg.as_string())
+        break
+      except SMTPException, x:
+        if i == EmailNotify.RETRY_COUNT - 1:
+          raise
+        print "Can't send email notify: '%s'" % str(x)
+        time.sleep(EmailNotify.RESEND_TIMEOUT)
     
   def __exit__(self, exc_type, exc_value, traceback):
-    self.__smtp__.quit()
+    self.__smtp.quit()
 
 
 def email_body(report, text):
@@ -88,3 +99,29 @@ def notify(report, prev_run, subject, reason, notify_owner = True):
     email_notify.send(
       to, subject, 
       email_body(report, email_commits(cs, reason)))
+
+def emergency_body(report, name, text):
+  return """Chief!
+
+  There is an error in the taskbot report '%s'
+
+%s
+
+Use the links for details:
+  Taskbot page: %s
+
+(task #%s)
+
+--
+  taskbot""" % (name, text, report.get_taskbot_link(), report.link_task_id)
+
+def emergency(report, name, error):
+  subject = "[Taskbot] [%s] [%s] internal report error" % \
+      (os.environ.get('TASKBOT_BRANCHNAME', ''),
+       report.platform.description)
+  to = DEBUG_WATCHERS
+  with EmailNotify() as email_notify:
+    email_notify.send(
+      to, subject, emergency_body(report, name, error))
+  
+  

@@ -22,10 +22,15 @@ class BuildReport(Report):
   OUTPUT_CLASS = [
     # Linux
     ( r':\d+:\d+:\s+(\S+\s+)?error:', 'error'),
+    ( r':\s+error:', 'error'),
+    ( r':\s+undefined reference to', 'error'),
+    ( r'\s+Error\s+\d+', 'error'),
     ( r':\d+:\d+:\s+warning:', 'warning'),
     # Windows
     ( r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:', 'error'),
     ( r':\s+warning\s[A-Z]+\d+\s*:', 'warning'),
+    # Mac
+    ( r'ERROR:', 'error'),
     # Common
     ( r'\[ERROR\]', 'error'),
     ( r'FAILURE', 'error'),
