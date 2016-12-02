@@ -1,7 +1,7 @@
 -- -*- sql -*-
 
 -- Create database
-CREATE DATABASE taskbot;
+CREATE DATABASE taskbot CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 -- Create users
 GRANT ALL PRIVILEGES ON *.* TO 'taskbot'@'%' IDENTIFIED BY 'taskbot';

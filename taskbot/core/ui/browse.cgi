@@ -371,7 +371,7 @@ sub generate_raw {
         $out = uncompress($out);
       }
     my $type = $params->{type} or 'text/html';
-    print $q->header(-type => $type,
+    print $q->header(-type => $type. "; charset=utf-8",
                      -content_length => length($out));
     print $out;
 }
