@@ -1,4 +1,4 @@
-\# -*- python -*-
+# -*- python -*-
 # $Id$
 # Artem V. Nikitin
 # Linux config
