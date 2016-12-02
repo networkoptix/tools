@@ -225,7 +225,7 @@ class FTReport(Report):
     self.add_history(color, history)
     
     import EmailNotify
-    if results or failed:
+    if failures:
       EmailNotify.notify(
         self, prev_run, "func-tests failed",
         "Fails detected in the func-tests.%s" %
