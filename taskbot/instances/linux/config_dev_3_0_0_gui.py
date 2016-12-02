@@ -1,4 +1,4 @@
-# -*- python -*-
+\# -*- python -*-
 # $Id$
 # Artem V. Nikitin
 # Linux config
@@ -32,6 +32,6 @@ config = {
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
-    'TASKBOT_UNIT_TESTS': 'client_ut common_ut nx_fusion_ut vms_utils_ut'
+    'TASKBOT_UNIT_TESTS': 'client_ut common_ut nx_fusion_ut vms_utils_ut utils_ut'
     }
   }

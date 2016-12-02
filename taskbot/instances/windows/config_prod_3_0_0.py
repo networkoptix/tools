@@ -1,11 +1,11 @@
 # -*- python -*-
 # $Id$
 # Artem V. Nikitin
-# Windows config
+# Linux config
 
 import os
 
-TASKBOT_BRANCHNAME='dev_3.0.0_gui'
+TASKBOT_BRANCHNAME='prod_3.0.0'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -21,7 +21,7 @@ config = {
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
-    'Sergey Ivanov' : 'sivanov@networkoptix.com'},
+    'Test Results' : 'test-results@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
@@ -31,8 +31,6 @@ config = {
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@la.hdw.mx/nx_vms',
-    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@la.hdw.mx/devtools',
-    'TASKBOT_UNIT_TESTS': 'client_ut common_ut nx_fusion_ut vms_utils_ut utils_ut'
+    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@la.hdw.mx/devtools'
     }
   }
-
