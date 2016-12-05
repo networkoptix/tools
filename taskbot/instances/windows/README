@@ -7,6 +7,7 @@ Required packages:
   * screen
   * wget
   * vim
+  * google-breakpad-tools
 - Install python mysql connector for CYGWIN python (https://dev.mysql.com/doc/connector-python/en/connector-python-installation-binary.html):
   * Under cygwin:
     1. wget http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-python-2.1.4.tar.gz

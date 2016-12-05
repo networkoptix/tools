@@ -23,6 +23,7 @@ config = {
     'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Sergey Ivanov' : 'sivanov@networkoptix.com'},
   'environment' : {
+    'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
