@@ -269,14 +269,12 @@ class FTReport(Report):
     passed = len(results) - len(failures)
 
     history = 'Func tests'
+    history += """<br>PASS/FAIL: <a href="%s">%d/%d (%d/%d)</a>""" % \
+        (self.href(), passed, failed, new_pass, new_fail)
     if failures:
       color = '"RED"'
-      history += """<br>PASS/FAIL: <a href="%s">%d/%d (%d/%d)</a>""" % \
-        (self.href(), passed, new_pass, failed, new_fail)
     else:
       color = '"GREEN"'
-      history += """<br><a href="%s">PASS</a>""" % \
-        (self.href())
 
     self.add_history(color, history)
     
