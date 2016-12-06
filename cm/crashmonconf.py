@@ -1,6 +1,6 @@
 __author__ = 'Danil Lavrentyuk'
 
-CHECK_PERIOD = 1 # minutes, used with -a command line option
+CHECK_PERIOD = 60 # minutes
 SUMMARY_PERIOD = 7 # days!
 PROCESS_NAME = "crashmon"
 
@@ -41,10 +41,10 @@ LAST_CRASH_TIME_TPL = """# Last crashfile timestamps
 %s = %d
 """
 
-SMTP_ADDR = 'smtp.gmail.com:587'
-SMTP_LOGIN = 'service@networkoptix.com'
-SMTP_PASS = 'kbnUk06boqBkwU'
+SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
+SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
+SMTP_PASS = 'AlYDnddPk8mWorQFVogh8sqkQX6Nv01JwxxfMoYJAFeC'
 
-MAIL_FROM = '"Crash Monitor (local)" <crashmon@networkoptix.com>'
+MAIL_FROM = '"Crash Monitor" <crashmon@networkoptix.com>'
 MAIL_TO = 'crashdumps@networkoptix.com'
-MAIL_TO = 'anikitin@networkoptix.com'
+#MAIL_TO = 'anikitin@networkoptix.com'

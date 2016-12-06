@@ -137,7 +137,7 @@ def get_crashes(crtype, mark):
             cp = crash['path'].lstrip('/').split('/')
             if (os.name == 'posix'  # on Windows we've got many different starting directories
                 and cp[0] not in ('mediaserver', 'mediaserver-bin', 'client-bin', 'client.bin')):
-                print "WARNING: unexpected the first crash dump path element: %s", cp[0]
+                print "WARNING: unexpected the first crash dump path element: %s" % cp[0]
             crash['basename'] = cp[-1]
             m = rx.match(cp[1])
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None

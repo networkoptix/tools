@@ -25,7 +25,7 @@ _version_rx = re.compile(r"^\d+\.\d+\.\d+")
 
 issue_data = {
     "fields" : {
-        "project": { "key": "TEST" },  # "VMS" #FIXME make it configurable
+        "project": { "key": "VMS" },  # "TEST" #FIXME make it configurable
         "issuetype": { "name": "Task" },
         "summary": "Testing bug creation scripting",
         "customfield_10200": {"value": "Server"},
@@ -33,7 +33,7 @@ issue_data = {
         "components": [ {"name": "Server" } ] ,
         "description": "Not a bug really, just testing the API",
         'priority': { "name": "Low" },
-        "customfield_10009": "TEST-1", # TODO: change to the real epic in VMS  #FIXME make it configurable
+        "customfield_10009": "VMS-2022",
     }
 }
 
