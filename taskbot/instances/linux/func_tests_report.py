@@ -19,21 +19,43 @@ SKIPPED_REGEXP=r'\s+Skipped\scases:\s+\d+'
 TESTCASE_COUNT_REGEXP=r'\[(\w+)\]\s+\w+\s+Total\stests\srun:\s(\d+)'
 TESTCASE_REGEXP=r'^\s+(\w+)\s+\((\w+)\.(\w+)\)$'
 
+# Colors
+FAIL_COLOR = "RED"
+NEW_FAIL_COLOR = "#C25A7C"
+PASSED_COLOR = "GREEN"
+NEW_PASSED_COLOR = "LIGHTGREEN"
+SKIP_COLOR="#C4A000"
+
+# Statuses
+FAIL_STATUS = "FAIL"
+PASS_STATUS = "PASS"
+SKIP_STATUS = "SKIP"
+ERROR_STATUS = "ERROR"
+
 def get_failed_text(tests):
   if tests:
     return "\n\nFailed tests:\n  " + "\n  ".join(map(lambda t: t.name, tests))
   else:
     return ""
 
-def get_test_color(test):
+def get_test_color(test, prev):
   errs  = len(test.errors) + len(test.fails)
   skips = len(test.skips)
   suite_stat = '(%d/%d/%d)' % (test.case_count, errs, skips)
   if test.failed or errs:
-    return 'RED', 'FAIL %s' % suite_stat
-  if len(test.skips):
-    return '#C4A000', 'SKIP %s' % suite_stat
-  return 'GREEN', 'PASS %s' % suite_stat
+    status = FAIL_STATUS + suite_stat
+    if prev and prev.failed:
+      return status, FAIL_COLOR
+    return "NEW " + status, NEW_FAIL_COLOR
+  elif len(test.skips):
+    status = SKIP_STATUS + suite_stat
+    return SKIP_COLOR, status
+  else:
+    status = PASS_STATUS + suite_stat
+    if prev and not prev.failed:
+      return status, PASSED_COLOR
+    return "NEW " + status, NEW_PASSED_COLOR
+
 
 def cases_to_table(cases, color, status):
   buff = ''
@@ -57,6 +79,24 @@ def get_summary_row(title, total, errors, skips):
          title, total,
          total - errors - skips,
          errors, skips)
+
+def find_test_by_name(lst, name):
+  for t in lst:
+    if name == t.name:
+      return t
+  return None
+
+def get_diff(current, prev):
+  passed = failed = 0
+  for info in current:
+    prev_info = None
+    if prev:
+      prev_info = find_test_by_name(prev, info.name)
+    passed+=int((prev_info and prev_info.failed and not info.failed) or \
+      (not prev_info and not info.failed))
+    failed+=int((prev_info and not prev_info.failed and info.failed) or \
+      (not prev_info and info.failed))
+  return passed, failed
 
 class FTReport(Report):
 
@@ -121,18 +161,19 @@ class FTReport(Report):
     if logfile:
       return """<a href="%s">log</a>""" % self.file_href(logfile)
     return "-"
-           
-  def __generate__( self ):
-    prev_run = self.get_previous_run()
-    tasks = self.find_task('Run functional test > %run_func_tests.taskbot%')
+
+  def _get_tests_results(self, prev_run = None):
+    tasks = self.find_task('Run functional test > %run_func_tests.taskbot%', prev_run)
+    if not tasks:
+      print "Can't find task"
+      return []
     tests = self.find_task('Run tests > %while % > %', tasks)
     if not tests:
-      print >> sys.stderr, "Cannot create func-tests report (func-tests task absent)" 
-      return 1      
-   
-    history = 'Func tests'
-    files = self.find_task('Store results > %file.py%', tasks)
+      print "Can't find tests"      
+      return []
+
     results = []
+    files = self.find_task('Store results > %file.py%', tasks)
     for test in tests:
       testname = test.description
       log_filename = "%s.log" % re.sub(r'\W', "_", testname)
@@ -144,14 +185,24 @@ class FTReport(Report):
           self.find_files_by_name(files[0], log_filename),
           bool(self.find_failed(test)),
           self.get_stdout(ftest_run)))
-
       
+    return results
+           
+  def __generate__( self ):
+    results = self._get_tests_results()
+    if not results:
+      print >> sys.stderr, "Cannot create func-tests report (func-tests task absent)" 
+      return 1
+
+    prev_run = self.get_previous_run()
+    results_prev = self._get_tests_results([prev_run])
+
+
     tests_report = "<header><h1>Func test results</h1>"
     tests_report+= """<h3>Branch: %s</h3>""" % self.branch
     tests_report+= """<h3>Platform: %s</h3>""" % self.platform.desc()
     tests_report+= """</header><br><br>"""
-
-
+   
     # Summary table
     tests_report += """<table>
       <thead><tr>
@@ -190,7 +241,8 @@ class FTReport(Report):
       <th>Out</th>
       </tr></thead><tbody>"""
       for t in results:
-        color, status = get_test_color(t)
+        test_prev = find_test_by_name(results_prev, t.name)
+        status, color = get_test_color(t, test_prev)
         tests_report += """<tr>
           <td>%s</td>
           <td bgcolor="%s" align="center">%s</td>
@@ -201,22 +253,26 @@ class FTReport(Report):
                       t.exec_time(),
                       self._log(t.logfile),
                       self.task_href(t.task))
-        tests_report += cases_to_table(t.errors, 'RED', 'ERROR')
-        tests_report += cases_to_table(t.fails, 'RED', 'FAIL')
-        tests_report += cases_to_table(t.skips, '#C4A000', 'SKIP')
+        tests_report += cases_to_table(t.errors, FAIL_COLOR, ERROR_STATUS)
+        tests_report += cases_to_table(t.fails, FAIL_COLOR, FAIL_STATUS)
+        tests_report += cases_to_table(t.skips, SKIP_COLOR, SKIP_STATUS)
       tests_report += "</tbody></table>"
       self.add_root_report(tests_report,
       views = {
         'css': ['/reports/styles/func_tests_report.css'],
         'js': ['/commons/scripts/ExpandableTable.js',
-             '/commons/scripts/ZebraTable.js']})
+               '/commons/scripts/ZebraTable.js']})
 
     failures = filter(lambda t: t.failed or t.errors, results)
+    new_pass, new_fail = get_diff(results, results_prev)
+    failed = len(failures)
+    passed = len(results) - len(failures)
 
+    history = 'Func tests'
     if failures:
       color = '"RED"'
-      history += """<br>FAIL: <a href="%s">%s</a>""" % \
-        (self.href(), len(failures))
+      history += """<br>PASS/FAIL: <a href="%s">%d/%d (%d/%d)</a>""" % \
+        (self.href(), passed, new_pass, failed, new_fail)
     else:
       color = '"GREEN"'
       history += """<br><a href="%s">PASS</a>""" % \
@@ -225,7 +281,12 @@ class FTReport(Report):
     self.add_history(color, history)
     
     import EmailNotify
-    if failures:
+
+    if prev_run and not failures and new_pass:
+      EmailNotify.notify(
+        self, prev_run, "func-tests fixed",
+        "The product func-tests executed successfully.")
+    elif failures:
       EmailNotify.notify(
         self, prev_run, "func-tests failed",
         "Fails detected in the func-tests.%s" %
