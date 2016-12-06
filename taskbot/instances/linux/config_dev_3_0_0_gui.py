@@ -20,7 +20,6 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
-    'Danil Lavrentyuk': 'dlavrentyuk@networkoptix.com',
     'Sergey Ivanov' : 'sivanov@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
