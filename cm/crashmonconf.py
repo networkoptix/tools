@@ -47,4 +47,4 @@ SMTP_PASS = 'kbnUk06boqBkwU'
 
 MAIL_FROM = '"Crash Monitor (local)" <crashmon@networkoptix.com>'
 MAIL_TO = 'crashdumps@networkoptix.com'
-MAIL_TO = 'dlavrentyuk@networkoptix.com'
+MAIL_TO = 'anikitin@networkoptix.com'
