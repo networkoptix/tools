@@ -49,7 +49,7 @@ def get_test_color(test, prev):
     return "NEW " + status, NEW_FAIL_COLOR
   elif len(test.skips):
     status = SKIP_STATUS + suite_stat
-    return SKIP_COLOR, status
+    return status, SKIP_COLOR
   else:
     status = PASS_STATUS + suite_stat
     if prev and not prev.failed:
