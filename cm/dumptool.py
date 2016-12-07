@@ -29,6 +29,7 @@ import urllib2
 
 CONFIG = dict(
     cdb_path = 'cdb',
+    zip_path = '7z',
     data_dir = 'c:/develop/dumptool/',
     dist_url = 'http://beta.networkoptix.com/beta-builds/daily/',
     ext = dict(
@@ -42,8 +43,8 @@ CONFIG = dict(
     ],
 )
 
-CONFIG['7z_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
-CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
+#CONFIG['zip_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
+#CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
 
 class Error(Exception):
     pass
@@ -145,13 +146,14 @@ class DumpAnalyzer(object):
 
     def __init__(
         self, path, customization='default',
-        version=None, build=None, verbose=0):
+        version=None, build=None, branch='', verbose=0):
         '''Initializes analizer with dump :path and :customization
         '''
         self.dump_path = path
         self.customization = customization
         self.version = version
         self.build = build
+        self.branch = branch
         self.verbose = verbose
 
     def log(self, message, level=0):
@@ -165,9 +167,9 @@ class DumpAnalyzer(object):
         '''
         with Cdb(self.dump_path) as cdb:
             self.module = cdb.main_module()
-            self.log("DEBUG: CDB reports main module: " + self.module)
+            self.log("CDB reports main module: " + self.module, level=2)
             self.version = self.version or cdb.module_info(self.module, 'version')
-            self.log("DEBUG: CDB reports version: " + self.version)
+            self.log("CDB reports version: " + self.version, level=2)
         self.msi = 'server' if self.module.find('server') != -1 else 'client'
         self.log('Dump information: %s (%s) %s %s ' % (
             self.module, self.msi, self.version, self.customization))
@@ -182,14 +184,13 @@ class DumpAnalyzer(object):
             page = urllib2.urlopen(url).read().replace('\n', '')
         except urllib2.HTTPError as e:
             raise Error('%s, url: %s' % (e, url))
-        #print "DEBUG (PAGE): %s" % (page,)
         results, failures = [], []
         for regexp in regexps:
             rx = '.+%s.+' % regexp
             self.log("Trying regexp /%s/" % (rx,), level=1)
             m = re.match(rx, page)
             if m:
-		print "DEBUG: regexp /%s/ got url '%s'" % (rx, m.group(1))
+                self.log("Regexp /%s/ got url '%s'" % (rx, m.group(1)), level=2)
                 results.append((url, m.group(1)))
             else:
                 failures.append(regexp)
@@ -202,15 +203,15 @@ class DumpAnalyzer(object):
         '''Fetches URLs of required resourses
         '''
         out = self.fetch_url_data(
-            CONFIG['dist_url'], ['''href="(%s\-[^/]+)"''' % self.build])
+            CONFIG['dist_url'], ['''.+\>(%s\-%s[^\>\<]+)\<.+''' % (self.build, self.branch)])
         if len(out) == 0:
             print "No distributive found for build %s. Dump analyze imposible" % self.build
             return False
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(CONFIG['dist_url'], build_path)
-        print "DEBUG: build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
-              build_url, CONFIG['dist_url'], build_path)
+        self.log("build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
+              build_url, CONFIG['dist_url'], build_path), level=2)
         out = self.fetch_url_data(
             build_url, ('''\"(.+\-%s)\"''' % r for r in [
                 CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
@@ -257,7 +258,7 @@ class DumpAnalyzer(object):
             self.module_dir = os.path.dirname(
                 self.find_file(self.module + '.exe'))
             return run(
-                CONFIG['7z_path'], 'x', path, '-o' + self.module_dir, '-y')
+                CONFIG['zip_path'], 'x', path, '-o' + self.module_dir, '-y')
 
     def download_dists(self):
         '''Downloads required distributives
@@ -327,8 +328,8 @@ def main():
     except Error as e:
         sys.stderr.write('Error: %s\n' % e)
         sys.exit(1)
-#    except KeyboardInterrupt:
-#        sys.stderr.write('Interrupted\n')
+    except KeyboardInterrupt:
+        sys.stderr.write('Interrupted\n')
 
 if __name__ == '__main__':
     main()

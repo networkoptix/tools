@@ -4,4 +4,3 @@ DIR=${NX_VAGRANT_DIR:-vagrant}
 test -d "$DIR" || mkdir "$DIR"
 #pushd $environment && rsync -av --delete rsync://$NX_RSYNC_SOURCE/buildenv/linux/test .
 rsync -av --delete rsync://$NX_RSYNC_SOURCE/buildenv/test/sample.mkv "$DIR"
-

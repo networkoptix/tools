@@ -13,7 +13,7 @@ exit 0
 fi
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
-DEV_TOOLS=$(readlink $SCRIPT_DIR)/..
+DEV_TOOLS=$(readlink -f $SCRIPT_DIR)/..
 
 BIN=$1
 shift

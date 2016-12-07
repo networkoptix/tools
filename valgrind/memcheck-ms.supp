@@ -100,6 +100,22 @@
    ...
 }
 {
+    makeCertificateAndKey
+    Memcheck:Cond
+    ...
+    fun:_ZN2nx7network9SslEngine21makeCertificateAndKeyERK10QByteArrayS4_S4_
+    fun:_ZN2nx7network9SslEngine22useOrCreateCertificateERK7QStringRK10QByteArrayS7_S7_
+    ...
+}
+{
+    makeCertificateAndKey
+    Memcheck:Value8
+    ...
+    fun:_ZN2nx7network9SslEngine21makeCertificateAndKeyERK10QByteArrayS4_S4_
+    fun:_ZN2nx7network9SslEngine22useOrCreateCertificateERK7QStringRK10QByteArrayS7_S7_
+    ...
+}
+{
    QString18toLocal8Bit
    Memcheck:Leak
    match-leak-kinds: reachable
@@ -112,6 +128,26 @@
    bn_mul4x_mont
    Memcheck:Value8
    fun:bn_mul4x_*
+   ...
+}
+{
+   bn_mul4x_mont
+   Memcheck:Cond
+   fun:bn_mul4x_*
+   ...
+}
+{
+   bn_power
+   Memcheck:Value8
+   fun:mul4x_internal
+   fun:bn_power*
+   ...
+}
+{
+   bn_power
+   Memcheck:Cond
+   fun:mul4x_internal
+   fun:bn_power*
    ...
 }
 {
@@ -175,7 +211,6 @@
    bn_sqr8x_internal
    Memcheck:Value8
    fun:bn_sqr8x_internal
-   obj:*
 }
 {
     SSL_load_error_strings
@@ -214,5 +249,67 @@
     match-leak-kinds: possible
     ...
     fun:_dl_init
+    ...
+}
+{
+    gtest_init
+    Memcheck:Leak
+    match-leak-kinds: possible
+    ...
+    fun:_ZN7testing8internal23MakeAndRegisterTestInfoEPKcS2_S2_S2_NS0_12CodeLocationEPKvPFvvES7_PNS0_15TestFactoryBaseE
+    ...
+    fun:__libc_csu_init
+    fun:(below main)
+}
+{
+    gtest_init
+    Memcheck:Leak
+    match-leak-kinds: possible
+    ...
+    fun:_ZNSs12_S_constructIPKcEEPcT_S3_RKSaIcESt20forward_iterator_tag
+    ...
+    fun:__libc_csu_init
+    fun:(below main)
+}
+{
+    gtest_assert
+    Memcheck:Leak
+    match-leak-kinds: possible
+    ...
+    fun:_ZNK7testing8internal12AssertHelpera*
+    ...
+}
+{
+    SSL_RSA
+    Memcheck:Cond
+    ...
+    fun:ssl3_accept
+    ...
+}
+{
+    SSL_RSA
+    Memcheck:Value8
+    ...
+    fun:ssl3_accept
+    ...
+}
+{
+    SSL_RSA
+    Memcheck:Cond
+    ...
+    fun:ssl3_connect
+    ...
+}
+{
+    SSL_RSA
+    Memcheck:Value8
+    ...
+    fun:ssl3_connect
+    ...
+}
+{
+    QUrl::setUrl
+    Memcheck:Cond
+    fun:_ZN4QUrl6setUrlERK7QStringNS_11ParsingModeE
     ...
 }
