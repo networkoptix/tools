@@ -748,6 +748,7 @@ def prepare_functest_cfg(path=""):
         name = os.path.join(path, name)
     args = {
         'serverList' : _confServerList('Box1', 'Box2'),
+        'vagrantFolder': os.path.join(os.path.abspath(rundir), 'vagrant'),
         'natTestServerList': _confServerList('Box1', 'Behind'),
         'username': conf.MEDIASERVER_USER,
         'password': conf.MEDIASERVER_PASS,
