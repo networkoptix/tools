@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 import sys, os
 import traceback as TB
@@ -13,7 +13,7 @@ JIRA = "https://networkoptix.atlassian.net"
 JIRAAPI = JIRA + "/rest/api/2/"
 ISSUE = JIRAAPI + "issue/"
 BROWSE = JIRA + "/browse/"
-AUTH = ("dlavrentyuk", "LathanderTest109")
+AUTH = ("service@networkoptix.com", "kbnUk06boqBkwU")
 
 CODE_OK = 200
 CODE_CREATED = 201

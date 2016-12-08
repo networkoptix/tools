@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 Crash Inspector regulary analizes crash reports, finds crashed function names,
 manages a know crashes list and creates tickets for new crashes.
 """
+
 __author__ = 'Danil Lavrentyuk'
 import sys
 import os
