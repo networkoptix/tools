@@ -30,15 +30,21 @@ if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
 fi
 echo $TEST_LIST
 
+ulimit -c unlimited
 # + Run tests
 for test in $TEST_LIST
 do
   test_tmp=$UNIT_TESTS_RESULT_PATH/$test
   mkdir -p $test_tmp
+  touch $test_tmp/$test$timestamp
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
      -c "./$test --gtest_filter=-NxCritical.All3 --tmp=$test_tmp" \
      --var "DYLD_LIBRARY_PATH=$NX_VMS_LIB_PATH" \
      --var "DYLD_FRAMEWORK_PATH=$QT_LIB_PATH" \
      -t 600 -s 100 || true
+  find /cores -name "core.*" -newer "$test_tmp/$test$timestamp" -exec mv '{}' $test_tmp \;
 done
+
+# + Process core files
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
