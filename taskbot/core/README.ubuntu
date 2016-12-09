@@ -19,7 +19,7 @@ APACHE
 MYSQL
 - Change /etc/mysql/my.cnf:
   * max_allowed_packet	= 16M
-- Ensure that mysql service were started.
+- Ensure that mysql service were started (service mysql status).
 - Create taskbot database:
   * sudo -i mysql --user=root mysql < devtools/taskbot/core/sql/initial.mysql
   * mysql --user=taskbot --password=taskbot taskbot <  devtools/taskbot/core/sql/schema.mysql
