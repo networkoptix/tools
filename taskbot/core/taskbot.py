@@ -243,7 +243,7 @@ class TaskExecutor:
     def __repr__(self):
       return self.__str__()
 
-  def __init__(self, db, shell, timeout, parent_task_id = None, args = []):
+  def __init__(self, db, shell, timeout, parent_task_id = None, args = [], env_vars=[]):
       
     self.__task_stack__ = []
     self.__db__ = db
@@ -271,6 +271,7 @@ class TaskExecutor:
     self.__out__ = OutputReader(self.__shell_process__.stdout)
     self.__err__ = OutputReader(self.__shell_process__.stderr)
     self.__status__ = StatusChecker(self.__rfdstatus__)
+    self.__env_vars = env_vars
     os.close(self.__wfdstatus__)
     self.closed = False
 
@@ -374,6 +375,8 @@ class TaskExecutor:
       return
     task = self.start_command(command)
     Trace.trace("%s\n" % command)
+    for v in self.__env_vars:
+      self.write_command( "export %s\n" %v, True)
     status, stderr, stdout = \
       self.write_command("{ %s\n/bin/echo $? >&%d; }\n" % \
         (command, self.__wfdstatus__), False, timeout, task)
@@ -495,6 +498,10 @@ def main():
                     "Zero (or negative) value means indefinite. "\
                     "Overrides corresponding setting in config file.")
 
+  parser.add_option("--var", action = "append", default=[],
+                    help="List of the environment variables, " \
+                    "passed into the script.")
+
 
   (options, args) = parser.parse_args()
 
@@ -544,7 +551,8 @@ def main():
     shell = config.get('sh', DEFAULT_SHELL),
     timeout = timeout,
     parent_task_id = parent_task_id,
-    args=args[1 + int(not options.command):])
+    args=args[1 + int(not options.command):],
+    env_vars=options.var)
 
   # Register signal handlers
   def _shutdown( sigNum, frame ):
