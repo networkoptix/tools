@@ -74,7 +74,7 @@ class BuildReport(Report):
     lines = self.get_stdout(task).split("\n")
     line_count=len(lines)
     line_number=last_warning=last_error=0
-    colored_report = errors_report = warnings_report = ''
+    errors_report = warnings_report = errors_text = ''
     colored_report = StringIO()
 
     def get_color_class(line):
@@ -101,7 +101,9 @@ class BuildReport(Report):
         if color_class == 'error':
           if last_error and line_number - last_error > 1:
             errors_report  += """<span class="%s">...</span><br>\n""" % color_class
+            errors_text += "...\n"
           errors_report  += rpt_line
+          errors_text += "%s\n" % line
           last_error = line_number
         elif color_class == 'warning':
           if last_warning and line_number - last_warning > 1:
@@ -115,6 +117,7 @@ class BuildReport(Report):
     self.__add_build_report(errors_report_id, build_reports, errors_report)
     self.__add_build_report(warnings_report_id, build_reports, warnings_report)
     colored_report.close()
+    return errors_text
 
   def __generate__( self ):
     build_tasks = self.find_task('Build product > %build.taskbot% > %')
@@ -131,9 +134,10 @@ class BuildReport(Report):
     color = '"GREEN"';
     desc = build.description
     result = "OK"
+    errors = ''
     if failed:
       color = '"RED"'
-      self.__build_report(failed)
+      errors = self.__build_report(failed)
       result = "FAILED"
     else:
       # Get mvn task
@@ -162,6 +166,8 @@ class BuildReport(Report):
       if not prev_build or \
          (prev_build and not self.find_failed(prev_build)):
        error_msg = "The product is no longer being built."
+       if errors:
+         error_msg += "\n\n%s" % errors 
       EmailNotify.notify(
         self, prev_run, "build failed", error_msg)
     elif prev_build and self.find_failed(prev_build):
