@@ -49,6 +49,8 @@ CONFIG = dict(
 class Error(Exception):
     pass
 
+class CdbError(Error):
+    pass
 
 def report_name(dump_path, safe=False):
     '''Generates report name based on dump name
@@ -57,10 +59,10 @@ def report_name(dump_path, safe=False):
     if not dump_path.lower().endswith(dump_ext):
         if safe:
             return ''  # to calls where exceptions aren't wanted
-        raise Error('Only *%s dumps are supported' % dump_ext)
+        raise Error('Only *%s dumps are supported, rejected: %s' % (
+            dump_ext, dump_path))
     report_ext = '.' + CONFIG['ext']['report']
     return dump_path[:-len(dump_ext)] + report_ext
-
 
 def clear_cache(cacheDir, keepFiles):
     print "Clearing cache dir %s" % (cacheDir,)
@@ -74,6 +76,9 @@ def clear_cache(cacheDir, keepFiles):
         except IOError:
             pass
 
+def shell_line(command):
+    return ' '.join(
+        '"%s"' % arg if arg.find(' ') != -1 else arg for arg in command)
 
 class Cdb(object):
     '''Cdb programm driver to analize DMP files
@@ -82,13 +87,13 @@ class Cdb(object):
     def __init__(self, dump, debug=None):
         '''Starts up cdb with :dump and :debug path
         '''
-        cmd = [CONFIG['cdb_path'], '-z', dump]
-        if debug: cmd += ['-i', debug]
+        self.shell = [CONFIG['cdb_path'], '-z', dump]
+        if debug: self.shell += ['-i', debug]
         try:
-            self.cdb = subprocess.Popen(cmd,
+            self.cdb = subprocess.Popen(self.shell,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         except OSError as e:
-            raise Error('Cannot start %s - %s' % (cmd, e))
+            raise CdbError('Cannot start %s -> %s' % (shell_line(self.shell), e))
         self.execute()
         if debug:
             self.execute('.sympath+ "%s"' % debug)
@@ -109,8 +114,11 @@ class Cdb(object):
         out = ''
         def read_ch():
             c = self.cdb.stdout.read(1)
-            if not c: raise Error(
-                "Cdb command: %s\nUnexpected eof: %s" % (command, out))
+            if not c:
+                raise CdbError('\n'.join((
+                    '%s ->' % shell_line(self.shell),
+                    'Cdb command: %s' % command,
+                    'Unexpected eof: %s' % out)))
             return c
         while not out.endswith('\n0:'): out += read_ch()
         while self.cdb.stdout.read(1) != '>': pass
@@ -128,7 +136,7 @@ class Cdb(object):
         for line in self.execute('lmvm%s\n' % name).split('\n'):
             if line.find(key) != -1:
                 return line.split(':')[1].strip()
-        raise Error("Attribute '%s' is not found" % key)
+        raise CdbError("Attribute '%s' is not found" % key)
 
     def report(self):
         '''Generates text crash report (cdb-bt)
@@ -160,12 +168,13 @@ class DumpAnalyzer(object):
         '''Logs data in case of verbose mode
         '''
         if level < int(self.verbose):
-            sys.stderr.write('> %s\n' % message)
+            sys.stderr.write('[%i] %s\n' % (level, message))
 
     def get_dump_information(self):
         '''Gets initial information from dump
         '''
         with Cdb(self.dump_path) as cdb:
+            self.log('Info run: ' + shell_line(cdb.shell), level=1)
             self.module = cdb.main_module()
             self.log("CDB reports main module: " + self.module, level=2)
             self.version = self.version or cdb.module_info(self.module, 'version')
@@ -187,14 +196,14 @@ class DumpAnalyzer(object):
         results, failures = [], []
         for regexp in regexps:
             rx = '.+%s.+' % regexp
-            self.log("Trying regexp /%s/" % (rx,), level=1)
+            self.log("Trying regexp /%s/" % (rx,), level=2)
             m = re.match(rx, page)
             if m:
                 self.log("Regexp /%s/ got url '%s'" % (rx, m.group(1)), level=2)
                 results.append((url, m.group(1)))
             else:
                 failures.append(regexp)
-                self.log("Warning: canot find '%s' in %s" % (regexp, url))
+                self.log("Warning: canot find '%s' in %s" % (regexp, url), level=1)
         if subUrl and len(failures):
             results += self.fetch_url_data(subUrl, failures)
         return results
@@ -223,15 +232,16 @@ class DumpAnalyzer(object):
             os.makedirs(self.target_path)
         return True
 
-    @staticmethod
-    def download_url_data(url, local, processor = lambda path: None):
+    def download_url_data(self, url, local, processor = lambda path: None):
         '''Downloads file from :url to :local directory, apply :processor if any
         '''
-        file = os.path.join(local, os.path.basename(url))
-        if not os.path.isfile(file):
-            with open(file, 'wb') as f:
+        name = os.path.join(local, os.path.basename(url))
+        if not os.path.isfile(name):
+            with open(name, 'wb') as f:
                 f.write(urllib2.urlopen(url).read())
-            processor(file)
+            processor(name)
+        else:
+            self.log('Already downloaded: %s' % name, level=1)
 
     def find_file(self, name):
         '''Searches file :name in build directory
@@ -244,12 +254,12 @@ class DumpAnalyzer(object):
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
         '''
-        self.log("Extracting %s ..." % (path,))
-        def run(*cmd):
+        self.log("Extract: %s" % (path,))
+        def run(*command):
             try:
-                return subprocess.check_output(cmd)
-            except IOError as e:
-                raise Error('Cannot run %s - %s' % (cmd, e))
+                return subprocess.check_output(command)
+            except (IOError, WindowsError, subprocess.CalledProcessError) as e:
+                raise Error('Cannot run %s - %s' % (shell_line(command), e))
         if path.endswith('.msi'):
             return run(
                 'msiexec', '-a', path.replace('/', '\\'),
@@ -276,35 +286,32 @@ class DumpAnalyzer(object):
         report_path = report_name(self.dump_path)
         self.log('Loading debug information: ' + self.module_dir)
         with Cdb(self.dump_path, debug=self.module_dir) as cdb:
+            self.log('Debug run: ' + shell_line(cdb.shell), level=1)
             self.log('Generating report: ' + report_path)
             report = cdb.report()
             with open(report_path, 'w') as report_file:
                 report_file.write(report)
         return report if asString else report_path
 
-
-FORMATS = {'path', 'str', 'dict'}
-
-def _resultDict(dump, text):
-    return dict(
-        component = dump.msi,
-        dump = text
-    )
-
 def analyseDump(*args, **kwargs):
     '''Generated cdb-bt report based on dmp file
     Note: Returns right away in case if dump is already analized
     Returns: cdb-bt report path
     '''
+    def resultDict(dump, text):
+        return dict(
+            component = dump.msi,
+            dump = text
+        )
     format = kwargs.pop('format', 'path')  # possible values: path, str, dict
-    if not format in FORMATS:
+    if not format in {'path', 'str', 'dict'}:
         raise Error("Wrong format value: %s" % format)
     dump = DumpAnalyzer(*args, **kwargs)
     report = report_name(dump.dump_path)
     if os.path.isfile(report):
         if format == 'dict':
             dump.get_dump_information()
-            return _resultDict(dump, open(report, 'r').read())
+            return resultDict(dump, open(report, 'r').read())
         elif format == 'str':
             return open(report, 'r').read()
         else:
@@ -315,7 +322,7 @@ def analyseDump(*args, **kwargs):
         return dict() if format == 'dict' else ''
     dump.download_dists()
     reportText = dump.generate_report(format != 'path')
-    return _resultDict(dump, reportText) if format == 'dict' else reportText
+    return resultDict(dump, reportText) if format == 'dict' else reportText
 
 def main():
     args, kwargs = list(), dict()
