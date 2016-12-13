@@ -60,6 +60,13 @@ function nxcleardb {
     nxedconf systemIdFromSystemName 1
 }
 
+function nxclearall {
+    rm -rf ${SERVDIR}/var/data/* &> /dev/null
+    nxedconf removeDbOnStartup 1
+    nxedconf systemName $MAIN_SYS_NAME
+    nxedconf systemIdFromSystemName 1
+}
+
 function safestop {
     status "$1"|grep 'stop' || stop "$1"
 }

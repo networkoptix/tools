@@ -166,6 +166,17 @@ function stress_ctl {
     esac
 }
 
+function vcamera_ctl {
+    case "$mode" in
+        init)
+            nxclearall
+            ;;
+        clear)
+            ;;
+        *) echo "Unknown mode '${mode}' for stress test control"
+    esac
+}
+
 ################################################################################################
 
 case "$mode" in
@@ -173,6 +184,7 @@ case "$mode" in
         safestop "$SERVICE"
         nxrestconf
         setLogLevel $debugLevel
+        nxedconf allowSslConnections false
         nxclearoldstor
         nxcleardb
         ;;
@@ -207,6 +219,9 @@ case "$testName" in
         ;;
     merge)
         merge_ctl "$@"
+        ;;
+    vcamera)
+        vcamera_ctl "$@"
         ;;
     *)
         echo Unknown test name "$testName"
