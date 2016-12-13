@@ -14,63 +14,57 @@ MAIL_FROM = '"Taskbot System" <autotest@networkoptix.com>'
 DEBUG_WATCHERS = {
   'Artem Nikitin': 'anikitin@networkoptix.com'}
 
-class EmailNotify:
 
-  RETRY_COUNT = 3
-  RESEND_TIMEOUT = 5 # seconds
+RETRY_COUNT = 3
+RESEND_TIMEOUT = 5 # seconds
 
-  def __init__(self):
-    self.__smtp = SMTP(SMTP_ADDR)
-    self.__smtp.ehlo()
-    self.__smtp.starttls()
-    self.__smtp.login(SMTP_LOGIN, SMTP_PASS)
-
-  def __enter__(self):
-    return self
-    
-  def send(self, to, subject, text):
-    msg = MIMEText(text)
-    
-    msg['Subject'] = subject
-    msg['From'] = MAIL_FROM
-    msg['To'] = ",".join(map(lambda t: '"%s" <%s>' % (t[0], t[1]), to.items()))
-    # Debug
-    print "TO:  %s\nMSG:  %s" % ("\n  ".join(to), text)
-    for i in range(EmailNotify.RETRY_COUNT):
+  
+def send(to, subject, text):
+  msg = MIMEText(text, 'plain', 'utf-8')
+  msg['Subject'] = subject
+  msg['From'] = MAIL_FROM
+  msg['To'] = ",".join(map(lambda t: '"{0}" <{1}>'.format(t[0], t[1]), to.items()))
+  # Debug
+  print "TO:  {0}\nMSG:  {1}".format(msg['To'], text)
+  for i in range(RETRY_COUNT):
+    try:
+      smtp = SMTP(SMTP_ADDR)
       try:
-        self.__smtp.sendmail(MAIL_FROM, to.values(), msg.as_string())
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(SMTP_LOGIN, SMTP_PASS)
+        smtp.sendmail(MAIL_FROM, to.values(), msg.as_string())
         break
-      except SMTPException, x:
-        if i == EmailNotify.RETRY_COUNT - 1:
-          raise
-        print "Can't send email notify: '%s'" % str(x)
-        time.sleep(EmailNotify.RESEND_TIMEOUT)
-    
-  def __exit__(self, exc_type, exc_value, traceback):
-    self.__smtp.quit()
+      finally:
+        smtp.quit()
+    except SMTPException, x:
+      if i == RETRY_COUNT - 1:
+        raise
+      print "Can't send email notify: '%s'" % str(x)
+      time.sleep(RESEND_TIMEOUT)
 
 
 def email_body(report, text):
   return """Dear all!
 
-%s
+{0}
 
 
 Use the links for details:
-  Report page: %s
-  Taskbot page: %s
+  Report page: {1}
+  Taskbot page: {2}
 
-(task #%s)
+(task #{3})
 
 --
-  taskbot""" % (text, report.href(True), report.get_taskbot_link(), report.link_task_id)
+  taskbot""".format(text, report.href(True), report.get_taskbot_link(), report.link_task_id)
 
 def email_commits(cs, reason):
   return """After these changes:
 
-  %s
+  {0}
 
-%s""" % (",\n  ".join(cs), reason)
+{1}""".format(",\n  ".join(cs), reason)
   
 
 def notify(report, prev_run, subject, reason, notify_owner = True):
@@ -95,33 +89,30 @@ def notify(report, prev_run, subject, reason, notify_owner = True):
       (os.environ.get('TASKBOT_BRANCHNAME', ''),
        report.platform.description, subject)
 
-  with EmailNotify() as email_notify:
-    email_notify.send(
-      to, subject, 
-      email_body(report, email_commits(cs, reason)))
+  send(
+    to, subject, 
+    email_body(report, email_commits(cs, reason)))
 
 def emergency_body(report, name, text):
   return """Chief!
 
-  There is an error in the taskbot report '%s'
+  There is an error in the taskbot report '{0}'
 
-%s
+{1}
 
 Use the links for details:
-  Taskbot page: %s
+  Taskbot page: {2}
 
-(task #%s)
+(task #{3})
 
 --
-  taskbot""" % (name, text, report.get_taskbot_link(), report.link_task_id)
+  taskbot""".format(name, text, report.get_taskbot_link(), report.link_task_id)
 
 def emergency(report, name, error):
   subject = "[Taskbot] [%s] [%s] internal report error" % \
       (os.environ.get('TASKBOT_BRANCHNAME', ''),
        report.platform.description)
   to = DEBUG_WATCHERS
-  with EmailNotify() as email_notify:
-    email_notify.send(
-      to, subject, emergency_body(report, name, error))
+  send(to, subject, emergency_body(report, name, error))
   
   

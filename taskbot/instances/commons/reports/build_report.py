@@ -45,22 +45,19 @@ class BuildReport(Report):
   def __add_build_report(self, report_id, reports, report_html):
     html = """<div class="container">\n"""
     html+= """<header><h1>Build report</h1></header>"""
-    html+= """<h3>Branch: %s</h3>""" % self.branch
-    html+= """<h3>Platform: %s</h3>""" % self.platform.desc()
+    html+= """<h3>Branch: {0}</h3>""".format(self.branch)
+    html+= """<h3>Platform: {0}</h3>""".format(self.platform.desc())
     html+= """</header><br><br>"""
     html+= """<nav><ul>"""
     for name, image, ref in reports:
-      html+= """<li><a href="%s"><img src="%s">%s</a></li>""" % (ref, image, name)
+      html+= """<li><a href="{0}"><img src="{1}">{2}</a></li>""".format(ref, image, name)
     html+= """</ul></nav>"""
-    # Unicode symbols break the build report
-    # TODO. Process unicode correctly
-    printable = set(string.printable)
-    html+= """<div class="content">%s</div>""" % filter(lambda x: x in printable, report_html)
+    html+= """<div class="content">{0}</div>""".format(report_html)
     html+= """</div>"""
     self.add_to_report(report_id, html)
 
   def __build_report( self, task ):
-    full_log_link = "?stdout=%s&type=%s&raw" % (task.id, "text/plain")
+    full_log_link = "?stdout={0}&type={1}&raw".format(task.id, "text/plain")
     colored_report_id = self.add_root_report(views = {'css': ['/reports/styles/build_report.css']})
     errors_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
     warnings_report_id = self.add_report(views = {'css': ['/reports/styles/build_report.css']})
@@ -95,19 +92,19 @@ class BuildReport(Report):
     
     for line in lines:
       color_class = get_color_class(line)
-      rpt_line = "%s<br>\n" % line
+      rpt_line = "{0}<br>\n".format(line)
       if color_class:
-        rpt_line = """<span class="%s">%s</span><br>\n""" % (color_class, line)
+        rpt_line = """<span class="{0}">{1}</span><br>\n""".format(color_class, line)
         if color_class == 'error':
           if last_error and line_number - last_error > 1:
-            errors_report  += """<span class="%s">...</span><br>\n""" % color_class
+            errors_report  += """<span class="{0}">...</span><br>\n""".format(color_class)
             errors_text += "...\n"
           errors_report  += rpt_line
-          errors_text += "%s\n" % line
+          errors_text += "{0}\n".format(line)
           last_error = line_number
         elif color_class == 'warning':
           if last_warning and line_number - last_warning > 1:
-            warnings_report += """<span class="%s">...</span><br>\n""" % color_class
+            warnings_report += """<span class="{0}">...</span><br>\n""".format(color_class)
           warnings_report += rpt_line
           last_warning = line_number
       append_colored_report(colored_report,
@@ -146,8 +143,8 @@ class BuildReport(Report):
         self.__build_report(mvn_task[0])
       
 
-    history = "<br>%s<br>" % desc
-    history += "<a href=\"%s\">%s</a>" % (self.href(), result)
+    history = "<br>{0}<br>".format(desc)
+    history += "<a href=\"{0}\">{1}</a>".format(self.href(), result)
 
     self.add_history(color, history)
 
@@ -167,7 +164,7 @@ class BuildReport(Report):
          (prev_build and not self.find_failed(prev_build)):
        error_msg = "The product is no longer being built."
        if errors:
-         error_msg += "\n\n%s" % errors 
+         error_msg += """\n\n{0}""".format(errors)
       EmailNotify.notify(
         self, prev_run, "build failed", error_msg)
     elif prev_build and self.find_failed(prev_build):
