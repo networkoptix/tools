@@ -43,7 +43,7 @@ do
      --var "DYLD_FRAMEWORK_PATH=$QT_LIB_PATH" \
      -t 600 -s 100 || true
   dt=$((`date +%s` + -60))
-  ts=$(date +"%Y%m%d%H%M.%S" -d @$dt)
+  ts=$(date  -r @$dt +%Y%m%d%H%M.%S)
   touch -t $ts $test_tmp/$test$ts
   find /cores -name "core.*" -newer "$test_tmp/$test$ts" -exec mv '{}' $test_tmp \;
 done
