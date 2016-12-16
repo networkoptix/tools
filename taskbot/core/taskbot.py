@@ -438,11 +438,11 @@ class TaskExecutor:
         safe_call(self.finish_tasks_to_level(0))
       self.closed = True
       safe_call(self.__shell_process__.stdin.close)
-      safe_call(self.__shell_process__.kill)
-      safe_call(self.__shell_process__.terminate)
-      # TODO. Need cross-platform solution to kill child processs
+      # TODO. Need cross-platform solution to kill child process
       pgid = safe_call(os.getpgid, self.__shell_process__.pid)
       safe_call(os.killpg, pgid, signal.SIGTERM)
+      safe_call(self.__shell_process__.kill)
+      safe_call(self.__shell_process__.terminate)
       shutdown.set()
       safe_call(self.__status__.stop)
       safe_call(self.__err__.stop)
