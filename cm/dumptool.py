@@ -9,6 +9,7 @@ Dependencies:
     msiexec - standart windows tool (comes with windows)
     7x - zip extracter (comes with buildenv/_setenv.bat)
     cdb - windows debugger (comes with Windows SDK)
+    dark - wix extractor (comes with wix toolset: wixtoolset.org)
 
 Usage (module):
     > import dumptool
@@ -22,6 +23,7 @@ Usage (console):
 
 import os
 import re
+import shutil
 import string
 import subprocess
 import sys
@@ -36,10 +38,16 @@ CONFIG = dict(
         dump = 'dmp',
         report = 'cdb-bt',
     ),
-    msi_suffix = 'x64[a-z\-]+%s-only.msi',
+    dist_suffixes = [
+        '''x64[a-z-_]+%s-only\.msi''',
+        '''x64[a-z-_]+%s-only\.exe''',
+    ],
     pdb_suffixes = [
-        'x64[a-z\\-]+windows-pdb-all.zip',
-        'x64[a-z\\-]+windows-pdb-apps.zip',
+        '''x64[a-z-_]+windows-pdb-all\.zip''',
+        '''x64[a-z-_]+windows-pdb-apps\.zip''',
+        '''x64[a-z-_]+windows-pdb-%(module)s\.zip''',
+        '''x64[a-z-_]+windows-pdb-libs\.zip''',
+        '''x64[a-z-_]+windows-pdb-misc\.zip''',
     ],
 )
 
@@ -154,7 +162,7 @@ class DumpAnalyzer(object):
 
     def __init__(
         self, path, customization='default',
-        version=None, build=None, branch='', verbose=0):
+        version=None, build=None, branch='', verbose=0, debug=''):
         '''Initializes analizer with dump :path and :customization
         '''
         self.dump_path = path
@@ -163,6 +171,7 @@ class DumpAnalyzer(object):
         self.build = build
         self.branch = branch
         self.verbose = verbose
+        self.debug = debug
 
     def log(self, message, level=0):
         '''Logs data in case of verbose mode
@@ -179,9 +188,9 @@ class DumpAnalyzer(object):
             self.log("CDB reports main module: " + self.module, level=2)
             self.version = self.version or cdb.module_info(self.module, 'version')
             self.log("CDB reports version: " + self.version, level=2)
-        self.msi = 'server' if self.module.find('server') != -1 else 'client'
+        self.dist = 'server' if self.module.find('server') != -1 else 'client'
         self.log('Dump information: %s (%s) %s %s ' % (
-            self.module, self.msi, self.version, self.customization))
+            self.module, self.dist, self.version, self.customization))
         self.build = self.build or self.version.split('.')[-1]
         if self.build == '0':
             raise Error('Build 0 is not supported')
@@ -190,20 +199,19 @@ class DumpAnalyzer(object):
         '''Fetches data from :url by :regexp (must contain single group!)
         '''
         try:
-            page = urllib2.urlopen(url).read().replace('\n', '')
+            page = urllib2.urlopen(url).read().replace('\r\n', '').replace('\n', '')
         except urllib2.HTTPError as e:
             raise Error('%s, url: %s' % (e, url))
         results, failures = [], []
         for regexp in regexps:
-            rx = '.+%s.+' % regexp
-            self.log("Trying regexp /%s/" % (rx,), level=2)
-            m = re.match(rx, page)
+            self.log("Trying regexp '%s'" % regexp, level=2)
+            m = re.search(regexp, page)
             if m:
-                self.log("Regexp /%s/ got url '%s'" % (rx, m.group(1)), level=2)
+                self.log("Regexp '%s' got url '%s'" % (regexp, m.group(1)), level=2)
                 results.append((url, m.group(1)))
             else:
-                failures.append(regexp)
                 self.log("Warning: canot find '%s' in %s" % (regexp, url), level=1)
+                failures.append(regexp)
         if subUrl and len(failures):
             results += self.fetch_url_data(subUrl, failures)
         return results
@@ -212,7 +220,7 @@ class DumpAnalyzer(object):
         '''Fetches URLs of required resourses
         '''
         out = self.fetch_url_data(
-            CONFIG['dist_url'], ['''.+\>(%s\-%s[^\>\<]+)\<.+''' % (self.build, self.branch)])
+            CONFIG['dist_url'], ['''>(%s\-%s[^<]+)<''' % (self.build, self.branch)])
         if len(out) == 0:
             print "No distributive found for build %s. Dump analyze imposible" % self.build
             return False
@@ -221,9 +229,10 @@ class DumpAnalyzer(object):
         build_url = os.path.join(CONFIG['dist_url'], build_path)
         self.log("build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
               build_url, CONFIG['dist_url'], build_path), level=2)
+        suffixes = list(s % self.dist for s in CONFIG['dist_suffixes']) +\
+           list(s % {'module': self.dist} for s in CONFIG['pdb_suffixes'])
         out = self.fetch_url_data(
-            build_url, ('''\"(.+\-%s)\"''' % r for r in [
-                CONFIG['msi_suffix'] % self.msi] + CONFIG['pdb_suffixes']),
+            build_url, ('''>([a-z0-9-\.]+%s)<''' % r for r in suffixes),
             os.path.join(CONFIG['dist_url'], update_path))
         self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
@@ -236,6 +245,8 @@ class DumpAnalyzer(object):
         '''Downloads file from :url to :local directory, apply :processor if any
         '''
         name = os.path.join(local, os.path.basename(url))
+        if 'nodl' in self.debug:
+           return processor(name)
         if not os.path.isfile(name):
             with open(name, 'wb') as f:
                 f.write(urllib2.urlopen(url).read())
@@ -243,16 +254,27 @@ class DumpAnalyzer(object):
         else:
             self.log('Already downloaded: %s' % name, level=1)
 
-    def find_file(self, name):
+    def find_file(self, name, path=None):
         '''Searches file :name in build directory
         '''
-        for root, dirs, files in os.walk(self.build_path):
+        path = path or self.build_path
+        for root, dirs, files in os.walk(path):
             if name in files:
                 return os.path.join(root, name)
-        raise Error("No such file '%s' in '%s'" % (name, self.build_path))
+        raise Error("No such file '%s' in '%s'" % (name, path))
+
+    def module_dir(self):
+        '''Returns exe module directory
+        '''
+        if not hasattr(self, '_module_dir'):
+            self._module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
+        return self._module_dir
 
     def extract_dist(self, path):
         '''Extract distributive by :path based in it's format
+           .msi - just extracts to the 'target' dir
+           .exe - extracts msi by wix toolset and treat exe normaly
+           .zip - just extract to the target exe directory
         '''
         self.log("Extract: %s" % (path,))
         def run(*command):
@@ -260,32 +282,39 @@ class DumpAnalyzer(object):
                 return subprocess.check_output(command)
             except (IOError, WindowsError, subprocess.CalledProcessError) as e:
                 raise Error('Cannot run %s - %s' % (shell_line(command), e))
+        if path.endswith('.exe'):
+            wix_dir = os.path.join(os.path.dirname(path), 'wix');
+            os.mkdir(wix_dir)
+            run('dark', '-x', wix_dir, path)
+            msi_name = os.path.basename(path.replace('.exe', '.msi'))
+            return self.extract_dist(self.find_file(msi_name, wix_dir))
         if path.endswith('.msi'):
             return run(
                 'msiexec', '-a', path.replace('/', '\\'),
                 '/qb', 'TARGETDIR=' + self.target_path.replace('/', '\\'))
         if path.endswith('.zip'):
-            self.module_dir = os.path.dirname(
-                self.find_file(self.module + '.exe'))
             return run(
-                CONFIG['zip_path'], 'x', path, '-o' + self.module_dir, '-y')
+                CONFIG['zip_path'], 'x', path, '-o' + self.module_dir(), '-y')
+        raise Error('Can not extract: %s' % path)
 
     def download_dists(self):
         '''Downloads required distributives
         '''
         if not self.dist_urls:
            raise Error('There are no any dist URLs avaliable')
+        self.log('Found dists urls:\n%s' % '\n'.join(self.dist_urls), level=1)
         for url in self.dist_urls:
             self.log('Download: %s to %s' % (url, self.build_path))
             self.download_url_data(url, self.build_path, self.extract_dist)
-        self.module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
+        if 'cp' in self.debug:
+            shutil.copy(self.dump_path, self.module_dir())
 
     def generate_report(self, asString=False):
         '''Generates report using cdb with debug information
         '''
         report_path = report_name(self.dump_path)
-        self.log('Loading debug information: ' + self.module_dir)
-        with Cdb(self.dump_path, debug=self.module_dir) as cdb:
+        self.log('Loading debug information: ' + self.module_dir())
+        with Cdb(self.dump_path, debug=self.module_dir()) as cdb:
             self.log('Debug run: ' + shell_line(cdb.shell), level=1)
             self.log('Generating report: ' + report_path)
             report = cdb.report()
@@ -300,7 +329,7 @@ def analyseDump(*args, **kwargs):
     '''
     def resultDict(dump, text):
         return dict(
-            component = dump.msi,
+            component = dump.dist,
             dump = text
         )
     format = kwargs.pop('format', 'path')  # possible values: path, str, dict
