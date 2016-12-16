@@ -29,7 +29,8 @@ fi
 
 function run_async() {
     set +e
-    local args="--gtest_filter=$2.* --gtest_shuffle --gtest_break_on_failure"
+    local tmpDir=$(mktemp -d)
+    local args="--gtest_filter=$2.* --gtest_shuffle --gtest_break_on_failure --tmp=$tmpDir"
     local out=$DIR/$1.$2.out
     [ $LL ] && args+=" --ll=$LL"
 
@@ -41,6 +42,7 @@ function run_async() {
         tail $out
     fi
 
+    rm -rf $tmpDir
     return $result
 }
 
