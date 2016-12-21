@@ -97,7 +97,8 @@ class UTReport(Report):
       self.task = task
       self.failed = failed
       self.testcases = {}
-      self.__parse_output(output)
+      if output:
+        self.__parse_output(output)
 
     def __add_case(self, m):
       name = "%s.%s" % m.group(1,2)

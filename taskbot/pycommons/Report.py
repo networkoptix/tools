@@ -274,7 +274,10 @@ class Report:
       else:
         return None
 
-    gzipped, out = fn(task.id)
+    result = fn(task.id)
+    if not result:
+      return None
+    gzipped, out = result
     out = str(out)
 
     if not out:
