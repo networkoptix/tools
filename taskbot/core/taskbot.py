@@ -177,6 +177,31 @@ class StatusChecker:
       return s
     return None
 
+# Delete stale records
+def delete_stale_records(db):
+  host = get_host_name()
+  user = os.environ['USER']
+  cursor = db.cursor
+  cursor.execute("""
+    SELECT DISTINCT pid
+    FROM running_task
+    WHERE host = %s AND user = %s""",
+    (host, user))
+  pids = []
+  for p in cursor:
+    pid = int(p[0])
+    if pid != os.getpid():
+      try:
+        os.kill(pid, 0)
+      except OSError:
+        pids.append(pid)
+
+  for pid in pids:
+    print "Deleting stale records from running_task (PID=%s)"\
+          " table for user '%s' on host '%s'" % (pid, user, host)
+    cursor.execute("""
+      DELETE FROM running_task
+      WHERE host = %s AND pid = %s""", (host, pid))
   
 # Taskbot script executor
 class TaskExecutor:
@@ -546,6 +571,8 @@ def main():
     run_timeout,
     select_timeout)
 
+  delete_stale_records(database)
+
   executor = TaskExecutor(
     database,
     shell = config.get('sh', DEFAULT_SHELL),
@@ -559,8 +586,6 @@ def main():
     executor.close(terminated = True)
   signal.signal(signal.SIGINT,  _shutdown)
   signal.signal(signal.SIGTERM, _shutdown)
-
-
   if options.description:
     executor.start_task(options.description)
 
