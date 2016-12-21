@@ -2,11 +2,17 @@
 
 set -o errexit +o nounset -o noclobber
 
+if [ -z $TASKBOT_NX_VMS_BUILD_FLAGS ]; then
+  TASKBOT_NX_VMS_BUILD_FLAGS="-Dutb"
+fi
+
+echo $TASKBOT_NX_VMS_BUILD_FLAGS
+
 cd "$TASKBOT_VAR"/nx_vms
 
 # + Incremental build
 set +o errexit
-mvn package -e -T4 -Dbuild.configuration=release -Dutb -Dclean=false 2>&1
+mvn package -e -T4 -Dbuild.configuration=release -Dclean=false $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
 RC=$?
 if [ $RC -eq 0 ]; then
     exit 0
@@ -20,4 +26,4 @@ set -o errexit
 hg purge . --all
 
 #+ Build from stratch
-mvn package -e -T4 -Dbuild.configuration=release -Dutb 2>&1
+mvn package -e -T4 -Dbuild.configuration=release $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
