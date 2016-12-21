@@ -37,5 +37,8 @@ Prepare to start:
    cd ~/taskbot/devtools/taskbot/instances/windows
    ./run.sh [<NX_VMS_BRANCH>]
 7. [Optional]. Repeat pp. 5-6 for other branches 
-
+8. [Optional]. Add start.bat to Windows startup:
+   - in the Run window, type shell:startup to open the Startup folder;
+   - in the Startup folder create shortcut to ~/taskbot/devtools/taskbot/instances/windows/start.bat
+  
 
