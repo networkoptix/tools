@@ -89,7 +89,7 @@ def shell_line(command):
         '"%s"' % arg if arg.find(' ') != -1 else arg for arg in command)
 
 class Cdb(object):
-    '''Cdb programm driver to analize DMP files
+    '''Cdb program driver to analyze DMP files
     '''
 
     def __init__(self, dump, debug=None):
