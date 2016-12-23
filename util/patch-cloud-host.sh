@@ -67,7 +67,7 @@ main()
         exit 0
     fi
 
-    if [ "$1" == "--log" ]; then
+    if [ "$1" == "--verbose" ]; then
         VERBOSE="1"
         shift
     fi
