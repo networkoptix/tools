@@ -147,6 +147,8 @@ def main():
         for (k, v) in props.items():
             command.append("{}:{}".format(k, v))
 
+        print " ".join(command)
+
         if subprocess.call(command) != 0:
             exit(1)
 
