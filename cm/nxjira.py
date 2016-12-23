@@ -110,26 +110,31 @@ def jirareq(op, query, data=None, what='issue'):
         url = ISSUE + query
     else:
         url = JIRAAPI + what + '/' + query
-    if op == 'GET':
-        res = requests.get(url, auth=AUTH)
-    elif op == 'DELETE':
-        res = requests.delete(url, auth=AUTH)
-    else:
-        jdata = json.dumps(data)
-        #print "Sending by %s json data: %s\nTo: %s" % (op, jdata, url)
-        res = requests.request(op, url, data=jdata, auth=AUTH, headers={"Content-Type": "application/json"})
-    #print "DEBUG: Query %s status: %s %s" % (query, res.status_code, res.reason)
-    if res.content is not None and len(res.content) > 0:
-        try:
-            content = res.json()
-        except ValueError:
-            content = res.content
-    else:
-        content = ''
-    reply = JiraReply(content, res.status_code, res.reason)
-    if op == 'DELETE' and res.status_code == CODE_NO_CONTENT:
-        reply.ok = True
-    return reply
+    try:
+        if op == 'GET':
+            res = requests.get(url, auth=AUTH)
+        elif op == 'DELETE':
+            res = requests.delete(url, auth=AUTH)
+        else:
+            jdata = json.dumps(data)
+            #print "Sending by %s json data: %s\nTo: %s" % (op, jdata, url)
+            res = requests.request(op, url, data=jdata, auth=AUTH, headers={"Content-Type": "application/json"})
+        #print "DEBUG: Query %s status: %s %s" % (query, res.status_code, res.reason)
+        if res.content is not None and len(res.content) > 0:
+            try:
+                content = res.json()
+            except ValueError:
+                content = res.content
+        else:
+            content = ''
+        reply = JiraReply(content, res.status_code, res.reason)
+        if op == 'DELETE' and res.status_code == CODE_NO_CONTENT:
+            reply.ok = True
+        return reply
+    except requests.exceptions.RequestException as e:
+        print "JIRA request '%s' error: '%s'" % (url, str(e))
+        return JiraReply(str(e), 500, "JIRA '%s' request exception")
+
 
 
 def report(data):
@@ -162,11 +167,17 @@ def create_issue(name, desc, priority="Medium", component=None, team=None):
 
 def create_attachment(issue, name, data):
     name = name.replace('/','--')
-    res = requests.request('POST', ISSUE + issue + '/attachments', auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
-                           files={'file': (name, data, 'text/plain')})
-    if res.status_code != CODE_OK:
-        print "Error creating attachment %s to the JIRA issue %s" % (name, issue)
-        return (res.status_code, res.reason, res.content)
+    query = ISSUE + issue + '/attachments'
+    try:
+        res = requests.request('POST', query, auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
+                               files={'file': (name, data, 'text/plain')})
+        if res.status_code != CODE_OK:
+            print "Error creating attachment %s to the JIRA issue %s" % (name, issue)
+            return (res.status_code, res.reason, res.content)
+    except requests.exceptions.RequestException as e:
+        print "Error creating attachment %s to the JIRA issue %s: '%s'" % (name, issue, str(e))
+        return (500, "JIRA '%s' request exception" % query, str(e))
+        
     #print "DEBUG: attached %s" % (name,)
     return None
 
