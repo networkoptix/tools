@@ -115,6 +115,12 @@ def is_crash_new(crash, mark):
         (crash['upload'] == mark['time'] and crash['path'] > mark['path'])
     )
 
+OLD_VERSIONS_RE = r'^\/\w+\/2\.[0-5]\.'
+
+def remove_old_versions(crashes):
+    return filter(
+        lambda v: not re.search(OLD_VERSIONS_RE, v['path']),
+        crashes)
 
 def get_crashes(crtype, mark):
     '''
@@ -131,6 +137,8 @@ def get_crashes(crtype, mark):
             print "Error: %s" % (res.status_code)
             return []
         crashes = res.json()
+        if os.name == 'nt':
+            crashes = remove_old_versions(crashes)
         rx = re.compile(r"\d+\.\d+\.\d+(\.\d+)")
         for crash in crashes:
             # 'new' means the crash upload timestamp is later than the last processed one
@@ -143,6 +151,7 @@ def get_crashes(crtype, mark):
             m = rx.match(cp[1])
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
             crash["isHotfix"] = isHotfix(crash["version"])
+            
 
         print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
         return sorted(crashes, key=lambda v: (v['upload'],v['path']))
