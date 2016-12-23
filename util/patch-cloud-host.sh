@@ -2,7 +2,7 @@
 
 CLOUD_HOST_KEY="this_is_cloud_host_name"
 FILE_LOCATION="build_environment"
-FILE_NAME=".*/\(lib\)?common\.\(a\|dll\|so\)"
+FILE_NAME=".*/\(lib\)?common\.\(a\|dll\|so\|lib\)"
 LIB_NAME="'common' library"
 
 # From C++ source:
