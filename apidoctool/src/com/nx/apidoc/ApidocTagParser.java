@@ -81,9 +81,6 @@ public final class ApidocTagParser
         }
     }
 
-    /**
-     * @return Null if no lines are available.
-     */
     public ApidocTagParser(List<String> lines)
     {
         this.lines = lines;
