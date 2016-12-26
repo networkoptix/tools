@@ -261,7 +261,10 @@ def email_newcrash(crash, calls, jira_error=None):
         )
         msg['Subject'] = "Failed to create issue for a new crash!"
     else:
-        where = " (%s)" % crash['component'] if crash['component'] else ''
+        vers, bn = get_vers_bn(crash)
+        where = " (%s, version: %s, build number: %s)" % \
+                (crash['component'] if crash['component'] else '',
+                 vers, bn)
         title = "A crash with a new trace path found%s.\n\n" % where
         msg['Subject'] = "Crash with a new trace path found!%s" % where
     text = MIMEText(
@@ -287,6 +290,14 @@ def email_priority_fail(key, issue, pold, pnew, error):
     print "DEBUG: email_priority_fail: %s, %s => %s, %s" % (issue, pold, pnew, error)
     pass # TODO!!!
 
+
+def get_vers_bn(crash):
+    version = crash['version']
+    vers = bn = 'unknown'
+    if version:
+        vers = '.'.join(map(str, crash['version'][:-1]))
+        bn = crash['version'][-1]
+    return (vers, bn)
 
 def fault_case2str(dumps, path, hash, issue=None):
     buf = []
@@ -556,7 +567,11 @@ class CrashMonitor(object):
             name = "Crash detected: %s" % crash['hash']
         else:
             name = "Crash detected in %s: %s" % (crash['component'], crash['hash'])
-        issue_key, url = nxjira.create_issue(name, desc, ISSUE_LEVEL[priority-1][1], component, team)
+
+        vers, bn = get_vers_bn(crash)    
+
+        issue_key, url = nxjira.create_issue(
+            name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn)
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         for _, path, dump in dumps:

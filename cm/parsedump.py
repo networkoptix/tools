@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 __author__ = 'Danil Lavrentyuk'
 import sys
 import os.path
@@ -50,7 +50,6 @@ CDB_EXC = "   ExceptionCode: "
 CDB_EXC_LEN = len(CDB_EXC)
 CDB_PREMARK = "  *** Stack trace for last set context"
 CDB_MARK = "Call Site"
-
 
 
 def parse_crash(f, fpath):

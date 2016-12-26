@@ -26,9 +26,11 @@ _version_rx = re.compile(r"^\d+\.\d+\.\d+")
 issue_data = {
     "fields" : {
         "project": { "key": "VMS" },  # "TEST" #FIXME make it configurable
-        "issuetype": { "name": "Task" },
+        "issuetype": { "name": "Bug" },
         "summary": "Testing bug creation scripting",
         "customfield_10200": {"value": "Server"},
+        "versions": [ {"name": "Future"} ],
+        "customfield_10800": "",
         "fixVersions": [ {"name": "Future"} ],
         "components": [ {"name": "Server" } ] ,
         "description": "Not a bug really, just testing the API",
@@ -105,6 +107,11 @@ class JiraReply(object):
         return False
 
 
+def get_versions():
+    url = JIRAAPI + 'project/VMS/versions'
+    res = requests.get(url, auth=AUTH)
+    return map(lambda v: v['name'], json.loads(res.content))
+
 def jirareq(op, query, data=None, what='issue'):
     if what == 'issue':
         url = ISSUE + query
@@ -145,11 +152,17 @@ def browse_url(issue):
     return BROWSE + issue
 
 
-def create_issue(name, desc, priority="Medium", component=None, team=None):
+def create_issue(name, desc, priority="Medium", component=None, team=None, version=None, build=None):
     issue = issue_data.copy()
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
     issue['fields']['priority']['name'] = priority
+    if version:
+        versions = get_versions()
+        if version in versions:
+            issue['fields']['versions'][0]['name'] = [version]
+    if build:
+        issue['fields']['customfield_10800'] = build
     if component is not None:
         issue['fields']['components'][0]['name'] = component
     if team is not None:
