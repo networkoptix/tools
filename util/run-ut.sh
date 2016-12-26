@@ -50,7 +50,7 @@ for name in $TESTS; do
     test_case_list=$($RUN $name --gtest_list_tests 2>/dev/null |\
         grep '\.' | grep -v DISABLED)
     for test_case in $test_case_list; do
-        while (($(jobs -rp | wc -l) > $MAX_JOBS)); do
+        while (($(jobs -rp | wc -l) >= $MAX_JOBS)); do
             sleep 0.1
         done
 

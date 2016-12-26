@@ -38,7 +38,12 @@ then
     if [ "$A" == bpi ]
     then
         KIT=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
-        LD_LIBRARY_PATH=$KIT/lib
+        if [ $(uanme) == Darwin ]
+        then
+            DYLD_LIBRARY_PATH=$KIT/lib
+        else
+            LD_LIBRARY_PATH=$KIT/lib
+        fi
         GDB=$KIT/bin/arm-linux-gnueabihf-gdb
     else
         echo Unsupported box: $A
@@ -47,19 +52,32 @@ then
 else
     ARCH=
     ARCH_GREP=x64
-    GDB=gdb
+    if [ $(uname) == Darwin ]
+    then
+        GDB=lldb
+        OS_GREP=macosx
+    else
+        GDB=gdb
+        OS_GREP=linux
+    fi
 fi
 
 function find_libs() {
     set +x
     find "$PWD/../buildenv/packages/" -name lib -o -name platforms |\
-        sort -r | grep linux-$ARCH_GREP |\
+        sort -r | grep $OS_GREP-$ARCH_GREP |\
         while read L; do echo -n ":${L}"; done
     set -x
 }
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
-export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(find_libs)"
+if [ $(uanme) == Darwin ]
+then
+    export DYLD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$DYLD_LIBRARY_PATH$(find_libs)"
+    export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH$(find_libs)"
+else
+    export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(find_libs)"
+fi
 
 
 if [ "$L" ]
