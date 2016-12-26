@@ -163,8 +163,8 @@ class BuildReport(Report):
       if not prev_build or \
          (prev_build and not self.find_failed(prev_build)):
        error_msg = "The product is no longer being built."
-       if errors:
-         error_msg += """\n\n{0}""".format(errors)
+      if errors:
+        error_msg += """\n\n{0}""".format(errors)
       EmailNotify.notify(
         self, prev_run, "build failed", error_msg)
     elif prev_build and self.find_failed(prev_build):

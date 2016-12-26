@@ -4,7 +4,7 @@
 
 from smtplib import SMTP, SMTPException
 from email.mime.text import MIMEText
-import os, time
+import os, time, re
 
 SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
 SMTP_LOGIN = 'AKIAJ6MLW7ZT7WXXXOIA' # service@networkoptix.com
@@ -17,12 +17,23 @@ DEBUG_WATCHERS = {
 
 RETRY_COUNT = 3
 RESEND_TIMEOUT = 5 # seconds
+# NOTE. This is not full RFC 5322 regexp.
+EMAIL_CHECKER=r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
 
-  
+def check_email(email):
+  result = bool(re.search(EMAIL_CHECKER, email))
+  if not result:
+    print "'%s' is not a valie email address" % email
+  return result
+
 def send(to, subject, text):
   msg = MIMEText(text, 'plain', 'utf-8')
   msg['Subject'] = subject
   msg['From'] = MAIL_FROM
+  to = {k:v for k,v in to.iteritems() if check_email(v)}
+  if not to:
+    print "'To' list is empty"
+    return
   msg['To'] = ",".join(map(lambda t: '"{0}" <{1}>'.format(t[0], t[1]), to.items()))
   # Debug
   print "TO:  {0}\nMSG:  {1}".format(msg['To'], text)
