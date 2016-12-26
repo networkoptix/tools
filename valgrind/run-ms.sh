@@ -22,10 +22,16 @@ case $TOOL in
     ;;
   *)
     echo Unsupported tool $TOOL >&2
+    exit 1
     ;;
 esac
 
-
 export LD_LIBRARY_PATH=$MS_PATH/lib
-valgrind $ARGS $MS_PATH/bin/mediaserver-bin -e >$LOG_FILE 2>&1
+if [ $(uname -p) == x86* ]; then
+    MS_BIN=$MS_PATH/bin/mediaserver-bin
+else
+    MS_BIN=$MS_PATH/bin/mediaserver
+fi
+
+valgrind $ARGS $MS_BIN -e >$LOG_FILE 2>&1
 
