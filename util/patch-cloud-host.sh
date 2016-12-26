@@ -11,7 +11,6 @@ CLOUD_HOST_NAME_WITH_KEY=$(eval echo \
 #--------------------------------------------------------------------------------------------------
 
 # Allow 'set -x' to echo the args.
-# @param ...
 log()
 {
     # Args already echoed when processing this function call under 'set -x', thus, do nothing.
@@ -33,18 +32,17 @@ writeln()
     fi
 }
 
-# @param ...
 fail()
 {
     writeln "ERROR: $@" >&2
     exit 1
 }
 
-# @param[out] FILES Array of files found by 'find' command.
+# [out] FILES Array of files found by 'find' command.
 find_FILES_array()
 {
     FILES=()
-    while IFS= read -r -d $'\0'; do
+    while IFS="" read -r -d $'\0'; do
         FILES+=("$REPLY")
     done < <(find "$@" -print0)
 }
@@ -52,7 +50,7 @@ find_FILES_array()
 #--------------------------------------------------------------------------------------------------
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
-# @param[in,out] VMS_DIR
+# [in,out] VMS_DIR
 find_VMS_DIR()
 {
     [ "$VMS_DIR" != "" ] && return 1
@@ -66,9 +64,9 @@ find_VMS_DIR()
 }
 
 # Search for the file inside the given dir using the given filename regex via 'find'.
-# @param[out] FILE
-# @param FILE_LOCATION
-# @param FILE_PATH_REGEX
+# [out] FILE
+# [in] FILE_LOCATION
+# [in] FILE_PATH_REGEX
 find_FILE()
 {
     local VMS_DIR
@@ -83,7 +81,7 @@ find_FILE()
     FILE=${FILES[0]}
 }
 
-# @param FILE
+# [in] FILE
 save_backup()
 {
     local BAK_FILE="$FILE.patch-cloud-host.BAK"
@@ -92,9 +90,9 @@ save_backup()
 }
 
 # If no CLOUD_HOST_KEY, show the current text, otherwise, patch FILE to set the new text.
-# @param FILE
-# @param CLOUD_HOST_KEY
-# @param NEW_CLOUD_HOST
+# [in] FILE
+# [in] CLOUD_HOST_KEY
+# [in] NEW_CLOUD_HOST
 process_file()
 {
     local STRING=$(strings --radix=d -d "$FILE" |grep "$CLOUD_HOST_KEY")
