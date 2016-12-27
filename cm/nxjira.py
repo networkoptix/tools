@@ -160,7 +160,7 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
     if version:
         versions = get_versions()
         if version in versions:
-            issue['fields']['versions'][0]['name'] = [version]
+            issue['fields']['versions'][0]['name'] = version
     if build:
         issue['fields']['customfield_10800'] = build
     if component is not None:
@@ -170,6 +170,7 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
     result =  jirareq('POST', '', issue)
     if result.code != CODE_CREATED:
         print "Error creting JIRA issue: %s, %s" % (result.code, result.reason)
+        print "Issue data: %s" % issue
         if result.data:
             print "Server reply: %s" % (result.data,)
         raise result.mk_error()
