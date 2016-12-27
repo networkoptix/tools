@@ -162,7 +162,7 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
         if version in versions:
             issue['fields']['versions'][0]['name'] = version
     if build:
-        issue['fields']['customfield_10800'] = build
+        issue['fields']['customfield_10800'] = str(build)
     if component is not None:
         issue['fields']['components'][0]['name'] = component
     if team is not None:
