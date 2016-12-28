@@ -19,19 +19,20 @@ CODE_OK = 200
 CODE_CREATED = 201
 CODE_NO_CONTENT = 204
 CODE_NOT_FOUND = 404
+FIX_VERSION = "3.0.0"
+JIRA_PROJECT = "VMS" # use "TEST" for testing
 
 _version_rx = re.compile(r"^\d+\.\d+\.\d+")
 
-
 issue_data = {
     "fields" : {
-        "project": { "key": "VMS" },  # "TEST" #FIXME make it configurable
+        "project": { "key": JIRA_PROJECT },
         "issuetype": { "name": "Bug" },
         "summary": "Testing bug creation scripting",
         "customfield_10200": {"value": "Server"},
-        "versions": [ {"name": "Future"} ],
+        "versions": [ ],
         "customfield_10800": "",
-        "fixVersions": [ {"name": "Future"} ],
+        "fixVersions": [ {"name": FIX_VERSION } ],
         "components": [ {"name": "Server" } ] ,
         "description": "Not a bug really, just testing the API",
         'priority': { "name": "Low" },
@@ -108,7 +109,7 @@ class JiraReply(object):
 
 
 def get_versions():
-    url = JIRAAPI + 'project/VMS/versions'
+    url = JIRAAPI + 'project/%s/versions' % JIRA_PROJECT
     res = requests.get(url, auth=AUTH)
     return map(lambda v: v['name'], json.loads(res.content))
 
@@ -157,16 +158,20 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
     issue['fields']['priority']['name'] = priority
+    versions = get_versions()
     if version:
-        versions = get_versions()
         if version in versions:
-            issue['fields']['versions'][0]['name'] = version
+            issue['fields']['versions'].append({'name': version})
+        hotfix_version = version + '_hotfix'
+        if hotfix_version in versions:
+            issue['fields']['fixVersions'].append({'name': hotfix_version })
     if build:
         issue['fields']['customfield_10800'] = str(build)
     if component is not None:
         issue['fields']['components'][0]['name'] = component
     if team is not None:
         issue['fields']['customfield_10200']['value'] = team
+    print issue
     result =  jirareq('POST', '', issue)
     if result.code != CODE_CREATED:
         print "Error creting JIRA issue: %s, %s" % (result.code, result.reason)
@@ -195,6 +200,18 @@ def create_attachment(issue, name, data):
     #print "DEBUG: attached %s" % (name,)
     return None
 
+def create_web_link(issue, name, url):
+    try:
+        query = issue + '/remotelink'
+        data = { "object" : { "url": url, "title": os.path.splitext(name)[0] } }
+        res = jirareq('POST', query, data=data)
+        if not res.ok:
+            print "Error creating weblink '%s' to the JIRA issue %s" % (url, issue)
+            return (res.code, res.reason, res.data)
+    except requests.exceptions.RequestException as e:
+        print "Error creating weblink '%s' to the JIRA issue %s: '%s'" % (url, issue, str(e))
+        return (500, "JIRA '%s' request exception" % query, str(e))
+    return None
 
 def get_issue(key):
     "Allows to pass a string issue key or already loaded issue data"
@@ -202,7 +219,6 @@ def get_issue(key):
         return key.data['key'], key
     else:
         return key, jirareq('GET', key)
-
 
 def priority_change(key, new_prio, old_prio=None):
     key, result = get_issue(key)

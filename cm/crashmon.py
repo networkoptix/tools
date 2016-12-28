@@ -510,7 +510,7 @@ class CrashMonitor(object):
                                                 break
                                             counted -= 1
                                         if counted < MAX_ATTACHMENTS:
-                                            res = self.add_attachment(issue[0], crash['path'], crash['dump'])
+                                            res = self.add_attachment(issue[0], crash['path'], crash['dump'], crash['url'])
                                             if res is not None:
                                                 email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])
                                         # 2. Check if the priority should be increased
@@ -545,8 +545,7 @@ class CrashMonitor(object):
         desc = (
             "Crash Monitor detected a crash with a new trace path\n\n"
             "Hash: %s\n"
-            "URL: %s\n\n"
-            "Call stask (named functions only):\n%s\n\n"
+            "Call stask (named functions only):\n{code}%s{code}\n\n"
              % (crash['hash'], crash['url'], calls)
         )
         if priority < 1:
@@ -575,17 +574,19 @@ class CrashMonitor(object):
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         for _, path, dump in dumps:
-            res = self.add_attachment(issue_key, path, dump)
+            res = self.add_attachment(issue_key, path, dump, crash['url'])
             if res is not None:
                 email_cant_attach(crash, issue_key, url, res, path)
         print "New jira issue created: %s" % (issue_key,)
         return issue_key
 
-    def add_attachment(self, issue, name, dump):
+    def add_attachment(self, issue, name, dump, url):
         name = report_name(name.lstrip('/'))
         if not is_crash_dump_path(name):
             print "WARNING: Strange crash dump name: %s" % name
             print "POSSIBLY is_crash_dump_path() conditions are to be updated!"
+        res = nxjira.create_web_link(issue, name, url)
+        if res is not None: return res
         return nxjira.create_attachment(issue, name, dump)
 
     def increase_priority(self, key, issue, priority, issue_data=None):
