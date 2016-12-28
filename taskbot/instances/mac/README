@@ -2,7 +2,7 @@
 
 Required packages:
 - Python mysql connector (https://dev.mysql.com/doc/connector-python/en/connector-python-installation-binary.html):
-  * curl  http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-python-2.1.4-osx10.11.dmg
+  * curl http://dev.mysql.com/get/Downloads/Connector-Python/mysql-connector-python-2.1.4-osx10.11.dmg
   * sudo hdiutil attach mysql-connector-python-2.1.4-osx10.11.dmg
   * sudo installer -package /Volumes/mysql-connector-python-cext-2.1.4/mysql-connector-python-cext-2.1.4.pkg -target /
 

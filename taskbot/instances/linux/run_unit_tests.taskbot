@@ -43,7 +43,7 @@ do
   mkdir -p $test_tmp
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
-     -c "./$test --gtest_filter=-NxCritical.All3 --tmp=$test_tmp" \
+     -c "./$test --gtest_filter=-NxCritical.All3 --gtest_shuffle --tmp=$test_tmp" \
      -t 600 -s 100 || true
 done
 
