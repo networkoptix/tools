@@ -38,7 +38,7 @@ then
     if [ "$A" == bpi ]
     then
         KIT=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
-        if [ $(uanme) == Darwin ]
+        if [ $(uname) == Darwin ]
         then
             DYLD_LIBRARY_PATH=$KIT/lib
         else
@@ -71,7 +71,7 @@ function find_libs() {
 }
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
-if [ $(uanme) == Darwin ]
+if [ $(uname) == Darwin ]
 then
     export DYLD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$DYLD_LIBRARY_PATH$(find_libs)"
     export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH$(find_libs)"
