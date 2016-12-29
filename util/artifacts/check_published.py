@@ -78,8 +78,8 @@ def main():
         init_color()
 
     product = get_product(args.customization)
-    version = "3.0.0.{0}".format(args.build)        
-        
+    version = "3.0.0.{0}".format(args.build)
+
     info(
 "Validating:\n"
 "    Customization: {0}\n"
