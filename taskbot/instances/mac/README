@@ -26,5 +26,9 @@ Prepare to start:
 6. Run taskbot instance
    cd ~/taskbot/devtools/taskbot/instances/mac
    ./run.sh [<NX_VMS_BRANCH>]
-7. [Optional]. Repeat pp. 5-6 for other branches 
-
+7. [Optional]. Repeat pp. 5-6 for other branches
+8. [Optional]. Add startup.sh to crontab, use crontab -e for it:
+   MAILTO=anikitin@networkoptix.com
+  
+   @reboot $HOME/taskbot/devtools/taskbot/instances/mac/startup.sh
+   ...
