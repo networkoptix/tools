@@ -546,7 +546,7 @@ class CrashMonitor(object):
             "Crash Monitor detected a crash with a new trace path\n\n"
             "Hash: %s\n"
             "Call stask (named functions only):\n{code}%s{code}\n\n"
-             % (crash['hash'], crash['url'], calls)
+             % (crash['hash'], calls)
         )
         if priority < 1:
             print "ERROR: create_jira_issue int number value < 1"
