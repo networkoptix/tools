@@ -205,7 +205,7 @@ def create_web_link(issue, name, url):
         query = issue + '/remotelink'
         data = { "object" : { "url": url, "title": os.path.splitext(name)[0] } }
         res = jirareq('POST', query, data=data)
-        if not res.ok:
+        if res.code < 200 or res.code > 299 :
             print "Error creating weblink '%s' to the JIRA issue %s" % (url, issue)
             return (res.code, res.reason, res.data)
     except requests.exceptions.RequestException as e:

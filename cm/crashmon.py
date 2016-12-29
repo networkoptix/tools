@@ -586,8 +586,7 @@ class CrashMonitor(object):
             print "WARNING: Strange crash dump name: %s" % name
             print "POSSIBLY is_crash_dump_path() conditions are to be updated!"
         res = nxjira.create_web_link(issue, name, url)
-        if res is not None: return res
-        return nxjira.create_attachment(issue, name, dump)
+        return nxjira.create_attachment(issue, name, dump) or res
 
     def increase_priority(self, key, issue, priority, issue_data=None):
         if priority < 1: # FIXME copypasta!
