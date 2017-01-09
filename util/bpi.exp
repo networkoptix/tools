@@ -1,0 +1,22 @@
+#!/usr/bin/expect
+
+# Login to bpi as root via ssh.
+
+set timeout 20
+set password "qweasd123"
+set bpi_host "bpi"
+
+proc set_window_title { title } {
+    send_user "\033]0;$title\007"
+}
+
+set_window_title "$bpi_host"
+
+spawn ssh root@$bpi_host
+expect "root@bpi's password:"
+send "$password\r"
+#send "clear && echo 'ssh root@bpi'\r"
+
+interact
+
+exit

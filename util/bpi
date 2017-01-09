@@ -1,0 +1,43 @@
+#!/bin/zsh
+
+# Execute the specified command at bpi via ssh, or just login to bpi. Uses bpi.exp.
+
+BPI_PASSWORD="qweasd123"
+BPI_HOST="bpi"
+BPI_BACKGROUND="003000" # RRGGBB
+
+# [out] RESTORE_BACKGROUND_CMD Command for eval to restore the background to the current one.
+get_RESTORE_BACKGROUND_CMD()
+{
+    exec </dev/tty
+    OLD_STTY=$(stty -g)
+    stty raw -echo min 0
+    BACKGROUND_COLOR=11
+    #          OSC   Ps  ;Pt ST
+    echo -en "\033]${BACKGROUND_COLOR};?\033\\" >/dev/tty # echo opts differ w/ OSes
+    RESTORE_BACKGROUND_CMD=
+    if IFS=';' read -r -d '\' COLOR ; then
+        RESTORE_BACKGROUND_CMD=$(echo $COLOR |sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g' |awk -F "[:/]" \
+'{printf "echo -ne \"\\\\e]11;#%s%s%s\\\\a\"",substr($2,1,2),substr($3,1,2),substr($4,1,2)}')
+    fi
+    stty $OLD_STTY
+}
+
+main()
+{
+    get_RESTORE_BACKGROUND_CMD
+    SET_BPI_BACKGROUND_CMD="echo -ne \"\\\\e]11;#$BPI_BACKGROUND\\\\a\""
+
+    if [ "$#" = "0" ]; then
+        eval "$SET_BPI_BACKGROUND_CMD"
+        bpi.exp
+    else
+        sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" "$SET_BPI_BACKGROUND_CMD && $@"
+    fi
+
+    #echo "Restoring background:"
+    #echo "$RESTORE_BACKGROUND_CMD"
+    eval "$RESTORE_BACKGROUND_CMD"
+}
+
+main "$@"
