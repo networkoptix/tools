@@ -1,0 +1,1 @@
+python %~dp0merge_dev.py %*
