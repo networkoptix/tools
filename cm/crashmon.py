@@ -573,8 +573,8 @@ class CrashMonitor(object):
             name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn)
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
-        for _, path, dump in dumps:
-            res = self.add_attachment(issue_key, path, dump, crash['url'])
+        for url, path, dump in dumps:
+            res = self.add_attachment(issue_key, path, dump, url)
             if res is not None:
                 email_cant_attach(crash, issue_key, url, res, path)
         print "New jira issue created: %s" % (issue_key,)
