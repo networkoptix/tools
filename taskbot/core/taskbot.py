@@ -268,13 +268,19 @@ class TaskExecutor:
     def __repr__(self):
       return self.__str__()
 
-  def __init__(self, db, shell, timeout, parent_task_id = None, args = [], env_vars=[]):
+  def __init__(self,
+               db, shell, timeout,
+               parent_task_id = None,
+               args = [],
+               env_vars=[],
+               core_on_timeout = False):
       
     self.__task_stack__ = []
     self.__db__ = db
     self.__timeout__ = timeout
     self.__branch_id__ = self.__select_branch()
     self.__platform_id__ = self.__select_platform()
+    self.__core_on_timeout = core_on_timeout
     
     self.__root_task_id__ = \
       self.__select_root_task_id(parent_task_id)
@@ -368,6 +374,7 @@ class TaskExecutor:
 
     status = None
     stdout = stderr = ''
+    interrupted = False
 
     if not is_comment:
       while True:
@@ -385,10 +392,11 @@ class TaskExecutor:
         except TimeOut.XTimedOut, x:
           if task:
             task.error_message = str(x)
+          interrupted = True
           break
 
-      return status,  stderr, stdout
-    return 0, "", ""
+      return status,  stderr, stdout, interrupted
+    return 0, "", "", interrupted
    
       
   def process_command(self, command, timeout = None):
@@ -402,7 +410,7 @@ class TaskExecutor:
     Trace.trace("%s\n" % command)
     for v in self.__env_vars:
       self.write_command( "export %s\n" %v, True)
-    status, stderr, stdout = \
+    status, stderr, stdout, interrupted = \
       self.write_command("{ %s\n/bin/echo $? >&%d; }\n" % \
         (command, self.__wfdstatus__), False, timeout, task)
 
@@ -414,7 +422,7 @@ class TaskExecutor:
       self.finish_tasks_to_level(0)
     
     if do_terminate:
-      self.close()
+      self.close(interrupted = interrupted)
       
     return status
 
@@ -455,7 +463,7 @@ class TaskExecutor:
     while len(self.__task_stack__) > level + 1:
       self.finish_task()
 
-  def close(self, terminated = False):
+  def close(self, terminated = False, interrupted = False):
     if not self.closed:
       if terminated:
         self.__task_stack__[-1].error_message = 'Terminated'
@@ -465,7 +473,14 @@ class TaskExecutor:
       safe_call(self.__shell_process__.stdin.close)
       # TODO. Need cross-platform solution to kill child process
       pgid = safe_call(os.getpgid, self.__shell_process__.pid)
-      safe_call(os.killpg, pgid, signal.SIGTERM)
+      sig = signal.SIGTERM
+      if self.__core_on_timeout and interrupted:
+        sig = signal.SIGSEGV
+#        import psutil
+#        parent = psutil.Process(self.__shell_process__.pid)
+#        for child in parent.children(recursive=True):
+#          child.send_signal(sig)
+      safe_call(os.killpg, pgid, sig)
       safe_call(self.__shell_process__.kill)
       safe_call(self.__shell_process__.terminate)
       shutdown.set()
@@ -508,6 +523,9 @@ def main():
                     help="Trace execution.  Print every command, " \
                     "its stdout and stderr, and its " \
                     "exit status.  Default is notrace.")
+
+  parser.add_option("--core_on_timeout", default=False, action="store_true",
+                    help="Send SIG_SEGV to group when timeout expired.")
   
   parser.add_option("-c", "--command",
                     help="Execute COMMAND. This option is mutually " \
@@ -579,7 +597,8 @@ def main():
     timeout = timeout,
     parent_task_id = parent_task_id,
     args=args[1 + int(not options.command):],
-    env_vars=options.var)
+    env_vars=options.var,
+    core_on_timeout = options.core_on_timeout)
 
   # Register signal handlers
   def _shutdown( sigNum, frame ):

@@ -24,4 +24,10 @@ MYSQL
   * sudo -i mysql --user=root mysql < devtools/taskbot/core/sql/initial.mysql
   * mysql --user=taskbot --password=taskbot taskbot <  devtools/taskbot/core/sql/schema.mysql
 
+Debbuging
+- use 'trace' parameter for taskbot.py script to view full output.
+- use TASKBOT_DEBUG_MODE to strict email notification:
+  1 - send notification to taskbot owner only
+  2 - send notification to taskbot & watchers (skip commiters).
+
 

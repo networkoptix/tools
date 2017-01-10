@@ -44,7 +44,7 @@ do
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
      -c "./$test --gtest_filter=-NxCritical.All3 --gtest_shuffle --tmp=$test_tmp" \
-     -t 600 -s 100 || true
+     -t 600 -s 100 --core_on_timeout || true
 done
 
 # + Process core files
