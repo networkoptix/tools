@@ -208,6 +208,10 @@ if [ "$WITH_TEST" == 1 ]; then
             MODULES+=(unit_tests/mediaserver_core_ut)
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/mediaserver_core_ut)
         fi
+        if [ $WITH_CLIENT -eq 1 ]; then
+            MODULES+=(unit_tests/client_ut)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/client_ut)
+        fi
     fi
 fi
 
