@@ -6,9 +6,9 @@ package com.nx.apidoc;
  */
 public abstract class ApidocComment
 {
-    // TODO: Consider defining default "format" in the Source Code.
+    // TODO: Consider defining default "format" and the description of its values in the C++ code.
     protected static final String DEFAULT_FORMAT_DESCRIPTION =
-        "Data format. Default value: 'json'";
+        "Data format. Default value is \"json\".";
 
     protected static final String TAG_APIDOC = "%apidoc";
     protected static final String TAG_PRIVATE = "%//";

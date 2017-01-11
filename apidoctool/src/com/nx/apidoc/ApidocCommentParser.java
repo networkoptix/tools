@@ -244,14 +244,14 @@ public final class ApidocCommentParser
         param.optional = true;
         param.description.xml = DEFAULT_FORMAT_DESCRIPTION;
         param.values.add(createValue("ubjson",
-            "universal binary json data format"));
+            "Universal Binary JSON data format."));
         param.values.add(createValue("json",
-            "json data format"));
+            "JSON data format."));
         param.values.add(createValue("xml",
-            "xml data format"));
+            "XML data format."));
         param.values.add(createValue("csv",
-            "CSV data format. In case of hierarchical structure only\n" +
-            "top level data will be provided"));
+            "CSV data format. In case of a hierarchical structure,\n" +
+            "only the top level data is provided."));
     }
 
     private static Apidoc.Value createValue(String name, String description)
