@@ -255,18 +255,17 @@ class DumpAnalyzer(object):
             os.makedirs(self.target_path)
         return True
 
-    def download_url_data(self, url, local, processor = lambda path: None):
+    def download_url_data(self, url, local):
         '''Downloads file from :url to :local directory, apply :processor if any.
         '''
-        name = os.path.join(local, os.path.basename(url))
-        if 'nodl' in self.debug:
-           return processor(name)
-        if not os.path.isfile(name):
-            with open(name, 'wb') as f:
+        path = os.path.join(local, os.path.basename(url))
+        if not os.path.isfile(path):
+            self.log('Download: %s to %s' % (url, path))
+            with open(path, 'wb') as f:
                 f.write(urllib2.urlopen(url).read())
-            processor(name)
         else:
-            self.log('Already downloaded: %s' % name, level=1)
+            self.log('Already downloaded: %s' % path, level=1)
+        return path
 
     def find_files_iter(self, condition, path=None):
         '''Searches file by :condition in :path (build directory by default).
@@ -280,6 +279,7 @@ class DumpAnalyzer(object):
     def find_file(self, name, path=None):
         '''Searches file by :name in :path (build directory by default).
         '''
+        path = path or self.build_path
         for path in self.find_files_iter(lambda n: n == name, path):
             return path
         raise DistError("No such file '%s' in '%s'" % (name, path))
@@ -297,25 +297,31 @@ class DumpAnalyzer(object):
            .exe - extracts msi by wix toolset and treats msi normaly;
            .zip - just extract to the target exe directory.
         '''
-        self.log("Extract: %s" % (path,))
         def run(*command):
             try:
                 return subprocess.check_output(command)
             except (IOError, WindowsError, subprocess.CalledProcessError) as e:
                 raise DistError('Cannot run: %s -> %s' % (shell_line(command), e))
+
         if path.endswith('.exe'):
             wix_dir = os.path.join(os.path.dirname(path), 'wix');
-            os.mkdir(wix_dir)
-            run('dark', '-x', wix_dir, path)
+            if not os.path.isdir(wix_dir):
+                os.mkdir(wix_dir)
+                self.log('Unpack %s to %s' % (path, wix_dir), level=1)
+                run('dark', '-x', wix_dir, path)
             msi_name = os.path.basename(path.replace('.exe', '.msi'))
             return self.extract_dist(self.find_file(msi_name, wix_dir))
+
         if path.endswith('.msi'):
-            return run(
-                'msiexec', '-a', path.replace('/', '\\'),
-                '/qb', 'TARGETDIR=' + self.target_path.replace('/', '\\'))
+            p, d = path.replace('/', '\\'), self.target_path.replace('/', '\\')
+            self.log('Extract %s to %s' % (p, d), level=1)
+            return run('msiexec', '-a', p, '/qb', 'TARGETDIR=' + d)
+
         if path.endswith('.zip'):
-            return run(
-                CONFIG['zip_path'], 'x', path, '-o' + self.module_dir(), '-y')
+            d = self.module_dir()
+            self.log('Unzip %s to %s' % (path, d), level=1)
+            return run(CONFIG['zip_path'], 'x', path, '-o' + d, '-y', '-aos')
+
         raise DistError('Can not extract: %s' % path)
 
     def download_dists(self):
@@ -326,8 +332,8 @@ class DumpAnalyzer(object):
         self.log('Found dists urls:\n%s' % '\n'.join(self.dist_urls), level=1)
         try:
             for url in self.dist_urls:
-                self.log('Download: %s to %s' % (url, self.build_path))
-                self.download_url_data(url, self.build_path, self.extract_dist)
+                path = self.download_url_data(url, self.build_path)
+                self.extract_dist(path)
             self.log('Download has finished: %s' % self.module_dir(), level=2)
         except DistError:
             if 'keep' not in self.debug:
