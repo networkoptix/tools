@@ -48,6 +48,8 @@ if os.name == 'posix':  # may be platform.system is better? ;)
                 ) and (
                 path.endswith('.crash') or path.endswith('.gdb-bt'))
 
+    
+
     filt_path = "/usr/bin/c++filt"
 
     def demangle_names(names):
@@ -93,10 +95,15 @@ else:
     print "Unsupported OS: %s" % os.name
     sys.exit(2)
 
-
 def attachment_filter(attachment):
     return is_crash_dump_path(attachment["filename"])
 
+def web_link_filter(link):
+    if not link or \
+       not link.get('object') or \
+       not link.['object'].get('url'): return False
+    ext = os.path.splitext(link['object']['url'])[1]
+    return ext and ext[1:] in CRASH_EXT
 
 def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
@@ -503,13 +510,19 @@ class CrashMonitor(object):
                                 if issue_data.ok:
                                     if self.can_change(issue_data, crash['version'], crash["isHotfix"]):
                                         # 1. Attach the new crash dump
-                                        _, counted = nxjira.count_attachments(issue_data, predicat=attachment_filter)
-                                        while counted >= MAX_ATTACHMENTS:
+                                        _, attach_count = nxjira.count_attachments(issue_data, predicat=attachment_filter)
+                                        while attach_count >= MAX_ATTACHMENTS:
                                             print "Deleting oldest attachment in %s" % (issue[0],)
                                             if not nxjira.delete_oldest_attchment(issue_data, predicat=attachment_filter):
                                                 break
-                                            counted -= 1
-                                        if counted < MAX_ATTACHMENTS:
+                                            attach_count -= 1
+                                        _, link_count = nxjira.count_web_links(issue_data, predicat=web_link_filter)
+                                        while link_count >= MAX_ATTACHMENTS:
+                                            print "Deleting oldest link in %s" % (issue[0],)
+                                            if not nxjira.delete_oldest_web_link(issue_data, predicat=web_link_filter):
+                                                break
+                                            link_count -= 1
+                                        if attach_count < MAX_ATTACHMENTS and link_count < MAX_ATTACHMENTS:
                                             res = self.add_attachment(issue[0], crash['path'], crash['dump'], crash['url'])
                                             if res is not None:
                                                 email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])

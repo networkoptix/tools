@@ -81,7 +81,7 @@ class JiraReply(object):
         return JiraError(self.code, self.reason, self.data)
 
     def is_done(self):
-        return self.ok and self.data['fields']['status']['statusCategory']["name"] == "Done"
+        return self.ok and self.data['fields']['status']['statusCategory']["name"] != "To Do"
 
     def is_closed(self):
         return self.ok and self.data['fields']['status']["name"] == "Closed"
@@ -122,6 +122,7 @@ def jirareq(op, query, data=None, what='issue'):
         if op == 'GET':
             res = requests.get(url, auth=AUTH)
         elif op == 'DELETE':
+            # print url
             res = requests.delete(url, auth=AUTH)
         else:
             jdata = json.dumps(data)
@@ -242,7 +243,7 @@ def priority_change(key, new_prio, old_prio=None):
 
 
 def count_attachments(key, predicat=None):
-    """"Returns tuple (None, numnber_attachments) if result.ok
+    """Returns tuple (None, numnber_attachments) if result.ok
     else (result.code, result.reason)
     """
     key, result = get_issue(key)
@@ -254,9 +255,8 @@ def count_attachments(key, predicat=None):
         return None, count
     return result.code, result.reason
 
-
 def delete_oldest_attchment(key, predicat=None):
-    """"Deletes issue's attachment with the oldest u[load time.
+    """Deletes issue's attachment with the oldest upload time.
     Returns True if no attachments found in the issue or on sucessful deletion.
     """
     k, result = get_issue(key)
@@ -275,9 +275,45 @@ def delete_oldest_attchment(key, predicat=None):
         if key == result: # i.e. we work with preloaded data
             result.data['fields']['attachment'].remove(to_del)
         return True
-    print "WARNING: Failed to delete attachment %s of issue %s" % (to_del['id'], k)
+    print "WARNING: Failed to delete attachment %s of issue %s: %d '%s'" % \
+    (to_del['id'], k, reply.code, reply.reason)
     return False
 
+def count_web_links(key, predicat=None):
+    """Returns tuple (None, numnber_attachments) if result.ok
+    else (result.code, result.reason)
+    """
+    key, result = get_issue(key)
+    if not result.ok:
+        return result.code, result.reason
+    result = jirareq('GET', '%s/remotelink' % key)
+    if result.ok:
+        if predicat is None:
+            count = len(result.data)
+        else:
+            count = sum(1 for link in result.data if predicat(link))
+        return None, count
+    return result.code, result.reason
+
+def delete_oldest_web_link(key, predicat=None):
+    key, result = get_issue(key)
+    if not result.ok:
+        return False
+    result = jirareq('GET', '%s/remotelink' % key)
+    if not result.ok:
+        return False
+    links = result.data
+    if predicat is not None:
+        links = filter(predicat, links)
+    if not links:
+        return True
+    to_del = sorted(links, key=lambda l: l['id'])[0]
+    reply = jirareq('DELETE', '%s/remotelink/%s' % (key, to_del['id']))
+    if reply.ok:
+        return True
+    print "WARNING: Failed to delete remotelink %s of issue %s: %d '%s'" % \
+        (to_del['id'], key, reply.code, reply.reason)
+    return False
 
 ##############
 # Testing (development tries) function
