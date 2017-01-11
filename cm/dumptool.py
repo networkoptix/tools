@@ -13,11 +13,11 @@ Dependencies:
 
 Usage (module):
     > import dumptool
-    > print dumptool.analyseDump('dump.dmp', customization)
+    > print dumptool.analyseDump('dump.dmp', customization[, branch=BRANCH][, verbose=N])
     dump.cdb-bt
 
 Usage (console):
-    > python dumptool.py dump.dmp [customization]
+    $ python dumptool.py dump.dmp [customization] [branch=BRANCH] [verbose=N]
     dump.cdb-bt
 '''
 
@@ -43,8 +43,8 @@ CONFIG = dict(
         '''%s-[0-9\.-_]+-win64[a-z-_]+\.(exe|msi)''',
     ],
     pdb_suffixes = [
-        '''x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs|misc)\.zip''',
-        '''(%(module)s|libs|misc)_debug-[0-9\.-_]+-win64[a-z-_]+\.zip''',
+        '''x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip''',
+        '''(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]+\.zip''',
     ],
 )
 
@@ -103,19 +103,21 @@ class Cdb(object):
     '''Cdb program driver to analize DMP files.
     '''
 
-    def __init__(self, dump, debug=None):
-        '''Starts up cdb with :dump and :debug path.
+    def __init__(self, dump, exe_dir=None, pdb_dirs=None):
+        '''Starts up cdb with :dump, :exe_dir and :pdb_dir.
         '''
         self.shell = [CONFIG['cdb_path'], '-z', dump]
-        if debug: self.shell += ['-i', debug]
+        if exe_dir:
+           self.shell += ['-i', exe_dir]
+        if pdb_dirs:
+           self.shell += ['-y', 'srv*;symsrv*;' + pdb_dirs]
         try:
             self.cdb = subprocess.Popen(self.shell,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         except OSError as e:
             raise CdbError('Cannot start %s -> %s' % (shell_line(self.shell), e))
         self.execute()
-        if debug:
-            self.execute('.sympath+ "%s"' % debug)
+        if exe_dir or pdb_dirs:
             self.execute('.reload /f')
 
     def __enter__(self, *a):
@@ -222,7 +224,7 @@ class DumpAnalyzer(object):
                 self.log("Regexp '%s' got url '%s'" % (regexp, m.group(1)), level=2)
                 results.append((url, m.group(1)))
             else:
-                self.log("Warning: canot find '%s' in %s" % (regexp, url), level=1)
+                self.log("Warning: Unable to find '%s' in %s" % (regexp, url), level=2)
                 failures.append(regexp)
         if subUrl and len(failures):
             results += self.fetch_url_data(subUrl, failures)
@@ -266,13 +268,20 @@ class DumpAnalyzer(object):
         else:
             self.log('Already downloaded: %s' % name, level=1)
 
-    def find_file(self, name, path=None):
-        '''Searches file :name in build directory.
+    def find_files_iter(self, condition, path=None):
+        '''Searches file by :condition in :path (build directory by default).
         '''
         path = path or self.build_path
         for root, dirs, files in os.walk(path):
-            if name in files:
-                return os.path.join(root, name)
+            for name in files:
+                if condition(name):
+                    yield os.path.join(root, name)
+
+    def find_file(self, name, path=None):
+        '''Searches file by :name in :path (build directory by default).
+        '''
+        for path in self.find_files_iter(lambda n: n == name, path):
+            return path
         raise DistError("No such file '%s' in '%s'" % (name, path))
 
     def module_dir(self):
@@ -334,7 +343,9 @@ class DumpAnalyzer(object):
         '''
         report_path = report_name(self.dump_path)
         self.log('Loading debug information: ' + self.module_dir())
-        with Cdb(self.dump_path, debug=self.module_dir()) as cdb:
+        pdb_dirs = ';'.join(set(os.path.dirname(f) for f in
+            self.find_files_iter(lambda n: n.lower().endswith(".pdb"))))
+        with Cdb(self.dump_path, self.module_dir(), pdb_dirs) as cdb:
             self.log('Debug run: ' + shell_line(cdb.shell), level=1)
             self.log('Generating report: ' + report_path)
             report = cdb.report()
