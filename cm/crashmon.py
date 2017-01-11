@@ -101,7 +101,7 @@ def attachment_filter(attachment):
 def web_link_filter(link):
     if not link or \
        not link.get('object') or \
-       not link.['object'].get('url'): return False
+       not link['object'].get('url'): return False
     ext = os.path.splitext(link['object']['url'])[1]
     return ext and ext[1:] in CRASH_EXT
 
