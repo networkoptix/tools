@@ -39,15 +39,12 @@ CONFIG = dict(
         report = 'cdb-bt',
     ),
     dist_suffixes = [
-        '''x64[a-z-_]+%s-only\.msi''',
-        '''x64[a-z-_]+%s-only\.exe''',
+        '''x64[a-z-_]+%s(-only)?\.(msi|exe)''',
+        '''%s-[0-9\.-_]+-win64[a-z-_]+\.(exe|msi)''',
     ],
     pdb_suffixes = [
-        '''x64[a-z-_]+windows-pdb-all\.zip''',
-        '''x64[a-z-_]+windows-pdb-apps\.zip''',
-        '''x64[a-z-_]+windows-pdb-%(module)s\.zip''',
-        '''x64[a-z-_]+windows-pdb-libs\.zip''',
-        '''x64[a-z-_]+windows-pdb-misc\.zip''',
+        '''x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs|misc)\.zip''',
+        '''(%(module)s|libs|misc)_debug-[0-9\.-_]+-win64[a-z-_]+\.zip''',
     ],
 )
 
@@ -221,8 +218,7 @@ class DumpAnalyzer(object):
         results, failures = [], []
         for regexp in regexps:
             self.log("Trying regexp '%s'" % regexp, level=2)
-            m = re.search(regexp, page)
-            if m:
+            for m in re.finditer(regexp, page):
                 self.log("Regexp '%s' got url '%s'" % (regexp, m.group(1)), level=2)
                 results.append((url, m.group(1)))
             else:
@@ -248,7 +244,7 @@ class DumpAnalyzer(object):
         suffixes = list(s % self.dist for s in CONFIG['dist_suffixes']) +\
            list(s % {'module': self.dist} for s in CONFIG['pdb_suffixes'])
         out = self.fetch_url_data(
-            build_url, ('''>([a-z0-9-\.]+%s)<''' % r for r in suffixes),
+            build_url, ('''>([a-zA-Z0-9-_\.]+%s)<''' % r for r in suffixes),
             os.path.join(CONFIG['dist_url'], update_path))
         self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
@@ -330,7 +326,7 @@ class DumpAnalyzer(object):
                     self.log("Warning: %s '%s': %s" % (f, p, repr(e)), level=1)
                 shutil.rmtree(self.build_path, onerror=logError)
             raise
-        if 'cp' in self.debug:
+        if 'copy' in self.debug or 'cp' in self.debug:
             shutil.copy(self.dump_path, self.module_dir())
 
     def generate_report(self, asString=False):
@@ -361,7 +357,7 @@ def analyseDump(*args, **kwargs):
         raise UserError("Wrong format value: %s" % format)
     dump = DumpAnalyzer(*args, **kwargs)
     report = report_name(dump.dump_path)
-    if os.path.isfile(report):
+    if os.path.isfile(report) and 'rewrite' not in kwargs['debug']:
         if format == 'dict':
             dump.get_dump_information()
             return resultDict(dump, open(report, 'r').read())
@@ -386,6 +382,7 @@ def main():
     try:
         print analyseDump(*args, **kwargs)
     except Error as e:
+        if 'throw' in kwargs['debug']: raise
         sys.stderr.write('%s: %s\n' % (type(e).__name__, e))
         sys.exit(1)
     except KeyboardInterrupt:
