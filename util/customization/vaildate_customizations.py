@@ -5,6 +5,7 @@ import sys
 import argparse
 import os
 from itertools import combinations
+from customization import Customization
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
@@ -16,36 +17,16 @@ sys.path.insert(0, projectDir)
 from vms_projects import getCustomizableProjects
 sys.path.pop(0)
 
-def iterateIconsInPath(path):
-    result = []
-    for dirname, dirnames, filenames in os.walk(path):
-        cut = len(path) + 1
-        for filename in filenames:
-            if filename[0] == '.':
-                continue;
-            norm = os.path.join(dirname, filename)[cut:].replace("\\", "/")
-            result.append(norm)
-    return result
 
-class Project:
+class Intro:
     CLIENT = "client"
-    INTRO = ["intro.mkv", "intro.avi", "intro.png", "intro.jpg", "intro.jpeg"]
-
-class Suffixes:
-    HOVERED = '_hovered'
-    SELECTED = '_selected'
-    PRESSED = '_pressed'
-    DISABLED = '_disabled'
-    CHECKED = '_checked'
-    ACCENTED = '_accented'
-    ALL = [HOVERED, SELECTED, PRESSED, DISABLED, CHECKED, ACCENTED]
+    FILES = {"intro.mkv", "intro.avi", "intro.png", "intro.jpg", "intro.jpeg"}
 
     @staticmethod
-    def baseName(fullname):
-        result = fullname;
-        for suffix in Suffixes.ALL:
-            result = result.replace(suffix, "")
-        return result
+    def validate(customization):
+        if customization.project.name == Intro.CLIENT:
+            return len(customization.icons & Intro.FILES) == 1
+        return True
 
 class Formats:
     PNG = '.png'
@@ -79,154 +60,16 @@ class Formats:
 
 verbose = False
 
-class Customization():
-    DEFAULT = 'default'
+def validateCustomization(customization):
+    info('Customization: ' + customization.name)
+    for duplicate in customization.duplicates:
+        err("Duplicate file {0}".format(duplicate))
 
-    def __init__(self, name, path, project):
-        self.name = name
-        self.path = path
-        self.project = project
-        self.rootPath = os.path.join(self.path, project)
-        if project == Project.CLIENT:
-            self.basePath = os.path.join(self.rootPath, 'resources', 'skin')
-            self.darkPath = os.path.join(self.rootPath, 'resources', 'skin_dark')
-            self.lightPath = os.path.join(self.rootPath, 'resources', 'skin_light')
-        else:
-            self.basePath = self.rootPath
+    if not Intro.validate(customization):
+        err("Intro is not found")
 
-        self.base = []
-        self.dark = []
-        self.light = []
-        self.total = []
-
-        with open(os.path.join(self.path, 'build.properties'), "r") as buildFile:
-            for line in buildFile.readlines():
-                if not 'parent.customization' in line:
-                    continue
-                self.parent = line.split('=')[1].strip()
-                break
-
-    def __str__(self):
-        return self.name
-
-    def isRoot(self):
-        if not self.parent:
-            err('Invalid build.properties file: ' + os.path.join(self.path, 'build.properties'))
-            return False
-        return self.parent == self.name
-
-    def relativePath(self, path, entry):
-        return os.path.relpath(os.path.join(path, entry), self.rootPath)
-
-    def populateFileList(self):
-        self.base = iterateIconsInPath(self.basePath)
-        if hasattr(self, 'darkPath'):
-            self.dark = iterateIconsInPath(self.darkPath)
-        if hasattr(self, 'lightPath'):
-            self.light = iterateIconsInPath(self.lightPath)
-        self.total = sorted(list(set(self.base + self.dark + self.light)))
-
-    def isUnused(self, entry, requiredFiles):
-        if not requiredFiles:
-            return False
-        if '@2x' in entry:
-            return False
-        if Suffixes.baseName(entry) in requiredFiles:
-           return False
-        if entry in Project.INTRO:
-           return False
-        if not Formats.isImage(entry):
-           return False
-        return True
-
-    def validateInner(self, requiredFiles):
-        info('Validating ' + self.name + '...')
-        clean = True
-        error = False
-
-        if self.project == Project.CLIENT:
-            hasIntro = False
-            for intro in Project.INTRO:
-                if intro in self.total:
-                    hasIntro = True
-
-            if not hasIntro:
-                clean = False
-                error = True
-                err('Intro is missing in ' + self.name)
-
-        for entry in self.base:
-            if entry in self.dark and entry in self.light:
-                clean = False
-                warn('File ' + os.path.join(self.basePath, entry) + ' duplicated in both skins')
-            if self.isUnused(entry, requiredFiles):
-                clean = False
-                warn('File %s in unused' % entry)
-
-        for entry in self.dark:
-            if not entry in self.light:
-                clean = False
-                if entry in self.base:
-                    warn('File ' + self.relativePath(self.lightPath, entry) + ' missing, using base version')
-                else:
-                    error = True
-                    err('File ' + self.relativePath(self.darkPath, entry) + ' missing in light skin')
-            if self.isUnused(entry, requiredFiles):
-                clean = False
-                warn('File %s in unused' % entry)
-
-        for entry in self.light:
-            if not entry in self.dark:
-                clean = False
-                if entry in self.base:
-                    warn('File ' + self.relativePath(self.darkPath, entry) + ' missing, using base version')
-                else:
-                    error = True
-                    err('File ' + self.relativePath(self.lightPath, entry) + ' missing in dark skin')
-            if self.isUnused(entry, requiredFiles):
-                clean = False
-                warn('File %s in unused' % entry)
-
-        if requiredFiles:
-            for entry in requiredFiles:
-                if entry in self.base or entry in self.dark or entry in self.light:
-                    continue
-                clean = False
-                error = True
-                err("File %s is missing" % entry)
-
-        if self.name == Customization.DEFAULT:
-            for entry in self.total:
-                if not entry.endswith(Formats.PNG):
-                    continue;
-
-        if clean:
-            green('Success')
-        if error:
-            return 1
-        return 0
-
-    def validateCross(self, other):
-        info('Validating ' + self.name + ' vs ' + other.name + '...')
-        clean = True
-
-        for entry in self.total:
-            #Intro files are checked an inner way
-            if self.project == Project.CLIENT:
-                if entry in Project.INTRO:
-                    continue
-
-            if entry.endswith(Formats.AI) or entry.endswith(Formats.SVG):
-                continue
-
-            if not entry in other.total:
-                clean = False
-                err('File ' + self.relativePath(self.basePath, entry) + ' missing in ' + other.name)
-
-        if clean:
-            green('Success')
-            return 0
-        return 1
+def crossCheckCustomizations(first, second):
+    info('Compare: ' + first.name + ' vs ' + second.name)
 
 def parseLine(line, extension, location):
     global verbose
@@ -351,12 +194,8 @@ td.light { background-color: #D0D0D0; }
 
 def checkProject(rootDir, project):
     separator()
-    info("Validating project " + str(project))
-    separator()
-    customizations = {}
+    info("Validating project " + project.name)
     roots = []
-    children = []
-    invalidInner = 0
 
     if project.sources:
         requiredFiles = []
@@ -364,10 +203,6 @@ def checkProject(rootDir, project):
             sourcesDir = os.path.join(rootDir, srcDir)
             requiredFiles += parseSources(sourcesDir)
         requiredSorted = sorted(list(set(requiredFiles)))
-
-        if project.static_icons_root:
-            static_icons = iterateIconsInPath(project.static_icons_root)
-            requiredSorted = sorted(list( set(requiredSorted) - set(static_icons) ))
     else:
         requiredSorted = None
 
@@ -379,29 +214,19 @@ def checkProject(rootDir, project):
         path = os.path.join(customizationDir, entry)
         if (not os.path.isdir(path)):
             continue
-        c = Customization(entry, path, project.name)
-        c.populateFileList()
+        c = Customization(entry, path, project)
+        if not c.supported:
+            info('Skip unsupported customization {0}'.format(c.name))
+            continue
+            
+        validateCustomization(c)
         if c.isRoot():
-            invalidInner += c.validateInner(requiredSorted)
             roots.append(c)
-        else:
-            children.append(c)
-        customizations[entry] = c
 
-    invalidCross = 0
     for c1, c2 in combinations(roots, 2):
-        invalidCross += c1.validateCross(c2)
-        invalidCross += c2.validateCross(c1)
+        crossCheckCustomizations(c1, c2)
+        crossCheckCustomizations(c2, c1)
     info('Validation finished')
-
-    targetFiles = customizations[Customization.DEFAULT].total
-
-    printCustomizations(project.name, customizationDir, targetFiles, customizations, roots, children)
-
-    if invalidInner > 0:
-        sys.exit(1)
-    if invalidCross > 0:
-        sys.exit(2)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -416,6 +241,7 @@ def main():
 
     rootDir = os.getcwd()
     projects = getCustomizableProjects()
+
     for project in projects:
         checkProject(rootDir, project)
 
