@@ -16,8 +16,16 @@ set -e
 
 MAX_JOBS=${J:-12}
 RUN=$(dirname "${BASH_SOURCE[0]}")/run.sh
-DIR=${DIR:-/tmp/ut}
-rm -rf $DIR
+DEFAULT_DIR=/tmp/nx_vms_ut
+
+if [ ! "$DIR" ]; then
+    DIR=$DEFAULT_DIR/$(date +%s)
+    rm -rf $DEFAULT_DIR
+else
+    rm -rf $DIR
+fi
+
+echo '-----' Prepare to run tests in: $DIR
 mkdir -p $DIR
 
 TESTS=$@
@@ -29,20 +37,23 @@ fi
 
 function run_async() {
     set +e
-    local tmpDir=$(mktemp -d)
+    local tmpDir="$DIR/$1.$2.tmp"
     local args="--gtest_filter=$2.* --gtest_shuffle --gtest_break_on_failure --tmp=$tmpDir"
-    local out=$DIR/$1.$2.out
+    local out="$DIR/$1.$2.out"
     [ $LL ] && args+=" --ll=$LL"
+    [ $EA ] && args+=" $EA"
 
+    mkdir -p "$tmpDir"
     echo '>>>>>' START: $@
     $RUN $1 $args > $out 2>&1
     local result=$?
     if [ $result != "0" ]; then
-        echo '<<<<<' FAILURE: $@ \> $out
-        tail $out
+        echo '<<<<<' FAILURE: $@ '>' $out
+        tail "$out"
+    else
+        rm -rf $tmpDir
     fi
 
-    rm -rf $tmpDir
     return $result
 }
 
