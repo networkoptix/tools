@@ -5,17 +5,9 @@ import os
 import re
 import pyfscache
 
+from file_formats import is_image_file, is_source_file
+
 sources_cache = pyfscache.FSCache('.sources_cache', hours=1, minutes=2.5)
-
-sources_extensions = ['.cpp', '.h', '.ui', '.qml']
-def is_source_file(path):
-    return any(path.endswith(ext) for ext in sources_extensions)
-
-images_extensions = ['.png', '.gif']
-def is_image_file(path):
-    if '%' in path:
-        return False
-    return any(path.endswith(ext) and len(path) > len(ext) for ext in images_extensions)
 
 def parse_line(line, extension, location):
     if '_IGNORE_VALIDATION_' in line:

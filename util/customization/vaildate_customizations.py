@@ -34,11 +34,25 @@ class Intro:
     def isIntro(customization, icon):
         return customization.project.name == Intro.CLIENT and icon in Intro.FILES
 
-def printError(customization, text):
+def requiredFileKey(icon, prefix):
+    key = icon
+    if prefix and prefix in key:
+        key = key.replace(prefix, "")
+    while key.startswith("/"):
+        key = key[1:]
+    return key
+
+def output(customization, text, func):
     if verbose:
-        err(text)
+        func(text)
     else:
-        err('{0}: {1}'.format(customization.name, text))
+        func('{0}:{1}: {2}'.format(customization.project.name, customization.name, text))
+
+def printError(customization, text):
+    output(customization, text, err)
+
+def printWarning(customization, text):
+    output(customization, text, warn)
 
 def validateCustomization(customization):
     if verbose:
@@ -54,26 +68,46 @@ def validateCustomization(customization):
             printError(customization, "Base icon {0} for {1} is not found".format(base, source))
 
 def validateRequiredFiles(customization, requiredFiles):
+    if not requiredFiles:
+        return
+
     prefix = customization.project.prefix
 
     for icon, location in requiredFiles:
-        key = icon
-        if prefix and prefix in key:
-            key = key.replace(prefix, "")
-        while key.startswith("/"):
-            key = key[1:]
+        key = requiredFileKey(icon, prefix)
         if Intro.isIntro(customization, key):
             continue
         if not key in customization.icons:
             if verbose:
                 printError(customization, "Icon {0} (key {1}) is not found (used in {2})".format(icon, key, location))
             else:
-                printError(customization, "Icon {0} is not found for project {1}".format(icon, customization.project.name))
+                printError(customization, "Icon {0} is not found".format(icon))
+
+def validateUnusedFiles(customization, requiredFiles):
+    if not requiredFiles:
+        return
+
+    prefix = customization.project.prefix
+    keys = set()
+    for icon, location in requiredFiles:
+        keys.add(requiredFileKey(icon, prefix))
+
+    base = set()
+    for icon, source in customization.baseIcons():
+        base.add(icon)
+
+    for unused in base - keys:
+        printWarning(customization, "Unused icon {0}".format(unused))
 
 def crossCheckCustomizations(first, second):
     if verbose:
         info('Compare: ' + first.name + ' vs ' + second.name)
-
+    for icon in first.icons - second.icons:
+        if Intro.isIntro(first, icon):
+            continue
+        printError(first, "Icon {0} is missing in {1}".format(icon, second.name))
+    for file in first.other_files - second.other_files:
+        printError(first, "File {0} is missing in {1}".format(file, second.name))
 
 def checkProject(rootDir, project):
     if verbose:
@@ -81,8 +115,9 @@ def checkProject(rootDir, project):
         info("Validating project " + project.name)
     roots = []
 
-    requiredFiles = []
+    requiredFiles = None
     if project.sources:
+        requiredFiles = []
         for dir in project.sources:
             requiredFiles += parse_sources_cached(os.path.join(rootDir, dir))
 
@@ -104,6 +139,7 @@ def checkProject(rootDir, project):
         if c.isRoot():
             roots.append(c)
             validateRequiredFiles(c, requiredFiles)
+            validateUnusedFiles(c, requiredFiles)
 
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)

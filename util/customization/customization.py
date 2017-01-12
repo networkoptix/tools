@@ -1,5 +1,7 @@
 import os
 
+from file_formats import is_image_file
+
 suffixes = ['_hovered', '_selected', '_pressed', '_disabled', '_checked', '_accented', '@2x', '@3x', '@4x']
 
 def basename(icon):
@@ -25,6 +27,7 @@ class Customization():
         self.supported = True
         self.parent = None
         self.icons = set()
+        self.other_files = set()
         self.static_files = project.static_files
         self.cusomized_files = project.cusomized_files
         self.duplicates = set()
@@ -60,7 +63,9 @@ class Customization():
                 if filename[0] == '.':
                     continue;
                 key = os.path.join(dirname, filename)[cut:].replace("\\", "/")
-                if key in self.icons:
+                if not is_image_file(key):
+                    self.other_files.add(key)
+                elif key in self.icons:
                     self.duplicates.add(key)
                 else:
                     self.icons.add(key)
