@@ -34,17 +34,24 @@ class Intro:
     def isIntro(customization, icon):
         return customization.project.name == Intro.CLIENT and icon in Intro.FILES
 
+def printError(customization, text):
+    if verbose:
+        err(text)
+    else:
+        err('{0}: {1}'.format(customization.name, text))
+
 def validateCustomization(customization):
-    info('Customization: ' + customization.name)
+    if verbose:
+        info('Customization: ' + customization.name)
     for duplicate in customization.duplicates:
-        err("Duplicate file {0}".format(duplicate))
+        printError(customization, "Duplicate file {0}".format(duplicate))
 
     if not Intro.validate(customization):
-        err("Intro is not found")
+        printError(customization, "Intro is not found")
 
     for base, source in customization.baseIcons():
         if not base in customization.icons:
-            err("Base icon {0} for {1} is not found".format(base, source))
+            printError(customization, "Base icon {0} for {1} is not found".format(base, source))
 
 def validateRequiredFiles(customization, requiredFiles):
     prefix = customization.project.prefix
@@ -58,15 +65,20 @@ def validateRequiredFiles(customization, requiredFiles):
         if Intro.isIntro(customization, key):
             continue
         if not key in customization.icons:
-            err("Icon {0} (key {1}) is not found (used in {2})".format(icon, key, location))
+            if verbose:
+                printError(customization, "Icon {0} (key {1}) is not found (used in {2})".format(icon, key, location))
+            else:
+                printError(customization, "Icon {0} is not found for project {1}".format(icon, customization.project.name))
 
 def crossCheckCustomizations(first, second):
-    info('Compare: ' + first.name + ' vs ' + second.name)
+    if verbose:
+        info('Compare: ' + first.name + ' vs ' + second.name)
 
 
 def checkProject(rootDir, project):
-    separator()
-    info("Validating project " + project.name)
+    if verbose:
+        separator()
+        info("Validating project " + project.name)
     roots = []
 
     requiredFiles = []
@@ -96,7 +108,8 @@ def checkProject(rootDir, project):
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)
         crossCheckCustomizations(c2, c1)
-    info('Validation finished')
+    if verbose:
+        info('Validation finished')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -106,7 +119,7 @@ def main():
     args = parser.parse_args()
     if args.color:
         init_color()
-        
+
     if args.clear_cache:
         clear_sources_cache()
 
