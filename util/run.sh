@@ -54,10 +54,17 @@ else
     ARCH_GREP=x64
     if [ $(uname) == Darwin ]
     then
-        GDB=lldb
+        # /usr/bin/lldb is protected against LD variables
+        GDB=/Applications/Xcode.app/Contents/Developer/usr/bin/lldb
+        GDB_ARGS=--
         OS_GREP=macosx
+        if [[ $C$D ]]; 
+        then
+            sudo /usr/sbin/DevToolsSecurity --enable
+        fi
     else
         GDB=gdb
+        GDB_ARGS=--args
         OS_GREP=linux
     fi
 fi
@@ -90,7 +97,7 @@ then
     $GDB $@ $C
 elif [ "$D" ]
 then
-    $GDB --args $@
+    $GDB $GDB_ARGS $@
 elif [ "$DS" ]
 then
     gdbserver :$DS $@
