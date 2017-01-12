@@ -13,13 +13,14 @@ def is_source_file(path):
 
 images_extensions = ['.png', '.gif']
 def is_image_file(path):
+    if '%' in path:
+        return False
     return any(path.endswith(ext) and len(path) > len(ext) for ext in images_extensions)
 
 def parse_line(line, extension, location):
-#    if extension == Formats.UI:
-#        line = line.replace("<", splitter).replace(">", splitter).replace(":/skin/", "")
-
-    parts = re.split("[^a-z_/.]", line, flags=re.IGNORECASE)
+    if '_IGNORE_VALIDATION_' in line:
+        return
+    parts = re.split("[^a-z0-9_/@%.]", line, flags=re.IGNORECASE)
     for part in parts:
         if not is_image_file(part):
             continue
@@ -41,6 +42,9 @@ def parse_sources_cached(dir):
         result.append((line, location))
     return result
 
+def clear_sources_cache():
+    sources_cache.purge()
+    
 def parse_sources(dir):
     if not os.path.exists(dir):
         return

@@ -6,7 +6,7 @@ import argparse
 import os
 from itertools import combinations
 from customization import Customization
-from sources_parser import parse_sources_cached
+from sources_parser import parse_sources_cached, clear_sources_cache
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
@@ -18,6 +18,8 @@ sys.path.insert(0, projectDir)
 from vms_projects import getCustomizableProjects
 sys.path.pop(0)
 
+verbose = False
+
 class Intro:
     CLIENT = "client"
     FILES = {"intro.mkv", "intro.avi", "intro.png", "intro.jpg", "intro.jpeg"}
@@ -28,7 +30,9 @@ class Intro:
             return len(customization.icons & Intro.FILES) == 1
         return True
 
-verbose = False
+    @staticmethod
+    def isIntro(customization, icon):
+        return customization.project.name == Intro.CLIENT and icon in Intro.FILES
 
 def validateCustomization(customization):
     info('Customization: ' + customization.name)
@@ -42,9 +46,22 @@ def validateCustomization(customization):
         if not base in customization.icons:
             err("Base icon {0} for {1} is not found".format(base, source))
 
+def validateRequiredFiles(customization, requiredFiles):
+    prefix = customization.project.prefix
+
+    for icon, location in requiredFiles:
+        key = icon
+        if prefix and prefix in key:
+            key = key.replace(prefix, "")
+        while key.startswith("/"):
+            key = key[1:]
+        if Intro.isIntro(customization, key):
+            continue
+        if not key in customization.icons:
+            err("Icon {0} (key {1}) is not found (used in {2})".format(icon, key, location))
+
 def crossCheckCustomizations(first, second):
     info('Compare: ' + first.name + ' vs ' + second.name)
-
 
 
 def checkProject(rootDir, project):
@@ -67,12 +84,14 @@ def checkProject(rootDir, project):
             continue
         c = Customization(entry, path, project)
         if not c.supported:
-            info('Skip unsupported customization {0}'.format(c.name))
+            if verbose:
+                info('Skip unsupported customization {0}'.format(c.name))
             continue
 
         validateCustomization(c)
         if c.isRoot():
             roots.append(c)
+            validateRequiredFiles(c, requiredFiles)
 
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)
@@ -83,9 +102,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
+    parser.add_argument('--clear-cache', action='store_true', help="Force clear sources cache")
     args = parser.parse_args()
     if args.color:
         init_color()
+        
+    if args.clear_cache:
+        clear_sources_cache()
 
     global verbose
     verbose = args.verbose
