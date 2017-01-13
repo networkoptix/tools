@@ -162,7 +162,7 @@ def get_crashes(crtype, mark):
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
             crash["isHotfix"] = isHotfix(crash["version"])
 
-        crashes = remove_developers_versions(crashes)
+        crashes = remove_developers_crashes(crashes)
 
         print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
         return sorted(crashes, key=lambda v: (v['upload'],v['path']))
