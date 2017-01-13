@@ -126,8 +126,11 @@ OLD_VERSIONS_RE = r'^\/\w+\/2\.[0-5]\.'
 
 def remove_old_versions(crashes):
     return filter(
-        lambda v: not re.search(OLD_VERSIONS_RE, v['path']),
-        crashes)
+        lambda v: not re.search(OLD_VERSIONS_RE, v['path']), crashes)
+
+def remove_developers_crashes(crashes):
+    return filter(
+        lambda v: get_vers_bn(v)[1] != 0, crashes)
 
 def get_crashes(crtype, mark):
     '''
@@ -158,7 +161,8 @@ def get_crashes(crtype, mark):
             m = rx.match(cp[1])
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
             crash["isHotfix"] = isHotfix(crash["version"])
-            
+
+        crashes = remove_developers_versions(crashes)
 
         print "Loaded %s: %s new crashes" % (crtype, sum(v['new'] for v in crashes))
         return sorted(crashes, key=lambda v: (v['upload'],v['path']))
@@ -299,8 +303,9 @@ def email_priority_fail(key, issue, pold, pnew, error):
 
 
 def get_vers_bn(crash):
-    version = crash['version']
-    vers = bn = 'unknown'
+    version = crash.get('version')
+    vers = 'unknown'
+    bn = 0
     if version:
         vers = '.'.join(map(str, crash['version'][:-1]))
         bn = crash['version'][-1]
