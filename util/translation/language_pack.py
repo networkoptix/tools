@@ -141,7 +141,7 @@ def main():
     
     rootDir = os.getcwd()    
     calculateTsFiles(rootDir)
-    calculateXmlFiles(rootDir)
+    #calculateXmlFiles(rootDir)
     calculateSources(rootDir)
 
 if __name__ == "__main__":
