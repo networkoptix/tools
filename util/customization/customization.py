@@ -29,7 +29,7 @@ class Customization():
         self.icons = set()
         self.other_files = set()
         self.static_files = project.static_files
-        self.cusomized_files = project.cusomized_files
+        self.customized_files = project.customized_files
         self.duplicates = set()
 
         with open(os.path.join(self.root, 'build.properties'), "r") as buildFile:
@@ -43,8 +43,8 @@ class Customization():
             for path in self.static_files:
                 self.populateFrom(path)
 
-        if self.cusomized_files:
-            for path in self.cusomized_files:
+        if self.customized_files:
+            for path in self.customized_files:
                 self.populateFrom(os.path.join(self.root, path))
 
     def __str__(self):

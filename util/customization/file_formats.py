@@ -1,4 +1,3 @@
-
 sources_extensions = ['.cpp', '.h', '.ui', '.qml']
 def is_source_file(path):
     return any(path.endswith(ext) for ext in sources_extensions)
