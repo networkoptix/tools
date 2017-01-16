@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-#/bin/python
+#!/bin/python2
 
 import sys
 import os
