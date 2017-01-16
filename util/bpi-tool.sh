@@ -27,11 +27,6 @@ else
     echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
 fi
 
-LIB_VDPAU_SUNXI="/usr/lib/arm-linux-gnueabihf/vdpau/libvdpau_sunxi.so.1"
-LIB_CEDRUS="/usr/local/lib/libcedrus.so.1"
-LIB_UMP="/usr/lib/arm-linux-gnueabihf/libUMP.so*"
-LIB_PIXMAN="/usr/lib/arm-linux-gnueabihf/libpixman-1.so*"
-
 QT_PATH="buildenv/packages/bpi/qt-5.6.2"
 
 #--------------------------------------------------------------------------------------------------
@@ -56,31 +51,48 @@ pack()
 
 pack_full()
 {
-    FILES_LIST=" \
-        $LIBS_DIR \
-        $LITE_CLIENT_DIR \
-        $MEDIASERVER_DIR \
-        $LIB_VDPAU_SUNXI \
-        $LIB_CEDRUS \
-        $LIB_UMP \
-        $LIB_PIXMAN \
-    "
-
+    FILES_LIST="$NX_BPI_DIR"
     pack "$*"
 }
 
 pack_short()
 {
+    # Pack build results and bpi-specific artifacts from third_party.
+
     FILES_LIST=" \
+        $LIBS_DIR/libappserver2.so \
+        $LIBS_DIR/libclient_core.so \
+        $LIBS_DIR/libcloud_db_client.so \
+        $LIBS_DIR/libcommon.so \
+        $LIBS_DIR/libconnection_mediator.so \
+        $LIBS_DIR/libmediaserver_core.so \
+        $LIBS_DIR/libudt.so \
+        $LIBS_DIR/libnx_audio.so \
+        $LIBS_DIR/libnx_email.so \
+        $LIBS_DIR/libnx_fusion.so \
+        $LIBS_DIR/libnx_media.so \
+        $LIBS_DIR/libnx_network.so \
+        $LIBS_DIR/libnx_streaming.so \
+        $LIBS_DIR/libnx_utils.so \
+        $LIBS_DIR/libnx_vms_utils.so \
+		\
+        $LIBS_DIR/ldpreloadhook.so \
+        $LIBS_DIR/libcedrus.so \
+        $LIBS_DIR/libpixman-1.so \
+        $LIBS_DIR/libproxydecoder.so \
+        $LIBS_DIR/libvdpau_sunxi.so \
+        $LIBS_DIR/libUMP.so \
+	    \
         $LITE_CLIENT_DIR/bin/mobile_client \
         $LITE_CLIENT_DIR/bin/video/videonode/libnx_bpi_videonode_plugin.so \
-        $LIBS_DIR/libnx_* \
-        $LIBS_DIR/libproxydecoder.so \
-        $LIBS_DIR/ldpreloadhook.so \
-        $LIB_VDPAU_SUNXI \
-        $LIB_CEDRUS \
+		$MEDIASERVER_DIR/bin/mediaserver \
+		$MEDIASERVER_DIR/bin/media_db_util \
+		$MEDIASERVER_DIR/bin/external.dat \
+		$MEDIASERVER_DIR/bin/plugins \
+		/etc/init.d/networkoptix* \
+		/etc/init.d/nx* \
+		$MEDIASERVER_DIR/var/scripts \
     "
-
     pack "$*"
 }
 
@@ -213,6 +225,7 @@ show_help_and_exit()
     echo "client - Copy mobile_client exe to bpi."
     echo "server - Copy mediaserver_core lib to bpi."
     echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
+	echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
     echo
     echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
     echo "run ... - Execute mobile_client @bpi via '$NX_BPI_DIR/mediaserver/var/scripts/start_lite_client'."
@@ -234,8 +247,8 @@ show_help_and_exit()
     echo "ldp ... - Make ldpreloadhook.so @bpi and intall it to bpi."
     echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
     echo
-    echo "pack-short <output.tgz> - Prepare tar with mobile_client and proxy_decoder binaries @bpi."
-    echo "pack-full <output.tgz> - Prepare tar with complete mobile_client binaries @bpi."
+    echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
+    echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
     exit 0
 }
 
@@ -286,13 +299,14 @@ main()
                 #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$MEDIASERVER_DIR" "etc" "$MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
                 cp_lite_client_bins "mobile_client" "mobile_client exe"
+                cp_lite_client_bins "video" "Qt OpenGL video plugin"
 
                 # Currently, "copy" verb copies only nx_vms build results.
                 #cp_files "$VMS_DIR/../$QT_PATH/lib" "*.so*" "$LIBS_DIR" "Qt libs" "$QT_PATH"
                 #cp_mediaserver_bins "vox" "mediaserver vox"
                 #
                 #cp_lite_client_bins \
-                #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
+                #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,libexec,resources,translations}" \
                 #    "mobile_client/bin Qt dirs"
                 #cp_sysroot_libs "lib{opus,vpx,webp,webpdemux}.so*" "libs for web-engine"
                 #cp_lite_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
@@ -358,6 +372,15 @@ main()
                     LIB_NAME="$2"
                 fi
                 cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
+                exit $?
+                ;;
+            "ini")
+                bpi " \
+                    touch /tmp/mobile_client.ini && \
+                    touch /tmp/nx_media.ini && \
+                    touch /tmp/ProxyVideoDecoder.ini && \
+                    touch /tmp/proxydecoder.ini
+                "
                 exit $?
                 ;;
             #......................................................................................
