@@ -1,5 +1,4 @@
 #!/bin/python2
-# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -18,7 +17,10 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-qt_path = 'c:\\develop\\buildenv\\packages\\windows-x64\\qt-5.6.1\\bin\\'
+buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
+sys.path.insert(0, buildVarDir)
+from current_config import QT_DIR
+sys.path.pop(0)
 
 ignored = [
             # QT files
@@ -73,15 +75,24 @@ def update(project):
     filename = project.name
     
     entries = calculateEntries(filename, translationDir)
-
-    command = qt_path + 'lupdate.exe -no-obsolete -no-ui-lines'
-    command += " -locations {}".format(project.locations)
-    command += " -extensions {}".format(project.extensions)
-    command += ' ' + sourcesDir
-    command += ' -ts'
+    
+    lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
+    command = [lupdate, '-no-obsolete', '-no-ui-lines']
+  
+    command.append('-locations {}'.format(project.locations))
+    command.append('-extensions {}'.format(project.extensions))
+    command.append(sourcesDir)
+    command.append('-ts')
     for path in entries:
-        command = command + ' ' + path
-    log = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+        command.append(path)
+    
+    log = ''
+    global verbose
+    if verbose:
+        log += ' '.join(command)
+        log += '\n'
+    
+    log += subprocess.check_output(' '.join(command), stderr=subprocess.STDOUT)
     global results
     results[project] = log
 
@@ -124,14 +135,15 @@ def main():
     threads = []
     for project in projects:
         if verbose:
-            info("Updating project " + str(project))
+            info("Updating project " + str(project))           
         threads.append(updateThreaded(project, update))
-
+            
     for thread in threads:
         thread.join()
 
     for project in projects:
-        separator()
+        if verbose:
+            separator()
         handleOutput(results[project])
 
 
