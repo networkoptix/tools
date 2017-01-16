@@ -79,8 +79,10 @@ def update(project):
     lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
     command = [lupdate, '-no-obsolete', '-no-ui-lines']
   
-    command.append('-locations {}'.format(project.locations))
-    command.append('-extensions {}'.format(project.extensions))
+    command.append('-locations')
+    command.append(project.locations)
+    command.append('-extensions')
+    command.append(project.extensions)
     command.append(sourcesDir)
     command.append('-ts')
     for path in entries:
@@ -92,7 +94,7 @@ def update(project):
         log += ' '.join(command)
         log += '\n'
     
-    log += subprocess.check_output(' '.join(command), stderr=subprocess.STDOUT)
+    log += subprocess.check_output(command, stderr=subprocess.STDOUT)
     global results
     results[project] = log
 
