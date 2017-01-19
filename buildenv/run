@@ -24,6 +24,7 @@ STRACE=
 STRACE_LOG=strace.log
 WITH_GDB=
 WITH_VALGRIND=
+WITH_STRACE=
 
 for i in "$@"
 do
@@ -114,7 +115,7 @@ cd $BIN_DIR
 
 LAUNCH_CMD="$BINARY_NAME $MSERVER_ARGS"
 if [ ! -z "$STRACE" ]; then
-    LAUNCH_CMD="strace -o $STRACE_LOG $LAUNCH_CMD"
+    LAUNCH_CMD="strace -fo $STRACE_LOG $LAUNCH_CMD"
 fi
 
 COMMON_VALGRIND_ARGS="--num-callers=32 --error-limit=no --log-file=$LOG_FILE $LAUNCH_CMD"
