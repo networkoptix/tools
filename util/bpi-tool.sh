@@ -75,23 +75,23 @@ pack_short()
         $LIBS_DIR/libnx_streaming.so \
         $LIBS_DIR/libnx_utils.so \
         $LIBS_DIR/libnx_vms_utils.so \
-		\
+        \
         $LIBS_DIR/ldpreloadhook.so \
         $LIBS_DIR/libcedrus.so \
         $LIBS_DIR/libpixman-1.so \
         $LIBS_DIR/libproxydecoder.so \
         $LIBS_DIR/libvdpau_sunxi.so \
         $LIBS_DIR/libUMP.so \
-	    \
+        \
         $LITE_CLIENT_DIR/bin/mobile_client \
         $LITE_CLIENT_DIR/bin/video/videonode/libnx_bpi_videonode_plugin.so \
-		$MEDIASERVER_DIR/bin/mediaserver \
-		$MEDIASERVER_DIR/bin/media_db_util \
-		$MEDIASERVER_DIR/bin/external.dat \
-		$MEDIASERVER_DIR/bin/plugins \
-		/etc/init.d/networkoptix* \
-		/etc/init.d/nx* \
-		$MEDIASERVER_DIR/var/scripts \
+        $MEDIASERVER_DIR/bin/mediaserver \
+        $MEDIASERVER_DIR/bin/media_db_util \
+        $MEDIASERVER_DIR/bin/external.dat \
+        $MEDIASERVER_DIR/bin/plugins \
+        /etc/init.d/networkoptix* \
+        /etc/init.d/nx* \
+        $MEDIASERVER_DIR/var/scripts \
     "
     pack "$*"
 }
@@ -225,7 +225,7 @@ show_help_and_exit()
     echo "client - Copy mobile_client exe to bpi."
     echo "server - Copy mediaserver_core lib to bpi."
     echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
-	echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
+    echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
     echo
     echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
     echo "run ... - Execute mobile_client @bpi via '$NX_BPI_DIR/mediaserver/var/scripts/start_lite_client'."
@@ -247,6 +247,7 @@ show_help_and_exit()
     echo "ldp ... - Make ldpreloadhook.so @bpi and intall it to bpi."
     echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
     echo
+    echo "rebuild ... - Perform 'mvn clean package' with the required parameters."
     echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
     echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
     exit 0
@@ -493,6 +494,14 @@ main()
                 exit $?
                 ;;
             #......................................................................................
+            "rebuild")
+                shift
+                find_vms_dir
+                cd "$VMS_DIR"
+                mvn clean package \
+                    -Dbox=bpi -Darch=arm -Dcloud.url="cloud-test.hdw.mx" "$@"
+                exit $?
+                ;;
             "pack-short")
                 pack_short "$2"
                 exit $?
