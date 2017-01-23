@@ -109,6 +109,22 @@ def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
 
 
+# Do not process (add JIRA task) for drivers call stack
+DRIVERS_FILTER = [
+    r'ig.*cd64',
+    r'atig6txx',
+    r'atio6axx',
+    r'nvoglv64',
+    r'DpOFeedb',
+    r'DBROverlayIconBackuped' ]
+
+def need_process_calls(calls):
+    for c in KnowCrashDB.prepare2hash(calls)[0:2]:
+        for exp in DRIVERS_FILTER:
+            if re.search(exp, c):
+                return False
+    return True
+
 def isHotfix(version):
     if version is None:
         return False
@@ -244,7 +260,8 @@ def load_crash_dump(crash_type, crash):
         crash['calls'] = tuple(demangle_names(crash['calls']))
         crash['hash'] = KnowCrashDB.hash(crash['calls'])
     else:
-        crash['hash'] = ''
+        print "Error parsing %s" % (crash['path'])
+        return False
     return True
 
 
@@ -351,15 +368,6 @@ def email_summary(faults, mintime, maxtime, known_issues):
         email_send(MAIL_FROM, MAIL_TO, msg)
 
 
-def email_hash_collision(hash, keys):
-    msg = MIMEText(
-        "WARNING! A hash collision detected!\n(We're very lucky, take a drink! :) It's a really rare occation!)\n\n"
-        "Hash: %s\nKeys:\n%s\n"
-         % (hash, keys))
-    msg['Subject'] = "WARNING! A hash collision detected for %s" % hash
-    email_send(MAIL_FROM, MAIL_TO, msg)
-
-
 class LastCrashTracker(object):
     _name = 'LastTimes'
     _sumname = 'LastSummary' # The last time a summary crash report was reated
@@ -438,9 +446,6 @@ class CrashMonitor(object):
         self._stop = False
         self._lasts = LastCrashTracker(LASTS_FILE)
         self._known = KnowCrashDB(KNOWN_FAULTS_FILE)
-        self._hashes = dict()
-        for key, hashval in self._known.iterhash():
-            self._hashes.setdefault(hashval, []).append(key)
         self.args = args
         signal.signal(signal.SIGINT,self._onInterrupt)
 
@@ -451,10 +456,6 @@ class CrashMonitor(object):
         key = crash['calls']
         formated_calls = format_calls(key)
         if crash['new'] and not self._known.has(key):
-            if crash['hash'] in self._hashes:
-                self.report_hash_collision(crash['hash'], key)
-            else:
-                self._hashes[crash['hash']] = [key]
             print "New crash found in %s" % crash['path']
             if SEND_NEW_CRASHES:
                 email_newcrash(crash, formated_calls)
@@ -496,7 +497,7 @@ class CrashMonitor(object):
 
                 if crash['new']:
                     # only new crashes can increase counter
-                    if crash['calls']:
+                    if crash['calls'] and need_process_calls(crash['calls']):
                         # NOTE: faults[key][0] counts crashes in this call of load_crash_dump() only
                         # i.e. it counts only crashes currently stored on crash server
                         # (according to it's rotation period)
@@ -634,12 +635,6 @@ class CrashMonitor(object):
                         return True
             return False
         return True
-
-    def report_hash_collision(self, hash, key):
-        self._hashes[hash].append(key)
-        keys = "\n".join("\t%s" % (v,) for v in self._hashes[hash])
-        print "WARNING: a hash collision detected! Hash = %s. Keys:\n%s" % (hash, keys)
-        email_hash_collision(hash, keys)
 
     def run(self):
         """ The main cyrcle """
