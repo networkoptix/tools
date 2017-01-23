@@ -51,7 +51,11 @@ pack()
 
 pack_full()
 {
-    FILES_LIST="$NX_BPI_DIR"
+    FILES_LIST=" \
+        $NX_BPI_DIR \
+        /etc/init.d/networkoptix* \
+        /etc/init.d/nx* \
+        "
     pack "$*"
 }
 
@@ -224,6 +228,7 @@ show_help_and_exit()
     echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
     echo "client - Copy mobile_client exe to bpi."
     echo "server - Copy mediaserver_core lib to bpi."
+    echo "common - Copy common lib to bpi."
     echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
     echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
     echo
@@ -363,6 +368,10 @@ main()
                 ;;
             "server")
                 cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
+                exit $?
+                ;;
+            "common")
+                cp_libs "libcommon.so*" "lib common"
                 exit $?
                 ;;
             "lib")
