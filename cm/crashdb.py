@@ -113,8 +113,10 @@ class KnowCrashDB(object):
                 crashinfos.sort(key=lambda x: x.issue)
                 crashinfo = crashinfos[0]
                 crashinfo.faults = 1
+                self.crashes[key] = copy.deepcopy(crashinfo)
+            else:
+                self.crashes[key] = self.CrashInfo()
             self.hashes.setdefault(hashval, []).append(key)
-            self.crashes[key] = copy.deepcopy(crashinfo)
             open(self.fname, "a").write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
 
     def set_issue(self, key, issue):
@@ -138,7 +140,7 @@ class KnowCrashDB(object):
 
     def get_faults(self, key):
         hashval = self.hash(key)
-        crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()), self.hashes.get(hashval, []))
+        crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()) or self.CrashInfo(), self.hashes.get(hashval, []))
         return sum(map(lambda x: x.faults, crashinfos))
 
     def rewrite(self):
