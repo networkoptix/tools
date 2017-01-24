@@ -134,7 +134,7 @@ def checkProject(rootDir, project):
             if verbose:
                 info('Skip unsupported customization {0}'.format(c.name))
             continue
-
+            
         validateCustomization(c)
         if c.isRoot():
             roots.append(c)

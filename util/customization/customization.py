@@ -24,20 +24,26 @@ class Customization():
         self.name = name
         self.root = root
         self.project = project
-        self.supported = True
-        self.parent = None
         self.icons = set()
         self.other_files = set()
         self.static_files = project.static_files
         self.customized_files = project.customized_files
         self.duplicates = set()
+        self.build_properties = {}
 
         with open(os.path.join(self.root, 'build.properties'), "r") as buildFile:
             for line in buildFile.readlines():
-                if 'supported' in line:
-                    self.supported = not (line.split('=')[1].strip().lower() == "false")
-                if 'parent.customization' in line:
-                    self.parent = line.split('=')[1].strip()
+                if line.startswith('#'):
+                    continue
+                if line.startswith('['):
+                    continue
+                key, sep, value = line.partition('=')
+                if not key.strip():
+                    continue
+                self.build_properties[key.strip()] = value.strip()
+           
+        self.supported = not self.buildProperty('supported') == "false"
+        self.parent = self.buildProperty('parent.customization')
 
         if self.static_files:
             for path in self.static_files:
@@ -47,6 +53,11 @@ class Customization():
             for path in self.customized_files:
                 self.populateFrom(os.path.join(self.root, path))
 
+    def buildProperty(self, name, default = None):
+        if name in self.build_properties:
+            return self.build_properties[name]
+        return default
+                
     def __str__(self):
         return self.name
 
