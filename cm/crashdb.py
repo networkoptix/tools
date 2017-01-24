@@ -5,7 +5,7 @@ __author__ = 'Danil Lavrentyuk'
 
 from hashlib import md5
 import traceback
-import os, os.path, re
+import os, os.path, re, copy
 import errno
 from collections import OrderedDict
 
@@ -114,7 +114,7 @@ class KnowCrashDB(object):
                 crashinfo = crashinfos[0]
                 crashinfo.faults = 1
             self.hashes.setdefault(hashval, []).append(key)
-            self.crashes[key] = crashinfo
+            self.crashes[key] = copy.deepcopy(crashinfo)
             open(self.fname, "a").write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
 
     def set_issue(self, key, issue):

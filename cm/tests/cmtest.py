@@ -213,12 +213,15 @@ class CrashDBTest(unittest.TestCase):
                   'kernel32!BaseThreadInitThunk',
                   'ntdll!RtlUserThreadStart')
         self.db.add(calls2)
-        self.db.rewrite()
         for key, crashinfo in self.db.crashes.iteritems():
             self.assertEqual(crashinfo.issue,'VMS_TEST')
         self.assertEqual(self.db.get_faults(calls1), self.dbSize+2)
         self.assertEqual(self.db.get_faults(calls2), self.dbSize+2)
-        
+        ci = self.db.crashes[calls2]
+        ci.faults+=1
+        self.db.rewrite()
+        self.assertEqual(self.db.get_faults(calls1), self.dbSize+3)
+        self.assertEqual(self.db.get_faults(calls2), self.dbSize+3)
         
 
 class CrashDBHashTest(unittest.TestCase):

@@ -505,6 +505,7 @@ class CrashMonitor(object):
                         i = find_priority(self._known.get_faults() + 1)
                         if i > 0:
                             crashinfo = self._known.crashes[key]
+                            crashinfo.faults += 1
                             if crashinfo:
                                 _, issue_data = nxjira.get_issue(crashinfo.issue)
                                 if issue_data.code == nxjira.CODE_NOT_FOUND:
