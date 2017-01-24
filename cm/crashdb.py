@@ -7,6 +7,7 @@ from hashlib import md5
 import traceback
 import os, os.path, re
 import errno
+from collections import OrderedDict
 
 WINAPICALL = 'winapicall'
 EXEFILE = 'exefile!'
@@ -37,6 +38,24 @@ CALLS_TO_REMOVE = [ '0x0' ]
     
 class KnowCrashDB(object):
 
+    class CrashInfo(object):
+
+        def __init__(self, issue = None, priority = None, faults = None):
+            self.issue = issue
+            self.priority = priority
+            self.faults = faults or 1
+
+        def setIssue(self, issue, priority):
+            self.issue = issue
+            self.priority = priority
+
+        def resetIssue(self):
+            self.issue = None
+            self.priority = None
+
+        def get(self):
+            return (self.issue, self.priority, self.faults)
+
     def __init__(self, fname):
         # It doesn't open db here to allow global initialization
         self.fname = fname
@@ -56,7 +75,7 @@ class KnowCrashDB(object):
                         continue
                     key = val[0]
                     #TODO add priority here!
-                    self.crashes[key] = val[1] if len(val) > 1 else None
+                    self.crashes[key] = self.CrashInfo(*val[1]) if len(val) > 1 else self.CrashInfo()
                     self.hashes.setdefault(self.hash(key), []).append(key)
         except IOError, e:
             if e.errno == errno.ENOENT:
@@ -74,7 +93,7 @@ class KnowCrashDB(object):
             for exp, sub in CALLS_TO_REPLACE:
                 call_new = re.sub(exp, sub, call_new)
             return call_new
-        return map(replace, calls)
+        return tuple(OrderedDict.fromkeys(map(replace, calls)))
 
     @staticmethod
     def hash(key):
@@ -86,26 +105,42 @@ class KnowCrashDB(object):
     def add(self, key):
         if key not in self.crashes:
             hashval = self.hash(key)
-            self.crashes[key] = None
+            # Get min issue number
+            crashinfos = map(lambda k: self.crashes.get(k), self.hashes.get(hashval, []))
+            crashinfos = filter(lambda x: x, crashinfos)
+            crashinfo = None
+            if crashinfos:
+                crashinfos.sort(key=lambda x: x.issue)
+                crashinfo = crashinfos[0]
+                crashinfo.faults = 1
             self.hashes.setdefault(hashval, []).append(key)
-            open(self.fname, "a").write("%r\n" % ([key],))
+            self.crashes[key] = crashinfo
+            open(self.fname, "a").write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
 
     def set_issue(self, key, issue):
         #if key in self.crashes and self.crashes[key] is not None and self.crashes[key][0] != issue[0]:
         #    print "ERROR: Trying to owerride issue %s with %s" % (self.crashes[key], issue)
         #    return
         for k in self.hashes[self.hash(key)]:
-            self.crashes[k] = issue
-            open(self.fname, "a").write("%r\n" % ([k, issue],))
+            if issue:
+                self.crashes[k].setIssue(*issue)
+            else:
+                self.crashes[k].resetIssue()
+            open(self.fname, "a").write("%r\n" % ([k, self.crashes[k].get()],))
             self.changed = True
+
+    def get_faults(self, key):
+        hashval = self.hash(key)
+        crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()), self.hashes.get(hashval, []))
+        return sum(map(lambda x: x.faults, crashinfos))
 
     def rewrite(self):
         print "Known crashed table was updated. Rewriting it's file."
         tmpname = self.fname + '.tmp'
         try:
             with open(tmpname, "w") as out:
-                for key, issue in self.crashes.iteritems():
-                    out.write("%r\n" % ([key, issue] if issue is not None else [key],))
+                for key, crashinfo in self.crashes.iteritems():
+                    out.write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
                 out.close()
             if os.path.isfile(self.fname) and os.name == 'nt':
                 os.remove(self.fname)
@@ -113,4 +148,3 @@ class KnowCrashDB(object):
             self.changed = False
         except Exception:
             print "Error rewritting known crashes file: %s" % (traceback.format_exc(),)
-

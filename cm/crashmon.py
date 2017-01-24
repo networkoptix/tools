@@ -428,7 +428,6 @@ class LastCrashTracker(object):
         return "%s('%s', changed=%s, summary_tm=%s, %s)" % (
             self.__class__.__name__, self._name, self._changed, self._summary_tm, self._stamps)
 
-
 def find_priority(number):
     for i, level in enumerate(ISSUE_LEVEL):
         if number < level[0]:
@@ -503,47 +502,47 @@ class CrashMonitor(object):
                         # (according to it's rotation period)
                         # i.e. too rare crashes are ignored
                         # It's Misha Uskov's idea, approved by Roma
-                        i = find_priority(len(faults[key][0]))
+                        i = find_priority(self._known.get_faults() + 1)
                         if i > 0:
-                            issue = self._known.crashes[key]
-                            if issue:
-                                _, issue_data = nxjira.get_issue(issue[0])
+                            crashinfo = self._known.crashes[key]
+                            if crashinfo:
+                                _, issue_data = nxjira.get_issue(crashinfo.issue)
                                 if issue_data.code == nxjira.CODE_NOT_FOUND:
-                                    print "WARNING: Jira issue %s is not found. Issue will be created anew!"
+                                    print "WARNING: Jira issue %s is not found. Issue will be created anew!" % crashinfo.issue
                                     self._known.set_issue(key, None)
-                                    issue = None
-                            if issue:
+                                    crashinfo = None
+                            if crashinfo:
                                 if issue_data.ok:
                                     if self.can_change(issue_data, crash['version'], crash["isHotfix"]):
                                         # 1. Attach the new crash dump
                                         _, attach_count = nxjira.count_attachments(issue_data, predicat=attachment_filter)
                                         while attach_count >= MAX_ATTACHMENTS:
-                                            print "Deleting oldest attachment in %s" % (issue[0],)
+                                            print "Deleting oldest attachment in %s" % crashinfo.issue
                                             if not nxjira.delete_oldest_attchment(issue_data, predicat=attachment_filter):
                                                 break
                                             attach_count -= 1
                                         _, link_count = nxjira.count_web_links(issue_data, predicat=web_link_filter)
                                         while link_count >= MAX_ATTACHMENTS:
-                                            print "Deleting oldest link in %s" % (issue[0],)
+                                            print "Deleting oldest link in %s" % crashinfo.issue
                                             if not nxjira.delete_oldest_web_link(issue_data, predicat=web_link_filter):
                                                 break
                                             link_count -= 1
                                         if attach_count < MAX_ATTACHMENTS and link_count < MAX_ATTACHMENTS:
-                                            res = self.add_attachment(issue[0], crash['path'], crash['dump'], crash['url'])
+                                            res = self.add_attachment(crashinfo.issue, crash['path'], crash['dump'], crash['url'])
                                             if res is not None:
-                                                email_cant_attach(crash, issue[0], crash['url'], res, crash['path'])
+                                                email_cant_attach(crash, crashinfo.issue, crash['url'], res, crash['path'])
                                         # 2. Check if the priority should be increased
-                                        if issue[1] < i: # new priority is higher
-                                            rc = self.increase_priority(key, issue, i, issue_data)
+                                        if crashinfo.priority < i: # new priority is higher
+                                            rc = self.increase_priority(key, crashinfo, i, issue_data)
                                             if rc:
-                                                self._known.set_issue(key, (issue[0], i))
+                                                self._known.set_issue(key, (crashinfo.issue, i))
                                             elif rc is not None:
-                                                print "No issue %s found in Jira, priority change ignored" % (issue[0],)
+                                                print "No issue %s found in Jira, priority change ignored" % crashinfo.issue
                                     else:
-                                        print "Ignore already closed issue %s" % (issue[0],)
+                                        print "Ignore already closed issue %s" % crashinfo.issue
                                 else:
                                     print "ERROR: can't load issue %s: %s, %s" % (
-                                        issue[0], issue_data.code, issue_data.reason)
+                                        crashinfo.issue, issue_data.code, issue_data.reason)
                             else:
                                 try:
                                     new_issue = self.create_jira_issue(crash, formated_calls, i, faults[key][0])
@@ -607,21 +606,21 @@ class CrashMonitor(object):
         res = nxjira.create_web_link(issue, name, url)
         return nxjira.create_attachment(issue, name, dump) or res
 
-    def increase_priority(self, key, issue, priority, issue_data=None):
+    def increase_priority(self, key, crashinfo, priority, issue_data=None):
         if priority < 1: # FIXME copypasta!
             print "ERROR: increase_priority int number value < 1"
             return
         if priority > len(ISSUE_LEVEL):
             priority = len(ISSUE_LEVEL)
         pnew = ISSUE_LEVEL[priority-1][1]
-        pold = ISSUE_LEVEL[issue[1]-1][1] if 0 < issue[1] <= len(ISSUE_LEVEL) else None
+        pold = ISSUE_LEVEL[crashinfo.priority-1][1] if 0 < crashinfo.priority <= len(ISSUE_LEVEL) else None
         try:
-            rc = nxjira.priority_change(issue_data or issue[0], pnew, pold)
+            rc = nxjira.priority_change(issue_data or crashinfo.issue, pnew, pold)
             if rc:
-                print "Issue %s priority changed: %s -> %s" % (issue[0], pold, pnew)
+                print "Issue %s priority changed: %s -> %s" % (crashinfo.issue, pold, pnew)
             return rc
         except nxjira.JiraError, e:
-            email_priority_fail(key, issue, pold, pnew, e)
+            email_priority_fail(key, crashinfo.issue, pold, pnew, e)
             return None
 
     def can_change(self, issue_data, crashed_version, is_hotfix): # TODO why not to move it into the JiraReply class?
