@@ -223,6 +223,7 @@ show_help_and_exit()
     echo
     echo "mount - Mount bpi root to $BPI via NFS."
     echo "sshfs - Mount bpi root to $BPI via SSHFS."
+    echo "mac [xx:xx:xx:xx:xx:xx] - Read or write MAC address on an SD Card connected to Linux PC."
     echo
     echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
     echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
@@ -282,6 +283,28 @@ main()
                 sudo mkdir -p "$BPI" || exit 1
                 sudo chown "$USER" "$BPI"
                 sudo sshfs root@bpi:/ "$BPI" -o nonempty
+                exit $?
+                ;;
+            "mac")
+                # Check that 3 partitions from the same device are mounted to '/media'.
+                DEV=($(mount |grep media |grep udisks |sed 's#/dev/##' |sed 's/[0-9] on .*//'))
+                if [ "${#DEV[@]}" != 3 -o "$DEV" != "${DEV[1]}" -o "$DEV" != "${DEV[2]}" ]; then
+                    echo "ERROR: SD Card with 3 partitions seems not mounted."
+                    exit 1
+                fi
+                if ! cat "/etc/fw_env.config" |grep "/dev/$DEV " >/dev/null; then
+                    echo "ERROR: /etc/fw_env.config does not match mounted SD Card."
+                    exit 1
+                fi
+
+                shift
+                if [ ! -z "$1" ]; then
+                    sudo fw_setenv ethaddr "$1" || exit $?
+                    rm fw_printenv.lock
+                fi
+
+                sudo fw_printenv |grep ethaddr |sed 's/ethaddr=//g'
+                rm fw_printenv.lock
                 exit $?
                 ;;
             #......................................................................................
