@@ -21,12 +21,12 @@ case "$BOX_TYPE" in
         ;;
 esac
 
-#REMOTE_HOST=192.168.0.1
-REMOTE_HOST=10.0.2.220
+REMOTE_HOST=192.168.0.1:8081
+#REMOTE_HOST=10.0.2.220:8081
 #TODO #ak arch auto-detection
 ARCH=arm
 #ARCH=x64
-VERSION=232
+VERSION=300
 
 #IP_ADDRS="`ifconfig | grep 'inet addr' | cut -d: -f 2 | cut -d' ' -f 1`"
 #for addr in $IP_ADDRS
@@ -75,9 +75,9 @@ if [ "$ARCH" = "arm" ]; then
 fi
 
 if [ -z "$BOX" ]; then
-    REMOTE_ROOT=http://$REMOTE_HOST/$ARCH/
+    REMOTE_ROOT=http://$REMOTE_HOST/$VERSION/$ARCH
 else
-    REMOTE_ROOT=http://$REMOTE_HOST/$ARCH-$BOX/
+    REMOTE_ROOT=http://$REMOTE_HOST/$VERSION/$ARCH-$BOX
 fi
 
 case "$BOX" in
@@ -85,7 +85,7 @@ case "$BOX" in
         LOCAL_ROOT=/usr/local/apps/$CUSTOMIZATION/mediaserver
         ;;
     bpi|rpi|"")
-        LOCAL_ROOT=/opt/$CUSTOMIZATION/mediaserver
+        LOCAL_ROOT=/opt/$CUSTOMIZATION
         ;;
     *)
         echo "Set local root manually with -l switch"
@@ -127,12 +127,19 @@ updateLib()
 
 updateBin()
 {
-    updateModule $REMOTE_ROOT/bin/$CONFIGURATION/$1 $LOCAL_ROOT/bin/$1
+    updateModule $REMOTE_ROOT/bin/$CONFIGURATION/$1 $LOCAL_ROOT/mediaserver/bin/$1
 }
 
-updateLib libappserver2.so.$VERSION.0.0
-updateLib libcommon.so.$VERSION.0.0
-updateLib libmediaserver_core.so.$VERSION.0.0
+updateLib libappserver2.so
+updateLib libcommon.so
+updateLib libmediaserver_core.so
+updateLib libnx_network.so
+updateLib libnx_utils.so
+updateLib libudt.so
+updateLib libnx_streaming.so
+updateLib libcloud_db_client.so
+updateLib libnx_fusion.so
+updateLib libnx_email.so
 if [ "$BOX" = "isd" ]; then
     updateLib libcreateprocess.so
 fi
