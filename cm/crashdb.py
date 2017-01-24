@@ -129,6 +129,13 @@ class KnowCrashDB(object):
             open(self.fname, "a").write("%r\n" % ([k, self.crashes[k].get()],))
             self.changed = True
 
+    def get_and_incr_faults(self):
+        crashinfo = self.crashes.get(key)
+        if crashinfo:
+            crashinfo.faults += 1
+            self.changed = True
+        return crashinfo
+
     def get_faults(self, key):
         hashval = self.hash(key)
         crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()), self.hashes.get(hashval, []))

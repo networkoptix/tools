@@ -502,17 +502,16 @@ class CrashMonitor(object):
                         # (according to it's rotation period)
                         # i.e. too rare crashes are ignored
                         # It's Misha Uskov's idea, approved by Roma
-                        i = find_priority(self._known.get_faults() + 1)
+                        i = find_priority(self._known.get_faults(key) + 1)
                         if i > 0:
-                            crashinfo = self._known.crashes[key]
-                            crashinfo.faults += 1
-                            if crashinfo:
+                            crashinfo = self._known.get_and_incr_faults(key)
+                            if crashinfo and crashinfo.issue:
                                 _, issue_data = nxjira.get_issue(crashinfo.issue)
                                 if issue_data.code == nxjira.CODE_NOT_FOUND:
                                     print "WARNING: Jira issue %s is not found. Issue will be created anew!" % crashinfo.issue
                                     self._known.set_issue(key, None)
                                     crashinfo = None
-                            if crashinfo:
+                            if crashinfo and crashinfo.issue:
                                 if issue_data.ok:
                                     if self.can_change(issue_data, crash['version'], crash["isHotfix"]):
                                         # 1. Attach the new crash dump
