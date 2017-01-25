@@ -131,7 +131,7 @@ class KnowCrashDB(object):
             open(self.fname, "a").write("%r\n" % ([k, self.crashes[k].get()],))
             self.changed = True
 
-    def get_and_incr_faults(self):
+    def get_and_incr_faults(self, key):
         crashinfo = self.crashes.get(key)
         if crashinfo:
             crashinfo.faults += 1
@@ -157,3 +157,6 @@ class KnowCrashDB(object):
             self.changed = False
         except Exception:
             print "Error rewritting known crashes file: %s" % (traceback.format_exc(),)
+
+
+merge_systems_rest_handler.cpp
