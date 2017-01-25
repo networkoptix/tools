@@ -335,7 +335,7 @@ def fault_case2str(dumps, path, hash, issue=None):
     else:
         buf.append("Hash: %s" % hash)
         if issue:
-            buf.append("Jira issue: %s" % (nxjira.browse_url(issue[0]),))
+            buf.append("Jira issue: %s" % (nxjira.browse_url(issue),))
         if path:
             buf.append("Stack:")
             buf.append(path)
@@ -351,7 +351,7 @@ def email_summary(faults, mintime, maxtime, known_issues):
     sig_only = []
     buf = []
     for k in sorted(faults.keys(), key=lambda x: (len(faults[x][0]), x), reverse=True):
-        issue = known_issues.crashes[k] if known_issues.has(k) else None
+        issue = known_issues.crashes[k].issue if known_issues.has(k) else None
         (sig_only if len(k) == 1 else buf).append(fault_case2str(faults[k][0], faults[k][1], faults[k][2], issue))
     if sig_only:
         buf += sig_only
