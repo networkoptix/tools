@@ -157,6 +157,3 @@ class KnowCrashDB(object):
             self.changed = False
         except Exception:
             print "Error rewritting known crashes file: %s" % (traceback.format_exc(),)
-
-
-merge_systems_rest_handler.cpp
