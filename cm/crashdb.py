@@ -93,7 +93,7 @@ class KnowCrashDB(object):
             for exp, sub in CALLS_TO_REPLACE:
                 call_new = re.sub(exp, sub, call_new)
             return call_new
-        return tuple(OrderedDict.fromkeys(map(replace, calls)))
+        return tuple(OrderedDict.fromkeys(map(replace, calls)))[0:4]
 
     @staticmethod
     def hash(key):
@@ -117,7 +117,8 @@ class KnowCrashDB(object):
             else:
                 self.crashes[key] = self.CrashInfo()
             self.hashes.setdefault(hashval, []).append(key)
-            open(self.fname, "a").write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
+            open(self.fname, "a").write("%r\n" % ([key, self.crashes[key].get()]))
+            self.changed = True
 
     def set_issue(self, key, issue):
         #if key in self.crashes and self.crashes[key] is not None and self.crashes[key][0] != issue[0]:
@@ -140,7 +141,7 @@ class KnowCrashDB(object):
 
     def get_faults(self, key):
         hashval = self.hash(key)
-        crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()) or self.CrashInfo(), self.hashes.get(hashval, []))
+        crashinfos = map(lambda k: self.crashes.get(k, self.CrashInfo()), self.hashes.get(hashval, []))
         return sum(map(lambda x: x.faults, crashinfos))
 
     def rewrite(self):
@@ -149,7 +150,7 @@ class KnowCrashDB(object):
         try:
             with open(tmpname, "w") as out:
                 for key, crashinfo in self.crashes.iteritems():
-                    out.write("%r\n" % ([key, crashinfo.get()] if crashinfo is not None else [key],))
+                    out.write("%r\n" % ([key, crashinfo.get()]))
                 out.close()
             if os.path.isfile(self.fname) and os.name == 'nt':
                 os.remove(self.fname)
