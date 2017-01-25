@@ -12,6 +12,10 @@ NX_BPI_DIR="/opt/networkoptix"
 LITE_CLIENT_DIR="$NX_BPI_DIR/lite_client"
 MEDIASERVER_DIR="$NX_BPI_DIR/mediaserver"
 
+# Variable names for fw_printenv/fw_setenv.
+MAC_VAR="ethaddr"
+SERIAL_VAR="serial"
+
 # LIBS_DIR can be predefined.
 if [ -z "$LIBS_DIR" ]; then
     LIBS_DIR="$NX_BPI_DIR/lib"
@@ -31,6 +35,60 @@ QT_PATH="buildenv/packages/bpi/qt-5.6.2"
 
 #--------------------------------------------------------------------------------------------------
 
+show_help_and_exit()
+{
+    echo "Swiss Army Knife for Banana Pi (NX1): execute various commands. Uses 'bpi' script."
+    echo "Usage: run from any dir inside the proper nx_vms dir:"
+    echo $0 "<command>"
+    echo "Here <command> can be one of the following:"
+    echo
+    echo "mount - Mount bpi root to $BPI via NFS."
+    echo "sshfs - Mount bpi root to $BPI via SSHFS."
+    echo "mac [xx:xx:xx:xx:xx:xx] - Read or write MAC on an SD Card connected to Linux PC."
+    echo "serial [nnnnnnnnn] - Read or write Serial on an SD Card connected to Linux PC."
+    echo
+    echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
+    echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
+    echo "client - Copy mobile_client exe to bpi."
+    echo "server - Copy mediaserver_core lib to bpi."
+    echo "common - Copy common lib to bpi."
+    echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
+    echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
+    echo
+    echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
+    echo "run ... - Execute mobile_client @bpi via '$NX_BPI_DIR/mediaserver/var/scripts/start_lite_client'."
+    echo "kill - Stop mobile_client via 'killall mobile_client'."
+    echo "start-s ... - Start mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver start'."
+    echo "stop-s - Stop mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver stop'."
+    echo "start-s ... - Start mobile_client @bpi via '/etc/init.d/networkoptix-lite-client start'."
+    echo "stop-s - Stop mobile_client @bpi via '/etc/init.d/networkoptix-lite-client stop'."
+    echo "start ... - Start mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* start'."
+    echo "stop - Stop mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* stop'."
+    echo
+    echo "vdp ... - Make libvdpau_sunxi @bpi and install it to bpi."
+    echo "vdp-rdep - Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
+    echo "pd ... - Make libproxydecoder @bpi and install it to bpi."
+    echo "pd-rdep - Deploy libproxydecoder to packages/bpi via 'rdep -u'."
+    echo "cedrus [ump] ... - Make libcedrus @bpi and install it to bpi."
+    echo "cedrus-rdep - Deploy libcedrus to packages/bpi via 'rdep -u'."
+    echo "ump - Rebuild libUMP @bpi and install it to bpi."
+    echo "ldp ... - Make ldpreloadhook.so @bpi and intall it to bpi."
+    echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
+    echo
+    echo "rebuild ... - Perform 'mvn clean package' with the required parameters."
+    echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
+    echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
+    exit 0
+}
+
+#--------------------------------------------------------------------------------------------------
+
+fail()
+{
+    echo "ERROR: $@" >&2
+    exit 1
+}
+
 echo_with_nice_paths()
 {
     echo "$1" |sed -e "s#$HOME#~#g"
@@ -42,8 +100,7 @@ pack()
     ARCHIVE="$1"
 
     if [ "$ARCHIVE" = "" ]; then
-        echo "ERROR: Archive filename to create not specified."
-        exit 1
+        fail "Archive filename to create not specified."
     fi
 
     bpi "tar --absolute-names -czvf $ARCHIVE $FILES_LIST"
@@ -114,8 +171,7 @@ find_vms_dir()
     done
 
     if [ "$VMS_DIR" = "/" ]; then
-        echo "ERROR: Run this script from any dir inside nx_vms."
-        exit 1
+        fail "Run this script from any dir inside nx_vms."
     fi
 }
 
@@ -134,8 +190,7 @@ find_lib_dir()
     done
 
     if [ "$LIB_DIR" = "/" ]; then
-        echo "ERROR: Either specify lib name or cd to common_libs/<lib_name>."
-        exit 1
+        fail "Either specify lib name or cd to common_libs/<lib_name>."
     fi
 }
 
@@ -213,53 +268,70 @@ copy_scripts()
         "${BPI}$MEDIASERVER_DIR/var/scripts"
 }
 
-#--------------------------------------------------------------------------------------------------
-show_help_and_exit()
+# Check that 3 partitions from the same device are mounted to '/media'.
+check_sd_card()
 {
-    echo "Swiss Army Knife for Banana Pi (NX1): execute various commands. Uses 'bpi' script."
-    echo "Usage: run from any dir inside the proper nx_vms dir:"
-    echo $0 "<command>"
-    echo "Here <command> can be one of the following:"
-    echo
-    echo "mount - Mount bpi root to $BPI via NFS."
-    echo "sshfs - Mount bpi root to $BPI via SSHFS."
-    echo "mac [xx:xx:xx:xx:xx:xx] - Read or write MAC address on an SD Card connected to Linux PC."
-    echo
-    echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
-    echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
-    echo "client - Copy mobile_client exe to bpi."
-    echo "server - Copy mediaserver_core lib to bpi."
-    echo "common - Copy common lib to bpi."
-    echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
-    echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
-    echo
-    echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
-    echo "run ... - Execute mobile_client @bpi via '$NX_BPI_DIR/mediaserver/var/scripts/start_lite_client'."
-    echo "kill - Stop mobile_client via 'killall mobile_client'."
-    echo "start-s ... - Start mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver start'."
-    echo "stop-s - Stop mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver stop'."
-    echo "start-s ... - Start mobile_client @bpi via '/etc/init.d/networkoptix-lite-client start'."
-    echo "stop-s - Stop mobile_client @bpi via '/etc/init.d/networkoptix-lite-client stop'."
-    echo "start ... - Start mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* start'."
-    echo "stop - Stop mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* stop'."
-    echo
-    echo "vdp ... - Make libvdpau_sunxi @bpi and install it to bpi."
-    echo "vdp-rdep - Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
-    echo "pd ... - Make libproxydecoder @bpi and install it to bpi."
-    echo "pd-rdep - Deploy libproxydecoder to packages/bpi via 'rdep -u'."
-    echo "cedrus [ump] ... - Make libcedrus @bpi and install it to bpi."
-    echo "cedrus-rdep - Deploy libcedrus to packages/bpi via 'rdep -u'."
-    echo "ump - Rebuild libUMP @bpi and install it to bpi."
-    echo "ldp ... - Make ldpreloadhook.so @bpi and intall it to bpi."
-    echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
-    echo
-    echo "rebuild ... - Perform 'mvn clean package' with the required parameters."
-    echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
-    echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
-    exit 0
+    local DEV=($(mount |grep media |grep udisks |sed 's#/dev/##' |sed 's/[0-9] on .*//'))
+    if [ "${#DEV[@]}" != 3 -o "$DEV" != "${DEV[1]}" -o "$DEV" != "${DEV[2]}" ]; then
+        fail "SD Card with 3 partitions seems not mounted."
+    fi
+    if ! cat "/etc/fw_env.config" |grep "/dev/$DEV " >/dev/null; then
+        fail "/etc/fw_env.config does not match mounted SD Card."
+    fi
+}
+
+fw_print()
+{
+    local VAR="$1"
+    local PREFIX="$2"
+
+    local ENV    
+    ENV=$(sudo fw_printenv) || exit $?
+    rm -rf fw_printenv.lock
+
+    local VALUE=$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")
+    echo "$PREFIX$VALUE"
+}
+
+fw_set()
+{
+    local VAR="$1"
+    local VALUE="$2"
+    
+    sudo fw_setenv "$VAR" "$VALUE" || exit $?
+    rm -rf fw_printenv.lock
+}
+
+check_mac()
+{
+    local MAC="$1"
+    
+    local HEX="[0-9A-Fa-f][0-9A-Fa-f]"
+    local MAC_REGEX="^$HEX:$HEX:$HEX:$HEX:$HEX:$HEX$"
+    if [[ ! $MAC =~ $MAC_REGEX ]]; then
+        fail "Invalid MAC: $MAC"
+    fi
+}
+
+check_serial()
+{
+    local SERIAL="$1"
+    
+    local SERIAL_REGEX="^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$"
+    if [[ ! $SERIAL =~ $SERIAL_REGEX ]]; then
+        fail "Invalid Serial: $SERIAL"
+    fi
+    
+    if [ ${SERIAL:0:2} -gt 31 ]; then
+        fail "Invalid Serial: first pair of digits should be <= 31."
+    fi
+    if [ ${SERIAL:2:2} -gt 12 ]; then
+        fail "Invalid Serial: second pair of digits should be <= 12."
+    fi
 }
 
 #--------------------------------------------------------------------------------------------------
+
 main()
 {
     if [ "$#" = "0" -o "$1" = "-h" -o "$1" = "--help" ]; then
@@ -286,25 +358,31 @@ main()
                 exit $?
                 ;;
             "mac")
-                # Check that 3 partitions from the same device are mounted to '/media'.
-                DEV=($(mount |grep media |grep udisks |sed 's#/dev/##' |sed 's/[0-9] on .*//'))
-                if [ "${#DEV[@]}" != 3 -o "$DEV" != "${DEV[1]}" -o "$DEV" != "${DEV[2]}" ]; then
-                    echo "ERROR: SD Card with 3 partitions seems not mounted."
-                    exit 1
-                fi
-                if ! cat "/etc/fw_env.config" |grep "/dev/$DEV " >/dev/null; then
-                    echo "ERROR: /etc/fw_env.config does not match mounted SD Card."
-                    exit 1
-                fi
-
+                check_sd_card || exit $?
                 shift
-                if [ ! -z "$1" ]; then
-                    sudo fw_setenv ethaddr "$1" || exit $?
-                    rm fw_printenv.lock
+                local MAC="$1"
+                if [ -z "$MAC" ]; then
+                    fw_print "$MAC_VAR" || exit $?
+                else
+                    fw_print "$MAC_VAR" "Old MAC: " || exit $?
+                    check_mac "$MAC" || exit $?
+                    fw_set "$MAC_VAR" "$MAC"
+                    fw_print "$MAC_VAR" "New MAC: " || exit $?
                 fi
-
-                sudo fw_printenv |grep ethaddr |sed 's/ethaddr=//g'
-                rm fw_printenv.lock
+                exit $?
+                ;;
+            "serial")
+                check_sd_card || exit $?
+                shift
+                local SERIAL="$1"
+                if [ -z "$SERIAL" ]; then
+                    fw_print "$SERIAL_VAR" || exit $?
+                else
+                    fw_print "$SERIAL_VAR" "Old Serial: " || exit $?
+                    check_serial "$SERIAL" || exit $?
+                    fw_set "$SERIAL_VAR" "$SERIAL" || exit $?
+                    fw_print "$SERIAL_VAR" "New Serial: " || exit $?
+                fi
                 exit $?
                 ;;
             #......................................................................................
@@ -544,13 +622,11 @@ main()
                 ;;
             #......................................................................................
             *)
-                echo "ERROR: Unknown argument: $1"
-                exit 1
+                fail "Unknown argument: $1"
                 ;;
         esac
     else
-        echo "ERROR: Invalid arguments. Run with -h for help."
-        exit 1
+        fail "Invalid arguments. Run with -h for help."
     fi
 }
 
