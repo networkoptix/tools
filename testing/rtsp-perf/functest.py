@@ -27,7 +27,6 @@ CONFIG_FNAME = "functest.cfg"
 
 DEFAULT_ARCHIVE_STREAM_RATE = 1024*1024*10 # 10 MB/Sec
 
-
 # Rollback support
 class UnitTestRollback:
     _rollbackFile = None
@@ -2465,7 +2464,7 @@ class SingleServerRtspTestBase:
     def _fetchCameraList(self):
         # Get this server's GUID and filter out the only cameras that should be used on this server
         guid = self._getServerGUID()
-        response = urllib2.urlopen("http://%s/ec2/getCamerasEx?id=%s" % (self._serverEndpoint,guid))
+        response = urllib2.urlopen("http://%s/ec2/getCamerasEx?parentId=%s" % (self._serverEndpoint,guid))
 
         if response.getcode() != 200:
             raise Exception("Cannot connect to server:%s using getCamerasEx" % (self._serverEndpoint))
@@ -2822,9 +2821,10 @@ class SingleServerRtspPerf(SingleServerRtspTestBase):
         print "DEBUG: cameras found: %s" % len(self._cameraList)
         cameras = []
         for ph_id, id, name, status in self._cameraList:
+            print "Camera:", id, name, status
             if status != 'Recording':
                 attr_data = CAMERA_ATTR_EMPTY.copy()
-                attr_data['cameraID'] = id
+                attr_data['cameraId'] = id
                 attr_data['scheduleEnabled'] = True
                 attr_data['scheduleTasks'] = FULL_SCHEDULE_TASKS
                 cameras.append(attr_data)
