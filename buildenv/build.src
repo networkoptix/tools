@@ -32,6 +32,10 @@ fi
 
 WITH_MSERVER=1
 WITH_TEST=0
+WITH_CLOUD_BIN=1
+if [ "`uname -s`" = "Darwin" ]; then
+    WITH_CLOUD_BIN=0
+fi
 
 STRIP=
 CLEAN=
@@ -180,14 +184,23 @@ if [ $WITH_MSERVER -eq 1 ]; then
 fi
 
 if [[ ! "$VERSION" < "3.0" ]]; then
-    MODULES+=(nx_cloud/libconnection_mediator nx_cloud/cloud_connect_test_util)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so bin/$CONFIGURATION/cloud_connect_test_util)
+    MODULES+=(nx_cloud/libconnection_mediator)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so)
+    if [ $WITH_CLOUD_BIN -eq 1 ]; then
+        MODULES+=(nx_cloud/cloud_connect_test_util)
+        MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_connect_test_util)
+    fi
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [[ ! "$VERSION" < "3.0" ]]; then
-        MODULES+=(nx_cloud/libcloud_db nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/libvms_gateway nx_cloud/vms_gateway)
-        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator lib/$CONFIGURATION/libvms_gateway.so bin/$CONFIGURATION/vms_gateway)
+        MODULES+=(nx_cloud/libcloud_db nx_cloud/libvms_gateway)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so lib/$CONFIGURATION/libvms_gateway.so)
+
+        if [ $WITH_CLOUD_BIN -eq 1 ]; then
+            MODULES+=(nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/vms_gateway)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator bin/$CONFIGURATION/vms_gateway)
+        fi
     fi
 fi
 
@@ -244,7 +257,11 @@ if [ "`uname -s`" = "Darwin" ]; then
         if [[ "$libName" =~ .*\.so.* ]]; then
             libNameShort=`echo $libName | sed "s/\(.*\)\.so.*/\1/g"`
             libVersion=`echo "$libName" | sed "s/\(.*\)\.so[\.]*\(.*\)/\2/g"`
-            libName=${libNameShort}.${libVersion}.dylib
+            if [ ! -z "${libVersion}" ]; then
+                libName=${libNameShort}.${libVersion}.dylib
+            else
+                libName=${libNameShort}.dylib
+            fi
             MODULE_BIN_PATH[$i]=$libName
         fi
     done
