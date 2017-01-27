@@ -79,7 +79,7 @@ do
  "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
    -d "$name"  \
    -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$filename.log\"" \
-   -t 600
+   -t 600 || true
 done
 
 # + Store results
@@ -89,5 +89,5 @@ $TASKBOT_BIN/file.py \
     --mask '*.log'
 
 # + Destroy virtual boxes
-#cd "$TASKBOT_VAR"/var/testing/vagrant
-#vagrant destroy -f
+cd "$TASKBOT_VAR"/var/testing/vagrant
+vagrant destroy -f

@@ -40,15 +40,15 @@ if [ "$TASKBOT_UNIT_TESTS" != "none" ]; then
 fi
 
 # + Run functional test
-# FT_RC=0
-# if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
-#   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
-#   FT_RC=$?
-# fi
+FT_RC=0
+if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
+  FT_RC=$?
+fi
 
-# if [ $TASKBOT_FUNC_TESTS = "true" ]; then
-#   "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
-# fi
+if [ $TASKBOT_FUNC_TESTS = "true" ]; then
+  "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
+fi
 
 let "RC|=$UT_RC" || true
 let "RC|=$FT_RC" || true
