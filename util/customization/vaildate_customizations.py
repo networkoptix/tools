@@ -140,6 +140,8 @@ def checkProject(rootDir, project):
             roots.append(c)
             validateRequiredFiles(c, requiredFiles)
             validateUnusedFiles(c, requiredFiles)
+        elif project.ignore_parent:
+            roots.append(c)
 
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)
