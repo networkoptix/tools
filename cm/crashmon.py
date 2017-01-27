@@ -626,9 +626,14 @@ class CrashMonitor(object):
     def can_change(self, issue_data, crashed_version, is_hotfix): # TODO why not to move it into the JiraReply class?
         if issue_data.is_done(): # it's a readon not to add more dumps and increase priority
             if issue_data.is_closed(): # hmm...
+                smallest_version = issue_data.smallest_fixversion()
                 print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (
-                    issue_data.data['key'], issue_data.smallest_fixversion(), crashed_version)
-                if crashed_version is None or crashed_version[:3] > issue_data.smallest_fixversion() or is_hotfix:
+                    issue_data.data['key'], smallest_version, crashed_version)
+                # Future version case
+                if smallest_version and smallest_version[0] == 0:
+                    print "Issue %s has Future version" % (issue_data.data['key'],)
+                    return True
+                if crashed_version is None or crashed_version[:3] > smallest_version or is_hotfix:
                     if issue_data.reopen():
                         print "Issue %s reopened" % (issue_data.data['key'],)
                         return True

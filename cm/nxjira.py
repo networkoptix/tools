@@ -57,6 +57,8 @@ transition_data = {
 
 
 def _parse_fixVersion(version):
+    if version == 'Future':
+        return [0, 0, 0]
     m = _version_rx.match(version)
     return [int(n) for n in m.group(0).split('.')] if m else None
 
