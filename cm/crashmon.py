@@ -632,7 +632,7 @@ class CrashMonitor(object):
                 # Future version case
                 if smallest_version and smallest_version[0] == 0:
                     print "Issue %s has Future version" % (issue_data.data['key'],)
-                    return True
+                    return False
                 if crashed_version is None or crashed_version[:3] > smallest_version or is_hotfix:
                     if issue_data.reopen():
                         print "Issue %s reopened" % (issue_data.data['key'],)
