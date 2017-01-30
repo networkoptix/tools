@@ -6,7 +6,10 @@ import os
 import argparse
 import shutil
 
+projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
+sys.path.pop(0)
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
@@ -43,32 +46,19 @@ def calculateTsEntries(dir, prefix, extension, results):
         if not lang in results:
             results[lang] = []
         results[lang].append(path)
-    
+
 # c++ translatable projects
-def calculateTsFiles(rootDir):
+def calculateTsFiles(rootDir, project):
     extension = '.ts'
-    
-    projects = getTranslatableProjects()   
-    for project, targets in projects.items():
-        projectDir = os.path.join(rootDir, project)
-        translationDir = os.path.join(projectDir, 'translations')
-        files = dict()
-        
-        if not targets:
-            prefix = '{0}_'.format(project)
-            calculateTsEntries(translationDir, prefix, extension, files)
-        else:
-            for target in targets:
-                prefix = '{0}_{1}_'.format(project, target)
-                calculateTsEntries(translationDir, prefix, extension, files)
-         
-        if 'common' == project:
-            calculateTsEntries(translationDir, 'qtbase_', extension, files)
-         
-        copyFiles(project, files)
+
+    translationDir = os.path.join(rootDir, project.path, 'translations')
+    files = dict()
+    prefix = '{0}_'.format(project.name)
+    calculateTsEntries(translationDir, prefix, extension, files)
+    copyFiles(project.name, files)
 
 # Old android client
-def calculateXmlFiles(rootDir):   
+def calculateXmlFiles(rootDir):
     extension = '.xml'
     prefix = 'translatable_'
     dirPrefix = 'values-'
@@ -79,7 +69,7 @@ def calculateXmlFiles(rootDir):
     for dirname, dirnames, filenames in os.walk(resourcesDir):
         for filename in filenames:
             if not filename.startswith(prefix):
-                continue        
+                continue
             if not filename.endswith(extension):
                 continue
             entry = os.path.join(dirname, filename)
@@ -92,11 +82,10 @@ def calculateXmlFiles(rootDir):
             files[lang].append(entry)
     copyFiles(project, files)
 
-def calculateSources(rootDir):
+def calculateSources(rootDir, project):
     extension = '.ui'
-    project = 'client'
-    projectDir = os.path.join(rootDir, project)
-    sourcesDir = os.path.join(projectDir, 'src')
+
+    sourcesDir = os.path.join(rootDir, project.path, 'src')
 
     filesByDir = dict()
     cut = len(sourcesDir) + 1
@@ -109,7 +98,7 @@ def calculateSources(rootDir):
             if not dir in filesByDir:
                 filesByDir[dir] = []
             filesByDir[dir].append(entry)
-            
+
     for lang in os.listdir(targetFolder):
         packDir = os.path.join(targetFolder, lang)
         srcDir = os.path.join(packDir, 'src')
@@ -124,12 +113,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
-    parser.add_argument('-l', '--language', help="target language")    
-    parser.add_argument('-t', '--target', help="target folder")    
+    parser.add_argument('-l', '--language', help="target language")
+    parser.add_argument('-t', '--target', help="target folder")
     args = parser.parse_args()
     global verbose
     verbose = args.verbose
-    
+
     if args.color:
         init_color()
 
@@ -138,11 +127,13 @@ def main():
     if not targetFolder:
         targetFolder = os.path.join(os.getcwd(), 'language_packs')
     #os.makedirs(targetFolder)
-    
-    rootDir = os.getcwd()    
-    calculateTsFiles(rootDir)
-    #calculateXmlFiles(rootDir)
-    calculateSources(rootDir)
+
+    rootDir = os.getcwd()
+    projects = getTranslatableProjects()   
+    for project in projects:
+        calculateTsFiles(rootDir, project)
+        #calculateXmlFiles(rootDir)
+        calculateSources(rootDir, project)
 
 if __name__ == "__main__":
     main()
