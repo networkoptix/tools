@@ -114,6 +114,8 @@ def checkProject(rootDir, project):
         separator()
         info("Validating project " + project.name)
     roots = []
+    unparented = []
+    default = None
 
     requiredFiles = None
     if project.sources:
@@ -130,6 +132,9 @@ def checkProject(rootDir, project):
         if (not os.path.isdir(path)):
             continue
         c = Customization(entry, path, project)
+        if 'default' == entry:
+            default = c        
+        
         if not c.supported:
             if verbose:
                 info('Skip unsupported customization {0}'.format(c.name))
@@ -141,11 +146,15 @@ def checkProject(rootDir, project):
             validateRequiredFiles(c, requiredFiles)
             validateUnusedFiles(c, requiredFiles)
         elif project.ignore_parent:
-            roots.append(c)
+            unparented.append(c)
 
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)
         crossCheckCustomizations(c2, c1)
+       
+    for c2 in unparented:
+        crossCheckCustomizations(default, c2)
+        
     if verbose:
         info('Validation finished')
 
