@@ -183,6 +183,11 @@ def validateBuildProperties(rootDir):
             customizations.append(c)
 
     for c in customizations:
+        if not c.supported:
+            if verbose:
+                info('Skip unsupported customization {0}'.format(c.name))
+            continue    
+    
         for key in default.build_properties:
             if key in defaultValues:
                 continue
