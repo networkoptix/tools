@@ -105,10 +105,15 @@ def validateUnusedFiles(customization, requiredFiles):
 def crossCheckCustomizations(first, second):
     if verbose:
         info('Compare: ' + first.name + ' vs ' + second.name)
+
     for icon in first.icons - second.icons:
         if Intro.isIntro(first, icon):
             continue
+        folder, sep, path = icon.partition("/")
+        if folder in second.skipped:
+            continue
         printError(first, "Icon {0} is missing in {1}".format(icon, second.name))
+
     for file in first.other_files - second.other_files:
         printError(first, "File {0} is missing in {1}".format(file, second.name))
 

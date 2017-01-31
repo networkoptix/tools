@@ -48,6 +48,11 @@ class Customization():
 
         self.supported = not self.buildProperty('supported') == "false"
         self.parent = self.buildProperty('parent.customization')
+        
+        self.skipped = set()
+        for entry in os.listdir(self.root):
+            if entry.endswith(".skip"):
+                self.skipped.add(entry[:-5])
 
         if self.static_files:
             for path in self.static_files:
