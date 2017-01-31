@@ -5,7 +5,7 @@ import sys
 import argparse
 import os
 from itertools import combinations
-from customization import Customization
+from customization import Customization, readConfig
 from sources_parser import parse_sources_cached, clear_sources_cache
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
@@ -19,6 +19,8 @@ from vms_projects import getCustomizableProjects
 sys.path.pop(0)
 
 verbose = False
+
+DEFAULT = "default"
 
 class Intro:
     CLIENT = "client"
@@ -43,10 +45,11 @@ def requiredFileKey(icon, prefix):
     return key
 
 def output(customization, text, func):
+    projectName = customization.project.name if customization.project else ""
     if verbose:
         func(text)
     else:
-        func('{0}:{1}: {2}'.format(customization.project.name, customization.name, text))
+        func('{0}:{1}: {2}'.format(projectName, customization.name, text))
 
 def printError(customization, text):
     output(customization, text, err)
@@ -126,20 +129,18 @@ def checkProject(rootDir, project):
     customizationDir = os.path.join(rootDir, "customization")
 
     for entry in os.listdir(customizationDir):
-        if (entry[:1] == '_'):
-            continue
         path = os.path.join(customizationDir, entry)
         if (not os.path.isdir(path)):
             continue
         c = Customization(entry, path, project)
-        if 'default' == entry:
-            default = c        
-        
+        if DEFAULT == entry:
+            default = c
+
         if not c.supported:
             if verbose:
                 info('Skip unsupported customization {0}'.format(c.name))
             continue
-            
+
         validateCustomization(c)
         if c.isRoot():
             roots.append(c)
@@ -151,12 +152,42 @@ def checkProject(rootDir, project):
     for c1, c2 in combinations(roots, 2):
         crossCheckCustomizations(c1, c2)
         crossCheckCustomizations(c2, c1)
-       
+
     for c2 in unparented:
         crossCheckCustomizations(default, c2)
-        
+
     if verbose:
         info('Validation finished')
+
+def validateBuildProperties(rootDir):
+    if verbose:
+        separator()
+        info("Validating build properties")
+
+    customizationDir = os.path.join(rootDir, "customization")
+
+    defaultValues = readConfig(os.path.join(customizationDir, 'default-values.properties'))
+
+    customizations = []
+    default = None
+
+    for entry in os.listdir(customizationDir):
+        path = os.path.join(customizationDir, entry)
+        if (not os.path.isdir(path)):
+            continue
+
+        c = Customization(entry, path, None)
+        if DEFAULT == entry:
+            default = c
+        else:
+            customizations.append(c)
+
+    for c in customizations:
+        for key in default.build_properties:
+            if key in defaultValues:
+                continue
+            if not key in c.build_properties:
+                printError(c, "Property {0} is missing".format(key))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -174,8 +205,9 @@ def main():
     verbose = args.verbose
 
     rootDir = os.getcwd()
-    projects = getCustomizableProjects()
+    validateBuildProperties(rootDir)
 
+    projects = getCustomizableProjects()
     for project in projects:
         checkProject(rootDir, project)
 

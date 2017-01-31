@@ -10,6 +10,21 @@ def basename(icon):
         result = result.replace(suffix, "")
     return result
 
+#TODO: #GDM change to ConfigParser
+def readConfig(filename):
+    result = {}
+    with open(filename, "r") as config:
+        for line in config.readlines():
+            if line.startswith('#'):
+                continue
+            if line.startswith('['):
+                continue
+            key, sep, value = line.partition('=')
+            if not key.strip():
+                continue
+            result[key.strip()] = value.strip()
+    return result
+
 '''
 Customization class is just a set of icons, collected from several folders.
 '''
@@ -26,22 +41,11 @@ class Customization():
         self.project = project
         self.icons = set()
         self.other_files = set()
-        self.static_files = project.static_files
-        self.customized_files = project.customized_files
+        self.static_files = project.static_files if project else None
+        self.customized_files = project.customized_files if project else None
         self.duplicates = set()
-        self.build_properties = {}
+        self.build_properties = readConfig(os.path.join(self.root, 'build.properties'))
 
-        with open(os.path.join(self.root, 'build.properties'), "r") as buildFile:
-            for line in buildFile.readlines():
-                if line.startswith('#'):
-                    continue
-                if line.startswith('['):
-                    continue
-                key, sep, value = line.partition('=')
-                if not key.strip():
-                    continue
-                self.build_properties[key.strip()] = value.strip()
-           
         self.supported = not self.buildProperty('supported') == "false"
         self.parent = self.buildProperty('parent.customization')
 
@@ -57,7 +61,7 @@ class Customization():
         if name in self.build_properties:
             return self.build_properties[name]
         return default
-                
+
     def __str__(self):
         return self.name
 
@@ -81,7 +85,7 @@ class Customization():
                 else:
                     self.icons.add(key)
 
-    def baseIcons(self):        
+    def baseIcons(self):
         for icon in sorted(self.icons):
             yield basename(icon), icon
 
