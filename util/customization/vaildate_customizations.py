@@ -112,10 +112,10 @@ def crossCheckCustomizations(first, second):
         folder, sep, path = icon.partition("/")
         if folder in second.skipped:
             continue
-        printError(first, "Icon {0} is missing in {1}".format(icon, second.name))
+        printError(second, "Icon {0} is missing".format(icon))
 
     for file in first.other_files - second.other_files:
-        printError(first, "File {0} is missing in {1}".format(file, second.name))
+        printError(second, "File {0} is missing".format(file))
 
 def checkProject(rootDir, project):
     if verbose:
@@ -196,6 +196,15 @@ def validateBuildProperties(rootDir):
         for key in default.build_properties:
             if key in defaultValues:
                 continue
+            
+            section, sep, name = key.partition(".")
+            if section == "ax" and "paxton" in c.skipped:
+                continue
+            if section == "android" and "android" in c.skipped:
+                continue
+            if section == "ios" and "ios" in c.skipped:
+                continue                
+                
             if not key in c.build_properties:
                 printError(c, "Property {0} is missing".format(key))
 
