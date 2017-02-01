@@ -2464,7 +2464,7 @@ class SingleServerRtspTestBase:
     def _fetchCameraList(self):
         # Get this server's GUID and filter out the only cameras that should be used on this server
         guid = self._getServerGUID()
-        response = urllib2.urlopen("http://%s/ec2/getCamerasEx?parentId=%s" % (self._serverEndpoint,guid))
+        response = urllib2.urlopen("http://%s/ec2/getCamerasEx" % self._serverEndpoint)
 
         if response.getcode() != 200:
             raise Exception("Cannot connect to server:%s using getCamerasEx" % (self._serverEndpoint))
@@ -2472,6 +2472,8 @@ class SingleServerRtspTestBase:
         response.close()
 
         for c in json_obj:
+            if c["parentId"] != guid:
+                continue
             if c["typeId"] == "{1657647e-f6e4-bc39-d5e8-563c93cb5e1c}":
                 continue # Skip desktop
             if "name" in c and c["name"].startswith("ec2_test"):
