@@ -190,21 +190,6 @@ div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
                                 <th class="t">Type</th>
                             </tr>
                         </thead>
-                        <!-- uncomment the following block to enable totals -->
-                        <!--
-            <tfoot>
-              <tr>
-                <td>&nbsp;</td>
-              </tr>
-              <tr>
-                <td colspan="4">
-                  <xsl:value-of select="count(//directory)"/> directories,
-                  <xsl:value-of select="count(//file)"/> files,
-                  <xsl:call-template name="size"><xsl:with-param name="bytes" select="sum(//file/@size)" /></xsl:call-template> total
-                </td>
-              </tr>
-            </tfoot>
-            -->
                         <tbody>
                             <tr>
                                 <td class="icon folder"/>
