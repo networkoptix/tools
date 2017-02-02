@@ -44,7 +44,7 @@ show_help_and_exit()
     echo $0 "<command>"
     echo "Here <command> can be one of the following:"
     echo
-    echo "mount - Mount bpi root to $BPI via NFS."
+    echo "nfs - Mount bpi root to $BPI via NFS."
     echo "sshfs - Mount bpi root to $BPI via SSHFS."
     echo
     echo "sdcard [/dev/sd...] - Read or write SD Card device reference in /etc/fw_env.config."
@@ -52,6 +52,7 @@ show_help_and_exit()
     echo "mac [--force] [xx:xx:xx:xx:xx:xx] - Read or write MAC on an SD Card connected to Linux PC."
     echo "serial [--force] [nnnnnnnnn] - Read or write Serial on an SD Card connected to Linux PC."
     echo
+    echo "copy - Copy mobile_client and mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
     echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
     echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
     echo "client - Copy mobile_client exe to bpi."
@@ -60,27 +61,27 @@ show_help_and_exit()
     echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library to bpi."
     echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
     echo
-    echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
-    echo "run ... - Execute mobile_client @bpi via '$NX_BPI_DIR/mediaserver/var/scripts/start_lite_client'."
-    echo "kill - Stop mobile_client via 'killall mobile_client'."
-    echo "start-s ... - Start mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver start'."
+    echo "exec [args] - Pass all args to 'bpi'; can be used to check args passing: 'b exec [args]'"
+    echo "run [args] - Execute mobile_client @bpi via 'mediaserver/var/scripts/start_lite_client [args]'."
+    echo "kill-c - Stop mobile_client via 'killall mobile_client'."
+    echo "start-s [args] - Start mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver start [args]'."
     echo "stop-s - Stop mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver stop'."
-    echo "start-s ... - Start mobile_client @bpi via '/etc/init.d/networkoptix-lite-client start'."
+    echo "start-c [args] - Start mobile_client @bpi via '/etc/init.d/networkoptix-lite-client start [args]'."
     echo "stop-s - Stop mobile_client @bpi via '/etc/init.d/networkoptix-lite-client stop'."
-    echo "start ... - Start mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* start'."
+    echo "start [args] - Start mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* start [args]'."
     echo "stop - Stop mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* stop'."
     echo
-    echo "vdp ... - Make libvdpau_sunxi @bpi and install it to bpi."
+    echo "vdp [args] - Make libvdpau_sunxi @bpi and install it to bpi, passing [args] to 'make'."
     echo "vdp-rdep - Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
-    echo "pd ... - Make libproxydecoder @bpi and install it to bpi."
+    echo "pd [args] - Make libproxydecoder @bpi and install it to bpi, passing [args] to 'make'."
     echo "pd-rdep - Deploy libproxydecoder to packages/bpi via 'rdep -u'."
-    echo "cedrus [ump] ... - Make libcedrus @bpi and install it to bpi."
+    echo "cedrus [ump] [args] - Make libcedrus @bpi and install it to bpi, passing [args] to 'make'."
     echo "cedrus-rdep - Deploy libcedrus to packages/bpi via 'rdep -u'."
     echo "ump - Rebuild libUMP @bpi and install it to bpi."
-    echo "ldp ... - Make ldpreloadhook.so @bpi and intall it to bpi."
+    echo "ldp [args] - Make ldpreloadhook.so @bpi and intall it to bpi, passing [args] to 'make'."
     echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
     echo
-    echo "rebuild ... - Perform 'mvn clean package' with the required parameters."
+    echo "rebuild [args] - Perform 'mvn clean package <required-args> [args]'."
     echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
     echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
     exit 0
@@ -291,7 +292,7 @@ getAndCheck_DEV_SDCARD()
     local PARTITIONS=$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")
     if [ -z "$PARTITIONS" ]; then
         fail "SD Card not found at $DEV_SDCARD (configured in $FW_CONFIG)."
-    fi    
+    fi
 
     local PARTITION_SIZES=$(awk '{ORS=","; print $4}' <<<"$PARTITIONS")
     if [ "$PARTITION_SIZES" != "$SDCARD_PARTITION_SIZES" ]; then
@@ -310,7 +311,7 @@ getAndCheck_DEV_SDCARD()
 forceGet_DEV_SDCARD()
 {
     read_DEV_SDCARD || exit $?
-    
+
     echo "WARNING: Device at $DEV_SDCARD will NOT be checked to be likely an unmounted Nx1 SD Card."
     echo "Your PC HDD can be under risk!"
     read -p "Are you sure to continue? (Y/n) " -n 1 -r
@@ -325,7 +326,7 @@ fw_print()
     local VAR="$1"
     local OUTPUT_PREFIX="$2"
 
-    local ENV    
+    local ENV
     ENV=$(sudo fw_printenv) || exit $?
     rm -rf fw_printenv.lock
 
@@ -337,7 +338,7 @@ fw_set()
 {
     local VAR="$1"
     local VALUE="$2"
-    
+
     sudo fw_setenv "$VAR" "$VALUE" || exit $?
     rm -rf fw_printenv.lock
 }
@@ -345,7 +346,7 @@ fw_set()
 check_mac()
 {
     local MAC="$1"
-    
+
     local HEX="[0-9A-Fa-f][0-9A-Fa-f]"
     local MAC_REGEX="^$HEX:$HEX:$HEX:$HEX:$HEX:$HEX$"
     if [[ ! $MAC =~ $MAC_REGEX ]]; then
@@ -356,12 +357,12 @@ check_mac()
 check_serial()
 {
     local SERIAL="$1"
-    
+
     local SERIAL_REGEX="^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$"
     if [[ ! $SERIAL =~ $SERIAL_REGEX ]]; then
         fail "Invalid Serial: $SERIAL"
     fi
-    
+
     if [ ${SERIAL:0:2} -gt 31 ]; then
         fail "Invalid Serial: first pair of digits should be <= 31."
     fi
@@ -381,7 +382,7 @@ main()
     if [ "$#" -ge "1" ]; then
         case "$1" in
             #......................................................................................
-            "mount")
+            "nfs")
                 sudo umount "$BPI"
                 sudo rm -rf "$BPI"
                 sudo mkdir -p "$BPI" || exit $?
@@ -592,7 +593,7 @@ main()
                 bpi "/opt/networkoptix/mediaserver/var/scripts/start_lite_client $*"
                 exit $?
                 ;;
-            "kill")
+            "kill-c")
                 bpi "killall mobile_client"
                 exit $?
                 ;;
@@ -686,7 +687,7 @@ main()
                 ;;
             "ldp-rdep")
                 cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
-                cp -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit 
+                cp -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit
                 rdep -u
                 exit $?
                 ;;
