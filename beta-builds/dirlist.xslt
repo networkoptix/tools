@@ -199,7 +199,10 @@ div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
                                 <td class="s">- &nbsp;</td>
                                 <td class="t">Directory</td>
                             </tr>
-                            <xsl:apply-templates />
+                            <xsl:apply-templates select="list/directory">
+                                <xsl:sort select="@mtime" order="descending"></xsl:sort>
+                            </xsl:apply-templates>
+                            <xsl:apply-templates select="list/file" />
                         </tbody>
                     </table>
                 </div>
