@@ -19,8 +19,11 @@ class CrashMonitorTests(unittest.TestCase):
         calls = ('<c0000005 (Access violation)>', 'ig4icd64', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0',
                  'avcodec_54!avcodec_register_all', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', 'ig4icd64', '0x0', 'ig4icd64')
         self.assertFalse(crashmon.need_process_calls(calls))
-
-
+        calls = ('<c0000005 (Access violation)>', 'ntdll!RtlpWaitOnCriticalSection', 'ntdll!RtlpEnterCriticalSectionContended',
+                 'ntdll!RtlEnterCriticalSection', 'LavasoftTcpService64', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0')
+        self.assertFalse(crashmon.need_process_calls(calls))
+        
+        
     def testValidDriverStack(self):
         'valid driver stak'
         calls = ('<c0000005 (Access violation)>', 'ntdll', '0x0', '0x0', '0x0')

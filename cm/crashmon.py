@@ -22,7 +22,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from parsedump import parse_dump
-from crashdb import KnowCrashDB
+from crashdb import KnowCrashDB, WINAPICALL
 import nxjira
 
 from crashmonconf import *
@@ -116,13 +116,20 @@ DRIVERS_FILTER = [
     r'atio6axx',
     r'nvoglv64',
     r'DpOFeedb',
+    r'LavasoftTcpService64',
     r'DBROverlayIconBackuped' ]
 
 def need_process_calls(calls):
-    for c in KnowCrashDB.prepare2hash(calls)[0:2]:
+    level = 0
+    for c in KnowCrashDB.prepare2hash(calls):
+        if c == WINAPICALL:
+            continue
+        if level >= 2:
+            break
         for exp in DRIVERS_FILTER:
             if re.search(exp, c):
                 return False
+        level+=1
     return True
 
 def isHotfix(version):
