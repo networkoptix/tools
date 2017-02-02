@@ -12,9 +12,11 @@ NX_BPI_DIR="/opt/networkoptix"
 LITE_CLIENT_DIR="$NX_BPI_DIR/lite_client"
 MEDIASERVER_DIR="$NX_BPI_DIR/mediaserver"
 
-# Variable names for fw_printenv/fw_setenv.
+# Constants for working with SD Card via fw_printenv/fw_setenv.
 MAC_VAR="ethaddr"
 SERIAL_VAR="serial"
+FW_CONFIG="/etc/fw_env.config"
+SDCARD_PARTITION_SIZES="61440,3521536,40960,"
 
 # LIBS_DIR can be predefined.
 if [ -z "$LIBS_DIR" ]; then
@@ -44,15 +46,18 @@ show_help_and_exit()
     echo
     echo "mount - Mount bpi root to $BPI via NFS."
     echo "sshfs - Mount bpi root to $BPI via SSHFS."
-    echo "mac [xx:xx:xx:xx:xx:xx] - Read or write MAC on an SD Card connected to Linux PC."
-    echo "serial [nnnnnnnnn] - Read or write Serial on an SD Card connected to Linux PC."
+    echo
+    echo "sdcard [/dev/sd...] - Read or write SD Card device reference in /etc/fw_env.config."
+    echo "img [--force] sd_card_image.img - Write the image onto the SD Card."
+    echo "mac [--force] [xx:xx:xx:xx:xx:xx] - Read or write MAC on an SD Card connected to Linux PC."
+    echo "serial [--force] [nnnnnnnnn] - Read or write Serial on an SD Card connected to Linux PC."
     echo
     echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
     echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
     echo "client - Copy mobile_client exe to bpi."
     echo "server - Copy mediaserver_core lib to bpi."
     echo "common - Copy common lib to bpi."
-    echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library (e.g. nx...) to bpi."
+    echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library to bpi."
     echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
     echo
     echo "exec ... - Pass all args to 'bpi'; can be used to check args passing: 'b exec args ...'"
@@ -204,12 +209,12 @@ cp_files()
 
     echo_with_nice_paths "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
-    sudo mkdir -p "${BPI}$FILES_DST" || exit 1
+    sudo mkdir -p "${BPI}$FILES_DST" || exit $?
 
     # Here eval performs expanding of globs, including "{,}".
     FILES_LIST_EXPANDED=$(eval echo "$FILES_SRC/$FILES_LIST")
 
-    sudo cp -r $FILES_LIST_EXPANDED "${BPI}$FILES_DST/" || exit 1
+    sudo cp -r $FILES_LIST_EXPANDED "${BPI}$FILES_DST/" || exit $?
 }
 
 cp_libs()
@@ -244,7 +249,7 @@ cp_script_with_customization_filtering()
     # Here tee is required because ">/bpi/..." requires root access.
     sudo cat "$SCRIPT_SRC" |sed -e 's/${deb\.customization\.company\.name}/networkoptix/g' |sudo tee "$SCRIPT_DST" >/dev/null
 
-    sudo chmod +x "$SCRIPT_DST" || exit 1
+    sudo chmod +x "$SCRIPT_DST" || exit $?
 }
 
 cp_scripts()
@@ -268,29 +273,64 @@ copy_scripts()
         "${BPI}$MEDIASERVER_DIR/var/scripts"
 }
 
-# Check that 3 partitions from the same device are mounted to '/media'.
-check_sd_card()
+# Read SD Card device from /etc/fw_env.config.
+read_DEV_SDCARD()
 {
-    local DEV=($(mount |grep media |grep udisks |sed 's#/dev/##' |sed 's/[0-9] on .*//'))
-    if [ "${#DEV[@]}" != 3 -o "$DEV" != "${DEV[1]}" -o "$DEV" != "${DEV[2]}" ]; then
-        fail "SD Card with 3 partitions seems not mounted."
+    DEV_SDCARD=$(cat "$FW_CONFIG" |awk '{print $1}')
+    if [ -z "$DEV_SDCARD" ]; then
+        fail "$FW_CONFIG is missing or empty."
     fi
-    if ! cat "/etc/fw_env.config" |grep "/dev/$DEV " >/dev/null; then
-        fail "/etc/fw_env.config does not match mounted SD Card."
+}
+
+# Read SD Card device from /etc/fw_env.config, check that SD Card contains 3 partitions with the
+# expected size, umount these partitions.
+getAndCheck_DEV_SDCARD()
+{
+    read_DEV_SDCARD || exit $?
+
+    local PARTITIONS=$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")
+    if [ -z "$PARTITIONS" ]; then
+        fail "SD Card not found at $DEV_SDCARD (configured in $FW_CONFIG)."
+    fi    
+
+    local PARTITION_SIZES=$(awk '{ORS=","; print $4}' <<<"$PARTITIONS")
+    if [ "$PARTITION_SIZES" != "$SDCARD_PARTITION_SIZES" ]; then
+        fail "SD Card $DEV_SDCARD (configured in $FW_CONFIG) has unexpected partitions."
+    fi
+
+    local DEV
+    for DEV in $(awk '{print $1}' <<<"$PARTITIONS"); do
+        if mount |grep -q "$DEV"; then
+            echo "WARNING: $DEV is mounted; unmounting."
+            umount "$DEV" || exit $?
+        fi
+    done
+}
+
+forceGet_DEV_SDCARD()
+{
+    read_DEV_SDCARD || exit $?
+    
+    echo "WARNING: Device at $DEV_SDCARD will NOT be checked to be likely an unmounted Nx1 SD Card."
+    echo "Your PC HDD can be under risk!"
+    read -p "Are you sure to continue? (Y/n) " -n 1 -r
+    echo
+    if [ "$REPLY" != "Y" ]; then
+        fail "Aborted, no changes made."
     fi
 }
 
 fw_print()
 {
     local VAR="$1"
-    local PREFIX="$2"
+    local OUTPUT_PREFIX="$2"
 
     local ENV    
     ENV=$(sudo fw_printenv) || exit $?
     rm -rf fw_printenv.lock
 
     local VALUE=$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")
-    echo "$PREFIX$VALUE"
+    echo "$OUTPUT_PREFIX$VALUE"
 }
 
 fw_set()
@@ -344,7 +384,7 @@ main()
             "mount")
                 sudo umount "$BPI"
                 sudo rm -rf "$BPI"
-                sudo mkdir -p "$BPI" || exit 1
+                sudo mkdir -p "$BPI" || exit $?
                 sudo chown "$USER" "$BPI"
                 sudo mount -o nolock bpi:/ "$BPI"
                 exit $?
@@ -352,14 +392,56 @@ main()
             "sshfs")
                 sudo umount "$BPI"
                 sudo rm -rf "$BPI"
-                sudo mkdir -p "$BPI" || exit 1
+                sudo mkdir -p "$BPI" || exit $?
                 sudo chown "$USER" "$BPI"
                 sudo sshfs root@bpi:/ "$BPI" -o nonempty
                 exit $?
                 ;;
-            "mac")
-                check_sd_card || exit $?
+            #......................................................................................
+            "sdcard")
                 shift
+                local NEW_DEV_SDCARD="$1"
+                read_DEV_SDCARD || exit $?
+                if [ -z "$NEW_DEV_SDCARD" ]; then
+                    echo "SD Card device: $DEV_SDCARD"
+                else
+                    echo "Old SD Card device: $DEV_SDCARD"
+                    local NEW_CONFIG=$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")
+                    sudo echo "$NEW_CONFIG" |sudo tee "$FW_CONFIG" >/dev/null || exit $?
+                    read_DEV_SDCARD || exit $?
+                    if [ "$DEV_SDCARD" != "$NEW_DEV_SDCARD" ]; then
+                        fail "Wrong SD Card device in $FW_CONFIG: $DEV_SDCARD" $'\n'"$NEW_CONFIG"
+                    fi
+                    echo "New SD Card device: $DEV_SDCARD"
+                fi
+                getAndCheck_DEV_SDCARD || exit $?
+                echo "Seems to contain expected Nx1 partitions, not mounted."
+                exit $?
+                ;;
+            "img")
+                shift
+                if [ "$1" = "--force" ]; then
+                    shift
+                    forceGet_DEV_SDCARD || exit $?
+                else
+                    getAndCheck_DEV_SDCARD || exit $?
+                fi
+                local IMG="$1"
+                if [ -z "$IMG" ]; then
+                    fail "Image file not specified."
+                fi
+                echo "Writing to $DEV_SDCARD: $IMG"
+                sudo dd if="$IMG" of="$DEV_SDCARD" bs=1M
+                exit $?
+                ;;
+            "mac")
+                shift
+                if [ "$1" = "--force" ]; then
+                    shift
+                    forceGet_DEV_SDCARD || exit $?
+                else
+                    getAndCheck_DEV_SDCARD || exit $?
+                fi
                 local MAC="$1"
                 if [ -z "$MAC" ]; then
                     fw_print "$MAC_VAR" || exit $?
@@ -372,8 +454,13 @@ main()
                 exit $?
                 ;;
             "serial")
-                check_sd_card || exit $?
                 shift
+                if [ "$1" = "--force" ]; then
+                    shift
+                    forceGet_DEV_SDCARD || exit $?
+                else
+                    getAndCheck_DEV_SDCARD || exit $?
+                fi
                 local SERIAL="$1"
                 if [ -z "$SERIAL" ]; then
                     fw_print "$SERIAL_VAR" || exit $?
@@ -549,8 +636,8 @@ main()
                 exit $?
                 ;;
             "vdp-rdep")
-                cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit 1
-                cp -r "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit 1
+                cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit $?
+                cp -r "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -560,9 +647,9 @@ main()
                 exit $?
                 ;;
             "pd-rdep")
-                cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit 1
-                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit 1
-                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit 1
+                cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit $?
+                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit $?
+                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -577,8 +664,8 @@ main()
                 exit $?
                 ;;
             "cedrus-rdep")
-                cd "$PACKAGES_DIR/libcedrus-1.0${PACKAGE_SUFFIX}" || exit 1
-                cp -r "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit 1
+                cd "$PACKAGES_DIR/libcedrus-1.0${PACKAGE_SUFFIX}" || exit $?
+                cp -r "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -598,8 +685,8 @@ main()
                 exit $?
                 ;;
             "ldp-rdep")
-                cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit 1
-                cp -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit 1
+                cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
+                cp -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit 
                 rdep -u
                 exit $?
                 ;;
