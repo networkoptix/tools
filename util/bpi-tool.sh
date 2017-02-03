@@ -341,6 +341,7 @@ fw_set()
 
     sudo fw_setenv "$VAR" "$VALUE" || exit $?
     rm -rf fw_printenv.lock
+    sync || exit $?
 }
 
 check_mac()
@@ -432,7 +433,8 @@ main()
                     fail "Image file not specified."
                 fi
                 echo "Writing to $DEV_SDCARD: $IMG"
-                sudo dd if="$IMG" of="$DEV_SDCARD" bs=1M
+                sudo dd if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
+                sync || exit $?
                 exit $?
                 ;;
             "mac")
