@@ -18,7 +18,7 @@ TEMP = '' # temporary files directory, leave it '' for the process' current dire
 PROJECT_ROOT = "~/develop/nx_vms"
 
 UT_SUBDIR = "unit_tests"  # ut sources subdirectory, relative to PROJECT_ROOT
-FT_PATH = "$NX/func_tests"  # if it starts with $NX, set_paths() will update it with PROJECT_ROOT used
+FT_PATH = "$NX/func_tests_old"  # if it starts with $NX, set_paths() will update it with PROJECT_ROOT used
 
 FAIL_FILE = './fails.py' # where to save failed branches list
 RESTART_FLAG = './.restart'
