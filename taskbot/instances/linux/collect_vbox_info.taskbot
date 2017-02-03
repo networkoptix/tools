@@ -1,0 +1,24 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+RESULT_PATH=$1
+
+if [ ! -d "$RESULT_PATH" ]; then 
+  mkdir -p "$RESULT_PATH"
+else
+  rm -rf "$RESULT_PATH"/*
+fi
+
+# + Check virtual boxes
+cd $TASKBOT_VAR/nx_vms/func_tests_old
+BOXES="Box1 Box2 Nat Behind"
+for box in $BOXES
+do
+    core_path=/vagrant/cores/$box
+   ./vssh.sh $box "sudo mkdir -p $core_path"
+   ./vssh.sh $box "sudo find /root -name '*.gdb-bt' -exec sudo mv {} $core_path \;"
+done
+
+cp -r "$TASKBOT_VAR"/var/testing/vagrant/cores $RESULT_PATH

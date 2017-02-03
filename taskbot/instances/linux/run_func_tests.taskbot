@@ -80,6 +80,7 @@ do
    -d "$name"  \
    -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$filename.log\"" \
    -t 600 || true
+ "$TASKBOT" $ARGS "$TASKBOT_SHARE"/collect_vbox_info.taskbot $FUNC_TESTS_RESULT_PATH/$filename
 done
 
 # + Store results
@@ -87,6 +88,17 @@ $TASKBOT_BIN/file.py \
      $TASKBOT_CONFIG \
     --path $FUNC_TESTS_RESULT_PATH \
     --mask '*.log'
+
+# + Store vbox cores
+for testname in $(find "$FUNC_TESTS_RESULT_PATH" -maxdepth 1 -type d ! -path "$FUNC_TESTS_RESULT_PATH" -exec basename {} \;); do
+    echo $testname
+    i=0
+    for core in $(find "$FUNC_TESTS_RESULT_PATH/$testname" -name '*.gdb-bt'); do
+        "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+                   -d "$testname.$i.gdb-bt" -c "cat $core"
+        i=$(($i + 1))
+    done
+done
 
 # + Destroy virtual boxes
 cd "$TASKBOT_VAR"/var/testing/vagrant

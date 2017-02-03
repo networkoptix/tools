@@ -165,11 +165,9 @@ class FTReport(Report):
   def _get_tests_results(self, prev_run = None):
     tasks = self.find_task('Run functional test > %run_func_tests.taskbot%', prev_run)
     if not tasks:
-      print "Can't find task"
       return []
     tests = self.find_task('Run tests > %while % > %', tasks)
     if not tests:
-      print "Can't find tests"      
       return []
 
     results = []
@@ -178,15 +176,35 @@ class FTReport(Report):
       testname = test.description
       log_filename = "%s.log" % re.sub(r'\W', "_", testname)
       ftest_run = self.find_task('%functest.py%', [test])
-      results.append(
-        self.TestResult(
-          testname,
-          ftest_run[0],
-          self.find_files_by_name(files[0], log_filename),
-          bool(self.find_failed(test)),
-          self.get_stdout(ftest_run)))
+      if ftest_run and len(ftest_run):
+        results.append(
+          self.TestResult(
+            testname,
+            ftest_run[0],
+            self.find_files_by_name(files[0], log_filename),
+            bool(self.find_failed(test)),
+            self.get_stdout(ftest_run)))
       
     return results
+
+  def __get_cores_cell(self, task, name):
+    if task:
+      cores = self.find_task(name.replace(" ", "_") + '% > %', [task])
+      return " ".join(
+        map(lambda (i, c): """<a href="%s">%s</a>""" % \
+            (self.task_href(c),
+             "core%d.gdb-bt" % (i+1)), enumerate(cores)))
+    return ""
+
+  def __get_cores(self):
+    tasks = self.find_task('Run functional test > %run_func_tests.taskbot%')
+    cores_task = self.find_task(
+      'Store vbox cores > %for %', tasks)
+    if cores_task:
+      cores =  self.find_task('%', cores_task)
+      cores_count = len(cores)
+      return cores_count, cores_task[0]
+    return 0, None
            
   def __generate__( self ):
     results = self._get_tests_results()
@@ -194,7 +212,10 @@ class FTReport(Report):
       print >> sys.stderr, "Cannot create func-tests report (func-tests task absent)" 
       return 1
 
+    cores_count, cores_task = self.__get_cores()
+
     prev_run = self.get_previous_run()
+  
     results_prev = self._get_tests_results([prev_run])
 
 
@@ -239,6 +260,7 @@ class FTReport(Report):
       <th>Execution time</th>
       <th>Log</th>
       <th>Out</th>
+      <th>Mediaserver cores</th>
       </tr></thead><tbody>"""
       for t in results:
         test_prev = find_test_by_name(results_prev, t.name)
@@ -249,10 +271,12 @@ class FTReport(Report):
           <td>%s</td>
           <td>%s</td>
           <td><a href="%s">out</a></td>
+          <td>%s</td>
           </tr>""" % (t.name, color, status,
                       t.exec_time(),
                       self._log(t.logfile),
-                      self.task_href(t.task))
+                      self.task_href(t.task),
+                      self.__get_cores_cell(cores_task, t.name))
         tests_report += cases_to_table(t.errors, FAIL_COLOR, ERROR_STATUS)
         tests_report += cases_to_table(t.fails, FAIL_COLOR, FAIL_STATUS)
         tests_report += cases_to_table(t.skips, SKIP_COLOR, SKIP_STATUS)
@@ -268,10 +292,15 @@ class FTReport(Report):
     failed = len(failures)
     passed = len(results) - len(failures)
 
+    cores_link = ""
+    if cores_count:
+      cores_link ="""<br>core files: <a href="%s">%d</a>""" % \
+        (self.task_href(cores_task), cores_count)
+
     history = 'Func tests'
-    history += """<br>PASS/FAIL: <a href="%s">%d/%d (%d/%d)</a>""" % \
-        (self.href(), passed, failed, new_pass, new_fail)
-    if failures:
+    history += """<br>PASS/FAIL: <a href="%s">%d/%d (%d/%d)</a>%s""" % \
+        (self.href(), passed, failed, new_pass, new_fail, cores_link)
+    if failures or cores_count:
       color = '"RED"'
     else:
       color = '"GREEN"'
@@ -283,15 +312,20 @@ class FTReport(Report):
     if prev_run and not failures and new_pass:
       EmailNotify.notify(
         self, prev_run, "func-tests fixed",
-        "The product func-tests executed successfully.")
+        "The product func-tests executed successfully.",
+        notify_owner = False)
     elif failures:
       EmailNotify.notify(
         self, prev_run, "func-tests failed",
         "Fails detected in the func-tests.%s" %
         get_failed_text(failures),
         notify_owner = False)
-      
-      
+    elif cores_count:
+      EmailNotify.notify(
+        self, prev_run, "func-tests failed",
+        "%d mediaserver core(s) detected after the func-tests.%s" % \
+        (cores_count, get_failed_text(failures)),
+        notify_owner = False)      
       
 if __name__ == "__main__":
   sys.exit(FTReport(sys.argv[1]).generate())
