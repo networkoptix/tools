@@ -11,3 +11,16 @@
   -moz-opacity: 0.3;
   filter:alpha(opacity=30);
 }
+
+td.Header
+{
+    border: none;
+}
+
+table {
+    border: none;
+}
+
+table th td {
+    border: 1px;
+}

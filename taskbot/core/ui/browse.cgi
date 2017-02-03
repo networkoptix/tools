@@ -370,8 +370,7 @@ EOF;
       LIMIT 0, 2]);
 
   print $q->start_table({
-      -id=> 'historyList',
-      -border => 1}) . "<tbdoy>";
+                         -id=> 'historyList', -border => 1 }) . "<tbdoy>";
 
    for my $b (sort @branches) {
      my $need_branch_header = 1;
@@ -381,14 +380,14 @@ EOF;
        if ($history->rows()) {
          if ($need_branch_header) {
            print $q->start_Tr({ -align => 'center' });
-           print $q->td({ -colspan => '100'}, "<h1>$b</h1>");
+           print $q->td({ -colspan => '100', -class => 'Header'}, "<h2>$b</h2>");
            $need_branch_header = 0;
          }
          print $q->start_Tr({ -align => 'center' });
          my $link = $q->a({ -href => "?platform=$p&branch=$b"},
                           $q->escapeHTML($platforms{$p}));
 
-         print $q->td({ -colspan => '100'}, "<h2>$link</h2>");
+         print $q->td({ -colspan => '100', -class => 'Header'}, "<h3>$link</h3>");
 
          while (my $row = $history->fetchrow_hashref) {
            print $q->start_Tr({ -align => 'center' });
