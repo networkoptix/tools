@@ -333,49 +333,95 @@ sub generate_summary_list
   my %platforms = get_platforms;
   my @branches = $params->{branch} eq $ANY? get_branches :
     ($params->{branch});
+  my @platfs = $params->{platform} eq $ANY? keys(%platforms) :
+    ($params->{platform});
 
   print $q->header(-type => 'text/html; charset=utf-8');
   print $q->start_html('Taskbot');
 
+  print <<"EOF;";
+<link rel="stylesheet" type="text/css" href="/commons/styles/TaskbotRunList.css"/>
+<script type="text/javascript" src="/commons/scripts/Taskbot.js"></script>
+<script type="text/javascript" src="/commons/scripts/Utils.js"></script>
+<script type="text/javascript" src="/commons/scripts/TaskbotRunList.js"></script>
+EOF;
+
+  my $history = $dbh->prepare(q[
+    SELECT t.id, t.start, t.finish, h.html_table_row, r.host,
+      t2.id l_id, t2.start l_start, t2.finish l_finish,
+      h2.html_table_row l_html_table_row, r2.host l_host,
+      t3.id l2_id, t3.start l2_start, t3.finish l2_finish,
+      h3.html_table_row l2_html_table_row, r3.host l2_host
+    FROM history h
+      JOIN task t ON h.task_id = t.id
+      LEFT JOIN running_task r ON h.task_id = r.task_id
+      LEFT JOIN history h2 ON h2.link_task_id = h.task_id
+           AND h2.task_id != h.link_task_id
+      LEFT JOIN task t2 ON h2.task_id = t2.id
+      LEFT JOIN running_task r2 ON h2.task_id = r2.task_id
+      LEFT JOIN history h3 ON h3.link_task_id = h2.task_id
+          AND h3.task_id != h2.link_task_id
+      LEFT JOIN task t3 ON h3.task_id = t3.id
+      LEFT JOIN running_task r3 ON h3.task_id = r3.task_id
+      WHERE h.task_id = h.link_task_id
+      AND (t.branch_id IN (SELECT id FROM branch where description=?))
+      AND (t.platform_id IN (SELECT id FROM platform where host=?))
+      ORDER BY h.task_id DESC
+      LIMIT 0, 2]);
+
+  print $q->start_table({
+      -id=> 'historyList',
+      -border => 1}) . "<tbdoy>";
+
    for my $b (sort @branches) {
      my $need_branch_header = 1;
-     for my $p (sort keys(%platforms)) {
-       my $history = $dbh->prepare(q[
-        SELECT t.id, t.start, t.finish, h.html_table_row, r.host,
-               t2.id l_id, t2.start l_start, t2.finish l_finish,
-               h2.html_table_row l_html_table_row, r2.host l_host,
-               t3.id l2_id, t3.start l2_start, t3.finish l2_finish,
-               h3.html_table_row l2_html_table_row, r3.host l2_host
-        FROM history h
-        JOIN task t ON h.task_id = t.id
-        LEFT JOIN running_task r ON h.task_id = r.task_id
-        LEFT JOIN history h2 ON h2.link_task_id = h.task_id
-            AND h2.task_id != h.link_task_id
-        LEFT JOIN task t2 ON h2.task_id = t2.id
-        LEFT JOIN running_task r2 ON h2.task_id = r2.task_id
-        LEFT JOIN history h3 ON h3.link_task_id = h2.task_id
-            AND h3.task_id != h2.link_task_id
-        LEFT JOIN task t3 ON h3.task_id = t3.id
-        LEFT JOIN running_task r3 ON h3.task_id = r3.task_id
-        WHERE h.task_id = h.link_task_id
-        AND (t.branch_id IN (SELECT id FROM branch where description=?))
-        AND (t.platform_id IN (SELECT id FROM platform where host=?))
-        ORDER BY h.task_id DESC
-        LIMIT 0, 2]);
+     for my $p (sort @platfs) {
+
        $history->execute($b, $p);
        if ($history->rows()) {
          if ($need_branch_header) {
-           print $q->h1("Branch: $b");
+           print $q->start_Tr({ -align => 'center' });
+           print $q->td({ -colspan => '100'}, "<h1>$b</h1>");
            $need_branch_header = 0;
          }
-         print $q->h2("Platform: $platforms{$p}");
-         history_list($history);
+         print $q->start_Tr({ -align => 'center' });
+         my $link = $q->a({ -href => "?platform=$p&branch=$b"},
+                          $q->escapeHTML($platforms{$p}));
+
+         print $q->td({ -colspan => '100'}, "<h2>$link</h2>");
+
+         while (my $row = $history->fetchrow_hashref) {
+           print $q->start_Tr({ -align => 'center' });
+
+           print $q->td("#$row->{id}");
+
+           sub loop_list {
+             my ($row, $prefix) = @_;
+
+             my $stime = $row->{$prefix . "start"};
+             my $running = $row->{$prefix . "host"};
+             my $ftime = $row->{$prefix . "finish"} || ($running && time);
+             my $msg = self_ref(($running ? "Running" : "Run time"),
+                                task => $row->{$prefix . "id"}) . ": ";
+             print $q->td({ -bgcolor => ($running
+                                         ? "LIGHTGREY"
+                                         : "#f0f0f0"),
+                            -id => "task".$row->{$prefix."id"} },
+                          time_str($stime) . "<br>$msg"
+                          . ($ftime ? difftime_str($stime, $ftime) : "KILLED"));
+
+             print $row->{$prefix . "html_table_row"};
+           }
+
+           loop_list($row, "");
+
+           print $q->end_Tr;
+         }
        }
      }
    }
   print $q->end_html;
 }
-
 
 sub generate_report {
     my ($gzipped, $html) = $dbh->selectrow_array(q[
