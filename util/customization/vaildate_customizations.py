@@ -69,20 +69,20 @@ def validateCustomization(customization, requiredFiles):
     for base, source in customization.scaled_icons:
         if not base in customization.icons:
             printError(customization, "Base icon {0} for {1} is not found".format(base, source))
-        
+
     for base, source in customization.baseIcons():
         if not base in customization.icons:
             # Check if we are directly using suffixed icon
             if requiredFiles and source in requiredFiles:
-                continue 
-            printError(customization, "Base icon {0} for {1} is not found".format(base, source))                
+                continue
+            printError(customization, "Base icon {0} for {1} is not found".format(base, source))
 
 def validateRequiredFiles(customization, requiredFiles):
     if not requiredFiles:
         return
 
     scaled_sources = set([source for base, source in customization.scaled_icons])
-        
+
     for key, value in requiredFiles.items():
         if Intro.isIntro(customization, key):
             continue
@@ -93,12 +93,12 @@ def validateRequiredFiles(customization, requiredFiles):
             else:
                 printError(customization, "Icon {0} for {1} is not found".format(icon, location))
 
-def validateUnusedFiles(customization, requiredFiles):
+def validateUnusedFiles(customization, requiredFiles, specificFiles):
     if not requiredFiles:
         return
 
     for icon, source in customization.baseIcons():
-        if not icon in requiredFiles and not source in requiredFiles:
+        if not icon in requiredFiles and not source in requiredFiles and not source in specificFiles:
             printWarning(customization, "Unused icon {0}".format(source))
 
 def crossCheckCustomizations(first, second):
@@ -152,11 +152,15 @@ def checkProject(rootDir, project):
                 info('Skip unsupported customization {0}'.format(c.name))
             continue
 
+        specificFiles = set()
+        for icon, location in c.specific_icons:
+            specificFiles.add(requiredFileKey(icon, prefix))
+
         validateCustomization(c, requiredFiles)
         if c.isRoot():
             roots.append(c)
             validateRequiredFiles(c, requiredFiles)
-            validateUnusedFiles(c, requiredFiles)
+            validateUnusedFiles(c, requiredFiles, specificFiles)
         elif project.ignore_parent:
             unparented.append(c)
 

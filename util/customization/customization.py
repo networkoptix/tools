@@ -1,6 +1,7 @@
 import os
 
 from file_formats import is_image_file
+from sources_parser import parse_file
 
 stateSuffixes = ['_hovered', '_selected', '_pressed', '_disabled', '_checked', '_accented']
 scaleSuffixes = ['@2x', '@3x', '@4x']
@@ -47,7 +48,10 @@ class Customization():
         self.static_files = project.static_files if project else None
         self.customized_files = project.customized_files if project else None
         self.duplicates = set()
-        self.build_properties = readConfig(os.path.join(self.root, 'build.properties'))
+        
+        configFile = os.path.join(self.root, 'build.properties')
+        self.build_properties = readConfig(configFile)
+        self.specific_icons = parse_file(configFile)
 
         self.supported = not self.buildProperty('supported') == "false"
         self.parent = self.buildProperty('parent.customization')
