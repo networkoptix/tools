@@ -253,7 +253,7 @@ cp_script_with_customization_filtering()
     sudo chmod +x "$SCRIPT_DST" || exit $?
 }
 
-cp_scripts()
+cp_scripts_dir()
 {
     SCRIPTS_SRC="$1"
     SCRIPTS_DST="$2"
@@ -268,9 +268,9 @@ cp_scripts()
 copy_scripts()
 {
     find_vms_dir
-    cp_scripts "$VMS_DIR/edge_firmware/rpi/maven/bpi/etc/init.d" "${BPI}/etc/init.d"
-    cp_scripts "$VMS_DIR/edge_firmware/rpi/maven/filter-resources/etc/init.d" "${BPI}/etc/init.d"
-    cp_scripts "$VMS_DIR/edge_firmware/rpi/maven/bpi/opt/networkoptix/mediaserver/var/scripts" \
+    cp_scripts_dir "$VMS_DIR/edge_firmware/rpi/maven/bpi/etc/init.d" "${BPI}/etc/init.d"
+    cp_scripts_dir "$VMS_DIR/edge_firmware/rpi/maven/filter-resources/etc/init.d" "${BPI}/etc/init.d"
+    cp_scripts_dir "$VMS_DIR/edge_firmware/rpi/maven/bpi/opt/networkoptix/mediaserver/var/scripts" \
         "${BPI}$MEDIASERVER_DIR/var/scripts"
 }
 
@@ -285,7 +285,7 @@ read_DEV_SDCARD()
 
 # Read SD Card device from /etc/fw_env.config, check that SD Card contains 3 partitions with the
 # expected size, umount these partitions.
-getAndCheck_DEV_SDCARD()
+get_and_check_DEV_SDCARD()
 {
     read_DEV_SDCARD || exit $?
 
@@ -308,7 +308,7 @@ getAndCheck_DEV_SDCARD()
     done
 }
 
-forceGet_DEV_SDCARD()
+force_get_DEV_SDCARD()
 {
     read_DEV_SDCARD || exit $?
 
@@ -416,7 +416,7 @@ main()
                     fi
                     echo "New SD Card device: $DEV_SDCARD"
                 fi
-                getAndCheck_DEV_SDCARD || exit $?
+                get_and_check_DEV_SDCARD || exit $?
                 echo "Seems to contain expected Nx1 partitions, not mounted."
                 exit $?
                 ;;
@@ -424,9 +424,9 @@ main()
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    forceGet_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD || exit $?
                 else
-                    getAndCheck_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD || exit $?
                 fi
                 local IMG="$1"
                 if [ -z "$IMG" ]; then
@@ -441,9 +441,9 @@ main()
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    forceGet_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD || exit $?
                 else
-                    getAndCheck_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD || exit $?
                 fi
                 local MAC="$1"
                 if [ -z "$MAC" ]; then
@@ -460,9 +460,9 @@ main()
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    forceGet_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD || exit $?
                 else
-                    getAndCheck_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD || exit $?
                 fi
                 local SERIAL="$1"
                 if [ -z "$SERIAL" ]; then
