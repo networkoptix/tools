@@ -78,7 +78,9 @@ def email_commits(cs, reason):
 {1}""".format(",\n  ".join(cs), reason)
   
 
-def notify(report, prev_run, subject, reason, notify_owner = True):
+def notify(report, prev_run, subject, reason,
+           notify_owner = True,
+           notify_filter = None):
   import HGUtils
   debug_mode = os.environ.get('TASKBOT_DEBUG_MODE', '0')
   if debug_mode == '2':
@@ -90,7 +92,7 @@ def notify(report, prev_run, subject, reason, notify_owner = True):
   if debug or not to:
     to = DEBUG_WATCHERS
   cs = []
-  for c in commits:
+  for c in filter(notify_filter, commits):
     if not debug and notify_owner:
       to[c.author] = c.author_email
     cs.append("%-20s %-20s %s" % \

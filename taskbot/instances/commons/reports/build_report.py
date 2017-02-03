@@ -152,6 +152,8 @@ class BuildReport(Report):
     import EmailNotify
     prev_run = self.get_previous_run()
     prev_build = None
+    def check_commit(commit):
+      return commit.repo != 'devtools'
     while prev_run:
       prev_builds = self.find_task('Build product > %build.taskbot% > %', [prev_run])
       if prev_builds:
@@ -166,11 +168,13 @@ class BuildReport(Report):
       if errors:
         error_msg += """\n\n{0}""".format(errors)
       EmailNotify.notify(
-        self, prev_run, "build failed", error_msg)
+        self, prev_run, "build failed", error_msg,
+        notify_filter = check_commit)
     elif prev_build and self.find_failed(prev_build):
           EmailNotify.notify(
           self, prev_run, "success build",
-          "The product built successfully.")
+          "The product built successfully.",
+          notify_filter = check_commit)
     
     return 0
 
