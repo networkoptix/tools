@@ -3,10 +3,10 @@
 #
 use warnings;
 use strict;
-
+#use utf8;
 
 my $config_file = 'browse.config';
-
+my $ANY = 'any';
 
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
@@ -295,6 +295,85 @@ sub generate_history_list {
                   "Branch: $params->{branch}<br><br>" .
                   "Run list (total $count)", \&history_list,
                   self_ref("Task list", tasks => 0));
+  }
+
+sub get_branches {
+  # Branch
+  my $select = $dbh->prepare(
+    q[SELECT description FROM branch]);
+
+  $select->execute();
+  my @branches = ();
+  while (my $row = $select->fetchrow_hashref) {
+    push @branches, $row->{description};
+  }
+  return @branches;
+}
+
+sub get_platforms {
+  # Platform
+  my $select = $dbh->prepare(
+    q[SELECT host, description
+      FROM platform]);
+
+  $select->execute();
+
+  my %platform_hash;
+
+  while (my $row = $select->fetchrow_hashref) {
+    $platform_hash{$row->{host}} = 
+      "$row->{description} ($row->{host})";
+  }
+
+  return %platform_hash;
+}
+
+sub generate_summary_list
+{
+  my %platforms = get_platforms;
+  my @branches = $params->{branch} eq $ANY? get_branches :
+    ($params->{branch});
+
+  print $q->header(-type => 'text/html; charset=utf-8');
+  print $q->start_html('Taskbot');
+
+   for my $b (sort @branches) {
+     my $need_branch_header = 1;
+     for my $p (sort keys(%platforms)) {
+       my $history = $dbh->prepare(q[
+        SELECT t.id, t.start, t.finish, h.html_table_row, r.host,
+               t2.id l_id, t2.start l_start, t2.finish l_finish,
+               h2.html_table_row l_html_table_row, r2.host l_host,
+               t3.id l2_id, t3.start l2_start, t3.finish l2_finish,
+               h3.html_table_row l2_html_table_row, r3.host l2_host
+        FROM history h
+        JOIN task t ON h.task_id = t.id
+        LEFT JOIN running_task r ON h.task_id = r.task_id
+        LEFT JOIN history h2 ON h2.link_task_id = h.task_id
+            AND h2.task_id != h.link_task_id
+        LEFT JOIN task t2 ON h2.task_id = t2.id
+        LEFT JOIN running_task r2 ON h2.task_id = r2.task_id
+        LEFT JOIN history h3 ON h3.link_task_id = h2.task_id
+            AND h3.task_id != h2.link_task_id
+        LEFT JOIN task t3 ON h3.task_id = t3.id
+        LEFT JOIN running_task r3 ON h3.task_id = r3.task_id
+        WHERE h.task_id = h.link_task_id
+        AND (t.branch_id IN (SELECT id FROM branch where description=?))
+        AND (t.platform_id IN (SELECT id FROM platform where host=?))
+        ORDER BY h.task_id DESC
+        LIMIT 0, 2]);
+       $history->execute($b, $p);
+       if ($history->rows()) {
+         if ($need_branch_header) {
+           print $q->h1("Branch: $b");
+           $need_branch_header = 0;
+         }
+         print $q->h2("Platform: $platforms{$p}");
+         history_list($history);
+       }
+     }
+   }
+  print $q->end_html;
 }
 
 
@@ -370,8 +449,9 @@ sub generate_raw {
         use Compress::Zlib;
         $out = uncompress($out);
       }
+    #$out = utf8::encode($out);
     my $type = $params->{type} or 'text/html';
-    print $q->header(-type => $type. "; charset=utf-8",
+    print $q->header(-type => $type,
                      -content_length => length($out));
     print $out;
 }
@@ -500,7 +580,8 @@ sub generate_task_description {
     }
 
     print $q->end_html;
-}
+  }
+
 
 sub generate_main {
     if (!$q->param || !($q->param('platform') && $q->param('branch'))) {
@@ -515,21 +596,9 @@ sub generate_main {
       print $q->br;
 
       {
-        # Platform
-        my $select = $dbh->prepare(
-         q[SELECT host, description
-          FROM platform]);
-
-        $select->execute();
-
-        my %platform_hash;
-
-        while (my $row = $select->fetchrow_hashref) {
-          $platform_hash{$row->{host}} = 
-            "$row->{description} ($row->{host})";
-        }
-
-        my @platforms = keys %platform_hash;
+        my %platform_hash = get_platforms;
+        my @platforms = (keys %platform_hash, $ANY);
+        $platform_hash{$ANY} = $ANY;
 
         print $q->label('Platform:');
         print $q->popup_menu(
@@ -542,16 +611,7 @@ sub generate_main {
       print $q->br;
 
       {
-        # Branch
-        my $select = $dbh->prepare(
-          q[SELECT description FROM branch]);
-
-        $select->execute();
-        my @branches = ();
-        while (my $row = $select->fetchrow_hashref) {
-          push @branches, $row->{description};
-        }
-
+        my @branches = (get_branches, $ANY);
         print $q->label('Branch: ');
         print $q->popup_menu(
                              -name=>'branch',
@@ -572,7 +632,12 @@ if (exists $params->{history}) {
   }
   else
   {
-    generate_history_list;
+    if ($params->{branch} eq $ANY || $params->{platform} eq $ANY) {
+      generate_summary_list;
+    }
+    else  {
+      generate_history_list;
+    }
   }
 } elsif (exists $params->{tasks}) {
   generate_task_list;
