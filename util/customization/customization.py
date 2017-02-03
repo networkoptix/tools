@@ -51,7 +51,7 @@ class Customization():
         
         configFile = os.path.join(self.root, 'build.properties')
         self.build_properties = readConfig(configFile)
-        self.specific_icons = parse_file(configFile)
+        self.specific_icons = list(parse_file(configFile))
 
         self.supported = not self.buildProperty('supported') == "false"
         self.parent = self.buildProperty('parent.customization')

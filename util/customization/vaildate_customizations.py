@@ -43,6 +43,13 @@ def requiredFileKey(icon, prefix):
     while key.startswith("/"):
         key = key[1:]
     return key
+    
+def getSpecificFiles(customization):
+    prefix = customization.project.prefix
+    result = set()
+    for icon, location in customization.specific_icons:
+        result.add(requiredFileKey(icon, prefix))
+    return result
 
 def output(customization, text, func):
     projectName = customization.project.name if customization.project else ""
@@ -105,7 +112,11 @@ def crossCheckCustomizations(first, second):
     if verbose:
         info('Compare: ' + first.name + ' vs ' + second.name)
 
+    specific = getSpecificFiles(first)
+        
     for icon in first.icons - second.icons:
+        if icon in specific:
+            continue
         if Intro.isIntro(first, icon):
             continue
         folder, sep, path = icon.partition("/")
@@ -152,15 +163,11 @@ def checkProject(rootDir, project):
                 info('Skip unsupported customization {0}'.format(c.name))
             continue
 
-        specificFiles = set()
-        for icon, location in c.specific_icons:
-            specificFiles.add(requiredFileKey(icon, prefix))
-
         validateCustomization(c, requiredFiles)
         if c.isRoot():
             roots.append(c)
             validateRequiredFiles(c, requiredFiles)
-            validateUnusedFiles(c, requiredFiles, specificFiles)
+            validateUnusedFiles(c, requiredFiles, getSpecificFiles(c))
         elif project.ignore_parent:
             unparented.append(c)
 
