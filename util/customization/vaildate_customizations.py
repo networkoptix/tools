@@ -57,7 +57,7 @@ def printError(customization, text):
 def printWarning(customization, text):
     output(customization, text, warn)
 
-def validateCustomization(customization):
+def validateCustomization(customization, requiredFiles):
     if verbose:
         info('Customization: ' + customization.name)
     for duplicate in customization.duplicates:
@@ -66,41 +66,40 @@ def validateCustomization(customization):
     if not Intro.validate(customization):
         printError(customization, "Intro is not found")
 
-    for base, source in customization.baseIcons():
+    for base, source in customization.scaled_icons:
         if not base in customization.icons:
             printError(customization, "Base icon {0} for {1} is not found".format(base, source))
+        
+    for base, source in customization.baseIcons():
+        if not base in customization.icons:
+            # Check if we are directly using suffixed icon
+            if requiredFiles and source in requiredFiles:
+                continue 
+            printError(customization, "Base icon {0} for {1} is not found".format(base, source))                
 
 def validateRequiredFiles(customization, requiredFiles):
     if not requiredFiles:
         return
 
-    prefix = customization.project.prefix
-
-    for icon, location in requiredFiles:
-        key = requiredFileKey(icon, prefix)
+    scaled_sources = set([source for base, source in customization.scaled_icons])
+        
+    for key, value in requiredFiles.items():
         if Intro.isIntro(customization, key):
             continue
-        if not key in customization.icons:
+        icon, location = value
+        if not key in customization.icons and not key in scaled_sources:
             if verbose:
                 printError(customization, "Icon {0} (key {1}) is not found (used in {2})".format(icon, key, location))
             else:
-                printError(customization, "Icon {0} is not found".format(icon))
+                printError(customization, "Icon {0} for {1} is not found".format(icon, location))
 
 def validateUnusedFiles(customization, requiredFiles):
     if not requiredFiles:
         return
 
-    prefix = customization.project.prefix
-    keys = set()
-    for icon, location in requiredFiles:
-        keys.add(requiredFileKey(icon, prefix))
-
-    base = set()
     for icon, source in customization.baseIcons():
-        base.add(icon)
-
-    for unused in base - keys:
-        printWarning(customization, "Unused icon {0}".format(unused))
+        if not icon in requiredFiles and not source in requiredFiles:
+            printWarning(customization, "Unused icon {0}".format(source))
 
 def crossCheckCustomizations(first, second):
     if verbose:
@@ -125,11 +124,18 @@ def checkProject(rootDir, project):
     unparented = []
     default = None
 
+    prefix = project.prefix
+
     requiredFiles = None
     if project.sources:
-        requiredFiles = []
+        requiredFiles = {} # Map of key -> tuple (icon, location)
         for dir in project.sources:
-            requiredFiles += parse_sources_cached(os.path.join(rootDir, dir))
+            for icon, location in parse_sources_cached(os.path.join(rootDir, dir)):
+                key = requiredFileKey(icon, prefix)
+                # ignoring additional locations of an icon
+                if key in requiredFiles:
+                    continue
+                requiredFiles[key] = (icon, location)
 
     customizationDir = os.path.join(rootDir, "customization")
 
@@ -146,7 +152,7 @@ def checkProject(rootDir, project):
                 info('Skip unsupported customization {0}'.format(c.name))
             continue
 
-        validateCustomization(c)
+        validateCustomization(c, requiredFiles)
         if c.isRoot():
             roots.append(c)
             validateRequiredFiles(c, requiredFiles)
@@ -191,20 +197,22 @@ def validateBuildProperties(rootDir):
         if not c.supported:
             if verbose:
                 info('Skip unsupported customization {0}'.format(c.name))
-            continue    
-    
+            continue
+
+        if verbose:
+            info('Customization: {0}'.format(c.name))
         for key in default.build_properties:
             if key in defaultValues:
                 continue
-            
+
             section, sep, name = key.partition(".")
             if section == "ax" and "paxton" in c.skipped:
                 continue
             if section == "android" and "android" in c.skipped:
                 continue
             if section == "ios" and "ios" in c.skipped:
-                continue                
-                
+                continue
+
             if not key in c.build_properties:
                 printError(c, "Property {0} is missing".format(key))
 

@@ -2,9 +2,10 @@ import os
 
 from file_formats import is_image_file
 
-suffixes = ['_hovered', '_selected', '_pressed', '_disabled', '_checked', '_accented', '@2x', '@3x', '@4x']
+stateSuffixes = ['_hovered', '_selected', '_pressed', '_disabled', '_checked', '_accented']
+scaleSuffixes = ['@2x', '@3x', '@4x']
 
-def basename(icon):
+def basename(icon, suffixes):
     result = icon;
     for suffix in suffixes:
         result = result.replace(suffix, "")
@@ -40,6 +41,8 @@ class Customization():
         self.root = root
         self.project = project
         self.icons = set()
+        self.scaled_icons = []
+        self.base_icons = []
         self.other_files = set()
         self.static_files = project.static_files if project else None
         self.customized_files = project.customized_files if project else None
@@ -48,7 +51,7 @@ class Customization():
 
         self.supported = not self.buildProperty('supported') == "false"
         self.parent = self.buildProperty('parent.customization')
-        
+
         self.skipped = set()
         for entry in os.listdir(self.root):
             if entry.endswith(".skip"):
@@ -83,7 +86,10 @@ class Customization():
                 if filename[0] == '.':
                     continue;
                 key = os.path.join(dirname, filename)[cut:].replace("\\", "/")
-                if not is_image_file(key):
+                scaleBase = basename(key, scaleSuffixes)
+                if scaleBase != key:
+                    self.scaled_icons.append((scaleBase, key))
+                elif not is_image_file(key):
                     self.other_files.add(key)
                 elif key in self.icons:
                     self.duplicates.add(key)
@@ -92,7 +98,7 @@ class Customization():
 
     def baseIcons(self):
         for icon in sorted(self.icons):
-            yield basename(icon), icon
+            yield basename(icon, stateSuffixes), icon
 
     def relativePath(self, path, entry):
         return os.path.relpath(os.path.join(path, entry), self.rootPath)
