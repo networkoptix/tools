@@ -6,6 +6,7 @@
 BPI="/bpi"
 
 # Settings for ssh-login to bpi.
+BPI_INITIAL_PASSWORD="admin"
 BPI_PASSWORD="qweasd123"
 BPI_HOST="bpi"
 BPI_BACKGROUND_RRGGBB="003000"
@@ -58,6 +59,7 @@ e "Here <command> can be one of the following:"
 e
 e "nfs # Mount bpi root to $BPI via NFS."
 e "sshfs # Mount bpi root to $BPI via SSHFS."
+e "passwd # Change root password from '$BPI_INITIAL_PASSWORD' to '$BPI_PASSWORD'."
 e
 e "sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it."
 e "img [--force] sd_card_image.img # Write the image onto the SD Card."
@@ -160,7 +162,7 @@ get_RESTORE_BACKGROUND_CMD()
     RESTORE_BACKGROUND_CMD=
     if IFS=';' read -r -d '\' COLOR ; then
         RESTORE_BACKGROUND_CMD=$(echo $COLOR |sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g' |awk -F "[:/]" \
-'{printf "echo -ne \"\\\\e]11;#%s%s%s\\\\a\"",substr($2,1,2),substr($3,1,2),substr($4,1,2)}')
+'{printf "echo -en \"\\\\e]11;#%s%s%s\\\\a\"",substr($2,1,2),substr($3,1,2),substr($4,1,2)}')
     fi
     stty $OLD_STTY
 }
@@ -671,6 +673,14 @@ main()
                 sudo mkdir -p "$BPI" || exit $?
                 sudo chown "$USER" "$BPI"
                 sudo sshfs root@bpi:/ "$BPI" -o nonempty
+                exit $?
+                ;;
+            "passwd")
+                sshpass -p "$BPI_INITIAL_PASSWORD" ssh -t "root@$BPI_HOST" \
+                    "(echo \"$BPI_PASSWORD\"; echo \"$BPI_PASSWORD\") |passwd" \
+                    || exit $?
+                writeln "Old bpi password: $BPI_INITIAL_PASSWORD"
+                writeln "New bpi password: $BPI_PASSWORD"
                 exit $?
                 ;;
             #......................................................................................
