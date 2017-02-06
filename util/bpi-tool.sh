@@ -5,6 +5,16 @@
 # Mount point of Banana Pi root at this workstation.
 BPI="/bpi"
 
+# Settings for ssh-login to bpi.
+BPI_PASSWORD="qweasd123"
+BPI_HOST="bpi"
+BPI_BACKGROUND_RRGGBB="003000"
+BPI_TERMINAL_TITLE="$BPI_HOST"
+
+# Lines from /etc/network/interfaces
+BPI_DHCP_LINE="iface eth0 inet dhcp"
+BPI_STATIC_LINE="iface eth0 inet static"
+    
 PACKAGES_DIR="$HOME/develop/buildenv/packages/bpi"
 PACKAGES_SRC_DIR="$HOME/develop/third_party/bpi"
 PACKAGES_SRC_BPI_DIR="/root/develop/third_party/bpi" # Expected to be mounted at bpi.
@@ -39,65 +49,160 @@ QT_PATH="buildenv/packages/bpi/qt-5.6.2"
 
 show_help_and_exit()
 {
-    echo "Swiss Army Knife for Banana Pi (NX1): execute various commands. Uses 'bpi' script."
-    echo "Usage: run from any dir inside the proper nx_vms dir:"
-    echo $0 "<command>"
-    echo "Here <command> can be one of the following:"
-    echo
-    echo "nfs - Mount bpi root to $BPI via NFS."
-    echo "sshfs - Mount bpi root to $BPI via SSHFS."
-    echo
-    echo "sdcard [/dev/sd...] - Read or write SD Card device reference in /etc/fw_env.config."
-    echo "img [--force] sd_card_image.img - Write the image onto the SD Card."
-    echo "mac [--force] [xx:xx:xx:xx:xx:xx] - Read or write MAC on an SD Card connected to Linux PC."
-    echo "serial [--force] [nnnnnnnnn] - Read or write Serial on an SD Card connected to Linux PC."
-    echo
-    echo "copy - Copy mobile_client and mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
-    echo "copy-s - Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
-    echo "copy-c - Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
-    echo "client - Copy mobile_client exe to bpi."
-    echo "server - Copy mediaserver_core lib to bpi."
-    echo "common - Copy common lib to bpi."
-    echo "lib [<name>] - Copy the specified (or pwd-guessed common_libs/<name>) library to bpi."
-    echo "ini - Create empty .ini files @bpi in /tmp (to be filled with defauls)."
-    echo
-    echo "exec [args] - Pass all args to 'bpi'; can be used to check args passing: 'b exec [args]'"
-    echo "run [args] - Execute mobile_client @bpi via 'mediaserver/var/scripts/start_lite_client [args]'."
-    echo "kill-c - Stop mobile_client via 'killall mobile_client'."
-    echo "start-s [args] - Start mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver start [args]'."
-    echo "stop-s - Stop mediaserver @bpi via '/etc/init.d/networkoptix-mediaserver stop'."
-    echo "start-c [args] - Start mobile_client @bpi via '/etc/init.d/networkoptix-lite-client start [args]'."
-    echo "stop-s - Stop mobile_client @bpi via '/etc/init.d/networkoptix-lite-client stop'."
-    echo "start [args] - Start mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* start [args]'."
-    echo "stop - Stop mediaserver and mobile_client @bpi via '/etc/init.d/networkoptix-* stop'."
-    echo
-    echo "vdp [args] - Make libvdpau_sunxi @bpi and install it to bpi, passing [args] to 'make'."
-    echo "vdp-rdep - Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
-    echo "pd [args] - Make libproxydecoder @bpi and install it to bpi, passing [args] to 'make'."
-    echo "pd-rdep - Deploy libproxydecoder to packages/bpi via 'rdep -u'."
-    echo "cedrus [ump] [args] - Make libcedrus @bpi and install it to bpi, passing [args] to 'make'."
-    echo "cedrus-rdep - Deploy libcedrus to packages/bpi via 'rdep -u'."
-    echo "ump - Rebuild libUMP @bpi and install it to bpi."
-    echo "ldp [args] - Make ldpreloadhook.so @bpi and intall it to bpi, passing [args] to 'make'."
-    echo "ldp-rdep - Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
-    echo
-    echo "rebuild [args] - Perform 'mvn clean package <required-args> [args]'."
-    echo "pack-short <output.tgz> - Prepare tar with build results @bpi."
-    echo "pack-full <output.tgz> - Prepare tar with complete /opt/networkoptix/ @bpi."
+    e() { echo "$@"; }
+
+e "Swiss Army Knife for Banana Pi (NX1): execute various commands."
+e "Usage: run from any dir inside the proper nx_vms dir:"
+e "$(basename $0) [--verbose] <command>"
+e "Here <command> can be one of the following:"
+e
+e "nfs # Mount bpi root to $BPI via NFS."
+e "sshfs # Mount bpi root to $BPI via SSHFS."
+e
+e "sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it."
+e "img [--force] sd_card_image.img # Write the image onto the SD Card."
+e "mac [--force] [xx:xx:xx:xx:xx:xx] # Read or write MAC on an SD Card connected to Linux PC."
+e "serial [--force] [nnnnnnnnn] # Read or write Serial on an SD Card connected to Linux PC."
+e "ip [--force] [<ip-address> <mask> [<gateway>]] # Read/write /etc/network/interfaces on SD Card."
+e "dhcp [--force] # Restore default (configured for DHCP) /etc/network/interfaces on SD Card."
+e
+e "copy # Copy mobile_client and mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
+e "copy-s # Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
+e "copy-c # Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
+e "client # Copy mobile_client exe to bpi."
+e "server # Copy mediaserver_core lib to bpi."
+e "common # Copy common lib to bpi."
+e "lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to bpi."
+e "ini # Create empty .ini files @bpi in /tmp (to be filled with defauls)."
+e
+e "exec [command args] # Execute a command at bpi via ssh, or log in to bpi via 'bpi.exp'."
+e "run-c [args] # Start mobile_client via 'mediaserver/var/scripts/start_lite_client [args]'."
+e "kill-c # Stop mobile_client via 'killall mobile_client'."
+e "start-s [args] # Run mediaserver via '/etc/init.d/networkoptix-mediaserver start [args]'."
+e "stop-s # Stop mediaserver via '/etc/init.d/networkoptix-mediaserver stop'."
+e "start-c [args] # Run mobile_client via '/etc/init.d/networkoptix-lite-client start [args]'."
+e "stop-s # Stop mobile_client via '/etc/init.d/networkoptix-lite-client stop'."
+e "start [args] # Run mediaserver and mobile_client via '/etc/init.d/networkoptix-* start [args]'."
+e "stop # Stop mediaserver and mobile_client via '/etc/init.d/networkoptix-* stop'."
+e
+e "vdp [args] # Make libvdpau_sunxi at bpi and install it to bpi, passing [args] to 'make'."
+e "vdp-rdep # Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
+e "pd [args] # Make libproxydecoder at bpi and install it to bpi, passing [args] to 'make'."
+e "pd-rdep # Deploy libproxydecoder to packages/bpi via 'rdep -u'."
+e "cedrus [ump] [args] # Make libcedrus at bpi and install it to bpi, passing [args] to 'make'."
+e "cedrus-rdep # Deploy libcedrus to packages/bpi via 'rdep -u'."
+e "ump # Rebuild libUMP at bpi and install it to bpi."
+e "ldp [args] # Make ldpreloadhook.so at bpi and intall it to bpi, passing [args] to 'make'."
+e "ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via 'rdep -u'."
+e
+e "rebuild [args] # Perform 'mvn clean package <required-args> [args]'."
+e "pack-short <output.tgz> # Prepare tar with build results at bpi."
+e "pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at bpi."
+
     exit 0
 }
 
 #--------------------------------------------------------------------------------------------------
+# Utils.
+
+# Allow 'set -x' to echo the args. If not called under 'set -x', do nothing.
+log()
+{
+    # Args already echoed if called under 'set -x', thus, do nothing, but suppress unneeded logging.
+    {
+        set +x;
+        [ ! -z "$VERBOSE" ] && set -x
+    } 2>/dev/null
+}
+
+log_file_contents() # filename
+{
+    # Args already echoed if called under 'set -x', thus, do nothing, but suppress unneeded logging.
+    {
+        set +x;
+        local FILE="$1"
+        if [ ! -z "$VERBOSE" ]; then
+            echo "<< EOF"
+            sudo cat "$FILE"
+            echo "EOF"
+            set -x
+        fi
+    } 2>/dev/null
+}
+
+# Echo the args replacing full home path with '~', unless the args are already echoed when
+# processing this function call under 'set -x'.
+writeln()
+{
+    { set +x; } 2>/dev/null
+    if [ -z "$VERBOSE" ]; then
+        echo "$@" |sed "s#$HOME/#~/#g"
+    else
+        set -x
+    fi
+}
 
 fail()
 {
-    echo "ERROR: $@" >&2
+    writeln "ERROR: $@" >&2
     exit 1
 }
 
-echo_with_nice_paths()
+# [out] RESTORE_BACKGROUND_CMD Command for eval to restore the background to the current one.
+get_RESTORE_BACKGROUND_CMD()
 {
-    echo "$1" |sed -e "s#$HOME#~#g"
+    exec </dev/tty
+    OLD_STTY=$(stty -g)
+    stty raw -echo min 0
+    BACKGROUND_COLOR=11
+    #          OSC   Ps  ;Pt ST
+    echo -en "\033]${BACKGROUND_COLOR};?\033\\" >/dev/tty # echo opts differ w/ OSes
+    RESTORE_BACKGROUND_CMD=
+    if IFS=';' read -r -d '\' COLOR ; then
+        RESTORE_BACKGROUND_CMD=$(echo $COLOR |sed 's/^.*\;//;s/[^rgb:0-9a-f/]//g' |awk -F "[:/]" \
+'{printf "echo -ne \"\\\\e]11;#%s%s%s\\\\a\"",substr($2,1,2),substr($3,1,2),substr($4,1,2)}')
+    fi
+    stty $OLD_STTY
+}
+
+set_background()
+{
+    local BACKGROUND_RRGGBB="$1"
+    echo -en "\\e]11;#${BACKGROUND_RRGGBB}\\a"
+}
+
+set_title()
+{
+    local TITLE="$*"
+    echo -en "\033]0;${TITLE}\007"
+}
+
+push_title()
+{
+    echo -en '\033[22;0t'
+}
+
+pop_title()
+{
+    echo -en '\033[23;0t'
+}
+
+#--------------------------------------------------------------------------------------------------
+
+# Execute command at bpi via ssh, or interactively log in to bpi via 'bpi.exp'.
+bpi()
+{
+    get_RESTORE_BACKGROUND_CMD
+    set_background "$BPI_BACKGROUND_RRGGBB"
+    push_title
+    set_title "${BPI_TERMINAL_TITLE}"
+    
+    sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" "$*"
+
+    pop_title
+    log "Restoring background command:"
+    log "$RESTORE_BACKGROUND_CMD"
+    eval "$RESTORE_BACKGROUND_CMD"
 }
 
 # [in] FILES_LIST
@@ -208,7 +313,7 @@ cp_files()
     FILES_DESCRIPTION="$4"
     FILES_SRC_DESCRIPTION="$5"
 
-    echo_with_nice_paths "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
+    writeln "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
     sudo mkdir -p "${BPI}$FILES_DST" || exit $?
 
@@ -258,7 +363,7 @@ cp_scripts_dir()
     SCRIPTS_SRC="$1"
     SCRIPTS_DST="$2"
 
-    echo_with_nice_paths "Copying scripts from $SCRIPTS_SRC"
+    writeln "Copying scripts from $SCRIPTS_SRC"
 
     for SCRIPT in $SCRIPTS_SRC/*; do
         cp_script_with_customization_filtering "$SCRIPT" "$SCRIPTS_DST/$(basename $SCRIPT)"
@@ -302,20 +407,20 @@ get_and_check_DEV_SDCARD()
     local DEV
     for DEV in $(awk '{print $1}' <<<"$PARTITIONS"); do
         if mount |grep -q "$DEV"; then
-            echo "WARNING: $DEV is mounted; unmounting."
-            umount "$DEV" || exit $?
+            writeln "WARNING: $DEV is mounted; unmounting."
+            sudo umount "$DEV" || exit $?
         fi
     done
 }
 
 force_get_DEV_SDCARD()
 {
-    read_DEV_SDCARD || exit $?
+    read_DEV_SDCARD
 
-    echo "WARNING: Device at $DEV_SDCARD will NOT be checked to be likely an unmounted Nx1 SD Card."
-    echo "Your PC HDD can be under risk!"
+    writeln "WARNING: $DEV_SDCARD will NOT be checked to be likely an unmounted Nx1 SD Card."
+    writeln "Your PC HDD can be under risk!"
     read -p "Are you sure to continue? (Y/n) " -n 1 -r
-    echo
+    writeln
     if [ "$REPLY" != "Y" ]; then
         fail "Aborted, no changes made."
     fi
@@ -331,7 +436,7 @@ fw_print()
     rm -rf fw_printenv.lock
 
     local VALUE=$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")
-    echo "$OUTPUT_PREFIX$VALUE"
+    writeln "$OUTPUT_PREFIX$VALUE"
 }
 
 fw_set()
@@ -372,6 +477,167 @@ check_serial()
     fi
 }
 
+get_value_by_prefix()
+{
+    local FILE="$1"
+    local PREFIX="$2"
+    grep "^\\s*$PREFIX " "$FILE" |sed "s/\\s*$PREFIX //"
+}
+
+is_line_present()
+{
+    local FILE="$1"
+    local LINE="$2"
+    grep -q "^\\s*$LINE\\s*$" "$FILE"
+}
+
+comment_out_line()
+{
+    local FILE="$1"
+    local LINE="$2"
+    sudo sed --in-place "s/^\\(\\s*$LINE\\s*\\)/#\\1/" "$FILE"
+
+    log_file_contents "$FILE"
+}
+
+# If the prefix is found, uncomment if commented out, and change the value. Otherwise, add a line.
+set_value_by_prefix()
+{
+    local FILE="$1"
+    local PREFIX="$2"
+    local VALUE="$3"
+    
+    if ! is_line_present "$FILE" "#\\?\\s*$PREFIX.*"; then
+        echo "$PREFIX" "$VALUE" |sudo tee -a "$FILE" >/dev/null || exit $?
+    else
+        # Uncomment the line (if commented out), and change the value.
+        sudo sed --in-place "s/^\\(\\s*\\)#\\?\\(\\s*\\)$PREFIX.*/\\1\\2$PREFIX $VALUE/" "$FILE" || exit $?
+    fi
+    
+    log_file_contents "$FILE"
+}
+
+ip_show()
+{
+    local FILE="$1"
+
+    log_file_contents "$FILE"
+    
+    if is_line_present "$FILE" "$BPI_DHCP_LINE"; then
+        if is_line_present "$FILE" "$BPI_STATIC_LINE"; then
+            fail "IP config unrecognized: both 'static' and 'dhcp' lines are found in $FILE"
+        fi
+        writeln "$BPI_DHCP_LINE"
+    else
+        if ! is_line_present "$FILE" "$BPI_STATIC_LINE"; then
+            fail "IP config unrecognized: none of 'static' and 'dhcp' lines are found in $FILE"
+        fi
+        
+        local IP_ADDRESS=$(get_value_by_prefix "$FILE" "address")
+        if [ -z "$IP_ADDRESS" ]; then
+            fail "IP address not found in $FILE"
+        fi
+
+        local IP_NETMASK=$(get_value_by_prefix "$FILE" "netmask")
+        if [ -z "$IP_NETMASK" ]; then
+            fail "IP netmask not found in $FILE"
+        fi
+        
+        local IP_GATEWAY=$(get_value_by_prefix "$FILE" "gateway")
+        
+        writeln "$BPI_STATIC_LINE"
+        writeln -e "\t""address $IP_ADDRESS"
+        writeln -e "\t""netmask $IP_NETMASK"
+        if [ ! -z "$IP_GATEWAY" ]; then
+            writeln -e "\t""gateway $IP_GATEWAY"
+        fi
+    fi
+}
+
+ip_write_IP_ADDRESS_and_IP_NETMASK_and_IP_GATEWAY()
+{
+    local FILE="$1"
+
+    comment_out_line "$FILE" "$BPI_DHCP_LINE" || exit $?
+    
+    set_value_by_prefix "$FILE" "$BPI_STATIC_LINE" "" || exit $?
+    
+    set_value_by_prefix "$FILE" "address" "$IP_ADDRESS" || exit $?
+    set_value_by_prefix "$FILE" "netmask" "$IP_NETMASK" || exit $?
+    
+    if [ ! -z "$IP_GATEWAY" ]; then
+        set_value_by_prefix "$FILE" "gateway" "$IP_GATEWAY"
+    else
+        comment_out_line "$FILE" "gateway .*" || exit $?
+    fi
+}
+
+# [in] DEV_SDCARD Device representing the whole SD Card.
+# [out] SD_DIR Directory to which the SD Card is mounted.
+sd_card_mount_SD_DIR()
+{
+    SD_DIR=$(mktemp -d) || exit $?
+    sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
+}
+
+# [in] SD_DIR Directory to which the SD Card is mounted.
+sd_card_umount_SD_DIR()
+{
+    sudo umount "$SD_DIR" || exit $?
+    rmdir "$SD_DIR" || exit $?
+}
+
+show_or_set_ip_config() # /etc/network/interfaces [<ip-address> <mask> [<gateway>]]
+{
+    local FILE="$1"
+    shift
+    
+    if [ -z "$1" ]; then
+        ip_show "$FILE"
+    else
+        local IP_ADDRESS="$1"
+        local IP_NETMASK="$2"
+        if [ -z "$IP_NETMASK" ]; then
+            fail "IP netmask should be specified."
+        fi
+        local IP_GATEWAY="$3" #< Can be empty
+        if [ ! -z "$4" ]; then
+            fail "Too many arguments."
+        fi
+        
+        writeln "Old IP config:"
+        ip_show "$FILE"
+        writeln
+
+        ip_write_IP_ADDRESS_and_IP_NETMASK_and_IP_GATEWAY "$FILE"
+
+        writeln "New IP config:"
+        ip_show "$FILE"
+    fi                
+}
+
+set_default_ip_config() # /etc/network/interfaces
+{
+    local FILE="$1"
+    
+    cat << EOF |sudo tee "$FILE" >/dev/null
+# interfaces(5) file used by ifup(8) and ifdown(8)
+auto lo
+iface lo inet loopback
+
+auto eth0
+
+# dhcp configuration
+iface eth0 inet dhcp
+
+# static ip configuration
+#iface eth0 inet static
+#address 192.168.0.103
+#netmask 255.255.254.0
+#gateway 192.168.0.101
+EOF
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -379,6 +645,14 @@ main()
     if [ "$#" = "0" -o "$1" = "-h" -o "$1" = "--help" ]; then
         show_help_and_exit
     fi
+
+    local VERBOSE
+    if [ "$1" == "--verbose" ]; then
+        VERBOSE="1"
+        set -x
+        shift
+    fi
+
 
     if [ "$#" -ge "1" ]; then
         case "$1" in
@@ -400,50 +674,50 @@ main()
                 exit $?
                 ;;
             #......................................................................................
-            "sdcard")
+            "sdcard") # [/dev/sd...]
                 shift
                 local NEW_DEV_SDCARD="$1"
-                read_DEV_SDCARD || exit $?
+                read_DEV_SDCARD
                 if [ -z "$NEW_DEV_SDCARD" ]; then
-                    echo "SD Card device: $DEV_SDCARD"
+                    writeln "SD Card device: $DEV_SDCARD"
                 else
-                    echo "Old SD Card device: $DEV_SDCARD"
+                    writeln "Old SD Card device: $DEV_SDCARD"
                     local NEW_CONFIG=$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")
-                    sudo echo "$NEW_CONFIG" |sudo tee "$FW_CONFIG" >/dev/null || exit $?
-                    read_DEV_SDCARD || exit $?
+                    echo "$NEW_CONFIG" |sudo tee "$FW_CONFIG" >/dev/null || exit $?
+                    read_DEV_SDCARD
                     if [ "$DEV_SDCARD" != "$NEW_DEV_SDCARD" ]; then
                         fail "Wrong SD Card device in $FW_CONFIG: $DEV_SDCARD" $'\n'"$NEW_CONFIG"
                     fi
-                    echo "New SD Card device: $DEV_SDCARD"
+                    writeln "New SD Card device: $DEV_SDCARD"
                 fi
-                get_and_check_DEV_SDCARD || exit $?
-                echo "Seems to contain expected Nx1 partitions, not mounted."
+                get_and_check_DEV_SDCARD
+                writeln "Seems to contain expected Nx1 partitions, not mounted."
                 exit $?
                 ;;
-            "img")
+            "img") # [--force] sd_card_image.img
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    force_get_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD
                 else
-                    get_and_check_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD
                 fi
                 local IMG="$1"
                 if [ -z "$IMG" ]; then
                     fail "Image file not specified."
                 fi
-                echo "Writing to $DEV_SDCARD: $IMG"
+                writeln "Writing to $DEV_SDCARD: $IMG"
                 sudo dd if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
                 sync || exit $?
                 exit $?
                 ;;
-            "mac")
+            "mac") # [--force] [xx:xx:xx:xx:xx:xx]
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    force_get_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD
                 else
-                    get_and_check_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD
                 fi
                 local MAC="$1"
                 if [ -z "$MAC" ]; then
@@ -456,13 +730,13 @@ main()
                 fi
                 exit $?
                 ;;
-            "serial")
+            "serial") # [--force] [nnnnnnnnn]
                 shift
                 if [ "$1" = "--force" ]; then
                     shift
-                    force_get_DEV_SDCARD || exit $?
+                    force_get_DEV_SDCARD
                 else
-                    get_and_check_DEV_SDCARD || exit $?
+                    get_and_check_DEV_SDCARD
                 fi
                 local SERIAL="$1"
                 if [ -z "$SERIAL" ]; then
@@ -474,6 +748,40 @@ main()
                     fw_print "$SERIAL_VAR" "New Serial: " || exit $?
                 fi
                 exit $?
+                ;;
+            "ip") # [--force] [<ip-address> <mask> [<gateway>]]
+                shift
+                if [ "$1" = "--force" ]; then
+                    shift
+                    force_get_DEV_SDCARD
+                else
+                    get_and_check_DEV_SDCARD
+                fi
+
+                sd_card_mount_SD_DIR
+                local FILE="$SD_DIR/etc/network/interfaces"
+                
+                (show_or_set_ip_config "$FILE" "$@") #< Subshell allows to umount on error.
+                local RESULT=$?
+                sd_card_umount_SD_DIR
+                exit $RESULT
+                ;;
+            "dhcp") # [--force]
+                shift
+                if [ "$1" = "--force" ]; then
+                    shift
+                    force_get_DEV_SDCARD
+                else
+                    get_and_check_DEV_SDCARD
+                fi
+
+                sd_card_mount_SD_DIR
+                local FILE="$SD_DIR/etc/network/interfaces"
+
+                (set_default_ip_config "$FILE") #< Subshell allows to umount on error.
+                local RESULT=$?
+                sd_card_umount_SD_DIR
+                exit $RESULT
                 ;;
             #......................................................................................
             "copy-scripts")
@@ -546,6 +854,7 @@ main()
                 #cp_files "$VMS_DIR/../$QT_PATH/lib" "*.so*" "$LIBS_DIR" "Qt libs" "$QT_PATH"
                 #cp_lite_client_bins \
                 #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
+                #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
                 #    "mobile_client/bin Qt dirs"
                 #cp_sysroot_libs "lib{opus,vpx,webp,webpdemux}.so*" "libs for web-engine"
                 #cp_lite_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
@@ -590,7 +899,7 @@ main()
                 bpi "$*"
                 exit $?
                 ;;
-            "run")
+            "run-c")
                 shift
                 bpi "/opt/networkoptix/mediaserver/var/scripts/start_lite_client $*"
                 exit $?
@@ -620,7 +929,7 @@ main()
             "start")
                 shift
                 bpi "/etc/init.d/networkoptix-mediaserver start $*"
-                echo
+                writeln
                 bpi "/etc/init.d/networkoptix-lite-client start $*"
                 exit $?
                 ;;
