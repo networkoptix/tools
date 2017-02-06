@@ -13,7 +13,7 @@ CLOUD_HOST_NAME_WITH_KEY=$(eval echo \
 # Allow 'set -x' to echo the args.
 log()
 {
-    # Args already echoed when processing this function call under 'set -x', thus, do nothing.
+    # Allow 'set -x' to echo the args. If not called under 'set -x', do nothing.
     {
         set +x;
         [ ! -z "$VERBOSE" ] && set -x
