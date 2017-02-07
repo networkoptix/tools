@@ -25,6 +25,7 @@ config = {
   'ft_watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,

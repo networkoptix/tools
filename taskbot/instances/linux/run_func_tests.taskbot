@@ -3,103 +3,46 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-# + Prepare environment
-if [ -d "$TASKBOT_VAR"/var/testing ]; then
-  cd "$TASKBOT_VAR"/var/testing/vagrant
-  set +o errexit
+# # + Prepare environment
+FUNTESTS_DIR="$TASKBOT_VAR"/var/functest
+if [ -d $FUNTESTS_DIR/tmp/vagrant ]; then
+  cd $FUNTESTS_DIR/tmp/vagrant
   vagrant destroy -f
-  set -o errexit
-  rm -rvf "$TASKBOT_VAR"/var/testing
 fi
+[ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
+[ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp
+[ -d $FUNTESTS_DIR/result ] && rm -rf $FUNTESTS_DIR/result
+mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/tmp $FUNTESTS_DIR/result
 
-cp -r $TASKBOT_REPO/testing "$TASKBOT_VAR"/var/testing
-
-if [ -e "$TASKBOT_VAR"/var/testing/testconf_local.py ]; then 
-  rm -rf "$TASKBOT_VAR"/var/testing/testconf_local.py
-fi
-
-cd "$TASKBOT_VAR"/var/testing
-
-BOX_SUFFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
-BOX1="box1_$BOX_SUFFIX"
-BOX2="box2_$BOX_SUFFIX"
-NAT="nat_$BOX_SUFFIX"
-BEHIND="behind_$BOX_SUFFIX"
-
-cat << EOF > testconf_local.py
-BOX_NAMES = {
-    "Box1": "$BOX1",
-    "Box2": "$BOX2",
-    "Nat": "$NAT",
-    "Behind": "$BEHIND"
-}
-BOX_IP = {
-  'Box1': '192.168.$TASKBOT_NET_BASE.2',
-  'Box2': '192.168.$TASKBOT_NET_BASE.3',        
-  'Nat': '192.168.$TASKBOT_NET_BASE.4',
-  'Nat2': '192.168.$[$TASKBOT_NET_BASE + 1].2',
-  'Behind': '192.168.$[$TASKBOT_NET_BASE + 1].3'
-  }
-EOF
-
-cat testconf_local.py
-
-./sync.sh
-
-rm -rfv $TASKBOT_VAR/nx_vms/func_tests_old/functest-tmp.cfg
-
-# + Start virual boxes
-cd "$TASKBOT_VAR"/var/testing
-./auto.py --ftprepare --path $TASKBOT_VAR/nx_vms
-
-FUNC_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/ftests
-if [ ! -d "$FUNC_TESTS_RESULT_PATH" ]; then 
-  mkdir -p "$FUNC_TESTS_RESULT_PATH"
-else
-  rm -rf "$FUNC_TESTS_RESULT_PATH"/*
-fi
-
-cat $TASKBOT_VAR/nx_vms/func_tests_old/functest-tmp.cfg
-
-# + Check virtual boxes
-cd $TASKBOT_VAR/nx_vms/func_tests_old
-BOXES="Box1 Box2 Nat Behind"
-for box in $BOXES
-do
-  ./vssh.sh $box hostname
-done
+# + Prepare box files
+rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/wd
+CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
+ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
+DEB_PROP_FILENAME="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-server.properties"
+DEB_FILENAME=$(cat "$DEB_PROP_FILENAME" | sed -r 's/server\.finalName=//')
+DEB_FILEPATH="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb"
+echo $DEB_FILEPATH
+cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
+#cp "$TASKBOT_VAR"/var/testing/vagrant/networkoptix-mediaserver.deb "$FUNTESTS_DIR"/wd
 
 # + Run tests
-./functest.py --list-auto-test | \
-while read line
-do
- key=$(echo $line | sed -r 's|(--\w+)\s(.+)|\1|')
- name=$(echo $line | sed -r 's|(--\w+)\s(.+)|\2|')
- filename=$(echo $name | sed -r 's|\W|_|g')
- "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-   -d "$name"  \
-   -c "./functest.py --config=functest-tmp.cfg $key --log=\"$FUNC_TESTS_RESULT_PATH/$filename.log\"" \
-   -t 600 || true
- "$TASKBOT" $ARGS "$TASKBOT_SHARE"/collect_vbox_info.taskbot $FUNC_TESTS_RESULT_PATH/$filename
-done
+echo $FUNTESTS_DIR/wd
+cd $FUNTESTS_DIR/wd && py.test \
+  "$TASKBOT_VAR"/nx_vms/func_tests \
+  --work-dir="$FUNTESTS_DIR"/tmp \
+  --html="$FUNTESTS_DIR"/result/functest.html \
+  --self-contained-html || true
 
 # + Store results
 $TASKBOT_BIN/file.py \
      $TASKBOT_CONFIG \
-    --path $FUNC_TESTS_RESULT_PATH \
-    --mask '*.log'
+    --path "$FUNTESTS_DIR"/result \
+    --mask '*.html'
 
-# + Store vbox cores
-for testname in $(find "$FUNC_TESTS_RESULT_PATH" -maxdepth 1 -type d ! -path "$FUNC_TESTS_RESULT_PATH" -exec basename {} \;); do
-    echo $testname
-    i=0
-    for core in $(find "$FUNC_TESTS_RESULT_PATH/$testname" -name '*.gdb-bt'); do
-        "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
-                   -d "$testname.$i.gdb-bt" -c "cat $core"
-        i=$(($i + 1))
-    done
-done
-
-# + Destroy virtual boxes
-cd "$TASKBOT_VAR"/var/testing/vagrant
-vagrant destroy -f
+# + Clear test data
+if [ -d $FUNTESTS_DIR/tmp/vagrant ]; then
+  cd $FUNTESTS_DIR/tmp/vagrant
+  vagrant destroy -f
+fi
+[ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
+[ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp

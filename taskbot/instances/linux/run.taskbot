@@ -39,6 +39,17 @@ if [ "$TASKBOT_UNIT_TESTS" != "none" ]; then
   "$TASKBOT_COMMONS"/reports/unit_tests_report.py "$TASKBOT_CONFIG"
 fi
 
+# + Run functional test old
+FT_RC_OLD=0
+if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests_old.taskbot
+  FT_RC_OLD=$?
+fi
+
+if [ $TASKBOT_FUNC_TESTS = "true" ]; then
+  "$TASKBOT_SHARE"/func_tests_report_old.py "$TASKBOT_CONFIG"
+fi
+
 # + Run functional test
 FT_RC=0
 if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
@@ -50,7 +61,10 @@ if [ $TASKBOT_FUNC_TESTS = "true" ]; then
   "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
 fi
 
+set +o nounset
 let "RC|=$UT_RC" || true
+let "RC|=$FT_RC_OLD" || true
 let "RC|=$FT_RC" || true
+set -o nounset
 
 exit $RC
