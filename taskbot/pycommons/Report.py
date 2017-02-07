@@ -263,9 +263,9 @@ class Report:
         LIMIT %s, %s""", (filename, fullpath, task_id, min, max))
 
   def __get_file_content(self, file_id):
-    return self.__db.query("""SELECT content
+    return self.__db.query("""SELECT gzipped, content
       FROM file
-      WHERE id = %s""",(file_id))
+      WHERE id = %s""", (file_id, ))
 
   def __get_ouput(self, fn, task):
     if isinstance(task, list):
@@ -350,6 +350,9 @@ class Report:
   def get_stderr( self, task):
     return self.__get_ouput(self.__get_stderr, task)
 
+  def get_file_content( self, f):
+    return self.__get_ouput(self.__get_file_content, f)
+  
   # Get task status
   def get_status( self, task):
     if isinstance(task, list):
