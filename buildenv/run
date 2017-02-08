@@ -97,7 +97,6 @@ if [ "`uname -s`" = "Darwin" ]; then
     PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/macosx-x64/
     export DYLD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.2/lib
     export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:$PACKAGES_ROOT/qt-5.6.2/lib/
-    echo "$DYLD_FRAMEWORK_PATH"
 else
     PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/linux-x64/
     export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.1/lib
@@ -137,7 +136,14 @@ do
         #valgrind --tool=drd --exclusive-threshold=100 $COMMON_VALGRIND_ARGS
         #valgrind --tool=callgrind $LAUNCH_CMD
     elif [ ! -z "$WITH_GDB" ]; then
-        gdb --args ./$BINARY_NAME $MSERVER_ARGS
+        if [ "`uname -s`" = "Darwin" ]; then
+            echo "env DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" > lldb_set_env
+            echo "env DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH" >> lldb_set_env
+            echo "run" >> lldb_set_env
+            lldb -s ./lldb_set_env -- ./$BINARY_NAME $MSERVER_ARGS
+        else
+            gdb --args ./$BINARY_NAME $MSERVER_ARGS
+        fi
     else
         $LAUNCH_CMD
     fi
