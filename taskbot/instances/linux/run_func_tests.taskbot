@@ -27,11 +27,15 @@ cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
 
 # + Run tests
 echo $FUNTESTS_DIR/wd
-cd $FUNTESTS_DIR/wd && py.test \
+cd $FUNTESTS_DIR/wd
+set +o nounset
+py.test -v \
   "$TASKBOT_VAR"/nx_vms/func_tests \
   --work-dir="$FUNTESTS_DIR"/tmp \
   --html="$FUNTESTS_DIR"/result/functest.html \
-  --self-contained-html || true
+  --self-contained-html \
+  --timeout=900
+set +o nounset
 
 # + Store results
 $TASKBOT_BIN/file.py \
