@@ -189,6 +189,42 @@ pop_title()
     echo -en '\033[23;0t'
 }
 
+# NOTE: Works only if the terminal is not scrolling.
+save_cursor_pos()
+{
+    echo -en '\033[s'
+}
+
+restore_cursor_pos()
+{
+    echo -en '\033[u'
+}
+
+sudo_dd_with_progress() # args_for_dd...
+{
+    # Redirect to a subshell to enable capturing the pid of the "sudo" process.
+    # Print only lines containing "copied", suppress '\n' (to avoid scrolling).
+    # "-W interactive" run awk without input buffering.
+    # Spaces are added to overwrite the remnants of a previous text.
+    sudo dd "$@" 2> >(awk -W interactive '$0 ~ /copied/ {printf "%s                      ", $0}') & 
+    local SUDO_PID=$!
+
+    # On ^C, kill "dd" which is the child of "sudo".
+    trap "trap - SIGINT; sudo pkill -9 -P $SUDO_PID" SIGINT
+
+    save_cursor_pos
+    while sudo kill -0 $SUDO_PID; do #< Checking that "sudo dd" is still running.
+        restore_cursor_pos
+
+        # Ask "dd" to print the progress; break if "dd" is finished.
+        sudo kill -USR1 $SUDO_PID || break 
+        
+        sleep 1
+    done
+    
+    wait $SUDO_PID #< Get the Status Code of finished "dd".
+}
+
 #--------------------------------------------------------------------------------------------------
 
 # Execute command at bpi via ssh, or interactively log in to bpi via 'bpi.exp'.
@@ -716,8 +752,9 @@ main()
                 if [ -z "$IMG" ]; then
                     fail "Image file not specified."
                 fi
-                writeln "Writing to $DEV_SDCARD: $IMG"
-                sudo dd if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
+                local IMG_SIZE=$(du -h "$IMG" |sed 's/\t.*//')
+                writeln "Writing to $DEV_SDCARD: $IMG_SIZE $IMG"
+                sudo_dd_with_progress if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
                 sync || exit $?
                 exit $?
                 ;;
