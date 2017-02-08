@@ -62,24 +62,18 @@ def checkText(source, target, context, result, index, hasNumerusForm):
             err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
             result.error += 1
 
-    if not hasNumerusForm:
-        for symbol in numerus:
-            if source.count(symbol):
-                err(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
-                result.error += 1
-                break
+    for symbol in numerus:
+        isNumerus = source.count(symbol)
+        if (isNumerus and not hasNumerusForm) or (hasNumerusForm and not isNumerus and index > 1):
+            err(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
+            result.error += 1
+            break
 
     for symbol in critical:
         if checkSymbol(symbol, source, target, context, err):
             result.error += 1
             break
-    
-    if (index != 1):
-        for symbol in numerus:
-            if checkSymbol(symbol, source, target, context, err):
-                result.error += 1
-                break
-    
+       
     if verbose:
         for symbol in warned:
             if checkSymbol(symbol, source, target, context, warn):
