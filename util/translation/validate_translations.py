@@ -18,6 +18,7 @@ sys.path.pop(0)
 critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>']
 warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
 numerus = ['%n']
+substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 
 verbose = False
 noTarget = False
@@ -51,10 +52,10 @@ def checkSymbol(symbol, source, target, context, out):
             .format(
                     symbolText(symbol),
                     context,
-                    source, target))    
-        
+                    source, target))
+
     return invalid
-    
+
 def checkText(source, target, context, result, index, hasNumerusForm):
 
     if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
@@ -73,7 +74,17 @@ def checkText(source, target, context, result, index, hasNumerusForm):
         if checkSymbol(symbol, source, target, context, err):
             result.error += 1
             break
-       
+
+    # Check if %2 does not exist without %1
+    hasPreviuosSubstitution = True
+    for symbol in substitution:
+        hasCurrentSubstitution = source.count(symbol) > 0
+        if hasCurrentSubstitution and not hasPreviuosSubstitution:
+            err(u'Invalid substitution form \nContext: {0}\nSource: {1}'.format(context, source))
+            result.error += 1
+            break
+        hasPreviuosSubstitution = hasCurrentSubstitution
+
     if verbose:
         for symbol in warned:
             if checkSymbol(symbol, source, target, context, warn):
@@ -81,16 +92,16 @@ def checkText(source, target, context, result, index, hasNumerusForm):
                 break
             if checkSymbol(symbol, source, '', context, warn):
                 result.warned += 1
-                break             
-            
+                break
+
 
     return result;
 
 def validateXml(root, name):
     result = ValidationResult()
-       
+
     printAll = strict and 'en_US' in name
-    
+
     for context in root:
         contextName = context.find('name').text
         for message in context.iter('message'):
@@ -100,11 +111,11 @@ def validateXml(root, name):
 #            if translatorcomment is not None:
 #                info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}'.format(contextName, source.text))
 #                warn(u'Translator comment: {0}'.format(translatorcomment.text))
-            
+
             translation = message.find('translation')
             if translation.get('type') == 'unfinished':
                 result.unfinished += 1
-            
+
             if translation.get('type') == 'obsolete':
                 continue
 
@@ -120,7 +131,7 @@ def validateXml(root, name):
                 if not numerusform.text:
                     continue;
                 result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
-                
+
             if hasNumerusForm:
                 forms = [numerusform for numerusform in translation.iter('numerusform') if numerusform.text]
                 filled = len([numerusform for numerusform in translation.iter('numerusform') if numerusform.text])
@@ -128,13 +139,13 @@ def validateXml(root, name):
                     result.error += 1
                     err(u'Incomplete numerus translation:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
                     err(u'Filled {0} of {1} numerus forms'.format(filled, index))
-                
+
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
                 if printAll and not (source.text == translation.text):
                     info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 
-                
+
     return result
 
 def validate(path):
@@ -158,22 +169,22 @@ def validateProject(project, translationDir):
 
     for entry in os.listdir(translationDir):
         path = os.path.join(translationDir, entry)
-        
+
         if (os.path.isdir(path)):
             continue;
-        
+
         suffix = '.ts'
         if language:
             suffix = '_{0}{1}'.format(language, suffix)
-        
+
         if (not path.endswith(suffix)):
             continue;
-            
+
         if (not entry.startswith(project)):
             continue;
-                           
+
         entries.append(path)
-            
+
     for path in entries:
         validate(path)
 
@@ -185,35 +196,35 @@ def main():
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
     parser.add_argument('-l', '--language', help="check only selected language")
     args = parser.parse_args()
-    
+
     global verbose
     verbose = args.verbose
-    
+
     global noTarget
     noTarget = args.no_target
-    
+
     global strict
     strict = args.strict
 
     global language
     language = args.language
-    
+
     if args.color:
         init_color()
 
-        
+
     rootDir = os.getcwd()
-    
-    projects = getTranslatableProjects()   
+
+    projects = getTranslatableProjects()
     for project in projects:
         if verbose:
             info("Updating project " + str(project))
         projectDir = os.path.join(rootDir, project.path)
         translationDir = os.path.join(projectDir, 'translations')
         validateProject(project.name, translationDir)
-       
+
     info("Validation finished.")
-    
-    
+
+
 if __name__ == "__main__":
     main()
