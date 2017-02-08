@@ -35,7 +35,7 @@ py.test -v \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
   --timeout=900
-set +o nounset
+set -o nounset
 
 # + Store results
 $TASKBOT_BIN/file.py \
