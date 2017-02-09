@@ -158,7 +158,6 @@ EOF;
 
             print $row->{$prefix . "html_table_row"};
         }
-
         loop_list($row, "");
         loop_list($row, "l_") if $row->{l_start};
         loop_list($row, "l2_") if $row->{l2_start};
@@ -335,6 +334,7 @@ sub generate_summary_list
     ($params->{branch});
   my @platfs = $params->{platform} eq $ANY? keys(%platforms) :
     ($params->{platform});
+  my $count = $params->{count}? $params->{count} : 2;
 
   print $q->header(-type => 'text/html; charset=utf-8');
   print $q->start_html('Taskbot');
@@ -343,7 +343,6 @@ sub generate_summary_list
 <link rel="stylesheet" type="text/css" href="/commons/styles/TaskbotRunList.css"/>
 <script type="text/javascript" src="/commons/scripts/Taskbot.js"></script>
 <script type="text/javascript" src="/commons/scripts/Utils.js"></script>
-<script type="text/javascript" src="/commons/scripts/TaskbotRunList.js"></script>
 EOF;
 
   my $history = $dbh->prepare(q[
@@ -367,7 +366,7 @@ EOF;
       AND (t.branch_id IN (SELECT id FROM branch where description=?))
       AND (t.platform_id IN (SELECT id FROM platform where host=?))
       ORDER BY h.task_id DESC
-      LIMIT 0, 2]);
+      LIMIT ?, ?]);
 
   print $q->start_table({
                          -id=> 'historyList', -border => 1 }) . "<tbdoy>";
@@ -376,7 +375,7 @@ EOF;
      my $need_branch_header = 1;
      for my $p (sort @platfs) {
 
-       $history->execute($b, $p);
+       $history->execute($b, $p, 0, $count);
        if ($history->rows()) {
          if ($need_branch_header) {
            print $q->start_Tr({ -align => 'center' });
@@ -629,12 +628,18 @@ sub generate_task_description {
 
 
 sub generate_main {
+
     if (!$q->param || !($q->param('platform') && $q->param('branch'))) {
       print $q->header(-type => 'text/html; charset=utf-8');
       print $q->start_html('Taskbot');
+
+      print <<"EOF;";
+       <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+EOF;
+
       print $q->start_form(
         -method  => 'GET',
-        -enctype => &CGI::URL_ENCODED);
+        -enctype => &CGI::URL_ENCODED );
 
       print $q->h3("Select platform & branch");
 
@@ -647,6 +652,7 @@ sub generate_main {
 
         print $q->label('Platform:');
         print $q->popup_menu(
+                             -id=>'platform',
                              -name=>'platform',
                              -values=>\@platforms,
                              -default=>$params->{platform} || $platforms[0],
@@ -659,13 +665,48 @@ sub generate_main {
         my @branches = (get_branches, $ANY);
         print $q->label('Branch: ');
         print $q->popup_menu(
+                             -id=>'branch',
                              -name=>'branch',
                              -values=>\@branches,
                              -default=>$params->{branch} || $branches[0]);
       }
+
+      # print $q->hidden(
+      #        -id=>"count",
+      #        -name=>"count",
+      #        -value=>2,
+      #        -override=>1);
+
       print $q->br;
       print $q->submit(-value=>'Select');
       print $q->end_form;
+
+      print <<"EOF;";
+      <script>
+        \$("form").submit( function(eventObj)
+      {
+          var anyCount = 0;
+          \$('select').each(function(){
+          var \$this = \$(this);
+          if (\$this.val() == 'any'){
+            anyCount++;
+            }
+          });
+          if (anyCount > 0) {
+            \$('<input />').attr('type', 'hidden')
+            .attr('id', "count")
+            .attr('name', "count")
+            .attr('value', "2")
+            .attr('override', "1")
+            .appendTo("form");
+           }
+          else {
+           \$('#count').remove()
+          }
+         return true;
+       })
+      </script>
+EOF;
 
       print $q->end_html;
     }
