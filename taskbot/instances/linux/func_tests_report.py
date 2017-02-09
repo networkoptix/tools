@@ -73,12 +73,10 @@ class FTReport(Report):
         if not files:
             print >> sys.stderr, "Cannot create func-tests report (func-tests report isn't created)"
 
-        print 'Files', files
         log_files = self.find_files_by_name(files[0], 'functest.html')
         if not log_files:
             print >> sys.stderr, "Cannot create func-tests report (func-tests report isn't created)"
 
-        print log_files
         self.add_root_report(self.get_file_content(log_files[0]))
 
         history = 'Func tests'

@@ -3,12 +3,13 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-# # + Prepare environment
+# + Prepare environment
 FUNTESTS_DIR="$TASKBOT_VAR"/var/functest
 if [ -d $FUNTESTS_DIR/tmp/vagrant ]; then
   cd $FUNTESTS_DIR/tmp/vagrant
   vagrant destroy -f
 fi
+cd $FUNTESTS_DIR
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
 [ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp
 [ -d $FUNTESTS_DIR/result ] && rm -rf $FUNTESTS_DIR/result
@@ -28,14 +29,14 @@ cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
 # + Run tests
 echo $FUNTESTS_DIR/wd
 cd $FUNTESTS_DIR/wd
-set +o nounset
+set +o errexit
 py.test -v \
   "$TASKBOT_VAR"/nx_vms/func_tests \
   --work-dir="$FUNTESTS_DIR"/tmp \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
   --timeout=900
-set -o nounset
+set -o errexit
 
 # + Store results
 $TASKBOT_BIN/file.py \
