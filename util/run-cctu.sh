@@ -10,7 +10,9 @@ END
 exit 0
 fi
 
-set -e -x
+set -e
+[[ $NOX ]] || set -x
+
 FLAGS=$1
 if [ $1 ]; then shift; fi
 

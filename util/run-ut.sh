@@ -59,7 +59,7 @@ function run_async() {
 
 for name in $TESTS; do
     test_case_list=$($RUN $name --gtest_list_tests 2>/dev/null |\
-        grep '\.' | grep -v DISABLED)
+        grep '\.' | grep -v DISABLED | awk '{print $1}')
     for test_case in $test_case_list; do
         while (($(jobs -rp | wc -l) >= $MAX_JOBS)); do
             sleep 0.1

@@ -34,7 +34,13 @@ writeln()
 
 fail()
 {
-    writeln "ERROR: $@" >&2
+    if [ $fail_MULTILINE ]; then
+        for line in "$@"; do
+            writeln "ERROR: $line" >&2
+        done
+    else
+        writeln "ERROR: $@" >&2
+    fi
     exit 1
 }
 
@@ -77,7 +83,9 @@ find_FILE()
 
     # Make sure 'find' returned exactly one file.
     [ ${#FILES[*]} = 0 ] && fail "Unable to find the file to patch in $FILE_LOCATION" >&2
-    [ ${#FILES[*]} -gt 1 ] && fail "Found ${#FILES[*]} candidates to patch in $FILE_LOCATION" >&2
+    if [ ${#FILES[*]} -gt 1 ]; then
+        fail_MULTILINE=1 fail "Found ${#FILES[*]} candidates to patch in $FILE_LOCATION:" ${FILES[@]}
+    fi
     FILE=${FILES[0]}
 }
 

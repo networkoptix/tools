@@ -13,10 +13,10 @@ fi
 
 set -e -x
 
-DIR=${DIR:-$HOME/develop/connection_mediator}
+DIR=${DIR:-$HOME/develop/cloud_configs}
 RUN=$(dirname "${BASH_SOURCE[0]}")/run.sh
 
 $RUN connection_mediator -e \
-   --configFile=$DIR/connection_mediator.conf \
+   --conf-file=$DIR/connection_mediator.conf \
    $@
 

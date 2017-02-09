@@ -14,6 +14,7 @@ Options:
     D   use 1 for gdb run
     ST  use 1 for strace run
     V   valgrind args, empty means no valgrind
+    T   run and measure time
 Example:
     run.sh mediaserver -e   # run mediaserver
     R=1 V="--tool=exp-dhat" run.sh client.bin   # run release client under valgrind dhat
@@ -22,7 +23,8 @@ END
 exit 0
 fi
 
-set -x -e
+set -e
+[[ $NOX ]] || set -x
 
 if [ "$R" ]
 then
@@ -58,7 +60,7 @@ else
         GDB=/Applications/Xcode.app/Contents/Developer/usr/bin/lldb
         GDB_ARGS=--
         OS_GREP=macosx
-        if [[ $C$D ]]; 
+        if [[ $C$D ]];
         then
             sudo /usr/sbin/DevToolsSecurity --enable
         fi
@@ -86,7 +88,6 @@ else
     export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(find_libs)"
 fi
 
-
 if [ "$L" ]
 then
     ulimit -c unlimited
@@ -107,6 +108,9 @@ then
 elif [ "$V" ]
 then
     valgrind $V $@
+elif [ "$T" ]
+then
+    time $@
 else
     $@
 fi
