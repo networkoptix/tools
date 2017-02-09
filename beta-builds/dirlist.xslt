@@ -203,8 +203,8 @@ div.list { background-color: white; border-top: 1px solid #646464; border-bottom
 div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
 
 .icon {
-    height: 20px;
-    width: 20px;
+    height: 24px;
+    width: 24px;
     padding-bottom: 1px;
     padding-top: 1px;
 }
