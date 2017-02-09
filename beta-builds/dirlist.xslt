@@ -127,6 +127,16 @@
                                 </xsl:otherwise>
                             </xsl:choose>
                         </xsl:when>
+                        <xsl:when test="contains($filePath, 'cloud_debug')">
+                            <xsl:choose>
+                                <xsl:when test="contains($filePath, '64')">
+                                    <td class="icon cloud_debug-x64"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <td class="icon cloud_debug-x32"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:when>
                         <xsl:when test="contains($filePath, 'server_update')">
                             <xsl:choose>
                                 <xsl:when test="contains($filePath, '64')">
@@ -251,6 +261,13 @@ div.foot { font: 90% monospace; color: #787878; padding-top: 4px;}
     background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOwgAADsIBFShKgAAAABl0RVh0U29mdHdhcmUAcGFpbnQubmV0IDQuMC4xMzQDW3oAAAFQSURBVDhPrZSxSgNBEIZXIUGwlpA2jY2kSASLpPJBfC9BS9EmpBHURsREi7WwsBHERhCx1kaCO87M7l5mZzco5gb+u9l/Z76bvYMzAFCriuYy4svR2VUt0sAJCv4p6s2AtDEM0g1/0ULgIOSs04kt5gVlwOTIo8tbWZyosDdFZcBK6LW1p1Wq0cD6PwqYLtw/Pu+FIhZ5ci2l3mkKPB5fkDmUgJiHvd/kgc7stMD0G4fj6xuzRla30lezD+TFppPROd+fXl6x0Afl6ImPEpqpkbTVIzv1SOzZB2IsCovyR5aNVbMC2jvyO3PJmHu2DGzvYqIm1BGhEo55dmRuJg+hcb1/4Os5ZjN/l6AYG9vhlyNgJPkQfqcyCKRhb+8AzU2AFZoQt6l5df27COR1KSL049PnYa2O7FwOdC45cowIVNP6CYU0MPo+C5NIiPRMB34AKVtiS1vUWKYAAAAASUVORK5CYII=') no-repeat;
     }
 
+.cloud_debug-x64 {
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABZ0lEQVQ4T63UvUrDUBjG8WNBiRQnUdFdBcF0UBTBRfACFK/EOxBdBXVy8At0EATvwVmcFBGsg1BQsLvWanL8v0lOPCYnrdAOvzZ5znneJDRUaa27yhl2QlVOq13lDBOzOEMNTTziHItw7Y84Q2wggC6wix7kurkA65DSF7YxgT5MQS7UgKxvIte3T8ZwCbmzEKuw141lfEMuuIJ+pOvmYBBVyJU/sYN0k8MJzOO/YQ3RmtmwB1m8xmiStbKAC9xCenLHS0gHyi/JW+TLol1UrixjC7LnSs5N2Jw7uJOw1x5gjl+VXzaZwwBk34ecq1DNj8wcP9xPHz1p5cm77qcC5b9LlhRVXU1KOTtwHLKnLufRXQgpGq2yZIgooYIbSH6I+JHtol3O5knR5RnD6HjgC/YxhHiWq9wqM8Ui8V+OVbTLuZyvduIDyqVy8FvMDPS8Rpzx2U7mkcMwP/BvZopF8kFmoMn/R6sf0Hdwa5H3v78AAAAASUVORK5CYII=') no-repeat;
+    }
+
+.cloud_debug-x32 {
+    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAABnUlEQVQ4T62UO0sDQRSFJ4IhEqxERMuABkSjYNDKQrSzifhL/AeiraC2PkELQbGwt7BOpyKCEREtgqZT0ZiYHc/ZnUmu+wgBc+Fj7pyZe+YOO6zSWreVUPE/qLGDQlsJFQ1ZcAieQQXcgaPs+vk8xrD9LqEiWAY1oCPYADEQqA0IYAmwqArWwBCIg2HAg8qA6ysgUC8nA+AUsDMHLAC5bpkDP4AH5kAXqK/bpAcUAE/+zp09bhk9iv3Zkwd7/VewaPS64SbgYh70Gy2S8Z3LaYzH4Aqwjh3PgLohvyReUQZPSY8YzYWanEvM3lXAPRfU7GJlcvuaYqc0sHlRZZJWC6EbcN8X58pRU30Te7c3o7v3WiX41tGloaYyn9RMoSqpNIvdnFdhIB8EHEvU3S4ICy3NtKh4eqvw43hXloWyOKinGshoaPmWDQNhTaU58tavbKNa9UZpZKM3a345otAtbmZII79Z8UXreFrrGDvEMos7krVIw0Si7Nb9CWv6/uHlZu67suMEDY3mD2vo69brUOA3tLqXmU6kidRUSv8CYme1YwvsC8UAAAAASUVORK5CYII=') no-repeat;
+    }    
                 </style>
                 <title>Index of <xsl:value-of select="$path"/>
                 </title>
