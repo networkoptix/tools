@@ -195,10 +195,7 @@ save_cursor_pos()
     echo -en '\033[s'
 }
 
-restore_cursor_pos()
-{
-    echo -en '\033[u'
-}
+RESTORE_CURSOR_POS='\033[u'
 
 sudo_dd_with_progress() # args_for_dd...
 {
@@ -206,7 +203,8 @@ sudo_dd_with_progress() # args_for_dd...
     # Print only lines containing "copied", suppress '\n' (to avoid scrolling).
     # "-W interactive" run awk without input buffering.
     # Spaces are added to overwrite the remnants of a previous text.
-    sudo dd "$@" 2> >(awk -W interactive '$0 ~ /copied/ {printf "%s                      ", $0}') & 
+    sudo dd "$@" 2> >(awk -W interactive \
+        "\$0 ~ /copied/ {printf \"${RESTORE_CURSOR_POS}%s                 \", \$0}") & 
     local SUDO_PID=$!
 
     # On ^C, kill "dd" which is the child of "sudo".
@@ -214,13 +212,14 @@ sudo_dd_with_progress() # args_for_dd...
 
     save_cursor_pos
     while sudo kill -0 $SUDO_PID; do #< Checking that "sudo dd" is still running.
-        restore_cursor_pos
-
         # Ask "dd" to print the progress; break if "dd" is finished.
-        sudo kill -USR1 $SUDO_PID || break 
+        sudo kill -USR1 $SUDO_PID || break
         
         sleep 1
     done
+    
+    # Avoid "%" appearing in the console.
+    echo 
     
     wait $SUDO_PID #< Get the Status Code of finished "dd".
 }
@@ -755,7 +754,9 @@ main()
                 local IMG_SIZE=$(du -h "$IMG" |sed 's/\t.*//')
                 writeln "Writing to $DEV_SDCARD: $IMG_SIZE $IMG"
                 sudo_dd_with_progress if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
+                writeln "Performing sync..."
                 sync || exit $?
+                writeln "Done"
                 exit $?
                 ;;
             "mac") # [--force] [xx:xx:xx:xx:xx:xx]
