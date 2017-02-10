@@ -481,8 +481,15 @@ class TaskExecutor:
 #        for child in parent.children(recursive=True):
 #          child.send_signal(sig)
       safe_call(os.killpg, pgid, sig)
-      safe_call(self.__shell_process__.kill)
-      safe_call(self.__shell_process__.terminate)
+      start = time.time()
+      finished = False
+      while time.time() - start < 5.0:
+        if self.__shell_process__.poll():
+          finished = True
+          break
+      if not finished:
+        safe_call(os.killpg, pgid, signal.SIGKILL)
+        self.__shell_process__.wait()
       shutdown.set()
       safe_call(self.__status__.stop)
       safe_call(self.__err__.stop)
