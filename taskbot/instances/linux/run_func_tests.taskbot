@@ -27,12 +27,11 @@ cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
 #cp "$TASKBOT_VAR"/var/testing/vagrant/networkoptix-mediaserver.deb "$FUNTESTS_DIR"/wd
 
 # + Run tests
-echo $FUNTESTS_DIR/wd
-cd $FUNTESTS_DIR/wd
 set +o errexit
 py.test -v \
   "$TASKBOT_VAR"/nx_vms/func_tests \
   --work-dir="$FUNTESTS_DIR"/tmp \
+  --bin-dir="$FUNTESTS_DIR"/wd \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
   --timeout=900
