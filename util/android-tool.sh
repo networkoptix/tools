@@ -1,85 +1,45 @@
 #!/bin/bash
+source "$(dirname $0)/utils.sh"
+
+#--------------------------------------------------------------------------------------------------
+# Configuration
 
 GVFS_PATH="/run/user/1000/gvfs/mtp:host=*"
+DEVELOP_DIR="$HOME/develop"
 
 #--------------------------------------------------------------------------------------------------
 
-show_help_and_exit()
+help()
 {
-    echo "Swiss Army Knife for Android Mobile Client: execute various commands."
-    echo "Usage: run from any dir inside nx_vms:"
-    echo $0 "<command>"
-    echo "Here <command> can be one of the following:"
-    echo
-    echo "device - Check Android device is connected and mount it to '/android'."
-    echo
-    echo "deploy - Rebuild apk, reinstall apk, launch the app."
-    echo "run - Lanuch the app."
-    echo "stop - Force-stop the app."
-    echo "log - Show Mobile Client log via filtering 'adb logcat'."
-    echo "uninstall - Uninstall apk from Android device."
-    echo "install - Install apk to Android device."
-    echo
-    echo "java - After changing .java: copy sources so that 'deploy' will rebuild classes."
-    echo "rebuild ... - Perform 'mvn clean package' with the required parameters."
-    echo "unpack <path/to/new/dir> - Unpack existing .apk, including dex2jar."
-    exit 0
+    cat <<EOF
+Swiss Army Knife for Android Mobile Client: execute various commands.
+Usage: run from any dir inside nx_vms:
+$(basename $0) [--verbose] <command>
+Here <command> can be one of the following:
+
+device - Check Android device is connected and mount it to '/android'.
+
+deploy - Rebuild apk, reinstall apk, launch the app.
+run - Lanuch the app.
+stop - Force-stop the app.
+log - Show Mobile Client log via filtering 'adb logcat'.
+uninstall - Uninstall apk from Android device.
+install - Install apk to Android device.
+
+java - After changing .java: copy sources so that 'deploy' will rebuild classes.
+rebuild ... - Perform 'mvn clean package' with the required parameters.
+unpack <path/to/new/dir> - Unpack existing .apk, including dex2jar.
+EOF
 }
 
 #--------------------------------------------------------------------------------------------------
-
-# Check that the specified file exists. Needed to support globs in the filename.
-exists_glob()
-{
-    [ -e "$1" ]
-}
-
-writeln()
-{
-    echo "$1" |sed -e "s#$HOME/#~/#g"
-}
-
-fail()
-{
-    writeln "ERROR: $@" >&2
-    exit 1
-}
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
-find_vms_dir()
+find_VMS_DIR()
 {
-    if [ "$VMS_DIR" != "" ]; then
-        return 1;
-    fi
-
-    VMS_DIR=$(pwd)
-    while [ $(basename $(dirname "$VMS_DIR")) != "develop" -a "$VMS_DIR" != "/" ]; do
-        VMS_DIR=$(dirname "$VMS_DIR")
-    done
-
-    if [ "$VMS_DIR" = "/" ]; then
-        fail "Run this script from any dir inside nx_vms."
-    fi
-}
-
-# If not done yet, scan from current dir upwards to find "common_libs" dir; set LIB_DIR to its
-# inner dir.
-# [in][out] LIB_DIR
-find_lib_dir()
-{
-    if [ "$LIB_DIR" != "" ]; then
-        return 1;
-    fi
-
-    LIB_DIR=$(pwd)
-    while [ $(basename $(dirname "$LIB_DIR")) != "common_libs" -a "$LIB_DIR" != "/" ]; do
-        LIB_DIR=$(dirname "$LIB_DIR")
-    done
-
-    if [ "$LIB_DIR" = "/" ]; then
-        fail "Either specify lib name or cd to common_libs/<lib_name>."
-    fi
+    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
+        "Run this script from any dir inside your nx_vms repo dir."
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -92,12 +52,12 @@ mount_adb()
     fi
     echo "$ADB_DEVICES"
 
-# TODO: GVFS works unstably, and does not provide write access, thus, disabled.
-#    sudo rm -rf /android
-#    if ! exists_glob $GVFS_PATH; then
-#        fail "Android device is not gvfs-mounted at $GVFS_PATH"
-#    fi
-#    sudo ln -s "$GVFS_PATH/Phone" /android
+    # TODO: GVFS works unstably, and does not provide write access, thus, disabled.
+    #sudo rm -rf /android
+    #if ! nx_glob_exists $GVFS_PATH; then
+    #    nx_fail "Android device is not gvfs-mounted at $GVFS_PATH"
+    #fi
+    #sudo ln -s "$GVFS_PATH/Phone" /android
 }
 
 do_run()
@@ -117,7 +77,7 @@ do_uninstall()
 
 do_install()
 {
-    find_vms_dir
+    find_VMS_DIR
 
     # Name of apk depends on the repo branch.
     adb install -r "$VMS_DIR/client/mobile_client/arm"/*client*.apk || exit $?
@@ -127,113 +87,105 @@ do_install()
 
 main()
 {
-    if [ "$#" = "0" -o "$1" = "-h" -o "$1" = "--help" ]; then
-        show_help_and_exit
-    fi
+    case "$1" in
+        #..........................................................................................
+        "device")
+            mount_adb || exit $?
+            nx_echo "SUCCESS: Android device is accessible."
+            exit 0
+            ;;
+        #..........................................................................................
+        "deploy")
+            find_VMS_DIR
+            mount_adb || exit $?
 
-    if [ "$#" -ge "1" ]; then
-        case "$1" in
-            #..........................................................................................
-            "device")
-                mount_adb || exit $?
-                writeln "SUCCESS: Android device is accessible."
-                exit 0
-                ;;
-            #..........................................................................................
-            "deploy")
-                find_vms_dir
-                mount_adb || exit $?
+            rm -rf "$VMS_DIR/build_environment/target/lib/debug/libmobile_client.so"
+            rm -rf "$VMS_DIR/client/mobile_client/arm/apk/bin"/*.apk
+            rm -rf "$VMS_DIR/client/mobile_client/arm"/*.apk
 
-                rm -rf "$VMS_DIR/build_environment/target/lib/debug/libmobile_client.so"
-                rm -rf "$VMS_DIR/client/mobile_client/arm/apk/bin"/*.apk
-                rm -rf "$VMS_DIR/client/mobile_client/arm"/*.apk
+            pushd "$VMS_DIR/client/mobile_client/arm" >/dev/null
+            ./deploy-android.sh
+            ERR=$?
+            popd >/dev/null
+            [ "$ERR" -gt 0 ] && exit $ERR
 
-                pushd "$VMS_DIR/client/mobile_client/arm" >/dev/null
-                ./deploy-android.sh
-                ERR=$?
-                popd >/dev/null
-                [ "$ERR" -gt 0 ] && exit $ERR
+            do_uninstall || exit $?
+            do_install || exit $?
 
-                do_uninstall || exit $?
-                do_install || exit $?
+            nx_echo
 
-                writeln
+            do_run || exit $?
 
-                do_run || exit $?
+            nx_echo "SUCCESS deploying"
+            exit 0
+            ;;
+        "run")
+            do_run
+            exit $?
+            ;;
+        "stop")
+            do_stop
+            exit $?
+            ;;
+        #..........................................................................................
+        "log")
+            adb logcat |grep --line-buffered "Mobile Client" \
+                |sed -u 's/.*Mobile Client: //' |sed -u 's/.*QnLogLevel)): //'
+            exit $?
+            ;;
+        "uninstall")
+            mount_adb || exit $?
+            do_uninstall
+            exit $?
+            ;;
+        "install")
+            mount_adb || exit $?
+            do_install
+            exit $?
+            ;;
+        #..........................................................................................
+        "java")
+            find_VMS_DIR
+            MOBILE_CLIENT="$VMS_DIR/client/mobile_client"
+            rm -rf "$MOBILE_CLIENT/arm/android/src" || exit $?
+            cp -r "$MOBILE_CLIENT/maven/bin-resources/android/src" "$MOBILE_CLIENT/arm/android/" \
+                || exit $?
+            nx_echo "SUCCESS preparing .java for 'deploy'"
+            exit 0
+            ;;
+        "rebuild")
+            shift
+            find_VMS_DIR
+            cd "$VMS_DIR"
+            mvn clean package \
+                -Dbox=android -Darch=arm -Dnewmobile=true -Dcloud.url="cloud-test.hdw.mx" "$@"
+            exit $?
+            ;;
+        "unpack")
+            shift
+            UNPACK_DIR="$1"
+            [ -z "$UNPACK_DIR" ] && nx_fail "Target dir not specified."
 
-                writeln "SUCCESS deploying"
-                exit 0
-                ;;
-            "run")
-                do_run
-                exit $?
-                ;;
-            "stop")
-                do_stop
-                exit $?
-                ;;
-            #..........................................................................................
-            "log")
-                adb logcat |grep --line-buffered "Mobile Client" \
-                    |sed -u 's/.*Mobile Client: //' |sed -u 's/.*QnLogLevel)): //'
-                exit $?
-                ;;
-            "uninstall")
-                mount_adb || exit $?
-                do_uninstall
-                exit $?
-                ;;
-            "install")
-                mount_adb || exit $?
-                do_install
-                exit $?
-                ;;
-            #..........................................................................................
-            "java")
-                find_vms_dir
-                MOBILE_CLIENT="$VMS_DIR/client/mobile_client"
-                rm -rf "$MOBILE_CLIENT/arm/android/src" || exit $?
-                cp -r "$MOBILE_CLIENT/maven/bin-resources/android/src" "$MOBILE_CLIENT/arm/android/" \
-                    || exit $?
-                writeln "SUCCESS preparing .java for 'deploy'"
-                exit 0
-                ;;
-            "rebuild")
-                shift
-                find_vms_dir
-                cd "$VMS_DIR"
-                mvn clean package \
-                    -Dbox=android -Darch=arm -Dnewmobile=true -Dcloud.url="cloud-test.hdw.mx" "$@"
-                exit $?
-                ;;
-            "unpack")
-                shift
-                UNPACK_DIR="$1"
-                [ -z "$UNPACK_DIR" ] && fail "Target dir not specified."
+            find_VMS_DIR
 
-                find_vms_dir
+            mkdir -p "$UNPACK_DIR"
+            cp "$VMS_DIR/client/mobile_client/arm"/*client.apk "$UNPACK_DIR/apk.zip" || exit $?
+            unzip "$UNPACK_DIR/apk.zip" -d "$UNPACK_DIR/" || exit $?
+            rm "$UNPACK_DIR/apk.zip" || exit $?
+            mkdir -p "$UNPACK_DIR/classes" || exit $?
+            d2j-dex2jar.sh "$UNPACK_DIR/classes.dex" -o "$UNPACK_DIR/classes/classes.zip" || exit $?
+            unzip "$UNPACK_DIR/classes/classes.zip" -d "$UNPACK_DIR/classes/" || exit $?
+            rm "$UNPACK_DIR/classes/classes.zip" || exit $?
 
-                mkdir -p "$UNPACK_DIR"
-                cp "$VMS_DIR/client/mobile_client/arm"/*client.apk "$UNPACK_DIR/apk.zip" || exit $?
-                unzip "$UNPACK_DIR/apk.zip" -d "$UNPACK_DIR/" || exit $?
-                rm "$UNPACK_DIR/apk.zip" || exit $?
-                mkdir -p "$UNPACK_DIR/classes" || exit $?
-                d2j-dex2jar.sh "$UNPACK_DIR/classes.dex" -o "$UNPACK_DIR/classes/classes.zip" || exit $?
-                unzip "$UNPACK_DIR/classes/classes.zip" -d "$UNPACK_DIR/classes/" || exit $?
-                rm "$UNPACK_DIR/classes/classes.zip" || exit $?
-
-                echo
-                echo "Unpacked;  dex2jarred to $UNPACK_DIR/classes"
-                exit 0
-                ;;
-            #..........................................................................................
-            *)
-                fail "Unknown argument: $1"
-                ;;
-        esac
-    else
-        fail "Invalid arguments. Run with -h for help."
-    fi
+            nx_echo
+            nx_echo "Unpacked;  dex2jarred to $UNPACK_DIR/classes"
+            exit 0
+            ;;
+        #..........................................................................................
+        *)
+            nx_fail "Invalid arguments. Run with -h for help."
+            ;;
+    esac
 }
 
-main "$@"
+nx_run "$@"
