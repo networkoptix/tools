@@ -509,7 +509,8 @@ class CrashMonitor(object):
                         # (according to it's rotation period)
                         # i.e. too rare crashes are ignored
                         # It's Misha Uskov's idea, approved by Roma
-                        i = find_priority(self._known.get_faults(key) + 1)
+                        crashes_count = self._known.get_faults(key) + 1
+                        i = find_priority(crashes_count)
                         if i > 0:
                             crashinfo = self._known.get_and_incr_faults(key)
                             if crashinfo and crashinfo.issue:
@@ -552,7 +553,7 @@ class CrashMonitor(object):
                                         crashinfo.issue, issue_data.code, issue_data.reason)
                             else:
                                 try:
-                                    new_issue = self.create_jira_issue(crash, formated_calls, i, faults[key][0])
+                                    new_issue = self.create_jira_issue(crash, formated_calls, i, crashes_count, faults[key][0])
                                     self._known.set_issue(key, (new_issue, i))
                                 except nxjira.JiraError, e:
                                     email_newcrash(crash, formated_calls, e)
@@ -566,12 +567,12 @@ class CrashMonitor(object):
             email_summary(faults, mintime, maxtime, self._known)
             self._lasts.set_summary()
 
-    def create_jira_issue(self, crash, calls, priority, dumps):
+    def create_jira_issue(self, crash, calls, priority, crashes_count, dumps):
         desc = (
-            "Crash Monitor detected a crash with a new trace path\n\n"
+            "Crash Monitor detected '%d' crashes with a new trace path\n\n"
             "Hash: %s\n"
             "Call stask (named functions only):\n{code}%s{code}\n\n"
-             % (crash['hash'], calls)
+             % (crashes_count, crash['hash'], calls)
         )
         if priority < 1:
             print "ERROR: create_jira_issue int number value < 1"

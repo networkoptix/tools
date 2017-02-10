@@ -8,6 +8,7 @@ import json
 import StringIO
 #import jira
 import re
+import copy
 
 JIRA = "https://networkoptix.atlassian.net"
 JIRAAPI = JIRA + "/rest/api/2/"
@@ -157,7 +158,7 @@ def browse_url(issue):
 
 
 def create_issue(name, desc, priority="Medium", component=None, team=None, version=None, build=None):
-    issue = issue_data.copy()
+    issue = copy.deepcopy(issue_data)
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
     issue['fields']['priority']['name'] = priority
