@@ -1,21 +1,25 @@
 #!/bin/bash
 
 # Collection of various convenient commands used for Banana Pi (NX1) development.
+[ -f "$HOME/.bpirc" ] && source $HOME/.bpirc
 
 # Mount point of Banana Pi root at this workstation.
-BPI="/bpi"
+BPI=${BPI_MOUNT:-"/bpi"}
 
 # Settings for ssh-login to bpi.
 BPI_INITIAL_PASSWORD="admin"
 BPI_PASSWORD="qweasd123"
-BPI_HOST="bpi"
+BPI_HOST=${BPI_HOST:-"bpi"}
 BPI_BACKGROUND_RRGGBB="003000"
 BPI_TERMINAL_TITLE="$BPI_HOST"
+
+# Terminal emulators compatibility.
+([ "$TMUX" ] || [ "$TERM" = "screen" ]) && BPI_BACKGROUND_RRGGBB=""
 
 # Lines from /etc/network/interfaces
 BPI_DHCP_LINE="iface eth0 inet dhcp"
 BPI_STATIC_LINE="iface eth0 inet static"
-    
+
 PACKAGES_DIR="$HOME/develop/buildenv/packages/bpi"
 PACKAGES_SRC_DIR="$HOME/develop/third_party/bpi"
 PACKAGES_SRC_BPI_DIR="/root/develop/third_party/bpi" # Expected to be mounted at bpi.
@@ -45,6 +49,7 @@ else
 fi
 
 QT_PATH="buildenv/packages/bpi/qt-5.6.2"
+CP="rsync -ah --progress"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -53,6 +58,7 @@ show_help_and_exit()
     e() { echo "$@"; }
 
 e "Swiss Army Knife for Banana Pi (NX1): execute various commands."
+e "Use $HOME/.bpirc to configure workstation dependent environment variables."
 e "Usage: run from any dir inside the proper nx_vms dir:"
 e "$(basename $0) [--verbose] <command>"
 e "Here <command> can be one of the following:"
@@ -71,13 +77,14 @@ e
 e "copy # Copy mobile_client and mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
 e "copy-s # Copy mediaserver libs, bins and scripts to bpi $NX_BPI_DIR."
 e "copy-c # Copy mobile_client libs and bins to bpi $NX_BPI_DIR."
+e "copy-ut # Copy all libs and unit test bins to bpi $NX_BPI_DIR."
 e "client # Copy mobile_client exe to bpi."
 e "server # Copy mediaserver_core lib to bpi."
 e "common # Copy common lib to bpi."
 e "lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to bpi."
 e "ini # Create empty .ini files @bpi in /tmp (to be filled with defauls)."
 e
-e "exec [command args] # Execute a command at bpi via ssh, or log in to bpi via 'bpi.exp'."
+e "ssh [command args] # Execute a command at bpi via ssh, or log in to bpi via 'bpi.exp'."
 e "run-c [args] # Start mobile_client via 'mediaserver/var/scripts/start_lite_client [args]'."
 e "kill-c # Stop mobile_client via 'killall mobile_client'."
 e "start-s [args] # Run mediaserver via '/etc/init.d/networkoptix-mediaserver start [args]'."
@@ -86,6 +93,7 @@ e "start-c [args] # Run mobile_client via '/etc/init.d/networkoptix-lite-client 
 e "stop-s # Stop mobile_client via '/etc/init.d/networkoptix-lite-client stop'."
 e "start [args] # Run mediaserver and mobile_client via '/etc/init.d/networkoptix-* start [args]'."
 e "stop # Stop mediaserver and mobile_client via '/etc/init.d/networkoptix-* stop'."
+e "run-ut [test name] # Run specified unit test with strict expectations."
 e
 e "vdp [args] # Make libvdpau_sunxi at bpi and install it to bpi, passing [args] to 'make'."
 e "vdp-rdep # Deploy libvdpau-sunxi to packages/bpi via 'rdep -u'."
@@ -214,7 +222,7 @@ sudo_dd_with_progress() # args_for_dd...
     while sudo kill -0 $SUDO_PID; do #< Checking that "sudo dd" is still running.
         # Ask "dd" to print the progress; break if "dd" is finished.
         sudo kill -USR1 $SUDO_PID || break
-        
+
         sleep 1
     done
     
@@ -229,17 +237,21 @@ sudo_dd_with_progress() # args_for_dd...
 # Execute command at bpi via ssh, or interactively log in to bpi via 'bpi.exp'.
 bpi()
 {
-    get_RESTORE_BACKGROUND_CMD
-    set_background "$BPI_BACKGROUND_RRGGBB"
+    if [ "$BPI_BACKGROUND_RRGGBB" ]; then
+        get_RESTORE_BACKGROUND_CMD
+        set_background "$BPI_BACKGROUND_RRGGBB"
+    fi
     push_title
     set_title "${BPI_TERMINAL_TITLE}"
-    
-    sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" "$*"
+
+    sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" "$@"
 
     pop_title
-    log "Restoring background command:"
-    log "$RESTORE_BACKGROUND_CMD"
-    eval "$RESTORE_BACKGROUND_CMD"
+    if [ "$BPI_BACKGROUND_RRGGBB" ]; then
+        log "Restoring background command:"
+        log "$RESTORE_BACKGROUND_CMD"
+        eval "$RESTORE_BACKGROUND_CMD"
+    fi
 }
 
 # [in] FILES_LIST
@@ -352,12 +364,12 @@ cp_files()
 
     writeln "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
-    sudo mkdir -p "${BPI}$FILES_DST" || exit $?
+    mkdir -p "${BPI}$FILES_DST" || exit $?
 
     # Here eval performs expanding of globs, including "{,}".
     FILES_LIST_EXPANDED=$(eval echo "$FILES_SRC/$FILES_LIST")
 
-    sudo cp -r $FILES_LIST_EXPANDED "${BPI}$FILES_DST/" || exit $?
+    $CP -r $FILES_LIST_EXPANDED "${BPI}$FILES_DST/" || exit $?
 }
 
 cp_libs()
@@ -390,9 +402,11 @@ cp_script_with_customization_filtering()
     SCRIPT_DST="$2"
 
     # Here tee is required because ">/bpi/..." requires root access.
-    sudo cat "$SCRIPT_SRC" |sed -e 's/${deb\.customization\.company\.name}/networkoptix/g' |sudo tee "$SCRIPT_DST" >/dev/null
+    cat "$SCRIPT_SRC" \
+        |sed -e 's/${deb\.customization\.company\.name}/networkoptix/g' \
+        >"$SCRIPT_DST"
 
-    sudo chmod +x "$SCRIPT_DST" || exit $?
+    chmod +x "$SCRIPT_DST" || exit $?
 }
 
 cp_scripts_dir()
@@ -684,7 +698,7 @@ main()
     fi
 
     local VERBOSE
-    if [ "$1" == "--verbose" ]; then
+    if [ "$1" == "--verbose" ] || [ "$1" == "-v" ]; then
         VERBOSE="1"
         set -x
         shift
@@ -694,6 +708,11 @@ main()
     if [ "$#" -ge "1" ]; then
         case "$1" in
             #......................................................................................
+            "ssh")
+                shift
+                sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" ${@:-bash}
+                exit $?
+                ;;
             "nfs")
                 sudo umount "$BPI"
                 sudo rm -rf "$BPI"
@@ -703,11 +722,9 @@ main()
                 exit $?
                 ;;
             "sshfs")
-                sudo umount "$BPI"
-                sudo rm -rf "$BPI"
-                sudo mkdir -p "$BPI" || exit $?
-                sudo chown "$USER" "$BPI"
-                sudo sshfs root@bpi:/ "$BPI" -o nonempty
+                fusermount -u "$BPI"
+                mkdir -p "$BPI"
+                echo "$BPI_PASSWORD" | sshfs root@"$BPI_HOST":/ "$BPI" -o nonempty,password_stdin
                 exit $?
                 ;;
             "passwd")
@@ -871,7 +888,7 @@ main()
                 find_vms_dir
 
                 # In case of taking mobile_client from different branch and overriding LIBS_DIR:
-                sudo mkdir -p "${BPI}$LIBS_DIR"
+                mkdir -p "${BPI}$LIBS_DIR"
 
                 cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -910,6 +927,13 @@ main()
 
                 exit 0
                 ;;
+            "copy-ut")
+                find_vms_dir
+                cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
+                cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug" '*_ut' \
+                    "$MEDIASERVER_DIR/ut" "unit_tests" "$VMS_DIR"
+                exit 0
+                ;;
             "client")
                 cp_lite_client_bins "mobile_client" "mobile_client exe"
                 exit $?
@@ -942,7 +966,7 @@ main()
                 exit $?
                 ;;
             #......................................................................................
-            "exec")
+            "ssh")
                 shift
                 bpi "$*"
                 exit $?
@@ -989,6 +1013,14 @@ main()
                 "
                 exit $?
                 ;;
+            "run-ut")
+                shift
+                [ ! "$1" ] && fail "Test name is not specified"
+                local cmd="$@"
+                echo Running: "$cmd"
+                bpi "LD_LIBRARY_PATH=$MEDIASERVER_DIR/lib $MEDIASERVER_DIR/ut/$cmd"
+                exit $?
+                ;;
             #......................................................................................
             "vdp")
                 shift
@@ -997,7 +1029,7 @@ main()
                 ;;
             "vdp-rdep")
                 cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit $?
-                cp -r "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit $?
+                $CP -r "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -1008,8 +1040,8 @@ main()
                 ;;
             "pd-rdep")
                 cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit $?
-                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit $?
-                cp -r "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit $?
+                $CP -r "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit $?
+                $CP -r "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -1025,7 +1057,7 @@ main()
                 ;;
             "cedrus-rdep")
                 cd "$PACKAGES_DIR/libcedrus-1.0${PACKAGE_SUFFIX}" || exit $?
-                cp -r "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit $?
+                $CP -r "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit $?
                 rdep -u
                 exit $?
                 ;;
@@ -1046,7 +1078,7 @@ main()
                 ;;
             "ldp-rdep")
                 cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
-                cp -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit
+                $CP -r "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit
                 rdep -u
                 exit $?
                 ;;
