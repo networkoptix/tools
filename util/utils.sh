@@ -84,9 +84,9 @@ nx_fail()
 nx_get_background() # RRGGBB_VAR
 {
     local RRGGBB_VAR="$1"
-    
+
     eval "$RRGGBB_VAR="
-    
+
     # To get terminal background, one should type "\033]11;?\033\\", and the terminal echoes:
     # "\033]11;rgb:RrRr/GgGg/BbBb\033\\", where Rr is Red hex, Gg is Green hex, and Bb is Blue hex.
     # If the terminal does not support it, it will not echo anything in reply.
@@ -152,7 +152,7 @@ nx_find_files() # FILES_ARRAY_VAR find_args...
 {
     local FILES_ARRAY_VAR="$1"
     shift
-    
+
     local FILES_ARRAY=()
     while IFS="" read -r -d $'\0'; do
         FILES_ARRAY+=("$REPLY")
@@ -199,7 +199,7 @@ nx_find_parent_dir() # DIR_VAR parent/dir error_message_if_not_found
     fi
 
     DIR=$(pwd)
-    while [ $(basename $(dirname "$DIR")) != "$PARENT_DIR" -a "$DIR" != "/" ]; do
+    while [ "$(basename "$(dirname "$DIR")")" != "$PARENT_DIR" -a "$DIR" != "/" ]; do
         DIR=$(dirname "$DIR")
     done
 

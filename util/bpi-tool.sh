@@ -59,7 +59,7 @@ help()
 Swiss Army Knife for Banana Pi (NX1): execute various commands.
 Use ~/.bpirc to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
-$(basename $0) [--verbose] <command>
+$(basename "$0") [--verbose] <command>
 Here <command> can be one of the following:
 
 nfs # Mount bpi root to $BPI_MNT via NFS.
@@ -116,7 +116,7 @@ EOF
 bpi() # args...
 {
     # Ssh reparses the combined args string at bpi, thus, it needs to be escaped.
-    local ARGS=
+    local ARGS=""
     if [ ! -z "$*" ]; then
         printf -v ARGS "%q " "$@"
         ARGS="${ARGS//\\\*/*}" #< Unescape each "*" to enable passing globs.
@@ -202,7 +202,7 @@ pack_short()
 # [in][out] VMS_DIR
 find_VMS_DIR()
 {
-    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
+    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
@@ -217,20 +217,19 @@ find_LIB_DIR()
 
 cp_files()
 {
-    local FILES_SRC="$1"
-    local FILES_LIST="$2"
-    local FILES_DST="$3"
-    local FILES_DESCRIPTION="$4"
-    local FILES_SRC_DESCRIPTION="$5"
+    local FILE_MASK="$1"
+    local FILES_DST="$2"
+    local FILES_DESCRIPTION="$3"
+    local FILES_SRC_DESCRIPTION="$4"
 
     nx_echo "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
     mkdir -p "${BPI_MNT}$FILES_DST" || exit $?
 
-    # Here eval performs expanding of globs, including "{,}".
-    FILES_LIST_EXPANDED=$(eval echo "$FILES_SRC/$FILES_LIST")
+    # Here eval expands globs and braces to the array, after we enquote spaces (if any).
+    eval FILE_LIST=(${FILE_MASK// /\" \"})
 
-    nx_rsync $FILES_LIST_EXPANDED "${BPI_MNT}$FILES_DST/" || exit $?
+    nx_rsync "${FILE_LIST[@]}" "${BPI_MNT}$FILES_DST/" || exit $?
 }
 
 cp_libs() # file_mask description
@@ -238,7 +237,8 @@ cp_libs() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/lib/debug" "$MASK" \
+
+    cp_files "$VMS_DIR/build_environment/target-bpi/lib/debug/$MASK" \
         "$BPI_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -246,7 +246,7 @@ cp_sysroot_libs() # file_mask description
 {
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$PACKAGES_DIR/sysroot/usr/lib/arm-linux-gnueabihf" "$MASK" \
+    cp_files "$PACKAGES_DIR/sysroot/usr/lib/arm-linux-gnueabihf/$MASK" \
         "$BPI_LIBS_DIR" "$DESCRIPTION" "packages/bpi/sysroot"
 }
 
@@ -255,7 +255,7 @@ cp_lite_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug" "$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/$MASK" \
         "$BPI_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -264,7 +264,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug" "$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/$MASK" \
         "$BPI_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -304,7 +304,7 @@ copy_scripts()
 # Read SD Card device from /etc/fw_env.config.
 read_DEV_SDCARD()
 {
-    DEV_SDCARD=$(cat "$FW_CONFIG" |awk '{print $1}')
+    DEV_SDCARD="$(cat "$FW_CONFIG" |awk '{print $1}')"
     if [ -z "$DEV_SDCARD" ]; then
         nx_fail "$FW_CONFIG is missing or empty."
     fi
@@ -316,18 +316,18 @@ get_and_check_DEV_SDCARD()
 {
     read_DEV_SDCARD
 
-    local PARTITIONS=$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")
+    local PARTITIONS="$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")"
     if [ -z "$PARTITIONS" ]; then
         nx_fail "SD Card not found at $DEV_SDCARD (configured in $FW_CONFIG)."
     fi
 
-    local PARTITION_SIZES=$(awk '{ORS=","; print $4}' <<<"$PARTITIONS")
+    local PARTITION_SIZES="$(awk '{ORS=","; print $4}' <<<"$PARTITIONS")"
     if [ "$PARTITION_SIZES" != "$SDCARD_PARTITION_SIZES" ]; then
         nx_fail "SD Card $DEV_SDCARD (configured in $FW_CONFIG) has unexpected partitions."
     fi
 
     local DEV
-    for DEV in $(awk '{print $1}' <<<"$PARTITIONS"); do
+    for DEV in "$(awk '{print $1}' <<<"$PARTITIONS")"; do
         if mount |grep -q "$DEV"; then
             nx_echo "WARNING: $DEV is mounted; unmounting."
             sudo umount "$DEV" || exit $?
@@ -354,10 +354,10 @@ fw_print() # var output_prefix
     local OUTPUT_PREFIX="$2"
 
     local ENV
-    ENV=$(sudo fw_printenv) || exit $?
+    ENV="$(sudo fw_printenv)" || exit $?
     rm -rf fw_printenv.lock
 
-    local VALUE=$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")
+    local VALUE="$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")"
     nx_echo "$OUTPUT_PREFIX$VALUE"
 }
 
@@ -403,7 +403,7 @@ check_serial() # serial
 # [out] SD_DIR Directory to which the SD Card is mounted.
 sd_card_mount_SD_DIR()
 {
-    SD_DIR=$(mktemp -d) || exit $?
+    SD_DIR="$(mktemp -d)" || exit $?
     sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
 }
 
@@ -471,17 +471,17 @@ ip_show() # /etc/network/interfaces
             nx_fail "IP config unrecognized: none of 'static' and 'dhcp' lines are found in $FILE"
         fi
 
-        local IP_ADDRESS=$(get_value_by_prefix "$FILE" "address")
+        local IP_ADDRESS="$(get_value_by_prefix "$FILE" "address")"
         if [ -z "$IP_ADDRESS" ]; then
             nx_fail "IP address not found in $FILE"
         fi
 
-        local IP_NETMASK=$(get_value_by_prefix "$FILE" "netmask")
+        local IP_NETMASK="$(get_value_by_prefix "$FILE" "netmask")"
         if [ -z "$IP_NETMASK" ]; then
             nx_fail "IP netmask not found in $FILE"
         fi
 
-        local IP_GATEWAY=$(get_value_by_prefix "$FILE" "gateway")
+        local IP_GATEWAY="$(get_value_by_prefix "$FILE" "gateway")"
 
         nx_echo "$IP_STATIC_LINE"
         nx_echo -e "\t""address $IP_ADDRESS"
@@ -584,7 +584,7 @@ main()
                 nx_echo "SD Card device: $DEV_SDCARD"
             else
                 nx_echo "Old SD Card device: $DEV_SDCARD"
-                local NEW_CONFIG=$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")
+                local NEW_CONFIG="$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")"
                 echo "$NEW_CONFIG" |sudo tee "$FW_CONFIG" >/dev/null || exit $?
                 read_DEV_SDCARD
                 if [ "$DEV_SDCARD" != "$NEW_DEV_SDCARD" ]; then
@@ -607,7 +607,7 @@ main()
             if [ -z "$IMG" ]; then
                 nx_fail "Image file not specified."
             fi
-            local IMG_SIZE=$(du -h "$IMG" |sed 's/\t.*//')
+            local IMG_SIZE="$(du -h "$IMG" |sed 's/\t.*//')"
             nx_echo "Writing to $DEV_SDCARD: $IMG_SIZE $IMG"
             nx_sudo_dd if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
             nx_echo "Performing sync..."
@@ -711,13 +711,13 @@ main()
             copy_scripts
 
             # Server configuration does not need to be copied.
-            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR" "etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
+            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR/etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
             cp_lite_client_bins "mobile_client" "mobile_client exe"
             cp_lite_client_bins "video" "Qt OpenGL video plugin"
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib" "*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
             #cp_mediaserver_bins "vox" "mediaserver vox"
             #
             #cp_lite_client_bins \
@@ -745,11 +745,11 @@ main()
             copy_scripts
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib" "*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
             #cp_mediaserver_bins "vox" "mediaserver vox"
 
             # Server configuration does not need to be copied.
-            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR" "etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
+            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR/etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
             exit 0
             ;;
@@ -761,7 +761,7 @@ main()
             cp_lite_client_bins "mobile_client" "mobile_client exe"
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib" "*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
             #cp_lite_client_bins \
             #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
             #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
@@ -775,7 +775,7 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
-            cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug" "*_ut" \
+            cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/*_ut" \
                 "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             exit $?
             ;;
@@ -794,7 +794,7 @@ main()
         lib)
             if [ "$2" = "" ]; then
                 find_LIB_DIR
-                LIB_NAME=$(basename "$LIB_DIR")
+                LIB_NAME="$(basename "$LIB_DIR")"
             else
                 LIB_NAME="$2"
             fi

@@ -13,7 +13,7 @@ help()
     cat <<EOF
 Swiss Army Knife for Android Mobile Client: execute various commands.
 Usage: run from any dir inside nx_vms:
-$(basename $0) [--verbose] <command>
+$(basename "$0") [--verbose] <command>
 Here <command> can be one of the following:
 
 device - Check Android device is connected and mount it to '/android'.
@@ -37,7 +37,7 @@ EOF
 # [in][out] VMS_DIR
 find_VMS_DIR()
 {
-    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
+    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
