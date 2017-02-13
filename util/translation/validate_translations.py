@@ -102,6 +102,18 @@ def validateXml(root, name):
 
     printAll = strict and 'en_US' in name
 
+    version = root.get('version')
+    language = root.get('language')
+    sourcelanguage = root.get('sourcelanguage')
+    if sourcelanguage and sourcelanguage != 'en' and sourcelanguage != 'en_US':
+        result.warned += 1
+        warn(u'Source Language is {0}'.format(sourcelanguage))
+        
+    suffix = language + '.ts'
+    if not name.endswith(suffix):
+        result.error += 1
+        err(u'Invalid Locale code {0} for file {1}'.format(language, name))    
+    
     for context in root:
         contextName = context.find('name').text
         for message in context.iter('message'):
