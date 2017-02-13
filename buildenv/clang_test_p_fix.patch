@@ -1,0 +1,21 @@
+240d239
+< # if defined(__clang__)
+243,252c242
+<     typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
+<   } \
+<   static const char* GTEST_REGISTERED_TEST_NAMES_(CaseName) \
+<       /*GTEST_ATTRIBUTE_UNUSED*/ = \
+<           GTEST_TYPED_TEST_CASE_P_STATE_(CaseName).VerifyRegisteredTestNames(\
+<               __FILE__, __LINE__, #__VA_ARGS__)
+< #else
+< # define REGISTER_TYPED_TEST_CASE_P(CaseName, ...) \
+<   namespace GTEST_CASE_NAMESPACE_(CaseName) { \
+<     typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
+---
+>   typedef ::testing::internal::Templates<__VA_ARGS__>::type gtest_AllTests_; \
+255c245
+<     GTEST_ATTRIBUTE_UNUSED = \
+---
+>       GTEST_ATTRIBUTE_UNUSED = \
+258d247
+< #endif
