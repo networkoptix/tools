@@ -171,10 +171,11 @@ def validate(path):
     if result.error > 0:
         err('{0}: {1} errors found'.format(name, result.error))
 
-    if result.unfinished > 0:
-        warn('{0}: {1} of {2} translations are unfinished'.format(name, result.unfinished, result.total))
-    elif verbose:
-        green('{0}: ok'.format(name))
+    if verbose:
+        if result.unfinished > 0:
+            warn('{0}: {1} of {2} translations are unfinished'.format(name, result.unfinished, result.total))
+        else:
+            green('{0}: ok'.format(name))
 
 def validateProject(project, translationDir):
     entries = []
