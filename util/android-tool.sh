@@ -4,7 +4,6 @@ source "$(dirname $0)/utils.sh"
 #--------------------------------------------------------------------------------------------------
 # Configuration
 
-GVFS_PATH="/run/user/1000/gvfs/mtp:host=*"
 DEVELOP_DIR="$HOME/develop"
 
 #--------------------------------------------------------------------------------------------------
@@ -50,14 +49,7 @@ mount_adb()
     if [ -z  "$(echo "$ADB_DEVICES" |grep -w "device")" ]; then
         fail "Unable to access Android device via adb."
     fi
-    echo "$ADB_DEVICES"
-
-    # TODO: GVFS works unstably, and does not provide write access, thus, disabled.
-    #sudo rm -rf /android
-    #if ! nx_glob_exists $GVFS_PATH; then
-    #    nx_fail "Android device is not gvfs-mounted at $GVFS_PATH"
-    #fi
-    #sudo ln -s "$GVFS_PATH/Phone" /android
+    nx_echo "$ADB_DEVICES"
 }
 
 do_run()
@@ -87,15 +79,17 @@ do_install()
 
 main()
 {
-    case "$1" in
+    local COMMAND="$1"
+    shift
+    case "$COMMAND" in
         #..........................................................................................
-        "device")
+        device)
             mount_adb || exit $?
             nx_echo "SUCCESS: Android device is accessible."
             exit 0
             ;;
         #..........................................................................................
-        "deploy")
+        deploy)
             find_VMS_DIR
             mount_adb || exit $?
 
@@ -119,32 +113,32 @@ main()
             nx_echo "SUCCESS deploying"
             exit 0
             ;;
-        "run")
+        run)
             do_run
             exit $?
             ;;
-        "stop")
+        stop)
             do_stop
             exit $?
             ;;
         #..........................................................................................
-        "log")
+        log)
             adb logcat |grep --line-buffered "Mobile Client" \
                 |sed -u 's/.*Mobile Client: //' |sed -u 's/.*QnLogLevel)): //'
             exit $?
             ;;
-        "uninstall")
+        uninstall)
             mount_adb || exit $?
             do_uninstall
             exit $?
             ;;
-        "install")
+        install)
             mount_adb || exit $?
             do_install
             exit $?
             ;;
         #..........................................................................................
-        "java")
+        java)
             find_VMS_DIR
             MOBILE_CLIENT="$VMS_DIR/client/mobile_client"
             rm -rf "$MOBILE_CLIENT/arm/android/src" || exit $?
@@ -153,16 +147,14 @@ main()
             nx_echo "SUCCESS preparing .java for 'deploy'"
             exit 0
             ;;
-        "rebuild")
-            shift
+        rebuild)
             find_VMS_DIR
             cd "$VMS_DIR"
             mvn clean package \
                 -Dbox=android -Darch=arm -Dnewmobile=true -Dcloud.url="cloud-test.hdw.mx" "$@"
             exit $?
             ;;
-        "unpack")
-            shift
+        unpack)
             UNPACK_DIR="$1"
             [ -z "$UNPACK_DIR" ] && nx_fail "Target dir not specified."
 

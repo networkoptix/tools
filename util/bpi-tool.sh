@@ -4,43 +4,40 @@ source "$(dirname $0)/utils.sh"
 # Collection of various convenient commands used for Banana Pi (Nx1) development.
 
 #--------------------------------------------------------------------------------------------------
-# Configuration
+# Config
 
-nx_load_config "bpirc"
+nx_load_config ".bpirc" #< Load config and assign defaults to values missing in config.
 : ${BPI_MNT:="/bpi"}
 : ${BPI_INITIAL_PASSWORD:="admin"}
 : ${BPI_PASSWORD:="qweasd123"}
 : ${BPI_HOST:="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
 : ${BPI_TERMINAL_TITLE:="$BPI_HOST"}
-: ${BPI_BACKGROUND_RRGGBB="003000"}
-: ${BPI_PACKAGES_SRC_DIR="/root/develop/third_party/bpi"} #< Should be mounted at bpi.
+: ${BPI_BACKGROUND_RRGGBB:="003000"}
+: ${BPI_PACKAGES_SRC_DIR:="/root/develop/third_party/bpi"} #< Should be mounted at bpi.
+: ${DEVELOP_DIR:="$HOME/develop"}
+: ${SDCARD_PARTITION_SIZES:="61440,3521536,40960,"} #< Used to check SD card before accessing it.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
+: ${PACKAGES_SRC_DIR="DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
+: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at this workstation.
 
-# Lines from /etc/network/interfaces at bpi.
-IP_DHCP_LINE="iface eth0 inet dhcp"
-IP_STATIC_LINE="iface eth0 inet static"
-
-# Paths at workstation.
-DEVELOP_DIR="$HOME/develop"
-PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"
-PACKAGES_SRC_DIR="DEVELOP_DIR/third_party/bpi"
-QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"
+#--------------------------------------------------------------------------------------------------
+# Const
 
 # Paths at bpi.
 BPI_INSTALL_DIR="/opt/networkoptix"
 BPI_LITE_CLIENT_DIR="$BPI_INSTALL_DIR/lite_client"
 BPI_MEDIASERVER_DIR="$BPI_INSTALL_DIR/mediaserver"
 
-# BPI_LIBS_DIR can be predefined.
+# BPI_LIBS_DIR can be pre-defined before running this script.
 if [ -z "$BPI_LIBS_DIR" ]; then
     BPI_LIBS_DIR="$BPI_INSTALL_DIR/lib"
 else
     nx_echo "ATTENTION: BPI_LIBS_DIR overridden to $BPI_LIBS_DIR"
-    BPI_LIBS_DIR_OVERRIDEN=1
 fi
 
-# PACKAGE_SUFFIX can be predefined.
+# PACKAGE_SUFFIX can be pre-defined before running this script.
 if [ -z "$PACKAGE_SUFFIX" ]; then
-    PACKAGE_SUFFIX=
+    PACKAGE_SUFFIX=""
 else
     nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
 fi
@@ -49,7 +46,10 @@ fi
 MAC_VAR="ethaddr"
 SERIAL_VAR="serial"
 FW_CONFIG="/etc/fw_env.config"
-SDCARD_PARTITION_SIZES="61440,3521536,40960,"
+
+# Lines from /etc/network/interfaces at bpi.
+IP_DHCP_LINE="iface eth0 inet dhcp"
+IP_STATIC_LINE="iface eth0 inet static"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ bpi() # args...
         printf -v ARGS "%q " "$@"
         ARGS="${ARGS//\\\*/*}" #< Unescape each "*" to enable passing globs.
         ARGS="${ARGS%?}" #< Trim the last space introduced by printf.
-    fi    
+    fi
 
     local OLD_BACKGROUND
     nx_get_background OLD_BACKGROUND
@@ -399,6 +399,21 @@ check_serial() # serial
     fi
 }
 
+# [in] DEV_SDCARD Device representing the whole SD Card.
+# [out] SD_DIR Directory to which the SD Card is mounted.
+sd_card_mount_SD_DIR()
+{
+    SD_DIR=$(mktemp -d) || exit $?
+    sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
+}
+
+# [in] SD_DIR Directory to which the SD Card is mounted.
+sd_card_umount_SD_DIR()
+{
+    sudo umount "$SD_DIR" || exit $?
+    rmdir "$SD_DIR" || exit $?
+}
+
 get_value_by_prefix() # /etc/network/interfaces prefix
 {
     local FILE="$1"
@@ -419,7 +434,7 @@ comment_out_line()  # /etc/network/interfaces line_text
     local LINE="$2"
     sudo sed --in-place "s/^\\(\\s*$LINE\\s*\\)/#\\1/" "$FILE"
 
-    log_file_contents "$FILE"
+    nx_log_file_contents "$FILE"
 }
 
 # If the prefix is found, uncomment if commented out, and change the value. Otherwise, add a line.
@@ -437,14 +452,14 @@ set_value_by_prefix() #  # /etc/network/interfaces prefix value
             || exit $?
     fi
 
-    log_file_contents "$FILE"
+    nx_log_file_contents "$FILE"
 }
 
 ip_show() # /etc/network/interfaces
 {
     local FILE="$1"
 
-    log_file_contents "$FILE"
+    nx_log_file_contents "$FILE"
 
     if is_line_present "$FILE" "$IP_DHCP_LINE"; then
         if is_line_present "$FILE" "$IP_STATIC_LINE"; then
@@ -477,69 +492,36 @@ ip_show() # /etc/network/interfaces
     fi
 }
 
-ip_write_IP_ADDRESS_and_IP_NETMASK_and_IP_GATEWAY() # /etc/network/interfaces
+ip_set_static() # /etc/network/interfaces ip_address netmask [gateway]
 {
     local FILE="$1"
+    local IP_ADDRESS="$2"
+    local IP_NETMASK="$3"
+    local IP_GATEWAY="$4" #< Can be empty
+
+    if [ -z "$IP_NETMASK" ]; then
+        nx_fail "IP netmask should be specified."
+    fi
+
+    nx_echo "Old IP config:"
+    ip_show "$FILE"
+    nx_echo
 
     comment_out_line "$FILE" "$IP_DHCP_LINE" || exit $?
-
     set_value_by_prefix "$FILE" "$IP_STATIC_LINE" "" || exit $?
-
     set_value_by_prefix "$FILE" "address" "$IP_ADDRESS" || exit $?
     set_value_by_prefix "$FILE" "netmask" "$IP_NETMASK" || exit $?
-
     if [ ! -z "$IP_GATEWAY" ]; then
         set_value_by_prefix "$FILE" "gateway" "$IP_GATEWAY"
     else
         comment_out_line "$FILE" "gateway .*" || exit $?
     fi
+
+    nx_echo "New IP config:"
+    ip_show "$FILE"
 }
 
-# [in] DEV_SDCARD Device representing the whole SD Card.
-# [out] SD_DIR Directory to which the SD Card is mounted.
-sd_card_mount_SD_DIR()
-{
-    SD_DIR=$(mktemp -d) || exit $?
-    sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
-}
-
-# [in] SD_DIR Directory to which the SD Card is mounted.
-sd_card_umount_SD_DIR()
-{
-    sudo umount "$SD_DIR" || exit $?
-    rmdir "$SD_DIR" || exit $?
-}
-
-show_or_set_ip_config() # /etc/network/interfaces [<ip-address> <mask> [<gateway>]]
-{
-    local FILE="$1"
-    shift
-
-    if [ -z "$1" ]; then
-        ip_show "$FILE"
-    else
-        local IP_ADDRESS="$1"
-        local IP_NETMASK="$2"
-        if [ -z "$IP_NETMASK" ]; then
-            nx_fail "IP netmask should be specified."
-        fi
-        local IP_GATEWAY="$3" #< Can be empty
-        if [ ! -z "$4" ]; then
-            nx_fail "Too many arguments."
-        fi
-
-        nx_echo "Old IP config:"
-        ip_show "$FILE"
-        nx_echo
-
-        ip_write_IP_ADDRESS_and_IP_NETMASK_and_IP_GATEWAY "$FILE"
-
-        nx_echo "New IP config:"
-        ip_show "$FILE"
-    fi
-}
-
-set_default_ip_config() # /etc/network/interfaces
+ip_set_dhcp() # /etc/network/interfaces
 {
     local FILE="$1"
 
@@ -565,7 +547,9 @@ EOF
 
 main()
 {
-    case "$1" in
+    local COMMAND="$1"
+    shift
+    case "$COMMAND" in
         nfs)
             sudo umount "$BPI_MNT"
             sudo rm -rf "$BPI_MNT" || exit $?
@@ -580,7 +564,7 @@ main()
             sudo rm -rf "$BPI_MNT" || exit $?
             sudo mkdir -p "$BPI_MNT" || exit $?
             sudo chown "$USER" "$BPI_MNT"
-            
+
             echo "$BPI_PASSWORD" |sshfs root@"$BPI_HOST":/ "$BPI_MNT" -o nonempty,password_stdin
             exit $?
             ;;
@@ -594,7 +578,6 @@ main()
             ;;
         #..........................................................................................
         sdcard) # [/dev/sd...]
-            shift
             local NEW_DEV_SDCARD="$1"
             read_DEV_SDCARD
             if [ -z "$NEW_DEV_SDCARD" ]; then
@@ -614,7 +597,6 @@ main()
             exit $?
             ;;
         img) # [--force] sd_card_image.img
-            shift
             if [ "$1" = "--force" ]; then
                 shift
                 force_get_DEV_SDCARD
@@ -634,7 +616,6 @@ main()
             exit $?
             ;;
         mac) # [--force] [xx:xx:xx:xx:xx:xx]
-            shift
             if [ "$1" = "--force" ]; then
                 shift
                 force_get_DEV_SDCARD
@@ -653,7 +634,6 @@ main()
             exit $?
             ;;
         serial) # [--force] [nnnnnnnnn]
-            shift
             if [ "$1" = "--force" ]; then
                 shift
                 force_get_DEV_SDCARD
@@ -672,7 +652,6 @@ main()
             exit $?
             ;;
         ip) # [--force] [<ip-address> <mask> [<gateway>]]
-            shift
             if [ "$1" = "--force" ]; then
                 shift
                 force_get_DEV_SDCARD
@@ -683,13 +662,19 @@ main()
             sd_card_mount_SD_DIR
             local FILE="$SD_DIR/etc/network/interfaces"
 
-            (show_or_set_ip_config "$FILE" "$@") #< Subshell allows to umount on error.
+            # Subshell used to finally umount.
+            (
+                if [ -z "$1" ]; then
+                    ip_show "$FILE"
+                else
+                    ip_set_static "$FILE" "$@"
+                fi
+            )
             local RESULT=$?
             sd_card_umount_SD_DIR
             exit $RESULT
             ;;
         dhcp) # [--force]
-            shift
             if [ "$1" = "--force" ]; then
                 shift
                 force_get_DEV_SDCARD
@@ -700,7 +685,10 @@ main()
             sd_card_mount_SD_DIR
             local FILE="$SD_DIR/etc/network/interfaces"
 
-            (set_default_ip_config "$FILE") #< Subshell allows to umount on error.
+            # Subshell used to finally umount.
+            (
+                ip_set_dhcp "$FILE"
+            )
             local RESULT=$?
             sd_card_umount_SD_DIR
             exit $RESULT
@@ -785,7 +773,7 @@ main()
             exit 0
             ;;
         copy-ut)
-            find_vms_dir
+            find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
             cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug" "*_ut" \
                 "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
@@ -823,12 +811,10 @@ main()
             ;;
         #..........................................................................................
         ssh)
-            shift
             bpi "$@"
             exit $?
             ;;
         run-c)
-            shift
             bpi /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
             exit $?
             ;;
@@ -837,7 +823,6 @@ main()
             exit $?
             ;;
         start-s)
-            shift
             bpi /etc/init.d/networkoptix-mediaserver start "$@"
             exit $?
             ;;
@@ -846,7 +831,6 @@ main()
             exit $?
             ;;
         start-c)
-            shift
             bpi /etc/init.d/networkoptix-lite-client start "$@"
             exit $?
             ;;
@@ -855,7 +839,6 @@ main()
             exit $?
             ;;
         start)
-            shift
             bpi /etc/init.d/networkoptix-mediaserver start "$@"
             nx_echo
             bpi /etc/init.d/networkoptix-lite-client start "$@"
@@ -869,12 +852,11 @@ main()
             exit $?
             ;;
         run-ut)
-            shift
             local TEST_NAME="$1"
             shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             local ARGS=("$@")
-            
+
             echo "Running: $TEST_NAME ${ARGS[@]}"
             bpi "LD_LIBRARY_PATH=$BPI_MEDIASERVER_DIR/lib" \
                 "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "${ARGS[@]}"
@@ -882,7 +864,6 @@ main()
             ;;
         #..........................................................................................
         vdp)
-            shift
             bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" \&\& echo "SUCCESS"
             exit $?
             ;;
@@ -893,7 +874,6 @@ main()
             exit $?
             ;;
         pd)
-            shift
             bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" \&\& echo "SUCCESS"
             exit $?
             ;;
@@ -905,7 +885,6 @@ main()
             exit $?
             ;;
         cedrus)
-            shift
             if [ "$1" = "ump" ]; then
                 shift
                 bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" \&\& echo "SUCCESS"
@@ -931,7 +910,6 @@ main()
             exit $?
             ;;
         ldp)
-            shift
             bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" \&\& echo "SUCCESS"
             exit $?
             ;;
@@ -943,19 +921,16 @@ main()
             ;;
         #..........................................................................................
         rebuild)
-            shift
             find_VMS_DIR
             cd "$VMS_DIR"
             mvn clean package -Dbox=bpi -Darch=arm -Dcloud.url="cloud-test.hdw.mx" "$@"
             exit $?
             ;;
         pack-short)
-            shift
             pack_short "$1"
             exit $?
             ;;
         pack-full)
-            shift
             pack_full "$1"
             exit $?
             ;;
