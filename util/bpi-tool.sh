@@ -15,7 +15,7 @@ nx_load_config ".bpirc" #< Load config and assign defaults to values missing in 
 : ${BPI_BACKGROUND_RRGGBB:="003000"}
 : ${BPI_PACKAGES_SRC_DIR:="/root/develop/third_party/bpi"} #< Should be mounted at bpi.
 : ${DEVELOP_DIR:="$HOME/develop"}
-: ${SDCARD_PARTITION_SIZES:="61440,3521536,40960,"} #< Used to check SD card before accessing it.
+: ${SDCARD_PARTITION_SECTORS:="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
 : ${PACKAGES_SRC_DIR="DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
 : ${QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at this workstation.
@@ -304,7 +304,7 @@ copy_scripts()
 # Read SD Card device from /etc/fw_env.config.
 read_DEV_SDCARD()
 {
-    DEV_SDCARD="$(cat "$FW_CONFIG" |awk '{print $1}')"
+    DEV_SDCARD=$(cat "$FW_CONFIG" |awk '{print $1}')
     if [ -z "$DEV_SDCARD" ]; then
         nx_fail "$FW_CONFIG is missing or empty."
     fi
@@ -316,18 +316,18 @@ get_and_check_DEV_SDCARD()
 {
     read_DEV_SDCARD
 
-    local PARTITIONS="$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")"
+    local PARTITIONS=$(sudo fdisk -l "$DEV_SDCARD" |grep "^$DEV_SDCARD")
     if [ -z "$PARTITIONS" ]; then
         nx_fail "SD Card not found at $DEV_SDCARD (configured in $FW_CONFIG)."
     fi
 
-    local PARTITION_SIZES="$(awk '{ORS=","; print $4}' <<<"$PARTITIONS")"
-    if [ "$PARTITION_SIZES" != "$SDCARD_PARTITION_SIZES" ]; then
+    local PARTITION_SECTORS=$(awk '{ORS=","; print $3 - $2}' <<<"$PARTITIONS")
+    if [ "$PARTITION_SECTORS" != "$SDCARD_PARTITION_SECTORS" ]; then
         nx_fail "SD Card $DEV_SDCARD (configured in $FW_CONFIG) has unexpected partitions."
     fi
 
     local DEV
-    for DEV in "$(awk '{print $1}' <<<"$PARTITIONS")"; do
+    for DEV in $(awk '{print $1}' <<<"$PARTITIONS"); do
         if mount |grep -q "$DEV"; then
             nx_echo "WARNING: $DEV is mounted; unmounting."
             sudo umount "$DEV" || exit $?
@@ -354,10 +354,10 @@ fw_print() # var output_prefix
     local OUTPUT_PREFIX="$2"
 
     local ENV
-    ENV="$(sudo fw_printenv)" || exit $?
+    ENV=$(sudo fw_printenv) || exit $?
     rm -rf fw_printenv.lock
 
-    local VALUE="$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")"
+    local VALUE=$(echo "$ENV" |grep "$VAR=" |sed "s/$VAR=//g")
     nx_echo "$OUTPUT_PREFIX$VALUE"
 }
 
@@ -403,7 +403,7 @@ check_serial() # serial
 # [out] SD_DIR Directory to which the SD Card is mounted.
 sd_card_mount_SD_DIR()
 {
-    SD_DIR="$(mktemp -d)" || exit $?
+    SD_DIR=$(mktemp -d) || exit $?
     sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
 }
 
@@ -471,17 +471,17 @@ ip_show() # /etc/network/interfaces
             nx_fail "IP config unrecognized: none of 'static' and 'dhcp' lines are found in $FILE"
         fi
 
-        local IP_ADDRESS="$(get_value_by_prefix "$FILE" "address")"
+        local IP_ADDRESS=$(get_value_by_prefix "$FILE" "address")
         if [ -z "$IP_ADDRESS" ]; then
             nx_fail "IP address not found in $FILE"
         fi
 
-        local IP_NETMASK="$(get_value_by_prefix "$FILE" "netmask")"
+        local IP_NETMASK=$(get_value_by_prefix "$FILE" "netmask")
         if [ -z "$IP_NETMASK" ]; then
             nx_fail "IP netmask not found in $FILE"
         fi
 
-        local IP_GATEWAY="$(get_value_by_prefix "$FILE" "gateway")"
+        local IP_GATEWAY=$(get_value_by_prefix "$FILE" "gateway")
 
         nx_echo "$IP_STATIC_LINE"
         nx_echo -e "\t""address $IP_ADDRESS"
@@ -584,7 +584,7 @@ main()
                 nx_echo "SD Card device: $DEV_SDCARD"
             else
                 nx_echo "Old SD Card device: $DEV_SDCARD"
-                local NEW_CONFIG="$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")"
+                local NEW_CONFIG=$(cat "$FW_CONFIG" |sed "s#$DEV_SDCARD#$NEW_DEV_SDCARD#")
                 echo "$NEW_CONFIG" |sudo tee "$FW_CONFIG" >/dev/null || exit $?
                 read_DEV_SDCARD
                 if [ "$DEV_SDCARD" != "$NEW_DEV_SDCARD" ]; then
@@ -607,7 +607,7 @@ main()
             if [ -z "$IMG" ]; then
                 nx_fail "Image file not specified."
             fi
-            local IMG_SIZE="$(du -h "$IMG" |sed 's/\t.*//')"
+            local IMG_SIZE=$(du -h "$IMG" |sed 's/\t.*//')
             nx_echo "Writing to $DEV_SDCARD: $IMG_SIZE $IMG"
             nx_sudo_dd if="$IMG" of="$DEV_SDCARD" bs=1M || exit $?
             nx_echo "Performing sync..."
@@ -794,7 +794,7 @@ main()
         lib)
             if [ "$2" = "" ]; then
                 find_LIB_DIR
-                LIB_NAME="$(basename "$LIB_DIR")"
+                LIB_NAME=$(basename "$LIB_DIR")
             else
                 LIB_NAME="$2"
             fi

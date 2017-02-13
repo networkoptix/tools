@@ -73,10 +73,10 @@ Utility to patch "exe" or compiled "common" lib to replace Cloud Host.
 Call from anywhere inside "nx_vms" folder to search for the file.
 
 Show current value:
-    $(basename $0) [--verbose] --show [path/to/binary_file]
+    $(basename "$0") [--verbose] --show [path/to/binary_file]
 
 Patch with new value:
-    $(basename $0) [--verbose] 'new_cloud_host' [path/to/binary_file]
+    $(basename "$0") [--verbose] 'new_cloud_host' [path/to/binary_file]
 EOF
 }
 
