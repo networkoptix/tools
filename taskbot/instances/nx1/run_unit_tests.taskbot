@@ -1,4 +1,4 @@
-\# -*- sh -*-
+# -*- sh -*-
 
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
@@ -53,7 +53,7 @@ do
     "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
      -c "ssh -tt test@$TASKBOT_NX1_ADDRESS \"cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \
-     -t 20 -s 10 || true
+      -t 600 -s 100 || true
 done
 
 # + Process core files
