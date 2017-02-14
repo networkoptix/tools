@@ -29,6 +29,12 @@ from crashmonconf import *
 
 __version__ = '1.4'
 
+import warnings
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', InsecureRequestWarning)
+
 if os.name == 'posix':  # may be platform.system is better? ;)
     dumptool = None
 

@@ -313,20 +313,25 @@ class UTReport(Report):
     failed_tests = OrderedDict(sorted(get_failed(unit_tests)))
 
     import EmailNotify
+    def check_commit(commit):
+      return commit.repo.name != 'devtools'
     if prev_run and not total_fail and new_pass:
       EmailNotify.notify(
         self, prev_run, "unit-tests fixed",
-        "The product unit-tests executed successfully.")
+        "The product unit-tests executed successfully.",
+        notify_filter = check_commit)
     elif total_fail:
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "Fails detected in the unit-tests.%s" %
-        get_failed_text(failed_tests))
+        get_failed_text(failed_tests),
+        notify_filter = check_commit)
     elif cores_count:
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "%d core(s) detected after the unit-tests.%s" % \
-        (cores_count, get_failed_text(failed_tests)))
+        (cores_count, get_failed_text(failed_tests)),
+        notify_filter = check_commit)
 
     return 0
    

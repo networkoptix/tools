@@ -19,6 +19,7 @@ nx_load_config ".bpirc" #< Load config and assign defaults to values missing in 
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
 : ${PACKAGES_SRC_DIR="DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
 : ${QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at this workstation.
+: ${NX_CONF="debug"}
 
 #--------------------------------------------------------------------------------------------------
 # Const
@@ -238,7 +239,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/build_environment/target-bpi/lib/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-bpi/lib/$NX_CONF/$MASK" \
         "$BPI_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -255,7 +256,7 @@ cp_lite_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/$MASK" \
         "$BPI_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -264,7 +265,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/$MASK" \
         "$BPI_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -775,7 +776,7 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
-            cp_files "$VMS_DIR/build_environment/target-bpi/bin/debug/*_ut" \
+            cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/*_ut" \
                 "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             exit $?
             ;;
@@ -858,7 +859,7 @@ main()
             local ARGS=("$@")
 
             echo "Running: $TEST_NAME ${ARGS[@]}"
-            bpi "LD_LIBRARY_PATH=$BPI_MEDIASERVER_DIR/lib" \
+            bpi "LD_LIBRARY_PATH=$BPI_MEDIASERVER_DIR/../lib" \
                 "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "${ARGS[@]}"
             exit $?
             ;;

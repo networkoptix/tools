@@ -47,8 +47,10 @@ def sub_environment(s):
 
 def get_host_name():
   return os.environ.get(
-    'HOSTNAME',
-    socket.gethostname())
+    'TASKBOT_DESTINATION_HOST',
+      os.environ.get(
+      'HOSTNAME',
+        socket.gethostname()))
 
 def get_platform():
   (system, node, release, version, machine, processor) = \

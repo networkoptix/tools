@@ -153,7 +153,7 @@ class BuildReport(Report):
     prev_run = self.get_previous_run()
     prev_build = None
     def check_commit(commit):
-      return commit.repo != 'devtools'
+      return commit.repo.name != 'devtools'
     while prev_run:
       prev_builds = self.find_task('Build product > %build.taskbot% > %', [prev_run])
       if prev_builds:
