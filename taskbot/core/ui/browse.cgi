@@ -634,7 +634,7 @@ sub generate_main {
       print $q->start_html('Taskbot');
 
       print <<"EOF;";
-       <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+       <script src="/commons/scripts/jquery.min.js"></script>
 EOF;
 
       print $q->start_form(
