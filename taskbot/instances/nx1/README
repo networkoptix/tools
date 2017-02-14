@@ -1,0 +1,14 @@
+===Taskbot instance installation & settings===
+
+For master host, please, read ../linux/README.
+
+The project builds on master host (Ubuntu). Unit tests run on NX1 (bananian).
+
+Prepare NX1:
+ 1. Prepare sdcard with valid version of image of the nx_vms:
+   - https://networkoptix.atlassian.net/wiki/display/SD/How+to+get+clean+NX1+with+default+image.
+ 2. Set correct NX1 serial, mac and ip (NX1 shoud have internet access for the unit-tests):
+   - https://networkoptix.atlassian.net/wiki/display/PM/Mac+Writer+Tool
+ 3. Prepare config_VERSION.py:
+   - Set TASKBOT_NX1_ADDRESS variable
+ 4. Run ./prepare_nx1.sh script to create test user & copy ssh key.

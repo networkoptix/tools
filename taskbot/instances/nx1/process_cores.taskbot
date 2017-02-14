@@ -1,0 +1,18 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+NX_WORK_DIR=/home/test/taskbot/$TASKBOT_BRANCHNAME
+NX_VMS_BIN_DST_PATH="$NX_WORK_DIR/nx_vms/bin"
+CMD=$(cat << EOF
+cd $NX_VMS_BIN_DST_PATH
+find . -name 'core.*' -printf "%p "
+EOF
+)
+CORES=$(ssh -tt test@$TASKBOT_NX1_ADDRESS "$CMD")
+
+for core in $CORES; do
+    "$TASKBOT" -d "$core" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
+        "$TASKBOT_SHARE"/examine_core.taskbot "$core"
+done

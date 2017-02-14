@@ -1,0 +1,59 @@
+# -*- sh -*-
+
+set -o errexit +o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Prepare environment
+CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
+
+QT_DIR=$(grep qt_dir= "$CURRENT_CONFIG" | sed -r 's/qt_dir=//')
+QT_LIB=`find "$QT_DIR" -name 'libQt*.so' -print | head -n 1`
+if [ -n "$QT_LIB" ]; then
+  QT_LIB_PATH=$(dirname "$QT_LIB")
+fi
+
+NX_VMS_LIB_PATH=$(grep linux_lib_dir= "$CURRENT_CONFIG" | sed -r 's/linux_lib_dir=//')
+
+NX_VMS_BIN_PATH=$(grep bin_dir= "$CURRENT_CONFIG" | sed -r 's/bin_dir="?([^"]+)"?/\1/')
+
+TEST_LIST=$TASKBOT_UNIT_TESTS
+if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
+  TEST_LIST=$(find . -name '*_ut' -type f -exec basename {} \;)
+fi
+echo $TEST_LIST
+
+# + Copy binary files
+NX_WORK_DIR=/home/test/taskbot/$TASKBOT_BRANCHNAME
+NX_VMS_BIN_DST_PATH="$NX_WORK_DIR/nx_vms/bin"
+NX_VMS_LIB_DST_PATH="$NX_WORK_DIR/nx_vms/lib"
+NX_DEFAULT_LIB_PATH=/opt/networkoptix/lib
+
+CMD=$(cat << EOF
+[ -d $NX_WORK_DIR ] && rm -rvf $NX_WORK_DIR
+mkdir -p $NX_VMS_BIN_DST_PATH
+mkdir -p $NX_VMS_LIB_DST_PATH
+cp -r $NX_DEFAULT_LIB_PATH/* $NX_VMS_LIB_DST_PATH
+EOF
+)
+ssh -tt test@$TASKBOT_NX1_ADDRESS "$CMD"
+
+echo $QT_LIB_PATH
+echo $NX_VMS_LIB_PATH
+echo $NX_VMS_BIN_PATH
+
+scp $QT_LIB_PATH/*.so* test@$TASKBOT_NX1_ADDRESS:$NX_VMS_LIB_DST_PATH
+scp $NX_VMS_LIB_PATH/*.so* test@$TASKBOT_NX1_ADDRESS:$NX_VMS_LIB_DST_PATH
+scp $NX_VMS_BIN_PATH/*_ut test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
+scp $TASKBOT_SHARE/run_unit_test.sh test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
+
+# + Run tests
+for test in $TEST_LIST
+do
+    "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+     -d "$test"  \
+     -c "ssh -tt test@$TASKBOT_NX1_ADDRESS \"cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \
+     -t 20 -s 10 || true
+done
+
+# + Process core files
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
