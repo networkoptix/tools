@@ -7,10 +7,10 @@ UT_PATH="$TASKBOT_VAR"/var/utests
 
 for testname in $(find "$UT_PATH" -maxdepth 1 -type d ! -path "$UT_PATH" -exec basename {} \;); do
     echo $testname
-    for core in $(find "$UT_PATH/$testname" -name 'core.*'); do
-       core_name=$(basename $core)
-       "$TASKBOT" -d "$core_name" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
-          "$TASKBOT_SHARE"/examine_core.taskbot "$core" "$testname" \
+    for crash in $(find "$UT_PATH/$testname" -name "$testname*.crash"); do
+       crash_name=$(basename $crash)
+       "$TASKBOT" -d "$crash_name" $TASKBOT_OPTIONS "$TASKBOT_CONFIG" \
+          "$TASKBOT_SHARE"/examine_core.taskbot "$crash" "$testname" \
         -t 30 || true
     done
 done

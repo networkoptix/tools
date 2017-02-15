@@ -43,10 +43,15 @@ do
      --var "DYLD_LIBRARY_PATH=$NX_VMS_LIB_PATH" \
      --var "DYLD_FRAMEWORK_PATH=$QT_LIB_PATH" \
      -t 600 -s 100 --core_on_timeout || true
-  dt=$((`date +%s` + -60))
-  ts=$(date -r $dt +%Y%m%d%H%M.%S)
-  touch -t $ts $test_tmp/$test$ts
-  find /cores -name "core.*" -newer "$test_tmp/$test$ts" -exec mv '{}' $test_tmp \;
+done
+
+# + Collect crashes
+sleep 10
+ls $HOME/Library/Logs/DiagnosticReports
+for test in $TEST_LIST
+do
+  test_tmp=$UNIT_TESTS_RESULT_PATH/$test
+  find $HOME/Library/Logs/DiagnosticReports -name "$test*.crash" -exec mv '{}' $test_tmp \;
 done
 
 # + Process core files
