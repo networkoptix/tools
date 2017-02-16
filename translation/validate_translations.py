@@ -29,6 +29,7 @@ substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 verbose = False
 strict = False
 language = None
+errorsOnly = False
 
 def printCritical(text, context, filename):
     err(u'Context: {0}\n{1}'.format(context, text))
@@ -71,7 +72,8 @@ def checkText(source, target, context, result, index, hasNumerusForm):
     for symbol in numerus:
         isNumerus = source.count(symbol)
         if (isNumerus and not hasNumerusForm) or (hasNumerusForm and not isNumerus and index > 1):
-            warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
+            if not errorsOnly:
+                warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
             result.warned += 1
             break
            
@@ -177,7 +179,8 @@ def validate(path):
 
     if verbose:
         if result.unfinished > 0:
-            warn('{0}: {1} of {2} translations are unfinished'.format(name, result.unfinished, result.total))
+            if not errorsOnly:
+                warn('{0}: {1} of {2} translations are unfinished'.format(name, result.unfinished, result.total))
         else:
             green('{0}: ok'.format(name))
 
@@ -210,6 +213,7 @@ def main():
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
+    parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")    
     parser.add_argument('-l', '--language', help="check only selected language")
     args = parser.parse_args()
 
@@ -222,6 +226,9 @@ def main():
     global language
     language = args.language
 
+    global errorsOnly
+    errorsOnly = args.errors_only
+    
     if args.color:
         init_color()
 
@@ -229,8 +236,6 @@ def main():
 
     projects = getTranslatableProjects()
     for project in projects:
-        if verbose:
-            info("Updating project " + str(project))
         projectDir = os.path.join(rootDir, project.path)
         translationDir = os.path.join(projectDir, 'translations')
         validateProject(project.name, translationDir)

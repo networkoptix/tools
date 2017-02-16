@@ -2,7 +2,7 @@ from validation_rule import ValidationRule, Levels
 
 class LeadingTrailingSymbolsRule(ValidationRule):
     def __str__(self):
-        return "Check leading and trailing symbols"
+        return "Check leading and trailing symbols and other forbidden symbols"
 
     def __repr__(self):
         return "<LeadingTrailingSymbolsRule>"
