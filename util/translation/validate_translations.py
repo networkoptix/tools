@@ -15,13 +15,12 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>']
+critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>', '  ']
 warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
 numerus = ['%n']
 substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 
 verbose = False
-noTarget = False
 strict = False
 language = None
 
@@ -39,39 +38,41 @@ def symbolText(symbol):
     return symbol
 
 def checkSymbol(symbol, source, target, context, out):
+    # Ignoring incomplete translations
+    if not target:
+        return True
+
     occurences = source.count(symbol)
-    invalid = target.count(symbol) != occurences
-    if invalid and noTarget:
-        out(u'Invalid translation string, error on {0} count:\nContext: {1}\nSource: {2}'
-            .format(
-                    symbolText(symbol),
-                    context,
-                    source))
-    elif invalid:
+    valid = target.count(symbol) == occurences
+    if not valid:
         out(u'Invalid translation string, error on {0} count:\nContext: {1}\nSource: {2}\nTarget: {3}'
             .format(
                     symbolText(symbol),
                     context,
                     source, target))
 
-    return invalid
+    return valid
 
 def checkText(source, target, context, result, index, hasNumerusForm):
 
     if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
-        if target != source:
+        if target and target != source:
             err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
             result.error += 1
+
+    if source.startswith('<') or source.startswith('&lt;'):
+        err(u'Untranslatable string? \nContext: {0}\nSource: {1}'.format(context, source))
+        result.error += 1
 
     for symbol in numerus:
         isNumerus = source.count(symbol)
         if (isNumerus and not hasNumerusForm) or (hasNumerusForm and not isNumerus and index > 1):
-            err(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
-            result.error += 1
+            warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
+            result.warned += 1
             break
 
     for symbol in critical:
-        if checkSymbol(symbol, source, target, context, err):
+        if not checkSymbol(symbol, source, target, context, err):
             result.error += 1
             break
 
@@ -87,10 +88,10 @@ def checkText(source, target, context, result, index, hasNumerusForm):
 
     if verbose:
         for symbol in warned:
-            if checkSymbol(symbol, source, target, context, warn):
+            if not checkSymbol(symbol, source, target, context, warn):
                 result.warned += 1
                 break
-            if checkSymbol(symbol, source, '', context, warn):
+            if not checkSymbol(symbol, source, '', context, warn):
                 result.warned += 1
                 break
 
@@ -108,21 +109,17 @@ def validateXml(root, name):
     if sourcelanguage and sourcelanguage != 'en' and sourcelanguage != 'en_US':
         result.warned += 1
         warn(u'Source Language is {0}'.format(sourcelanguage))
-        
+
     suffix = language + '.ts'
     if not name.endswith(suffix):
         result.error += 1
-        err(u'Invalid Locale code {0} for file {1}'.format(language, name))    
-    
+        err(u'Invalid Locale code {0} for file {1}'.format(language, name))
+
     for context in root:
         contextName = context.find('name').text
         for message in context.iter('message'):
             result.total += 1
             source = message.find('source')
-#            translatorcomment = message.find('translatorcomment')
-#            if translatorcomment is not None:
-#                info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}'.format(contextName, source.text))
-#                warn(u'Translator comment: {0}'.format(translatorcomment.text))
 
             translation = message.find('translation')
             if translation.get('type') == 'unfinished':
@@ -132,8 +129,8 @@ def validateXml(root, name):
                 continue
 
             #Using source text
-            if not translation.text:
-                continue
+            #if not translation.text:
+            #    continue
 
             hasNumerusForm = False
             index = 0
@@ -154,7 +151,7 @@ def validateXml(root, name):
 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
-                if printAll and not (source.text == translation.text):
+                if printAll and translation.text and not (source.text == translation.text):
                     info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 
 
@@ -205,16 +202,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
-    parser.add_argument('-t', '--no-target', action='store_true', help="skip target field")
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
     parser.add_argument('-l', '--language', help="check only selected language")
     args = parser.parse_args()
 
     global verbose
     verbose = args.verbose
-
-    global noTarget
-    noTarget = args.no_target
 
     global strict
     strict = args.strict
