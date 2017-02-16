@@ -68,10 +68,6 @@ def checkText(source, target, context, result, index, hasNumerusForm):
             err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
             result.error += 1
 
-    if source.startswith('<') or source.startswith('&lt;'):
-        err(u'Untranslatable string? \nContext: {0}\nSource: {1}'.format(context, source))
-        result.error += 1
-
     for symbol in numerus:
         isNumerus = source.count(symbol)
         if (isNumerus and not hasNumerusForm) or (hasNumerusForm and not isNumerus and index > 1):
