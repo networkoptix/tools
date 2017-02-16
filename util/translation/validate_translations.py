@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import xml.etree.ElementTree as ET
+from validation_rules import get_validation_rules, Levels
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)
 sys.path.insert(0, utilDir)
@@ -15,7 +16,7 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', 'href', '<html', '<b>', '<br>', '<b/>', '<br/>', '  ']
+critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '<b>', '<b/>']
 warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
 numerus = ['%n']
 substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
@@ -23,6 +24,9 @@ substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 verbose = False
 strict = False
 language = None
+
+def printCritical(text, context, filename):
+    err(u'{0}\nContext: {1}'.format(text, context))
 
 class ValidationResult():
     error = 0
@@ -54,7 +58,6 @@ def checkSymbol(symbol, source, target, context, out):
     return valid
 
 def checkText(source, target, context, result, index, hasNumerusForm):
-
     if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
         if target and target != source:
             err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
@@ -70,7 +73,7 @@ def checkText(source, target, context, result, index, hasNumerusForm):
             warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
             result.warned += 1
             break
-
+           
     for symbol in critical:
         if not checkSymbol(symbol, source, target, context, err):
             result.error += 1
@@ -98,10 +101,10 @@ def checkText(source, target, context, result, index, hasNumerusForm):
 
     return result;
 
-def validateXml(root, name):
+def validateXml(root, filename):
     result = ValidationResult()
 
-    printAll = strict and 'en_US' in name
+    printAll = strict and 'en_US' in filename
 
     version = root.get('version')
     language = root.get('language')
@@ -111,9 +114,9 @@ def validateXml(root, name):
         warn(u'Source Language is {0}'.format(sourcelanguage))
 
     suffix = language + '.ts'
-    if not name.endswith(suffix):
+    if not filename.endswith(suffix):
         result.error += 1
-        err(u'Invalid Locale code {0} for file {1}'.format(language, name))
+        err(u'Invalid Locale code {0} for file {1}'.format(language, filename))
 
     for context in root:
         contextName = context.find('name').text
@@ -127,10 +130,13 @@ def validateXml(root, name):
 
             if translation.get('type') == 'obsolete':
                 continue
-
-            #Using source text
-            #if not translation.text:
-            #    continue
+                
+            for rule in get_validation_rules():
+                if rule.valid(source.text, translation):
+                    continue
+                if rule.level() == Levels.CRITICAL:
+                    result.error += 1
+                    printCritical(rule.last_error_text(), contextName, filename)
 
             hasNumerusForm = False
             index = 0
@@ -217,7 +223,6 @@ def main():
 
     if args.color:
         init_color()
-
 
     rootDir = os.getcwd()
 
