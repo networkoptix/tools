@@ -4,11 +4,16 @@ import sys
 import os
 import argparse
 import xml.etree.ElementTree as ET
-from validation_rules import get_validation_rules, Levels
 
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
+sys.path.pop(0)
+
+rulesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rules')
+sys.path.insert(0, rulesDir)
+from validation_rule import Levels
+from rules_list import get_validation_rules
 sys.path.pop(0)
 
 projectDir = os.path.join(os.getcwd(), 'build_utils/python')
