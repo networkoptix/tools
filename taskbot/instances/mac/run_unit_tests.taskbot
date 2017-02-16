@@ -43,6 +43,14 @@ do
      --var "DYLD_LIBRARY_PATH=$NX_VMS_LIB_PATH" \
      --var "DYLD_FRAMEWORK_PATH=$QT_LIB_PATH" \
      -t 600 -s 100 --core_on_timeout || true
+  sleep 10
+  dt=$((`date +%s` + -60))
+  ts=$(date -r $dt +%Y%m%d%H%M.%S)
+  touch -t $ts $test_tmp/$test$ts
+  find /Library/Logs/DiagnosticReports \
+       -name "$test*.crash" \
+       -newer "$test_tmp/$test$ts" \
+       -exec cp '{}' $HOME/Library/Logs/DiagnosticReports \;
 done
 
 # + Collect crashes
