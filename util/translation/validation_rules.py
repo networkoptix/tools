@@ -20,7 +20,7 @@ class ForbiddenSymbolsRule:
         invalid = ['  ', '\'', '&apos;', 'href', '<html', '<br>', '<br/>']
         for substring in invalid:
             if substring in source:
-                self.lastErrorText = u"Invalid substring {0} found in {1}".format(substring, source)
+                self.lastErrorText = u"Invalid substring {0} found in:\n\"{1}\"".format(substring, source)
                 return False
                 
         return True
