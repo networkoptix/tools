@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from validation_rule import ValidationRule, Levels
 
 class ForbiddenSymbolsRule(ValidationRule):
@@ -11,10 +13,14 @@ class ForbiddenSymbolsRule(ValidationRule):
         return Levels.CRITICAL
 
     def valid(self, source, translation):
-        forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>']
+        forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>', u'ё']
         for substring in forbidden:
             if substring in source:
                 self.lastErrorText = u"Invalid substring {0} found in:\n\"{1}\"".format(substring, source)
                 return False
+            for text in ValidationRule.translation_texts(translation):
+                if substring in text:
+                    self.lastErrorText = u"Invalid substring {0} found in:\n\"{1}\"".format(substring, text)
+                    return False                
 
         return True

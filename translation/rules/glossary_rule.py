@@ -18,8 +18,9 @@ class GlossaryRule(ValidationRule):
         invalid_terms = {
             'low-res': 'Lo-Res',
             'qnt': 'Qty',
-            'e-mail': 'Email'
-        }
+            'e-mail': 'Email',
+            'media server': 'server'
+            }
         
         for word in text.split(' '):
             for term in case_sensitive:
@@ -27,10 +28,10 @@ class GlossaryRule(ValidationRule):
                     self.lastErrorText = u"Invalid term {0} instead of {1} found in:\n\"{2}\"".format(word, term, text)
                     return False
                     
-            for term, fix in invalid_terms.items():
-                if word.lower() == term.lower():
-                    self.lastErrorText = u"Invalid term {0} instead of {1} found in:\n\"{2}\"".format(word, fix, text)
-                    return False     
+        for term, fix in invalid_terms.items():
+            if term.lower() in text.lower():
+                self.lastErrorText = u"Invalid term {0} instead of {1} found in:\n\"{2}\"".format(term, fix, text)
+                return False     
 
         return True
 

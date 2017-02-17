@@ -16,8 +16,6 @@ class ContractionsRule(ValidationRule):
             return True
 
         for word in (w for w in source.split(' ') if apos in w):
-            if word.endswith(apos) or word.endswith('\'s'):
-                continue
             self.lastErrorText = u"Invalid contraction found in:\n\"{0}\"".format(source)
             return False
         
