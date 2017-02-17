@@ -32,7 +32,7 @@ language = None
 errorsOnly = False
 
 def printCritical(text, context, filename):
-    err(u'Context: {0}\n{1}'.format(context, text))
+    err(u'*** Context: {0} ***\n{1}'.format(context, text))
 
 class ValidationResult():
     error = 0

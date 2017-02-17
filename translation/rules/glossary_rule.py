@@ -11,11 +11,16 @@ class GlossaryRule(ValidationRule):
         return Levels.CRITICAL
 
     def valid_text(self, text):
-        case_sensitive = ['URL', 'Hi-Res', 'Custom-Res']
+        case_sensitive = [
+            'URL', 'Hi-Res', 'Custom-Res', 'Email', 'ID', 'PTZ',
+            'B', 'KB', 'MB', 'GB', 'TB'
+            ]
         invalid_terms = {
-            'low-res': 'Lo-Res'
+            'low-res': 'Lo-Res',
+            'qnt': 'Qty',
+            'e-mail': 'Email'
         }
-
+        
         for word in text.split(' '):
             for term in case_sensitive:
                 if word.lower() == term.lower() and word != term:
