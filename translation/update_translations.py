@@ -49,8 +49,9 @@ warnings = [
 verbose = False
 results = dict()
 
-def calculateEntries(prefix, dir):
+def calculateEntries(prefix, dir, language):
     entries = []
+    suffix = language + '.ts'
 
     for entry in os.listdir(dir):
         path = os.path.join(dir, entry)
@@ -58,7 +59,7 @@ def calculateEntries(prefix, dir):
         if (os.path.isdir(path)):
             continue
 
-        if (not path[-3:] == '.ts'):
+        if not path.endswith(suffix):
             continue
 
         if (not entry.startswith(prefix)):
@@ -67,14 +68,14 @@ def calculateEntries(prefix, dir):
         entries.append(path)
     return entries
 
-def update(project):
+def update(project, language):
     rootDir = os.getcwd()
     projectDir = os.path.join(rootDir, project.path)
     translationDir = os.path.join(projectDir, 'translations')
     sourcesDir = os.path.join(projectDir, project.sources)
     filename = project.name
     
-    entries = calculateEntries(filename, translationDir)
+    entries = calculateEntries(filename, translationDir, language)
     
     lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
     command = [lupdate, '-no-obsolete', '-no-ui-lines']
@@ -117,8 +118,8 @@ def handleOutput(log):
         if verbose:
             info(line)
 
-def updateThreaded(project, callback):
-    thread = threading.Thread(None, callback, args=(project,))
+def updateThreaded(project, language, callback):
+    thread = threading.Thread(None, callback, args=(project,language))
     thread.start()
     return thread
 
@@ -126,6 +127,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
+    parser.add_argument('-l', '--language', default="")
     args = parser.parse_args()
     global verbose
     verbose = args.verbose
@@ -138,7 +140,7 @@ def main():
     for project in projects:
         if verbose:
             info("Updating project " + str(project))           
-        threads.append(updateThreaded(project, update))
+        threads.append(updateThreaded(project, args.language, update))
             
     for thread in threads:
         thread.join()
