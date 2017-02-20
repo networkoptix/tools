@@ -7,6 +7,9 @@ set +o nounset
 if [ -z $TASKBOT_UNIT_TESTS ]; then
    export TASKBOT_UNIT_TESTS="none"
 fi
+if [ -z $TASKBOT_FUNC_TESTS_OLD ]; then
+   export TASKBOT_FUNC_TESTS_OLD="false"
+fi
 if [ -z $TASKBOT_FUNC_TESTS ]; then
    export TASKBOT_FUNC_TESTS="false"
 fi
@@ -41,12 +44,12 @@ fi
 
 # + Run functional test old
 FT_RC_OLD=0
-if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
+if [ $TASKBOT_FUNC_TESTS_OLD = "true" ] && [ $RC -eq 0 ]; then
   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests_old.taskbot
   FT_RC_OLD=$?
 fi
 
-if [ $TASKBOT_FUNC_TESTS = "true" ]; then
+if [ $TASKBOT_FUNC_TESTS_OLD = "true" ]; then
   "$TASKBOT_SHARE"/func_tests_report_old.py "$TASKBOT_CONFIG"
 fi
 

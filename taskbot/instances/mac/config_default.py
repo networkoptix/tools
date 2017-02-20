@@ -1,11 +1,11 @@
 # -*- python -*-
 # $Id$
 # Artem V. Nikitin
-# Linux config
+# Mac config
 
 import os
 
-TASKBOT_BRANCHNAME='dev_3.0.0'
+TASKBOT_BRANCHNAME='default'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -20,26 +20,18 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
-    'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+    'Mikhail Uskov': 'muskov@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
-  'ft_watchers': {
-    'Artem Nikitin': 'anikitin@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
-    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
-    'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
-    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/linux'),
+    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/mac'),
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     'TASKBOT_UNIT_TESTS': 'all',
-    'TASKBOT_FUNC_TESTS_OLD': 'true',
-    'TASKBOT_FUNC_TESTS': 'true',
-    'TASKBOT_NET_BASE': '120'
     }
   }

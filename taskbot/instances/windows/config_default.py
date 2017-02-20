@@ -1,11 +1,11 @@
 # -*- python -*-
 # $Id$
 # Artem V. Nikitin
-# Linux config
+# Windows config
 
 import os
 
-TASKBOT_BRANCHNAME='dev_3.0.0'
+TASKBOT_BRANCHNAME='default'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -21,25 +21,20 @@ config = {
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
-  'ft_watchers': {
-    'Artem Nikitin': 'anikitin@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
-    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
-    'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
+    'Mikhail Uskov': 'muskov@networkoptix.com'},
   'environment' : {
+    'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
-    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/linux'),
+    'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/windows'),
     'TASKBOT_COMMONS': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/commons'),
     'TASKBOT_REPO': TASKBOT_DEVTOOLS_ROOT,
-    'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
-    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
-    'TASKBOT_UNIT_TESTS': 'all',
-    'TASKBOT_FUNC_TESTS_OLD': 'true',
-    'TASKBOT_FUNC_TESTS': 'true',
-    'TASKBOT_NET_BASE': '120'
+    'TASKBOT_NX_VMS_REPO': 'ssh://hg@la.hdw.mx/nx_vms',
+    'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@la.hdw.mx/devtools',
+    'TASKBOT_UNIT_TESTS': 'all'
     }
   }
+
