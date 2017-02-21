@@ -9,13 +9,15 @@ if [ -f $FUNTESTS_DIR/tmp/vagrant/Vagrantfile ]; then
   cd $FUNTESTS_DIR/tmp/vagrant
   vagrant destroy -f
 fi
-cd $FUNTESTS_DIR
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
 [ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp
 [ -d $FUNTESTS_DIR/result ] && rm -rf $FUNTESTS_DIR/result
+[ -d $FUNTESTS_DIR/.cache ] && rm -rf $FUNTESTS_DIR/.cache
+[ -d $TASKBOT_VAR/.cache ] && rm -rf $TASKBOT_VAR/.cache
 mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/tmp $FUNTESTS_DIR/result
 
 # + Prepare box files
+cd $FUNTESTS_DIR
 rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/wd
 CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
 ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
