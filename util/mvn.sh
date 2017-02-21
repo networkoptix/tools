@@ -38,6 +38,7 @@ if [[ "$FLAGS" = *c* ]]; then
     hg st -i | awk '{print$2}' | grep -Ev "\.pro\.user$" | xargs rm || true
 fi
 
+[[ "$@" ]] && shift
 mvn $ACTION -Dbuild.configuration=$CONF $OPTIONS $@
 
 if [[ "$FLAGS" = *m* ]]; then

@@ -17,8 +17,8 @@ FLAGS=$1
 if [ $1 ]; then shift; fi
 
 MEDIATOR=$M
-SYSTEM=${SYS:-6d4a6a15-c739-43c4-8971-2c87e6630f30}
-KEY=${KEY:-a75f54e2-c011-48c6-ad54-652e47db3aad}
+SYSTEM=${SYS:-62513f08-e3d2-4977-aa64-fec67d62b38c}
+KEY=${KEY:-13dacdf0-0bae-4612-8b43-0cf8355b64d9}
 SERVER=${NM:-srv}
 LOG_LEVEL=${LL:-DEBUG}
 RW_TIMEOUT=${TO:-3s}

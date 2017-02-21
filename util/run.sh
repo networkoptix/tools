@@ -14,7 +14,7 @@ Options:
     D   use 1 for gdb run
     ST  use 1 for strace run
     V   valgrind args, empty means no valgrind
-    T   run and measure time
+    T   use 1 for time  measure
 Example:
     run.sh mediaserver -e   # run mediaserver
     R=1 V="--tool=exp-dhat" run.sh client.bin   # run release client under valgrind dhat
@@ -26,19 +26,14 @@ fi
 set -e
 [[ $NOX ]] || set -x
 
-if [ "$R" ]
-then
-    EXTRA=release/
-else
-    EXTRA=debug/
-fi
 
-if [ "$A" ]
-then
+EXTRA=debug/
+[ $R ] && EXTRA=release/
+
+if [ "$A" ]; then
     ARCH=-$A
     ARCH_GREP=$A
-    if [ "$A" == bpi ]
-    then
+    if [ "$A" == bpi ]; then
         KIT=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
         if [ $(uname) == Darwin ]
         then
@@ -54,8 +49,7 @@ then
 else
     ARCH=
     ARCH_GREP=x64
-    if [ $(uname) == Darwin ]
-    then
+    if [ $(uname) == Darwin ]; then
         # /usr/bin/lldb is protected against LD variables
         GDB=/Applications/Xcode.app/Contents/Developer/usr/bin/lldb
         GDB_ARGS=--
@@ -80,37 +74,19 @@ function find_libs() {
 }
 
 export PATH="$PWD/build_environment/target/bin/$EXTRA:$PATH"
-if [ $(uname) == Darwin ]
-then
+if [ $(uname) == Darwin ]; then
     export DYLD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$DYLD_LIBRARY_PATH$(find_libs)"
     export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH$(find_libs)"
 else
     export LD_LIBRARY_PATH="$PWD/build_environment/target$ARCH/lib/$EXTRA:$LD_LIBRARY_PATH$(find_libs)"
 fi
 
-if [ "$L" ]
-then
-    ulimit -c unlimited
-fi
+[ "$L" ] && ulimit -c unlimited
 
-if [ "$C" ]
-then
-    $GDB $@ $C
-elif [ "$D" ]
-then
-    $GDB $GDB_ARGS $@
-elif [ "$DS" ]
-then
-    gdbserver :$DS $@
-elif [ "$ST" ]
-then
-    strace $@
-elif [ "$V" ]
-then
-    valgrind $V $@
-elif [ "$T" ]
-then
-    time $@
-else
-    $@
-fi
+if [ "$C" ]; then $GDB $@ $C
+elif [ "$D" ]; then $GDB $GDB_ARGS $@
+elif [ "$DS" ]; then gdbserver :$DS $@
+elif [ "$ST" ]; then strace $@
+elif [ "$V" ]; then valgrind $V $@
+elif [ "$T" ]; then time $@
+else $@; fi
