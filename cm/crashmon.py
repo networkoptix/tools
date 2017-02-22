@@ -117,7 +117,7 @@ def format_calls(calls): # FIXME put it into a separate module
 
 # Do not process (add JIRA task) for drivers call stack
 DRIVERS_FILTER = [
-    r'ig.*cd64',
+    r'ig.*64',
     r'atig6txx',
     r'atio6axx',
     r'nvoglv64',
