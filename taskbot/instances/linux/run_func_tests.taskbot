@@ -6,6 +6,9 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 # + Prepare environment
 FUNTESTS_DIR="$TASKBOT_VAR"/var/functest
 if [ -f $FUNTESTS_DIR/tmp/vagrant/Vagrantfile ]; then
+  for path in $(find $FUNTESTS_DIR/tmp/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
+      echo "$path $(cat $path)"
+  done
   cd $FUNTESTS_DIR/tmp/vagrant
   vagrant destroy -f
 fi
@@ -28,6 +31,9 @@ echo $DEB_FILEPATH
 cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
 #cp "$TASKBOT_VAR"/var/testing/vagrant/networkoptix-mediaserver.deb "$FUNTESTS_DIR"/wd
 
+VBoxManage list vms
+ifconfig
+
 # + Run tests
 set +o errexit
 py.test -v \
@@ -39,6 +45,8 @@ py.test -v \
   --timeout=900
 set -o errexit
 
+VBoxManage list vms
+
 # + Store results
 $TASKBOT_BIN/file.py \
      $TASKBOT_CONFIG \
@@ -47,6 +55,9 @@ $TASKBOT_BIN/file.py \
 
 # + Clear test data
 if [ -f $FUNTESTS_DIR/tmp/vagrant/Vagrantfile ]; then
+  for path in $(find $FUNTESTS_DIR/tmp/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
+      echo "$path $(cat $path)"
+  done
   cd $FUNTESTS_DIR/tmp/vagrant
   vagrant destroy -f
 fi
