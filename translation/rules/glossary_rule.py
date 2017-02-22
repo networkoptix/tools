@@ -12,7 +12,10 @@ class GlossaryRule(ValidationRule):
 
     def valid_text(self, text):
         case_sensitive = [
-            'URL', 'Hi-Res', 'Custom-Res', 'Email', 'ID', 'PTZ',
+            'URL', 'Hi-Res', 'Custom-Res', 
+            'ID', 'PTZ',
+            'Email', 'Internet',
+            'System', "Systems",
             'B', 'KB', 'MB', 'GB', 'TB'
             ]
         invalid_terms = {
@@ -21,16 +24,21 @@ class GlossaryRule(ValidationRule):
             'e-mail': 'Email',
             'media server': 'server'
             }
+        exclusions = ['system tray', 'system administrator']
+        
+        for exclusion in exclusions:
+            if exclusion in text:
+                return True
         
         for word in text.split(' '):
             for term in case_sensitive:
                 if word.lower() == term.lower() and word != term:
-                    self.lastErrorText = u"Invalid term {0} instead of {1} found in:\n\"{2}\"".format(word, term, text)
+                    self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(word, term, text)
                     return False
                     
         for term, fix in invalid_terms.items():
             if term.lower() in text.lower():
-                self.lastErrorText = u"Invalid term {0} instead of {1} found in:\n\"{2}\"".format(term, fix, text)
+                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(term, fix, text)
                 return False     
 
         return True

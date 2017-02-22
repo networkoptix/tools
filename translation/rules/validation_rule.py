@@ -1,3 +1,5 @@
+import re
+
 class Levels:
     CRITICAL = "critical"
 
@@ -17,3 +19,7 @@ class ValidationRule:
                 yield numerusform.text
         if translation.text and not isNumerus:
             yield translation.text
+
+    @staticmethod
+    def words(string):        
+        return [word for word in re.split('[^a-zA-Z\']', string) if word]
