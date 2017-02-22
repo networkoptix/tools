@@ -22,4 +22,4 @@ class ValidationRule:
 
     @staticmethod
     def words(string):        
-        return [word for word in re.split('[^a-zA-Z\']', string) if word]
+        return [word for word in re.split('[^a-zA-Z\'/]', string) if word]
