@@ -30,7 +30,7 @@ if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
 fi
 echo $TEST_LIST
 
-ulimit -c unlimited
+#ulimit -c unlimited
 ulimit -n 10000
 # + Run tests
 for test in $TEST_LIST
@@ -54,7 +54,7 @@ do
   find $HOME/Library/Logs/DiagnosticReports \
        -name "$test*.crash" \
        -newer "$test_tmp/$test$ts" \
-       -exec cp '{}' $test_tmp \;
+       -exec mv '{}' $test_tmp \;
 done
 
 # + Process core files
