@@ -9,7 +9,7 @@ udt_VERSION=4.11
 qt_VERSION=5.2.1
 sasl2_VERSION=2.1.26
 openldap_VERSION=2.4.42
-festival_VERSION=2.1x
+festival_VERSION=2.4
 ffmpeg_VERSION=3.1.1
 #qt_VERSION=5.4.1
 
@@ -1535,7 +1535,7 @@ function festival_generate_config()
 {
     local artifactVersion=$2
     export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
-    export CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+    export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
     ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1552,7 +1552,7 @@ function festival_generate_config()
 function festival_build()
 {
     export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
-    export CC_OTHER_FLAGS="-fpermissive $festival_CXXFLAGS"
+    export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
     make -j1 >>$LOG_FILE_PATH 2>&1 || return 1
