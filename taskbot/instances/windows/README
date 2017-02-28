@@ -40,5 +40,13 @@ Prepare to start:
 8. [Optional]. Add start.bat to Windows startup:
    - in the Run window, type shell:startup to open the Startup folder;
    - in the Startup folder create shortcut to ~/taskbot/devtools/taskbot/instances/windows/start.bat
+
+Dump Tools:
+1. Install Windows SDK 10 (contains cdb debugger utility) from
+   https://developer.microsoft.com/en-us/windows/downloads/sdk-archive.
+2. Download & install procdump utility:
+   - Get from https://technet.microsoft.com/en-us/sysinternals/dd996900.aspx;
+   - Unpack to c:/bin;
+   - Add c:/bin to the system environment variables 'Path'.
   
 

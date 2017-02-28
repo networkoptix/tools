@@ -273,7 +273,8 @@ class TaskExecutor:
                parent_task_id = None,
                args = [],
                env_vars=[],
-               core_on_timeout = False):
+               core_on_timeout = False,
+               exec_on_timeout = None):
       
     self.__task_stack__ = []
     self.__db__ = db
@@ -281,6 +282,7 @@ class TaskExecutor:
     self.__branch_id__ = self.__select_branch()
     self.__platform_id__ = self.__select_platform()
     self.__core_on_timeout = core_on_timeout
+    self.__exec_on_timeout = exec_on_timeout
     
     self.__root_task_id__ = \
       self.__select_root_task_id(parent_task_id)
@@ -474,8 +476,11 @@ class TaskExecutor:
       # TODO. Need cross-platform solution to kill child process
       pgid = safe_call(os.getpgid, self.__shell_process__.pid)
       sig = signal.SIGTERM
-      if self.__core_on_timeout and interrupted:
-        sig = signal.SIGSEGV
+      if interrupted:
+        if self.__core_on_timeout:
+          sig = signal.SIGSEGV
+        if self.__exec_on_timeout:
+          safe_call(subprocess.call,  self.__exec_on_timeout.split())
 #        import psutil
 #        parent = psutil.Process(self.__shell_process__.pid)
 #        for child in parent.children(recursive=True):
@@ -533,6 +538,9 @@ def main():
 
   parser.add_option("--core_on_timeout", default=False, action="store_true",
                     help="Send SIG_SEGV to group when timeout expired.")
+
+  parser.add_option("-e", "--exec_on_timeout",
+                    help="Execute command on timeout expired.")
   
   parser.add_option("-c", "--command",
                     help="Execute COMMAND. This option is mutually " \
@@ -605,7 +613,8 @@ def main():
     parent_task_id = parent_task_id,
     args=args[1 + int(not options.command):],
     env_vars=options.var,
-    core_on_timeout = options.core_on_timeout)
+    core_on_timeout = options.core_on_timeout,
+    exec_on_timeout = options.exec_on_timeout)
 
   # Register signal handlers
   def _shutdown( sigNum, frame ):
