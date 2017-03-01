@@ -4,6 +4,7 @@
 
 from smtplib import SMTP, SMTPException
 from email.mime.text import MIMEText
+from Utils import safe_call
 import os, time, re
 
 SMTP_ADDR = 'email-smtp.us-east-1.amazonaws.com:587'
@@ -41,18 +42,21 @@ def send(to, subject, text):
     try:
       smtp = SMTP(SMTP_ADDR)
       try:
-        smtp.ehlo()
+#        smtp.ehlo()
         smtp.starttls()
         smtp.login(SMTP_LOGIN, SMTP_PASS)
         smtp.sendmail(MAIL_FROM, to.values(), msg.as_string())
         break
       finally:
-        smtp.quit()
+        safe_call(smtp.quit)
     except SMTPException, x:
       if i == RETRY_COUNT - 1:
         raise
       print "Can't send email notify: '%s'" % str(x)
       time.sleep(RESEND_TIMEOUT)
+    except Exception, x:
+      print "Exception '%s' when email sent" % str(x)
+      raise
 
 
 def email_body(report, text):
@@ -102,9 +106,9 @@ def notify(report, prev_run, subject, reason,
       (os.environ.get('TASKBOT_BRANCHNAME', ''),
        report.platform.description, subject)
 
-  send(
-    to, subject, 
-    email_body(report, email_commits(cs, reason)))
+  safe_call(send,
+            to, subject, 
+            email_body(report, email_commits(cs, reason)))
 
 def emergency_body(report, name, text):
   return """Chief!
@@ -126,6 +130,6 @@ def emergency(report, name, error):
       (os.environ.get('TASKBOT_BRANCHNAME', ''),
        report.platform.description)
   to = DEBUG_WATCHERS
-  send(to, subject, emergency_body(report, name, error))
+  safe_call(send, to, subject, emergency_body(report, name, error))
   
   

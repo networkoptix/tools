@@ -46,7 +46,8 @@ Dump Tools:
    https://developer.microsoft.com/en-us/windows/downloads/sdk-archive.
 2. Download & install procdump utility:
    - Get from https://technet.microsoft.com/en-us/sysinternals/dd996900.aspx;
-   - Unpack to c:/bin;
-   - Add c:/bin to the system environment variables 'Path'.
+   - Unpack to c:\bin;
+   - Add c:\bin to the system environment variables 'Path';
+   - Run c:\bin\procdump to accept EULA.
   
 
