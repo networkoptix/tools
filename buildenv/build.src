@@ -112,6 +112,8 @@ MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
 if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speech_synthesizer)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so lib/$CONFIGURATION/libudt.so lib/$CONFIGURATION/libnx_network.so lib/$CONFIGURATION/libcloud_db_client.so lib/$CONFIGURATION/libnx_speech_synthesizer.a)
+    MODULES+=(nx_cloud/libcloud_db)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so)
 fi
 
 MODULES+=(appserver2)
@@ -194,12 +196,22 @@ fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [[ ! "$VERSION" < "3.0" ]]; then
-        MODULES+=(nx_cloud/libcloud_db nx_cloud/libvms_gateway)
-        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so lib/$CONFIGURATION/libvms_gateway.so)
+        MODULES+=(nx_cloud/libvms_gateway)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway.so)
 
         if [ $WITH_CLOUD_BIN -eq 1 ]; then
-            MODULES+=(nx_cloud/cloud_db nx_cloud/connection_mediator nx_cloud/vms_gateway)
-            MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db bin/$CONFIGURATION/connection_mediator bin/$CONFIGURATION/vms_gateway)
+            MODULES+=(\
+                nx_cloud/cloud_db \
+                nx_cloud/connection_mediator \
+                nx_cloud/vms_gateway \
+                nx_cloud/cloud_connect_test_util \
+                nx_cloud/time_server)
+            MODULE_BIN_PATH+=(\
+                bin/$CONFIGURATION/cloud_db \
+                bin/$CONFIGURATION/connection_mediator \
+                bin/$CONFIGURATION/vms_gateway \
+                bin/$CONFIGURATION/cloud_connect_test_util \
+                bin/$CONFIGURATION/time_server)
         fi
     fi
 fi
