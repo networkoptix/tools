@@ -14,10 +14,13 @@ class GlossaryRule(ValidationRule):
         case_sensitive = [
             'URL', 'Hi-Res', 'Custom-Res', 
             'ID', 'PTZ',
-            'Email', 'Internet',
+            'License Key',
+            'Hardware Id',
+            'Email', 'internet',
             'System', "Systems",
             'B', 'KB', 'MB', 'GB', 'TB'
-            ]
+            ]           
+            
         invalid_terms = {
             'low-res': 'Lo-Res',
             'qnt': 'Qty',
@@ -30,14 +33,25 @@ class GlossaryRule(ValidationRule):
             if exclusion in text:
                 return True
         
-        for word in text.split(' '):
-            for term in case_sensitive:
-                if word.lower() == term.lower() and word != term:
-                    self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(word, term, text)
-                    return False
+        plain_text = text.lower()
+        for term in case_sensitive:
+            idx = plain_text.find(term.lower())
+            if idx < 0:
+                continue
+            substr = text[idx:idx+len(term)]
+            if idx > 0 and text[idx - 1].isalpha():
+                continue
+                
+            next_idx = idx + len(term)
+            if next_idx < len(text) and text[next_idx].isalpha():
+                continue
+            
+            if substr != term:
+                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(substr, term, text)
+                return False
                     
         for term, fix in invalid_terms.items():
-            if term.lower() in text.lower():
+            if term.lower() in plain_text:
                 self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(term, fix, text)
                 return False     
 
