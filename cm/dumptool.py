@@ -374,7 +374,7 @@ def analyseDump(*args, **kwargs):
         raise UserError("Wrong format value: %s" % format)
     dump = DumpAnalyzer(*args, **kwargs)
     report = report_name(dump.dump_path)
-    if os.path.isfile(report) and 'rewrite' not in kwargs['debug']:
+    if os.path.isfile(report) and 'rewrite' not in kwargs.get('debug', ''):
         if format == 'dict':
             dump.get_dump_information()
             return resultDict(dump, open(report, 'r').read())
