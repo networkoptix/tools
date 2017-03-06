@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<slave>
+  <name>linux-agent</name>
+  <description></description>
+  <remoteFS>/jenkins</remoteFS>
+  <numExecutors>1</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.13">
+    <host>172.17.0.6</host>
+    <port>22</port>
+    <credentialsId>vagrant2</credentialsId>
+    <maxNumRetries>0</maxNumRetries>
+    <retryWaitTime>0</retryWaitTime>
+  </launcher>
+  <label>linux x64</label>
+  <nodeProperties>
+    <hudson.slaves.EnvironmentVariablesNodeProperty>
+      <envVars serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+          </default>
+          <int>5</int>
+          <string>arch</string>
+          <string>x64</string>
+          <string>box</string>
+          <string>none</string>
+          <string>environment</string>
+          <string>/nx/buildenv</string>
+          <string>newmobile</string>
+          <string>false</string>
+          <string>PATH</string>
+          <string>/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/nx/buildenv/bin:/nx/buildenv/qt/bin:/nx/buildenv/maven/bin</string>
+        </tree-map>
+      </envVars>
+    </hudson.slaves.EnvironmentVariablesNodeProperty>
+    <hudson.tools.ToolLocationNodeProperty>
+      <locations>
+        <hudson.tools.ToolLocationNodeProperty_-ToolLocation>
+          <type>hudson.tasks.Maven$MavenInstallation$DescriptorImpl</type>
+          <name>default</name>
+          <home>/nx/buildenv/maven</home>
+        </hudson.tools.ToolLocationNodeProperty_-ToolLocation>
+      </locations>
+    </hudson.tools.ToolLocationNodeProperty>
+  </nodeProperties>
+</slave>

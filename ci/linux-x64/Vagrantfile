@@ -1,0 +1,64 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# nx_vmx project can be build using command:
+# $ vagrant ssh ubuntu_14_04 -- '. ~/.profile && cd /nx/nx_vms && mvn package'
+
+guest_proj_dir = "/nx/nx_vms"
+host_proj_dir = ENV['VMS_PROJ_DIR'] || "/tmp"
+
+puts "HOST PROJECT DIR: #{host_proj_dir}"
+
+
+Vagrant.configure(2) do |config|
+
+  config.ssh.forward_agent = true
+  config.vm.boot_timeout = 900
+
+  config.vm.provision "shell" do |s|
+    s.privileged = false
+    s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+  end
+
+  config.vm.provider :docker do |d|
+    d.has_ssh = true
+  end
+
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = 8*1024  # megabytes
+    vb.cpus = 6
+    vb.gui = false
+    # vb.customize ["modifyvm", :id, "--cpuexecutioncap", "75"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--vram", "32"]
+    # network created by virtualbox by default conflicts with nx moscow local network 10.0.2.0/23
+    vb.customize ["modifyvm", :id, "--natnet1", "10.0.5/24"]
+  end
+
+  config.vm.define "ubuntu_16_04" do |box|
+    box.vm.hostname = "ubuntu.16.04"
+    box.vm.box = "ubuntu/xenial64"
+    box.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--name", "ubuntu_16_04"]
+    end
+    box.vm.provision :shell, :path => "setup-build-box-linux.sh", :args => []
+  end
+
+  config.vm.define "ubuntu_14_04" do |box|
+    box.vm.hostname = "ubuntu.14.04"
+
+    box.vm.provider :docker do |d|
+      d.image = "tknerr/baseimage-ubuntu:14.04"  # ubuntu 14.04 precooked for vagrant
+    end
+
+    box.vm.provider :virtualbox do |vb, override|
+      override.vm.box = "ubuntu/trusty64"
+      vb.customize ["modifyvm", :id, "--name", "ubuntu_14_04"]
+    end
+
+    box.vm.synced_folder host_proj_dir, guest_proj_dir
+    box.vm.provision :shell, :path => "setup-build-box-linux.sh", :args => []
+    box.vm.provision :shell, :privileged => false, :path => "setup-env-build-box-linux.sh", :args => []
+  end
+
+end
