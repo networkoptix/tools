@@ -28,7 +28,7 @@ _version_rx = re.compile(r"^\d+\.\d+\.\d+")
 issue_data = {
     "fields" : {
         "project": { "key": JIRA_PROJECT },
-        "issuetype": { "name": "Bug" },
+        "issuetype": { "name": "Crash" },
         "summary": "Testing bug creation scripting",
         "customfield_10200": {"value": "Server"},
         "versions": [ ],
