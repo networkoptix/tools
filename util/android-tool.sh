@@ -16,18 +16,18 @@ Usage: run from any dir inside nx_vms:
 $(basename "$0") [--verbose] <command>
 Here <command> can be one of the following:
 
-device - Check Android device is connected and mount it to '/android'.
+devices # Check that the Android device is connected.
 
-deploy - Rebuild apk, reinstall apk, launch the app.
-run - Lanuch the app.
-stop - Force-stop the app.
-log - Show Mobile Client log via filtering 'adb logcat'.
-uninstall - Uninstall apk from Android device.
-install - Install apk to Android device.
+deploy # Rebuild apk, reinstall apk, launch the app.
+run # Lanuch the app.
+stop # Force-stop the app.
+log # Show Mobile Client log via filtering "adb logcat".
+uninstall # Uninstall apk from Android device.
+install # Install apk to Android device.
 
-java - After changing .java: copy sources so that 'deploy' will rebuild classes.
-rebuild ... - Perform 'mvn clean package' with the required parameters.
-unpack <path/to/new/dir> - Unpack existing .apk, including dex2jar.
+java # After changing .java: copy sources so that "deploy" will rebuild classes.
+rebuild [args] # Perform "hg purge --all" and "mvn clean package ... [args]", excluding unit tests.
+unpack <path/to/new/dir> # Unpack existing .apk, including dex2jar.
 EOF
 }
 
@@ -43,7 +43,7 @@ find_VMS_DIR()
 
 #--------------------------------------------------------------------------------------------------
 
-mount_adb()
+adb_devices()
 {
     ADB_DEVICES="$(adb devices)"
     if [ -z  "$(echo "$ADB_DEVICES" |grep -w "device")" ]; then
@@ -83,15 +83,15 @@ main()
     shift
     case "$COMMAND" in
         #..........................................................................................
-        device)
-            mount_adb || exit $?
+        devices)
+            adb_devices || exit $?
             nx_echo "SUCCESS: Android device is accessible."
             exit 0
             ;;
         #..........................................................................................
         deploy)
             find_VMS_DIR
-            mount_adb || exit $?
+            adb_devices || exit $?
 
             rm -rf "$VMS_DIR/build_environment/target/lib/debug/libmobile_client.so"
             rm -rf "$VMS_DIR/client/mobile_client/arm/apk/bin"/*.apk
@@ -128,12 +128,12 @@ main()
             exit $?
             ;;
         uninstall)
-            mount_adb || exit $?
+            adb_devices || exit $?
             do_uninstall
             exit $?
             ;;
         install)
-            mount_adb || exit $?
+            adb_devices || exit $?
             do_install
             exit $?
             ;;
@@ -150,8 +150,9 @@ main()
         rebuild)
             find_VMS_DIR
             cd "$VMS_DIR"
-            mvn clean package \
-                -Dbox=android -Darch=arm -Dnewmobile=true -Dcloud.url="cloud-test.hdw.mx" "$@"
+            hg purge --all || exit $?
+            mvn clean package -Dbox=android -Darch=arm \
+                -Dnewmobile=true -Dcloud.url="cloud-test.hdw.mx" "$@"
             exit $?
             ;;
         unpack)

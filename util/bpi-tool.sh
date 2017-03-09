@@ -793,11 +793,11 @@ main()
             exit $?
             ;;
         lib)
-            if [ "$2" = "" ]; then
+            if [ "$1" = "" ]; then
                 find_LIB_DIR
                 LIB_NAME=$(basename "$LIB_DIR")
             else
-                LIB_NAME="$2"
+                LIB_NAME="$1"
             fi
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             exit $?
@@ -846,10 +846,9 @@ main()
             exit $?
             ;;
         stop)
-            bpi \
-                /etc/init.d/networkoptix-lite-client stop \&\& \
-                echo \&\& \
-                /etc/init.d/networkoptix-mediaserver stop
+            bpi /etc/init.d/networkoptix-lite-client stop
+            nx_echo
+            bpi /etc/init.d/networkoptix-mediaserver stop
             exit $?
             ;;
         run-ut)
@@ -859,7 +858,7 @@ main()
             local ARGS=("$@")
 
             echo "Running: $TEST_NAME ${ARGS[@]}"
-            bpi "LD_LIBRARY_PATH=$BPI_MEDIASERVER_DIR/../lib" \
+            bpi LD_LIBRARY_PATH="$BPI_MEDIASERVER_DIR/../lib" \
                 "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "${ARGS[@]}"
             exit $?
             ;;
@@ -924,7 +923,7 @@ main()
         rebuild)
             find_VMS_DIR
             cd "$VMS_DIR"
-            mvn clean package -Dbox=bpi -Darch=arm -Dcloud.url="cloud-test.hdw.mx" "$@"
+            mvn clean package -Dbox=bpi -Darch=arm -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
             exit $?
             ;;
         pack-short)
