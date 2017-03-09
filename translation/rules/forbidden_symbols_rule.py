@@ -13,7 +13,7 @@ class ForbiddenSymbolsRule(ValidationRule):
         return Levels.CRITICAL
 
     def valid(self, source, translation):
-        forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>', u'ё']
+        forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>', '&amp;']
         for substring in forbidden:
             if substring in source:
                 self.lastErrorText = u"Invalid substring {0} found in:\n\"{1}\"".format(substring, source)
