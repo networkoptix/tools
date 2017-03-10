@@ -10,6 +10,15 @@ class ValidationRule:
     def last_error_text(self):
         return self.lastErrorText
 
+    def valid_text(self, text):
+        return True
+        
+    def valid_source(self, source):
+        return self.valid_text(source)
+        
+    def valid_translations(self, source, translation):
+        return all(self.valid_text(text) for text in ValidationRule.translation_texts(translation))
+        
     @staticmethod
     def translation_texts(translation):
         isNumerus = False

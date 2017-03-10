@@ -1,5 +1,8 @@
 from validation_rule import ValidationRule, Levels
 
+leading = [' ', '<', '&lt;']
+trailing = [' '] #colons, dots will possibly be here
+
 class LeadingTrailingSymbolsRule(ValidationRule):
     def __str__(self):
         return "Check leading and trailing symbols and other forbidden symbols"
@@ -10,26 +13,15 @@ class LeadingTrailingSymbolsRule(ValidationRule):
     def level(self):
         return Levels.CRITICAL
 
-    def valid(self, source, translation):
-        leading = [' ', '<', '&lt;']
+    def valid_text(self, text):
         for substring in leading:
-            if source.startswith(substring):
-                self.lastErrorText = u"Invalid leading substring {0} found in source:\n\"{1}\"".format(substring, source)
+            if text.startswith(substring):
+                self.lastErrorText = u"Invalid leading substring {0} found in text:\n\"{1}\"".format(substring, text)
                 return False
-            for text in ValidationRule.translation_texts(translation):
-                if text.startswith(substring):
-                    self.lastErrorText = u"Invalid leading substring {0} found in translation:\n\"{1}\"".format(substring, text)
-                    return False
 
-        #colons, dots will possibly be here
-        trailing = [' ']
         for substring in trailing:
-            if source.endswith(substring):
-                self.lastErrorText = u"Invalid trailing substring {0} found in source:\n\"{1}\"".format(substring, source)
+            if text.endswith(substring):
+                self.lastErrorText = u"Invalid trailing substring {0} found in text:\n\"{1}\"".format(substring, text)
                 return False
-            for text in ValidationRule.translation_texts(translation):
-                if text.endswith(substring):
-                    self.lastErrorText = u"Invalid trailing substring {0} found in translation:\n\"{1}\"".format(substring, text)
-                    return False
 
         return True

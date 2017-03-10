@@ -10,7 +10,7 @@ class ContractionsRule(ValidationRule):
     def level(self):
         return Levels.CRITICAL
 
-    def valid(self, source, translation):
+    def valid_source(self, source):
         apos = '\''
         if not apos in source:
             return True

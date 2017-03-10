@@ -10,8 +10,8 @@ class AtLeastOneAlphaRule(ValidationRule):
     def level(self):
         return Levels.CRITICAL
 
-    def valid(self, source, translation):
-        valid = any(c.isalpha() for c in source)
+    def valid_text(self, text):
+        valid = any(c.isalpha() for c in text)
         if not valid:
-            self.lastErrorText = u"No alphabet characters found in:\n\"{0}\"".format(source)
+            self.lastErrorText = u"No alphabet characters found in:\n\"{0}\"".format(text)
         return valid

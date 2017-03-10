@@ -30,6 +30,7 @@ verbose = False
 strict = False
 language = None
 errorsOnly = False
+translationsOnly = False
 
 def printCritical(text, context, filename):
     err(u'*** Context: {0} ***\n{1}'.format(context, text))
@@ -76,7 +77,7 @@ def checkText(source, target, context, result, index, hasNumerusForm):
                 warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
             result.warned += 1
             break
-           
+
     for symbol in critical:
         if not checkSymbol(symbol, source, target, context, err):
             result.error += 1
@@ -103,6 +104,19 @@ def checkText(source, target, context, result, index, hasNumerusForm):
 
 
     return result;
+
+def handleRuleError(rule, context, filename, result):
+    if rule.level() == Levels.CRITICAL:
+        result.error += 1
+        printCritical(rule.last_error_text(), context, filename)
+
+def handleRule(rule, context, filename, source, translation, result):
+    if not translationsOnly and not rule.valid_source(source):
+        handleRuleError(rule, context, filename, result)
+
+    if not rule.valid_translations(source, translation):
+        handleRuleError(rule, context, filename, result)
+
 
 def validateXml(root, filename):
     result = ValidationResult()
@@ -133,13 +147,9 @@ def validateXml(root, filename):
 
             if translation.get('type') == 'obsolete':
                 continue
-                
+
             for rule in get_validation_rules():
-                if rule.valid(source.text, translation):
-                    continue
-                if rule.level() == Levels.CRITICAL:
-                    result.error += 1
-                    printCritical(rule.last_error_text(), contextName, filename)
+                handleRule(rule, contextName, filename, source.text, translation, result)
 
             hasNumerusForm = False
             index = 0
@@ -213,8 +223,9 @@ def main():
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
-    parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")    
+    parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")
     parser.add_argument('-l', '--language', help="check only selected language")
+    parser.add_argument('-to', '--translations-only', action='store_true', help="check only translations")
     args = parser.parse_args()
 
     global verbose
@@ -228,7 +239,10 @@ def main():
 
     global errorsOnly
     errorsOnly = args.errors_only
-    
+
+    global translationsOnly
+    translationsOnly = args.translations_only
+
     if args.color:
         init_color()
 
