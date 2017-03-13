@@ -13,11 +13,12 @@ nx_load_config ".bpirc" #< Load config and assign defaults to values missing in 
 : ${BPI_HOST:="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
 : ${BPI_TERMINAL_TITLE:="$BPI_HOST"}
 : ${BPI_BACKGROUND_RRGGBB:="003000"}
-: ${BPI_PACKAGES_SRC_DIR:="/root/develop/third_party/bpi"} #< Should be mounted at bpi.
+: ${BPI_DEVELOP_DIR:="/root/develop"}
+: ${BPI_PACKAGES_SRC_DIR:="$BPI_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at bpi.
 : ${DEVELOP_DIR:="$HOME/develop"}
 : ${SDCARD_PARTITION_SECTORS:="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
-: ${PACKAGES_SRC_DIR="DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
+: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
 : ${QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at this workstation.
 : ${NX_CONF="debug"}
 
@@ -66,6 +67,7 @@ Here <command> can be one of the following:
 nfs # Mount bpi root to $BPI_MNT via NFS.
 sshfs # Mount bpi root to $BPI_MNT via SSHFS.
 passwd # Change root password from "$BPI_INITIAL_PASSWORD" to "$BPI_PASSWORD".
+mount # Mount ~/develop to bpi's /root/develop via sshfs. May require workstation password.
 
 sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it.
 img [--force] sd_card_image.img # Write the image onto the SD Card.
@@ -90,7 +92,7 @@ kill-c # Stop mobile_client via "killall mobile_client".
 start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
 stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
 start-c [args] # Run mobile_client via "/etc/init.d/networkoptix-lite-client start [args]".
-stop-s # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
+stop-c # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
 run-ut [test-name args] # Run the specified unit test with strict expectations.
 start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
 stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
@@ -116,24 +118,7 @@ EOF
 # Execute a command at bpi via ssh, or log in to bpi via ssh.
 bpi() # args...
 {
-    # Ssh reparses the combined args string at bpi, thus, it needs to be escaped.
-    local ARGS=""
-    if [ ! -z "$*" ]; then
-        printf -v ARGS "%q " "$@"
-        ARGS="${ARGS//\\\*/*}" #< Unescape each "*" to enable passing globs.
-        ARGS="${ARGS%?}" #< Trim the last space introduced by printf.
-    fi
-
-    local OLD_BACKGROUND
-    nx_get_background OLD_BACKGROUND
-    nx_set_background "$BPI_BACKGROUND_RRGGBB"
-    nx_push_title
-    nx_set_title "$BPI_TERMINAL_TITLE"
-
-    sshpass -p "$BPI_PASSWORD" ssh -t "root@$BPI_HOST" ${ARGS:+"$ARGS"} #< Omit the param if empty.
-
-    nx_pop_title
-    nx_set_background "$OLD_BACKGROUND"
+    nx_ssh "root" "$BPI_PASSWORD" "$BPI_HOST" "$BPI_TERMINAL_TITLE" "$BPI_BACKGROUND_RRGGBB" "$@"
 }
 
 pack() # archive files...
@@ -577,6 +562,21 @@ main()
             nx_echo "New bpi password: $BPI_PASSWORD"
             exit $?
             ;;
+        mount)
+            local BPI_IP=$(ping -q -c 1 -t 1 bpi | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+            local SUBNET=$(echo "$BPI_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
+            local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
+            bpi umount "$BPI_DEVELOP_DIR" #< Just in case.
+            bpi mkdir -p "$BPI_DEVELOP_DIR" || exit $?
+            bpi apt-get install -y sshfs #< Install sshfs.
+
+            # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at bpi.
+            nx_echo "\nExecute the following command at bpi:"
+            nx_echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty
+            #bpi sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty \
+                #&& echo "$DEVELOP_DIR mounted to bpi's $BPI_DEVELOP_DIR."
+            exit $?
+            ;;
         #..........................................................................................
         sdcard) # [/dev/sd...]
             local NEW_DEV_SDCARD="$1"
@@ -804,9 +804,9 @@ main()
             ;;
         ini)
             bpi \
-                touch /tmp/mobile_client.ini \&\& \
-                touch /tmp/nx_media.ini \&\& \
-                touch /tmp/ProxyVideoDecoder.ini \&\& \
+                touch /tmp/mobile_client.ini "{&&}" \
+                touch /tmp/nx_media.ini "{&&}" \
+                touch /tmp/ProxyVideoDecoder.ini "{&&}" \
                 touch /tmp/proxydecoder.ini
             exit $?
             ;;
@@ -840,31 +840,30 @@ main()
             exit $?
             ;;
         start)
-            bpi /etc/init.d/networkoptix-mediaserver start "$@"
-            nx_echo
-            bpi /etc/init.d/networkoptix-lite-client start "$@"
+            bpi \
+                /etc/init.d/networkoptix-mediaserver start "$@" "{&&}" \
+                echo "{&&}" \
+                /etc/init.d/networkoptix-lite-client start "$@"
             exit $?
             ;;
         stop)
-            bpi /etc/init.d/networkoptix-lite-client stop
-            nx_echo
-            bpi /etc/init.d/networkoptix-mediaserver stop
+            bpi \
+                /etc/init.d/networkoptix-lite-client stop "{&&}" \
+                echo "{&&}" \
+                /etc/init.d/networkoptix-mediaserver stop
             exit $?
             ;;
         run-ut)
-            local TEST_NAME="$1"
-            shift
+            local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
-            local ARGS=("$@")
-
-            echo "Running: $TEST_NAME ${ARGS[@]}"
+            nx_echo "Running: $TEST_NAME $@"
             bpi LD_LIBRARY_PATH="$BPI_MEDIASERVER_DIR/../lib" \
-                "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "${ARGS[@]}"
+                "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             exit $?
             ;;
         #..........................................................................................
         vdp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" \&\& echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "{&&}" echo "SUCCESS"
             exit $?
             ;;
         vdp-rdep)
@@ -874,7 +873,7 @@ main()
             exit $?
             ;;
         pd)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" \&\& echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" "{&&}" echo "SUCCESS"
             exit $?
             ;;
         pd-rdep)
@@ -887,9 +886,9 @@ main()
         cedrus)
             if [ "$1" = "ump" ]; then
                 shift
-                bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" \&\& echo "SUCCESS"
+                bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "{&&}" echo "SUCCESS"
             else
-                bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" \&\& echo "SUCCESS"
+                bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "{&&}" echo "SUCCESS"
             fi
             exit $?
             ;;
@@ -901,16 +900,16 @@ main()
             ;;
         ump)
             bpi \
-                rm -r /tmp/libump \&\& \
-                cp -r "$BPI_PACKAGES_SRC_DIR/libump" /tmp/ \&\& \
-                cd /tmp/libump \&\& \
-                dpkg-buildpackage -b \|\| \
-                    echo "WARNING: Package build failed; manually installing .so and .h." \&\& \
+                rm -r /tmp/libump "{&&}" \
+                cp -r "$BPI_PACKAGES_SRC_DIR/libump" /tmp/ "{&&}" \
+                cd /tmp/libump "{&&}" \
+                "{{}" dpkg-buildpackage -b "{||}" \
+                    echo "WARNING: Package build failed; manually installing .so and .h." "{}}" "{;}" \
                 cp -r /tmp/libump/debian/tmp/usr /
             exit $?
             ;;
         ldp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" \&\& echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "{&&}" echo "SUCCESS"
             exit $?
             ;;
         ldp-rdep)

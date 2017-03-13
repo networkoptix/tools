@@ -11,7 +11,7 @@ nx_handle_help() # "$@"
 {
     if [ $# = 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
         help
-        exit 0
+        exit 1
     fi
 }
 
@@ -146,6 +146,48 @@ nx_restore_cursor_pos()
 
 #--------------------------------------------------------------------------------------------------
 # High-level utils, can use low-level utils.
+
+# Execute a command via ssh, or log in via ssh.
+#
+# Ssh reparses the concatenated args string at the remote host, thus, this function performs the
+# escaping of the args, except for the "*" chars (to enable globs) and args in curly braces (to
+# enable e.g. combining commands via "{&&}" or redirecting with "{>}").
+nx_ssh() # user password host terminal_title background_rrggbb [command [args...]]
+{
+    local USER="$1"; shift
+    local PASSWORD="$1"; shift
+    local HOST="$1"; shift
+    local TERMINAL_TITLE="$1"; shift
+    local BACKGROUND_RRGGBB="$1"; shift
+
+    # Concatenate and escape the args except "*" and args in "{}".
+    local ARGS=""
+    if [ ! -z "$*" ]; then
+        for ARG in "$@"; do
+            case "$ARG" in
+                {*}) # Anything in curly braces.
+                    ARGS+="${ARG:1:-1} " #< Trim surrounding braces.
+                    ;;
+                *)
+                    printf -v ARG_ESCAPED "%q " "$ARG" #< Perform the escaping.
+                    ARGS+="${ARG_ESCAPED//\\\*/*}" #< Append, unescaping all "*".
+                    ;;
+            esac
+        done
+        ARGS="${ARGS%?}" #< Trim the last space introduced by printf.
+    fi
+
+    local OLD_BACKGROUND
+    nx_get_background OLD_BACKGROUND
+    nx_set_background "$BACKGROUND_RRGGBB"
+    nx_push_title
+    nx_set_title "$TERMINAL_TITLE"
+
+    sshpass -p "$PASSWORD" ssh -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit the param if empty.
+
+    nx_pop_title
+    nx_set_background "$OLD_BACKGROUND"
+}
 
 # Return in the specified variable the array of files found by 'find' command.
 nx_find_files() # FILES_ARRAY_VAR find_args...
