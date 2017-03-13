@@ -133,7 +133,9 @@ DRIVERS_FILTER = [
     r'nvoglv64',
     r'DpOFeedb',
     r'LavasoftTcpService64',
-    r'DBROverlayIconBackuped' ]
+    r'DBROverlayIconBackuped',
+    r'ColdstoreSpectrumPlugin',
+    r'QnCrashServerHandler']
 
 def need_process_calls(calls):
     level = 0
@@ -593,7 +595,7 @@ class CrashMonitor(object):
 
     def create_jira_issue(self, crash, calls, priority, crashes_count, dumps):
         desc = (
-            "Crash Monitor detected '%d' crashes with a new trace path\n\n"
+            "Crash Monitor detected *_%d_* crashes with a new trace path\n\n"
             "Hash: %s\n"
             "Call stask (named functions only):\n{code}%s{code}\n\n"
              % (crashes_count, crash['hash'], calls)
