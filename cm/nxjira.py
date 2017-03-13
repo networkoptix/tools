@@ -204,6 +204,21 @@ def create_attachment(issue, name, data):
     #print "DEBUG: attached %s" % (name,)
     return None
 
+def create_dump_attachment(issue, url, auth):
+    name = os.path.basename(url)
+    query = ISSUE + issue + '/attachments'
+    try:
+        res_dump = requests.get(url, auth = auth)
+        if res_dump.status_code != 200:
+            print "Error when download dump attachment '%s': %s" % (url, res_dump.status_code)
+            return
+        res = requests.request('POST', query, auth=AUTH, headers={"X-Atlassian-Token": "nocheck"},
+                               files={'file': (name, res_dump.content, 'text/plain')})
+        if res.status_code != CODE_OK:
+            print "Error creating dump attachment '%s' to the JIRA issue %s" % (name, issue)
+    except requests.exceptions.RequestException as e:
+        print "Error creating dump attachment '%s' to the JIRA issue %s: '%s'" % (name, issue, str(e))
+
 def create_web_link(issue, name, url):
     try:
         query = issue + '/remotelink'

@@ -54,6 +54,9 @@ if os.name == 'posix':  # may be platform.system is better? ;)
                 ) and (
                 path.endswith('.crash') or path.endswith('.gdb-bt'))
 
+    def is_windows_dump(path):
+        return False
+
     
 
     filt_path = "/usr/bin/c++filt"
@@ -91,6 +94,9 @@ elif os.name == 'nt':
     def is_crash_dump_path(path):
         return path.endswith('.cdb-bt')
 
+    def is_windows_dump(path):
+        return path.endswith('.dmp')
+
     def demangle_names(names):  # already processed
         return names
 
@@ -103,6 +109,10 @@ else:
 
 def attachment_filter(attachment):
     return is_crash_dump_path(attachment["filename"])
+
+def attachment_windows_dump_filter(attachment):
+    return is_windows_dump(attachment["filename"])
+
 
 def web_link_filter(link):
     if not link or \
@@ -541,8 +551,16 @@ class CrashMonitor(object):
                                             if not nxjira.delete_oldest_web_link(issue_data, predicat=web_link_filter):
                                                 break
                                             link_count -= 1
+                                        _, dump_attach_count = nxjira.count_attachments(
+                                            issue_data, predicat=attachment_windows_dump_filter)
+                                        while dump_attach_count >= 0:
+                                            print "Deleting oldest attachment in %s" % crashinfo.issue
+                                            if not nxjira.delete_oldest_attchment(
+                                                issue_data, predicat=attachment_windows_dump_filter):
+                                                break
+                                            dump_attach_count -= 1
                                         if attach_count < MAX_ATTACHMENTS and link_count < MAX_ATTACHMENTS:
-                                            res = self.add_attachment(crashinfo.issue, crash['path'], crash['dump'], crash['url'])
+                                            res = self.add_attachment(crashinfo.issue, crash['path'], crash['dump'], crash['url'], True)
                                             if res is not None:
                                                 email_cant_attach(crash, crashinfo.issue, crash['url'], res, crash['path'])
                                         # 2. Check if the priority should be increased
@@ -605,19 +623,23 @@ class CrashMonitor(object):
             name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn)
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
+        is_first = True
         for url, path, dump in dumps:
-            res = self.add_attachment(issue_key, path, dump, url)
+            res = self.add_attachment(issue_key, path, dump, url, is_first)
+            is_first = False
             if res is not None:
                 email_cant_attach(crash, issue_key, url, res, path)
         print "New jira issue created: %s" % (issue_key,)
         return issue_key
 
-    def add_attachment(self, issue, name, dump, url):
+    def add_attachment(self, issue, name, dump, url, add_dump_attachment):
         name = report_name(name.lstrip('/'))
         if not is_crash_dump_path(name):
             print "WARNING: Strange crash dump name: %s" % name
             print "POSSIBLY is_crash_dump_path() conditions are to be updated!"
         res = nxjira.create_web_link(issue, name, url)
+        if not res and add_dump_attachment:
+            nxjira.create_dump_attachment(issue, url, AUTH)
         return nxjira.create_attachment(issue, name, dump) or res
 
     def increase_priority(self, key, crashinfo, priority, issue_data=None):
