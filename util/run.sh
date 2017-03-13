@@ -22,17 +22,19 @@ Example:
     run.sh mediaserver -e   # run mediaserver
     R=1 V="--tool=exp-dhat" run.sh client.bin   # run release client under valgrind dhat
     A=bpi C=./core run.sh mediaserver   # open mediaserver core for bpi
-    VT=mem O=/tmp/network.vg nx_network_ut --ll=DEBUG2   # run network tests with valgrind
+    VT=leak O=/tmp/network.vg nx_network_ut --ll=DEBUG2   # run network tests with valgrind
 END
 exit 0
 fi
 
 set -e
 [[ $NOX ]] || set -x
+DEVTOOLS=$(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)
 
 EXTRA=debug/
 [ "$R" ] && EXTRA=release/
 [ "$L" ] && ulimit -c unlimited
+[ "$VT" ] && V="$($DEVTOOLS/valgrind/args.sh $VT $1) $V"
 
 if [ "$A" ]; then
     ARCH=-$A; ARCH_GREP=$A
@@ -63,27 +65,12 @@ RDEP_LIB_DIRS=$(find "$PWD/../buildenv/packages/" -name lib -o -name platforms \
         | sort -r | grep $OS_GREP-$ARCH_GREP | awk "/qt-$Q/ || !/qt-/" \
         | while read L; do echo -n ":${L}"; done)
 
-[[ $NOX ]] && set -x
+[[ $NOX ]] || set -x
 if [ $(uname) == Darwin ]; then
     export DYLD_LIBRARY_PATH="$BUILD_LIB_DIRS:$DYLD_LIBRARY_PATH:$RDEP_LIB_DIRS"
     export DYLD_FRAMEWORK_PATH="$DYLD_FRAMEWORK_PATH:$RDEP_LIB_DIRS"
 else
     export LD_LIBRARY_PATH="$BUILD_LIB_DIRS:$LD_LIBRARY_PATH:$RDEP_LIB_DIRS"
-fi
-
-# Update $V (valgrind options) in case of $VT (some tool is selected)
-if [ "$VT" ]; then
-    OLD_V="$V"
-    VS=${VS:-$(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)/valgrind/memcheck-ms.supp}
-    case "$VT" in
-        *leak*) V="--leak-check=yes --show-leak-kinds=definite --undef-value-errors=no --suppressions=$VS" ;;
-        *rw*) V="--leak-check=no --undef-value-errors=no" ;;
-        *dhat*) V="--tool=exp-dhat --show-top-n=100 --sort-by=max-bytes-live" ;;
-        *mass*) V="--tool=massif" ;;
-        *call*) V="--tool=callgrind --callgrind-out-file=$1-$(time +%s).cg" ;;
-        *) echo "Unsupported tool: $VT" >&2; exit 1 ;;
-    esac
-    V+=" --num-callers=25 $OLD_V"
 fi
 
 if [ "$C" ]; then $GDB $@ $C

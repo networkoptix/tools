@@ -8,6 +8,7 @@ TOOL=${1:-mem}
 MS_PATH=$(find /opt -type d -name mediaserver)
 cp $SCRIPT_PATH/memcheck-ms.supp $MS_PATH/bin
 cp $SCRIPT_PATH/run-ms.sh $MS_PATH/bin/mediaserver-valgrind
+cp $SCRIPT_PATH/args.sh $MS_PATH/bin/args.sh
 
 # Huck service
 INIT_SCRIPT=$(find /etc/init -name '*mediaserver.conf')
