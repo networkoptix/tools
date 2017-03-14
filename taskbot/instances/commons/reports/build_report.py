@@ -141,6 +141,11 @@ class BuildReport(Report):
       mvn_task = self.find_task('%mvn package%', [build])
       if mvn_task:
         self.__build_report(mvn_task[0])
+      else:
+        # Add absent error report
+        self.add_history('"RED"', "There is no build")
+        print >> sys.stderr, "Cannot create build report (build task absent)" 
+        return 1
       
 
     history = "<br>{0}<br>".format(desc)
@@ -181,4 +186,3 @@ class BuildReport(Report):
 
 if __name__ == "__main__":
   sys.exit(BuildReport(sys.argv[1]).generate())
-

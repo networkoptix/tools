@@ -28,7 +28,7 @@ DEB_PROP_FILENAME="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-
 DEB_FILENAME=$(cat "$DEB_PROP_FILENAME" | sed -r 's/server\.finalName=//')
 DEB_FILEPATH="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb"
 echo $DEB_FILEPATH
-cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/networkoptix-mediaserver.deb
+cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/mediaserver.deb
 #cp "$TASKBOT_VAR"/var/testing/vagrant/networkoptix-mediaserver.deb "$FUNTESTS_DIR"/wd
 
 VBoxManage list vms
