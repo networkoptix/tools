@@ -150,8 +150,8 @@ nx_restore_cursor_pos()
 # Execute a command via ssh, or log in via ssh.
 #
 # Ssh reparses the concatenated args string at the remote host, thus, this function performs the
-# escaping of the args, except for the "*" chars (to enable globs) and args in curly braces (to
-# enable e.g. combining commands via "{&&}" or redirecting with "{>}").
+# escaping of the args, except for the "*" chars (to enable globs) and args in square brackets (to
+# enable e.g. combining commands via "[&&]" or redirecting with "[>]").
 nx_ssh() # user password host terminal_title background_rrggbb [command [args...]]
 {
     local USER="$1"; shift
@@ -160,12 +160,12 @@ nx_ssh() # user password host terminal_title background_rrggbb [command [args...
     local TERMINAL_TITLE="$1"; shift
     local BACKGROUND_RRGGBB="$1"; shift
 
-    # Concatenate and escape the args except "*" and args in "{}".
+    # Concatenate and escape the args except "*" and args in "[]".
     local ARGS=""
     if [ ! -z "$*" ]; then
         for ARG in "$@"; do
             case "$ARG" in
-                {*}) # Anything in curly braces.
+                "["*"]") # Anything in square brackets.
                     ARGS+="${ARG:1:-1} " #< Trim surrounding braces.
                     ;;
                 *)

@@ -804,9 +804,9 @@ main()
             ;;
         ini)
             bpi \
-                touch /tmp/mobile_client.ini "{&&}" \
-                touch /tmp/nx_media.ini "{&&}" \
-                touch /tmp/ProxyVideoDecoder.ini "{&&}" \
+                touch /tmp/mobile_client.ini "[&&]" \
+                touch /tmp/nx_media.ini "[&&]" \
+                touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
             exit $?
             ;;
@@ -841,15 +841,15 @@ main()
             ;;
         start)
             bpi \
-                /etc/init.d/networkoptix-mediaserver start "$@" "{&&}" \
-                echo "{&&}" \
+                /etc/init.d/networkoptix-mediaserver start "$@" "[&&]" \
+                echo "[&&]" \
                 /etc/init.d/networkoptix-lite-client start "$@"
             exit $?
             ;;
         stop)
             bpi \
-                /etc/init.d/networkoptix-lite-client stop "{&&}" \
-                echo "{&&}" \
+                /etc/init.d/networkoptix-lite-client stop "[&&]" \
+                echo "[&&]" \
                 /etc/init.d/networkoptix-mediaserver stop
             exit $?
             ;;
@@ -863,7 +863,7 @@ main()
             ;;
         #..........................................................................................
         vdp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "{&&}" echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
             exit $?
             ;;
         vdp-rdep)
@@ -873,7 +873,7 @@ main()
             exit $?
             ;;
         pd)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" "{&&}" echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
             exit $?
             ;;
         pd-rdep)
@@ -886,9 +886,9 @@ main()
         cedrus)
             if [ "$1" = "ump" ]; then
                 shift
-                bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "{&&}" echo "SUCCESS"
+                bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
             else
-                bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "{&&}" echo "SUCCESS"
+                bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
             fi
             exit $?
             ;;
@@ -900,16 +900,16 @@ main()
             ;;
         ump)
             bpi \
-                rm -r /tmp/libump "{&&}" \
-                cp -r "$BPI_PACKAGES_SRC_DIR/libump" /tmp/ "{&&}" \
-                cd /tmp/libump "{&&}" \
-                "{{}" dpkg-buildpackage -b "{||}" \
-                    echo "WARNING: Package build failed; manually installing .so and .h." "{}}" "{;}" \
+                rm -r /tmp/libump "[&&]" \
+                cp -r "$BPI_PACKAGES_SRC_DIR/libump" /tmp/ "[&&]" \
+                cd /tmp/libump "[&&]" \
+                "[{]" dpkg-buildpackage -b "[||]" \
+                    echo "WARNING: Package build failed; manually installing .so and .h." "[}]" "[;]" \
                 cp -r /tmp/libump/debian/tmp/usr /
             exit $?
             ;;
         ldp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "{&&}" echo "SUCCESS"
+            bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
             exit $?
             ;;
         ldp-rdep)

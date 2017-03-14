@@ -208,7 +208,7 @@ main()
             ;;
         ini)
             tx1 \
-                touch /tmp/mobile_client.ini "{&&}" \
+                touch /tmp/mobile_client.ini "[&&]" \
                 touch /tmp/nx_media.ini \
             exit $?
             ;;
@@ -238,7 +238,8 @@ main()
         rebuild)
             find_VMS_DIR
             cd "$VMS_DIR"
-            mvn clean package -Dbox=tx1 -Darch=aarch64 -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
+            mvn clean package \
+                -Dbox=tx1-aarch64 -Darch=aarch64 -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
             exit $?
             ;;
         #..........................................................................................
