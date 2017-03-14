@@ -1080,11 +1080,13 @@ function ffmpeg_generate_config()
             ffmpeg_DECODERS_STR+="--enable-decoder=$decoder "
         done
 
+        local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
 ./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
---enable-cross-compile --cross-prefix=$CROSS_PREFIX \
+--enable-cross-compile --cross-prefix=$TOOLCHAIN_PREFIX \
 --arch=arm --target-os=linux --disable-debug --enable-dct --enable-asm \
 --disable-everything \
 --enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
@@ -1118,13 +1120,23 @@ EOF
             ffmpeg_CONFIG_OPTIONS+=" --disable-debug --enable-optimizations"
         fi
 
+        if [ ! -z "$CROSS_PREFIX" ]; then
+            # E.g. NVidia Tegra
+            local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+            local CROSS_OPTIONS="--enable-cross-compile --cross-prefix=$TOOLCHAIN_PREFIX --target-os=linux "
+            local EXTRA_CODECS=""
+        else
+            local CROSS_OPTIONS=""
+            local EXTRA_CODECS="--enable-libmp3lame --enable-libvpx --enable-libvorbis "
+        fi
+
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
 [ $OS = "windows" ] && sed -i'' 's/-lvorbisenc//g' configure 2> /dev/null
 
 ./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
---arch=$makeArch --enable-libmp3lame --enable-libvorbis --enable-libvpx \
+$CROSS_OPTIONS --arch=$makeArch $EXTRA_CODECS \
 $ffmpeg_EXTRA_OPTIONS \
 $ffmpeg_CONFIG_OPTIONS
 EOF
@@ -1142,7 +1154,7 @@ function ffmpeg_build()
 
     [ $OS = "windows" ] && makeFlags=""
 
-    # mingw's make h3.81 angs with -j 
+    # mingw's make h3.81 angs with -j
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
     CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make $makeFlags V=1 >>$LOG_FILE_PATH 2>&1 || return 1
     make install >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1193,8 +1205,21 @@ gtest_PRI_FILE="LIBS += -lgtest -lgtest_main"
 # returns list of mirrors separated with ;
 function gtest_getMirrorList()
 {
-    echo "https://googletest.googlecode.com/files/"
+    echo "https://github.com/google/googletest/archive/"
     return 0
+}
+
+function gtest_generateDownloadTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName="$1"
+    local artifactVersion="$2"
+
+    echo "release-$artifactVersion.zip"
 }
 
 function gtest_generateTarballName()
@@ -1204,11 +1229,10 @@ function gtest_generateTarballName()
         return 1
     fi
 
-    local artifactName=$1
-    local artifactVersion=$2
+    local artifactName="$1"
+    local artifactVersion="$2"
 
-    echo "$artifactName-$artifactVersion.zip"
-    return 0
+    echo "googletest-release-$artifactVersion.zip"
 }
 
 function gtest_generate_config()
@@ -1222,33 +1246,39 @@ function gtest_generate_config()
         local hostArch="--host=$ARCH"
     fi
 
+    local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
 read -d '' configureGtestScript<<EOF
 #!/bin/bash
-
-./configure --prefix=$gtest_DIR $hostArch \
-    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gtest_CONFIG_OPTIONS \
-    CFLAGS="$gtest_CFLAGS" CXXFLAGS="$gtest_CXXFLAGS"
+cmake -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_COMPILER="${TOOLCHAIN_PREFIX}gcc" \
+    -DCMAKE_CXX_COMPILER="${TOOLCHAIN_PREFIX}g++" -DCMAKE_BUILD_TYPE=Release ..
 EOF
 
+    # Provide a symlink for gmock.
+    ln -s $(basename $(pwd)) ../gtest
+
+    mkdir -p build
+    pushd build
     echo "$configureGtestScript" > ./config.gtest
     chmod u+x ./config.gtest
-
-    return 0
+    popd
 }
 
 function gtest_build()
 {
     local INSTALL_DIR=$ARTIFACT_BUILD_DIR/gtest-$gtest_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
+    pushd build
+
     ./config.gtest >>$LOG_FILE_PATH 2>&1 || return 1
     make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
     #make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
 
     mkdir -p $INSTALL_DIR/lib/
-    cp -rf ./include $INSTALL_DIR
-    cp -rf ./lib/.libs/libgtest.a $INSTALL_DIR/lib/
-    cp -rf ./lib/.libs/libgtest_main.a $INSTALL_DIR/lib/
-    return 0
+    cp -rf ../include $INSTALL_DIR
+    cp -rf libgtest.a $INSTALL_DIR/lib/
+    cp -rf libgtest_main.a $INSTALL_DIR/lib/
+
+    popd
 }
 
 function gtest_prepareMvnArtifact()
@@ -1279,8 +1309,21 @@ gmock_PRI_FILE="LIBS += -lgmock -lgmock_main"
 # returns list of mirrors separated with ;
 function gmock_getMirrorList()
 {
-    echo "https://googlemock.googlecode.com/files/"
+    echo "https://github.com/google/googlemock/archive/"
     return 0
+}
+
+function gmock_generateDownloadTarballName()
+{
+    if [ "$#" -lt 2 ]; then
+        echo "$FUNCNAME function accepts two parameter, but $# were given"
+        return 1
+    fi
+
+    local artifactName="$1"
+    local artifactVersion="$2"
+
+    echo "release-$artifactVersion.zip"
 }
 
 function gmock_generateTarballName()
@@ -1293,7 +1336,7 @@ function gmock_generateTarballName()
     local artifactName=$1
     local artifactVersion=$2
 
-    echo "$artifactName-$artifactVersion.zip"
+    echo "googlemock-release-$artifactVersion.zip"
     return 0
 }
 
@@ -1307,33 +1350,37 @@ function gmock_generate_config()
         local hostArch="--host=$ARCH"
     fi
 
-read -d '' configureGtestScript<<EOF
-#!/bin/bash
+    local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
 
-./configure --prefix=$gmock_DIR $hostArch --with-gtest=$gtest_SRC \
-    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gmock_CONFIG_OPTIONS \
-    CFLAGS="$gmock_CFLAGS" CXXFLAGS="$gmock_CXXFLAGS"
+read -d '' configureGmockScript<<EOF
+#!/bin/bash
+cmake -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_COMPILER="${TOOLCHAIN_PREFIX}gcc" \
+    -DCMAKE_CXX_COMPILER="${TOOLCHAIN_PREFIX}g++" -DCMAKE_BUILD_TYPE=Release ..
 EOF
 
-    echo "$configureGtestScript" > ./config.gmock
+    mkdir -p build
+    pushd build
+    echo "$configureGmockScript" > ./config.gmock
     chmod u+x ./config.gmock
-
-    return 0
+    popd
 }
 
 function gmock_build()
 {
     local INSTALL_DIR=$ARTIFACT_BUILD_DIR/gmock-$gmock_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
 
+    pushd build
+
     ./config.gmock >>$LOG_FILE_PATH 2>&1 || return 1
     make -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
     #make install -j $JOB_COUNT >>$LOG_FILE_PATH 2>&1 || return 1
 
     mkdir -p $INSTALL_DIR/lib/
-    cp -rf ./include $INSTALL_DIR
-    cp -rf ./lib/.libs/libgmock.a $INSTALL_DIR/lib/
-    cp -rf ./lib/.libs/libgmock_main.a $INSTALL_DIR/lib/
-    return 0
+    cp -rf ../include $INSTALL_DIR
+    cp -rf libgmock.a $INSTALL_DIR/lib/
+    cp -rf libgmock_main.a $INSTALL_DIR/lib/
+
+    popd
 }
 
 function gmock_prepareMvnArtifact()
@@ -1349,7 +1396,6 @@ function gmock_prepareMvnArtifact()
 
     return 0
 }
-
 
 
 ###############################################################
@@ -1376,6 +1422,9 @@ function onvif_generateTarballName()
     #Generating onvif tar.gz
     mkdir ./$artifactName-$artifactVersion 2>/dev/null
     cp -rf $THIRD_PARTY_SRC_DIR/libonvif/* ./$artifactName-$artifactVersion || return 2
+
+    chmod +x ./$artifactName-$artifactVersion/configure
+
     tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
 
     echo "$artifactName-$artifactVersion.tar.gz"
@@ -1386,11 +1435,15 @@ function onvif_generateTarballName()
 function onvif_generate_config()
 {
     local artifactVersion=$2
-    # assuming, we've built openssl previously
-    CONFIGURE_OPTIONS="--target-arch=$ARCH --cross-prefix=$CROSS_PREFIX --cxxflags=$onvif_CXXFLAGS"
-    if [ ! -z "$openssl_DIR" ]; then
-        CONFIGURE_OPTIONS+=" --with-openssl=$openssl_DIR"
+
+    local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+    CONFIGURE_OPTIONS="--target-arch=$ARCH --cross-prefix=$TOOLCHAIN_PREFIX --cxxflags=$onvif_CXXFLAGS"
+     # assuming, we've built openssl previously, or openssl_DIR is specified externally.
+    if [ -z "$openssl_DIR" ]; then
+        echo "OpenSSL not found - please specify env var openssl_DIR."
+        return 1
     fi
+    CONFIGURE_OPTIONS+=" --with-openssl=$openssl_DIR"
     ./configure $CONFIGURE_OPTIONS || return 1
 
     return 0
@@ -1552,6 +1605,7 @@ function festival_generate_config()
 function festival_build()
 {
     export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
+    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
     export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
@@ -1614,7 +1668,7 @@ function common_generateTarballName()
 # params:
 # 1. tarball name
 # 2. list of mirrors where to look for tarball
-# 3. (optional) output directory. By default, current directory
+# 3. [opt] Alternative tarball name used in download URL.
 # returns local path to tarball
 function get_source_tar()
 {
@@ -1623,15 +1677,16 @@ function get_source_tar()
         return 2
     fi
 
-    local sourceTarballName=$1
-    local mirrorList=$2
-    local outputDir=
-    if [ "$#" -gt 2 ]; then
-        outputDir=$3
+    local sourceTarballName="$1"
+    local mirrorList="$2"
+    if [ "$3" != "" ]; then
+        local downloadSourceTarballName="$3"
+    else
+        local downloadSourceTarballName="$sourceTarballName"
     fi
 
-    if [ -e "$outputDir$sourceTarballName" ]; then
-        echo "$outputDir$sourceTarballName"
+    if [ -e "$sourceTarballName" ]; then
+        echo "$sourceTarballName"
         return 0
     fi
 
@@ -1643,10 +1698,10 @@ function get_source_tar()
     do
         echo "$mirrorUrl" >&2
         echo -n "    Trying $mirrorUrl              " >&2
-        wget $mirrorUrl/$sourceTarballName -O $outputDir$sourceTarballName
-        if [ -e "$outputDir$sourceTarballName" ]; then
+        wget $mirrorUrl/$downloadSourceTarballName -O $sourceTarballName
+        if [ -e "$sourceTarballName" ]; then
             #success
-            echo "$outputDir$sourceTarballName"
+            echo "$sourceTarballName"
             return 0
         fi
     done
@@ -1674,7 +1729,8 @@ function unpack_source_tar()
             echo "`tar -v -zxf $1 | cut -d/ -f1 | uniq`"
         fi
     elif [[ "$filename" =~ .*zip ]]; then
-        echo "`unzip -o $filename | tail -n +2 | cut -d: -f 2- | cut -d/ -f1 | uniq | xargs basename`"
+        local UNZIP_OUTPUT=$(unzip -o "$filename")
+        echo $(echo "$UNZIP_OUTPUT" | tail -n +3 | cut -d: -f 2- | cut -d/ -f1 | uniq | xargs basename)
     else
         echo "File $filename has unsupported format"
         return 1
@@ -1779,6 +1835,7 @@ function mvn_deploy_artifact()
 
 function rdep_deploy_artifact()
 {
+echo "======= rdep_deploy_artifact()"
     if [ "$#" -lt 3 ]; then
         echo "$FUNCNAME function accepts two parameters, but $# were given"
         return 2
@@ -1800,7 +1857,7 @@ function rdep_deploy_artifact()
         echo "Rdep packages dir does not exist: $PKG_DIR"
         return 4
     fi
-    if [[ $ARCH == "arm" ]]; then
+    if [[ $ARCH == "arm" ]] || [[ $ARCH == "aarch64" ]]; then
         PLATFORM=/$BOX
     else
         PLATFORM=/$OS-$ARCH
@@ -1956,6 +2013,19 @@ function build_artifact()
         return 3
     fi
 
+    #if available, generating source tarball download name
+    generateDownloadTarballNameFunc=${artifactName}_generateDownloadTarballName
+    if [ -z "`type $generateDownloadTarballNameFunc 2>&1 | grep 'is a function'`" ]; then
+        local downloadSourceTarballName=""
+    else
+        local downloadSourceTarballName=$( \
+            ${generateDownloadTarballNameFunc} $artifactName $artifactVersion)
+        if [ $? != 0 ]; then
+            echo "Could not generate $artifaceName-$artifactVersion tarball download name"
+            return 3
+        fi
+    fi
+
     #getting source tarball
     getMirrorListFunc="$artifactName"_getMirrorList
     if [ -z "`type $getMirrorListFunc | grep 'is a function'`" ]; then
@@ -1964,7 +2034,7 @@ function build_artifact()
     fi
     local mirrorList=$(${getMirrorListFunc} $artifactName $artifactVersion)
 
-    local srcTarballPath=$(get_source_tar $sourceTarballName "$mirrorList")
+    local srcTarballPath=$(get_source_tar $sourceTarballName "$mirrorList" "$downloadSourceTarballName")
     if [ ! -e "$srcTarballPath" ]; then
         echo "Failed to get $sourceTarballName. You can download it by hand and place to the current directory"
         return 5
