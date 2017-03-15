@@ -240,11 +240,8 @@ nx_find_parent_dir() # DIR_VAR parent/dir error_message_if_not_found
         return
     fi
 
-    echo $PARENT_DIR
     DIR=$(pwd)
-    echo $DIR
     while [ "$(basename "$(dirname "$DIR")")" != "$PARENT_DIR" -a "$DIR" != "/" ]; do
-        echo $DIR
         DIR=$(dirname "$DIR")
     done
 
