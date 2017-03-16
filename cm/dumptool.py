@@ -399,7 +399,7 @@ def main():
     try:
         print analyseDump(*args, **kwargs)
     except Error as e:
-        if 'throw' in kwargs['debug']: raise
+        if 'throw' in kwargs.get('debug', ''): raise
         sys.stderr.write('%s: %s\n' % (type(e).__name__, e))
         sys.exit(1)
     except KeyboardInterrupt:

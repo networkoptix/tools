@@ -48,6 +48,7 @@ if [ "$A" ]; then
 else
     ARCH=; ARCH_GREP=x64
     if [ $(uname) == Darwin ]; then
+        ulimit -n 10000
         GDB=/Applications/Xcode.app/Contents/Developer/usr/bin/lldb; GDB_ARGS=--; OS_GREP=macosx
 
         # /usr/bin/lldb is protected against LD variables
