@@ -124,38 +124,11 @@ def web_link_filter(link):
 def format_calls(calls): # FIXME put it into a separate module
     return "\n".join("\t"+c for c in calls)
 
-
-# Do not process (add JIRA task) for drivers call stack
-DRIVERS_FILTER = [
-    r'ig.*64',
-    r'atig6txx',
-    r'atio6axx',
-    r'nvoglv64',
-    r'DpOFeedb',
-    r'LavasoftTcpService64',
-    r'DBROverlayIconBackuped',
-    r'ColdstoreSpectrumPlugin',
-    r'QnCrashServerHandler']
-
-def need_process_calls(calls):
-    level = 0
-    for c in KnowCrashDB.prepare2hash(calls):
-        if c == WINAPICALL:
-            continue
-        if level >= 2:
-            break
-        for exp in DRIVERS_FILTER:
-            if re.search(exp, c):
-                return False
-        level+=1
-    return True
-
 def isHotfix(version):
     if version is None:
         return False
     lastBuild = RELEASE_BUILDS.get(tuple(version[:3]), None)
     return lastBuild is not None and version[3] > lastBuild
-
 
 def is_crash_new(crash, mark):
     return (
@@ -521,7 +494,7 @@ class CrashMonitor(object):
 
                 if crash['new']:
                     # only new crashes can increase counter
-                    if crash['calls'] and need_process_calls(crash['calls']):
+                    if crash['calls']:
                         # NOTE: faults[key][0] counts crashes in this call of load_crash_dump() only
                         # i.e. it counts only crashes currently stored on crash server
                         # (according to it's rotation period)
@@ -667,6 +640,9 @@ class CrashMonitor(object):
                 smallest_version = issue_data.smallest_fixversion()
                 print "DEBUG: closed issue %s, fix version %s, crash found in %s" % (
                     issue_data.data['key'], smallest_version, crashed_version)
+                if issue_data.is_rejected():
+                    print "Issue %s is rejected" % (issue_data.data['key'],)
+                    return False
                 # Future version case
                 if smallest_version and smallest_version[0] == 0:
                     print "Issue %s has Future version" % (issue_data.data['key'],)
