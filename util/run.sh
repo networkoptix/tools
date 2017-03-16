@@ -29,12 +29,11 @@ fi
 
 set -e
 [[ $NOX ]] || set -x
-DEVTOOLS=$(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)
 
 EXTRA=debug/
 [ "$R" ] && EXTRA=release/
 [ "$L" ] && ulimit -c unlimited
-[ "$VT" ] && V="$($DEVTOOLS/valgrind/args.sh $VT $1) $V"
+[ "$VT" ] && V="$($(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)/valgrind/args.sh $VT $1) $V"
 
 if [ "$A" ]; then
     ARCH=-$A; ARCH_GREP=$A
