@@ -9,7 +9,7 @@ udt_VERSION=4.11
 qt_VERSION=5.2.1
 sasl2_VERSION=2.1.26
 openldap_VERSION=2.4.42
-festival_VERSION=2.4
+festival_VERSION=2.1x # Was 2.4
 ffmpeg_VERSION=3.1.1
 #qt_VERSION=5.4.1
 
@@ -1511,10 +1511,19 @@ function sigar_generate_config()
 {
     local artifactVersion=$2
 
+    if [ -z "$CROSS_PREFIX" ]; then
+        local TOOLCHAIN_PREFIX=""
+    else
+        local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+    fi
+
+
 read -d '' configureSigarScript<<EOF
 #!/bin/bash
 
-cmake -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_COMPILER="$CROSS_PREFIX"gcc -DCMAKE_CXX_COMPILER="$CROSS_PREFIX"g++ -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_C_COMPILER="${TOOLCHAIN_PREFIX}gcc" \
+    -DCMAKE_CXX_COMPILER="${TOOLCHAIN_PREFIX}g++" -DCMAKE_VERBOSE_MAKEFILE=1 \
+    -DCMAKE_BUILD_TYPE=Release ..
 EOF
 
     mkdir build
@@ -1587,7 +1596,14 @@ function festival_generateTarballName()
 function festival_generate_config()
 {
     local artifactVersion=$2
-    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
+
+    if [ -z "$CROSS_PREFIX" ]; then
+        local TOOLCHAIN_PREFIX=""
+    else
+        local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+    fi
+
+    export CC=${TOOLCHAIN_PREFIX}gcc CXX=${TOOLCHAIN_PREFIX}g++
     export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
@@ -1604,8 +1620,14 @@ function festival_generate_config()
 
 function festival_build()
 {
-    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
-    export CC=${CROSS_PREFIX}gcc CXX=${CROSS_PREFIX}g++
+    if [ -z "$CROSS_PREFIX" ]; then
+        local TOOLCHAIN_PREFIX=""
+    else
+        local TOOLCHAIN_PREFIX="$TOOLCHAIN_PATH/bin/$CROSS_PREFIX"
+    fi
+
+    export CC=${TOOLCHAIN_PREFIX}gcc CXX=${TOOLCHAIN_PREFIX}g++
+    export CC=${TOOLCHAIN_PREFIX}gcc CXX=${TOOLCHAIN_PREFIX}g++
     export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
