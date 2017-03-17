@@ -857,7 +857,7 @@ main()
             local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             nx_echo "Running: $TEST_NAME $@"
-            bpi LD_LIBRARY_PATH="$BPI_MEDIASERVER_DIR/../lib" \
+            bpi LD_LIBRARY_PATH="$BPI_LIBS_DIR" \
                 "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             exit $?
             ;;
@@ -922,6 +922,12 @@ main()
         rebuild)
             find_VMS_DIR
             cd "$VMS_DIR"
+            local BUILD_DIRS=()
+            nx_find_files BUILD_DIRS -type d -name "arm-bpi"
+            for BUILD_DIR in "${BUILD_DIRS[@]}"; do
+                nx_echo "Deleting: $BUILD_DIR"
+                rm -r "$BUILD_DIR"
+            done
             mvn clean package -Dbox=bpi -Darch=arm -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
             exit $?
             ;;
