@@ -15,8 +15,8 @@ nx_load_config ".tx1rc" #< Load config and assign defaults to values missing in 
 : ${TX1_BACKGROUND_RRGGBB:="302000"}
 : ${TARGET_DIR:="target"}
 : ${DEVELOP_DIR:="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at this workstation.
-: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/tx1/qt-5.6.2"} #< Path at this workstation.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at this workstation.
+: ${QT_PATH="$PACKAGES_DIR/qt-5.6.2"} #< Path at this workstation.
 
 #--------------------------------------------------------------------------------------------------
 # Const
@@ -40,7 +40,7 @@ else
     nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
 fi
 
-BUILD_DIR="arm-bpi"
+BUILD_DIR="aarch64"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -183,18 +183,21 @@ main()
         copy-s)
             find_VMS_DIR
 
-            mkdir -p "${TX1_MNT}$TX1_LIBS_DIR"
+            local LIBS_DIR="${TX1_MNT}$TX1_LIBS_DIR"
+            mkdir -p "$LIBS_DIR/tegra"
+            mkdir -p "$LIBS_DIR/libgtk2.0-0"
+            mkdir -p "$LIBS_DIR/stubs"
+            mkdir -p "$LIBS_DIR/libgtk-3-0"
 
             cp_libs "*.so*" "all libs"
 
             mkdir -p "${TX1_MNT}$TX1_MEDIASERVER_DIR/bin"
             cp_mediaserver_bins "mediaserver" "mediaserver executable"
-            cp_mediaserver_bins "media_db_util" "media_db_util"
             cp_mediaserver_bins "external.dat" "web-admin (external.dat)"
             cp_mediaserver_bins "plugins" "mediaserver plugins"
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$TX1_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$QT_PATH/lib/*.so*" "$TX1_LIBS_DIR" "Qt libs" "$QT_PATH"
             #cp_mediaserver_bins "vox" "mediaserver vox"
 
             # Server configuration does not need to be copied.
@@ -233,10 +236,10 @@ main()
             tx1 "$@"
             ;;
         start-s)
-            tx1 /etc/init.d/networkoptix-mediaserver start "$@"
+            tx1 sudo LD_LIBRARY_PATH="$TX1_LIBS_DIR" "$TX1_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            tx1 /etc/init.d/networkoptix-mediaserver stop
+            tx1 sudo kill -9 mediaserver
             ;;
         run-ut)
             local TEST_NAME="$1"
