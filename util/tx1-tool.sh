@@ -13,6 +13,7 @@ nx_load_config ".tx1rc" #< Load config and assign defaults to values missing in 
 : ${TX1_HOST:="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
 : ${TX1_TERMINAL_TITLE:="$TX1_HOST"}
 : ${TX1_BACKGROUND_RRGGBB:="302000"}
+: ${TARGET_DIR:="target"}
 : ${DEVELOP_DIR:="$HOME/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at this workstation.
 : ${QT_PATH="$DEVELOP_DIR/buildenv/packages/tx1/qt-5.6.2"} #< Path at this workstation.
@@ -124,7 +125,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/build_environment/target-tx1/lib/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/lib/debug/$MASK" \
         "$TX1_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -133,7 +134,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/debug/$MASK" \
         "$TX1_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -182,11 +183,11 @@ main()
         copy-s)
             find_VMS_DIR
 
-            # In case of taking mobile_client from different branch and overriding TX1_LIBS_DIR:
             mkdir -p "${TX1_MNT}$TX1_LIBS_DIR"
 
             cp_libs "*.so*" "all libs"
 
+            mkdir -p "${TX1_MNT}$TX1_MEDIASERVER_DIR/bin"
             cp_mediaserver_bins "mediaserver" "mediaserver executable"
             cp_mediaserver_bins "media_db_util" "media_db_util"
             cp_mediaserver_bins "external.dat" "web-admin (external.dat)"
@@ -204,7 +205,7 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs"
-            cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/*_ut" \
+            cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/debug/*_ut" \
                 "$TX1_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         server)

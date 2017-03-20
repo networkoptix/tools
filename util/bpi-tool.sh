@@ -15,6 +15,7 @@ nx_load_config ".bpirc" #< Load config and assign defaults to values missing in 
 : ${BPI_BACKGROUND_RRGGBB:="003000"}
 : ${BPI_DEVELOP_DIR:="/root/develop"}
 : ${BPI_PACKAGES_SRC_DIR:="$BPI_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at bpi.
+: ${TARGET_DIR:="target-bpi"}
 : ${DEVELOP_DIR:="$HOME/develop"}
 : ${SDCARD_PARTITION_SECTORS:="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
@@ -228,7 +229,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/build_environment/target-bpi/lib/$NX_CONF/$MASK" \
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/lib/$NX_CONF/$MASK" \
         "$BPI_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -245,7 +246,7 @@ cp_lite_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/$MASK" \
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/$MASK" \
         "$BPI_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -254,7 +255,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/$MASK" \
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/$MASK" \
         "$BPI_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -789,7 +790,7 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
-            cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/*_ut" \
+            cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/*_ut" \
                 "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         client)
