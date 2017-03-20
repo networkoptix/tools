@@ -53,6 +53,8 @@ FW_CONFIG="/etc/fw_env.config"
 IP_DHCP_LINE="iface eth0 inet dhcp"
 IP_STATIC_LINE="iface eth0 inet static"
 
+BUILD_DIR="arm-bpi"
+
 #--------------------------------------------------------------------------------------------------
 
 help()
@@ -107,7 +109,9 @@ ump # Rebuild libUMP at bpi and install it to bpi.
 ldp [args] # Make ldpreloadhook.so at bpi and intall it to bpi, passing [args] to "make".
 ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
-rebuild [args] # Perform "mvn clean package <required-args> [args]".
+clean # Delete all build dirs recursively.
+rebuild [args] # Perform clean, then "mvn clean package ... [args]".
+mvn [args] # Call maven with the required platorm and box.
 pack-short <output.tgz> # Prepare tar with build results at bpi.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at bpi.
 EOF
@@ -529,6 +533,24 @@ iface eth0 inet dhcp
 EOF
 }
 
+clean()
+{
+    find_VMS_DIR
+    cd "$VMS_DIR"
+    local BUILD_DIRS=()
+    nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
+    local DIR
+    for DIR in "${BUILD_DIRS[@]}"; do
+        nx_echo "Deleting: $DIR"
+        rm -r "$DIR"
+    done
+}
+
+do_mvn() # "$@"
+{
+    mvn -Dbox=bpi -Darch=arm "$@"
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -543,7 +565,6 @@ main()
             sudo chown "$USER" "$BPI_MNT"
 
             sudo mount -o nolock bpi:/ "$BPI_MNT"
-            exit $?
             ;;
         sshfs)
             sudo umount "$BPI_MNT"
@@ -552,7 +573,6 @@ main()
             sudo chown "$USER" "$BPI_MNT"
 
             echo "$BPI_PASSWORD" |sshfs root@"$BPI_HOST":/ "$BPI_MNT" -o nonempty,password_stdin
-            exit $?
             ;;
         passwd)
             sshpass -p "$BPI_INITIAL_PASSWORD" ssh -t "root@$BPI_HOST" \
@@ -560,7 +580,6 @@ main()
                 || exit $?
             nx_echo "Old bpi password: $BPI_INITIAL_PASSWORD"
             nx_echo "New bpi password: $BPI_PASSWORD"
-            exit $?
             ;;
         mount)
             local BPI_IP=$(ping -q -c 1 -t 1 bpi | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
@@ -575,7 +594,6 @@ main()
             nx_echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty
             #bpi sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty \
                 #&& echo "$DEVELOP_DIR mounted to bpi's $BPI_DEVELOP_DIR."
-            exit $?
             ;;
         #..........................................................................................
         sdcard) # [/dev/sd...]
@@ -595,7 +613,6 @@ main()
             fi
             get_and_check_DEV_SDCARD
             nx_echo "Seems to contain expected Nx1 partitions, not mounted."
-            exit $?
             ;;
         img) # [--force] sd_card_image.img
             if [ "$1" = "--force" ]; then
@@ -614,7 +631,6 @@ main()
             nx_echo "Performing sync..."
             sync || exit $?
             nx_echo "Done"
-            exit $?
             ;;
         mac) # [--force] [xx:xx:xx:xx:xx:xx]
             if [ "$1" = "--force" ]; then
@@ -632,7 +648,6 @@ main()
                 fw_set "$MAC_VAR" "$MAC"
                 fw_print "$MAC_VAR" "New MAC: " || exit $?
             fi
-            exit $?
             ;;
         serial) # [--force] [nnnnnnnnn]
             if [ "$1" = "--force" ]; then
@@ -650,7 +665,6 @@ main()
                 fw_set "$SERIAL_VAR" "$SERIAL" || exit $?
                 fw_print "$SERIAL_VAR" "New Serial: " || exit $?
             fi
-            exit $?
             ;;
         ip) # [--force] [<ip-address> <mask> [<gateway>]]
             if [ "$1" = "--force" ]; then
@@ -697,7 +711,6 @@ main()
         #..........................................................................................
         copy-scripts)
             copy_scripts
-            exit $?
             ;;
         copy)
             find_VMS_DIR
@@ -778,19 +791,15 @@ main()
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
             cp_files "$VMS_DIR/build_environment/target-bpi/bin/$NX_CONF/*_ut" \
                 "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
-            exit $?
             ;;
         client)
             cp_lite_client_bins "mobile_client" "mobile_client exe"
-            exit $?
             ;;
         server)
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
-            exit $?
             ;;
         common)
             cp_libs "libcommon.so*" "lib common"
-            exit $?
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -800,7 +809,6 @@ main()
                 LIB_NAME="$1"
             fi
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
-            exit $?
             ;;
         ini)
             bpi \
@@ -808,80 +816,65 @@ main()
                 touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
-            exit $?
             ;;
         #..........................................................................................
         ssh)
             bpi "$@"
-            exit $?
             ;;
         run-c)
             bpi /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
-            exit $?
             ;;
         kill-c)
             bpi killall mobile_client
-            exit $?
             ;;
         start-s)
             bpi /etc/init.d/networkoptix-mediaserver start "$@"
-            exit $?
             ;;
         stop-s)
             bpi /etc/init.d/networkoptix-mediaserver stop
-            exit $?
             ;;
         start-c)
             bpi /etc/init.d/networkoptix-lite-client start "$@"
-            exit $?
             ;;
         stop-c)
             bpi /etc/init.d/networkoptix-lite-client stop
-            exit $?
             ;;
         start)
             bpi \
                 /etc/init.d/networkoptix-mediaserver start "$@" "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-lite-client start "$@"
-            exit $?
             ;;
         stop)
             bpi \
                 /etc/init.d/networkoptix-lite-client stop "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-mediaserver stop
-            exit $?
             ;;
         run-ut)
             local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             nx_echo "Running: $TEST_NAME $@"
-            bpi LD_LIBRARY_PATH="$BPI_MEDIASERVER_DIR/../lib" \
+            bpi LD_LIBRARY_PATH="$BPI_LIBS_DIR" \
                 "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
-            exit $?
             ;;
         #..........................................................................................
         vdp)
             bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
-            exit $?
             ;;
         vdp-rdep)
             cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit $?
             nx_rsync "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit $?
             rdep -u
-            exit $?
             ;;
         pd)
             bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
-            exit $?
             ;;
         pd-rdep)
             cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit $?
             nx_rsync "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit $?
             nx_rsync "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit $?
             rdep -u
-            exit $?
             ;;
         cedrus)
             if [ "$1" = "ump" ]; then
@@ -890,13 +883,11 @@ main()
             else
                 bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
             fi
-            exit $?
             ;;
         cedrus-rdep)
             cd "$PACKAGES_DIR/libcedrus-1.0${PACKAGE_SUFFIX}" || exit $?
             nx_rsync "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit $?
             rdep -u
-            exit $?
             ;;
         ump)
             bpi \
@@ -906,32 +897,31 @@ main()
                 "[{]" dpkg-buildpackage -b "[||]" \
                     echo "WARNING: Package build failed; manually installing .so and .h." "[}]" "[;]" \
                 cp -r /tmp/libump/debian/tmp/usr /
-            exit $?
             ;;
         ldp)
             bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
-            exit $?
             ;;
         ldp-rdep)
             cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
             nx_sync "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit
             rdep -u
-            exit $?
             ;;
         #..........................................................................................
+        clean)
+            clean
+            ;;
         rebuild)
-            find_VMS_DIR
-            cd "$VMS_DIR"
-            mvn clean package -Dbox=bpi -Darch=arm -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
-            exit $?
+            clean || exit $?
+            do_mvn clean package "$@"
+            ;;
+        mvn)
+            do_mvn "$@"
             ;;
         pack-short)
             pack_short "$1"
-            exit $?
             ;;
         pack-full)
             pack_full "$1"
-            exit $?
             ;;
         #..........................................................................................
         *)

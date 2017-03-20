@@ -40,6 +40,8 @@ else
     nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
 fi
 
+BUILD_DIR="arm-bpi"
+
 #--------------------------------------------------------------------------------------------------
 
 help()
@@ -68,7 +70,9 @@ run-ut [test-name args] # Run the specified unit test with strict expectations.
 start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
 stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
 
-rebuild [args] # Perform "mvn clean package ... [args]", including unit tests.
+clean # Delete all build dirs recursively.
+rebuild [args] # Perform clean, then "mvn clean package ... [args]".
+mvn [args] # Call maven with the required platorm and box.
 EOF
 }
 
@@ -134,6 +138,24 @@ cp_mediaserver_bins() # file_mask description
         "$TX1_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
+clean()
+{
+    find_VMS_DIR
+    cd "$VMS_DIR"
+    local BUILD_DIRS=()
+    nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
+    local DIR
+    for DIR in "${BUILD_DIRS[@]}"; do
+        nx_echo "Deleting: $DIR"
+        rm -r "$DIR"
+    done
+}
+
+do_mvn() # "$@"
+{
+    mvn -Dbox=tx1-aarch64 -Darch=aarch64 "$@"
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -148,7 +170,6 @@ main()
             sudo chown "$USER" "$TX1_MNT"
 
             sudo mount -o nolock tx1:/ "$TX1_MNT"
-            exit $?
             ;;
         sshfs)
             sudo umount "$TX1_MNT"
@@ -157,7 +178,6 @@ main()
             sudo chown "$USER" "$TX1_MNT"
 
             echo "$TX1_PASSWORD" |sshfs "$TX1_USER@$TX1_HOST":/ "$TX1_MNT" -o nonempty,password_stdin
-            exit $?
             ;;
         #..........................................................................................
         copy-s)
@@ -184,15 +204,12 @@ main()
             cp_libs "*.so*" "all libs"
             cp_files "$VMS_DIR/$TX1_TARGET/bin/debug/*_ut" \
                 "$TX1_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
-            exit $?
             ;;
         server)
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
-            exit $?
             ;;
         common)
             cp_libs "libcommon.so*" "lib common"
-            exit $?
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -202,26 +219,21 @@ main()
                 LIB_NAME="$1"
             fi
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
-            exit $?
             ;;
         ini)
             tx1 \
                 touch /tmp/mobile_client.ini "[&&]" \
                 touch /tmp/nx_media.ini \
-            exit $?
             ;;
         #..........................................................................................
         ssh)
             tx1 "$@"
-            exit $?
             ;;
         start-s)
             tx1 /etc/init.d/networkoptix-mediaserver start "$@"
-            exit $?
             ;;
         stop-s)
             tx1 /etc/init.d/networkoptix-mediaserver stop
-            exit $?
             ;;
         run-ut)
             local TEST_NAME="$1"
@@ -230,21 +242,17 @@ main()
             echo "Running: $TEST_NAME $@"
             tx1 LD_LIBRARY_PATH="$TX1_LIBS_DIR" \
                 "$TX1_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
-            exit $?
             ;;
         #..........................................................................................
+        clean)
+            clean
+            ;;
         rebuild)
-            find_VMS_DIR
-            cd "$VMS_DIR"
-            local BUILD_DIRS=()
-            nx_find_files BUILD_DIRS -type d -name "aarch64"
-            for BUILD_DIR in "${BUILD_DIRS[@]}"; do
-                nx_echo "Deleting: $BUILD_DIR"
-                rm -r "$BUILD_DIR"
-            done
-            mvn clean package \
-                -Dbox=tx1-aarch64 -Darch=aarch64 -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
-            exit $?
+            clean || exit $?
+            do_mvn clean package "$@"
+            ;;
+        mvn)
+            do_mvn "$@"
             ;;
         #..........................................................................................
         *)
