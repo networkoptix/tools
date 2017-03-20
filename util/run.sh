@@ -29,12 +29,11 @@ fi
 
 set -e
 [[ $NOX ]] || set -x
-DEVTOOLS=$(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)
 
 EXTRA=debug/
 [ "$R" ] && EXTRA=release/
 [ "$L" ] && ulimit -c unlimited
-[ "$VT" ] && V="$($DEVTOOLS/valgrind/args.sh $VT $1) $V"
+[ "$VT" ] && V="$($(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)/valgrind/args.sh $VT $1) $V"
 
 if [ "$A" ]; then
     ARCH=-$A; ARCH_GREP=$A
@@ -48,6 +47,7 @@ if [ "$A" ]; then
 else
     ARCH=; ARCH_GREP=x64
     if [ $(uname) == Darwin ]; then
+        ulimit -n 10000
         GDB=/Applications/Xcode.app/Contents/Developer/usr/bin/lldb; GDB_ARGS=--; OS_GREP=macosx
 
         # /usr/bin/lldb is protected against LD variables

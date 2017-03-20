@@ -6,57 +6,6 @@ import unittest, os, shutil, sys
 import crashmon
 import crashdb
 
-class CrashMonitorTests(unittest.TestCase):
-
-    def testSkipDriverCall(self):
-        'skip driver call'
-        calls = ('<c0000005 (Access violation)>', 'ig75icd64', '0x0', 'ig75icd64')
-        self.assertFalse(crashmon.need_process_calls(calls))
-        calls = ( '<c0000005 (Access violation)>', '0x0', 'nvoglv64',
-                  '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0',
-                  'KERNELBASE', '0x0', '0x0', '0x0')
-        self.assertFalse(crashmon.need_process_calls(calls))
-        calls = ('<c0000005 (Access violation)>', 'ig4icd64', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0',
-                 'avcodec_54!avcodec_register_all', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', 'ig4icd64', '0x0', 'ig4icd64')
-        self.assertFalse(crashmon.need_process_calls(calls))
-        calls = ('<c0000005 (Access violation)>', 'ntdll!RtlpWaitOnCriticalSection', 'ntdll!RtlpEnterCriticalSectionContended',
-                 'ntdll!RtlEnterCriticalSection', 'LavasoftTcpService64', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0', '0x0')
-        self.assertFalse(crashmon.need_process_calls(calls))
-        
-        
-    def testValidDriverStack(self):
-        'valid driver stak'
-        calls = ('<c0000005 (Access violation)>', 'ntdll', '0x0', '0x0', '0x0')
-        self.assertTrue(crashmon.need_process_calls(calls))
-        calls = ('<c0000005 (Access violation)>',
-                 'Qt5Gui!QPlatformOffscreenSurface::offscreenSurface',
-                 'qwindows!qt_plugin_query_metadata',
-                 'Qt5Widgets!QWidgetPrivate::setGeometry_sys',
-                 'Qt5Widgets!QWidget::setGeometry',
-                 'Qt5Widgets!QWidgetItem::setGeometry',
-                 'Qt5Widgets!QBoxLayout::setGeometry',
-                 'Qt5Widgets!QBoxLayout::setGeometry',
-                 'Qt5Widgets!QLayoutPrivate::doResize',
-                 'Qt5Widgets!QApplicationPrivate::notify_helper',
-                 'Qt5Widgets!QApplication::notify',
-                 'Qt5Core!QCoreApplication::notifyInternal',
-                 'Qt5Widgets!QWidgetWindow::handleResizeEvent',
-                 'Qt5Widgets!QWidgetWindow::event',
-                 'Qt5Widgets!QApplicationPrivate::notify_helper',
-                 'Qt5Widgets!QApplication::notify',
-                 'Qt5Core!QCoreApplication::notifyInternal',
-                 'Qt5Gui!QGuiApplicationPrivate::processGeometryChangeEvent',
-                 'Qt5Gui!QGuiApplicationPrivate::processWindowSystemEvent',
-                 'Qt5Gui!QWindowSystemInterface::sendWindowSystemEvents',
-                 'qwindows!qt_plugin_query_metadata',
-                 'qwindows!qt_plugin_query_metadata',
-                 'qwindows!qt_plugin_query_metadata',
-                 'user32',
-                 '0x0',
-                 'ntdll', '0x0', '0x0', '0x0', 'nvoglv64', '0x0', '0x0', '0x0')
-        self.assertTrue(crashmon.need_process_calls(calls))
-
-
 class CrashDBTest(unittest.TestCase):
 
     def setUp(self):

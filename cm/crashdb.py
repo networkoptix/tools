@@ -24,6 +24,7 @@ CALLS_TO_REPLACE = [
     (r'(DW_Spectrum_Global!)', EXEFILE),
     (r'(EZ_Pro!)', EXEFILE),
     (r'(FlyView!)', EXEFILE),
+    (r'(Nx_Witness_Chinese!)', EXEFILE),
     (r'(HD_Witness!)', EXEFILE),
     (r'(NTN!)', EXEFILE),
     (r'(PCMS!)', EXEFILE),

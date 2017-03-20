@@ -13,10 +13,9 @@ nx_load_config ".tx1rc" #< Load config and assign defaults to values missing in 
 : ${TX1_HOST:="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
 : ${TX1_TERMINAL_TITLE:="$TX1_HOST"}
 : ${TX1_BACKGROUND_RRGGBB:="302000"}
-: ${TX1_TARGET:="build_environment/target"}
 : ${DEVELOP_DIR:="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at this workstation.
-: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/tx1-aarch64/qt-5.6.2"} #< Path at this workstation.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at this workstation.
+: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/tx1/qt-5.6.2"} #< Path at this workstation.
 
 #--------------------------------------------------------------------------------------------------
 # Const
@@ -125,7 +124,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/$TX1_TARGET/lib/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-tx1/lib/debug/$MASK" \
         "$TX1_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -134,7 +133,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/$TX1_TARGET/bin/debug/$MASK" \
+    cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/$MASK" \
         "$TX1_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -189,20 +188,23 @@ main()
             cp_libs "*.so*" "all libs"
 
             cp_mediaserver_bins "mediaserver" "mediaserver executable"
-            #cp_mediaserver_bins "media_db_util" "media_db_util"
+            cp_mediaserver_bins "media_db_util" "media_db_util"
             cp_mediaserver_bins "external.dat" "web-admin (external.dat)"
             cp_mediaserver_bins "plugins" "mediaserver plugins"
 
-            # Currently, "copy" command copies only nx_vms build results.
-            cp_files "$QT_PATH/lib/*.so*" "$TX1_LIBS_DIR" "Qt libs" "$QT_PATH"
-            cp_mediaserver_bins "vox" "vox (festival)"
+            # Currently, "copy" verb copies only nx_vms build results.
+            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$TX1_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_mediaserver_bins "vox" "mediaserver vox"
+
+            # Server configuration does not need to be copied.
+            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/tx1/$TX1_MEDIASERVER_DIR/etc" "$TX1_MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
             exit 0
             ;;
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs"
-            cp_files "$VMS_DIR/$TX1_TARGET/bin/debug/*_ut" \
+            cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/*_ut" \
                 "$TX1_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         server)
@@ -238,9 +240,9 @@ main()
         run-ut)
             local TEST_NAME="$1"
             shift
-            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
+            [ -z "$TEST_NAME" ] && fail "Test name not specified."
             echo "Running: $TEST_NAME $@"
-            tx1 LD_LIBRARY_PATH="$TX1_LIBS_DIR" \
+            tx1 LD_LIBRARY_PATH="$TX1_MEDIASERVER_DIR/lib" \
                 "$TX1_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             ;;
         #..........................................................................................
