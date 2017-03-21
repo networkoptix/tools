@@ -13,8 +13,10 @@ nx_load_config "$CONFIG" #< Load config and assign defaults to values missing in
 : ${BOX_TERMINAL_TITLE:="$BOX_HOST"}
 : ${BOX_BACKGROUND_RRGGBB:="302000"}
 : ${DEVELOP_DIR:="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
-: ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
+: ${PACKAGES_DIR:="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${QT_DIR:="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
+: ${BUILD_CONFIG:=""} #< TODO: #mshevchenko: Fix empty overridings. Was: "debug".
+: ${TARGET_IN_VMS_DIR:="build_environment/target"}
 
 #--------------------------------------------------------------------------------------------------
 # Const
@@ -40,7 +42,6 @@ fi
 
 # Path components at the workstation.
 BUILD_DIR="aarch64"
-TARGET_IN_VMS_DIR="build_environment/target"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -127,7 +128,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/lib/debug/$MASK" \
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/lib/$BUILD_CONFIG/$MASK" \
         "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -136,7 +137,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/debug/$MASK" \
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
         "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -207,11 +208,13 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs"
-            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/debug/*_ut" \
+            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
                 "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         server)
+            cp_libs "libappserver2.so*" "lib appserver2"
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
+            cp_mediaserver_bins "mediaserver" "mediaserver executable"
             ;;
         common)
             cp_libs "libcommon.so*" "lib common"
@@ -238,7 +241,7 @@ main()
             box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            box sudo kill -9 mediaserver
+            box sudo killall -9 mediaserver
             ;;
         run-ut)
             local TEST_NAME="$1"

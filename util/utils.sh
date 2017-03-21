@@ -289,7 +289,7 @@ nx_sudo_dd() # dd_args...
 # Copy the file(s) recursively, showing a progress.
 nx_rsync() # rsync_args...
 {
-    rsync -r -ah --progress "$@"
+    rsync -ah --progress "$@"
 }
 
 # Source the specified file (typically with settings), return whether it exists.
