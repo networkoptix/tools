@@ -47,6 +47,9 @@ scp $NX_VMS_LIB_PATH/*.so* test@$TASKBOT_NX1_ADDRESS:$NX_VMS_LIB_DST_PATH
 scp $NX_VMS_BIN_PATH/*_ut test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
 scp $TASKBOT_SHARE/run_unit_test.sh test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
 
+# + Remove results folder
+ssh -tt test@$TASKBOT_NX1_ADDRESS "rm -rfv $NX_VMS_BIN_DST_PATH/../../var"
+
 # + Run tests
 for test in $TEST_LIST
 do

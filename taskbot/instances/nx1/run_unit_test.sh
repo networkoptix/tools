@@ -12,5 +12,5 @@ ulimit -n 4000
 ./$TEST --gtest_filter=-NxCritical.All3 \
         --gtest_shuffle \
         --tmp=$TEST_VAR \
-        --log-file=../../var/$TEST.log \
+        --log-file=../../var/$TEST \
         --log-level=DEBUG2

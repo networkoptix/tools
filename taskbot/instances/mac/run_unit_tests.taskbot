@@ -39,7 +39,7 @@ do
   mkdir -p $test_tmp
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
-     -c "./$test --gtest_filter=-NxCritical.All3 --gtest_shuffle --tmp=$test_tmp --log-file=$UNIT_TESTS_RESULT_PATH/$test.log  --log-level=DEBUG2" \
+     -c "./$test --gtest_filter=-NxCritical.All3 --gtest_shuffle --tmp=$test_tmp --log-file=$UNIT_TESTS_RESULT_PATH/$test  --log-level=DEBUG2" \
      --var "DYLD_LIBRARY_PATH=$NX_VMS_LIB_PATH" \
      --var "DYLD_FRAMEWORK_PATH=$QT_LIB_PATH" \
      -t 600 -s 100 --core_on_timeout || true
