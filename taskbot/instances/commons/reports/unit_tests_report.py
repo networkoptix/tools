@@ -188,7 +188,15 @@ class UTReport(Report):
       map(lambda c: """<a href="%s">%s</a>""" % \
           (self.task_href(c),
            self.find_non_command_parent(c, 1).description), result))
-      
+
+  def __get_log_cell(self, name):
+    files = self.find_task('Store test results > %file.py%')
+    if files:
+      log_files = self.find_files_by_name(files[0], '%s.log' % name)
+      if log_files:
+        return """<a href="%s">log</a>""" % self.file_href(log_files[0], raw=True)
+    return ""
+        
   def __get_cores(self):
     tests = self.find_task('Run unit tests > %run_unit_tests.taskbot%')
     cores_task = self.find_task(
@@ -246,6 +254,7 @@ class UTReport(Report):
     <th>Test name</th>
     <th>Status (TOTAL/FAIL)</th>
     <th>Execution time</th>
+    <th>Out</th>
     <th>Log</th>
     <th>Cores</th>
     </tr>"""
@@ -258,11 +267,13 @@ class UTReport(Report):
         <td>%s</td>
         <td bgcolor="%s" align="center">%s</td>
         <td>%s</td>
-        <td><a href="%s">log</a></td>
+        <td><a href="%s">out</a></td>
+        <td>%s</td>
         <td>%s</td>
         </tr>""" % (name,  color, status,
                   info.exec_time(),
                   self.task_href(info.task),
+                  self.__get_log_cell(name),
                   self.__get_cores_cell(cores_task, name))
       for case_name, case_info in OrderedDict(sorted(get_failed_cases(info))).iteritems():
         prev_test_cases = {}

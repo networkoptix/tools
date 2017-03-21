@@ -437,9 +437,10 @@ class Report:
     return "?report=%s" % self.__report_id
   
   # Get file href
-  def file_href( self, f, need_header = False):
+  def file_href( self, f, need_header = False, raw = False):
     header = need_header and "&header_required=1" or ""
-    return "/taskbot/browse-file.cgi?id=%d%s" % (f.id, header)
+    raw = raw and "&raw" or ""
+    return "/taskbot/browse-file.cgi?id=%d%s%s" % (f.id, header, raw)
 
   @property
   def link_task_id(self):

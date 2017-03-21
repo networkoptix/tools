@@ -9,4 +9,8 @@ export LD_LIBRARY_PATH=../lib
 ulimit -c unlimited
 ulimit -n 4000
 
-./$TEST --gtest_filter=-NxCritical.All3 --gtest_shuffle --tmp=$TEST_VAR
+./$TEST --gtest_filter=-NxCritical.All3 \
+        --gtest_shuffle \
+        --tmp=$TEST_VAR \
+        --log-file=../../var/$TEST.log \
+        --log-level=DEBUG2

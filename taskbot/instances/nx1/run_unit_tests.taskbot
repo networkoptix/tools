@@ -58,3 +58,14 @@ done
 
 # + Process core files
 "$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
+
+# + Get test results
+UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
+mkdir -p "$UNIT_TESTS_RESULT_PATH"
+scp -r test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH/../../var/* "$UNIT_TESTS_RESULT_PATH"
+
+# + Store test results
+$TASKBOT_BIN/file.py \
+     $TASKBOT_CONFIG \
+    --path $UNIT_TESTS_RESULT_PATH \
+    --mask '*.log'

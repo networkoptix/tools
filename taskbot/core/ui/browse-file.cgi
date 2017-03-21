@@ -11,6 +11,7 @@ my $config_file = 'browse.config';
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use CGI qw(escapeHTML);
+use HTML::Entities qw(encode_entities);
 
 my $q = new CGI;
 if ($q->cgi_error) {
@@ -130,9 +131,12 @@ if (scalar @result == 1)
       $file_content = $uncompressed;
     }
 
-    $file_content = escapeHTML($file_content) unless $highlighted;
-    $file_content =~ s/(?<!-->)\n/<br>/g;
-    while ($file_content =~ s/(<br>\s*)\s/$1&nbsp;/g) {}; # Leading spaces
+    if (! defined $params->{raw})
+    {
+      $file_content = escapeHTML(encode_entities($file_content)) unless $highlighted;
+      $file_content =~ s/(?<!-->)\n/<br>/g;
+      while ($file_content =~ s/(<br>\s*)\s/$1&nbsp;/g) {}; # Leading spaces
+    }
 
     my $header = "";
     if (defined $params->{header_required})
@@ -146,12 +150,18 @@ File: $result[0]->{name}<br>
 EOF;
     }
 
-    print $q->header(-type => "text/html; charset=utf-8") .
-          $q->start_html(-title => $result[0]->{name},
-                         -dtd => 1,
-                         -encoding => "utf-8") .
-          $header .
-          $file_content;
+    if (defined $params->{raw}) {
+      print $q->header(-type => "text/plain; charset=utf-8") .
+        $file_content;
+    }
+    else {
+      print $q->header(-type => "text/html; charset=utf-8") .
+        $q->start_html(-title => $result[0]->{name},
+                       -dtd => 1,
+                       -encoding => "utf-8") .
+         $header .
+         $file_content;
+    }
 }
 elsif (scalar @result > 1)
 {

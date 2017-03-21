@@ -45,7 +45,7 @@ do
   test=$name.exe
   "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
       -d "$name"  \
-      -c "nice -n -20 ./$test --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\" --gtest_catch_exceptions=0 --gtest_shuffle" \
+      -c "nice -n -20 ./$test --gtest_filter=-NxCritical.All3 --tmp=\"$test_win_tmp\" --gtest_catch_exceptions=0 --gtest_shuffle --log-file=$UNIT_TESTS_RESULT_PATH/$name.log  --log-level=DEBUG2" \
       -e "procdump $test" \
       -t 900 -s 100 || true
   find "$LOCALAPPDATA" -name "*$name*.dmp" -exec mv '{}' $test_tmp \;
@@ -54,3 +54,9 @@ done
 
 # + Process core files
 "$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
+
+# + Store test results
+$TASKBOT_BIN/file.py \
+     $TASKBOT_CONFIG \
+    --path $UNIT_TESTS_RESULT_PATH \
+    --mask '*.log'
