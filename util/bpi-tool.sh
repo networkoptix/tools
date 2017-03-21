@@ -1,41 +1,39 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-# Collection of various convenient commands used for Banana Pi (Nx1) development.
-
 #--------------------------------------------------------------------------------------------------
 # Config
 
-nx_load_config ".bpirc" #< Load config and assign defaults to values missing in config.
-: ${BPI_MNT:="/bpi"}
-: ${BPI_INITIAL_PASSWORD:="admin"}
-: ${BPI_PASSWORD:="qweasd123"}
-: ${BPI_HOST:="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
-: ${BPI_TERMINAL_TITLE:="$BPI_HOST"}
-: ${BPI_BACKGROUND_RRGGBB:="003000"}
-: ${BPI_DEVELOP_DIR:="/root/develop"}
-: ${BPI_PACKAGES_SRC_DIR:="$BPI_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at bpi.
-: ${TARGET_DIR:="target-bpi"}
+CONFIG=".bpi-toolrc"
+nx_load_config "$CONFIG" #< Load config and assign defaults to values missing in config.
+: ${BOX_MNT:="/bpi"}
+: ${BOX_INITIAL_PASSWORD:="admin"}
+: ${BOX_PASSWORD:="qweasd123"}
+: ${BOX_HOST:="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
+: ${BOX_TERMINAL_TITLE:="$BOX_HOST"}
+: ${BOX_BACKGROUND_RRGGBB:="003000"}
+: ${BOX_DEVELOP_DIR:="/root/develop"}
+: ${BOX_PACKAGES_SRC_DIR:="$BOX_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at the box.
 : ${DEVELOP_DIR:="$HOME/develop"}
 : ${SDCARD_PARTITION_SECTORS:="122879,7043071,81919,"} #< Used to check SD card before accessing it.
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at this workstation.
-: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at this workstation.
-: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at this workstation.
-: ${NX_CONF="debug"}
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at the workstation.
+: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at the workstation.
+: ${QT_DIR="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at the workstation.
+: ${BUILD_CONFIG="debug"}
 
 #--------------------------------------------------------------------------------------------------
 # Const
 
-# Paths at bpi.
-BPI_INSTALL_DIR="/opt/networkoptix"
-BPI_LITE_CLIENT_DIR="$BPI_INSTALL_DIR/lite_client"
-BPI_MEDIASERVER_DIR="$BPI_INSTALL_DIR/mediaserver"
+# Paths at the box.
+BOX_INSTALL_DIR="/opt/networkoptix"
+BOX_LITE_CLIENT_DIR="$BOX_INSTALL_DIR/lite_client"
+BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"
 
-# BPI_LIBS_DIR can be pre-defined before running this script.
-if [ -z "$BPI_LIBS_DIR" ]; then
-    BPI_LIBS_DIR="$BPI_INSTALL_DIR/lib"
+# BOX_LIBS_DIR can be pre-defined before running this script.
+if [ -z "$BOX_LIBS_DIR" ]; then
+    BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"
 else
-    nx_echo "ATTENTION: BPI_LIBS_DIR overridden to $BPI_LIBS_DIR"
+    nx_echo "ATTENTION: BOX_LIBS_DIR overridden to $BOX_LIBS_DIR"
 fi
 
 # PACKAGE_SUFFIX can be pre-defined before running this script.
@@ -50,27 +48,30 @@ MAC_VAR="ethaddr"
 SERIAL_VAR="serial"
 FW_CONFIG="/etc/fw_env.config"
 
-# Lines from /etc/network/interfaces at bpi.
+# Lines from /etc/network/interfaces at the box.
 IP_DHCP_LINE="iface eth0 inet dhcp"
 IP_STATIC_LINE="iface eth0 inet static"
 
 BUILD_DIR="arm-bpi"
+TARGET_IN_VMS_DIR:="build_environment/target-bpi"
 
 #--------------------------------------------------------------------------------------------------
 
 help()
 {
     cat <<EOF
-Swiss Army Knife for Banana Pi (NX1): execute various commands.
-Use ~/.bpirc to override workstation-dependent environment variables (see them in this script).
+Swiss Army Knife for Banana Pi (Nx1): execute various commands.
+Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
+
 $(basename "$0") [--verbose] <command>
+
 Here <command> can be one of the following:
 
-nfs # Mount bpi root to $BPI_MNT via NFS.
-sshfs # Mount bpi root to $BPI_MNT via SSHFS.
-passwd # Change root password from "$BPI_INITIAL_PASSWORD" to "$BPI_PASSWORD".
-mount # Mount ~/develop to bpi's /root/develop via sshfs. May require workstation password.
+nfs # Mount the box root to $BOX_MNT via NFS.
+sshfs # Mount the box root to $BOX_MNT via SSHFS.
+passwd # Change root password from "$BOX_INITIAL_PASSWORD" to "$BOX_PASSWORD".
+mount # Mount ~/develop to the box /root/develop via sshfs. May require workstation password.
 
 sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it.
 img [--force] sd_card_image.img # Write the image onto the SD Card.
@@ -79,17 +80,17 @@ serial [--force] [nnnnnnnnn] # Read or write Serial on an SD Card connected to L
 ip [--force] [<ip-address> <mask> [<gateway>]] # Read/write /etc/network/interfaces on SD Card.
 dhcp [--force] # Restore default (configured for DHCP) /etc/network/interfaces on SD Card.
 
-copy # Copy mobile_client and mediaserver libs, bins and scripts to bpi $BPI_INSTALL_DIR.
-copy-s # Copy mediaserver libs, bins and scripts to bpi $BPI_INSTALL_DIR.
-copy-c # Copy mobile_client libs and bins to bpi $BPI_INSTALL_DIR.
-copy-ut # Copy all libs and unit test bins to bpi $BPI_INSTALL_DIR.
-client # Copy mobile_client exe to bpi.
-server # Copy mediaserver_core lib to bpi.
-common # Copy common lib to bpi.
-lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to bpi.
-ini # Create empty .ini files @bpi in /tmp (to be filled with defauls).
+copy # Copy mobile_client and mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
+copy-s # Copy mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
+copy-c # Copy mobile_client libs and bins to the box $BOX_INSTALL_DIR.
+copy-ut # Copy all libs and unit test bins to the box $BOX_INSTALL_DIR.
+client # Copy mobile_client exe to the box.
+server # Copy mediaserver_core lib to the box.
+common # Copy common lib to the box.
+lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
+ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
-ssh [command args] # Execute a command at bpi via ssh, or log in to bpi via ssh.
+ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
 run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
 kill-c # Stop mobile_client via "killall mobile_client".
 start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
@@ -100,30 +101,30 @@ run-ut [test-name args] # Run the specified unit test with strict expectations.
 start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
 stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
 
-vdp [args] # Make libvdpau_sunxi at bpi and install it to bpi, passing [args] to "make".
+vdp [args] # Make libvdpau_sunxi at the box and install it to the box, passing [args] to "make".
 vdp-rdep # Deploy libvdpau-sunxi to packages/bpi via "rdep -u".
-pd [args] # Make libproxydecoder at bpi and install it to bpi, passing [args] to "make".
+pd [args] # Make libproxydecoder at the box and install it to the box, passing [args] to "make".
 pd-rdep # Deploy libproxydecoder to packages/bpi via "rdep -u".
-cedrus [ump] [args] # Make libcedrus at bpi and install it to bpi, passing [args] to "make".
+cedrus [ump] [args] # Make libcedrus at the box and install it to the box, passing [args] to "make".
 cedrus-rdep # Deploy libcedrus to packages/bpi via "rdep -u".
-ump # Rebuild libUMP at bpi and install it to bpi.
-ldp [args] # Make ldpreloadhook.so at bpi and intall it to bpi, passing [args] to "make".
+ump # Rebuild libUMP at the box and install it to the box.
+ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
 ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
 clean # Delete all build dirs recursively.
 rebuild [args] # Perform clean, then "mvn clean package ... [args]".
 mvn [args] # Call maven with the required platorm and box.
-pack-short <output.tgz> # Prepare tar with build results at bpi.
-pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at bpi.
+pack-short <output.tgz> # Prepare tar with build results at the box.
+pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 EOF
 }
 
 #--------------------------------------------------------------------------------------------------
 
-# Execute a command at bpi via ssh, or log in to bpi via ssh.
+# Execute a command at the box via ssh, or log in to the box via ssh.
 bpi() # args...
 {
-    nx_ssh "root" "$BPI_PASSWORD" "$BPI_HOST" "$BPI_TERMINAL_TITLE" "$BPI_BACKGROUND_RRGGBB" "$@"
+    nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
 pack() # archive files...
@@ -144,7 +145,7 @@ pack_full() # archive
     local ARCHIVE="$1"
 
     pack "$ARCHIVE" \
-        "$BPI_INSTALL_DIR" \
+        "$BOX_INSTALL_DIR" \
         "/etc/init.d/networkoptix*" \
         "/etc/init.d/nx*"
 }
@@ -155,38 +156,38 @@ pack_short()
     local ARCHIVE="$1"
 
     pack "$ARCHIVE" \
-        "$BPI_LIBS_DIR"/libappserver2.so \
-        "$BPI_LIBS_DIR"/libclient_core.so \
-        "$BPI_LIBS_DIR"/libcloud_db_client.so \
-        "$BPI_LIBS_DIR"/libcommon.so \
-        "$BPI_LIBS_DIR"/libconnection_mediator.so \
-        "$BPI_LIBS_DIR"/libmediaserver_core.so \
-        "$BPI_LIBS_DIR"/libudt.so \
-        "$BPI_LIBS_DIR"/libnx_audio.so \
-        "$BPI_LIBS_DIR"/libnx_email.so \
-        "$BPI_LIBS_DIR"/libnx_fusion.so \
-        "$BPI_LIBS_DIR"/libnx_media.so \
-        "$BPI_LIBS_DIR"/libnx_network.so \
-        "$BPI_LIBS_DIR"/libnx_streaming.so \
-        "$BPI_LIBS_DIR"/libnx_utils.so \
-        "$BPI_LIBS_DIR"/libnx_vms_utils.so \
+        "$BOX_LIBS_DIR"/libappserver2.so \
+        "$BOX_LIBS_DIR"/libclient_core.so \
+        "$BOX_LIBS_DIR"/libcloud_db_client.so \
+        "$BOX_LIBS_DIR"/libcommon.so \
+        "$BOX_LIBS_DIR"/libconnection_mediator.so \
+        "$BOX_LIBS_DIR"/libmediaserver_core.so \
+        "$BOX_LIBS_DIR"/libudt.so \
+        "$BOX_LIBS_DIR"/libnx_audio.so \
+        "$BOX_LIBS_DIR"/libnx_email.so \
+        "$BOX_LIBS_DIR"/libnx_fusion.so \
+        "$BOX_LIBS_DIR"/libnx_media.so \
+        "$BOX_LIBS_DIR"/libnx_network.so \
+        "$BOX_LIBS_DIR"/libnx_streaming.so \
+        "$BOX_LIBS_DIR"/libnx_utils.so \
+        "$BOX_LIBS_DIR"/libnx_vms_utils.so \
         \
-        "$BPI_LIBS_DIR"/ldpreloadhook.so \
-        "$BPI_LIBS_DIR"/libcedrus.so \
-        "$BPI_LIBS_DIR"/libpixman-1.so \
-        "$BPI_LIBS_DIR"/libproxydecoder.so \
-        "$BPI_LIBS_DIR"/libvdpau_sunxi.so \
-        "$BPI_LIBS_DIR"/libUMP.so \
+        "$BOX_LIBS_DIR"/ldpreloadhook.so \
+        "$BOX_LIBS_DIR"/libcedrus.so \
+        "$BOX_LIBS_DIR"/libpixman-1.so \
+        "$BOX_LIBS_DIR"/libproxydecoder.so \
+        "$BOX_LIBS_DIR"/libvdpau_sunxi.so \
+        "$BOX_LIBS_DIR"/libUMP.so \
         \
-        "$BPI_LITE_CLIENT_DIR"/bin/mobile_client \
-        "$BPI_LITE_CLIENT_DIR"/bin/video/videonode/libnx_bpi_videonode_plugin.so \
-        "$BPI_MEDIASERVER_DIR"/bin/mediaserver \
-        "$BPI_MEDIASERVER_DIR"/bin/media_db_util \
-        "$BPI_MEDIASERVER_DIR"/bin/external.dat \
-        "$BPI_MEDIASERVER_DIR"/bin/plugins \
+        "$BOX_LITE_CLIENT_DIR"/bin/mobile_client \
+        "$BOX_LITE_CLIENT_DIR"/bin/video/videonode/libnx_bpi_videonode_plugin.so \
+        "$BOX_MEDIASERVER_DIR"/bin/mediaserver \
+        "$BOX_MEDIASERVER_DIR"/bin/media_db_util \
+        "$BOX_MEDIASERVER_DIR"/bin/external.dat \
+        "$BOX_MEDIASERVER_DIR"/bin/plugins \
         "/etc/init.d/networkoptix*" \
         "/etc/init.d/nx*" \
-        "$BPI_MEDIASERVER_DIR"/var/scripts
+        "$BOX_MEDIASERVER_DIR"/var/scripts
 }
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
@@ -215,12 +216,12 @@ cp_files()
 
     nx_echo "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
-    mkdir -p "${BPI_MNT}$FILES_DST" || exit $?
+    mkdir -p "${BOX_MNT}$FILES_DST" || exit $?
 
     # Here eval expands globs and braces to the array, after we enquote spaces (if any).
     eval FILE_LIST=(${FILE_MASK// /\" \"})
 
-    nx_rsync "${FILE_LIST[@]}" "${BPI_MNT}$FILES_DST/" || exit $?
+    nx_rsync "${FILE_LIST[@]}" "${BOX_MNT}$FILES_DST/" || exit $?
 }
 
 cp_libs() # file_mask description
@@ -229,8 +230,8 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/lib/$NX_CONF/$MASK" \
-        "$BPI_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/lib/$BUILD_CONFIG/$MASK" \
+        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
 cp_sysroot_libs() # file_mask description
@@ -238,7 +239,7 @@ cp_sysroot_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
     cp_files "$PACKAGES_DIR/sysroot/usr/lib/arm-linux-gnueabihf/$MASK" \
-        "$BPI_LIBS_DIR" "$DESCRIPTION" "packages/bpi/sysroot"
+        "$BOX_LIBS_DIR" "$DESCRIPTION" "packages/bpi/sysroot"
 }
 
 cp_lite_client_bins() # file_mask description
@@ -246,8 +247,8 @@ cp_lite_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/$MASK" \
-        "$BPI_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$BUILD_CONFIG/$MASK" \
+        "$BOX_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
 cp_mediaserver_bins() # file_mask description
@@ -255,8 +256,8 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/$MASK" \
-        "$BPI_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
+    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$BUILD_CONFIG/$MASK" \
+        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
 cp_script_with_customization_filtering() # src dst
@@ -286,10 +287,10 @@ copy_scripts()
 {
     find_VMS_DIR
     local DIR="$VMS_DIR/edge_firmware/rpi/maven"
-    cp_scripts_dir "$DIR/bpi/etc/init.d" "${BPI_MNT}/etc/init.d"
-    cp_scripts_dir "$DIR/filter-resources/etc/init.d" "${BPI_MNT}/etc/init.d"
+    cp_scripts_dir "$DIR/bpi/etc/init.d" "${BOX_MNT}/etc/init.d"
+    cp_scripts_dir "$DIR/filter-resources/etc/init.d" "${BOX_MNT}/etc/init.d"
     cp_scripts_dir "$DIR/bpi/opt/networkoptix/mediaserver/var/scripts" \
-        "${BPI_MNT}$BPI_MEDIASERVER_DIR/var/scripts"
+        "${BOX_MNT}$BOX_MEDIASERVER_DIR/var/scripts"
 }
 
 # Read SD Card device from /etc/fw_env.config.
@@ -560,41 +561,41 @@ main()
     shift
     case "$COMMAND" in
         nfs)
-            sudo umount "$BPI_MNT"
-            sudo rm -rf "$BPI_MNT" || exit $?
-            sudo mkdir -p "$BPI_MNT" || exit $?
-            sudo chown "$USER" "$BPI_MNT"
+            sudo umount "$BOX_MNT"
+            sudo rm -rf "$BOX_MNT" || exit $?
+            sudo mkdir -p "$BOX_MNT" || exit $?
+            sudo chown "$USER" "$BOX_MNT"
 
-            sudo mount -o nolock bpi:/ "$BPI_MNT"
+            sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
             ;;
         sshfs)
-            sudo umount "$BPI_MNT"
-            sudo rm -rf "$BPI_MNT" || exit $?
-            sudo mkdir -p "$BPI_MNT" || exit $?
-            sudo chown "$USER" "$BPI_MNT"
+            sudo umount "$BOX_MNT"
+            sudo rm -rf "$BOX_MNT" || exit $?
+            sudo mkdir -p "$BOX_MNT" || exit $?
+            sudo chown "$USER" "$BOX_MNT"
 
-            echo "$BPI_PASSWORD" |sshfs root@"$BPI_HOST":/ "$BPI_MNT" -o nonempty,password_stdin
+            echo "$BOX_PASSWORD" |sshfs root@"$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
             ;;
         passwd)
-            sshpass -p "$BPI_INITIAL_PASSWORD" ssh -t "root@$BPI_HOST" \
-                "(echo \"$BPI_PASSWORD\"; echo \"$BPI_PASSWORD\") |passwd" \
+            sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "root@$BOX_HOST" \
+                "(echo \"$BOX_PASSWORD\"; echo \"$BOX_PASSWORD\") |passwd" \
                 || exit $?
-            nx_echo "Old bpi password: $BPI_INITIAL_PASSWORD"
-            nx_echo "New bpi password: $BPI_PASSWORD"
+            nx_echo "Old box password: $BOX_INITIAL_PASSWORD"
+            nx_echo "New box password: $BOX_PASSWORD"
             ;;
         mount)
-            local BPI_IP=$(ping -q -c 1 -t 1 bpi | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
-            local SUBNET=$(echo "$BPI_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
+            local BOX_IP=$(ping -q -c 1 -t 1 bpi | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+            local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            bpi umount "$BPI_DEVELOP_DIR" #< Just in case.
-            bpi mkdir -p "$BPI_DEVELOP_DIR" || exit $?
-            bpi apt-get install -y sshfs #< Install sshfs.
+            box umount "$BOX_DEVELOP_DIR" #< Just in case.
+            box mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            box apt-get install -y sshfs #< Install sshfs.
 
-            # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at bpi.
-            nx_echo "\nExecute the following command at bpi:"
-            nx_echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty
-            #bpi sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BPI_DEVELOP_DIR" -o nonempty \
-                #&& echo "$DEVELOP_DIR mounted to bpi's $BPI_DEVELOP_DIR."
+            # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
+            nx_echo "\nExecute the following command at the box:"
+            nx_echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
+            #box sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+                #&& echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
         sdcard) # [/dev/sd...]
@@ -726,13 +727,13 @@ main()
             copy_scripts
 
             # Server configuration does not need to be copied.
-            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR/etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
+            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BOX_MEDIASERVER_DIR/etc" "$BOX_MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
             cp_lite_client_bins "mobile_client" "mobile_client exe"
             cp_lite_client_bins "video" "Qt OpenGL video plugin"
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
             #cp_mediaserver_bins "vox" "mediaserver vox"
             #
             #cp_lite_client_bins \
@@ -747,8 +748,8 @@ main()
         copy-s)
             find_VMS_DIR
 
-            # In case of taking mobile_client from different branch and overriding BPI_LIBS_DIR:
-            mkdir -p "${BPI_MNT}$BPI_LIBS_DIR"
+            # In case of taking mobile_client from different branch and overriding BOX_LIBS_DIR:
+            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -760,11 +761,11 @@ main()
             copy_scripts
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
             #cp_mediaserver_bins "vox" "mediaserver vox"
 
             # Server configuration does not need to be copied.
-            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BPI_MEDIASERVER_DIR/etc" "$BPI_MEDIASERVER_DIR" "etc" "$VMS_DIR"
+            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BOX_MEDIASERVER_DIR/etc" "$BOX_MEDIASERVER_DIR" "etc" "$VMS_DIR"
 
             exit 0
             ;;
@@ -776,7 +777,7 @@ main()
             cp_lite_client_bins "mobile_client" "mobile_client exe"
 
             # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$BPI_LIBS_DIR" "Qt libs" "$QT_PATH"
+            #cp_files "$VMS_DIR/$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
             #cp_lite_client_bins \
             #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
             #    "{egldeviceintegrations,fonts,imageformats,platforms,qml,video,libexec,resources,translations}" \
@@ -790,8 +791,8 @@ main()
         copy-ut)
             find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
-            cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$NX_CONF/*_ut" \
-                "$BPI_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
+            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
+                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         client)
             cp_lite_client_bins "mobile_client" "mobile_client exe"
@@ -812,7 +813,7 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         ini)
-            bpi \
+            box \
                 touch /tmp/mobile_client.ini "[&&]" \
                 touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
@@ -820,34 +821,34 @@ main()
             ;;
         #..........................................................................................
         ssh)
-            bpi "$@"
+            box "$@"
             ;;
         run-c)
-            bpi /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
+            box /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
             ;;
         kill-c)
-            bpi killall mobile_client
+            box killall mobile_client
             ;;
         start-s)
-            bpi /etc/init.d/networkoptix-mediaserver start "$@"
+            box /etc/init.d/networkoptix-mediaserver start "$@"
             ;;
         stop-s)
-            bpi /etc/init.d/networkoptix-mediaserver stop
+            box /etc/init.d/networkoptix-mediaserver stop
             ;;
         start-c)
-            bpi /etc/init.d/networkoptix-lite-client start "$@"
+            box /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop-c)
-            bpi /etc/init.d/networkoptix-lite-client stop
+            box /etc/init.d/networkoptix-lite-client stop
             ;;
         start)
-            bpi \
+            box \
                 /etc/init.d/networkoptix-mediaserver start "$@" "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop)
-            bpi \
+            box \
                 /etc/init.d/networkoptix-lite-client stop "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-mediaserver stop
@@ -856,12 +857,12 @@ main()
             local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             nx_echo "Running: $TEST_NAME $@"
-            bpi LD_LIBRARY_PATH="$BPI_LIBS_DIR" \
-                "$BPI_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
+            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" \
+                "$BOX_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             ;;
         #..........................................................................................
         vdp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
+            box make -C "$BOX_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
             ;;
         vdp-rdep)
             cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit $?
@@ -869,7 +870,7 @@ main()
             rdep -u
             ;;
         pd)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
+            box make -C "$BOX_PACKAGES_SRC_DIR/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
             ;;
         pd-rdep)
             cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit $?
@@ -880,9 +881,9 @@ main()
         cedrus)
             if [ "$1" = "ump" ]; then
                 shift
-                bpi USE_UMP=1 make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                box USE_UMP=1 make -C "$BOX_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
             else
-                bpi make -C "$BPI_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                box make -C "$BOX_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
             fi
             ;;
         cedrus-rdep)
@@ -891,16 +892,16 @@ main()
             rdep -u
             ;;
         ump)
-            bpi \
+            box \
                 rm -r /tmp/libump "[&&]" \
-                cp -r "$BPI_PACKAGES_SRC_DIR/libump" /tmp/ "[&&]" \
+                cp -r "$BOX_PACKAGES_SRC_DIR/libump" /tmp/ "[&&]" \
                 cd /tmp/libump "[&&]" \
                 "[{]" dpkg-buildpackage -b "[||]" \
                     echo "WARNING: Package build failed; manually installing .so and .h." "[}]" "[;]" \
                 cp -r /tmp/libump/debian/tmp/usr /
             ;;
         ldp)
-            bpi make -C "$BPI_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
+            box make -C "$BOX_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
             ;;
         ldp-rdep)
             cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
