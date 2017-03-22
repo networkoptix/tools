@@ -1,47 +1,33 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-#--------------------------------------------------------------------------------------------------
-# Config
-
-CONFIG=".bpi-toolrc"
-nx_load_config "$CONFIG" #< Load config and assign defaults to values missing in config.
-: ${BOX_MNT:="/bpi"}
-: ${BOX_INITIAL_PASSWORD:="admin"}
-: ${BOX_PASSWORD:="qweasd123"}
-: ${BOX_HOST:="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
-: ${BOX_TERMINAL_TITLE:="$BOX_HOST"}
-: ${BOX_BACKGROUND_RRGGBB:="003000"}
-: ${BOX_DEVELOP_DIR:="/root/develop"}
-: ${BOX_PACKAGES_SRC_DIR:="$BOX_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at the box.
-: ${DEVELOP_DIR:="$HOME/develop"}
-: ${SDCARD_PARTITION_SECTORS:="122879,7043071,81919,"} #< Used to check SD card before accessing it.
+nx_load_config "{$CONFIG=".bpi-toolrc"}"
+: ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
+: ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".
+: ${BOX_MNT="/bpi"}
+: ${BOX_INITIAL_PASSWORD="admin"}
+: ${BOX_PASSWORD="qweasd123"}
+: ${BOX_HOST="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
+: ${BOX_TERMINAL_TITLE="$BOX_HOST"}
+: ${BOX_BACKGROUND_RRGGBB="003000"}
+: ${BOX_INSTALL_DIR="/opt/networkoptix"}
+: ${BOX_LITE_CLIENT_DIR="$BOX_INSTALL_DIR/lite_client"}
+: ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
+: ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
+: ${BOX_DEVELOP_DIR="/root/develop"} #< Mount point at the box for the workstation develop dir.
+: ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at the box.
+: ${DEVELOP_DIR="$HOME/develop"}
+: ${SDCARD_PARTITION_SECTORS="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at the workstation.
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at the workstation.
 : ${QT_DIR="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at the workstation.
 : ${BUILD_CONFIG="debug"}
+: ${TARGET_IN_VMS_DIR="build_environment/target"} #< Path component at the workstation.
+: ${BUILD_DIR="aarch64"} #< Path component at the workstation.
+: ${PACKAGE_SUFFIX=""}
 
 #--------------------------------------------------------------------------------------------------
 # Const
-
-# Paths at the box.
-BOX_INSTALL_DIR="/opt/networkoptix"
-BOX_LITE_CLIENT_DIR="$BOX_INSTALL_DIR/lite_client"
-BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"
-
-# BOX_LIBS_DIR can be pre-defined before running this script.
-if [ -z "$BOX_LIBS_DIR" ]; then
-    BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"
-else
-    nx_echo "ATTENTION: BOX_LIBS_DIR overridden to $BOX_LIBS_DIR"
-fi
-
-# PACKAGE_SUFFIX can be pre-defined before running this script.
-if [ -z "$PACKAGE_SUFFIX" ]; then
-    PACKAGE_SUFFIX=""
-else
-    nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
-fi
 
 # Constants for working with SD Card via fw_printenv/fw_setenv.
 MAC_VAR="ethaddr"
@@ -51,9 +37,6 @@ FW_CONFIG="/etc/fw_env.config"
 # Lines from /etc/network/interfaces at the box.
 IP_DHCP_LINE="iface eth0 inet dhcp"
 IP_STATIC_LINE="iface eth0 inet static"
-
-BUILD_DIR="arm-bpi"
-TARGET_IN_VMS_DIR:="build_environment/target-bpi"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -86,7 +69,6 @@ copy-c # Copy mobile_client libs and bins to the box $BOX_INSTALL_DIR.
 copy-ut # Copy all libs and unit test bins to the box $BOX_INSTALL_DIR.
 client # Copy mobile_client exe to the box.
 server # Copy mediaserver_core lib to the box.
-common # Copy common lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
@@ -97,7 +79,7 @@ start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start
 stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
 start-c [args] # Run mobile_client via "/etc/init.d/networkoptix-lite-client start [args]".
 stop-c # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
-run-ut [test-name args] # Run the specified unit test with strict expectations.
+run-ut test_name [args] # Run the unit test with strict expectations.
 start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
 stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
 
@@ -111,8 +93,7 @@ ump # Rebuild libUMP at the box and install it to the box.
 ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
 ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
-clean # Delete all build dirs recursively.
-rebuild [args] # Perform clean, then "mvn clean package ... [args]".
+clean # Delete all build dirs.
 mvn [args] # Call maven with the required platorm and box.
 pack-short <output.tgz> # Prepare tar with build results at the box.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
@@ -230,7 +211,7 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/lib/$BUILD_CONFIG/$MASK" \
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/lib/$BUILD_CONFIG/$MASK" \
         "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -247,7 +228,7 @@ cp_lite_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$BUILD_CONFIG/$MASK" \
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
         "$BOX_LITE_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -256,7 +237,7 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/$TARGET_DIR/bin/$BUILD_CONFIG/$MASK" \
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
         "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
 }
 
@@ -538,7 +519,11 @@ EOF
 clean()
 {
     find_VMS_DIR
-    cd "$VMS_DIR"
+    pushd "$VMS_DIR" >/dev/null
+
+    nx_echo "Deleting: $VMS_DIR/$TARGET_IN_VMS_DIR"
+    rm -r "$VMS_DIR/$TARGET_IN_VMS_DIR"
+
     local BUILD_DIRS=()
     nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
     local DIR
@@ -546,11 +531,27 @@ clean()
         nx_echo "Deleting: $DIR"
         rm -r "$DIR"
     done
+
+    popd >/dev/null
 }
 
 do_mvn() # "$@"
 {
     mvn -Dbox=bpi -Darch=arm "$@"
+}
+
+assert_not_client_only()
+{
+    if [ "$CLIENT_ONLY" = "1" ]; then
+        nx_fail "Non-client command attempted while config \"~/$CONFIG\" specifies CLIENT_ONLY=1."
+    fi
+}
+
+assert_not_server_only()
+{
+    if [ "$SERVER_ONLY" = "1" ]; then
+        nx_fail "Non-server command attempted while config \"~/$CONFIG\" specifies SERVER_ONLY=1."
+    fi
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -715,6 +716,8 @@ main()
             copy_scripts
             ;;
         copy)
+            assert_not_client_only
+            assert_not_server_only
             find_VMS_DIR
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
@@ -742,13 +745,11 @@ main()
             #cp_sysroot_libs "lib{opus,vpx,webp,webpdemux}.so*" "libs for web-engine"
             #cp_lite_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
             #cp_libs "ffmpeg" "lib/ffmpeg for proxydecoder"
-
-            exit 0
             ;;
         copy-s)
+            assert_not_client_only
             find_VMS_DIR
 
-            # In case of taking mobile_client from different branch and overriding BOX_LIBS_DIR:
             mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
@@ -766,10 +767,9 @@ main()
 
             # Server configuration does not need to be copied.
             #cp_files "$VMS_DIR/edge_firmware/rpi/maven/bpi/$BOX_MEDIASERVER_DIR/etc" "$BOX_MEDIASERVER_DIR" "etc" "$VMS_DIR"
-
-            exit 0
             ;;
         copy-c)
+            assert_not_server_only
             find_VMS_DIR
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
@@ -785,8 +785,6 @@ main()
             #cp_sysroot_libs "lib{opus,vpx,webp,webpdemux}.so*" "libs for web-engine"
             #cp_lite_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
             #cp_libs "ffmpeg" "lib/ffmpeg for proxydecoder"
-
-            exit 0
             ;;
         copy-ut)
             find_VMS_DIR
@@ -795,13 +793,12 @@ main()
                 "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         client)
+            assert_not_server_only
             cp_lite_client_bins "mobile_client" "mobile_client exe"
             ;;
         server)
+            assert_not_client_only
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
-            ;;
-        common)
-            cp_libs "libcommon.so*" "lib common"
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -911,10 +908,6 @@ main()
         #..........................................................................................
         clean)
             clean
-            ;;
-        rebuild)
-            clean || exit $?
-            do_mvn clean package "$@"
             ;;
         mvn)
             do_mvn "$@"

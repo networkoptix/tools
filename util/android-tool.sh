@@ -1,12 +1,8 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-#--------------------------------------------------------------------------------------------------
-# Config
-
-CONFIG=".android-toolrc"
-nx_load_config "$CONFIG" #< Load config and assign defaults to values missing in config.
-: ${DEVELOP_DIR:="$HOME/develop"}
+nx_load_config "${CONFIG=".android-toolrc"}"
+: ${DEVELOP_DIR="$HOME/develop"}
 
 #--------------------------------------------------------------------------------------------------
 

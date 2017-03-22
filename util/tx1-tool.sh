@@ -1,47 +1,26 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-#--------------------------------------------------------------------------------------------------
-# Config
-
-CONFIG=".tx1-toolrc"
-nx_load_config "$CONFIG" #< Load config and assign defaults to values missing in config.
-: ${BOX_MNT:="/tx1"} #< Path at the workstation to which the box root is mounted.
-: ${BOX_USER:="ubuntu"}
-: ${BOX_PASSWORD:="ubuntu"}
-: ${BOX_HOST:="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
-: ${BOX_TERMINAL_TITLE:="$BOX_HOST"}
-: ${BOX_BACKGROUND_RRGGBB:="302000"}
-: ${DEVELOP_DIR:="$HOME/develop"}
-: ${PACKAGES_DIR:="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
-: ${QT_DIR:="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
-: ${BUILD_CONFIG:=""} #< TODO: #mshevchenko: Fix empty overridings. Was: "debug".
-: ${TARGET_IN_VMS_DIR:="build_environment/target"}
-
-#--------------------------------------------------------------------------------------------------
-# Const
-
-# Paths at the box.
-BOX_INSTALL_DIR="/opt/networkoptix"
-BOX_LITE_CLIENT_DIR="$BOX_INSTALL_DIR/lite_client"
-BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"
-
-# BOX_LIBS_DIR can be pre-defined before running this script.
-if [ -z "$BOX_LIBS_DIR" ]; then
-    BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"
-else
-    nx_echo "ATTENTION: BOX_LIBS_DIR overridden to $BOX_LIBS_DIR"
-fi
-
-# PACKAGE_SUFFIX can be pre-defined before running this script.
-if [ -z "$PACKAGE_SUFFIX" ]; then
-    PACKAGE_SUFFIX=""
-else
-    nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
-fi
-
-# Path components at the workstation.
-BUILD_DIR="aarch64"
+nx_load_config "${CONFIG=".tx1-toolrc"}"
+: ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
+: ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
+: ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
+: ${BOX_USER="ubuntu"}
+: ${BOX_PASSWORD="ubuntu"}
+: ${BOX_HOST="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
+: ${BOX_TERMINAL_TITLE="$BOX_HOST"}
+: ${BOX_BACKGROUND_RRGGBB="302000"}
+: ${BOX_INSTALL_DIR="/opt/networkoptix"}
+: ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
+: ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
+: ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
+: ${DEVELOP_DIR="$HOME/develop"}
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-arm"} #< Path at the workstation.
+: ${QT_DIR="$PACKAGES_DIR/qt-5.6.1"} #< Path at the workstation.
+: ${BUILD_CONFIG="debug"}
+: ${TARGET_IN_VMS_DIR="build_environment/target-tx1"} #< Path component at the workstation.
+: ${BUILD_DIR="arm-tx1"} #< Path component at the workstation.
+: ${PACKAGE_SUFFIX=""}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -59,23 +38,27 @@ Here <command> can be one of the following:
 nfs # Mount the box root to $BOX_MNT via NFS.
 sshfs # Mount the box root to $BOX_MNT via SSHFS.
 
-copy-s # Copy mediaserver libs and bins to the box $BOX_INSTALL_DIR.
-copy-ut # Copy all libs and unit test bins to the box $BOX_INSTALL_DIR.
+copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
+copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
 server # Copy mediaserver_core lib to the box.
-common # Copy common lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
 ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
-start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
-stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
-run-ut [test-name args] # Run the specified unit test with strict expectations.
-start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
-stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
+start-s [args] # Run mediaserver exe with [args].
+stop-s # Stop mediaserver via "kill -9".
+start-c [args] # Run desktop_client exe with [args].
+stop-c # Stop desktop_client via "kill -9".
+run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
+run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
 
-clean # Delete all build dirs recursively.
-rebuild [args] # Perform clean, then "mvn clean package ... [args]".
+clean # Delete all build dirs.
 mvn [args] # Call maven with the required platorm and box.
+cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
+make [args] # Call make in cmake build dir.
 EOF
 }
 
@@ -112,7 +95,7 @@ cp_files()
     local FILES_DESCRIPTION="$3"
     local FILES_SRC_DESCRIPTION="$4"
 
-    nx_echo "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
+    nx_echo "Rsyncing $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
 
     mkdir -p "${BOX_MNT}$FILES_DST" || exit $?
 
@@ -129,7 +112,16 @@ cp_libs() # file_mask description
     local DESCRIPTION="$2"
 
     cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/lib/$BUILD_CONFIG/$MASK" \
-        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
+        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+}
+
+cp_desktop_client_bins() # file_mask description
+{
+    find_VMS_DIR
+    local MASK="$1"
+    local DESCRIPTION="$2"
+    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
+        "$BOX_DESKTOP_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
 }
 
 cp_mediaserver_bins() # file_mask description
@@ -138,13 +130,17 @@ cp_mediaserver_bins() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
     cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
-        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
+        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
 }
 
 clean()
 {
     find_VMS_DIR
-    cd "$VMS_DIR"
+    pushd "$VMS_DIR" >/dev/null
+
+    nx_echo "Deleting: $VMS_DIR/$TARGET_IN_VMS_DIR"
+    rm -r "$VMS_DIR/$TARGET_IN_VMS_DIR"
+
     local BUILD_DIRS=()
     nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
     local DIR
@@ -152,11 +148,51 @@ clean()
         nx_echo "Deleting: $DIR"
         rm -r "$DIR"
     done
+
+    popd >/dev/null
 }
 
 do_mvn() # "$@"
 {
-    mvn -Dbox=tx1-aarch64 -Darch=aarch64 "$@"
+    mvn -Dbox=tx1 -Darch=arm "$@"
+}
+
+do_cmake() # "$@"
+{
+    find_VMS_DIR
+    local CMAKE_BUILD_DIR="$VMS_DIR/$TARGET_IN_VMS_DIR"
+    mkdir -p "$CMAKE_BUILD_DIR"
+    pushd "$CMAKE_BUILD_DIR" >/dev/null
+    cmake "$VMS_DIR" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$@"
+    local RESULT=$?
+    popd >/dev/null
+    return "$RESULT"
+}
+
+do_make() # "$@"
+{
+    find_VMS_DIR
+    local CMAKE_BUILD_DIR="$VMS_DIR/$TARGET_IN_VMS_DIR"
+    mkdir -p "$CMAKE_BUILD_DIR"
+    pushd "$CMAKE_BUILD_DIR" >/dev/null
+    make "$@"
+    local RESULT=$?
+    popd >/dev/null
+    return "$RESULT"
+}
+
+assert_not_client_only()
+{
+    if [ "$CLIENT_ONLY" = "1" ]; then
+        nx_fail "Non-client command attempted while config \"~/$CONFIG\" specifies CLIENT_ONLY=1."
+    fi
+}
+
+assert_not_server_only()
+{
+    if [ "$SERVER_ONLY" = "1" ]; then
+        nx_fail "Non-server command attempted while config \"~/$CONFIG\" specifies SERVER_ONLY=1."
+    fi
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -184,40 +220,65 @@ main()
             ;;
         #..........................................................................................
         copy-s)
+            assert_not_client_only
             find_VMS_DIR
 
-            local LIBS_DIR="${BOX_MNT}$BOX_LIBS_DIR"
-            mkdir -p "$LIBS_DIR/tegra"
-            mkdir -p "$LIBS_DIR/libgtk2.0-0"
-            mkdir -p "$LIBS_DIR/stubs"
-            mkdir -p "$LIBS_DIR/libgtk-3-0"
-
+            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
             cp_libs "*.so*" "all libs"
 
             mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin"
             cp_mediaserver_bins "mediaserver" "mediaserver executable"
-            cp_mediaserver_bins "external.dat" "web-admin (external.dat)"
-            cp_mediaserver_bins "plugins" "mediaserver plugins"
-
-            # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
-            #cp_mediaserver_bins "vox" "mediaserver vox"
-
-            exit 0
             ;;
-        copy-ut)
+        copy-c)
+            assert_not_server_only
             find_VMS_DIR
+
+            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
             cp_libs "*.so*" "all libs"
+
+            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_desktop_client_bins "desktop_client" "desktop_client exe"
+            ;;
+        copy-c-all)
+            assert_not_server_only
+            find_VMS_DIR
+
+            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
+            cp_libs "*.so*" "all libs"
+
+            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_desktop_client_bins "desktop_client" "desktop_client exe"
+            cp_desktop_client_bins "applauncher" "applauncher exe"
+            # TODO: Temporary hack: copy mediaserver exe to the desktop_client bin dir.
+            cp_desktop_client_bins "mediaserver" "mediaserver exe"
+
+            cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
+
+            cp_desktop_client_bins \
+                "{xcbglintegrations,fonts,help,imageformats,platforminputcontexts,platforms,plugins,qml,qmltooling,vox}" \
+                "{xcbglintegrations,fonts,help,imageformats,platforminputcontexts,platforms,plugins,qml,qmltooling,vox}" \
+                "desktop_client/bin dirs"
+            cp_desktop_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
+            ;;
+        copy-s-ut)
+            assert_not_client_only
+            find_VMS_DIR
+
+            mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/ut"
             cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
-                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
+                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+            ;;
+        copy-c-ut)
+            assert_not_server_only
+            find_VMS_DIR
+
+            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/ut"
+            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
+                "$BOX_DESKTOP_CLIENT_DIR/ut" "unit tests" "$VMS_DIR/$TARGET_IN_VMS_DIR"
             ;;
         server)
-            cp_libs "libappserver2.so*" "lib appserver2"
+            assert_not_client_only
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
-            cp_mediaserver_bins "mediaserver" "mediaserver executable"
-            ;;
-        common)
-            cp_libs "libcommon.so*" "lib common"
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -229,37 +290,54 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         ini)
-            box \
-                touch /tmp/mobile_client.ini "[&&]" \
-                touch /tmp/nx_media.ini \
+            box touch /tmp/nx_media.ini
             ;;
         #..........................................................................................
         ssh)
             box "$@"
             ;;
         start-s)
+            assert_not_client_only
             box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
             box sudo killall -9 mediaserver
             ;;
-        run-ut)
+        start-c)
+            assert_not_server_only
+            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            ;;
+        stop-c)
+            box sudo killall -9 desktop_client
+            ;;
+        run-s-ut)
             local TEST_NAME="$1"
             shift
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
-            echo "Running: $TEST_NAME $@"
-            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
+            local TEST_PATH="$BOX_MEDIASERVER_DIR/ut/$TEST_NAME"
+            echo "Running: $TEST_PATH $@"
+            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
+            ;;
+        run-c-ut)
+            local TEST_NAME="$1"
+            shift
+            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
+            local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/ut/$TEST_NAME"
+            echo "Running: $TEST_PATH $@"
+            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
             ;;
         #..........................................................................................
         clean)
             clean
             ;;
-        rebuild)
-            clean || exit $?
-            do_mvn clean package "$@"
-            ;;
         mvn)
             do_mvn "$@"
+            ;;
+        cmake)
+            do_cmake "$@"
+            ;;
+        make)
+            do_make "$@"
             ;;
         #..........................................................................................
         *)

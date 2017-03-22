@@ -15,13 +15,29 @@ nx_handle_help() # "$@"
     fi
 }
 
-# Set the verbose mode and return 0 if $1 is "--verbose"; return 1 otherwise.
-# Usage: nx_set_VERBOSE "$@" && shift
-nx_handle_verbose() # "$@"
+# Set the verbose mode and return whether $1 is consumed.
+nx_handle_verbose() # "$@" && shift
 {
     if [ "$1" == "--verbose" -o "$1" == "-v" ]; then
         NX_VERBOSE="1"
         set -x
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Set the mode to simulate rsync calls and return whether $1 is consumed.
+nx_handle_simulate_rsync() # "$@" && shift
+{
+    if [ "$1" == "--simulate-rsync" ]; then
+        rsync() #< Define the function which overrides rsync executable name.
+        {
+            nx_echo
+            nx_echo "SIMULATED:"
+            nx_echo "rsync $*"
+            nx_echo
+        }
         return 0
     else
         return 1
@@ -293,7 +309,7 @@ nx_rsync() # rsync_args...
 }
 
 # Source the specified file (typically with settings), return whether it exists.
-nx_load_config() # rc_file
+nx_load_config() # "${CONFIG=".<tool-name>rc"}"
 {
     local FILE="$1"
 
@@ -306,5 +322,6 @@ nx_run()
 {
     nx_handle_verbose "$@" && shift
     nx_handle_help "$@"
+    nx_handle_simulate_rsync "$@" && shift
     main "$@"
 }
