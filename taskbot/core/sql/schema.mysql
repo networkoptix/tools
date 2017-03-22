@@ -56,7 +56,6 @@ CREATE TABLE command (
             ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
 CREATE TABLE running_task (
         -- running_task inherits task.
         task_id INTEGER UNSIGNED PRIMARY KEY,
@@ -113,6 +112,23 @@ CREATE TABLE report_view (
   FOREIGN KEY (report_id) REFERENCES report (id)
     ON DELETE CASCADE,
   FOREIGN KEY (view_id) REFERENCES view (id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE test (
+   id INTEGER UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+   name VARCHAR(255) NOT NULL) ENGINE=InnoDB;
+
+CREATE UNIQUE INDEX test_name ON test (name);
+
+CREATE TABLE report_test (
+  report_id INTEGER UNSIGNED NOT NULL,
+  test_id INTEGER UNSIGNED NOT NULL,
+  failure_reason VARCHAR(255) NOT NULL,
+
+  FOREIGN KEY (report_id) REFERENCES report (id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (test_id) REFERENCES test (id)
     ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

@@ -7,9 +7,9 @@ from MySQLDB import MySQLDB
 from EmailNotify import emergency
 from Utils import *
 
-class Report:
+class Report(object):
 
-  class Task:
+  class Task(object):
     def __init__(self,
                  task_id, parent_task_id,
                  description,
@@ -29,7 +29,7 @@ class Report:
     def __repr__(self):
       return self.__str__()
 
-  class Platform:
+  class Platform(object):
     def __init__(self, platform_id, host, description):
       self.id = platform_id
       self.host = host
@@ -45,7 +45,7 @@ class Report:
     def desc(self):
       return "%s (%s)" % (self.description, self.host)
 
-  class File:
+  class File(object):
     def __init__(self,
                  file_id, task_id,
                  name, fullpath):
@@ -60,7 +60,17 @@ class Report:
     
     def __repr__(self):
       return self.__str__()
+
+  class Test(object):
+    def __init__(self, test_id, name):
+      self.id = test_id
+      self.name = name
+      
+    def __str__(self):
+      return "Test#%s" % (self.name)
     
+    def __repr__(self):
+      return self.__str__()
       
   def __init__(self, config, root_task = None, report_watchers=None):
     self.__config = read_config(config) # Takbot config
@@ -109,7 +119,7 @@ class Report:
     if res:
       return Report.Task(*res)
     return None
-  
+
   def __find_root_by_pid(self):
     if not os.environ.get('TASKBOT_PARENT_PID'):
       return None
@@ -266,6 +276,26 @@ class Report:
     return self.__db.query("""SELECT gzipped, content
       FROM file
       WHERE id = %s""", (file_id, ))
+
+  # Tests
+  def __find_test(self, name):
+    res = self.__db.query("""SELECT id, name FROM test WHERE name = %s""", (name,))
+    if res:
+      return self.Test(*res)
+    return None
+
+  def __insert_test(self, name):
+    return self.Test(
+      self.__db.execute("""INSERT INTO test (name) VALUES (%s)""", (name,)), name)
+
+  def __insert_test_report(self, report_id, test_id, failure_reason):
+    return self.__db.execute("""INSERT INTO report_test
+        (report_id, test_id, failure_reason)
+        VALUES (%s, %s, %s)""",  (report_id,  test_id, failure_reason))
+
+  def insert_fail_test(self, report_id, name, failure_reason):
+    test = self.__find_test(name) or self.__insert_test(name)
+    self.__insert_test_report(report_id, test.id, failure_reason)
 
   def __get_ouput(self, fn, task):
     if isinstance(task, list):
