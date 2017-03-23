@@ -248,12 +248,12 @@ fi
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [ "$WITH_CLIENT" == 1 ]; then
         if [[ ! "$VERSION" < "2.4" ]]; then # >= 2.4
-            MODULES+=( client.core )
-            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.core.so )
-            MODULES+=( client )
+            MODULES+=( client/libclient_core )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient_core.so )
+            MODULES+=( client/libclient )
             MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so )
-            MODULES+=( client.bin )
-            MODULE_BIN_PATH+=( bin/$CONFIGURATION/client.bin )
+            MODULES+=( client/desktop_client )
+            MODULE_BIN_PATH+=( bin/$CONFIGURATION/desktop_client )
         else  # < 2.4
             MODULES+=( client )
             MODULE_BIN_PATH+=( bin/$CONFIGURATION/client )
@@ -310,6 +310,7 @@ do
         BINARY=$SRC_ROOT/build_environment/target/${MODULE_BIN_PATH[$i]}
     fi
 
+    echo "Building ${MODULES[$i]}"
     cd $SRC_ROOT/${MODULES[$i]}/$ARCH
     make -f Makefile.$CONFIGURATION -j $JOB_COUNT || exit 0
     if [ "$DO_EXT_DEBUG" == "1" ]; then
