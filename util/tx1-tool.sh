@@ -15,12 +15,20 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${DEVELOP_DIR="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-arm"} #< Path at the workstation.
-: ${QT_DIR="$PACKAGES_DIR/qt-5.6.1"} #< Path at the workstation.
-: ${BUILD_CONFIG="debug"}
-: ${TARGET_IN_VMS_DIR="build_environment/target-tx1"} #< Path component at the workstation.
-: ${BUILD_DIR="arm-tx1"} #< Path component at the workstation.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
+: ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
+: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
+: ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${PACKAGE_SUFFIX=""}
+
+# Config for maven instead of cmake:
+#TARGET_SUFFIX="/build_environment/target-tx1"
+#BUILD_CONFIG="debug"
+#PACKAGES_DIR="$HOME/develop/buildenv/packages/tx1-arm"
+#QT_DIR="$PACKAGES_DIR/qt-5.6.1"
+#MVN_BUILD_DIR="arm-tx1"
+#BOX_LIBS_DIR="/opt/networkoptix/desktop_client/lib"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -111,8 +119,8 @@ cp_libs() # file_mask description
     local MASK="$1"
     local DESCRIPTION="$2"
 
-    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/lib/$BUILD_CONFIG/$MASK" \
-        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+    cp_files "$VMS_DIR$TARGET_SUFFIX/lib/$BUILD_CONFIG/$MASK" \
+        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
 }
 
 cp_desktop_client_bins() # file_mask description
@@ -120,8 +128,8 @@ cp_desktop_client_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
-        "$BOX_DESKTOP_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+    cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/$MASK" \
+        "$BOX_DESKTOP_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
 }
 
 cp_mediaserver_bins() # file_mask description
@@ -129,8 +137,8 @@ cp_mediaserver_bins() # file_mask description
     find_VMS_DIR
     local MASK="$1"
     local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/$MASK" \
-        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+    cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/$MASK" \
+        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
 }
 
 clean()
@@ -138,16 +146,18 @@ clean()
     find_VMS_DIR
     pushd "$VMS_DIR" >/dev/null
 
-    nx_echo "Deleting: $VMS_DIR/$TARGET_IN_VMS_DIR"
-    rm -r "$VMS_DIR/$TARGET_IN_VMS_DIR"
+    nx_echo "Deleting: $VMS_DIR$TARGET_SUFFIX"
+    rm -r "$VMS_DIR$TARGET_SUFFIX"
 
-    local BUILD_DIRS=()
-    nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
-    local DIR
-    for DIR in "${BUILD_DIRS[@]}"; do
-        nx_echo "Deleting: $DIR"
-        rm -r "$DIR"
-    done
+    if [ ! -z "$MVN_BUILD_DIR" ]; then
+        local BUILD_DIRS=()
+        nx_find_files BUILD_DIRS -type d -name "$MVN_BUILD_DIR"
+        local DIR
+        for DIR in "${BUILD_DIRS[@]}"; do
+            nx_echo "Deleting: $DIR"
+            rm -r "$DIR"
+        done
+    fi
 
     popd >/dev/null
 }
@@ -160,7 +170,7 @@ do_mvn() # "$@"
 do_cmake() # "$@"
 {
     find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR/$TARGET_IN_VMS_DIR"
+    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
     pushd "$CMAKE_BUILD_DIR" >/dev/null
     cmake "$VMS_DIR" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$@"
@@ -172,7 +182,7 @@ do_cmake() # "$@"
 do_make() # "$@"
 {
     find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR/$TARGET_IN_VMS_DIR"
+    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
     pushd "$CMAKE_BUILD_DIR" >/dev/null
     make "$@"
@@ -249,8 +259,6 @@ main()
             mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/bin"
             cp_desktop_client_bins "desktop_client" "desktop_client exe"
             cp_desktop_client_bins "applauncher" "applauncher exe"
-            # TODO: Temporary hack: copy mediaserver exe to the desktop_client bin dir.
-            cp_desktop_client_bins "mediaserver" "mediaserver exe"
 
             cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
 
@@ -265,16 +273,16 @@ main()
             find_VMS_DIR
 
             mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/ut"
-            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
-                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+            cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/*_ut" \
+                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR$TARGET_SUFFIX"
             ;;
         copy-c-ut)
             assert_not_server_only
             find_VMS_DIR
 
             mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/ut"
-            cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
-                "$BOX_DESKTOP_CLIENT_DIR/ut" "unit tests" "$VMS_DIR/$TARGET_IN_VMS_DIR"
+            cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/*_ut" \
+                "$BOX_DESKTOP_CLIENT_DIR/ut" "unit tests" "$VMS_DIR$TARGET_SUFFIX"
             ;;
         server)
             assert_not_client_only
