@@ -27,13 +27,11 @@ echo $TEST_LIST
 NX_WORK_DIR=/home/test/taskbot/$TASKBOT_BRANCHNAME
 NX_VMS_BIN_DST_PATH="$NX_WORK_DIR/nx_vms/bin"
 NX_VMS_LIB_DST_PATH="$NX_WORK_DIR/nx_vms/lib"
-NX_DEFAULT_LIB_PATH=/opt/networkoptix/lib
 
 CMD=$(cat << EOF
 [ -d $NX_WORK_DIR ] && rm -rvf $NX_WORK_DIR
 mkdir -p $NX_VMS_BIN_DST_PATH
 mkdir -p $NX_VMS_LIB_DST_PATH
-cp -r $NX_DEFAULT_LIB_PATH/* $NX_VMS_LIB_DST_PATH
 EOF
 )
 ssh -tt test@$TASKBOT_NX1_ADDRESS "$CMD"
