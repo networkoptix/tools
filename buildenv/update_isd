@@ -21,12 +21,13 @@ case "$BOX_TYPE" in
         ;;
 esac
 
-REMOTE_HOST=192.168.0.1:8081
-#REMOTE_HOST=10.0.2.220:8081
+#REMOTE_HOST=192.168.0.1:8081
+REMOTE_HOST=10.0.2.220:8081
 #TODO #ak arch auto-detection
 ARCH=arm
 #ARCH=x64
 VERSION=300
+WITH_TEST=
 
 #IP_ADDRS="`ifconfig | grep 'inet addr' | cut -d: -f 2 | cut -d' ' -f 1`"
 #for addr in $IP_ADDRS
@@ -64,6 +65,8 @@ do
         CONFIGURATION="debug"
     elif [ "$i" = "-r" ] ; then
         CONFIGURATION="release"
+    elif [ "$i" = "-t" ] ; then
+        WITH_TEST=1
     fi
 done
 
@@ -146,4 +149,9 @@ fi
 updateBin mediaserver
 if [ "$BOX" = "isd" -o "$BOX" = "isd_s2" ]; then
     updateBin plugins/libisd_native_plugin.so
+fi
+
+if [ ! -z "$WITH_TEST" ]; then
+    updateBin nx_network_ut
+    updateBin cloud_connectivity_ut
 fi
