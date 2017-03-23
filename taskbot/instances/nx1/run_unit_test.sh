@@ -16,6 +16,7 @@ if [ "$TEST" != "mediaserver_core_ut" ]; then
           --gtest_shuffle \
           --tmp=$TEST_VAR \
           --log-file=../../var/$TEST \
+          --log-size=20M \
           --log-level=DEBUG2
 else
   ./$TEST --gtest_filter=-NxCritical.All3 \
