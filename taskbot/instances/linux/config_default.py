@@ -21,6 +21,7 @@ config = {
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+    'Sergey Ivanov' : 'sivanov@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
   'ft_watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
