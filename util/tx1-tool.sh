@@ -14,8 +14,11 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
+: ${BOX_DEVELOP_DIR="/develop"} #< Mount point at the box for the workstation develop dir.
+: ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
 : ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
 : ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
@@ -46,6 +49,7 @@ Here <command> can be one of the following:
 nfs # Mount the box root to $BOX_MNT via NFS.
 sshfs # Mount the box root to $BOX_MNT via SSHFS.
 
+tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
 copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
 copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
 copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
@@ -67,6 +71,7 @@ clean # Delete all build dirs.
 mvn [args] # Call maven with the required platorm and box.
 cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
 make [args] # Call make in cmake build dir.
+ninja [args] # Call ninja in cmake build dir.
 EOF
 }
 
@@ -191,6 +196,18 @@ do_make() # "$@"
     return "$RESULT"
 }
 
+do_ninja() # "$@"
+{
+    find_VMS_DIR
+    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
+    mkdir -p "$CMAKE_BUILD_DIR"
+    pushd "$CMAKE_BUILD_DIR" >/dev/null
+    ninja "$@"
+    local RESULT=$?
+    popd >/dev/null
+    return "$RESULT"
+}
+
 assert_not_client_only()
 {
     if [ "$CLIENT_ONLY" = "1" ]; then
@@ -229,6 +246,11 @@ main()
             echo "$BOX_PASSWORD" |sshfs "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
             ;;
         #..........................................................................................
+        tegra_video)
+            assert_not_client_only
+            cp_files "$PACKAGES_DIR/tegra_video/lib/*.so*" "$BOX_LIBS_DIR" \
+                "libtegra_video.so" "$PACKAGES_DIR/tegra_video"
+            ;;
         copy-s)
             assert_not_client_only
             find_VMS_DIR
@@ -298,7 +320,8 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         ini)
-            box touch /tmp/nx_media.ini
+            box touch /tmp/nx_media.ini "[&&]" \
+                touch /tmp/analytics.ini
             ;;
         #..........................................................................................
         ssh)
@@ -334,6 +357,24 @@ main()
             echo "Running: $TEST_PATH $@"
             box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
             ;;
+        run-tv)
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
+            ;;
+        #..........................................................................................
+        tv)
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            box make -C "$BOX_SRC_DIR" "$@" \
+                "[&&]" echo "SUCCESS" \
+                "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
+                "[&&]" echo "libtegra_video.so deployed to $BOX_LIBS_DIR/"
+            ;;
+        tv-rdep)
+            local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
+            cd "$PACKAGES_DIR/tegra_video" || exit $?
+            rdep -u
+            ;;
         #..........................................................................................
         clean)
             clean
@@ -346,6 +387,9 @@ main()
             ;;
         make)
             do_make "$@"
+            ;;
+        ninja)
+            do_ninja "$@"
             ;;
         #..........................................................................................
         *)

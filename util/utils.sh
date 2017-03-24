@@ -200,9 +200,12 @@ nx_ssh() # user password host terminal_title background_rrggbb [command [args...
     nx_set_title "$TERMINAL_TITLE"
 
     sshpass -p "$PASSWORD" ssh -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit the param if empty.
+    RESULT=$?
 
     nx_pop_title
     nx_set_background "$OLD_BACKGROUND"
+
+    return "$RESULT"
 }
 
 # Return in the specified variable the array of files found by 'find' command.
