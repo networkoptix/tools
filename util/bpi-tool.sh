@@ -8,6 +8,7 @@ nx_load_config "{$CONFIG=".bpi-toolrc"}"
 : ${BOX_INITIAL_PASSWORD="admin"}
 : ${BOX_PASSWORD="qweasd123"}
 : ${BOX_HOST="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
+: ${BOX_PORT="22"}
 : ${BOX_TERMINAL_TITLE="$BOX_HOST"}
 : ${BOX_BACKGROUND_RRGGBB="003000"}
 : ${BOX_INSTALL_DIR="/opt/networkoptix"}
@@ -105,7 +106,8 @@ EOF
 # Execute a command at the box via ssh, or log in to the box via ssh.
 bpi() # args...
 {
-    nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
+    nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
+        "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
 pack() # archive files...

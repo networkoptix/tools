@@ -8,6 +8,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_USER="ubuntu"}
 : ${BOX_PASSWORD="ubuntu"}
 : ${BOX_HOST="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
+: ${BOX_PORT="22"}
 : ${BOX_TERMINAL_TITLE="$BOX_HOST"}
 : ${BOX_BACKGROUND_RRGGBB="302000"}
 : ${BOX_INSTALL_DIR="/opt/networkoptix"}
@@ -80,8 +81,8 @@ EOF
 # Execute a command at the box via ssh, or log in to the box via ssh.
 box() # args...
 {
-    nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" \
-        "$@"
+    nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
+        "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
@@ -178,7 +179,7 @@ do_cmake() # "$@"
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
     pushd "$CMAKE_BUILD_DIR" >/dev/null
-    cmake "$VMS_DIR" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$@"
+    cmake "$@" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
     local RESULT=$?
     popd >/dev/null
     return "$RESULT"
@@ -243,7 +244,8 @@ main()
             sudo mkdir -p "$BOX_MNT" || exit $?
             sudo chown "$USER" "$BOX_MNT"
 
-            echo "$BOX_PASSWORD" |sshfs "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
+            echo "$BOX_PASSWORD" |sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
+                -o nonempty,password_stdin
             ;;
         #..........................................................................................
         tegra_video)
@@ -372,6 +374,7 @@ main()
         tv-rdep)
             local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
+            nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
             cd "$PACKAGES_DIR/tegra_video" || exit $?
             rdep -u
             ;;

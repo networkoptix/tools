@@ -168,11 +168,12 @@ nx_restore_cursor_pos()
 # Ssh reparses the concatenated args string at the remote host, thus, this function performs the
 # escaping of the args, except for the "*" chars (to enable globs) and args in square brackets (to
 # enable e.g. combining commands via "[&&]" or redirecting with "[>]").
-nx_ssh() # user password host terminal_title background_rrggbb [command [args...]]
+nx_ssh() # user password host port terminal_title background_rrggbb [command [args...]]
 {
     local USER="$1"; shift
     local PASSWORD="$1"; shift
     local HOST="$1"; shift
+    local PORT="$1"; shift
     local TERMINAL_TITLE="$1"; shift
     local BACKGROUND_RRGGBB="$1"; shift
 
@@ -199,7 +200,7 @@ nx_ssh() # user password host terminal_title background_rrggbb [command [args...
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" ssh -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit the param if empty.
+    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit param if empty.
     RESULT=$?
 
     nx_pop_title
