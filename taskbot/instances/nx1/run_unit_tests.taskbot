@@ -53,7 +53,7 @@ for test in $TEST_LIST
 do
     "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
-     -c "LANG=C ssh -tt test@$TASKBOT_NX1_ADDRESS \"export TERM=\\\"xterm -cm\\\"; cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \     
+     -c "LANG=C ssh -tt test@$TASKBOT_NX1_ADDRESS \"export TERM=\\\"xterm -cm\\\"; cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \
      -t 1000 -s 100 || true
 done
 

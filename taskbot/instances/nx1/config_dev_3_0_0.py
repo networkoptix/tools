@@ -24,7 +24,7 @@ config = {
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
-    'TASKBOT_PUBLIC_HTML_HOST': '10.0.3.249',
+    'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/nx1'),
@@ -34,7 +34,7 @@ config = {
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     'TASKBOT_UNIT_TESTS': 'all',
     'TASKBOT_NX_VMS_BUILD_FLAGS': "-Dbox=bpi -Darch=arm -Dutb",
-    'TASKBOT_NX1_ADDRESS': '10.0.3.251',
+    'TASKBOT_NX1_ADDRESS': '10.1.5.121',
     'TASKBOT_DESTINATION_HOST': 'NX1'
     }
   }
