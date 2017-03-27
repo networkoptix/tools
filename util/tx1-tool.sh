@@ -52,6 +52,7 @@ sshfs # Mount the box root to $BOX_MNT via SSHFS.
 
 tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
 copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
 copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
 copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
 copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
@@ -262,6 +263,22 @@ main()
 
             mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin"
             cp_mediaserver_bins "mediaserver" "mediaserver executable"
+            ;;
+        copy-s-all)
+            assert_not_client_only
+            find_VMS_DIR
+
+            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
+            cp_libs "*.so*" "all libs"
+
+            mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin"
+            cp_mediaserver_bins "mediaserver" "mediaserver executable"
+
+            cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
+
+            cp_mediaserver_bins "nvidia_models" "mediaserver/bin/nvidia_models"
+            cp_mediaserver_bins "{plugins,vox}" "{plugins,vox}" "mediaserver/bin dirs"
+            cp_mediaserver_bins "ff{mpeg,probe,server}" "ffmpeg executables"
             ;;
         copy-c)
             assert_not_server_only
