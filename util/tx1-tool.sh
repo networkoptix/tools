@@ -372,7 +372,8 @@ main()
             ;;
         ini)
             box touch /tmp/nx_media.ini "[&&]" \
-                touch /tmp/analytics.ini
+                touch /tmp/analytics.ini "[&&]" \
+                touch /tmp/tegra_video.ini
             ;;
         #..........................................................................................
         ssh)
