@@ -328,4 +328,9 @@ nx_run()
     nx_handle_help "$@"
     nx_handle_simulate_rsync "$@" && shift
     main "$@"
+    local RESULT=$?
+    if [ $RESULT != 0 ]; then
+        nx_echo "The last command FAILED."
+    fi
+    return $RESULT
 }

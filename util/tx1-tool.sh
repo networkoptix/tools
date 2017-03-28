@@ -74,6 +74,8 @@ mvn [args] # Call maven with the required platorm and box.
 cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
 make [args] # Call make in cmake build dir.
 ninja [args] # Call ninja in cmake build dir.
+
+so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
 }
 
@@ -183,7 +185,7 @@ do_cmake() # "$@"
     cmake "$@" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
     local RESULT=$?
     popd >/dev/null
-    return "$RESULT"
+    return $RESULT
 }
 
 do_make() # "$@"
@@ -195,7 +197,7 @@ do_make() # "$@"
     make "$@"
     local RESULT=$?
     popd >/dev/null
-    return "$RESULT"
+    return $RESULT
 }
 
 do_ninja() # "$@"
@@ -207,7 +209,7 @@ do_ninja() # "$@"
     ninja "$@"
     local RESULT=$?
     popd >/dev/null
-    return "$RESULT"
+    return $RESULT
 }
 
 assert_not_client_only()
@@ -222,6 +224,36 @@ assert_not_server_only()
     if [ "$SERVER_ONLY" = "1" ]; then
         nx_fail "Non-server command attempted while config \"~/$CONFIG\" specifies SERVER_ONLY=1."
     fi
+}
+
+getSoDeps() # libname.so
+{
+    local LIB="$1"
+    readelf -d "$LIB" |grep 'Shared library:' |sed 's/.*\[//' |sed 's/\]//'
+}
+
+so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
+{
+    local RECURSIVE=$1; shift
+    local TREE=$1; shift
+    local LIB="$1"; shift
+    local INDENT="$1"; shift
+
+    local LIBS_DIR="$VMS_DIR$TARGET_SUFFIX/lib/$BUILD_CONFIG"
+
+    local DEPS=$(getSoDeps "$LIBS_DIR/$LIB")
+
+    local DEP
+    for DEP in $DEPS; do
+        if [ $TREE = 1 ]; then
+            nx_echo "$INDENT$DEP"
+        else
+            nx_echo "$DEP"
+        fi
+        if [[ $RECURSIVE = 1 && -f "$LIBS_DIR/$DEP" ]]; then #< DEP is nx lib.
+            so $RECURSIVE $TREE "$DEP" "$INDENT    "
+        fi
+    done
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -410,6 +442,35 @@ main()
             ;;
         ninja)
             do_ninja "$@"
+            ;;
+        #..........................................................................................
+        so)
+            find_VMS_DIR
+
+            local RECURSIVE=0
+            if [ "$1" = "-r" ]; then
+                RECURSIVE=1
+                shift
+            fi
+
+            local TREE=0
+            if [ "$1" = "--tree" ]; then
+                TREE=1
+                shift
+            fi
+
+            if [ "$1" = "" ]; then
+                find_LIB_DIR
+                local LIB_NAME=$(basename "$LIB_DIR")
+            else
+                local LIB_NAME="$1"
+            fi
+
+            if [ $TREE = 1 ]; then
+                so $RECURSIVE $TREE "lib$LIB_NAME.so"
+            else
+                so $RECURSIVE $TREE "lib$LIB_NAME.so" |sort |uniq
+            fi
             ;;
         #..........................................................................................
         *)
