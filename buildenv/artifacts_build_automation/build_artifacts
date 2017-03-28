@@ -1070,7 +1070,7 @@ function ffmpeg_generate_config()
 
     ffmpeg_DIR=$ARTIFACT_BUILD_DIR/ffmpeg-$artifactVersion-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION${DEBUG_ON:+-debug}
 
-    if [ $ARCH = arm ]; then
+    if [ "$ARCH" == "arm" ] || [ "$ARCH" == "aarch64" ]; then
         ffmpeg_DECODERS=(pcm_s16be pcm_s16le pcm_s16le_planar pcm_s8 pcm_s8_planar pcm_u16be pcm_u16le pcm_u8)
 
         ffmpeg_DECODERS_STR=
@@ -1085,7 +1085,7 @@ function ffmpeg_generate_config()
 
 ./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
 --enable-cross-compile --cross-prefix=$CROSS_PREFIX \
---arch=arm --target-os=linux --disable-debug --enable-dct --enable-asm \
+--arch=$makeArch --target-os=linux --disable-debug --enable-dct --enable-asm \
 --disable-everything \
 --enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
 --enable-decoder=pcm_mulaw --enable-decoder=pcm_alaw --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
