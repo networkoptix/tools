@@ -9,9 +9,6 @@ export TOOLCHAIN_NAME=linaro
 export TOOLCHAIN_VERSION=1.13.1
 export SYSROOT_DIR="$NETOPTIX_DEV_DIR/buildenv/packages/bpi/sysroot"
 
-export PKG_CONFIG_LIBDIR="$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf/pkgconfig"
-export PKG_CONFIG_SYSROOT_DIR="$SYSROOT_DIR"
-
 export common_CXXFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
 export common_CFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
 
@@ -24,7 +21,9 @@ export ffmpeg_CONFIG_OPTIONS="\
 --enable-neon \
 --enable-decoder='mp3,mp2' \
 --enable-encoder='aac,pcm_mulaw,pcm_s16le,pcm_s16le_planar,g726,pcm_alaw' \
---enable-demuxer='mp3,mp2' \
+--enable-demuxer='mp3,mp2'"
+
+ffmpeg_bpi_options="\
 --enable-decoder='vorbis,theora,vp8' \
 --enable-demuxer='ogg,wav' \
 --enable-parser='opus,vorbis,vp3,vp8' \
@@ -33,3 +32,10 @@ export ffmpeg_CONFIG_OPTIONS="\
 --enable-decoder=h264_vdpau \
 --extra-cflags='-I$SYSROOT_DIR/usr/include' \
 --extra-ldflags='-L$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf -Wl,-rpath-link,$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf'"
+
+if [ "$BANANAPI" != "true" ]; then
+    export PKG_CONFIG_LIBDIR="$SYSROOT_DIR/usr/lib/arm-linux-gnueabihf/pkgconfig"
+    export PKG_CONFIG_SYSROOT_DIR="$SYSROOT_DIR"
+
+    export ffmpeg_CONFIG_OPTIONS="$ffmpeg_CONFIG_OPTIONS $ffmpeg_bpi_options"
+fi
