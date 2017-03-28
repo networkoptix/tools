@@ -194,7 +194,7 @@ do_make() # "$@"
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
     pushd "$CMAKE_BUILD_DIR" >/dev/null
-    make "$@"
+    make -j12 "$@"
     local RESULT=$?
     popd >/dev/null
     return $RESULT
@@ -206,7 +206,7 @@ do_ninja() # "$@"
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
     pushd "$CMAKE_BUILD_DIR" >/dev/null
-    ninja "$@"
+    ninja -j12 "$@"
     local RESULT=$?
     popd >/dev/null
     return $RESULT
