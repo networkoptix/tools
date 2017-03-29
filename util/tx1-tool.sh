@@ -438,7 +438,7 @@ main()
             ;;
         start-c)
             assert_not_server_only
-            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR"  DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
             box sudo killall -9 desktop_client
