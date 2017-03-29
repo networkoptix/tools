@@ -28,15 +28,27 @@ nx_handle_verbose() # "$@" && shift
 }
 
 # Set the mode to simulate rsync calls and return whether $1 is consumed.
-nx_handle_simulate_rsync() # "$@" && shift
+nx_handle_mock_rsync() # "$@" && shift
 {
-    if [ "$1" == "--simulate-rsync" ]; then
+    if [ "$1" == "--mock-rsync" ]; then
         rsync() #< Define the function which overrides rsync executable name.
         {
             nx_echo
-            nx_echo "SIMULATED:"
+            nx_echo "MOCKED:"
             nx_echo "rsync $*"
             nx_echo
+            # Check that all local files exist.
+            local FILE
+            local I=0
+            for FILE in "$@"; do
+                 # Check all args not starting with "-" except the last, which is the remote path.
+                let I='I+1'
+                if [[ $I < $# && $FILE != \-* ]]; then
+                    if [ ! -r "$FILE" ]; then
+                        nx_fail "Mocked rsync: Cannot access local file: $FILE"
+                    fi
+                fi
+            done
         }
         return 0
     else
@@ -124,6 +136,25 @@ nx_set_background() # RRGGBB
     [ ! -z "$RRGGBB" ] && echo -en "\\e]11;#${RRGGBB}\\a"
 }
 
+# Produce colored output: nx_echo "$(nx_red)Red text$(nx_nocolor)"
+nx_nocolor()  { echo -en "\033[0m"   ; }
+nx_black()    { echo -en "\033[0;30m"; }
+nx_dred()     { echo -en "\033[0;31m"; }
+nx_dgreen()   { echo -en "\033[0;32m"; }
+nx_dyellow()  { echo -en "\033[0;33m"; }
+nx_dblue()    { echo -en "\033[0;34m"; }
+nx_dmagenta() { echo -en "\033[0;35m"; }
+nx_dcyan()    { echo -en "\033[0;36m"; }
+nx_lgray()     { echo -en "\033[0;37m"; }
+nx_dgray()    { echo -en "\033[1;30m"; }
+nx_lred()     { echo -en "\033[1;31m"; }
+nx_lgreen()   { echo -en "\033[1;32m"; }
+nx_lyellow()  { echo -en "\033[1;33m"; }
+nx_lblue()    { echo -en "\033[1;34m"; }
+nx_lmagenta() { echo -en "\033[1;35m"; }
+nx_lcyan()    { echo -en "\033[1;36m"; }
+nx_white()    { echo -en "\033[1;37m"; }
+
 # Set the terminal window title.
 nx_set_title()
 {
@@ -158,6 +189,19 @@ NX_RESTORE_CURSOR_POS="\033[u"
 nx_restore_cursor_pos()
 {
     echo -en "$NX_RESTORE_CURSOR_POS"
+}
+
+nx_pushd() # "$@"
+{
+    # Do not print pushed dir name.
+    # On failure, the error message is printed by pushd.
+    pushd "$@" >/dev/null || nx_fail
+}
+
+nx_popd()
+{
+    # Do not print popped dir name.
+    popd >/dev/null || nx_fail
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -313,7 +357,7 @@ nx_rsync() # rsync_args...
 }
 
 # Source the specified file (typically with settings), return whether it exists.
-nx_load_config() # "${CONFIG=".<tool-name>rc"}"
+nx_load_config() # "${CONFIG='.<tool-name>rc'}"
 {
     local FILE="$1"
 
@@ -326,7 +370,7 @@ nx_run()
 {
     nx_handle_verbose "$@" && shift
     nx_handle_help "$@"
-    nx_handle_simulate_rsync "$@" && shift
+    nx_handle_mock_rsync "$@" && shift
     main "$@"
     local RESULT=$?
     if [ $RESULT != 0 ]; then

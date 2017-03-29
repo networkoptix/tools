@@ -2,8 +2,15 @@
 source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
+
 : ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
+: ${DEVELOP_DIR="$HOME/develop"}
+: ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
+: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
+: ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
+: ${CORES_ARG="-j12"}
+
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="ubuntu"}
 : ${BOX_PASSWORD="ubuntu"}
@@ -17,22 +24,34 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${BOX_DEVELOP_DIR="/develop"} #< Mount point at the box for the workstation develop dir.
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
-: ${DEVELOP_DIR="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
-: ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"} #< Path at the workstation.
-: ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
-: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
-: ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
-: ${PACKAGE_SUFFIX=""}
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${PACKAGE_QT="qt-5.6.2"}
+: ${PACKAGE_QUAZIP="quazip-0.7"}
+: ${PACKAGE_FFMPEG="ffmpeg-3.1.1"}
+: ${PACKAGE_OPENLDAP="openldap-2.4.42"}
+: ${PACKAGE_SASL2="sasl2-2.1.26"}
+: ${PACKAGE_SIGAR="sigar-1.7"}
 
 # Config for maven instead of cmake:
 #TARGET_SUFFIX="/build_environment/target-tx1"
 #BUILD_CONFIG="debug"
 #PACKAGES_DIR="$HOME/develop/buildenv/packages/tx1-arm"
-#QT_DIR="$PACKAGES_DIR/qt-5.6.1"
+#PACKAGE_QT="qt-5.6.1"
 #MVN_BUILD_DIR="arm-tx1"
 #BOX_LIBS_DIR="/opt/networkoptix/desktop_client/lib"
+
+#--------------------------------------------------------------------------------------------------
+
+BIN="bin"
+LIB="lib"
+if [ ! -z "$BUILD_CONFIG" ]; then
+    BIN="$BIN/$BUILD_CONFIG"
+    LIB="$LIB/$BUILD_CONFIG"
+fi
+
+PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -92,7 +111,7 @@ box() # args...
 # [in][out] VMS_DIR
 find_VMS_DIR()
 {
-    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
+    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
@@ -105,55 +124,89 @@ find_LIB_DIR()
         "Either specify lib name or cd to common_libs/<lib_name>."
 }
 
-cp_files()
+#--------------------------------------------------------------------------------------------------
+
+cp_files() # src_dir file_mask dst_dir
 {
-    local FILE_MASK="$1"
-    local FILES_DST="$2"
-    local FILES_DESCRIPTION="$3"
-    local FILES_SRC_DESCRIPTION="$4"
+    local SRC_DIR="$1"; shift
+    local FILE_MASK="$1"; shift
+    local DST_DIR="$1"; shift
 
-    nx_echo "Rsyncing $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
+    nx_echo "Rsyncing $(nx_lyellow)$FILE_MASK$(nx_nocolor)" \
+        "from $(nx_lcyan)$SRC_DIR/$(nx_nocolor)" \
+        "to $(nx_lgreen)$DST_DIR/$(nx_nocolor)"
 
-    mkdir -p "${BOX_MNT}$FILES_DST" || exit $?
+    mkdir -p "${BOX_MNT}$DST_DIR" || exit $?
+
+    nx_pushd "$SRC_DIR"
 
     # Here eval expands globs and braces to the array, after we enquote spaces (if any).
-    eval FILE_LIST=(${FILE_MASK// /\" \"})
+    eval FILES_LIST=(${FILE_MASK// /\" \"})
 
-    nx_rsync "${FILE_LIST[@]}" "${BOX_MNT}$FILES_DST/" || exit $?
+    nx_rsync "${FILES_LIST[@]}" "${BOX_MNT}$DST_DIR/"
+    local RESULT=$?
+
+    nx_popd
+    return $RESULT
 }
 
-cp_libs() # file_mask description
+cp_libs() # file_mask [file_mask]...
 {
     find_VMS_DIR
-    local MASK="$1"
-    local DESCRIPTION="$2"
-
-    cp_files "$VMS_DIR$TARGET_SUFFIX/lib/$BUILD_CONFIG/$MASK" \
-        "$BOX_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$LIB" "$FILE_MASK" "$BOX_LIBS_DIR"
+    done
 }
 
-cp_desktop_client_bins() # file_mask description
+cp_package_libs() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/lib" "*.so*" "$BOX_LIBS_DIR"
+    done
+}
+
+cp_mediaserver_package_bins() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_MEDIASERVER_DIR/bin"
+    done
+}
+
+cp_desktop_client_package_bins() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_MEDIASERVER_DIR/bin"
+    done
+}
+
+cp_mediaserver_bins() # file_mask [file_mask]...
 {
     find_VMS_DIR
-    local MASK="$1"
-    local DESCRIPTION="$2"
-    cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/$MASK" \
-        "$BOX_DESKTOP_CLIENT_DIR/bin" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_MEDIASERVER_DIR/bin"
+    done
 }
 
-cp_mediaserver_bins() # file_mask description
+cp_desktop_client_bins() # file_mask [file_mask]...
 {
     find_VMS_DIR
-    local MASK="$1"
-    local DESCRIPTION="$2"
-    cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/$MASK" \
-        "$BOX_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR$TARGET_SUFFIX"
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
+    done
 }
+
+#--------------------------------------------------------------------------------------------------
 
 clean()
 {
     find_VMS_DIR
-    pushd "$VMS_DIR" >/dev/null
+    nx_pushd "$VMS_DIR"
 
     nx_echo "Deleting: $VMS_DIR$TARGET_SUFFIX"
     rm -r "$VMS_DIR$TARGET_SUFFIX"
@@ -168,7 +221,7 @@ clean()
         done
     fi
 
-    popd >/dev/null
+    nx_popd
 }
 
 do_mvn() # "$@"
@@ -181,10 +234,10 @@ do_cmake() # "$@"
     find_VMS_DIR
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
-    pushd "$CMAKE_BUILD_DIR" >/dev/null
+    nx_pushd "$CMAKE_BUILD_DIR"
     cmake "$@" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
     local RESULT=$?
-    popd >/dev/null
+    nx_popd
     return $RESULT
 }
 
@@ -193,10 +246,10 @@ do_make() # "$@"
     find_VMS_DIR
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
-    pushd "$CMAKE_BUILD_DIR" >/dev/null
-    make -j12 "$@"
+    nx_pushd "$CMAKE_BUILD_DIR"
+    make "$CORES_ARG" "$@"
     local RESULT=$?
-    popd >/dev/null
+    nx_popd
     return $RESULT
 }
 
@@ -205,10 +258,10 @@ do_ninja() # "$@"
     find_VMS_DIR
     local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
     mkdir -p "$CMAKE_BUILD_DIR"
-    pushd "$CMAKE_BUILD_DIR" >/dev/null
-    ninja -j12 "$@"
+    nx_pushd "$CMAKE_BUILD_DIR"
+    ninja "$CORES_ARG" "$@"
     local RESULT=$?
-    popd >/dev/null
+    nx_popd
     return $RESULT
 }
 
@@ -239,7 +292,7 @@ so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
     local LIB="$1"; shift
     local INDENT="$1"; shift
 
-    local LIBS_DIR="$VMS_DIR$TARGET_SUFFIX/lib/$BUILD_CONFIG"
+    local LIBS_DIR="$VMS_DIR$TARGET_SUFFIX/$LIB"
 
     local DEPS=$(getSoDeps "$LIBS_DIR/$LIB")
 
@@ -283,83 +336,80 @@ main()
         #..........................................................................................
         tegra_video)
             assert_not_client_only
-            cp_files "$PACKAGES_DIR/tegra_video/lib/*.so*" "$BOX_LIBS_DIR" \
-                "libtegra_video.so" "$PACKAGES_DIR/tegra_video"
+            cp_package_libs "tegra-video"
             ;;
         copy-s)
             assert_not_client_only
             find_VMS_DIR
-
-            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
-            cp_libs "*.so*" "all libs"
-
-            mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin"
-            cp_mediaserver_bins "mediaserver" "mediaserver executable"
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
             ;;
         copy-s-all)
             assert_not_client_only
             find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
 
-            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
-            cp_libs "*.so*" "all libs"
+            cp_package_libs "tegra_video"
 
-            mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin"
-            cp_mediaserver_bins "mediaserver" "mediaserver executable"
+            cp_mediaserver_package_bins "$PACKAGE_FFMPEG"
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
 
-            cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
+            cp_mediaserver_bins "external.dat" "plugins"
 
-            cp_mediaserver_bins "nvidia_models" "mediaserver/bin/nvidia_models"
-            cp_mediaserver_bins "{plugins,vox}" "{plugins,vox}" "mediaserver/bin dirs"
-            cp_mediaserver_bins "ff{mpeg,probe,server}" "ffmpeg executables"
+            # TODO: #mshevchenko: Ask #dklychkov whether cmake should copy this to "bin/".
+            cp_files "$PACKAGES_ANY_DIR/festival-vox-2.1x/bin" "vox" "$BOX_MEDIASERVER_DIR/bin"
+            cp_files "$PACKAGES_ANY_DIR/nvidia_analytics/bin" "nvidia_models" "$BOX_MEDIASERVER_DIR/bin"
             ;;
         copy-c)
             assert_not_server_only
             find_VMS_DIR
-
-            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
-            cp_libs "*.so*" "all libs"
-
-            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/bin"
-            cp_desktop_client_bins "desktop_client" "desktop_client exe"
+            cp_libs "*.so*"
+            cp_desktop_client_bins "desktop_client"
             ;;
         copy-c-all)
             assert_not_server_only
             find_VMS_DIR
+            cp_libs "*.so*"
+            cp_desktop_client_bins "desktop_client"
 
-            mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
-            cp_libs "*.so*" "all libs"
+            cp_desktop_client_bins "applauncher" "fonts"
 
-            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/bin"
-            cp_desktop_client_bins "desktop_client" "desktop_client exe"
-            cp_desktop_client_bins "applauncher" "applauncher exe"
+            cp_package_libs \
 
-            cp_files "$QT_DIR/lib/*.so*" "$BOX_LIBS_DIR" "Qt libs" "$QT_DIR"
+            cp_desktop_client_package_bins "$PACKAGE_FFMPEG"
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
 
-            cp_desktop_client_bins \
-                "{xcbglintegrations,fonts,help,imageformats,platforminputcontexts,platforms,plugins,qml,qmltooling,vox}" \
-                "{xcbglintegrations,fonts,help,imageformats,platforminputcontexts,platforms,plugins,qml,qmltooling,vox}" \
-                "desktop_client/bin dirs"
-            cp_desktop_client_bins "ff{mpeg,probe,server}" "ffmpeg executables"
+            # TODO: #mshevchenko: Ask #dklychkov whether cmake should copy this to "bin/".
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" "*" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+            # TODO: #mshevchenko: Investigate "help" folder.
             ;;
         copy-s-ut)
             assert_not_client_only
             find_VMS_DIR
-
-            mkdir -p "${BOX_MNT}$BOX_MEDIASERVER_DIR/ut"
-            cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/*_ut" \
-                "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR$TARGET_SUFFIX"
+            cp_mediaserver_bins "*_ut"
             ;;
         copy-c-ut)
             assert_not_server_only
             find_VMS_DIR
-
-            mkdir -p "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/ut"
-            cp_files "$VMS_DIR$TARGET_SUFFIX/bin/$BUILD_CONFIG/*_ut" \
-                "$BOX_DESKTOP_CLIENT_DIR/ut" "unit tests" "$VMS_DIR$TARGET_SUFFIX"
+            cp_desktop_client_bins "*_ut"
             ;;
         server)
             assert_not_client_only
-            cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
+            cp_libs "libmediaserver_core.so*"
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -368,7 +418,7 @@ main()
             else
                 LIB_NAME="$1"
             fi
-            cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
+            cp_libs "lib$LIB_NAME.so*"
             ;;
         ini)
             box touch /tmp/nx_media.ini "[&&]" \
