@@ -56,6 +56,12 @@ nx_handle_mock_rsync() # "$@" && shift
     fi
 }
 
+# Copy the file(s) recursively, showing a progress.
+nx_rsync() # rsync_args...
+{
+    rsync -rlpDh --progress "$@"
+}
+
 # Log the args if in verbose mode, otherwise, do nothing.
 nx_log() # ...
 {
@@ -348,12 +354,6 @@ nx_sudo_dd() # dd_args...
     echo
 
     wait $SUDO_PID #< Get the Status Code of finished "dd".
-}
-
-# Copy the file(s) recursively, showing a progress.
-nx_rsync() # rsync_args...
-{
-    rsync -ah --progress "$@"
 }
 
 # Source the specified file (typically with settings), return whether it exists.

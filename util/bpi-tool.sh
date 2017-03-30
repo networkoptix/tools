@@ -572,7 +572,7 @@ main()
             sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
             ;;
         sshfs)
-            sudo umount "$BOX_MNT"
+            fusermount -u "$BOX_MNT"
             sudo rm -rf "$BOX_MNT" || exit $?
             sudo mkdir -p "$BOX_MNT" || exit $?
             sudo chown "$USER" "$BOX_MNT"

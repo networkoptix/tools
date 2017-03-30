@@ -363,6 +363,8 @@ main()
                 "$PACKAGE_SIGAR"
 
             cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+
+            nx_echo "SUCCESS: All mediaserver files copied."
             ;;
         copy-c)
             assert_not_server_only
@@ -390,6 +392,8 @@ main()
                 "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
                 "$BOX_DESKTOP_CLIENT_DIR/bin"
             cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+            nx_echo "SUCCESS: All desktop_client files copied."
             ;;
         copy)
             assert_not_client_only
@@ -424,6 +428,8 @@ main()
                 "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
                 "$BOX_DESKTOP_CLIENT_DIR/bin"
             cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+            nx_echo "SUCCESS: All files copied."
             ;;
         copy-s-ut)
             assert_not_client_only
@@ -466,7 +472,8 @@ main()
             ;;
         start-c)
             assert_not_server_only
-            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR"  DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" DISPLAY=:0 \
+                "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
             box sudo killall -9 desktop_client
@@ -495,10 +502,10 @@ main()
         tv)
             local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
             box make -C "$BOX_SRC_DIR" "$@" \
-                "[&&]" echo "SUCCESS" \
+                "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
                 "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
                 "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
-                "[&&]" echo "libtegra_video.so and video_dec_gie copied to $BOX_INSTALL_DIR/"
+                "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
             ;;
         tv-rdep)
             local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
@@ -506,7 +513,7 @@ main()
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
             nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
             cd "$PACKAGES_DIR/tegra_video" || exit $?
-            rdep -u
+            rdep -u && nx_echo "SUCCESS: Deployed to rdep."
             ;;
         #..........................................................................................
         clean)
