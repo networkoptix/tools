@@ -69,11 +69,14 @@ Here <command> can be one of the following:
 nfs # Mount the box root to $BOX_MNT via NFS.
 sshfs # Mount the box root to $BOX_MNT via SSHFS.
 
+ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
 tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
 copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
 copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
 copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
 copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+copy # Copy mediaserver and desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-all # Copy all mediaserver and desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
 copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
 copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
 server # Copy mediaserver_core lib to the box.
@@ -124,8 +127,6 @@ find_LIB_DIR()
         "Either specify lib name or cd to common_libs/<lib_name>."
 }
 
-#--------------------------------------------------------------------------------------------------
-
 cp_files() # src_dir file_mask dst_dir
 {
     local SRC_DIR="$1"; shift
@@ -143,11 +144,9 @@ cp_files() # src_dir file_mask dst_dir
     # Here eval expands globs and braces to the array, after we enquote spaces (if any).
     eval FILES_LIST=(${FILE_MASK// /\" \"})
 
-    nx_rsync "${FILES_LIST[@]}" "${BOX_MNT}$DST_DIR/"
-    local RESULT=$?
+    nx_rsync "${FILES_LIST[@]}" "${BOX_MNT}$DST_DIR/" || exit $?
 
     nx_popd
-    return $RESULT
 }
 
 cp_libs() # file_mask [file_mask]...
@@ -179,7 +178,7 @@ cp_desktop_client_package_bins() # package-name [package-name]...
 {
     local PACKAGE
     for PACKAGE in "$@"; do
-        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_MEDIASERVER_DIR/bin"
+        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_DESKTOP_CLIENT_DIR/bin"
     done
 }
 
@@ -200,8 +199,6 @@ cp_desktop_client_bins() # file_mask [file_mask]...
         cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
     done
 }
-
-#--------------------------------------------------------------------------------------------------
 
 clean()
 {
@@ -313,8 +310,7 @@ so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
 
 main()
 {
-    local COMMAND="$1"
-    shift
+    local COMMAND="$1"; shift
     case "$COMMAND" in
         nfs)
             sudo umount "$BOX_MNT"
@@ -334,9 +330,15 @@ main()
                 -o nonempty,password_stdin
             ;;
         #..........................................................................................
+        ffmpeg-bins)
+            # Debug tools, not included into the distro.
+            [ "$CLIENT_ONLY" != "1" ] && cp_mediaserver_package_bins "$PACKAGE_FFMPEG"
+            [ "$SERVER_ONLY" != "1" ] && cp_desktop_client_package_bins "$PACKAGE_FFMPEG"
+            ;;
         tegra_video)
             assert_not_client_only
-            cp_package_libs "tegra-video"
+            cp_package_libs "tegra_video"
+            cp_mediaserver_package_bins "tegra_video" #< Debug tools, not included into the distro.
             ;;
         copy-s)
             assert_not_client_only
@@ -352,7 +354,6 @@ main()
 
             cp_package_libs "tegra_video"
 
-            cp_mediaserver_package_bins "$PACKAGE_FFMPEG"
             cp_package_libs \
                 "$PACKAGE_FFMPEG" \
                 "$PACKAGE_QT" \
@@ -361,11 +362,7 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
-            cp_mediaserver_bins "external.dat" "plugins"
-
-            # TODO: #mshevchenko: Ask #dklychkov whether cmake should copy this to "bin/".
-            cp_files "$PACKAGES_ANY_DIR/festival-vox-2.1x/bin" "vox" "$BOX_MEDIASERVER_DIR/bin"
-            cp_files "$PACKAGES_ANY_DIR/nvidia_analytics/bin" "nvidia_models" "$BOX_MEDIASERVER_DIR/bin"
+            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
             ;;
         copy-c)
             assert_not_server_only
@@ -379,11 +376,8 @@ main()
             cp_libs "*.so*"
             cp_desktop_client_bins "desktop_client"
 
-            cp_desktop_client_bins "applauncher" "fonts"
+            cp_desktop_client_bins "fonts" "vox" "help"
 
-            cp_package_libs \
-
-            cp_desktop_client_package_bins "$PACKAGE_FFMPEG"
             cp_package_libs \
                 "$PACKAGE_FFMPEG" \
                 "$PACKAGE_QT" \
@@ -392,10 +386,44 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
-            # TODO: #mshevchenko: Ask #dklychkov whether cmake should copy this to "bin/".
-            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" "*" "$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
+                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
+                "$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+            ;;
+        copy)
+            assert_not_client_only
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+            cp_desktop_client_bins "desktop_client"
+            ;;
+        copy-all)
+            assert_not_client_only
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+            cp_desktop_client_bins "desktop_client"
 
-            # TODO: #mshevchenko: Investigate "help" folder.
+            cp_desktop_client_bins "fonts" "vox" "help"
+            cp_package_libs "tegra_video"
+
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
+
+            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
+                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
+                "$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
             ;;
         copy-s-ut)
             assert_not_client_only
@@ -448,7 +476,7 @@ main()
             shift
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
             local TEST_PATH="$BOX_MEDIASERVER_DIR/ut/$TEST_NAME"
-            echo "Running: $TEST_PATH $@"
+            nx_echo "Running: $TEST_PATH $@"
             box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
             ;;
         run-c-ut)
@@ -456,7 +484,7 @@ main()
             shift
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
             local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/ut/$TEST_NAME"
-            echo "Running: $TEST_PATH $@"
+            nx_echo "Running: $TEST_PATH $@"
             box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
             ;;
         run-tv)
@@ -469,12 +497,14 @@ main()
             box make -C "$BOX_SRC_DIR" "$@" \
                 "[&&]" echo "SUCCESS" \
                 "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
-                "[&&]" echo "libtegra_video.so deployed to $BOX_LIBS_DIR/"
+                "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
+                "[&&]" echo "libtegra_video.so and video_dec_gie copied to $BOX_INSTALL_DIR/"
             ;;
         tv-rdep)
             local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
+            nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
             cd "$PACKAGES_DIR/tegra_video" || exit $?
             rdep -u
             ;;
