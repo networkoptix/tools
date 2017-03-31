@@ -316,6 +316,8 @@ main()
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
 
+            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
+
             cp_package_libs "tegra_video"
 
             cp_package_libs \
@@ -341,6 +343,8 @@ main()
             find_VMS_DIR
             cp_libs "*.so*"
             cp_desktop_client_bins "desktop_client"
+
+            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
 
             cp_desktop_client_bins "fonts" "vox" "help"
 
@@ -374,6 +378,9 @@ main()
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
             cp_desktop_client_bins "desktop_client"
+
+            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
+            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
 
             cp_desktop_client_bins "fonts" "vox" "help"
             cp_package_libs "tegra_video"
@@ -429,15 +436,14 @@ main()
             ;;
         start-s)
             assert_not_client_only
-            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
+            box sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
             box sudo killall -9 mediaserver
             ;;
         start-c)
             assert_not_server_only
-            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" DISPLAY=:0 QT_QPA_PLATFORM=xcb \
-                "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            box sudo DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
             box sudo killall -9 desktop_client
