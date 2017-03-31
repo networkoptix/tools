@@ -11,9 +11,14 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-def move(source, target):
-    command = ['hg', 'move', source, target]
-    subprocess.check_output(command, stderr=subprocess.STDOUT)
+def move(rootDir, source, target, dryrun):
+    source = os.path.relpath(source, rootDir)
+    target = os.path.relpath(target, rootDir)
+    if dryrun:
+        print "{0} will be moved to {1}".format(source, target)
+    else:
+        command = ['hg', 'move', source, target]
+        subprocess.check_output(command, stderr=subprocess.STDOUT)
 
 def moveTranslations(rootDir, languageFrom, languageTo, dryrun):
     suffix = "_{0}.ts".format(languageFrom)    
@@ -26,18 +31,13 @@ def moveTranslations(rootDir, languageFrom, languageTo, dryrun):
             if (not source.endswith(suffix)):
                 continue;              
             target = source.replace(languageFrom, languageTo)
-            if dryrun:
-                print "{0} will be moved to {1}".format(source, target)
-                continue
-            move(source, target)
+            move(rootDir, source, target, dryrun)
 
 def moveFlag(rootDir, languageFrom, languageTo, dryrun):
     relPath = 'common/static-resources/flags/{0}.png'.format(languageFrom)
     source = os.path.join(rootDir, relPath)
     target = source.replace(languageFrom, languageTo)
-    if dryrun:
-        print "{0} will be moved to {1}".format(source, target)
-    move(source, target)   
+    move(rootDir, source, target, dryrun)
 
 def fixCustomizations(rootDir, languageFrom, languageTo, dryrun):
     customizationsDir = os.path.join(rootDir, 'customization')
@@ -72,8 +72,6 @@ def main():
     moveTranslations(os.getcwd(), args.source, args.target, args.dryrun)
     moveFlag(os.getcwd(), args.source, args.target, args.dryrun)
     fixCustomizations(os.getcwd(), args.source, args.target, args.dryrun)
-    print "ok"
-
 
 if __name__ == "__main__":
     main()
