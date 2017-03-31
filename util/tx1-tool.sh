@@ -10,6 +10,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${CORES_ARG="-j12"}
+: ${MAKE_TOOL="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="ubuntu"}
@@ -94,8 +95,7 @@ run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict 
 clean # Delete all build dirs.
 mvn [args] # Call maven with the required platorm and box.
 cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
-make [args] # Call make in cmake build dir.
-ninja [args] # Call ninja in cmake build dir.
+m [args] # Call the configured make tool in cmake build dir.
 
 so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
@@ -224,42 +224,6 @@ clean()
 do_mvn() # "$@"
 {
     mvn -Dbox=tx1 -Darch=arm "$@"
-}
-
-do_cmake() # "$@"
-{
-    find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
-    mkdir -p "$CMAKE_BUILD_DIR"
-    nx_pushd "$CMAKE_BUILD_DIR"
-    cmake "$@" -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
-    local RESULT=$?
-    nx_popd
-    return $RESULT
-}
-
-do_make() # "$@"
-{
-    find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
-    mkdir -p "$CMAKE_BUILD_DIR"
-    nx_pushd "$CMAKE_BUILD_DIR"
-    make "$CORES_ARG" "$@"
-    local RESULT=$?
-    nx_popd
-    return $RESULT
-}
-
-do_ninja() # "$@"
-{
-    find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
-    mkdir -p "$CMAKE_BUILD_DIR"
-    nx_pushd "$CMAKE_BUILD_DIR"
-    ninja "$CORES_ARG" "$@"
-    local RESULT=$?
-    nx_popd
-    return $RESULT
 }
 
 assert_not_client_only()
@@ -472,7 +436,7 @@ main()
             ;;
         start-c)
             assert_not_server_only
-            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" DISPLAY=:0 \
+            box sudo LD_LIBRARY_PATH="$BOX_LIBS_DIR" DISPLAY=:0 QT_QPA_PLATFORM=xcb \
                 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
@@ -523,13 +487,29 @@ main()
             do_mvn "$@"
             ;;
         cmake)
-            do_cmake "$@"
+            find_VMS_DIR
+            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
+            mkdir -p "$CMAKE_BUILD_DIR"
+            nx_pushd "$CMAKE_BUILD_DIR"
+
+            cmake "$@" -G$MAKE_TOOL \
+                -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
+
+            local RESULT=$?
+            nx_popd
+            return $RESULT
             ;;
-        make)
-            do_make "$@"
-            ;;
-        ninja)
-            do_ninja "$@"
+        m)
+            find_VMS_DIR
+            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
+            mkdir -p "$CMAKE_BUILD_DIR"
+            nx_pushd "$CMAKE_BUILD_DIR"
+
+            ${MAKE_TOOL,,} "$CORES_ARG" "$@"
+
+            local RESULT=$?
+            nx_popd
+            return $RESULT
             ;;
         #..........................................................................................
         so)
