@@ -15,9 +15,8 @@ nx_handle_help() # "$@"
     fi
 }
 
-# Set the verbose mode and return 0 if $1 is "--verbose"; return 1 otherwise.
-# Usage: nx_set_VERBOSE "$@" && shift
-nx_handle_verbose() # "$@"
+# Set the verbose mode and return whether $1 is consumed.
+nx_handle_verbose() # "$@" && shift
 {
     if [ "$1" == "--verbose" -o "$1" == "-v" ]; then
         NX_VERBOSE="1"
@@ -26,6 +25,41 @@ nx_handle_verbose() # "$@"
     else
         return 1
     fi
+}
+
+# Set the mode to simulate rsync calls and return whether $1 is consumed.
+nx_handle_mock_rsync() # "$@" && shift
+{
+    if [ "$1" == "--mock-rsync" ]; then
+        rsync() #< Define the function which overrides rsync executable name.
+        {
+            nx_echo
+            nx_echo "MOCKED:"
+            nx_echo "rsync $*"
+            nx_echo
+            # Check that all local files exist.
+            local FILE
+            local I=0
+            for FILE in "$@"; do
+                 # Check all args not starting with "-" except the last, which is the remote path.
+                let I='I+1'
+                if [[ $I < $# && $FILE != \-* ]]; then
+                    if [ ! -r "$FILE" ]; then
+                        nx_fail "Mocked rsync: Cannot access local file: $FILE"
+                    fi
+                fi
+            done
+        }
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Copy the file(s) recursively, showing a progress.
+nx_rsync() # rsync_args...
+{
+    rsync -rlpDh --progress "$@"
 }
 
 # Log the args if in verbose mode, otherwise, do nothing.
@@ -108,6 +142,25 @@ nx_set_background() # RRGGBB
     [ ! -z "$RRGGBB" ] && echo -en "\\e]11;#${RRGGBB}\\a"
 }
 
+# Produce colored output: nx_echo "$(nx_red)Red text$(nx_nocolor)"
+nx_nocolor()  { echo -en "\033[0m"   ; }
+nx_black()    { echo -en "\033[0;30m"; }
+nx_dred()     { echo -en "\033[0;31m"; }
+nx_dgreen()   { echo -en "\033[0;32m"; }
+nx_dyellow()  { echo -en "\033[0;33m"; }
+nx_dblue()    { echo -en "\033[0;34m"; }
+nx_dmagenta() { echo -en "\033[0;35m"; }
+nx_dcyan()    { echo -en "\033[0;36m"; }
+nx_lgray()     { echo -en "\033[0;37m"; }
+nx_dgray()    { echo -en "\033[1;30m"; }
+nx_lred()     { echo -en "\033[1;31m"; }
+nx_lgreen()   { echo -en "\033[1;32m"; }
+nx_lyellow()  { echo -en "\033[1;33m"; }
+nx_lblue()    { echo -en "\033[1;34m"; }
+nx_lmagenta() { echo -en "\033[1;35m"; }
+nx_lcyan()    { echo -en "\033[1;36m"; }
+nx_white()    { echo -en "\033[1;37m"; }
+
 # Set the terminal window title.
 nx_set_title()
 {
@@ -144,6 +197,19 @@ nx_restore_cursor_pos()
     echo -en "$NX_RESTORE_CURSOR_POS"
 }
 
+nx_pushd() # "$@"
+{
+    # Do not print pushed dir name.
+    # On failure, the error message is printed by pushd.
+    pushd "$@" >/dev/null || nx_fail
+}
+
+nx_popd()
+{
+    # Do not print popped dir name.
+    popd >/dev/null || nx_fail
+}
+
 #--------------------------------------------------------------------------------------------------
 # High-level utils, can use low-level utils.
 
@@ -152,11 +218,12 @@ nx_restore_cursor_pos()
 # Ssh reparses the concatenated args string at the remote host, thus, this function performs the
 # escaping of the args, except for the "*" chars (to enable globs) and args in square brackets (to
 # enable e.g. combining commands via "[&&]" or redirecting with "[>]").
-nx_ssh() # user password host terminal_title background_rrggbb [command [args...]]
+nx_ssh() # user password host port terminal_title background_rrggbb [command [args...]]
 {
     local USER="$1"; shift
     local PASSWORD="$1"; shift
     local HOST="$1"; shift
+    local PORT="$1"; shift
     local TERMINAL_TITLE="$1"; shift
     local BACKGROUND_RRGGBB="$1"; shift
 
@@ -183,10 +250,13 @@ nx_ssh() # user password host terminal_title background_rrggbb [command [args...
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" ssh -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit the param if empty.
+    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit param if empty.
+    RESULT=$?
 
     nx_pop_title
     nx_set_background "$OLD_BACKGROUND"
+
+    return "$RESULT"
 }
 
 # Return in the specified variable the array of files found by 'find' command.
@@ -286,14 +356,8 @@ nx_sudo_dd() # dd_args...
     wait $SUDO_PID #< Get the Status Code of finished "dd".
 }
 
-# Copy the file(s) recursively, showing a progress.
-nx_rsync() # rsync_args...
-{
-    rsync -r -ah --progress "$@"
-}
-
 # Source the specified file (typically with settings), return whether it exists.
-nx_load_config() # rc_file
+nx_load_config() # "${CONFIG='.<tool-name>rc'}"
 {
     local FILE="$1"
 
@@ -306,5 +370,11 @@ nx_run()
 {
     nx_handle_verbose "$@" && shift
     nx_handle_help "$@"
+    nx_handle_mock_rsync "$@" && shift
     main "$@"
+    local RESULT=$?
+    if [ $RESULT != 0 ]; then
+        nx_echo "The last command FAILED."
+    fi
+    return $RESULT
 }

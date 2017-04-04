@@ -1,43 +1,58 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-# Collection of various convenient commands used for NVidia Tegra (Tx1) development.
+nx_load_config "${CONFIG=".tx1-toolrc"}"
+
+: ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
+: ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
+: ${DEVELOP_DIR="$HOME/develop"}
+: ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
+: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
+: ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
+: ${CORES_ARG="-j12"}
+: ${MAKE_TOOL="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
+
+: ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
+: ${BOX_USER="ubuntu"}
+: ${BOX_PASSWORD="ubuntu"}
+: ${BOX_HOST="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
+: ${BOX_PORT="22"}
+: ${BOX_TERMINAL_TITLE="$BOX_HOST"}
+: ${BOX_BACKGROUND_RRGGBB="302000"}
+: ${BOX_INSTALL_DIR="/opt/networkoptix"}
+: ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
+: ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
+: ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
+: ${BOX_DEVELOP_DIR="/develop"} #< Mount point at the box for the workstation develop dir.
+: ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
+
+: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${PACKAGE_QT="qt-5.6.2"}
+: ${PACKAGE_QUAZIP="quazip-0.7"}
+: ${PACKAGE_FFMPEG="ffmpeg-3.1.1"}
+: ${PACKAGE_OPENLDAP="openldap-2.4.42"}
+: ${PACKAGE_SASL2="sasl2-2.1.26"}
+: ${PACKAGE_SIGAR="sigar-1.7"}
+
+# Config for maven instead of cmake:
+#TARGET_SUFFIX="/build_environment/target-tx1"
+#BUILD_CONFIG="debug"
+#PACKAGES_DIR="$HOME/develop/buildenv/packages/tx1-arm"
+#PACKAGE_QT="qt-5.6.1"
+#MVN_BUILD_DIR="arm-tx1"
+#BOX_LIBS_DIR="/opt/networkoptix/desktop_client/lib"
 
 #--------------------------------------------------------------------------------------------------
-# Config
 
-nx_load_config ".tx1rc" #< Load config and assign defaults to values missing in config.
-: ${TX1_MNT:="/tx1"}
-: ${TX1_USER:="ubuntu"}
-: ${TX1_PASSWORD:="ubuntu"}
-: ${TX1_HOST:="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
-: ${TX1_TERMINAL_TITLE:="$TX1_HOST"}
-: ${TX1_BACKGROUND_RRGGBB:="302000"}
-: ${DEVELOP_DIR:="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at this workstation.
-: ${QT_PATH="$DEVELOP_DIR/buildenv/packages/tx1/qt-5.6.2"} #< Path at this workstation.
-
-#--------------------------------------------------------------------------------------------------
-# Const
-
-# Paths at tx1.
-TX1_INSTALL_DIR="/opt/networkoptix"
-TX1_LITE_CLIENT_DIR="$TX1_INSTALL_DIR/lite_client"
-TX1_MEDIASERVER_DIR="$TX1_INSTALL_DIR/mediaserver"
-
-# TX1_LIBS_DIR can be pre-defined before running this script.
-if [ -z "$TX1_LIBS_DIR" ]; then
-    TX1_LIBS_DIR="$TX1_INSTALL_DIR/lib"
-else
-    nx_echo "ATTENTION: TX1_LIBS_DIR overridden to $TX1_LIBS_DIR"
+BIN="bin"
+LIB="lib"
+if [ ! -z "$BUILD_CONFIG" ]; then
+    BIN="$BIN/$BUILD_CONFIG"
+    LIB="$LIB/$BUILD_CONFIG"
 fi
 
-# PACKAGE_SUFFIX can be pre-defined before running this script.
-if [ -z "$PACKAGE_SUFFIX" ]; then
-    PACKAGE_SUFFIX=""
-else
-    nx_echo "ATTENTION: PACKAGE_SUFFIX defined as $PACKAGE_SUFFIX"
-fi
+PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -45,46 +60,61 @@ help()
 {
     cat <<EOF
 Swiss Army Knife for NVidia Tegra (Tx1): execute various commands.
-Use ~/.tx1rc to override workstation-dependent environment variables (see them in this script).
+Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
+
 $(basename "$0") [--verbose] <command>
+
 Here <command> can be one of the following:
 
-nfs # Mount tx1 root to $TX1_MNT via NFS.
-sshfs # Mount tx1 root to $TX1_MNT via SSHFS.
+nfs # Mount the box root to $BOX_MNT via NFS.
+sshfs # Mount the box root to $BOX_MNT via SSHFS.
 
-copy-s # Copy mediaserver libs and bins to tx1 $TX1_INSTALL_DIR.
-copy-ut # Copy all libs and unit test bins to tx1 $TX1_INSTALL_DIR.
-server # Copy mediaserver_core lib to tx1.
-common # Copy common lib to tx1.
-lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to tx1.
-ini # Create empty .ini files @tx1 in /tmp (to be filled with defauls).
+ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
+tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
+copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
+copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+copy # Copy mediaserver and desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+copy-all # Copy all mediaserver and desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
+copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
+server # Copy mediaserver_core lib to the box.
+lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
+ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
-ssh [command args] # Execute a command at tx1 via ssh, or log in to tx1 via ssh.
-start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
-stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
-run-ut [test-name args] # Run the specified unit test with strict expectations.
-start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
-stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
+ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+start-s [args] # Run mediaserver exe with [args].
+stop-s # Stop mediaserver via "kill -9".
+start-c [args] # Run desktop_client exe with [args].
+stop-c # Stop desktop_client via "kill -9".
+run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
+run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
 
-rebuild [args] # Perform "mvn clean package ... [args]", including unit tests.
+clean # Delete all build dirs.
+mvn [args] # Call maven with the required platorm and box.
+cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
+m [args] # Call the configured make tool in cmake build dir.
+
+so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
 }
 
 #--------------------------------------------------------------------------------------------------
 
-# Execute a command at tx1 via ssh, or log in to tx1 via ssh.
-tx1() # args...
+# Execute a command at the box via ssh, or log in to the box via ssh.
+box() # args...
 {
-    nx_ssh "$TX1_USER" "$TX1_PASSWORD" "$TX1_HOST" "$TX1_TERMINAL_TITLE" "$TX1_BACKGROUND_RRGGBB" \
-        "$@"
+    nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
+        "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
 find_VMS_DIR()
 {
-    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
+    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
@@ -97,104 +127,294 @@ find_LIB_DIR()
         "Either specify lib name or cd to common_libs/<lib_name>."
 }
 
-cp_files()
+cp_files() # src_dir file_mask dst_dir
 {
-    local FILE_MASK="$1"
-    local FILES_DST="$2"
-    local FILES_DESCRIPTION="$3"
-    local FILES_SRC_DESCRIPTION="$4"
+    local SRC_DIR="$1"; shift
+    local FILE_MASK="$1"; shift
+    local DST_DIR="$1"; shift
 
-    nx_echo "Copying $FILES_DESCRIPTION from $FILES_SRC_DESCRIPTION to $FILES_DST/"
+    nx_echo "Rsyncing $(nx_lyellow)$FILE_MASK$(nx_nocolor)" \
+        "from $(nx_lcyan)$SRC_DIR/$(nx_nocolor)" \
+        "to $(nx_lgreen)$DST_DIR/$(nx_nocolor)"
 
-    mkdir -p "${TX1_MNT}$FILES_DST" || exit $?
+    mkdir -p "${BOX_MNT}$DST_DIR" || exit $?
+
+    nx_pushd "$SRC_DIR"
 
     # Here eval expands globs and braces to the array, after we enquote spaces (if any).
-    eval FILE_LIST=(${FILE_MASK// /\" \"})
+    eval FILES_LIST=(${FILE_MASK// /\" \"})
 
-    nx_rsync "${FILE_LIST[@]}" "${TX1_MNT}$FILES_DST/" || exit $?
+    nx_rsync "${FILES_LIST[@]}" "${BOX_MNT}$DST_DIR/" || exit $?
+
+    nx_popd
 }
 
-cp_libs() # file_mask description
+cp_libs() # file_mask [file_mask]...
 {
     find_VMS_DIR
-    local MASK="$1"
-    local DESCRIPTION="$2"
-
-    cp_files "$VMS_DIR/build_environment/target-tx1/lib/debug/$MASK" \
-        "$TX1_LIBS_DIR" "$DESCRIPTION" "$VMS_DIR"
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$LIB" "$FILE_MASK" "$BOX_LIBS_DIR"
+    done
 }
 
-cp_mediaserver_bins() # file_mask description
+cp_package_libs() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/lib" "*.so*" "$BOX_LIBS_DIR"
+    done
+}
+
+cp_mediaserver_package_bins() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_MEDIASERVER_DIR/bin"
+    done
+}
+
+cp_desktop_client_package_bins() # package-name [package-name]...
+{
+    local PACKAGE
+    for PACKAGE in "$@"; do
+        cp_files "$PACKAGES_DIR/$PACKAGE/bin" "*" "$BOX_DESKTOP_CLIENT_DIR/bin"
+    done
+}
+
+cp_mediaserver_bins() # file_mask [file_mask]...
 {
     find_VMS_DIR
-    local MASK="$1"
-    local DESCRIPTION="$2"
-    cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/$MASK" \
-        "$TX1_MEDIASERVER_DIR/bin" "$DESCRIPTION" "$VMS_DIR"
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_MEDIASERVER_DIR/bin"
+    done
+}
+
+cp_desktop_client_bins() # file_mask [file_mask]...
+{
+    find_VMS_DIR
+    local FILE_MASK
+    for FILE_MASK in "$@"; do
+        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
+    done
+}
+
+clean()
+{
+    find_VMS_DIR
+    nx_pushd "$VMS_DIR"
+
+    nx_echo "Deleting: $VMS_DIR$TARGET_SUFFIX"
+    rm -r "$VMS_DIR$TARGET_SUFFIX"
+
+    if [ ! -z "$MVN_BUILD_DIR" ]; then
+        local BUILD_DIRS=()
+        nx_find_files BUILD_DIRS -type d -name "$MVN_BUILD_DIR"
+        local DIR
+        for DIR in "${BUILD_DIRS[@]}"; do
+            nx_echo "Deleting: $DIR"
+            rm -r "$DIR"
+        done
+    fi
+
+    nx_popd
+}
+
+do_mvn() # "$@"
+{
+    mvn -Dbox=tx1 -Darch=arm "$@"
+}
+
+assert_not_client_only()
+{
+    if [ "$CLIENT_ONLY" = "1" ]; then
+        nx_fail "Non-client command attempted while config \"~/$CONFIG\" specifies CLIENT_ONLY=1."
+    fi
+}
+
+assert_not_server_only()
+{
+    if [ "$SERVER_ONLY" = "1" ]; then
+        nx_fail "Non-server command attempted while config \"~/$CONFIG\" specifies SERVER_ONLY=1."
+    fi
+}
+
+getSoDeps() # libname.so
+{
+    local LIB="$1"
+    readelf -d "$LIB" |grep 'Shared library:' |sed 's/.*\[//' |sed 's/\]//'
+}
+
+so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
+{
+    local RECURSIVE=$1; shift
+    local TREE=$1; shift
+    local LIB="$1"; shift
+    local INDENT="$1"; shift
+
+    local LIBS_DIR="$VMS_DIR$TARGET_SUFFIX/$LIB"
+
+    local DEPS=$(getSoDeps "$LIBS_DIR/$LIB")
+
+    local DEP
+    for DEP in $DEPS; do
+        if [ $TREE = 1 ]; then
+            nx_echo "$INDENT$DEP"
+        else
+            nx_echo "$DEP"
+        fi
+        if [[ $RECURSIVE = 1 && -f "$LIBS_DIR/$DEP" ]]; then #< DEP is nx lib.
+            so $RECURSIVE $TREE "$DEP" "$INDENT    "
+        fi
+    done
 }
 
 #--------------------------------------------------------------------------------------------------
 
 main()
 {
-    local COMMAND="$1"
-    shift
+    local COMMAND="$1"; shift
     case "$COMMAND" in
         nfs)
-            sudo umount "$TX1_MNT"
-            sudo rm -rf "$TX1_MNT" || exit $?
-            sudo mkdir -p "$TX1_MNT" || exit $?
-            sudo chown "$USER" "$TX1_MNT"
+            sudo umount "$BOX_MNT"
+            sudo rm -rf "$BOX_MNT" || exit $?
+            sudo mkdir -p "$BOX_MNT" || exit $?
+            sudo chown "$USER" "$BOX_MNT"
 
-            sudo mount -o nolock tx1:/ "$TX1_MNT"
-            exit $?
+            sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
             ;;
         sshfs)
-            sudo umount "$TX1_MNT"
-            sudo rm -rf "$TX1_MNT" || exit $?
-            sudo mkdir -p "$TX1_MNT" || exit $?
-            sudo chown "$USER" "$TX1_MNT"
+            sudo umount "$BOX_MNT"
+            sudo rm -rf "$BOX_MNT" || exit $?
+            sudo mkdir -p "$BOX_MNT" || exit $?
+            sudo chown "$USER" "$BOX_MNT"
 
-            echo "$TX1_PASSWORD" |sshfs root@"$TX1_HOST":/ "$TX1_MNT" -o nonempty,password_stdin
-            exit $?
+            echo "$BOX_PASSWORD" |sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
+                -o nonempty,password_stdin
             ;;
         #..........................................................................................
-        copy-s)
-            find_VMS_DIR
-
-            # In case of taking mobile_client from different branch and overriding TX1_LIBS_DIR:
-            mkdir -p "${TX1_MNT}$TX1_LIBS_DIR"
-
-            cp_libs "*.so*" "all libs"
-
-            cp_mediaserver_bins "mediaserver" "mediaserver executable"
-            cp_mediaserver_bins "media_db_util" "media_db_util"
-            cp_mediaserver_bins "external.dat" "web-admin (external.dat)"
-            cp_mediaserver_bins "plugins" "mediaserver plugins"
-
-            # Currently, "copy" verb copies only nx_vms build results.
-            #cp_files "$VMS_DIR/$QT_PATH/lib/*.so*" "$TX1_LIBS_DIR" "Qt libs" "$QT_PATH"
-            #cp_mediaserver_bins "vox" "mediaserver vox"
-
-            # Server configuration does not need to be copied.
-            #cp_files "$VMS_DIR/edge_firmware/rpi/maven/tx1/$TX1_MEDIASERVER_DIR/etc" "$TX1_MEDIASERVER_DIR" "etc" "$VMS_DIR"
-
-            exit 0
+        ffmpeg-bins)
+            # Debug tools, not included into the distro.
+            [ "$CLIENT_ONLY" != "1" ] && cp_mediaserver_package_bins "$PACKAGE_FFMPEG"
+            [ "$SERVER_ONLY" != "1" ] && cp_desktop_client_package_bins "$PACKAGE_FFMPEG"
             ;;
-        copy-ut)
+        tegra_video)
+            assert_not_client_only
+            cp_package_libs "tegra_video"
+            cp_mediaserver_package_bins "tegra_video" #< Debug tools, not included into the distro.
+            ;;
+        copy-s)
+            assert_not_client_only
             find_VMS_DIR
-            cp_libs "*.so*" "all libs"
-            cp_files "$VMS_DIR/build_environment/target-tx1/bin/debug/*_ut" \
-                "$TX1_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
-            exit $?
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+            ;;
+        copy-s-all)
+            assert_not_client_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+
+            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
+
+            cp_package_libs "tegra_video"
+
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
+
+            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+
+            nx_echo "SUCCESS: All mediaserver files copied."
+            ;;
+        copy-c)
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_desktop_client_bins "desktop_client"
+            ;;
+        copy-c-all)
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_desktop_client_bins "desktop_client"
+
+            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
+
+            cp_desktop_client_bins "fonts" "vox" "help"
+
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
+
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
+                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
+                "$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+            nx_echo "SUCCESS: All desktop_client files copied."
+            ;;
+        copy)
+            assert_not_client_only
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+            cp_desktop_client_bins "desktop_client"
+            ;;
+        copy-all)
+            assert_not_client_only
+            assert_not_server_only
+            find_VMS_DIR
+            cp_libs "*.so*"
+            cp_mediaserver_bins "mediaserver"
+            cp_desktop_client_bins "desktop_client"
+
+            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
+            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
+
+            cp_desktop_client_bins "fonts" "vox" "help"
+            cp_package_libs "tegra_video"
+
+            cp_package_libs \
+                "$PACKAGE_FFMPEG" \
+                "$PACKAGE_QT" \
+                "$PACKAGE_QUAZIP" \
+                "$PACKAGE_OPENLDAP" \
+                "$PACKAGE_SASL2" \
+                "$PACKAGE_SIGAR"
+
+            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
+                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
+                "$BOX_DESKTOP_CLIENT_DIR/bin"
+            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+            nx_echo "SUCCESS: All files copied."
+            ;;
+        copy-s-ut)
+            assert_not_client_only
+            find_VMS_DIR
+            cp_mediaserver_bins "*_ut"
+            ;;
+        copy-c-ut)
+            assert_not_server_only
+            find_VMS_DIR
+            cp_desktop_client_bins "*_ut"
             ;;
         server)
-            cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
-            exit $?
-            ;;
-        common)
-            cp_libs "libcommon.so*" "lib common"
-            exit $?
+            assert_not_client_only
+            cp_libs "libmediaserver_core.so*"
             ;;
         lib)
             if [ "$1" = "" ]; then
@@ -203,44 +423,128 @@ main()
             else
                 LIB_NAME="$1"
             fi
-            cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
-            exit $?
+            cp_libs "lib$LIB_NAME.so*"
             ;;
         ini)
-            tx1 \
-                touch /tmp/mobile_client.ini "[&&]" \
-                touch /tmp/nx_media.ini \
-            exit $?
+            box touch /tmp/nx_media.ini "[&&]" \
+                touch /tmp/analytics.ini "[&&]" \
+                touch /tmp/tegra_video.ini
             ;;
         #..........................................................................................
         ssh)
-            tx1 "$@"
-            exit $?
+            box "$@"
             ;;
         start-s)
-            tx1 /etc/init.d/networkoptix-mediaserver start "$@"
-            exit $?
+            assert_not_client_only
+            box sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            tx1 /etc/init.d/networkoptix-mediaserver stop
-            exit $?
+            box sudo killall -9 mediaserver
             ;;
-        run-ut)
+        start-c)
+            assert_not_server_only
+            box sudo DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            ;;
+        stop-c)
+            box sudo killall -9 desktop_client
+            ;;
+        run-s-ut)
             local TEST_NAME="$1"
             shift
-            [ -z "$TEST_NAME" ] && fail "Test name not specified."
-            echo "Running: $TEST_NAME $@"
-            tx1 LD_LIBRARY_PATH="$TX1_MEDIASERVER_DIR/lib" \
-                "$TX1_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
-            exit $?
+            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
+            local TEST_PATH="$BOX_MEDIASERVER_DIR/ut/$TEST_NAME"
+            nx_echo "Running: $TEST_PATH $@"
+            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
+            ;;
+        run-c-ut)
+            local TEST_NAME="$1"
+            shift
+            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
+            local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/ut/$TEST_NAME"
+            nx_echo "Running: $TEST_PATH $@"
+            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
+            ;;
+        run-tv)
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
-        rebuild)
+        tv)
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            box make -C "$BOX_SRC_DIR" "$@" \
+                "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
+                "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
+                "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
+                "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
+            ;;
+        tv-rdep)
+            local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
+            nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
+            nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
+            cd "$PACKAGES_DIR/tegra_video" || exit $?
+            rdep -u && nx_echo "SUCCESS: Deployed to rdep."
+            ;;
+        #..........................................................................................
+        clean)
+            clean
+            ;;
+        mvn)
+            do_mvn "$@"
+            ;;
+        cmake)
             find_VMS_DIR
-            cd "$VMS_DIR"
-            mvn clean package \
-                -Dbox=tx1-aarch64 -Darch=aarch64 -Dutb -Dcloud.url='cloud-test.hdw.mx' "$@"
-            exit $?
+            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
+            mkdir -p "$CMAKE_BUILD_DIR"
+            nx_pushd "$CMAKE_BUILD_DIR"
+
+            cmake "$@" -G$MAKE_TOOL \
+                -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
+
+            local RESULT=$?
+            nx_popd
+            return $RESULT
+            ;;
+        m)
+            find_VMS_DIR
+            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
+            mkdir -p "$CMAKE_BUILD_DIR"
+            nx_pushd "$CMAKE_BUILD_DIR"
+
+            ${MAKE_TOOL,,} "$CORES_ARG" "$@"
+
+            local RESULT=$?
+            nx_popd
+            return $RESULT
+            ;;
+        #..........................................................................................
+        so)
+            find_VMS_DIR
+
+            local RECURSIVE=0
+            if [ "$1" = "-r" ]; then
+                RECURSIVE=1
+                shift
+            fi
+
+            local TREE=0
+            if [ "$1" = "--tree" ]; then
+                TREE=1
+                shift
+            fi
+
+            if [ "$1" = "" ]; then
+                find_LIB_DIR
+                local LIB_NAME=$(basename "$LIB_DIR")
+            else
+                local LIB_NAME="$1"
+            fi
+
+            if [ $TREE = 1 ]; then
+                so $RECURSIVE $TREE "lib$LIB_NAME.so"
+            else
+                so $RECURSIVE $TREE "lib$LIB_NAME.so" |sort |uniq
+            fi
             ;;
         #..........................................................................................
         *)
