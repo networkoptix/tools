@@ -59,7 +59,9 @@ sub descr_str {
     my ($row) = @_;
 
     if ($row->{is_command}) {
-        return $q->pre($q->escapeHTML($row->{description}));
+      return $q->pre( {-style => "white-space: -moz-pre-wrap; white-space: -pre-wrap;".
+                       "white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word;"},
+                      $q->escapeHTML($row->{description}));
     } else {
         return $q->escapeHTML($row->{description});
     }

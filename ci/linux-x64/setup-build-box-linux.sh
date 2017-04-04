@@ -50,7 +50,8 @@ apt-get install -y --no-install-recommends \
 	rsync \
 	mercurial \
 	fakeroot \
-	python-demjson
+	python-demjson \
+	python-opencv
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50

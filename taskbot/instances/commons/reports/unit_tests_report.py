@@ -188,7 +188,14 @@ class UTReport(Report):
       map(lambda c: """<a href="%s">%s</a>""" % \
           (self.task_href(c),
            self.find_non_command_parent(c, 1).description), result))
-      
+
+  def __get_log_cell(self, log_files, name):
+    if log_files:
+      ut_log_files = self.find_files_by_name(log_files[0], '%s.log' % name)
+      if ut_log_files:
+        return """<a href="%s">log</a>""" % self.file_href(ut_log_files[0], raw=True)
+    return ""
+        
   def __get_cores(self):
     tests = self.find_task('Run unit tests > %run_unit_tests.taskbot%')
     cores_task = self.find_task(
@@ -207,6 +214,7 @@ class UTReport(Report):
       return 1
 
     cores_count, cores_task = self.__get_cores()
+    log_files = self.find_task('Store test results > %file.py%')
 
     # Get previous tests result
     prev_run = self.get_previous_run()
@@ -246,6 +254,7 @@ class UTReport(Report):
     <th>Test name</th>
     <th>Status (TOTAL/FAIL)</th>
     <th>Execution time</th>
+    <th>Out</th>
     <th>Log</th>
     <th>Cores</th>
     </tr>"""
@@ -258,11 +267,13 @@ class UTReport(Report):
         <td>%s</td>
         <td bgcolor="%s" align="center">%s</td>
         <td>%s</td>
-        <td><a href="%s">log</a></td>
+        <td><a href="%s">out</a></td>
+        <td>%s</td>
         <td>%s</td>
         </tr>""" % (name,  color, status,
                   info.exec_time(),
                   self.task_href(info.task),
+                  self.__get_log_cell(log_files, name),
                   self.__get_cores_cell(cores_task, name))
       for case_name, case_info in OrderedDict(sorted(get_failed_cases(info))).iteritems():
         prev_test_cases = {}
@@ -286,7 +297,7 @@ class UTReport(Report):
       
     tests_report += "</table>"
 
-    self.add_root_report(
+    root_report_id = self.add_root_report(
       tests_report,
       views = {
       'css': ['/reports/styles/func_tests_report.css'],
@@ -311,6 +322,9 @@ class UTReport(Report):
     self.add_history(color, history)
 
     failed_tests = OrderedDict(sorted(get_failed(unit_tests)))
+    for name, info in failed_tests.iteritems():
+      for case_name, case_info in OrderedDict(sorted(get_failed_cases(info))).iteritems():
+        self.insert_fail_test(root_report_id, case_name, case_info.status)
 
     import EmailNotify
     def check_commit(commit):

@@ -56,7 +56,8 @@ fi
 # + Run functional test
 FT_RC=0
 if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
-  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
+  "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot \
+    --trace
   FT_RC=$?
 fi
 

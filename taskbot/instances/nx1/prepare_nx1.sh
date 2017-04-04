@@ -24,6 +24,7 @@ if [ \$? != 0 ]; then
   useradd test -m --shell /bin/bash
   passwd test 
 fi
+echo "Prepare sysctl.conf" 
 echo "core.%p" > /proc/sys/kernel/core_pattern
 [ ! -f /etc/sysctl.conf.backup ] && cp /etc/sysctl.conf /etc/sysctl.conf.backup
 if [ ! \$(grep "kernel.core_pattern=" /etc/sysctl.conf) ]; then
@@ -33,6 +34,8 @@ else
   sed -r 's|^.*kernel.core_pattern=(.*)$|kernel.core_pattern=core.%p|' /etc/sysctl.conf > /tmp/sysctl.conf
   mv /tmp/sysctl.conf /etc/sysctl.conf
 fi
+echo "Stop mediaserver"
+service networkoptix-mediaserver stop
 EOF
 )
 ssh -tt root@$TASKBOT_NX1_ADDRESS "$CMD"

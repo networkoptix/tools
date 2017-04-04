@@ -21,6 +21,7 @@ config = {
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Mikhail Uskov': 'muskov@networkoptix.com',
+    'Sergey Ivanov' : 'sivanov@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,

@@ -112,12 +112,15 @@ MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
 if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_streaming common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speech_synthesizer)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_streaming.so lib/$CONFIGURATION/libudt.so lib/$CONFIGURATION/libnx_network.so lib/$CONFIGURATION/libcloud_db_client.so lib/$CONFIGURATION/libnx_speech_synthesizer.a)
-    MODULES+=(nx_cloud/libcloud_db)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so)
 fi
 
 MODULES+=(appserver2)
 MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so)
+
+if [[ ! "$VERSION" < "3.0" ]]; then
+    MODULES+=(nx_cloud/libcloud_db)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so)
+fi
 
 if [ "$CONF_PARAM_SET" == 1 ]; then
     if [ -z "$BOX" ]; then
@@ -233,10 +236,6 @@ if [ "$WITH_TEST" == 1 ]; then
             MODULES+=(unit_tests/mediaserver_core_ut)
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/mediaserver_core_ut)
         fi
-        if [ $WITH_CLIENT -eq 1 ]; then
-            MODULES+=(unit_tests/client_ut)
-            MODULE_BIN_PATH+=(bin/$CONFIGURATION/client_ut)
-        fi
     fi
 fi
 
@@ -248,15 +247,26 @@ fi
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [ "$WITH_CLIENT" == 1 ]; then
         if [[ ! "$VERSION" < "2.4" ]]; then # >= 2.4
-            MODULES+=( client.core )
-            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.core.so )
-            MODULES+=( client )
+            MODULES+=( common_libs/nx_media )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_media.so )
+            MODULES+=( common_libs/nx_audio )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_audio.so )
+            MODULES+=( common_libs/nx_vms_utils )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_vms_utils.so )
+            MODULES+=( client/libclient_core )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient_core.so )
+            MODULES+=( client/libclient )
             MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so )
-            MODULES+=( client.bin )
-            MODULE_BIN_PATH+=( bin/$CONFIGURATION/client.bin )
+            MODULES+=( client/desktop_client )
+            MODULE_BIN_PATH+=( bin/$CONFIGURATION/desktop_client )
         else  # < 2.4
             MODULES+=( client )
             MODULE_BIN_PATH+=( bin/$CONFIGURATION/client )
+        fi
+
+        if [ "$WITH_TEST" == 1 ]; then
+            MODULES+=(unit_tests/client_ut)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/client_ut)
         fi
     fi
 fi
@@ -310,6 +320,7 @@ do
         BINARY=$SRC_ROOT/build_environment/target/${MODULE_BIN_PATH[$i]}
     fi
 
+    echo "Building ${MODULES[$i]}"
     cd $SRC_ROOT/${MODULES[$i]}/$ARCH
     make -f Makefile.$CONFIGURATION -j $JOB_COUNT || exit 0
     if [ "$DO_EXT_DEBUG" == "1" ]; then

@@ -27,13 +27,11 @@ echo $TEST_LIST
 NX_WORK_DIR=/home/test/taskbot/$TASKBOT_BRANCHNAME
 NX_VMS_BIN_DST_PATH="$NX_WORK_DIR/nx_vms/bin"
 NX_VMS_LIB_DST_PATH="$NX_WORK_DIR/nx_vms/lib"
-NX_DEFAULT_LIB_PATH=/opt/networkoptix/lib
 
 CMD=$(cat << EOF
 [ -d $NX_WORK_DIR ] && rm -rvf $NX_WORK_DIR
 mkdir -p $NX_VMS_BIN_DST_PATH
 mkdir -p $NX_VMS_LIB_DST_PATH
-cp -r $NX_DEFAULT_LIB_PATH/* $NX_VMS_LIB_DST_PATH
 EOF
 )
 ssh -tt test@$TASKBOT_NX1_ADDRESS "$CMD"
@@ -47,14 +45,28 @@ scp $NX_VMS_LIB_PATH/*.so* test@$TASKBOT_NX1_ADDRESS:$NX_VMS_LIB_DST_PATH
 scp $NX_VMS_BIN_PATH/*_ut test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
 scp $TASKBOT_SHARE/run_unit_test.sh test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH
 
+# + Remove results folder
+ssh -tt test@$TASKBOT_NX1_ADDRESS "rm -rfv $NX_VMS_BIN_DST_PATH/../../var"
+
 # + Run tests
 for test in $TEST_LIST
 do
     "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
      -d "$test"  \
-     -c "ssh -tt test@$TASKBOT_NX1_ADDRESS \"cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \
-      -t 600 -s 100 || true
+     -c "LANG=C ssh -tt test@$TASKBOT_NX1_ADDRESS \"export TERM=\\\"xterm -cm\\\"; cd $NX_VMS_BIN_DST_PATH && ./run_unit_test.sh $test\"" \
+     -t 1000 -s 100 || true
 done
 
 # + Process core files
 "$TASKBOT" $ARGS "$TASKBOT_SHARE"/process_cores.taskbot
+
+# + Get test results
+UNIT_TESTS_RESULT_PATH="$TASKBOT_VAR"/var/utests
+mkdir -p "$UNIT_TESTS_RESULT_PATH"
+scp -r test@$TASKBOT_NX1_ADDRESS:$NX_VMS_BIN_DST_PATH/../../var/* "$UNIT_TESTS_RESULT_PATH"
+
+# + Store test results
+$TASKBOT_BIN/file.py \
+     $TASKBOT_CONFIG \
+    --path $UNIT_TESTS_RESULT_PATH \
+    --mask '*.log'

@@ -474,17 +474,20 @@ class TaskExecutor:
       self.closed = True
       safe_call(self.__shell_process__.stdin.close)
       # TODO. Need cross-platform solution to kill child process
-      pgid = safe_call(os.getpgid, self.__shell_process__.pid)
+      pgid = safe_call(os.getpgid, self.__shell_process__.pid) or self.__shell_process__.pid
+      print 'Kill PID: %r, PGID: %r' % (self.__shell_process__.pid, pgid)
       sig = signal.SIGTERM
       if interrupted:
         if self.__core_on_timeout:
           sig = signal.SIGSEGV
         if self.__exec_on_timeout:
           safe_call(subprocess.call,  self.__exec_on_timeout.split())
+
 #        import psutil
 #        parent = psutil.Process(self.__shell_process__.pid)
 #        for child in parent.children(recursive=True):
 #          child.send_signal(sig)
+
       safe_call(os.killpg, pgid, sig)
       start = time.time()
       finished = False
@@ -494,7 +497,7 @@ class TaskExecutor:
           break
       if not finished:
         safe_call(os.killpg, pgid, signal.SIGKILL)
-        self.__shell_process__.wait()
+      self.__shell_process__.wait()
       shutdown.set()
       safe_call(self.__status__.stop)
       safe_call(self.__err__.stop)
