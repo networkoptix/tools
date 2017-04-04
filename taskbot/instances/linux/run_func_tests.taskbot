@@ -36,7 +36,7 @@ py.test -v \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
-  --cache-clear \
+  --cache-clear
 set -o errexit
 
 # + Store results
