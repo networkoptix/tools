@@ -57,7 +57,7 @@ fi
 FT_RC=0
 if [ $TASKBOT_FUNC_TESTS = "true" ] && [ $RC -eq 0 ]; then
   "$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot \
-  -e "killall VBoxHeadless"
+    --trace
   FT_RC=$?
 fi
 

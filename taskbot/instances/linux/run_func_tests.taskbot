@@ -5,47 +5,39 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
 # + Prepare environment
 FUNTESTS_DIR="$TASKBOT_VAR"/var/functest
-if [ -f $FUNTESTS_DIR/tmp/vagrant/Vagrantfile ]; then
-  for path in $(find $FUNTESTS_DIR/tmp/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
+if [ -f $FUNTESTS_DIR/wd/vagrant/Vagrantfile ]; then
+  for path in $(find $FUNTESTS_DIR/wd/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
       echo "$path $(cat $path)"
   done
-  cd $FUNTESTS_DIR/tmp/vagrant
+  cd $FUNTESTS_DIR/wd/vagrant
   vagrant destroy -f
 fi
+[ -d $FUNTESTS_DIR/bin ] && rm -rf $FUNTESTS_DIR/bin
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
-[ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp
 [ -d $FUNTESTS_DIR/result ] && rm -rf $FUNTESTS_DIR/result
-[ -d $FUNTESTS_DIR/.cache ] && rm -rf $FUNTESTS_DIR/.cache
-[ -d $TASKBOT_VAR/.cache ] && rm -rf $TASKBOT_VAR/.cache
-mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/tmp $FUNTESTS_DIR/result
+mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/bin $FUNTESTS_DIR/result
 
 # + Prepare box files
 cd $FUNTESTS_DIR
-rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/wd
+rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/bin
 CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
 ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
 DEB_PROP_FILENAME="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-server.properties"
 DEB_FILENAME=$(cat "$DEB_PROP_FILENAME" | sed -r 's/server\.finalName=//')
 DEB_FILEPATH="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb"
 echo $DEB_FILEPATH
-cp $DEB_FILEPATH "$FUNTESTS_DIR"/wd/mediaserver.deb
-#cp "$TASKBOT_VAR"/var/testing/vagrant/networkoptix-mediaserver.deb "$FUNTESTS_DIR"/wd
-
-VBoxManage list vms
-ifconfig
+cp $DEB_FILEPATH "$FUNTESTS_DIR"/bin/mediaserver.deb
 
 # + Run tests
 set +o errexit
 py.test -v \
   "$TASKBOT_VAR"/nx_vms/func_tests \
-  --work-dir="$FUNTESTS_DIR"/tmp \
-  --bin-dir="$FUNTESTS_DIR"/wd \
+  --work-dir="$FUNTESTS_DIR"/wd \
+  --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
-  --timeout=900
+  --cache-clear \
 set -o errexit
-
-VBoxManage list vms
 
 # + Store results
 $TASKBOT_BIN/file.py \
@@ -54,12 +46,12 @@ $TASKBOT_BIN/file.py \
     --mask '*.html'
 
 # + Clear test data
-if [ -f $FUNTESTS_DIR/tmp/vagrant/Vagrantfile ]; then
-  for path in $(find $FUNTESTS_DIR/tmp/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
+if [ -f $FUNTESTS_DIR/wd/vagrant/Vagrantfile ]; then
+  for path in $(find $FUNTESTS_DIR/wd/vagrant/.vagrant/machines -path '*/virtualbox/id'); do
       echo "$path $(cat $path)"
   done
-  cd $FUNTESTS_DIR/tmp/vagrant
+  cd $FUNTESTS_DIR/wd/vagrant
   vagrant destroy -f
 fi
+[ -d $FUNTESTS_DIR/bin ] && rm -rf $FUNTESTS_DIR/bin
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
-[ -d $FUNTESTS_DIR/tmp ] && rm -rf $FUNTESTS_DIR/tmp

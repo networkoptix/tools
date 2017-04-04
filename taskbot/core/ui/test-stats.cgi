@@ -62,7 +62,8 @@ if (! defined $params->{branch}) {
         -method  => 'GET',
         -enctype => &CGI::URL_ENCODED );
 
-  my $branches = $dbh->selectall_arrayref(q[SELECT description FROM branch]);
+  my @branches = map( { $_->[0] } @{ $dbh->selectall_arrayref(q[SELECT description FROM branch]) }) ;
+
 
   print $q->h2("Select branch");
   print $q->br;
@@ -70,8 +71,8 @@ if (! defined $params->{branch}) {
   print $q->popup_menu(
                        -id=>'branch',
                        -name=>'branch',
-                       -values=> @$branches,
-                       -default=>$params->{branch} || $branches->[0]);
+                       -values=> \@branches,
+                       -default=> $branches[0]);
 
   print $q->br;
   print $q->submit(-value=>'Select');
@@ -123,23 +124,21 @@ else {
 
   else {
     $stmt = $dbh->prepare(q[
-      SELECT test.id id, test.name name, task_time.count count, task_time.max_start last_fail,
-           platform.host host, platform.description p_description
-      FROM test
-      LEFT JOIN report_test ON test.id = report_test.test_id
-      LEFT JOIN report ON report.id = report_test.report_id
-      LEFT JOIN task ON task.id = report.task_id
-      LEFT JOIN branch ON branch.id = task.branch_id
-      LEFT JOIN platform ON platform.id = task.platform_id
-      LEFT OUTER JOIN (SELECT report_test.test_id test_id, task.id task_id, 
-                       MAX(task.start) max_start, COUNT(*) count
-           FROM report_test
+      SELECT test.id test_id, test.name test_name, test_platform.count count, 
+           test_platform.last_fail last_fail, platform.host host, platform.description p_description
+      FROM (SELECT  test.id test_id, platform.id platform_id, branch.id branch_id, COUNT(*) count,
+           MAX(task.start) last_fail FROM test
+           LEFT JOIN report_test ON test.id = report_test.test_id
            LEFT JOIN report ON report.id = report_test.report_id
            LEFT JOIN task ON task.id = report.task_id
-           GROUP BY report_test.test_id, task.id) task_time ON
-           test.id = task_time.test_id AND task.id = task_time.task_id
+           LEFT JOIN branch ON branch.id = task.branch_id
+           LEFT JOIN platform ON platform.id = task.platform_id
+           GROUP BY test.id, platform.id, branch.id) test_platform
+   LEFT JOIN branch ON branch.id = test_platform.branch_id
+   LEFT JOIN platform ON platform.id = test_platform.platform_id
+   LEFT JOIN test ON test.id = test_platform.test_id
    WHERE branch.description = ?
-   ORDER BY task_time.max_start DESC, platform.host, test.name]);
+   ORDER BY test_platform.last_fail DESC, platform.host, test.name]);
    $stmt->execute($params->{branch});
 
     print $q->h2('Test fails');
@@ -150,14 +149,14 @@ else {
 
     while (my $row = $stmt->fetchrow_hashref) {
         print $q->start_Tr;
-        print $q->td($row->{name});
+        print $q->td($row->{test_name});
         print $q->td(
                      $q->a({ -href => "browse.cgi?platform=" . $row->{host} . '&branch=' . $params->{branch} },
                            $row->{p_description} . ' (' . $row->{host} . ')'));
         print $q->td(time_str($row->{last_fail}));
         print $q->td({-align => "center"},
                      $q->a({ -href => "?branch=" . $params->{branch} .
-                             "&id=" . $row->{id}}, $row->{count}));
+                             "&id=" . $row->{test_id}}, $row->{count}));
         print $q->end_Tr;
       }
   }
