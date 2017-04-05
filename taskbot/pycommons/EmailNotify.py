@@ -96,8 +96,8 @@ def notify(report, prev_run, subject, reason,
   if debug or not to:
     to = DEBUG_WATCHERS
   cs = []
-  for c in filter(notify_filter, commits):
-    if not debug and notify_owner:
+  for c in commits:
+    if not debug and notify_owner and notify_filter(c):
       to[c.author] = c.author_email
     cs.append("%-20s %-20s %s" % \
       (c.author, c.repo.name, c.description))
