@@ -20,10 +20,10 @@ CODE_OK = 200
 CODE_CREATED = 201
 CODE_NO_CONTENT = 204
 CODE_NOT_FOUND = 404
-FIX_VERSION = "3.0.0"
+FIX_VERSION = "3.1"
 JIRA_PROJECT = "VMS" # use "TEST" for testing
 
-_version_rx = re.compile(r"^\d+\.\d+\.\d+")
+_version_rx = re.compile(r"^\d+\.\d+(\.\d+)?")
 
 issue_data = {
     "fields" : {
@@ -172,6 +172,11 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
         hotfix_version = version + '_hotfix'
         if hotfix_version in versions:
             issue['fields']['fixVersions'].append({'name': hotfix_version })
+        else:
+            # special case for 3.0.0 -> 3.0_hotfix
+            hotfix_version = '.'.join(str(v) for v in nxjira._parse_fixVersion(version)[:2])
+            if hotfix_version in versions:
+                issue['fields']['fixVersions'].append({'name': hotfix_version })
     if build:
         issue['fields']['customfield_10800'] = str(build)
     if component is not None:
