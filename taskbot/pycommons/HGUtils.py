@@ -83,10 +83,10 @@ def get_changes(repo, rev, prev_rev):
 
 def changes(report, since):
   revisions = \
-      report.find_task_by_root('%remember_revisions.taskbot% > Remember revisions > %')
+      report.find_task_by_root('% > Remember revisions > %')
 
   prev_revisions = \
-     report.find_task_by_root('%remember_revisions.taskbot% > Remember revisions > %', since)
+     report.find_task_by_root('% > Remember revisions > %', since)
 
   commits = {}
 

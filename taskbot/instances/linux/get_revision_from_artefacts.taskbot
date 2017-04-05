@@ -1,0 +1,11 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Remember revisions
+TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
+DEB_FILE_PATH=$(find "$TASKBOT_VAR"/var/artefacts/$TASK_ID -type f -name '*.deb' | head -1)
+"$TASKBOT" -d nx_vms $ARGS \
+           -c "basename $DEB_FILE_PATH | sed -r 's/^(.+).deb$/\1/' | sed s'/\+$//'" || true

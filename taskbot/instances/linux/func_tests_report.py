@@ -12,6 +12,8 @@ pycommons = os.path.join(
 sys.path.insert(0, pycommons)
 import EmailNotify
 from Report import Report
+from functools import partial
+from operator import is_not
 
 PASSED_REGEXP=r'(\d+)\s+passed'
 FAILS_REGEXP=r'(\d+)\s+failed'
@@ -55,7 +57,7 @@ class FTReport(Report):
         tasks = self.find_task('Run functional test > %run_func_tests.taskbot%', prev_run)
         if not tasks:
             return None
-        tests = self.find_task('Run tests > %py.test%', tasks)
+        tests = filter(partial(is_not, None), self.find_task('Run tests > %py.test%', tasks))
         if not tests:
             return None
         return self._parse_output(self.get_stdout(tests))

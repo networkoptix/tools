@@ -72,7 +72,7 @@ class Report(object):
     def __repr__(self):
       return self.__str__()
       
-  def __init__(self, config, root_task = None, report_watchers=None):
+  def __init__(self, config, root_task = None, link_task_id = None, report_watchers=None):
     self.__config = read_config(config) # Takbot config
     Compressor.gzip_threshold = self.__config.get('gzip_threshold', 0)
     Compressor.gzip_ratio = self.__config.get('gzip_ratio', 0)
@@ -81,8 +81,10 @@ class Report(object):
     self.__db =  MySQLDB(self.__config.get('db_config', None)) # Takbot database
     self.__platform = self.__find_platform()
     self.__branch = self.__find_branch()
+    if isinstance(root_task, int):
+      root_task = self.__find_task_by_id(root_task)
     self.__root_task = root_task or self.__find_root_by_pid() or self.__find_last_root()
-    self.__link_task_id = self.__root_task.id
+    self.__link_task_id = link_task_id or self.__root_task.id
     # Root report id
     self.__report_id = None
 
@@ -139,6 +141,14 @@ class Report(object):
       parent_task_id = res[1]
 
     return Report.Task(*res)
+
+  def __find_task_by_id(self, task_id):
+    res =  self.__db.query("""SELECT id, parent_task_id, description,
+      is_command, start, finish, error_message
+      FROM task
+      WHERE id = %s""", (task_id, ))
+
+    return Report.Task(*res) if res else None
 
   def find_non_command_parent(self, task, level=0):
     l = 0

@@ -1,0 +1,34 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+if [ ! -s "$TASKBOT_VAR"/var/slow.task ]
+then
+  echo "Can't find $TASKBOT_VAR/var/slow.task file";
+  exit;
+fi
+TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
+
+ROOT_ARTEFACTS_PATH="$TASKBOT_VAR"/var/artefacts
+
+# + Delete old artefacts
+for path in $(find "$ROOT_ARTEFACTS_PATH" -maxdepth 1 -type d ! -path "$ROOT_ARTEFACTS_PATH" -exec basename {} \;); do
+    if [ $path -lt $TASK_ID ]; then
+        rm -rfv "$ROOT_ARTEFACTS_PATH"/$path
+    fi
+done
+
+# + Insert empty entry to make timer appear
+"$TASKBOT_COMMONS"/reports/empty_report.py "$TASKBOT_CONFIG" "$TASK_ID"
+
+# + Save update info
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/get_revision_from_artefacts.taskbot
+RC=$?
+echo $RC
+
+# + Run functional test
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot \
+    --trace
+
+"$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"

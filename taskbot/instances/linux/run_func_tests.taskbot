@@ -20,13 +20,10 @@ mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/bin $FUNTESTS_DIR/result
 # + Prepare box files
 cd $FUNTESTS_DIR
 rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/bin
-CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
-ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
-DEB_PROP_FILENAME="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-server.properties"
-DEB_FILENAME=$(cat "$DEB_PROP_FILENAME" | sed -r 's/server\.finalName=//')
-DEB_FILEPATH="$TASKBOT_VAR/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb"
-echo $DEB_FILEPATH
-cp $DEB_FILEPATH "$FUNTESTS_DIR"/bin/mediaserver.deb
+TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
+DEB_FILE_PATH=$(find "$TASKBOT_VAR"/var/artefacts/$TASK_ID -type f -name '*.deb' | head -1)
+echo $DEB_FILE_PATH
+cp $DEB_FILE_PATH "$FUNTESTS_DIR"/bin/mediaserver.deb
 
 # + Run tests
 set +o errexit

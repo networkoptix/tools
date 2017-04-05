@@ -1,0 +1,25 @@
+# -*- sh -*-
+
+set +o errexit -o nounset -o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# Remember old slow task ID
+LAST_SLOW_TASK=$(cat "$TASKBOT_VAR"/var/slow.task || echo none)
+
+while [ "x$(cat $TASKBOT_VAR/var/ready.task || echo $LAST_SLOW_TASK)" \
+         = "x$LAST_SLOW_TASK" ]
+do
+    # Wait loop
+    date +"%Y-%m-%d %H:%M:%S  No changes"
+    WAIT=300
+    while [ $WAIT -gt 0 ]; do
+        echo -n .
+        sleep 5
+        WAIT=$[$WAIT - 5]
+    done
+    echo
+done
+date +"%Y-%m-%d %H:%M:%S  Have changes"
+
+cp -f "$TASKBOT_VAR"/var/ready.task "$TASKBOT_VAR"/var/slow.task
+

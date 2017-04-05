@@ -1,0 +1,27 @@
+# -*- sh -*-
+
+set +o errexit -o nounset +o noclobber
+ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
+
+# + Prepare environment
+CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
+ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
+DEB_PROP_FILENAME="$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-server.properties
+DEB_FILENAME=$(grep server.finalName= "$DEB_PROP_FILENAME" | sed -r 's/server.finalName=//')
+DEB_PATH="$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb
+REV=$(hg id -i "$TASKBOT_VAR"/nx_vms)
+TASK_ID=$("$TASKBOT_COMMONS"/reports/task_report.py "$TASKBOT_CONFIG")
+
+# + Copy package file
+mkdir -p "$TASKBOT_VAR"/var/artefacts/$TASK_ID
+cp $DEB_PATH "$TASKBOT_VAR"/var/artefacts/$TASK_ID/$REV.deb
+
+# + Delete old artefacts
+for path in $(find "$ROOT_ARTEFACTS_PATH" -maxdepth 1 -type d ! -path "$ROOT_ARTEFACTS_PATH" -exec basename {} \;); do
+    if [ $path -lt $TASK_ID ]; then
+        rm -rfv "$ROOT_ARTEFACTS_PATH"/$path
+    fi
+done
+
+# + Mark task as ready
+echo "$TASK_ID" > "$TASKBOT_VAR"/var/ready.task
