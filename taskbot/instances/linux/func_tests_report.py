@@ -60,7 +60,10 @@ class FTReport(Report):
         tests = filter(partial(is_not, None), self.find_task('Run tests > %py.test%', tasks))
         if not tests:
             return None
-        return self._parse_output(self.get_stdout(tests))
+        stdout = self.get_stdout(tests)
+        if stdout:
+            return self._parse_output(stdout)
+        return None
 
     def __generate__( self ):
         results = self._get_tests_results()

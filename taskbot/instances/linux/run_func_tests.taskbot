@@ -19,7 +19,7 @@ mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/bin $FUNTESTS_DIR/result
 
 # + Prepare box files
 cd $FUNTESTS_DIR
-rsync -av --delete rsync://noptix.enk.me/buildenv/test/sample.mkv $FUNTESTS_DIR/bin
+rsync -av --delete rsync://noptix.enk.me/buildenv/test/* $FUNTESTS_DIR/bin
 TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
 DEB_FILE_PATH=$(find "$TASKBOT_VAR"/var/artefacts/$TASK_ID -type f -name '*.deb' | head -1)
 echo $DEB_FILE_PATH
