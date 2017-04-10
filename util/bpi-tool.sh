@@ -579,8 +579,10 @@ main()
             sudo chown "$USER" "$BOX_MNT"
 
             echo "$BOX_PASSWORD" |( \
-                sshfs root@"$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin && \
-                    echo "Box mounted via sshfs to $BOX_MNT" )
+                sshfs root@"$BOX_HOST":/ "$BOX_MNT" \
+                    -o UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no \
+                    -o nonempty,password_stdin && \
+                        echo "Box mounted via sshfs to $BOX_MNT" )
             ;;
         passwd)
             sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "root@$BOX_HOST" \

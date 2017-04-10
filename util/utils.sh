@@ -250,15 +250,29 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" \
-        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-            -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit param if empty.
+    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} `# Omit arg if empty` \
+        -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `# Do not use known_hosts`
+
     RESULT=$?
 
     nx_pop_title
     nx_set_background "$OLD_BACKGROUND"
 
     return "$RESULT"
+}
+
+nx_sshfs() # user password host port host_path mnt_point
+{
+    local USER="$1"; shift
+    local PASSWORD="$1"; shift
+    local HOST="$1"; shift
+    local PORT="$1"; shift
+    local HOST_PATH="$1"; shift
+    local MNT_POINT="$1"; shift
+
+    echo "$BOX_PASSWORD" |sshfs -p "$PORT" "$USER@$HOST":"$HOST_PATH" "$MNT_POINT" \
+        -o nonempty,password_stdin \
+        -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `# Do not use known_hosts`
 }
 
 # Return in the specified variable the array of files found by 'find' command.
