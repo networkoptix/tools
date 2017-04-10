@@ -33,6 +33,7 @@ py.test -v \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
+  --vm-bind-network=10.20.0/24 \
   --cache-clear
 set -o errexit
 
