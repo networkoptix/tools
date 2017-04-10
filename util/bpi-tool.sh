@@ -104,7 +104,7 @@ EOF
 #--------------------------------------------------------------------------------------------------
 
 # Execute a command at the box via ssh, or log in to the box via ssh.
-bpi() # args...
+box() # args...
 {
     nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
@@ -569,15 +569,18 @@ main()
             sudo mkdir -p "$BOX_MNT" || exit $?
             sudo chown "$USER" "$BOX_MNT"
 
-            sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
+            sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT" &&
+                echo "Box mounted via nfs to $BOX_MNT"
             ;;
         sshfs)
-            fusermount -u "$BOX_MNT"
+            fusermount -u "$BOX_MNT" 2>/dev/null
             sudo rm -rf "$BOX_MNT" || exit $?
             sudo mkdir -p "$BOX_MNT" || exit $?
             sudo chown "$USER" "$BOX_MNT"
 
-            echo "$BOX_PASSWORD" |sshfs root@"$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
+            echo "$BOX_PASSWORD" |( \
+                sshfs root@"$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin && \
+                    echo "Box mounted via sshfs to $BOX_MNT" )
             ;;
         passwd)
             sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "root@$BOX_HOST" \

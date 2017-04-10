@@ -250,7 +250,9 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit param if empty.
+    sshpass -p "$PASSWORD" \
+        ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+            -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} #< Omit param if empty.
     RESULT=$?
 
     nx_pop_title
