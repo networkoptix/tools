@@ -118,8 +118,8 @@ MODULES+=(appserver2)
 MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so)
 
 if [[ ! "$VERSION" < "3.0" ]]; then
-    MODULES+=(nx_cloud/libcloud_db)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so)
+    MODULES+=(nx_cloud/libcloud_db nx_cloud/libtraffic_relay)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so lib/$CONFIGURATION/libtraffic_relay.so)
 fi
 
 if [ "$CONF_PARAM_SET" == 1 ]; then
@@ -205,12 +205,14 @@ if [ "$CONF_PARAM_SET" == 0 ]; then
         if [ $WITH_CLOUD_BIN -eq 1 ]; then
             MODULES+=(\
                 nx_cloud/cloud_db \
+                nx_cloud/traffic_relay \
                 nx_cloud/connection_mediator \
                 nx_cloud/vms_gateway \
                 nx_cloud/cloud_connect_test_util \
                 nx_cloud/time_server)
             MODULE_BIN_PATH+=(\
                 bin/$CONFIGURATION/cloud_db \
+                bin/$CONFIGURATION/traffic_relay \
                 bin/$CONFIGURATION/connection_mediator \
                 bin/$CONFIGURATION/vms_gateway \
                 bin/$CONFIGURATION/cloud_connect_test_util \
@@ -259,6 +261,8 @@ if [ "$CONF_PARAM_SET" == 0 ]; then
             MODULE_BIN_PATH+=( lib/$CONFIGURATION/libclient.so )
             MODULES+=( client/desktop_client )
             MODULE_BIN_PATH+=( bin/$CONFIGURATION/desktop_client )
+            MODULES+=( client/mobile_client )
+            MODULE_BIN_PATH+=( bin/$CONFIGURATION/mobile_client )
         else  # < 2.4
             MODULES+=( client )
             MODULE_BIN_PATH+=( bin/$CONFIGURATION/client )
