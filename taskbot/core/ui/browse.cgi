@@ -414,6 +414,8 @@ EOF;
            }
 
            loop_list($row, "");
+           loop_list($row, "l_") if $row->{l_start};
+           loop_list($row, "l2_") if $row->{l2_start};
 
            print $q->end_Tr;
          }
@@ -694,6 +696,7 @@ EOF;
             anyCount++;
             }
           });
+          \$('#count').remove();
           if (anyCount > 0) {
             \$('<input />').attr('type', 'hidden')
             .attr('id', "count")
@@ -702,9 +705,6 @@ EOF;
             .attr('override', "1")
             .appendTo("form");
            }
-          else {
-           \$('#count').remove()
-          }
          return true;
        })
       </script>

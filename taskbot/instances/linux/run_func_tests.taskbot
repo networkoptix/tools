@@ -12,18 +12,21 @@ if [ -f $FUNTESTS_DIR/wd/vagrant/Vagrantfile ]; then
   cd $FUNTESTS_DIR/wd/vagrant
   vagrant destroy -f
 fi
-[ -d $FUNTESTS_DIR/bin ] && rm -rf $FUNTESTS_DIR/bin
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
 [ -d $FUNTESTS_DIR/result ] && rm -rf $FUNTESTS_DIR/result
 mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/bin $FUNTESTS_DIR/result
 
 # + Prepare box files
 cd $FUNTESTS_DIR
-rsync -av --delete rsync://noptix.enk.me/buildenv/test/* $FUNTESTS_DIR/bin
+rsync -avz --delete --partial -t rsync://noptix.enk.me/buildenv/test/* $FUNTESTS_DIR/bin
 TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
 DEB_FILE_PATH=$(find "$TASKBOT_VAR"/var/artefacts/$TASK_ID -type f -name '*.deb' | head -1)
 echo $DEB_FILE_PATH
 cp $DEB_FILE_PATH "$FUNTESTS_DIR"/bin/mediaserver.deb
+
+if [ -z $TASKBOT_CAMERA_ADDRESS ]; then
+   echo "Camera address isn't defined!" >> /dev/stderr && exit 1
+fi
 
 # + Run tests
 set +o errexit
@@ -33,7 +36,7 @@ py.test -v \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
-  --vm-bind-network=10.20.0/24 \
+  --vm-address=$TASKBOT_CAMERA_ADDRESS \
   --cache-clear
 set -o errexit
 
@@ -51,5 +54,4 @@ if [ -f $FUNTESTS_DIR/wd/vagrant/Vagrantfile ]; then
   cd $FUNTESTS_DIR/wd/vagrant
   vagrant destroy -f
 fi
-[ -d $FUNTESTS_DIR/bin ] && rm -rf $FUNTESTS_DIR/bin
 [ -d $FUNTESTS_DIR/wd ] && rm -rf $FUNTESTS_DIR/wd
