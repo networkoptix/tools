@@ -14,6 +14,7 @@ Vagrant.configure(2) do |config|
 
   config.ssh.forward_agent = true
   config.vm.boot_timeout = 900
+  config.ssh.insert_key = false
 
   config.vm.provision "shell" do |s|
     s.privileged = false
@@ -49,6 +50,7 @@ Vagrant.configure(2) do |config|
 
     box.vm.provider :docker do |d|
       d.image = "tknerr/baseimage-ubuntu:14.04"  # ubuntu 14.04 precooked for vagrant
+      d.name = "buildbox_ubuntu_14_04"
     end
 
     box.vm.provider :virtualbox do |vb, override|
