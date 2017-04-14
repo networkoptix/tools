@@ -19,7 +19,7 @@ fi
 
 set -e -x
 FLAGS=$1
-[[ "$FLAGS" ]]; shift
+[[ "$FLAGS" ]] && shift
 
 [[ "$FLAGS" = *p* ]] && ACTION=package || ACTION=compile
 [[ "$FLAGS" = *r* ]] && CONF=release || CONF=debug
