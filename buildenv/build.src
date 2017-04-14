@@ -226,8 +226,8 @@ if [ "$WITH_TEST" == 1 ]; then
     MODULE_BIN_PATH+=( bin/$CONFIGURATION/common_ut )
     if [[ ! "$VERSION" < "3.0" ]]; then
         if [ "$CONF_PARAM_SET" == 0 ]; then
-            MODULES+=(unit_tests/cloud_db_ut unit_tests/connection_mediator_ut)
-            MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db_ut bin/$CONFIGURATION/connection_mediator_ut)
+            MODULES+=(unit_tests/cloud_db_ut unit_tests/connection_mediator_ut unit_tests/traffic_relay_ut)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_db_ut bin/$CONFIGURATION/connection_mediator_ut bin/$CONFIGURATION/traffic_relay_ut)
         else
             MODULES+=(nx_cloud/libconnection_mediator)
             MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so)
