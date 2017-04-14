@@ -1,10 +1,31 @@
 #!/bin/bash
 
+function printHelp()
+{
+    echo "Options:"
+    echo
+}
+
 DUMP_PATH=/home/ak/develop/netoptix_vms_3.0.0/unit_tests/cloud_db_ut/static-resources/cdb_mysql.dump
 DB_NAME=clouddb
 CDB_USER=clouddb
+CLEAN=
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [ "$i" == "--clean" ] ; then
+        CLEAN=1
+    elif [[ "$i" =~ "--dump=" ]] ; then
+        DUMP_PATH="`echo $i | sed 's/--dump=\(.*\)/\1/'`"
+    fi
+done
 
 mysql -e "drop database $DB_NAME"
 mysql -e "create database $DB_NAME DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci"
 mysql -e "grant all on $DB_NAME.* to $CDB_USER"
-mysql $DB_NAME < $DUMP_PATH
+if [ -z "$CLEAN" ]; then
+    mysql $DB_NAME < $DUMP_PATH
+fi
