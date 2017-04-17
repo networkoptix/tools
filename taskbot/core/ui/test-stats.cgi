@@ -54,6 +54,10 @@ print $q->start_html(-title => "Test fails statistic",
                      -dtd => 1,
                      -encoding => "utf-8");
 
+print <<"EOF;";
+<link rel="stylesheet" type="text/css" href="/commons/styles/TestStatisticLink.css"/>
+EOF;
+
 my $params = $q->Vars;
 
 
@@ -79,7 +83,7 @@ if (! defined $params->{branch}) {
   print $q->end_form;
 }
 else {
- 
+
   print $q->start_table({-border => 1});
 
   if (defined $params->{id}) {
@@ -88,7 +92,7 @@ else {
                                      undef, $params->{id});
 
     print $q->h2($test_name);
-    
+
     $stmt = $dbh->prepare(q[
       SELECT test.id tets_id, test.name name, report_test.failure_reason fail,
          report.id report_id, task.id task_id, task.start task_start,
@@ -106,7 +110,7 @@ else {
 
     print $q->Tr(
                  { -align => "center", -valign => "top" },
-                 $q->th( [ 'Date', 'Platform', 'Branch', 'Reason (report link)' ] ));
+                 $q->th( [ 'Date', 'Platform', 'Branch', 'Reason (report link)', 'Status' ] ));
 
     while (my $row = $stmt->fetchrow_hashref) {
       print $q->start_Tr;
@@ -123,9 +127,13 @@ else {
   }
 
   else {
+
+    my $show_resolved = $params->{show_resolved}? 1: 0;
+
     $stmt = $dbh->prepare(q[
-      SELECT test.id test_id, test.name test_name, test_platform.count count, 
-           test_platform.last_fail last_fail, platform.host host, platform.description p_description
+      SELECT test.id test_id, test.name test_name, test_platform.count count, platform.id platform_id, branch.id branch_id,
+           test_platform.last_fail last_fail, platform.host host, platform.description p_description,
+           IF(rt.test_id, 'Resolved', 'Unresolved') as resolve_status
       FROM (SELECT  test.id test_id, platform.id platform_id, branch.id branch_id, COUNT(*) count,
            MAX(task.start) last_fail FROM test
            LEFT JOIN report_test ON test.id = report_test.test_id
@@ -137,15 +145,23 @@ else {
    LEFT JOIN branch ON branch.id = test_platform.branch_id
    LEFT JOIN platform ON platform.id = test_platform.platform_id
    LEFT JOIN test ON test.id = test_platform.test_id
-   WHERE branch.description = ?
-   ORDER BY test_platform.last_fail DESC, platform.host, test.name]);
-   $stmt->execute($params->{branch});
+   LEFT JOIN resolved_test rt ON (platform.id = rt.platform_id AND branch.id = rt.branch_id AND test.id = rt.test_id)
+   WHERE branch.description = ? AND (rt.test_id IS NULL OR ? = 1)
+   ORDER BY resolve_status DESC, test_platform.last_fail DESC, platform.host, test.name]);
+   $stmt->execute($params->{branch}, $show_resolved);
 
     print $q->h2('Test fails');
 
+
+    if ($show_resolved) {
+      print $q->a({ -href => "?branch=" . $params->{branch} }, 'Show only unresolved tests');
+    } else {
+      print $q->a({ -href => "?branch=" . $params->{branch} . '&show_resolved=1' }, 'Show all tests');
+    }
+
     print $q->Tr(
                  { -align => "center", -valign => "top" },
-                 $q->th( [ 'Test case', 'Platform', 'Last failure', 'Total fails' ] ));
+                 $q->th( [ 'Test case', 'Platform', 'Last failure', 'Total fails', 'Status' ] ));
 
     while (my $row = $stmt->fetchrow_hashref) {
         print $q->start_Tr;
@@ -157,6 +173,16 @@ else {
         print $q->td({-align => "center"},
                      $q->a({ -href => "?branch=" . $params->{branch} .
                              "&id=" . $row->{test_id}}, $row->{count}));
+        my $change_status_link = 'resolve_test.cgi?';
+        if ($row->{resolve_status} eq 'Resolved')  {
+          $change_status_link = 'unresolve_test.cgi?';
+        }
+        $change_status_link .= 'branch=' . $row->{branch_id} . '&platform=' . $row->{platform_id} . '&test=' .  $row->{test_id};
+        print $q->td({-align => "center"},
+                     $q->a({-href => "#",
+                            -class => $row->{resolve_status},
+                            -onclick=>"var xhr = new XMLHttpRequest(); xhr.open('GET', '" . $change_status_link . "', false); xhr.send(); location.reload(true)"},
+                           $q->p($q->span($row->{resolve_status}))));
         print $q->end_Tr;
       }
   }

@@ -129,7 +129,22 @@ CREATE TABLE report_test (
   FOREIGN KEY (report_id) REFERENCES report (id)
     ON DELETE CASCADE,
   FOREIGN KEY (test_id) REFERENCES test (id)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  PRIMARY KEY(test_id, report_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE resolved_test (
+  test_id INTEGER UNSIGNED NOT NULL,
+  platform_id INTEGER UNSIGNED NOT NULL,
+  branch_id INTEGER UNSIGNED NOT NULL,
+
+  FOREIGN KEY (test_id) REFERENCES test (id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (platform_id) REFERENCES platform (id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (branch_id) REFERENCES branch (id)
+    ON DELETE CASCADE,
+  PRIMARY KEY(test_id, platform_id, branch_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE file (

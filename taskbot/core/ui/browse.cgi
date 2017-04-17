@@ -137,37 +137,43 @@ EOF;
       -id=> 'historyList',
       -border => 1}) . "<tbdoy>";
 
-    while (my $row = $select->fetchrow_hashref) {
-        print $q->start_Tr({ -align => 'center' });
-
-        print $q->td("#$row->{id}");
-
-        sub loop_list {
-            my ($row, $prefix) = @_;
-
-            my $stime = $row->{$prefix . "start"};
-            my $running = $row->{$prefix . "host"};
-            my $ftime = $row->{$prefix . "finish"} || ($running && time);
-            my $msg = self_ref(($running ? "Running" : "Run time"),
-                               task => $row->{$prefix . "id"}) . ": ";
-
-            print $q->td({ -bgcolor => ($running
-                                        ? "LIGHTGREY"
-                                        : "#f0f0f0"),
-                          -id => "task".$row->{$prefix."id"} },
-                         time_str($stime) . "<br>$msg"
-                         . ($ftime ? difftime_str($stime, $ftime) : "KILLED"));
-
-            print $row->{$prefix . "html_table_row"};
-        }
-        loop_list($row, "");
-        loop_list($row, "l_") if $row->{l_start};
-        loop_list($row, "l2_") if $row->{l2_start};
-
-        print $q->end_Tr;
-    }
+    print_history_table($select);
 
     print "</tbody>".$q->end_table;
+}
+
+sub print_history_table {
+  my ($select) = @_;
+
+  while (my $row = $select->fetchrow_hashref) {
+    print $q->start_Tr({ -align => 'center' });
+
+    print $q->td("#$row->{id}");
+
+    sub loop_list {
+      my ($row, $prefix) = @_;
+
+      my $stime = $row->{$prefix . "start"};
+      my $running = $row->{$prefix . "host"};
+      my $ftime = $row->{$prefix . "finish"} || ($running && time);
+      my $msg = self_ref(($running ? "Running" : "Run time"),
+                         task => $row->{$prefix . "id"}) . ": ";
+
+      print $q->td({ -bgcolor => ($running
+                                  ? "LIGHTGREY"
+                                  : "#f0f0f0"),
+                     -id => "task".$row->{$prefix."id"} },
+                   time_str($stime) . "<br>$msg"
+                   . ($ftime ? difftime_str($stime, $ftime) : "KILLED"));
+
+      print $row->{$prefix . "html_table_row"};
+    }
+    loop_list($row, "");
+    loop_list($row, "l_") if $row->{l_start};
+    loop_list($row, "l2_") if $row->{l2_start};
+
+    print $q->end_Tr;
+  }
 }
 
 sub task_list {
@@ -291,7 +297,7 @@ sub generate_history_list {
              (SELECT id FROM platform where host=?)))
     ], undef, $params->{branch}, $params->{platform});
 
-    generate_list($history, $count, 
+    generate_list($history, $count,
                   "Platform: $platform_dsc ($params->{platform}), " .
                   "Branch: $params->{branch}<br><br>" .
                   "Run list (total $count)", \&history_list,
@@ -390,35 +396,8 @@ EOF;
 
          print $q->td({ -colspan => '100', -class => 'Header'}, "<h3>$link</h3>");
 
-         while (my $row = $history->fetchrow_hashref) {
-           print $q->start_Tr({ -align => 'center' });
+         print_history_table($history);
 
-           print $q->td("#$row->{id}");
-
-           sub loop_list {
-             my ($row, $prefix) = @_;
-
-             my $stime = $row->{$prefix . "start"};
-             my $running = $row->{$prefix . "host"};
-             my $ftime = $row->{$prefix . "finish"} || ($running && time);
-             my $msg = self_ref(($running ? "Running" : "Run time"),
-                                task => $row->{$prefix . "id"}) . ": ";
-             print $q->td({ -bgcolor => ($running
-                                         ? "LIGHTGREY"
-                                         : "#f0f0f0"),
-                            -id => "task".$row->{$prefix."id"} },
-                          time_str($stime) . "<br>$msg"
-                          . ($ftime ? difftime_str($stime, $ftime) : "KILLED"));
-
-             print $row->{$prefix . "html_table_row"};
-           }
-
-           loop_list($row, "");
-           loop_list($row, "l_") if $row->{l_start};
-           loop_list($row, "l2_") if $row->{l2_start};
-
-           print $q->end_Tr;
-         }
        }
      }
    }

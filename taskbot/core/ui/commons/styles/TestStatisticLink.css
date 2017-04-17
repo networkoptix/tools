@@ -1,0 +1,91 @@
+table {
+    border: none;
+}
+
+table th td {
+    border: 1px;
+}
+
+// Test status column
+a {
+    margin: 0;
+    padding: 0;
+}
+
+a p {
+    margin: 0;
+    padding: 0;
+}
+
+a p span {
+  margin: 0;
+  padding: 0;
+}
+
+a.Resolved:link {
+    color: green;
+}
+
+a.Resolved:visited {
+    color: green;
+}
+
+a.Resolved:hover {
+    color: red;
+}
+
+a.Resolved p span {
+  position: relative;
+  content: 'Resolved';
+  margin: 0;
+  padding: 0;
+}
+
+a.Resolved:hover p span {
+  display: none;
+}
+
+a.Resolved:hover p:after {
+  content: 'Unresolve';
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+a.Resolved:active {
+    color: green;
+}
+
+a.Unresolved:link {
+    color: red;
+}
+
+a.Unresolved:visited {
+    color: red;
+}
+
+a.Unresolved:hover {
+    color: green;
+}
+
+a.Unresolved p span {
+  position: relative;
+  content: 'Unresolved';
+  margin: 0;
+  padding: 0;
+}
+
+a.Unresolved:hover p span {
+  display: none;
+}
+
+a.Unresolved:hover p:after {
+  content: 'Resolve';
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+a.Unresolved:active {
+    color: red;
+}
