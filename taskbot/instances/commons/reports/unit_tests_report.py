@@ -324,7 +324,7 @@ class UTReport(Report):
     failed_tests = OrderedDict(sorted(get_failed(unit_tests)))
     for name, info in failed_tests.iteritems():
       for case_name, case_info in OrderedDict(sorted(get_failed_cases(info))).iteritems():
-        self.insert_fail_test(root_report_id, case_name, case_info.status)
+        self.insert_fail_test(root_report_id, '%s.%s'  % (name, case_name), case_info.status)
 
     import EmailNotify
     def check_commit(commit):

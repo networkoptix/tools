@@ -110,7 +110,7 @@ else {
 
     print $q->Tr(
                  { -align => "center", -valign => "top" },
-                 $q->th( [ 'Date', 'Platform', 'Branch', 'Reason (report link)', 'Status' ] ));
+                 $q->th( [ 'Date', 'Platform', 'Branch', 'Reason (report link)'] ));
 
     while (my $row = $stmt->fetchrow_hashref) {
       print $q->start_Tr;
