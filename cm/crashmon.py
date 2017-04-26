@@ -515,7 +515,7 @@ class CrashMonitor(object):
                                     crashinfo = None
                             if crashinfo and crashinfo.issue:
                                 if issue_data.ok:
-                                    if self.can_change(issue_data, crash['version'], crash["isHotfix"]):
+                                    if self.can_change(issue_data, crash):
                                         # 1. Attach the new crash dump
                                         _, attach_count = nxjira.count_attachments(issue_data, predicat=attachment_filter)
                                         while attach_count >= MAX_ATTACHMENTS:
@@ -595,7 +595,7 @@ class CrashMonitor(object):
         else:
             name = "Crash detected in %s: %s" % (crash['component'], crash['hash'])
 
-        vers, bn = get_vers_bn(crash)    
+        vers, bn = get_vers_bn(crash)
 
         issue_key, url = nxjira.create_issue(
             name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn, crash["isHotfix"])
@@ -637,7 +637,11 @@ class CrashMonitor(object):
             email_priority_fail(key, crashinfo.issue, pold, pnew, e)
             return None
 
-    def can_change(self, issue_data, crashed_version, is_hotfix): # TODO why not to move it into the JiraReply class?
+    def can_change(self, issue_data, crash): # TODO why not to move it into the JiraReply class?
+        if crash['version'] > [2,5]:
+            crashed_version = crash['version'][:2]
+        else:
+            crashed_version = crash['version'][:3]
         if issue_data.is_done(): # it's a readon not to add more dumps and increase priority
             if issue_data.is_closed(): # hmm...
                 smallest_version = issue_data.smallest_fixversion()
@@ -650,7 +654,7 @@ class CrashMonitor(object):
                 if smallest_version and smallest_version[0] == 0:
                     print "Issue %s has Future version" % (issue_data.data['key'],)
                     return False
-                if crashed_version is None or crashed_version[:3] > smallest_version or is_hotfix:
+                if crashed_version is None or crashed_version > smallest_version or crash['isHotfix']:
                     if issue_data.reopen():
                         print "Issue %s reopened" % (issue_data.data['key'],)
                         return True

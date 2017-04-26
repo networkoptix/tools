@@ -90,6 +90,9 @@ class JiraReply(object):
     def is_rejected(self):
         return self.ok and self.data['fields']['resolution']['name'] == "Rejected"
 
+    def is_duplicate(self):
+        return self.ok and self.data['fields']['resolution']['name'] == "Duplicate"
+
     def is_closed(self):
         return self.ok and self.data['fields']['status']["name"] == "Closed"
 
