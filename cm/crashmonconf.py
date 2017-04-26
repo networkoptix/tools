@@ -16,6 +16,7 @@ AUTH = ("statlord", "razdvatri")
 RELEASE_BUILDS = {
     # (x, y, z) => build, where all values are ints
     (2, 5, 0): 11500,
+    (2, 6, 0): 13109,
 }
 
 LASTS_FILE = "last-crash" #

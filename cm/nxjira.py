@@ -161,7 +161,7 @@ def browse_url(issue):
     return BROWSE + issue
 
 
-def create_issue(name, desc, priority="Medium", component=None, team=None, version=None, build=None):
+def create_issue(name, desc, priority="Medium", component=None, team=None, version=None, build=None, is_hot_fix = False):
     issue = copy.deepcopy(issue_data)
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
@@ -170,6 +170,9 @@ def create_issue(name, desc, priority="Medium", component=None, team=None, versi
     if version:
         if version in versions:
             issue['fields']['versions'].append({'name': version})
+        hot_fix_version = version + '_hotfix'
+        if is_hot_fix and hot_fix_version in versions:
+            issue['fields']['versions'].append({'name': hot_fix_version})
         if version != FIX_VERSION:
             issue['fields']['fixVersions'].append({'name': HOT_FIX_VERSION })
     if build:

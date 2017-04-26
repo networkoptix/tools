@@ -322,7 +322,10 @@ def get_vers_bn(crash):
     vers = 'unknown'
     bn = 0
     if version:
-        vers = '.'.join(map(str, crash['version'][:-1]))
+        if crash['version'] > [2,5]:
+            vers = '.'.join(map(str, crash['version'][0:2]))
+        else:
+            vers = '.'.join(map(str, crash['version'][0:3]))
         bn = crash['version'][-1]
     return (vers, bn)
 
@@ -595,7 +598,7 @@ class CrashMonitor(object):
         vers, bn = get_vers_bn(crash)    
 
         issue_key, url = nxjira.create_issue(
-            name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn)
+            name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn, crash["isHotfix"])
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         is_first = True
