@@ -650,6 +650,9 @@ class CrashMonitor(object):
                 if issue_data.is_rejected():
                     print "Issue %s is rejected" % (issue_data.data['key'],)
                     return False
+                if issue_data.is_duplicate():
+                    print "Issue %s is duplicate" % (issue_data.data['key'],)
+                    return False
                 # Future version case
                 if smallest_version and smallest_version[0] == 0:
                     print "Issue %s has Future version" % (issue_data.data['key'],)
