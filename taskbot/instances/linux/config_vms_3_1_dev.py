@@ -5,7 +5,7 @@
 
 import os
 
-TASKBOT_BRANCHNAME='dev_3.0.0'
+TASKBOT_BRANCHNAME='vms_3.1_dev'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -40,9 +40,6 @@ config = {
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     'TASKBOT_UNIT_TESTS': 'all',
     'TASKBOT_STORE_ARTEFACTS': 'true',
-    'TASKBOT_FUNC_TESTS_OLD': 'true',
-    'TASKBOT_NET_BASE': '120',
     'TASKBOT_CAMERA_ADDRESS': '10.1.5.35'
-    'TASKBOT_PYTEST_OPTIONS': "-m 'not testcam'"
     }
   }
