@@ -45,7 +45,7 @@ py.test -v \
   --self-contained-html \
   --vm-name-prefix=$VM_NAME_PREFIX \
   --vm-address=$TASKBOT_CAMERA_ADDRESS \
-  --vm-address=$TASKBOT_VM_BASE_PORT \
+  --vm-port-base=$TASKBOT_VM_BASE_PORT \
   --cache-clear "$TASKBOT_PYTEST_OPTIONS"
 set -o errexit
 
