@@ -42,7 +42,7 @@ config = {
     'TASKBOT_STORE_ARTEFACTS': 'true',
     'TASKBOT_FUNC_TESTS_OLD': 'true',
     'TASKBOT_NET_BASE': '120',
-    'TASKBOT_CAMERA_ADDRESS': '10.1.5.35'
+    'TASKBOT_CAMERA_ADDRESS': '10.1.5.35',
     'TASKBOT_PYTEST_OPTIONS': "-m 'not testcam'"
     }
   }
