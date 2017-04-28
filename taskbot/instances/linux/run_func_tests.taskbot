@@ -30,6 +30,7 @@ fi
 
 VM_NAME_PREFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
 
+
 # + Run tests
 set +o errexit
 py.test -v \
@@ -40,7 +41,7 @@ py.test -v \
   --self-contained-html \
   --vm-name-prefix=$VM_NAME_PREFIX \
   --vm-address=$TASKBOT_CAMERA_ADDRESS \
-  --cache-clear $TASKBOT_PYTEST_OPTIONS
+  --cache-clear "$TASKBOT_PYTEST_OPTIONS"
 set -o errexit
 
 # + Store results
