@@ -34,11 +34,11 @@ fi
 
 VM_NAME_PREFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
 
-
 # + Run tests
 set +o errexit
+CMD=$(cat << EOF
 py.test -v \
-  "$TASKBOT_VAR"/nx_vms/func_tests \
+  "$TASKBOT_VAR"/nx_vms/func_tests/camera_streaming_test.py \
   --work-dir="$FUNTESTS_DIR"/wd \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
@@ -46,7 +46,10 @@ py.test -v \
   --vm-name-prefix=$VM_NAME_PREFIX \
   --vm-address=$TASKBOT_CAMERA_ADDRESS \
   --vm-port-base=$TASKBOT_VM_BASE_PORT \
-  --cache-clear "$TASKBOT_PYTEST_OPTIONS"
+  --cache-clear $TASKBOT_PYTEST_OPTIONS
+EOF
+)
+eval $CMD
 set -o errexit
 
 # + Store results
