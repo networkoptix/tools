@@ -38,7 +38,7 @@ VM_NAME_PREFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
 set +o errexit
 CMD=$(cat << EOF
 py.test -v \
-  "$TASKBOT_VAR"/nx_vms/func_tests/camera_streaming_test.py \
+  "$TASKBOT_VAR"/nx_vms/func_tests \
   --work-dir="$FUNTESTS_DIR"/wd \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
