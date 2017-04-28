@@ -41,6 +41,6 @@ config = {
     'TASKBOT_UNIT_TESTS': 'all',
     'TASKBOT_STORE_ARTEFACTS': 'true',
     'TASKBOT_CAMERA_ADDRESS': '10.1.5.35',
-    'TASKBOT_VM_BASE_PORT': 19000
+    'TASKBOT_VM_BASE_PORT': '19000'
     }
   }

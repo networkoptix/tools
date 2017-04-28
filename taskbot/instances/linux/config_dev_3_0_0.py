@@ -44,6 +44,6 @@ config = {
     'TASKBOT_NET_BASE': '120',
     'TASKBOT_CAMERA_ADDRESS': '10.1.5.35',
     'TASKBOT_PYTEST_OPTIONS': "-m 'not testcam'",
-    'TASKBOT_VM_BASE_PORT': 17000
+    'TASKBOT_VM_BASE_PORT': '17000'
     }
   }
