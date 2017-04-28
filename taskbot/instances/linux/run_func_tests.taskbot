@@ -3,10 +3,6 @@
 set -o errexit +o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-if [ -z $TASKBOT_PYTEST_OPTIONS ]; then
-   export TASKBOT_PYTEST_OPTIONS=""
-fi
-
 # + Prepare environment
 FUNTESTS_DIR="$TASKBOT_VAR"/var/functest
 if [ -f $FUNTESTS_DIR/wd/vagrant/Vagrantfile ]; then
@@ -36,7 +32,7 @@ VM_NAME_PREFIX=$(echo $TASKBOT_BRANCHNAME | sed -r 's/\./_/g')
 
 # + Run tests
 set +o errexit
-py.test -v $TASKBOT_PYTEST_OPTIONS \
+py.test -v \
   "$TASKBOT_VAR"/nx_vms/func_tests \
   --work-dir="$FUNTESTS_DIR"/wd \
   --bin-dir="$FUNTESTS_DIR"/bin \
@@ -44,7 +40,7 @@ py.test -v $TASKBOT_PYTEST_OPTIONS \
   --self-contained-html \
   --vm-name-prefix=$VM_NAME_PREFIX \
   --vm-address=$TASKBOT_CAMERA_ADDRESS \
-  --cache-clear
+  --cache-clear $TASKBOT_PYTEST_OPTIONS
 set -o errexit
 
 # + Store results

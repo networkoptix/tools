@@ -41,6 +41,7 @@ config = {
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     'TASKBOT_UNIT_TESTS': 'all',
     'TASKBOT_STORE_ARTEFACTS': 'true',
-    'TASKBOT_CAMERA_ADDRESS': '10.1.5.35'
+    'TASKBOT_CAMERA_ADDRESS': '10.1.5.35',
+    'TASKBOT_PYTEST_OPTIONS': "-m 'not testcam'"
     }
   }
