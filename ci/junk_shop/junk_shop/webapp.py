@@ -47,7 +47,7 @@ class RunNode(object):
         self.path_tuple = path_tuple
         self.run = run
         self.artifacts = [ArtifactRec(artifact) for artifact in run.artifacts]
-        self.children = set()  # converted to list after loading
+        self.children = []  # RunNode list
 
 
 def load_root_run_node_list(branch=None, platform=None):
@@ -68,7 +68,7 @@ def load_run_node_tree(root_run):
     for path, node in path2node.items():
         if len(path) == 1: continue
         parent = path2node[path[:-1]]
-        parent.children.add(node)
+        parent.children.append(node)
     for node in path2node.values():
         node.children = sorted(node.children, key=lambda node: node.path_tuple)  # now a list
     return root_node

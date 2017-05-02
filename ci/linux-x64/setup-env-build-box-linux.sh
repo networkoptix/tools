@@ -43,6 +43,7 @@ ssh-keyscan $NX_RSYNC_SOURCE >> ~/.ssh/known_hosts
 
 cd $PROJ_ROOT_DIR
 test -e buildenv || hg clone ssh://hg@$NX_RSYNC_SOURCE/buildenv
+test -e devtools || hg clone ssh://hg@$NX_RSYNC_SOURCE/devtools
 
 cd $BUILDENV_DIR
 rsync -a --delete rsync://$NX_RSYNC_SOURCE/buildenv/all-os/help .

@@ -13,6 +13,8 @@ apt-get install -y --no-install-recommends \
 
 add-apt-repository ppa:ubuntu-toolchain-r/test  # using newest gcc from here
 
+JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev"
+
 apt-get install -y --no-install-recommends \
     openjdk-7-jdk \
     protobuf-compiler \
@@ -51,7 +53,10 @@ apt-get install -y --no-install-recommends \
 	mercurial \
 	fakeroot \
 	python-demjson \
-	python-opencv
+	python-opencv \
+	libpq-dev \
+	python-dev \
+	$JUNK_SHOP_REQUIREMENTS
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
