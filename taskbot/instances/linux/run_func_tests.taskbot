@@ -43,7 +43,7 @@ py.test -v \
   --bin-dir="$FUNTESTS_DIR"/bin \
   --html="$FUNTESTS_DIR"/result/functest.html \
   --self-contained-html \
-  --vm-name-prefix=$VM_NAME_PREFIX \
+  --vm-name-prefix="$VM_NAME_PREFIX"_ \
   --vm-address=$TASKBOT_CAMERA_ADDRESS \
   --vm-port-base=$TASKBOT_VM_BASE_PORT \
   --cache-clear $TASKBOT_PYTEST_OPTIONS
