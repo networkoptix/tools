@@ -1,0 +1,15 @@
+<html>
+  <head>
+    {% block head %}
+      <title>{% block title %}Test results{% endblock %}</title>
+      <script src="{{ url_for('static', filename='all.js') }}"></script>
+      <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='common.css') }}">
+    {% endblock head %}
+  </head>
+  <body>
+
+    {% block contents %}
+    {% endblock %}
+
+  </body>
+</html>

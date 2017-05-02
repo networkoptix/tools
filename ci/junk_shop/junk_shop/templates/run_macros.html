@@ -1,0 +1,64 @@
+
+{% macro run_box(node, box_class='', expand_level=0) %}
+
+  <div class="{{ box_class }}">
+    <div>
+
+      <a class="run-name
+                {%- if node.run.outcome %} outcome outcome-{{ node.run.outcome }}{% endif -%}
+                {%- if node.children %} run-expandable
+                    {%- if expand_level <= 0 %} run-collapsed{% else %} run-expanded{% endif %}
+                {%- else %}
+                  outcome-leaf
+                {%- endif %}"
+                {% if node.children %}
+                  href="#" onclick="return toggle_children_visible(this)"
+                {% endif %}
+                >
+        {% if node.run.name %}
+          {{ node.run.name }}
+        {% else %}
+          {{ node.run.path }}
+        {% endif %}
+      </a>
+
+      <span class="run-property">{{ node.run.started_at|format_datetime|default('-', true) }}</span>
+      {% if node.run.duration %}<span class="run-property">Duration: {{ node.run.duration|format_timedelta }}</span>{% endif %}
+
+      {% if node.artifacts %}
+        <span class="artifacts-pane">
+          {% for artifact in node.artifacts %}
+            <a id="{{ artifact.id }}"
+               href="#"
+               class="artifact-button {% if artifact.is_error %}artifact-button-error{% endif %}"
+               onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
+               >
+              {{ artifact.name }}
+            </a>
+          {% endfor %}
+        </span>
+      {% endif %}
+
+    </div>
+
+    <div class="artifact-loading-error" style="display: none"></div>
+    <div class="artifacts" style="display: none"></div>
+
+    <ul style="{% if expand_level <= 0 -%} display: none {%- endif %}">
+      {{ run_box_children(node.children, expand_level=expand_level - 1) }}
+    </ul>
+
+  </div>
+
+{% endmacro %}
+
+
+{% macro run_box_children(node_list, box_class, expand_level=0) %}
+
+  {% for node in node_list %}
+    <li id="{{ node.run.id }}" class="run">
+      {{ run_box(node, box_class, expand_level) }}
+    </li>
+  {% endfor %}
+
+{% endmacro %}

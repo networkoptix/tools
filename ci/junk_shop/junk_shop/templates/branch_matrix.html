@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Runs{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='branch_matrix.css') }}">
+{% endblock head %}
+
+
+{% macro run_link(name, run) %}
+
+  <a {% if run -%} href="{{ url_for('branch_version_list', branch_name=run.branch.name, platform_name=run.platform.name) }}" {%- endif %}
+     class="outcome outcome-{{ run.outcome if run else 'not-run' }} {% if run -%} has-run {%- endif %}">
+     {{ name }}
+  </a>
+
+{% endmacro %}
+
+
+{% block contents %}
+
+  <table>
+    <tr>
+      <th></th>
+      {% for platform in platform_list %}
+        <th class="axiz">{{ platform.name }}</th>
+      {% endfor %}
+    </tr>
+    {% for row in branch_table %}
+      <tr>
+        <td class="axiz">{{ row.branch_name }}</td>
+        {% for element in row.platform_list %}
+          <td>
+            <div class="white-box">
+              <div>
+                {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
+              </div>
+              <div>
+                {{ run_link('build', element.build) }}
+                {{ run_link('unit', element.unit) }}
+                {{ run_link('functional', element.functional) }}
+              </div>
+            </div>
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock contents %}

@@ -1,0 +1,45 @@
+body {
+	background-color: #F2F2F2;
+	font-family: 'Arial Regular', 'Arial';
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 400;
+}
+
+hr {
+	border: none;
+	border-top: 1px solid #DDD;
+	margin: 20px 0 20px 0;
+}
+
+.white-box {
+	padding: 6px;
+	background-color: #FFF;
+	margin: 6px;
+	border: 1px solid #DDD;
+}
+
+.outcome {
+	font-weight: normal;
+	font-style: normal;
+	padding: 2px 5px 2px 5px;
+	border-radius: 3px;
+	text-decoration: none !important;
+}
+.outcome-passed {
+	color: #3A911E;
+	background-color: #DDFFDD;
+}
+a.outcome-passed:hover:not(.outcome-leaf) {
+	background-color: #AFA;
+}
+.outcome-failed {
+	color: #C22626;
+	background-color: #FFDDDD;
+}
+a.outcome-failed:hover:not(.outcome-leaf) {
+	background-color: #FAA;
+}
+.outcome-not-run {
+	color: grey;
+}

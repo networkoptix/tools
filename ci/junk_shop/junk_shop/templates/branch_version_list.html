@@ -1,0 +1,56 @@
+{% import "run_macros.html" as run_macros %}
+
+{% extends "layout.html" %}
+{% block title %}{{ branch_name }} / {{ platform_name }}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='branch_version_list.css') }}">
+{% endblock head %}
+
+
+{% macro run_link(name, rec) %}
+
+  <div class="tests-block">
+    <a {% if rec.run -%} href="{{ url_for('run', run_id=rec.run.id) }}" {%- endif %}
+       class="outcome outcome-{{ rec.run.outcome if rec.run else 'not-run' }} {% if rec.run -%} has-run {%- endif %}">
+       {{ name }}
+    </a>
+    <div class="test-counts">
+      {% if rec.run %}
+        <span class="passed">{{ rec.test_count.passed }}</span>
+        {% if rec.test_count.failed %}
+          /
+          <span class="failed">{{ rec.test_count.failed }}</span>
+        {% endif %}
+      {% else %}
+        <span>&nbsp</span>
+      {% endif %}
+    </div>
+  </div>
+
+{% endmacro %}
+
+
+{% block contents %}
+
+  <a href="{{ url_for('branch_list') }}">Branches</a>
+
+  <h2>{{ branch_name }} / {{ platform_name }}</h2>
+
+  <hr>
+
+  <div>
+    {% for rec in version_list %}
+      <div class="white-box">
+        <div class="version-box">
+          <a class="version-link">{{ rec.version }}</a>
+          {{ run_link('build', rec.build) }}
+          {{ run_link('unit', rec.unit) }}
+          {{ run_link('functional', rec.functional) }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% endblock contents %}

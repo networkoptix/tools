@@ -1,0 +1,110 @@
+
+.outcome-passed.run-expandable {
+	border-bottom: 1px dotted #3A911E;
+}
+.outcome-failed.run-expandable {
+	border-bottom: 1px dotted #C22626;
+}
+
+a.run-collapsed::before {
+	content: "\002B";  // plus sign
+}
+a.run-expanded::before {
+	content: "\2212";  // minus sign
+}
+.run-name {
+	color: #2592C3;
+	text-decoration: none !important;
+}
+.run-name.outcome-passed {
+	color: #3A911E;
+}
+.run-name.outcome-failed {
+	color: #C22626;
+}
+.run-expandable {
+	border-bottom: 1px dotted #2592C3;
+}
+
+ul {
+    list-style: none;
+	margin: 1px;
+    padding-left: 1px;
+    // padding-left: 0px;
+}
+
+.white-box li {
+	padding-left: 5px;
+	margin: 10px 10px 10px 1;
+	border-left: 1px solid lightgrey;
+}
+
+.run-property {
+	margin: 0 5px 0 5px;
+}
+
+.artifact-button {
+	text-decoration: none;
+	color: black;
+	border: 1px solid lightgrey;
+	padding: 1px 5px 1px 5px;
+	margin-left: 5px;
+	border-radius: 3px;
+}
+.artifact-button:hover {
+	border-color: black;
+}
+.artifact-button-error {
+	color: #C22626;
+	// background-color: #FFEEEE;
+}
+.artifact-button-opened {
+	background-color: lightgrey;
+}
+
+.artifacts {
+}
+
+.artifact {
+	border: 1px solid #AAAAAA;
+	background-color: #EEEEEE;
+	border-radius: 3px;
+	//
+	margin: 0 auto;
+	//
+	max-width: 90%;
+	min-width: inherit;  //
+	http://stackoverflow.com/a/16720242;
+}
+.artifact div {
+	max-width: 100%;
+	overflow: auto;
+	border: none;
+	font-family: 'Lucida Console', monospace;
+	white-space: pre;
+	font-size: 14px;
+}
+.artifact legend {
+	font-size: 90%;
+}
+
+.artifact-loading-error {
+	border: 1px solid #FFCCCC;
+	color: #C22626;
+	background-color: #FFDEDE;
+	padding: 5px 10px 5px 30px;
+	border-radius: 5px;
+}
+
+//===================================================================================================
+
+.xrun-list li::before {
+	content: "before-li";
+	position: absolute;
+	left: 10px;
+}
+.xrun-list li::after {
+	content: "after-li";
+	position: absolute;
+	left: 10px;
+}
