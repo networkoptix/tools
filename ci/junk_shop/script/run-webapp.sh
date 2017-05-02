@@ -2,7 +2,8 @@
 
 . ~/venv/bin/activate
 
-cd $(dirname $0)
+cd $(dirname $0)/..
+
 export FLASK_APP=junk_shop/webapp.py
 export FLASK_DEBUG=1
 
