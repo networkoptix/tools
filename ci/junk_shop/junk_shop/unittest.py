@@ -24,7 +24,7 @@ def status2outcome(passed):
 
 class TestProcess(object):
 
-    class Output(object):
+    class Level(object):
 
         @db_session
         def __init__(self, repository, parent_run, root_name, suite=None, test=None):
@@ -81,7 +81,7 @@ class TestProcess(object):
         self._binary_path = binary_path
         self._pipe = None
         self._threads = []
-        self._output = [self.Output(self._repository, self._root_run, self._test_name)]  # Output list, [global, suite, test]
+        self._levels = [self.Level(self._repository, self._root_run, self._test_name)]  # Level list, [global, suite, test]
         self._current_suite = None
         self._current_test = None
         self._started_at = None
@@ -101,7 +101,7 @@ class TestProcess(object):
                 '--log-size=20M',
                 '--log-level=DEBUG2',
                 ]
-        self._output[0].stdout_lines.append('[ command line: "%s" ]' % subprocess.list2cmdline(args))
+        self._levels[0].stdout_lines.append('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         self._pipe = subprocess.Popen(
             args,
             env=env,
@@ -128,7 +128,7 @@ class TestProcess(object):
             thread.join()  # threads are still reading buffered output after process is already dead
         passed = return_code == 0
         duration = datetime_utc_now() - self._started_at
-        output = self._output.pop()
+        output = self._levels.pop()
         output.stdout_lines.append('[ return code: %d ]' % return_code)
         output.report('global')
         output.flush(passed, duration)
@@ -153,22 +153,22 @@ class TestProcess(object):
             self._process_suite_start_stop(line, mo.group(1), mo.group(3))
             return
         if line or self._current_suite:
-            self._output[-1].stdout_lines.append(line)
+            self._levels[-1].stdout_lines.append(line)
 
     def _process_test_start_stop(self, line, status, suite, test, duration_ms):
         assert suite == self._current_suite
         if status == 'RUN':
             assert not self._current_test
-            self._output[-1].stdout_lines.append(line)
-            self._output.append(self.Output(self._repository, self._output[1].run, self._test_name, self._current_suite, test))
+            self._levels[-1].stdout_lines.append(line)
+            self._levels.append(self.Level(self._repository, self._levels[1].run, self._test_name, self._current_suite, test))
             self._current_test = test
         else:
             assert test == self._current_test
             passed = status == 'OK'
-            output = self._output.pop()
+            output = self._levels.pop()
             output.report(self._current_suite + '.' + self._current_test)
             output.flush(passed, duration_ms=duration_ms)
-            self._output[-1].stdout_lines.append(line)
+            self._levels[-1].stdout_lines.append(line)
             self._current_test = None
             if not passed:
                 self.output[-1].passed = False
@@ -176,7 +176,7 @@ class TestProcess(object):
     def _process_suite_start_stop(self, line, suite, duration_ms):
         if duration_ms is not None:
             assert suite == self._current_suite
-            output = self._output.pop()
+            output = self._levels.pop()
             output.report(self._current_suite)
             output.flush(duration_ms=duration_ms)
             self._current_suite = None
@@ -184,12 +184,12 @@ class TestProcess(object):
                 self.output[-1].passed = False
         else:
             assert not self._current_suite
-            self._output.append(self.Output(self._repository, self._output[0].run, self._test_name, suite))
+            self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
             self._current_suite = suite
             
     def _process_stderr_line(self, line):
         #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
-        self._output[-1].stderr_lines.append(line)
+        self._levels[-1].stderr_lines.append(line)
 
 
 class TestRunner(object):
