@@ -1,0 +1,151 @@
+from argparse import ArgumentTypeError
+from pony.orm import commit, select, raw_sql
+from .utils import SimpleNamespace, datetime_utc_now
+from . import models
+
+
+class Parameters(object):
+
+    example = 'branch=dev_3.0.0,version=3.0.10,release=beta,kind=debug,platform=linux-64'
+    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform']
+
+    @classmethod
+    def from_string(cls, parameters_str):
+        error_msg = 'Expected parameters in form "%s", but got: %r' % (cls.example, parameters_str)
+        parameters = cls()
+        for pair in parameters_str.split(','):
+            l = pair.split('=')
+            if len(l) != 2:
+                raise ArgumentTypeError(error_msg)
+            name, value = l
+            if name not in cls.known_parameters:
+                raise ArgumentTypeError('Unknown parameter: %r. Known are: %s' % (name, ', '.join(known_names)))
+            setattr(parameters, name, value)
+        return parameters
+
+    def __init__(self):
+        self.branch = None
+        self.version = None
+        self.cloud_group = None
+        self.customization = None
+        self.release = None
+        self.kind = None
+        self.platform = None
+
+
+class ArtifactType(object):
+
+    def __init__(self, name, content_type):
+        self.name = name
+        self.content_type = content_type
+        self.id = None
+
+
+class DbCaptureRepository(object):
+
+    def __init__(self, db_config, parameters):
+        self.parameters = parameters
+        self.artifact_type = SimpleNamespace(
+            traceback=ArtifactType('traceback', 'text/plain'),
+            output=ArtifactType('output', 'text/plain'),
+            log=ArtifactType('log', 'text/plain'),
+            core=ArtifactType('core', 'application/octet-stream'),
+            )
+        models.db.bind('postgres', host=db_config.host, user=db_config.user, password=db_config.password)
+        models.db.generate_mapping(create_tables=True)
+        self.test_run = {}  # test path -> models.Run
+
+    def _select_run_children(self, parent):
+        return select(run for run in models.Run if raw_sql("run.path similar to $parent.path || '[^/]+/'"))
+
+    def add_run(self, name=None, parent=None, test=None):
+        root_run = None
+        if parent:
+            parent = models.Run[parent.id]
+            root_run = parent.root_run or parent
+        run = models.Run(
+            root_run=root_run if parent else None,
+            name=name or '',
+            test=test,
+            started_at=datetime_utc_now(),
+            )
+        if self.parameters:
+            for name in Parameters.known_parameters:
+                setattr(run, name, self._produce_parameter(name, getattr(self.parameters, name)))
+        commit()
+        run.path = '%s%d/' % (parent.path if parent else '', run.id)
+        return run
+
+    def _produce_artifact_type(self, artifact_type_rec):
+        if artifact_type_rec.id:
+            return models.ArtifactType[artifact_type_rec.id]
+        at = models.ArtifactType.get(name=artifact_type_rec.name)
+        if not at:
+            at = models.ArtifactType(name=artifact_type_rec.name, content_type=artifact_type_rec.content_type)
+            commit()
+        artifact_type_rec.id = at.id
+        return at
+
+    def _produce_parameter(self, parameter, value):
+        param2model = dict(
+            branch=models.Branch,
+            cloud_group=models.CloudGroup,
+            customization=models.Customization,
+            platform=models.Platform,
+            )
+        model = param2model.get(parameter)
+        if not model:
+            return value or ''  # plain str or None
+        if value is None:
+            return None
+        rec = model.get(name=value)
+        if not rec:
+            rec = model(name=value)
+        return rec
+
+    def produce_run(self, parent, name):
+        run = self._select_run_children(parent).filter(name=name).get()
+        if not run:
+            run = self.add_run(name, parent)
+        return run
+
+    def produce_test_run(self, root_run, test_path_list, is_test=False):
+        run = root_run
+        # create all parent nodes too
+        for path, name, is_leaf in self._iter_path_parents(test_path_list):
+            test = models.Test.get(path=path)
+            if test:
+                assert test.is_leaf == (is_leaf and is_test), repr(path)
+            else:
+                test = models.Test(path=path, is_leaf=is_leaf and is_test)
+            parent_run = run
+            run = self.test_run.get(path)
+            if not run:
+                run = self.add_run(name, parent_run, test)
+                self.test_run[path] = run
+        return run
+
+    def _iter_path_parents(self, path_list):
+        for i in range(len(path_list)):
+            path = '/'.join(path_list[:i+1])
+            name = path_list[i]
+            is_leaf = i == len(path_list) - 1
+            yield (path, name, is_leaf)
+
+    def add_artifact(self, run, name, artifact_type_rec, data, is_error=False):
+        assert run
+        if not data: return
+        at = self._produce_artifact_type(artifact_type_rec)
+        if type(data) is unicode:
+            data = data.encode('utf-8')
+        artifact = models.Artifact(type=at, name=name, is_error=is_error, run=run, data=data)
+        #print '----- added artifact %s for run %s' % (artifact.type, run.path)
+
+    def set_test_outcome(self, parent_run):
+        outcome = 'passed'
+        for run in self._select_run_children(parent_run):
+            if not run.outcome:
+                self.set_test_outcome(run)
+            if run.outcome != 'passed':
+                outcome = 'failed'
+        parent_run.outcome = outcome

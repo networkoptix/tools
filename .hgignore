@@ -17,4 +17,4 @@ networkoptix-mediaserver.deb
 sample.mkv
 *test-tmp.cfg
 *.*.*.*_*.*.log
-
+.cache

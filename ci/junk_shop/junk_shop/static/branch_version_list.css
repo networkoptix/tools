@@ -12,11 +12,12 @@
 
 .tests-block {
 	display: inline-block;
+	margin: 0 10px;
+	width: 100px;
 }
 .test-counts {
 	display: block;
 	margin: auto;
-	width: 40%;
 }
 .test-counts span {
 	font-weight: bold;

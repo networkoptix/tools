@@ -70,7 +70,7 @@ def load_run_node_tree(root_run):
         parent = path2node[path[:-1]]
         parent.children.append(node)
     for node in path2node.values():
-        node.children = sorted(node.children, key=lambda node: node.path_tuple)  # now a list
+        node.children = sorted(node.children, key=lambda node: node.path_tuple)
     return root_node
 
         
@@ -98,17 +98,20 @@ def run(run_id):
 
 def load_branch_row(branch):
     for platform in models.Platform.select():
-        fun_test = models.Test.get(path='functional')
-        last_run = models.Run.select().filter(
-            test=fun_test,
-            platform=platform,
-            branch=branch,
-            ).order_by(desc(models.Run.id)).first()
+
+        def load_last_run(test_path):
+            return select(run for run in models.Run
+                          if run.test.path==test_path
+                          and run.platform==platform
+                          and run.branch==branch).order_by(
+                              desc(models.Run.id)).first()
+
+        last_build_run = load_last_run('build')
         yield SimpleNamespace(
-            started_at=last_run.started_at if last_run else None,
-            build=None,
-            unit=None,
-            functional=last_run,
+            started_at=last_build_run.started_at if last_build_run else None,
+            build=last_build_run,
+            unit=load_last_run('unit'),
+            functional=load_last_run('functional'),
             )
 
 def load_branch_table():
@@ -140,20 +143,27 @@ def load_version_list(branch, platform):
     for version in sorted(filter(
             None, select(run.version for run in models.Run
                          if run.branch==branch and run.platform==platform)), key=parse_version, reverse=True):
-        functional_run = select(run for run in models.Run
-                                if run.test==models.Test.get(path='functional')
-                                and run.branch==branch
-                                and run.platform==platform
-                                and run.version==version
-                                ).order_by(desc(models.Run.id)).first()
-        test_count = dict(select((run.outcome, count(run)) for run in models.Run
-                                 if run.path.startswith(functional_run.path)
-                                 and run.test.is_leaf))
+
+        def load_run_rec(test_path):
+            run = select(run for run in models.Run
+                         if run.test.path==test_path
+                         and run.branch==branch
+                         and run.platform==platform
+                         and run.version==version
+                         ).order_by(desc(models.Run.id)).first()
+            if run:
+                test_count = dict(select((run.outcome, count(run)) for run in models.Run
+                                        if run.path.startswith(run.path)
+                                        and run.test.is_leaf))
+            else:
+                test_count = None
+            return SimpleNamespace(run=run, test_count=test_count)
+
         yield SimpleNamespace(
             version=version,
-            build=None,
-            unit=None,
-            functional=SimpleNamespace(run=functional_run, test_count=test_count),
+            build=load_run_rec('build'),
+            unit=load_run_rec('unit'),
+            functional=load_run_rec('functional'),
             )
 
 @app.route('/branch/<branch_name>/<platform_name>/')

@@ -19,10 +19,9 @@
     <div class="test-counts">
       {% if rec.run %}
         <span class="passed">{{ rec.test_count.passed }}</span>
-        {% if rec.test_count.failed %}
-          /
-          <span class="failed">{{ rec.test_count.failed }}</span>
-        {% endif %}
+        {%- if rec.test_count.failed -%}
+           &nbsp/&nbsp<span class="failed">{{ rec.test_count.failed }}</span>
+        {%- endif %}
       {% else %}
         <span>&nbsp</span>
       {% endif %}

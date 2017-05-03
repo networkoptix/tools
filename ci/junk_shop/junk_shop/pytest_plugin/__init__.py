@@ -1,6 +1,7 @@
 import pytest
 from ..utils import DbConfig
-from .plugin import Parameters, DbCapturePlugin
+from ..capture_repository import Parameters
+from .plugin import DbCapturePlugin
 
 
 def pytest_addoption(parser):
