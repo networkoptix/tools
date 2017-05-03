@@ -6,8 +6,10 @@ import os.path
 import sys
 import re
 from datetime import timedelta
+import time
 import argparse
 import subprocess
+import signal
 import threading
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now
@@ -32,6 +34,8 @@ class TestProcess(object):
             self.run = self._produce_test_run(parent_run, root_name, suite, test)
             self.stdout_lines = []
             self.stderr_lines = []
+            self.full_stdout_lines = []  # including children stdout
+            self.parse_errors = []
             self.passed = True
 
         def report(self, name):
@@ -54,12 +58,14 @@ class TestProcess(object):
                 duration = timedelta(milliseconds=int(duration_ms))
             if duration is not None:
                 run.duration = duration
-            if self.stdout_lines:
-                self.repository.add_artifact(
-                    run, 'stdout', self.repository.artifact_type.output, '\n'.join(self.stdout_lines))
-            if self.stderr_lines:
-                self.repository.add_artifact(
-                    run, 'stderr', self.repository.artifact_type.output, '\n'.join(self.stderr_lines))
+            self._add_artifact(run, 'stdout', self.repository.artifact_type.output, self.stdout_lines)
+            self._add_artifact(run, 'stderr', self.repository.artifact_type.output, self.stderr_lines, is_error=True)
+            self._add_artifact(run, 'full stdout', self.repository.artifact_type.output, self.full_stdout_lines)
+            self._add_artifact(run, 'parse errors', self.repository.artifact_type.output, self.parse_errors, is_error=True)
+
+        def _add_artifact(self, run, name, type, lines, is_error=False):
+            if lines:
+                self.repository.add_artifact(run, name, type, '\n'.join(lines), is_error)
 
         def _produce_test_run(self, parent_run, root_name, suite, test):
             test_path = ['unit', root_name]
@@ -97,7 +103,6 @@ class TestProcess(object):
                 '--gtest_filter=-NxCritical.All3',
                 '--gtest_shuffle',
                 '--tmp=',
-                '--log-file=/',
                 '--log-size=20M',
                 '--log-level=DEBUG2',
                 ]
@@ -117,10 +122,17 @@ class TestProcess(object):
         self._started_at = datetime_utc_now()
         print '%s is started' % self._test_name
 
-    def stop(self):
-        if self._pipe.poll() is None:
-            self._pipe.kill()
-        self.wait()
+    def is_finished(self):
+        return self._pipe.poll() is not None
+
+    def abort_on_timeout(self, run_duration):
+        if not self.is_finished():
+            print 'Aborting %s' % self._test_name
+            if self._levels:
+                self._levels[0].stdout_lines.append(
+                    '[ Aborted by timeout, still running after %s seconds ]' % run_duration.total_seconds())
+            self._pipe.send_signal(signal.SIGABRT)
+            self._pipe.wait()
 
     def wait(self):
         return_code = self._pipe.wait()
@@ -128,9 +140,12 @@ class TestProcess(object):
             thread.join()  # threads are still reading buffered output after process is already dead
         passed = return_code == 0
         duration = datetime_utc_now() - self._started_at
+        while len(self._levels) > 1:
+            output = self._levels.pop()
+            output.stdout_lines.append('[ aborted ]')
+            output.flush(passed=False)
         output = self._levels.pop()
         output.stdout_lines.append('[ return code: %d ]' % return_code)
-        output.report('global')
         output.flush(passed, duration)
         passed = output.passed and passed
         print '%s is %s' % (self._test_name, status2outcome(passed))
@@ -144,7 +159,8 @@ class TestProcess(object):
     def _process_stdout_line(self, line):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
-        mo = re.match(r'^\[\s+(RUN|OK|FAILED)\s+\] (\w+)\.(\w+)( \((\d+) ms\))?', line)
+        self._levels[0].full_stdout_lines.append(line)
+        mo = re.match(r'^\[\s+(RUN|OK|FAILED)\s+\] (\w+)\.(\w+)( \((\d+) ms\))?$', line)
         if mo:
             self._process_test_start_stop(line, mo.group(1), mo.group(2), mo.group(3), mo.group(5))
             return
@@ -155,35 +171,49 @@ class TestProcess(object):
         if line or self._current_suite:
             self._levels[-1].stdout_lines.append(line)
 
+    def _parse_error(self, desc, line, suite, test=None):
+        error = ('%s: binary: %s, current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
+                 % (desc, self._test_name, self._current_suite, self._current_test, suite, test, line))
+        if self._levels:
+            self._levels[0].parse_errors.append(error)
+        else:
+            print 'parse error: %s' % error
+
     def _process_test_start_stop(self, line, status, suite, test, duration_ms):
-        assert suite == self._current_suite
+        if suite != self._current_suite:
+            self._parse_error('current suite does not match', line, suite, test)
+            self._current_suite = suite
         if status == 'RUN':
-            assert not self._current_test
+            if self._current_test:
+                self._parse_error('test closing is missing', line, suite, test)
             self._levels[-1].stdout_lines.append(line)
             self._levels.append(self.Level(self._repository, self._levels[1].run, self._test_name, self._current_suite, test))
             self._current_test = test
         else:
-            assert test == self._current_test
+            if test != self._current_test:
+                self._parse_error('current test mismatch', line, suite, test)
             passed = status == 'OK'
             output = self._levels.pop()
-            output.report(self._current_suite + '.' + self._current_test)
+            output.report((self._current_suite or suite) + '.' + (self._current_test or test))
             output.flush(passed, duration_ms=duration_ms)
             self._levels[-1].stdout_lines.append(line)
             self._current_test = None
             if not passed:
-                self.output[-1].passed = False
+                self._levels[-1].passed = False
 
     def _process_suite_start_stop(self, line, suite, duration_ms):
         if duration_ms is not None:
-            assert suite == self._current_suite
+            if suite != self._current_suite:
+                self._parse_error('current suite mismatch', line, suite)
             output = self._levels.pop()
             output.report(self._current_suite)
             output.flush(duration_ms=duration_ms)
             self._current_suite = None
             if not output.passed:
-                self.output[-1].passed = False
+                self._levels[-1].passed = False
         else:
-            assert not self._current_suite
+            if self._current_suite:
+                self._parse_error('not in a suite', line, suite)
             self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
             self._current_suite = suite
             
@@ -195,8 +225,10 @@ class TestProcess(object):
 class TestRunner(object):
 
     @db_session
-    def __init__(self, repository, bin_dir, binary_list):
+    def __init__(self, repository, timeout, bin_dir, binary_list):
         config_vars = self._read_current_config(bin_dir)
+        self._repository = repository
+        self._timeout = timeout  # timedelta
         self._started_at = None
         self._root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
         self._processes = [
@@ -210,10 +242,19 @@ class TestRunner(object):
 
     def wait(self):
         passed = True
-        for process in self._processes:
-            test_passed = process.wait()
-            if not test_passed:
-                passed = False
+        while self._processes:
+            run_duration = datetime_utc_now() - self._started_at
+            if run_duration > self._timeout:
+                print 'Timed out'
+                for process in self._processes:
+                    process.abort_on_timeout(run_duration)
+            for process in self._processes[:]:
+                if not process.is_finished(): continue
+                test_passed = process.wait()
+                self._processes.remove(process)
+                if not test_passed:
+                    passed = False
+            time.sleep(1)
         with db_session:
             run = models.Run[self._root_run.id]
             run.outcome = status2outcome(passed)
@@ -236,14 +277,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--parameters', type=Parameters.from_string, metavar=Parameters.example,
                         help='Run parameters')
+    parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
     parser.add_argument('bin_dir', type=check_is_dir, help='Directory to test binaries')
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
+    timeout = timedelta(seconds=args.timeout_sec)
     try:
         repository = DbCaptureRepository(args.db_config, args.parameters)
-        runner = TestRunner(repository, args.bin_dir, args.test_binary)
+        runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
         runner.start()
         runner.wait()
     except RuntimeError as x:
