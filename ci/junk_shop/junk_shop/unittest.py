@@ -103,7 +103,7 @@ class TestProcess(object):
         @db_session
         def flush(self, passed=True, duration=None, duration_ms=None):
             run = models.Run[self.run.id]
-            run.outcome = status2outcome(passed)
+            run.outcome = status2outcome(self.passed and passed)
             if duration_ms is not None:
                 duration = timedelta(milliseconds=int(duration_ms))
             if duration is not None:
