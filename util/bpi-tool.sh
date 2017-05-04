@@ -600,8 +600,9 @@ main()
             box apt-get install -y sshfs #< Install sshfs.
 
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
-            nx_echo "\nExecute the following command at the box:"
-            nx_echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
+            nx_echo
+            nx_echo "ATTENTION: Now execute the following command directly at the box:"
+            echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
             #box sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
                 #&& echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;

@@ -250,8 +250,9 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" ${ARGS:+"$ARGS"} `# Omit arg if empty` \
-        -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `# Do not use known_hosts`
+    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
+        -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty`
 
     RESULT=$?
 
