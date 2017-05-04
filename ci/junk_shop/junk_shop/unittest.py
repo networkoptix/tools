@@ -20,6 +20,16 @@ from junk_shop.capture_repository import Parameters, DbCaptureRepository
 
 
 ARTIFACT_LINE_COUNT_LIMIT = 10000
+EXPECTED_CORE_PATTERN = '%e.core.%t.%p'
+CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
+GDB_BACKTRACE_EXTRACT_COMMAND = 'thread apply all backtrace'
+
+GTEST_ARGUMENTS = [
+    '--gtest_filter=-NxCritical.All3',
+    '--gtest_shuffle',
+    '--log-level=DEBUG2',
+    ]
+
 
 
 def status2outcome(passed):
@@ -62,6 +72,12 @@ class TestProcess(object):
                 artifact_type = self._repository.artifact_type.core
                 self._repository.add_artifact(run, name, artifact_type, f.read(), is_error=True)
 
+        def add_core_backtrace(self, name, contents):
+            if not contents: return
+            run = models.Run[self.run.id]
+            artifact_type = self._repository.artifact_type.traceback
+            self._repository.add_artifact(run, name, artifact_type, contents, is_error=True)
+
         def report(self, name):
             return
             if not self._stdout_lines and not self._stderr_lines: return
@@ -102,11 +118,12 @@ class TestProcess(object):
             return self._repository.produce_test_run(parent_run, test_path, is_test)
 
 
-    def __init__(self, repository, config_vars, root_run, test_name, binary_path):
+    def __init__(self, repository, config_vars, gdb_path, root_run, test_name, binary_path):
         if not os.path.exists(binary_path):
             raise RuntimeError('File %r does not exist' % binary_path)
         self._repository = repository
         self._config_vars = config_vars
+        self._gdb_path = gdb_path
         self._root_run = root_run
         self._test_name = test_name  # aka executable file name
         self._binary_path = binary_path
@@ -125,11 +142,7 @@ class TestProcess(object):
                        filter(None, [os.environ.get('LD_LIBRARY_PATH'),
                                      self._config_vars['LIB_PATH'],
                                      self._config_vars['QT_LIB']])))
-        args = [self._binary_path,
-                '--gtest_filter=-NxCritical.All3',
-                '--gtest_shuffle',
-                '--log-level=DEBUG2',
-                ]
+        args = [self._binary_path] + GTEST_ARGUMENTS
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         self._pipe = subprocess.Popen(
             args,
@@ -258,7 +271,16 @@ class TestProcess(object):
             level.add_stdout_line('[ produced core file: %s ]' % path)
             fname = os.path.basename(path)
             level.add_core_file(fname, path)
+            level.add_core_backtrace('%s-bt' % fname, self._extract_core_backtrace(path))
         return path_list != []
+
+    def _extract_core_backtrace(self, core_path):
+        if not self._gdb_path: return
+        print 'Extracting backtrace from %s' % core_path
+        pipe = subprocess.Popen([self._gdb_path, '--quiet', self._binary_path, core_path],
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout, stderr = pipe.communicate(GDB_BACKTRACE_EXTRACT_COMMAND)
+        return stdout
 
 
 class TestRunner(object):
@@ -269,9 +291,11 @@ class TestRunner(object):
         self._repository = repository
         self._timeout = timeout  # timedelta
         self._started_at = None
+        self._gdb_path = None
         self._root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
+        self._run_pre_checks(self._root_run)
         self._processes = [
-            TestProcess(repository, config_vars, self._root_run, binary_name, os.path.join(bin_dir, binary_name))
+            TestProcess(repository, config_vars, self._gdb_path, self._root_run, binary_name, os.path.join(bin_dir, binary_name))
             for binary_name in binary_list]
 
     def start(self):
@@ -305,6 +329,26 @@ class TestRunner(object):
         d = {}
         execfile(path, d)
         return d
+
+    def _run_pre_checks(self, root_run):
+        error_list = []
+        try:
+            self._gdb_path = subprocess.check_output(['which', 'gdb']).rstrip()
+        except subprocess.CalledProcessError as x:
+            error_list.append('gdb is missing: core files will not be parsed')
+        core_pattern = subprocess.check_output(['cat', CORE_PATTERH_FILE]).rstrip()
+        if core_pattern != EXPECTED_CORE_PATTERN:
+            error_list.append('Core pattern is %r, but expected is %r; core files will not be collected. Set it in %s'
+                              % (core_pattern, EXPECTED_CORE_PATTERN, CORE_PATTERH_FILE))
+        core_ulimit = subprocess.check_output(['ulimit', '-c'], shell=True).rstrip()
+        if core_ulimit != 'unlimited':
+            error_list.append('ulimit for core files is %s, but expected is "unlimited"; core files may not be generated.'
+                              ' Set it using command "ulimit -c unlimited"' % core_ulimit)
+        if error_list:
+            for error in error_list:
+                print 'Environment configuration error:', error
+            artifact_type = self._repository.artifact_type.output
+            self._repository.add_artifact(root_run, 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
 
 
 def check_is_dir(dir):
