@@ -22,12 +22,22 @@ from junk_shop.capture_repository import Parameters, DbCaptureRepository
 ARTIFACT_LINE_COUNT_LIMIT = 10000
 EXPECTED_CORE_PATTERN = '%e.core.%t.%p'
 CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
-GDB_BACKTRACE_EXTRACT_COMMAND = 'thread apply all backtrace'
 
 GTEST_ARGUMENTS = [
     '--gtest_filter=-NxCritical.All3',
     '--gtest_shuffle',
     '--log-level=DEBUG2',
+    ]
+
+GDB_BACKTRACE_EXTRACT_COMMANDS = [
+    r'set print static-members off',
+    r'echo \n-- current thread backtrace --\n',
+    r'bt',
+    r'echo \n-- backtraces of all threads --\n',
+    r'thread apply all backtrace',
+    r'echo \n-- full backtraces of all threads --\n',
+    r'thread apply all backtrace full',
+    r'quit',
     ]
 
 
@@ -277,10 +287,10 @@ class TestProcess(object):
     def _extract_core_backtrace(self, core_path):
         if not self._gdb_path: return
         print 'Extracting backtrace from %s' % core_path
-        pipe = subprocess.Popen([self._gdb_path, '--quiet', self._binary_path, core_path],
-                                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        stdout, stderr = pipe.communicate(GDB_BACKTRACE_EXTRACT_COMMAND)
-        return stdout
+        args = [self._gdb_path, '--quiet', self._binary_path, core_path]
+        for command in GDB_BACKTRACE_EXTRACT_COMMANDS:
+            args += ['-ex', command]
+        return subprocess.check_output(args)
 
 
 class TestRunner(object):
