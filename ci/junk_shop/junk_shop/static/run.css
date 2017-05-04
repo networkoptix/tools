@@ -44,14 +44,16 @@ ul {
 }
 
 .artifact-button {
-	text-decoration: none;
 	color: black;
 	border: 1px solid lightgrey;
 	padding: 1px 5px 1px 5px;
 	margin-left: 5px;
 	border-radius: 3px;
 }
-.artifact-button:hover {
+.artifact-button-text {
+	text-decoration: none;
+}
+.artifact-button-text:hover {
 	border-color: black;
 }
 .artifact-button-error {

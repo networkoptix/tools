@@ -15,10 +15,26 @@
 
   <hr>
 
-  <div>
-    <ul>
-      {{ run_macros.run_box_children(run_node_list, 'white-box') }}
-    </ul>
-  </div>
+  {% if run_node_list %}
+
+    <div>
+      <ul>
+        {{ run_macros.run_box_children(run_node_list, 'white-box') }}
+      </ul>
+    </div>
+
+  {% else %}
+    <p>No runs executed yet</p>
+  {% endif %}
+
+  <hr>
+
+  {% for page in range(1, page_count + 1) %}
+    <a
+       {% if page != current_page %} href="{{ url_for('run_list', page=page) }}" {% endif -%}
+       class="page {%- if page == current_page %} current-page {%- endif %}">
+       {{- page -}}
+    </a>
+  {% endfor %}
 
 {% endblock contents %}

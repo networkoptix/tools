@@ -19,31 +19,38 @@
 
 {% block contents %}
 
-  <table>
-    <tr>
-      <th></th>
-      {% for platform in platform_list %}
-        <th class="axiz">{{ platform.name }}</th>
-      {% endfor %}
-    </tr>
-    {% for row in branch_table %}
+  {% if not branch_table %}
+    <p>No runs executed yet</p>
+  {% else %}
+
+    <table>
       <tr>
-        <td class="axiz">{{ row.branch_name }}</td>
-        {% for element in row.platform_list %}
-          <td>
-            <div class="white-box">
-              <div>
-                {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
-              </div>
-              <div>
-                {{ run_link('build', element.build) }}
-                {{ run_link('unit', element.unit) }}
-                {{ run_link('functional', element.functional) }}
-              </div>
-            </div>
-          </td>
+        <th></th>
+        {% for platform in platform_list %}
+          <th class="axiz">{{ platform.name }}</th>
         {% endfor %}
       </tr>
-    {% endfor %}
-  </table>
+      {% for row in branch_table %}
+        <tr>
+          <td class="axiz">{{ row.branch_name }}</td>
+          {% for element in row.platform_list %}
+            <td>
+              <div class="white-box">
+                <div>
+                  {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
+                </div>
+                <div>
+                  {{ run_link('build', element.build) }}
+                  {{ run_link('unit', element.unit) }}
+                  {{ run_link('functional', element.functional) }}
+                </div>
+              </div>
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+
+{% endif %}
+
 {% endblock contents %}

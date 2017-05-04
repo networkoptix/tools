@@ -12,6 +12,22 @@ hr {
 	margin: 20px 0 20px 0;
 }
 
+.page {
+	font-weight: bold;
+	border: 1px solid #DDD;
+	padding: 3px 8px;
+	border-radius: 4px;
+	color: #2592C3;
+}
+.current-page {
+	color: #222;
+	background-color: #AAA;
+}
+.page:hover:not(.current-page) {
+	border-color: #555;
+	background-color: #DDD;
+}
+
 .white-box {
 	padding: 6px;
 	background-color: #FFF;

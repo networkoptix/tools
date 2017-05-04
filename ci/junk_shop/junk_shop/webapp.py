@@ -1,12 +1,15 @@
 import os
 from datetime import datetime, timedelta
-from flask import Flask, render_template, make_response, url_for, redirect
+from flask import Flask, request, render_template, make_response, url_for, redirect
 from jinja2 import Markup
-from pony.orm import db_session, desc, select, raw_sql, count
+from pony.orm import db_session, desc, select, raw_sql, count, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now, DbConfig
 from . import models
 
 app = Flask(__name__)
+
+
+DEFAULT_RUN_LIST_PAGE_SIZE = 20
 
 
 @app.template_filter('format_datetime')
@@ -38,7 +41,8 @@ class ArtifactRec(object):
         self.id = artifact.id
         self.name = artifact.name
         self.is_error = artifact.is_error
-        if artifact.type.name not in ['output', 'traceback']:
+        self.is_binary = not artifact.type.content_type.startswith('text/')
+        if artifact.type.name not in ['output', 'traceback', 'core']:
             self.name += ' ' + artifact.type.name
 
 class RunNode(object):
@@ -46,17 +50,17 @@ class RunNode(object):
     def __init__(self, path_tuple, run):
         self.path_tuple = path_tuple
         self.run = run
-        self.artifacts = [ArtifactRec(artifact) for artifact in run.artifacts]
+        self.artifacts = [ArtifactRec(artifact) for artifact in run.artifacts.order_by(models.Artifact.id)]
         self.children = []  # RunNode list
 
 
-def load_root_run_node_list(branch=None, platform=None):
+def load_root_run_node_list(page, page_size, branch=None, platform=None):
     query = select(run for run in models.Run if run.root_run is None)
     if branch:
         query = query.filter(branch=branch)
     if platform:
         query = query.filter(platform=platform)
-    for root_run in query.order_by(desc(models.Run.id)):
+    for root_run in query.order_by(desc(models.Run.id)).page(page, page_size):
         yield load_run_node_tree(root_run)
 
 def load_run_node_tree(root_run):
@@ -82,8 +86,16 @@ def index():
 @app.route('/run/')
 @db_session
 def run_list():
+    page = int(request.args.get('page', 1))
+    page_size = DEFAULT_RUN_LIST_PAGE_SIZE
+    rec_count = select(run for run in models.Run if run.root_run is None).count()
+    page_count = (rec_count - 1) / page_size + 1
+    run_node_list = list(load_root_run_node_list(page, page_size))
     return render_template(
-        'run_list.html', run_node_list=load_root_run_node_list())
+        'run_list.html',
+        current_page=page,
+        page_count=page_count,
+        run_node_list=run_node_list)
 
 @app.route('/run/<int:run_id>')
 @db_session
@@ -124,7 +136,7 @@ def load_branch_table():
 @app.route('/branch/')
 @db_session
 def branch_list():
-    branch_table = load_branch_table()
+    branch_table = list(load_branch_table())
     platform_list = models.Platform.select()
     return render_template(
         'branch_matrix.html',
@@ -181,11 +193,15 @@ def branch_version_list(branch_name, platform_name):
 @db_session
 def get_artifact(artifact_id):
     artifact = models.Artifact.get(id=artifact_id)
-    return str(artifact.data), {'Content-Type': 'text/plain'}
+    return str(artifact.data), {
+        'Content-Type': artifact.type.content_type,
+        'Content-Disposition': 'attachment; filename="%s"' % artifact.name,
+        }
 
 
 def init():
     db_config = DbConfig.from_string(os.environ['DB_CONFIG'])
+    # sql_debug(True)
     models.db.bind('postgres', host=db_config.host, user=db_config.user, password=db_config.password)
     models.db.generate_mapping(create_tables=True)
 

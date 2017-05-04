@@ -57,4 +57,4 @@ class Artifact(db.Entity):
     name = Required(str)
     is_error = Required(bool)
     run = Required(Run)
-    data = Required(buffer)
+    data = Required(buffer, lazy=True)

@@ -23,15 +23,22 @@
       </a>
 
       <span class="run-property">{{ node.run.started_at|format_datetime|default('-', true) }}</span>
-      {% if node.run.duration %}<span class="run-property">Duration: {{ node.run.duration|format_timedelta }}</span>{% endif %}
+      {% if node.run.duration is not none %}<span class="run-property">Duration: {{ node.run.duration|format_timedelta }}</span>{% endif %}
 
       {% if node.artifacts %}
         <span class="artifacts-pane">
           {% for artifact in node.artifacts %}
             <a id="{{ artifact.id }}"
-               href="#"
-               class="artifact-button {% if artifact.is_error %}artifact-button-error{% endif %}"
-               onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
+               {% if artifact.is_binary %}
+                 href="{{ url_for('get_artifact', artifact_id=artifact.id) }}"
+               {% else %}
+                 href="#"
+               {% endif %}
+               class="artifact-button {% if artifact.is_error %}artifact-button-error{% endif %}
+                      {%- if artifact.is_binary %} artifact-button-binary {%- else %} artifact-button-text {%- endif %}"
+               {% if not artifact.is_binary %}
+                 onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
+               {% endif %}
                >
               {{ artifact.name }}
             </a>
