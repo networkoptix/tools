@@ -13,7 +13,7 @@ apt-get install -y --no-install-recommends \
 
 add-apt-repository ppa:ubuntu-toolchain-r/test  # using newest gcc from here
 
-JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev"
+JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev gdb"
 
 apt-get install -y --no-install-recommends \
     openjdk-7-jdk \
