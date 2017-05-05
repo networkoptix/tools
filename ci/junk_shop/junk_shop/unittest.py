@@ -226,7 +226,7 @@ class TestProcess(object):
         if self._current_suite:
             mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self._current_suite, line)
             if mo:
-                self._process_suite_stop(mo.group(1))
+                self._process_suite_stop(line, mo.group(1))
                 return
         else:
             mo = re.match(r'^\[----------\] \d+ tests? from (\w+)$', line)
@@ -266,9 +266,9 @@ class TestProcess(object):
         self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
         self._current_suite = suite
 
-    def _process_suite_stop(self, duration_ms):
+    def _process_suite_stop(self, line, duration_ms):
         if self._current_test:
-            self._parse_error('test %s closing tag is missing' % self._current_test)
+            self._parse_error('test %s closing tag is missing' % self._current_test, line, self._current_suite, self._current_test)
             assert len(self._levels) == 3, len(self._levels)
             self._levels.pop()
             self._current_test = None
