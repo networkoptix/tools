@@ -208,15 +208,31 @@ class TestProcess(object):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
-        if self._current_suite:
-            mo = re.match(r'^\[\s+(RUN|OK|FAILED)\s+\] (\w+)\.(\w+)( \((\d+) ms\))?$', line)
+        if self._current_test:
+            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.+)? \((\d+) ms\)$' % (self._current_suite, self._current_test), line)
             if mo:
-                self._process_test_start_stop(line, mo.group(1), mo.group(2), mo.group(3), mo.group(5))
+                # handle log/output lines interleaved with gtest output:
+                if mo.group(2):
+                    self._levels[-1].add_stdout_line(mo.group(2))
+                if mo.group(3):
+                    self._levels[-1].add_stdout_line(mo.group(3))
+                self._process_test_stop(line, mo.group(1), mo.group(4))
                 return
-        mo = re.match(r'^\[----------\] \d+ tests? from (\w+)( \((\d+) ms total\))?$', line)
-        if mo:
-            self._process_suite_start_stop(line, mo.group(1), mo.group(3))
-            return
+        elif self._current_suite:
+            mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self._current_suite, line)
+            if mo:
+                self._process_test_start(line, mo.group(1))
+                return
+        if self._current_suite:
+            mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self._current_suite, line)
+            if mo:
+                self._process_suite_stop(mo.group(1))
+                return
+        else:
+            mo = re.match(r'^\[----------\] \d+ tests? from (\w+)$', line)
+            if mo:
+                self._process_suite_start(mo.group(1))
+                return
         if line or self._current_suite:
             self._levels[-1].add_stdout_line(line)
 
@@ -228,43 +244,41 @@ class TestProcess(object):
         else:
             print 'parse error: %s' % error
 
-    def _process_test_start_stop(self, line, status, suite, test, duration_ms):
-        if suite != self._current_suite:
-            self._parse_error('current suite does not match', line, suite, test)
-            self._current_suite = suite
-        if status == 'RUN':
-            if self._current_test:
-                self._parse_error('test closing is missing', line, suite, test)
-            self._levels[-1].add_stdout_line(line)
-            self._levels.append(self.Level(self._repository, self._levels[1].run, self._test_name, self._current_suite, test))
-            self._current_test = test
-        else:
-            if test != self._current_test:
-                self._parse_error('current test mismatch', line, suite, test)
-            passed = status == 'OK'
-            level = self._levels.pop()
-            level.report((self._current_suite or suite) + '.' + (self._current_test or test))
-            level.flush(passed, duration_ms=duration_ms)
-            self._levels[-1].add_stdout_line(line)
-            self._current_test = None
-            if not passed:
-                self._levels[-1].passed = False
+    def _process_test_start(self, line, test):
+        if self._current_test:
+            self._parse_error('test closing is missing', line, suite, test)
+        self._levels[-1].add_stdout_line(line)
+        self._levels.append(self.Level(self._repository, self._levels[1].run, self._test_name, self._current_suite, test))
+        self._current_test = test
 
-    def _process_suite_start_stop(self, line, suite, duration_ms):
-        if duration_ms is not None:
-            if suite != self._current_suite:
-                self._parse_error('current suite mismatch', line, suite)
-            level = self._levels.pop()
-            level.report(self._current_suite)
-            level.flush(duration_ms=duration_ms)
-            self._current_suite = None
-            if not level.passed:
-                self._levels[-1].passed = False
-        else:
-            if self._current_suite:
-                self._parse_error('not in a suite', line, suite)
-            self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
-            self._current_suite = suite
+    def _process_test_stop(self, line, status, duration_ms):
+        assert len(self._levels) == 3, len(self._levels)
+        passed = status == 'OK'
+        level = self._levels.pop()
+        level.report(self._current_suite + '.' + self._current_test)
+        level.flush(passed, duration_ms=duration_ms)
+        self._levels[-1].add_stdout_line(line)
+        self._current_test = None
+        if not passed:
+            self._levels[-1].passed = False
+
+    def _process_suite_start(self, suite):
+        self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
+        self._current_suite = suite
+
+    def _process_suite_stop(self, duration_ms):
+        if self._current_test:
+            self._parse_error('test %s closing tag is missing' % self._current_test)
+            assert len(self._levels) == 3, len(self._levels)
+            self._levels.pop()
+            self._current_test = None
+        assert len(self._levels) == 2, len(self._levels)
+        level = self._levels.pop()
+        level.report(self._current_suite)
+        level.flush(duration_ms=duration_ms)
+        self._current_suite = None
+        if not level.passed:
+            self._levels[-1].passed = False
             
     def _process_stderr_line(self, line):
         #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)

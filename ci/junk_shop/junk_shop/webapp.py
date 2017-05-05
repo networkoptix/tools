@@ -158,19 +158,19 @@ def load_version_list(branch, platform):
                          if run.branch==branch and run.platform==platform)), key=parse_version, reverse=True):
 
         def load_run_rec(test_path):
-            run = select(run for run in models.Run
-                         if run.test.path==test_path
-                         and run.branch==branch
-                         and run.platform==platform
-                         and run.version==version
-                         ).order_by(desc(models.Run.id)).first()
-            if run:
+            root_run = select(run for run in models.Run
+                              if run.test.path==test_path
+                              and run.branch==branch
+                              and run.platform==platform
+                              and run.version==version
+                              ).order_by(desc(models.Run.id)).first()
+            if root_run:
                 test_count = dict(select((run.outcome, count(run)) for run in models.Run
-                                        if run.path.startswith(run.path)
-                                        and run.test.is_leaf))
+                                         if run.path.startswith(root_run.path)
+                                         and run.test.is_leaf))
             else:
                 test_count = None
-            return SimpleNamespace(run=run, test_count=test_count)
+            return SimpleNamespace(run=root_run, test_count=test_count)
 
         yield SimpleNamespace(
             version=version,
