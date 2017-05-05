@@ -28,9 +28,12 @@ def getHeader(merged, current):
 def getCurrentBranch():
     return subprocess.check_output(['hg', 'branch']).strip('\n')
 
+def commandLine(command):
+    return '>> ' + ' '.join(command).replace('\n', '\\n')
+    
 def execCommand(*command):
     if verbose:
-        print command
+        print commandLine(command[0])
     
     code = subprocess.call(command)
     if code != 0:
@@ -38,10 +41,15 @@ def execCommand(*command):
         sys.exit(code)
     return code
         
-def getChangelog(revision):
-    command = ['hg', 'log', '--template', '{desc|firstline}\n\n', '-r']
-    changeset = ["(::{0} - ::{1})".format(revision, targetBranch)]
-    command = command + changeset
+def getChangelog(revision, multiline):
+    command = ['hg', 'log', '--template']
+    if multiline:
+        command += ['{desc}\n\n']
+    else:
+        command += ['{desc|firstline}\n\n']
+    command += ['-r', "(::{0} - ::{1})".format(revision, targetBranch)]
+    if verbose:
+        print commandLine(command)
     try:
         changelog = subprocess.check_output(command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, e:
@@ -66,6 +74,7 @@ def main():
     parser.add_argument('-r', '--rev', type=str, help="Source revision")
     parser.add_argument('-p', '--preview', action='store_true', help="preview changes")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
+    parser.add_argument('-m', '--multiline', action='store_true', help="multiline changelog")
     args = parser.parse_args()
 
     global verbose
@@ -88,12 +97,12 @@ def main():
         revision = currentBranch
         
     if args.preview:
-        print getChangelog(revision)
+        print getChangelog(revision, args.multiline)
         sys.exit(0)
    
     execCommand('hg', 'up', targetBranch)
     execCommand('hg', 'merge',  '--tool=internal:merge', revision)
-    execCommand('hg', 'ci', '-m' + getChangelog(revision))
+    execCommand('hg', 'ci', '-m' + getChangelog(revision, args.multiline))
     execCommand('hg', 'up', currentBranch)
     sys.exit(0)
     
