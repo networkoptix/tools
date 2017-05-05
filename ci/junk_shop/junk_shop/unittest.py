@@ -115,7 +115,10 @@ class TestProcess(object):
 
         def _add_artifact(self, run, name, type, lines, is_error=False):
             if lines:
-                self._repository.add_artifact(run, name, type, '\n'.join(lines), is_error)
+                data = '\n'.join(lines)
+                if len(lines) == lines.maxlen:
+                    data = '[ truncated to %d lines ]\n' % lines.maxlen + data
+                self._repository.add_artifact(run, name, type, data, is_error)
 
         def _produce_test_run(self, parent_run, root_name, suite, test):
             test_path = ['unit', root_name]
