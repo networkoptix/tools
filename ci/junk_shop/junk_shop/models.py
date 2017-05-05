@@ -8,6 +8,7 @@ db = Database()
 
 
 class CloudGroup(db.Entity):
+    _table_ = 'cloud_group'
     name = Required(str)
     runs = Set('Run')
 
@@ -24,6 +25,7 @@ class Platform(db.Entity):
     runs = Set('Run')
 
 class ArtifactType(db.Entity):
+    _table_ = 'artifact_type'
     name = Required(str)
     content_type = Required(str)
     artifacts = Set('Artifact')
@@ -44,7 +46,7 @@ class Run(db.Entity):
     duration = Optional(timedelta)
     artifacts = Set('Artifact')
     branch = Optional(Branch)
-    version = Optional(str)
+    version = Optional(str, index=True)
     cloud_group = Optional(CloudGroup)
     customization = Optional(Customization)
     release = Optional(str)  # beta, release
@@ -53,8 +55,9 @@ class Run(db.Entity):
     children = Set('Run')
 
 class Artifact(db.Entity):
+    run = Required(Run)
     type = Required(ArtifactType)
     name = Required(str)
     is_error = Required(bool)
-    run = Required(Run)
+    encoding = Optional(str)
     data = Required(buffer, lazy=True)

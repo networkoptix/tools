@@ -1,4 +1,5 @@
 from argparse import ArgumentTypeError
+import bz2
 from pony.orm import commit, select, raw_sql
 from .utils import SimpleNamespace, datetime_utc_now
 from . import models
@@ -138,7 +139,14 @@ class DbCaptureRepository(object):
         at = self._produce_artifact_type(artifact_type_rec)
         if type(data) is unicode:
             data = data.encode('utf-8')
-        artifact = models.Artifact(type=at, name=name, is_error=is_error, run=run, data=data)
+        compressed_data = bz2.compress(data)
+        artifact = models.Artifact(
+            type=at,
+            name=name,
+            is_error=is_error,
+            run=run,
+            encoding='bz2',
+            data=compressed_data)
         #print '----- added artifact %s for run %s' % (artifact.type, run.path)
 
     def set_test_outcome(self, parent_run):

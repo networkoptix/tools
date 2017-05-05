@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+import bz2
 from flask import Flask, request, render_template, make_response, url_for, redirect
 from jinja2 import Markup
 from pony.orm import db_session, desc, select, raw_sql, count, sql_debug
@@ -193,7 +194,13 @@ def branch_version_list(branch_name, platform_name):
 @db_session
 def get_artifact(artifact_id):
     artifact = models.Artifact.get(id=artifact_id)
-    return str(artifact.data), {
+    if artifact.encoding == 'bz2':
+        data = bz2.decompress(artifact.data)
+    elif not artifact.encoding:
+        data = artifact.data
+    else:
+        assert False, 'Unknown artifact encoding: %r' % artifact.encoding
+    return str(data), {
         'Content-Type': artifact.type.content_type,
         'Content-Disposition': 'attachment; filename="%s"' % artifact.name,
         }
