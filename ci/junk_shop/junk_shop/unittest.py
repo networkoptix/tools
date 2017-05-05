@@ -232,8 +232,10 @@ class TestProcess(object):
                 self._process_suite_stop(line, mo.group(1))
                 return
         else:
-            mo = re.match(r'^\[----------\] \d+ tests? from (\w+)$', line)
+            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(20\d\d-\d\d-\d\d .+)?$', line)
             if mo:
+                if mo.group(2):  # handle log/output lines interleaved with gtest output
+                    self._levels[-1].add_stdout_line(mo.group(3))
                 self._process_suite_start(mo.group(1))
                 return
         if line or self._current_suite:
