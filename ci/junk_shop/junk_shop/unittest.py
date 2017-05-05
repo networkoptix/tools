@@ -115,7 +115,7 @@ class TestProcess(object):
 
         def _add_artifact(self, run, name, type, lines, is_error=False):
             if lines:
-                data = '\n'.join(lines)
+                data = '\n'.join(line for line in lines if line is not None)
                 if len(lines) == lines.maxlen:
                     data = '[ truncated to %d lines ]\n' % lines.maxlen + data
                 self._repository.add_artifact(run, name, type, data, is_error)
@@ -148,7 +148,6 @@ class TestProcess(object):
         self._started_at = None
 
     def start(self):
-        self._clean_core_files()
         kind = os.path.basename(os.path.dirname(self._binary_path))
         env = dict(os.environ,
                    LD_LIBRARY_PATH=':'.join(
@@ -212,14 +211,14 @@ class TestProcess(object):
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
         if self._current_test:
-            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.+)? \((\d+) ms\)$' % (self._current_suite, self._current_test), line)
+            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.+)?( \((\d+) ms\))?$' % (self._current_suite, self._current_test), line)
             if mo:
                 # handle log/output lines interleaved with gtest output:
                 if mo.group(2):
                     self._levels[-1].add_stdout_line(mo.group(2))
                 if mo.group(3):
                     self._levels[-1].add_stdout_line(mo.group(3))
-                self._process_test_stop(line, mo.group(1), mo.group(4))
+                self._process_test_stop(line, mo.group(1), mo.group(5))
                 return
         elif self._current_suite:
             mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self._current_suite, line)
@@ -275,8 +274,10 @@ class TestProcess(object):
         if self._current_test:
             self._parse_error('test %s closing tag is missing' % self._current_test, line, self._current_suite, self._current_test)
             assert len(self._levels) == 3, len(self._levels)
-            self._levels.pop()
+            level = self._levels.pop()
+            level.flush(passed=False)
             self._current_test = None
+            self._levels[-1].passed = False
         assert len(self._levels) == 2, len(self._levels)
         level = self._levels.pop()
         level.report(self._current_suite)
@@ -289,19 +290,19 @@ class TestProcess(object):
         #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[-1].add_stderr_line(line)
 
-    def _clean_core_files(self):
-        for path in glob.glob('%s.core.*' % self._test_name):
-            os.remove(path)
-
     @db_session
     def _collect_core_files(self, level):
-        path_list = glob.glob('%s.core.*' % self._test_name)
-        for path in path_list:
+        has_cores = False
+        for path in glob.glob('*.core.*'):
+            core_fname = path.split('.')[0]
+            # core file name is truncated by linux to TASK_COMM_LEN - 1 (currently 16-1, will be 20-1)
+            if not self._test_name.startswith(core_fname): continue  # not our core
             level.add_stdout_line('[ produced core file: %s ]' % path)
             fname = os.path.basename(path)
             level.add_core_file(fname, path)
             level.add_core_backtrace('%s-bt' % fname, self._extract_core_backtrace(path))
-        return path_list != []
+            has_cores = True
+        return has_cores
 
     def _extract_core_backtrace(self, core_path):
         if not self._gdb_path: return
@@ -328,6 +329,7 @@ class TestRunner(object):
             for binary_name in binary_list]
 
     def start(self):
+        self._clean_core_files()
         self._started_at = datetime_utc_now()
         for process in self._processes:
             process.start()
@@ -337,9 +339,7 @@ class TestRunner(object):
         while self._processes:
             run_duration = datetime_utc_now() - self._started_at
             if self._timeout and run_duration > self._timeout:
-                print 'Timed out'
-                for process in self._processes:
-                    process.abort_on_timeout(run_duration)
+                self._handle_timeout(run_duration)
             for process in self._processes[:]:
                 if not process.is_finished(): continue
                 test_passed = process.wait()
@@ -358,6 +358,16 @@ class TestRunner(object):
         d = {}
         execfile(path, d)
         return d
+
+    def _handle_timeout(self, run_duration):
+        error = 'Timed out after %s seconds; aborted' % run_duration
+        print error
+        with db_session:
+            root_run = models.Run[self._root_run.id]
+            artifact_type = self._repository.artifact_type.output
+            self._repository.add_artifact(root_run, 'errors', artifact_type, error, is_error=True)
+        for process in self._processes:
+            process.abort_on_timeout(run_duration)
 
     def _run_pre_checks(self, root_run):
         error_list = []
@@ -378,6 +388,11 @@ class TestRunner(object):
                 print 'Environment configuration error:', error
             artifact_type = self._repository.artifact_type.output
             self._repository.add_artifact(root_run, 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
+
+    def _clean_core_files(self):
+        for path in glob.glob('*.core.*'):
+            print 'Removing old core file %s' % path
+            os.remove(path)
 
 
 def check_is_dir(dir):
