@@ -384,10 +384,6 @@ class TestRunner(object):
         error = 'Timed out after %s seconds; aborted' % run_duration
         print error
         self._errors.append(error)
-        with db_session:
-            root_run = models.Run[self._root_run.id]
-            artifact_type = self._repository.artifact_type.output
-            self._repository.add_artifact(root_run, 'errors', artifact_type, error, is_error=True)
         for process in self._processes:
             process.abort_on_timeout(run_duration)
 
