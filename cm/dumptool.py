@@ -40,11 +40,11 @@ CONFIG = dict(
     ),
     dist_suffixes = [
         '''x64[a-z-_]+%s(-only)?\.(msi|exe)''',
-        '''%s-[0-9\.-_]+-win64[a-z-_]+\.(exe|msi)''',
+        '''%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)''',
     ],
     pdb_suffixes = [
         '''x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip''',
-        '''(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]+\.zip''',
+        '''(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip''',
     ],
 )
 
@@ -172,6 +172,9 @@ class Cdb(object):
 class DumpAnalyzer(object):
     '''Provides ability to analize windows DMP dumps.
     '''
+    CUSTOMIZATIONS = dict(
+        dw='digitalwatchdog'
+    )
 
     def __init__(
         self, path, customization='default',
@@ -181,7 +184,7 @@ class DumpAnalyzer(object):
         :verbose - maximal log level (default 0 means no logs).
         '''
         self.dump_path = path
-        self.customization = customization
+        self.customization = self.CUSTOMIZATIONS.get(customization, customization)
         self.version = version
         self.build = build
         self.branch = branch
