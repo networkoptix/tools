@@ -51,7 +51,11 @@ def status2outcome(passed):
 def extract_core_source_binary(core_path):
     # max ELF program sections processed, will get 'too many program headers' message overwise:
     phnum_arg = '-Pelf_phnum=10000'
-    output = subprocess.check_output(['file', phnum_arg, core_path])
+    try:
+        output = subprocess.check_output(['file', phnum_arg, core_path])
+    except subprocess.CalledProcessError as x:
+        print 'Error extracting core source binary from %s: %s' % (core_path, x)
+        return None
     mo = re.match(r".*, from '(\S+).*'", output.rstrip())
     if mo:
         return mo.group(1)
