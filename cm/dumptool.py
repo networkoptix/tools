@@ -10,15 +10,19 @@ Dependencies:
     7x - zip extracter (comes with buildenv/_setenv.bat)
     cdb - windows debugger (comes with Windows SDK)
     dark - wix extractor (comes with wix toolset: wixtoolset.org)
+    devenv - Visual Studio (optional, required for debug=vs)
 
-Usage (module):
+Usage (Module):
     > import dumptool
     > print dumptool.analyseDump('dump.dmp', customization[, branch=BRANCH][, verbose=N])
     dump.cdb-bt
 
-Usage (console):
+Usage (Console):
     $ python dumptool.py dump.dmp [customization] [branch=BRANCH] [verbose=N]
     dump.cdb-bt
+
+Usage (Visual Studio):
+    $ python dumptool.py dump.dmp debug=vs
 '''
 
 import os
@@ -32,6 +36,7 @@ import urllib2
 CONFIG = dict(
     cdb_path = 'cdb',
     zip_path = '7z',
+    vs_path = 'devenv',
     data_dir = 'c:/develop/dumptool/',
     dist_url = 'http://beta.networkoptix.com/beta-builds/daily/',
     ext = dict(
@@ -50,6 +55,7 @@ CONFIG = dict(
 
 #CONFIG['zip_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
 #CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
+#CONFIG['vs_path'] = 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe'
 
 class Error(Exception):
     '''Base error type.
@@ -344,12 +350,18 @@ class DumpAnalyzer(object):
                     self.log("Warning: %s '%s': %s" % (f, p, repr(e)), level=1)
                 shutil.rmtree(self.build_path, onerror=logError)
             raise
-        if 'copy' in self.debug or 'cp' in self.debug:
+        if 'copy' in self.debug or 'cp' in self.debug or 'vs' in self.debug:
             shutil.copy(self.dump_path, self.module_dir())
 
     def generate_report(self, asString=False):
         '''Generates report using cdb with debug information.
         '''
+        if 'vs' in self.debug:
+            self.log('Open with Visual Studio in %s' % self.module_dir())
+            os.chdir(self.module_dir())
+            dump_name = os.path.basename(self.dump_path)
+            subprocess.check_output([CONFIG['vs_path'], dump_name])
+            return 'Done'
         report_path = report_name(self.dump_path)
         self.log('Loading debug information: ' + self.module_dir())
         pdb_dirs = ';'.join(set(os.path.dirname(f) for f in
