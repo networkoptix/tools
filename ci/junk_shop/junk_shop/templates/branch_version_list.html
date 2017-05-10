@@ -18,10 +18,20 @@
     </a>
     <div class="test-counts">
       {% if rec.run %}
-        <span class="passed">{{ rec.test_count.passed }}</span>
-        {%- if rec.test_count.failed -%}
-           &nbsp/&nbsp<span class="failed">{{ rec.test_count.failed }}</span>
-        {%- endif %}
+        <span class="passed">
+          {%- if rec.test_count.passed -%}
+            {{ rec.test_count.passed }}
+          {%- else -%}
+            0
+          {%- endif -%}
+        </span>
+        &nbsp/&nbsp<span class="failed">
+          {%- if rec.test_count.failed -%}
+            {{ rec.test_count.failed }}
+          {%- else -%}
+            0
+          {%- endif -%}
+        </span>
       {% else %}
         <span>&nbsp</span>
       {% endif %}
