@@ -13,6 +13,7 @@ Flags:
     S   build mediaserver only
     C   build desktop client only
     D   build deb packages
+    N   do not run mvn
 END
 exit 0
 fi
@@ -24,7 +25,7 @@ FLAGS=$1
 [[ "$FLAGS" = *p* ]] && ACTION=package || ACTION=compile
 [[ "$FLAGS" = *r* ]] && CONF=release || CONF=debug
 
-OPTIONS=
+OPTIONS="-Dbuild.configuration=$CONF $@"
 [[ "$FLAGS" = *u* ]] && OPTIONS+=" -Dutb"
 [[ "$FLAGS" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
 
@@ -38,10 +39,10 @@ if [[ "$FLAGS" = *c* ]]; then
     hg st -i | awk '{print$2}' | grep -Ev "\.pro\.user$" | xargs rm || true
 fi
 
-[[ "$@" ]] && shift
-mvn $ACTION -Dbuild.configuration=$CONF $OPTIONS $@
+[[ "$FLAGS" != *N* ]] && mvn $ACTION $OPTIONS
 
 if [[ "$FLAGS" = *m* ]]; then
     SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
     $SCRIPT_DIR/makepro.py $OPTIONS
 fi
+
