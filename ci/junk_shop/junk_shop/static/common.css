@@ -59,3 +59,11 @@ a.outcome-failed:hover:not(.outcome-leaf) {
 .outcome-not-run {
 	color: grey;
 }
+
+.permalink {
+	color: #DDD;
+	margin-left: 10px;
+}
+.permalink:hover {
+	color: #AAA;
+}

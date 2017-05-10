@@ -46,6 +46,10 @@
         </span>
       {% endif %}
 
+      {% if node.run.root_run is none %}
+        <a href="{{ url_for('run', run_id=node.run.id) }}" class="permalink">&para;</a>
+      {% endif %}
+
     </div>
 
     <div class="artifact-loading-error" style="display: none"></div>

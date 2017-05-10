@@ -38,20 +38,20 @@ def format_timedelta(d):
 
 class ArtifactRec(object):
 
-    def __init__(self, artifact):
-        self.id = artifact.id
-        self.name = artifact.name
-        self.is_error = artifact.is_error
-        self.is_binary = not artifact.type.content_type.startswith('text/')
-        if artifact.type.name not in ['output', 'traceback', 'core']:
-            self.name += ' ' + artifact.type.name
+    def __init__(self, artifact_id, artifact_name, is_error, type_name, content_type):
+        self.id = artifact_id
+        self.name = artifact_name
+        self.is_error = is_error
+        self.is_binary = not content_type.startswith('text/')
+        if type_name not in ['output', 'traceback', 'core']:
+            self.name += ' ' + type_name
 
 class RunNode(object):
 
-    def __init__(self, path_tuple, run):
+    def __init__(self, path_tuple, run, artifacts=None):
         self.path_tuple = path_tuple
         self.run = run
-        self.artifacts = [ArtifactRec(artifact) for artifact in run.artifacts.order_by(models.Artifact.id)]
+        self.artifacts = artifacts or []
         self.children = []  # RunNode list
 
 
@@ -64,12 +64,24 @@ def load_root_run_node_list(page, page_size, branch=None, platform=None):
     for root_run in query.order_by(desc(models.Run.id)).page(page, page_size):
         yield load_run_node_tree(root_run)
 
+def load_root_run_artifacts(root_run):
+    run_id2artifacts = {}  # Run -> ArtifactRec list
+    for run_id, artifact_id, artifact_name, is_error, type_name, content_type in select(
+            (run.id, artifact.id, artifact.name, artifact.is_error, artifact.type.name, artifact.type.content_type)
+            for artifact in models.Artifact
+            for run in models.Run
+            if (run.root_run == root_run or run is root_run) and artifact.run == run).order_by(2):
+        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type)
+        run_id2artifacts.setdefault(run_id, []).append(rec)
+    return run_id2artifacts
+
 def load_run_node_tree(root_run):
-    root_node = RunNode((root_run.path.rstrip('/'),), root_run)
+    run_id2artifacts = load_root_run_artifacts(root_run)
+    root_node = RunNode((root_run.path.rstrip('/'),), root_run, run_id2artifacts.get(root_run.id))
     path2node = {root_node.path_tuple: root_node}
     for run in select(run for run in models.Run if run.root_run is root_run):
         path_tuple = tuple(run.path.rstrip('/').split('/'))
-        path2node[path_tuple] = RunNode(path_tuple, run)
+        path2node[path_tuple] = RunNode(path_tuple, run, run_id2artifacts.get(run.id))
     for path, node in path2node.items():
         if len(path) == 1: continue
         parent = path2node[path[:-1]]
@@ -208,7 +220,8 @@ def get_artifact(artifact_id):
 
 def init():
     db_config = DbConfig.from_string(os.environ['DB_CONFIG'])
-    # sql_debug(True)
+    if 'SQL_DEBUG' in os.environ:
+        sql_debug(True)
     models.db.bind('postgres', host=db_config.host, user=db_config.user, password=db_config.password)
     models.db.generate_mapping(create_tables=True)
 
