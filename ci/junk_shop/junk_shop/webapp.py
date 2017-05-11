@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import bz2
 from flask import Flask, request, render_template, make_response, url_for, redirect
 from jinja2 import Markup
-from pony.orm import db_session, desc, select, raw_sql, count, sql_debug
+from pony.orm import db_session, desc, select, raw_sql, count, exists, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now, DbConfig
 from . import models
 
@@ -50,16 +50,17 @@ class ArtifactRec(object):
 
 class RunNode(object):
 
-    def __init__(self, path_tuple, run, artifacts=None, lazy=False):
+    def __init__(self, path_tuple, run, artifacts=None, lazy=False, has_children=False):
         self.path_tuple = path_tuple
         self.run = run
         self.artifacts = artifacts or []
         self.children = []  # RunNode list
         self.lazy = lazy  # children must by retrieved using ajax if True
+        self._has_children = has_children
 
     @property
     def has_children(self):
-        return self.children or self.lazy
+        return self.children or self._has_children
 
 
 def load_artifacts(root_run_list):
@@ -83,8 +84,10 @@ def load_root_run_node_list(page, page_size, branch=None, platform=None, version
         query = query.filter(version=version)
     root_run_list = query.order_by(desc(models.Run.id)).page(page, page_size)
     run_id2artifacts = load_artifacts(root_run_list)
-    return [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id), lazy=True)
-            for run in root_run_list]
+    run_has_children = dict(select((run.id, exists(run.children)) for run in models.Run if run in root_run_list))
+    return [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id),
+                    lazy=True, has_children=run_has_children[run.id])
+                    for run in root_run_list]
 
 def load_run_node_tree(root_run):
     run_id2artifacts = load_artifacts([root_run])

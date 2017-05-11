@@ -26,6 +26,12 @@ def as_local_tz(dt):
     tz = tzlocal.get_localzone()
     return dt.astimezone(tz)
 
+def status2outcome(passed):
+    if passed:
+        return 'passed'
+    else:
+        return 'failed'
+
 
 class DbConfig(object):
 

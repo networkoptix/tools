@@ -110,15 +110,19 @@ class DbCaptureRepository(object):
             run = self.add_run(name, parent)
         return run
 
+    def produce_test(self, test_path, is_leaf):
+        test = models.Test.get(path=test_path)
+        if test:
+            assert test.is_leaf == is_leaf, repr((is_leaf, test_path))
+        else:
+            test = models.Test(path=test_path, is_leaf=is_leaf)
+        return test
+
     def produce_test_run(self, root_run, test_path_list, is_test=False):
         run = root_run
         # create all parent nodes too
         for path, name, is_leaf in self._iter_path_parents(test_path_list):
-            test = models.Test.get(path=path)
-            if test:
-                assert test.is_leaf == (is_leaf and is_test), repr(path)
-            else:
-                test = models.Test(path=path, is_leaf=is_leaf and is_test)
+            test = self.produce_test(path, is_leaf=is_leaf and is_test)
             parent_run = run
             run = self.test_run.get(path)
             if not run:

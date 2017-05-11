@@ -14,7 +14,7 @@ import subprocess
 import signal
 import threading
 from pony.orm import db_session
-from junk_shop.utils import DbConfig, datetime_utc_now
+from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import Parameters, DbCaptureRepository
 
@@ -40,13 +40,6 @@ GDB_BACKTRACE_EXTRACT_COMMANDS = [
     r'quit',
     ]
 
-
-
-def status2outcome(passed):
-    if passed:
-        return 'passed'
-    else:
-        return 'failed'
 
 def extract_core_source_binary(core_path):
     # max ELF program sections processed, will get 'too many program headers' message overwise:
