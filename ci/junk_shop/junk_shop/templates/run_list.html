@@ -1,6 +1,6 @@
 {% import "run_macros.html" as run_macros %}
 
-{% extends "run_node_list.html" %}
+{% extends "run_list_base.html" %}
 {% block title %}Runs{% endblock %}
 
 
@@ -10,5 +10,12 @@
   <h2>Runs</h2>
   <hr>
 
-  {{ super() }}
+    {{ super() }}
+
+  <hr>
+
+  {% call(page) paginator(page_count, current_page) %}
+    {{ url_for('run_list', page=page) }}
+  {% endcall %}
+
 {% endblock contents %}

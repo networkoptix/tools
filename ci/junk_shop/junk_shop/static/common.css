@@ -42,16 +42,20 @@ hr {
 	border-radius: 3px;
 	text-decoration: none !important;
 }
+.passed, .outcome-passed {
+    color: #3A911E;
+}
 .outcome-passed {
-	color: #3A911E;
 	background-color: #DDFFDD;
 }
 a.outcome-passed:hover:not(.outcome-leaf) {
 	background-color: #AFA;
 }
-.outcome-failed {
+.failed, .outcome-failed {
 	color: #C22626;
-	background-color: #FFDDDD;
+}
+.outcome-failed {
+        background-color: #FFDDDD;
 }
 a.outcome-failed:hover:not(.outcome-leaf) {
 	background-color: #FAA;
@@ -68,17 +72,8 @@ a.outcome-failed:hover:not(.outcome-leaf) {
 	color: #AAA;
 }
 
-.link {
+.link, a.link:visited {
         color:  #2592C3;
-}
-
-a.link:visited {
-       color:  #2592C3;
-}
-
-a.link:hover {
-    color:  #2592C3;
-    font-weight: bold;
 }
 
 .list-row-box  {

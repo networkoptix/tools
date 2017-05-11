@@ -10,29 +10,17 @@
 
 {% block contents %}
 
-  {{ run_macros.header(branch_name) }}
+  {{ run_macros.breadcrumbs([('Branches',  url_for('branch_list')) ]) }}
+
+  <h2>{{ self.title() }}</h2>
 
   <hr>
 
-   <div>
-    {% for element in platform_list %}
-      <div class="white-box">
-        <div class="list-row-box">
-          <a class="link"
-            href="{{ url_for('branch_version_list', branch_name=branch_name, platform_name=element.platform_name) }}">
-            {{ element.platform_name }}
-          </a>
-          <div class="started-at-block">
-            <span>
-              {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
-            </span>
-          </div>
-          {{ run_macros.run_link('build', element.build) }}
-          {{ run_macros.run_link('unit', element.unit) }}
-          {{ run_macros.run_link('functional', element.functional) }}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+  {% call(element) run_macros.boxed_list(platform_list) %}
+    <a class="link"
+       href="{{ url_for('branch_version_list', branch_name=branch_name, platform_name=element.platform_name) }}">
+       {{ element.platform_name }}
+    </a>
+  {% endcall %}
 
 {% endblock contents %}

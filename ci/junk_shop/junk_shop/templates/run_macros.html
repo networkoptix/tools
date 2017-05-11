@@ -78,7 +78,7 @@
 
 {% macro run_link(name, rec) %}
 
-  <div class="tests-block">
+  <div class="tests-block" align="center">
     <a {% if rec.run -%} href="{{ url_for('run', run_id=rec.run.id) }}" {%- endif %}
        class="outcome outcome-{{ rec.run.outcome if rec.run else 'not-run' }} {% if rec.run -%} has-run {%- endif %}">
        {{ name }}
@@ -106,33 +106,30 @@
 
 {% endmacro %}
 
-{% macro header(branch_name, platform_name, version_name) %}
+{% macro breadcrumbs(breadcrumb_list) %}
+  {% for title, href in breadcrumb_list %}
+     <a class="link" href="{{ href }}">{{ title }}</a>
+     {% if not loop.last %}&nbsp/&nbsp{% endif %}
+  {% endfor %}
+{% endmacro %}
 
-  <a class="link" href="{{ url_for('branch_list') }}">Branches</a>
-  {%- if branch_name -%}
-    {%- if platform_name -%}
-      &nbsp/&nbsp
-      <a class="link"
-         href="{{ url_for('branch_platform_list', branch_name=branch_name) }}">
-        {{ branch_name }}
-      </a>
-      {%- if version_name -%}
-        &nbsp/&nbsp
-        <a class="link"
-           href="{{ url_for('branch_version_list', branch_name=branch_name, platform_name=platform_name) }}">
-          {{ platform_name }}
-        </a>
-        <h2>{{ version_name }}</h2>
-      {%- else -%}
-         <h2>{{ platform_name }}</h2>
-       {%- endif -%}
-    {%- else -%}
-      <h2>{{ branch_name }}</h2>
-    {%- endif -%}
- {%- else -%}
-    {%- if platform_name -%}
-      <h2>{{ platform_name }}</h2>
-    {%- endif -%}
-  {%- endif -%}
 
+{% macro boxed_list(list) %}
+  <div>
+    {% for element in list %}
+      <div class="white-box">
+        <div class="list-row-box">
+          {{ caller(element) }}
+          <div class="started-at-block">
+            <span>
+              {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
+            </span>
+          </div>
+          {{ run_link('build', element.build) }}
+          {{ run_link('unit', element.unit) }}
+          {{ run_link('functional', element.functional) }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 {% endmacro %}

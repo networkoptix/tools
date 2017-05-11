@@ -287,23 +287,27 @@ def get_artifact(artifact_id):
         }
 
 
-@app.route('/version/<branch_name>/<platform_name>/<version_name>')
+@app.route('/version/<branch_name>/<platform_name>/<version>')
 @db_session
-def version_run_list(branch_name, platform_name, version_name):
-    page = int(request.args.get('page', 1))
-    page_size = DEFAULT_RUN_LIST_PAGE_SIZE
-    rec_count = select(run for run in models.Run if run.root_run is None).count()
-    page_count = (rec_count - 1) / page_size + 1
+def version_run_list(branch_name, platform_name, version):
     branch = models.Branch.get(name=branch_name)
     platform = models.Platform.get(name=platform_name)
-    run_list = list(load_root_run_node_list(page, page_size, branch, platform, version_name))
+    page = int(request.args.get('page', 1))
+    page_size = DEFAULT_RUN_LIST_PAGE_SIZE
+    rec_count = select(run for run in models.Run
+                       if run.root_run is None and
+                       run.branch == branch and
+                       run.platform == platform and
+                       run.version == version).count()
+    page_count = (rec_count - 1) / page_size + 1
+    run_list = list(load_root_run_node_list(page, page_size, branch, platform, version))
     return render_template(
         'version_run_list.html',
         current_page=page,
         page_count=page_count,
         branch_name=branch_name,
         platform_name=platform_name,
-        version_name=version_name,
+        version=version,
         run_node_list=run_list)
 
 

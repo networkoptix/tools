@@ -10,24 +10,19 @@
 
 {% block contents %}
 
-  {{ run_macros.header(branch_name, platform_name) }}
+  {{ run_macros.breadcrumbs([
+    ('Branches',  url_for('branch_list')),
+    (branch_name, url_for('branch_platform_list', branch_name=branch_name))
+   ]) }}
 
+  <h2>{{ self.title() }}</h2>
   <hr>
 
-  <div>
-    {% for rec in version_list %}
-      <div class="white-box">
-        <div class="list-row-box">
-          <a class="link"
-             href="{{ url_for('version_run_list', branch_name=branch_name, platform_name=platform_name, version_name=rec.version) }}">
-            {{ rec.version }}
-          </a>
-          {{ run_macros.run_link('build', rec.build) }}
-          {{ run_macros.run_link('unit', rec.unit) }}
-          {{ run_macros.run_link('functional', rec.functional) }}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+  {% call(element) run_macros.boxed_list(version_list) %}
+    <a class="link"
+       href="{{ url_for('version_run_list', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">
+       {{ element.version }}
+    </a>
+  {% endcall %}
 
 {% endblock contents %}

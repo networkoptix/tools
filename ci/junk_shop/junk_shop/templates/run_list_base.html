@@ -7,6 +7,15 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='run.css') }}">
 {% endblock head %}
 
+{% macro paginator(page_count, current_page) %}
+  {% for page in range(1, page_count + 1) %}
+    <a
+       {% if page != current_page %} href="{{ caller(page) }}" {% endif -%}
+       class="page {%- if page == current_page %} current-page {%- endif %}">
+       {{- page -}}
+    </a>
+  {% endfor %}
+{% endmacro %}
 
 {% block contents %}
 
@@ -21,15 +30,5 @@
   {% else %}
     <p>No runs executed yet</p>
   {% endif %}
-
-  <hr>
-
-  {% for page in range(1, page_count + 1) %}
-    <a
-       {% if page != current_page %} href="{{ url_for('run_list', page=page) }}" {% endif -%}
-       class="page {%- if page == current_page %} current-page {%- endif %}">
-       {{- page -}}
-    </a>
-  {% endfor %}
 
 {% endblock contents %}

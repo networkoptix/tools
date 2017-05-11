@@ -112,13 +112,7 @@ ul {
 	margin: auto;
 }
 .test-counts span {
-	font-weight: bold;
-}
-.test-counts .passed {
-	color: #3A911E;
-}
-.test-counts .failed {
-	color: #C22626;
+        font-weight: bold;
 }
 
 //===================================================================================================
