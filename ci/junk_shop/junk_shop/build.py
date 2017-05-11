@@ -4,23 +4,36 @@
 
 import sys
 import argparse
+import re
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import Parameters, DbCaptureRepository
 
 
+def parse_maven_output(output):
+    for line in output.splitlines():
+        mo = re.match(r'^\[INFO\] BUILD (SUCCESS|FAILURE)$', line.rstrip())
+        if mo:
+            return mo.group(1) == 'SUCCESS'
+    return False
+
 @db_session
-def store_output_and_exit_code(repository, output, exit_code):
-    passed = exit_code == 0
+def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcome):
+    passed = True
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
-    run.outcome = status2outcome(passed)
     repository.add_artifact(run, 'output', repository.artifact_type.output, output)
-    if exit_code != 0:
+    if parse_maven_outcome:
+        outcome = parse_maven_output(output)
+        if not outcome:
+            passed = False
+    if exit_code is not None and exit_code != 0:
+        passed = False
         exit_code_message = 'Exit code: %d' % exit_code
         repository.add_artifact(
             run, 'exit code', repository.artifact_type.output, exit_code_message, is_error=not passed)
+    run.outcome = status2outcome(passed)
     print 'Created %s run %s' % (run.outcome, run.path)
 
 
@@ -30,11 +43,13 @@ def main():
                         help='Run parameters')
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('exit_code', type=int, help='Build exit code to store to db')
+    parser.add_argument('--exit-code', type=int, dest='exit_code', help='Build exit code to store to db')
+    parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
+                        help='Parse output to determine maven outcome')
     args = parser.parse_args()
     try:
         repository = DbCaptureRepository(args.db_config, args.parameters)
-        store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code)
+        store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
     except RuntimeError as x:
         print x
         sys.exit(1)
