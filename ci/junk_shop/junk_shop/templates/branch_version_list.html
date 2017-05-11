@@ -5,57 +5,26 @@
 
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='branch_version_list.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='run.css') }}">
 {% endblock head %}
-
-
-{% macro run_link(name, rec) %}
-
-  <div class="tests-block">
-    <a {% if rec.run -%} href="{{ url_for('run', run_id=rec.run.id) }}" {%- endif %}
-       class="outcome outcome-{{ rec.run.outcome if rec.run else 'not-run' }} {% if rec.run -%} has-run {%- endif %}">
-       {{ name }}
-    </a>
-    <div class="test-counts">
-      {% if rec.run %}
-        <span class="passed">
-          {%- if rec.test_count.passed -%}
-            {{ rec.test_count.passed }}
-          {%- else -%}
-            0
-          {%- endif -%}
-        </span>&nbsp/&nbsp<span class="failed">
-          {%- if rec.test_count.failed -%}
-            {{ rec.test_count.failed }}
-          {%- else -%}
-            0
-          {%- endif -%}
-        </span>
-      {% else %}
-        <span>&nbsp</span>
-      {% endif %}
-    </div>
-  </div>
-
-{% endmacro %}
-
 
 {% block contents %}
 
-  <a href="{{ url_for('branch_list') }}">Branches</a>
-
-  <h2>{{ branch_name }} / {{ platform_name }}</h2>
+  {{ run_macros.header(branch_name, platform_name) }}
 
   <hr>
 
   <div>
     {% for rec in version_list %}
       <div class="white-box">
-        <div class="version-box">
-          <a class="version-link">{{ rec.version }}</a>
-          {{ run_link('build', rec.build) }}
-          {{ run_link('unit', rec.unit) }}
-          {{ run_link('functional', rec.functional) }}
+        <div class="list-row-box">
+          <a class="link"
+             href="{{ url_for('version_run_list', branch_name=branch_name, platform_name=platform_name, version_name=rec.version) }}">
+            {{ rec.version }}
+          </a>
+          {{ run_macros.run_link('build', rec.build) }}
+          {{ run_macros.run_link('unit', rec.unit) }}
+          {{ run_macros.run_link('functional', rec.functional) }}
         </div>
       </div>
     {% endfor %}

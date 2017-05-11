@@ -1,0 +1,13 @@
+{% import "run_macros.html" as run_macros %}
+
+{% extends "run_node_list.html" %}
+{% block title %} {{ branch_name }} / {{ platform_name }} / {{ version_name }} {% endblock %}
+
+
+{% block contents %}
+
+  {{ run_macros.header(branch_name, platform_name, version_name) }}
+
+  <hr>
+  {{ super() }}
+{% endblock contents %}

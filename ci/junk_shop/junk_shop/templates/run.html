@@ -11,9 +11,9 @@
 
 {% block contents %}
 
-  <a href="{{ url_for('branch_list') }}">Branches</a>
-  <br>
-  <a href="{{ url_for('run_list') }}">Runs</a>
+  <a class="link" href="{{ url_for('branch_list') }}">Branches</a>
+  &nbsp/&nbsp
+  <a class="link" href="{{ url_for('run_list') }}">Runs</a>
 
   <h2>{{ run_node.run.branch.name }} / {{ run_node.run.platform.name }}</h2>
 

@@ -1,0 +1,38 @@
+{% import "run_macros.html" as run_macros %}
+
+{% extends "layout.html" %}
+{% block title %}{{ platform_name }}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='run.css') }}">
+    {% endblock head %}
+
+{% block contents %}
+
+  {{ run_macros.header('', platform_name) }}
+
+  <hr>
+
+   <div>
+    {% for element in branch_list %}
+      <div class="white-box">
+        <div class="list-row-box">
+          <a class="link"
+            href="{{ url_for('branch_version_list', branch_name=element.branch_name, platform_name=platform_name) }}">
+            {{ element.branch_name }}
+          </a>
+          <div class="started-at-block">
+            <span>
+              {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
+            </span>
+          </div>
+          {{ run_macros.run_link('build', element.build) }}
+          {{ run_macros.run_link('unit', element.unit) }}
+          {{ run_macros.run_link('functional', element.functional) }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% endblock contents %}

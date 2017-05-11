@@ -98,6 +98,28 @@ ul {
 	border-radius: 5px;
 }
 
+/* following classes are using for run_link macros (run_macros.html) */
+
+.tests-block {
+	display: inline-block;
+	margin: 0 10px;
+	width: 100px;
+}
+
+.test-counts {
+	display: block;
+	margin: auto;
+}
+.test-counts span {
+	font-weight: bold;
+}
+.test-counts .passed {
+	color: #3A911E;
+}
+.test-counts .failed {
+	color: #C22626;
+}
+
 //===================================================================================================
 
 .xrun-list li::before {

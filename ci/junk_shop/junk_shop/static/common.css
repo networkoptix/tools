@@ -67,3 +67,39 @@ a.outcome-failed:hover:not(.outcome-leaf) {
 .permalink:hover {
 	color: #AAA;
 }
+
+.link {
+        color:  #2592C3;
+}
+
+a.link:visited {
+       color:  #2592C3;
+}
+
+a.link:hover {
+    color:  #2592C3;
+    font-weight: bold;
+}
+
+.list-row-box  {
+	display: table;
+}
+
+.list-row-box a {
+	display: table-cell;
+	vertical-align: middle;
+	width: 60px;
+	padding: 0 30px 0 10px;
+}
+
+.started-at-block {
+	display:  inline-block;
+	margin: 0 10px;
+	width: 150px;
+}
+
+.started-at-block span {
+        font-weight: bold;
+    	vertical-align: middle;
+        font-size: 12px;
+}

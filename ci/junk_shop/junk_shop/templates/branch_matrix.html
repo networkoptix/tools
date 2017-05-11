@@ -27,12 +27,22 @@
       <tr>
         <th></th>
         {% for platform in platform_list %}
-          <th class="axiz">{{ platform.name }}</th>
+        <th class="axiz">
+          <a class="link"
+             href="{{ url_for('platform_branch_list', platform_name=platform.name) }}">
+            {{ platform.name }}
+          </a>
+        </th>
         {% endfor %}
       </tr>
       {% for row in branch_table %}
         <tr>
-          <td class="axiz">{{ row.branch_name }}</td>
+          <td class="axiz">
+            <a class="link"
+               href="{{ url_for('branch_platform_list', branch_name=row.branch_name) }}">
+              {{ row.branch_name }}
+            </a>
+          </td>
           {% for element in row.platform_list %}
             <td>
               <div class="white-box">
@@ -40,9 +50,9 @@
                   {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
                 </div>
                 <div>
-                  {{ run_link('build', element.build) }}
-                  {{ run_link('unit', element.unit) }}
-                  {{ run_link('functional', element.functional) }}
+                  {{ run_link('build', element.build.run) }}
+                  {{ run_link('unit', element.unit.run) }}
+                  {{ run_link('functional', element.functional.run) }}
                 </div>
               </div>
             </td>
