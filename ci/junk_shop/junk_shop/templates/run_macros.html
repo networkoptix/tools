@@ -6,13 +6,15 @@
 
       <a class="run-name
                 {%- if node.run.outcome %} outcome outcome-{{ node.run.outcome }}{% endif -%}
-                {%- if node.children %} run-expandable
+                {%- if node.has_children %} run-expandable
                     {%- if expand_level <= 0 %} run-collapsed{% else %} run-expanded{% endif %}
+                    {%- if node.lazy %} run-lazy-children-loading {%- endif -%}
                 {%- else %}
                   outcome-leaf
                 {%- endif %}"
-                {% if node.children %}
-                  href="#" onclick="return toggle_children_visible(this)"
+                {% if node.has_children %}
+                  href="#" onclick="return toggle_children_visible(
+                      this, {{ node.run.id }}, '{{ url_for('run_children', run_id=node.run.id) }}')"
                 {% endif %}
                 >
         {% if node.run.name %}
@@ -52,7 +54,7 @@
 
     </div>
 
-    <div class="artifact-loading-error" style="display: none"></div>
+    <div class="ajax-loading-error" style="display: none"></div>
     <div class="artifacts" style="display: none"></div>
 
     <ul style="{% if expand_level <= 0 -%} display: none {%- endif %}">

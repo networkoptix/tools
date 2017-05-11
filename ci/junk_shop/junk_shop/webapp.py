@@ -50,12 +50,28 @@ class ArtifactRec(object):
 
 class RunNode(object):
 
-    def __init__(self, path_tuple, run, artifacts=None):
+    def __init__(self, path_tuple, run, artifacts=None, lazy=False):
         self.path_tuple = path_tuple
         self.run = run
         self.artifacts = artifacts or []
         self.children = []  # RunNode list
+        self.lazy = lazy  # children must by retrieved using ajax if True
 
+    @property
+    def has_children(self):
+        return self.children or self.lazy
+
+
+def load_artifacts(root_run_list):
+    run_id2artifacts = {}  # Run -> ArtifactRec list
+    for run_id, artifact_id, artifact_name, is_error, type_name, content_type in select(
+            (run.id, artifact.id, artifact.name, artifact.is_error, artifact.type.name, artifact.type.content_type)
+            for artifact in models.Artifact
+            for run in models.Run
+            if (run.root_run in root_run_list or run in root_run_list) and artifact.run == run).order_by(2):
+        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type)
+        run_id2artifacts.setdefault(run_id, []).append(rec)
+    return run_id2artifacts
 
 def load_root_run_node_list(page, page_size, branch=None, platform=None, version=None):
     query = select(run for run in models.Run if run.root_run is None)
@@ -65,24 +81,13 @@ def load_root_run_node_list(page, page_size, branch=None, platform=None, version
         query = query.filter(platform=platform)
     if version:
         query = query.filter(version=version)
-    for root_run in query.order_by(desc(models.Run.id)).page(page, page_size):
-        yield load_run_node_tree(root_run)
-
-
-def load_root_run_artifacts(root_run):
-    run_id2artifacts = {}  # Run -> ArtifactRec list
-    for run_id, artifact_id, artifact_name, is_error, type_name, content_type in select(
-            (run.id, artifact.id, artifact.name, artifact.is_error, artifact.type.name, artifact.type.content_type)
-            for artifact in models.Artifact
-            for run in models.Run
-            if (run.root_run == root_run or run is root_run) and artifact.run == run).order_by(2):
-        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type)
-        run_id2artifacts.setdefault(run_id, []).append(rec)
-    return run_id2artifacts
-
+    root_run_list = query.order_by(desc(models.Run.id)).page(page, page_size)
+    run_id2artifacts = load_artifacts(root_run_list)
+    return [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id), lazy=True)
+            for run in root_run_list]
 
 def load_run_node_tree(root_run):
-    run_id2artifacts = load_root_run_artifacts(root_run)
+    run_id2artifacts = load_artifacts([root_run])
     root_node = RunNode((root_run.path.rstrip('/'),), root_run, run_id2artifacts.get(root_run.id))
     path2node = {root_node.path_tuple: root_node}
     for run in select(run for run in models.Run if run.root_run is root_run):
@@ -116,6 +121,15 @@ def run_list():
         current_page=page,
         page_count=page_count,
         run_node_list=run_node_list)
+
+@app.route('/run/<int:run_id>/children')
+@db_session
+def run_children(run_id):
+    run = models.Run[run_id]
+    return render_template(
+        'run_children.html',
+        run_node_list=load_run_node_tree(run).children,
+        )
 
 
 @app.route('/run/<int:run_id>')

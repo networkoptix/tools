@@ -90,11 +90,12 @@ ul {
 	font-size: 90%;
 }
 
-.artifact-loading-error {
+.ajax-loading-error {
 	border: 1px solid #FFCCCC;
 	color: #C22626;
 	background-color: #FFDEDE;
 	padding: 5px 10px 5px 30px;
+	margin: 5px 0;
 	border-radius: 5px;
 }
 

@@ -1,8 +1,12 @@
 
-function toggle_children_visible(element) {
-	var li = element.parentNode.parentNode;
-	var link = li.querySelector('div a');
+function toggle_children_visible(link, run_id, children_load_request_path) {
+	var li = link.parentNode.parentNode;
 	var children_ul = li.querySelector('ul');
+	if ( link.classList.contains('run-lazy-children-loading') )
+	{
+		var ajax_loading_error_div = li.querySelector('.ajax-loading-error');
+		load_run_children(link, children_ul, ajax_loading_error_div, run_id, children_load_request_path);
+	}
 	if ( children_ul.style.display == 'none' ) {
 		children_ul.style.display = 'block';
 		link.classList.remove('run-collapsed');
@@ -16,12 +20,27 @@ function toggle_children_visible(element) {
 	return false;
 }
 
+
+function load_run_children(link, children_ul, ajax_loading_error_div, run_id, children_load_request_path)
+{
+	run_ajax_request(children_load_request_path, ajax_loading_error_div,
+		'Failed to load children for run ' + run_id, function(responseText) {
+		handle_loaded_run_children(link, children_ul, ajax_loading_error_div, responseText);
+	});
+}
+
+function handle_loaded_run_children(link, children_ul, ajax_loading_error_div, contents)
+{
+	ajax_loading_error_div.style.display = 'none';
+	link.classList.remove('run-lazy-children-loading');
+	children_ul.innerHTML = contents;
+}
+
+
 function toggle_artifact_visible(button_element, artifact_id, artifact_name, request_path) {
-	console.log('toggle_artifact_visible', artifact_id, request_path, button_element);
 	var li = button_element.parentNode.parentNode.parentNode;
-	var artifact_loading_error_div = li.querySelector('.artifact-loading-error');
+	var ajax_loading_error_div = li.querySelector('.ajax-loading-error');
 	var artifacts_div = li.querySelector('.artifacts');
-	console.log('li:', li, artifact_loading_error_div);
 
 	var artifact_element = document.getElementById('artifact-' + artifact_id);
 	if (artifact_element) {
@@ -32,26 +51,32 @@ function toggle_artifact_visible(button_element, artifact_id, artifact_name, req
 		return false;
 	}
 
-	var request = new XMLHttpRequest();
-	request.open('GET', request_path);
-	request.onload = function() {
-		if (request.status == 200) {
-			handle_loaded_artifact(button_element, artifacts_div, artifact_loading_error_div, artifact_id, artifact_name, request.responseText);
-		} else {
-			show_artifact_loading_error(
-				artifact_name, artifact_loading_error_div, 'server returned: ' + request.status + ' ' + request.statusText);
-		}
-	};
-	request.onerror = function() {
-		show_artifact_loading_error(
-			artifact_name, artifact_loading_error_div, 'server is unreachable ' + request.statusText);
-	};
-	request.send();
+	run_ajax_request(request_path, ajax_loading_error_div, 'Failed to load artifact "' + artifact_name + '"', function(responseText){
+			handle_loaded_artifact(button_element, artifacts_div, ajax_loading_error_div, artifact_id, artifact_name, responseText);
+	});
+
 	return false;
 }
 
-function show_artifact_loading_error(artifact_name, error_div, error) {
-	error_div.textContent = 'Failed to load artifact "' + artifact_name + '": ' + error;
+function run_ajax_request(request_path, ajax_loading_error_div, error_message, on_success)
+{
+	var request = new XMLHttpRequest();
+	request.open('GET', request_path);
+	request.onload = function() {
+		if (request.status == 200)
+			on_success(request.responseText);
+		else
+			show_ajax_loading_error(ajax_loading_error_div,
+				error_message + ': server returned: ' + request.status + ' ' + request.statusText);
+	};
+	request.onerror = function() {
+		show_ajax_loading_error(ajax_loading_error_div, error_message + ': server is unreachable ' + request.statusText);
+	};
+	request.send();
+}
+
+function show_ajax_loading_error(error_div, error_message) {
+	error_div.textContent = error_message;
 	error_div.style.display = 'block';
 }
 
@@ -66,7 +91,6 @@ function show_artifact(button_element, artifact_element) {
 }
 
 function handle_loaded_artifact(button_element, artifacts_div, error_div, artifact_id, artifact_name, contents) {
-	console.log('loaded artifact', contents);
 	error_div.style.display = 'none';
 	var artifact_element = make_artifact_element(artifact_id, artifact_name, contents);
 	artifacts_div.appendChild(artifact_element);
