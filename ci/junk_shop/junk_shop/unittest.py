@@ -226,19 +226,19 @@ class TestProcess(object):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
-        if not self._try_match_gtest_message(line):
+        if not self._match_gtest_message(line):
             if line or self._current_suite:
                 self._levels[-1].add_stdout_line(line)
         self._last_stdout_line = line
 
-    def _try_match_gtest_message(self, line):
-        if self._try_match_gtest_message_to_line(line):
+    def _match_gtest_message(self, line):
+        if self._match_gtest_message_to_line(line):
             return True
         if not self._last_stdout_line:
             return False
-        return self._try_match_gtest_message_to_line(self._last_stdout_line + line)
+        return self._match_gtest_message_to_line(self._last_stdout_line + line)
 
-    def _try_match_gtest_message_to_line(self, line):
+    def _match_gtest_message_to_line(self, line):
         if self._current_test:
             mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
                           % (LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
