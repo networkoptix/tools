@@ -22,6 +22,7 @@ from junk_shop.capture_repository import Parameters, DbCaptureRepository
 ARTIFACT_LINE_COUNT_LIMIT = 10000
 EXPECTED_CORE_PATTERN = '%e.core.%t.%p'
 CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
+LOG_PATTERN = '20\d\d-\d\d-\d\d .+'
 
 GTEST_ARGUMENTS = [
     '--gtest_filter=-NxCritical.All3',
@@ -158,6 +159,7 @@ class TestProcess(object):
         self._levels = [self.Level(self._repository, self._root_run, self._test_name)]  # Level list, [global, suite, test]
         self._current_suite = None
         self._current_test = None
+        self._last_stdout_line = None
         self._started_at = None
         self.my_core_files = set()
 
@@ -224,10 +226,22 @@ class TestProcess(object):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
-        log_pattern = '20\d\d-\d\d-\d\d .+'
+        if not self._try_match_gtest_message(line):
+            if line or self._current_suite:
+                self._levels[-1].add_stdout_line(line)
+        self._last_stdout_line = line
+
+    def _try_match_gtest_message(self, line):
+        if self._try_match_gtest_message_to_line(line):
+            return True
+        if not self._last_stdout_line:
+            return False
+        return self._try_match_gtest_message_to_line(self._last_stdout_line + line)
+
+    def _try_match_gtest_message_to_line(self, line):
         if self._current_test:
             mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
-                          % (log_pattern, self._current_suite, self._current_test, log_pattern), line)
+                          % (LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
             if mo:
                 # handle log/output lines interleaved with gtest output:
                 if mo.group(2):
@@ -235,26 +249,25 @@ class TestProcess(object):
                 if mo.group(3):
                     self._levels[-1].add_stdout_line(mo.group(3))
                 self._process_test_stop(line, mo.group(1), mo.group(5))
-                return
+                return True
         elif self._current_suite:
             mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self._current_suite, line)
             if mo:
                 self._process_test_start(line, mo.group(1))
-                return
+                return True
         if self._current_suite:
             mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self._current_suite, line)
             if mo:
                 self._process_suite_stop(line, mo.group(1))
-                return
+                return True
         else:
-            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(%s)?$' % log_pattern, line)
+            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(%s)?$' % LOG_PATTERN, line)
             if mo:
                 if mo.group(2):  # handle log/output lines interleaved with gtest output
                     self._levels[-1].add_stdout_line(mo.group(3))
                 self._process_suite_start(mo.group(1))
-                return
-        if line or self._current_suite:
-            self._levels[-1].add_stdout_line(line)
+                return True
+        return False
 
     def _parse_error(self, desc, line, suite, test=None):
         error = ('%s: binary: %s, current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
