@@ -16,8 +16,10 @@ a.run-expanded::before {
 	content: "\2212";  // minus sign
 }
 
-.run-expandable {
+.run-expandable:not(.outcome-failed):not(.outcome-passed):not(.outcome-incomplete) {
+	color: #2592C3;
 	border-bottom: 1px dotted #2592C3;
+	text-decoration: none;
 }
 
 ul {
