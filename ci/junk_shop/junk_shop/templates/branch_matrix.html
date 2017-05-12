@@ -10,7 +10,7 @@
 {% macro run_link(name, run) %}
 
   <a {% if run -%} href="{{ url_for('branch_version_list', branch_name=run.branch.name, platform_name=run.platform.name) }}" {%- endif %}
-     class="outcome outcome-{{ run.outcome if run else 'not-run' }} {% if run -%} has-run {%- endif %}">
+     class="outcome outcome-{{ run.outcome|default('not-run', true) }} {% if run -%} has-run {%- endif %}">
      {{ name }}
   </a>
 

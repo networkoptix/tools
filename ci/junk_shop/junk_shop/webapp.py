@@ -252,9 +252,11 @@ def load_version_list(page, page_size, branch, platform):
                 test_count = None
             return SimpleNamespace(run=root_run, test_count=test_count)
 
+        last_build = load_run_rec('build')
         yield SimpleNamespace(
             version=version,
-            build=load_run_rec('build'),
+            started_at=last_build.run.started_at if last_build.run else None,
+            build=last_build,
             unit=load_run_rec('unit'),
             functional=load_run_rec('functional'),
             )

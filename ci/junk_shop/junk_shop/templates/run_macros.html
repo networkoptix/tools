@@ -80,7 +80,7 @@
 
   <div class="tests-block" align="center">
     <a {% if rec.run -%} href="{{ url_for('run', run_id=rec.run.id) }}" {%- endif %}
-       class="outcome outcome-{{ rec.run.outcome if rec.run else 'not-run' }} {% if rec.run -%} has-run {%- endif %}">
+       class="outcome outcome-{{ rec.run.outcome|default('not-run', true) }} {% if rec.run -%} has-run {%- endif %}">
        {{ name }}
     </a>
     <div class="test-counts">

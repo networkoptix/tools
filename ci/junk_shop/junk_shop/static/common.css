@@ -64,6 +64,13 @@ a.outcome-passed:hover:not(.outcome-leaf) {
 a.outcome-failed:hover:not(.outcome-leaf) {
 	background-color: #FAA;
 }
+.outcome-not-run {
+	background-color: #E8E8E8;
+}
+a.outcome-not-run.has-run:hover {
+	background-color: #CCC;
+}
+
 .incomplete, .outcome-incomplete, .outcome-incomplete:visited {
     color: #AAAA00;
 }
@@ -89,10 +96,9 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 	display: table;
 }
 
-.list-row-box a {
+.list-row-box a, .list-row-box .started-at-block {
 	display: table-cell;
 	vertical-align: middle;
-	width: 60px;
 	padding: 0 30px 0 10px;
 }
 
@@ -103,7 +109,6 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 }
 
 .started-at-block span {
-        font-weight: bold;
-    	vertical-align: middle;
-        font-size: 12px;
+	vertical-align: middle;
+    font-size: 12px;
 }
