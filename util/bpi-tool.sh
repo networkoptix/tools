@@ -23,8 +23,8 @@ nx_load_config "{$CONFIG=".bpi-toolrc"}"
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at the workstation.
 : ${QT_DIR="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at the workstation.
 : ${BUILD_CONFIG="debug"}
-: ${TARGET_IN_VMS_DIR="build_environment/target"} #< Path component at the workstation.
-: ${BUILD_DIR="aarch64"} #< Path component at the workstation.
+: ${TARGET_IN_VMS_DIR="build_environment/target-bpi"} #< Path component at the workstation.
+: ${BUILD_DIR="arm-bpi"} #< Path component at the workstation.
 : ${PACKAGE_SUFFIX=""}
 
 #--------------------------------------------------------------------------------------------------
