@@ -4,7 +4,7 @@
   <div class="{{ box_class }}">
     <div>
 
-      <a class="run-name
+      <a class="link
                 {%- if node.run.outcome %} outcome outcome-{{ node.run.outcome }}{% endif -%}
                 {%- if node.has_children %} run-expandable
                     {%- if expand_level <= 0 %} run-collapsed{% else %} run-expanded{% endif %}

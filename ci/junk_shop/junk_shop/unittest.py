@@ -224,8 +224,10 @@ class TestProcess(object):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
+        log_pattern = '20\d\d-\d\d-\d\d .+'
         if self._current_test:
-            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.+)?( \((\d+) ms\))?$' % (self._current_suite, self._current_test), line)
+            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
+                          % (log_pattern, self._current_suite, self._current_test, log_pattern), line)
             if mo:
                 # handle log/output lines interleaved with gtest output:
                 if mo.group(2):
@@ -245,7 +247,7 @@ class TestProcess(object):
                 self._process_suite_stop(line, mo.group(1))
                 return
         else:
-            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(20\d\d-\d\d-\d\d .+)?$', line)
+            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(%s)?$' % log_pattern, line)
             if mo:
                 if mo.group(2):  # handle log/output lines interleaved with gtest output
                     self._levels[-1].add_stdout_line(mo.group(3))

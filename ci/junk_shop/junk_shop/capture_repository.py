@@ -69,6 +69,7 @@ class DbCaptureRepository(object):
             name=name or '',
             test=test,
             started_at=datetime_utc_now(),
+            outcome='incomplete' if test else '',
             )
         if self.parameters:
             for name in Parameters.known_parameters:

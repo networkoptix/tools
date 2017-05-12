@@ -35,6 +35,10 @@ hr {
 	border: 1px solid #DDD;
 }
 
+.link, .link:visited {
+	color:  #2592C3;
+}
+
 .outcome {
 	font-weight: normal;
 	font-style: normal;
@@ -42,7 +46,7 @@ hr {
 	border-radius: 3px;
 	text-decoration: none !important;
 }
-.passed, .outcome-passed {
+.passed, .outcome-passed, .outcome-passed:visited {
     color: #3A911E;
 }
 .outcome-passed {
@@ -51,14 +55,23 @@ hr {
 a.outcome-passed:hover:not(.outcome-leaf) {
 	background-color: #AFA;
 }
-.failed, .outcome-failed {
+.failed, .outcome-failed, .outcome-failed:visited {
 	color: #C22626;
 }
 .outcome-failed {
-        background-color: #FFDDDD;
+	background-color: #FFDDDD;
 }
 a.outcome-failed:hover:not(.outcome-leaf) {
 	background-color: #FAA;
+}
+.incomplete, .outcome-incomplete, .outcome-incomplete:visited {
+    color: #AAAA00;
+}
+.outcome-incomplete {
+	background-color: #EEFFC8;
+}
+a.outcome-incomplete:hover:not(.outcome-leaf) {
+	background-color: #EEFF88;
 }
 .outcome-not-run {
 	color: grey;
@@ -70,10 +83,6 @@ a.outcome-failed:hover:not(.outcome-leaf) {
 }
 .permalink:hover {
 	color: #AAA;
-}
-
-.link, a.link:visited {
-        color:  #2592C3;
 }
 
 .list-row-box  {
