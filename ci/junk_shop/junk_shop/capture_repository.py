@@ -157,7 +157,7 @@ class DbCaptureRepository(object):
     def set_test_outcome(self, parent_run):
         outcome = 'passed'
         for run in self._select_run_children(parent_run):
-            if not run.outcome:
+            if run.outcome in [None, 'incomplete']:
                 self.set_test_outcome(run)
             if run.outcome != 'passed':
                 outcome = 'failed'
