@@ -12,6 +12,12 @@ app = Flask(__name__)
 
 DEFAULT_RUN_LIST_PAGE_SIZE = 20
 
+VERSION_LIST_SQL='''Select version FROM run
+WHERE branch = $branch and platform = $platform
+GROUP BY version
+ORDER BY string_to_array(version, '.')::int[] DESC
+LIMIT $limit OFFSET $offset'''
+
 
 @app.template_filter('format_datetime')
 def format_datetime(dt, precise=True):
@@ -193,11 +199,11 @@ def load_branch_table():
 
 @app.route('/branch/')
 @db_session
-def branch_list():
+def matrix():
     branch_table = list(load_branch_table())
     platform_list = models.Platform.select()
     return render_template(
-        'branch_matrix.html',
+        'matrix.html',
         branch_table=branch_table,
         platform_list=platform_list)
 
@@ -231,11 +237,11 @@ def platform_branch_list(platform_name):
 
 
 def load_version_list(page, page_size, branch, platform):
-    query = select(run.version for run in models.Run
-                   if run.branch == branch and
-                   run.platform == platform).order_by(-1)
-    for version in sorted(filter(None, query.page(page, page_size)),
-                          key=parse_version, reverse=True):
+    versions = models.db.select(
+        VERSION_LIST_SQL,
+        {'platform': platform.id, 'branch': branch.id,
+         'limit': page_size, 'offset': (page - 1) * page_size})
+    for version in versions:
 
         def load_run_rec(test_path):
             root_run = select(run for run in models.Run
@@ -264,17 +270,18 @@ def load_version_list(page, page_size, branch, platform):
 
 @app.route('/branch/<branch_name>/<platform_name>/')
 @db_session
-def branch_version_list(branch_name, platform_name):
+def branch_platform_version_list(branch_name, platform_name):
     branch = models.Branch.get(name=branch_name)
     platform = models.Platform.get(name=platform_name)
     page = int(request.args.get('page', 1))
     page_size = DEFAULT_RUN_LIST_PAGE_SIZE
+    version_list=load_version_list(page, page_size, branch, platform)
     rec_count = select(run.version for run in models.Run
                        if run.branch == branch and
                        run.platform == platform).count()
     page_count = (rec_count - 1) / page_size + 1
     return render_template(
-        'branch_version_list.html',
+        'branch_platform_version_list.html',
         current_page=page,
         page_count=page_count,
         branch_name=branch_name,
@@ -300,7 +307,7 @@ def get_artifact(artifact_id):
 
 @app.route('/version/<branch_name>/<platform_name>/<version>')
 @db_session
-def version_run_list(branch_name, platform_name, version):
+def branch_platform_version_run_list(branch_name, platform_name, version):
     branch = models.Branch.get(name=branch_name)
     platform = models.Platform.get(name=platform_name)
     page = int(request.args.get('page', 1))
@@ -313,7 +320,7 @@ def version_run_list(branch_name, platform_name, version):
     page_count = (rec_count - 1) / page_size + 1
     run_list = list(load_root_run_node_list(page, page_size, branch, platform, version))
     return render_template(
-        'version_run_list.html',
+        'branch_platform_version_run_list.html',
         current_page=page,
         page_count=page_count,
         branch_name=branch_name,

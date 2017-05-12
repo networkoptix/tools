@@ -5,10 +5,10 @@
 {% block contents %}
 
   {{ run_macros.breadcrumbs([
-       ('Branches',  url_for('branch_list')),
+       ('Branches',  url_for('matrix')),
        (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
-       (platform_name, url_for('branch_version_list', branch_name=branch_name,
-                               platform_name=platform_name))
+       (platform_name, url_for('branch_platform_version_list', branch_name=branch_name,
+  platform_name=platform_name))
   ]) }}
 
   <h2>{{ self.title() }}</h2>
@@ -20,8 +20,8 @@
   <hr>
 
   {% call(page) common_macros.paginator(page_count, current_page) %}
-  {{ url_for('version_run_list', branch_name=branch_name,
-             platform_name=platform_name, version=version, page=page) }}
+    {{ url_for('branch_platform_version_run_list', branch_name=branch_name,
+         platform_name=platform_name, version=version, page=page) }}
   {% endcall %}
 
 {% endblock contents %}

@@ -10,7 +10,7 @@
 
  {% block contents %}
 
- {{ run_macros.breadcrumbs([('Branches',  url_for('branch_list')) ]) }}
+ {{ run_macros.breadcrumbs([('Branches',  url_for('matrix')) ]) }}
 
  <h2>{{ self.title() }}</h2>
 
@@ -18,7 +18,7 @@
 
  {% call(element) run_macros.outcome_box_list(branch_list) %}
      <a class="link"
-            href="{{ url_for('branch_version_list', branch_name=element.branch_name, platform_name=platform_name) }}">
+            href="{{ url_for('branch_platform_version_list', branch_name=element.branch_name, platform_name=platform_name) }}">
             {{ element.branch_name }}
      </a>
  {% endcall %}
