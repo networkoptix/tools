@@ -230,11 +230,12 @@ def platform_branch_list(platform_name):
         branch_list=list(load_platform_row(platform)))
 
 
-def load_version_list(branch, platform):
-    for version in sorted(filter(
-            None, select(run.version for run in models.Run
-                         if run.branch == branch and
-                         run.platform == platform)), key=parse_version, reverse=True):
+def load_version_list(page, page_size, branch, platform):
+    query = select(run.version for run in models.Run
+                   if run.branch == branch and
+                   run.platform == platform).order_by(-1)
+    for version in sorted(filter(None, query.page(page, page_size)),
+                          key=parse_version, reverse=True):
 
         def load_run_rec(test_path):
             root_run = select(run for run in models.Run
@@ -264,11 +265,19 @@ def load_version_list(branch, platform):
 def branch_version_list(branch_name, platform_name):
     branch = models.Branch.get(name=branch_name)
     platform = models.Platform.get(name=platform_name)
+    page = int(request.args.get('page', 1))
+    page_size = DEFAULT_RUN_LIST_PAGE_SIZE
+    rec_count = select(run.version for run in models.Run
+                       if run.branch == branch and
+                       run.platform == platform).count()
+    page_count = (rec_count - 1) / page_size + 1
     return render_template(
         'branch_version_list.html',
+        current_page=page,
+        page_count=page_count,
         branch_name=branch_name,
         platform_name=platform_name,
-        version_list=load_version_list(branch, platform))
+        version_list=load_version_list(page, page_size, branch, platform))
 
 
 @app.route('/artifact/<int:artifact_id>')

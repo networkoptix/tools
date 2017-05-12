@@ -5,7 +5,7 @@
     <div>
 
       <a class="link
-                {%- if node.run.outcome %} outcome outcome-{{ node.run.outcome }}{% endif -%}
+                {%- if node.run.outcome %} outcome outcome-{{ node.run.outcome if node.run else 'not-run' }}{% endif -%}
                 {%- if node.has_children %} run-expandable
                     {%- if expand_level <= 0 %} run-collapsed{% else %} run-expanded{% endif %}
                     {%- if node.lazy %} run-lazy-children-loading {%- endif -%}
@@ -114,10 +114,10 @@
 {% endmacro %}
 
 
-{% macro boxed_list(list) %}
+{% macro outcome_box_list(list) %}
   <div>
     {% for element in list %}
-      <div class="white-box">
+      <div class="top-level-box">
         <div class="list-row-box">
           {{ caller(element) }}
           <div class="started-at-block">

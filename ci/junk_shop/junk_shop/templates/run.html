@@ -1,7 +1,7 @@
 {% import "run_macros.html" as run_macros %}
 
 {% extends "layout.html" %}
-{% block title %}{{ run_name }}{% endblock %}
+{% block title %}{{ run_node.run.branch.name }} / {{ run_node.run.platform.name }} / {{ run_name }}{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -11,15 +11,15 @@
 
 {% block contents %}
 
-  <a class="link" href="{{ url_for('branch_list') }}">Branches</a>
-  &nbsp/&nbsp
-  <a class="link" href="{{ url_for('run_list') }}">Runs</a>
+  {{ run_macros.breadcrumbs([
+       ('Branches',  url_for('branch_list')),
+       ('Runs', url_for('run_list')) ]) }}
 
-  <h2>{{ run_node.run.branch.name }} / {{ run_node.run.platform.name }}</h2>
+  <h2>{{ self.title() }}</h2>
 
   <hr>
 
-  <div class="run white-box">
+  <div class="run top-level-box">
     {{ run_macros.run_box(run_node, expand_level=1) }}
   </div>
 

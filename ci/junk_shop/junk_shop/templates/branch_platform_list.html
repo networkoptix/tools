@@ -16,7 +16,7 @@
 
   <hr>
 
-  {% call(element) run_macros.boxed_list(platform_list) %}
+  {% call(element) run_macros.outcome_box_list(platform_list) %}
     <a class="link"
        href="{{ url_for('branch_version_list', branch_name=branch_name, platform_name=element.platform_name) }}">
        {{ element.platform_name }}

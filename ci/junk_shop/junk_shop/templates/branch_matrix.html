@@ -45,7 +45,7 @@
           </td>
           {% for element in row.platform_list %}
             <td>
-              <div class="white-box">
+              <div class="top-level-box">
                 <div>
                   {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
                 </div>

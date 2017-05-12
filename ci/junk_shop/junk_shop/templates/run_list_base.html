@@ -1,4 +1,5 @@
 {% import "run_macros.html" as run_macros %}
+{% import "common_macros.html" as common_macros %}
 
 {% extends "layout.html" %}
 
@@ -7,23 +8,13 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='run.css') }}">
 {% endblock head %}
 
-{% macro paginator(page_count, current_page) %}
-  {% for page in range(1, page_count + 1) %}
-    <a
-       {% if page != current_page %} href="{{ caller(page) }}" {% endif -%}
-       class="page {%- if page == current_page %} current-page {%- endif %}">
-       {{- page -}}
-    </a>
-  {% endfor %}
-{% endmacro %}
-
 {% block contents %}
 
   {% if run_node_list %}
 
     <div>
       <ul>
-        {{ run_macros.run_box_children(run_node_list, 'white-box') }}
+        {{ run_macros.run_box_children(run_node_list, 'top-level-box') }}
       </ul>
     </div>
 

@@ -1,4 +1,5 @@
 {% import "run_macros.html" as run_macros %}
+{% import "common_macros.html" as common_macros %}
 
 {% extends "layout.html" %}
 {% block title %}{{ branch_name }} / {{ platform_name }}{% endblock %}
@@ -11,18 +12,23 @@
 {% block contents %}
 
   {{ run_macros.breadcrumbs([
-    ('Branches',  url_for('branch_list')),
-    (branch_name, url_for('branch_platform_list', branch_name=branch_name))
+       ('Branches',  url_for('branch_list')),
+       (branch_name, url_for('branch_platform_list', branch_name=branch_name))
    ]) }}
 
   <h2>{{ self.title() }}</h2>
   <hr>
 
-  {% call(element) run_macros.boxed_list(version_list) %}
+  {% call(element) run_macros.outcome_box_list(version_list) %}
     <a class="link"
        href="{{ url_for('version_run_list', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">
        {{ element.version }}
     </a>
+  {% endcall %}
+
+  {% call(page) common_macros.paginator(page_count, current_page) %}
+  {{ url_for('branch_version_list', branch_name=branch_name,
+             platform_name=platform_name, page=page) }}
   {% endcall %}
 
 {% endblock contents %}

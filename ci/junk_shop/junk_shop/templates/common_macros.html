@@ -1,0 +1,9 @@
+{% macro paginator(page_count, current_page) %}
+  {% for page in range(1, page_count + 1) %}
+    <a
+       {% if page != current_page %} href="{{ caller(page) }}" {% endif -%}
+       class="page {%- if page == current_page %} current-page {%- endif %}">
+       {{- page -}}
+    </a>
+  {% endfor %}
+{% endmacro %}
