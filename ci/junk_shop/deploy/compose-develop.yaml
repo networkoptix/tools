@@ -1,0 +1,31 @@
+# docker-compose configuration file for junk_shop development
+
+version: '2'
+
+volumes:
+  junk_shop_database:
+
+services:
+
+  junk_shop_web:
+    container_name: junk_shop_web
+    image: junk_shop_web
+    links:
+      - junk_shop_db:database
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - '5000:80'
+    environment:
+      DB_CONFIG: postgres:${POSTGRES_PASSWORD}@database
+
+  junk_shop_db:
+    container_name: junk_shop_db
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD
+    volumes:
+      - junk_shop_database:/var/lib/postgresql/data
