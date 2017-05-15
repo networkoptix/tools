@@ -1,9 +1,11 @@
+import sys
 import os
+import time
 from datetime import datetime, timedelta
 import bz2
 from flask import Flask, request, render_template, make_response, url_for, redirect
 from jinja2 import Markup
-from pony.orm import db_session, desc, select, raw_sql, count, exists, sql_debug
+from pony.orm import db_session, desc, select, raw_sql, count, exists, sql_debug, OperationalError
 from .utils import SimpleNamespace, datetime_utc_now, DbConfig
 from . import models
 
@@ -280,13 +282,17 @@ def branch_platform_version_list(branch_name, platform_name):
                        if run.branch == branch and
                        run.platform == platform).count()
     page_count = (rec_count - 1) / page_size + 1
+    if branch and platform:
+        version_list = load_version_list(page, page_size, branch, platform)
+    else:
+        version_list = []
     return render_template(
         'branch_platform_version_list.html',
         current_page=page,
         page_count=page_count,
         branch_name=branch_name,
         platform_name=platform_name,
-        version_list=load_version_list(page, page_size, branch, platform))
+        version_list=version_list)
 
 
 @app.route('/artifact/<int:artifact_id>')
@@ -329,11 +335,19 @@ def branch_platform_version_run_list(branch_name, platform_name, version):
         run_node_list=run_list)
 
 
+def retry_on_db_error(fn, *args, **kw):
+    while True:
+        try:
+            return fn(*args, **kw)
+        except OperationalError as x:
+            print >>sys.stderr, 'Error connecting to database:', x
+            time.sleep(1)
+
 def init():
     db_config = DbConfig.from_string(os.environ['DB_CONFIG'])
     if 'SQL_DEBUG' in os.environ:
         sql_debug(True)
-    models.db.bind('postgres', host=db_config.host, user=db_config.user, password=db_config.password)
-    models.db.generate_mapping(create_tables=True)
+    retry_on_db_error(models.db.bind, 'postgres', host=db_config.host, user=db_config.user, password=db_config.password)
+    retry_on_db_error(models.db.generate_mapping, create_tables=True)
 
 init()

@@ -19,16 +19,22 @@
   <h2>{{ self.title() }}</h2>
   <hr>
 
-  {% call(element) run_macros.outcome_box_list(version_list) %}
-    <a class="link"
-       href="{{ url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">
-       {{ element.version }}
-    </a>
-  {% endcall %}
+  {% if not version_list %}
+    <p>No runs executed yet</p>
+  {% else %}
 
-  {% call(page) common_macros.paginator(page_count, current_page) %}
-  {{ url_for('branch_platform_version_list', branch_name=branch_name,
-             platform_name=platform_name, page=page) }}
-  {% endcall %}
+    {% call(element) run_macros.outcome_box_list(version_list) %}
+      <a class="link"
+         href="{{ url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">
+         {{ element.version }}
+      </a>
+    {% endcall %}
+
+    {% call(page) common_macros.paginator(page_count, current_page) %}
+      {{ url_for('branch_platform_version_list', branch_name=branch_name,
+      platform_name=platform_name, page=page) }}
+    {% endcall %}
+
+  {% endif %}
 
 {% endblock contents %}
