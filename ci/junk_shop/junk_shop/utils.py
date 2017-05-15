@@ -37,13 +37,14 @@ class DbConfig(object):
 
     @classmethod
     def from_string(cls, value):
-        mo = re.match(r'([^:]+):([^@]+)@(.+)', value)
-        if not mo or len(mo.groups()) != 3:
-            raise ArgumentTypeError('Expected postgres database credentials in form "user:password@host", but got: %r' % value)
-        user, password, host = mo.groups()
-        return cls(host, user, password)
+        mo = re.match(r'^([^:]+):([^@]+)@([^:]+)(:(\d+))?$', value)
+        if not mo:
+            raise ArgumentTypeError('Expected postgres database credentials in form "user:password@host[:port]", but got: %r' % value)
+        user, password, host, _, port = mo.groups()
+        return cls(host, user, password, port)
 
-    def __init__(self, host, user, password):
+    def __init__(self, host, user, password, port):
         self.host = host
         self.user = user
         self.password = password
+        self.port = port

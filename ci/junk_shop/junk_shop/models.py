@@ -52,6 +52,7 @@ class Run(db.Entity):
     release = Optional(str)  # beta, release
     kind = Optional(str)  # release, debug
     platform = Optional(Platform)
+    vc_changeset_id = Optional(str)  # version control changeset id of this build (hg id --debug)
     children = Set('Run')
 
 class Artifact(db.Entity):

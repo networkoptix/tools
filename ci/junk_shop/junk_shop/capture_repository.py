@@ -1,14 +1,22 @@
+import os
 from argparse import ArgumentTypeError
 import bz2
-from pony.orm import commit, select, raw_sql
+from pony.orm import commit, select, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now
 from . import models
 
 
 class Parameters(object):
 
-    example = 'branch=dev_3.0.0,version=3.0.10,release=beta,kind=debug,platform=linux-64'
-    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform']
+    example = ','.join([
+        'branch=dev_3.0.0'
+        'version=3.0.10',
+        'release=beta',
+        'kind=debug',
+        'platform=linux-64',
+        'vc_changeset_id=6f305e61fc95ecf3caf2fcc6dcdf51b18811e12e',
+        ])
+    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -32,6 +40,7 @@ class Parameters(object):
         self.release = None
         self.kind = None
         self.platform = None
+        self.vc_changeset_id = None
 
 
 class ArtifactType(object):
@@ -52,7 +61,10 @@ class DbCaptureRepository(object):
             log=ArtifactType('log', 'text/plain'),
             core=ArtifactType('core', 'application/octet-stream'),
             )
-        models.db.bind('postgres', host=db_config.host, user=db_config.user, password=db_config.password)
+        if 'SQL_DEBUG' in os.environ:
+            sql_debug(True)
+        models.db.bind('postgres', host=db_config.host, user=db_config.user,
+                       password=db_config.password, port=db_config.port)
         models.db.generate_mapping(create_tables=True)
         self.test_run = {}  # test path -> models.Run
 
