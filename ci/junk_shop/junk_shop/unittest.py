@@ -240,8 +240,8 @@ class TestProcess(object):
 
     def _match_gtest_message_to_line(self, line):
         if self._current_test:
-            mo = re.match(r'^\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
-                          % (LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
+            mo = re.match(r'^(%s)?\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
+                          % (LOG_PATTERN, LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
             if mo:
                 # handle log/output lines interleaved with gtest output:
                 if mo.group(2):
