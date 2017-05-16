@@ -35,6 +35,7 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
             run, 'exit code', repository.artifact_type.output, exit_code_message, is_error=not passed)
     run.outcome = status2outcome(passed)
     print 'Created %s run %s' % (run.outcome, run.path)
+    return passed
 
 
 def main():
@@ -49,7 +50,9 @@ def main():
     args = parser.parse_args()
     try:
         repository = DbCaptureRepository(args.db_config, args.parameters)
-        store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
+        passed = store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
+        if not passed:
+            sys.exit(2)
     except RuntimeError as x:
         print x
         sys.exit(1)
