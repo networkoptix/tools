@@ -244,11 +244,11 @@ class TestProcess(object):
                           % (LOG_PATTERN, LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
             if mo:
                 # handle log/output lines interleaved with gtest output:
-                if mo.group(2):
-                    self._levels[-1].add_stdout_line(mo.group(2))
                 if mo.group(3):
                     self._levels[-1].add_stdout_line(mo.group(3))
-                self._process_test_stop(line, mo.group(1), mo.group(5))
+                if mo.group(4):
+                    self._levels[-1].add_stdout_line(mo.group(4))
+                self._process_test_stop(line, mo.group(2), mo.group(6))
                 return True
         elif self._current_suite:
             mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self._current_suite, line)
