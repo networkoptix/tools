@@ -4,6 +4,8 @@ from time import sleep
 
 default_timeout = 60
 
+#http://localhost:7001/api/createEvent?source=gdm&metadata={%22cameraRefs%22:[%22ed93120e-0f50-3cdf-39c8-dd52a640688c%22]}
+
 def send_request():
     try:
         r = requests.get('http://localhost:7001/api/createEvent?caption=Test%20Caption&description=Test%20Description', auth=('admin', 'admin'), timeout=2)
