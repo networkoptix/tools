@@ -167,10 +167,14 @@ class DbCaptureRepository(object):
         #print '----- added artifact %s for run %s' % (artifact.type, run.path)
 
     def set_test_outcome(self, parent_run):
-        outcome = 'passed'
+        outcome = None
         for run in self._select_run_children(parent_run):
             if run.outcome in [None, 'incomplete']:
                 self.set_test_outcome(run)
-            if run.outcome != 'passed':
-                outcome = 'failed'
-        parent_run.outcome = outcome
+            if run.outcome == 'failed':
+                outcome = run.outcome
+            elif not outcome and run.outcome == 'passed':
+                outcome = run.outcome
+            elif not outcome and run.outcome != 'skipped':
+                outcome = run.outcome
+        parent_run.outcome = outcome or 'skipped'

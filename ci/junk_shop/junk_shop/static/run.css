@@ -5,6 +5,9 @@
 .outcome-failed.run-expandable {
 	border-bottom: 1px dotted #C22626;
 }
+.outcome-failed.run-expandable {
+	border-bottom: 1px dotted #C22626;
+}
 .outcome-incomplete.run-expandable {
 	border-bottom: 1px dotted #888800;
 }
@@ -16,7 +19,7 @@ a.run-expanded::before {
 	content: "\2212";  // minus sign
 }
 
-.run-expandable:not(.outcome-failed):not(.outcome-passed):not(.outcome-incomplete) {
+.run-expandable:not(.outcome-failed):not(.outcome-passed):not(.outcome-incomplete):not(.outcome-skipped) {
 	color: #2592C3;
 	border-bottom: 1px dotted #2592C3;
 	text-decoration: none;

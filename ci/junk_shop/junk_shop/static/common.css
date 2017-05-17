@@ -58,11 +58,20 @@ a.outcome-passed:hover:not(.outcome-leaf) {
 .failed, .outcome-failed, .outcome-failed:visited {
 	color: #C22626;
 }
+.skipped, .outcome-skipped, .outcome-skipped:visited {
+	color: grey;
+}
 .outcome-failed {
 	background-color: #FFDDDD;
 }
 a.outcome-failed:hover:not(.outcome-leaf) {
 	background-color: #FAA;
+}
+.outcome-skipped {
+	background-color: #E8E8E8;
+}
+a.outcome-skipped:hover:not(.outcome-leaf) {
+	background-color: #CCC;
 }
 .outcome-not-run {
 	background-color: #E8E8E8;

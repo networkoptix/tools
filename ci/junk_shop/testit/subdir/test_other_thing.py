@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.fixture
 def some_fixture():
     print 'some fixture in other test'
@@ -10,3 +11,7 @@ def test_1(some_fixture):
 
 def test_2(some_fixture):
     print 'test 2 from other thing'
+
+@pytest.mark.skip
+def test_3():
+    print 'skipped test'
