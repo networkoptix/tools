@@ -98,6 +98,12 @@ done
 
 MODULES=()
 MODULE_BIN_PATH=()
+
+if [[ ! "$VERSION" < "3.1" ]]; then
+    MODULES+=(nx_kit)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_kit.so)
+fi
+
 if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/nx_utils common_libs/nx_fusion)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_utils.so lib/$CONFIGURATION/libnx_fusion.so)
@@ -118,8 +124,13 @@ MODULES+=(appserver2)
 MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so)
 
 if [[ ! "$VERSION" < "3.0" ]]; then
-    MODULES+=(nx_cloud/libcloud_db nx_cloud/libtraffic_relay)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so lib/$CONFIGURATION/libtraffic_relay.so)
+    MODULES+=(nx_cloud/libcloud_db)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcloud_db.so)
+fi
+
+if [[ ! "$VERSION" < "3.1" ]]; then
+    MODULES+=(nx_cloud/libtraffic_relay)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libtraffic_relay.so)
 fi
 
 if [ "$CONF_PARAM_SET" == 1 ]; then
