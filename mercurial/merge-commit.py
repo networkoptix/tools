@@ -37,10 +37,10 @@ def merge_commit(ui, repo, *pats, **opts):
 
     match = revset.match(ui, "(::{0} - ::{1})".format(other.branch(), branch), repo)
     empty = True
-    for rev in match(repo, range(len(repo))):
+    for rev in match(repo, set(range(len(repo)))):
         empty = False
         description = repo[rev].description()
-        if description.startswith("##"):
+        if description.startswith("#") or description.startswith("Merge:"):
             continue
         message += description
         message += "\n"
