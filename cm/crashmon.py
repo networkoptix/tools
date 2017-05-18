@@ -144,7 +144,7 @@ def remove_old_versions(crashes):
 
 def remove_developers_crashes(crashes):
     return filter(
-        lambda v: get_vers_bn(v)[1] != 0, crashes)
+        lambda crash: crash['buildNumber'] != 0, crashes)
 
 def get_crashes(crtype, mark):
     '''
@@ -175,6 +175,7 @@ def get_crashes(crtype, mark):
             m = rx.match(cp[1])
             crash["version"] = [int(n) for n in m.group(0).split('.')[:4]] if m else None
             crash["isHotfix"] = isHotfix(crash["version"])
+            crash["majorVersion"], crash["buildNumber"] = get_major_version_and_build_number(crash)
 
         crashes = remove_developers_crashes(crashes)
 
@@ -287,10 +288,9 @@ def email_newcrash(crash, calls, jira_error=None):
         )
         msg['Subject'] = "Failed to create issue for a new crash!"
     else:
-        vers, bn = get_vers_bn(crash)
         where = " (%s, version: %s, build number: %s)" % \
                 (crash['component'] if crash['component'] else '',
-                 vers, bn)
+                 crash['majorVersion'], crash['buildNumber'])
         title = "A crash with a new trace path found%s.\n\n" % where
         msg['Subject'] = "Crash with a new trace path found!%s" % where
     text = MIMEText(
@@ -306,28 +306,49 @@ def email_newcrash(crash, calls, jira_error=None):
     msg.attach(att)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
-
 def email_cant_attach(crash, issue, url, response, dump_path):
-    print "DEBUG: email_cant_attach: %s, %s, %s, %s" % (issue, url, response, dump_url(dump_path))
-    pass # TODO!!!
+    msg = MIMEMultipart()
+    msg['Subject'] = "Can't attach dump to %s" % issue
+    text = MIMEText(
+        "URL: %s\n\n"
+        "Dump path: %s"
+        "Response:\n%s\n\n"
+         % (url, dump_url(dump_path), response))
+    msg.attach(text)
+    email_send(MAIL_FROM, MAIL_TO, msg)
 
 
 def email_priority_fail(key, issue, pold, pnew, error):
-    print "DEBUG: email_priority_fail: %s, %s => %s, %s" % (issue, pold, pnew, error)
-    pass # TODO!!!
+    msg = MIMEMultipart()
+    msg['Subject'] = "Can't change priority for %s" % issue
+    text = MIMEText(
+        "From %s to %s\n"
+        "Error:\n%s\n\n"
+         % (pold, pnew, error))
+    msg.attach(text)
+    email_send(MAIL_FROM, MAIL_TO, msg)
 
+def email_cant_update_version(crash, issue, error):
+    msg = MIMEMultipart()
+    msg['Subject'] = "Can't update affect version for %s" % issue
+    text = MIMEText(
+        "Major version: %s, hot fix: %s\n"
+        "Error:\n%s\n\n" %
+        (crash['majorVersion'], crash['isHotfix'], error))
+    msg.attach(text)
+    email_send(MAIL_FROM, MAIL_TO, msg)
 
-def get_vers_bn(crash):
+def get_major_version_and_build_number(crash):
     version = crash.get('version')
-    vers = 'unknown'
-    bn = 0
+    major_version = 'unknown'
+    build_number = 0
     if version:
         if crash['version'] > [2,5]:
-            vers = '.'.join(map(str, crash['version'][0:2]))
+            major_version = '.'.join(map(str, crash['version'][0:2]))
         else:
-            vers = '.'.join(map(str, crash['version'][0:3]))
-        bn = crash['version'][-1]
-    return (vers, bn)
+            major_version = '.'.join(map(str, crash['version'][0:3]))
+        build_number = crash['version'][-1]
+    return (major_version, build_number)
 
 def fault_case2str(dumps, path, hash, issue=None):
     buf = []
@@ -548,6 +569,8 @@ class CrashMonitor(object):
                                                 self._known.set_issue(key, (crashinfo.issue, i))
                                             elif rc is not None:
                                                 print "No issue %s found in Jira, priority change ignored" % crashinfo.issue
+                                        # 3. Check affect version and change it if necessary
+                                        self.check_and_update_affect_version(crashinfo.issue, crash)
                                     else:
                                         print "Ignore already closed issue %s" % crashinfo.issue
                                 else:
@@ -595,10 +618,11 @@ class CrashMonitor(object):
         else:
             name = "Crash detected in %s: %s" % (crash['component'], crash['hash'])
 
-        vers, bn = get_vers_bn(crash)
-
         issue_key, url = nxjira.create_issue(
-            name, desc, ISSUE_LEVEL[priority-1][1], component, team, vers, bn, crash["isHotfix"])
+            name, desc, ISSUE_LEVEL[priority-1][1],
+            component, team, crash['majorVersion'],
+            crash['buildNumber'], crash["isHotfix"])
+
         if len(dumps) > MAX_ATTACHMENTS:
             del dumps[MAX_ATTACHMENTS:]
         is_first = True
@@ -664,6 +688,11 @@ class CrashMonitor(object):
                         return True
             return False
         return True
+
+    def check_and_update_affect_version(self, issue_data, crash):
+        result = nxjira.update_affect_version(issue_data, crash['majorVersion'], crash['isHotfix'])
+        if result:
+            email_cant_update_version(crash, issue_data, result)
 
     def run(self):
         """ The main cyrcle """

@@ -96,6 +96,11 @@ class JiraReply(object):
     def is_closed(self):
         return self.ok and self.data['fields']['status']["name"] == "Closed"
 
+    def affect_versions(self):
+        if self.ok:
+            return [v['name'] for v in self.data['fields']['versions']]
+        return []
+
     def smallest_fixversion(self):
         if self.ok:
             versions = sorted(filter(None,
@@ -132,7 +137,6 @@ def jirareq(op, query, data=None, what='issue'):
         if op == 'GET':
             res = requests.get(url, auth=AUTH)
         elif op == 'DELETE':
-            # print url
             res = requests.delete(url, auth=AUTH)
         else:
             jdata = json.dumps(data)
@@ -164,19 +168,20 @@ def browse_url(issue):
     return BROWSE + issue
 
 
-def create_issue(name, desc, priority="Medium", component=None, team=None, version=None, build=None, is_hot_fix = False):
+def create_issue(name, desc, priority="Medium", component=None,
+                 team=None, major_version=None, build=None, is_hot_fix = False):
     issue = copy.deepcopy(issue_data)
     issue['fields']['summary'] = name
     issue['fields']['description'] = desc
     issue['fields']['priority']['name'] = priority
     versions = get_versions()
-    if version:
-        if version in versions:
-            issue['fields']['versions'].append({'name': version})
-        hot_fix_version = version + '_hotfix'
+    if major_version:
+        if major_version in versions:
+            issue['fields']['versions'].append({'name': major_version})
+        hot_fix_version = major_version + '_hotfix'
         if is_hot_fix and hot_fix_version in versions:
             issue['fields']['versions'].append({'name': hot_fix_version})
-        if version != FIX_VERSION:
+        if major_version != FIX_VERSION:
             issue['fields']['fixVersions'].append({'name': HOT_FIX_VERSION })
     if build:
         issue['fields']['customfield_10800'] = str(build)
@@ -239,6 +244,26 @@ def create_web_link(issue, name, url):
     except requests.exceptions.RequestException as e:
         print "Error creating weblink '%s' to the JIRA issue %s: '%s'" % (url, issue, str(e))
         return (500, "JIRA '%s' request exception" % query, str(e))
+    return None
+
+def update_affect_version(issue, major_version, is_hot_fix):
+    versions = get_versions()
+    _, issue_data = get_issue(issue)
+    new_versions = []
+    if major_version in versions and major_version not in issue_data.affect_versions():
+        new_versions.append({"add": {'name': major_version}})
+    hot_fix_version = major_version + '_hotfix'
+    if is_hot_fix and hot_fix_version in versions and hot_fix_version not in issue_data.affect_versions():
+        new_versions.append({"add": {'name': hot_fix_version}})
+    if new_versions:
+        try:
+            result =  jirareq('PUT', issue, data={"update": {"versions": new_versions}})
+            if result.code < 200 or result.code > 299 :
+                print "Error updating affect versions for JIRA issue '%s': %s, %s, %s" % (issue,  result.code, result.reason, result.data)
+                return (result.code, result.reason, result.data)
+        except requests.exceptions.RequestException as e:
+            print "Error updating affect versions for JIRA issue '%s': '%s'" % (issue, str(e))
+            return (500, "JIRA '%s' request exception" % query, str(e))
     return None
 
 def get_issue(key):
