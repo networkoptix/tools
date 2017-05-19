@@ -161,7 +161,13 @@ if [ "$CONF_PARAM_SET" == 1 ]; then
     if [ -z "$DO_EXT_DEBUG" ]; then
         DO_EXT_DEBUG=1
     fi
-    ARCH=arm-$BOX
+    if [ "$BOX" = "android" ]; then
+        ARCH=arm
+        DO_EXT_DEBUG=0
+        STRIP=0
+    else
+        ARCH=arm-$BOX
+    fi
     CALC_MD5=1
 elif [ "$CONF_PARAM_SET" == 0 ]; then
     #x64
@@ -243,8 +249,8 @@ if [ "$WITH_TEST" == 1 ]; then
             MODULES+=(nx_cloud/libconnection_mediator)
             MODULE_BIN_PATH+=(lib/$CONFIGURATION/libconnection_mediator.so)
         fi
-        MODULES+=(unit_tests/nx_network_ut unit_tests/cloud_connectivity_ut unit_tests/utils_ut unit_tests/nx_fusion_ut)
-        MODULE_BIN_PATH+=(bin/$CONFIGURATION/nx_network_ut bin/$CONFIGURATION/cloud_connectivity_ut bin/$CONFIGURATION/utils_ut bin/$CONFIGURATION/nx_fusion_ut)
+        MODULES+=(unit_tests/nx_network_ut unit_tests/cloud_connectivity_ut nx_cloud/tests/cloud_connect_integration_tests unit_tests/utils_ut unit_tests/nx_fusion_ut)
+        MODULE_BIN_PATH+=(bin/$CONFIGURATION/nx_network_ut bin/$CONFIGURATION/cloud_connectivity_ut bin/$CONFIGURATION/cloud_connect_integration_tests bin/$CONFIGURATION/utils_ut bin/$CONFIGURATION/nx_fusion_ut)
         if [ $WITH_MSERVER -eq 1 ]; then
             MODULES+=(unit_tests/mediaserver_core_ut)
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/mediaserver_core_ut)
