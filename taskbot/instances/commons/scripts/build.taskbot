@@ -12,7 +12,7 @@ cd "$TASKBOT_VAR"/nx_vms
 
 # + Incremental build
 set +o errexit
-mvn package -e -T4 -Dbuild.configuration=release -Dclean=false $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
+mvn package -e -Dbuild.configuration=release -Dclean=false $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
 RC=$?
 if [ $RC -eq 0 ]; then
     exit 0
@@ -26,4 +26,4 @@ hg purge . --all --print
 set -o errexit
 
 #+ Build from stratch
-mvn package -e -T4 -Dbuild.configuration=release $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
+mvn package -e -Dbuild.configuration=release $TASKBOT_NX_VMS_BUILD_FLAGS 2>&1
