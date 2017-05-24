@@ -21,7 +21,6 @@ config = {
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
     'Mikhail Uskov': 'muskov@networkoptix.com'},
   'environment' : {
     'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',

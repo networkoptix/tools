@@ -20,8 +20,7 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Artem Nikitin': 'anikitin@networkoptix.com',
-    'Mikhail Uskov': 'muskov@networkoptix.com',
-    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com'},
+    'Mikhail Uskov': 'muskov@networkoptix.com'},
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
