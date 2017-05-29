@@ -99,6 +99,14 @@ class JiraReply(object):
     def is_closed(self):
         return self.ok and self.data['fields']['status']["name"] == "Closed"
 
+    def changeset(self):
+        if self.ok:
+            try:
+                return int(self.data['fields']['customfield_10800'])
+            except:
+                return 0
+        return 0
+
     def affect_versions(self):
         if self.ok:
             return [v['name'] for v in self.data['fields']['versions']]
@@ -111,7 +119,13 @@ class JiraReply(object):
             return versions[0] if versions else None
         return None
 
-    def reopen(self):
+    def __update_build_number(self, build_number):
+        put_result = jirareq('PUT', self.data['key'], {"fields": { "customfield_10800": build_number}})
+        if put_result.code not in (CODE_NO_CONTENT, CODE_OK):
+            return False
+        return True
+
+    def reopen(self, build_number):
         if self.ok and self.is_closed():
             reply = jirareq("POST", self.data['key'] + '/transitions', data=transition_data["Reopen"])
             if reply.code != CODE_NO_CONTENT:
@@ -123,7 +137,7 @@ class JiraReply(object):
             print "ERROR: issue %s isn't closed, so can't reopen id" % (self.data['key'],)
         else:
             print "ERROR: JiraReply.reopen() called when self.ok isn't True"
-        return False
+        return self.__update_build_number(build_number)
 
 
 def get_versions():

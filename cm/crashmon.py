@@ -685,8 +685,9 @@ class CrashMonitor(object):
                     print "Issue %s has Future version" % (issue_data.data['key'],)
                     return False
                 if crashed_version is None or crashed_version > smallest_version or \
-                       (crashed_version == smallest_version and crash['isHotfix']):
-                    if issue_data.reopen():
+                       (crashed_version == smallest_version and crash['isHotfix'] and \
+                        crash['buildNumber'] > issue_data.changeset()):
+                    if issue_data.reopen(crash['buildNumber']):
                         print "Issue %s reopened" % (issue_data.data['key'],)
                         return True
             return False
