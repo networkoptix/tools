@@ -88,7 +88,7 @@ class JiraReply(object):
         return self.data['fields']['resolution'] or 'Unresolved'
 
     def is_done(self):
-        return self.ok and data['fields']['status']['statusCategory']["name"] != "To Do"
+        return self.ok and self.data['fields']['status']['statusCategory']["name"] != "To Do"
 
     def is_rejected(self):
         return self.ok and self.resolution() == "Rejected"
