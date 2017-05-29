@@ -298,10 +298,10 @@ def email_newcrash(crash, calls, jira_error=None):
         "Hash: %s\n"
         "URL: %s\n\n"
         "Call stask (named functions only):\n%s\n\n"
-         % (title, crash['hash'], crash['url'], calls)
-    )
+         % (title, crash['hash'], crash['url'], calls),
+        "plain", "utf-8")
     msg.attach(text)
-    att = MIMEText(crash['dump'])
+    att = MIMEText(crash['dump'], "plain", "utf-8")
     att.add_header('Content-Disposition', 'attachment', filename=report_name(crash['path']).lstrip('/'))
     msg.attach(att)
     email_send(MAIL_FROM, MAIL_TO, msg)
@@ -313,7 +313,8 @@ def email_cant_attach(crash, issue, url, response, dump_path):
         "URL: %s\n\n"
         "Dump path: %s"
         "Response:\n%s\n\n"
-         % (url, dump_url(dump_path), response))
+         % (url, dump_url(dump_path), response),
+        "plain", "utf-8")
     msg.attach(text)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
@@ -324,7 +325,8 @@ def email_priority_fail(key, issue, pold, pnew, error):
     text = MIMEText(
         "From %s to %s\n"
         "Error:\n%s\n\n"
-         % (pold, pnew, error))
+         % (pold, pnew, error),
+        "plain", "utf-8")
     msg.attach(text)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
@@ -334,7 +336,8 @@ def email_cant_update_version(crash, issue, error):
     text = MIMEText(
         "Major version: %s, hot fix: %s\n"
         "Error:\n%s\n\n" %
-        (crash['majorVersion'], crash['isHotfix'], error))
+        (crash['majorVersion'], crash['isHotfix'], error),
+        "plain", "utf-8")
     msg.attach(text)
     email_send(MAIL_FROM, MAIL_TO, msg)
 
@@ -381,7 +384,7 @@ def email_summary(faults, mintime, maxtime, known_issues):
         buf.append(fault_case2str(*unknown))
     if buf:
         #print "DEBUG:\n%s" % ("\n".join(buf),)
-        msg = MIMEText("\n".join(buf))
+        msg = MIMEText("\n".join(buf), "plain", "utf-8")
         if re.search(r"\.\d\d\d\d\d\d$", mintime):
             mintime = mintime[:-7]
         if re.search(r"\.\d\d\d\d\d\d$", maxtime):

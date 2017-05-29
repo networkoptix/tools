@@ -84,14 +84,17 @@ class JiraReply(object):
     def mk_error(self):
         return JiraError(self.code, self.reason, self.data)
 
+    def resolution(self):
+        return self.data['fields']['resolution'] or 'Unresolved'
+
     def is_done(self):
-        return self.ok and self.data['fields']['status']['statusCategory']["name"] != "To Do"
+        return self.ok and data['fields']['status']['statusCategory']["name"] != "To Do"
 
     def is_rejected(self):
-        return self.ok and self.data['fields']['resolution']['name'] == "Rejected"
+        return self.ok and self.resolution() == "Rejected"
 
     def is_duplicate(self):
-        return self.ok and self.data['fields']['resolution']['name'] == "Duplicate"
+        return self.ok and self.resolution() == "Duplicate"
 
     def is_closed(self):
         return self.ok and self.data['fields']['status']["name"] == "Closed"
