@@ -195,7 +195,7 @@ def upload_update(server, update):
 
                     if offset == -3:
                         print("Not enought free space on server.")
-                    else:
+                    elif offset == -2:
                         print("Unknown error occured on server.")
 
                     return False
