@@ -252,7 +252,7 @@ if __name__ == '__main__':
     parser.add_argument("--install", help="Send install command to servers.", action="store_true")
     parser.add_argument("--one-server", help="Upload update to the specified server only.", action="store_true")
     parser.add_argument("--ignore-offline", help="Ignore offline servers.", action="store_true")
-    parser.add_argument("--ignore", help="Ignore the specified servers.", nargs="+", metavar="IDs")
+    parser.add_argument("--ignore", help="Ignore the specified servers.", nargs="+", metavar="IDs", default=[])
 
     args = parser.parse_args()
 
