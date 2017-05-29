@@ -174,7 +174,7 @@ def upload_update(server, update):
         file_size = uf.tell()
 
         while True:
-            print("\r{}%".format(int(offset * 100 / file_size)), end='')
+            print("\r{}%".format(offset * 100 // file_size), end='')
             uf.seek(offset)
             data = uf.read(CHUNK_SIZE)
 
@@ -189,6 +189,16 @@ def upload_update(server, update):
                     return False
 
                 offset = int(json.loads(r.text)["reply"]["offset"])
+
+                if offset < 0:
+                    print()
+
+                    if offset == -3:
+                        print("Not enought free space on server.")
+                    else:
+                        print("Unknown error occured on server.")
+
+                    return False
 
             except(KeyboardInterrupt):
                 return False
