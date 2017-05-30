@@ -85,7 +85,9 @@ class JiraReply(object):
         return JiraError(self.code, self.reason, self.data)
 
     def resolution(self):
-        return self.data['fields']['resolution'] or 'Unresolved'
+        if self.data['fields']['resolution']:
+            return self.data['fields']['resolution']['name']
+        return 'Unresolved'
 
     def is_done(self):
         return self.ok and self.data['fields']['status']['statusCategory']["name"] != "To Do"
