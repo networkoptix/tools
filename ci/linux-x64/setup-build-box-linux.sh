@@ -47,16 +47,14 @@ apt-get install -y --no-install-recommends \
     libstdc++6-4.7-dev \
     python-virtualenv \
     libldap2-dev \
-	python-software-properties \
-	g++-4.8 \
-	rsync \
-	mercurial \
-	fakeroot \
-	python-demjson \
-	python-opencv \
-	libpq-dev \
-	python-dev \
-	$JUNK_SHOP_REQUIREMENTS
+    python-software-properties \
+    g++-4.8 \
+    rsync \
+    mercurial \
+    fakeroot \
+    python-demjson \
+    python-opencv \
+    $JUNK_SHOP_REQUIREMENTS
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
