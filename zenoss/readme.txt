@@ -1,7 +1,7 @@
 Based on  http://wiki.zenoss.org/Prepare_Remote_Device
 
 === Start Zenoss docker container ===
-1. ssh-keygen -b 2048 -t dsa -f /tmp/zenoss -q -N ""
+1. ssh-keygen -t dsa -f ./zenoss_dsa -q -N ""
 2. docker build -t zenoss .
 3. docker run -p 1080:80 -d zenoss:latest
 NOTE. The first run of the container may take a long time due to zenpack procedure.
@@ -37,5 +37,5 @@ Configuration Properties:
    su - zenoss
    cat zenoss_dsa.pub >> ~/.ssh/authorized_keys
 
-6. Add device through Zenoss GUI. 
+6. Add device through Zenoss GUI.
 
