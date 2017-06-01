@@ -39,7 +39,7 @@ config = {
     'TASKBOT_NX_VMS_REPO': 'ssh://hg@hdw.mx/nx_vms',
     'TASKBOT_DEVTOOLS_REPO': 'ssh://hg@hdw.mx/devtools',
     'TASKBOT_UNIT_TESTS': 'all',
-    'TASKBOT_STORE_ARTEFACTS': 'true',
+#    'TASKBOT_STORE_ARTEFACTS': 'true',
     'TASKBOT_FUNC_TESTS_OLD': 'true',
     'TASKBOT_NET_BASE': '120',
     'TASKBOT_CAMERA_ADDRESS': '10.1.5.35',
