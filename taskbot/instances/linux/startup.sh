@@ -3,7 +3,7 @@
 #export TASKBOT_DEBUG_MODE=1
 cd $HOME/taskbot/devtools/taskbot/instances/linux
 
-. $HOME/.bash_profile
+. $HOME/.bashrc
 
 screen -wipe
 screen -dmS taskbot -t main bash
