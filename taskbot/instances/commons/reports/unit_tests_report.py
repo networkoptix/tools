@@ -47,13 +47,23 @@ def get_diff(current, prev):
       (not prev_info and info.failed))
   return passed, failed
 
-def get_failed_text(tests):
+def get_failed_text(tests, prev):
   if tests:
     buf = "\n\nFailed tests:"
     for name, info in tests.iteritems():
+      prev_info = prev.get(name)
       buf+="\n  %s" % name
+      prev_info = prev.get(name)
+      if prev_info and prev_info.failed:
+        buf+=""" *NEW*"""
       if info.testcases:
-        fails = map(lambda x: x[0], get_failed_cases(info))
+        def case_to_text((case_name, case_info)):
+          if prev_info:
+            prev_case = prev_info.testcases.get(case_name)
+            if prev_case and prev_case.status == PASS_STATUS:
+              return """%s *NEW*""" % case_name
+          return case_name
+        fails = map(case_to_text, get_failed_cases(info))
         fails.sort()
         buf+="\n    " + "\n    ".join(fails)
     return buf
@@ -338,13 +348,13 @@ class UTReport(Report):
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "Fails detected in the unit-tests.%s" %
-        get_failed_text(failed_tests),
+        get_failed_text(failed_tests, unit_tests_prev),
         notify_filter = check_commit)
     elif cores_count:
       EmailNotify.notify(
         self, prev_run, "unit-tests failed",
         "%d core(s) detected after the unit-tests.%s" % \
-        (cores_count, get_failed_text(failed_tests)),
+        (cores_count, get_failed_text(failed_tests, unit_tests_prev)),
         notify_filter = check_commit)
 
     return 0
