@@ -15,6 +15,7 @@ from MTValue import MTFlag, MTValue, MTBuffer
 from Shutdown import shutdown
 from MySQLDB import MySQLDB
 from Utils import *
+from ProcessLock import get_lock
 
 
 CMD_HEADER_REGEX="^\s*#\s*(%s{1,2})(\s*!\s*(timeout)\s*=)?\s*(.*\S)\s*$" % re.escape('+')
@@ -94,13 +95,13 @@ class TimeOut:
     return self.__check_select(selected) or \
       self.__check_run(command_timeout)
 
-# Strict output by max size
-class StrictOutput:
+# Truncate output by max size
+class TruncateOutput:
 
   max_output_size = None
 
   @classmethod
-  def strict(cls, buf):
+  def truncate(cls, buf):
     if len(buf) > cls.max_output_size:
       return buf[0:cls.max_output_size]  + \
         "WARNING: stored only last %s"\
@@ -563,6 +564,9 @@ def main():
                     help="List of the environment variables, " \
                     "passed into the script.")
 
+  parser.add_option("-l", "--process-lock",
+                    help="Allow only one instance of the process with corresponding lock")
+
 
   (options, args) = parser.parse_args()
 
@@ -571,6 +575,11 @@ def main():
     print >> sys.stderr, "%s invalid args: '%s'" % (sys.argv[0], args)
     parser.print_help()
     exit(2)
+
+  if options.process_lock and not get_lock(options.process_lock):
+    print >> sys.stderr, "%s another process locked the '%s'" % (
+     sys.argv[0], options.process_lock)
+    exit(1)
     
   config = args[0]
 
@@ -580,7 +589,7 @@ def main():
   config = read_config(config)
   Compressor.gzip_threshold = config.get('gzip_threshold', 0)
   Compressor.gzip_ratio = config.get('gzip_ratio', 0)
-  StrictOutput.max_output_size = config.get('max_output_size', 0)
+  TruncateOutput.max_output_size = config.get('max_output_size', 0)
     
   database = MySQLDB(config.get('db_config', None))
  

@@ -20,7 +20,7 @@ def add_jira_link(src):
     r'<a href="' + JIRA_HREF + r'\1">\1</a>', src)
 
 MAX_WIDTH = 25
-def strict_message(msg):
+def truncate_message(msg):
   if len(msg) > MAX_WIDTH:
     return msg[:MAX_WIDTH-3] + '...'
   return msg
@@ -50,7 +50,7 @@ class UpdateReport(Report):
         for c in commits:
           history+="<tr><td>%s</td>\n" % c.author
           history+="<td><a href=\"%s\">%s</a></td>\n" % (c.ui_rev, c.repo.name)
-          history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(strict_message(c.description)))
+          history+="<td>%s</td></tr>\n" % add_jira_link(cgi.escape(truncate_message(c.description)))
     history += "</table>"
 
     print "Add update report:\n%s" % history

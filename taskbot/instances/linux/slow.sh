@@ -35,7 +35,8 @@ while true; do
       $TASKBOT \
         --description "NX VMS slow tests ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
         $TASKBOT_CONFIG \
-        slow.taskbot
+        slow.taskbot \
+        --process-lock 'functional_tests'
     fi
 
     sleep 60
