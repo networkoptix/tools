@@ -10,7 +10,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${CORES_ARG="-j12"}
-: ${MAKE_TOOL="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
+: ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="ubuntu"}
@@ -498,7 +498,7 @@ main()
             mkdir -p "$CMAKE_BUILD_DIR"
             nx_pushd "$CMAKE_BUILD_DIR"
 
-            cmake "$@" -G$MAKE_TOOL \
+            cmake "$@" -G$CMAKE_GEN \
                 -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
 
             local RESULT=$?
@@ -511,7 +511,7 @@ main()
             mkdir -p "$CMAKE_BUILD_DIR"
             nx_pushd "$CMAKE_BUILD_DIR"
 
-            ${MAKE_TOOL,,} "$CORES_ARG" "$@"
+            ${CMAKE_GEN,,} "$CORES_ARG" "$@"
 
             local RESULT=$?
             nx_popd
