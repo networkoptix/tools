@@ -22,10 +22,9 @@ public final class CodeToXmlExecutor
         final File connectionFactoryCppFile = Utils.insertSuffix(
             new File(vmsPath + CONNECTION_FACTORY_CPP), sourceFileExtraSuffix);
 
-        System.out.println("Parsing Apidoc in C++ and inserting to XML.");
-        System.out.println("Input files:");
-        System.out.println("    " + connectionFactoryCppFile);
-        System.out.println("    " + templateApiXmlFile);
+        System.out.println("apidoctool: parsing apidoc in C++ and inserting into XML");
+        System.out.println("    Input: " + connectionFactoryCppFile);
+        System.out.println("    Input: " + templateApiXmlFile);
 
         // NOTE: This code can be easily rewritten to avoid deserializing and
         // serializing of untouched XML groups.
@@ -35,7 +34,7 @@ public final class CodeToXmlExecutor
 
         SourceCode reader = new SourceCode(connectionFactoryCppFile);
 
-        SourceCodeParser parser = new SourceCodeParser(reader);
+        SourceCodeParser parser = new SourceCodeParser(verbose, reader);
 
         final Apidoc.Group targetGroup = new Apidoc.Group();
         final int processedFunctionsCount = parser.parseCommentsFromSystemApi(
@@ -43,11 +42,10 @@ public final class CodeToXmlExecutor
 
         ApidocHandler.replaceFunctions(apidoc, targetGroup);
 
-        System.out.println("Processed " + processedFunctionsCount + " API functions");
+        System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
-        System.out.println("Created .xml file:");
-        System.out.println("    " + outputApiXmlFile);
+        System.out.println("    Output: " + outputApiXmlFile);
 
         return processedFunctionsCount;
     }

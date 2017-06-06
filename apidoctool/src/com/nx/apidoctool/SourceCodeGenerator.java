@@ -131,13 +131,12 @@ public final class SourceCodeGenerator
             return;
 
         System.out.println(
-            "WARNING: The following functions are present in API XML but\n" +
-                "not registered in the source code:");
+"    WARNING: The following functions are present in API XML but not registered in the source code:");
 
         for (Apidoc.Function function: group.functions)
         {
             if (!processedFunctions.contains(function))
-                System.out.println("    " + function.name);
+                System.out.println("        " + function.name);
         }
     }
 

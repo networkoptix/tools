@@ -24,10 +24,9 @@ public final class XmlToCodeExecutor
         final File outputConnectionFactoryCppFile = Utils.insertSuffix(
             connectionFactoryCppFile, OUTPUT_FILE_EXTRA_SUFFIX);
 
-        System.out.println("Inserting Apidoc from XML to C++.");
-        System.out.println("Input files:");
-        System.out.println("    " + sourceApiXmlFile);
-        System.out.println("    " + connectionFactoryCppFile);
+        System.out.println("apidoctool: inserting apidoc from XML into C++");
+        System.out.println("    Input: " + sourceApiXmlFile);
+        System.out.println("    Input: " + connectionFactoryCppFile);
 
         final Apidoc apidoc = new Apidoc();
         apidoc.readFromDocument(XmlUtils.parseXmlDocument(sourceApiXmlFile));
@@ -40,15 +39,13 @@ public final class XmlToCodeExecutor
         final int processedFunctionsCount = generator.insertCommentsForSystemApi(
             ApidocHandler.getGroupByName(apidoc, SYSTEM_API_GROUP_NAME));
 
-        System.out.println("Processed " + processedFunctionsCount + " API functions");
+        System.out.println("    API functions processed: " + processedFunctionsCount);
 
         editor.saveToFile(outputConnectionFactoryCppFile);
-        System.out.println("Created .cpp file:");
-        System.out.println("    " + outputConnectionFactoryCppFile);
+        System.out.println("    Output: " + outputConnectionFactoryCppFile);
 
         XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
-        System.out.println("Created .xml file:");
-        System.out.println("    " + outputApiXmlFile);
+        System.out.println("    Output: " + outputApiXmlFile);
 
         return processedFunctionsCount;
     }

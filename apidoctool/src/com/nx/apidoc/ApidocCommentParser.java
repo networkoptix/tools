@@ -300,7 +300,7 @@ public final class ApidocCommentParser
         if (deprecatedAttributeTagFound)
         {
             System.out.println(
-                "WARNING: Deprecated Apidoc tag \"%attribute\" found" +
+                "    WARNING: Deprecated Apidoc tag \"%attribute\" found" +
                     " instead of \"" + TAG_PARAM + "\"" +
                     " in function " + function.name + ".");
         }

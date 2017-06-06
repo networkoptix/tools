@@ -29,8 +29,9 @@ public final class SourceCodeParser
         }
     }
 
-    public SourceCodeParser(SourceCode sourceCode)
+    public SourceCodeParser(boolean verbose, SourceCode sourceCode)
     {
+        this.verbose = verbose;
         this.sourceCode = sourceCode;
     }
 
@@ -62,9 +63,12 @@ public final class SourceCodeParser
                     match, line, targetGroup.urlPrefix);
                 if (function != null)
                 {
-                    if (targetGroup.functions.isEmpty())
-                        System.out.println("Processed functions:");
-                    System.out.println("    " + function.name);
+                    if (verbose)
+                    {
+                        if (targetGroup.functions.isEmpty())
+                            System.out.println("    Processed API functions:");
+                        System.out.println("        " + function.name);
+                    }
                     targetGroup.functions.add(function);
                 }
             }
@@ -73,7 +77,7 @@ public final class SourceCodeParser
         }
 
         if (targetGroup.functions.isEmpty())
-            System.out.println("WARNING: No functions were processed.");
+            System.out.println("    WARNING: No functions were processed.");
 
         return targetGroup.functions.size();
     }
@@ -146,7 +150,8 @@ public final class SourceCodeParser
 
     //--------------------------------------------------------------------------
 
-    private SourceCode sourceCode;
+    private final boolean verbose;
+    private final SourceCode sourceCode;
 
     //--------------------------------------------------------------------------
 

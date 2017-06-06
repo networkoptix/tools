@@ -7,9 +7,9 @@ import java.util.Map;
 /**
  * Map-based parser for command line of the following format:
  * <code>
- *     <action> { <-key> "<value>" }
+ *     [-verbose] <action> { <-key> "<value>" }
  * </code>
- * Keys start with "-". Key-values and action can appear in an any order. On
+ * Keys start with "-". Key-values and action can appear in any order. On
  * error, an appropriate message is printed and System.exit(1) is performed.
  */
 public abstract class SimpleArgsParser
@@ -23,6 +23,12 @@ public abstract class SimpleArgsParser
         }
 
         int i = 0;
+        if ("-verbose".equals(args[i]))
+        {
+            verbose = true;
+            ++i;
+        }
+
         while (i < args.length)
         {
             final String arg = args[i];
@@ -51,6 +57,11 @@ public abstract class SimpleArgsParser
     }
 
     protected abstract void showHelp();
+
+    public final boolean isVerbose()
+    {
+        return verbose;
+    }
 
     /**
      * Report an error if there was no action.
@@ -106,6 +117,7 @@ public abstract class SimpleArgsParser
 
     //--------------------------------------------------------------------------
 
+    private boolean verbose = false;
     private String action;
     private Map<String, String> map = new HashMap<String, String>();
 }

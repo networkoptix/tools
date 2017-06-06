@@ -35,7 +35,10 @@ public class Main
 "code-to-xml -vms-path <netoptix_vms> -template-xml <file> -output-xml <file>\n" +
 "    Parse Apidoc comments in the code, and generate Apidoc XML, taking the\n" +
 "    functions not mentioned in the code from -template-xml.\n" +
-                    "");
+"\n" +
+"print-deps\n" +
+"    Print paths to all C++ source code files to be accessed, relative to vms-path.\n" +
+    "");
                 }
             };
 
@@ -54,6 +57,7 @@ public class Main
             else if ("xml-to-code".equals(arg.action()))
             {
                 final XmlToCodeExecutor exec = new XmlToCodeExecutor();
+                exec.verbose = arg.isVerbose();
                 exec.vmsPath = arg.getFile("-vms-path");
                 exec.sourceApiXmlFile = arg.getFile("-source-xml");
                 exec.outputApiXmlFile = arg.getFile("-output-xml");
@@ -62,10 +66,15 @@ public class Main
             else if ("code-to-xml".equals(arg.action()))
             {
                 final CodeToXmlExecutor exec = new CodeToXmlExecutor();
+                exec.verbose = arg.isVerbose();
                 exec.vmsPath = arg.getFile("-vms-path");
                 exec.templateApiXmlFile = arg.getFile("-template-xml");
                 exec.outputApiXmlFile = arg.getFile("-output-xml");
                 exec.execute();
+            }
+            else if ("print-deps".equals(arg.action()))
+            {
+                Executor.printDeps();
             }
             else
             {
