@@ -90,6 +90,31 @@ nx_log_file_contents() # filename
     } 2>/dev/null
 }
 
+# Execute the command specified in the args, logging the call with "set -x", unless "set -x" mode
+# is already on - in this case, the call of this function with all its args is already logged.
+nx_logged() # "$@"
+{
+    {
+        if [ -z "$NX_VERBOSE" ]; then
+            set -x
+        else
+            set +x
+        fi
+    } 2>/dev/null
+
+    "$@"
+
+    {
+        local RESULT=$?
+        if [ -z "$NX_VERBOSE" ]; then
+            set +x
+        else
+            set -x
+        fi
+        return $RESULT
+    } 2>/dev/null
+}
+
 # Echo the args replacing full home path with '~', but do nothing in verbose mode because the args
 # are already printed by "set -x".
 nx_echo() # ...
@@ -315,7 +340,9 @@ nx_find_file() # FILE_VAR dir regex file_description_for_error_message
 
 # If the specified variable is not set, scan from the current dir upwards up to but not including
 # the specified parent dir, and return its child dir in the variable.
-nx_find_parent_dir() # DIR_VAR parent/dir error_message_if_not_found
+# @param error_message_if_not_found If specified, on failure a fatal error is produced, otherwise,
+#     return 1 and set DIR_VAR to the current dir.
+nx_find_parent_dir() # DIR_VAR parent/dir [error_message_if_not_found]
 {
     local DIR_VAR="$1"
     local PARENT_DIR="$2"
@@ -324,7 +351,7 @@ nx_find_parent_dir() # DIR_VAR parent/dir error_message_if_not_found
     local DIR=$(eval "echo \$$DIR_VAR")
 
     if [ "$DIR" != "" ]; then
-        return
+        return 0
     fi
 
     DIR=$(pwd)
@@ -332,11 +359,18 @@ nx_find_parent_dir() # DIR_VAR parent/dir error_message_if_not_found
         DIR=$(dirname "$DIR")
     done
 
+    local RESULT=0
     if [ "$DIR" = "/" ]; then
-        nx_fail "$ERROR_MESSAGE"
+        if [ -z "$ERROR_MESSAGE" ]; then
+            RESULT=1
+            DIR=$(pwd)
+        else
+            nx_fail "$ERROR_MESSAGE"
+        fi
     fi
 
     eval "$DIR_VAR=\$DIR"
+    return $RESULT
 }
 
 # Check that the specified file exists. Needed to support globs in the filename.
@@ -350,10 +384,12 @@ nx_sudo_dd() # dd_args...
 {
     # Redirect to a subshell to enable capturing the pid of the "sudo" process.
     # Print only lines containing "copied", suppress '\n' (to avoid scrolling).
-    # "-W interactive" run awk without input buffering.
     # Spaces are added to overwrite the remnants of a previous text.
+    # "-W interactive" runs awk without input buffering for certain versions of awk; suppressing
+    # awk's stderr is used to avoid its warning in case it does not support this option.
     sudo dd "$@" 2> >(awk -W interactive \
-        "\$0 ~ /copied/ {printf \"${NX_RESTORE_CURSOR_POS}%s                 \", \$0}") &
+        "\$0 ~ /copied/ {printf \"${NX_RESTORE_CURSOR_POS}%s                 \", \$0}" \
+        2>/dev/null) &
     local SUDO_PID=$!
 
     # On ^C, kill "dd" which is the child of "sudo".
@@ -388,10 +424,12 @@ nx_run()
     nx_handle_verbose "$@" && shift
     nx_handle_help "$@"
     nx_handle_mock_rsync "$@" && shift
+
     main "$@"
+
     local RESULT=$?
     if [ $RESULT != 0 ]; then
-        nx_echo "The last command FAILED."
+        nx_echo "The script FAILED."
     fi
     return $RESULT
 }
