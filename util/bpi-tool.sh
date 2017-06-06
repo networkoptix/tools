@@ -72,6 +72,7 @@ client # Copy mobile_client exe to the box.
 server # Copy mediaserver_core lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+install # Install distrib package (.tar.gz) to the box.
 
 ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
 run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
@@ -94,8 +95,10 @@ ump # Rebuild libUMP at the box and install it to the box.
 ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
 ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
-clean # Delete all build dirs.
+clean # Call "linux-tool.sh clean bpi".
 mvn [args] # Call maven with the required platorm and box.
+cmake [args] # Call "linux-tool.sh cmake bpi [args]".
+build # Call "linux-tool.sh build bpi".
 pack-short <output.tgz> # Prepare tar with build results at the box.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 EOF
@@ -518,25 +521,6 @@ iface eth0 inet dhcp
 EOF
 }
 
-clean()
-{
-    find_VMS_DIR
-    pushd "$VMS_DIR" >/dev/null
-
-    nx_echo "Deleting: $VMS_DIR/$TARGET_IN_VMS_DIR"
-    rm -r "$VMS_DIR/$TARGET_IN_VMS_DIR"
-
-    local BUILD_DIRS=()
-    nx_find_files BUILD_DIRS -type d -name "$BUILD_DIR"
-    local DIR
-    for DIR in "${BUILD_DIRS[@]}"; do
-        nx_echo "Deleting: $DIR"
-        rm -r "$DIR"
-    done
-
-    popd >/dev/null
-}
-
 do_mvn() # "$@"
 {
     mvn -Dbox=bpi -Darch=arm "$@"
@@ -824,6 +808,12 @@ main()
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
             ;;
+        install)
+            find_VMS_DIR
+            box tar xfzv \
+                "$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}/edge_firmware/rpi/target-bpi/*.tar.gz" \
+                -C "/"
+            ;;
         #..........................................................................................
         ssh)
             box "$@"
@@ -915,10 +905,16 @@ main()
             ;;
         #..........................................................................................
         clean)
-            clean
+            ./linux-tool.sh clean bpi "$@"
             ;;
         mvn)
             do_mvn "$@"
+            ;;
+        cmake)
+            ./linux-tool.sh cmake bpi "$@"
+            ;;
+        build)
+            ./linux-tool.sh build bpi "$@"
             ;;
         pack-short)
             pack_short "$1"
