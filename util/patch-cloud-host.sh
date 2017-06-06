@@ -2,8 +2,7 @@
 source "$(dirname $0)/utils.sh"
 
 CLOUD_HOST_KEY="this_is_cloud_host_name"
-FILE_LOCATION="build_environment"
-FILE_PATH_REGEX=".*/libcommon\.\(a\|so\)"
+FILE_PATH_REGEX=".*/\(libnx_network\.\(a\|so\)\|nx_network\.dll\)"
 
 # From C++ source:
 CLOUD_HOST_NAME_WITH_KEY=$(eval echo \
@@ -11,18 +10,19 @@ CLOUD_HOST_NAME_WITH_KEY=$(eval echo \
 
 #--------------------------------------------------------------------------------------------------
 
-# If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
+# If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms),
+# or, if not found, set VMS_DIR to the current dir.
 # [in,out] VMS_DIR
 find_VMS_DIR()
 {
-    nx_find_parent_dir VMS_DIR "develop" "Run this script from any dir inside nx_vms."
+    nx_find_parent_dir VMS_DIR "develop"
 }
 
 # [in] FILE
 save_backup()
 {
     local BAK_FILE="$FILE.patch-cloud-host.BAK"
-    cp "$FILE" "$BAK_FILE" || fail "failed: cp $FILE $BAK_FILE"
+    cp "$FILE" "$BAK_FILE" || nx_fail "failed: cp $FILE $BAK_FILE"
     nx_echo "Backup saved: $BAK_FILE"
 }
 
@@ -33,7 +33,7 @@ save_backup()
 process_file()
 {
     local STRING=$(strings --radix=d -d "$FILE" |grep "$CLOUD_HOST_KEY")
-    [ -z "$STRING" ] && fail "'$CLOUD_HOST_KEY' string not found in $FILE"
+    [ -z "$STRING" ] && nx_fail "'$CLOUD_HOST_KEY' string not found in $FILE"
 
     local OFFSET=$(echo "$STRING" |awk '{print $1}')
     local EXISTING_CLOUD_HOST=$(echo "$STRING" |awk '{print $3}')
@@ -54,11 +54,11 @@ process_file()
 
         # Patching the printable chars.
         echo -ne "$NEW_CLOUD_HOST" |dd bs=1 conv=notrunc seek="$PATCH_OFFSET" of="$FILE" \
-            2>/dev/null || fail "failed: dd of text"
+            2>/dev/null || nx_fail "failed: dd of text"
 
         # Filling the remaining bytes with NUL chars.
         dd bs=1 conv=notrunc seek="$NUL_OFFSET" of="$FILE" if=/dev/zero count="$NUL_LEN" \
-            2>/dev/null || fail "failed: dd of NULs"
+            2>/dev/null || nx_fail "failed: dd of NULs"
 
         nx_echo "Cloud Host was '$EXISTING_CLOUD_HOST', now is '$NEW_CLOUD_HOST' in $FILE"
     fi
@@ -69,14 +69,22 @@ process_file()
 help()
 {
     cat <<EOF
-Utility to patch "exe" or compiled "common" lib to replace Cloud Host.
-Call from anywhere inside "nx_vms" folder to search for the file.
+Utility to patch a binary file to replace the hard-coded Cloud Host.
 
 Show current value:
-    $(basename "$0") [--verbose] --show [path/to/binary_file]
+    $(basename "$0") [--verbose] --show [path/to/binary_to_patch]
 
 Patch with new value:
-    $(basename "$0") [--verbose] 'new_cloud_host' [path/to/binary_file]
+    $(basename "$0") [--verbose] 'new_cloud_host' [path/to/binary_to_patch]
+
+Cloud Host resides in: VMS 3.1 - nx_network library (.so, .a, or .dll), VMS 3.0 - each .exe for
+Windows, libcommon.so for Linux, and libcommon.a for Android.
+
+If the binary to patch is not specified, a search is performed considering VMS 3.1, and the current
+directory should be:
+- For Maven build: any directory inside root of nx_vms repo.
+- For CMake build, or installed VMS: any directory containing nx_network binary at any level.
+
 EOF
 }
 
@@ -89,12 +97,12 @@ main()
     local FILE
     if [ $# -ge 2 ]; then
         FILE="$2"
-        [ ! -f "$FILE" ] && fail "Specified file does not exist: $FILE"
+        [ ! -f "$FILE" ] && nx_fail "Specified file does not exist: $FILE"
     else
         local VMS_DIR
         find_VMS_DIR
 
-        nx_find_file FILE "$VMS_DIR/$FILE_LOCATION" "$FILE_PATH_REGEX" "the file to patch"
+        nx_find_file FILE "$VMS_DIR" "$FILE_PATH_REGEX" "the file to patch"
     fi
 
     process_file
