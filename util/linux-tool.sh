@@ -6,7 +6,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/linux-x64"}
 : ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"}
 : ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"}
-: ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
+: ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${PACKAGE_SUFFIX=""}
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
@@ -26,11 +26,14 @@ Here <command> can be one of the following:
 
 ini # Create empty .ini files in /tmp (to be filled with defauls).
 
+apidoc target [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
+kit [cmake-build-args] # Build artifacts/nx_kit, run tests and deploy its src to the rdep artifact.
+
 start-s [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
 start-c [args] # Start desktop_client with [args].
 stop-c # Stop desktop_client.
-run-ut test_name [args] # Run the unit test with strict expectations.
+run-ut target [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
 
 clean # Delete cmake build dir and all maven build dirs.
 mvn [args] # Call maven.
@@ -58,7 +61,7 @@ do_mvn() # "$@"
 # [in] VMS_DIR
 get_CMAKE_BUILD_DIR() # target
 {
-    local TARGET="$1"; shift
+    local TARGET="$1"
     case "$VMS_DIR" in *-"$TARGET")
         CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
         return
@@ -66,11 +69,16 @@ get_CMAKE_BUILD_DIR() # target
     CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
 }
 
+get_TARGET() # "$1" && shift
+{
+    local TARGET="$1"
+    [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
+}
+
 clean() # target
 {
-    local TARGET="$1"; shift
-    [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
     find_VMS_DIR
+    get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
 
     if [ -d "$CMAKE_BUILD_DIR" ]; then
@@ -114,9 +122,8 @@ clean() # target
 
 do_cmake() # target "$@"
 {
-    local TARGET="$1"; shift
-    [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
     find_VMS_DIR
+    get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
     [ -d "$CMAKE_BUILD_DIR" ] && nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
     mkdir -p "$CMAKE_BUILD_DIR"
@@ -136,13 +143,94 @@ do_cmake() # target "$@"
 
 do_build() # target
 {
-    local TARGET="$1"; shift
-    [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
     find_VMS_DIR
+    get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
     [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake first."
 
     nx_logged cmake --build "$CMAKE_BUILD_DIR" "$@"
+}
+
+do_run_ut() # target [all|TestName] "$@"
+{
+    get_TARGET "$1" && shift
+    find_and_pushd_CMAKE_BUILD_DIR
+
+    local TEST_NAME="$1" && shift
+
+    local TEST_ARG
+    case "$TEST_NAME" in
+        all) TEST_ARG="";;
+        "") nx_fail "Expected either 'all' or a test name as the first arg.";;
+        *) TEST_ARG="-R $TEST_NAME";;
+    esac
+
+    nx_logged ctest $TEST_ARG "$@"
+    local RESULT=$?
+
+    nx_popd
+    return $RESULT
+}
+
+do_apidoc() # target [dev|prod] "$@"
+{
+    find_VMS_DIR
+    get_TARGET "$1" && shift
+
+    local TOOL="$1" && shift
+
+    local TARGET_DIR_DESCRIPTION="$VMS_DIR (maven)"
+    local API_XML="$VMS_DIR/mediaserver_core/$MVN_BUILD_DIR/resources/static/api.xml"
+    if [ ! -f "$API_XML" ]; then #< Assume cmake instead of maven.
+        get_CMAKE_BUILD_DIR "$TARGET"
+        TARGET_DIR_DESCRIPTION="$CMAKE_BUILD_DIR (cmake)"
+        API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
+    fi
+
+    local API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
+
+    [ ! -f "$API_TEMPLATE_XML" ] && nx_fail "Cannot open file $API_TEMPLATE_XML"
+
+    local JAR_DEV="$VMS_DIR/../devtools/apidoctool/out/apidoctool.jar"
+    local JAR_PROD="$VMS_DIR/../buildenv/packages/any/apidoctool/apidoctool.jar"
+    if [[ $TOOL = "dev" || ($TOOL = "" && -f "$JAR_DEV") ]]; then
+        local JAR="$JAR_DEV"
+        nx_echo "Executing apidoctool from devtools/ in $TARGET_DIR_DESCRIPTION"
+    elif [[ $TOOL = "prod" || $TOOL = "" ]]; then
+        local JAR="$JAR_PROD"
+        nx_echo "Executing apidoctool from packages/any/ in $TARGET_DIR_DESCRIPTION"
+    else
+        nx_fail "Invalid apidoctool location \"$TOOL\": expected \"dev\" or \"prod\"."
+    fi
+
+    if [ -z "$1" ]; then #< No other args - run apidoctool to generate documentation.
+        nx_logged java -jar "$JAR" -verbose code-to-xml -vms-path "$VMS_DIR" \
+            -template-xml "$API_TEMPLATE_XML" -output-xml "$API_XML"
+    else #< Some args specified - run apidoctool with the specified args.
+        nx_logged java -jar "$JAR" "$@"
+    fi
+}
+
+do_kit() # "$@"
+{
+    find_VMS_DIR
+
+    # Recreate nx_kit build dir in /tmp.
+    local KIT_BUILD_DIR="/tmp/nx_kit-build"
+    rm -rf "$KIT_BUILD_DIR"
+    mkdir -p "$KIT_BUILD_DIR" || exit $?
+    nx_logged cd "$KIT_BUILD_DIR"
+
+    local KIT_SRC_DIR="$VMS_DIR/artifacts/nx_kit"
+
+    nx_logged cmake "$KIT_SRC_DIR" -GNinja || exit $?
+    nx_logged cmake --build . "$@" || exit $?
+    ./nx_kit_test || exit $?
+    cp -r "$KIT_SRC_DIR/src" "$PACKAGES_ANY_DIR/nx_kit/" || exit $?
+    nx_echo
+    nx_echo "SUCCESS: artifacts/nx_kit/src copied to packages/any/"
+
+    rm -rf "$KIT_BUILD_DIR"
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -157,6 +245,13 @@ main()
             touch /tmp/analytics.ini
             touch /tmp/mobile_client.ini
             touch /tmp/nx_media.ini
+            ;;
+        #..........................................................................................
+        apidoc)
+            do_apidoc "$@"
+            ;;
+        kit)
+            do_kit "$@"
             ;;
         #..........................................................................................
         start-s)
@@ -176,16 +271,7 @@ main()
             sudo killall -9 desktop_client
             ;;
         run-ut)
-            find_VMS_DIR
-            local TEST_NAME="$1"
-            shift
-            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
-
-            // TODO: IMPLEMENT
-            nx_fail "Command not implemented yet."
-            #local TEST_PATH="$VMS_DIR$BUILD_SUFFIX/ut/$TEST_NAME"
-            #echo "Running: $TEST_PATH $@"
-            #LD_LIBRARY_PATH="$LIBS_DIR" "$TEST_PATH" "$@"
+            do_run_ut "$@"
             ;;
         #..........................................................................................
         clean)
