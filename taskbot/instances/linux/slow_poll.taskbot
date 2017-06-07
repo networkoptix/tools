@@ -21,5 +21,3 @@ do
 done
 date +"%Y-%m-%d %H:%M:%S  Have changes"
 
-cp -f "$TASKBOT_VAR"/var/ready.task "$TASKBOT_VAR"/var/slow.task
-

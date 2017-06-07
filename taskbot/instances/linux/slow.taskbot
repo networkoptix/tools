@@ -3,11 +3,14 @@
 set +o errexit -o nounset -o noclobber
 ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 
-if [ ! -s "$TASKBOT_VAR"/var/slow.task ]
+if [ ! -s "$TASKBOT_VAR"/var/ready.task ]
 then
-  echo "Can't find $TASKBOT_VAR/var/slow.task file";
+  echo "Can't find $TASKBOT_VAR/var/ready.task file";
   exit;
 fi
+
+cp -f "$TASKBOT_VAR"/var/ready.task "$TASKBOT_VAR"/var/slow.task
+
 TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
 
 ROOT_ARTEFACTS_PATH="$TASKBOT_VAR"/var/artefacts
