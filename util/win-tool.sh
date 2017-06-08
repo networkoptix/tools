@@ -26,7 +26,7 @@ ini # Create empty .ini files (to be filled with defauls) in $TEMP - should poin
 apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
 kit [cmake-build-args] # Build artifacts/nx_kit, run tests and deploy its src to the rdep artifact.
 
-start-s [args] # Start mediaserver with [args].
+start-s [Release] [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
 start-c [args] # Start desktop_client with [args].
 stop-c # Stop desktop_client.
@@ -253,8 +253,11 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            // TODO: IMPLEMENT
-            nx_fail "Command not implemented yet."
+            find_and_pushd_CMAKE_BUILD_DIR
+            local CONFIGURATION="Debug"
+            [ "$1" == "Release" ] && { shift; CONFIGURATION="Release"; }
+            nx_logged "$CONFIGURATION"/bin/mediaserver -e
+            nx_popd
             ;;
         stop-s)
             // TODO: IMPLEMENT
