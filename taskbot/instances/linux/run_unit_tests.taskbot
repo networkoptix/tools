@@ -32,7 +32,7 @@ cd $NX_VMS_BIN_PATH
 
 TEST_LIST=$TASKBOT_UNIT_TESTS
 if [ "$TASKBOT_UNIT_TESTS" = "all" ]; then
-  TEST_LIST=$(find . \( -name '*_ut' -o -name 'cloud_connect_integration_tests' \) -type f -exec basename {} \;)
+  TEST_LIST=$(find . \( -name '*_ut' -o -name 'cloud_connect_integration_tests' -o -name 'vms_cloud_integration_tests' \) -type f -exec basename {} \;)
 fi
 echo $TEST_LIST
 
