@@ -128,7 +128,7 @@ do_cmake() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
 
-    nx_logged cmake "$@" -Ax64 $(w "$VMS_DIR")
+    nx_logged cmake $(w "$VMS_DIR") "$@" -Ax64
     local RESULT=$?
 
     nx_popd
