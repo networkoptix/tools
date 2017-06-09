@@ -33,11 +33,11 @@ start-s [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
 start-c [args] # Start desktop_client with [args].
 stop-c # Stop desktop_client.
-run-ut target [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
+run-ut target [all|test_name] [args] # Run all or the specified unit test via ctest.
 
 clean # Delete cmake build dir and all maven build dirs.
 mvn [args] # Call maven.
-cmake target [cmake-args] # Call cmake in cmake build dir. For linux, use target "linux".
+cmake target [Release] [cmake-args] # Call cmake in cmake build dir. For linux, use target "linux".
 build target # Build via "cmake --build".
 EOF
 }
@@ -71,8 +71,9 @@ get_CMAKE_BUILD_DIR() # target
 
 get_TARGET() # "$1" && shift
 {
-    local TARGET="$1"
+    TARGET="$1"
     [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
+    return 0
 }
 
 clean() # target
@@ -120,21 +121,26 @@ clean() # target
     nx_popd
 }
 
-do_cmake() # target "$@"
+do_cmake() # target [Release] "$@"
 {
     find_VMS_DIR
+
     get_TARGET "$1" && shift
+
+    local CONFIGURATION_ARG=""
+    [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="-DCMAKE_BUILD_TYPE=Release"; }
+
     get_CMAKE_BUILD_DIR "$TARGET"
     [ -d "$CMAKE_BUILD_DIR" ] && nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
     mkdir -p "$CMAKE_BUILD_DIR"
 
     nx_pushd "$CMAKE_BUILD_DIR"
-    local TARGET_OPTION=""
-    [ "$TARGET" != "linux" ] && TARGET_OPTION="-DtargetDevice=$TARGET"
-    local GENERATOR_OPTION=""
-    [ ! -z "$CMAKE_GEN" ] && GENERATOR_OPTION="-G$CMAKE_GEN"
+    local TARGET_ARG=""
+    [ "$TARGET" != "linux" ] && TARGET_ARG="-DtargetDevice=$TARGET"
+    local GENERATOR_ARG=""
+    [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
-    nx_logged cmake "$@" "$GENERATOR_OPTION" "$TARGET_OPTION" "$VMS_DIR"
+    nx_logged cmake "$VMS_DIR" "$@" "$GENERATOR_ARG" "$TARGET_ARG" $CONFIGURATION_ARG
     local RESULT=$?
 
     nx_popd
