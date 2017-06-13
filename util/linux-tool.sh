@@ -132,12 +132,13 @@ do_cmake() # target [Release] "$@"
     mkdir -p "$CMAKE_BUILD_DIR"
 
     nx_pushd "$CMAKE_BUILD_DIR"
+    nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
     local TARGET_ARG=""
     [ "$TARGET" != "linux" ] && TARGET_ARG="-DtargetDevice=$TARGET"
     local GENERATOR_ARG=""
     [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
-    nx_logged cmake "$VMS_DIR" "$@" "$GENERATOR_ARG" "$TARGET_ARG" $CONFIGURATION_ARG
+    nx_logged cmake "$VMS_DIR" "$@" $GENERATOR_ARG $TARGET_ARG $CONFIGURATION_ARG
     local RESULT=$?
 
     nx_popd
