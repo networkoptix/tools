@@ -3,12 +3,9 @@ source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/linux-x64"}
-: ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"}
-: ${QT_DIR="$PACKAGES_DIR/qt-5.6.2"}
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
-: ${PACKAGE_SUFFIX=""}
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 
 #--------------------------------------------------------------------------------------------------
@@ -197,8 +194,8 @@ do_apidoc() # target [dev|prod] "$@"
 
     [ ! -f "$API_TEMPLATE_XML" ] && nx_fail "Cannot open file $API_TEMPLATE_XML"
 
-    local JAR_DEV="$VMS_DIR/../devtools/apidoctool/out/apidoctool.jar"
-    local JAR_PROD="$VMS_DIR/../buildenv/packages/any/apidoctool/apidoctool.jar"
+    local JAR_DEV="$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar"
+    local JAR_PROD="$PACKAGES_DIR/any/apidoctool/apidoctool.jar"
     if [[ $TOOL = "dev" || ($TOOL = "" && -f "$JAR_DEV") ]]; then
         local JAR="$JAR_DEV"
         nx_echo "Executing apidoctool from devtools/ in $TARGET_DIR_DESCRIPTION"
@@ -232,7 +229,7 @@ do_kit() # "$@"
     nx_logged cmake "$KIT_SRC_DIR" -GNinja || exit $?
     nx_logged cmake --build . "$@" || exit $?
     ./nx_kit_test || exit $?
-    cp -r "$KIT_SRC_DIR/src" "$PACKAGES_ANY_DIR/nx_kit/" || exit $?
+    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
     nx_echo "SUCCESS: artifacts/nx_kit/src copied to packages/any/"
 
