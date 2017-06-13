@@ -3,9 +3,9 @@ source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".win-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
-: ${PACKAGE_SUFFIX=""}
 : ${MVN_BUILD_DIR="x64"} #< Name of the directories inside "nx_vms".
 
 #--------------------------------------------------------------------------------------------------
@@ -185,8 +185,8 @@ do_apidoc() # [dev|prod] "$@"
 
     [ ! -f "$API_TEMPLATE_XML" ] && nx_fail "Cannot open file $API_TEMPLATE_XML"
 
-    local JAR_DEV="$VMS_DIR/../devtools/apidoctool/out/apidoctool.jar"
-    local JAR_PROD="$VMS_DIR/../buildenv/packages/any/apidoctool/apidoctool.jar"
+    local JAR_DEV="$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar"
+    local JAR_PROD="$PACKAGES_DIR/any/apidoctool/apidoctool.jar"
     if [[ $TOOL = "dev" || ($TOOL = "" && -f "$JAR_DEV") ]]; then
         local JAR="$JAR_DEV"
         nx_echo "Executing apidoctool from devtools/ in $TARGET_DIR_DESCRIPTION"
@@ -208,8 +208,6 @@ do_apidoc() # [dev|prod] "$@"
 
 do_kit() # "$@"
 {
-    find_VMS_DIR
-
     find_and_pushd_CMAKE_BUILD_DIR -create
 
     # Recreate nx_kit build dir inside cmake build dir.
@@ -224,7 +222,7 @@ do_kit() # "$@"
     nx_logged cmake "$KIT_SRC_DIR_W" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || exit $?
     nx_logged cmake --build . "$@" || exit $?
     ./nx_kit_test || exit $?
-    cp -r "$KIT_SRC_DIR/src" "$PACKAGES_ANY_DIR/nx_kit/" || exit $?
+    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
     nx_echo "SUCCESS: artifacts/nx_kit/src copied to packages/any/"
 
@@ -256,6 +254,7 @@ main()
             find_and_pushd_CMAKE_BUILD_DIR
             local CONFIGURATION="Debug"
             [ "$1" == "Release" ] && { shift; CONFIGURATION="Release"; }
+            PATH=$PATH:
             nx_logged "$CONFIGURATION"/bin/mediaserver -e
             nx_popd
             ;;
