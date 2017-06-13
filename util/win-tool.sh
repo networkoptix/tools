@@ -254,7 +254,7 @@ main()
             find_and_pushd_CMAKE_BUILD_DIR
             local CONFIGURATION="Debug"
             [ "$1" == "Release" ] && { shift; CONFIGURATION="Release"; }
-            PATH=$PATH:
+            PATH="$PATH:$PACKAGES_DIR/windows-x64/qt-5.6.1-1/bin"
             nx_logged "$CONFIGURATION"/bin/mediaserver -e
             nx_popd
             ;;
