@@ -21,3 +21,9 @@ do
 done
 date +"%Y-%m-%d %H:%M:%S  Have changes"
 
+# Wait functional_tests lock release
+while ! "$TASKBOT" $TASKBOT_OPTIONS $TASKBOT_CONFIG \
+     -c "echo \"functional_tests unlocked\"" \
+    --process-lock 'functional_tests'; do
+  sleep 60
+done

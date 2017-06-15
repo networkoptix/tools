@@ -27,7 +27,6 @@ while true; do
         --description "Poll slow ($TASKBOT_PLATFORM $TASKBOT_BRANCHNAME)" \
         --trace \
         --timeout=0 \
-        --process-lock 'functional_tests' \
         $TASKBOT_CONFIG \
         slow_poll.taskbot
     then
