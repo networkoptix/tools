@@ -24,7 +24,7 @@ Here <command> can be one of the following:
 ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
 
 apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # Build artifacts/nx_kit, run tests and deploy its src to the rdep artifact.
+kit [cmake-build-args] # artifacts/nx_kit: build, test, copy src to artifact, rdep -u.
 
 start-s [Release] [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
@@ -128,7 +128,7 @@ do_cmake() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
 
-    nx_logged cmake $(w "$VMS_DIR") "$@" -Ax64
+    time nx_logged cmake $(w "$VMS_DIR") "$@" -Ax64
     local RESULT=$?
 
     nx_popd
@@ -142,7 +142,7 @@ do_build() # [Release] "$@"
     local CONFIGURATION_ARG=""
     [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="--config Release"; }
 
-    nx_logged cmake --build $(w "$CMAKE_BUILD_DIR") $CONFIGURATION_ARG "$@"
+    time nx_logged cmake --build $(w "$CMAKE_BUILD_DIR") $CONFIGURATION_ARG "$@"
 }
 
 do_run_ut() # [Release] [all|TestName] "$@"
@@ -198,17 +198,26 @@ do_apidoc() # [dev|prod] "$@"
     fi
 
     local JAR_W=$(w "$JAR")
+    local API_XML_W=$(w "$API_XML")
     if [ -z "$1" ]; then #< No other args - run apidoctool to generate documentation.
         nx_logged java -jar "$JAR_W" -verbose code-to-xml -vms-path $(w "$VMS_DIR") \
-            -template-xml $(w "$API_TEMPLATE_XML") -output-xml $(w "$API_XML")
+            -template-xml $(w "$API_TEMPLATE_XML") -output-xml "$API_XML_W"
+        RESULT=$?
     else #< Some args specified - run apidoctool with the specified args.
         nx_logged java -jar "$JAR_W" "$@"
+        RESULT=$?
     fi
+    nx_echo
+    nx_logged cmake -E copy_if_different \
+        "$API_XML_W" $(w "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/") \
+        || exit $?
+    return $RESULT
 }
 
 do_kit() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
+    nx_popd
 
     # Recreate nx_kit build dir inside cmake build dir.
     local KIT_BUILD_DIR="$CMAKE_BUILD_DIR/artifacts/nx_kit"
@@ -222,11 +231,18 @@ do_kit() # "$@"
     nx_logged cmake "$KIT_SRC_DIR_W" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || exit $?
     nx_logged cmake --build . "$@" || exit $?
     ./nx_kit_test || exit $?
+    nx_logged rm -r "$PACKAGES_DIR/any/nx_kit/src"
     nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_logged cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
-    nx_echo "SUCCESS: artifacts/nx_kit/src copied to packages/any/"
+    nx_echo "SUCCESS: artifacts/nx_kit/src and nx_kit.cmake copied to packages/any/"
+    nx_echo
 
+    nx_pushd "$PACKAGES_DIR/any/nx_kit"
+    rdep -u && nx_echo "SUCCESS: nx_kit uploaded via rdep"
+    local RESULT=$?
     nx_popd
+    return $RESULT
 }
 
 #--------------------------------------------------------------------------------------------------
