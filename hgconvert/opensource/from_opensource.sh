@@ -1,1 +1,1 @@
-hg convert nx_vms_opensource nx_vms --filemap=from_opensource.filemap --sourcesort
+hg convert nx_open nx_vms --filemap=from_opensource.filemap --sourcesort
