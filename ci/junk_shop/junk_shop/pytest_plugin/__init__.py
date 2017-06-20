@@ -4,6 +4,9 @@ from ..capture_repository import Parameters
 from .plugin import DbCapturePlugin
 
 
+JUNK_SHOP_PLUGIN_NAME = 'junk-shop-db-capture'
+
+
 def pytest_addoption(parser):
     parser.addoption('--capture-db', type=DbConfig.from_string, metavar='user:password@host',
                      help='Capture postgres database credentials')
@@ -16,6 +19,4 @@ def pytest_configure(config):
     if config.getvalue('capturelog') and db_config:
         raise pytest.UsageError('--capture-db and capturelog plugin are mutually exclusive; add --nocapturelog option')
     if db_config:
-        config.pluginmanager.register(DbCapturePlugin(config, db_config, parameters))
-
-
+        config.pluginmanager.register(DbCapturePlugin(config, db_config, parameters), JUNK_SHOP_PLUGIN_NAME)
