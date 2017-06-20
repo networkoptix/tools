@@ -1,1 +1,1 @@
-hg convert public private --filemap=convert_back.filemap --sourcesort
+hg convert nx_vms_opensource nx_vms --filemap=convert_back.filemap --sourcesort
