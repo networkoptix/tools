@@ -9,14 +9,15 @@ from . import models
 class Parameters(object):
 
     example = ','.join([
-        'branch=dev_3.0.0'
+        'project=ci',
+        'branch=dev_3.0.0',
         'version=3.0.10',
         'release=beta',
         'kind=debug',
         'platform=linux-64',
         'vc_changeset_id=6f305e61fc95ecf3caf2fcc6dcdf51b18811e12e',
         ])
-    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
+    known_parameters = ['project', 'branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -33,6 +34,7 @@ class Parameters(object):
         return parameters
 
     def __init__(self):
+        self.project = None
         self.branch = None
         self.version = None
         self.cloud_group = None
@@ -83,7 +85,7 @@ class DbCaptureRepository(object):
             started_at=datetime_utc_now(),
             outcome='incomplete' if test else '',
             )
-        if self.parameters:
+        if self.parameters and not parent:
             for name in Parameters.known_parameters:
                 setattr(run, name, self._produce_parameter(name, getattr(self.parameters, name)))
         commit()
@@ -102,6 +104,7 @@ class DbCaptureRepository(object):
 
     def _produce_parameter(self, parameter, value):
         param2model = dict(
+            project=models.Project,
             branch=models.Branch,
             cloud_group=models.CloudGroup,
             customization=models.Customization,
@@ -110,7 +113,7 @@ class DbCaptureRepository(object):
         model = param2model.get(parameter)
         if not model:
             return value or ''  # plain str or None
-        if value is None:
+        if not value:
             return None
         rec = model.get(name=value)
         if not rec:

@@ -7,6 +7,10 @@ from pony.orm import *
 db = Database()
 
 
+class Project(db.Entity):
+    name = Required(str)
+    runs = Set('Run')
+
 class CloudGroup(db.Entity):
     _table_ = 'cloud_group'
     name = Required(str)
@@ -45,6 +49,7 @@ class Run(db.Entity):
     started_at = Required(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)
     artifacts = Set('Artifact')
+    project = Optional(Project)
     branch = Optional(Branch)
     version = Optional(str, index=True)
     cloud_group = Optional(CloudGroup)
