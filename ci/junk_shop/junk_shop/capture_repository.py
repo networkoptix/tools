@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentTypeError
 import bz2
-from pony.orm import commit, select, raw_sql, sql_debug
+from pony.orm import db_session, commit, select, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now
 from . import models
 
@@ -53,16 +53,35 @@ class ArtifactType(object):
         self.id = None
 
 
+class ArtifactTypeFactory(object):
+
+    def __init__(self, builtin_types):
+        self._name2at = {at.name: at for at in builtin_types}  # type_name -> ArtifactType
+        for at in builtin_types:
+            setattr(self, at.name, at)
+
+    def __call__(self, name, content_type=None):
+        at = self._name2at.get(name)
+        if at:
+            assert content_type is None or content_type == at.content_type  # conflicting content type for same name
+            return at
+        assert content_type  # required to create new ArtifactType
+        at = ArtifactType(name, content_type)
+        self._name2at[name] = at
+        setattr(self, name, at)
+        return at
+
+
 class DbCaptureRepository(object):
 
     def __init__(self, db_config, parameters):
         self.parameters = parameters
-        self.artifact_type = SimpleNamespace(
-            traceback=ArtifactType('traceback', 'text/plain'),
-            output=ArtifactType('output', 'text/plain'),
-            log=ArtifactType('log', 'text/plain'),
-            core=ArtifactType('core', 'application/octet-stream'),
-            )
+        self.artifact_type = ArtifactTypeFactory([
+            ArtifactType('traceback', 'text/plain'),
+            ArtifactType('output', 'text/plain'),
+            ArtifactType('log', 'text/plain'),
+            ArtifactType('core', 'application/octet-stream'),
+            ])
         if 'SQL_DEBUG' in os.environ:
             sql_debug(True)
         models.db.bind('postgres', host=db_config.host, user=db_config.user,
@@ -168,6 +187,11 @@ class DbCaptureRepository(object):
             encoding='bz2',
             data=compressed_data)
         #print '----- added artifact %s for run %s' % (artifact.type, run.path)
+
+    @db_session
+    def add_artifact_with_session(self, run, name, artifact_type_rec, data, is_error=False):
+        run_reloaded = models.Run[run.id]  # it may belong to different transaction
+        self.add_artifact(run_reloaded, name, artifact_type_rec, data, is_error)
 
     def set_test_outcome(self, parent_run):
         outcome = None
