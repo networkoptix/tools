@@ -31,7 +31,6 @@ RC=$?
 echo $RC
 
 # + Run functional test
-"$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot \
-    --trace
+"$TASKBOT" $ARGS "$TASKBOT_SHARE"/run_func_tests.taskbot
 
 "$TASKBOT_SHARE"/func_tests_report.py "$TASKBOT_CONFIG"
