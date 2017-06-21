@@ -471,7 +471,7 @@ class TaskExecutor:
       if terminated:
         self.__task_stack__[-1].error_message = 'Terminated'
       if self.__db__.connected:
-        safe_call(self.finish_tasks_to_level(0))
+        safe_call(self.finish_tasks_to_level, 0)
       self.closed = True
       safe_call(self.__shell_process__.stdin.close)
       # TODO. Need cross-platform solution to kill child process
