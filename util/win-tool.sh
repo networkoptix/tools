@@ -7,6 +7,7 @@ nx_load_config "${CONFIG=".win-toolrc"}"
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR="x64"} #< Name of the directories inside "nx_vms".
+: ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
 
 #--------------------------------------------------------------------------------------------------
 
@@ -24,7 +25,7 @@ Here <command> can be one of the following:
 ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
 
 apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # artifacts/nx_kit: build, test, copy src to artifact, rdep -u.
+kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact, rdep -u.
 
 start-s [Release] [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
@@ -34,8 +35,9 @@ run-ut [Release] [all|test_name] [args] # Run all or the specified unit test via
 
 clean # Delete cmake build dir and all maven build dirs.
 mvn [args] # Call maven.
-cmake [cmake-args] # Call cmake in cmake build dir.
+gen [cmake-args] # Perform cmake generation.
 build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
+cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 EOF
 }
 
@@ -124,7 +126,7 @@ find_and_pushd_CMAKE_BUILD_DIR() # [-create]
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
 }
 
-do_cmake() # "$@"
+do_gen() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
 
@@ -214,30 +216,40 @@ do_apidoc() # [dev|prod] "$@"
     return $RESULT
 }
 
+build_and_test_nx_kit() # nx_kit_src_dir "$@"
+{
+    local SRC="$1"; shift
+    nx_logged cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || return $?
+    nx_logged cmake --build . "$@" || return $?
+    ./nx_kit_test
+}
+
 do_kit() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
     nx_popd
 
     # Recreate nx_kit build dir inside cmake build dir.
-    local KIT_BUILD_DIR="$CMAKE_BUILD_DIR/artifacts/nx_kit"
+    local KIT_BUILD_DIR="$CMAKE_BUILD_DIR/$NX_KIT_DIR"
     rm -rf "$KIT_BUILD_DIR"
     mkdir -p "$KIT_BUILD_DIR" || exit $?
-    nx_logged cd "$KIT_BUILD_DIR"
+    nx_pushd "$KIT_BUILD_DIR"
+    nx_echo "+ cd $KIT_BUILD_DIR"
 
-    local KIT_SRC_DIR="$VMS_DIR/artifacts/nx_kit"
+    local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
+    build_and_test_nx_kit $(w "$KIT_SRC_DIR") || { local RESULT=$?; nx_popd; exit $?; }
 
-    local KIT_SRC_DIR_W=$(w "$KIT_SRC_DIR")
-    nx_logged cmake "$KIT_SRC_DIR_W" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || exit $?
-    nx_logged cmake --build . "$@" || exit $?
-    ./nx_kit_test || exit $?
+    nx_popd
+    rm -rf "$KIT_BUILD_DIR"
+
     nx_logged rm -r "$PACKAGES_DIR/any/nx_kit/src"
     nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_logged cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
-    nx_echo "SUCCESS: artifacts/nx_kit/src and nx_kit.cmake copied to packages/any/"
-    nx_echo
+    nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 
+
+    nx_echo
     nx_pushd "$PACKAGES_DIR/any/nx_kit"
     rdep -u && nx_echo "SUCCESS: nx_kit uploaded via rdep"
     local RESULT=$?
@@ -296,11 +308,17 @@ main()
         mvn)
             do_mvn "$@"
             ;;
-        cmake)
-            do_cmake "$@"
+        gen)
+            do_gen "$@"
             ;;
         build)
             do_build "$@"
+            ;;
+        cmake)
+            local CONFIGURATION_ARG=""
+            [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="Release"; }
+            do_gen "$@"
+            do_build $CONFIGURATION_ARG
             ;;
         #..........................................................................................
         *)

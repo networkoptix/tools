@@ -3,10 +3,12 @@ source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
+: ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
+: ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
 
 #--------------------------------------------------------------------------------------------------
 
@@ -24,7 +26,7 @@ Here <command> can be one of the following:
 ini # Create empty .ini files in /tmp (to be filled with defauls).
 
 apidoc target [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # Build artifacts/nx_kit, run tests and deploy its src to the rdep artifact.
+kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact, rdep -u.
 
 start-s [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
@@ -34,8 +36,9 @@ run-ut target [all|test_name] [args] # Run all or the specified unit test via ct
 
 clean # Delete cmake build dir and all maven build dirs.
 mvn [args] # Call maven.
-cmake target [Release] [cmake-args] # Call cmake in cmake build dir. For linux, use target "linux".
-build target # Build via "cmake --build".
+gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+build target # Build via "cmake --build <dir>".
+cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 EOF
 }
 
@@ -59,11 +62,18 @@ do_mvn() # "$@"
 get_CMAKE_BUILD_DIR() # target
 {
     local TARGET="$1"
-    case "$VMS_DIR" in *-"$TARGET")
-        CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
-        return
+    case "$VMS_DIR" in
+        *-"$TARGET")
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+            ;;
+        "$WIN_DEVELOP_DIR"/*)
+            VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
+            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX-$TARGET"
+            ;;
+        *)
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
+            ;;
     esac
-    CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
 }
 
 get_TARGET() # "$1" && shift
@@ -118,7 +128,7 @@ clean() # target
     nx_popd
 }
 
-do_cmake() # target [Release] "$@"
+do_gen() # target [Release] "$@"
 {
     find_VMS_DIR
 
@@ -150,9 +160,9 @@ do_build() # target
     find_VMS_DIR
     get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
-    [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake first."
+    [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
 
-    nx_logged cmake --build "$CMAKE_BUILD_DIR" "$@"
+    time nx_logged cmake --build "$CMAKE_BUILD_DIR" "$@"
 }
 
 do_run_ut() # target [all|TestName] "$@"
@@ -215,6 +225,14 @@ do_apidoc() # target [dev|prod] "$@"
     fi
 }
 
+build_and_test_nx_kit() # nx_kit_src_dir "$@"
+{
+    local SRC="$1"; shift
+    nx_logged cmake "$SRC" -GNinja || return $?
+    nx_logged cmake --build . "$@" || return $?
+    ./nx_kit_test
+}
+
 do_kit() # "$@"
 {
     find_VMS_DIR
@@ -223,18 +241,27 @@ do_kit() # "$@"
     local KIT_BUILD_DIR="/tmp/nx_kit-build"
     rm -rf "$KIT_BUILD_DIR"
     mkdir -p "$KIT_BUILD_DIR" || exit $?
-    nx_logged cd "$KIT_BUILD_DIR"
+    nx_pushd "$KIT_BUILD_DIR"
+    nx_echo "+ cd $KIT_BUILD_DIR"
 
-    local KIT_SRC_DIR="$VMS_DIR/artifacts/nx_kit"
+    local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
+    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; exit $?; }
 
-    nx_logged cmake "$KIT_SRC_DIR" -GNinja || exit $?
-    nx_logged cmake --build . "$@" || exit $?
-    ./nx_kit_test || exit $?
-    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_echo
-    nx_echo "SUCCESS: artifacts/nx_kit/src copied to packages/any/"
-
+    nx_popd
     rm -rf "$KIT_BUILD_DIR"
+
+    nx_logged rm -r "$PACKAGES_DIR/any/nx_kit/src"
+    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_logged cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_echo
+    nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
+
+    nx_echo
+    nx_pushd "$PACKAGES_DIR/any/nx_kit"
+    rdep -u && nx_echo "SUCCESS: nx_kit uploaded via rdep"
+    local RESULT=$?
+    nx_popd
+    return $RESULT
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -284,11 +311,14 @@ main()
         mvn)
             do_mvn "$@"
             ;;
-        cmake)
-            do_cmake "$@"
+        gen)
+            do_gen "$@"
             ;;
         build)
             do_build "$@"
+            ;;
+        cmake)
+            do_gen "$@" && do_build "$1"
             ;;
         #..........................................................................................
         *)
