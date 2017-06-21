@@ -62,8 +62,8 @@ def get_platform():
 def safe_call(fn, *args, **kw):
   try:
     return fn(*args, **kw)
-  except:
-    pass
+  except Exception as x:
+    print >>sys.stderr, 'Error calling %s: %s' % (fn.__name__, x)
 
 # Compress output
 class Compressor:
