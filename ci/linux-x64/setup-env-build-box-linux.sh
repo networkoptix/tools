@@ -7,11 +7,15 @@ ARCH=x64
 PROJ_ROOT_DIR=/nx
 BUILDENV_DIR=$PROJ_ROOT_DIR/buildenv
 
+CMAKE_VERSION=3.8.2
+CMAKE_DIR_NAME=cmake-$CMAKE_VERSION-Linux-x86_64
+CMAKE_ARCH_NAME=$CMAKE_DIR_NAME.tar.gz
+
 mkdir -p $PROJ_ROOT_DIR
 
 cat > $HOME/.profile <<EOF
 . \$HOME/.bashrc
-export PATH=$PATH:$BUILDENV_DIR/bin:$BUILDENV_DIR/qt/bin:$BUILDENV_DIR/maven/bin
+export PATH=$HOME/$CMAKE_DIR_NAME/bin:$PATH:$BUILDENV_DIR/bin:$BUILDENV_DIR/qt/bin:$BUILDENV_DIR/maven/bin
 export QTDIR=$BUILDENV_DIR/qt
 export ANDROID_NDK_ROOT=$BUILDENV_DIR/android/android-ndk
 export ANDROID_SDK_ROOT=$BUILDENV_DIR/android/android-sdk
@@ -51,3 +55,9 @@ rsync -a --delete rsync://$NX_RSYNC_SOURCE/buildenv/all-os/help .
 rsync -a rsync://$NX_RSYNC_SOURCE/buildenv/all-os/ . --exclude 'help' --exclude 'qt5'
 rsync -a rsync://$NX_RSYNC_SOURCE/buildenv/$OS/noarch/ .
 rsync -a rsync://$NX_RSYNC_SOURCE/buildenv/$OS/$ARCH/ .
+
+# download and unpack cmake
+cd /tmp
+wget --no-verbose https://cmake.org/files/v3.8/$CMAKE_ARCH_NAME
+cd ~/
+tar xfz /tmp/$CMAKE_ARCH_NAME
