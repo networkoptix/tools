@@ -7,6 +7,18 @@ from multiprocessing import Process
 import threading
 import subprocess
 
+if os.path.isfile('current_config.py'):
+    sys.path.insert(0, os.getcwd())
+    from current_config import QT_DIR
+    from current_config import PROJECT_SOURCE_DIR
+    os.chdir(PROJECT_SOURCE_DIR)
+    sys.path.pop(0)
+else:
+    buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
+    sys.path.insert(0, buildVarDir)
+    from current_config import QT_DIR
+    sys.path.pop(0)
+
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
@@ -17,10 +29,6 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
-sys.path.insert(0, buildVarDir)
-from current_config import QT_DIR
-sys.path.pop(0)
 
 ignored = [
             # QT files
