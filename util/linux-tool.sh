@@ -58,7 +58,10 @@ do_mvn() # "$@"
     mvn "$@" # No additional args needed like platform and box.
 }
 
-# E.g. nx_vms -> nx_vms-build-isd; nx_vms-bpi -> nx_vms-bpi-build.
+# Deduce CMake build dir out of VMS_DIR and targetDevice (box). Examples:
+# nx -> nx-build-isd
+# nx-bpi -> nx-bpi-build.
+# /C/develop/nx -> nx-win-build-linux
 # [in] VMS_DIR
 get_CMAKE_BUILD_DIR() # target
 {
