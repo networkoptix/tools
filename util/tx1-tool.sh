@@ -10,7 +10,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${CORES_ARG="-j12"}
-: ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
+: ${TARGET_DEVICE="tx1"} #< Target device for CMake.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="ubuntu"}
@@ -69,6 +69,7 @@ Here <command> can be one of the following:
 
 nfs # Mount the box root to $BOX_MNT via NFS.
 sshfs # Mount the box root to $BOX_MNT via SSHFS.
+mount box_develop # Mount ~/develop to the box path box_develop via sshfs. May require workstation password.
 
 ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
 tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
@@ -91,11 +92,16 @@ start-c [args] # Run desktop_client exe with [args].
 stop-c # Stop desktop_client via "kill -9".
 run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
 run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
+run-tv [args] # Run video_dec_gie with [args].
+
+tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
+tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
 
 clean # Delete all build dirs.
 mvn [args] # Call maven with the required platorm and box.
-cmake [args] # Call cmake in cmake build dir with the required platorm/box parameters.
-m [args] # Call the configured make tool in cmake build dir.
+cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
+gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
+build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
 
 so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
@@ -293,6 +299,22 @@ main()
             echo "$BOX_PASSWORD" |sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
                 -o nonempty,password_stdin
             ;;
+        mount)
+            local BOX_DEVELOP_DIR="$1"
+            [ "$BOX_DEVELOP_DIR" = "" ] && nx_fail "Path at the box is not specified."
+            local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+            local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
+            local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
+            box umount "$BOX_DEVELOP_DIR" #< Just in case.
+            box mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+
+            # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
+            nx_echo
+            nx_echo "ATTENTION: Now execute the following command directly at the box:"
+            echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
+            #box sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+                #"[&&]" echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
+            ;;
         #..........................................................................................
         ffmpeg-bins)
             # Debug tools, not included into the distro.
@@ -328,6 +350,7 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
+            # TODO: #mshevchenko: Copy external.dat from the proper place.
             cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
 
             nx_echo "SUCCESS: All mediaserver files copied."
@@ -393,6 +416,7 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
+            # TODO: #mshevchenko: Copy external.dat from the proper place.
             cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
 
             cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
@@ -493,29 +517,13 @@ main()
             do_mvn "$@"
             ;;
         cmake)
-            find_VMS_DIR
-            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
-            mkdir -p "$CMAKE_BUILD_DIR"
-            nx_pushd "$CMAKE_BUILD_DIR"
-
-            cmake "$@" -G$CMAKE_GEN \
-                -DCMAKE_TOOLCHAIN_FILE="$VMS_DIR/cmake/toolchain/tx1-aarch64.cmake" "$VMS_DIR"
-
-            local RESULT=$?
-            nx_popd
-            return $RESULT
+            ./linux-tool.sh cmake "$TARGET_DEVICE" "$@"
             ;;
-        m)
-            find_VMS_DIR
-            local CMAKE_BUILD_DIR="$VMS_DIR$TARGET_SUFFIX"
-            mkdir -p "$CMAKE_BUILD_DIR"
-            nx_pushd "$CMAKE_BUILD_DIR"
-
-            ${CMAKE_GEN,,} "$CORES_ARG" "$@"
-
-            local RESULT=$?
-            nx_popd
-            return $RESULT
+        gen)
+            ./linux-tool.sh gen "$TARGET_DEVICE" "$@"
+            ;;
+        build)
+            ./linux-tool.sh build "$TARGET_DEVICE" "$@"
             ;;
         #..........................................................................................
         so)

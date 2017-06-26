@@ -98,7 +98,8 @@ ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 clean # Call "linux-tool.sh clean bpi".
 mvn [args] # Call maven with the required platorm and box.
 cmake [args] # Call "linux-tool.sh cmake bpi [args]".
-build # Call "linux-tool.sh build bpi".
+gen [args] # Call "linux-tool.sh gen bpi [args]".
+build [args] # Call "linux-tool.sh build bpi [args]".
 pack-short <output.tgz> # Prepare tar with build results at the box.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 EOF
@@ -576,7 +577,7 @@ main()
             nx_echo "New box password: $BOX_PASSWORD"
             ;;
         mount)
-            local BOX_IP=$(ping -q -c 1 -t 1 bpi | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+            local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
             box umount "$BOX_DEVELOP_DIR" #< Just in case.
@@ -912,6 +913,9 @@ main()
             ;;
         cmake)
             ./linux-tool.sh cmake bpi "$@"
+            ;;
+        gen)
+            ./linux-tool.sh gen bpi "$@"
             ;;
         build)
             ./linux-tool.sh build bpi "$@"

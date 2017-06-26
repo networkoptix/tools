@@ -320,6 +320,16 @@ main()
         cmake)
             do_gen "$@" && do_build "$1"
             ;;
+        print-dirs) # TODO: #mshevchenko: Add help.
+            find_VMS_DIR
+            get_TARGET "$1" && shift
+            get_CMAKE_BUILD_DIR "$TARGET"
+            if [ ! -d "$CMAKE_BUILD_DIR" ]; then
+                nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+            fi
+            echo "$VMS_DIR"
+            echo "$CMAKE_BUILD_DIR"
+            ;;
         #..........................................................................................
         *)
             nx_fail "Invalid arguments. Run with -h for help."
