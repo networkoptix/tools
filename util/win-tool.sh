@@ -130,7 +130,7 @@ do_gen() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
 
-    time nx_logged cmake $(w "$VMS_DIR") "$@" -Ax64
+    time nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64
     local RESULT=$?
 
     nx_popd
@@ -144,7 +144,7 @@ do_build() # [Release] "$@"
     local CONFIGURATION_ARG=""
     [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="--config Release"; }
 
-    time nx_logged cmake --build $(w "$CMAKE_BUILD_DIR") $CONFIGURATION_ARG "$@"
+    time nx_verbose cmake --build $(w "$CMAKE_BUILD_DIR") $CONFIGURATION_ARG "$@"
 }
 
 do_run_ut() # [Release] [all|TestName] "$@"
@@ -162,7 +162,7 @@ do_run_ut() # [Release] [all|TestName] "$@"
     local CONFIGURATION_ARG="-C Debug"
     [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="-C Release"; }
 
-    nx_logged ctest $CONFIGURATION_ARG $TEST_ARG "$@"
+    nx_verbose ctest $CONFIGURATION_ARG $TEST_ARG "$@"
     local RESULT=$?
 
     nx_popd
@@ -202,15 +202,15 @@ do_apidoc() # [dev|prod] "$@"
     local JAR_W=$(w "$JAR")
     local API_XML_W=$(w "$API_XML")
     if [ -z "$1" ]; then #< No other args - run apidoctool to generate documentation.
-        nx_logged java -jar "$JAR_W" -verbose code-to-xml -vms-path $(w "$VMS_DIR") \
+        nx_verbose java -jar "$JAR_W" -verbose code-to-xml -vms-path $(w "$VMS_DIR") \
             -template-xml $(w "$API_TEMPLATE_XML") -output-xml "$API_XML_W"
         RESULT=$?
     else #< Some args specified - run apidoctool with the specified args.
-        nx_logged java -jar "$JAR_W" "$@"
+        nx_verbose java -jar "$JAR_W" "$@"
         RESULT=$?
     fi
     nx_echo
-    nx_logged cmake -E copy_if_different \
+    nx_verbose cmake -E copy_if_different \
         "$API_XML_W" $(w "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/") \
         || exit $?
     return $RESULT
@@ -219,8 +219,8 @@ do_apidoc() # [dev|prod] "$@"
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
     local SRC="$1"; shift
-    nx_logged cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || return $?
-    nx_logged cmake --build . "$@" || return $?
+    nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || return $?
+    nx_verbose cmake --build . "$@" || return $?
     ./nx_kit_test
 }
 
@@ -242,9 +242,9 @@ do_kit() # "$@"
     nx_popd
     rm -rf "$KIT_BUILD_DIR"
 
-    nx_logged rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_logged cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
+    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 
@@ -283,7 +283,7 @@ main()
             local CONFIGURATION="Debug"
             [ "$1" == "Release" ] && { shift; CONFIGURATION="Release"; }
             PATH="$PATH:$PACKAGES_DIR/windows-x64/qt-5.6.1-1/bin"
-            nx_logged "$CONFIGURATION"/bin/mediaserver -e
+            nx_verbose "$CONFIGURATION"/bin/mediaserver -e
             nx_popd
             ;;
         stop-s)

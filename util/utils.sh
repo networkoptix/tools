@@ -92,7 +92,7 @@ nx_log_file_contents() # filename
 
 # Execute the command specified in the args, logging the call with "set -x", unless "set -x" mode
 # is already on - in this case, the call of this function with all its args is already logged.
-nx_logged() # "$@"
+nx_verbose() # "$@"
 {
     {
         if [ -z "$NX_VERBOSE" ]; then
@@ -113,6 +113,13 @@ nx_logged() # "$@"
         fi
         return $RESULT
     } 2>/dev/null
+}
+
+nx_show() # VAR_NAME
+{
+    local VAR_NAME="$1"
+    eval local VAR_VALUE="\$$VAR_NAME"
+    echo "####### $VAR_NAME: [$VAR_VALUE]"
 }
 
 # Echo the args replacing full home path with '~', but do nothing in verbose mode because the args
@@ -276,7 +283,7 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_set_title "$TERMINAL_TITLE"
 
     sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
-        -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
+        -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
         ${ARGS:+"$ARGS"} `#< Omit arg if empty`
 
     RESULT=$?

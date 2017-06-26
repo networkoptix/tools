@@ -1,13 +1,11 @@
 #!/bin/bash
-source "$(dirname $0)/utils.sh"
+source "$(dirname "$0")/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
 
 : ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
 : ${DEVELOP_DIR="$HOME/develop"}
-: ${TARGET_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
-: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${CORES_ARG="-j12"}
 : ${TARGET_DEVICE="tx1"} #< Target device for CMake.
@@ -28,6 +26,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"} #< Path at the workstation.
 : ${PACKAGE_QT="qt-5.6.2"}
 : ${PACKAGE_QUAZIP="quazip-0.7"}
 : ${PACKAGE_FFMPEG="ffmpeg-3.1.1"}
@@ -35,24 +34,10 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${PACKAGE_SASL2="sasl2-2.1.26"}
 : ${PACKAGE_SIGAR="sigar-1.7"}
 
-# Config for maven instead of cmake:
-#TARGET_SUFFIX="/build_environment/target-tx1"
-#BUILD_CONFIG="debug"
-#PACKAGES_DIR="$HOME/develop/buildenv/packages/tx1-arm"
-#PACKAGE_QT="qt-5.6.1"
-#MVN_BUILD_DIR="arm-tx1"
-#BOX_LIBS_DIR="/opt/networkoptix/desktop_client/lib"
-
 #--------------------------------------------------------------------------------------------------
 
-BIN="bin"
-LIB="lib"
-if [ ! -z "$BUILD_CONFIG" ]; then
-    BIN="$BIN/$BUILD_CONFIG"
-    LIB="$LIB/$BUILD_CONFIG"
-fi
-
-PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"
+LINUX_TOOL="$(dirname "$0")/linux-tool.sh"
+VIDEO_DEC_GIE_PATH="tegra_multimedia_api/samples/04_video_dec_gie"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -69,7 +54,7 @@ Here <command> can be one of the following:
 
 nfs # Mount the box root to $BOX_MNT via NFS.
 sshfs # Mount the box root to $BOX_MNT via SSHFS.
-mount box_develop # Mount ~/develop to the box path box_develop via sshfs. May require workstation password.
+mount # Mount ~/develop to $BOX_DEVELOP_DIR via sshfs. May require workstation password.
 
 ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
 tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
@@ -98,7 +83,6 @@ tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" wi
 tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
 
 clean # Delete all build dirs.
-mvn [args] # Call maven with the required platorm and box.
 cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
 gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
 build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
@@ -116,12 +100,17 @@ box() # args...
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
-# If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
-# [in][out] VMS_DIR
-find_VMS_DIR()
+get_VMS_DIR_and_CMAKE_BUILD_DIR()
 {
-    nx_find_parent_dir VMS_DIR $(basename "$DEVELOP_DIR") \
-        "Run this script from any dir inside your nx_vms repo dir."
+    local DIRS=( $("$LINUX_TOOL" print-dirs "$TARGET_DEVICE") )
+
+    VMS_DIR=${DIRS[0]}
+    [ -z "$VMS_DIR" ] && nx_fail "Unable to get VMS_DIR via $LINUX_TOOL print-dirs"
+
+    CMAKE_BUILD_DIR=${DIRS[1]}
+    [ -z "$CMAKE_BUILD_DIR" ] && nx_fail "Unable to get CMAKE_BUILD_DIR via $LINUX_TOOL print-dirs"
+
+    return 0
 }
 
 # If not done yet, scan from current dir upwards to find "common_libs" dir; set LIB_DIR to its
@@ -157,10 +146,9 @@ cp_files() # src_dir file_mask dst_dir
 
 cp_libs() # file_mask [file_mask]...
 {
-    find_VMS_DIR
     local FILE_MASK
     for FILE_MASK in "$@"; do
-        cp_files "$VMS_DIR$TARGET_SUFFIX/$LIB" "$FILE_MASK" "$BOX_LIBS_DIR"
+        cp_files "$CMAKE_BUILD_DIR/lib" "$FILE_MASK" "$BOX_LIBS_DIR"
     done
 }
 
@@ -190,46 +178,18 @@ cp_desktop_client_package_bins() # package-name [package-name]...
 
 cp_mediaserver_bins() # file_mask [file_mask]...
 {
-    find_VMS_DIR
     local FILE_MASK
     for FILE_MASK in "$@"; do
-        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_MEDIASERVER_DIR/bin"
+        cp_files "$CMAKE_BUILD_DIR/bin" "$FILE_MASK" "$BOX_MEDIASERVER_DIR/bin"
     done
 }
 
 cp_desktop_client_bins() # file_mask [file_mask]...
 {
-    find_VMS_DIR
     local FILE_MASK
     for FILE_MASK in "$@"; do
-        cp_files "$VMS_DIR$TARGET_SUFFIX/$BIN" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
+        cp_files "$CMAKE_BUILD_DIR/bin" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
     done
-}
-
-clean()
-{
-    find_VMS_DIR
-    nx_pushd "$VMS_DIR"
-
-    nx_echo "Deleting: $VMS_DIR$TARGET_SUFFIX"
-    rm -r "$VMS_DIR$TARGET_SUFFIX"
-
-    if [ ! -z "$MVN_BUILD_DIR" ]; then
-        local BUILD_DIRS=()
-        nx_find_files BUILD_DIRS -type d -name "$MVN_BUILD_DIR"
-        local DIR
-        for DIR in "${BUILD_DIRS[@]}"; do
-            nx_echo "Deleting: $DIR"
-            rm -r "$DIR"
-        done
-    fi
-
-    nx_popd
-}
-
-do_mvn() # "$@"
-{
-    mvn -Dbox=tx1 -Darch=arm "$@"
 }
 
 assert_not_client_only()
@@ -259,7 +219,7 @@ so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
     local LIB="$1"; shift
     local INDENT="$1"; shift
 
-    local LIBS_DIR="$VMS_DIR$TARGET_SUFFIX/$LIB"
+    local LIBS_DIR="$CMAKE_BUILD_DIR/$LIB"
 
     local DEPS=$(getSoDeps "$LIBS_DIR/$LIB")
 
@@ -300,8 +260,6 @@ main()
                 -o nonempty,password_stdin
             ;;
         mount)
-            local BOX_DEVELOP_DIR="$1"
-            [ "$BOX_DEVELOP_DIR" = "" ] && nx_fail "Path at the box is not specified."
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
@@ -323,18 +281,19 @@ main()
             ;;
         tegra_video)
             assert_not_client_only
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_package_libs "tegra_video"
             cp_mediaserver_package_bins "tegra_video" #< Debug tools, not included into the distro.
             ;;
         copy-s)
             assert_not_client_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
             ;;
         copy-s-all)
             assert_not_client_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
 
@@ -350,20 +309,23 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
-            # TODO: #mshevchenko: Copy external.dat from the proper place.
-            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+            # TODO: Rewrite when the branch "analytics" is merged into default.
+            cp_files "$PACKAGES_ANY_DIR/server-external-vms_3.0/bin" "external.dat" \
+                "$BOX_MEDIASERVER_DIR/bin"
+
+            cp_mediaserver_bins "plugins" "vox" "nvidia_models"
 
             nx_echo "SUCCESS: All mediaserver files copied."
             ;;
         copy-c)
             assert_not_server_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_desktop_client_bins "desktop_client"
             ;;
         copy-c-all)
             assert_not_server_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_desktop_client_bins "desktop_client"
 
@@ -389,7 +351,7 @@ main()
         copy)
             assert_not_client_only
             assert_not_server_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
             cp_desktop_client_bins "desktop_client"
@@ -397,7 +359,7 @@ main()
         copy-all)
             assert_not_client_only
             assert_not_server_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "*.so*"
             cp_mediaserver_bins "mediaserver"
             cp_desktop_client_bins "desktop_client"
@@ -416,8 +378,11 @@ main()
                 "$PACKAGE_SASL2" \
                 "$PACKAGE_SIGAR"
 
-            # TODO: #mshevchenko: Copy external.dat from the proper place.
-            cp_mediaserver_bins "external.dat" "plugins" "vox" "nvidia_models"
+            # TODO: Rewrite when the branch "analytics" is merged into default.
+            cp_files "$PACKAGES_ANY_DIR/server-external-vms_3.0/bin" "external.dat" \
+                "$BOX_MEDIASERVER_DIR/bin"
+
+            cp_mediaserver_bins "plugins" "vox" "nvidia_models"
 
             cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
                 "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
@@ -428,19 +393,21 @@ main()
             ;;
         copy-s-ut)
             assert_not_client_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_mediaserver_bins "*_ut"
             ;;
         copy-c-ut)
             assert_not_server_only
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_desktop_client_bins "*_ut"
             ;;
         server)
             assert_not_client_only
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_libs "libmediaserver_core.so*"
             ;;
         lib)
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
             if [ "$1" = "" ]; then
                 find_LIB_DIR
                 LIB_NAME=$(basename "$LIB_DIR")
@@ -489,12 +456,12 @@ main()
             box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
             ;;
         run-tv)
-            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
             box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
         tv)
-            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
             box make -C "$BOX_SRC_DIR" "$@" \
                 "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
                 "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
@@ -502,32 +469,33 @@ main()
                 "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
             ;;
         tv-rdep)
-            local SRC_DIR="$PACKAGES_SRC_DIR/tegra_multimedia_api/samples/04_video_dec_gie"
+            local SRC_DIR="$PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
             nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
-            cd "$PACKAGES_DIR/tegra_video" || exit $?
+
+            nx_pushd "$PACKAGES_DIR/tegra_video"
             rdep -u && nx_echo "SUCCESS: Deployed to rdep."
+            local RESULT=$?
+            nx_popd
+            return $RESULT
             ;;
         #..........................................................................................
         clean)
-            clean
-            ;;
-        mvn)
-            do_mvn "$@"
+            "$LINUX_TOOL" clean "$TARGET_DEVICE" "$@"
             ;;
         cmake)
-            ./linux-tool.sh cmake "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
             ;;
         gen)
-            ./linux-tool.sh gen "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" gen "$TARGET_DEVICE" "$@"
             ;;
         build)
-            ./linux-tool.sh build "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
             ;;
         #..........................................................................................
         so)
-            find_VMS_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR
 
             local RECURSIVE=0
             if [ "$1" = "-r" ]; then

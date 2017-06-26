@@ -1,5 +1,5 @@
 #!/bin/bash
-source "$(dirname $0)/utils.sh"
+source "$(dirname "$0")/utils.sh"
 
 nx_load_config "{$CONFIG=".bpi-toolrc"}"
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
@@ -28,7 +28,6 @@ nx_load_config "{$CONFIG=".bpi-toolrc"}"
 : ${PACKAGE_SUFFIX=""}
 
 #--------------------------------------------------------------------------------------------------
-# Const
 
 # Constants for working with SD Card via fw_printenv/fw_setenv.
 MAC_VAR="ethaddr"
@@ -38,6 +37,8 @@ FW_CONFIG="/etc/fw_env.config"
 # Lines from /etc/network/interfaces at the box.
 IP_DHCP_LINE="iface eth0 inet dhcp"
 IP_STATIC_LINE="iface eth0 inet static"
+
+LINUX_TOOL="$(dirname "$0")/linux-tool.sh"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -906,19 +907,19 @@ main()
             ;;
         #..........................................................................................
         clean)
-            ./linux-tool.sh clean bpi "$@"
+            "$LINUX_TOOL" clean bpi "$@"
             ;;
         mvn)
             do_mvn "$@"
             ;;
         cmake)
-            ./linux-tool.sh cmake bpi "$@"
+            "$LINUX_TOOL" cmake bpi "$@"
             ;;
         gen)
-            ./linux-tool.sh gen bpi "$@"
+            "$LINUX_TOOL" gen bpi "$@"
             ;;
         build)
-            ./linux-tool.sh build bpi "$@"
+            "$LINUX_TOOL" build bpi "$@"
             ;;
         pack-short)
             pack_short "$1"

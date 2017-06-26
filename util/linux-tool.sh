@@ -39,6 +39,7 @@ mvn [args] # Call maven.
 gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
 build target # Build via "cmake --build <dir>".
 cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
 EOF
 }
 
@@ -83,7 +84,7 @@ get_TARGET() # "$1" && shift
     return 0
 }
 
-clean() # target
+do_clean() # target
 {
     find_VMS_DIR
     get_TARGET "$1" && shift
@@ -145,10 +146,16 @@ do_gen() # target [Release] "$@"
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
     local TARGET_ARG=""
     [ "$TARGET" != "linux" ] && TARGET_ARG="-DtargetDevice=$TARGET"
+
+    # TODO: Remove when the branch "analytics" is merged into default.
+    if [ "$TARGET" = "tx1" ]; then
+        TARGET_ARG="-DCMAKE_TOOLCHAIN_FILE=$VMS_DIR/cmake/toolchain/tx1.cmake"
+    fi
+
     local GENERATOR_ARG=""
     [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
-    nx_logged cmake "$VMS_DIR" "$@" $GENERATOR_ARG $TARGET_ARG $CONFIGURATION_ARG
+    nx_verbose cmake "$VMS_DIR" "$@" $GENERATOR_ARG $TARGET_ARG $CONFIGURATION_ARG
     local RESULT=$?
 
     nx_popd
@@ -162,7 +169,7 @@ do_build() # target
     get_CMAKE_BUILD_DIR "$TARGET"
     [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
 
-    time nx_logged cmake --build "$CMAKE_BUILD_DIR" "$@"
+    time nx_verbose cmake --build "$CMAKE_BUILD_DIR" "$@"
 }
 
 do_run_ut() # target [all|TestName] "$@"
@@ -179,7 +186,7 @@ do_run_ut() # target [all|TestName] "$@"
         *) TEST_ARG="-R $TEST_NAME";;
     esac
 
-    nx_logged ctest $TEST_ARG "$@"
+    nx_verbose ctest $TEST_ARG "$@"
     local RESULT=$?
 
     nx_popd
@@ -218,18 +225,18 @@ do_apidoc() # target [dev|prod] "$@"
     fi
 
     if [ -z "$1" ]; then #< No other args - run apidoctool to generate documentation.
-        nx_logged java -jar "$JAR" -verbose code-to-xml -vms-path "$VMS_DIR" \
+        nx_verbose java -jar "$JAR" -verbose code-to-xml -vms-path "$VMS_DIR" \
             -template-xml "$API_TEMPLATE_XML" -output-xml "$API_XML"
     else #< Some args specified - run apidoctool with the specified args.
-        nx_logged java -jar "$JAR" "$@"
+        nx_verbose java -jar "$JAR" "$@"
     fi
 }
 
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
     local SRC="$1"; shift
-    nx_logged cmake "$SRC" -GNinja || return $?
-    nx_logged cmake --build . "$@" || return $?
+    nx_verbose cmake "$SRC" -GNinja || return $?
+    nx_verbose cmake --build . "$@" || return $?
     ./nx_kit_test
 }
 
@@ -250,9 +257,9 @@ do_kit() # "$@"
     nx_popd
     rm -rf "$KIT_BUILD_DIR"
 
-    nx_logged rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    nx_logged cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_logged cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
+    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 
@@ -306,7 +313,7 @@ main()
             ;;
         #..........................................................................................
         clean)
-            clean "$@"
+            do_clean "$@"
             ;;
         mvn)
             do_mvn "$@"
@@ -320,7 +327,7 @@ main()
         cmake)
             do_gen "$@" && do_build "$1"
             ;;
-        print-dirs) # TODO: #mshevchenko: Add help.
+        print-dirs)
             find_VMS_DIR
             get_TARGET "$1" && shift
             get_CMAKE_BUILD_DIR "$TARGET"
