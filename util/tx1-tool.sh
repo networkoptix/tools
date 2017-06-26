@@ -281,7 +281,6 @@ main()
             ;;
         tegra_video)
             assert_not_client_only
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
             cp_package_libs "tegra_video"
             cp_mediaserver_package_bins "tegra_video" #< Debug tools, not included into the distro.
             ;;
