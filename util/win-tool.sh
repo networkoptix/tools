@@ -3,6 +3,7 @@ source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".win-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
+: ${UBUNTU_DEVELOP_DIR="/S/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
@@ -57,10 +58,59 @@ find_VMS_DIR()
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
-do_clean()
+do_mvn() # "$@"
+{
+    mvn "$@" # No additional args needed like platform and box.
+}
+
+# Deduce CMake build dir out of VMS_DIR. Examples:
+# nx -> nx-build
+# /S/develop/nx -> nx-ubuntu-build
+find_CMAKE_BUILD_DIR() # [-create]
 {
     find_VMS_DIR
-    local CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+
+    case "$VMS_DIR" in
+        "$UBUNTU_DEVELOP_DIR"/*)
+            VMS_DIR_NAME=${VMS_DIR#$UBUNTU_DEVELOP_DIR/} #< Removing the prefix.
+            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-ubuntu$BUILD_SUFFIX"
+            ;;
+        *)
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+            ;;
+    esac
+
+
+    case "$1" in
+        -create)
+            if [ -d "$CMAKE_BUILD_DIR" ]; then
+                nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
+            else
+                mkdir -p "$CMAKE_BUILD_DIR"
+            fi
+            ;;
+        "")
+            if [ ! -d "$CMAKE_BUILD_DIR" ]; then
+                nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake first."
+            fi
+            ;;
+        *)
+            nx_fail "INTERNAL ERROR: find_CMAKE_BUILD_DIR: Expected no args or '-create'."
+            ;;
+    esac
+
+}
+
+find_and_pushd_CMAKE_BUILD_DIR() # [-create]
+{
+    find_CMAKE_BUILD_DIR "$@"
+    nx_pushd "$CMAKE_BUILD_DIR"
+    nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
+}
+
+do_clean()
+{
+    find_CMAKE_BUILD_DIR
 
     if [ -d "$CMAKE_BUILD_DIR" ]; then
         nx_echo "Deleting cmake build dir: $CMAKE_BUILD_DIR"
@@ -92,38 +142,6 @@ do_clean()
     done
 
     nx_popd
-}
-
-do_mvn() # "$@"
-{
-    mvn "$@" # No additional args needed like platform and box.
-}
-
-find_and_pushd_CMAKE_BUILD_DIR() # [-create]
-{
-    find_VMS_DIR
-    CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
-
-    case "$1" in
-        -create)
-            if [ -d "$CMAKE_BUILD_DIR" ]; then
-                nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
-            else
-                mkdir -p "$CMAKE_BUILD_DIR"
-            fi
-            ;;
-        "")
-            if [ ! -d "$CMAKE_BUILD_DIR" ]; then
-                nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake first."
-            fi
-            ;;
-        *)
-            nx_fail "INTERNAL ERROR: find_CMAKE_BUILD_DIR: Expected no args or '-create'."
-            ;;
-    esac
-
-    nx_pushd "$CMAKE_BUILD_DIR"
-    nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
 }
 
 do_gen() # "$@"
@@ -177,8 +195,7 @@ do_apidoc() # [dev|prod] "$@"
     local TARGET_DIR_DESCRIPTION="$VMS_DIR (maven)"
     local API_XML="$VMS_DIR/mediaserver_core/$MVN_BUILD_DIR/resources/static/api.xml"
     if [ ! -f "$API_XML" ]; then #< Assume cmake instead of maven.
-        find_and_pushd_CMAKE_BUILD_DIR
-        nx_popd
+        find_CMAKE_BUILD_DIR
         TARGET_DIR_DESCRIPTION="$CMAKE_BUILD_DIR (cmake)"
         API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
     fi
@@ -226,8 +243,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
 do_kit() # "$@"
 {
-    find_and_pushd_CMAKE_BUILD_DIR -create
-    nx_popd
+    find_CMAKE_BUILD_DIR -create
 
     # Recreate nx_kit build dir inside cmake build dir.
     local KIT_BUILD_DIR="$CMAKE_BUILD_DIR/$NX_KIT_DIR"
@@ -317,7 +333,7 @@ main()
         cmake)
             local CONFIGURATION_ARG=""
             [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="Release"; }
-            do_gen "$@"
+            do_gen "$@" || exit $?
             do_build $CONFIGURATION_ARG
             ;;
         #..........................................................................................
