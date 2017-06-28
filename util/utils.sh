@@ -436,7 +436,7 @@ nx_run()
 
     local RESULT=$?
     if [ $RESULT != 0 ]; then
-        nx_echo "The script FAILED."
+        nx_echo "The script FAILED (status $RESULT)."
     fi
     return $RESULT
 }
