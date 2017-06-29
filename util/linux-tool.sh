@@ -340,6 +340,21 @@ main()
             echo "$VMS_DIR"
             echo "$CMAKE_BUILD_DIR"
             ;;
+        tunnel) # ip1 [ip2]...
+            local SUBNET="10.0."
+            local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
+            local ID=${SELF_IP##*.} #< Take the last byte of SELF_IP.
+            [ "$*" = "" ] && nx_fail "List of host IP addresses not specified."
+            local HOSTS_ARGS=""
+            local PORT_PREFIX=22
+            for IP in "$@"; do
+                nx_echo "Tunnelling $IP as localhost:$PORT_PREFIX$ID"
+                HOSTS_ARG="$HOSTS_ARG -L$PORT_PREFIX$ID:$IP:22"
+                ((PORT_PREFIX+=1))
+            done
+
+            nx_verbose ssh$HOSTS_ARG -R22$ID:localhost:22 $USER@la.hdw.mx
+            ;;
         #..........................................................................................
         *)
             nx_fail "Invalid arguments. Run with -h for help."
