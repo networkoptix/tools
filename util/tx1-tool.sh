@@ -260,7 +260,8 @@ main()
                 -o nonempty,password_stdin
             ;;
         mount)
-            local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
+            local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST \
+                | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
             box umount "$BOX_DEVELOP_DIR" #< Just in case.

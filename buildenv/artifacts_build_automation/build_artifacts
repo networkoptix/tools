@@ -1142,7 +1142,7 @@ function ffmpeg_build()
 
     [ $OS = "windows" ] && makeFlags=""
 
-    # mingw's make h3.81 angs with -j 
+    # mingw's make h3.81 angs with -j
     ./config.ffmpeg >>$LOG_FILE_PATH 2>&1 || return 1
     CFLAGS="$ffmpeg_EXTRA_CFLAGS" LDFLAGS="$ffmpeg_EXTRA_LDFLAGS" make $makeFlags V=1 >>$LOG_FILE_PATH 2>&1 || return 1
     make install >>$LOG_FILE_PATH 2>&1 || return 1
@@ -1520,7 +1520,7 @@ function festival_generateTarballName()
     local artifactName=$1
     local artifactVersion=$2
 
-    #Generating onvif tar.gz
+    #Generating tar.gz
     mkdir ./$artifactName-$artifactVersion 2>/dev/null
     cp -rf $THIRD_PARTY_SRC_DIR/speech_synthesis/2.1/* \
         ./$artifactName-$artifactVersion || return 2
