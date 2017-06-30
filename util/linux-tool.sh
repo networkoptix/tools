@@ -9,6 +9,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
+: ${LA_HDW_MX_USER="$USER"} #< Username at la.hdw.mx.
 
 #--------------------------------------------------------------------------------------------------
 
@@ -353,7 +354,7 @@ main()
                 ((PORT_PREFIX+=1))
             done
 
-            nx_verbose ssh$HOSTS_ARG -R22$ID:localhost:22 $USER@la.hdw.mx
+            nx_verbose ssh$HOSTS_ARG -R22$ID:localhost:22 $LA_HDW_MX_USER@la.hdw.mx
             ;;
         #..........................................................................................
         *)
