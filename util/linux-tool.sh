@@ -41,6 +41,7 @@ gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use
 build target # Build via "cmake --build <dir>".
 cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
+tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
 EOF
 }
 
