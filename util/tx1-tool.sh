@@ -251,13 +251,17 @@ main()
             sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
             ;;
         sshfs)
-            sudo umount "$BOX_MNT"
+            sudo umount "$BOX_MNT"  2>/dev/null
             sudo rm -rf "$BOX_MNT" || exit $?
             sudo mkdir -p "$BOX_MNT" || exit $?
             sudo chown "$USER" "$BOX_MNT"
 
-            echo "$BOX_PASSWORD" |sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
-                -o nonempty,password_stdin
+            if ! echo "$BOX_PASSWORD" |nx_verbose sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
+            then
+                nx_fail "Unable to mount $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT"
+            fi
+            nx_echo "Mounted $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT:"
+            ls "$BOX_MNT"
             ;;
         mount)
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST \
