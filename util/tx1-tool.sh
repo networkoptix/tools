@@ -21,7 +21,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
-: ${BOX_DEVELOP_DIR="/develop"} #< Mount point at the box for the workstation develop dir.
+: ${BOX_DEVELOP_DIR="/home/$USER/develop"} #< Mount point at the box for the workstation develop dir.
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
