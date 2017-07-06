@@ -99,10 +99,10 @@ def load_root_run_node_list(page, page_size, branch=None, platform=None, version
 
 def load_run_node_tree(root_run):
     run_id2artifacts = load_artifacts([root_run])
-    root_node = RunNode((root_run.path.rstrip('/'),), root_run, run_id2artifacts.get(root_run.id))
+    root_node = RunNode((int(root_run.path.rstrip('/')),), root_run, run_id2artifacts.get(root_run.id))
     path2node = {root_node.path_tuple: root_node}
     for run in select(run for run in models.Run if run.root_run is root_run):
-        path_tuple = tuple(run.path.rstrip('/').split('/'))
+        path_tuple = tuple(map(int, run.path.rstrip('/').split('/')))
         path2node[path_tuple] = RunNode(path_tuple, run, run_id2artifacts.get(run.id))
     for path, node in path2node.items():
         if len(path) == 1: continue
@@ -347,7 +347,8 @@ def init():
     db_config = DbConfig.from_string(os.environ['DB_CONFIG'])
     if 'SQL_DEBUG' in os.environ:
         sql_debug(True)
-    retry_on_db_error(models.db.bind, 'postgres', host=db_config.host, user=db_config.user, password=db_config.password)
+    retry_on_db_error(models.db.bind, 'postgres', host=db_config.host,
+                      user=db_config.user, password=db_config.password, port=db_config.port)
     retry_on_db_error(models.db.generate_mapping, create_tables=True)
 
 init()
