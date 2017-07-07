@@ -36,6 +36,7 @@ appserverPassword=
 authKey=@ByteArray(SK_1267cfbb4010058a2c8e5d2abaf917ed)
 dataDir=$DIR
 guidIsHWID=0
+logLevel=DEBUG2
 logFile=$DIR/log//log_file
 lowPriorityPassword=
 publicIPEnabled=1

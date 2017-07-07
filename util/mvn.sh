@@ -3,17 +3,21 @@
 if [[ "$1" == *h* ]]; then
 cat <<END
 Usage: mvn.sh [flags] [extra-args]
-Flags:
+General flags:
+    c   clean up before run (e.g. hg purge --all)
     p   package (instead of compile)
+    m   run makepro.py after maven
+    N   do not run mvn
+Target flags:
+    S   build mediaserver only
+    C   build desktop client only
+    D   build deb packages (useful with S and C)
+Build configuration flags:
     r   -Dbuild.configuration=release (instead of debug)
     u   build unit tests as well (-Dut)
     b   NX1 (-Darch=arm -Dbox=bpi)
-    c   clean up before run (e.g. hg purge --all)
-    m   run makepro.py after maven
-    S   build mediaserver only
-    C   build desktop client only
-    D   build deb packages
-    N   do not run mvn
+    i   ISD (-Darch=arm -Dbox=isd)
+    I   ISD (-Darch=arm -Dbox=isd_s2)
 END
 exit 0
 fi
@@ -28,6 +32,8 @@ FLAGS=$1
 OPTIONS="-Dbuild.configuration=$CONF $@"
 [[ "$FLAGS" = *u* ]] && OPTIONS+=" -Dutb"
 [[ "$FLAGS" = *b* ]] && OPTIONS+=" -Darch=arm -Dbox=bpi"
+[[ "$FLAGS" = *i* ]] && OPTIONS+=" -Darch=arm -Dbox=isd"
+[[ "$FLAGS" = *I* ]] && OPTIONS+=" -Darch=arm -Dbox=isd_s2"
 
 PROJECT=
 [[ "$FLAGS" = *S* ]] && PROJECT="mediaserver"

@@ -30,8 +30,7 @@ mkdir -p $DIR
 
 TESTS=$@
 if [ ! "$TESTS" ]; then
-    TESTS=$(find build_environment -name "*_ut" -type f |
-        tr '/' ' ' | awk '{print $NF}')
+    TESTS=$(find . -name "*_ut" -type f | tr '/' ' ' | awk '{print $NF}')
 fi
 [ "$TESTS" == n ] && TESTS="nx_network_ut cloud_connectivity_ut"
 

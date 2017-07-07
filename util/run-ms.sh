@@ -8,6 +8,7 @@ Usage: [OPTION=VALUE ...] run-ms.sh [<hex-id>] [ms-extra-args]
 Options:
     DIR - config directory to use, default $HOME/develop/mediaserver<hex-id>
     LL  - log level to use (DEBUG2 is default)
+    CH  - disable crash handler
 END
 exit 0
 fi
@@ -21,10 +22,9 @@ DIR=${DIR:-$HOME/develop/mediaserver$ID}
 ARGS="-e --conf-file=$DIR/mediaserver.conf --runtime-conf-file=$DIR/run.conf"
 
 LL=${LL-DEBUG2}
-ARGS+=" --log-level=$LL --http-log-level=$LL --ec2-tran-log-level=$LL"
+#ARGS+=" --log-level=$LL --http-log-level=$LL --ec2-tran-log-level=$LL"
 
 if [ ! $noD ]; then ARGS+=" --dev-mode-key=razrazraz"; fi
-if [ ! $CH ]; then ARGS+=" --disable-crash-handler"; fi
 
 $(dirname "${BASH_SOURCE[0]}")/run.sh mediaserver $ARGS $@
 
