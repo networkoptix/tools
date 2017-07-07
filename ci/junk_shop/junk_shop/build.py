@@ -8,7 +8,7 @@ import re
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
-from junk_shop.capture_repository import Parameters, DbCaptureRepository
+from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 
 def parse_maven_output(output):
@@ -40,8 +40,8 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--parameters', type=Parameters.from_string, metavar=Parameters.example,
-                        help='Run parameters')
+    parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
+                        help='Build parameters')
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
     parser.add_argument('--exit-code', type=int, dest='exit_code', help='Build exit code to store to db')
@@ -49,7 +49,7 @@ def main():
                         help='Parse output to determine maven outcome')
     args = parser.parse_args()
     try:
-        repository = DbCaptureRepository(args.db_config, args.parameters)
+        repository = DbCaptureRepository(args.db_config, args.build_parameters)
         passed = store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
         if not passed:
             sys.exit(2)

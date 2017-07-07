@@ -6,7 +6,7 @@ from .utils import SimpleNamespace, datetime_utc_now
 from . import models
 
 
-class Parameters(object):
+class BuildParameters(object):
 
     example = ','.join([
         'project=ci',
@@ -21,7 +21,7 @@ class Parameters(object):
 
     @classmethod
     def from_string(cls, parameters_str):
-        error_msg = 'Expected parameters in form "%s", but got: %r' % (cls.example, parameters_str)
+        error_msg = 'Expected build parameters in form "%s", but got: %r' % (cls.example, parameters_str)
         parameters = cls()
         for pair in parameters_str.split(','):
             l = pair.split('=')
@@ -29,7 +29,7 @@ class Parameters(object):
                 raise ArgumentTypeError(error_msg)
             name, value = l
             if name not in cls.known_parameters:
-                raise ArgumentTypeError('Unknown parameter: %r. Known are: %s' % (name, ', '.join(known_names)))
+                raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
             setattr(parameters, name, value)
         return parameters
 
@@ -105,7 +105,7 @@ class DbCaptureRepository(object):
             outcome='incomplete' if test else '',
             )
         if self.parameters and not parent:
-            for name in Parameters.known_parameters:
+            for name in BuildParameters.known_parameters:
                 setattr(run, name, self._produce_parameter(name, getattr(self.parameters, name)))
         commit()
         run.path = '%s%d/' % (parent.path if parent else '', run.id)

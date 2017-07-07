@@ -16,7 +16,7 @@ import threading
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
-from junk_shop.capture_repository import Parameters, DbCaptureRepository
+from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 
 ARTIFACT_LINE_COUNT_LIMIT = 10000
@@ -441,8 +441,8 @@ def check_is_dir(dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--parameters', type=Parameters.from_string, metavar=Parameters.example,
-                        help='Run parameters')
+    parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
+                        help='Build parameters')
     parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
@@ -451,7 +451,7 @@ def main():
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
     try:
-        repository = DbCaptureRepository(args.db_config, args.parameters)
+        repository = DbCaptureRepository(args.db_config, args.build_parameters)
         runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
         runner.start()
         runner.wait()
