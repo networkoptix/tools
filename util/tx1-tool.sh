@@ -21,7 +21,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
-: ${BOX_DEVELOP_DIR="/home/$USER/develop"} #< Mount point at the box for the workstation develop dir.
+: ${BOX_DEVELOP_DIR="/home/$USER/develop"} #< Mount point at the box for the workstation "develop".
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
@@ -466,11 +466,16 @@ main()
         #..........................................................................................
         tv)
             local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
-            box make -C "$BOX_SRC_DIR" "$@" \
-                "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
-                "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
-                "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
-                "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
+            if [ "$*" = "clean" ]; then
+                box make -C "$BOX_SRC_DIR" clean
+                # No need to attempt copying files.
+            else
+                box make -C "$BOX_SRC_DIR" "$@" \
+                    "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
+                    "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
+                    "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
+                    "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
+            fi
             ;;
         tv-rdep)
             local SRC_DIR="$PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"

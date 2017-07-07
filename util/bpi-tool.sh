@@ -103,6 +103,7 @@ gen [args] # Call "linux-tool.sh gen bpi [args]".
 build [args] # Call "linux-tool.sh build bpi [args]".
 pack-short <output.tgz> # Prepare tar with build results at the box.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
+test-installer [mvn] <original-installer.tgz> # Build installer and test to equal the original.
 EOF
 }
 
@@ -902,7 +903,7 @@ main()
             ;;
         ldp-rdep)
             cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
-            nx_sync "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit
+            nx_sync "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit $?
             rdep -u
             ;;
         #..........................................................................................
@@ -926,6 +927,9 @@ main()
             ;;
         pack-full)
             pack_full "$1"
+            ;;
+        test-installer)
+            "$LINUX_TOOL" test_installer bpi "$@"
             ;;
         #..........................................................................................
         *)

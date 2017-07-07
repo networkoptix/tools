@@ -323,12 +323,12 @@ nx_find_files() # FILES_ARRAY_VAR find_args...
 
 # Search for the file inside the given dir using the given filename regex via 'find'.
 # If more than one file is found, fail with the message including the file list.
-nx_find_file() # FILE_VAR dir regex file_description_for_error_message
+nx_find_file() # FILE_VAR dir regex [file_description_for_error_message]
 {
     local FILE_VAR="$1"
     local FILE_LOCATION="$2"
     local FILE_PATH_REGEX="$3"
-    local FILE_DESCRIPTION="$4"
+    local FILE_DESCRIPTION="${4:-$3}"
 
     local FILES=()
     nx_find_files FILES "$FILE_LOCATION" -regex "$FILE_PATH_REGEX"
