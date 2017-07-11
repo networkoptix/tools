@@ -28,11 +28,21 @@ class Platform(db.Entity):
     name = Required(str)
     runs = Set('Run')
 
+class RunParameter(db.Entity):
+    _table_ = 'run_parameter'
+    name = Required(str)
+    values = Set('RunParameterValue')
+
+
 class ArtifactType(db.Entity):
     _table_ = 'artifact_type'
     name = Required(str)
     content_type = Required(str)
     artifacts = Set('Artifact')
+
+class Metric(db.Entity):
+    name = Required(str)
+    values = Set('MetricValue')
 
 class Test(db.Entity):
     path = Required(str)  # functional/some_dir/something_test.py/test_that
@@ -59,6 +69,8 @@ class Run(db.Entity):
     platform = Optional(Platform)
     vc_changeset_id = Optional(str)  # version control changeset id of this build (hg id --debug)
     children = Set('Run')
+    run_parameters = Set('RunParameterValue')
+    metrics = Set('MetricValue')
 
 class Artifact(db.Entity):
     run = Required(Run)
@@ -67,3 +79,15 @@ class Artifact(db.Entity):
     is_error = Required(bool)
     encoding = Optional(str)
     data = Required(buffer, lazy=True)
+
+class RunParameterValue(db.Entity):
+    _table_ = 'run_parameter_value'
+    run_parameter = Required(RunParameter)
+    run = Required(Run)
+    value = Required(str)
+
+class MetricValue(db.Entity):
+    _table_ = 'metric_value'
+    metric = Required(Metric)
+    run = Required(Run)
+    value = Required(str)

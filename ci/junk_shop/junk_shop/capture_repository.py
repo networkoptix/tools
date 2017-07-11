@@ -45,6 +45,29 @@ class BuildParameters(object):
         self.vc_changeset_id = None
 
 
+class RunParameters(object):
+
+    example = 'some_param_1=some_value_1,some_param2=some_value_2'
+
+    @classmethod
+    def from_string(cls, parameters_str):
+        error_msg = 'Expected run parameters in form "%s", but got: %r' % (cls.example, parameters_str)
+        parameters = {}
+        for pair in parameters_str.split(','):
+            l = pair.split('=')
+            if len(l) != 2:
+                raise ArgumentTypeError(error_msg)
+            name, value = l
+            parameters[name] = value
+        return cls(parameters)
+
+    def __init__(self, parameters):
+        self.parameters = parameters  # name -> value, str -> str
+
+    def items(self):
+        return self.parameters.items()
+
+
 class ArtifactType(object):
 
     def __init__(self, name, content_type):
@@ -74,8 +97,9 @@ class ArtifactTypeFactory(object):
 
 class DbCaptureRepository(object):
 
-    def __init__(self, db_config, parameters):
-        self.parameters = parameters
+    def __init__(self, db_config, build_parameters, run_parameters):
+        self.build_parameters = build_parameters
+        self.run_parameters = run_parameters
         self.artifact_type = ArtifactTypeFactory([
             ArtifactType('traceback', 'text/plain'),
             ArtifactType('output', 'text/plain'),
@@ -104,12 +128,26 @@ class DbCaptureRepository(object):
             started_at=datetime_utc_now(),
             outcome='incomplete' if test else '',
             )
-        if self.parameters and not parent:
-            for name in BuildParameters.known_parameters:
-                setattr(run, name, self._produce_parameter(name, getattr(self.parameters, name)))
+        if not parent:
+            self._set_paramerers(run)
         commit()
         run.path = '%s%d/' % (parent.path if parent else '', run.id)
         return run
+
+    def _set_paramerers(self, run):
+        if self.build_parameters:
+            for name in BuildParameters.known_parameters:
+                setattr(run, name, self._produce_build_parameter(name, getattr(self.build_parameters, name)))
+        if self.run_parameters:
+            for name, value in self.run_parameters.items():
+                param = models.RunParameter.get(name=name)
+                if not param:
+                    param = models.RunParameter(name=name)
+                param_value = models.RunParameterValue(
+                    run_parameter=param,
+                    run=run,
+                    value=value,
+                    )
 
     def _produce_artifact_type(self, artifact_type_rec):
         if artifact_type_rec.id:
@@ -121,7 +159,7 @@ class DbCaptureRepository(object):
         artifact_type_rec.id = at.id
         return at
 
-    def _produce_parameter(self, parameter, value):
+    def _produce_build_parameter(self, parameter, value):
         param2model = dict(
             project=models.Project,
             branch=models.Branch,
@@ -192,6 +230,18 @@ class DbCaptureRepository(object):
     def add_artifact_with_session(self, run, name, artifact_type_rec, data, is_error=False):
         run_reloaded = models.Run[run.id]  # it may belong to different transaction
         self.add_artifact(run_reloaded, name, artifact_type_rec, data, is_error)
+
+    @db_session
+    def add_metric_with_session(self, run, metric_name, metric_value):
+        assert isinstance(metric_value, str), repr(metroc_value)
+        run_reloaded = models.Run[run.id]  # it may belong to different transaction
+        metric = models.Metric.get(name=metric_name)
+        if not metric:
+            metric = models.Metric(name=metric_name)
+        metric_value = models.MetricValue(
+            metric=metric,
+            run=run_reloaded,
+            value=metric_value)
 
     def set_test_outcome(self, parent_run):
         outcome = None
