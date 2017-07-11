@@ -9,7 +9,6 @@ from . import models
 class BuildParameters(object):
 
     example = ','.join([
-        'project=ci',
         'branch=dev_3.0.0',
         'version=3.0.10',
         'release=beta',
@@ -17,7 +16,7 @@ class BuildParameters(object):
         'platform=linux-64',
         'vc_changeset_id=6f305e61fc95ecf3caf2fcc6dcdf51b18811e12e',
         ])
-    known_parameters = ['project', 'branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
+    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -97,7 +96,8 @@ class ArtifactTypeFactory(object):
 
 class DbCaptureRepository(object):
 
-    def __init__(self, db_config, build_parameters, run_parameters):
+    def __init__(self, db_config, project, build_parameters, run_parameters):
+        self.project = project  # str
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
         self.artifact_type = ArtifactTypeFactory([
@@ -135,6 +135,11 @@ class DbCaptureRepository(object):
         return run
 
     def _set_paramerers(self, run):
+        if self.project:
+            project = models.Project.get(name=self.project)
+            if not project:
+                project = models.Project(name=self.project)
+            run.project = project
         if self.build_parameters:
             for name in BuildParameters.known_parameters:
                 setattr(run, name, self._produce_build_parameter(name, getattr(self.build_parameters, name)))
@@ -161,7 +166,6 @@ class DbCaptureRepository(object):
 
     def _produce_build_parameter(self, parameter, value):
         param2model = dict(
-            project=models.Project,
             branch=models.Branch,
             cloud_group=models.CloudGroup,
             customization=models.Customization,

@@ -7,7 +7,6 @@ import py
 from pony.orm import db_session, commit
 import pytest
 from .. import models
-from ..capture_repository import DbCaptureRepository
 
 
 LOG_FORMAT = '%(asctime)-15s %(levelname)-7s %(message)s'
@@ -38,10 +37,10 @@ class LogCapturer(object):
 
 class DbCapturePlugin(object):
 
-    def __init__(self, config, db_config, build_parameters, run_parameters):
+    def __init__(self, config, db_capture_repository):
         assert not config.getvalue('capturelog')  # mutually exclusive
         self.capture_manager = config.pluginmanager.getplugin('capturemanager')
-        self.repo = DbCaptureRepository(db_config, build_parameters, run_parameters)
+        self.repo = db_capture_repository
         self.log_capturer = None
         self.root_run = None
         self.current_test_run = None
