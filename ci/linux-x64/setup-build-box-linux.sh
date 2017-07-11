@@ -17,7 +17,6 @@ JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev gdb"
 CMAKE_BUILD_REQUIREMENTS="ninja-build"
 
 apt-get install -y --no-install-recommends \
-    openjdk-7-jdk \
     protobuf-compiler \
     build-essential \
     unzip zip \
@@ -57,6 +56,14 @@ apt-get install -y --no-install-recommends \
     python-opencv \
     $JUNK_SHOP_REQUIREMENTS \
     $CMAKE_BUILD_REQUIREMENTS
+
+# install jre 1.8 required for jenkins with jre 1.8
+cd /tmp
+wget --no-verbose --no-cookies --no-check-certificate --header \
+	 "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" \
+	 http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jre-8u131-linux-x64.tar.gz
+cd /
+tar xfz /tmp/jre-8u131-linux-x64.tar.gz
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
