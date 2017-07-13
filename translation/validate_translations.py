@@ -16,6 +16,18 @@ from validation_rule import Levels
 from rules_list import get_validation_rules
 sys.path.pop(0)
 
+if os.path.isfile('current_config.py'):
+    sys.path.insert(0, os.getcwd())
+    from current_config import QT_DIR
+    from current_config import PROJECT_SOURCE_DIR
+    os.chdir(PROJECT_SOURCE_DIR)
+    sys.path.pop(0)
+else:
+    buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
+    sys.path.insert(0, buildVarDir)
+    from current_config import QT_DIR
+    sys.path.pop(0)
+
 projectDir = os.path.join(os.getcwd(), 'build_utils/python')
 sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
