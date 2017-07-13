@@ -5,7 +5,7 @@ case_sensitive = [
     'ID', 'PTZ',
 #    'License Key',
 #    'Hardware Id',
-    'Email', 'the Internet',
+    'the Internet',
     'System', "Systems",
     'B', 'KB', 'MB', 'GB', 'TB'
     ]
@@ -13,12 +13,15 @@ case_sensitive = [
 invalid_terms = {
     'low-res': 'Lo-Res',
     'qnt': 'Qty',
-    'e-mail': 'Email',
     'media server': 'server'
     }
 
-exclusions = ['system tray', 'system administrator', '<b>']
-            
+exclusions = [
+    'system tray',
+    'system administrator',
+    'system partitions',
+    '<b>']
+
 class GlossaryRule(ValidationRule):
     def __str__(self):
         return "Check glossary items"

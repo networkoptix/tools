@@ -3,8 +3,8 @@
 from validation_rule import ValidationRule, Levels
 
 the = "the"
-exclusions = ['I/O', 'Internet', 'App']
-text_exclusions = ['settings']
+exclusions = ['I/O', 'Internet', 'App', 'Latest']
+text_exclusions = ['settings', 'license server']
 
 class TheSubjectRule(ValidationRule):
     def __str__(self):
