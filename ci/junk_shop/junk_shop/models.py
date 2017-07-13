@@ -90,4 +90,4 @@ class MetricValue(db.Entity):
     _table_ = 'metric_value'
     metric = Required(Metric)
     run = Required(Run)
-    value = Required(str)
+    value = Required(float)

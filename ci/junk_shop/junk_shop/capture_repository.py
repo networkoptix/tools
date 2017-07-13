@@ -237,7 +237,7 @@ class DbCaptureRepository(object):
 
     @db_session
     def add_metric_with_session(self, run, metric_name, metric_value):
-        assert isinstance(metric_value, str), repr(metroc_value)
+        assert isinstance(metric_value, (float, int)), repr(metric_value)
         run_reloaded = models.Run[run.id]  # it may belong to different transaction
         metric = models.Metric.get(name=metric_name)
         if not metric:
