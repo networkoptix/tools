@@ -1,6 +1,6 @@
 # docker-compose configuration file for junk_shop development
 # Usage:
-# $ POSTGRES_PASSWORD=xxxxx docker-compose -f deploy/compose-develop.yaml up -d
+# $ PGPASSWORD=xxxxx docker-compose -f deploy/compose-develop.yaml up -d
 
 version: '2'
 
@@ -20,7 +20,7 @@ services:
     ports:
       - '5000:80'
     environment:
-      DB_CONFIG: postgres:${POSTGRES_PASSWORD}@database
+      DB_CONFIG: postgres:${PGPASSWORD}@database
 
   junk_shop_db:
     container_name: junk_shop_db
@@ -28,6 +28,6 @@ services:
     ports:
       - '5432:5432'
     environment:
-      - POSTGRES_PASSWORD
+      - PGPASSWORD
     volumes:
       - junk_shop_database:/var/lib/postgresql/data

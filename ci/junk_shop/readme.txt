@@ -9,8 +9,8 @@ To select runs:
 
 To run web application locally, for development:
 cd ~/develop/devtools/ci/junkshop
-DB_CONFIG=postgres:<postgress-db-password>@localhost FLASK_APP=junk_shop/webapp.py flask run
+PYTHONPATH=. DB_CONFIG=postgres:<postgress-db-password>@localhost FLASK_APP=junk_shop.webapp flask run
 
 To do the same, but when postgres database is behind double-ssh:
 ssh -L 15432:localhost:5432 junk-shop  &  # where 'junk-shop' is remote ssh host
-DB_CONFIG=postgres:<postgress-db-password>@localhost:15432 FLASK_APP=junk_shop/webapp.py  FLASK_DEBUG=1 flask run
+PYTHONPATH=. DB_CONFIG=postgres:<postgress-db-password>@localhost:15432 FLASK_APP=junk_shop.webapp FLASK_DEBUG=1 flask run

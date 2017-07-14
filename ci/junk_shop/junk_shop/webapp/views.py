@@ -1,15 +1,11 @@
 import sys
-import os
-import time
-from datetime import datetime, timedelta
 import bz2
-from flask import Flask, request, render_template, make_response, url_for, redirect
-from jinja2 import Markup
-from pony.orm import db_session, desc, select, raw_sql, count, exists, sql_debug, OperationalError
-from .utils import SimpleNamespace, datetime_utc_now, DbConfig
-from . import models
-
-app = Flask(__name__)
+from flask import request, render_template, make_response, url_for, redirect, abort
+from pony.orm import db_session, desc, select, count
+from ..utils import SimpleNamespace
+from .. import models
+from junk_shop.webapp import app
+from .run import load_root_run_node_list, load_run_node_tree
 
 
 DEFAULT_RUN_LIST_PAGE_SIZE = 20
@@ -20,97 +16,6 @@ GROUP BY version
 ORDER BY string_to_array(version, '.')::int[] DESC
 LIMIT $limit OFFSET $offset'''
 
-
-@app.template_filter('format_datetime')
-def format_datetime(dt, precise=True):
-    if not dt: return dt
-    assert isinstance(dt, datetime), repr(dt)
-    s = dt.strftime('%Y %b %d')
-    if not precise and dt.day < datetime_utc_now().day:
-        return Markup(s)
-    s += ' <b>' + dt.strftime('%H:%M') + '</b>'
-    if precise:
-        s += ':' + dt.strftime('%S') + '.%03d' % (dt.microsecond/1000)
-    return Markup(s)
-
-
-@app.template_filter('format_timedelta')
-def format_timedelta(d):
-    hours, rem = divmod(d.total_seconds(), 3600)
-    minutes, seconds = divmod(rem, 60)
-    if hours:
-        return '%d:%02d:02d' % (hours, minutes, seconds)
-    if minutes:
-        return '%d:%02d' % (minutes, seconds)
-    return '%d.%03d' % (seconds, d.microseconds/1000)
-
-
-class ArtifactRec(object):
-
-    def __init__(self, artifact_id, artifact_name, is_error, type_name, content_type):
-        self.id = artifact_id
-        self.name = artifact_name
-        self.is_error = is_error
-        self.is_binary = not content_type.startswith('text/')
-        if type_name not in ['output', 'traceback', 'core']:
-            self.name += ' ' + type_name
-
-
-class RunNode(object):
-
-    def __init__(self, path_tuple, run, artifacts=None, lazy=False, has_children=False):
-        self.path_tuple = path_tuple
-        self.run = run
-        self.artifacts = artifacts or []
-        self.children = []  # RunNode list
-        self.lazy = lazy  # children must by retrieved using ajax if True
-        self._has_children = has_children
-
-    @property
-    def has_children(self):
-        return self.children or self._has_children
-
-
-def load_artifacts(root_run_list):
-    run_id2artifacts = {}  # Run -> ArtifactRec list
-    for run_id, artifact_id, artifact_name, is_error, type_name, content_type in select(
-            (run.id, artifact.id, artifact.name, artifact.is_error, artifact.type.name, artifact.type.content_type)
-            for artifact in models.Artifact
-            for run in models.Run
-            if (run.root_run in root_run_list or run in root_run_list) and artifact.run == run).order_by(2):
-        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type)
-        run_id2artifacts.setdefault(run_id, []).append(rec)
-    return run_id2artifacts
-
-def load_root_run_node_list(page, page_size, branch=None, platform=None, version=None):
-    query = select(run for run in models.Run if run.root_run is None)
-    if branch:
-        query = query.filter(branch=branch)
-    if platform:
-        query = query.filter(platform=platform)
-    if version:
-        query = query.filter(version=version)
-    root_run_list = query.order_by(desc(models.Run.id)).page(page, page_size)
-    run_id2artifacts = load_artifacts(root_run_list)
-    run_has_children = dict(select((run.id, exists(run.children)) for run in models.Run if run in root_run_list))
-    return [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id),
-                    lazy=True, has_children=run_has_children[run.id])
-                    for run in root_run_list]
-
-def load_run_node_tree(root_run):
-    run_id2artifacts = load_artifacts([root_run])
-    root_node = RunNode((int(root_run.path.rstrip('/')),), root_run, run_id2artifacts.get(root_run.id))
-    path2node = {root_node.path_tuple: root_node}
-    for run in select(run for run in models.Run if run.root_run is root_run):
-        path_tuple = tuple(map(int, run.path.rstrip('/').split('/')))
-        path2node[path_tuple] = RunNode(path_tuple, run, run_id2artifacts.get(run.id))
-    for path, node in path2node.items():
-        if len(path) == 1: continue
-        parent = path2node[path[:-1]]
-        parent.children.append(node)
-    for node in path2node.values():
-        node.children = sorted(node.children, key=lambda node: node.path_tuple)
-    return root_node
 
 
 @app.route('/')
@@ -155,6 +60,7 @@ def run(run_id):
 
 
 def load_platform_branch_cell(branch, platform):
+    if not branch or not platform: abort(404)
     def load_last_run(test_path):
         last_run = select(run for run in models.Run
                           if run.test.path == test_path and
@@ -295,22 +201,6 @@ def branch_platform_version_list(branch_name, platform_name):
         version_list=version_list)
 
 
-@app.route('/artifact/<int:artifact_id>')
-@db_session
-def get_artifact(artifact_id):
-    artifact = models.Artifact.get(id=artifact_id)
-    if artifact.encoding == 'bz2':
-        data = bz2.decompress(artifact.data)
-    elif not artifact.encoding:
-        data = artifact.data
-    else:
-        assert False, 'Unknown artifact encoding: %r' % artifact.encoding
-    return str(data), {
-        'Content-Type': artifact.type.content_type,
-        'Content-Disposition': 'attachment; filename="%s"' % artifact.name,
-        }
-
-
 @app.route('/version/<branch_name>/<platform_name>/<version>')
 @db_session
 def branch_platform_version_run_list(branch_name, platform_name, version):
@@ -335,20 +225,17 @@ def branch_platform_version_run_list(branch_name, platform_name, version):
         run_node_list=run_list)
 
 
-def retry_on_db_error(fn, *args, **kw):
-    while True:
-        try:
-            return fn(*args, **kw)
-        except OperationalError as x:
-            print >>sys.stderr, 'Error connecting to database:', x
-            time.sleep(1)
-
-def init():
-    db_config = DbConfig.from_string(os.environ['DB_CONFIG'])
-    if 'SQL_DEBUG' in os.environ:
-        sql_debug(True)
-    retry_on_db_error(models.db.bind, 'postgres', host=db_config.host,
-                      user=db_config.user, password=db_config.password, port=db_config.port)
-    retry_on_db_error(models.db.generate_mapping, create_tables=True)
-
-init()
+@app.route('/artifact/<int:artifact_id>')
+@db_session
+def get_artifact(artifact_id):
+    artifact = models.Artifact.get(id=artifact_id)
+    if artifact.encoding == 'bz2':
+        data = bz2.decompress(artifact.data)
+    elif not artifact.encoding:
+        data = artifact.data
+    else:
+        assert False, 'Unknown artifact encoding: %r' % artifact.encoding
+    return str(data), {
+        'Content-Type': artifact.type.content_type,
+        'Content-Disposition': 'attachment; filename="%s"' % artifact.name,
+        }

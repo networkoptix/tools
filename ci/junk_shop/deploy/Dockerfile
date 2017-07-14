@@ -9,3 +9,5 @@ RUN pip install --requirement /tmp/requirements.txt
 COPY ./junk_shop /app/junk_shop
 COPY ./deploy/uwsgi.ini /app/uwsgi.ini
 COPY ./deploy/nginx.conf /etc/nginx/conf.d/
+
+ADD https://cdn.plot.ly/plotly-latest.min.js /app/junk_shop/webapp/static/

@@ -96,7 +96,7 @@ class ArtifactTypeFactory(object):
 
 class DbCaptureRepository(object):
 
-    def __init__(self, db_config, project, build_parameters, run_parameters):
+    def __init__(self, db_config, project, build_parameters, run_parameters=None):
         self.project = project  # str
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
