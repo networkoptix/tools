@@ -441,17 +441,18 @@ def check_is_dir(dir):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
+                        help='Capture postgres database credentials')
+    parser.add_argument('--project', help='Junk-shop project name')
     parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')
-    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
-                        help='Capture postgres database credentials')
     parser.add_argument('bin_dir', type=check_is_dir, help='Directory to test binaries')
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
     try:
-        repository = DbCaptureRepository(args.db_config, args.build_parameters)
+        repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
         runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
         runner.start()
         runner.wait()
