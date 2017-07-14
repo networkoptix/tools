@@ -14,6 +14,7 @@ apt-get install -y --no-install-recommends \
 add-apt-repository ppa:ubuntu-toolchain-r/test  # using newest gcc from here
 
 JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev gdb"
+MAVEN_BUILD_REQUIREMENTS="maven"
 CMAKE_BUILD_REQUIREMENTS="ninja-build"
 
 apt-get install -y --no-install-recommends \
@@ -55,6 +56,7 @@ apt-get install -y --no-install-recommends \
     python-demjson \
     python-opencv \
     $JUNK_SHOP_REQUIREMENTS \
+    $MAVEN_BUILD_REQUIREMENTS \
     $CMAKE_BUILD_REQUIREMENTS
 
 # install jre 1.8 required for jenkins with jre 1.8
