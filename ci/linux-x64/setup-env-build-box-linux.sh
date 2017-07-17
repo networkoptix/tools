@@ -15,7 +15,7 @@ mkdir -p $PROJ_ROOT_DIR
 
 cat > $HOME/.profile <<EOF
 . \$HOME/.bashrc
-export PATH=$HOME/$CMAKE_DIR_NAME/bin:$PATH:$BUILDENV_DIR/bin:$BUILDENV_DIR/qt/bin:$BUILDENV_DIR/maven/bin
+export PATH=$BUILDENV_DIR/maven/bin:$HOME/$CMAKE_DIR_NAME/bin:$PATH:$BUILDENV_DIR/bin:$BUILDENV_DIR/qt/bin
 export QTDIR=$BUILDENV_DIR/qt
 export ANDROID_NDK_ROOT=$BUILDENV_DIR/android/android-ndk
 export ANDROID_SDK_ROOT=$BUILDENV_DIR/android/android-sdk

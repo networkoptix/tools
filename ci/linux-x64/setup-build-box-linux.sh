@@ -14,7 +14,7 @@ apt-get install -y --no-install-recommends \
 add-apt-repository ppa:ubuntu-toolchain-r/test  # using newest gcc from here
 
 JUNK_SHOP_REQUIREMENTS="libpq-dev python-dev gdb"
-MAVEN_BUILD_REQUIREMENTS="maven"
+MAVEN_BUILD_REQUIREMENTS="maven"  # only it's dependencies are actually required
 CMAKE_BUILD_REQUIREMENTS="ninja-build"
 
 apt-get install -y --no-install-recommends \
