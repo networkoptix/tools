@@ -2,12 +2,13 @@ from validation_rule import ValidationRule, Levels
 
 case_sensitive = [
     'URL', 'Hi-Res', 'Custom-Res',
-    'ID', 'PTZ',
-#    'License Key',
-#    'Hardware Id',
+    'Id', 'PTZ',
+    'License Key',
+    'Hardware Id',
     'the Internet',
+    'the support team',
     'System', "Systems",
-    'B', 'KB', 'MB', 'GB', 'TB'
+    'B', 'kB', 'MB', 'GB', 'TB'
     ]
 
 invalid_terms = {
@@ -20,6 +21,7 @@ exclusions = [
     'system tray',
     'system administrator',
     'system partitions',
+    'system presets',
     '<b>']
 
 class GlossaryRule(ValidationRule):
