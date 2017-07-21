@@ -83,7 +83,8 @@ class QmlDeployUtil:
             dst = os.path.join(output_dir, subdir)
             if os.path.exists(dst):
                 shutil.rmtree(dst)
-            shutil.copytree(path, dst, symlinks=True)
+            shutil.copytree(path, dst, symlinks=True,
+                ignore = shutil.ignore_patterns("*.a", "*.prl"))
 
     def deploy(self, qml_root, output_dir):
         imports = self.invoke_qmlimportscanner(qml_root)
