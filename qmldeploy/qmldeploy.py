@@ -14,12 +14,12 @@ class QmlDeployUtil:
 
         self.scanner_path = QmlDeployUtil.find_qmlimportscanner(qt_root)
         if not self.scanner_path:
-            print("qmlimportscanner is not found in {}".format(qt_root), file=sys.stderr)
+            exit("qmlimportscanner is not found in {}".format(qt_root))
             raise
 
         self.import_path = QmlDeployUtil.find_qml_import_path(qt_root)
         if not self.import_path:
-            print("qml import path is not found in {}".format(qt_root), file=sys.stderr)
+            exit("qml import path is not found in {}".format(qt_root))
             raise
 
     def find_qmlimportscanner(qt_root):
@@ -40,15 +40,14 @@ class QmlDeployUtil:
         process = subprocess.Popen(command, stdout=subprocess.PIPE)
 
         if not process:
-            print("Cannot start {}".format(" ".join(command)), file=sys.stderr)
+            exit("Cannot start {}".format(" ".join(command)))
             return
 
         return json.load(process.stdout)
 
     def get_qt_imports(self, imports):
         if not type(imports) is list:
-            print("Parsed imports is not a list.", file=sys.stderr)
-            return
+            exit("Parsed imports is not a list.")
 
         qt_deps = []
 
@@ -58,27 +57,33 @@ class QmlDeployUtil:
             if not path or os.path.commonprefix([self.qt_root, path]) != self.qt_root:
                 continue
 
-            qt_deps.append(path)
+            qt_deps.append(
+                {
+                    "path": path,
+                    "plugin": item.get("plugin")
+                })
 
-        qt_deps.sort()
+        qt_deps.sort(key=lambda item: item["path"])
 
         result = []
         previous_path = None
 
-        for path in qt_deps:
+        for item in qt_deps:
+            path = item["path"]
             if previous_path and path.startswith(previous_path):
                 continue
 
-            result.append(path)
+            result.append(item)
             previous_path = path
 
         return result
 
-    def copy_components(self, paths, output_dir):
+    def copy_components(self, imports, output_dir):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        for path in paths:
+        for item in imports:
+            path = item["path"]
             subdir = os.path.relpath(path, self.import_path)
             dst = os.path.join(output_dir, subdir)
             if os.path.exists(dst):
@@ -87,23 +92,49 @@ class QmlDeployUtil:
                 ignore = shutil.ignore_patterns("*.a", "*.prl"))
 
     def deploy(self, qml_root, output_dir):
-        imports = self.invoke_qmlimportscanner(qml_root)
-        if not imports:
+        imports_dict = self.invoke_qmlimportscanner(qml_root)
+        if not imports_dict:
             return
 
-        paths = self.get_qt_imports(imports)
-        self.copy_components(paths, output_dir)
+        imports = self.get_qt_imports(imports_dict)
+        self.copy_components(imports, output_dir)
+
+    def print_static_plugins(self, qml_root):
+        imports_dict = self.invoke_qmlimportscanner(qml_root)
+        if not imports_dict:
+            return
+
+        imports = self.get_qt_imports(imports_dict)
+
+        for item in imports:
+            path = item["path"]
+            plugin = item["plugin"]
+
+            if not plugin:
+                continue
+
+            name = os.path.join(path, "lib" + plugin + ".a")
+            if os.path.exists(name):
+                print(name)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--qml-root", type=str, required=True, help="Root QML directory.")
     parser.add_argument("--qt-root", type=str, required=True, help="Qt root directory.")
-    parser.add_argument("-o", "--output", type=str, required=True, help="Output directory.")
+    parser.add_argument("-o", "--output", type=str, help="Output directory.")
+    parser.add_argument("--print-static-plugins", action="store_true", help="Print static plugins list.")
 
     args = parser.parse_args()
 
     deploy_util = QmlDeployUtil(args.qt_root)
-    deploy_util.deploy(args.qml_root, args.output)
+
+    if args.print_static_plugins:
+        deploy_util.print_static_plugins(args.qml_root)
+    else:
+        if not args.output:
+            exit("Output directory is not specified.")
+
+        deploy_util.deploy(args.qml_root, args.output)
 
 if __name__ == "__main__":
     main()
