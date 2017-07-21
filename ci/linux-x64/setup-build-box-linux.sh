@@ -52,6 +52,7 @@ apt-get install -y --no-install-recommends \
     g++-4.8 \
     rsync \
     mercurial \
+    nano \
     fakeroot \
     python-demjson \
     python-opencv \
