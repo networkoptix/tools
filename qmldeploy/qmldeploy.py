@@ -72,7 +72,7 @@ class QmlDeployUtil:
 
         for item in qt_deps:
             path = item["path"]
-            if previous_path and path.startswith(previous_path):
+            if previous_path and path == previous_path:
                 continue
 
             result.append(item)
@@ -84,8 +84,18 @@ class QmlDeployUtil:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+        paths  = []
+        previous_path = None
+
         for item in imports:
             path = item["path"]
+            if previous_path and path.startswith(previous_path):
+                continue
+
+            paths.append(path)
+            previous_path = path
+
+        for path in paths:
             subdir = os.path.relpath(path, self.import_path)
             dst = os.path.join(output_dir, subdir)
             if os.path.exists(dst):
