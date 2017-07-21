@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 from __future__ import print_function
 import os
@@ -22,6 +22,7 @@ class QmlDeployUtil:
             exit("qml import path is not found in {}".format(qt_root))
             raise
 
+    @staticmethod
     def find_qmlimportscanner(qt_root):
         for name in ["qmlimportscanner", "qmlimportscanner.exe"]:
             path = os.path.join(qt_root, "bin", name)
@@ -31,6 +32,7 @@ class QmlDeployUtil:
 
         return None
 
+    @staticmethod
     def find_qml_import_path(qt_root):
         path = os.path.join(qt_root, "qml")
         return path if os.path.exists(path) else None
