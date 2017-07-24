@@ -10,10 +10,15 @@ fi
 # 'hg branches' returns nothing for incompletely cloned repository
 if [[ ! -d "$TASKBOT_VAR/nx_vms" || ! $(cd "$TASKBOT_VAR/nx_vms" && hg branches) ]]; then
   cd "$TASKBOT_VAR"
-  [[ -d nx_vms ]] && rm -r nx_vms
+  if [[ -d nx_vms ]]; then
+    echo "Removing broken nx_vms directory"
+    rm -r nx_vms
+  fi
   if [[ "$TASKBOT_BRANCHNAME" == "default" ]]; then
+    echo "Cloning nx_vms from $TASKBOT_NX_VMS_REPO"
     hg clone "$TASKBOT_NX_VMS_REPO" nx_vms
   else
+    echo "Sharing nx_vms from default"
     hg share ../default/nx_vms nx_vms
   fi
 fi
