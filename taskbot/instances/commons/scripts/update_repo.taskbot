@@ -7,9 +7,15 @@ if [ ! -d "$TASKBOT_VAR"/revision ]; then
   mkdir -p "$TASKBOT_VAR"/revision
 fi
 
-if [ ! -d "$TASKBOT_VAR"/nx_vms ]; then 
+# 'hg branches' returns nothing for incompletely cloned repository
+if [[ ! -d "$TASKBOT_VAR/nx_vms" || ! $(cd "$TASKBOT_VAR/nx_vms" && hg branches) ]]; then
   cd "$TASKBOT_VAR"
-  hg clone "$TASKBOT_NX_VMS_REPO" nx_vms
+  [[ -d nx_vms ]] && rm -r nx_vms
+  if [[ "$TASKBOT_BRANCHNAME" == "default" ]]; then
+    hg clone "$TASKBOT_NX_VMS_REPO" nx_vms
+  else
+    hg share ../default/nx_vms nx_vms
+  fi
 fi
 
 # Remember old revisions
