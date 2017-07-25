@@ -7,19 +7,25 @@ import argparse
 import subprocess
 import shutil
 import json
+import re
 
 class QmlDeployUtil:
     def __init__(self, qt_root):
         self.qt_root = os.path.abspath(qt_root)
 
-        self.scanner_path = QmlDeployUtil.find_qmlimportscanner(qt_root)
+        self.scanner_path = self.find_qmlimportscanner(qt_root)
         if not self.scanner_path:
             exit("qmlimportscanner is not found in {}".format(qt_root))
             raise
 
-        self.import_path = QmlDeployUtil.find_qml_import_path(qt_root)
+        self.import_path = self.find_qml_import_path(qt_root)
         if not self.import_path:
             exit("qml import path is not found in {}".format(qt_root))
+            raise
+
+        self.modules_path = self.find_modules_path(qt_root)
+        if not self.import_path:
+            exit("modules path is not found in {}".format(qt_root))
             raise
 
     @staticmethod
@@ -35,6 +41,11 @@ class QmlDeployUtil:
     @staticmethod
     def find_qml_import_path(qt_root):
         path = os.path.join(qt_root, "qml")
+        return path if os.path.exists(path) else None
+
+    @staticmethod
+    def find_modules_path(qt_root):
+        path = os.path.join(qt_root, "mkspecs", "modules")
         return path if os.path.exists(path) else None
 
     def invoke_qmlimportscanner(self, qml_root):
@@ -81,6 +92,37 @@ class QmlDeployUtil:
 
         return result
 
+    def get_plugin_information(self, plugin_name):
+        pri_file_name = os.path.join(self.modules_path, "qt_plugin_{}.pri".format(plugin_name))
+
+        if not os.path.exists(pri_file_name):
+            return
+
+        with open(pri_file_name) as pri_file:
+            pri_data = pri_file.read()
+
+        re_prefix = "QT_PLUGIN\\." + plugin_name + "\\."
+
+        m = re.search(re_prefix + "TYPE = (.+)", pri_data)
+        if not m:
+            return
+        plugin_type = m.group(1)
+
+        file_path = os.path.join(self.qt_root, "plugins", plugin_type, "lib" + plugin_name + ".a")
+        if not os.path.exists(file_path):
+            return
+
+        m = re.search(re_prefix + "CLASS_NAME = (.+)", pri_data)
+        if not m:
+            return
+        plugin_class = m.group(1)
+
+        return {
+            "name": plugin_name,
+            "path": file_path,
+            "class_name": plugin_class
+        }
+
     def copy_components(self, imports, output_dir):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -112,7 +154,7 @@ class QmlDeployUtil:
         imports = self.get_qt_imports(imports_dict)
         self.copy_components(imports, output_dir)
 
-    def print_static_plugins(self, qml_root):
+    def print_static_plugins(self, qml_root, additional_plugins=[]):
         imports_dict = self.invoke_qmlimportscanner(qml_root)
         if not imports_dict:
             return
@@ -130,7 +172,14 @@ class QmlDeployUtil:
             if os.path.exists(name):
                 print(name)
 
-    def generate_import_cpp(self, qml_root, file_name):
+        for plugin_name in additional_plugins:
+            info = self.get_plugin_information(plugin_name)
+            if not info:
+                continue
+
+            print(info["path"])
+
+    def generate_import_cpp(self, qml_root, file_name, additional_plugins=[]):
         imports_dict = self.invoke_qmlimportscanner(qml_root)
         if not imports_dict:
             return
@@ -148,22 +197,35 @@ class QmlDeployUtil:
 
                 out_file.write("Q_IMPORT_PLUGIN({})\n".format(class_name))
 
+            for plugin_name in additional_plugins:
+                info = self.get_plugin_information(plugin_name)
+                if not info:
+                    continue
+
+                out_file.write("Q_IMPORT_PLUGIN({})\n".format(info["class_name"]))
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--qmlimportscanner", type=str, help="Custom qmlimportscanner binary.")
     parser.add_argument("--qml-root", type=str, required=True, help="Root QML directory.")
     parser.add_argument("--qt-root", type=str, required=True, help="Qt root directory.")
     parser.add_argument("-o", "--output", type=str, help="Output.")
     parser.add_argument("--print-static-plugins", action="store_true", help="Print static plugins list.")
     parser.add_argument("--generate-import-cpp", action="store_true", help="Generate a file for importing plugins.")
+    parser.add_argument("--additional-plugins", nargs="+", help="Additional plugins to process.")
 
     args = parser.parse_args()
 
     deploy_util = QmlDeployUtil(args.qt_root)
+    if args.qmlimportscanner:
+        if not os.path.exists(args.qmlimportscanner):
+            exit("{}: not found".format(args.qmlimportscanner))
+        deploy_util.scanner_path = args.qmlimportscanner
 
     if args.print_static_plugins:
-        deploy_util.print_static_plugins(args.qml_root)
+        deploy_util.print_static_plugins(args.qml_root, args.additional_plugins)
     elif args.generate_import_cpp:
-        deploy_util.generate_import_cpp(args.qml_root, args.output)
+        deploy_util.generate_import_cpp(args.qml_root, args.output, args.additional_plugins)
     elif args.output:
         if not arg.output:
             exit("Output directory is not specified.")
