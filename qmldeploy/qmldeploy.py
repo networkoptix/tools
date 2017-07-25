@@ -154,12 +154,17 @@ class QmlDeployUtil:
         imports = self.get_qt_imports(imports_dict)
         self.copy_components(imports, output_dir)
 
-    def print_static_plugins(self, qml_root, additional_plugins=[]):
+    def print_static_plugins(self, qml_root, file_name=None, additional_plugins=[]):
         imports_dict = self.invoke_qmlimportscanner(qml_root)
         if not imports_dict:
             return
 
         imports = self.get_qt_imports(imports_dict)
+
+        if file_name:
+            output = open(file_name, "w")
+        else:
+            output = sys.stdout
 
         for item in imports:
             path = item["path"]
@@ -170,14 +175,17 @@ class QmlDeployUtil:
 
             name = os.path.join(path, "lib" + plugin + ".a")
             if os.path.exists(name):
-                print(name)
+                output.write(name + "\n")
 
         for plugin_name in additional_plugins:
             info = self.get_plugin_information(plugin_name)
             if not info:
                 continue
 
-            print(info["path"])
+            output.write(info["path"] + "\n")
+
+        if output != sys.stdout:
+            output.close()
 
     def generate_import_cpp(self, qml_root, file_name, additional_plugins=[]):
         imports_dict = self.invoke_qmlimportscanner(qml_root)
@@ -223,7 +231,7 @@ def main():
         deploy_util.scanner_path = args.qmlimportscanner
 
     if args.print_static_plugins:
-        deploy_util.print_static_plugins(args.qml_root, args.additional_plugins)
+        deploy_util.print_static_plugins(args.qml_root, args.output, args.additional_plugins)
     elif args.generate_import_cpp:
         deploy_util.generate_import_cpp(args.qml_root, args.output, args.additional_plugins)
     elif args.output:
