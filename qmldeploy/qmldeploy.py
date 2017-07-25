@@ -234,7 +234,7 @@ def main():
         deploy_util.print_static_plugins(args.qml_root, args.output, args.additional_plugins)
     elif args.generate_import_cpp:
         deploy_util.generate_import_cpp(args.qml_root, args.output, args.additional_plugins)
-    elif args.output:
+    else:
         if not arg.output:
             exit("Output directory is not specified.")
 
