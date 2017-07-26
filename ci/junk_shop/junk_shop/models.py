@@ -37,6 +37,7 @@ class RunParameter(db.Entity):
 class ArtifactType(db.Entity):
     _table_ = 'artifact_type'
     name = Required(str)
+    ext = Optional(str)
     content_type = Required(str)
     artifacts = Set('Artifact')
 

@@ -237,5 +237,5 @@ def get_artifact(artifact_id):
         assert False, 'Unknown artifact encoding: %r' % artifact.encoding
     return str(data), {
         'Content-Type': artifact.type.content_type,
-        'Content-Disposition': 'attachment; filename="%s"' % artifact.name,
+        'Content-Disposition': 'attachment; filename="%s%s"' % (artifact.name, artifact.type.ext),
         }

@@ -1,0 +1,54 @@
+{% import "run_macros.html" as run_macros %}
+
+{% extends "layout.html" %}
+{% block title -%} {{ version }} metrics {%- endblock %}
+
+{% block head %}
+  {{ super() }}
+  <script src="{{ url_for('static', filename='plotly-latest.min.js') }}"></script>
+  <script>
+    window.onload = function() {
+      var div = document.getElementById('plot')
+
+      {% for trace in trace_list -%}
+
+      var trace_{{ trace.name }} = {
+        type: 'scatter',
+        name: '{{ trace.name }}',
+        x: [{% for point in trace.x -%} {{ point }}, {% endfor %}],
+        y: [{% for point in trace.y -%} {{ point }}, {% endfor %}],
+        text: [{% for td in trace.text -%} '{{ td | format_timedelta }}', {% endfor %}],
+        mode: 'lines+markers+text',
+        textposition: 'top',
+        hoverinfo: 'text',
+      };
+
+      {% endfor -%}
+
+      var data = [ {%- for trace in trace_list -%} trace_{{ trace.name }}, {% endfor -%} ];
+      var layout = {
+        title: 'Servers merge time by server count',
+        xaxis: { title: 'Server count' },
+        yaxis: { title: 'Merge and other times' },
+      }
+      Plotly.plot(div, data, layout);
+    }
+  </script>
+{% endblock head %}
+
+{% block contents %}
+
+  {{ run_macros.breadcrumbs([
+       ('Branches',  url_for('matrix')),
+       (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
+       (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name))
+  ]) }}
+
+  <h2>{{ self.title() }}</h2>
+
+  <hr>
+
+  <div id="plot">
+  </div>
+
+{% endblock contents %}

@@ -69,9 +69,10 @@ class RunParameters(object):
 
 class ArtifactType(object):
 
-    def __init__(self, name, content_type):
+    def __init__(self, name, content_type, ext=''):
         self.name = name
         self.content_type = content_type
+        self.ext = ext
         self.id = None
 
 
@@ -82,13 +83,14 @@ class ArtifactTypeFactory(object):
         for at in builtin_types:
             setattr(self, at.name, at)
 
-    def __call__(self, name, content_type=None):
+    def __call__(self, name, content_type=None, ext=None):
         at = self._name2at.get(name)
         if at:
-            assert content_type is None or content_type == at.content_type  # conflicting content type for same name
+            assert ((content_type is None or content_type == at.content_type) and
+                    (ext is None or ext == at.ext)) # conflicting content type or ext for same name
             return at
         assert content_type  # required to create new ArtifactType
-        at = ArtifactType(name, content_type)
+        at = ArtifactType(name, content_type, ext or '')
         self._name2at[name] = at
         setattr(self, name, at)
         return at
@@ -101,9 +103,9 @@ class DbCaptureRepository(object):
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
         self.artifact_type = ArtifactTypeFactory([
-            ArtifactType('traceback', 'text/plain'),
-            ArtifactType('output', 'text/plain'),
-            ArtifactType('log', 'text/plain'),
+            ArtifactType('traceback', 'text/plain', '.txt'),
+            ArtifactType('output', 'text/plain', '.txt'),
+            ArtifactType('log', 'text/plain', '.log'),
             ArtifactType('core', 'application/octet-stream'),
             ])
         if 'SQL_DEBUG' in os.environ:
@@ -159,7 +161,11 @@ class DbCaptureRepository(object):
             return models.ArtifactType[artifact_type_rec.id]
         at = models.ArtifactType.get(name=artifact_type_rec.name)
         if not at:
-            at = models.ArtifactType(name=artifact_type_rec.name, content_type=artifact_type_rec.content_type)
+            at = models.ArtifactType(
+                name=artifact_type_rec.name,
+                content_type=artifact_type_rec.content_type,
+                ext=artifact_type_rec.ext,
+                )
             commit()
         artifact_type_rec.id = at.id
         return at
