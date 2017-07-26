@@ -102,7 +102,7 @@ if [ "`uname -s`" = "Darwin" ]; then
     export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:$PACKAGES_ROOT/qt-5.6.2/lib/
 else
     PACKAGES_ROOT=$TARGET_ROOT/../../../buildenv/packages/linux-x64/
-    export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.1/lib
+    export LD_LIBRARY_PATH=$TARGET_ROOT/lib/$CONFIGURATION/:$TARGET_ROOT/lib/:$PACKAGES_ROOT/quazip-0.7.1/lib:$PACKAGES_ROOT/qt-5.6.2/lib
 fi
 export VMS_PLUGIN_DIR=$TARGET_ROOT/bin/$CONFIGURATION/plugins/
 

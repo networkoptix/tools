@@ -6,7 +6,7 @@ function printHelp()
     echo
 }
 
-DUMP_PATH=/home/ak/develop/netoptix_vms_3.0.0/unit_tests/cloud_db_ut/static-resources/cdb_mysql.dump
+DUMP_PATH=/home/ak/develop/nx_vms/unit_tests/cloud_db_ut/static-resources/cdb_mysql.dump
 DB_NAME=clouddb
 CDB_USER=clouddb
 CLEAN=
