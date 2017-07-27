@@ -6,15 +6,21 @@ ARGS="$TASKBOT_OPTIONS $TASKBOT_CONFIG"
 # + Prepare environment
 CURRENT_CONFIG="$TASKBOT_VAR"/nx_vms/build_variables/target/current_config
 ARCH=$(grep arch= "$CURRENT_CONFIG" | sed -r 's/arch=//')
+CONFIGURATION=$(grep configuration= "$CURRENT_CONFIG" | sed -r 's/configuration=//')
+# debian distributive paths
 DEB_PROP_FILENAME="$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb/$ARCH/finalname-server.properties
 DEB_FILENAME=$(grep server.finalName= "$DEB_PROP_FILENAME" | sed -r 's/server.finalName=//')
 DEB_PATH="$TASKBOT_VAR"/nx_vms/debsetup/mediaserver-deb/$ARCH/deb/$DEB_FILENAME.deb
+# appserver2_ut path
+APPSERVER2_UT_PATH="$TASKBOT_VAR/nx_vms/build_environment/target/bin/$CONFIGURATION/appserver2_ut"
+# set variables
 REV=$(hg id -i "$TASKBOT_VAR"/nx_vms)
 TASK_ID=$("$TASKBOT_COMMONS"/reports/task_report.py "$TASKBOT_CONFIG")
 
-# + Copy package file
+# + Copy artefacts
 mkdir -p "$TASKBOT_VAR"/var/artefacts/$TASK_ID
 cp $DEB_PATH "$TASKBOT_VAR"/var/artefacts/$TASK_ID/$REV.deb
+cp $APPSERVER2_UT_PATH "$TASKBOT_VAR"/var/artefacts/$TASK_ID/
 
 # + Delete old artefacts
 for path in $(find "$ROOT_ARTEFACTS_PATH" -maxdepth 1 -type d ! -path "$ROOT_ARTEFACTS_PATH" -exec basename {} \;); do

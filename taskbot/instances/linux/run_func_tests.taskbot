@@ -20,9 +20,11 @@ mkdir -p $FUNTESTS_DIR/wd $FUNTESTS_DIR/bin $FUNTESTS_DIR/result
 cd $FUNTESTS_DIR
 rsync -avz --delete --partial -t rsync://noptix.enk.me/buildenv/test/ $FUNTESTS_DIR/bin/
 TASK_ID=$(cat "$TASKBOT_VAR"/var/slow.task)
-DEB_FILE_PATH=$(find "$TASKBOT_VAR"/var/artefacts/$TASK_ID -type f -name '*.deb' | head -1)
+ARTEFACTS_DIR="$TASKBOT_VAR/var/artefacts/$TASK_ID"
+DEB_FILE_PATH=$(find "$ARTEFACTS_DIR" -type f -name '*.deb' | head -1)
 echo $DEB_FILE_PATH
 cp $DEB_FILE_PATH "$FUNTESTS_DIR"/bin/mediaserver.deb
+cp "$ARTEFACTS_DIR/appserver2_ut" "$FUNTESTS_DIR/bin"
 
 if [ -z $TASKBOT_CAMERA_ADDRESS ]; then
    echo "Camera address isn't defined!" >> /dev/stderr && exit 1
