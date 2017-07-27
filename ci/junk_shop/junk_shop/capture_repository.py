@@ -107,6 +107,7 @@ class DbCaptureRepository(object):
             ArtifactType('output', 'text/plain', '.txt'),
             ArtifactType('log', 'text/plain', '.log'),
             ArtifactType('core', 'application/octet-stream'),
+            ArtifactType('core-traceback', 'text/plain', '.txt'),
             ])
         if 'SQL_DEBUG' in os.environ:
             sql_debug(True)
