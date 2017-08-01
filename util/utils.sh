@@ -11,7 +11,7 @@ nx_handle_help() # "$@"
 {
     if [ $# = 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
         help
-        exit 1
+        exit 0
     fi
 }
 
@@ -284,14 +284,12 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
 
     sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
         -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
-        ${ARGS:+"$ARGS"} `#< Omit arg if empty`
-
-    RESULT=$?
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty`; 
+    local RESULT=$?
 
     nx_pop_title
     nx_set_background "$OLD_BACKGROUND"
-
-    return "$RESULT"
+    return $RESULT
 }
 
 nx_sshfs() # user password host port host_path mnt_point
@@ -311,8 +309,7 @@ nx_sshfs() # user password host port host_path mnt_point
 # Return in the specified variable the array of files found by 'find' command.
 nx_find_files() # FILES_ARRAY_VAR find_args...
 {
-    local FILES_ARRAY_VAR="$1"
-    shift
+    local FILES_ARRAY_VAR="$1"; shift
 
     local FILES_ARRAY=()
     while IFS="" read -r -d $'\0'; do
@@ -321,25 +318,24 @@ nx_find_files() # FILES_ARRAY_VAR find_args...
     eval "$FILES_ARRAY_VAR"'=("${FILES_ARRAY[@]}")'
 }
 
-# Search for the file inside the given dir using the given filename regex via 'find'.
-# If more than one file is found, fail with the message including the file list.
-nx_find_file() # FILE_VAR dir regex [file_description_for_error_message]
+# Search for the file inside the given dir via 'find'. If more than one file is found, fail with
+# the message including the file list.
+nx_find_file() # FILE_VAR file_description_for_error_message dir find_args...
 {
-    local FILE_VAR="$1"
-    local FILE_LOCATION="$2"
-    local FILE_PATH_REGEX="$3"
-    local FILE_DESCRIPTION="${4:-$3}"
+    local FILE_VAR="$1"; shift
+    local FILE_DESCRIPTION="$1"; shift
+    local FILE_LOCATION="$1"; shift
 
     local FILES=()
-    nx_find_files FILES "$FILE_LOCATION" -regex "$FILE_PATH_REGEX"
+    nx_find_files FILES "$FILE_LOCATION" "$@"
 
     # Make sure "find" returned exactly one file.
     if [ ${#FILES[*]} = 0 ]; then
         nx_fail "Unable to find $FILE_DESCRIPTION in $FILE_LOCATION"
     fi
     if [ ${#FILES[*]} -gt 1 ]; then
-        nx_fail "Found ${#FILES[*]} files instead of $FILE_DESCRIPTION in $FILE_LOCATION:" \
-            ${FILES[@]}
+        nx_fail "Found ${#FILES[*]} files for $FILE_DESCRIPTION matching [$@] in $FILE_LOCATION:" \
+            "${FILES[@]}"
     fi
 
     eval "$FILE_VAR=\${FILES[0]}"
@@ -425,18 +421,23 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
     [ -f "$PATH" ] && source "$PATH"
 }
 
-# Call after sourcing this script.
-nx_run()
+nx_detail_on_exit() # Called by trap.
 {
-    nx_handle_verbose "$@" && shift
-    nx_handle_help "$@"
-    nx_handle_mock_rsync "$@" && shift
-
-    main "$@"
-
     local RESULT=$?
     if [ $RESULT != 0 ]; then
         nx_echo "The script FAILED (status $RESULT)."
     fi
     return $RESULT
+}
+
+# Call after sourcing this script.
+nx_run()
+{
+    trap nx_detail_on_exit EXIT
+
+    nx_handle_verbose "$@" && shift
+    nx_handle_help "$@"
+    nx_handle_mock_rsync "$@" && shift
+
+    main "$@"
 }

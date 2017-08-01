@@ -36,11 +36,13 @@ start-c [args] # Start desktop_client with [args].
 stop-c # Stop desktop_client.
 run-ut target [all|test_name] [args] # Run all or the specified unit test via ctest.
 
+share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
 clean # Delete cmake build dir and all maven build dirs.
-mvn [args] # Call maven.
+mvn target [args] # Call maven.
 gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
 build target # Build via "cmake --build <dir>".
 cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+build-installer target [mvn] # Build installer using cmake or (if "mvn" specified) maven.
 test-installer target [mvn] original/archives/dir # Build installer and test to equal the original.
 print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
 tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
@@ -57,9 +59,33 @@ find_VMS_DIR()
         "Run this script from any dir inside your nx_vms repo dir."
 }
 
+do_share() # target_path
+{
+    find_VMS_DIR
+    local TARGET_PATH="$1"
+    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
+    if [[ $TARGET_PATH != /* ]]; then # The path is relative, treat as relative to VMS_DIR parent.
+        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
+    else # The path is absolute: use as is.
+        local TARGET_DIR="$TARGET_PATH"
+    fi
+    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
+
+    local BRANCH=$(hg branch)
+    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
+
+    nx_verbose mkdir -p "$TARGET_DIR"
+    nx_verbose hg share "$VMS_DIR" "$TARGET_DIR" || return $?
+    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
+    cd "$TARGET_DIR"
+    nx_verbose hg update "$BRANCH" || return $?
+}
+
 do_mvn() # "$@"
 {
-    mvn "$@" # No additional args needed like platform and box.
+    find_VMS_DIR
+    get_TARGET "$1" && shift
+    nx_verbose mvn -Darch="$ARCH" -Dbox="$BOX" "$@"
 }
 
 # Deduce CMake build dir out of VMS_DIR and targetDevice (box). Examples:
@@ -131,7 +157,8 @@ do_clean() # target
 
     local BUILD_DIRS=()
     nx_find_files BUILD_DIRS -type d -name "$MVN_BUILD_DIR" \
-        ! -path "./.hg/*" ! -path "./artifacts/*"
+        ! -path "./.hg/*" \
+        ! -path "./artifacts/*"
     local DIR
     for DIR in "${BUILD_DIRS[@]}"; do
         nx_echo "Deleting maven build dir: $DIR"
@@ -144,7 +171,6 @@ do_clean() # target
 do_gen() # target [Release] "$@"
 {
     find_VMS_DIR
-
     get_TARGET "$1" && shift
 
     local CONFIGURATION_ARG=""
@@ -186,6 +212,7 @@ do_build() # target
 
 do_run_ut() # target [all|TestName] "$@"
 {
+    find_VMS_DIR
     get_TARGET "$1" && shift
     find_and_pushd_CMAKE_BUILD_DIR
 
@@ -259,19 +286,19 @@ do_kit() # "$@"
     # Recreate nx_kit build dir in /tmp.
     local KIT_BUILD_DIR="/tmp/nx_kit-build"
     rm -rf "$KIT_BUILD_DIR"
-    mkdir -p "$KIT_BUILD_DIR" || exit $?
+    mkdir -p "$KIT_BUILD_DIR" || return $?
     nx_pushd "$KIT_BUILD_DIR"
     nx_echo "+ cd $KIT_BUILD_DIR"
 
     local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
-    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; exit $?; }
+    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; return $?; }
 
     nx_popd
     rm -rf "$KIT_BUILD_DIR"
 
     nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
+    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || return $?
+    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || return $?
     nx_echo
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 }
@@ -297,19 +324,23 @@ build_installer_mvn()
 
 test_installer_tar_gz() # original.tar.gz built.tar.gz
 {
+    local ORIGINAL_TAR_GZ="$1"
+    local BUILT_TAR_GZ="$2"
     nx_echo "Comparing .tar.gz archives by checksum:"
 
     # Using "tarsum.py" to produce two columns: md5 and filename for each archive file.
-    local ORIGINAL_OUT="/tmp/test-installer-tar-gz-original.txt"
-    local BUILT_OUT="/tmp/test-installer-tar-gz-built.txt"
-    tarsum.py < "$1" |sort -k 2 >"$ORIGINAL_OUT"
-    tarsum.py < "$2" |sort -k 2 >"$BUILT_OUT"
+    local ORIGINAL_LISTING="$ORIGINAL_TAR_GZ.txt"
+    local BUILT_LISTING="$ORIGINAL_TAR_GZ.BUILT.txt"
+    tarsum.py < "$ORIGINAL_TAR_GZ" |sort -k 2 >"$ORIGINAL_LISTING" \
+        || nx_fail "tarsum.py failed, see above."
+    tarsum.py < "$BUILT_TAR_GZ" |sort -k 2 >"$BUILT_LISTING" \
+        || nx_fail "tarsum.py failed, see above."
 
-    nx_verbose diff "$ORIGINAL_OUT" "$BUILT_OUT" \
+    nx_verbose diff "$ORIGINAL_LISTING" "$BUILT_LISTING" \
         || nx_fail "Archives are different; see above."
 
-    rm "$ORIGINAL_OUT"
-    rm "$BUILT_OUT"
+    rm "$ORIGINAL_LISTING"
+    rm "$BUILT_LISTING"
     nx_echo "SUCCESS: The built .tar.gz contains the same files as the original one."
 }
 
@@ -322,26 +353,26 @@ test_installer_zip() # original.zip built.zip built.tar.gz
     nx_echo "Comparing .zip archives by contents:"
 
     # Unpack original.zip - do this every time to allow the .zip file to be updated by the user.
-    local ORIGINAL_ZIP_DIR="${ORIGINAL_ZIP%.zip}"
-    rm -rf "$ORIGINAL_ZIP_DIR"
-    mkdir -p "$ORIGINAL_ZIP_DIR"
-    unzip -q "$ORIGINAL_ZIP" -d "$ORIGINAL_ZIP_DIR"
+    local ORIGINAL_ZIP_UNPACKED="${ORIGINAL_ZIP%.zip}"
+    rm -rf "$ORIGINAL_ZIP_UNPACKED"
+    mkdir -p "$ORIGINAL_ZIP_UNPACKED"
+    unzip -q "$ORIGINAL_ZIP" -d "$ORIGINAL_ZIP_UNPACKED" || nx_fail "Unzipping failed, see above."
 
-    local BUILT_ZIP_FILENAME=$(basename "$BUILT_ZIP")
-    local BUILT_ZIP_DIR="$(dirname "$1")/built-${BUILT_ZIP_FILENAME%.zip}"
-    rm -rf "$BUILT_ZIP_DIR"
-    mkdir -p "BUILT_ZIP_DIR"
-    unzip -q "$BUILT_ZIP" -d "$BUILT_ZIP_DIR"
+    local BUILT_ZIP_UNPACKED="${ORIGINAL_ZIP%.zip}.BUILT"
+    rm -rf "$BUILT_ZIP_UNPACKED"
+    mkdir -p "BUILT_ZIP_UNPACKED"
+    unzip -q "$BUILT_ZIP" -d "$BUILT_ZIP_UNPACKED" || nx_fail "Unzipping failed, see above."
 
     # Tar.gz in zips are bitwise-different, thus, compare tar.gz in built zip to built tar.gz.
-    nx_verbose diff "$BUILT_TAR_GZ" "$BUILT_ZIP_DIR/$(basename "$BUILT_TAR_GZ")" \
+    nx_verbose diff "$BUILT_TAR_GZ" "$BUILT_ZIP_UNPACKED/$(basename "$BUILT_TAR_GZ")" \
         || nx_fail "The .tar.gz archive in .zip differs from the one built."
 
-    nx_verbose diff -r "$ORIGINAL_ZIP_DIR" "$BUILT_ZIP_DIR" --exclude $(basename "$BUILT_TAR_GZ") \
+    nx_verbose diff -r "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED" \
+        --exclude $(basename "$BUILT_TAR_GZ") \
         || nx_fail "The .zip archives are different; see above."
 
-    rm -r "$ORIGINAL_ZIP_DIR"
-    rm -r "$BUILT_ZIP_DIR"
+    rm -r "$ORIGINAL_ZIP_UNPACKED"
+    rm -r "$BUILT_ZIP_UNPACKED"
     nx_echo "SUCCESS: The built .zip contains the same files as the original one."
 }
 
@@ -350,27 +381,50 @@ do_test_installer()
     find_VMS_DIR
     get_TARGET "$1" && shift
 
-    local BUILT_TAR_GZ
-    local BUILT_ZIP
+    # TODO: #mshevchenko: Learn how to EXCLUDE files like '*-debug-sumbols.tar.gz'.
+    local TAR_GZ_MASK="nxwitness-*.tar.gz"
+    local ZIP_MASK="nxwitness-*.zip"
+    local DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
+    local BUILD_DIR #< Dir inside which (at any level) the installer archives are built.
     if [ "$1" = "mvn" ]; then
         shift
-        build_installer_mvn || exit $?
-        nx_find_file BUILT_TAR_GZ "$VMS_DIR" '.*nxwitness-.*\.tar\.gz'
-        nx_find_file BUILT_ZIP "$VMS_DIR" '.*nxwitness-.*\.zip'
+        build_installer_mvn || return $?
+        BUILD_DIR="$VMS_DIR"
     else
         get_CMAKE_BUILD_DIR "$TARGET"
         if [ ! -d "$CMAKE_BUILD_DIR" ]; then
             nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
         fi
-        build_installer_cmake || exit $?
-        nx_find_file BUILT_TAR_GZ "$CMAKE_BUILD_DIR" '.*nxwitness-.*\.tar\.gz'
-        nx_find_file BUILT_ZIP "$CMAKE_BUILD_DIR" '.*nxwitness-.*\.zip'
+        build_installer_cmake || return $?
+        BUILD_DIR="$CMAKE_BUILD_DIR"
     fi
 
+    local BUILT_TAR_GZ
+    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$BUILD_DIR" -name "$TAR_GZ_MASK" \
+        ! -name "*$DEBUG_TAR_GZ_SUFFIX"
+
+    local BUILT_ZIP
+    nx_find_file BUILT_ZIP "installer .zip" "$BUILD_DIR" -name "$ZIP_MASK"
+
+    local ORIGINAL_DIR="$1"
+    local ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
+
+    # Test main installer .tar.gz.
     nx_echo
-    test_installer_tar_gz "$1"/$(basename "$BUILT_TAR_GZ") "$BUILT_TAR_GZ" || exit $?
+    test_installer_tar_gz "$ORIGINAL_TAR_GZ" "$BUILT_TAR_GZ"
+
+    # Also test the archive with debug libraries, if its sample is present in the "original" dir.
+    local ORIGINAL_DEBUG_TAR_GZ="$ORIGINAL_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+    if [ -f "$ORIGINAL_TAR_GZ" ]; then
+        local BUILT_DEBUG_TAR_GZ="$BUILT_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+        nx_echo
+        test_installer_tar_gz "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ"
+    fi
+
+    # Test .zip which contains .tar.gz and some other files.
+    local ORIGINAL_ZIP="$ORIGINAL_DIR"/$(basename "$BUILT_ZIP")
     nx_echo
-    test_installer_zip "$1"/$(basename "$BUILT_ZIP") "$BUILT_ZIP" "$BUILT_TAR_GZ"
+    test_installer_zip "$ORIGINAL_ZIP" "$BUILT_ZIP" "$BUILT_TAR_GZ"
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -401,19 +455,19 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            // TODO: IMPLEMENT
+            # TODO: IMPLEMENT
             nx_fail "Command not implemented yet."
             ;;
         stop-s)
-            // TODO: Decide on better impl.
+            # TODO: Decide on better impl.
             sudo killall -9 mediaserver
             ;;
         start-c)
-            // TODO: IMPLEMENT
+            # TODO: IMPLEMENT
             nx_fail "Command not implemented yet."
             ;;
         stop-c)
-            // TODO: Decide on better impl.
+            # TODO: Decide on better impl.
             sudo killall -9 desktop_client
             ;;
         run-ut)
@@ -422,6 +476,9 @@ main()
         #..........................................................................................
         clean)
             do_clean "$@"
+            ;;
+        share)
+            do_share "$@"
             ;;
         mvn)
             do_mvn "$@"
@@ -437,6 +494,20 @@ main()
             ;;
         test-installer)
             do_test_installer "$@"
+            ;;
+        build-installer) # target [mvn]
+            find_VMS_DIR
+            get_TARGET "$1" && shift
+            if [ "$1" = "mvn" ]; then
+                shift
+                build_installer_mvn
+            else
+                get_CMAKE_BUILD_DIR "$TARGET"
+                if [ ! -d "$CMAKE_BUILD_DIR" ]; then
+                    nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+                fi
+                build_installer_cmake
+            fi
             ;;
         print-dirs)
             find_VMS_DIR

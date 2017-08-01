@@ -102,7 +102,7 @@ main()
         local VMS_DIR
         find_VMS_DIR
 
-        nx_find_file FILE "$VMS_DIR" "$FILE_PATH_REGEX" "the file to patch"
+        nx_find_file FILE "the file to patch" "$VMS_DIR" -regex "$FILE_PATH_REGEX"
     fi
 
     process_file

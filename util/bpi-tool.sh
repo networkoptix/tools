@@ -20,7 +20,7 @@ nx_load_config "{$CONFIG=".bpi-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${SDCARD_PARTITION_SECTORS="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at the workstation.
-: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/bpi"} #< Path at the workstation.
+: ${PACKAGES_SRC_PATH="artifacts/bpi"} #< Path at the workstation to the artifact sources.
 : ${QT_DIR="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at the workstation.
 : ${BUILD_CONFIG="debug"}
 : ${TARGET_IN_VMS_DIR="build_environment/target-bpi"} #< Path component at the workstation.
@@ -73,7 +73,8 @@ client # Copy mobile_client exe to the box.
 server # Copy mediaserver_core lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
-install # Install distrib package (.tar.gz) to the box.
+install-tar # Install distrib .tar.gz to the box via untarring to the root.
+install-zip # Install distrib .zip to the box via unzipping to /tmp and running "install.sh".
 
 ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
 run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
@@ -103,6 +104,7 @@ gen [args] # Call "linux-tool.sh gen bpi [args]".
 build [args] # Call "linux-tool.sh build bpi [args]".
 pack-short <output.tgz> # Prepare tar with build results at the box.
 pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
+build-installer [mvn] # Build installer using cmake or (if "mvn" specified) maven.
 test-installer [mvn] original/archives/dir # Build installer and test to equal the original.
 EOF
 }
@@ -114,6 +116,15 @@ box() # args...
 {
     nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
+}
+
+# Check that $BOX_MNT is likely to refer to the box root.
+check_box_mounted()
+{
+    if [ ! -d "$BOX_MNT/usr" ]; then
+        nx_fail "It seems $BOX_MNT does not refer to the box root dir." \
+            "Use $0 sshfs or $0 nfs to mount."
+    fi
 }
 
 pack() # archive files...
@@ -139,7 +150,7 @@ pack_full() # archive
         "/etc/init.d/nx*"
 }
 
-# Pack build results and bpi-specific artifacts from third_party.
+# Pack build results and bpi-specific artifacts.
 pack_short()
 {
     local ARCHIVE="$1"
@@ -181,10 +192,12 @@ pack_short()
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
+# [out] BOX_VMS_DIR
 find_VMS_DIR()
 {
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
+    BOX_VMS_DIR="$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}"
 }
 
 # If not done yet, scan from current dir upwards to find "common_libs" dir; set LIB_DIR to its
@@ -526,7 +539,7 @@ EOF
 
 do_mvn() # "$@"
 {
-    mvn -Dbox=bpi -Darch=arm "$@"
+    nx_verbose mvn -Dbox=bpi -Darch=arm "$@"
 }
 
 assert_not_client_only()
@@ -708,12 +721,14 @@ main()
             ;;
         #..........................................................................................
         copy-scripts)
+            check_box_mounted
             copy_scripts
             ;;
         copy)
             assert_not_client_only
             assert_not_server_only
             find_VMS_DIR
+            check_box_mounted
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -744,6 +759,7 @@ main()
         copy-s)
             assert_not_client_only
             find_VMS_DIR
+            check_box_mounted
 
             mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
 
@@ -766,6 +782,7 @@ main()
         copy-c)
             assert_not_server_only
             find_VMS_DIR
+            check_box_mounted
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -783,19 +800,23 @@ main()
             ;;
         copy-ut)
             find_VMS_DIR
+            check_box_mounted
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
             cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
                 "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
             ;;
         client)
             assert_not_server_only
+            check_box_mounted
             cp_lite_client_bins "mobile_client" "mobile_client exe"
             ;;
         server)
             assert_not_client_only
+            check_box_mounted
             cp_libs "libmediaserver_core.so*" "lib mediaserver_core"
             ;;
         lib)
+            check_box_mounted
             if [ "$1" = "" ]; then
                 find_LIB_DIR
                 LIB_NAME=$(basename "$LIB_DIR")
@@ -811,11 +832,31 @@ main()
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
             ;;
-        install)
+        install-tar)
             find_VMS_DIR
-            box tar xfzv \
-                "$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}/edge_firmware/rpi/target-bpi/*.tar.gz" \
+            nx_verbose box tar xfv \
+                "$BOX_VMS_DIR/edge_firmware/rpi/target-bpi/*.tar.gz" \
                 -C "/"
+            ;;
+        install-zip)
+            find_VMS_DIR
+            check_box_mounted
+            local ZIP_FILE
+            nx_find_file ZIP_FILE "Distro .zip" \
+                "$VMS_DIR/edge_firmware/rpi/target-bpi" -name "*.zip"
+            local ZIP_FILENAME=$(basename "$ZIP_FILE")
+            local DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
+            local BOX_UPDATES_DIR="/tmp/mediaserver/updates"
+            box \
+                rm -rf "$BOX_UPDATES_DIR" "[&&]" \
+                mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
+
+            nx_rsync "$ZIP_FILE" "${BOX_MNT}$BOX_UPDATES_DIR/"
+
+            box \
+                cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
+                unzip "../$ZIP_FILENAME" "[&&]" \
+                ./install.sh
             ;;
         #..........................................................................................
         ssh)
@@ -860,50 +901,60 @@ main()
             ;;
         #..........................................................................................
         vdp)
-            box make -C "$BOX_PACKAGES_SRC_DIR/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
+            find_VMS_DIR
+            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
             ;;
         vdp-rdep)
+            find_VMS_DIR
             cd "$PACKAGES_DIR/libvdpau-sunxi-1.0${PACKAGE_SUFFIX}" || exit $?
-            nx_rsync "$PACKAGES_SRC_DIR/libvdpau-sunxi"/lib*so* lib/ || exit $?
+            nx_rsync "$VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi"/lib*so* lib/ || exit $?
             rdep -u
             ;;
         pd)
-            box make -C "$BOX_PACKAGES_SRC_DIR/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
+            find_VMS_DIR
+            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
             ;;
         pd-rdep)
+            find_VMS_DIR
             cd "$PACKAGES_DIR/proxy-decoder${PACKAGE_SUFFIX}" || exit $?
-            nx_rsync "$PACKAGES_SRC_DIR/proxy-decoder/libproxydecoder.so" lib/ || exit $?
-            nx_rsync "$PACKAGES_SRC_DIR/proxy-decoder/proxy_decoder.h" include/ || exit $?
+            nx_rsync "$VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder/libproxydecoder.so" lib/ || exit $?
+            nx_rsync "$VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder/proxy_decoder.h" include/ || exit $?
             rdep -u
             ;;
         cedrus)
+            find_VMS_DIR
             if [ "$1" = "ump" ]; then
                 shift
-                box USE_UMP=1 make -C "$BOX_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                box USE_UMP=1 make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" \
+                    echo "SUCCESS"
             else
-                box make -C "$BOX_PACKAGES_SRC_DIR/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" echo "SUCCESS"
             fi
             ;;
         cedrus-rdep)
+            find_VMS_DIR
             cd "$PACKAGES_DIR/libcedrus-1.0${PACKAGE_SUFFIX}" || exit $?
-            nx_rsync "$PACKAGES_SRC_DIR/libcedrus"/lib*so* lib/ || exit $?
+            nx_rsync "$VMS_DIR/$PACKAGES_SRC_PATH/libcedrus"/lib*so* lib/ || exit $?
             rdep -u
             ;;
         ump)
+            find_VMS_DIR
             box \
                 rm -r /tmp/libump "[&&]" \
-                cp -r "$BOX_PACKAGES_SRC_DIR/libump" /tmp/ "[&&]" \
+                cp -r "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libump" /tmp/ "[&&]" \
                 cd /tmp/libump "[&&]" \
                 "[{]" dpkg-buildpackage -b "[||]" \
                     echo "WARNING: Package build failed; manually installing .so and .h." "[}]" "[;]" \
                 cp -r /tmp/libump/debian/tmp/usr /
             ;;
         ldp)
-            box make -C "$BOX_PACKAGES_SRC_DIR/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
+            find_VMS_DIR
+            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
             ;;
         ldp-rdep)
+            find_VMS_DIR
             cd "$PACKAGES_DIR/ldpreloadhook-1.0${PACKAGE_SUFFIX}" || exit $?
-            nx_sync "$PACKAGES_SRC_DIR/ldpreloadhook"/*.so* lib/ || exit $?
+            nx_rsync "$VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook"/*.so* lib/ || exit $?
             rdep -u
             ;;
         #..........................................................................................
@@ -927,6 +978,9 @@ main()
             ;;
         pack-full)
             pack_full "$1"
+            ;;
+        build-installer)
+            "$LINUX_TOOL" build-installer bpi "$@"
             ;;
         test-installer)
             "$LINUX_TOOL" test-installer bpi "$@"
