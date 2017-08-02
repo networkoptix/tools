@@ -45,6 +45,7 @@ hr {
 	padding: 2px 5px 2px 5px;
 	border-radius: 3px;
 	text-decoration: none !important;
+	min-width: 10ex !important;
 }
 .passed, .outcome-passed, .outcome-passed:visited {
     color: #3A911E;
@@ -105,10 +106,15 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 	display: table;
 }
 
-.list-row-box a, .list-row-box .started-at-block {
+.list-row-box a, .list-row-box .started-at-block, .list-row-box .disabled-link {
 	display: table-cell;
 	vertical-align: middle;
 	padding: 0 30px 0 10px;
+	min-width: 12ex;
+}
+
+.list-row-box .disabled-link {
+	color: #AAA;
 }
 
 .started-at-block {

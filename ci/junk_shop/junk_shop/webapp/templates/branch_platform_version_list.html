@@ -28,7 +28,11 @@
          href="{{ url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">
          {{ element.version }}
       </a>
-      <a class="link" href="{{ url_for('branch_platform_version_metrics', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">Scalability</a>
+      {% if element.has_scalability %}
+        <a class="link" href="{{ url_for('branch_platform_version_metrics', branch_name=branch_name, platform_name=platform_name, version=element.version) }}">Scalability</a>
+      {% else %}
+        <span class="disabled-link">Scalability</span>
+      {% endif %}
     {% endcall %}
 
     {% call(page) common_macros.paginator(page_count, current_page) %}

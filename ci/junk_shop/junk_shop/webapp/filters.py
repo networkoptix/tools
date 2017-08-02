@@ -1,8 +1,16 @@
 from datetime import datetime, timedelta
+import re
 from jinja2 import Markup
 from ..utils import datetime_utc_now
 from junk_shop.webapp import app
 
+
+@app.template_filter('to_ident')
+def to_indent(value):
+    assert value, repr(value)
+    assert isinstance(value, (str, unicode)), repr(value)
+    result, repl_count = re.subn(r'\s+', '_', value)
+    return result
 
 @app.template_filter('format_datetime')
 def format_datetime(dt, precise=True):

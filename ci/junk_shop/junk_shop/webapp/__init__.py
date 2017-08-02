@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from pony.orm import sql_debug, OperationalError
 from flask import Flask
@@ -9,6 +10,8 @@ app = Flask(__name__)
 
 from . import filters
 from . import views
+from . import branch_views
+from . import version_list_views
 from . import metrics_views
 
 

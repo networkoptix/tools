@@ -79,10 +79,16 @@
 {% macro run_link(name, rec) %}
 
   <div class="tests-block" align="center">
-    <a {% if rec.run -%} href="{{ url_for('run', run_id=rec.run.id) }}" {%- endif %}
-       class="outcome outcome-{{ rec.run.outcome|default('not-run', true) }} {% if rec.run -%} has-run {%- endif %}">
-       {{ name }}
-    </a>
+    {% if rec.run %}
+      <a href="{{ url_for('run', run_id=rec.run.id) }}"
+         class="outcome outcome-{{ rec.run.outcome|default('not-run', true) }} has-run">
+         {{ name }}
+      </a>
+    {% else %}
+      <a class="outcome outcome-not-run">
+         {{ name }}
+      </a>
+    {% endif %}
     <div class="test-counts">
       {% if rec.run %}
         <span class="passed">
