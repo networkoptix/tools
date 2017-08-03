@@ -30,20 +30,29 @@
       {% if node.artifacts %}
         <span class="artifacts-pane">
           {% for artifact in node.artifacts %}
-            <a id="{{ artifact.id }}"
-               {% if artifact.is_binary %}
-                 href="{{ url_for('get_artifact', artifact_id=artifact.id) }}"
-               {% else %}
-                 href="#"
-               {% endif %}
-               class="artifact-button {% if artifact.is_error %}artifact-button-error{% endif %}
-                      {%- if artifact.is_binary %} artifact-button-binary {%- else %} artifact-button-text {%- endif %}"
-               {% if not artifact.is_binary %}
-                 onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
-               {% endif %}
-               >
+            <span id="{{ artifact.id }}"
+                  class="artifact-button {% if artifact.is_error %}artifact-button-error{% endif %}
+                       {%- if artifact.is_inline %} artifact-button-inline {%- else %} artifact-button-link {%- endif %}">
+              <a
+                {% if artifact.is_inline %}
+                  href="#"
+                  onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
+                {% else %}
+                  href="{{ url_for('get_artifact', artifact_id=artifact.id) }}"
+                {% endif %}
+                >
               {{ artifact.name }}
-            </a>
+              </a>
+              {% if artifact.is_inline %}
+                <a class="permalink" href="{{ url_for('get_artifact', artifact_id=artifact.id) }}">&para;</a>
+              {% else %}
+                {% if artifact.disposition == 'inline' %}
+                  &rarr;
+                {% else %}
+                  &darr;
+                {% endif %}
+              {% endif %}
+            </span>
           {% endfor %}
         </span>
       {% endif %}

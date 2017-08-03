@@ -43,24 +43,35 @@ ul {
 }
 
 .artifact-button {
-	color: black;
 	border: 1px solid lightgrey;
 	padding: 1px 5px 1px 5px;
 	margin-left: 5px;
 	border-radius: 3px;
 }
-.artifact-button-text {
+.artifact-button a {
+	color: black;
+}
+.artifact-button-inline a {
 	text-decoration: none;
 }
-.artifact-button-text:hover {
+.artifact-button-inline:hover {
 	border-color: black;
 }
-.artifact-button-error {
+.artifact-button-error a {
 	color: #C22626;
 	// background-color: #FFEEEE;
 }
 .artifact-button-opened {
 	background-color: lightgrey;
+}
+.artifact-button-inline .permalink {
+	color: lightgrey;
+}
+.artifact-button-opened .permalink, .artifact-button-inline .permalink:hover {
+	color: darkgrey;
+}
+.artifact-link-loading::before {
+	content: url('/static/spinner.gif');
 }
 
 .artifacts {

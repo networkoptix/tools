@@ -221,7 +221,7 @@ class DbCaptureRepository(object):
             is_leaf = i == len(path_list) - 1
             yield (path, name, is_leaf)
 
-    def add_artifact(self, run, name, artifact_type_rec, data, is_error=False):
+    def add_artifact(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
         assert run
         if not data: return
         at = self._produce_artifact_type(artifact_type_rec)
@@ -230,7 +230,8 @@ class DbCaptureRepository(object):
         compressed_data = bz2.compress(data)
         artifact = models.Artifact(
             type=at,
-            name=name,
+            short_name=short_name,
+            full_name=full_name,
             is_error=is_error,
             run=run,
             encoding='bz2',
@@ -238,9 +239,9 @@ class DbCaptureRepository(object):
         #print '----- added artifact %s for run %s' % (artifact.type, run.path)
 
     @db_session
-    def add_artifact_with_session(self, run, name, artifact_type_rec, data, is_error=False):
+    def add_artifact_with_session(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
         run_reloaded = models.Run[run.id]  # it may belong to different transaction
-        self.add_artifact(run_reloaded, name, artifact_type_rec, data, is_error)
+        self.add_artifact(run_reloaded, short_name, full_name, artifact_type_rec, data, is_error)
 
     @db_session
     def add_metric_with_session(self, run, metric_name, metric_value):

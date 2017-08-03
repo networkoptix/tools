@@ -64,11 +64,11 @@ def extract_core_backtrace(binary_path, gdb_path, core_path):
 def add_core_artifacts(repository, binary_path, gdb_path, run, artifact_path):
     fname = os.path.basename(artifact_path)
     with open(artifact_path, 'rb') as f:
-        repository.add_artifact(run, fname, repository.artifact_type.core, f.read(), is_error=True)
+        repository.add_artifact(run, fname, fname, repository.artifact_type.core, f.read(), is_error=True)
     if not gdb_path or not binary_path: return
     backtrace = extract_core_backtrace(binary_path, gdb_path, artifact_path)
     if backtrace:
-        repository.add_artifact(run, '%s-bt' % fname, repository.artifact_type.traceback, backtrace, is_error=True)
+        repository.add_artifact(run, '%s-bt' % fname, '%s-bt' % fname, repository.artifact_type.traceback, backtrace, is_error=True)
 
 
 class TestProcess(object):
@@ -132,7 +132,7 @@ class TestProcess(object):
                 data = '\n'.join(line for line in lines if line is not None)
                 if len(lines) == lines.maxlen:
                     data = '[ truncated to %d lines ]\n' % lines.maxlen + data
-                self._repository.add_artifact(run, name, type, data, is_error)
+                self._repository.add_artifact(run, name, '%s-%s' % (self.run.name, name.replace(' ', '-')), type, data, is_error)
 
         def _produce_test_run(self, parent_run, root_name, suite, test):
             test_path = ['unit', root_name]
@@ -379,7 +379,7 @@ class TestRunner(object):
             run.duration = datetime_utc_now() - self._started_at
             if self._errors:
                 self._repository.add_artifact(
-                    run, 'errors', self._repository.artifact_type.output, '\n'.join(self._errors), is_error=True)
+                    run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._errors), is_error=True)
 
     def _read_current_config(self, bin_dir):
         path = os.path.join(bin_dir, '../../../../build_variables/target/current_config.py')
@@ -413,7 +413,7 @@ class TestRunner(object):
             for error in error_list:
                 print 'Environment configuration error:', error
             artifact_type = self._repository.artifact_type.output
-            self._repository.add_artifact(root_run, 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
+            self._repository.add_artifact(root_run, 'warnings', 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
 
     def _clean_core_files(self):
         for path in glob.glob('*.core.*'):

@@ -1,14 +1,20 @@
-from pony.orm import desc, select, exists
+from pony.orm import desc, select, exists, raw_sql
 from .. import models
+
+
+ARTIFACT_COMPRESS_RATIO = 10  # Just some value from some small artifact. For large artifacts seen ratio 55
+ARTIFACT_LINE_LENGTH = 220    # Mean artifact line lengh from same random artifact, for first 1000 lines
+MAX_INLINE_ARTIFACT_LINE_COUNT = 1000
 
 
 class ArtifactRec(object):
 
-    def __init__(self, artifact_id, artifact_name, is_error, type_name, content_type):
+    def __init__(self, artifact_id, artifact_name, is_error, type_name, content_type, is_inline):
         self.id = artifact_id
         self.name = artifact_name
         self.is_error = is_error
-        self.is_binary = not content_type.startswith('text/')
+        self.is_inline = is_inline
+        self.disposition = artifact_disposition(content_type)
         if type_name not in ['output', 'traceback', 'core']:
             self.name += ' ' + type_name
 
@@ -28,14 +34,30 @@ class RunNode(object):
         return self.children or self._has_children
 
 
+def artifact_disposition(content_type):
+    if content_type.startswith('text/') or content_type == 'application/json':
+        return 'inline'
+    else:
+        return 'attachment'
+
+def can_show_artifact_inline(content_type, data_len):
+    if artifact_disposition(content_type) != 'inline':
+        return False
+    if (data_len * ARTIFACT_COMPRESS_RATIO) / ARTIFACT_LINE_LENGTH > MAX_INLINE_ARTIFACT_LINE_COUNT:
+        return False
+    return True
+
 def load_artifacts(root_run_list):
     run_id2artifacts = {}  # Run -> ArtifactRec list
-    for run_id, artifact_id, artifact_name, is_error, type_name, content_type in select(
-            (run.id, artifact.id, artifact.name, artifact.is_error, artifact.type.name, artifact.type.content_type)
+    for run_id, artifact_id, artifact_name, is_error, data_len, type_name, content_type in select(
+            (run.id, artifact.id, artifact.short_name, artifact.is_error,
+                 raw_sql('length(artifact.data)'),
+                 artifact.type.name, artifact.type.content_type)
             for artifact in models.Artifact
             for run in models.Run
             if (run.root_run in root_run_list or run in root_run_list) and artifact.run == run).order_by(2):
-        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type)
+        is_inline = can_show_artifact_inline(content_type, data_len)
+        rec = ArtifactRec(artifact_id, artifact_name, is_error, type_name, content_type, is_inline)
         run_id2artifacts.setdefault(run_id, []).append(rec)
     return run_id2artifacts
 

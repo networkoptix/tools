@@ -5,7 +5,7 @@ from ..utils import SimpleNamespace
 from .. import models
 from .utils import DEFAULT_RUN_LIST_PAGE_SIZE
 from junk_shop.webapp import app
-from .run import load_root_run_node_list, load_run_node_tree
+from .run import artifact_disposition, load_root_run_node_list, load_run_node_tree
 
 
 @app.route('/')
@@ -49,7 +49,6 @@ def run(run_id):
         )
 
 
-
 # versions must be compared as ints
 # unused
 def parse_version(version_str):
@@ -57,8 +56,6 @@ def parse_version(version_str):
         return map(int, version_str.split('.'))
     except ValueError:
         return (99999,)  # show invalid versions first
-
-
 
 
 @app.route('/version/<branch_name>/<platform_name>/<version>')
@@ -95,7 +92,9 @@ def get_artifact(artifact_id):
         data = artifact.data
     else:
         assert False, 'Unknown artifact encoding: %r' % artifact.encoding
-    return str(data), {
+    headers = {
         'Content-Type': artifact.type.content_type,
-        'Content-Disposition': 'attachment; filename="%s%s"' % (artifact.name, artifact.type.ext),
+        'Content-Disposition': '%s; filename="%s%s"' % (
+            artifact_disposition(artifact.type.content_type), artifact.full_name, artifact.type.ext),
         }
+    return str(data), headers
