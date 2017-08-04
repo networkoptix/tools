@@ -1,0 +1,15 @@
+hosts:
+  - host: localhost
+    dir: ~/run/scalability
+    limit: 2
+  - name: scalability2
+    host: 10.1.5.167
+    dir: ~/run/scalability
+    lightweight_servers_limit: 300
+  - name: scalability3
+    host: 10.1.5.132
+    dir: ~/run/scalability
+
+tests:
+  scalability_test:
+    server_count: 5

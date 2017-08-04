@@ -1,0 +1,274 @@
+// -* mode: groovy -*-
+
+// DIST_HOST = 'demo'
+DIST_HOST = ''  // local for burbank jenkins
+UPSTREAM_CI_PROJECT_NAME = 'ci_vms_3.1_dev/PYTHON=Python2,label=ci-linux-x64-test'
+UPSTREAM_CI_BRANCH = 'vms_3.1_dev'
+NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
+JENKINS_SRC_DIR = 'devtools/ci/jenkins/scalability_test'
+JUNK_SHOP_SRC_DIR = 'devtools/ci/junk_shop'
+JUNK_SHOP_HOST = '10.1.5.105'
+JUNK_SHOP_CREDENTIALS_ID = 'junk_shop_db'
+JUNK_SHOP_PROJECT = 'scalability'
+PLATFORM = 'linux64'
+DEFAULT_MERGE_TIMEOUT = '1h'
+WORKER_HOST_LIST = ['scalability2', 'scalability3']  // ssh names
+DEFAULT_SERVER_COUNT = '50, 100, 150, 200, 250'
+CAMERAS_PER_SERVER = 5
+USERS_PER_SERVER = 4
+
+
+def main() {
+	def build_to_test = null  // [customization: ..., path: ...]
+	def action = params?.action ?: 'update_parameters'
+	def clean_ws = params?.clean ?: false
+	def p2p_mode = params?.p2p_mode ?: true
+	def server_count = params.server_count
+	def test_params = [
+		use_lightweight_servers: params?.use_lightweight_servers ?: true,
+		merge_timeout: params.merge_timeout,
+		cameras_per_server: CAMERAS_PER_SERVER,
+		users_per_server: USERS_PER_SERVER,
+		]
+
+	stage('Load distributive') {
+		node ('master') {
+			echo '============================================================'
+			echo "Started $action testing ${params?.build_to_test}"
+			build_to_test = load_distributive_stage(clean_ws, params.build_to_test)
+		}
+	}
+
+	if (action != 'update_parameters') {
+		node('scalability-test') {
+			scalability_test_stages(clean_ws, p2p_mode, build_to_test, server_count, test_params)
+		}
+	}
+}
+
+def load_distributive_stage(clean_ws, build_to_test_id) {
+	if (clean_ws) {
+		echo "Cleaning workspace ${pwd()}"
+		deleteDir()
+	}
+	dir ('devtools') {
+		checkout scm
+	}
+
+	def builds = update_job_parameters()
+
+	if (action == 'test_release') {
+		def build_to_test = pick_release_build_by_param(build_to_test_id)
+		stash_release_distributive(build_to_test)
+		return build_to_test
+	} else if (action == 'test_ci') {
+		def build_to_test = stash_ci_distributive()
+		return build_to_test
+	} else {
+		for (build in builds) {
+			echo "Loaded build: $build"
+		}
+	}
+}
+
+def scalability_test_stages(clean_ws, p2p_mode, build_to_test, server_count_list, test_params) {
+	echo "Will test build $build_to_test"
+
+	stage('Prepare test environment') {
+		prepare_test_environment(clean_ws, p2p_mode)
+	}
+	stage('Run tests') {
+		echo ("Will test version $build_to_test.version customization $build_to_test.customization"
+			  + " with server counts $server_count_list and params $test_params:")
+		def workspace_dir = pwd()
+		for (server_count in split_int_list(server_count_list)) {
+			run_test(workspace_dir, build_to_test, test_params + [server_count: server_count])
+		}
+	}
+}
+
+def update_job_parameters() {
+	def builds = load_build_list()
+	def job_params = [
+		choice(name: 'action', choices: ['test_ci', 'test_release', 'update_parameters'].join('\n'),
+			description: 'Action to run', default: 'test_ci'),
+		[$class: 'BuildSelectorParameter',
+			defaultSelector: [$class: 'StatusBuildSelector', stable: true],
+			description: 'Which kind of latest CI build to test',
+			name: 'artifact_source'],
+		choice(name: 'build_to_test', choices: builds.join('\n'), description: 'Build to test, <branch>-<build-num>-<customization>'),
+		booleanParam(name: 'clean', defaultValue: false, description: 'Start from clean workspace'),
+		string(name: 'server_count', defaultValue: DEFAULT_SERVER_COUNT,
+			description: 'How many servers to create and merge. Use multiple values "10, 20, 30" to run test multiple times'),
+		string(name: 'merge_timeout', defaultValue: DEFAULT_MERGE_TIMEOUT,
+			description: 'Timeout for servers merge, in format: 2h, 30m, 50s'),
+		booleanParam(name: 'p2p_mode', defaultValue: true, description: 'Turn p2p mode on/off'),
+		booleanParam(name: 'use_lightweight_servers', defaultValue: true, description: 'Use lightweight servers from appserver2_ut test'),
+	]
+	properties([parameters(job_params)])
+	return builds
+}
+
+def stash_release_distributive(build_to_test) {
+	echo "Will test release distributive $build_to_test"
+	sh "mkdir -p dist"
+	sh "rm dist/* || true"  // clean distributive from previous build
+	if (DIST_HOST)
+		sh "scp ${DIST_HOST}:$build_to_test.path dist/"
+	else
+		sh "cp $build_to_test.path dist/"
+	stash includes: 'dist/*', name: 'distributive'
+}
+
+def stash_ci_distributive() {
+	sh "mkdir -p dist"
+	sh "rm dist/* || true"  // clean distributive from previous build
+	step([$class: 'CopyArtifact',
+			fingerprintArtifacts: true,
+			flatten: true,
+			projectName: UPSTREAM_CI_PROJECT_NAME,
+			selector: [$class: 'StatusBuildSelector', stable: false],
+			target: 'dist'])
+	def file_list = findFiles glob: 'dist/*.deb, dist/appserver2_ut'
+	def dist_path = file_list.find { it =~ /\.deb$/ }
+	def dist_info = parse_dist_path(dist_path)
+	stash includes: 'dist/*', name: 'distributive'
+	return [
+		branch: UPSTREAM_CI_BRANCH,
+		build: dist_info.build,
+		version: dist_info.version,
+		customization: 'default',
+		path: null,
+	]
+}
+
+def prepare_test_environment(clean_ws, p2p_mode) {
+	def ws_dir = pwd()
+	if (clean_ws) {
+		echo "Cleaning workspace $ws_dir"
+		deleteDir()
+	}
+	dir ('devtools') {
+		checkout scm
+	}
+
+	sh 'if [ -d dist ]; then rm -rf dist; fi'  // clean distributive from previous build
+	unstash 'distributive'
+	sh 'mkdir -p bin work/test'
+	sh "ln -sf $ws_dir/dist/*.deb bin/mediaserver.deb"  // we expect only one .deb in distributives
+	sh "ln -sf $ws_dir/dist/appserver2_ut bin/"
+	checkout([
+			$class: 'MercurialSCM',
+			credentialsId: NX_REPOSITORY_CREDENTIALS_ID,
+			installation: '(Default)',
+			revision: 'vms_3.1_dev',
+			source: 'ssh://hg@la.hdw.mx/nx_vms',
+			subdir: 'nx_vms',
+		])
+	sh 'if [ -d work/venv ]; then rm -rf work/venv; fi'
+	sh 'virtualenv --system-site-packages work/venv'
+	sh './work/venv/bin/pip install -r nx_vms/func_tests/requirements.txt'
+	sh './work/venv/bin/pip install -r $JUNK_SHOP_SRC_DIR/requirements.txt'
+	write_p2p_flag(p2p_mode)
+}
+
+def write_p2p_flag(p2p_mode) {
+	def path = '/tmp/appserver2.ini'
+	writeFile file: path, text: "isP2pMode = ${p2p_mode ? 1 : 0}\n"
+	for (host in WORKER_HOST_LIST) {
+		sh "scp $path $host:$path"
+	}
+}
+
+def run_test(ws_dir, build_to_test, test_params) {
+	echo "Running test with server count $test_params.server_count:"
+	def build_parameters = [
+		"platform=$PLATFORM",
+		"customization=$build_to_test.customization",
+		"branch=$build_to_test.branch",
+		"version=$build_to_test.version",
+	]
+	def run_parameters = test_params.collect { it -> "$it.key=$it.value" }
+	def test_parameters = test_params.collect { it -> "scalability_test.$it.key=$it.value" }
+	def options = [
+		"--work-dir=$ws_dir/work/test",
+		"--bin-dir=$ws_dir/bin",
+		"--reinstall",
+		"--customization=$build_to_test.customization",
+		"--nocapturelog",
+		"--capture-db=\$junk_shop_credentials@$JUNK_SHOP_HOST",
+		"--project=$JUNK_SHOP_PROJECT",
+		"--build-parameters=${build_parameters.join(',')}",
+		"--run-parameters=${run_parameters.join(',')}",
+		"--test-parameters=${test_parameters.join(',')}",
+		"--tests-config-file=$ws_dir/$JENKINS_SRC_DIR/test-config.yaml",
+	]
+	dir('nx_vms/func_tests') {
+		withEnv(["PYTHONPATH+X=$ws_dir/$JUNK_SHOP_SRC_DIR",
+				"PYTEST_PLUGINS=junk_shop.pytest_plugin"]) {
+			withCredentials([usernameColonPassword(
+						credentialsId: JUNK_SHOP_CREDENTIALS_ID,
+						variable: 'junk_shop_credentials')]) {
+				sh ". $ws_dir/work/venv/bin/activate && pytest ${options.join(' ')} scalability_test.py"
+			}
+		}
+	}
+}
+
+
+// utilities ====================================================================
+
+def pick_release_build_by_param(build_to_test_id) {
+	def l = build_to_test_id.tokenize('-')
+	def branch = l[0]
+	def build = l[1]
+	def customization = l[2]
+
+	def output = sh script: "./$JENKINS_SRC_DIR/pick-build-path.sh '$DIST_HOST' $build $branch $customization", returnStdout: true
+	def path = output.trim()
+	assert !path.contains('\n')  // only one distributive expected to be found
+	def version = parse_dist_path(path).version
+	return [
+		branch: branch,
+		build: build,
+		version: version,
+		customization: customization,
+		path: path,
+	]
+}
+
+def load_build_list() {
+	def output = sh script: "./$JENKINS_SRC_DIR/list-builds.sh $DIST_HOST", returnStdout: true
+	return match_builds(output)
+}
+
+def match_builds(findOutput) {
+	def mo = findOutput =~ '/((\\d+)\\-([^/]+)/([^/]+)/.+\\.deb)'
+	def builds = []
+	for (match in mo) {
+		def branch = match[3]
+		def build = match[2]
+		def customization = match[4]
+		//println "branch: ${branch}, build: ${build}, customization: ${customization}, path: ${match[1]}"
+		builds << "${branch}-${build}-${customization}"
+	}
+	return builds
+}
+
+def parse_dist_path(path) {
+	def mo = path =~ '/.+-server-(([0-9]\\.){3}([0-9]+))-linux64.*.deb'
+	return [
+		version: mo[0][1],
+		build: mo[0][3].toInteger(),
+		]
+}
+
+// Move to separate function to avoid java.io.NotSerializableException: java.util.AbstractList$Itr
+def split_int_list(value) {
+	return (value.split(/[, ]+/)) as ArrayList
+}
+
+
+// ==============================================================================
+main()
+// ==============================================================================
