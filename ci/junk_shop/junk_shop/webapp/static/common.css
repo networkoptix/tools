@@ -12,6 +12,22 @@ hr {
 	margin: 20px 0 20px 0;
 }
 
+table th {
+	font-family: 'Arial Bold';
+}
+table td {
+	font-size: 14px;
+	line-height: 20px;
+}
+table th, table td {
+	padding: 1px 15px;
+	text-align: start;
+}
+table {
+	background: white;
+	border: 1px solid #DDD;
+	padding: 10px;
+}
 .page {
 	font-weight: bold;
 	border: 1px solid #DDD;

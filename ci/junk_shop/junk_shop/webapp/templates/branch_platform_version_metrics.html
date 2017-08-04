@@ -4,6 +4,7 @@
 {% block title -%} {{ version }} metrics {%- endblock %}
 
 {% block head %}
+
   {{ super() }}
   <script src="{{ url_for('static', filename='plotly-latest.min.js') }}"></script>
   <script>
@@ -13,12 +14,12 @@
 
       {% for trace in trace_list -%}
 
-      var trace_{{ trace.name | to_ident }} = {
+      var trace_{{ trace.name|to_ident }} = {
         type: 'scatter',
         name: '{{ trace.name }}',
         x: [{% for point in trace.points -%} {{ point.x }}, {% endfor %}],
         y: [{% for point in trace.points -%} {{ point.y }}, {% endfor %}],
-        text: [{% for point in trace.points -%} '{{ point.text | format_timedelta }}', {% endfor %}],
+        text: [{% for point in trace.points -%} '{{ point.text|format_timedelta }}', {% endfor %}],
         mode: 'lines+markers+text',
         textposition: 'top',
         hoverinfo: 'text',
@@ -26,31 +27,33 @@
 
       {% endfor -%}
 
-      var data = [ {%- for trace in trace_list -%} trace_{{ trace.name | to_ident }}, {% endfor -%} ];
+      var data = [ {%- for trace in trace_list -%} trace_{{ trace.name|to_ident }}, {% endfor -%} ];
       var layout = {
-        title: 'Servers merge time by server count',
-        xaxis: { title: 'Server count' },
-        yaxis: { title: 'Merge and other times' },
+      title: 'Servers merge time by server count',
+      xaxis: { title: 'Server count' },
+      yaxis: { title: 'Merge and other times' },
       }
       Plotly.plot(div, data, layout);
-    }
+      }
 
-    window.addEventListener('resize', function() {
+      window.addEventListener('resize', function() {
       var div = document.getElementById('plot');
       Plotly.Plots.resize(div);
       });
 
   </script>
+
 {% endblock head %}
 
 {% block contents %}
 
   {{ run_macros.breadcrumbs([
-       ('Branches',  url_for('matrix')),
-       (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
-       (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
-       (version, url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=version)),
-  ]) }}
+  ('Branches',  url_for('matrix')),
+  (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
+  (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
+  (version, url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=version)),
+  ])
+  }}
 
   <h2>{{ self.title() }}</h2>
 
@@ -58,5 +61,8 @@
 
   <div id="plot">
   </div>
+
+  <hr/>
+  {{ run_macros.run_parameters_table(run_parameters) }}
 
 {% endblock contents %}

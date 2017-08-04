@@ -52,6 +52,41 @@ class MetricTrace(object):
         return '<%s: %r>' % (self.name, self.points)
 
 
+class RunParameter(object):
+
+    def __init__(self, name, value_list):
+        self.name = name
+        self.value_list = value_list
+
+
+# convert int parameters to int, leave rest ones as is
+def param_to_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
+def load_branch_platform_version_run_parameters(branch_name, platform_name, version):
+    parameters = {}  # name -> value set
+    for (name, value) in select(
+            (pv.run_parameter.name, pv.value)
+            for run in models.Run for pv in run.run_parameters
+            if run.version == version and
+               run.branch.name == branch_name and
+               run.platform.name == platform_name):
+        parameters.setdefault(name, set()).add(param_to_int(value))
+    return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
+
+def load_branch_platform_run_parameters(branch_name, platform_name):
+    parameters = {}  # name -> value set
+    for (name, value) in select(
+            (pv.run_parameter.name, pv.value)
+            for run in models.Run for pv in run.run_parameters
+            if run.branch.name == branch_name and
+               run.platform.name == platform_name):
+        parameters.setdefault(name, set()).add(param_to_int(value))
+    return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
+
 def load_branch_platform_version_metric_traces(branch_name, platform_name, version):
     all_metric_names = set()
     accumulators = {}
@@ -118,21 +153,25 @@ def load_branch_platform_metric_traces(branch_name, platform_name):
 @db_session
 def branch_platform_version_metrics(branch_name, platform_name, version):
     trace_list = list(load_branch_platform_version_metric_traces(branch_name, platform_name, version))
+    run_parameters = load_branch_platform_version_run_parameters(branch_name, platform_name, version)
     return render_template(
         'branch_platform_version_metrics.html',
         branch_name=branch_name,
         platform_name=platform_name,
         version=version,
         trace_list=trace_list,
+        run_parameters=run_parameters,
         )
 
 @app.route('/branch/<branch_name>/<platform_name>/metrics')
 @db_session
 def branch_platform_metrics(branch_name, platform_name):
     trace_list = list(load_branch_platform_metric_traces(branch_name, platform_name))
+    run_parameters = load_branch_platform_run_parameters(branch_name, platform_name)
     return render_template(
         'branch_platform_metrics.html',
         branch_name=branch_name,
         platform_name=platform_name,
         trace_list=trace_list,
+        run_parameters=run_parameters,
         )
