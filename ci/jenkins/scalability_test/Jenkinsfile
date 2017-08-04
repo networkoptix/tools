@@ -14,8 +14,9 @@ PLATFORM = 'linux64'
 DEFAULT_MERGE_TIMEOUT = '1h'
 WORKER_HOST_LIST = ['scalability2', 'scalability3']  // ssh names
 DEFAULT_SERVER_COUNT = '50, 100, 150, 200, 250'
-CAMERAS_PER_SERVER = 5
+CAMERAS_PER_SERVER = 20
 USERS_PER_SERVER = 4
+PROPERTIES_PER_CAMERA = 5
 
 
 def main() {
@@ -29,6 +30,7 @@ def main() {
 		merge_timeout: params.merge_timeout,
 		cameras_per_server: CAMERAS_PER_SERVER,
 		users_per_server: USERS_PER_SERVER,
+		properties_per_camera: PROPERTIES_PER_CAMERA,
 		]
 
 	stage('Load distributive') {
