@@ -168,7 +168,7 @@ def prepare_test_environment(clean_ws, p2p_mode) {
 	sh 'if [ -d work/venv ]; then rm -rf work/venv; fi'
 	sh 'virtualenv --system-site-packages work/venv'
 	sh './work/venv/bin/pip install -r nx_vms/func_tests/requirements.txt'
-	sh './work/venv/bin/pip install -r $JUNK_SHOP_SRC_DIR/requirements.txt'
+	sh "./work/venv/bin/pip install -r $JUNK_SHOP_SRC_DIR/requirements.txt"
 	write_p2p_flag(p2p_mode)
 }
 
