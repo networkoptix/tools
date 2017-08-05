@@ -26,7 +26,8 @@ Here <command> can be one of the following:
 ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
 
 apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact, rdep -u.
+kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
+kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
 start-s [Release] [args] # Start mediaserver with [args].
 stop-s # Stop mediaserver.
@@ -263,14 +264,6 @@ do_kit() # "$@"
     nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
     nx_echo
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
-
-
-    nx_echo
-    nx_pushd "$PACKAGES_DIR/any/nx_kit"
-    rdep -u && nx_echo "SUCCESS: nx_kit uploaded via rdep"
-    local RESULT=$?
-    nx_popd
-    return $RESULT
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -292,6 +285,12 @@ main()
             ;;
         kit)
             do_kit "$@"
+            ;;
+        kit-rdep)
+            nx_pushd "$PACKAGES_DIR/any/nx_kit"
+            rdep -u || exit $?
+            nx_echo "SUCCESS: nx_kit uploaded via rdep"
+            nx_popd
             ;;
         #..........................................................................................
         start-s)
