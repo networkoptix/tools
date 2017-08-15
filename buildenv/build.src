@@ -117,13 +117,13 @@ else
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_speach_synthesizer.a)
 fi
 
-MODULES+=(common)
-MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
-
 if [[ ! "$VERSION" < "3.0" ]]; then
     MODULES+=(common_libs/udt common_libs/nx_network nx_cloud/cloud_db_client common_libs/nx_speech_synthesizer)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libudt.so lib/$CONFIGURATION/libnx_network.so lib/$CONFIGURATION/libcloud_db_client.so lib/$CONFIGURATION/libnx_speech_synthesizer.a)
 fi
+
+MODULES+=(common)
+MODULE_BIN_PATH+=(lib/$CONFIGURATION/libcommon.so)
 
 MODULES+=(appserver2)
 MODULE_BIN_PATH+=(lib/$CONFIGURATION/libappserver2.so)
@@ -290,10 +290,10 @@ fi
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [ "$WITH_CLIENT" == 1 ]; then
         if [[ ! "$VERSION" < "2.4" ]]; then # >= 2.4
-            MODULES+=( common_libs/nx_media )
-            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_media.so )
             MODULES+=( common_libs/nx_audio )
             MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_audio.so )
+            MODULES+=( common_libs/nx_media )
+            MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_media.so )
             MODULES+=( common_libs/nx_vms_utils )
             MODULE_BIN_PATH+=( lib/$CONFIGURATION/libnx_vms_utils.so )
             MODULES+=( client/nx_client_core )
