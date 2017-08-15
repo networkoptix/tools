@@ -254,11 +254,6 @@ if [ "$WITH_TEST" == 1 ]; then
             MODULE_BIN_PATH+=(bin/$CONFIGURATION/mediaserver_core_ut)
         fi
     fi
-
-    if [[ ! "$VERSION" < "3.1" ]]; then
-        MODULES+=(nx_cloud/tests/cloud_connect_integration_tests tests/vms_cloud_integration_tests)
-        MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_connect_integration_tests bin/$CONFIGURATION/vms_cloud_integration_tests)
-    fi
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
@@ -275,6 +270,8 @@ if [ "$CONF_PARAM_SET" == 0 ]; then
             if [ "$WITH_TEST" == 1 ]; then
                 MODULES+=(unit_tests/traffic_relay_ut)
                 MODULE_BIN_PATH+=(bin/$CONFIGURATION/traffic_relay_ut)
+                MODULES+=(nx_cloud/tests/cloud_connect_integration_tests)
+                MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_connect_integration_tests)
             fi
         fi
     fi
@@ -283,6 +280,11 @@ fi
 if [ $WITH_MSERVER -eq 1 ]; then
     MODULES+=( mediaserver )
     MODULE_BIN_PATH+=( bin/$CONFIGURATION/mediaserver )
+
+    if [[ ! "$VERSION" < "3.1" ]]; then
+        MODULES+=(tests/vms_cloud_integration_tests)
+        MODULE_BIN_PATH+=(bin/$CONFIGURATION/vms_cloud_integration_tests)
+    fi
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
