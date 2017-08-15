@@ -119,7 +119,11 @@ cd $BIN_DIR
 
 LAUNCH_CMD="$BINARY_NAME $MSERVER_ARGS"
 if [ ! -z "$STRACE" ]; then
-    LAUNCH_CMD="strace -fo $STRACE_LOG $LAUNCH_CMD"
+    if [ "`uname -s`" = "Darwin" ]; then
+        LAUNCH_CMD="dtruss -f $LAUNCH_CMD"
+    else
+        LAUNCH_CMD="strace -fo $STRACE_LOG $LAUNCH_CMD"
+    fi
 fi
 
 COMMON_VALGRIND_ARGS="--num-callers=32 --error-limit=no --log-file=$VALGRIND_LOG_FILE $LAUNCH_CMD"
