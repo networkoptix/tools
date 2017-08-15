@@ -1108,8 +1108,12 @@ EOF
             ffmpeg_EXTRA_CFLAGS="-I${libvpx_DIR_NATIVE}\\\\\\\\include -I${lame_DIR_NATIVE}\\\\\\\\include -I${libogg_DIR_NATIVE}\\\\\\\\include -I${libvorbis_DIR_NATIVE}\\\\\\\\include"
             ffmpeg_EXTRA_LDFLAGS="-LIBPATH:${libvpx_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${lame_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libogg_DIR_NATIVE}\\\\\\\\lib -LIBPATH:${libvorbis_DIR_NATIVE}\\\\\\\\lib"
             ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"$ffmpeg_EXTRA_CFLAGS\" --extra-ldflags=\"$ffmpeg_EXTRA_LDFLAGS\""
+            ffmpeg_EXTRA_OPTIONS+="--enable-libmp3lame --enable-libvorbis --enable-libvpx"
+        elif [ $OS = "macosx" ]
+        then
+            ffmpeg_CONFIG_OPTIONS="--enable-rpath --install-name-dir=@rpath"
         else
-            [ -n "$lame_DIR" ] && ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"-I$libvpx_DIR/include -I$lame_DIR/include -I$libogg_DIR/include -I$libvorbis_DIR/include\" --extra-ldflags=\"-L$libvpx_DIR/lib -L$lame_DIR/lib -L$libogg_DIR/lib -L$libvorbis_DIR/lib\""
+            [ -n "$lame_DIR" ] && ffmpeg_EXTRA_OPTIONS="--extra-cflags=\"-I$libvpx_DIR/include -I$lame_DIR/include -I$libogg_DIR/include -I$libvorbis_DIR/include\" --extra-ldflags=\"-L$libvpx_DIR/lib -L$lame_DIR/lib -L$libogg_DIR/lib -L$libvorbis_DIR/lib\" --enable-libmp3lame --enable-libvorbis --enable-libvpx"
         fi
 
         if [ -n "$DEBUG_ON" ]; then
@@ -1124,7 +1128,7 @@ EOF
 [ $OS = "windows" ] && sed -i'' 's/-lvorbisenc//g' configure 2> /dev/null
 
 ./configure --disable-static --enable-shared --prefix=$ffmpeg_DIR \
---arch=$makeArch --enable-libmp3lame --enable-libvorbis --enable-libvpx \
+--arch=$makeArch \
 $ffmpeg_EXTRA_OPTIONS \
 $ffmpeg_CONFIG_OPTIONS
 EOF
