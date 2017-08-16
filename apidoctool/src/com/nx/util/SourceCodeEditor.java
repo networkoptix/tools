@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Allows to edit and save modified SourceCode to file.
@@ -21,7 +20,7 @@ public final class SourceCodeEditor
     public void saveToFile(File file)
         throws IOException, Error
     {
-        Utils.saveStringListToFile(file, lines, lineBreak);
+        Utils.writeStringListToFile(file, lines, lineBreak);
     }
 
     /**

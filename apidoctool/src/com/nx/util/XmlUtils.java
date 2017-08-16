@@ -10,6 +10,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class XmlUtils
 {
@@ -32,7 +34,7 @@ public final class XmlUtils
         return documentBuilder;
     }
 
-    public static Document parseXmlDocument(File xmlFile)
+    public static Document parseXmlFile(File xmlFile)
         throws IOException, SAXException
     {
         return createDocumentBuilder().parse(xmlFile);
@@ -68,7 +70,7 @@ public final class XmlUtils
         return writer.toString();
     }
 
-    public static void writeXmlDocument(Document document, File xmlFile)
+    public static void writeXmlFile(File xmlFile, Document document)
         throws IOException
     {
         OutputFormat format = new OutputFormat(document);
@@ -83,20 +85,29 @@ public final class XmlUtils
 
             // Workaround of a known JDK-8081650 bug: processing instructions
             // (often "xml-stylesheet") are serialized in wrong order.
-            ProcessingInstruction pi = null;
-            Node node = document.getFirstChild();
-            if (node instanceof ProcessingInstruction)
+            List<ProcessingInstruction> processingInstructions = new ArrayList();
+            int i = 0;
+            while (i < document.getChildNodes().getLength())
             {
-                pi = (ProcessingInstruction) node;
-                try
+                final Node node = document.getChildNodes().item(i);
+                if (node instanceof ProcessingInstruction)
                 {
-                    serializer.processingInstruction(pi.getTarget(), pi.getData());
+                    ProcessingInstruction p = (ProcessingInstruction) node;
+                    processingInstructions.add(p);
+                    try
+                    {
+                        serializer.processingInstruction(p.getTarget(), p.getData());
+                    }
+                    catch (SAXException e)
+                    {
+                        throw new RuntimeException("INTERNAL ERROR", e);
+                    }
+                    document.removeChild(p);
                 }
-                catch (SAXException e)
+                else
                 {
-                    throw new RuntimeException("INTERNAL ERROR", e);
+                    ++i;
                 }
-                document.removeChild(pi);
             }
 
             try
@@ -106,8 +117,9 @@ public final class XmlUtils
             finally
             {
                 // Restore the document after workaround.
-                if (pi != null)
-                    document.insertBefore(pi, document.getFirstChild());
+                final Node firstNode = document.getFirstChild();
+                for (ProcessingInstruction p: processingInstructions)
+                    document.insertBefore(p, firstNode);
             }
         }
         finally

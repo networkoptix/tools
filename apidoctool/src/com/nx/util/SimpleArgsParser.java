@@ -103,6 +103,19 @@ public abstract class SimpleArgsParser
         return new File(get(key));
     }
 
+    /**
+     * @return null If there was no such key.
+     */
+    public final File getFileOptional(String key)
+    {
+        final String value = map.get(key);
+
+        if (value == null)
+            return null;
+
+        return new File(value);
+    }
+
     //--------------------------------------------------------------------------
 
     private void error(String message)

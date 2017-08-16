@@ -17,6 +17,7 @@ java -jar ../out/apidoctool.jar ^
     -vms-path netoptix_vms.TEST ^
     -template-xml api.TEMPLATE.xml ^
     -output-xml api.OUT.xml ^
+    -output-json api.OUT.json ^
     || echo ATTENTION: SCRIPT FAILED && pause && exit
 
 @echo.

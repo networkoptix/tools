@@ -26,20 +26,29 @@ public abstract class TestBase
         void run() throws Exception;
     }
 
-    protected void run(String testName, Run runnable)
+    private void print()
     {
         System.out.println();
-        System.out.println("####### Running test: " + testName);
+    }
+    
+    private void print(String message)
+    {
+        System.out.println("[TEST] " + message);
+    }
+
+    protected void run(String testName, Run runnable)
+    {
+        print();
+        print("Running test: " + testName);
         try
         {
             runnable.run();
-            System.out.println("####### Test PASSED");
+            print("Test PASSED");
         }
         catch (Throwable e)
         {
             ++failedTestsCount;
-            System.err.println("");
-            System.err.println("####### Test " + testName + " FAILED:");
+            System.err.println("\n[TEST] Test " + testName + " FAILED:");
             e.printStackTrace();
         }
     }
@@ -49,11 +58,11 @@ public abstract class TestBase
         System.out.println();
         if (failedTestsCount == 0)
         {
-            System.out.println("All tests PASSED");
+            print("All tests PASSED");
         }
         else
         {
-            System.out.println("ATTENTION: " +
+            print("ATTENTION: " +
                 (failedTestsCount == 1 ?
                 "1 test" : failedTestsCount + " tests") + " FAILED");
             System.exit(3);

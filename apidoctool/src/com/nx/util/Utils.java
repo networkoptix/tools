@@ -115,7 +115,7 @@ public final class Utils
         return buffer;
     }
 
-    public static void saveStringListToFile(
+    public static void writeStringListToFile(
         File file, List<String> lines, String lineBreak)
         throws IOException
     {
@@ -141,6 +141,25 @@ public final class Utils
         }
     }
 
+    public static void writeStringToFile(File file, String s)
+        throws IOException
+    {
+        if (s == null)
+        {
+            throw new IllegalStateException("INTERNAL ERROR: " +
+                "null string found");
+        }
+        FileWriter writer = new FileWriter(file);
+        try
+        {
+            writer.write(s);
+        }
+        finally
+        {
+            writer.close();
+        }
+    }
+
     /**
      * Insert the specified suffix before the file extension (if any).
      */
@@ -153,5 +172,21 @@ public final class Utils
             return new File(file + suffix);
 
         return new File(pathAndExt[0] + suffix + pathAndExt[1]);
+    }
+
+    public static <T> T createObject(Class<T> objClass)
+    {
+        try
+        {
+            return objClass.newInstance();
+        }
+        catch (InstantiationException e)
+        {
+            throw new IllegalStateException(e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
 }

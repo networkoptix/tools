@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-dummy-processing-instruction dummy-attr="dummy-value"?>
 <?xml-stylesheet type="text/xsl" href="api.xsl"?>
 <apidoc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="api.xsd">
     <groups>
@@ -4091,6 +4092,10 @@ when creating, keep the value when modifying.</description>
                     <name>createEvent</name>
                     <description>Using this method it's possible to deliver a generic event to the system from 3rd party systems.
                                  It will be processed and logged according to current event rules.
+
+                          <pre><![CDATA[
+http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z&caption=CreditCardUsed&metadata={"cameraRefs":["3A4AD4EA-9269-4B1F-A7AA-2CEC537D0248","3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240"]}
+                          ]]></pre>
                     </description>
                     <method>GET</method>
                     <params>

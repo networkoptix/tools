@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/</output-path>
     <root id="archive" name="apidoctool.jar">
       <element id="module-output" name="apidoctool" />
+      <element id="module-output" name="JSON-java" />
     </root>
   </artifact>
 </component>

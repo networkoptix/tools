@@ -4,6 +4,7 @@ import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocHandler;
 import com.nx.util.SourceCodeEditor;
 import com.nx.util.Utils;
+import com.nx.util.XmlSerializer;
 import com.nx.util.XmlUtils;
 
 import java.io.File;
@@ -28,8 +29,8 @@ public final class XmlToCodeExecutor
         System.out.println("    Input: " + sourceApiXmlFile);
         System.out.println("    Input: " + connectionFactoryCppFile);
 
-        final Apidoc apidoc = new Apidoc();
-        apidoc.readFromDocument(XmlUtils.parseXmlDocument(sourceApiXmlFile));
+        final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
+            XmlUtils.parseXmlFile(sourceApiXmlFile));
 
         final SourceCodeEditor editor = new SourceCodeEditor(
             connectionFactoryCppFile);
@@ -44,7 +45,7 @@ public final class XmlToCodeExecutor
         editor.saveToFile(outputConnectionFactoryCppFile);
         System.out.println("    Output: " + outputConnectionFactoryCppFile);
 
-        XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
+        XmlUtils.writeXmlFile(outputApiXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApiXmlFile);
 
         return processedFunctionsCount;

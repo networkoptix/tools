@@ -32,9 +32,10 @@ public class Main
 "    Generated source code files are given \"" + Executor.OUTPUT_FILE_EXTRA_SUFFIX + "\" suffix.\n" +
 "    -output-xml is a copy of -source-xml with processed functions removed.\n" +
 "\n" +
-"code-to-xml -vms-path <netoptix_vms> -template-xml <file> -output-xml <file>\n" +
+"code-to-xml -vms-path <netoptix_vms> -template-xml <file> -output-xml <file> [-output-json <file>]\n" +
 "    Parse Apidoc comments in the code, and generate Apidoc XML, taking the\n" +
 "    functions not mentioned in the code from -template-xml.\n" +
+"    If requested, a JSON file is generated with similar contents as the XML.\n" +
 "\n" +
 "print-deps\n" +
 "    Print paths to all C++ source code files to be accessed, relative to vms-path.\n" +
@@ -70,6 +71,7 @@ public class Main
                 exec.vmsPath = arg.getFile("-vms-path");
                 exec.templateApiXmlFile = arg.getFile("-template-xml");
                 exec.outputApiXmlFile = arg.getFile("-output-xml");
+                exec.outputApiJsonFile = arg.getFileOptional("-output-json");
                 exec.execute();
             }
             else if ("print-deps".equals(arg.action()))

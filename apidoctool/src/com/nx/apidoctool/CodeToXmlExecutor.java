@@ -2,9 +2,7 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocHandler;
-import com.nx.util.SourceCode;
-import com.nx.util.Utils;
-import com.nx.util.XmlUtils;
+import com.nx.util.*;
 
 import java.io.File;
 
@@ -14,6 +12,7 @@ public final class CodeToXmlExecutor
     public File vmsPath;
     public File templateApiXmlFile;
     public File outputApiXmlFile;
+    public File outputApiJsonFile; ///< Can be null if not needed.
     public String sourceFileExtraSuffix = "";
 
     public int execute()
@@ -29,8 +28,8 @@ public final class CodeToXmlExecutor
         // NOTE: This code can be easily rewritten to avoid deserializing and
         // serializing of untouched XML groups.
 
-        final Apidoc apidoc = new Apidoc();
-        apidoc.readFromDocument(XmlUtils.parseXmlDocument(templateApiXmlFile));
+        final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
+            XmlUtils.parseXmlFile(templateApiXmlFile));
 
         SourceCode reader = new SourceCode(connectionFactoryCppFile);
 
@@ -44,8 +43,15 @@ public final class CodeToXmlExecutor
 
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
-        XmlUtils.writeXmlDocument(apidoc.toDocument(), outputApiXmlFile);
+        XmlUtils.writeXmlFile(outputApiXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApiXmlFile);
+
+        if (outputApiJsonFile != null)
+        {
+            final String json = JsonSerializer.toJsonString(apidoc);
+            Utils.writeStringToFile(outputApiJsonFile, json);
+            System.out.println("    Output: " + outputApiJsonFile);
+        }
 
         return processedFunctionsCount;
     }
