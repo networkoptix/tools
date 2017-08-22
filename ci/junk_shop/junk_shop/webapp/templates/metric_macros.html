@@ -1,0 +1,28 @@
+
+{% macro plot_data(name, trace_list, mode) %}
+
+  {% for trace in trace_list -%}
+
+      var {{ name }}_trace_{{ trace.name|to_ident }} = {
+        type: 'scatter',
+        name: '{{ trace.name }}',
+        x: [{% for point in trace.points -%} "{{ point.x }}", {% endfor %}],
+        y: [{% for point in trace.points -%} "{{ point.y }}", {% endfor %}],
+        text: [{% for point in trace.points -%} '{{ point.text }}', {% endfor %}],
+        mode: '{{ mode }}',
+        textposition: 'top',
+        hoverinfo: 'x+text',
+        {% if trace.yaxis -%}
+          yaxis: '{{ trace.yaxis }}',
+        {%- endif %}
+      };
+
+  {% endfor -%}
+
+  var {{ name }}_data = [
+    {%- for trace in trace_list -%}
+      {{ name }}_trace_{{ trace.name|to_ident }},
+    {% endfor -%}
+  ];
+
+{% endmacro %}

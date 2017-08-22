@@ -1,4 +1,5 @@
 {% import "run_macros.html" as run_macros %}
+{% import "metric_macros.html" as metric_macros %}
 
 {% extends "layout.html" %}
 {% block title -%} {{ version }} metrics {%- endblock %}
@@ -12,34 +13,25 @@
     window.onload = function() {
       var div = document.getElementById('plot')
 
-      {% for trace in trace_list -%}
+      {{ metric_macros.plot_data('plot', trace_list, 'lines+markers+text') }}
 
-      var trace_{{ trace.name|to_ident }} = {
-        type: 'scatter',
-        name: '{{ trace.name }}',
-        x: [{% for point in trace.points -%} {{ point.x }}, {% endfor %}],
-        y: [{% for point in trace.points -%} {{ point.y }}, {% endfor %}],
-        text: [{% for point in trace.points -%} '{{ point.text|format_timedelta }}', {% endfor %}],
-        mode: 'lines+markers+text',
-        textposition: 'top',
-        hoverinfo: 'text',
-      };
-
-      {% endfor -%}
-
-      var data = [ {%- for trace in trace_list -%} trace_{{ trace.name|to_ident }}, {% endfor -%} ];
       var layout = {
-      title: 'Servers merge time by server count',
-      xaxis: { title: 'Server count' },
-      yaxis: { title: 'Merge and other times' },
+        title: 'Servers merge time by server count',
+        xaxis: { title: 'Server count' },
+        yaxis: { title: 'Merge and other times, sec' },
+        yaxis2: {
+          title: 'Total bytes sent',
+          overlaying: 'y',
+          side: 'right',
+        },
       }
-      Plotly.plot(div, data, layout);
-      }
+      Plotly.plot(div, plot_data, layout);
+    }
 
-      window.addEventListener('resize', function() {
+    window.addEventListener('resize', function() {
       var div = document.getElementById('plot');
       Plotly.Plots.resize(div);
-      });
+    });
 
   </script>
 

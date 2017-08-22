@@ -1,46 +1,43 @@
 {% import "run_macros.html" as run_macros %}
+{% import "metric_macros.html" as metric_macros %}
 
 {% extends "layout.html" %}
 {% block title -%} {{ version }} metrics {%- endblock %}
 
 {% block head %}
+
   {{ super() }}
   <script src="{{ url_for('static', filename='plotly-latest.min.js') }}"></script>
   <script>
 
     window.onload = function() {
-      var div = document.getElementById('plot')
 
-      {% for trace in trace_list -%}
+      {{ metric_macros.plot_data('merge_duration', merge_duration_traces, 'lines+markers') }}
 
-      var trace_{{ trace.name | to_ident }} = {
-        type: 'scatter',
-        name: '{{ trace.name }}',
-        x: [{% for point in trace.points -%} "{{ point.x }}", {% endfor %}],
-        y: [{% for point in trace.points -%} {{ point.y }}, {% endfor %}],
-        text: [{% for point in trace.points -%} '{{ point.text | format_timedelta }}', {% endfor %}],
-        mode: 'lines+markers',
-        textposition: 'top',
-        hoverinfo: 'x+text',
-      };
-
-      {% endfor -%}
-
-      var data = [ {%- for trace in trace_list -%} trace_{{ trace.name | to_ident }}, {% endfor -%} ];
       var layout = {
         title: 'Servers merge time by build version',
         xaxis: { title: 'Build version' },
-        yaxis: { title: 'Merge times' },
+        yaxis: { title: 'Merge times, sec' },
       }
-      Plotly.plot(div, data, layout);
+      Plotly.plot(document.getElementById('merge_duration_plot'), merge_duration_data, layout);
+
+      {{ metric_macros.plot_data('total_bytes_sent', total_bytes_sent_traces, 'lines+markers') }}
+
+      var layout = {
+        title: 'Total bytes sent by build version',
+        xaxis: { title: 'Build version' },
+        yaxis: { title: 'Total bytes sent' },
+      }
+      Plotly.plot(document.getElementById('total_bytes_sent_plot'), total_bytes_sent_data, layout);
     }
 
     window.addEventListener('resize', function() {
-      var div = document.getElementById('plot');
-      Plotly.Plots.resize(div);
-      });
+      Plotly.Plots.resize(document.getElementById('merge_duration_plot'));
+      Plotly.Plots.resize(document.getElementById('total_bytes_sent_plot'));
+    });
 
   </script>
+
 {% endblock head %}
 
 {% block contents %}
@@ -55,7 +52,9 @@
 
   <hr>
 
-  <div id="plot">
+  <div id="merge_duration_plot">
+  </div>
+  <div id="total_bytes_sent_plot">
   </div>
 
   <hr/>

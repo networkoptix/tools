@@ -1,8 +1,10 @@
 import datetime
+import abc
 from pony.orm import db_session, desc, select
 from flask import render_template
 from .. import models
 from junk_shop.webapp import app
+from .filters import format_timedelta
 
 
 # How many measured versions are taken to measure which server_count is to show
@@ -33,20 +35,50 @@ class MetricAccumulator(object):
 
 class Point(object):
 
-    def __init__(self, x, y, text=None):
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.text = text or y
 
     def __repr__(self):
         return '<%s -> %s/%s>' % (self.x, self.y, self.text)
 
+    @property
+    @abc.abstractmethod
+    def text(self):
+        pass
+
+
+class DurationPoint(Point):
+
+    @property
+    def text(self):
+        return format_timedelta(datetime.timedelta(seconds=self.y))
+
+
+class BytesPoint(Point):
+
+    @property
+    def text(self):
+        kb = self.y / 1024
+        mb = kb / 1024
+        gb = mb / 1024
+        if gb > 10:
+            return '%.2fGB' % gb
+        if mb > 10:
+            return '%.2fMB' % mb
+        if kb > 10:
+            return '%.2fKB' % kb
+        return '%.2fB' % self.y
+
 
 class MetricTrace(object):
 
-    def __init__(self, metric_name, points):
+    def __init__(self, metric_name, points, yaxis=None):
         self.name = metric_name
         self.points = points
+        self.yaxis = yaxis
 
     def __repr__(self):
         return '<%s: %r>' % (self.name, self.points)
@@ -105,48 +137,61 @@ def load_branch_platform_version_metric_traces(branch_name, platform_name, versi
         acc.add_value(metric_value)
         # print 'metric:', server_count, metric_name, metric_value
     for metric_name in all_metric_names:
-        points = [Point(server_count, acc.mean, datetime.timedelta(seconds=acc.mean))
+        if metric_name == 'total_bytes_sent':
+            Point = BytesPoint
+            yaxis = 'y2'
+        else:
+            Point = DurationPoint
+            yaxis = None
+        points = [Point(server_count, acc.mean)
                       for (server_count, acc_metric_name), acc in sorted(accumulators.items())
                            if acc_metric_name == metric_name]
-        yield MetricTrace(metric_name, points)
+        yield MetricTrace(metric_name, points, yaxis)
 
 def load_branch_platform_metric_traces(branch_name, platform_name):
-    metric_name = 'merge_duration'
     all_server_counts = {}   # server_count -> collected metric count
     versions = set()
-    accumulators = {}
-    for version, server_count, metric_value in select(
-            (run.root_run.version, param.value, mv.value)
+    accumulators = {}  # (metric_name, version, server_count) -> MetricAcculumator
+    for metric_name, version, server_count, metric_value in select(
+            (mv.metric.name, run.root_run.version, param.value, mv.value)
             for mv in models.MetricValue
             for run in mv.run
             for param in run.root_run.run_parameters
             if run.root_run.branch.name == branch_name and
                run.root_run.platform.name == platform_name and
                param.run_parameter.name == 'server_count' and
-               mv.metric.name == metric_name
+               mv.metric.name in ['merge_duration', 'total_bytes_sent']
             ):
         server_count = int(server_count)
         versions.add(version)
         all_server_counts[server_count] = all_server_counts.get(server_count, 0) + 1
-        acc = accumulators.setdefault((version, server_count), MetricAccumulator())
+        acc = accumulators.setdefault((metric_name, version, server_count), MetricAccumulator())
         acc.add_value(metric_value)
         # print 'metric:', version, server_count, metric_value
     ## print 'all counts', sorted(all_server_counts.items())
     last_versions = set(sorted(versions)[-MERGE_DURATION_DYNAMICS_LAST_VERSION_COUNT:])
     ## print 'last versions:', sorted(last_versions)
     last_server_counts = {}
-    for version, server_count in accumulators:
+    for metric_name, version, server_count in accumulators:
         if version in last_versions:
             last_server_counts[server_count] = last_server_counts.get(server_count, 0) + 1
     ## print 'last counts', sorted(last_server_counts.items())
     # show greatest server counts from last runs
     show_server_counts = sorted(last_server_counts)[-MAX_SERVER_COUNT_TRACES:]
     ## print 'show_server_counts:', show_server_counts
+    merge_duration_traces = []
+    total_bytes_sent_traces = []
     for server_count in show_server_counts:
-        points = [Point(version, acc.mean, datetime.timedelta(seconds=acc.mean))
-                      for (version, acc_server_count), acc in sorted(accumulators.items())
-                      if acc_server_count == server_count]
-        yield MetricTrace('%d servers' % server_count, points)
+        points = [DurationPoint(version, acc.mean)
+                      for (metric_name, version, acc_server_count), acc in sorted(accumulators.items())
+                      if metric_name == 'merge_duration' and acc_server_count == server_count]
+        merge_duration_traces.append(MetricTrace('%d servers' % server_count, points))
+    for server_count in show_server_counts:
+        points = [BytesPoint(version, acc.mean)
+                      for (metric_name, version, acc_server_count), acc in sorted(accumulators.items())
+                      if metric_name == 'total_bytes_sent' and acc_server_count == server_count]
+        total_bytes_sent_traces.append(MetricTrace('%d servers' % server_count, points))
+    return (merge_duration_traces, total_bytes_sent_traces)
 
 
 @app.route('/branch/<branch_name>/<platform_name>/<version>/metrics')
@@ -166,12 +211,13 @@ def branch_platform_version_metrics(branch_name, platform_name, version):
 @app.route('/branch/<branch_name>/<platform_name>/metrics')
 @db_session
 def branch_platform_metrics(branch_name, platform_name):
-    trace_list = list(load_branch_platform_metric_traces(branch_name, platform_name))
+    merge_duration_traces, total_bytes_sent_traces = list(load_branch_platform_metric_traces(branch_name, platform_name))
     run_parameters = load_branch_platform_run_parameters(branch_name, platform_name)
     return render_template(
         'branch_platform_metrics.html',
         branch_name=branch_name,
         platform_name=platform_name,
-        trace_list=trace_list,
+        merge_duration_traces=merge_duration_traces,
+        total_bytes_sent_traces=total_bytes_sent_traces,
         run_parameters=run_parameters,
         )
