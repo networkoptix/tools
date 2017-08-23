@@ -2,7 +2,7 @@
 {% import "metric_macros.html" as metric_macros %}
 
 {% extends "layout.html" %}
-{% block title -%} {{ version }} metrics {%- endblock %}
+{% block title -%} Server build {{ version }} metrics {%- endblock %}
 
 {% block head %}
 
@@ -11,11 +11,9 @@
   <script>
 
     window.onload = function() {
-      var div = document.getElementById('plot')
 
-      {{ metric_macros.plot_data('plot', trace_list, 'lines+markers+text') }}
-
-      var layout = {
+      {{ metric_macros.plot_data('merge_duration', merge_duration_traces, 'lines+markers+text') }}
+      var merge_duration_layout = {
         title: 'Servers merge time by server count',
         xaxis: { title: 'Server count' },
         yaxis: { title: 'Merge and other times, sec' },
@@ -25,12 +23,20 @@
           side: 'right',
         },
       }
-      Plotly.plot(div, plot_data, layout);
+      Plotly.plot(document.getElementById('merge_duration_plot'), merge_duration_data, merge_duration_layout);
+
+      {{ metric_macros.plot_data('host_memory_usage', host_memory_usage_traces, 'lines+markers+text') }}
+      var host_memory_usage_layout = {
+        title: 'Host memory usage by server count',
+        xaxis: { title: 'Server count' },
+        yaxis: { title: 'Memory usage' },
+      }
+      Plotly.plot(document.getElementById('host_memory_usage_plot'), host_memory_usage_data, host_memory_usage_layout);
     }
 
     window.addEventListener('resize', function() {
-      var div = document.getElementById('plot');
-      Plotly.Plots.resize(div);
+      Plotly.Plots.resize(document.getElementById('merge_duration_plot'));
+      Plotly.Plots.resize(document.getElementById('host_memory_usage_plot'));
     });
 
   </script>
@@ -40,18 +46,19 @@
 {% block contents %}
 
   {{ run_macros.breadcrumbs([
-  ('Branches',  url_for('matrix')),
-  (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
-  (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
-  (version, url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=version)),
-  ])
-  }}
+      ('Branches',  url_for('matrix')),
+      (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
+      (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
+      (version, url_for('branch_platform_version_run_list', branch_name=branch_name, platform_name=platform_name, version=version)),
+  ]) }}
 
   <h2>{{ self.title() }}</h2>
 
   <hr>
 
-  <div id="plot">
+  <div id="merge_duration_plot">
+  </div>
+  <div id="host_memory_usage_plot">
   </div>
 
   <hr/>

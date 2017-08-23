@@ -7,11 +7,13 @@
         type: 'scatter',
         name: '{{ trace.name }}',
         x: [{% for point in trace.points -%} "{{ point.x }}", {% endfor %}],
-        y: [{% for point in trace.points -%} "{{ point.y }}", {% endfor %}],
-        text: [{% for point in trace.points -%} '{{ point.text }}', {% endfor %}],
+        y: [{% for point in trace.points -%} {{ point.y if point.y is not none else 'null' }}, {% endfor %}],
+        text: [{% for point in trace.points -%} {% if point.text -%}"{{ point.text }}" {%- else -%} null {%- endif %}, {% endfor %}],
         mode: '{{ mode }}',
         textposition: 'top',
-        hoverinfo: 'x+text',
+        hoverinfo: 'x+text+name',
+        visible: {% if trace.visible -%} true {%- else -%} 'legendonly' {%- endif %},
+        connectgaps: true,
         {% if trace.yaxis -%}
           yaxis: '{{ trace.yaxis }}',
         {%- endif %}

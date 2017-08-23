@@ -90,11 +90,12 @@ class DbCapturePlugin(object):
     def save_captured_to_fixture(self, name):
         if self.stage_run:
             parent_run = self.stage_run
+            stage_name = '%s-%s-%s' % (self.current_test_run.name, self.stage_run.name, name)
         else:
             parent_run = self.root_run  # session fixture teardown
+            stage_name = '%s-%s' % (self.root_run.name, name)
         out, err = self.capture_manager.suspendcapture()
         log = self.log_capturer.pick_collected()
-        stage_name = '%s-%s-%s' % (self.current_test_run.name, self.stage_run.name, name)
         if out or err or log:
             run = self.repo.add_run(name=name, parent=parent_run)
         if out:

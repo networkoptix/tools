@@ -9,7 +9,7 @@ from junk_shop.webapp import app
 def to_indent(value):
     assert value, repr(value)
     assert isinstance(value, (str, unicode)), repr(value)
-    result, repl_count = re.subn(r'\s+', '_', value)
+    result, repl_count = re.subn(r'[\s.-]+', '_', value)
     return result
 
 @app.template_filter('format_datetime')
