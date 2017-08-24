@@ -263,8 +263,6 @@ def branch_platform_metrics(branch_name, platform_name):
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
 
     trace_list = list(load_branch_platform_metric_traces(branch_name, platform_name))
-    for trace in trace_list:
-        print trace, partial(pred, use_lws=True, is_total_bytes_sent=False, is_memory_usage=False)(trace)
     lws_traces = dict(
         merge_duration=filter(partial(pred, use_lws=True, is_total_bytes_sent=False, is_memory_usage=False), trace_list),
         total_bytes_sent=filter(partial(pred, use_lws=True, is_total_bytes_sent=True, is_memory_usage=False), trace_list),
