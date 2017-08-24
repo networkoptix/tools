@@ -1,3 +1,4 @@
+{% import "common_macros.html" as common_macros %}
 {% import "run_macros.html" as run_macros %}
 {% import "common_macros.html" as common_macros %}
 
@@ -11,7 +12,7 @@
 
 {% block contents %}
 
-  {{ run_macros.breadcrumbs([
+  {{ common_macros.breadcrumbs([
        ('Branches',  url_for('matrix')),
        (branch_name, url_for('branch_platform_list', branch_name=branch_name))
    ]) }}

@@ -1,3 +1,4 @@
+{% import "common_macros.html" as common_macros %}
 {% import "run_macros.html" as run_macros %}
 
 {% extends "layout.html" %}
@@ -10,7 +11,7 @@
 
  {% block contents %}
 
- {{ run_macros.breadcrumbs([('Branches',  url_for('matrix')) ]) }}
+ {{ common_macros.breadcrumbs([('Branches',  url_for('matrix')) ]) }}
 
  <h2>{{ self.title() }}</h2>
 

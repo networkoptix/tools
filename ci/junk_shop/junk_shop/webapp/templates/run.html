@@ -1,3 +1,4 @@
+{% import "common_macros.html" as common_macros %}
 {% import "run_macros.html" as run_macros %}
 
 {% extends "layout.html" %}
@@ -11,7 +12,7 @@
 
 {% block contents %}
 
-  {{ run_macros.breadcrumbs([
+  {{ common_macros.breadcrumbs([
        ('Branches',  url_for('matrix')),
        ('Runs', url_for('run_list')) ]) }}
 
