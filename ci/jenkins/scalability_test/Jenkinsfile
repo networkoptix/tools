@@ -24,9 +24,9 @@ def main() {
 	def action = params?.action ?: 'update_parameters'
 	def must_clean_workspace = params?.clean ?: false
 	def is_p2p_mode = params?.p2p_mode ?: true
+	def use_lightweight_servers = params?.use_lightweight_servers ?: "both"
 	def server_count = params?.server_count
 	def test_params = [
-		use_lightweight_servers: params?.use_lightweight_servers ?: true,
 		merge_timeout: params?.merge_timeout,
 		cameras_per_server: CAMERAS_PER_SERVER,
 		users_per_server: USERS_PER_SERVER,
@@ -43,7 +43,7 @@ def main() {
 
 	if (action != 'update_parameters') {
 		node('scalability-test') {
-			scalability_test_stages(must_clean_workspace, is_p2p_mode, build_to_test, server_count, test_params)
+			scalability_test_stages(must_clean_workspace, is_p2p_mode, use_lightweight_servers, build_to_test, server_count, test_params)
 		}
 	}
 }
@@ -75,15 +75,24 @@ def load_distributive_stage(must_clean_workspace, build_to_test_param) {
 	}
 }
 
-def scalability_test_stages(must_clean_workspace, is_p2p_mode, build_to_test, server_count_list, test_params) {
+def scalability_test_stages(must_clean_workspace, is_p2p_mode, use_lightweight_servers, build_to_test, server_count_list, test_params) {
 	echo "Will test build $build_to_test"
 
 	stage('Prepare test environment') {
 		prepare_test_environment(must_clean_workspace, is_p2p_mode)
 	}
-	stage('Run tests') {
+	if (use_lightweight_servers in ['yes', 'both']) {
+		run_tests_stage('with lws', build_to_test, server_count_list, test_params + [use_lightweight_servers: true])
+	}
+	if (use_lightweight_servers in ['no', 'both']) {
+		run_tests_stage('without lws', build_to_test, server_count_list, test_params + [use_lightweight_servers: false])
+	}
+}
+
+def run_tests_stage(stage_desc, build_to_test, server_count_list, test_params) {
+	stage("Run tests $stage_desc") {
 		echo ("Will test version $build_to_test.version customization $build_to_test.customization"
-			  + " with server counts $server_count_list and params $test_params:")
+			+ " $stage_desc with server counts $server_count_list and params $test_params:")
 		def workspace_dir = pwd()
 		for (server_count in split_int_list(server_count_list)) {
 			run_test(workspace_dir, build_to_test, test_params + [server_count: server_count])
@@ -107,7 +116,8 @@ def update_job_parameters(build_list) {
 		string(name: 'merge_timeout', defaultValue: DEFAULT_MERGE_TIMEOUT,
 			description: 'Timeout for servers merge, in format: 2h, 30m, 50s'),
 		booleanParam(name: 'p2p_mode', defaultValue: true, description: 'Turn p2p mode on/off'),
-		booleanParam(name: 'use_lightweight_servers', defaultValue: true, description: 'Use lightweight servers from appserver2_ut test'),
+		choice(name: 'use_lightweight_servers', choices: ['yes', 'no', 'both'], defaultValue: 'both',
+			description: 'Use lightweight servers from appserver2_ut test; "both" means run both variants'),
 	]
 	properties([parameters(job_params)])
 }
