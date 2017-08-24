@@ -13,7 +13,8 @@ JUNK_SHOP_PROJECT = 'scalability'
 PLATFORM = 'linux64'
 DEFAULT_MERGE_TIMEOUT = '1h'
 WORKER_HOST_LIST = ['scalability2', 'scalability3']  // ssh names
-DEFAULT_SERVER_COUNT = '50, 100, 150, 200, 250'
+DEFAULT_LWS_SERVER_COUNT = '50, 100, 150, 200, 250'
+DEFAULT_FULL_SERVER_COUNT = '20, 40, 60, 80, 100'
 CAMERAS_PER_SERVER = 20
 USERS_PER_SERVER = 4
 PROPERTIES_PER_CAMERA = 5
@@ -24,10 +25,13 @@ def main() {
 	def action = params?.action ?: 'update_parameters'
 	def must_clean_workspace = params?.clean ?: false
 	def is_p2p_mode = params?.p2p_mode ?: true
-	def use_lightweight_servers = params?.use_lightweight_servers ?: "both"
-	def server_count = params?.server_count
+	def use_lightweight_servers = params?.use_lightweight_servers ?: 'both'
+	def server_count_list = [
+		lws: params?.lws_server_count ?: DEFAULT_LWS_SERVER_COUNT,
+		full: params?.full_server_count ?: DEFAULT_FULL_SERVER_COUNT,
+		]
 	def test_params = [
-		merge_timeout: params?.merge_timeout,
+		merge_timeout: params?.merge_timeout ?: DEFAULT_MERGE_TIMEOUT,
 		cameras_per_server: CAMERAS_PER_SERVER,
 		users_per_server: USERS_PER_SERVER,
 		properties_per_camera: PROPERTIES_PER_CAMERA,
@@ -43,7 +47,7 @@ def main() {
 
 	if (action != 'update_parameters') {
 		node('scalability-test') {
-			scalability_test_stages(must_clean_workspace, is_p2p_mode, use_lightweight_servers, build_to_test, server_count, test_params)
+			scalability_test_stages(must_clean_workspace, is_p2p_mode, use_lightweight_servers, build_to_test, server_count_list, test_params)
 		}
 	}
 }
@@ -82,10 +86,10 @@ def scalability_test_stages(must_clean_workspace, is_p2p_mode, use_lightweight_s
 		prepare_test_environment(must_clean_workspace, is_p2p_mode)
 	}
 	if (use_lightweight_servers in ['yes', 'both']) {
-		run_tests_stage('with lws', build_to_test, server_count_list, test_params + [use_lightweight_servers: true])
+		run_tests_stage('with lws', build_to_test, server_count_list.lws, test_params + [use_lightweight_servers: true])
 	}
 	if (use_lightweight_servers in ['no', 'both']) {
-		run_tests_stage('without lws', build_to_test, server_count_list, test_params + [use_lightweight_servers: false])
+		run_tests_stage('without lws', build_to_test, server_count_list.full, test_params + [use_lightweight_servers: false])
 	}
 }
 
@@ -104,19 +108,23 @@ def run_tests_stage(stage_desc, build_to_test, server_count_list, test_params) {
 def update_job_parameters(build_list) {
 	def job_params = [
 		choice(name: 'action', choices: ['test_ci', 'test_release', 'update_parameters'].join('\n'),
-			description: 'Action to run', default: 'test_ci'),
+			description: 'Action to run'),
 		[$class: 'BuildSelectorParameter',
 			defaultSelector: [$class: 'StatusBuildSelector', stable: true],
 			description: 'Which kind of latest CI build to test',
 			name: 'artifact_source'],
 		choice(name: 'build_to_test', choices: build_list.join('\n'), description: 'Build to test, <branch>-<build-num>-<customization>'),
 		booleanParam(name: 'clean', defaultValue: false, description: 'Start from clean workspace'),
-		string(name: 'server_count', defaultValue: DEFAULT_SERVER_COUNT,
-			description: 'How many servers to create and merge. Use multiple values "10, 20, 30" to run test multiple times'),
+		string(name: 'lws_server_count', defaultValue: DEFAULT_LWS_SERVER_COUNT,
+			description: 'How many servers to create and merge when running tests with lightweight servers.'
+					   + ' Use multiple values "10, 20, 30" to run test multiple times'),
+		string(name: 'full_server_count', defaultValue: DEFAULT_FULL_SERVER_COUNT,
+			description: 'How many servers to create and merge when running tests with full mediaservers.'
+					   + ' Use multiple values "10, 20, 30" to run test multiple times'),
 		string(name: 'merge_timeout', defaultValue: DEFAULT_MERGE_TIMEOUT,
 			description: 'Timeout for servers merge, in format: 2h, 30m, 50s'),
 		booleanParam(name: 'p2p_mode', defaultValue: true, description: 'Turn p2p mode on/off'),
-		choice(name: 'use_lightweight_servers', choices: ['yes', 'no', 'both'].join('\n'), defaultValue: 'both',
+		choice(name: 'use_lightweight_servers', choices: ['both', 'yes', 'no'].join('\n'),
 			description: 'Use lightweight servers from appserver2_ut test; "both" means run both variants'),
 	]
 	properties([parameters(job_params)])
