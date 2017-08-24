@@ -116,7 +116,7 @@ def update_job_parameters(build_list) {
 		string(name: 'merge_timeout', defaultValue: DEFAULT_MERGE_TIMEOUT,
 			description: 'Timeout for servers merge, in format: 2h, 30m, 50s'),
 		booleanParam(name: 'p2p_mode', defaultValue: true, description: 'Turn p2p mode on/off'),
-		choice(name: 'use_lightweight_servers', choices: ['yes', 'no', 'both'], defaultValue: 'both',
+		choice(name: 'use_lightweight_servers', choices: ['yes', 'no', 'both'].join('\n'), defaultValue: 'both',
 			description: 'Use lightweight servers from appserver2_ut test; "both" means run both variants'),
 	]
 	properties([parameters(job_params)])
