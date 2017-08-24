@@ -19,7 +19,6 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
-    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     'Mikhail Uskov': 'muskov@networkoptix.com',
     },
   'environment' : {
