@@ -1,3 +1,12 @@
+
+{% macro breadcrumbs(breadcrumb_list) %}
+  {% for title, href in breadcrumb_list %}
+     <a class="link" href="{{ href }}">{{ title }}</a>
+     {% if not loop.last %}&nbsp/&nbsp{% endif %}
+  {% endfor %}
+{% endmacro %}
+
+
 {% macro paginator(page_count, current_page) %}
   {% for page in range(1, page_count + 1) %}
     <a

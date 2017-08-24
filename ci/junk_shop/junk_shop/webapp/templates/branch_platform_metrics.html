@@ -1,5 +1,5 @@
-{% import "run_macros.html" as run_macros %}
-{% import "metric_macros.html" as metric_macros %}
+{% import "common_macros.html" as common_macros %}
+{% import "metrics_macros.html" as metrics_macros %}
 
 {% extends "layout.html" %}
 {% block title -%} {{ version }} Server scalability metrics {%- endblock %}
@@ -10,38 +10,30 @@
   <script src="{{ url_for('static', filename='plotly-latest.min.js') }}"></script>
   <script>
 
-    window.onload = function() {
+    {% for div_id_prefix, trace_list in [
+          ('lws', lws_traces),
+          ('full', full_traces),
+          ] %}
 
-      {{ metric_macros.plot_data('merge_duration', merge_duration_traces, 'lines+markers') }}
-      var merge_duration_layout = {
+      {% call metrics_macros.plotly_plot(div_id_prefix + '_merge_duration_plot', trace_list.merge_duration, 'lines+markers') %}
         title: 'Servers merge time by build version',
         xaxis: { title: 'Build version' },
         yaxis: { title: 'Merge times, sec' },
-      }
-      Plotly.plot(document.getElementById('merge_duration_plot'), merge_duration_data, merge_duration_layout);
+      {% endcall %}
 
-      {{ metric_macros.plot_data('total_bytes_sent', total_bytes_sent_traces, 'lines+markers') }}
-      var total_bytes_sent_layout = {
+      {% call metrics_macros.plotly_plot(div_id_prefix + '_total_bytes_sent_plot', trace_list.total_bytes_sent, 'lines+markers') %}
         title: 'Total bytes sent by build version',
         xaxis: { title: 'Build version' },
         yaxis: { title: 'Total bytes sent' },
-      }
-      Plotly.plot(document.getElementById('total_bytes_sent_plot'), total_bytes_sent_data, total_bytes_sent_layout);
+      {% endcall %}
 
-      {{ metric_macros.plot_data('memory_usage', memory_usage_traces, 'lines+markers') }}
-      var memory_usage_layout = {
+      {% call metrics_macros.plotly_plot(div_id_prefix + '_memory_usage_plot', trace_list.memory_usage, 'lines+markers') %}
         title: 'Host memory usage by build version',
         xaxis: { title: 'Build version' },
         yaxis: { title: 'Memory usage' },
-      }
-      Plotly.plot(document.getElementById('memory_usage_plot'), memory_usage_data, memory_usage_layout);
-    }
+      {% endcall %}
 
-    window.addEventListener('resize', function() {
-      Plotly.Plots.resize(document.getElementById('merge_duration_plot'));
-      Plotly.Plots.resize(document.getElementById('total_bytes_sent_plot'));
-      Plotly.Plots.resize(document.getElementById('memory_usage_plot'));
-    });
+    {% endfor %}
 
   </script>
 
@@ -49,7 +41,7 @@
 
 {% block contents %}
 
-  {{ run_macros.breadcrumbs([
+  {{ common_macros.breadcrumbs([
        ('Branches',  url_for('matrix')),
        (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
        (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
@@ -59,14 +51,19 @@
 
   <hr>
 
-  <div id="merge_duration_plot">
-  </div>
-  <div id="total_bytes_sent_plot">
-  </div>
-  <div id="memory_usage_plot">
-  </div>
+  <h3>Using lightweight servers</h3>
+
+  <div id="lws_merge_duration_plot"></div>
+  <div id="lws_total_bytes_sent_plot"></div>
+  <div id="lws_memory_usage_plot"></div>
+
+  <h3>Using full mediaservers</h3>
+
+  <div id="full_merge_duration_plot"></div>
+  <div id="full_total_bytes_sent_plot"></div>
+  <div id="full_memory_usage_plot"></div>
 
   <hr/>
-  {{ run_macros.run_parameters_table(run_parameters) }}
+  {{ metrics_macros.run_parameters_table(run_parameters) }}
 
 {% endblock contents %}

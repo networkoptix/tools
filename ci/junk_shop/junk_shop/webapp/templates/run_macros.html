@@ -121,13 +121,6 @@
 
 {% endmacro %}
 
-{% macro breadcrumbs(breadcrumb_list) %}
-  {% for title, href in breadcrumb_list %}
-     <a class="link" href="{{ href }}">{{ title }}</a>
-     {% if not loop.last %}&nbsp/&nbsp{% endif %}
-  {% endfor %}
-{% endmacro %}
-
 
 {% macro outcome_box_list(list) %}
   <div>
@@ -147,28 +140,4 @@
       </div>
     {% endfor %}
   </div>
-{% endmacro %}
-
-{% macro run_parameters_table(run_parameters) %}
-  {% if run_parameters %}
-    <div>
-      <table>
-        <tr>
-          <th>Parameter</th>
-          <th>Values</th>
-        </tr>
-        {%- for param in run_parameters %}
-          <tr>
-            <td>{{ param.name }}</td>
-            <td>
-              {%- for value in param.value_list -%}
-                {{ value }}
-                {%- if not loop.last %}, {% endif -%}
-              {%- endfor -%}
-            </td>
-          </tr>
-        {%- endfor %}
-      </table>
-    </div>
-  {% endif %}
 {% endmacro %}
