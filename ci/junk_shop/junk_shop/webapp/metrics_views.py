@@ -161,12 +161,13 @@ def load_branch_platform_version_metric_traces(branch_name, platform_name, versi
             points = [Point(server_count, acc.mean)
                           for (acc_use_lws, server_count, acc_metric_name), acc in sorted(accumulators.items())
                                if acc_use_lws == use_lws and acc_metric_name == metric_name]
-            if fnmatch(metric_name, 'host_memory_usage.*.mediaserver'):
-                visible = not use_lws
-            elif fnmatch(metric_name, 'host_memory_usage.*.lws'):
-                visible = use_lws
+            if fnmatch(metric_name, 'host_memory_usage.*'):
+                if use_lws:
+                    visible = not fnmatch_list(metric_name, ['host_memory_usage.*.mediaserver', 'host_memory_usage.*.used_swap'])
+                else:
+                    visible = fnmatch_list(metric_name, ['host_memory_usage.*.total', 'host_memory_usage.*.mediaserver'])
             else:
-                visible = not fnmatch_list(metric_name, ['*_init_duration', 'host_memory_usage.*.used_swap'])
+                visible = not fnmatch(metric_name, '*_init_duration')
             trace_name = metric_name.replace('host_memory_usage.', '')
             yield MetricTrace(trace_name, points, visible, yaxis, metric_name=metric_name, use_lws=use_lws)
 
@@ -230,15 +231,18 @@ def load_branch_platform_metric_traces(branch_name, platform_name):
 def branch_platform_version_metrics(branch_name, platform_name, version):
 
     def pred(trace, use_lws, is_memory_usage):
+        if not use_lws and trace.metric_name == 'total_bytes_sent': return False
         return (trace.use_lws == use_lws and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
 
     trace_list = list(load_branch_platform_version_metric_traces(branch_name, platform_name, version))
     lws_traces = dict(
+        has_total_bytes_sent=True,
         merge_duration=filter(partial(pred, use_lws=True, is_memory_usage=False), trace_list),
         host_memory_usage=filter(partial(pred, use_lws=True, is_memory_usage=True), trace_list),
         )
     full_traces = dict(
+        has_total_bytes_sent=False,
         merge_duration=filter(partial(pred, use_lws=False, is_memory_usage=False), trace_list),
         host_memory_usage=filter(partial(pred, use_lws=False, is_memory_usage=True), trace_list),
         )
@@ -270,7 +274,6 @@ def branch_platform_metrics(branch_name, platform_name):
         )
     full_traces = dict(
         merge_duration=filter(partial(pred, use_lws=False, is_total_bytes_sent=False, is_memory_usage=False), trace_list),
-        total_bytes_sent=filter(partial(pred, use_lws=False, is_total_bytes_sent=True, is_memory_usage=False), trace_list),
         memory_usage=filter(partial(pred, use_lws=False, is_total_bytes_sent=False, is_memory_usage=True), trace_list),
         )
     run_parameters = load_branch_platform_run_parameters(branch_name, platform_name)

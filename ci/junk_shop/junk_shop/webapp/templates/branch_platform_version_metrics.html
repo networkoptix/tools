@@ -20,11 +20,13 @@
         title: 'Servers merge time by server count',
         xaxis: { title: 'Server count' },
         yaxis: { title: 'Merge and other times, sec' },
-        yaxis2: {
-          title: 'Total bytes sent',
-          overlaying: 'y',
-          side: 'right',
-        },
+        {% if trace_list.has_total_bytes_sent %}
+          yaxis2: {
+            title: 'Total bytes sent',
+            overlaying: 'y',
+            side: 'right',
+          },
+        {% endif %}
       {% endcall %}
 
       {% call metrics_macros.plotly_plot(

@@ -21,11 +21,13 @@
         yaxis: { title: 'Merge times, sec' },
       {% endcall %}
 
-      {% call metrics_macros.plotly_plot(div_id_prefix + '_total_bytes_sent_plot', trace_list.total_bytes_sent, 'lines+markers') %}
-        title: 'Total bytes sent by build version',
-        xaxis: { title: 'Build version' },
-        yaxis: { title: 'Total bytes sent' },
-      {% endcall %}
+      {% if trace_list.total_bytes_sent %}
+        {% call metrics_macros.plotly_plot(div_id_prefix + '_total_bytes_sent_plot', trace_list.total_bytes_sent, 'lines+markers') %}
+          title: 'Total bytes sent by build version',
+          xaxis: { title: 'Build version' },
+          yaxis: { title: 'Total bytes sent' },
+        {% endcall %}
+      {% endif %}
 
       {% call metrics_macros.plotly_plot(div_id_prefix + '_memory_usage_plot', trace_list.memory_usage, 'lines+markers') %}
         title: 'Host memory usage by build version',
@@ -60,7 +62,6 @@
   <h3>Using full mediaservers</h3>
 
   <div id="full_merge_duration_plot"></div>
-  <div id="full_total_bytes_sent_plot"></div>
   <div id="full_memory_usage_plot"></div>
 
   <hr/>
