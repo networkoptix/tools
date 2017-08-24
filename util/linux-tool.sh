@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
@@ -43,7 +44,7 @@ gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use
 build target # Build via "cmake --build <dir>".
 cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 build-installer target [mvn] # Build installer using cmake or (if "mvn" specified) maven.
-test-installer target [mvn] original/archives/dir # Build installer and test to equal the original.
+test-installer target [checksum] [no-build] [mvn] original/archives/dir # Test built installer against the original.
 print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
 tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
 EOF
@@ -53,10 +54,15 @@ EOF
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
-find_VMS_DIR()
+find_VMS_DIR() # [cd]
 {
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
+    if [ "$1" == "cd" ]; then
+        if [ "$(pwd)" != "$(readlink -f "$VMS_DIR")" ]; then
+            nx_verbose cd "$VMS_DIR"
+        fi
+    fi
 }
 
 do_share() # target_path
@@ -133,7 +139,7 @@ get_TARGET() # "$1" && shift
 
 do_clean() # target
 {
-    find_VMS_DIR
+    find_VMS_DIR cd
     get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
 
@@ -141,8 +147,6 @@ do_clean() # target
         nx_echo "Deleting cmake build dir: $CMAKE_BUILD_DIR"
         rm -r "$CMAKE_BUILD_DIR"
     fi
-
-    nx_pushd "$VMS_DIR"
 
     if [ -d "$MVN_TARGET_DIR" ]; then
         nx_echo "Deleting maven target dir: $MVN_TARGET_DIR"
@@ -164,13 +168,11 @@ do_clean() # target
         nx_echo "Deleting maven build dir: $DIR"
         rm -r "$DIR"
     done
-
-    nx_popd
 }
 
 do_gen() # target [Release] "$@"
 {
-    find_VMS_DIR
+    find_VMS_DIR cd
     get_TARGET "$1" && shift
 
     local CONFIGURATION_ARG=""
@@ -202,7 +204,7 @@ do_gen() # target [Release] "$@"
 
 do_build() # target
 {
-    find_VMS_DIR
+    find_VMS_DIR cd
     get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
     [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
@@ -212,7 +214,7 @@ do_build() # target
 
 do_run_ut() # target [all|TestName] "$@"
 {
-    find_VMS_DIR
+    find_VMS_DIR cd
     get_TARGET "$1" && shift
     find_and_pushd_CMAKE_BUILD_DIR
 
@@ -305,8 +307,7 @@ do_kit() # "$@"
 
 build_installer_cmake()
 {
-    # TODO: Implement.
-    nx_fail "NOT IMPLEMENTED: build_installer_cmake()"
+    do_gen "$TARGET" && do_build "$TARGET" --target "arm-installer"
 }
 
 build_installer_mvn()
@@ -322,19 +323,42 @@ build_installer_mvn()
     nx_verbose mvn package -Dbox="$BOX" -Darch="$ARCH" --projects :"$INSTALLER_PROJECT"
 }
 
-test_installer_tar_gz() # original.tar.gz built.tar.gz
+list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
 {
-    local ORIGINAL_TAR_GZ="$1"
-    local BUILT_TAR_GZ="$2"
-    nx_echo "Comparing .tar.gz archives by checksum:"
+    local -r -i CHECKSUM="$1"; shift
+    local -r ARCHIVE="$1"; shift
+    local -r LISTING="$1"; shift
 
-    # Using "tarsum.py" to produce two columns: md5 and filename for each archive file.
-    local ORIGINAL_LISTING="$ORIGINAL_TAR_GZ.txt"
-    local BUILT_LISTING="$ORIGINAL_TAR_GZ.BUILT.txt"
-    tarsum.py < "$ORIGINAL_TAR_GZ" |sort -k 2 >"$ORIGINAL_LISTING" \
-        || nx_fail "tarsum.py failed, see above."
-    tarsum.py < "$BUILT_TAR_GZ" |sort -k 2 >"$BUILT_LISTING" \
-        || nx_fail "tarsum.py failed, see above."
+    if [ $CHECKSUM = 1 ]; then
+        # Using "tarsum.py" to produce two columns for each archive file: md5, filename.
+        tarsum.py <"$ARCHIVE" |sort -k 2 >"$LISTING" \
+            || nx_fail "tarsum.py failed, see above."
+    else
+        # tar output: 1-permissions, 2-user/group, 3-size, 4-date, 5-time, filename...
+        tar tvf "$ARCHIVE" \
+            |awk '{$1=$2=$3=$4=$5=""; gsub("^ +", "", $0); print $0}' \
+            |sort >"$LISTING" \
+            || nx_fail "tar failed, see above."
+    fi
+}
+
+test_installer_tar_gz() # CHECKSUM original.tar.gz built.tar.gz
+{
+    local -r -i CHECKSUM="$1"; shift
+    local -r ORIGINAL_TAR_GZ="$1"; shift
+    local -r BUILT_TAR_GZ="$1"; shift
+
+    if [ $CHECKSUM = 1 ]; then
+        local -r CHECKSUM_MESSAGE="by checksum"
+    else
+        local -r CHECKSUM_MESSAGE="by filename list"
+    fi
+    nx_echo "Comparing .tar.gz archives ${CHECKSUM_MESSAGE}:"
+
+    local -r ORIGINAL_LISTING="$ORIGINAL_TAR_GZ.txt"
+    local -r BUILT_LISTING="$ORIGINAL_TAR_GZ.BUILT.txt"
+    list_tar_gz $CHECKSUM "$ORIGINAL_TAR_GZ" "$ORIGINAL_LISTING"
+    list_tar_gz $CHECKSUM "$BUILT_TAR_GZ" "$BUILT_LISTING"
 
     nx_verbose diff "$ORIGINAL_LISTING" "$BUILT_LISTING" \
         || nx_fail "Archives are different; see above."
@@ -346,9 +370,9 @@ test_installer_tar_gz() # original.tar.gz built.tar.gz
 
 test_installer_zip() # original.zip built.zip built.tar.gz
 {
-    local ORIGINAL_ZIP="$1"
-    local BUILT_ZIP="$2"
-    local BUILT_TAR_GZ="$3"
+    local -r ORIGINAL_ZIP="$1"; shift
+    local -r BUILT_ZIP="$1"; shift
+    local -r BUILT_TAR_GZ="$1"; shift
 
     nx_echo "Comparing .zip archives by contents:"
 
@@ -376,27 +400,35 @@ test_installer_zip() # original.zip built.zip built.tar.gz
     nx_echo "SUCCESS: The built .zip contains the same files as the original one."
 }
 
-do_test_installer()
+do_test_installer() # "$@"
 {
-    find_VMS_DIR
+    find_VMS_DIR cd
     get_TARGET "$1" && shift
 
     # TODO: #mshevchenko: Learn how to EXCLUDE files like '*-debug-sumbols.tar.gz'.
-    local TAR_GZ_MASK="nxwitness-*.tar.gz"
-    local ZIP_MASK="nxwitness-*.zip"
-    local DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
+    local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
+    local -r ZIP_MASK="nxwitness-*.zip"
+    local -r DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
+
+    local int CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
+    local int NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
+
     local BUILD_DIR #< Dir inside which (at any level) the installer archives are built.
     if [ "$1" = "mvn" ]; then
         shift
-        build_installer_mvn || return $?
         BUILD_DIR="$VMS_DIR"
+        if [ $NO_BUILD = 0 ]; then
+            build_installer_mvn || return $?
+        fi
     else
         get_CMAKE_BUILD_DIR "$TARGET"
         if [ ! -d "$CMAKE_BUILD_DIR" ]; then
             nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
         fi
-        build_installer_cmake || return $?
         BUILD_DIR="$CMAKE_BUILD_DIR"
+        if [ $NO_BUILD = 0 ]; then
+            build_installer_cmake || return $?
+        fi
     fi
 
     local BUILT_TAR_GZ
@@ -406,25 +438,27 @@ do_test_installer()
     local BUILT_ZIP
     nx_find_file BUILT_ZIP "installer .zip" "$BUILD_DIR" -name "$ZIP_MASK"
 
-    local ORIGINAL_DIR="$1"
-    local ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
+    local -r ORIGINAL_DIR="$1"
+    local -r ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
 
     # Test main installer .tar.gz.
     nx_echo
-    test_installer_tar_gz "$ORIGINAL_TAR_GZ" "$BUILT_TAR_GZ"
+    test_installer_tar_gz $CHECKSUM "$ORIGINAL_TAR_GZ" "$BUILT_TAR_GZ"
 
     # Also test the archive with debug libraries, if its sample is present in the "original" dir.
-    local ORIGINAL_DEBUG_TAR_GZ="$ORIGINAL_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+    local -r ORIGINAL_DEBUG_TAR_GZ="$ORIGINAL_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
     if [ -f "$ORIGINAL_TAR_GZ" ]; then
-        local BUILT_DEBUG_TAR_GZ="$BUILT_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+        local -r BUILT_DEBUG_TAR_GZ="$BUILT_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
         nx_echo
         test_installer_tar_gz "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ"
     fi
 
     # Test .zip which contains .tar.gz and some other files.
-    local ORIGINAL_ZIP="$ORIGINAL_DIR"/$(basename "$BUILT_ZIP")
+    local -r ORIGINAL_ZIP="$ORIGINAL_DIR"/$(basename "$BUILT_ZIP")
     nx_echo
     test_installer_zip "$ORIGINAL_ZIP" "$BUILT_ZIP" "$BUILT_TAR_GZ"
+    nx_echo
+    nx_echo "All tests SUCCEEDED."
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -496,7 +530,7 @@ main()
             do_test_installer "$@"
             ;;
         build-installer) # target [mvn]
-            find_VMS_DIR
+            find_VMS_DIR cd
             get_TARGET "$1" && shift
             if [ "$1" = "mvn" ]; then
                 shift
