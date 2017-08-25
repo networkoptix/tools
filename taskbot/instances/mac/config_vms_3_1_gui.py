@@ -19,8 +19,8 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
-    'Artem Nikitin': 'anikitin@networkoptix.com',
-    'Sergey Ivanov' : 'sivanov@networkoptix.com'},
+    'Sergey Ivanov' : 'sivanov@networkoptix.com',
+    },
 'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
     'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',

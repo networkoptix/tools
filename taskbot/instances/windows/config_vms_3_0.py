@@ -19,10 +19,10 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
-    'Artem Nikitin': 'anikitin@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
-    'Mikhail Uskov': 'muskov@networkoptix.com'},
+    'Mikhail Uskov': 'muskov@networkoptix.com',
+    },
   'environment' : {
     'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
