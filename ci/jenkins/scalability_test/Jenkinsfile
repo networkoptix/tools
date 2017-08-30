@@ -40,7 +40,7 @@ def main() {
 	stage('Load package') {
 		node ('master') {
 			echo '============================================================'
-			echo "Started $action testing ${params?.build_to_test}"
+			echo "Started $action"
 			build_to_test = load_distributive_stage(must_clean_workspace, params?.build_to_test)
 		}
 	}
