@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "{$CONFIG=".bpi-toolrc"}"
+nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".
 : ${BOX_MNT="/bpi"}
@@ -198,6 +198,28 @@ find_VMS_DIR()
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
     BOX_VMS_DIR="$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}"
+}
+
+# Deduce CMake build dir out of VMS_DIR and targetDevice (box). Examples:
+# nx -> nx-build-isd
+# nx-bpi -> nx-bpi-build.
+# /C/develop/nx -> nx-win-build-linux
+# [in] VMS_DIR
+get_CMAKE_BUILD_DIR()
+{
+    local -r TARGET="bpi"
+    case "$VMS_DIR" in
+        *-"$TARGET")
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+            ;;
+        "$WIN_DEVELOP_DIR"/*)
+            VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
+            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX-$TARGET"
+            ;;
+        *)
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
+            ;;
+    esac
 }
 
 # If not done yet, scan from current dir upwards to find "common_libs" dir; set LIB_DIR to its
@@ -834,7 +856,7 @@ main()
             ;;
         install-tar)
             find_VMS_DIR
-            nx_verbose box tar xfv \
+            box tar xfv \
                 "$BOX_VMS_DIR/edge_firmware/rpi/target-bpi/*.tar.gz" \
                 -C "/"
             ;;

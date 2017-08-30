@@ -132,7 +132,7 @@ get_TARGET() # "$1" && shift
         rpi) MVN_TARGET_DIR="target-rpi"; MVN_BUILD_DIR="arm-rpi"; BOX="rpi"; ARCH="arm";;
         bananapi) MVN_TARGET_DIR="target-bananapi"; MVN_BUILD_DIR="arm-bananapi"; BOX="bananapi"; ARCH="arm";;
         android) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
-        ios) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< TODO: Support ios.
+        #ios) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< TODO: Support ios.
         *) nx_fail "Unsupported target [$TARGET].";;
     esac
 }
@@ -187,11 +187,6 @@ do_gen() # target [Release] "$@"
     local TARGET_ARG=""
     [ "$TARGET" != "linux" ] && TARGET_ARG="-DtargetDevice=$TARGET"
 
-    # TODO: Remove when the branch "analytics" is merged into default.
-    if [ "$TARGET" = "tx1" ]; then
-        TARGET_ARG="-DCMAKE_TOOLCHAIN_FILE=$VMS_DIR/cmake/toolchain/tx1.cmake"
-    fi
-
     local GENERATOR_ARG=""
     [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
@@ -207,7 +202,9 @@ do_build() # target
     find_VMS_DIR cd
     get_TARGET "$1" && shift
     get_CMAKE_BUILD_DIR "$TARGET"
-    [ ! -d "$CMAKE_BUILD_DIR" ] && nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+    if [ ! -d "$CMAKE_BUILD_DIR" ]; then
+        nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+    fi
 
     time nx_verbose cmake --build "$CMAKE_BUILD_DIR" "$@"
 }
@@ -374,7 +371,7 @@ test_installer_zip() # original.zip built.zip built.tar.gz
     local -r BUILT_ZIP="$1"; shift
     local -r BUILT_TAR_GZ="$1"; shift
 
-    nx_echo "Comparing .zip archives by contents:"
+    nx_echo "Comparing .zip archives (.tar.gz compared to the one built):"
 
     # Unpack original.zip - do this every time to allow the .zip file to be updated by the user.
     local ORIGINAL_ZIP_UNPACKED="${ORIGINAL_ZIP%.zip}"
@@ -387,7 +384,7 @@ test_installer_zip() # original.zip built.zip built.tar.gz
     mkdir -p "BUILT_ZIP_UNPACKED"
     unzip -q "$BUILT_ZIP" -d "$BUILT_ZIP_UNPACKED" || nx_fail "Unzipping failed, see above."
 
-    # Tar.gz in zips are bitwise-different, thus, compare tar.gz in built zip to built tar.gz.
+    # Tar.gz in zips can be bitwise-different, thus, compare tar.gz in built zip to built tar.gz.
     nx_verbose diff "$BUILT_TAR_GZ" "$BUILT_ZIP_UNPACKED/$(basename "$BUILT_TAR_GZ")" \
         || nx_fail "The .tar.gz archive in .zip differs from the one built."
 
@@ -397,7 +394,7 @@ test_installer_zip() # original.zip built.zip built.tar.gz
 
     rm -r "$ORIGINAL_ZIP_UNPACKED"
     rm -r "$BUILT_ZIP_UNPACKED"
-    nx_echo "SUCCESS: The built .zip contains the same files as the original one."
+    nx_echo "SUCCESS: The built .zip contains the proper .tar.gz, and other files equal originals."
 }
 
 do_test_installer() # "$@"
@@ -405,30 +402,29 @@ do_test_installer() # "$@"
     find_VMS_DIR cd
     get_TARGET "$1" && shift
 
-    # TODO: #mshevchenko: Learn how to EXCLUDE files like '*-debug-sumbols.tar.gz'.
     local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
     local -r ZIP_MASK="nxwitness-*.zip"
     local -r DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
 
-    local int CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
-    local int NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
+    local -i CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
+    local -i NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
 
-    local BUILD_DIR #< Dir inside which (at any level) the installer archives are built.
+    # Set BUILD_DIR - dir inside which (at any level) the installer archives are built.
     if [ "$1" = "mvn" ]; then
         shift
-        BUILD_DIR="$VMS_DIR"
-        if [ $NO_BUILD = 0 ]; then
-            build_installer_mvn || return $?
-        fi
+        local -r BUILD_DIR="$VMS_DIR"
+        local -r BUILD_FUNC=build_installer_mvn
     else
         get_CMAKE_BUILD_DIR "$TARGET"
         if [ ! -d "$CMAKE_BUILD_DIR" ]; then
             nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
         fi
-        BUILD_DIR="$CMAKE_BUILD_DIR"
-        if [ $NO_BUILD = 0 ]; then
-            build_installer_cmake || return $?
-        fi
+        local -r BUILD_DIR="$CMAKE_BUILD_DIR"
+        local -r BUILD_FUNC=build_installer_cmake
+    fi
+
+    if [ $NO_BUILD = 0 ]; then
+        $BUILD_FUNC || return $?
     fi
 
     local BUILT_TAR_GZ
@@ -447,10 +443,15 @@ do_test_installer() # "$@"
 
     # Also test the archive with debug libraries, if its sample is present in the "original" dir.
     local -r ORIGINAL_DEBUG_TAR_GZ="$ORIGINAL_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
-    if [ -f "$ORIGINAL_TAR_GZ" ]; then
-        local -r BUILT_DEBUG_TAR_GZ="$BUILT_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+    local -r BUILT_DEBUG_TAR_GZ="$BUILT_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
+    if [ -f "$ORIGINAL_DEBUG_TAR_GZ" ]; then
         nx_echo
-        test_installer_tar_gz "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ"
+        test_installer_tar_gz $CHECKSUM "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ"
+    else
+        # There is no original debug archive - require that there is no such file built.
+        if [ -f "$BUILT_DEBUG_TAR_GZ" ]; then
+            nx_fail "Debug symbols archive was built but not expected - the original is absent."
+        fi
     fi
 
     # Test .zip which contains .tar.gz and some other files.

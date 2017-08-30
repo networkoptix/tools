@@ -284,7 +284,7 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
 
     sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
         -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
-        ${ARGS:+"$ARGS"} `#< Omit arg if empty`; 
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty`;
     local RESULT=$?
 
     nx_pop_title
@@ -418,7 +418,11 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
     local FILE="$1"
 
     local PATH="$HOME/$FILE"
-    [ -f "$PATH" ] && source "$PATH"
+    if [ -f "$PATH" ]; then
+        source "$PATH"
+    else
+        return 1
+    fi
 }
 
 nx_detail_on_exit() # Called by trap.
