@@ -1,0 +1,68 @@
+#!/bin/bash
+
+PRINT_PERIOD_SEC=5
+PROC_FILES=(status stat statm)
+PROC_NAME=mediaserver
+OUTPUT_FILE=
+
+function printHelp()
+{
+    echo
+    echo "  --delay=<num>                               Delay in seconds between printing statistics"
+    echo "  --log-file=<path to the file to print to>   "
+    echo "  --name=<name of process to monitor>         By default, $PROC_NAME"
+}
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+#    elif [ "$i" == "--without-mserver" ] ; then
+#        WITH_MSERVER=0
+    elif [[ "$i" =~ "--delay=" ]] ; then
+        PRINT_PERIOD_SEC="`echo $i | sed 's/--delay=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--name=" ]] ; then
+        PROC_NAME="`echo $i | sed 's/--name=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--log-file=" ]] ; then
+        OUTPUT_FILE="`echo $i | sed 's/--log-file=\(.*\)/\1/'`"
+    fi
+done
+
+if [ -z "$OUTPUT_FILE" ]; then
+    OUTPUT_FILE=$PROC_NAME"_statistics.log"
+fi
+
+echo "Printing $PROC_NAME statistics to $OUTPUT_FILE every $PRINT_PERIOD_SEC seconds"
+
+exec > $OUTPUT_FILE 2>&1
+
+while :
+do
+    pid="`pidof $PROC_NAME`"
+
+    echo "=============================================================================="
+    echo "Process $PROC_NAME, pid $pid, date `date`"
+
+    #Printing proc statistics
+    for (( i=0; i<${#PROC_FILES[@]}; i++ ))
+    do
+        shortFileName="${PROC_FILES[$i]}"
+        fullFileName="/proc/$pid/$shortFileName"
+        echo "=============================================================================="
+        echo "============= $fullFileName ===================="
+        cat $fullFileName
+        echo "=============================================================================="
+    done
+
+    #Printing file descriptors
+    ls -l "/proc/$pid/fd/"
+
+    echo
+    echo
+    echo
+    echo
+    echo
+    echo
+    sleep $PRINT_PERIOD_SEC
+done
