@@ -1,0 +1,24 @@
+#!/bin/bash
+
+PROC_NAME=mediaserver
+
+function printHelp()
+{
+    echo
+    echo "  --name=<name of process to monitor>         By default, $PROC_NAME"
+}
+
+for i in "$@"
+do
+    if [ $i == "-h" -o $i == "--help"  ] ; then
+        printHelp
+        exit 0
+    elif [[ "$i" =~ "--name=" ]] ; then
+        OUTPUT_FILE="`echo $i | sed 's/--log-file=\(.*\)/\1/'`"
+    fi
+done
+
+pid="`pidof $PROC_NAME`"
+fullPath="`readlink -f /proc/$pid/exe`"
+
+gdb $fullPath $pid -ex generate-core-file -batch -q 2>&1 | grep "Saved corefile"
