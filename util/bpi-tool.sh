@@ -26,6 +26,7 @@ nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${TARGET_IN_VMS_DIR="build_environment/target-bpi"} #< Path component at the workstation.
 : ${BUILD_DIR="arm-bpi"} #< Path component at the workstation.
 : ${PACKAGE_SUFFIX=""}
+: ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 
 #--------------------------------------------------------------------------------------------------
 
@@ -73,8 +74,8 @@ client # Copy mobile_client exe to the box.
 server # Copy mediaserver_core lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
-install-tar # Install distrib .tar.gz to the box via untarring to the root.
-install-zip # Install distrib .zip to the box via unzipping to /tmp and running "install.sh".
+install-tar [x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
+install-zip [x.zip] # Install x.zip to the box via unzipping to /tmp and running "install.sh".
 
 ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
 run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
@@ -420,7 +421,7 @@ check_serial() # serial
 sd_card_mount_SD_DIR()
 {
     SD_DIR=$(mktemp -d) || exit $?
-    sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
+    nx_verbose sudo mount -t ext4 -o rw,nosuid,nodev,uhelper=udisks2 "${DEV_SDCARD}2" "$SD_DIR" || exit $?
 }
 
 # [in] SD_DIR Directory to which the SD Card is mounted.
@@ -576,6 +577,59 @@ assert_not_server_only()
     if [ "$SERVER_ONLY" = "1" ]; then
         nx_fail "Non-server command attempted while config \"~/$CONFIG\" specifies SERVER_ONLY=1."
     fi
+}
+
+install_tar() # "$@"
+{
+    local TAR_GZ
+    if [ $# -ge 1 ]; then
+        TAR_GZ="$1"; shift
+    else
+        TAR_GZ="$BOX_VMS_DIR/edge_firmware/rpi/target-bpi/*.tar.gz"
+    fi
+    find_VMS_DIR
+    box tar xfv "$TAR_GZ" -C "/"
+}
+
+install_zip() # "$@"
+{
+    find_VMS_DIR
+    check_box_mounted
+
+    local ZIP_FILE
+    if [ $# -ge 1 ]; then
+        ZIP_FILE="$1"; shift
+    else
+        # Look for cmake build dir first, then for maven build dir.
+        get_CMAKE_BUILD_DIR
+        local -r CMAKE_ZIP_DIR="$CMAKE_BUILD_DIR/edge_firmware"
+        if [ -d "$CMAKE_ZIP_DIR" ]; then # Cmake build dir exists.
+            nx_find_file ZIP_FILE "Installer .zip (cmake)" "$CMAKE_ZIP_DIR" -name "*.zip"
+        else
+            local -r MVN_ZIP_DIR="$VMS_DIR/edge_firmware/rpi/target-bpi"
+            if [ ! -d "$MVN_ZIP_DIR" ]; then
+                nx_fail "Unable to find neither cmake nor mvn build dir."
+            fi
+            nx_find_file ZIP_FILE "Installer .zip (maven)" "$MVN_ZIP_DIR" -name "*.zip"
+        fi
+    fi
+
+    local -r ZIP_FILENAME=$(basename "$ZIP_FILE")
+    local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
+    local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
+
+    box \
+        rm -rf "$BOX_UPDATES_DIR" "[&&]" \
+        mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
+
+    nx_echo "Installing .zip from $(dirname "$ZIP_FILE")"
+    nx_rsync "$ZIP_FILE" "${BOX_MNT}$BOX_UPDATES_DIR/"
+
+    box \
+        cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
+        unzip "../$ZIP_FILENAME" "[&&]" \
+        chmod +x install.sh "[&&]" \
+        ./install.sh --verbose
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -855,30 +909,10 @@ main()
                 touch /tmp/proxydecoder.ini
             ;;
         install-tar)
-            find_VMS_DIR
-            box tar xfv \
-                "$BOX_VMS_DIR/edge_firmware/rpi/target-bpi/*.tar.gz" \
-                -C "/"
+            install_tar "$@"
             ;;
         install-zip)
-            find_VMS_DIR
-            check_box_mounted
-            local ZIP_FILE
-            nx_find_file ZIP_FILE "Distro .zip" \
-                "$VMS_DIR/edge_firmware/rpi/target-bpi" -name "*.zip"
-            local ZIP_FILENAME=$(basename "$ZIP_FILE")
-            local DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
-            local BOX_UPDATES_DIR="/tmp/mediaserver/updates"
-            box \
-                rm -rf "$BOX_UPDATES_DIR" "[&&]" \
-                mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
-
-            nx_rsync "$ZIP_FILE" "${BOX_MNT}$BOX_UPDATES_DIR/"
-
-            box \
-                cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
-                unzip "../$ZIP_FILENAME" "[&&]" \
-                ./install.sh
+            install_zip "$@"
             ;;
         #..........................................................................................
         ssh)
