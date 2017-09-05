@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentTypeError
 import bz2
-from pony.orm import db_session, commit, select, raw_sql, sql_debug
+from pony.orm import db_session, commit, flush, select, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now
 from . import models
 
@@ -133,7 +133,7 @@ class DbCaptureRepository(object):
             )
         if not parent:
             self._set_paramerers(run)
-        commit()
+        flush()
         run.path = '%s%d/' % (parent.path if parent else '', run.id)
         return run
 

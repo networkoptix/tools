@@ -37,10 +37,11 @@ class LogCapturer(object):
 
 class DbCapturePlugin(object):
 
-    def __init__(self, config, db_capture_repository):
+    def __init__(self, config, db_capture_repository, run_id_file=None):
         assert not config.getvalue('capturelog')  # mutually exclusive
         self.capture_manager = config.pluginmanager.getplugin('capturemanager')
         self.repo = db_capture_repository
+        self.run_id_file = run_id_file
         self.log_capturer = None
         self.root_run = None
         self.current_test_run = None
@@ -54,6 +55,9 @@ class DbCapturePlugin(object):
     def pytest_sessionstart(self, session):
         self.root_run = self._produce_test_run()
         self.log_capturer = LogCapturer(LOG_FORMAT)
+        if self.run_id_file:
+            with open(self.run_id_file, 'w') as f:
+                print >>f, self.root_run.id
 
     @db_session
     def pytest_sessionfinish(self, session):
