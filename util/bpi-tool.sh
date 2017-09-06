@@ -641,7 +641,7 @@ install_zip() # "$@"
 
     box \
         /etc/init.d/networkoptix-lite-client stop "[&&]" \
-        /etc/init.d/networkoptix-mediaserver stop
+        /etc/init.d/networkoptix-mediaserver stop "[&&]" \
         rm -f "$BOX_LOGS_DIR/*.log" "[&&]" \
         rm -rf "$BOX_UPDATES_DIR" "[&&]" \
         mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
