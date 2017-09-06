@@ -179,7 +179,7 @@ def generate_branch_platform_version_traces(accumulators):
 
 def load_branch_platform_version_metric_traces(branch_name, platform_name, version):
 
-    def pred(trace, use_lws, is_memory_usage):
+    def pred(use_lws, is_memory_usage, trace):
         if not use_lws and trace.metric_name == 'total_bytes_sent': return False
         return (trace.use_lws == use_lws and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
@@ -188,13 +188,13 @@ def load_branch_platform_version_metric_traces(branch_name, platform_name, versi
     trace_list = list(generate_branch_platform_version_traces(accumulators))
     lws_traces = dict(
         has_total_bytes_sent=True,
-        merge_duration=filter(partial(pred, use_lws=True, is_memory_usage=False), trace_list),
-        host_memory_usage=filter(partial(pred, use_lws=True, is_memory_usage=True), trace_list),
+        merge_duration=filter(partial(pred, True, False), trace_list),
+        host_memory_usage=filter(partial(pred, True, True), trace_list),
         )
     full_traces = dict(
         has_total_bytes_sent=False,
-        merge_duration=filter(partial(pred, use_lws=False, is_memory_usage=False), trace_list),
-        host_memory_usage=filter(partial(pred, use_lws=False, is_memory_usage=True), trace_list),
+        merge_duration=filter(partial(pred, False, False), trace_list),
+        host_memory_usage=filter(partial(pred, False, True), trace_list),
         )
     return (lws_traces, full_traces)
 
@@ -272,7 +272,7 @@ def generate_branch_platform_traces(accumulators):
 
 def load_branch_platform_metric_traces(branch_name, platform_name):
 
-    def pred(trace, use_lws, is_total_bytes_sent, is_memory_usage):
+    def pred(use_lws, is_total_bytes_sent, is_memory_usage, trace):
         return (trace.use_lws == use_lws and
                 (trace.metric_name == 'total_bytes_sent') == is_total_bytes_sent and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
@@ -280,13 +280,13 @@ def load_branch_platform_metric_traces(branch_name, platform_name):
     accumulators = load_branch_platform_metrics(branch_name, platform_name)
     trace_list = list(generate_branch_platform_traces(accumulators))
     lws_traces = dict(
-        merge_duration=filter(partial(pred, use_lws=True, is_total_bytes_sent=False, is_memory_usage=False), trace_list),
-        total_bytes_sent=filter(partial(pred, use_lws=True, is_total_bytes_sent=True, is_memory_usage=False), trace_list),
-        memory_usage=filter(partial(pred, use_lws=True, is_total_bytes_sent=False, is_memory_usage=True), trace_list),
+        merge_duration=filter(partial(pred, True, False, False), trace_list),
+        total_bytes_sent=filter(partial(pred, True, True, False), trace_list),
+        memory_usage=filter(partial(pred, True, False, True), trace_list),
         )
     full_traces = dict(
-        merge_duration=filter(partial(pred, use_lws=False, is_total_bytes_sent=False, is_memory_usage=False), trace_list),
-        memory_usage=filter(partial(pred, use_lws=False, is_total_bytes_sent=False, is_memory_usage=True), trace_list),
+        merge_duration=filter(partial(pred, False, False, False), trace_list),
+        memory_usage=filter(partial(pred, False, False, True), trace_list),
         )
     return (lws_traces, full_traces)
 
