@@ -35,7 +35,7 @@
       {% endif %}
     {% endcall %}
 
-    {% call(page) common_macros.paginator(page_count, current_page) %}
+    {% call(page) common_macros.paginator(paginator) %}
       {{ url_for('branch_platform_version_list', branch_name=branch_name,
       platform_name=platform_name, page=page) }}
     {% endcall %}

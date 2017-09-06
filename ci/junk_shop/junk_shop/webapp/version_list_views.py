@@ -1,7 +1,7 @@
 from flask import request, render_template
 from pony.orm import db_session, select, count, desc, raw_sql
 from .. import models
-from .utils import DEFAULT_RUN_LIST_PAGE_SIZE
+from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator
 from junk_shop.webapp import app
 
 
@@ -75,13 +75,11 @@ def branch_platform_version_list(branch_name, platform_name):
                         query.order_by(desc(2)).page(page, page_size)]
     version_map = {rec.version: rec for rec in version_list}
     rec_count = query.count()
-    page_count = (rec_count - 1) / page_size + 1
     load_test_outcomes(branch_name, platform_name, version_list, version_map)
     load_has_scalability_flags(branch_name, platform_name, version_list, version_map)
     return render_template(
         'branch_platform_version_list.html',
-        current_page=page,
-        page_count=page_count,
+        paginator=paginator(page, rec_count, page_size),
         branch_name=branch_name,
         platform_name=platform_name,
         version_list=version_list)

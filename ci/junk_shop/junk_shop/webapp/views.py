@@ -3,7 +3,7 @@ from flask import request, render_template, make_response, url_for, redirect, ab
 from pony.orm import db_session, desc, select
 from ..utils import SimpleNamespace
 from .. import models
-from .utils import DEFAULT_RUN_LIST_PAGE_SIZE
+from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator
 from junk_shop.webapp import app
 from .run import artifact_disposition, load_root_run_node_list, load_run_node_tree
 
@@ -20,12 +20,10 @@ def run_list():
     page = int(request.args.get('page', 1))
     page_size = DEFAULT_RUN_LIST_PAGE_SIZE
     rec_count = select(run for run in models.Run if run.root_run is None).count()
-    page_count = (rec_count - 1) / page_size + 1
     run_node_list = list(load_root_run_node_list(page, page_size))
     return render_template(
         'run_list.html',
-        current_page=page,
-        page_count=page_count,
+        paginator=paginator(page, rec_count, page_size),
         run_node_list=run_node_list)
 
 @app.route('/run/<int:run_id>/children')
@@ -70,12 +68,10 @@ def branch_platform_version_run_list(branch_name, platform_name, version):
                        run.branch == branch and
                        run.platform == platform and
                        run.version == version).count()
-    page_count = (rec_count - 1) / page_size + 1
     run_list = list(load_root_run_node_list(page, page_size, branch, platform, version))
     return render_template(
         'branch_platform_version_run_list.html',
-        current_page=page,
-        page_count=page_count,
+        paginator=paginator(page, rec_count, page_size),
         branch_name=branch_name,
         platform_name=platform_name,
         version=version,

@@ -7,12 +7,24 @@
 {% endmacro %}
 
 
-{% macro paginator(page_count, current_page) %}
-  {% for page in range(1, page_count + 1) %}
+{% macro paginator(paginator) %}
+  {% if not paginator.at_begin %}
+    <a class="page" href="{{ caller(paginator.first_page) }}">&#x21E4;</a>
+    {% if paginator.backward_page != paginator.first_page %}
+      <a class="page" href="{{ caller(paginator.backward_page) }}">&#x00AB;</a>
+    {% endif %}
+  {% endif %}
+  {% for page in paginator.pages_range %}
     <a
-       {% if page != current_page %} href="{{ caller(page) }}" {% endif -%}
-       class="page {%- if page == current_page %} current-page {%- endif %}">
+       {% if page != paginator.current_page %} href="{{ caller(page) }}" {% endif -%}
+       class="page {%- if page == paginator.current_page %} current-page {%- endif %}">
        {{- page -}}
     </a>
   {% endfor %}
+  {% if not paginator.at_end %}
+    {% if paginator.forward_page != paginator.last_page %}
+      <a class="page" href="{{ caller(paginator.forward_page) }}">&#x00BB;</a>
+    {% endif %}
+    <a class="page" href="{{ caller(paginator.last_page) }}">&#x21E5;</a>
+  {% endif %}
 {% endmacro %}

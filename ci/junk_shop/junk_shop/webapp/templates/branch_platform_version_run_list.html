@@ -18,7 +18,7 @@
 
   <hr>
 
-  {% call(page) common_macros.paginator(page_count, current_page) %}
+  {% call(page) common_macros.paginator(paginator) %}
     {{ url_for('branch_platform_version_run_list', branch_name=branch_name,
          platform_name=platform_name, version=version, page=page) }}
   {% endcall %}
