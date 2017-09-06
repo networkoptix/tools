@@ -135,8 +135,9 @@ def run_test(workspace_dir, distributive) {
 	]
 	dir('nx_vms/func_tests') {
 		withEnv(["PYTHONPATH+X=$workspace_dir/$JUNK_SHOP_SRC_DIR",
-				"PYTEST_PLUGINS=junk_shop.pytest_plugin"]) {
-			withCredentials([usernameColonPassword(
+				 "PYTEST_PLUGINS=junk_shop.pytest_plugin"]) {
+			withCredentials([
+					usernameColonPassword(
 						credentialsId: JUNK_SHOP_CREDENTIALS_ID,
 						variable: 'junk_shop_credentials'),
 					string(
