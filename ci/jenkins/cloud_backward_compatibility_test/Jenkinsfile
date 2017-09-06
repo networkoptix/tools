@@ -1,6 +1,9 @@
 // -* mode: groovy -*-
 
-WATCHER_EMAIL_LIST = ['vfedorov@networkoptix.com']
+WATCHER_EMAIL_LIST = [
+	'vfedorov@networkoptix.com',
+	'akolesnikov@networkoptix.com',
+]
 
 DISTRIBUTIVE_LIST = [
 	[path: '/vol/ftp/beta-builds/daily/15878-vms_3.0/digitalwatchdog/linux/dwspectrum-server-3.0.0.15878-linux64.deb',
@@ -14,11 +17,12 @@ TESTS_LIST = [
 	'cloud_host_test.py::test_server_should_be_able_to_merge_local_to_cloud_one[http]',
 	]
 
+CLOUD_GROUP = 'prod'
+
 // TEST_NODE = 'ci-linux-x64-test'
 TEST_NODE = 'linux-x64'
-
-CLOUD_GROUP = 'prod'
 DAYS_TO_KEEP_OLD_BUILD = '100'
+
 FUN_TESTS_BRANCH = 'vms_3.1_dev'
 NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
 SERVICE_EMAIL_PASSWORD_ID = 'service-email-password'
