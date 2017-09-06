@@ -14,6 +14,7 @@ nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${BOX_INSTALL_DIR="/opt/networkoptix"}
 : ${BOX_LITE_CLIENT_DIR="$BOX_INSTALL_DIR/lite_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
+: ${BOX_LOGS_DIR="$BOX_MEDIASERVER_DIR/var/log"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${BOX_DEVELOP_DIR="/root/develop"} #< Mount point at the box for the workstation develop dir.
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at the box.
@@ -55,7 +56,7 @@ $(basename "$0") [--verbose] <command>
 Here <command> can be one of the following:
 
 nfs # Mount the box root to $BOX_MNT via NFS.
-sshfs # Mount the box root to $BOX_MNT via SSHFS.
+sshfs [umount] # Mount/unmount the box root to $BOX_MNT via SSHFS.
 passwd # Change root password from "$BOX_INITIAL_PASSWORD" to "$BOX_PASSWORD".
 mount # Mount ~/develop to the box /root/develop via sshfs. May require workstation password.
 
@@ -74,8 +75,8 @@ client # Copy mobile_client exe to the box.
 server # Copy mediaserver_core lib to the box.
 lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
 ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
-install-tar [x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
-install-zip [x.zip] # Install x.zip to the box via unzipping to /tmp and running "install.sh".
+install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
+install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
 
 ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
 run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
@@ -124,7 +125,7 @@ check_box_mounted()
 {
     if [ ! -d "$BOX_MNT/usr" ]; then
         nx_fail "It seems $BOX_MNT does not refer to the box root dir." \
-            "Use $0 sshfs or $0 nfs to mount."
+            "Use $(basename "$0") sshfs or $(basename "$0") nfs to mount."
     fi
 }
 
@@ -579,16 +580,52 @@ assert_not_server_only()
     fi
 }
 
+find_INSTALLER() # .ext [mvn|cmake|archive.file]
+{
+    local -r EXT="$1"; shift
+
+    get_CMAKE_BUILD_DIR
+    local -r CMAKE_DIR="$CMAKE_BUILD_DIR/edge_firmware"
+    local -r MVN_DIR="$VMS_DIR/edge_firmware/rpi/target-bpi"
+
+    local BUILD="" #< mvn|cmake
+    if [ $# -ge 1 ]; then
+        case "$1" in
+            mvn|cmake)
+                BUILD="$1"
+                ;;
+            *)
+                INSTALLER="$1"
+                ;;
+        esac
+    else
+        # Auto-detect cmake vs msn, producing an error if none or both are present.
+        if [ -d "$CMAKE_DIR" ] && [ ! -d "$MVN_DIR" ]; then # cmake only
+            BUILD=cmake
+        elif [ -d "$MVN_DIR" ] && [ ! -d "$CMAKE_DIR" ]; then # mvn only
+            BUILD=mvn
+        elif [ ! -d "$MVN_DIR" ] && [ ! -d "$CMAKE_DIR" ]; then # none
+            nx_fail "Unable to find either maven or cmake installer directory."
+        else # both
+            nx_fail "Both maven and cmake installer directories exist, specify manually."
+        fi
+    fi
+
+    case $BUILD in
+        mvn) nx_find_file INSTALLER "Installer $EXT (maven)" "$MVN_DIR" -name "*$EXT" ;;
+        cmake) nx_find_file INSTALLER "Installer $EXT (cmake)" "$CMAKE_DIR" -name "*$EXT" ;;
+        *) `# Already found.` ;;
+    esac
+
+    nx_echo "Installing $INSTALLER"
+}
+
 install_tar() # "$@"
 {
-    local TAR_GZ
-    if [ $# -ge 1 ]; then
-        TAR_GZ="$1"; shift
-    else
-        TAR_GZ="$BOX_VMS_DIR/edge_firmware/rpi/target-bpi/*.tar.gz"
-    fi
     find_VMS_DIR
-    box tar xfv "$TAR_GZ" -C "/"
+    check_box_mounted
+    find_INSTALLER ".tar.gz" "$@"
+    nx_verbose tar xfv "$INSTALLER" -C "$BOX_MNT/"
 }
 
 install_zip() # "$@"
@@ -596,34 +633,20 @@ install_zip() # "$@"
     find_VMS_DIR
     check_box_mounted
 
-    local ZIP_FILE
-    if [ $# -ge 1 ]; then
-        ZIP_FILE="$1"; shift
-    else
-        # Look for cmake build dir first, then for maven build dir.
-        get_CMAKE_BUILD_DIR
-        local -r CMAKE_ZIP_DIR="$CMAKE_BUILD_DIR/edge_firmware"
-        if [ -d "$CMAKE_ZIP_DIR" ]; then # Cmake build dir exists.
-            nx_find_file ZIP_FILE "Installer .zip (cmake)" "$CMAKE_ZIP_DIR" -name "*.zip"
-        else
-            local -r MVN_ZIP_DIR="$VMS_DIR/edge_firmware/rpi/target-bpi"
-            if [ ! -d "$MVN_ZIP_DIR" ]; then
-                nx_fail "Unable to find neither cmake nor mvn build dir."
-            fi
-            nx_find_file ZIP_FILE "Installer .zip (maven)" "$MVN_ZIP_DIR" -name "*.zip"
-        fi
-    fi
+    find_INSTALLER ".zip" "$@"
 
-    local -r ZIP_FILENAME=$(basename "$ZIP_FILE")
+    local -r ZIP_FILENAME=$(basename "$INSTALLER")
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
     local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
 
     box \
+        /etc/init.d/networkoptix-lite-client stop "[&&]" \
+        /etc/init.d/networkoptix-mediaserver stop
+        rm -f "$BOX_LOGS_DIR/*.log" "[&&]" \
         rm -rf "$BOX_UPDATES_DIR" "[&&]" \
         mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
 
-    nx_echo "Installing .zip from $(dirname "$ZIP_FILE")"
-    nx_rsync "$ZIP_FILE" "${BOX_MNT}$BOX_UPDATES_DIR/"
+    nx_rsync "$INSTALLER" "${BOX_MNT}$BOX_UPDATES_DIR/"
 
     box \
         cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
@@ -649,16 +672,21 @@ main()
                 echo "Box mounted via nfs to $BOX_MNT"
             ;;
         sshfs)
-            fusermount -u "$BOX_MNT" 2>/dev/null
-            sudo rm -rf "$BOX_MNT" || exit $?
-            sudo mkdir -p "$BOX_MNT" || exit $?
-            sudo chown "$USER" "$BOX_MNT"
+            if [ $# -ge 1 ] && [ "$1" = "umount" ]; then
+                fusermount -u "$BOX_MNT" || exit $?
+                sudo rmdir "$BOX_MNT" || exit $?
+            else
+                fusermount -u "$BOX_MNT" 2>/dev/null
+                sudo rmdir "$BOX_MNT" 2>/dev/null
+                sudo mkdir -p "$BOX_MNT" || exit $?
+                sudo chown "$USER" "$BOX_MNT"
 
-            echo "$BOX_PASSWORD" |( \
-                sshfs root@"$BOX_HOST":/ "$BOX_MNT" \
-                    -o UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no \
-                    -o nonempty,password_stdin && \
-                        echo "Box mounted via sshfs to $BOX_MNT" )
+                echo "$BOX_PASSWORD" |( \
+                    sshfs root@"$BOX_HOST":/ "$BOX_MNT" \
+                        -o UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no \
+                        -o nonempty,password_stdin && \
+                            echo "Box mounted via sshfs to $BOX_MNT" )
+            fi
             ;;
         passwd)
             sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "root@$BOX_HOST" \
@@ -718,6 +746,37 @@ main()
             nx_echo "Performing sync..."
             sync || exit $?
             nx_echo "Done"
+            ;;
+        img-mount) # sd_card_image.img mount_dir
+            local -r IMG="$1"
+            if [ -z "$IMG" ]; then
+                nx_fail "Image file not specified."
+            fi
+            local -r MNT="$2"
+            if [ -z "$MNT" ]; then
+                nx_fail "Mount point not specified."
+            fi
+
+            local PARTITIONS=$(fdisk -l "$IMG" |grep "^$IMG")
+            if [ -z "$PARTITIONS" ]; then
+                nx_fail "Unable to get SD Card image partitions via fdisk -l \"$IMG\"."
+            fi
+
+            local -a PARTITION_OFFSETS=($(awk '{print $2}' <<<"$PARTITIONS"))
+            if [ ${#PARTITION_OFFSETS[@]} = 0 ]; then
+                nx_fail "Unable to get partition offsets in the image via fdisk -l \"$IMG\"."
+            fi
+
+            local -i i=0
+            local -i OFFSET
+            for OFFSET in "${PARTITION_OFFSETS[@]}"; do
+                let ++i
+                local MNT_I="$MNT$i"
+                nx_verbose mkdir -p "$MNT_I" || exit $?
+                sudo mount -o loop,offset="$(expr 512 '*' $OFFSET)" "$IMG" "$MNT_I" || exit $?
+            done
+            nx_echo "SUCCESS: Mounted $i partitions. Run the following command to unmount:"
+            echo "DIRS=(\"$MNT\"?); sudo umount \"\${DIRS[@]}\" && rmdir \"\${DIRS[@]}\""
             ;;
         mac) # [--force] [xx:xx:xx:xx:xx:xx]
             if [ "$1" = "--force" ]; then
