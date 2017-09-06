@@ -1,0 +1,199 @@
+// -* mode: groovy -*-
+
+WATCHER_EMAIL_LIST = ['vfedorov@networkoptix.com']
+
+DISTRIBUTIVE_LIST = [
+	[path: '/vol/ftp/beta-builds/daily/15878-vms_3.0/digitalwatchdog/linux/dwspectrum-server-3.0.0.15878-linux64.deb',
+	 customization: 'digitalwatchdog'],
+	[path: '/vol/ftp/beta-builds/daily/15456-vms_3.1_beta/vmsdemoorange/linux/vmsdemo-server-3.1.0.15456-linux64-beta-demo.deb',
+	 customization: 'vmsdemoorange'],
+	]
+
+TESTS_LIST = [
+	'cloud_host_test.py::test_with_different_cloud_hosts_must_not_be_able_to_merge[http]',
+	'cloud_host_test.py::test_server_should_be_able_to_merge_local_to_cloud_one[http]',
+	]
+TESTS_LIST = ['scalability_test.py']
+
+// TEST_NODE = 'ci-linux-x64-test'
+TEST_NODE = 'linux-x64'
+
+CLOUD_GROUP = 'prod'
+DAYS_TO_KEEP_OLD_BUILD = '100'
+FUN_TESTS_BRANCH = 'vms_3.1_dev'
+NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
+SERVICE_EMAIL_PASSWORD_ID = 'service-email-password'
+JUNK_SHOP_RUN_URL = 'http://demo.networkoptix.com:10180/run'
+JUNK_SHOP_SRC_DIR = 'devtools/ci/junk_shop'
+JUNK_SHOP_HOST = '10.1.5.105'
+JUNK_SHOP_CREDENTIALS_ID = 'junk_shop_db'
+JUNK_SHOP_PROJECT = 'scalability'
+PLATFORM = 'linux64'
+FAILURE_EMAIL_TEMPLATE = 'devtools/ci/jenkins/cloud_backward_compatibility_test/failure_email.txt'
+
+
+def main() {
+	def must_clean_workspace = params?.clean ?: false
+
+	stage('Load package') {
+		node ('master') {
+			update_job_parameters()
+			stash_distributives(DISTRIBUTIVE_LIST)
+		}
+	}
+	node (TEST_NODE) {
+		def workspace_dir = pwd()
+		stage("Prepare test environment") {
+			prepare_test_environment(workspace_dir, must_clean_workspace)
+		}
+		stage("Run tests") {
+			def result_list = DISTRIBUTIVE_LIST.collect { run_test(workspace_dir, it) }
+			def failure_list = result_list.findAll { it }
+			if (failure_list) {
+				email_failure_to_watchers(failure_list)
+				error "Tests are failed for ${failure_list.size()} distributives"
+			}
+		}
+	}
+}
+
+// Change parameters for currently running jenkins task; next run will require and use these parameters.
+def update_job_parameters() {
+	def job_params = [
+		booleanParam(name: 'clean', defaultValue: false, description: 'Start from clean workspace'),
+	]
+	properties([
+			parameters(job_params),
+			disableConcurrentBuilds(),
+			buildDiscarder(logRotator(daysToKeepStr: DAYS_TO_KEEP_OLD_BUILD)),
+		])
+}
+
+def stash_distributives(distributive_list) {
+	def file_list = distributive_list.collect { it.path }
+	sh 'mkdir -p dist'
+	sh "cp ${file_list.join(' ')} dist/"
+	stash includes: 'dist/*', name: 'distributives'
+}
+
+def prepare_test_environment(workspace_dir, must_clean_workspace) {
+	if (must_clean_workspace) {
+		echo "Cleaning workspace $workspace_dir"
+		deleteDir()
+	}
+	dir ('devtools') {
+		// checkout scm
+		checkout([
+				$class: 'MercurialSCM',
+				credentialsId: NX_REPOSITORY_CREDENTIALS_ID,
+				installation: '(Default)',
+				revision: 'default',
+				source: 'ssh://hg@la.hdw.mx/devtools',
+			])
+	}
+	
+	sh 'if [ -d dist ]; then rm -rf dist; fi'  // clean distributives from previous build
+	unstash 'distributives'
+	sh 'mkdir -p bin work/test'
+	checkout([
+			$class: 'MercurialSCM',
+			credentialsId: NX_REPOSITORY_CREDENTIALS_ID,
+			installation: '(Default)',
+			revision: FUN_TESTS_BRANCH,
+			source: 'ssh://hg@la.hdw.mx/nx_vms',
+			subdir: 'nx_vms',
+		])
+	sh 'if [ ! -d work/venv ]; then virtualenv --system-site-packages work/venv; fi'
+	sh './work/venv/bin/pip install -r nx_vms/func_tests/requirements.txt'
+	sh "./work/venv/bin/pip install -r $JUNK_SHOP_SRC_DIR/requirements.txt"
+}
+
+
+def run_test(workspace_dir, distributive) {
+	echo "Running tests for distributive $distributive:"
+
+	def file_name = distributive.path.split('/')[-1]
+	def dist_info = parse_dist_name(file_name)
+	def run_id_file = "$workspace_dir/work/run_id.txt"
+
+	sh "ln -sf $workspace_dir/dist/$file_name bin/mediaserver.deb"
+	sh "if [ -f $run_id_file ]; then rm $run_id_file; fi"
+
+	def build_parameters = [
+		"platform=$PLATFORM",
+		"customization=$distributive.customization",
+		"version=$dist_info.version",
+	]
+	def options = [
+		"--work-dir=$workspace_dir/work/test",
+		"--bin-dir=$workspace_dir/bin",
+		"--reinstall",
+		"--cloud-group=$CLOUD_GROUP",
+		"--customization=$distributive.customization",
+		"--nocapturelog",
+		"--capture-db=\$junk_shop_credentials@$JUNK_SHOP_HOST",
+		"--autotest-email-password=\$service_email_password",
+		"--project=$JUNK_SHOP_PROJECT",
+		"--build-parameters=${build_parameters.join(',')}",
+		"--run-id-file=$run_id_file",
+	]
+	dir('nx_vms/func_tests') {
+		withEnv(["PYTHONPATH+X=$workspace_dir/$JUNK_SHOP_SRC_DIR",
+				"PYTEST_PLUGINS=junk_shop.pytest_plugin"]) {
+			withCredentials([usernameColonPassword(
+						credentialsId: JUNK_SHOP_CREDENTIALS_ID,
+						variable: 'junk_shop_credentials'),
+					string(
+						credentialsId: SERVICE_EMAIL_PASSWORD_ID,
+						variable: 'service_email_password'),
+				]) {
+				try {
+					sh (". $workspace_dir/work/venv/bin/activate" +
+							" && pytest ${options.join(' ')} ${TESTS_LIST.join(' ')}")
+					return null
+				} catch (hudson.AbortException x) {
+					echo "Error running test: $x"
+					def run_id = fileExists("$run_id_file") ? readFile("$run_id_file").trim() : null
+					return [distributive: distributive, error: x, run_id: run_id]
+				}
+			}
+		}
+	}
+}
+
+def email_failure_to_watchers(failure_list) {
+	def body = expand_template_file(FAILURE_EMAIL_TEMPLATE, [
+			build_url: env.BUILD_URL,
+			junk_shop_run_url: JUNK_SHOP_RUN_URL,
+			failure_list: failure_list,
+		])
+	emailext(
+		body: body,
+		subject: 'Cloud backward compatibility test is failed',
+		to: WATCHER_EMAIL_LIST.join(' '),
+		attachLog: true,
+		)
+}
+
+def expand_template_file(template_file_path, binding) {
+	def template_text = readFile(template_file_path)
+	return expand_template(template_text, binding)
+}
+
+def expand_template(template_text, binding) {
+	def engine = new groovy.text.SimpleTemplateEngine()
+	def template = engine.createTemplate(template_text).make(binding)
+	return template.toString()
+}
+
+def parse_dist_name(path) {
+	def mo = path =~ '.+-server-(([0-9]\\.){3}([0-9]+))-linux64.*.deb'
+	return [
+		version: mo[0][1],
+		build: mo[0][3].toInteger(),
+		]
+}
+
+// ==============================================================================
+main()
+// ==============================================================================
