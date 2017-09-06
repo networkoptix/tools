@@ -13,7 +13,6 @@ TESTS_LIST = [
 	'cloud_host_test.py::test_with_different_cloud_hosts_must_not_be_able_to_merge[http]',
 	'cloud_host_test.py::test_server_should_be_able_to_merge_local_to_cloud_one[http]',
 	]
-TESTS_LIST = ['scalability_test.py']
 
 // TEST_NODE = 'ci-linux-x64-test'
 TEST_NODE = 'linux-x64'
@@ -82,14 +81,7 @@ def prepare_test_environment(workspace_dir, must_clean_workspace) {
 		deleteDir()
 	}
 	dir ('devtools') {
-		// checkout scm
-		checkout([
-				$class: 'MercurialSCM',
-				credentialsId: NX_REPOSITORY_CREDENTIALS_ID,
-				installation: '(Default)',
-				revision: 'default',
-				source: 'ssh://hg@la.hdw.mx/devtools',
-			])
+		checkout scm
 	}
 	
 	sh 'if [ -d dist ]; then rm -rf dist; fi'  // clean distributives from previous build
@@ -171,7 +163,6 @@ def email_failure_to_watchers(failure_list) {
 		body: body,
 		subject: 'Cloud backward compatibility test is failed',
 		to: WATCHER_EMAIL_LIST.join(' '),
-		attachLog: true,
 		)
 }
 

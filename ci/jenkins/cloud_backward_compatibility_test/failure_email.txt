@@ -2,7 +2,7 @@ Cloud backward compatibility test is failed for the following distributives:
 <% failure_list.each { failure -> %>
 Distributive $failure.distributive.path:
 	Error: $failure.error
-<% if (failure.run_id) { %>		Junk-shop report: $junk_shop_run_url/$failure.run_id
+<% if (failure.run_id) { %>	Junk-shop report: $junk_shop_run_url/$failure.run_id
 <% }
 } %>
 Jenkins build output:
