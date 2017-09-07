@@ -20,8 +20,7 @@ TESTS_LIST = [
 
 CLOUD_GROUP = 'prod'
 
-// TEST_NODE = 'ci-linux-x64-test'
-TEST_NODE = 'linux-x64'
+TEST_NODE = 'ci-linux-x64-test'
 DAYS_TO_KEEP_OLD_BUILD = '100'
 
 FUN_TESTS_BRANCH = 'vms_3.1_dev'
