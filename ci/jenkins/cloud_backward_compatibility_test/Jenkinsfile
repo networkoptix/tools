@@ -3,6 +3,7 @@
 WATCHER_EMAIL_LIST = [
 	'vfedorov@networkoptix.com',
 	'akolesnikov@networkoptix.com',
+	'rvasilenko@networkoptix.com',
 ]
 
 DISTRIBUTIVE_LIST = [
