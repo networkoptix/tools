@@ -23,8 +23,8 @@ case "$TOOL" in
     *leak*) OPT="--leak-check=yes --show-leak-kinds=definite,possible --undef-value-errors=no $SUP" ;;
     *rw*) OPT="--leak-check=no --undef-value-errors=yes $SUP" ;;
     *dhat*) OPT="--tool=exp-dhat --show-top-n=100 --sort-by=max-bytes-live" ;;
-    *mass*) OPT="--tool=massif" ;;
-    *call*) OPT="--tool=callgrind --callgrind-out-file=$OUT.$(date +%s).cg" ;;
+    *mass*) OPT="--tool=massif --massif-out-file=$OUT.massif" ;;
+    *call*) OPT="--tool=callgrind --callgrind-out-file=$OUT.callgrind" ;;
     *) echo Error: unsupported tool: $TOOL >&2; echo_help >&2; exit 1 ;;
 esac
 
