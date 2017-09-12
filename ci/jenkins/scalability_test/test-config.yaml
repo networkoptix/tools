@@ -3,7 +3,7 @@ hosts:
     dir: ~/run/scalability
     limit: 2
   - name: scalability2
-    host: 10.1.5.167
+    host: 10.1.5.164
     dir: ~/run/scalability
     lightweight_servers_limit: 300
   - name: scalability3
