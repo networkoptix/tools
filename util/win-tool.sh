@@ -23,23 +23,23 @@ $(basename "$0") [--verbose] <command>
 
 Here <command> can be one of the following:
 
-ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
+ ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
 
-apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
-kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
+ apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
+ kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
+ kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
-start-s [Release] [args] # Start mediaserver with [args].
-stop-s # Stop mediaserver.
-start-c [args] # Start desktop_client with [args].
-stop-c # Stop desktop_client.
-run-ut [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
+ start-s [Release] [args] # Start mediaserver with [args].
+ stop-s # Stop mediaserver.
+ start-c [args] # Start desktop_client with [args].
+ stop-c # Stop desktop_client.
+ run-ut [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
 
-clean # Delete cmake build dir and all maven build dirs.
-mvn [args] # Call maven.
-gen [cmake-args] # Perform cmake generation.
-build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
-cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ clean # Delete cmake build dir and all maven build dirs.
+ mvn [args] # Call maven.
+ gen [cmake-args] # Perform cmake generation.
+ build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
+ cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 EOF
 }
 

@@ -55,59 +55,59 @@ $(basename "$0") [--verbose] <command>
 
 Here <command> can be one of the following:
 
-nfs # Mount the box root to $BOX_MNT via NFS.
-sshfs [umount] # Mount/unmount the box root to $BOX_MNT via SSHFS.
-passwd # Change root password from "$BOX_INITIAL_PASSWORD" to "$BOX_PASSWORD".
-mount # Mount ~/develop to the box /root/develop via sshfs. May require workstation password.
+ nfs # Mount the box root to $BOX_MNT via NFS.
+ sshfs [umount] # Mount/unmount the box root to $BOX_MNT via SSHFS.
+ passwd # Change root password from "$BOX_INITIAL_PASSWORD" to "$BOX_PASSWORD".
+ mount # Mount ~/develop to the box /root/develop via sshfs. May require workstation password.
 
-sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it.
-img [--force] sd_card_image.img # Write the image onto the SD Card.
-mac [--force] [xx:xx:xx:xx:xx:xx] # Read or write MAC on an SD Card connected to Linux PC.
-serial [--force] [nnnnnnnnn] # Read or write Serial on an SD Card connected to Linux PC.
-ip [--force] [<ip-address> <mask> [<gateway>]] # Read/write /etc/network/interfaces on SD Card.
-dhcp [--force] # Restore default (configured for DHCP) /etc/network/interfaces on SD Card.
+ sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it.
+ img [--force] sd_card_image.img # Write the image onto the SD Card.
+ mac [--force] [xx:xx:xx:xx:xx:xx] # Read or write MAC on an SD Card connected to Linux PC.
+ serial [--force] [nnnnnnnnn] # Read or write Serial on an SD Card connected to Linux PC.
+ ip [--force] [<ip-address> <mask> [<gateway>]] # Read/write /etc/network/interfaces on SD Card.
+ dhcp [--force] # Restore default (configured for DHCP) /etc/network/interfaces on SD Card.
 
-copy # Copy mobile_client and mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
-copy-s # Copy mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
-copy-c # Copy mobile_client libs and bins to the box $BOX_INSTALL_DIR.
-copy-ut # Copy all libs and unit test bins to the box $BOX_INSTALL_DIR.
-client # Copy mobile_client exe to the box.
-server # Copy mediaserver_core lib to the box.
-lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
-ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
-install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
-install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
+ copy # Copy mobile_client and mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
+ copy-s # Copy mediaserver libs, bins and scripts to the box $BOX_INSTALL_DIR.
+ copy-c # Copy mobile_client libs and bins to the box $BOX_INSTALL_DIR.
+ copy-ut # Copy all libs and unit test bins to the box $BOX_INSTALL_DIR.
+ client # Copy mobile_client exe to the box.
+ server # Copy mediaserver_core lib to the box.
+ lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
+ ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+ install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
+ install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
 
-ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
-run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
-kill-c # Stop mobile_client via "killall mobile_client".
-start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
-stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
-start-c [args] # Run mobile_client via "/etc/init.d/networkoptix-lite-client start [args]".
-stop-c # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
-run-ut test_name [args] # Run the unit test with strict expectations.
-start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
-stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
+ ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+ run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
+ kill-c # Stop mobile_client via "killall mobile_client".
+ start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
+ stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
+ start-c [args] # Run mobile_client via "/etc/init.d/networkoptix-lite-client start [args]".
+ stop-c # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
+ run-ut test_name [args] # Run the unit test with strict expectations.
+ start [args] # Run mediaserver and mobile_client via "/etc/init.d/networkoptix-* start [args]".
+ stop # Stop mediaserver and mobile_client via "/etc/init.d/networkoptix-* stop".
 
-vdp [args] # Make libvdpau_sunxi at the box and install it to the box, passing [args] to "make".
-vdp-rdep # Deploy libvdpau-sunxi to packages/bpi via "rdep -u".
-pd [args] # Make libproxydecoder at the box and install it to the box, passing [args] to "make".
-pd-rdep # Deploy libproxydecoder to packages/bpi via "rdep -u".
-cedrus [ump] [args] # Make libcedrus at the box and install it to the box, passing [args] to "make".
-cedrus-rdep # Deploy libcedrus to packages/bpi via "rdep -u".
-ump # Rebuild libUMP at the box and install it to the box.
-ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
-ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
+ vdp [args] # Make libvdpau_sunxi at the box and install it to the box, passing [args] to "make".
+ vdp-rdep # Deploy libvdpau-sunxi to packages/bpi via "rdep -u".
+ pd [args] # Make libproxydecoder at the box and install it to the box, passing [args] to "make".
+ pd-rdep # Deploy libproxydecoder to packages/bpi via "rdep -u".
+ cedrus [ump] [args] # Make and install libcedrus at the box, passing [args] to "make".
+ cedrus-rdep # Deploy libcedrus to packages/bpi via "rdep -u".
+ ump # Rebuild libUMP at the box and install it to the box.
+ ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
+ ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
-clean # Call "linux-tool.sh clean bpi".
-mvn [args] # Call maven with the required platorm and box.
-cmake [args] # Call "linux-tool.sh cmake bpi [args]".
-gen [args] # Call "linux-tool.sh gen bpi [args]".
-build [args] # Call "linux-tool.sh build bpi [args]".
-pack-short <output.tgz> # Prepare tar with build results at the box.
-pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
-build-installer [mvn] # Build installer using cmake or (if "mvn" specified) maven.
-test-installer [mvn] original/archives/dir # Build installer and test to equal the original.
+ clean # Call "linux-tool.sh clean bpi".
+ mvn [args] # Call maven with the required platorm and box.
+ cmake [args] # Call "linux-tool.sh cmake bpi [args]".
+ gen [args] # Call "linux-tool.sh gen bpi [args]".
+ build [args] # Call "linux-tool.sh build bpi [args]".
+ pack-short <output.tgz> # Prepare tar with build results at the box.
+ pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
+ build-installer [mvn] # Build installer using cmake or (if "mvn" specified) maven.
+ test-installer [mvn] original/archives/dir # Build installer and test to equal the original.
 EOF
 }
 

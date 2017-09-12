@@ -25,28 +25,28 @@ $(basename "$0") [--verbose] <command>
 
 Here <command> can be one of the following:
 
-ini # Create empty .ini files in /tmp (to be filled with defauls).
+ ini # Create empty .ini files in /tmp (to be filled with defauls).
 
-apidoc target [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
-kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
-kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
+ apidoc target [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
+ kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
+ kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
-start-s [args] # Start mediaserver with [args].
-stop-s # Stop mediaserver.
-start-c [args] # Start desktop_client with [args].
-stop-c # Stop desktop_client.
-run-ut target [all|test_name] [args] # Run all or the specified unit test via ctest.
+ start-s [args] # Start mediaserver with [args].
+ stop-s # Stop mediaserver.
+ start-c [args] # Start desktop_client with [args].
+ stop-c # Stop desktop_client.
+ run-ut target [all|test_name] [args] # Run all or the specified unit test via ctest.
 
-share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
-clean # Delete cmake build dir and all maven build dirs.
-mvn target [args] # Call maven.
-gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
-build target # Build via "cmake --build <dir>".
-cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
-build-installer target [mvn] # Build installer using cmake or (if "mvn" specified) maven.
-test-installer target [checksum] [no-build] [mvn] original/archives/dir # Test built installer against the original.
-print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
-tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
+ share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
+ clean # Delete cmake build dir and all maven build dirs.
+ mvn target [args] # Call maven.
+ gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+ build target # Build via "cmake --build <dir>".
+ cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ build-installer target [mvn] # Build installer using cmake or (if "mvn" specified) maven.
+ test-installer target [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
+ print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
+ tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
 EOF
 }
 
