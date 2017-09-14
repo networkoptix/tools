@@ -1083,19 +1083,51 @@ function ffmpeg_generate_config()
         read -d '' configureFfmpegScript<<EOF
 #!/bin/bash
 
-./configure --enable-gpl --disable-static --enable-shared --prefix=$ffmpeg_DIR \
---enable-cross-compile --cross-prefix=$CROSS_PREFIX \
---arch=$makeArch --target-os=linux --disable-debug --enable-dct --enable-asm \
---disable-everything \
---enable-decoder=mpeg2video --enable-decoder=mpeg4 --enable-decoder=h264 --enable-decoder=mjpeg --enable-decoder=mjpegb --enable-decoder=aac --enable-decoder=aac_latm \
---enable-decoder=pcm_mulaw --enable-decoder=pcm_alaw --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
---enable-encoder=mjpeg --enable-encoder=png \
---enable-muxer=matroska --enable-muxer=mpegts --enable-muxer=mpjpeg --enable-muxer=rtp --enable-muxer=rtsp \
---enable-demuxer=matroska --enable-demuxer=h264 \
---enable-parser=h264 --enable-parser=mjpeg --enable-parser=aac --enable-parser=aac_latm \
---enable-protocol=rtp \
---enable-filter=copy --enable-filter=mp --enable-filter=null \
---enable-bsf=h264_mp4toannexb $ffmpeg_CONFIG_OPTIONS
+./configure \
+ --enable-gpl \
+ --disable-static \
+ --enable-shared \
+ --prefix=$ffmpeg_DIR \
+ --enable-cross-compile \
+ --cross-prefix=$CROSS_PREFIX \
+ --arch=$makeArch \
+ --target-os=linux \
+ --disable-debug \
+ --enable-dct \
+ --enable-asm \
+ --disable-everything \
+ --enable-decoder=mpeg2video \
+ --enable-decoder=mpeg4 \
+ --enable-decoder=h264 \
+ --enable-decoder=hevc \
+ --enable-decoder=mjpeg \
+ --enable-decoder=mjpegb \
+ --enable-decoder=aac \
+ --enable-decoder=aac_latm \
+ --enable-decoder=pcm_mulaw \
+ --enable-decoder=pcm_alaw \
+ --enable-decoder=adpcm_g726 $ffmpeg_DECODERS_STR\
+ --enable-encoder=mjpeg \
+ --enable-encoder=png \
+ --enable-muxer=matroska \
+ --enable-muxer=mpegts \
+ --enable-muxer=mpjpeg \
+ --enable-muxer=rtp \
+ --enable-muxer=rtsp \
+ --enable-demuxer=matroska \
+ --enable-demuxer=h264 \
+ --enable-demuxer=hevc \
+ --enable-parser=h264 \
+ --enable-parser=hevc \
+ --enable-parser=mjpeg \
+ --enable-parser=aac \
+ --enable-parser=aac_latm \
+ --enable-protocol=rtp \
+ --enable-filter=copy \
+ --enable-filter=mp \
+ --enable-filter=null \
+ --enable-bsf=h264_mp4toannexb \
+$ffmpeg_CONFIG_OPTIONS
 EOF
     else
         if [ $OS = "windows" ]
