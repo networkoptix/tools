@@ -75,6 +75,7 @@ Here <command> can be one of the following:
  server # Copy mediaserver_core lib to the box.
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
  ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+ logs # Create empty -out.flag files at the box'es log dir to trigger logs with respective names.
  install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
  install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
 
@@ -966,6 +967,13 @@ main()
                 touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
+            ;;
+        logs)
+            box \
+                touch "$BOX_LOGS_DIR/networkoptix-mediaserver-out.flag" "[&&]" \
+                touch "$BOX_LOGS_DIR/networkoptix-lite-client-out.flag" "[&&]" \
+                touch "$BOX_LOGS_DIR/mediaserver-out.flag" "[&&]" \
+                touch "$BOX_LOGS_DIR/mobile_client-out.flag"
             ;;
         install-tar)
             install_tar "$@"
