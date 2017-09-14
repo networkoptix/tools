@@ -48,11 +48,12 @@ def main():
     parser.add_argument('--exit-code', type=int, dest='exit_code', help='Build exit code to store to db')
     parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
                         help='Parse output to determine maven outcome')
+    parser.add_argument('--signal-failure', action='store_true', help='Signal failed build with exit code 2')
     args = parser.parse_args()
     try:
         repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
         passed = store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
-        if not passed:
+        if not passed and args.signal_failure:
             sys.exit(2)
     except RuntimeError as x:
         print x
