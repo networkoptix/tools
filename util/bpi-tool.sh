@@ -62,6 +62,7 @@ Here <command> can be one of the following:
 
  sdcard [/dev/sd...] # Read or write SD Card device reference in /etc/fw_env.config and test it.
  img [--force] sd_card_image.img # Write the image onto the SD Card.
+ img-mount sd_card_image.img mount_dir # Mount SD Card partitions.
  mac [--force] [xx:xx:xx:xx:xx:xx] # Read or write MAC on an SD Card connected to Linux PC.
  serial [--force] [nnnnnnnnn] # Read or write Serial on an SD Card connected to Linux PC.
  ip [--force] [<ip-address> <mask> [<gateway>]] # Read/write /etc/network/interfaces on SD Card.
