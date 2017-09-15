@@ -6,7 +6,7 @@ cat <<END
 Clean up mediaservers database and setup default config
 Usage: [OPTION=VALUE ...] $0 [HEX_SERVER_ID]
 Options:
-    DIR     config directory to wipe, default $HOME/develop/mediaserver<hex-id>.
+    DIR     config directory to wipe, default $HOME/develop/mediaserver<HEX_SERVER_ID>.
     EMI     set to 1 to enableMultipleInstances=1, port will be also fixed.
     PART    clean up partialy, values: l(logs), d(data), e(ecs db), m(mserver db).
     SYS     system name, default muskov (the creator).
@@ -34,12 +34,12 @@ mkdir -p $DIR
 if [ ! "$WIPE" ]; then
     PRESERVE_DIR=/tmp/ms_preserve_$(date +%s)
     mkdir -p $PRESERVE_DIR
-    mv $DIR/mediaserver.conf $DIR/ecs_static.* $PRESERVE_DIR
+    mv $DIR/mediaserver.conf $DIR/ecs_static.* $PRESERVE_DIR || true
 fi
 
 rm -rf $DIR/*
 if [ "$PRESERVE_DIR" ]; then
-    mv $PRESERVE_DIR/* $DIR
+    mv $PRESERVE_DIR/* $DIR || true
     rmdir $PRESERVE_DIR
 fi
 
