@@ -4,12 +4,13 @@ if [[ "$@" == *help ]] || [[ "$@" == -h ]]
 then
 cat <<END
 Clean up mediaservers database and setup default config
-Usage: [OPTION=VALUE ...] clear-ms.sh [<hex-id>]
+Usage: [OPTION=VALUE ...] $0 [HEX_SERVER_ID]
 Options:
-    DIR config directory to wipe, default $HOME/develop/mediaserver<hex-id>.
-    SYS system name, default muskov (the creator).
-    EMI set to 1 to enableMultipleInstances=1, port will be also fixed.
-    PART clean up partialy, values: log, data.
+    DIR     config directory to wipe, default $HOME/develop/mediaserver<hex-id>.
+    EMI     set to 1 to enableMultipleInstances=1, port will be also fixed.
+    PART    clean up partialy, values: l(logs), d(data), e(ecs db), m(mserver db).
+    SYS     system name, default muskov (the creator).
+    WIPE    set to 1 to do not preserve config and static database.
 END
 exit 0
 fi
@@ -19,16 +20,30 @@ set -x -e
 ID=${1:-0}
 DIR=${DIR:-$HOME/develop/mediaserver$ID}
 SYS=${SYS:-muskov}
+CONFIG=mediaserver.conf
 
 if [[ "$PART" ]]; then
     [[ "$PART" =~ *l* ]] && rm $DIR/log/*
     [[ "$PART" =~ *d* ]] && rm -r $DIR/data
+    [[ "$PART" =~ *e* ]] && rm $DIR/ecs.sqlite*
+    [[ "$PART" =~ *m* ]] && rm $DIR/mserver.sqlite*
     exit 0
 fi
 
 mkdir -p $DIR
+if [ ! "$WIPE" ]; then
+    PRESERVE_DIR=/tmp/ms_preserve_$(date +%s)
+    mkdir -p $PRESERVE_DIR
+    mv $DIR/mediaserver.conf $DIR/ecs_static.* $PRESERVE_DIR
+fi
+
 rm -rf $DIR/*
-cd $DIR
+if [ "$PRESERVE_DIR" ]; then
+    mv $PRESERVE_DIR/* $DIR
+    rmdir $PRESERVE_DIR
+fi
+
+[ -f $DIR/mediaserver.conf ] && exit 0
 
 cat > $DIR/mediaserver.conf <<EOF
 [General]
