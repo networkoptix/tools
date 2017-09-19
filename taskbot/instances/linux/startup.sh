@@ -20,5 +20,5 @@ screen -S taskbot -X screen -t slow_vms_3.0 ./slow.sh config_vms_3_0.py
 screen -S taskbot -X screen -t slow_vms_3.1 ./slow.sh config_vms_3_1.py
 screen -S taskbot -X screen -t slow_vms_3.1_dev ./slow.sh config_vms_3_1_dev.py
 screen -S taskbot -X screen -t slow_vms_3.2_dev ./slow.sh config_vms_3_2_dev.py
-screen -S taskbot -X screen -t nx1_vms_3.0 "cd $HOME/taskbot/devtools/taskbot/instances/nx1 && ./run.sh config_vms_3_0.py"
-screen -S taskbot -X screen -t nx1_vms_3.1_dev "cd $HOME/taskbot/devtools/taskbot/instances/nx1 && ./run.sh config_vms_3_1_dev.py"
+screen -S taskbot -X screen -t nx1_vms_3.0 sh -c "cd $HOME/taskbot/devtools/taskbot/instances/nx1 && ./run.sh config_vms_3_0.py"
+screen -S taskbot -X screen -t nx1_vms_3.1_dev sh -c "cd $HOME/taskbot/devtools/taskbot/instances/nx1 && ./run.sh config_vms_3_1_dev.py"
