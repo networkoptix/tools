@@ -12,6 +12,7 @@ screen -S taskbot -X screen -t vms_3.1 ./run.sh config_vms_3_1.py
 screen -S taskbot -X screen -t vms_3.1.1 ./run.sh config_vms_3_1_1.py
 screen -S taskbot -X screen -t vms_3.1.2 ./run.sh config_vms_3_1_2.py
 screen -S taskbot -X screen -t cloud_dev ./run.sh config_cloud_dev.py
+screen -S taskbot -X screen -t cloud_17.1 ./run.sh config_cloud_17_1.py
 screen -S taskbot -X screen -t default ./run.sh config_default.py
 screen -S taskbot -X screen -t vms_3.1_gui ./run.sh config_vms_3_1_gui.py
 screen -S taskbot -X screen -t vms_3.1_dev ./run.sh config_vms_3_1_dev.py
