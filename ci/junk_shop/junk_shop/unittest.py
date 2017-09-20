@@ -21,7 +21,7 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 ARTIFACT_LINE_COUNT_LIMIT = 10000
 EXPECTED_CORE_PATTERN = '%e.core.%t.%p'
-CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
+LINUX_CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
 LOG_PATTERN = '20\d\d-\d\d-\d\d .+'
 
 GTEST_ARGUMENTS = [
@@ -321,6 +321,8 @@ class TestProcess(object):
 
     @db_session
     def _collect_core_files(self, level):
+        if sys.platform == 'win32':
+            return False
         has_cores = False
         for path in glob.glob('*.core.*'):
             binary_path = extract_core_source_binary(path)
@@ -396,13 +398,15 @@ class TestRunner(object):
             process.abort_on_timeout(run_duration)
 
     def _run_pre_checks(self, root_run):
+        if sys.platform == 'win32':
+            return
         error_list = []
         try:
             self._gdb_path = subprocess.check_output(['which', 'gdb']).rstrip()
         except subprocess.CalledProcessError as x:
             error_list.append('gdb is missing: core files will not be parsed')
-        core_pattern = subprocess.check_output(['cat', CORE_PATTERH_FILE]).rstrip()
-        if core_pattern != EXPECTED_CORE_PATTERN:
+        core_pattern = self._read_core_pattern()
+        if core_pattern is not None and core_pattern != EXPECTED_CORE_PATTERN:
             error_list.append('Core pattern is %r, but expected is %r; core files will not be collected. Set it in %s'
                               % (core_pattern, EXPECTED_CORE_PATTERN, CORE_PATTERH_FILE))
         core_ulimit = subprocess.check_output(['ulimit', '-c'], shell=True).rstrip()
@@ -414,6 +418,15 @@ class TestRunner(object):
                 print 'Environment configuration error:', error
             artifact_type = self._repository.artifact_type.output
             self._repository.add_artifact(root_run, 'warnings', 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
+
+    def _read_core_pattern(self):
+        if sys.platform == 'linux2':
+            with file(LINUX_CORE_PATTERH_FILE) as f:
+                return f.read().strip()
+        if sys.platform == 'darwin':
+            line = subprocess.check_output(['sysctl', 'kern.corefile']).rstrip()
+            return line.split(': ')[1]
+        assert False, sys.platform  # Unsupported platform for core pattern
 
     def _clean_core_files(self):
         for path in glob.glob('*.core.*'):
