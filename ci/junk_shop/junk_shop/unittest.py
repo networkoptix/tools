@@ -86,7 +86,7 @@ class Platform(object):
             return 'PATH'
         assert False, 'Unsupported platform: %r' % self._platform
 
-   def env_with_library_path(self, library_path_list):
+    def env_with_library_path(self, library_path_list):
         path_var = self.library_path_var
         if path_var in os.environ:
             library_path_list = os.environ[path_var].split(os.pathsep) + library_path_list
