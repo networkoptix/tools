@@ -407,8 +407,8 @@ class TestRunner(object):
             error_list.append('gdb is missing: core files will not be parsed')
         core_pattern = self._read_core_pattern()
         if core_pattern is not None and core_pattern != EXPECTED_CORE_PATTERN:
-            error_list.append('Core pattern is %r, but expected is %r; core files will not be collected. Set it in %s'
-                              % (core_pattern, EXPECTED_CORE_PATTERN, CORE_PATTERH_FILE))
+            error_list.append('Core pattern is %r, but expected is %r; core files will not be collected.'
+                              % (core_pattern, EXPECTED_CORE_PATTERN))
         core_ulimit = subprocess.check_output(['ulimit', '-c'], shell=True).rstrip()
         if core_ulimit != 'unlimited':
             error_list.append('ulimit for core files is %s, but expected is "unlimited"; core files may not be generated.'
