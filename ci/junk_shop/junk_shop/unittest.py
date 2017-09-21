@@ -71,6 +71,30 @@ def add_core_artifacts(repository, binary_path, gdb_path, run, artifact_path):
         repository.add_artifact(run, '%s-bt' % fname, '%s-bt' % fname, repository.artifact_type.traceback, backtrace, is_error=True)
 
 
+class Platform(object):
+
+    def __init__(self):
+        self._platform = sys.platform
+
+    @property
+    def library_path_var(self):
+        if self._platform == 'darwin':
+            return 'DYLD_LIBRARY_PATH'
+        if self._platform == 'linux2':
+            return 'LD_LIBRARY_PATH'
+        if self._platform == 'win32':
+            return 'PATH'
+        assert False, 'Unsupported platform: %r' % self._platform
+
+   def env_with_library_path(self, library_path_list):
+        path_var = self.library_path_var
+        if path_var in os.environ:
+            library_path_list = os.environ[path_var].split(os.pathsep) + library_path_list
+        env = os.environ.copy()
+        env[self.library_path_var] = os.pathsep.join(filter(None, library_path_list))
+        return env
+
+
 class TestProcess(object):
 
 
@@ -154,6 +178,7 @@ class TestProcess(object):
         self._root_run = root_run
         self._test_name = test_name  # aka executable file name
         self._binary_path = binary_path  # full path to test binary, *_ut
+        self._platform = Platform()
         self._pipe = None
         self._threads = []
         self._levels = [self.Level(self._repository, self._root_run, self._test_name)]  # Level list, [global, suite, test]
@@ -165,11 +190,9 @@ class TestProcess(object):
 
     def start(self):
         kind = os.path.basename(os.path.dirname(self._binary_path))
-        env = dict(os.environ,
-                   LD_LIBRARY_PATH=':'.join(
-                       filter(None, [os.environ.get('LD_LIBRARY_PATH'),
-                                     self._config_vars['LIB_PATH'],
-                                     self._config_vars['QT_LIB']])))
+        env = self._platform.env_with_library_path([
+            self._config_vars['LIB_PATH'],
+            self._config_vars['QT_LIB']])
         args = [self._binary_path] + GTEST_ARGUMENTS
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         self._pipe = subprocess.Popen(
