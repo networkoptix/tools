@@ -86,7 +86,11 @@ class Platform(object):
             return 'PATH'
         assert False, 'Unsupported platform: %r' % self._platform
 
-    def env_with_library_path(self, library_path_list):
+    def env_with_library_path(self, config):
+        if self._platform == 'win32':
+            library_path_list = [os.path.join(config['QT_DIR'], 'bin'), config['BIN_PATH']]
+        else:
+            library_path_list = [config['QT_LIB'], config['LIB_PATH']]
         path_var = self.library_path_var
         if path_var in os.environ:
             library_path_list = os.environ[path_var].split(os.pathsep) + library_path_list
@@ -190,9 +194,7 @@ class TestProcess(object):
 
     def start(self):
         kind = os.path.basename(os.path.dirname(self._binary_path))
-        env = self._platform.env_with_library_path([
-            self._config_vars['LIB_PATH'],
-            self._config_vars['QT_LIB']])
+        env = self._platform.env_with_library_path(self._config_vars)
         args = [self._binary_path] + GTEST_ARGUMENTS
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         self._pipe = subprocess.Popen(
