@@ -20,7 +20,10 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 
 ARTIFACT_LINE_COUNT_LIMIT = 10000
-EXPECTED_CORE_PATTERN = '%e.core.%t.%p'
+EXPECTED_CORE_PATTERN = dict(
+    linux2='%e.core.%t.%p',
+    darwin='%N.core.%P',  # N: process name, P: pid
+    )
 LINUX_CORE_PATTERH_FILE = '/proc/sys/kernel/core_pattern'
 LOG_PATTERN = '20\d\d-\d\d-\d\d .+'
 
@@ -75,6 +78,11 @@ class Platform(object):
 
     def __init__(self):
         self._platform = sys.platform
+
+    @property
+    def expected_core_pattern(self):
+        assert self._platform in EXPECTED_CORE_PATTERN, 'Unsupported platform: %r' % self._platform
+        return EXPECTED_CORE_PATTERN[self._platform]
 
     @property
     def library_path_var(self):
@@ -450,9 +458,9 @@ class TestRunner(object):
         except subprocess.CalledProcessError as x:
             error_list.append('gdb is missing: core files will not be parsed')
         core_pattern = self._platform.read_core_pattern()
-        if core_pattern is not None and core_pattern != EXPECTED_CORE_PATTERN:
+        if core_pattern is not None and core_pattern != self._platform.expected_core_pattern:
             error_list.append('Core pattern is %r, but expected is %r; core files will not be collected.'
-                              % (core_pattern, EXPECTED_CORE_PATTERN))
+                              % (core_pattern, self._platform.expected_core_pattern))
         core_ulimit = subprocess.check_output('ulimit -c', shell=True).rstrip()
         if core_ulimit != 'unlimited':
             error_list.append('ulimit for core files is %s, but expected is "unlimited"; core files may not be generated.'
