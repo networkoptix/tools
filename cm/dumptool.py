@@ -178,19 +178,39 @@ class Cdb(object):
 class DumpAnalyzer(object):
     '''Provides ability to analize windows DMP dumps.
     '''
-    CUSTOMIZATIONS = dict(
+    CUSTOMIZATIONS_ALIASES = dict(
         dw='digitalwatchdog'
+    )
+    CUSTOMIZATIONS = (
+        'default',
+        'default_cn',
+        'default_zh_CN',
+        'digitalwatchdog',
+        'ionetworks',
+        'ipera',
+        'hanwha',
+        'senturian',
+        'systemk',
+        'vista',
+        'vmsdemoblue',
+        'vmsdemoorange',
     )
 
     def __init__(
-        self, path, customization='default',
-        version=None, build=None, branch='', verbose=0, debug=''):
+        self, path, customization=None, version=None, build=None, branch='',
+        verbose=0, debug=''):
         '''Initializes analizer with dump :path and :customization;
         :version, :build, :branch - optionals to speed up process;
         :verbose - maximal log level (default 0 means no logs).
         '''
         self.dump_path = path
-        self.customization = self.CUSTOMIZATIONS.get(customization, customization)
+        if customization:
+            aliases = self.CUSTOMIZATIONS_ALIASES
+            self.customization = aliases.get(customization, customization)
+        else:
+            self.customization = 'default'
+            self.verify_customization()
+
         self.version = version
         self.build = build
         self.branch = branch
@@ -202,6 +222,12 @@ class DumpAnalyzer(object):
         '''
         if level < self.verbose:
             sys.stderr.write('[%i] %s\n' % (level, message))
+
+    def verify_customization(self):
+        for c in self.CUSTOMIZATIONS:
+            if c in self.dump_path and self.customization != c:
+                raise UserError('Dump path contains {} while customization is {}'.format(
+                    c, self.customization))
 
     def get_dump_information(self):
         '''Gets initial information from dump.
