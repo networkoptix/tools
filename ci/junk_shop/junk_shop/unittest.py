@@ -98,6 +98,15 @@ class Platform(object):
         env[self.library_path_var] = os.pathsep.join(filter(None, library_path_list))
         return env
 
+    def read_core_pattern(self):
+        if self._platform == 'linux2':
+            with file(LINUX_CORE_PATTERH_FILE) as f:
+                return f.read().strip()
+        if self._platform == 'darwin':
+            line = subprocess.check_output(['sysctl', 'kern.corefile']).rstrip()
+            return line.split(': ')[1]
+        assert False, sys.platform  # Unsupported platform for core pattern
+
 
 class TestProcess(object):
 
@@ -373,6 +382,7 @@ class TestRunner(object):
         self._gdb_path = None
         self._core_files_belonging_to_tests = set()  # core files recognized by particular test
         self._errors = []
+        self._platform = Platform()
         self._root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
         self._run_pre_checks(self._root_run)
         self._processes = [
@@ -439,7 +449,7 @@ class TestRunner(object):
             self._gdb_path = subprocess.check_output(['which', 'gdb']).rstrip()
         except subprocess.CalledProcessError as x:
             error_list.append('gdb is missing: core files will not be parsed')
-        core_pattern = self._read_core_pattern()
+        core_pattern = self._platform.read_core_pattern()
         if core_pattern is not None and core_pattern != EXPECTED_CORE_PATTERN:
             error_list.append('Core pattern is %r, but expected is %r; core files will not be collected.'
                               % (core_pattern, EXPECTED_CORE_PATTERN))
@@ -452,15 +462,6 @@ class TestRunner(object):
                 print 'Environment configuration error:', error
             artifact_type = self._repository.artifact_type.output
             self._repository.add_artifact(root_run, 'warnings', 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
-
-    def _read_core_pattern(self):
-        if sys.platform == 'linux2':
-            with file(LINUX_CORE_PATTERH_FILE) as f:
-                return f.read().strip()
-        if sys.platform == 'darwin':
-            line = subprocess.check_output(['sysctl', 'kern.corefile']).rstrip()
-            return line.split(': ')[1]
-        assert False, sys.platform  # Unsupported platform for core pattern
 
     def _clean_core_files(self):
         for path in glob.glob('*.core.*'):
