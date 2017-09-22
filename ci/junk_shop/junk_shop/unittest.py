@@ -245,7 +245,7 @@ class TestProcess(object):
         
     def _read_thread(self, f, processor):
         for line in f:
-            processor(line.rstrip('\n'))
+            processor(line.rstrip('\r\n'))
 
     def _process_stdout_line(self, line):
         #if not self._current_test:
@@ -376,7 +376,9 @@ class TestRunner(object):
         self._root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
         self._run_pre_checks(self._root_run)
         self._processes = [
-            TestProcess(repository, config_vars, self._gdb_path, self._root_run, binary_name, os.path.join(bin_dir, binary_name))
+            TestProcess(repository, config_vars, self._gdb_path, self._root_run,
+                        self._binary_to_test_name(binary_name),
+                        os.path.join(bin_dir, binary_name))
             for binary_name in binary_list]
 
     def start(self):
@@ -407,6 +409,13 @@ class TestRunner(object):
             if self._errors:
                 self._repository.add_artifact(
                     run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._errors), is_error=True)
+
+    @staticmethod
+    def _binary_to_test_name(binary_name):
+        if sys.platform == 'win32' and binary_name.endswith('.exe'):
+            return binary_name[:-len('.exe')]
+        else:
+            return binary_name
 
     def _read_current_config(self, bin_dir):
         path = os.path.join(bin_dir, '../../../../build_variables/target/current_config.py')
