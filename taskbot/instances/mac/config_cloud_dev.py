@@ -19,8 +19,8 @@ config = {
   'gzip_ratio': 0.9,
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
-    'Mikhail Uskov': 'muskov@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Alexander Kulikov': 'akulikov@networkoptix.com',
     },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,

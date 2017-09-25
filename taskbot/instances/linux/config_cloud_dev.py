@@ -21,10 +21,12 @@ config = {
   'watchers': {
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Alexander Kulikov': 'akulikov@networkoptix.com',
     },
   'ft_watchers': {
     'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Alexander Kulikov': 'akulikov@networkoptix.com',
     'Alexandra Matveeva': 'amatveeva@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     },

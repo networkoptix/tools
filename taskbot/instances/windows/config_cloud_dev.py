@@ -20,7 +20,7 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
-    'Mikhail Uskov': 'muskov@networkoptix.com',
+    'Alexander Kulikov': 'akulikov@networkoptix.com',
     },
   'environment' : {
     'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',
