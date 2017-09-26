@@ -180,7 +180,7 @@ class LinuxPlatform(PosixPlatform):
 
     def _check_if_file_utility_is_old(self):
         output = subprocess.check_output(['file', '-v'])  # 'file-5.14'
-        ver = tuple(map(int, output.rstrip().split('-')[1].split('.')))
+        ver = tuple(map(int, output.splitlines()[0].split('-')[1].split('.')))
         return ver <= (5, 14)
 
 
