@@ -176,7 +176,7 @@ class LinuxPlatform(PosixPlatform):
         args = [self._gdb_path, '--quiet', '--batch', binary_path, core_path]
         for command in self.GDB_BACKTRACE_EXTRACT_COMMANDS:
             args += ['-ex', command]
-        return subprocess.check_output(args)
+        return subprocess.check_output(args, stderr=subprocess.STDOUT)
 
     def _check_if_file_utility_is_old(self):
         output = subprocess.check_output(['file', '-v'])  # 'file-5.14'
@@ -218,9 +218,10 @@ class DarwinPlatform(PosixPlatform):
         try:
             args = [self._lldb_path, '--batch', '-c', core_path, '-o', 'target list']
             print 'Extracting source: %s' % subprocess.list2cmdline(args)
-            output = subprocess.check_output(args)
+            output = subprocess.check_output(args, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as x:
             print 'Error extracting core source binary from %s: %s' % (core_path, x)
+            print x.output
             return None
         mo = re.search(r'^\* target #0: (\S+)', output.rstrip(), re.MULTILINE)
         if not mo:
@@ -233,7 +234,7 @@ class DarwinPlatform(PosixPlatform):
         args = ([self._lldb_path, '--batch', '--core', core_path] +
                 ['--one-line=%s' % command for command in self.LLDB_BACKTRACE_EXTRACT_COMMANDS])
         print 'Extracting bt: %s' % subprocess.list2cmdline(args)
-        return subprocess.check_output(args)
+        return subprocess.check_output(args, stderr=subprocess.STDOUT)
 
 
 def create_platform():
