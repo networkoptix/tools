@@ -135,7 +135,10 @@ class LinuxPlatform(PosixPlatform):
 
     def __init__(self):
         self._gdb_path = self.which('gdb')
-        self._is_file_utility_old = self._check_if_file_utility_is_old()
+        file_ver = self.get_file_utility_version()
+        self._is_file_utility_old = file_ver <= (5, 14)
+        if self._is_file_utility_old:
+            print '"file" utility it too old: %s, does not support -P argument' % '.'.join(map(str, file_ver))
 
     @property
     def expected_core_pattern(self):
@@ -179,10 +182,9 @@ class LinuxPlatform(PosixPlatform):
             args += ['-ex', command]
         return subprocess.check_output(args, stderr=subprocess.STDOUT)
 
-    def _check_if_file_utility_is_old(self):
+    def get_file_utility_version(self):
         output = subprocess.check_output(['file', '-v'])  # 'file-5.14'
-        ver = tuple(map(int, output.splitlines()[0].split('-')[1].split('.')))
-        return ver <= (5, 14)
+        return tuple(map(int, output.splitlines()[0].split('-')[1].split('.')))
 
 
 class DarwinPlatform(PosixPlatform):
