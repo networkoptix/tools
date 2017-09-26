@@ -6,7 +6,6 @@ import os
 import os.path
 import re
 import subprocess
-import threading
 
 
 class Platform(object):
@@ -166,7 +165,7 @@ class LinuxPlatform(PosixPlatform):
     def extract_core_source_binary(self, core_path):
         try:
             # max ELF program sections processed, will get 'too many program headers' message overwise:
-            output = subprocess.check_output(['file', '--parameter', 'elf_phnum=10000', core_path])
+            output = subprocess.check_output(['file', '-Pelf_phnum=10000', core_path])
         except subprocess.CalledProcessError as x:
             print 'Error extracting core source binary from %s: %s' % (core_path, x)
             return None
@@ -199,7 +198,6 @@ class DarwinPlatform(PosixPlatform):
 
     def __init__(self):
         self._lldb_path = self.which('lldb')
-        self._lock = threading.Lock()
 
     @property
     def expected_core_pattern(self):
@@ -221,8 +219,7 @@ class DarwinPlatform(PosixPlatform):
         try:
             args = [self._lldb_path, '--batch', '-c', core_path, '-o', 'target list']
             print 'Extracting source: %s' % subprocess.list2cmdline(args)
-            with self._lock:
-                output = subprocess.check_output(args)
+            output = subprocess.check_output(args)
         except subprocess.CalledProcessError as x:
             print 'Error extracting core source binary from %s: %s' % (core_path, x)
             return None
@@ -237,8 +234,7 @@ class DarwinPlatform(PosixPlatform):
         args = ([self._lldb_path, '--batch', '--core', core_path] +
                 ['--one-line=%s' % command for command in self.LLDB_BACKTRACE_EXTRACT_COMMANDS])
         print 'Extracting bt: %s' % subprocess.list2cmdline(args)
-        with self._lock:
-            return subprocess.check_output(args)
+        return subprocess.check_output(args)
 
 
 def create_platform():
