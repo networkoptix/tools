@@ -134,6 +134,7 @@ class LinuxPlatform(PosixPlatform):
 
     def __init__(self):
         self._gdb_path = self.which('gdb')
+        self._is_file_utility_old = self._check_if_file_utility_is_old()
 
     @property
     def expected_core_pattern(self):
@@ -152,22 +153,16 @@ class LinuxPlatform(PosixPlatform):
         return 'LD_LIBRARY_PATH'
 
     def extract_core_source_binary(self, core_path):
+        if self._is_file_utility_old:
+            phnum_args = []
+        else:
+            phnum_args = ['-Pelf_phnum=10000']
         try:
             # max ELF program sections processed, will get 'too many program headers' message overwise:
-            output = subprocess.check_output(['file', '--parameter', 'elf_phnum=10000', core_path])
+            output = subprocess.check_output(['file'] + phnum_args + [core_path], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as x:
             print 'Error extracting core source binary from %s: %s' % (core_path, x)
-            return None
-        mo = re.match(r".*, from '(\S+).*'", output.rstrip())
-        if mo:
-            return mo.group(1)
-
-    def extract_core_source_binary(self, core_path):
-        try:
-            # max ELF program sections processed, will get 'too many program headers' message overwise:
-            output = subprocess.check_output(['file', '-Pelf_phnum=10000', core_path])
-        except subprocess.CalledProcessError as x:
-            print 'Error extracting core source binary from %s: %s' % (core_path, x)
+            print x.output
             return None
         mo = re.match(r".*, from '(\S+).*'", output.rstrip())
         if not mo:
@@ -183,6 +178,10 @@ class LinuxPlatform(PosixPlatform):
             args += ['-ex', command]
         return subprocess.check_output(args)
 
+    def _check_if_file_utility_is_old(self):
+        output = subprocess.check_output(['file', '-v'])  # 'file-5.14'
+        ver = tuple(map(int, output.rstrip().split('-')[1].split('.')))
+        return ver <= (5, 14)
 
 
 class DarwinPlatform(PosixPlatform):
