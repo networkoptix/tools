@@ -30,7 +30,7 @@ config = {
     },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
-    'TASKBOT_PUBLIC_HTML_HOST': 'demo.networkoptix.com:3580',
+    'TASKBOT_PUBLIC_HTML_HOST': 'taskbot.hdw.mx',
     'TASKBOT_VAR': TASKBOT_VAR,
     'TASKBOT_BIN': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/core'),                            
     'TASKBOT_SHARE': os.path.join(TASKBOT_DEVTOOLS_ROOT, 'taskbot/instances/linux'),
