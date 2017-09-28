@@ -368,11 +368,17 @@ class TestRunner(object):
     def add_error(self, message):
         self._errors.append(message)
 
+    @property
+    def is_passed(self):
+        return self._passed
+
     @db_session
     def finalize(self):
         run = models.Run[self._root_run.id]
         has_cores = self._collect_core_files(run)
-        run.outcome = status2outcome(self._passed and not has_cores)
+        if has_cores:
+            self._passed = False
+        run.outcome = status2outcome(self._passed)
         run.duration = datetime_utc_now() - self._started_at
         if self._errors:
             self._repository.add_artifact(
@@ -454,6 +460,8 @@ def main():
         raise
     finally:
         runner.finalize()
+    if not runner.is_passed:
+        sys.exit(1)
 
 
 if __name__ == '__main__':
