@@ -13,7 +13,7 @@ import argparse
 import subprocess
 import signal
 import threading
-from pony.orm import db_session
+from pony.orm import db_session, commit
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
@@ -326,17 +326,20 @@ class TestRunner(object):
         self._platform = create_platform()
 
     @db_session
+    def init(self):
+        self._started_at = datetime_utc_now()
+        self._root_run = self._repository.produce_test_run(root_run=None, test_path_list=['unit'])
+        commit()
+        self._run_pre_checks(self._root_run)
+
     def start(self):
         config_vars = self._read_current_config(self._bin_dir)
-        self._root_run = self._repository.produce_test_run(root_run=None, test_path_list=['unit'])
-        self._run_pre_checks(self._root_run)
         self._processes = [
             TestProcess(self._repository, config_vars, self._platform, self._root_run,
                         self._binary_to_test_name(binary_name),
                         os.path.join(self._bin_dir, binary_name))
             for binary_name in self._binary_list]
         self._clean_core_files()
-        self._started_at = datetime_utc_now()
         for process in self._processes:
             process.start()
 
@@ -354,15 +357,15 @@ class TestRunner(object):
                     self._passed = False
             time.sleep(1)
 
+    @db_session
     def finalize(self):
-        with db_session:
-            run = models.Run[self._root_run.id]
-            has_cores = self._collect_core_files(run)
-            run.outcome = status2outcome(self._passed and not has_cores)
-            run.duration = datetime_utc_now() - self._started_at
-            if self._errors:
-                self._repository.add_artifact(
-                    run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._errors), is_error=True)
+        run = models.Run[self._root_run.id]
+        has_cores = self._collect_core_files(run)
+        run.outcome = status2outcome(self._passed and not has_cores)
+        run.duration = datetime_utc_now() - self._started_at
+        if self._errors:
+            self._repository.add_artifact(
+                run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._errors), is_error=True)
 
     @staticmethod
     def _binary_to_test_name(binary_name):
@@ -432,6 +435,7 @@ def main():
     repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
     runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
     try:
+        runner.init()
         runner.start()
         runner.wait()
     finally:
