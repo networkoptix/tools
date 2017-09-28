@@ -119,8 +119,6 @@ class TestProcess(object):
 
 
     def __init__(self, repository, config_vars, platform, root_run, test_name, binary_path):
-        if not os.path.exists(binary_path):
-            raise RuntimeError('File %r does not exist' % binary_path)
         self._repository = repository
         self._config_vars = config_vars
         self._platform = platform
@@ -141,6 +139,12 @@ class TestProcess(object):
         env = self._platform.env_with_library_path(self._config_vars)
         args = [self._binary_path] + GTEST_ARGUMENTS
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
+        if not os.path.exists(self._binary_path):
+            print '%s: file %r is missing' % (self._test_name, self._binary_path)
+            level = self._levels.pop()
+            level.add_stderr_line('File %r does not exist' % self._binary_path)
+            level.flush(passed=False)
+            return
         self._pipe = subprocess.Popen(
             args,
             env=env,
@@ -157,6 +161,7 @@ class TestProcess(object):
         print '%s is started' % self._test_name
 
     def is_finished(self):
+        if not self._pipe: return True
         return self._pipe.poll() is not None
 
     def abort_on_timeout(self, run_duration):
@@ -169,6 +174,7 @@ class TestProcess(object):
             self._pipe.wait()
 
     def wait(self):
+        if not self._pipe: return False
         return_code = self._pipe.wait()
         for thread in self._threads:
             thread.join()  # threads are still reading buffered output after process is already dead
@@ -308,31 +314,33 @@ class TestProcess(object):
 
 class TestRunner(object):
 
-    @db_session
     def __init__(self, repository, timeout, bin_dir, binary_list):
-        config_vars = self._read_current_config(bin_dir)
         self._repository = repository
+        self._bin_dir = bin_dir
+        self._binary_list = binary_list
         self._timeout = timeout  # timedelta
         self._started_at = None
         self._core_files_belonging_to_tests = set()  # core files recognized by particular test
         self._errors = []
+        self._passed = True
         self._platform = create_platform()
-        self._root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
+
+    @db_session
+    def start(self):
+        config_vars = self._read_current_config(self._bin_dir)
+        self._root_run = self._repository.produce_test_run(root_run=None, test_path_list=['unit'])
         self._run_pre_checks(self._root_run)
         self._processes = [
-            TestProcess(repository, config_vars, self._platform, self._root_run,
+            TestProcess(self._repository, config_vars, self._platform, self._root_run,
                         self._binary_to_test_name(binary_name),
-                        os.path.join(bin_dir, binary_name))
-            for binary_name in binary_list]
-
-    def start(self):
+                        os.path.join(self._bin_dir, binary_name))
+            for binary_name in self._binary_list]
         self._clean_core_files()
         self._started_at = datetime_utc_now()
         for process in self._processes:
             process.start()
 
     def wait(self):
-        passed = True
         while self._processes:
             run_duration = datetime_utc_now() - self._started_at
             if self._timeout and run_duration > self._timeout:
@@ -343,12 +351,14 @@ class TestRunner(object):
                 self._core_files_belonging_to_tests |= process.my_core_files
                 self._processes.remove(process)
                 if not test_passed:
-                    passed = False
+                    self._passed = False
             time.sleep(1)
+
+    def finalize(self):
         with db_session:
             run = models.Run[self._root_run.id]
             has_cores = self._collect_core_files(run)
-            run.outcome = status2outcome(passed and not has_cores)
+            run.outcome = status2outcome(self._passed and not has_cores)
             run.duration = datetime_utc_now() - self._started_at
             if self._errors:
                 self._repository.add_artifact(
@@ -419,14 +429,13 @@ def main():
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
+    repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
+    runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
     try:
-        repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
-        runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
         runner.start()
         runner.wait()
-    except RuntimeError as x:
-        print x
-        sys.exit(1)
+    finally:
+        runner.finalize()
 
 
 if __name__ == '__main__':
