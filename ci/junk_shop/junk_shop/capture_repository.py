@@ -1,9 +1,13 @@
 import os
 from argparse import ArgumentTypeError
+import re
 import bz2
 from pony.orm import db_session, commit, flush, select, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now
 from . import models
+
+
+VERSION_REGEX = r'^\d+(\.\d+)+$'
 
 
 class BuildParameters(object):
@@ -30,6 +34,8 @@ class BuildParameters(object):
             if name not in cls.known_parameters:
                 raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
             setattr(parameters, name, value)
+        if parameters.version and not re.match(VERSION_REGEX, parameters.version):
+            raise ArgumentTypeError('Invalid version: %r. Expected string in format: 1.2.3.4' % parameters.version)
         return parameters
 
     def __init__(self):
