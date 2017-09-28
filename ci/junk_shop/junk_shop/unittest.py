@@ -140,17 +140,18 @@ class TestProcess(object):
         args = [self._binary_path] + GTEST_ARGUMENTS
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         if not os.path.exists(self._binary_path):
-            print '%s: file %r is missing' % (self._test_name, self._binary_path)
-            level = self._levels.pop()
-            level.add_stderr_line('File %r does not exist' % self._binary_path)
-            level.flush(passed=False)
+            self._save_start_error('File %r is missing' % self._binary_path)
             return
-        self._pipe = subprocess.Popen(
-            args,
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            )
+        try:
+            self._pipe = subprocess.Popen(
+                args,
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                )
+        except Exception as x:
+            self._save_start_error('Error starting %r: %s' % (self._binary_path, x))
+            return
         for f, processor in [(self._pipe.stdout, self._process_stdout_line),
                              (self._pipe.stderr, self._process_stderr_line)]:
             thread = threading.Thread(target=self._read_thread, args=(f, processor))
@@ -159,6 +160,12 @@ class TestProcess(object):
             self._threads.append(thread)
         self._started_at = datetime_utc_now()
         print '%s is started' % self._test_name
+
+    def _save_start_error(self, message):
+        print '%s: %s' % (self._test_name, message)
+        level = self._levels.pop()
+        level.add_stderr_line(message)
+        level.flush(passed=False)
 
     def is_finished(self):
         if not self._pipe: return True
@@ -322,7 +329,7 @@ class TestRunner(object):
         self._started_at = None
         self._core_files_belonging_to_tests = set()  # core files recognized by particular test
         self._errors = []
-        self._passed = True
+        self._passed = False
         self._platform = create_platform()
 
     @db_session
@@ -344,6 +351,7 @@ class TestRunner(object):
             process.start()
 
     def wait(self):
+        self._passed = True
         while self._processes:
             run_duration = datetime_utc_now() - self._started_at
             if self._timeout and run_duration > self._timeout:
@@ -356,6 +364,9 @@ class TestRunner(object):
                 if not test_passed:
                     self._passed = False
             time.sleep(1)
+
+    def add_error(self, message):
+        self._errors.append(message)
 
     @db_session
     def finalize(self):
@@ -438,6 +449,9 @@ def main():
         runner.init()
         runner.start()
         runner.wait()
+    except Exception as x:
+        runner.add_error('Internal error: %s' % x)
+        raise
     finally:
         runner.finalize()
 
