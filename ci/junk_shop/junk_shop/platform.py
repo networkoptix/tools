@@ -108,7 +108,7 @@ class PosixPlatform(Platform):
             return 'ulimit for core files is %s, but expected is "unlimited"; core files may not be generated.' % core_ulimit
 
     def platform_library_path(self, config):
-         return [config['QT_LIB'], config['LIB_PATH']]
+        return [config['QT_LIB'], config['LIB_PATH']]
 
     def which(self, prog_name):
         try:

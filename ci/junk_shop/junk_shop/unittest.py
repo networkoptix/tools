@@ -149,7 +149,7 @@ class TestProcess(object):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 )
-        except Exception as x:
+        except OSError as x:
             self._save_start_error('Error starting %r: %s' % (self._binary_path, x))
             return
         for f, processor in [(self._pipe.stdout, self._process_stdout_line),
