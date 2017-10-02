@@ -30,7 +30,7 @@ JUNK_SHOP_RUN_URL = 'http://junkshop.hdw.mx/run'
 JUNK_SHOP_SRC_DIR = 'devtools/ci/junk_shop'
 JUNK_SHOP_HOST = '10.1.5.105'
 JUNK_SHOP_CREDENTIALS_ID = 'junk_shop_db'
-JUNK_SHOP_PROJECT = 'scalability'
+JUNK_SHOP_PROJECT = 'cloud_backward_compatibility'
 PLATFORM = 'linux64'
 FAILURE_EMAIL_TEMPLATE = 'devtools/ci/jenkins/cloud_backward_compatibility_test/failure_email.txt'
 
