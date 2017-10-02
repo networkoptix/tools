@@ -10,7 +10,7 @@ DISTRIBUTIVE_LIST = [
 	[path: '/vol/ftp/beta-builds/daily/15878-vms_3.0/digitalwatchdog/linux/dwspectrum-server-3.0.0.15878-linux64.deb',
 	 customization: 'digitalwatchdog'],
 	[path: '/vol/ftp/beta-builds/daily/16152-vms_3.1_dev/default/linux/nxwitness-server-3.1.0.16152-linux64-beta-test.deb',
-	 customization: 'vmsdemoorange'],  // built Sep 28 2017
+	 customization: 'default'],  // built Sep 28 2017
 	]
 
 TESTS_LIST = [
