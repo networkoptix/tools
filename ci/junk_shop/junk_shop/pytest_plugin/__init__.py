@@ -1,6 +1,6 @@
 import pytest
 from ..utils import DbConfig
-from ..capture_repository import BuildParameters, RunParameters, DbCaptureRepository
+from ..capture_repository import project_type, BuildParameters, RunParameters, DbCaptureRepository
 from .plugin import DbCapturePlugin
 
 
@@ -10,7 +10,7 @@ JUNK_SHOP_PLUGIN_NAME = 'junk-shop-db-capture'
 def pytest_addoption(parser):
     parser.addoption('--capture-db', type=DbConfig.from_string, metavar='user:password@host',
                      help='Capture postgres database credentials')
-    parser.addoption('--project', help='Junk-shop project name')
+    parser.addoption('--project', type=project_type, help='Junk-shop project name')
     parser.addoption('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                      help='Build parameters')
     parser.addoption('--run-parameters', type=RunParameters.from_string, metavar=RunParameters.example,

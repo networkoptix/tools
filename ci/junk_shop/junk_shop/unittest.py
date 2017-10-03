@@ -16,7 +16,7 @@ import threading
 from pony.orm import db_session, commit
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
-from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
+from junk_shop.capture_repository import project_type, BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
 
 
@@ -441,7 +441,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('--project', help='Junk-shop project name')
+    parser.add_argument('--project', type=project_type, help='Junk-shop project name')
     parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')

@@ -10,6 +10,12 @@ from . import models
 VERSION_REGEX = r'^\d+(\.\d+)+$'
 
 
+def project_type(value):
+    if value == 'null':
+        raise ArgumentTypeError('Got null value for "project" option')
+    return value
+
+
 class BuildParameters(object):
 
     example = ','.join([
@@ -33,6 +39,8 @@ class BuildParameters(object):
             name, value = l
             if name not in cls.known_parameters:
                 raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
+            if value == 'null':
+                raise ArgumentTypeError('Got null value for %r parameter' % name)
             setattr(parameters, name, value)
         if parameters.version and not re.match(VERSION_REGEX, parameters.version):
             raise ArgumentTypeError('Invalid version: %r. Expected string in format: 1.2.3.4' % parameters.version)
