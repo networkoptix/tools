@@ -20,6 +20,7 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     },
   'ft_watchers': {
     'Vsevolod Fedorov': 'vfedorov@networkoptix.com',

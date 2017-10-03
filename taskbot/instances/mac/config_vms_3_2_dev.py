@@ -20,6 +20,7 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Mikhail Uskov': 'muskov@networkoptix.com',
+    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,

@@ -21,6 +21,7 @@ config = {
   'watchers': {
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
+    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
     },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
