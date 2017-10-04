@@ -42,14 +42,17 @@ class BuildParameters(object):
             if value == 'null':
                 raise ArgumentTypeError('Got null value for %r parameter' % name)
             setattr(parameters, name, value)
-        if parameters.version and not re.match(VERSION_REGEX, parameters.version):
-            raise ArgumentTypeError('Invalid version: %r. Expected string in format: 1.2.3.4' % parameters.version)
+        if parameters.version:
+            if not re.match(VERSION_REGEX, parameters.version):
+                raise ArgumentTypeError('Invalid version: %r. Expected string in format: 1.2.3.4' % parameters.version)
+            parameters.build = int(parameters.version.split('.')[-1])
         return parameters
 
     def __init__(self):
         self.project = None
         self.branch = None
         self.version = None
+        self.build = None
         self.cloud_group = None
         self.customization = None
         self.release = None
@@ -158,7 +161,7 @@ class DbCaptureRepository(object):
                 project = models.Project(name=self.project)
             run.project = project
         if self.build_parameters:
-            for name in BuildParameters.known_parameters:
+            for name in BuildParameters.known_parameters + ['build']:
                 setattr(run, name, self._produce_build_parameter(name, getattr(self.build_parameters, name)))
         if self.run_parameters:
             for name, value in self.run_parameters.items():

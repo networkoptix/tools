@@ -62,6 +62,7 @@ class Run(db.Entity):
     project = Optional(Project)
     branch = Optional(Branch)
     version = Optional(str, index=True)
+    build = Optional(int, index=True)
     cloud_group = Optional(CloudGroup)
     customization = Optional(Customization)
     release = Optional(str)  # beta, release
