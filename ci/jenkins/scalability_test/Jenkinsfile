@@ -1,9 +1,6 @@
-// -* mode: groovy -*-
 
 // DIST_HOST = 'demo'
 DIST_HOST = ''  // local for burbank jenkins
-UPSTREAM_CI_PROJECT_NAME = 'ci_vms_3.1_dev/PYTHON=Python2,label=ci-linux-x64-test'
-UPSTREAM_CI_BRANCH = 'vms_3.1_dev'
 NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
 JENKINS_SRC_DIR = 'devtools/ci/jenkins/scalability_test'
 JUNK_SHOP_SRC_DIR = 'devtools/ci/junk_shop'
@@ -21,6 +18,11 @@ PROPERTIES_PER_CAMERA = 5
 
 
 def main() {
+	def upstream_ci_project_name = env.UPSTREAM_CI_PROJECT_NAME
+	def upstream_ci_branch = env.UPSTREAM_CI_BRANCH
+	assert upstream_ci_project_name, 'UPSTREAM_CI_PROJECT_NAME must be injected using properties
+	assert upstream_ci_branch, 'UPSTREAM_CI_BRANCH must be injected using properties
+
 	def build_to_test = null  // [customization: 'default', path: '/...', branch: 'dev_3.1_dev', build: 12345, version: '3.1.0.12345']
 	def action = params?.action ?: 'update_parameters'
 	def must_clean_workspace = params?.clean ?: false
@@ -41,7 +43,8 @@ def main() {
 		node ('master') {
 			echo '============================================================'
 			echo "Started $action"
-			build_to_test = load_distributive_stage(must_clean_workspace, params?.build_to_test)
+			build_to_test = load_distributive_stage(
+				upstream_ci_project_name, upstream_ci_branch, must_clean_workspace, params?.build_to_test)
 		}
 	}
 
@@ -52,7 +55,7 @@ def main() {
 	}
 }
 
-def load_distributive_stage(must_clean_workspace, build_to_test_param) {
+def load_distributive_stage(upstream_ci_project_name, upstream_ci_branch, must_clean_workspace, build_to_test_param) {
 	if (must_clean_workspace) {
 		echo "Cleaning workspace ${pwd()}"
 		deleteDir()
@@ -70,7 +73,7 @@ def load_distributive_stage(must_clean_workspace, build_to_test_param) {
 			stash_release_distributive(build_to_test)
 			return build_to_test
 		case 'test_ci':
-			def build_to_test = stash_ci_distributive()
+			def build_to_test = stash_ci_distributive(upstream_ci_project_name, upstream_ci_branch)
 			return build_to_test
 		default:
 			for (build in build_list) {
@@ -141,21 +144,22 @@ def stash_release_distributive(build_to_test) {
 	stash includes: 'dist/*', name: 'distributive'
 }
 
-def stash_ci_distributive() {
+def stash_ci_distributive(upstream_ci_project_name, upstream_ci_branch) {
 	sh "mkdir -p dist"
 	sh "rm dist/* || true"  // clean distributive from previous build
 	step([$class: 'CopyArtifact',
 			fingerprintArtifacts: true,
 			flatten: true,
-			projectName: UPSTREAM_CI_PROJECT_NAME,
+			projectName: upstream_ci_project_name,
 			selector: [$class: 'StatusBuildSelector', stable: false],
 			target: 'dist'])
-	def file_list = findFiles glob: 'dist/*.deb, dist/appserver2_ut'
-	def dist_path = file_list.find { it =~ /\.deb$/ }
-	def dist_info = parse_dist_path(dist_path)
+	def file_list = findFiles glob: 'dist/*server*.deb, dist/appserver2_ut'
+	def dist_path_list = file_list.findAll{ it =~ /\.deb$/ }
+	assert dist_path_list.size() == 1, dist_path_list
+	def dist_info = parse_dist_path(dist_path_list[0])
 	stash includes: 'dist/*', name: 'distributive'
 	return [
-		branch: UPSTREAM_CI_BRANCH,
+		branch: upstream_ci_branch,
 		build: dist_info.build,
 		version: dist_info.version,
 		customization: 'default',
