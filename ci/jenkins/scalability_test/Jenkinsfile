@@ -158,8 +158,9 @@ def stash_ci_distributive(upstream_ci_project_name, upstream_ci_branch) {
 	def file_list = findFiles glob: 'dist/*server*.deb, dist/appserver2_ut'
 	def dist_path_list = file_list.findAll{ it =~ /\.deb$/ }
 	assert dist_path_list.size() == 1, dist_path_list
-	def dist_info = parse_dist_path(dist_path_list[0])
-	stash includes: 'dist/*', name: 'distributive'
+	def dist_path = dist_path_list[0]
+	def dist_info = parse_dist_path(dist_path)
+	stash includes: "$dist_path, dist/appserver2_ut", name: 'distributive'
 	return [
 		branch: upstream_ci_branch,
 		build: dist_info.build,
