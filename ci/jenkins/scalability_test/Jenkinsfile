@@ -20,6 +20,8 @@ PROPERTIES_PER_CAMERA = 5
 def main() {
 	def upstream_ci_project_name = env.UPSTREAM_CI_PROJECT_NAME
 	def upstream_ci_branch = env.UPSTREAM_CI_BRANCH
+	echo "Upstream project: $upstream_ci_project_name"
+	echo "Branch: $upstream_ci_branch"
 	assert upstream_ci_project_name, 'UPSTREAM_CI_PROJECT_NAME must be injected using properties'
 	assert upstream_ci_branch, 'UPSTREAM_CI_BRANCH must be injected using properties'
 
