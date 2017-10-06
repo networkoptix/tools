@@ -39,7 +39,8 @@ while true; do
     break
   fi
   if [ "$DEVTOOLS_OLD" != "$DEVTOOLS_NEW" ]; then
-    break
+    echo "devtools is changed - ignoring"
+    # break
   fi
   # Wait loop
   date +"%Y-%m-%d %H:%M:%S  No changes"
