@@ -24,9 +24,9 @@ class BuildParameters(object):
         'release=beta',
         'kind=debug',
         'platform=linux-64',
-        'vc_changeset_id=6f305e61fc95ecf3caf2fcc6dcdf51b18811e12e',
+        'changeset=81510b15f3bc',
         ])
-    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'vc_changeset_id']
+    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'changeset']
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -58,7 +58,7 @@ class BuildParameters(object):
         self.release = None
         self.kind = None
         self.platform = None
-        self.vc_changeset_id = None
+        self.changeset = None
 
 
 class RunParameters(object):
