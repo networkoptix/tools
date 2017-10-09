@@ -68,7 +68,7 @@ class Run(db.Entity):
     release = Optional(str)  # beta, release
     kind = Optional(str)  # release, debug
     platform = Optional(Platform)
-    vc_changeset_id = Optional(str)  # version control changeset id of this build (hg id --debug)
+    changeset = Optional(str)  # version control changeset id of this build (hg id --id)
     children = Set('Run')
     artifacts = Set('Artifact')
     run_parameters = Set('RunParameterValue')
