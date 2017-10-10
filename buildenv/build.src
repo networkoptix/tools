@@ -214,11 +214,40 @@ if [[ ! "$VERSION" < "3.0" ]]; then
     fi
 fi
 
+if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
+    MODULES+=(nx_cloud/librelaying)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/librelaying.so)
+
+    MODULES+=(common_libs/nx_cassandra)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_cassandra.so)
+
+    MODULES+=(nx_cloud/libtraffic_relay)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libtraffic_relay.so)
+fi
+
+if [ "$CONF_PARAM_SET" == 0 ]; then
+    MODULES+=(nx_cloud/libvms_gateway)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway.so)
+
+    if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
+        if [[ ! "$VERSION" < "3.1" ]]; then
+            if [ "$WITH_CLOUD_BIN" -eq 1 ]; then
+                MODULES+=(nx_cloud/traffic_relay)
+                MODULE_BIN_PATH+=(bin/$CONFIGURATION/traffic_relay)
+            fi
+
+            if [ "$WITH_TEST" == 1 ]; then
+                MODULES+=(unit_tests/traffic_relay_ut)
+                MODULE_BIN_PATH+=(bin/$CONFIGURATION/traffic_relay_ut)
+                MODULES+=(nx_cloud/tests/cloud_connect_integration_tests)
+                MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_connect_integration_tests)
+            fi
+        fi
+    fi
+fi
+
 if [ "$CONF_PARAM_SET" == 0 ]; then
     if [[ ! "$VERSION" < "3.0" ]]; then
-        MODULES+=(nx_cloud/libvms_gateway)
-        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway.so)
-
         if [ $WITH_CLOUD_BIN -eq 1 ]; then
             MODULES+=(\
                 nx_cloud/cloud_db \
@@ -256,37 +285,15 @@ if [ "$WITH_TEST" == 1 ]; then
     fi
 fi
 
-if [ "$CONF_PARAM_SET" == 0 ]; then
-    if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
-        if [[ ! "$VERSION" < "3.1" ]]; then
-            MODULES+=(common_libs/nx_cassandra)
-            MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_cassandra.so)
-
-            MODULES+=(nx_cloud/libtraffic_relay)
-            MODULE_BIN_PATH+=(lib/$CONFIGURATION/libtraffic_relay.so)
-
-            if [ "$WITH_CLOUD_BIN" -eq 1 ]; then
-                MODULES+=(nx_cloud/traffic_relay)
-                MODULE_BIN_PATH+=(bin/$CONFIGURATION/traffic_relay)
-            fi
-
-            if [ "$WITH_TEST" == 1 ]; then
-                MODULES+=(unit_tests/traffic_relay_ut)
-                MODULE_BIN_PATH+=(bin/$CONFIGURATION/traffic_relay_ut)
-                MODULES+=(nx_cloud/tests/cloud_connect_integration_tests)
-                MODULE_BIN_PATH+=(bin/$CONFIGURATION/cloud_connect_integration_tests)
-            fi
-        fi
-    fi
-fi
-
 if [ $WITH_MSERVER -eq 1 ]; then
     MODULES+=( mediaserver )
     MODULE_BIN_PATH+=( bin/$CONFIGURATION/mediaserver )
 
     if [[ ! "$VERSION" < "3.1" ]]; then
-        MODULES+=(tests/vms_cloud_integration_tests)
-        MODULE_BIN_PATH+=(bin/$CONFIGURATION/vms_cloud_integration_tests)
+        if [ "$WITH_TEST" == 1 ]; then
+            MODULES+=(tests/vms_cloud_integration_tests)
+            MODULE_BIN_PATH+=(bin/$CONFIGURATION/vms_cloud_integration_tests)
+        fi
     fi
 fi
 
@@ -368,6 +375,11 @@ do
         BINARY=$SRC_ROOT/build_environment/target-$BOX/${MODULE_BIN_PATH[$i]}
     else
         BINARY=$SRC_ROOT/build_environment/target/${MODULE_BIN_PATH[$i]}
+    fi
+
+    if [ ! -d "$SRC_ROOT/${MODULES[$i]}" ]; then
+        echo "Skipping missing (higher version?) module ${MODULES[$i]}"
+        continue;
     fi
 
     echo "Building ${MODULES[$i]}"
