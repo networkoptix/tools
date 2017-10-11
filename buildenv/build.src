@@ -214,10 +214,12 @@ if [[ ! "$VERSION" < "3.0" ]]; then
     fi
 fi
 
-if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
+if [ -d "$SRC_ROOT/nx_cloud/librelaying" ]; then
     MODULES+=(nx_cloud/librelaying)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/librelaying.so)
+fi
 
+if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
     MODULES+=(common_libs/nx_cassandra)
     MODULE_BIN_PATH+=(lib/$CONFIGURATION/libnx_cassandra.so)
 
@@ -226,8 +228,8 @@ if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
-    MODULES+=(nx_cloud/libvms_gateway)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway.so)
+    MODULES+=(nx_cloud/libvms_gateway_core)
+    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway_core.so)
 
     if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
         if [[ ! "$VERSION" < "3.1" ]]; then
