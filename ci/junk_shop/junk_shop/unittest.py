@@ -16,7 +16,7 @@ import threading
 from pony.orm import db_session, commit
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
-from junk_shop.capture_repository import project_type, BuildParameters, DbCaptureRepository
+from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
 
 
@@ -331,6 +331,7 @@ class TestRunner(object):
         self._errors = []
         self._passed = False
         self._platform = create_platform()
+        self._root_run = None
 
     @db_session
     def init(self):
@@ -374,6 +375,8 @@ class TestRunner(object):
 
     @db_session
     def finalize(self):
+        if not self._root_run:
+            return
         run = models.Run[self._root_run.id]
         has_cores = self._collect_core_files(run)
         if has_cores:
@@ -441,7 +444,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('--project', type=project_type, help='Junk-shop project name')
     parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')
@@ -449,7 +451,7 @@ def main():
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
-    repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
+    repository = DbCaptureRepository(args.db_config, args.build_parameters)
     runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
     try:
         runner.init()

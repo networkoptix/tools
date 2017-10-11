@@ -2,7 +2,7 @@
 {% import "metrics_macros.html" as metrics_macros %}
 
 {% extends "layout.html" %}
-{% block title -%} {{ version }} Server scalability metrics {%- endblock %}
+{% block title -%} Server scalability dynamics for {{ platform_name }} {%- endblock %}
 
 {% block head %}
 
@@ -44,9 +44,8 @@
 {% block contents %}
 
   {{ common_macros.breadcrumbs([
-       ('Branches',  url_for('matrix')),
-       (branch_name, url_for('branch_platform_list', branch_name=branch_name)),
-       (platform_name, url_for('branch_platform_version_list', branch_name=branch_name, platform_name=platform_name)),
+       ('Projects',  url_for('project_list')),
+       (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
   ]) }}
 
   <h2>{{ self.title() }}</h2>

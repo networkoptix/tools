@@ -32,6 +32,13 @@ def status2outcome(passed):
     else:
         return 'failed'
 
+def param_to_bool(value):
+    if value in ['true', 'yes']:
+        return True
+    if value in ['false', 'no']:
+        return False
+    assert False, "Invalid bool value: %r; Expected one of 'true', 'false', 'yes', 'no'" % value
+
 
 class DbConfig(object):
 

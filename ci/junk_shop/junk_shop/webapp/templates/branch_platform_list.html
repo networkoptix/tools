@@ -11,7 +11,7 @@
 
 {% block contents %}
 
-  {{ common_macros.breadcrumbs([('Branches',  url_for('matrix')) ]) }}
+  {{ common_macros.breadcrumbs([('Branches',  url_for('branch_list')) ]) }}
 
   <h2>{{ self.title() }}</h2>
 
@@ -22,12 +22,11 @@
        href="{{ url_for('branch_platform_version_list', branch_name=branch_name, platform_name=element.platform_name) }}">
        {{ element.platform_name }}
     </a>
-      </a>
-      {% if element.has_scalability %}
-        <a class="link" href="{{ url_for('branch_platform_metrics', branch_name=branch_name, platform_name=element.platform_name) }}">Scalability</a>
-      {% else %}
-        <span class="disabled-link">Scalability</span>
-      {% endif %}
+    {% if element.has_scalability %}
+      <a class="link" href="{{ url_for('branch_platform_metrics', branch_name=branch_name, platform_name=element.platform_name) }}">Scalability</a>
+    {% else %}
+      <span class="disabled-link">Scalability</span>
+    {% endif %}
   {% endcall %}
 
 {% endblock contents %}

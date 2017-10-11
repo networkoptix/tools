@@ -1,9 +1,8 @@
-from flask import render_template, abort
+from flask import request, render_template
 from pony.orm import db_session, desc, select, count, exists
 from ..utils import SimpleNamespace
 from .. import models
 from junk_shop.webapp import app
-
 
 
 class TestsRec(object):
@@ -25,7 +24,7 @@ class BranchPlatformRec(object):
         self.has_scalability = False
 
 
-def load_platform_branch_rec(branch_name, platform_name):
+def load_platform_branch_rec(branch_name, platform_name, load_counts=True):
     def load_last_run(test_path):
         last_run = select(run for run in models.Run
                           if run.test.path == test_path and
@@ -33,7 +32,7 @@ def load_platform_branch_rec(branch_name, platform_name):
                           run.branch.name == branch_name).order_by(
                               desc(models.Run.id)).first()
 
-        if last_run:
+        if load_counts and last_run:
             test_count = dict(select((run.outcome, count(run)) for run in models.Run
                                      if run.path.startswith(last_run.path) and
                                      run.test.is_leaf))
@@ -52,33 +51,9 @@ def load_platform_branch_rec(branch_name, platform_name):
             )
 
 
-def load_branch_row(branch_name):
+def load_branch_row(branch_name, load_counts=True):
     for platform in models.Platform.select():
-        yield load_platform_branch_rec(branch_name, platform.name)
-
-
-def load_platform_row(platform_name):
-    for branch in models.Branch.select():
-        yield load_platform_branch_rec(branch.name, platform_name)
-
-
-def load_branch_table():
-    for branch in models.Branch.select():
-        yield SimpleNamespace(
-            branch_name=branch.name,
-            platform_list=list(load_branch_row(branch.name)),
-            )
-
-
-@app.route('/branch/')
-@db_session
-def matrix():
-    branch_table = list(load_branch_table())
-    platform_list = models.Platform.select()
-    return render_template(
-        'matrix.html',
-        branch_table=branch_table,
-        platform_list=platform_list)
+        yield load_platform_branch_rec(branch_name, platform.name, load_counts)
 
 
 def load_has_scalability_flag(branch_name, platform_list):
@@ -92,9 +67,7 @@ def load_has_scalability_flag(branch_name, platform_list):
         platform2rec[platform_name].has_scalability = True
 
 
-@app.route('/branch/<branch_name>')
-@db_session
-def branch_platform_list(branch_name):
+def _branch_list(project_name, branch_name):
     platform_list = list(load_branch_row(branch_name))
     load_has_scalability_flag(branch_name, platform_list)
     return render_template(
@@ -102,6 +75,10 @@ def branch_platform_list(branch_name):
         branch_name=branch_name,
         platform_list=platform_list)
 
+
+def load_platform_row(platform_name):
+    for branch in models.Branch.select():
+        yield load_platform_branch_rec(branch.name, platform_name)
 
 @app.route('/platform/<platform_name>')
 @db_session

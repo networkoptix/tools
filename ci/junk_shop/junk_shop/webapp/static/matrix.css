@@ -2,19 +2,57 @@
 .axiz {
 	font-weight: bold;
 	padding: 10px 20px 10px 20px;
-	font-size: 16px;
+	font-size: 14px;
+}
+
+th {
+	font-weight: normal;
 }
 
 td > div > div {
-	padding: 5px;
+	padding: 2px;
+}
+
+td > div.top-level-box {
+	margin: 2px;
 }
 
 a {
-	text-decoration: none;
+// text-decoration: none;
 }
 
+.top-level-box .datetime {
+    font-size: 80%;
+	padding: 0 0 5px 3px;
+}
+
+.platforms-narrow .outcome {
+	display: inline;
+
+}
+.platforms-wide .outcome {
+	display: inline-block;
+
+}
 .outcome {
 	padding: 3px 10px 3px 10px;
-	margin: 0 3px;
-	font-size: 90%;
+	margin: 1px;
+	font-size: 80%;
+}
+
+.platforms-narrow .tests-block {
+	display: inline-block;
+}
+.platforms-wide .tests-block {
+	display: block;
+	// margin: 0 1px;
+	// width: 100px;
+}
+
+.scalability-dynamics-link-block {
+	padding: 10px;
+	font-size: 110%;
+}
+.scalability-dynamics-link-block a {
+	font-weight: bold;
 }

@@ -11,7 +11,7 @@ from .run import artifact_disposition, load_root_run_node_list, load_run_node_tr
 @app.route('/')
 @db_session
 def index():
-    return redirect(url_for('run_list'))
+    return redirect(url_for('project_list'))
 
 
 @app.route('/run/')
@@ -43,6 +43,11 @@ def run(run_id):
     return render_template(
         'run.html',
         run_name=run.name,
+        project_name=run.build.project.name,
+        branch_name=run.build.branch.name,
+        platform_name=run.platform.name,
+        run_version=run.build.version,
+        run_id=run.id,
         run_node=load_run_node_tree(run),
         )
 

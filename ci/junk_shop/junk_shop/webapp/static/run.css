@@ -111,12 +111,6 @@ ul {
 
 /* following classes are used by run_link macros (run_macros.html) */
 
-.tests-block {
-	display: inline-block;
-	margin: 0 10px;
-	width: 100px;
-}
-
 .test-counts {
 	display: block;
 	margin: auto;

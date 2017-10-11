@@ -2,7 +2,7 @@
 {% import "run_macros.html" as run_macros %}
 
 {% extends "layout.html" %}
-{% block title %}{{ run_node.run.branch.name }} / {{ run_node.run.platform.name }} / {{ run_name }}{% endblock %}
+{% block title %}Run #{{ run_id }}{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -13,10 +13,11 @@
 {% block contents %}
 
   {{ common_macros.breadcrumbs([
-       ('Branches',  url_for('matrix')),
-       ('Runs', url_for('run_list')) ]) }}
+    ('Projects',  url_for('project_list')),
+    (project_name + ' - ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
+  ]) }}
 
-  <h2>{{ self.title() }}</h2>
+  <h2>{{ run_version }} / {{ platform_name }} / {{ run_name }}</h2>
 
   <hr>
 

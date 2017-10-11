@@ -8,7 +8,7 @@ import re
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
-from junk_shop.capture_repository import project_type, BuildParameters, DbCaptureRepository
+from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 
 def parse_maven_output(output):
@@ -42,7 +42,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('--project', type=project_type, help='Junk-shop project name')
     parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('--exit-code', type=int, dest='exit_code', help='Build exit code to store to db')
@@ -51,7 +50,7 @@ def main():
     parser.add_argument('--signal-failure', action='store_true', help='Signal failed build with exit code 2')
     args = parser.parse_args()
     try:
-        repository = DbCaptureRepository(args.db_config, args.project, args.build_parameters)
+        repository = DbCaptureRepository(args.db_config, args.build_parameters)
         passed = store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
         if not passed and args.signal_failure:
             sys.exit(2)

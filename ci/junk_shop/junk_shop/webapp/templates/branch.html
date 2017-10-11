@@ -1,0 +1,77 @@
+{% import "common_macros.html" as common_macros %}
+{% import "matrix_macros.html" as matrix_macros %}
+
+{% extends "layout.html" %}
+{% block title %}{{ project_name }} / {{ branch_name }}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='matrix.css') }}">
+{% endblock head %}
+
+
+{% block contents %}
+
+  {{ common_macros.breadcrumbs([('Projects',  url_for('project_list'))]) }}
+
+  <h2>{{ self.title() }}</h2>
+  <hr>
+
+  {% if not version_list %}
+
+    <p>No runs executed yet</p>
+
+  {% else %}
+
+    {% if scalability_platform_list %}
+      <div class="scalability-dynamics-link-block">
+        Scalability dynamics:
+        {% for platform_name in scalability_platform_list %}
+          <a href="{{ url_for('branch_platform_metrics', 
+                                  project_name=project_name, branch_name=branch_name, platform_name=platform_name) }}"
+             class="link">
+            {{ platform_name }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <table class="platforms-{{ 'narrow' if platform_list|length <= 5 else 'wide' }}">
+      <thead>
+        <tr>
+          <th></th>
+          {% for platform in platform_list %}
+            <th class="axiz">
+              {{ platform.name }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for version in version_list %}
+          <tr>
+            <td class="axiz">
+              <a class="link"
+                 {# href="{{ url_for('branch', project_name=project.name, branch_name=branch.name) }}" #}>
+                 {{ version }}
+              </a>
+            </td>
+            {% for platform in platform_list %}
+              <td>
+                {{ matrix_macros.matrix_cell(platform_map.get((version, platform))) }}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  <hr>
+
+  {% call(page) common_macros.paginator(paginator) %}
+    {{ url_for('branch', project_name=project_name, branch_name=branch_name, page=page) }}
+  {% endcall %}
+
+{% endif %}
+
+{% endblock contents %}

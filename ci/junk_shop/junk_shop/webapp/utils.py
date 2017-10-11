@@ -4,8 +4,10 @@ from collections import namedtuple
 DEFAULT_RUN_LIST_PAGE_SIZE = 20
 PAGINATOR_PAGE_LIMIT = 11  # how many pages show in paginator, max
 
+VERSION_AS_INTS_SQL = "string_to_array(run.version, '.')::int[]"
 
 BYTE_FORMATS = ['', 'K', 'M', 'G', 'T']
+
 
 def format_bytes(count):
     index = 0

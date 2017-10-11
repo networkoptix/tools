@@ -1,7 +1,7 @@
 from flask import request, render_template
 from pony.orm import db_session, select, count, desc, raw_sql
 from .. import models
-from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator
+from .utils import VERSION_AS_INTS_SQL, DEFAULT_RUN_LIST_PAGE_SIZE, paginator
 from junk_shop.webapp import app
 
 
@@ -66,7 +66,7 @@ def branch_platform_version_list(branch_name, platform_name):
     page = int(request.args.get('page', 1))
     page_size = DEFAULT_RUN_LIST_PAGE_SIZE
     query = select(
-        (run.version, raw_sql("string_to_array(run.version, '.')::int[]"))
+        (run.version, raw_sql(VERSION_AS_INTS_SQL))
         for run in models.Run
         if run.root_run is None and
         run.branch.name == branch_name and

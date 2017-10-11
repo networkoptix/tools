@@ -12,22 +12,7 @@ hr {
 	margin: 20px 0 20px 0;
 }
 
-table th {
-	font-family: 'Arial Bold';
-}
-table td {
-	font-size: 14px;
-	line-height: 20px;
-}
-table th, table td {
-	padding: 1px 15px;
-	text-align: start;
-}
-table {
-	background: white;
-	border: 1px solid #DDD;
-	padding: 10px;
-}
+
 .page {
 	font-weight: bold;
 	text-decoration: none;
@@ -60,7 +45,7 @@ table {
 	font-weight: normal;
 	font-style: normal;
 	padding: 2px 5px 2px 5px;
-	border-radius: 3px;
+	border-radius: 2px;
 	text-decoration: none !important;
 	min-width: 10ex !important;
 }
@@ -92,7 +77,7 @@ a.outcome-skipped:hover:not(.outcome-leaf) {
 	background-color: #CCC;
 }
 .outcome-not-run {
-	background-color: #E8E8E8;
+	// background-color: #F4F4F4;
 }
 a.outcome-not-run.has-run:hover {
 	background-color: #CCC;
@@ -108,7 +93,7 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 	background-color: #EEFF88;
 }
 .outcome-not-run {
-	color: grey;
+	color: #AAA;
 }
 
 .permalink {
@@ -130,6 +115,10 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 	min-width: 12ex;
 }
 
+.list-row-box .tests-block {
+	margin: 0 5px;
+}
+
 .list-row-box .disabled-link {
 	color: #AAA;
 }
@@ -139,8 +128,25 @@ a.outcome-incomplete:hover:not(.outcome-leaf) {
 	margin: 0 10px;
 	width: 150px;
 }
-
-.started-at-block span {
+.started-at-block .datetime {
 	vertical-align: middle;
-    font-size: 12px;
+    font-size: 90%;
+}
+
+
+table.parameters {
+	background: white;
+	border: 1px solid #DDD;
+	padding: 10px;
+}
+table.parameters th {
+	font-family: 'Arial Bold';
+}
+table.parameters td {
+	font-size: 14px;
+	line-height: 20px;
+}
+table.parameters th, table.parameters td {
+	padding: 1px 15px;
+	text-align: start;
 }

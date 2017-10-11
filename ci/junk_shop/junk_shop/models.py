@@ -9,20 +9,20 @@ db = Database()
 
 class Project(db.Entity):
     name = Required(str)
-    runs = Set('Run')
+    builds = Set('Build')
 
 class CloudGroup(db.Entity):
     _table_ = 'cloud_group'
     name = Required(str)
-    runs = Set('Run')
+    builds = Set('Build')
 
 class Customization(db.Entity):
     name = Required(str)
-    runs = Set('Run')
+    builds = Set('Build')
 
 class Branch(db.Entity):
     name = Required(str)
-    runs = Set('Run')
+    builds = Set('Build')
 
 class Platform(db.Entity):
     name = Required(str)
@@ -51,24 +51,45 @@ class Test(db.Entity):
     runs = Set('Run')
 
 
+# records information for particular jenkins build
+class Build(db.Entity):
+    project = Required(Project)
+    branch = Required(Branch)
+    build_num = Required(int)
+    version = Required(str)
+    release = Optional(str)  # beta, release
+    configuration = Optional(str)  # release, debug
+    cloud_group = Optional(CloudGroup)
+    customization = Optional(Customization)
+    is_incremental = Optional(bool)
+    jenkins_url = Optional(str)
+    repository_url = Optional(str)
+    revision = Optional(str)
+    duration = Optional(timedelta)
+    composite_key(project, branch, build_num)
+    runs = Set('Run')
+    changesets = Set('BuildChangeSet')
+
+class BuildChangeSet(db.Entity):
+    _table_ = 'build_changeset'
+    build = Required(Build, index=True)
+    changeset = Required(str)
+    date = Required(datetime, sql_type='timestamptz')
+    user = Required(str)
+    email = Required(str)
+    desc = Optional(str)
+
+
 class Run(db.Entity):
     root_run = Optional('Run')
     path = Optional(str, index=True)
     name = Optional(str)
+    build = Optional(Build, index=True)
     test = Optional(Test)
     outcome = Optional(str)
     started_at = Required(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)
-    project = Optional(Project)
-    branch = Optional(Branch)
-    version = Optional(str, index=True)
-    build = Optional(int, index=True)
-    cloud_group = Optional(CloudGroup)
-    customization = Optional(Customization)
-    release = Optional(str)  # beta, release
-    kind = Optional(str)  # release, debug
     platform = Optional(Platform)
-    changeset = Optional(str)  # version control changeset id of this build (hg id --id)
     children = Set('Run')
     artifacts = Set('Artifact')
     run_parameters = Set('RunParameterValue')

@@ -3,30 +3,45 @@ from argparse import ArgumentTypeError
 import re
 import bz2
 from pony.orm import db_session, commit, flush, select, raw_sql, sql_debug
-from .utils import SimpleNamespace, datetime_utc_now
+from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
 from . import models
 
 
 VERSION_REGEX = r'^\d+(\.\d+)+$'
 
 
-def project_type(value):
-    if value == 'null':
-        raise ArgumentTypeError('Got null value for "project" option')
-    return value
-
-
 class BuildParameters(object):
 
     example = ','.join([
-        'branch=dev_3.0.0',
-        'version=3.0.10',
+        'project=ci',
+        'branch=dev_3.1_dev',
+        'version=3.1.0.1000',
         'release=beta',
-        'kind=debug',
-        'platform=linux-64',
-        'changeset=81510b15f3bc',
+        'configuration=debug',
+        'cloud_group=demo',
+        'customization=default'
+        'is_incremental=true',
+        'jenkins_url=http://la.hdw.mx/jenkins/job/test/16299/'
+        'repository_url=ssh://hg@hdw.mx/nx_vms',
+        'revision=81510b15f3bc',
+        'duration_ms=1234',
+        'platform=linux-x64',
         ])
-    known_parameters = ['branch', 'version', 'cloud_group', 'customization', 'release', 'kind', 'platform', 'changeset']
+    known_parameters = [
+        'project',
+        'branch',
+        'version',
+        'release',
+        'configuration',
+        'cloud_group',
+        'customization',
+        'is_incremental',
+        'jenkins_url',
+        'repository_url',
+        'revision',
+        'duration_ms',
+        'platform',
+        ]
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -41,24 +56,35 @@ class BuildParameters(object):
                 raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
             if value == 'null':
                 raise ArgumentTypeError('Got null value for %r parameter' % name)
+            if name == 'is_incremental':
+                value = param_to_bool(value)
+            if name == 'duration_ms':
+                if not re.match(r'^\d+$', value):
+                    raise ArgumentTypeError('Invalid int for duration_ms: %r' % value)
+                value = timedelta(milliseconds=int(duration_ms))
+                name = 'duration'
             setattr(parameters, name, value)
         if parameters.version:
             if not re.match(VERSION_REGEX, parameters.version):
                 raise ArgumentTypeError('Invalid version: %r. Expected string in format: 1.2.3.4' % parameters.version)
-            parameters.build = int(parameters.version.split('.')[-1])
+            parameters.build_num = int(parameters.version.split('.')[-1])
         return parameters
 
     def __init__(self):
         self.project = None
         self.branch = None
         self.version = None
-        self.build = None
+        self.build_num = None
+        self.release = None
+        self.configuration = None
         self.cloud_group = None
         self.customization = None
-        self.release = None
-        self.kind = None
+        self.is_incremental = None
+        self.jenkins_url = None
+        self.repository_url = None
+        self.revision = None
+        self.duration = None
         self.platform = None
-        self.changeset = None
 
 
 class RunParameters(object):
@@ -115,8 +141,7 @@ class ArtifactTypeFactory(object):
 
 class DbCaptureRepository(object):
 
-    def __init__(self, db_config, project, build_parameters, run_parameters=None):
-        self.project = project  # str
+    def __init__(self, db_config, build_parameters, run_parameters=None):
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
         self.artifact_type = ArtifactTypeFactory([
@@ -155,14 +180,9 @@ class DbCaptureRepository(object):
         return run
 
     def _set_paramerers(self, run):
-        if self.project:
-            project = models.Project.get(name=self.project)
-            if not project:
-                project = models.Project(name=self.project)
-            run.project = project
         if self.build_parameters:
-            for name in BuildParameters.known_parameters + ['build']:
-                setattr(run, name, self._produce_build_parameter(name, getattr(self.build_parameters, name)))
+            run.build = self._produce_build()
+            run.platform = self._produce_build_parameter('platform')
         if self.run_parameters:
             for name, value in self.run_parameters.items():
                 param = models.RunParameter.get(name=name)
@@ -184,20 +204,46 @@ class DbCaptureRepository(object):
                 content_type=artifact_type_rec.content_type,
                 ext=artifact_type_rec.ext,
                 )
-            commit()
+            flush()
         artifact_type_rec.id = at.id
         return at
 
-    def _produce_build_parameter(self, parameter, value):
+    def _produce_build(self):
+        project = self._produce_build_parameter('project')
+        branch = self._produce_build_parameter('branch')
+        build_num = self._produce_build_parameter('build_num')
+        build = models.Build.get(
+            project=project,
+            branch=branch,
+            build_num=build_num)
+        if not build:
+            build = models.Build(
+                project=project,
+                branch=branch,
+                build_num=build_num,
+                version=self._produce_build_parameter('version'))
+        for name in BuildParameters.known_parameters:
+            if name in ['project', 'branch', 'version']: continue
+            if name == 'duration_ms':
+                name = 'duration'
+            setattr(build, name, self._produce_build_parameter(name))
+        return build
+
+    def _produce_build_parameter(self, name):
+        value = getattr(self.build_parameters, name)
         param2model = dict(
+            project=models.Project,
             branch=models.Branch,
             cloud_group=models.CloudGroup,
             customization=models.Customization,
             platform=models.Platform,
             )
-        model = param2model.get(parameter)
+        model = param2model.get(name)
         if not model:
-            return value or ''  # plain str or None
+            if name in ['build_num', 'duration', 'is_incremental']:
+                return value
+            else:
+                return value or ''  # str fields do not accept None
         if not value:
             return None
         rec = model.get(name=value)

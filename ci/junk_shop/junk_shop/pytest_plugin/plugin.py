@@ -161,4 +161,5 @@ class DbCapturePlugin(object):
         test_path = ['functional']
         if nodeid:
             test_path += nodeid.replace('::', '/').split('/')
-        return self.repo.produce_test_run(self.root_run, test_path, is_test)
+        run = self.repo.produce_test_run(self.root_run, test_path, is_test)
+        return models.Run[run.id]  # ensure it is from current transaction

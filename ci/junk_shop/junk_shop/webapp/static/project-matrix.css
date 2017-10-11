@@ -1,0 +1,14 @@
+
+.project-title-row td {
+	border-bottom: 1px solid #AAA;
+	padding: 10px 10px;
+	font-weight: bold;
+	font-size: 120%;
+	font-style: italic;
+	color: #444;
+}
+
+td.version {
+	font-size: 90%;
+	font-style: italic;
+}

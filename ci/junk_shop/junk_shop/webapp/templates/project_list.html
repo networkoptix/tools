@@ -1,0 +1,63 @@
+{% import "matrix_macros.html" as matrix_macros %}
+
+{% extends "layout.html" %}
+{% block title %}Projects{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='matrix.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='project-matrix.css') }}">
+{% endblock head %}
+
+
+{% block contents %}
+
+  <h2>{{ self.title() }}</h2>
+  <hr>
+
+  {% if not project_list %}
+
+    <p>No runs executed yet</p>
+
+  {% else %}
+
+    <table class="platforms-wide">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Last version</th>
+          {% for platform in platform_list %}
+            <th class="axiz">
+              {{ platform.name }}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for project, branch_list in project_list|dictsort %}
+          <tr class="project-title-row">
+            <td colspan="{{ platform_list|length + 2}}">{{ project.name }}</td>
+          </tr>
+          {% for branch, version in branch_list|dictsort %}
+            <tr>
+              <td class="axiz">
+                <a class="link"
+                   href="{{ url_for('branch', project_name=project.name, branch_name=branch.name) }}">
+                   {{ branch.name }}
+                </a>
+              </td>
+              <td class="version">{{ version }}</td>
+              {% for platform in platform_list %}
+                <td>
+                  {{ matrix_macros.matrix_cell(platform_map.get((project, branch, platform))) }}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+
+{% endif %}
+
+{% endblock contents %}

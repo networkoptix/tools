@@ -4,6 +4,7 @@ from fnmatch import fnmatch
 from functools import partial
 from pony.orm import db_session, desc, select
 from flask import render_template
+from ..utils import param_to_bool
 from .. import models
 from junk_shop.webapp import app
 from .utils import format_bytes
@@ -99,8 +100,6 @@ def param_to_int(value):
     except ValueError:
         return value
 
-def param_to_bool(value):
-    return value in ['true', 'yes']
 
 def fnmatch_list(name, pattern_list):
     for pattern in pattern_list:
@@ -120,12 +119,13 @@ def load_branch_platform_version_run_parameters(branch_name, platform_name, vers
         parameters.setdefault(name, set()).add(param_to_int(value))
     return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
 
-def load_branch_platform_run_parameters(branch_name, platform_name):
+def load_branch_platform_run_parameters(project_name, branch_name, platform_name):
     parameters = {}  # name -> value set
     for (name, value) in select(
             (pv.run_parameter.name, pv.value)
             for run in models.Run for pv in run.run_parameters
-            if run.branch.name == branch_name and
+            if run.build.project.name == project_name and
+               run.build.branch.name == branch_name and
                run.platform.name == platform_name):
         parameters.setdefault(name, set()).add(param_to_int(value))
     return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
@@ -216,15 +216,16 @@ def branch_platform_version_metrics(branch_name, platform_name, version):
 
 # branch/platform page  =============================================================================
 
-def load_branch_platform_metrics(branch_name, platform_name):
+def load_branch_platform_metrics(project_name, branch_name, platform_name):
     accumulators = {}  # (metric_name, version, server_count) -> MetricAcculumator
     for metric_name, version, use_lws, server_count, metric_value in select(
-            (mv.metric.name, run.root_run.version, use_lws_param.value, server_count_param.value, mv.value)
+            (mv.metric.name, run.root_run.build.version, use_lws_param.value, server_count_param.value, mv.value)
             for mv in models.MetricValue
             for run in mv.run
             for use_lws_param in run.root_run.run_parameters
             for server_count_param in run.root_run.run_parameters
-            if run.root_run.branch.name == branch_name and
+            if run.root_run.build.project.name == project_name and
+               run.root_run.build.branch.name == branch_name and
                run.root_run.platform.name == platform_name and
                use_lws_param.run_parameter.name == 'use_lightweight_servers' and
                server_count_param.run_parameter.name == 'server_count' and
@@ -270,14 +271,17 @@ def generate_branch_platform_traces(accumulators):
                            fnmatch(metric_name, 'host_memory_usage.*.total') and server_count == max(show_server_counts))
                 yield MetricTrace(trace_name, point_list, visible, metric_name=metric_name, use_lws=use_lws)
 
-def load_branch_platform_metric_traces(branch_name, platform_name):
+
+@app.route('/project/<project_name>/<branch_name>/<platform_name>/metrics')
+@db_session
+def branch_platform_metrics(project_name, branch_name, platform_name):
 
     def pred(use_lws, is_total_bytes_sent, is_memory_usage, trace):
         return (trace.use_lws == use_lws and
                 (trace.metric_name == 'total_bytes_sent') == is_total_bytes_sent and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
 
-    accumulators = load_branch_platform_metrics(branch_name, platform_name)
+    accumulators = load_branch_platform_metrics(project_name, branch_name, platform_name)
     trace_list = list(generate_branch_platform_traces(accumulators))
     lws_traces = dict(
         merge_duration=filter(partial(pred, True, False, False), trace_list),
@@ -288,15 +292,10 @@ def load_branch_platform_metric_traces(branch_name, platform_name):
         merge_duration=filter(partial(pred, False, False, False), trace_list),
         memory_usage=filter(partial(pred, False, False, True), trace_list),
         )
-    return (lws_traces, full_traces)
-
-@app.route('/branch/<branch_name>/<platform_name>/metrics')
-@db_session
-def branch_platform_metrics(branch_name, platform_name):
-    lws_traces, full_traces = load_branch_platform_metric_traces(branch_name, platform_name)
-    run_parameters = load_branch_platform_run_parameters(branch_name, platform_name)
+    run_parameters = load_branch_platform_run_parameters(project_name, branch_name, platform_name)
     return render_template(
         'branch_platform_metrics.html',
+        project_name=project_name,
         branch_name=branch_name,
         platform_name=platform_name,
         lws_traces=lws_traces,

@@ -16,10 +16,17 @@ def to_indent(value):
 def format_datetime(dt, precise=True):
     if not dt: return dt
     assert isinstance(dt, datetime), repr(dt)
-    s = dt.strftime('%Y %b %d')
-    if not precise and dt.day < datetime_utc_now().day:
+    now = datetime_utc_now()
+    if now.year == dt.year:
+        s = dt.strftime('%b %d')
+    else:
+        s = dt.strftime('%Y %b %d')
+    if not precise and (dt.timetuple()[:2] < now.timetuple()[:2] or dt.day < datetime_utc_now().day - 10):
         return Markup(s)
-    s += ' <b>' + dt.strftime('%H:%M') + '</b>'
+    if dt.timetuple()[:3] < now.timetuple()[:3]:
+        s += ' ' + dt.strftime('%H:%M')
+    else:
+        s += ' <b>' + dt.strftime('%H:%M') + '</b>'
     if precise:
         s += ':' + dt.strftime('%S') + '.%03d' % (dt.microsecond/1000)
     return Markup(s)

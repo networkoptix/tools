@@ -1,3 +1,5 @@
+{% import "run_macros.html" as run_macros %}
+
 {% extends "layout.html" %}
 {% block title %}Runs{% endblock %}
 
@@ -5,16 +7,6 @@
   {{ super() }}
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='matrix.css') }}">
 {% endblock head %}
-
-
-{% macro run_link(name, run) %}
-
-  <a {% if run -%} href="{{ url_for('branch_platform_version_list', branch_name=run.branch.name, platform_name=run.platform.name) }}" {%- endif %}
-     class="outcome outcome-{{ run.outcome|default('not-run', true) }} {% if run -%} has-run {%- endif %}">
-     {{ name }}
-  </a>
-
-{% endmacro %}
 
 
 {% block contents %}
@@ -45,16 +37,7 @@
           </td>
           {% for element in row.platform_list %}
             <td>
-              <div class="top-level-box">
-                <div>
-                  {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
-                </div>
-                <div>
-                  {{ run_link('build', element.build.run) }}
-                  {{ run_link('unit', element.unit.run) }}
-                  {{ run_link('functional', element.functional.run) }}
-                </div>
-              </div>
+              {{ run_macros.matrix_cell(element) }}
             </td>
           {% endfor %}
         </tr>
