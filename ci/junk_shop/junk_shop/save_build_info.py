@@ -13,7 +13,7 @@ from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
 
-HG_LOG_TEMPLATE = r'{node|short}|{date}|{author|person}|{author|email}|{desc|firstline|utf8}\n'
+HG_LOG_TEMPLATE = r'{node|short}|{date}|{author|person}|{author|email}|{desc|firstline}\n'
 
 
 def pick_last_revision(repository):
