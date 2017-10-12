@@ -16,6 +16,7 @@ class BuildParameters(object):
         'project=ci',
         'branch=dev_3.1_dev',
         'version=3.1.0.1000',
+        'build_num=1000',
         'release=beta',
         'configuration=debug',
         'cloud_group=demo',
@@ -31,6 +32,7 @@ class BuildParameters(object):
         'project',
         'branch',
         'version',
+        'build_num',
         'release',
         'configuration',
         'cloud_group',
@@ -58,9 +60,12 @@ class BuildParameters(object):
                 raise ArgumentTypeError('Got null value for %r parameter' % name)
             if name == 'is_incremental':
                 value = param_to_bool(value)
-            if name == 'duration_ms':
+            if name in ['duration_ms', 'build_num']:
                 if not re.match(r'^\d+$', value):
                     raise ArgumentTypeError('Invalid int for duration_ms: %r' % value)
+            if name == 'build_num':
+                value = int(value)
+            if name == 'duration_ms':
                 value = timedelta(milliseconds=int(duration_ms))
                 name = 'duration'
             setattr(parameters, name, value)
