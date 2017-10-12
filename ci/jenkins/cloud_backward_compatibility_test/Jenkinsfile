@@ -45,17 +45,19 @@ def main() {
 			stash_distributives(DISTRIBUTIVE_LIST)
 		}
 	}
-	node (TEST_NODE) {
-		def workspace_dir = pwd()
-		stage("Prepare test environment") {
-			prepare_test_environment(workspace_dir, must_clean_workspace)
-		}
-		stage("Run tests") {
-			def result_list = DISTRIBUTIVE_LIST.collect { run_test(workspace_dir, it) }
-			def failure_list = result_list.findAll { it }
-			if (failure_list) {
-				email_failure_to_watchers(failure_list)
-				error "Tests are failed for ${failure_list.size()} distributives"
+	steps.lock ("fun-test-$TEST_NODE") {  // currently only one fun tests run can be executed on a node
+		node (TEST_NODE) {
+			def workspace_dir = pwd()
+			stage("Prepare test environment") {
+				prepare_test_environment(workspace_dir, must_clean_workspace)
+			}
+			stage("Run tests") {
+				def result_list = DISTRIBUTIVE_LIST.collect { run_test(workspace_dir, it) }
+				def failure_list = result_list.findAll { it }
+				if (failure_list) {
+					email_failure_to_watchers(failure_list)
+					error "Tests are failed for ${failure_list.size()} distributives"
+				}
 			}
 		}
 	}
@@ -107,12 +109,6 @@ def prepare_test_environment(workspace_dir, must_clean_workspace) {
 
 
 def run_test(workspace_dir, distributive) {
-	steps.lock ("fun-test-$TEST_NODE") {  // currently only one fun tests run can be executed on a node
-		run_test_locked(workspace_dir, distributive)
-	}
-}
-
-def run_test_locked(workspace_dir, distributive) {
 	echo "Running tests for distributive $distributive:"
 
 	def file_name = distributive.path.split('/')[-1]
