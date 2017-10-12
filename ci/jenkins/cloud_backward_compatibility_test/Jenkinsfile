@@ -107,6 +107,12 @@ def prepare_test_environment(workspace_dir, must_clean_workspace) {
 
 
 def run_test(workspace_dir, distributive) {
+	steps.lock ("fun-test-$TEST_NODE") {  // currently only one fun tests run can be executed on a node
+		run_test_locked(workspace_dir, distributive)
+	}
+}
+
+def run_test_locked(workspace_dir, distributive) {
 	echo "Running tests for distributive $distributive:"
 
 	def file_name = distributive.path.split('/')[-1]
