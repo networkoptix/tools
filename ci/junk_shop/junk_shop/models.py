@@ -56,7 +56,7 @@ class Build(db.Entity):
     project = Required(Project)
     branch = Required(Branch)
     build_num = Required(int)
-    version = Required(str)
+    version = Optional(str)
     release = Optional(str)  # beta, release
     configuration = Optional(str)  # release, debug
     cloud_group = Optional(CloudGroup)
