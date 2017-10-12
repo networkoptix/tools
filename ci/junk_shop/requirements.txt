@@ -1,5 +1,6 @@
 py
 pytz
+python-dateutil
 tzlocal
 psycopg2
 pony
