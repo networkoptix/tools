@@ -14,7 +14,7 @@
 
   {{ common_macros.breadcrumbs([
     ('Projects',  url_for('project_list')),
-    (project_name + ' - ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
+    (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
   ]) }}
 
   <h2>{{ run_version }} / {{ platform_name }} / {{ run_name }}</h2>

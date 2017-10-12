@@ -63,7 +63,7 @@ def branch(project_name, branch_name):
     platform_map = {}  # (version, platform) -> PlatformRec
     for build, run in select(
             (run.build, run) for run in models.Run
-            if run.build in build_list and run.test.path in ['build', 'unit', 'functional']):
+            if run.build in build_list and run.test.path in ['build', 'unit', 'functional']).order_by(2):
         rec = platform_map.setdefault((build.version, run.platform), PlatformRec(build, run))
         rec.set_run(run)
     scalability_platform_list = list(select(

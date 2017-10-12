@@ -181,7 +181,7 @@ class DbCaptureRepository(object):
 
     def _set_paramerers(self, run):
         if self.build_parameters:
-            run.build = self._produce_build()
+            run.build = self.produce_build()
             run.platform = self._produce_build_parameter('platform')
         if self.run_parameters:
             for name, value in self.run_parameters.items():
@@ -208,7 +208,7 @@ class DbCaptureRepository(object):
         artifact_type_rec.id = at.id
         return at
 
-    def _produce_build(self):
+    def produce_build(self):
         project = self._produce_build_parameter('project')
         branch = self._produce_build_parameter('branch')
         build_num = self._produce_build_parameter('build_num')

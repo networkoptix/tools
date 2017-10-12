@@ -61,20 +61,24 @@ def load_artifacts(root_run_list):
         run_id2artifacts.setdefault(run_id, []).append(rec)
     return run_id2artifacts
 
-def load_root_run_node_list(page, page_size, branch=None, platform=None, version=None):
+def load_root_run_node_list(page, page_size, project_name=None, branch_name=None, platform_name=None, version=None):
     query = select(run for run in models.Run if run.root_run is None)
-    if branch:
-        query = query.filter(branch=branch)
-    if platform:
-        query = query.filter(platform=platform)
+    if project_name:
+        query = query.filter(lambda run: run.build.project.name==project_name)
+    if branch_name:
+        query = query.filter(lambda run: run.build.branch.name==branch_name)
+    if platform_name:
+        query = query.filter(lambda run: run.build.platform.name==platform_name)
     if version:
-        query = query.filter(version=version)
+        query = query.filter(lambda run: run.build.version==version)
+    rec_count = query.count()
     root_run_list = query.order_by(desc(models.Run.id)).page(page, page_size)
     run_id2artifacts = load_artifacts(root_run_list)
     run_has_children = dict(select((run.id, exists(run.children)) for run in models.Run if run in root_run_list))
-    return [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id),
-                    lazy=True, has_children=run_has_children[run.id])
-                    for run in root_run_list]
+    node_list = [RunNode((run.path.rstrip('/'),), run, run_id2artifacts.get(run.id),
+                         lazy=True, has_children=run_has_children[run.id])
+                 for run in root_run_list]
+    return (rec_count, node_list)
 
 def load_run_node_tree(root_run):
     run_id2artifacts = load_artifacts([root_run])

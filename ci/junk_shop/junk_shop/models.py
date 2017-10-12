@@ -73,7 +73,7 @@ class Build(db.Entity):
 class BuildChangeSet(db.Entity):
     _table_ = 'build_changeset'
     build = Required(Build, index=True)
-    changeset = Required(str)
+    revision = Required(str)
     date = Required(datetime, sql_type='timestamptz')
     user = Required(str)
     email = Required(str)
