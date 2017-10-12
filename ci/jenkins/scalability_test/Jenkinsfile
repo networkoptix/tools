@@ -211,10 +211,11 @@ def write_p2p_flag(is_p2p_mode) {
 def run_test(ws_dir, build_to_test, test_params) {
 	echo "Running test with server count $test_params.server_count:"
 	def build_parameters = [
-		"platform=$PLATFORM",
-		"customization=$build_to_test.customization",
+		"project=$JUNK_SHOP_PROJECT",
 		"branch=$build_to_test.branch",
 		"version=$build_to_test.version",
+		"platform=$PLATFORM",
+		"customization=$build_to_test.customization",
 	]
 	def run_parameters = test_params.collect { it -> "$it.key=$it.value" }
 	def test_parameters = test_params.collect { it -> "scalability_test.$it.key=$it.value" }
@@ -225,7 +226,6 @@ def run_test(ws_dir, build_to_test, test_params) {
 		"--customization=$build_to_test.customization",
 		"--nocapturelog",
 		"--capture-db=\$junk_shop_credentials@$JUNK_SHOP_HOST",
-		"--project=$JUNK_SHOP_PROJECT",
 		"--build-parameters=${build_parameters.join(',')}",
 		"--run-parameters=${run_parameters.join(',')}",
 		"--test-parameters=${test_parameters.join(',')}",

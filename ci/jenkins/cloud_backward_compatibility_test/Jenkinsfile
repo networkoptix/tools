@@ -26,6 +26,7 @@ DAYS_TO_KEEP_OLD_BUILD = '100'
 FUN_TESTS_BRANCH = 'vms_3.1_dev'
 NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
 SERVICE_EMAIL_PASSWORD_ID = 'service-email-password'
+JUNK_SHOP_BRANCH = 'mixed'
 JUNK_SHOP_RUN_URL = 'http://junkshop.hdw.mx/run'
 JUNK_SHOP_SRC_DIR = 'devtools/ci/junk_shop'
 JUNK_SHOP_HOST = '10.1.5.105'
@@ -116,9 +117,11 @@ def run_test(workspace_dir, distributive) {
 	sh "if [ -f $run_id_file ]; then rm $run_id_file; fi"
 
 	def build_parameters = [
+		"project=$JUNK_SHOP_PROJECT",
+		"branch=$JUNK_SHOP_BRANCH",
+		"version=$dist_info.version",
 		"platform=$PLATFORM",
 		"customization=$distributive.customization",
-		"version=$dist_info.version",
 	]
 	def options = [
 		"--work-dir=$workspace_dir/work/test",
@@ -129,7 +132,6 @@ def run_test(workspace_dir, distributive) {
 		"--nocapturelog",
 		"--capture-db=\$junk_shop_credentials@$JUNK_SHOP_HOST",
 		"--autotest-email-password=\$service_email_password",
-		"--project=$JUNK_SHOP_PROJECT",
 		"--build-parameters=${build_parameters.join(',')}",
 		"--run-id-file=$run_id_file",
 	]
