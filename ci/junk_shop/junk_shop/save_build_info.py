@@ -21,9 +21,11 @@ def pick_last_revision(repository):
         build for build in models.Build
         if build.project.name == parameters.project and
            build.branch.name == parameters.branch and
-           build.revision and
            build.build_num < parameters.build_num).order_by(desc(1)).first()
-    return prev_build.revision
+    if prev_build:
+        return prev_build.revision
+    else:
+        return None
 
 def delete_build_changesets(build):
     select(cs for cs in models.BuildChangeSet if cs.build is build).delete()
@@ -62,7 +64,8 @@ def main():
         prev_revision = pick_last_revision(repository)
         print 'current revision: %s, prev_revision: %s' % (build.revision, prev_revision)
         delete_build_changesets(build)
-        load_change_sets(repository, args.src_dir, build, prev_revision)
+        if prev_revision:
+            load_change_sets(repository, args.src_dir, build, prev_revision)
 
 
 if __name__ == '__main__':

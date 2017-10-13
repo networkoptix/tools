@@ -228,10 +228,12 @@ class DbCaptureRepository(object):
                 build_num=build_num,
                 version=self._produce_build_parameter('version'))
         for name in BuildParameters.known_parameters:
-            if name in ['project', 'branch', 'version']: continue
+            if name in ['project', 'branch', 'build_num']: continue
             if name == 'duration_ms':
                 name = 'duration'
-            setattr(build, name, self._produce_build_parameter(name))
+            value = self._produce_build_parameter(name)
+            if value:
+                setattr(build, name, value)
         return build
 
     def _produce_build_parameter(self, name):
