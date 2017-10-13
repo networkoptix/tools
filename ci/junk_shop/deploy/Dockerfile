@@ -9,6 +9,7 @@ RUN pip install --requirement /tmp/requirements.txt
 COPY ./junk_shop /app/junk_shop
 COPY ./deploy/uwsgi.ini /app/uwsgi.ini
 COPY ./deploy/nginx.conf /etc/nginx/conf.d/
+COPY ./deploy/settings.py /app/settings.py
 
 ADD https://cdn.plot.ly/plotly-latest.min.js /app/junk_shop/webapp/static/
 RUN chmod 0644 /app/junk_shop/webapp/static/plotly-latest.min.js

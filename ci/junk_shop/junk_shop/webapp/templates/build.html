@@ -1,0 +1,79 @@
+{% import "common_macros.html" as common_macros %}
+
+{% extends "layout.html" %}
+{% block title -%} {{ project_name }} / {{ branch_name }} / {{ build.version }} {%- endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='build.css') }}">
+{% endblock head %}
+
+
+{% block contents %}
+
+    {{ common_macros.breadcrumbs([
+      ('Projects',  url_for('project_list')),
+      (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
+    ]) }}
+
+    <h2>{{ build.version }}</h2>
+    <hr>
+
+    <div class="build-info">
+      {% if build.revision %}
+        <div>
+          <div class="title">Revision</div>
+          <div class="value">{{ repository }} #{{ build.revision }}</div>
+        </div>
+      {% endif %}
+      {% if build.is_incremental is not none %}
+        <div>
+          <div class="title">Build</div>
+          <div class="value"> {%- if build.is_incremental -%} Incremental {%- else -%} Full {%- endif -%} </div>
+        </div>
+      {% endif %}
+      {% if build.jenkins_url %}
+        <div>
+          <div class="title">Jenkins page</div>
+          <div class="value">
+            <a href="{{ build.jenkins_url }}">Build #{{ jenkins_build_num }}</a>
+          </div>
+        </div>
+      {% endif %}
+      {% if build.cloud_group %}
+        <div>
+          <div class="title">Cloud group</div>
+          <div class="value">{{ build.cloud_group.name }}</div>
+        </div>
+      {% endif %}
+      {% if build.configuration %}
+        <div>
+          <div class="title">Configuration</div>
+          <div class="value">{{ build.configuration }}</div>
+        </div>
+      {% endif %}
+      {% if build.customization %}
+        <div>
+          <div class="title">Customization</div>
+          <div class="value">{{ build.customization.name }}</div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if changeset_list %}
+      <div class="build-block">
+        <h2>Commits</h2>
+        {% for changeset in changeset_list %}
+          <div>
+            {{ changeset.user }} {{ changeset.revision|format_revision(build.repository_url) }}: {{ changeset.desc|format_commit_message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% for platform in platform_list %}
+      <h3>{{ platform.name }}</h3>
+      <hr>
+    {% endfor %}
+
+{% endblock contents %}

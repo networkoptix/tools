@@ -20,7 +20,8 @@ services:
     ports:
       - '10180:80'
     environment:
-      DB_CONFIG: postgres:${PGPASSWORD}@database
+      JUNK_SHOP_SETTINGS: /app/settings.py
+      PGPASSWORD:
 
   junk_shop_db:
     container_name: junk_shop_db

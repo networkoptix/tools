@@ -4,6 +4,11 @@ body {
 	font-size: 14px;
 	line-height: 20px;
 	font-weight: 400;
+	color: #333333;
+}
+
+.main {
+	margin: 10px;
 }
 
 hr {

@@ -1,0 +1,20 @@
+.build-info {
+	margin: 0 0 10px 0;
+}
+.build-info > div {
+	display: inline-block;
+	margin: 5px 30px 5px 0;
+}
+.build-info .title {
+	font-size: 90%;
+}
+.build-info .value {
+	font-weight: bold;
+}
+
+.build-block {
+	padding: 0 0 20px 22px;
+	background-color: #FFF;
+	border: 1px solid #DDD;
+	line-height: 170%;
+}

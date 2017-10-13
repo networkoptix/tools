@@ -17,7 +17,7 @@
   <h2>{{ self.title() }}</h2>
   <hr>
 
-  {% if not version_list %}
+  {% if not build_version_list %}
 
     <p>No runs executed yet</p>
 
@@ -48,11 +48,11 @@
         </tr>
       </thead>
       <tbody>
-        {% for version in version_list %}
+        {% for build, version in build_version_list %}
           <tr>
             <td class="axiz">
               <a class="link"
-                 {# href="{{ url_for('branch', project_name=project.name, branch_name=branch.name) }}" #}>
+                 href="{{ url_for('build', project_name=project_name, branch_name=branch_name, build_num=build.build_num) }}">
                  {{ version }}
               </a>
             </td>

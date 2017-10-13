@@ -77,7 +77,7 @@ def branch(project_name, branch_name):
         project_name=project_name,
         branch_name=branch_name,
         platform_list=platform_list,
-        version_list=version_list,
+        build_version_list=build_version_list,
         platform_map=platform_map,
         scalability_platform_list=scalability_platform_list,
         )
