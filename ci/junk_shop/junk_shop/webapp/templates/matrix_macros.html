@@ -59,8 +59,8 @@
 {% endmacro %}
 
 
-{% macro matrix_cell(element) %}
-  <div class="top-level-box">
+{% macro platform_box(element) %}
+  <div class="platform-box">
     <div class="datetime">
       {{ element.started_at|format_datetime(precise=False)|default('&nbsp;')|safe }}
     </div>

@@ -21,7 +21,7 @@
 
   {% else %}
 
-    <table class="platforms-wide">
+    <table class="project-list platforms-wide">
       <thead>
         <tr>
           <th></th>
@@ -38,7 +38,7 @@
           <tr class="project-title-row">
             <td colspan="{{ platform_list|length + 2}}">{{ project.name }}</td>
           </tr>
-          {% for branch, version in branch_list|dictsort %}
+          {% for branch, build in branch_list|dictsort %}
             <tr>
               <td class="axiz">
                 <a class="link"
@@ -46,10 +46,15 @@
                    {{ branch.name }}
                 </a>
               </td>
-              <td class="version">{{ version }}</td>
+              <td class="version">
+                <a class="link"
+                   href="{{ url_for('build', project_name=project.name, branch_name=branch.name, build_num=build.build_num) }}">
+                 {{ build.version }}
+                </a>
+              </td>
               {% for platform in platform_list %}
                 <td>
-                  {{ matrix_macros.matrix_cell(platform_map.get((project, branch, platform))) }}
+                  {{ matrix_macros.platform_box(platform_map.get((project, branch, platform))) }}
                 </td>
               {% endfor %}
             </tr>

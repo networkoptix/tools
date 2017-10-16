@@ -28,3 +28,12 @@
     <a class="page" href="{{ caller(paginator.last_page) }}">&#x21E5;</a>
   {% endif %}
 {% endmacro %}
+
+
+{% macro changeset_list(changeset_list, maxlen=1000) %}
+  {% for changeset in changeset_list %}
+    <div>
+      {{ changeset.user }} {{ changeset.revision|format_revision(changeset.build.repository_url) }}: {{ changeset.desc|truncate(maxlen)|format_commit_message }}
+    </div>
+  {% endfor %}
+{% endmacro %}

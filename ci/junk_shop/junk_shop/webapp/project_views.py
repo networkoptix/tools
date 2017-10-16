@@ -32,12 +32,12 @@ def project_list():
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
     project_list = {}  # project -> branch -> version
     platform_map = {}  # (project, branch, platform) -> PlatformRec
-    for run, build in select(
-            (run, run.build) for run in models.Run
-            if run.build.build_num in build_num_set and run.test.path in ['build', 'unit', 'functional']):
+    for build, run in select(
+            (run.build, run) for run in models.Run
+            if run.build.build_num in build_num_set and run.test.path in ['build', 'unit', 'functional']).order_by(2):
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue
-        project_list.setdefault(build.project, {})[build.branch] = build.version
+        project_list.setdefault(build.project, {})[build.branch] = build
         rec = platform_map.setdefault((build.project, build.branch, run.platform), PlatformRec(build, run))
         rec.set_run(run)
     platform_list = models.Platform.select()
@@ -60,6 +60,10 @@ def branch(project_name, branch_name):
     rec_count = query.count()
     build_version_list = list(query.order_by(desc(1)).page(page, page_size))
     build_list, version_list = zip(*build_version_list)
+    build_changesets_map = {}  # build -> changeset list
+    for changeset in select(build.changesets for build in models.Build if build in build_list).order_by(desc(1)):
+        changeset_list = build_changesets_map.setdefault(changeset.build, [])
+        changeset_list.append(changeset)
     platform_map = {}  # (version, platform) -> PlatformRec
     for build, run in select(
             (run.build, run) for run in models.Run
@@ -78,6 +82,7 @@ def branch(project_name, branch_name):
         branch_name=branch_name,
         platform_list=platform_list,
         build_version_list=build_version_list,
+        build_changesets_map=build_changesets_map,
         platform_map=platform_map,
         scalability_platform_list=scalability_platform_list,
         )

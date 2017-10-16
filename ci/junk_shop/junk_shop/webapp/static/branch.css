@@ -1,0 +1,39 @@
+.branch {
+	//border-collapse: collapse;
+	border-spacing: 0 5px;
+}
+
+.branch tr {
+	padding: 6px;
+	background-color: #FFF;
+}
+.branch th.header-spacer {
+	border-left: 1px solid #DDD;
+	border-right: 1px solid #DDD;
+}
+.branch th {
+	border-right: 1px solid #DDD;
+}
+.branch td.axiz {
+	border-left: 1px solid #DDD;
+}
+.branch td.changeset-list {
+	border-right: 1px solid #DDD;
+}
+.branch td, .branch th {
+	padding: 5px;
+	border-top: 1px solid #DDD;
+	border-bottom: 1px solid #DDD;
+}
+.platform-cell {
+	border-right: 1px solid #DDD;
+}
+
+.branch td div {
+	
+}
+
+.changeset-list {
+	line-height: 120%;
+	font-size: 13px;
+}

@@ -143,6 +143,9 @@ class DbCapturePlugin(object):
         if report.failed:
             self.repo.add_artifact(stage_run, 'traceback', '%s.traceback' % stage_name, self.repo.artifact_type.traceback, str(report.longrepr), is_error=True)
             root_run.outcome = current_test_run.outcome = 'failed'
+            message = report.longrepr.reprcrash.message
+            if message:
+                current_test_run.error_message = message.splitlines()[0]
         if report.outcome == 'skipped':
             current_test_run.outcome = 'skipped'
         if report.when == 'call':

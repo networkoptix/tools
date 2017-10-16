@@ -63,11 +63,7 @@
     {% if changeset_list %}
       <div class="build-block">
         <h2>Commits</h2>
-        {% for changeset in changeset_list %}
-          <div>
-            {{ changeset.user }} {{ changeset.revision|format_revision(build.repository_url) }}: {{ changeset.desc|format_commit_message }}
-          </div>
-        {% endfor %}
+        {{ common_macros.changeset_list(changeset_list) }}
       </div>
     {% endif %}
 

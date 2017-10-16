@@ -13,15 +13,22 @@ td > div > div {
 	padding: 2px;
 }
 
-td > div.top-level-box {
-	margin: 2px;
+td > div.platform-box {
+	// margin: 2px;
 }
 
 a {
 // text-decoration: none;
 }
 
-.top-level-box .datetime {
+.project-list .platform-box {
+	padding: 6px;
+	background-color: #FFF;
+	margin: 2px;
+	border: 1px solid #DDD;
+}
+
+.platform-box .datetime {
     font-size: 80%;
 	padding: 0 0 5px 3px;
 }

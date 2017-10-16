@@ -87,6 +87,7 @@ class Run(db.Entity):
     build = Optional(Build, index=True)
     test = Optional(Test)
     outcome = Optional(str)
+    error_message = Optional(str)
     started_at = Required(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)
     platform = Optional(Platform)

@@ -6,6 +6,7 @@
 
 {% block head %}
   {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='branch.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='matrix.css') }}">
 {% endblock head %}
 
@@ -36,10 +37,10 @@
       </div>
     {% endif %}
 
-    <table class="platforms-{{ 'narrow' if platform_list|length <= 5 else 'wide' }}">
+    <table class="branch platforms-{{ 'narrow' if platform_list|length <= 5 else 'wide' }}">
       <thead>
         <tr>
-          <th></th>
+          <th class="header-spacer" colspan=2></th>
           {% for platform in platform_list %}
             <th class="axiz">
               {{ platform.name }}
@@ -56,9 +57,14 @@
                  {{ version }}
               </a>
             </td>
+            <td class="changeset-list">
+              <div>
+                {{ common_macros.changeset_list(build_changesets_map.get(build, []), 50) }}
+              </div>
+            </td>
             {% for platform in platform_list %}
-              <td>
-                {{ matrix_macros.matrix_cell(platform_map.get((version, platform))) }}
+              <td class="platform-cell">
+                {{ matrix_macros.platform_box(platform_map.get((version, platform))) }}
               </td>
             {% endfor %}
           </tr>
