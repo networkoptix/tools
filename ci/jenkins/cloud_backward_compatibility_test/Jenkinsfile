@@ -118,10 +118,11 @@ def run_test(workspace_dir, distributive) {
 	sh "ln -sf $workspace_dir/dist/$file_name bin/mediaserver.deb"
 	sh "if [ -f $run_id_file ]; then rm $run_id_file; fi"
 
+	def build_num = env.BUILD_NUMBER.toInteger()
 	def build_parameters = [
 		"project=$JUNK_SHOP_PROJECT",
 		"branch=$JUNK_SHOP_BRANCH",
-		"version=$dist_info.version",
+		"build_num=$build_num",
 		"platform=$PLATFORM",
 		"customization=$distributive.customization",
 	]
