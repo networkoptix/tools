@@ -6,7 +6,7 @@ from junk_shop.webapp import app
 from .utils import paginator
 
 
-DEFAULT_VERSION_LIST_PAGE_SIZE = 10
+DEFAULT_BUILD_LIST_PAGE_SIZE = 10
 
 
 class PlatformRec(object):
@@ -30,7 +30,7 @@ def project_list():
         (rec[0], rec[1]) : rec[2] for rec in
         select((build.project, build.branch, max(build.build_num)) for build in models.Build)}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
-    project_list = {}  # project -> branch -> version
+    project_list = {}  # project -> branch -> build
     platform_map = {}  # (project, branch, platform) -> PlatformRec
     for build, run in select(
             (run.build, run) for run in models.Run
@@ -52,23 +52,22 @@ def project_list():
 @db_session
 def branch(project_name, branch_name):
     page = int(request.args.get('page', 1))
-    page_size = DEFAULT_VERSION_LIST_PAGE_SIZE
+    page_size = DEFAULT_BUILD_LIST_PAGE_SIZE
     query = select(
-        (build, build.version) for build in models.Build
+        build for build in models.Build
         if build.project.name == project_name and
            build.branch.name == branch_name)
     rec_count = query.count()
-    build_version_list = list(query.order_by(desc(1)).page(page, page_size))
-    build_list, version_list = zip(*build_version_list)
+    build_list = list(query.order_by(desc(1)).page(page, page_size))
     build_changesets_map = {}  # build -> changeset list
     for changeset in select(build.changesets for build in models.Build if build in build_list).order_by(desc(1)):
         changeset_list = build_changesets_map.setdefault(changeset.build, [])
         changeset_list.append(changeset)
-    platform_map = {}  # (version, platform) -> PlatformRec
+    platform_map = {}  # (build, platform) -> PlatformRec
     for build, run in select(
             (run.build, run) for run in models.Run
             if run.build in build_list and run.test.path in ['build', 'unit', 'functional']).order_by(2):
-        rec = platform_map.setdefault((build.version, run.platform), PlatformRec(build, run))
+        rec = platform_map.setdefault((build, run.platform), PlatformRec(build, run))
         rec.set_run(run)
     scalability_platform_list = list(select(
         run.root_run.platform.name for run in models.Run
@@ -81,7 +80,7 @@ def branch(project_name, branch_name):
         project_name=project_name,
         branch_name=branch_name,
         platform_list=platform_list,
-        build_version_list=build_version_list,
+        build_list=build_list,
         build_changesets_map=build_changesets_map,
         platform_map=platform_map,
         scalability_platform_list=scalability_platform_list,

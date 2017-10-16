@@ -18,7 +18,7 @@
   <h2>{{ self.title() }}</h2>
   <hr>
 
-  {% if not build_version_list %}
+  {% if not build_list %}
 
     <p>No runs executed yet</p>
 
@@ -49,12 +49,12 @@
         </tr>
       </thead>
       <tbody>
-        {% for build, version in build_version_list %}
+        {% for build in build_list %}
           <tr>
-            <td class="axiz">
+            <td class="build-num">
               <a class="link"
                  href="{{ url_for('build', project_name=project_name, branch_name=branch_name, build_num=build.build_num) }}">
-                 {{ version }}
+                 {{ build.build_num }}
               </a>
             </td>
             <td class="changeset-list">
@@ -64,7 +64,7 @@
             </td>
             {% for platform in platform_list %}
               <td class="platform-cell">
-                {{ matrix_macros.platform_box(platform_map.get((version, platform))) }}
+                {{ matrix_macros.platform_box(platform_map.get((build, platform))) }}
               </td>
             {% endfor %}
           </tr>

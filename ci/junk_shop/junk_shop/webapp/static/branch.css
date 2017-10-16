@@ -14,11 +14,19 @@
 .branch th {
 	border-right: 1px solid #DDD;
 }
+.branch td {
+}
 .branch td.axiz {
 	border-left: 1px solid #DDD;
+	padding-left: 10px;
+}
+.branch td.build-num {
+	border-left: 1px solid #DDD;
+	font-size: 13px;
 }
 .branch td.changeset-list {
 	border-right: 1px solid #DDD;
+	font-size: 13px;
 }
 .branch td, .branch th {
 	padding: 5px;
@@ -35,5 +43,4 @@
 
 .changeset-list {
 	line-height: 120%;
-	font-size: 13px;
 }

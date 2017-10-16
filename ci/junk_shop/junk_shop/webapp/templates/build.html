@@ -20,10 +20,16 @@
     <hr>
 
     <div class="build-info">
+      {% if build.version %}
+        <div>
+          <div class="title">Version</div>
+          <div class="value">{{ build.version }}</div>
+        </div>
+      {% endif %}
       {% if build.revision %}
         <div>
           <div class="title">Revision</div>
-          <div class="value">{{ repository }} #{{ build.revision }}</div>
+          <div class="value">{{ repository }} #{{ build.revision|decorate_revision(build.repository_url) }}</div>
         </div>
       {% endif %}
       {% if build.is_incremental is not none %}
@@ -62,14 +68,56 @@
 
     {% if changeset_list %}
       <div class="build-block">
-        <h2>Commits</h2>
+        <h3>Commits</h3>
         {{ common_macros.changeset_list(changeset_list) }}
       </div>
     {% endif %}
 
     {% for platform in platform_list %}
-      <h3>{{ platform.name }}</h3>
-      <hr>
+      {% if tests_run_map.has_key(platform) %}
+        <h2 class="platform-name">{{ platform.name }}</h3>
+        <hr>
+        {% for root_run, tests_run in tests_run_map.get(platform, {})|dictsort %}
+          <div class="build-block">
+            <h3>
+              <a class="link" href="{{ url_for('run', run_id=root_run.id) }}">
+              {%- if tests_run.stage == 'unit' -%}
+                Unit Tests
+              {%- elif tests_run.stage == 'functional' -%}
+                Functional Tests
+              {%- endif -%}
+              </a>
+            </h3>
+            <div class="test-counts">
+              <span class="passed">{{ tests_run.passed_count }}</span>
+              /
+              <span class="failed">{{ tests_run.failed_count }}</span>
+            </div>
+            {% if tests_run.run_list %}
+              <table class="test-list">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for run in tests_run.run_list %}
+                    <tr>
+                      <td>{{ run.test_name }}</td>
+                      <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
+                        {{- run.status -}}
+                      </td>
+                      <td class="error-message">{{ run.run.error_message }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
     {% endfor %}
 
 {% endblock contents %}

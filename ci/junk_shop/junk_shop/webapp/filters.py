@@ -70,3 +70,13 @@ def format_revision(revision, repository_url):
     dashed_repository_name = repository_name.replace('_', '-')
     ref = format.format(repository_name=dashed_repository_name, revision=revision)
     return Markup('<a class="link" href="%s">%s</a>' % (ref, repository_name))
+
+@app.template_filter('decorate_revision')
+def decorate_revision(revision, repository_url):
+    format = app.config.get('SCM_BROWSER_URL_FORMAT')
+    if not format or not repository_url:
+        return revision
+    repository_name = repository_url.split('/')[-1].lower()
+    dashed_repository_name = repository_name.replace('_', '-')
+    ref = format.format(repository_name=dashed_repository_name, revision=revision)
+    return Markup('<a class="link" href="%s">%s</a>' % (ref, revision))

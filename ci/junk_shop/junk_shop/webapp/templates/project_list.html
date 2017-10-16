@@ -25,7 +25,7 @@
       <thead>
         <tr>
           <th></th>
-          <th>Last version</th>
+          <th>Last build</th>
           {% for platform in platform_list %}
             <th class="axiz">
               {{ platform.name }}
@@ -49,7 +49,7 @@
               <td class="version">
                 <a class="link"
                    href="{{ url_for('build', project_name=project.name, branch_name=branch.name, build_num=build.build_num) }}">
-                 {{ build.version }}
+                 {{ build.build_num }}
                 </a>
               </td>
               {% for platform in platform_list %}

@@ -6,10 +6,18 @@
 	margin: 5px 30px 5px 0;
 }
 .build-info .title {
-	font-size: 90%;
 }
 .build-info .value {
 	font-weight: bold;
+	font-size: 110%;
+	color: #404040;
+}
+
+.platform-name {
+	margin: 30px 0 0 0;
+}
+hr {
+	margin: 5px 0 10px 0;
 }
 
 .build-block {
@@ -18,4 +26,42 @@
 	border: 1px solid #DDD;
 	line-height: 170%;
 	font-size: 14px;
+	margin-bottom: 10px;
+}
+.build-block h2 {
+	font-size: 1.3em;
+	margin: 10px 0;
+}
+
+.build-block h3 {
+	display: inline-block;
+	margin-bottom: 0;
+	width: 30%;
+}
+.build-block .test-counts {
+	display: inline-block;
+	font-size: 1.3em;
+	font-weight: bold;
+}
+.build-block .test-list {
+	margin-top: 20px;
+}
+
+.test-list td, .test-list th {
+	text-align: left;
+	padding: 0 10px 0 0;
+	font-size: 14px;
+}
+.test-list th {
+	padding-bottom: 5px;
+}
+.test-list td {
+	line-height: 150%;
+}
+.test-list .outcome {
+}
+.test-list .error-message {
+	// color: #C22626;
+	color: #d04c4c;
+	font-size: 13px;
 }
