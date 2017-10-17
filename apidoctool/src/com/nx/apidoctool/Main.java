@@ -45,7 +45,7 @@ public class Main
 
             if ("test".equals(arg.action()))
             {
-                new Tests(arg.getFile("-test-path"));
+                new Tests(arg.isVerbose(), arg.getFile("-test-path"));
             }
             else if ("sort-xml".equals(arg.action()))
             {
@@ -57,7 +57,7 @@ public class Main
             }
             else if ("xml-to-code".equals(arg.action()))
             {
-                final XmlToCodeExecutor exec = new XmlToCodeExecutor();
+                final ApiXmlToVmsCodeExecutor exec = new ApiXmlToVmsCodeExecutor();
                 exec.verbose = arg.isVerbose();
                 exec.vmsPath = arg.getFile("-vms-path");
                 exec.sourceApiXmlFile = arg.getFile("-source-xml");
@@ -66,7 +66,7 @@ public class Main
             }
             else if ("code-to-xml".equals(arg.action()))
             {
-                final CodeToXmlExecutor exec = new CodeToXmlExecutor();
+                final VmsCodeToApiXmlExecutor exec = new VmsCodeToApiXmlExecutor();
                 exec.verbose = arg.isVerbose();
                 exec.vmsPath = arg.getFile("-vms-path");
                 exec.templateApiXmlFile = arg.getFile("-template-xml");

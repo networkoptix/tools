@@ -44,17 +44,15 @@ public class SourceCode
     }
 
     /**
-     * Identify a multiline block of text starting from the specified line and
-     * lasting up to and including the line matching lastLineRegex. After the
-     * block of lines is identified, the lines are concatenated replacing line
-     * breaks with spaces, and the result is matched with groupRegex.
-     * @param firstLineRegex Should match the first line of the block,
-     *     otherwise, null is returned.
-     * @param lastLineRegex Defines the last line of the block. The last line
-     *     can be the first line if it matches both firstLineRegex and
-     *     lastLineRegex.
-     * @return Matched groups in groupRegex, or null if the first line does not
-     * match firstLineRegex.
+     * Identify a multiline block of text starting from the specified line and lasting up to and
+     * including the line matching lastLineRegex. After the block of lines is identified, the lines
+     * are concatenated replacing line breaks with spaces, and the result is matched with
+     * groupRegex.
+     * @param firstLineRegex Should match the first line of the block, otherwise, null is returned.
+     * @param lastLineRegex Defines the last line of the block. The last line can be the first line
+     *     if it matches both firstLineRegex and lastLineRegex.
+     * @return Matched groups in groupRegex (strings may be enpty but never null), or null if the
+     *     first line does not match firstLineRegex.
      * @throw Error if groupRegex is not matched.
      */
     public final String[] matchMultiline(

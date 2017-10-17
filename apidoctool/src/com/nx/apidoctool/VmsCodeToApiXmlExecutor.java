@@ -6,7 +6,7 @@ import com.nx.util.*;
 
 import java.io.File;
 
-public final class CodeToXmlExecutor
+public final class VmsCodeToApiXmlExecutor
     extends Executor
 {
     public File vmsPath;

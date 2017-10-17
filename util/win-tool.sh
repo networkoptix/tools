@@ -26,6 +26,7 @@ Here <command> can be one of the following:
  ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
 
  apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
+ apidoc-rdep # Run tests and deploy apidoctool from devtools to packages/any.
  kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
  kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
@@ -220,8 +221,8 @@ do_apidoc() # [dev|prod] "$@"
     local JAR_W=$(w "$JAR")
     local API_XML_W=$(w "$API_XML")
     if [ -z "$1" ]; then #< No other args - run apidoctool to generate documentation.
-        nx_verbose java -jar "$JAR_W" -verbose code-to-xml -vms-path $(w "$VMS_DIR") \
-            -template-xml $(w "$API_TEMPLATE_XML") -output-xml "$API_XML_W"
+        nx_verbose java -jar "$JAR_W" -verbose code-to-xml -vms-path "$(w "$VMS_DIR")" \
+            -template-xml "$(w "$API_TEMPLATE_XML")" -output-xml "$API_XML_W"
         RESULT=$?
     else #< Some args specified - run apidoctool with the specified args.
         nx_verbose java -jar "$JAR_W" "$@"
@@ -232,6 +233,26 @@ do_apidoc() # [dev|prod] "$@"
         "$API_XML_W" $(w "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/") \
         || exit $?
     return $RESULT
+}
+
+do_apidoc_rdep() # "$@"
+{
+    local -r DEV_DIR="$DEVELOP_DIR/devtools/apidoctool"
+    local -r JAR_DEV="$DEV_DIR/out/apidoctool.jar"
+    local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool"
+    local -r JAR_PROD="$PACKAGE_DIR/apidoctool.jar"
+    local -r TEST_DIR="$DEV_DIR/test"
+
+    nx_verbose java -jar "$(w "$JAR_DEV")" -verbose test -test-path "$(w "$TEST_DIR")" || exit $?
+
+    nx_echo
+    cp "$JAR_DEV" "$JAR_PROD" || exit $?
+
+    nx_pushd "$PACKAGE_DIR"
+    rdep -u || exit $?
+    nx_echo
+    nx_echo "SUCCESS: apidoctool tested and uploaded via rdep"
+    nx_popd
 }
 
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
@@ -282,6 +303,9 @@ main()
         #..........................................................................................
         apidoc)
             do_apidoc "$@"
+            ;;
+        apidoc-rdep)
+            do_apidoc_rdep "$@"
             ;;
         kit)
             do_kit "$@"

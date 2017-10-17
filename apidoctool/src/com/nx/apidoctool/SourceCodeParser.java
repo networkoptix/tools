@@ -53,7 +53,7 @@ public final class SourceCodeParser
         targetGroup.groupDescription = sourceGroup.groupDescription;
 
         int line = 1;
-        while (line < sourceCode.getLineCount())
+        while (line <= sourceCode.getLineCount())
         {
             MatchForRegisterHandler match = MatchForRegisterHandler.create(
                 sourceCode, line);

@@ -9,7 +9,7 @@ import com.nx.util.XmlUtils;
 
 import java.io.File;
 
-public final class XmlToCodeExecutor
+public final class ApiXmlToVmsCodeExecutor
     extends Executor
 {
     public File vmsPath;

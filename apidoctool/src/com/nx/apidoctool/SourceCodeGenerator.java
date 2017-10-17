@@ -38,7 +38,7 @@ public final class SourceCodeGenerator
             new HashSet<Apidoc.Function>();
 
         int line = 1;
-        while (line < editor.getLineCount())
+        while (line <= editor.getLineCount())
         {
             MatchForRegisterHandler match = MatchForRegisterHandler.create(
                 editor, line);

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This xml file is the expected result of parsing apidoc.cpp. -->
+<apidoc>
+    <groups>
+        <group>
+            <groupName>testGroup</groupName>
+            <urlPrefix>/urlPrefix</urlPrefix>
+            <groupDescription>testGroupDescription</groupDescription>
+            <functions>
+<!--============================================================================================-->
+                <function>
+                    <name>testFunction1</name>
+                    <description></description>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>withProprietaryValues</name>
+                            <description></description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>regularValue</name>
+                                    <description>Appears in xml.</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                </function>
+<!--============================================================================================-->
+            </functions>
+        </group>
+    </groups>
+</apidoc>

@@ -5,8 +5,8 @@ import com.nx.util.SourceCode;
 import java.util.regex.Pattern;
 
 /**
- * Parses SourceCode for registration line "register...Handler" of an API
- * function, and then represents the match.
+ * Parses SourceCode to find a registration line (like "reg...()") of an API function, and then
+ * represents the match.
  */
 public final class MatchForRegisterHandler
 {
@@ -15,12 +15,12 @@ public final class MatchForRegisterHandler
     public final String functionName;
 
     /**
-     * Null if no input data structure is defined for this API function.
+     * Empty string if no input data structure is defined for this API function.
      */
     public final String inputDataType;
 
     /**
-     * Null if no output data structure is defined for this API function.
+     * Empty string if no output data structure is defined for this API function.
      */
     public final String outputDataType;
 
@@ -50,7 +50,7 @@ public final class MatchForRegisterHandler
         if (params != null)
         {
             return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
-                params[1], params[0], null, "POST");
+                params[1], params[0], "", "POST");
         }
 
         params = sourceCode.matchMultiline(line,
@@ -75,8 +75,8 @@ public final class MatchForRegisterHandler
     {
         assert functionName != null;
         assert !functionName.isEmpty();
-        assert inputDataType == null || !inputDataType.isEmpty();
-        assert outputDataType == null || !outputDataType.isEmpty();
+        assert inputDataType != null;
+        assert outputDataType != null;
         assert method != null;
         assert !method.isEmpty();
 

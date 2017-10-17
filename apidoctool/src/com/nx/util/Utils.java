@@ -61,7 +61,8 @@ public final class Utils
     }
 
     /**
-     * @return Matched groups, or null If the line does not match lineRegex.
+     * @return Matched groups (strings may be empty but never null), or null if the line does not
+     * match lineRegex.
      */
     public static String[] matchRegex(Pattern pattern, String text)
     {
@@ -72,7 +73,11 @@ public final class Utils
         String[] groups = new String[matcher.groupCount()];
 
         for (int i = 0; i < groups.length; ++i)
+        {
             groups[i] = matcher.group(i + 1);
+            if (groups[i] == null)
+                groups[i] = "";
+        }
 
         return groups;
     }

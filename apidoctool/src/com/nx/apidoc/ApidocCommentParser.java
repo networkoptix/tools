@@ -90,7 +90,7 @@ public final class ApidocCommentParser
         return function;
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     /**
      * @return Null if the comment should not convert to an XML function.
@@ -101,51 +101,48 @@ public final class ApidocCommentParser
         String expectedFunctionName)
         throws Error
     {
-        if (parser.getItem() == null ||
-            !TAG_APIDOC.equals(parser.getItem().getTag()))
+        if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
         {
-            throw new Error("Comment should start with " + TAG_APIDOC + " tag" +
-                " in function " + expectedFunctionName + ".");
+            throw new Error("Comment should start with " + TAG_APIDOC + " tag in function "
+                + expectedFunctionName + ".");
         }
 
-        String[] values = Utils.matchRegex(
-            functionHeaderRegex, parser.getItem().getFullText());
+        String[] values = Utils.matchRegex(functionHeaderRegex, parser.getItem().getFullText());
         if (values == null)
         {
-            throw new Error("Wrong " + TAG_APIDOC + " function header" +
-                " in function " + expectedFunctionName + ".");
+            throw new Error("Wrong " + TAG_APIDOC + " function header in function "
+                + expectedFunctionName + ".");
         }
 
-        final String urlPrefix = values[1] == null ? "" : values[1];
+        // TODO: #mike: Fix: Produce an error for missing function name.
+        final String urlPrefix = values[1];
+        if (urlPrefix.isEmpty())
+        {
+            throw new Error("URL prefix (e.g. \"" + expectedUrlPrefix
+                + "\") is missing in function " + expectedFunctionName + ".");
+        }
         if (!urlPrefix.equals(expectedUrlPrefix))
             return null; //< The function belongs to a different group.
 
         Apidoc.Function function = new Apidoc.Function();
 
-        function.name = values[2] == null ? "" : values[2];
+        function.name = values[2];
         if (!function.name.equals(expectedFunctionName))
         {
-            throw new Error(TAG_APIDOC + " function name \"" + function.name +
-                "\" does not match C++ code" +
-                " in function " + expectedFunctionName + ".");
+            throw new Error(TAG_APIDOC + " function name \"" + function.name
+                + "\" does not match C++ code in function " + expectedFunctionName + ".");
         }
 
-        function.method = values[0] == null ? "" : values[0].trim();
+        function.method = values[0].trim();
         function.description = new Apidoc.Description();
         function.description.xml = values[3].trim();
 
         if ("".equals(parser.getItem().getAttribute()))
-        {
             function.proprietary = false;
-        }
         else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
-        {
             function.proprietary = true;
-        }
         else
-        {
             throwInvalidAttribute(parser, function.name);
-        }
 
         return function;
     }
@@ -209,6 +206,12 @@ public final class ApidocCommentParser
         {
             if (TAG_VALUE.equals(parser.getItem().getTag()))
             {
+                // ATTENTION: Currently, [proprietary] params are ignored, until supported in XML.
+                if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
+                {
+                    parser.parseNextItem();
+                    continue;
+                }
                 checkNoAttribute(parser, function.name);
                 Apidoc.Value value = new Apidoc.Value();
                 value.name = getInitialToken(parser, function.name);
@@ -393,8 +396,7 @@ public final class ApidocCommentParser
         ApidocTagParser parser, String functionName)
         throws Error
     {
-        final String attribute = parser.getItem().getAttribute();
-        throw new Error("An attribute [" + attribute + "]" +
+        throw new Error("The attribute " + parser.getItem().getAttribute() +
             " is not allowed after the tag " + parser.getItem().getTag() +
             " in function " + functionName + ".");
     }
@@ -403,13 +405,8 @@ public final class ApidocCommentParser
         ApidocTagParser parser, String functionName)
         throws Error
     {
-        final String attribute = parser.getItem().getAttribute();
-        if (!attribute.isEmpty())
-        {
-            throw new Error("The [" + attribute + "]" +
-                " is not allowed after the tag " + parser.getItem().getTag() +
-                " in function " + functionName + ".");
-        }
+        if (!parser.getItem().getAttribute().isEmpty())
+            throwInvalidAttribute(parser, functionName);
     }
 
     private static String getInitialToken(
@@ -428,8 +425,10 @@ public final class ApidocCommentParser
         return initialToken;
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
         "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w+)(.*)", Pattern.DOTALL);
+      //     0HttpMthd        1UrlPre   2FnNm 3Txt
+      //       GET             /ec2     getRe \nRe
 }

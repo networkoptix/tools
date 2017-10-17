@@ -24,17 +24,21 @@ public final class ApidocTagParser
         private final String initialTokenUntrimmed;
         private final String textAfterInitialToken;
 
-        protected Item(String tag, String attribute,
-            String initialTokenUntrimmed, String textAfterInitialToken)
+        protected Item(
+            String tag,
+            String attribute,
+            String initialTokenUntrimmed,
+            String textAfterInitialToken)
         {
             assert tag != null;
             assert !tag.isEmpty();
             this.tag = tag;
 
-            this.attribute = attribute == null ? "" : attribute;
+            assert(attribute != null);
+            this.attribute = attribute;
 
-            this.initialTokenUntrimmed =
-                initialTokenUntrimmed == null ? "" : initialTokenUntrimmed;
+            assert(initialTokenUntrimmed != null);
+            this.initialTokenUntrimmed = initialTokenUntrimmed;
 
             assert textAfterInitialToken != null;
             this.textAfterInitialToken = textAfterInitialToken;
@@ -111,7 +115,7 @@ public final class ApidocTagParser
         }
 
         ++line;
-        final String text = values[3] == null ? "" : values[3];
+        final String text = values[3];
         StringBuilder b = new StringBuilder(text.trim());
 
         while (line < lines.size())
