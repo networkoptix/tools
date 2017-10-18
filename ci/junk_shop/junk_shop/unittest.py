@@ -20,7 +20,7 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
 
 
-ARTIFACT_LINE_COUNT_LIMIT = 10000
+ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
 
 LOG_PATTERN = '20\d\d-\d\d-\d\d .+'
