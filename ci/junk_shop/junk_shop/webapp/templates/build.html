@@ -113,7 +113,8 @@
                   <tr>
                     <th>Name</th>
                     <th>Status</th>
-                    <th>Error</th>
+                    <th></th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -124,6 +125,13 @@
                         {{- run.status -}}
                       </td>
                       <td class="error-message">{{ run.run.error_message }}</td>
+                      <td class="output-link">
+                        {% if run.output_artifact_id %}
+                          <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
+                            Output
+                          </a>
+                        {% endif %}
+                      </td>
                     </tr>
                   {% endfor %}
                 </tbody>

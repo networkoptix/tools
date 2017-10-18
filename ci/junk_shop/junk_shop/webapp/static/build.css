@@ -78,3 +78,6 @@ hr {
 	color: #d04c4c;
 	font-size: 13px;
 }
+.test-list .output-link {
+	font-size: 90%;
+}

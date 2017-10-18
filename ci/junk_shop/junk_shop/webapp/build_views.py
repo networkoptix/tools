@@ -11,6 +11,7 @@ class InterestingTestRun(object):
         self.test_name = '/'.join(run.test.path.split('/')[1:])
         self.status = self._make_status_title(run.outcome, run.prev_outcome)
         self.succeeded = run.outcome != 'failed'
+        self.output_artifact_id = self._pick_output_artifact_id(run)
 
     def _make_status_title(self, outcome, prev_outcome):
         title_map = {
@@ -22,6 +23,10 @@ class InterestingTestRun(object):
             ('failed', ''): 'Failed',
             }
         return title_map.get((outcome, prev_outcome), '')
+
+    def _pick_output_artifact_id(self, run):
+        artifact = run.artifacts.filter(lambda artifact: artifact.type.name == 'output').first()
+        return artifact.id if artifact else None
 
 
 class TestsRun(object):
