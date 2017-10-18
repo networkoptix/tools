@@ -4,7 +4,10 @@
 
 {% block contents %}
 
-  <a class="link" href="{{ url_for('branch_list') }}">Branches</a>
+  {{ common_macros.breadcrumbs([
+    ('Projects',  url_for('project_list')),
+  ]) }}
+
   <h2>Runs</h2>
   <hr>
 

@@ -36,15 +36,15 @@
               <a
                 {% if artifact.is_inline %}
                   href="#"
-                  onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('get_artifact', artifact_id=artifact.id) }}')"
+                  onclick="return toggle_artifact_visible(this, {{ artifact.id }}, '{{ artifact.name }}', '{{ url_for('artifact', artifact_id=artifact.id) }}')"
                 {% else %}
-                  href="{{ url_for('get_artifact', artifact_id=artifact.id) }}"
+                  href="{{ url_for('artifact', artifact_id=artifact.id) }}"
                 {% endif %}
                 >
               {{ artifact.name }}
               </a>
               {% if artifact.is_inline %}
-                <a class="permalink" href="{{ url_for('get_artifact', artifact_id=artifact.id) }}">&para;</a>
+                <a class="permalink" href="{{ url_for('artifact', artifact_id=artifact.id) }}">&para;</a>
               {% else %}
                 {% if artifact.disposition == 'inline' %}
                   &rarr;

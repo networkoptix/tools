@@ -7,20 +7,32 @@
 }
 .build-info .title {
 }
-.build-info .value {
-	font-weight: bold;
+.build-info .value, .build-info .markup-value {
 	font-size: 110%;
 	color: #404040;
+}
+.build-info .value {
+	font-weight: bold;
 }
 
 .platform-name {
 	margin: 30px 0 0 0;
+	font-style: italic;
 }
 hr {
 	margin: 5px 0 10px 0;
 }
 
+.platform-build-blocks {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+}
 .build-block {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+.block {
 	padding: 0 0 20px 22px;
 	background-color: #FFF;
 	border: 1px solid #DDD;
@@ -36,10 +48,11 @@ hr {
 .build-block h3 {
 	display: inline-block;
 	margin-bottom: 0;
-	width: 30%;
 }
 .build-block .test-counts {
 	display: inline-block;
+	float: right;
+	padding: 20px 20px 0 20px;
 	font-size: 1.3em;
 	font-weight: bold;
 }

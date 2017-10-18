@@ -13,7 +13,7 @@ def index():
 
 @app.route('/artifact/<int:artifact_id>')
 @db_session
-def get_artifact(artifact_id):
+def artifact(artifact_id):
     artifact = models.Artifact.get(id=artifact_id)
     if artifact.encoding == 'bz2':
         data = bz2.decompress(artifact.data)
