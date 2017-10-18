@@ -87,6 +87,8 @@ class Run(db.Entity):
     build = Optional(Build, index=True)
     test = Optional(Test)
     outcome = Optional(str)
+    # outcome for the same test from lastest build where tests for this project/branch/platform were run
+    prev_outcome = Optional(str)
     error_message = Optional(str)
     started_at = Required(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)

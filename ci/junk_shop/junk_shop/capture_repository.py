@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentTypeError
 import re
 import bz2
-from pony.orm import db_session, commit, flush, select, raw_sql, sql_debug
+from pony.orm import db_session, commit, flush, select, desc, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
 from . import models
 
@@ -281,6 +281,7 @@ class DbCaptureRepository(object):
             run = self.test_run.get(path)
             if not run:
                 run = self.add_run(name, parent_run, test)
+                run.prev_outcome = self._pick_prev_outcome(run) or ''
                 self.test_run[path] = run
         return run
 
@@ -290,6 +291,19 @@ class DbCaptureRepository(object):
             name = path_list[i]
             is_leaf = i == len(path_list) - 1
             yield (path, name, is_leaf)
+
+    def _pick_prev_outcome(self, this_run):
+        if not this_run.root_run or not this_run.root_run.build:
+            return None
+        prev_run = select(prev_run for prev_run in models.Run if
+                          prev_run.root_run.build.project is this_run.root_run.build.project and
+                          prev_run.root_run.build.branch is this_run.root_run.build.branch and
+                          prev_run.root_run.build.build_num < this_run.root_run.build.build_num and
+                          prev_run.root_run.platform is this_run.root_run.platform and
+                          prev_run.test is this_run.test).order_by(desc(1)).first()
+        if not prev_run:
+            return None
+        return prev_run.outcome
 
     def add_artifact(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
         assert run
