@@ -94,7 +94,7 @@ public final class SourceCodeGenerator
             --line; //< Point to the line preceding the deleted "//" line.
 
             final String textToInsert = Utils.stringOfSpaces(indent) +
-                ApidocCommentGenerator.makePrivateTagLine(values[0].trim());
+                ApidocCommentGenerator.makeCommentedOutTagLine(values[0].trim());
 
             comment.add(commentIndexToInsert, textToInsert);
         }

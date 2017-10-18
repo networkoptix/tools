@@ -11,7 +11,7 @@ public abstract class ApidocComment
         "Data format. Default value is \"json\".";
 
     protected static final String TAG_APIDOC = "%apidoc";
-    protected static final String TAG_PRIVATE = "%//";
+    protected static final String TAG_COMMENTED_OUT = "%//";
     protected static final String TAG_CAPTION = "%caption";
     protected static final String TAG_PERMISSIONS = "%permissions";
     protected static final String TAG_PARAM = "%param";

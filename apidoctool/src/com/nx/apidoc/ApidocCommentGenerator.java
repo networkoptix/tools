@@ -13,9 +13,9 @@ public final class ApidocCommentGenerator
 {
     private ApidocCommentGenerator() {}
 
-    public static String makePrivateTagLine(String commentText)
+    public static String makeCommentedOutTagLine(String commentText)
     {
-        return " * " + TAG_PRIVATE + " " + commentText;
+        return " * " + TAG_COMMENTED_OUT + " " + commentText;
     }
 
     public static List<String> makeMainCommentFrom(Apidoc.Function function,

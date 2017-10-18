@@ -76,7 +76,7 @@ public final class ApidocCommentParser
                 returnParsed = checkTagOnce(returnParsed, function.name, TAG_RETURN);
                 parseFunctionResult(parser, function);
             }
-            else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
+            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
             {
                 // Ignore: this comment part is not intended for XML.
                 parser.parseNextItem();
@@ -220,7 +220,7 @@ public final class ApidocCommentParser
                 param.values.add(value);
                 parser.parseNextItem();
             }
-            else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
+            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
             {
                 // Ignore: this comment part is not intended for XML.
                 parser.parseNextItem();
@@ -289,7 +289,7 @@ public final class ApidocCommentParser
                 deprecatedAttributeTagFound = true;
                 parseFunctionResultAttributeDeprecated(parser, function);
             }
-            else if (TAG_PRIVATE.equals(parser.getItem().getTag()))
+            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
             {
                 // Ignore: this comment part is not intended for XML.
                 parser.parseNextItem();
