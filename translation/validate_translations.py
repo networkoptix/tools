@@ -133,9 +133,6 @@ def validateXml(root, filename):
         warn(u'Source Language is {0}'.format(sourcelanguage))
 
     suffix = language + '.ts'
-    #if not filename.endswith(suffix):
-    #    result.error += 1
-    #    err(u'Invalid Locale code {0} for file {1}'.format(language, filename))
 
     for context in root:
         contextName = context.find('name').text
@@ -177,7 +174,7 @@ def validate(path):
     result = validateXml(root, name)
 
     if result.error > 0:
-        err('{0}: {1} errors found'.format(name, result.error))
+        err('{0}: {1} errors found\n\n'.format(name, result.error))
 
     if verbose:
         if result.unfinished > 0:
