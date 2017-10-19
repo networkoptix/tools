@@ -45,6 +45,12 @@ errorsOnly = False
 def printCritical(text, context, filename):
     err(u'*** Context: {0} ***\n{1}'.format(context, text))
 
+def printWarning(text, context, filename):
+    warn(u'*** Context: {0} ***\n{1}'.format(context, text))
+
+def printInfo(text, context, filename):
+    info(u'*** Context: {0} ***\n{1}'.format(context, text))
+
 class ValidationResult():
     error = 0
     warned = 0
@@ -107,10 +113,16 @@ def checkText(source, target, context, result):
 
     return result;
 
+
 def handleRuleError(rule, context, filename, result):
     if rule.level() == Levels.CRITICAL:
         result.error += 1
         printCritical(rule.last_error_text(), context, filename)
+    elif rule.level() == Levels.WARNING:
+        result.warned += 1
+        printWarning(rule.last_error_text(), context, filename)
+    elif rule.level() == Levels.INFO:
+        printInfo(rule.last_error_text(), context, filename)
 
 
 def handleRule(message, rule, contextName, filename, result):
@@ -148,6 +160,8 @@ def validateXml(root, filename):
                 continue
 
             for rule in get_validation_rules():
+                if errorsOnly and rule.level() != Levels.CRITICAL:
+                    continue
                 handleRule(message, rule, contextName, filename, result)
 
             hasNumerusForm = False

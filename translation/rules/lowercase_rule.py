@@ -13,7 +13,7 @@ class LowercaseRule(ValidationRule):
         return "<LowercaseRule>"
 
     def level(self):
-        return Levels.CRITICAL
+        return Levels.INFO
 
     def valid_text(self, text):
         for msg in exceptions:

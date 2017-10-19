@@ -12,7 +12,7 @@ class AtLeastOneAlphaRule(ValidationRule):
         return "<AtLeastOneAlphaRule>"
 
     def level(self):
-        return Levels.CRITICAL
+        return Levels.WARNING
 
     @staticmethod
     def ignore(contextName, message):

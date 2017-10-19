@@ -14,7 +14,7 @@ class TheSubjectRule(ValidationRule):
         return "<TheSubjectRule>"
 
     def level(self):
-        return Levels.CRITICAL
+        return Levels.INFO
 
     def valid_text(self, text):     
         if not the in text.lower():

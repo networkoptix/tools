@@ -2,6 +2,8 @@ import re
 
 class Levels:
     CRITICAL = "critical"
+    WARNING = "warning"
+    INFO = "info"
 
 class ValidationRule:
     def __init__(self):

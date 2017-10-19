@@ -8,7 +8,7 @@ class ContractionsRule(ValidationRule):
         return "<ContractionsRule>"
 
     def level(self):
-        return Levels.CRITICAL
+        return Levels.WARNING
 
     def valid_text(self, text):
         apos = '\''

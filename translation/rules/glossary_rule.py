@@ -23,6 +23,7 @@ exclusions = [
     'system administrator',
     'system partitions',
     'system presets',
+    'operating system',
     '<b>']
 
 class GlossaryRule(ValidationRule):
@@ -33,7 +34,7 @@ class GlossaryRule(ValidationRule):
         return "<GlossaryRule>"
 
     def level(self):
-        return Levels.CRITICAL
+        return Levels.INFO
 
     def valid_text(self, text):
         for exclusion in exclusions:
