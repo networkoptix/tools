@@ -8,7 +8,8 @@ case_sensitive = [
     'the Internet',
     'the support team',
     'System', "Systems",
-    'B', 'kB', 'MB', 'GB', 'TB'
+    'B', 'KB', 'MB', 'GB', 'TB',
+    'kHz'
     ]
 
 invalid_terms = {

@@ -35,14 +35,12 @@ sys.path.pop(0)
 
 critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '<b>', '<b/>']
 warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
-numerus = ['%n']
 substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
 
 verbose = False
 strict = False
 language = None
 errorsOnly = False
-translationsOnly = False
 
 def printCritical(text, context, filename):
     err(u'*** Context: {0} ***\n{1}'.format(context, text))
@@ -76,19 +74,11 @@ def checkSymbol(symbol, source, target, context, out):
 
     return valid
 
-def checkText(source, target, context, result, index, hasNumerusForm):
+def checkText(source, target, context, result):
     if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
         if target and target != source:
             err(u'Invalid shortcut translation form \nContext: {0}\nSource: {1}\nTarget: {2}'.format(context, source, target))
             result.error += 1
-
-    for symbol in numerus:
-        isNumerus = source.count(symbol)
-        if (isNumerus and not hasNumerusForm) or (hasNumerusForm and not isNumerus and index > 1):
-            if not errorsOnly:
-                warn(u'Invalid numerus form \nContext: {0}\nSource: {1}'.format(context, source))
-            result.warned += 1
-            break
 
     for symbol in critical:
         if not checkSymbol(symbol, source, target, context, err):
@@ -122,12 +112,12 @@ def handleRuleError(rule, context, filename, result):
         result.error += 1
         printCritical(rule.last_error_text(), context, filename)
 
-def handleRule(rule, context, filename, source, translation, result):
-    if not translationsOnly and not rule.valid_source(source):
-        handleRuleError(rule, context, filename, result)
 
-    if not rule.valid_translations(source, translation):
-        handleRuleError(rule, context, filename, result)
+def handleRule(message, rule, contextName, filename, result):
+    source = message.find('source')
+    translation = message.find('translation')
+    if not rule.valid_message(contextName, message):
+        handleRuleError(rule, contextName, filename, result)
 
 
 def validateXml(root, filename):
@@ -143,9 +133,9 @@ def validateXml(root, filename):
         warn(u'Source Language is {0}'.format(sourcelanguage))
 
     suffix = language + '.ts'
-    if not filename.endswith(suffix):
-        result.error += 1
-        err(u'Invalid Locale code {0} for file {1}'.format(language, filename))
+    #if not filename.endswith(suffix):
+    #    result.error += 1
+    #    err(u'Invalid Locale code {0} for file {1}'.format(language, filename))
 
     for context in root:
         contextName = context.find('name').text
@@ -161,27 +151,17 @@ def validateXml(root, filename):
                 continue
 
             for rule in get_validation_rules():
-                handleRule(rule, contextName, filename, source.text, translation, result)
+                handleRule(message, rule, contextName, filename, result)
 
             hasNumerusForm = False
-            index = 0
             for numerusform in translation.iter('numerusform'):
                 hasNumerusForm = True
-                index = index + 1
                 if not numerusform.text:
                     continue;
-                result = checkText(source.text, numerusform.text, contextName, result, index, hasNumerusForm)
-
-            if hasNumerusForm:
-                forms = [numerusform for numerusform in translation.iter('numerusform') if numerusform.text]
-                filled = len([numerusform for numerusform in translation.iter('numerusform') if numerusform.text])
-                if filled > 0 and filled != index:
-                    result.error += 1
-                    err(u'Incomplete numerus translation:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
-                    err(u'Filled {0} of {1} numerus forms'.format(filled, index))
+                result = checkText(source.text, numerusform.text, contextName, result)
 
             if not hasNumerusForm:
-                result = checkText(source.text, translation.text, contextName, result, index, hasNumerusForm)
+                result = checkText(source.text, translation.text, contextName, result)
                 if printAll and translation.text and not (source.text == translation.text):
                     info(u'\n\nTranslation string:\nContext: {0}\nSource: {1}\nTarget: {2}'.format(contextName, source.text, translation.text))
 
@@ -237,7 +217,6 @@ def main():
     parser.add_argument('-s', '--strict', action='store_true', help="strict check en_US translation")
     parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")
     parser.add_argument('-l', '--language', help="check only selected language")
-    parser.add_argument('-to', '--translations-only', action='store_true', help="check only translations")
     args = parser.parse_args()
 
     global verbose
@@ -251,9 +230,6 @@ def main():
 
     global errorsOnly
     errorsOnly = args.errors_only
-
-    global translationsOnly
-    translationsOnly = args.translations_only
 
     if args.color:
         init_color()

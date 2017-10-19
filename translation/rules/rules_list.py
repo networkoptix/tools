@@ -7,6 +7,7 @@ from leading_trailing_symbols_rule import LeadingTrailingSymbolsRule
 from at_least_one_alpha_rule import AtLeastOneAlphaRule
 from the_subject_rule import TheSubjectRule
 from lowercase_rule import LowercaseRule
+from numerus_form_rule import NumerusFormRule
 
 def get_validation_rules():
     yield ForbiddenSymbolsRule()
@@ -16,6 +17,7 @@ def get_validation_rules():
     yield AtLeastOneAlphaRule()
     yield TheSubjectRule()
     yield LowercaseRule()
+    yield NumerusFormRule()
 
 if __name__ == "__main__":
     for rule in get_validation_rules():

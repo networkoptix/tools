@@ -10,13 +10,16 @@ class ContractionsRule(ValidationRule):
     def level(self):
         return Levels.CRITICAL
 
-    def valid_source(self, source):
+    def valid_text(self, text):
         apos = '\''
-        if not apos in source:
+        if not apos in text:
             return True
 
-        for word in (w for w in source.split(' ') if apos in w):
-            self.lastErrorText = u"Invalid contraction found in:\n\"{0}\"".format(source)
+        for word in (w for w in text.split(' ') if apos in w):
+            self.lastErrorText = u"Invalid contraction found in:\n\"{0}\"".format(text)
             return False
         
+        return True
+
+    def valid_translations(self, contextName, message):
         return True
