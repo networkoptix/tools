@@ -61,48 +61,68 @@ class GoogleTestParser(object):
 
     def _match_line(self, line):
         if self.current_test:
-            mo = re.match(r'^(.+)?\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.*?)( \((\d+) ms\))?$'
-                          % (self.current_suite, self.current_test), line)
-            if mo:
-                # handle log/output lines interleaved with gtest output:
-                if mo.group(1) or mo.group(3) or mo.group(4):
-                    self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or '') + (mo.group(4) or ''))
-                self._handler.on_test_stop(mo.group(2), mo.group(6))
-                self._handler.on_stdout_line(line)
-                self.current_test = None
+            if self._match_test_finish_signature(line):
                 return True
         elif self.current_suite:
-            mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self.current_suite, line)
-            if mo:
-                if self.current_test:
-                    self._parse_error('test closing tag is missing', line, suite, test)
-                test_name = mo.group(1)
-                self._handler.on_stdout_line(line)
-                self._handler.on_test_start(test_name)
-                self.current_test = test_name
+            if self._match_test_start_signature(line):
                 return True
         if self.current_suite:
-            mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self.current_suite, line)
-            if mo:
-                if self.current_test:
-                    self._parse_error('test closing tag is missing', line)
-                    self._handler.on_test_stop(None, None)
-                    self.current_test = None
-                self._handler.on_suite_stop(mo.group(1))
-                self._handler.on_stdout_line(line)
-                self.current_suite = None
+            if self._match_suite_finish_signature(line):
                 return True
         else:
-            mo = re.match(r'^(.+)?\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(.+)?$', line)
-            if mo:
-                if mo.group(1) or mo.group(3):  # handle log/output lines interleaved with gtest output
-                    self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or ''))
-                suite_name = mo.group(2)
-                self._handler.on_stdout_line(line)
-                self._handler.on_suite_start(suite_name)
-                self.current_suite = suite_name
+            if self._match_suite_start_signature(line):
                 return True
         return False
+
+    def _match_test_finish_signature(self, line):
+        mo = re.match(r'^(.+)?\[\s+(OK|FAILED)\s+\] (.+)?%s\.%s(.*?)( \((\d+) ms\))?$'
+                      % (self.current_suite, self.current_test), line)
+        if not mo:
+            return False
+        # handle log/output lines interleaved with gtest output:
+        if mo.group(1) or mo.group(3) or mo.group(4):
+            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or '') + (mo.group(4) or ''))
+        self._handler.on_test_stop(mo.group(2), mo.group(6))
+        self._handler.on_stdout_line(line)
+        self.current_test = None
+        return True
+
+    def _match_test_start_signature(self, line):
+        mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self.current_suite, line)
+        if not mo:
+            return False
+        if self.current_test:
+            self._parse_error('test closing tag is missing', line, suite, test)
+        test_name = mo.group(1)
+        self._handler.on_stdout_line(line)
+        self._handler.on_test_start(test_name)
+        self.current_test = test_name
+        return True
+
+    def _match_suite_finish_signature(self, line):
+        mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self.current_suite, line)
+        if not mo:
+            return False
+        if self.current_test:
+            self._parse_error('test closing tag is missing', line)
+            self._handler.on_test_stop(None, None)
+            self.current_test = None
+        self._handler.on_suite_stop(mo.group(1))
+        self._handler.on_stdout_line(line)
+        self.current_suite = None
+        return True
+
+    def _match_suite_start_signature(self, line):
+        mo = re.match(r'^(.+)?\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(.+)?$', line)
+        if not mo:
+            return False
+        if mo.group(1) or mo.group(3):  # handle log/output lines interleaved with gtest output
+            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or ''))
+        suite_name = mo.group(2)
+        self._handler.on_stdout_line(line)
+        self._handler.on_suite_start(suite_name)
+        self.current_suite = suite_name
+        return True
 
     def _parse_error(self, desc, line=None, parsed_suite=None, parsed_test=None):
         error = ('%s: current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
