@@ -7,19 +7,28 @@ function toggle_children_visible(link, run_id, children_load_request_path) {
 		var ajax_loading_error_div = li.querySelector('.ajax-loading-error');
 		load_run_children(link, children_ul, ajax_loading_error_div, run_id, children_load_request_path);
 	}
-	if ( children_ul.style.display == 'none' ) {
-		children_ul.style.display = 'block';
-		link.classList.remove('run-collapsed');
-		link.classList.add('run-expanded');
-	}
-	else {
-		children_ul.style.display = 'none';
-		link.classList.add('run-collapsed');
-		link.classList.remove('run-expanded');
-	}
+	if ( children_ul.style.display == 'none' )
+		expand_li(li);
+	else
+		collapse_li(li);
 	return false;
 }
 
+function expand_li(li) {
+	var ul = li.querySelector('ul');
+	var a = li.querySelector('a');
+	ul.style.display = 'block';
+	a.classList.remove('run-collapsed');
+	a.classList.add('run-expanded');
+}
+
+function collapse_li(li) {
+	var ul = li.querySelector('ul');
+	var a = li.querySelector('a');
+	ul.style.display = 'none';
+	a.classList.add('run-collapsed');
+	a.classList.remove('run-expanded');
+}
 
 function load_run_children(link, children_ul, ajax_loading_error_div, run_id, children_load_request_path)
 {
@@ -118,4 +127,25 @@ function make_artifact_element(artifact_id, artifact_name, contents) {
 	fieldset.appendChild(div);
 
 	return fieldset;
+}
+
+function ensure_run_is_visible(hash) {
+	var run_id = hash.replace('#', '');
+	if (!run_id)
+		return;
+	var target_li = document.getElementById(run_id);
+	target_li.classList.add('selected-target');
+	// open parents
+	for ( var li = target_li; li; ) {
+		expand_li(li);
+		if (li.parentNode)
+			li = li.parentNode.closest('li');
+	}
+	// open children
+	target_li.querySelectorAll('li').forEach(function(li) {
+		expand_li(li);
+	});
+	setTimeout(function(){
+		target_li.scrollIntoView({block: 'center'});
+	}, 0);
 }

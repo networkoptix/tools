@@ -120,7 +120,11 @@
                 <tbody>
                   {% for run in tests_run.run_list %}
                     <tr>
-                      <td>{{ run.test_name }}</td>
+                      <td>
+                        <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
+                          {{ run.test_name }}
+                        </a>
+                      </td>
                       <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
                         {{- run.status -}}
                       </td>

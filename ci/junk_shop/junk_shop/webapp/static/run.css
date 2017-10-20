@@ -119,6 +119,13 @@ ul {
         font-weight: bold;
 }
 
+.selected-target::before {
+	content: url('right-arrow-24.png');
+	margin-left: -50px;
+	margin-top: -3px;
+	float: left;
+}
+
 //===================================================================================================
 
 .xrun-list li::before {

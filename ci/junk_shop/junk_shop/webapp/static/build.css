@@ -81,3 +81,8 @@ hr {
 .test-list .output-link {
 	font-size: 90%;
 }
+
+.test-link {
+	text-decoration: none;
+	color: #333333;
+}

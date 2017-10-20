@@ -7,6 +7,11 @@
 {% block head %}
   {{ super() }}
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='run.css') }}">
+  <script>
+    window.addEventListener('load', function() {
+      ensure_run_is_visible(window.location.hash);
+    });
+  </script>
 {% endblock head %}
 
 
