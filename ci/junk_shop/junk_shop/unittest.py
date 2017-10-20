@@ -18,12 +18,11 @@ from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
+from junk_shop.google_test_parser import GoogleTestEventHandler, GoogleTestParser
 
 
 ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
-
-LOG_PATTERN = '20\d\d-\d\d-\d\d .+'
 
 GTEST_ARGUMENTS = [
     '--gtest_filter=-NxCritical.All3',
@@ -44,7 +43,7 @@ def add_core_artifacts(platform, repository, binary_path, run, artifact_path):
         repository.add_artifact(run, '%s-bt' % fname, '%s-bt' % fname, repository.artifact_type.traceback, backtrace, is_error=True)
 
 
-class TestProcess(object):
+class TestProcess(GoogleTestEventHandler):
 
 
     class Level(object):
@@ -128,9 +127,7 @@ class TestProcess(object):
         self._pipe = None
         self._threads = []
         self._levels = [self.Level(self._repository, self._root_run, self._test_name)]  # Level list, [global, suite, test]
-        self._current_suite = None
-        self._current_test = None
-        self._last_stdout_line = None
+        self._parser = GoogleTestParser(self)
         self._started_at = None
         self.my_core_files = set()
 
@@ -204,102 +201,49 @@ class TestProcess(object):
         for line in f:
             processor(line.rstrip('\r\n'))
 
+    def _process_stderr_line(self, line):
+        #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
+        self._levels[-1].add_stderr_line(line)
+
     def _process_stdout_line(self, line):
         #if not self._current_test:
         #print '%s %s %s stdout: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
         self._levels[0].add_full_stdout_line(line)
-        if not self._match_gtest_message(line):
-            if line or self._current_suite:
-                self._levels[-1].add_stdout_line(line)
-        self._last_stdout_line = line
+        self._parser.process_line(line)
 
-    def _match_gtest_message(self, line):
-        if self._match_gtest_message_to_line(line):
-            return True
-        if not self._last_stdout_line:
-            return False
-        return self._match_gtest_message_to_line(self._last_stdout_line + line)
-
-    def _match_gtest_message_to_line(self, line):
-        if self._current_test:
-            mo = re.match(r'^(%s)?\[\s+(OK|FAILED)\s+\] (%s)?%s\.%s(%s)?( \((\d+) ms\))?$'
-                          % (LOG_PATTERN, LOG_PATTERN, self._current_suite, self._current_test, LOG_PATTERN), line)
-            if mo:
-                # handle log/output lines interleaved with gtest output:
-                if mo.group(3):
-                    self._levels[-1].add_stdout_line(mo.group(3))
-                if mo.group(4):
-                    self._levels[-1].add_stdout_line(mo.group(4))
-                self._process_test_stop(line, mo.group(2), mo.group(6))
-                return True
-        elif self._current_suite:
-            mo = re.match(r'^\[\s+RUN\s+\] %s\.(\w+)$' % self._current_suite, line)
-            if mo:
-                self._process_test_start(line, mo.group(1))
-                return True
-        if self._current_suite:
-            mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self._current_suite, line)
-            if mo:
-                self._process_suite_stop(line, mo.group(1))
-                return True
-        else:
-            mo = re.match(r'^\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(%s)?$' % LOG_PATTERN, line)
-            if mo:
-                if mo.group(2):  # handle log/output lines interleaved with gtest output
-                    self._levels[-1].add_stdout_line(mo.group(3))
-                self._process_suite_start(mo.group(1))
-                return True
-        return False
-
-    def _parse_error(self, desc, line, suite, test=None):
-        error = ('%s: binary: %s, current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
-                 % (desc, self._test_name, self._current_suite, self._current_test, suite, test, line))
+    def on_parse_error(self, error):
+        message = '%s: %s' % (self._test_name, error)
         if self._levels:
-            self._levels[0].add_parse_error(error)
+            self._levels[0].add_parse_error(message)
         else:
-            print 'parse error: %s' % error
+            print 'parse error: %s' % message
 
-    def _process_test_start(self, line, test):
-        if self._current_test:
-            self._parse_error('test closing is missing', line, suite, test)
+    def on_stdout_line(self, line):
         self._levels[-1].add_stdout_line(line)
-        self._levels.append(self.Level(self._repository, self._levels[1].run, self._test_name, self._current_suite, test))
-        self._current_test = test
 
-    def _process_test_stop(self, line, status, duration_ms):
+    def on_suite_start(self, suite_name):
+        self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite_name))
+
+    def on_suite_stop(self, duration_ms):
+        assert len(self._levels) == 2, len(self._levels)
+        level = self._levels.pop()
+        level.report(self._parser.current_suite)
+        level.flush(duration_ms=duration_ms)
+        if not level.passed:
+            self._levels[-1].passed = False
+
+    def on_test_start(self, test_name):
+        self._levels.append(self.Level(
+            self._repository, self._levels[1].run, self._test_name, self._parser.current_suite, test_name))
+
+    def on_test_stop(self, status, duration_ms):
         assert len(self._levels) == 3, len(self._levels)
         passed = status == 'OK'
         level = self._levels.pop()
-        level.report(self._current_suite + '.' + self._current_test)
+        level.report(self._parser.current_suite + '.' + self._parser.current_test)
         level.flush(passed, duration_ms=duration_ms)
-        self._levels[-1].add_stdout_line(line)
-        self._current_test = None
         if not passed:
             self._levels[-1].passed = False
-
-    def _process_suite_start(self, suite):
-        self._levels.append(self.Level(self._repository, self._levels[0].run, self._test_name, suite))
-        self._current_suite = suite
-
-    def _process_suite_stop(self, line, duration_ms):
-        if self._current_test:
-            self._parse_error('test %s closing tag is missing' % self._current_test, line, self._current_suite, self._current_test)
-            assert len(self._levels) == 3, len(self._levels)
-            level = self._levels.pop()
-            level.flush(passed=False)
-            self._current_test = None
-            self._levels[-1].passed = False
-        assert len(self._levels) == 2, len(self._levels)
-        level = self._levels.pop()
-        level.report(self._current_suite)
-        level.flush(duration_ms=duration_ms)
-        self._current_suite = None
-        if not level.passed:
-            self._levels[-1].passed = False
-            
-    def _process_stderr_line(self, line):
-        #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)
-        self._levels[-1].add_stderr_line(line)
 
     @db_session
     def _collect_core_files(self, level):
