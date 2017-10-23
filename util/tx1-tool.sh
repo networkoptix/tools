@@ -52,42 +52,42 @@ $(basename "$0") [--verbose] <command>
 
 Here <command> can be one of the following:
 
-nfs # Mount the box root to $BOX_MNT via NFS.
-sshfs # Mount the box root to $BOX_MNT via SSHFS.
-mount # Mount ~/develop to $BOX_DEVELOP_DIR via sshfs. May require workstation password.
+ nfs # Mount the box root to $BOX_MNT via NFS.
+ sshfs # Mount the box root to $BOX_MNT via SSHFS.
+ mount # Mount ~/develop to $BOX_DEVELOP_DIR via sshfs. May require workstation password.
 
-ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
-tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
-copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
-copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
-copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
-copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
-copy # Copy mediaserver and desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
-copy-all # Copy all mediaserver and desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
-copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
-copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
-server # Copy mediaserver_core lib to the box.
-lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
-ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+ ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
+ tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
+ copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
+ copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
+ copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+ copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+ copy # Copy mediaserver and desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
+ copy-all # Copy all mediaserver and desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+ copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
+ copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
+ server # Copy mediaserver_core lib to the box.
+ lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
+ ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
-ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
-start-s [args] # Run mediaserver exe with [args].
-stop-s # Stop mediaserver via "kill -9".
-start-c [args] # Run desktop_client exe with [args].
-stop-c # Stop desktop_client via "kill -9".
-run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
-run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
-run-tv [args] # Run video_dec_gie with [args].
+ ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+ start-s [args] # Run mediaserver exe with [args].
+ stop-s # Stop mediaserver via "kill -9".
+ start-c [args] # Run desktop_client exe with [args].
+ stop-c # Stop desktop_client via "kill -9".
+ run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
+ run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
+ run-tv [args] # Run video_dec_gie with [args].
 
-tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
-tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
+ tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
+ tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
 
-clean # Delete all build dirs.
-cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
-gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
-build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
+ clean # Delete all build dirs.
+ cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
+ gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
+ build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
 
-so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
+ so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
 }
 
