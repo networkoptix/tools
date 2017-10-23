@@ -86,3 +86,6 @@ hr {
 	text-decoration: none;
 	color: #333333;
 }
+.test-link:hover {
+	text-decoration: underline;
+}

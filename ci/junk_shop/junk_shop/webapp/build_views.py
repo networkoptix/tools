@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, abort
 from pony.orm import db_session, select, desc, count
 from .. import models
 from junk_shop.webapp import app
@@ -52,6 +52,8 @@ def build(project_name, branch_name, build_num):
         build.project.name == project_name and
         build.branch.name == branch_name and
         build.build_num == build_num)
+    if not build:
+        abort(404)
     repository = build.repository_url.split('/')[-1]
     jenkins_build_num = build.jenkins_url.rstrip('/').split('/')[-1]
     changeset_list = list(build.changesets.order_by(desc(1)))

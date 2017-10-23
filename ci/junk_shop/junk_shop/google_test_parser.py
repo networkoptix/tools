@@ -44,10 +44,11 @@ class GoogleTestParser(object):
         self._last_stdout_line = None
 
     def process_line(self, line):
+        line = line.rstrip('\r\n')
         if not self._match_line(line):
             if not self._last_stdout_line or not self._match_line(self._last_stdout_line + line):
                 self._handler.on_stdout_line(line)
-        self._last_stdout_line = line
+                self._last_stdout_line = line
 
     def finish(self):
         if self.current_test:
@@ -116,7 +117,7 @@ class GoogleTestParser(object):
         mo = re.match(r'^(.+)?\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(.+)?$', line)
         if not mo:
             return False
-        if mo.group(1) or mo.group(3):  # handle log/output lines interleaved with gtest output
+        if mo.group(1) or mo.group(4):  # handle log/output lines interleaved with gtest output
             self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or ''))
         suite_name = mo.group(2)
         self._handler.on_stdout_line(line)

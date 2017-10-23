@@ -182,6 +182,7 @@ class TestProcess(GoogleTestEventHandler):
         return_code = self._pipe.wait()
         for thread in self._threads:
             thread.join()  # threads are still reading buffered output after process is already dead
+        self._parser.finish()
         duration = datetime_utc_now() - self._started_at
         while len(self._levels) > 1:
             level = self._levels.pop()
@@ -199,7 +200,7 @@ class TestProcess(GoogleTestEventHandler):
         
     def _read_thread(self, f, processor):
         for line in f:
-            processor(line.rstrip('\r\n'))
+            processor(line)
 
     def _process_stderr_line(self, line):
         #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)

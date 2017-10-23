@@ -1,4 +1,4 @@
-from flask import request, render_template, abort
+from flask import request, render_template
 from pony.orm import db_session, select
 from .. import models
 from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator
