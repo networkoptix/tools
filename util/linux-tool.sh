@@ -88,9 +88,9 @@ do_share() # target_path
 }
 
 # Set global variables depending on the target. Return 1 if the target is not recognized.
-apply_target() # target
+do_get_target() # target
 {
-    TARGET="$1"
+    TARGET="$1" #< Set the global var.
 
     case "$TARGET" in
         linux) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="x64"; BOX=""; ARCH="x64";;
@@ -101,7 +101,10 @@ apply_target() # target
         bananapi) MVN_TARGET_DIR="target-bananapi"; MVN_BUILD_DIR="arm-bananapi"; BOX="bananapi"; ARCH="arm";;
         android) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
         ios) nx-fail "Target \"$TARGET\" is not supported yet.";;
-        *) return 1;;
+        *)
+            unset TARGET
+            return 1
+            ;;
     esac
 }
 
@@ -112,14 +115,14 @@ apply_target() # target
 get_TARGET() # "$1" && shift
 {
     if [ $# != 0 ]; then
-        TARGET="$1"
-        apply_target "$TARGET" && return 0
+        local -r SPECIFIED_TARGET="$1"
+        do_get_target "$SPECIFIED_TARGET" && return 0
     fi
 
     # No recognized target is supplied in $1: trying auto-detect from VMS_DIR being "*-target".
     if [[ "$VMS_DIR" =~ ^.+-([^-]+)$ ]]; then
-        TARGET="${BASH_REMATCH[1]}"
-        apply_target "$TARGET" && return 1 #< No need for the caller to shift args.
+        local -r DETECTED_TARGET="${BASH_REMATCH[1]}"
+        do_get_target "$DETECTED_TARGET" && return 1 #< No need for the caller to shift args.
     fi
 
     nx_fail "Target is unknown: either specify it after the verb, or rename VMS_DIR as *-target."
@@ -542,7 +545,7 @@ main()
             do_build "$@"
             ;;
         cmake)
-            do_gen "$@" && do_build "$1"
+            do_gen "$@" && do_build "$TARGET"
             ;;
         test-installer)
             do_test_installer "$@"
