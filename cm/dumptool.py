@@ -269,7 +269,7 @@ class DumpAnalyzer(object):
         '''Fetches URLs of required resourses.
         '''
         out = self.fetch_url_data(
-            CONFIG['dist_url'], ['''>(%s\-%s[^<]+)<''' % (self.build, self.branch)])
+            CONFIG['dist_url'], ['''>(%s\-%s[^<]*)<''' % (self.build, re.escape(self.branch))])
         if len(out) == 0:
             print "No distributive found for build %s. Dump analyze imposible" % self.build
             return False
