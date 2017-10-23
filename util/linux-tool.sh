@@ -87,6 +87,44 @@ do_share() # target_path
     nx_verbose hg update "$BRANCH" || return $?
 }
 
+# Set global variables depending on the target. Return 1 if the target is not recognized.
+apply_target() # target
+{
+    TARGET="$1"
+
+    case "$TARGET" in
+        linux) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="x64"; BOX=""; ARCH="x64";;
+        tx1) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< tx1 is cmake-only
+        bpi) MVN_TARGET_DIR="target-bpi"; MVN_BUILD_DIR="arm-bpi"; BOX="bpi"; ARCH="arm";;
+        edge1) MVN_TARGET_DIR="target-edge1"; MVN_BUILD_DIR="arm-edge1"; BOX="edge1"; ARCH="arm";;
+        rpi) MVN_TARGET_DIR="target-rpi"; MVN_BUILD_DIR="arm-rpi"; BOX="rpi"; ARCH="arm";;
+        bananapi) MVN_TARGET_DIR="target-bananapi"; MVN_BUILD_DIR="arm-bananapi"; BOX="bananapi"; ARCH="arm";;
+        android) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
+        ios) nx-fail "Target \"$TARGET\" is not supported yet.";;
+        *) return 1;;
+    esac
+}
+
+# [out] TARGET
+# [out] MVN_TARGET_DIR
+# [out] MVN_BUILD_DIR
+# [in] VMS_DIR
+get_TARGET() # "$1" && shift
+{
+    if [ $# != 0 ]; then
+        TARGET="$1"
+        apply_target "$TARGET" && return 0
+    fi
+
+    # No recognized target is supplied in $1: trying auto-detect from VMS_DIR being "*-target".
+    if [[ "$VMS_DIR" =~ ^.+-([^-]+)$ ]]; then
+        TARGET="${BASH_REMATCH[1]}"
+        apply_target "$TARGET" && return 1 #< No need for the caller to shift args.
+    fi
+
+    nx_fail "Target is unknown: either specify it after the verb, or rename VMS_DIR as *-target."
+}
+
 do_mvn() # "$@"
 {
     find_VMS_DIR
@@ -116,28 +154,7 @@ get_CMAKE_BUILD_DIR() # target
     esac
 }
 
-# [out] TARGET
-# [out] MVN_TARGET_DIR
-# [out] MVN_BUILD_DIR
-get_TARGET() # "$1" && shift
-{
-    TARGET="$1"
-    [ -z "$TARGET" ] && nx_fail "Target should be specified as the first arg."
-
-    case "$TARGET" in
-        linux) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="x64"; BOX=""; ARCH="x64";;
-        tx1) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< tx1 is cmake-only
-        bpi) MVN_TARGET_DIR="target-bpi"; MVN_BUILD_DIR="arm-bpi"; BOX="bpi"; ARCH="arm";;
-        edge1) MVN_TARGET_DIR="target-edge1"; MVN_BUILD_DIR="arm-edge1"; BOX="edge1"; ARCH="arm";;
-        rpi) MVN_TARGET_DIR="target-rpi"; MVN_BUILD_DIR="arm-rpi"; BOX="rpi"; ARCH="arm";;
-        bananapi) MVN_TARGET_DIR="target-bananapi"; MVN_BUILD_DIR="arm-bananapi"; BOX="bananapi"; ARCH="arm";;
-        android) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
-        #ios) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< TODO: Support ios.
-        *) nx_fail "Unsupported target [$TARGET].";;
-    esac
-}
-
-do_clean() # target
+do_clean() # [target]
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -170,7 +187,7 @@ do_clean() # target
     done
 }
 
-do_gen() # target [Release] "$@"
+do_gen() # [target] [Release] "$@"
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -197,7 +214,7 @@ do_gen() # target [Release] "$@"
     return "$RESULT"
 }
 
-do_build() # target
+do_build() # [target]
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -209,7 +226,7 @@ do_build() # target
     time nx_verbose cmake --build "$CMAKE_BUILD_DIR" "$@"
 }
 
-do_run_ut() # target [all|TestName] "$@"
+do_run_ut() # [target] [all|TestName] "$@"
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -231,7 +248,7 @@ do_run_ut() # target [all|TestName] "$@"
     return $RESULT
 }
 
-do_apidoc() # target [dev|prod] "$@"
+do_apidoc() # [target] [dev|prod] "$@"
 {
     find_VMS_DIR
     get_TARGET "$1" && shift
@@ -403,7 +420,7 @@ do_test_installer() # "$@"
     get_TARGET "$1" && shift
 
     local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
-    local -r ZIP_MASK="nxwitness-*.zip"
+    local -r ZIP_MASK="nxwitness-*_update*.zip"
     local -r DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
 
     local -i CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
