@@ -99,7 +99,7 @@
               </h3>
               <div class="build-errors">
                 {% for line in failed_builds[platform] %}
-                  {{- line -}} <br>
+                  {{- line -}} <br/>
                 {% endfor %}
               </div>
             </div>
@@ -115,6 +115,13 @@
                 {%- endif -%}
                 </a>
               </h3>
+              {% if (platform, root_run) in error_map %}
+                <div class="run-errors">
+                  {% for error in error_map[(platform, root_run)] %}
+                    {{ error }}<br/>
+                  {% endfor %}
+                </div>
+              {% endif %}
               <div class="test-counts">
                 <span class="passed">{{ tests_run.passed_count }}</span>
                 {% if tests_run.failed_count %}

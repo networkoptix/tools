@@ -129,6 +129,7 @@ class TestProcess(GoogleTestEventHandler):
         self._levels = [self.Level(self._repository, self._root_run, self._test_name)]  # Level list, [global, suite, test]
         self._parser = GoogleTestParser(self)
         self._started_at = None
+        self._aborted = False
         self.my_core_files = set()
 
     def start(self):
@@ -174,6 +175,7 @@ class TestProcess(GoogleTestEventHandler):
             if self._levels:
                 self._levels[0].add_stdout_line(
                     '[ Aborted by timeout, still running after %s seconds ]' % run_duration.total_seconds())
+            self._aborted = True
             self._platform.abort_process(self._pipe)
             self._pipe.wait()
 
@@ -182,12 +184,11 @@ class TestProcess(GoogleTestEventHandler):
         return_code = self._pipe.wait()
         for thread in self._threads:
             thread.join()  # threads are still reading buffered output after process is already dead
-        self._parser.finish()
+        if self._aborted:
+            for level in self._levels:
+                level.add_stdout_line('[ aborted ]')
+        self._parser.finish(self._aborted)
         duration = datetime_utc_now() - self._started_at
-        while len(self._levels) > 1:
-            level = self._levels.pop()
-            level.add_stdout_line('[ aborted ]')
-            level.flush(passed=False)
         level = self._levels.pop()
         level.add_stdout_line('[ return code: %d ]' % return_code)
         has_cores = self._collect_core_files(level)
@@ -403,7 +404,7 @@ def main():
         runner.start()
         runner.wait()
     except Exception as x:
-        runner.add_error('Internal error: %s' % x)
+        runner.add_error('Internal unittest.py error: %r' % x)
         raise
     finally:
         runner.finalize()

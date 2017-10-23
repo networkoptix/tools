@@ -60,6 +60,12 @@ hr {
 	margin-top: 20px;
 }
 
+.run-errors {
+	display: inline-block;
+	margin: 0 50px 10px 50px;
+	color: #C22626;
+}
+
 .build-errors {
 	margin-top: 15px;
 	font-size: 90%;

@@ -10,6 +10,8 @@ SEVERITY_PATTERNS = [
     (r':\s+undefined reference to', 'error'),
     (r'\s+Error\s+\d+', 'error'),
     (r':\d+:\d+:\s+warning:', 'warning'),
+    (r':\d+: Warning:', 'warning'),  # [INFO] {standard input}:50870: Warning: end of file not at end of a line; newline inserted
+    (r':\d+: Error:', 'error'),      # [INFO] {standard input}:51067: Error: unknown pseudo-op: `.lbe293'
     # Windows
     (r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:', 'error'),
     (r':\s+warning\s[A-Z]+\d+\s*:', 'warning'),

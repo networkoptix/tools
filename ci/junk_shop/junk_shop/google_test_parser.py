@@ -1,5 +1,6 @@
 #!/bin/env python
 # parse output of google tests
+# TODO: parse errors
 
 import abc
 import re
@@ -50,13 +51,15 @@ class GoogleTestParser(object):
                 self._handler.on_stdout_line(line)
                 self._last_stdout_line = line
 
-    def finish(self):
+    def finish(self, is_aborted=False):
         if self.current_test:
-            self._parse_error('test closing tag is missing')
+            if not is_aborted:
+                self._parse_error('test closing tag is missing')
             self._handler.on_test_stop(None, None)
             self.current_test = None
         if self.current_suite:
-            self._parse_error('suite closing tag is missing')
+            if not is_aborted:
+                self._parse_error('suite closing tag is missing')
             self._handler.on_suite_stop(None)
             self.current_suite = None
 

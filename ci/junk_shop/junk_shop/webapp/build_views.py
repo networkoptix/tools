@@ -3,7 +3,7 @@ from pony.orm import db_session, select, desc, count
 from .. import models
 from junk_shop.webapp import app
 from .artifact import decode_artifact_data
-from .build_parser import match_output_line
+from .build_output_parser import match_output_line
 
 
 class InterestingTestRun(object):
@@ -55,6 +55,10 @@ def pick_build_errors(artifact):
         if severity == 'error':
             errors.append(line.decode('utf-8'))
     return errors
+
+def artifact_as_lines(artifact):
+    data = decode_artifact_data(artifact)
+    return data.splitlines()
 
 
 @app.route('/project/<project_name>/<branch_name>/<int:build_num>')
@@ -116,7 +120,16 @@ def build(project_name, branch_name, build_num):
             if run.build is build and
             run.name == 'build' and
             run.outcome == 'failed' and
-            artifact.short_name=='output')}
+            artifact.short_name == 'output')}
+    error_map = {
+        (platform, run): artifact_as_lines(artifact)
+        for platform, run, artifact in select(
+            (run.platform, run, artifact)
+            for run in models.Run
+            for artifact in run.artifacts
+            if run.build is build and
+            artifact.short_name == 'errors')}
+    print error_map
     return render_template(
         'build.html',
         build=build,
@@ -130,4 +143,5 @@ def build(project_name, branch_name, build_num):
         platform_to_build_output=platform_to_build_output,
         failed_builds=failed_builds,
         tests_run_map=tests_run_map,
+        error_map=error_map,
         )
