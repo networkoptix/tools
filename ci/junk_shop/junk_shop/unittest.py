@@ -200,7 +200,7 @@ class TestProcess(GoogleTestEventHandler):
         
     def _read_thread(self, f, processor):
         for line in f:
-            processor(line)
+            processor(line.rstrip('\r\n'))
 
     def _process_stderr_line(self, line):
         #print '%s %s %s stderr: %r' % (self._test_name, self._current_suite or '-', self._current_test or '-', line)

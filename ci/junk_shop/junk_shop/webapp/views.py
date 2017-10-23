@@ -1,9 +1,9 @@
-import bz2
 from flask import url_for, redirect
 from pony.orm import db_session
 from .. import models
 from junk_shop.webapp import app
 from .run import artifact_disposition
+from .artifact import decode_artifact_data
 
 
 @app.route('/')
@@ -15,12 +15,7 @@ def index():
 @db_session
 def artifact(artifact_id):
     artifact = models.Artifact.get(id=artifact_id)
-    if artifact.encoding == 'bz2':
-        data = bz2.decompress(artifact.data)
-    elif not artifact.encoding:
-        data = artifact.data
-    else:
-        assert False, 'Unknown artifact encoding: %r' % artifact.encoding
+    data = decode_artifact_data(artifact)
     headers = {
         'Content-Type': artifact.type.content_type,
         'Content-Disposition': '%s; filename="%s%s"' % (

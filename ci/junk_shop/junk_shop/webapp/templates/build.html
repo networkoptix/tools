@@ -90,59 +90,73 @@
         </h2>
         <hr>
         <div class="platform-build-blocks">
-        {% for root_run, tests_run in tests_run_map.get(platform, {})|dictsort %}
-          <div class="build-block block">
-            <h3>
-              <a class="link" href="{{ url_for('run', run_id=root_run.id) }}">
-              {%- if tests_run.stage == 'unit' -%}
-                Unit&nbsp;Tests
-              {%- elif tests_run.stage == 'functional' -%}
-                Functional&nbsp;Tests
-              {%- endif -%}
-              </a>
-            </h3>
-            <div class="test-counts">
-              <span class="passed">{{ tests_run.passed_count }}</span>
-              {% if tests_run.failed_count %}
-                / <span class="failed">{{ tests_run.failed_count }}</span>
+          {% if platform in failed_builds %}
+            <div class="build-block block">
+              <h3>
+                <a class="link" href="{{ url_for('artifact', artifact_id=platform_to_build_output[platform]) }}">
+                  Build errors
+                </a>
+              </h3>
+              <div class="build-errors">
+                {% for line in failed_builds[platform] %}
+                  {{- line -}} <br>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+          {% for root_run, tests_run in tests_run_map.get(platform, {})|dictsort %}
+            <div class="build-block block">
+              <h3>
+                <a class="link" href="{{ url_for('run', run_id=root_run.id) }}">
+                {%- if tests_run.stage == 'unit' -%}
+                  Unit&nbsp;Tests
+                {%- elif tests_run.stage == 'functional' -%}
+                  Functional&nbsp;Tests
+                {%- endif -%}
+                </a>
+              </h3>
+              <div class="test-counts">
+                <span class="passed">{{ tests_run.passed_count }}</span>
+                {% if tests_run.failed_count %}
+                  / <span class="failed">{{ tests_run.failed_count }}</span>
+                {% endif %}
+              </div>
+              {% if tests_run.run_list %}
+                <table class="test-list">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for run in tests_run.run_list %}
+                      <tr>
+                        <td>
+                          <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
+                            {{ run.test_name }}
+                          </a>
+                        </td>
+                        <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
+                          {{- run.status -}}
+                        </td>
+                        <td class="error-message">{{ run.run.error_message }}</td>
+                        <td class="output-link">
+                          {% if run.output_artifact_id %}
+                            <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
+                              Output
+                            </a>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
               {% endif %}
             </div>
-            {% if tests_run.run_list %}
-              <table class="test-list">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for run in tests_run.run_list %}
-                    <tr>
-                      <td>
-                        <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
-                          {{ run.test_name }}
-                        </a>
-                      </td>
-                      <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
-                        {{- run.status -}}
-                      </td>
-                      <td class="error-message">{{ run.run.error_message }}</td>
-                      <td class="output-link">
-                        {% if run.output_artifact_id %}
-                          <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
-                            Output
-                          </a>
-                        {% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% endif %}
-          </div>
-        {% endfor %}
+          {% endfor %}
         </div>
       {% endif %}
     {% endfor %}

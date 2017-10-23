@@ -60,6 +60,13 @@ hr {
 	margin-top: 20px;
 }
 
+.build-errors {
+	margin-top: 15px;
+	font-size: 90%;
+	line-height: 150%;
+	color: #C22626;
+}
+
 .test-list td, .test-list th {
 	text-align: left;
 	padding: 0 10px 0 0;
