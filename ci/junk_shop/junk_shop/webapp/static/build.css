@@ -62,7 +62,7 @@ hr {
 
 .run-errors {
 	display: inline-block;
-	margin: 0 50px 10px 50px;
+	margin: 10px 50px 0 50px;
 	color: #C22626;
 }
 

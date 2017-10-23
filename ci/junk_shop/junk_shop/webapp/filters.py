@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import re
 from jinja2 import Markup, escape
-from ..utils import datetime_utc_now
+from ..utils import datetime_utc_now, timedelta_to_str
 from junk_shop.webapp import app
 
 
@@ -35,7 +35,8 @@ def format_datetime(dt, precise=True):
     return Markup(s)
 
 
-@app.template_filter('format_timedelta')
+format_timedelta = app.template_filter('format_timedelta')(timedelta_to_str)
+
 def format_timedelta(d):
     hours, rem = divmod(d.total_seconds(), 3600)
     minutes, seconds = divmod(rem, 60)

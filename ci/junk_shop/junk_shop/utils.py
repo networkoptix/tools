@@ -26,6 +26,15 @@ def as_local_tz(dt):
     tz = tzlocal.get_localzone()
     return dt.astimezone(tz)
 
+def timedelta_to_str(d):
+    hours, rem = divmod(d.total_seconds(), 3600)
+    minutes, seconds = divmod(rem, 60)
+    if hours:
+        return '%d:%02d:%02d' % (hours, minutes, seconds)
+    if minutes:
+        return '%d:%02d' % (minutes, seconds)
+    return '%d.%03d' % (seconds, d.microseconds/1000)
+
 def status2outcome(passed):
     if passed:
         return 'passed'

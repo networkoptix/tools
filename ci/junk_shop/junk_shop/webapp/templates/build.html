@@ -78,10 +78,10 @@
     {% endif %}
 
     {% for platform in platform_list %}
-      {% if tests_run_map.has_key(platform) or platform_to_build_output.has_key(platform) %}
+      {% if tests_run_map.has_key(platform) or platform_to_build_artifact.has_key(platform) %}
         <h2 class="platform-name">
-          {%- if platform_to_build_output.has_key(platform) -%}
-            <a class="link" href="{{ url_for('artifact', artifact_id=platform_to_build_output[platform]) }}">
+          {%- if platform_to_build_artifact.has_key(platform) -%}
+            <a class="link" href="{{ url_for('run', run_id=platform_to_build_artifact[platform].run.id) }}">
             {{- platform.name -}}
             </a>
           {%- else -%}
@@ -93,7 +93,7 @@
           {% if platform in failed_builds %}
             <div class="build-block block">
               <h3>
-                <a class="link" href="{{ url_for('artifact', artifact_id=platform_to_build_output[platform]) }}">
+                <a class="link" href="{{ url_for('artifact', artifact_id=platform_to_build_artifact[platform].id) }}">
                   Build errors
                 </a>
               </h3>

@@ -14,7 +14,7 @@ import subprocess
 import signal
 import threading
 from pony.orm import db_session, commit
-from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
+from junk_shop.utils import DbConfig, datetime_utc_now, timedelta_to_str, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
@@ -348,7 +348,7 @@ class TestRunner(object):
         return d
 
     def _handle_timeout(self, run_duration):
-        error = 'Timed out after %s seconds; aborted' % run_duration
+        error = 'Timed out after %s seconds; aborted' % timedelta_to_str(run_duration)
         print error
         self._errors.append(error)
         for process in self._processes:

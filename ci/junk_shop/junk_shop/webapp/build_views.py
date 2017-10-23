@@ -103,9 +103,9 @@ def build(project_name, branch_name, build_num):
         tests_run.add_run(run)
         if not started_at or root_run.started_at < started_at:
             started_at = root_run.started_at  # first run for this build
-    platform_to_build_output = {
-        platform: artifact_id for platform, artifact_id in select(
-            (run.platform, artifact.id)
+    platform_to_build_artifact = {
+        platform: artifact for platform, artifact in select(
+            (run.platform, artifact)
             for run in models.Run
             for artifact in run.artifacts
             if run.build is build and
@@ -140,7 +140,7 @@ def build(project_name, branch_name, build_num):
         jenkins_build_num=jenkins_build_num,
         changeset_list=changeset_list,
         platform_list=platform_list,
-        platform_to_build_output=platform_to_build_output,
+        platform_to_build_artifact=platform_to_build_artifact,
         failed_builds=failed_builds,
         tests_run_map=tests_run_map,
         error_map=error_map,
