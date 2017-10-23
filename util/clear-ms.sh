@@ -15,10 +15,16 @@ END
 exit 0
 fi
 
+if [ $WINDIR ]; then
+    DEFAULT_DEVELOP=/c/develop
+else
+    DEFAULT_DEVELOP=$HOME/develop
+fi
+
 set -x -e
 
 ID=${1:-0}
-DIR=${DIR:-$HOME/develop/mediaserver$ID}
+DIR=${DIR:-$DEFAULT_DEVELOP/mediaserver$ID}
 SYS=${SYS:-muskov}
 CONFIG=mediaserver.conf
 
@@ -45,14 +51,20 @@ fi
 
 [ -f $DIR/mediaserver.conf ] && exit 0
 
+if [ $WINDIR ]; then
+    DATA_DIR=${DIR/\/c/c:}
+else
+    DATA_DIR=$DIR
+fi
+
 cat > $DIR/mediaserver.conf <<EOF
 [General]
 appserverPassword=
 authKey=@ByteArray(SK_1267cfbb4010058a2c8e5d2abaf917ed)
-dataDir=$DIR
+dataDir=$DATA_DIR
 guidIsHWID=0
 logLevel=DEBUG2
-logFile=$DIR/log//log_file
+logFile=$DATA_DIR/log/log_file
 lowPriorityPassword=
 publicIPEnabled=1
 removeDbOnStartup=0

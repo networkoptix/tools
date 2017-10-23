@@ -16,8 +16,10 @@ Options:
     V   valgrind args, empty means no valgrind
     VS  valgrind suppressions file (default in devtools/valgrind)
     VT  valgrind tool (modifies V), supported: leak, rw, dhat, mass, call
-    T   use 1 for time  measure
+    T   use 1 for time measure
     Q   specific qt version in library path's
+Notes:
+    Windows support (cygwin, git-bash, etc) is only partial, supported options: R, Q.
 Example:
     run.sh mediaserver -e   # run mediaserver
     R=1 V="--tool=exp-dhat" run.sh client.bin   # run release client under valgrind dhat
@@ -27,11 +29,25 @@ END
 exit 0
 fi
 
+if [ $WINDIR ]; then
+    DEFAULT_DEVELOP=/c/develop
+else
+    DEFAULT_DEVELOP=$HOME/develop
+fi
+
 set -e
 [[ $NOX ]] || set -x
 
-EXTRA=debug/
-[ "$R" ] && EXTRA=release/
+EXTRA=debug
+[ "$R" ] && EXTRA=release
+
+if [ $WINDIR ]; then
+    DIR=$(dirname $(find . -name $1.exe | grep $EXTRA | head -1))
+    PATH=$DEFAULT_DEVELOP/buildenv/packages/windows-x64/qt-${Q:-5.6.1-1}/bin
+    $DIR/$@
+    exit 0
+fi
+
 [ "$L" ] && ulimit -c unlimited
 [ "$VT" ] && V="$($(readlink -f $(dirname "${BASH_SOURCE[0]}")/..)/valgrind/args.sh $VT $1) $V"
 
