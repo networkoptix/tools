@@ -199,7 +199,13 @@ do_gen() # [target] [Release] "$@"
     [ "$1" = "Release" ] && { shift; CONFIGURATION_ARG="-DCMAKE_BUILD_TYPE=Release"; }
 
     get_CMAKE_BUILD_DIR "$TARGET"
-    [ -d "$CMAKE_BUILD_DIR" ] && nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
+    if [ -d "$CMAKE_BUILD_DIR" ]; then
+        nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
+        local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
+        if [ -f "$CMAKE_CACHE" ]; then
+            nx_verbose rm "$CMAKE_CACHE"
+        fi
+    fi
     mkdir -p "$CMAKE_BUILD_DIR"
 
     nx_pushd "$CMAKE_BUILD_DIR"
