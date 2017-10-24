@@ -1,0 +1,13 @@
+export BOX=tx1
+export TOOLCHAIN_PATH=$HOME/develop/buildenv/packages/tx1-arm/gcc-4.8.4 # provided by rdep
+export HOST=arm-linux-gnueabihf
+export CROSS_PREFIX=arm-linux-gnueabihf-
+export ARCH=arm
+export ARCH_SPEC_SUFFIX=v7l
+export TOOLCHAIN_NAME=jetpack
+export TOOLCHAIN_VERSION=2.1
+
+export common_CXXFLAGS="-mfloat-abi=hard"
+export common_CFLAGS="-mfloat-abi=hard"
+export openssl_CFLAGS="-fPIC -shared"
+

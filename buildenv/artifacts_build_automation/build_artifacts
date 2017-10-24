@@ -1226,10 +1226,9 @@ function ffmpeg_prepareMvnArtifact()
 gtest_VERSION=1.7.0
 gtest_PRI_FILE="LIBS += -lgtest -lgtest_main"
 
-# returns list of mirrors separated with ;
 function gtest_getMirrorList()
 {
-    echo "https://googletest.googlecode.com/files/"
+    # gtest sources reside in "nx_vms/artifacts/gtest-<version>/".
     return 0
 }
 
@@ -1243,7 +1242,13 @@ function gtest_generateTarballName()
     local artifactName=$1
     local artifactVersion=$2
 
-    echo "$artifactName-$artifactVersion.zip"
+    #Generating tar.gz
+    mkdir ./$artifactName-$artifactVersion 2>/dev/null
+    cp -rf $THIRD_PARTY_SRC_DIR/$artifactName-$artifactVersion/* ./$artifactName-$artifactVersion/ || return 2
+    tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+
     return 0
 }
 
@@ -1261,9 +1266,12 @@ function gtest_generate_config()
 read -d '' configureGtestScript<<EOF
 #!/bin/bash
 
-./configure --prefix=$gtest_DIR $hostArch \
-    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gtest_CONFIG_OPTIONS \
-    CFLAGS="$gtest_CFLAGS" CXXFLAGS="$gtest_CXXFLAGS"
+cmake . \\\\
+    -DCMAKE_SYSTEM_NAME=Linux \\\\
+    -DCMAKE_SYSTEM_PROCESSOR=aarch64 \\\\
+    -DCMAKE_C_COMPILER="${CROSS_PREFIX}gcc" \\\\
+    -DCMAKE_CXX_COMPILER="${CROSS_PREFIX}g++"
+    # $gtest_CONFIG_OPTIONS CFLAGS="$gtest_CFLAGS" CXXFLAGS="$gtest_CXXFLAGS"
 EOF
 
     echo "$configureGtestScript" > ./config.gtest
@@ -1282,8 +1290,8 @@ function gtest_build()
 
     mkdir -p $INSTALL_DIR/lib/
     cp -rf ./include $INSTALL_DIR
-    cp -rf ./lib/.libs/libgtest.a $INSTALL_DIR/lib/
-    cp -rf ./lib/.libs/libgtest_main.a $INSTALL_DIR/lib/
+    cp -rf ./libgtest.a $INSTALL_DIR/lib/
+    cp -rf ./libgtest_main.a $INSTALL_DIR/lib/
     return 0
 }
 
@@ -1301,8 +1309,6 @@ function gtest_prepareMvnArtifact()
     return 0
 }
 
-
-
 ###############################################################
 ###############################################################
 ########### gmock functions
@@ -1312,10 +1318,9 @@ function gtest_prepareMvnArtifact()
 gmock_VERSION=1.7.0
 gmock_PRI_FILE="LIBS += -lgmock -lgmock_main"
 
-# returns list of mirrors separated with ;
 function gmock_getMirrorList()
 {
-    echo "https://googlemock.googlecode.com/files/"
+    # gtest sources reside in "nx_vms/artifacts/gtest-<version>/".
     return 0
 }
 
@@ -1329,13 +1334,20 @@ function gmock_generateTarballName()
     local artifactName=$1
     local artifactVersion=$2
 
-    echo "$artifactName-$artifactVersion.zip"
+    #Generating tar.gz
+    mkdir ./$artifactName-$artifactVersion 2>/dev/null
+    cp -rf $THIRD_PARTY_SRC_DIR/$artifactName-$artifactVersion/* ./$artifactName-$artifactVersion/ || return 2
+    tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
+
+    echo "$artifactName-$artifactVersion.tar.gz"
+
     return 0
 }
 
 function gmock_generate_config()
 {
     gmock_DIR=$ARTIFACT_BUILD_DIR/gmock-$gmock_VERSION-$TOOLCHAIN_NAME.$TOOLCHAIN_VERSION
+    gmock_SRC=$PWD
 
     if [ $ARCH == x64 ]; then
         local hostArch=
@@ -1346,9 +1358,14 @@ function gmock_generate_config()
 read -d '' configureGtestScript<<EOF
 #!/bin/bash
 
-./configure --prefix=$gmock_DIR $hostArch --with-gtest=$gtest_SRC \
-    CC="$CROSS_PREFIX"gcc CXX="$CROSS_PREFIX"g++ $gmock_CONFIG_OPTIONS \
-    CFLAGS="$gmock_CFLAGS" CXXFLAGS="$gmock_CXXFLAGS"
+ln -s ../gtest-$gtest_VERSION ./gtest
+
+cmake . \\\\
+    -DCMAKE_SYSTEM_NAME=Linux \\\\
+    -DCMAKE_SYSTEM_PROCESSOR=aarch64 \\\\
+    -DCMAKE_C_COMPILER="${CROSS_PREFIX}gcc" \\\\
+    -DCMAKE_CXX_COMPILER="${CROSS_PREFIX}g++"
+    # $gmock_CONFIG_OPTIONS CFLAGS="$gmock_CFLAGS" CXXFLAGS="$gmock_CXXFLAGS"
 EOF
 
     echo "$configureGtestScript" > ./config.gmock
@@ -1367,8 +1384,8 @@ function gmock_build()
 
     mkdir -p $INSTALL_DIR/lib/
     cp -rf ./include $INSTALL_DIR
-    cp -rf ./lib/.libs/libgmock.a $INSTALL_DIR/lib/
-    cp -rf ./lib/.libs/libgmock_main.a $INSTALL_DIR/lib/
+    cp -rf ./libgmock.a $INSTALL_DIR/lib/
+    cp -rf ./libgmock_main.a $INSTALL_DIR/lib/
     return 0
 }
 
@@ -2132,9 +2149,6 @@ ALL_ARTIFACTS=(                 \
 
 ARTIFACTS_TO_BUILD=(${ALL_ARTIFACTS[@]})
 CONFIG_FILE=hdw_cross_build_params
-NETOPTIX_DEV_DIR=$HOME/develop
-VMS_SRC_DIR=$NETOPTIX_DEV_DIR/nx_vms
-THIRD_PARTY_SRC_DIR=$VMS_SRC_DIR/artifacts
 LOG_FILE_PATH=`pwd`/$LOG_FILE_NAME
 TMP_DIR=
 
@@ -2166,6 +2180,12 @@ do
         exit 0
     elif [ "$i" == "--debug" ] ; then
         DEBUG_ON=1
+    elif [[ "$i" =~ "--buildenv=" ]] ; then
+        NETOPTIX_DEV_DIR="`echo $i | sed 's/--buildenv=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--netoptix_src=" ]] ; then
+        VMS_SRC_DIR="`echo $i | sed 's/--netoptix_src=\(.*\)/\1/'`"
+    elif [[ "$i" =~ "--third_party_src=" ]] ; then
+        THIRD_PARTY_SRC_DIR="`echo $i | sed 's/--third_party_src=\(.*\)/\1/'`"
     elif [[ "$i" =~ "--start-over-with=" ]] ; then
         ARTIFACT_TO_START_WITH="`echo $i | sed 's/--start-over-with=\(.*\)/\1/'`"
 
@@ -2222,6 +2242,10 @@ Following are supported: ${ALL_ARTIFACTS[@]}"
     fi
 done
 
+# If the variables are not set above (based on args), assign default values.
+: ${NETOPTIX_DEV_DIR:="$HOME/develop"} # --buildenv
+: ${VMS_SRC_DIR:="$NETOPTIX_DEV_DIR/nx_vms"} # --netoptix_src
+: ${THIRD_PARTY_SRC_DIR:="$VMS_SRC_DIR/artifacts"} # --third_party_src
 
 #loading config file
 if [ ! -e $CONFIG_FILE ]; then
