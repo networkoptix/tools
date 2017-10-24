@@ -150,7 +150,12 @@ do_gen() # "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
 
-    time nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64
+    local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
+    if [ -f "$CMAKE_CACHE" ]; then
+        nx_verbose rm "$CMAKE_CACHE"
+    fi
+
+    nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64
     local RESULT=$?
 
     nx_popd
