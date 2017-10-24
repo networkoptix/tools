@@ -295,10 +295,15 @@ class DbCaptureRepository(object):
     def _pick_prev_outcome(self, this_run):
         if not this_run.root_run or not this_run.root_run.build:
             return None
-        prev_run = select(prev_run for prev_run in models.Run if
-                          prev_run.root_run.build.project is this_run.root_run.build.project and
-                          prev_run.root_run.build.branch is this_run.root_run.build.branch and
-                          prev_run.root_run.build.build_num < this_run.root_run.build.build_num and
+        prev_run = select(prev_run
+                          for prev_run in models.Run
+                          for this_build in models.Build
+                          for prev_build in models.Build if
+                          this_run.root_run.build is this_build and
+                          prev_run.root_run.build is prev_build and
+                          prev_build.project is this_build.project and
+                          prev_build.branch is this_build.branch and
+                          prev_build.build_num < this_build.build_num and
                           prev_run.root_run.platform is this_run.root_run.platform and
                           prev_run.test is this_run.test).order_by(desc(1)).first()
         if not prev_run:
