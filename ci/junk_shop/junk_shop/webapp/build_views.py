@@ -1,3 +1,4 @@
+from collections import namedtuple
 from flask import render_template, abort
 from pony.orm import db_session, select, desc, count
 from .. import models
@@ -6,14 +7,19 @@ from .artifact import decode_artifact_data
 from .build_output_parser import match_output_line
 
 
+# drop starting unit/ or functional/ part
+def make_test_name(test):
+    return '/'.join(test.path.split('/')[1:])
+
 class InterestingTestRun(object):
 
     def __init__(self, run):
-        self.run = run
-        self.test_name = '/'.join(run.test.path.split('/')[1:])
+        self.run = run  # models.Run
+        self.test_name = make_test_name(run.test)
         self.status = self._make_status_title(run.outcome, run.prev_outcome)
         self.succeeded = run.outcome != 'failed'
         self.output_artifact_id = self._pick_output_artifact_id(run)
+        self.traceback_list = []  # models.Artifact list - coredump tracebacks
 
     def _make_status_title(self, outcome, prev_outcome):
         title_map = {
@@ -60,6 +66,24 @@ def artifact_as_lines(artifact):
     data = decode_artifact_data(artifact)
     return data.splitlines()
 
+# have to load them separately as tracebacks are attached to top-level unit test runs, not to leaf ones
+def load_tracebacks(build):
+    traceback_map = {}
+    for platform, root_run, run, test, artifact in select(
+            (root_run.platform, root_run, run, run.test, artifact)
+            for root_run in models.Run
+            for run in models.Run
+            for artifact in run.artifacts
+            if root_run.build is build and
+            run.root_run is root_run and
+            root_run.test.path == 'unit' and
+            artifact.type.name == 'traceback'):
+        test_name = make_test_name(test)
+        itr_map = traceback_map.setdefault((platform, root_run), {})  # test_name -> InterestingTestRun
+        itr = itr_map.setdefault(test_name, InterestingTestRun(run))
+        itr.traceback_list.append(artifact)
+    return traceback_map
+
 
 @app.route('/project/<project_name>/<branch_name>/<int:build_num>')
 @db_session
@@ -103,6 +127,7 @@ def build(project_name, branch_name, build_num):
         tests_run.add_run(run)
         if not started_at or root_run.started_at < started_at:
             started_at = root_run.started_at  # first run for this build
+
     platform_to_build_artifact = {
         platform: artifact for platform, artifact in select(
             (run.platform, artifact)
@@ -110,7 +135,7 @@ def build(project_name, branch_name, build_num):
             for artifact in run.artifacts
             if run.build is build and
             run.name == 'build' and
-            artifact.short_name=='output')}
+            artifact.short_name == 'output')}
     failed_builds = {
         platform: pick_build_errors(artifact)
         for platform, artifact in select(
@@ -129,7 +154,7 @@ def build(project_name, branch_name, build_num):
             for artifact in run.artifacts
             if run.build is build and
             artifact.short_name == 'errors')}
-    print error_map
+    traceback_map = load_tracebacks(build)
     return render_template(
         'build.html',
         build=build,
@@ -144,4 +169,5 @@ def build(project_name, branch_name, build_num):
         failed_builds=failed_builds,
         tests_run_map=tests_run_map,
         error_map=error_map,
+        traceback_map=traceback_map,
         )

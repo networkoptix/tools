@@ -102,3 +102,11 @@ hr {
 .test-link:hover {
 	text-decoration: underline;
 }
+
+.test-list .error-link {
+	color: #C22626;
+	text-decoration: none;
+}
+.test-list .error-link:hover {
+	text-decoration: underline;
+}

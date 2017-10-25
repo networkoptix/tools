@@ -9,6 +9,28 @@
 {% endblock head %}
 
 
+{% macro test_row(root_run, run) %}
+
+  <td>
+    <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
+      {{ run.test_name }}
+    </a>
+  </td>
+  <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
+    {{- run.status -}}
+  </td>
+  <td class="error-message">{{ run.run.error_message }}</td>
+  <td class="output-link">
+    {% if run.output_artifact_id %}
+      <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
+        Output
+      </a>
+    {% endif %}
+  </td>
+
+{% endmacro %}
+
+
 {% block contents %}
 
     {{ common_macros.breadcrumbs([
@@ -128,7 +150,7 @@
                   / <span class="failed">{{ tests_run.failed_count }}</span>
                 {% endif %}
               </div>
-              {% if tests_run.run_list %}
+              {% if tests_run.run_list or (platform, root_run) in traceback_map %}
                 <table class="test-list">
                   <thead>
                     <tr>
@@ -139,24 +161,21 @@
                     </tr>
                   </thead>
                   <tbody>
+                    {% for test_name, run in traceback_map.get((platform, root_run), {})|dictsort %}
+                      <tr>
+                        {{ test_row(root_run, run) }}
+                        <td>
+                          {% for artifact in run.traceback_list %}
+                            <a class="link error-link" href="{{ url_for('artifact', artifact_id=artifact.id) }}">
+                              {{- artifact.short_name -}}
+                            </a>
+                          {% endfor %}
+                        </td>
+                      </tr>
+                    {% endfor %}
                     {% for run in tests_run.run_list %}
                       <tr>
-                        <td>
-                          <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
-                            {{ run.test_name }}
-                          </a>
-                        </td>
-                        <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
-                          {{- run.status -}}
-                        </td>
-                        <td class="error-message">{{ run.run.error_message }}</td>
-                        <td class="output-link">
-                          {% if run.output_artifact_id %}
-                            <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
-                              Output
-                            </a>
-                          {% endif %}
-                        </td>
+                        {{ test_row(root_run, run) }}
                       </tr>
                     {% endfor %}
                   </tbody>
