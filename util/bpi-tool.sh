@@ -5,6 +5,7 @@ nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".
 : ${BOX_MNT="/bpi"}
+: ${BOX_USER="root"}
 : ${BOX_INITIAL_PASSWORD="admin"}
 : ${BOX_PASSWORD="qweasd123"}
 : ${BOX_HOST="bpi"} #< Recommented to add "<ip> bpi" to /etc/hosts.
@@ -118,7 +119,7 @@ EOF
 # Execute a command at the box via ssh, or log in to the box via ssh.
 box() # args...
 {
-    nx_ssh "root" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
+    nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
 }
 
@@ -678,20 +679,26 @@ main()
                 fusermount -u "$BOX_MNT" || exit $?
                 sudo rmdir "$BOX_MNT" || exit $?
             else
-                fusermount -u "$BOX_MNT" 2>/dev/null
-                sudo rmdir "$BOX_MNT" 2>/dev/null
+                if [ -d "$BOX_MNT" ]; then
+                    fusermount -u "$BOX_MNT" 2>/dev/null
+                    sudo rmdir "$BOX_MNT" || exit $?
+                fi
                 sudo mkdir -p "$BOX_MNT" || exit $?
                 sudo chown "$USER" "$BOX_MNT"
 
-                echo "$BOX_PASSWORD" |( \
-                    sshfs root@"$BOX_HOST":/ "$BOX_MNT" \
+                if ! echo "$BOX_PASSWORD" \
+                    |nx_verbose sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
                         -o UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no \
-                        -o nonempty,password_stdin && \
-                            echo "Box mounted via sshfs to $BOX_MNT" )
+                        -o nonempty,password_stdin
+                then
+                    nx_fail "Unable to mount $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT"
+                fi
+                nx_echo "Mounted $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT:"
+                ls "$BOX_MNT"
             fi
             ;;
         passwd)
-            sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "root@$BOX_HOST" \
+            sshpass -p "$BOX_INITIAL_PASSWORD" ssh -t "$BOX_USER@$BOX_HOST" \
                 "(echo \"$BOX_PASSWORD\"; echo \"$BOX_PASSWORD\") |passwd" \
                 || exit $?
             nx_echo "Old box password: $BOX_INITIAL_PASSWORD"
@@ -864,8 +871,8 @@ main()
         copy)
             assert_not_client_only
             assert_not_server_only
-            find_VMS_DIR
             check_box_mounted
+            find_VMS_DIR
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -895,8 +902,8 @@ main()
             ;;
         copy-s)
             assert_not_client_only
-            find_VMS_DIR
             check_box_mounted
+            find_VMS_DIR
 
             mkdir -p "${BOX_MNT}$BOX_LIBS_DIR"
 
@@ -918,8 +925,8 @@ main()
             ;;
         copy-c)
             assert_not_server_only
-            find_VMS_DIR
             check_box_mounted
+            find_VMS_DIR
 
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
 
@@ -936,8 +943,8 @@ main()
             #cp_libs "ffmpeg" "lib/ffmpeg for proxydecoder"
             ;;
         copy-ut)
-            find_VMS_DIR
             check_box_mounted
+            find_VMS_DIR
             cp_libs "*.so*" "all libs except lib/ffmpeg for proxydecoder"
             cp_files "$VMS_DIR/$TARGET_IN_VMS_DIR/bin/$BUILD_CONFIG/*_ut" \
                 "$BOX_MEDIASERVER_DIR/ut" "unit tests" "$VMS_DIR"
