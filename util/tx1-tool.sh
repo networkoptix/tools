@@ -25,13 +25,11 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1-aarch64"} #< Path at the workstation.
+: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at the workstation.
 : ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"} #< Path at the workstation.
 : ${PACKAGE_QT="qt-5.6.2"}
 : ${PACKAGE_QUAZIP="quazip-0.7"}
 : ${PACKAGE_FFMPEG="ffmpeg-3.1.1"}
-: ${PACKAGE_OPENLDAP="openldap-2.4.42"}
-: ${PACKAGE_SASL2="sasl2-2.1.26"}
 : ${PACKAGE_SIGAR="sigar-1.7"}
 
 #--------------------------------------------------------------------------------------------------
@@ -53,7 +51,7 @@ $(basename "$0") [--verbose] <command>
 Here <command> can be one of the following:
 
  nfs # Mount the box root to $BOX_MNT via NFS.
- sshfs # Mount the box root to $BOX_MNT via SSHFS.
+ sshfs [umount] # Mount/unmount the box root to $BOX_MNT via SSHFS.
  mount # Mount ~/develop to $BOX_DEVELOP_DIR via sshfs. May require workstation password.
 
  ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
@@ -62,8 +60,8 @@ Here <command> can be one of the following:
  copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
  copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
  copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
- copy # Copy mediaserver and desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
- copy-all # Copy all mediaserver and desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
+ copy # Copy mediaserver and desktop_client build (libs and bins) to the box $BOX_INSTALL_DIR.
+ copy-all # Copy all mediaserver, desktop_client and artifact files to the box $BOX_INSTALL_DIR.
  copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
  copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
  server # Copy mediaserver_core lib to the box.
@@ -86,6 +84,7 @@ Here <command> can be one of the following:
  cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
  gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
  build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
+ pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 
  so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
 EOF
@@ -98,6 +97,48 @@ box() # args...
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
+}
+
+# Check that $BOX_MNT is likely to refer to the box root.
+check_box_mounted()
+{
+    if [ ! -d "$BOX_MNT/usr" ]; then
+        nx_fail "It seems $BOX_MNT does not refer to the box root dir." \
+            "Use $(basename "$0") sshfs or $(basename "$0") nfs to mount."
+    fi
+}
+
+create_archive() # archive dir command...
+{
+    local -r ARCHIVE=$(readlink -m "$1"); shift #< Absolute path needed because of later "cd".
+    local -r DIR="$1"; shift
+
+    rm -rf "$ARCHIVE" #< Avoid updating an existing archive.
+    echo
+    echo "Creating $ARCHIVE"
+    ( cd "$DIR" && "$@" "$ARCHIVE" * ) #< Subshell prevents "cd" from changing the current dir.
+    echo "Done"
+}
+
+pack_full() # archive
+{
+    local -r ARCHIVE="$1"
+    if [ -z "$ARCHIVE" ]; then
+        nx_fail "Archive name is not specified."
+    fi
+
+    assert_not_client_only
+    assert_not_server_only
+    get_VMS_DIR_and_CMAKE_BUILD_DIR
+
+    local -r BOX_MNT=$(mktemp -d) #< Override global var BOX_MNT for the following copy_... calls.
+
+    copy_libs
+    copy_mediaserver
+    copy_desktop_client
+    copy_package_libs
+
+    create_archive "$ARCHIVE" "$BOX_MNT" tar czf && rm -rf "$MNT_DIR"
 }
 
 get_VMS_DIR_and_CMAKE_BUILD_DIR()
@@ -137,7 +178,9 @@ cp_files() # src_dir file_mask dst_dir
     nx_pushd "$SRC_DIR"
 
     # Here eval expands globs and braces to the array, after we enquote spaces (if any).
+    shopt -s extglob #< Enable extended globs: ?(), *(), +(), @(), !().
     eval FILES_LIST=(${FILE_MASK// /\" \"})
+    shopt -u extglob #< Disable extended globs.
 
     nx_rsync "${FILES_LIST[@]}" "${BOX_MNT}$DST_DIR/" || exit $?
 
@@ -190,6 +233,39 @@ cp_desktop_client_bins() # file_mask [file_mask]...
     for FILE_MASK in "$@"; do
         cp_files "$CMAKE_BUILD_DIR/bin" "$FILE_MASK" "$BOX_DESKTOP_CLIENT_DIR/bin"
     done
+}
+
+copy_package_libs()
+{
+    cp_package_libs \
+        "$PACKAGE_FFMPEG" \
+        "$PACKAGE_QT" \
+        "$PACKAGE_QUAZIP" \
+        "$PACKAGE_SIGAR"
+}
+
+copy_mediaserver()
+{
+    cp_mediaserver_bins "mediaserver"
+    cp_mediaserver_bins "external.dat" "plugins" "vox" #"nvidia_models" - for tegra_video.
+    ln -s "../lib" "${BOX_MNT}$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
+    #cp_package_libs "tegra_video" #< Deprecated analytics plugin.
+}
+
+copy_desktop_client()
+{
+    cp_desktop_client_bins "desktop_client"
+    cp_desktop_client_bins "fonts" "vox" "help"
+    ln -s "../lib" "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
+    cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
+        "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
+        "$BOX_DESKTOP_CLIENT_DIR/bin"
+    cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+}
+
+copy_libs()
+{
+    cp_libs "*.so!(.debug)"
 }
 
 assert_not_client_only()
@@ -251,17 +327,27 @@ main()
             sudo mount -o nolock "$BOX_HOST:/" "$BOX_MNT"
             ;;
         sshfs)
-            sudo umount "$BOX_MNT"  2>/dev/null
-            sudo rm -rf "$BOX_MNT" || exit $?
-            sudo mkdir -p "$BOX_MNT" || exit $?
-            sudo chown "$USER" "$BOX_MNT"
+            if [ $# -ge 1 ] && [ "$1" = "umount" ]; then
+                fusermount -u "$BOX_MNT" || exit $?
+                sudo rmdir "$BOX_MNT" || exit $?
+            else
+                if [ -d "$BOX_MNT" ]; then
+                    fusermount -u "$BOX_MNT" 2>/dev/null
+                    sudo rmdir "$BOX_MNT" || exit $?
+                fi
+                sudo mkdir -p "$BOX_MNT" || exit $?
+                sudo chown "$USER" "$BOX_MNT"
 
-            if ! echo "$BOX_PASSWORD" |nx_verbose sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" -o nonempty,password_stdin
-            then
-                nx_fail "Unable to mount $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT"
+                if ! echo "$BOX_PASSWORD" \
+                    |nx_verbose sshfs -p "$BOX_PORT" "$BOX_USER@$BOX_HOST":/ "$BOX_MNT" \
+                        -o UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no \
+                        -o nonempty,password_stdin
+                then
+                    nx_fail "Unable to mount $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT"
+                fi
+                nx_echo "Mounted $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT:"
+                ls "$BOX_MNT"
             fi
-            nx_echo "Mounted $BOX_USER@$BOX_HOST:$BOX_PORT to $BOX_MNT:"
-            ls "$BOX_MNT"
             ;;
         mount)
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST \
@@ -280,137 +366,102 @@ main()
             ;;
         #..........................................................................................
         ffmpeg-bins)
+            check_box_mounted
             # Debug tools, not included into the distro.
             [ "$CLIENT_ONLY" != "1" ] && cp_mediaserver_package_bins "$PACKAGE_FFMPEG"
             [ "$SERVER_ONLY" != "1" ] && cp_desktop_client_package_bins "$PACKAGE_FFMPEG"
             ;;
         tegra_video)
             assert_not_client_only
+            check_box_mounted
+
             cp_package_libs "tegra_video"
             cp_mediaserver_package_bins "tegra_video" #< Debug tools, not included into the distro.
             ;;
         copy-s)
             assert_not_client_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
+
+            copy_libs
             cp_mediaserver_bins "mediaserver"
             ;;
         copy-s-all)
             assert_not_client_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
-            cp_mediaserver_bins "mediaserver"
 
-            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
-
-            cp_package_libs "tegra_video"
-
-            cp_package_libs \
-                "$PACKAGE_FFMPEG" \
-                "$PACKAGE_QT" \
-                "$PACKAGE_QUAZIP" \
-                "$PACKAGE_OPENLDAP" \
-                "$PACKAGE_SASL2" \
-                "$PACKAGE_SIGAR"
-
-            # TODO: Rewrite when the branch "analytics" is merged into default.
-            cp_files "$PACKAGES_ANY_DIR/server-external-vms_3.0/bin" "external.dat" \
-                "$BOX_MEDIASERVER_DIR/bin"
-
-            cp_mediaserver_bins "plugins" "vox" "nvidia_models"
+            copy_libs
+            copy_mediaserver
+            copy_package_libs
 
             nx_echo "SUCCESS: All mediaserver files copied."
             ;;
         copy-c)
             assert_not_server_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
+
+            copy_libs
             cp_desktop_client_bins "desktop_client"
             ;;
         copy-c-all)
             assert_not_server_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
-            cp_desktop_client_bins "desktop_client"
 
-            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
-
-            cp_desktop_client_bins "fonts" "vox" "help"
-
-            cp_package_libs \
-                "$PACKAGE_FFMPEG" \
-                "$PACKAGE_QT" \
-                "$PACKAGE_QUAZIP" \
-                "$PACKAGE_OPENLDAP" \
-                "$PACKAGE_SASL2" \
-                "$PACKAGE_SIGAR"
-
-            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
-                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
-                "$BOX_DESKTOP_CLIENT_DIR/bin"
-            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+            copy_libs
+            copy_desktop_client
+            copy_package_libs
 
             nx_echo "SUCCESS: All desktop_client files copied."
             ;;
         copy)
             assert_not_client_only
             assert_not_server_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
+
+            copy_libs
             cp_mediaserver_bins "mediaserver"
             cp_desktop_client_bins "desktop_client"
             ;;
         copy-all)
             assert_not_client_only
             assert_not_server_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
-            cp_libs "*.so*"
-            cp_mediaserver_bins "mediaserver"
-            cp_desktop_client_bins "desktop_client"
 
-            box ln -s "../lib" "$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
-            box ln -s "../lib" "$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
-
-            cp_desktop_client_bins "fonts" "vox" "help"
-            cp_package_libs "tegra_video"
-
-            cp_package_libs \
-                "$PACKAGE_FFMPEG" \
-                "$PACKAGE_QT" \
-                "$PACKAGE_QUAZIP" \
-                "$PACKAGE_OPENLDAP" \
-                "$PACKAGE_SASL2" \
-                "$PACKAGE_SIGAR"
-
-            # TODO: Rewrite when the branch "analytics" is merged into default.
-            cp_files "$PACKAGES_ANY_DIR/server-external-vms_3.0/bin" "external.dat" \
-                "$BOX_MEDIASERVER_DIR/bin"
-
-            cp_mediaserver_bins "plugins" "vox" "nvidia_models"
-
-            cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
-                "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
-                "$BOX_DESKTOP_CLIENT_DIR/bin"
-            cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+            copy_libs
+            copy_mediaserver
+            copy_desktop_client
+            copy_package_libs
 
             nx_echo "SUCCESS: All files copied."
             ;;
         copy-s-ut)
             assert_not_client_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
+
             cp_mediaserver_bins "*_ut"
             ;;
         copy-c-ut)
             assert_not_server_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
+
             cp_desktop_client_bins "*_ut"
             ;;
         server)
             assert_not_client_only
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
+
             cp_libs "libmediaserver_core.so*"
             ;;
         lib)
+            check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
             if [ "$1" = "" ]; then
                 find_LIB_DIR
@@ -447,17 +498,29 @@ main()
             local TEST_NAME="$1"
             shift
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
-            local TEST_PATH="$BOX_MEDIASERVER_DIR/ut/$TEST_NAME"
+            local TEST_PATH="$BOX_MEDIASERVER_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
+            box \
+                for TEST in $TEST_PATH "[;]" \
+                do \
+                    echo "[;]" \
+                    echo "Running" "[\$TEST]" "[;]" \
+                    LD_LIBRARY_PATH="$BOX_LIBS_DIR" "[\$TEST]" "$@" "[|| break;]" \
+                done
             ;;
         run-c-ut)
             local TEST_NAME="$1"
             shift
-            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
-            local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/ut/$TEST_NAME"
+            [ -z "$TEST_NAME" ] && nx_fail "Test name not specified. Use \"*_ut\" for all tests."
+            local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" "$TEST_PATH" "$@"
+            box \
+                for TEST in $TEST_PATH "[;]" \
+                do \
+                    echo "[;]" \
+                    echo "Running" "[\$TEST]" "[;]" \
+                    LD_LIBRARY_PATH="$BOX_LIBS_DIR" "[\$TEST]" "$@" "[|| break;]" \
+                done
             ;;
         run-tv)
             local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
@@ -501,6 +564,9 @@ main()
             ;;
         build)
             "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
+            ;;
+        pack-full)
+            pack_full "$1"
             ;;
         #..........................................................................................
         so)
