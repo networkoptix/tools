@@ -1,7 +1,8 @@
 #!/bin/bash -x
 
 
-openssl_VERSION=1.0.2e # NOTE: use 1.0.0j for AMR builds instead!!
+openssl_VERSION=1.0.2e
+openssl_VERSION_ARM=1.0.0j
 onvif_VERSION=2.1.2-io2
 sigar_VERSION=1.7
 quazip_VERSION=0.7
@@ -632,7 +633,7 @@ function openssl_generate_config()
     ESCAPED_ARTIFACT_BUILD_DIR="`echo $ESCAPED_ARTIFACT_BUILD_DIR | sed 's/\\\\/\\\\\\\\/g'`"
 
     local compilerToUse=
-    if [ "$ARCH" = "arm" ]; then
+    if [ "$ARCH" = "arm" ] || [ "$ARCH" = "aarch64" ]; then
         compilerToUse="os/compiler:arm-none-linux-gnueabi-gcc"
     fi
 
@@ -2254,6 +2255,10 @@ if [ ! -e $CONFIG_FILE ]; then
 fi
 
 source $CONFIG_FILE || { echo "Failed to load $CONFIG_FILE file"; exit 1; }
+
+if [ "$ARCH" = "arm" ] || [ "$ARCH" = "aarch64" ]; then
+    openssl_VERSION="$openssl_VERSION_ARM"
+fi
 
 #checking that all required variables are defined
 mandatory_variables=( BOX TOOLCHAIN_PATH HOST CROSS_PREFIX ARCH TOOLCHAIN_NAME TOOLCHAIN_VERSION )
