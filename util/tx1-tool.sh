@@ -73,8 +73,8 @@ Here <command> can be one of the following:
  stop-s # Stop mediaserver via "kill -9".
  start-c [args] # Run desktop_client exe with [args].
  stop-c # Stop desktop_client via "kill -9".
- run-s-ut test_name [args] # Run the unit test in server dir with strict expectations.
- run-c-ut test_name [args] # Run the unit test in desktop_client dir with strict expectations.
+ run-s-ut mask [args] # Run unit test(s) (use mask \"*_ut\" for all) in server dir.
+ run-c-ut mask [args] # Run unit test(s) (use mask \"*_ut\" for all) in desktop_client dir.
  run-tv [args] # Run video_dec_gie with [args].
 
  tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
