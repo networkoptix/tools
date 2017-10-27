@@ -21,7 +21,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
-: ${BOX_DEVELOP_DIR="/home/$USER/develop"} #< Mount point at the box for the workstation "develop".
+: ${BOX_DEVELOP_DIR="/home/ubuntu/develop"} #< Mount point at the box for the workstation "develop".
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
@@ -84,6 +84,7 @@ Here <command> can be one of the following:
  cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
  gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
  build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
+ pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 
  so [-r] [--tree] [<name>] # List all libs used by lib<name>.so (or pwd-guessed common_libs/<name>).
@@ -120,9 +121,9 @@ create_archive() # archive dir command...
     echo "Done"
 }
 
-pack_full() # archive
+do_pack() # archive copy_command...
 {
-    local -r ARCHIVE="$1"
+    local -r ARCHIVE="$1"; shift
     if [ -z "$ARCHIVE" ]; then
         nx_fail "Archive name is not specified."
     fi
@@ -133,12 +134,13 @@ pack_full() # archive
 
     local -r BOX_MNT=$(mktemp -d) #< Override global var BOX_MNT for the following copy_... calls.
 
-    copy_libs
-    copy_mediaserver
-    copy_desktop_client
-    copy_package_libs
+    "$@" || return $?
 
-    create_archive "$ARCHIVE" "$BOX_MNT" tar czf && rm -rf "$MNT_DIR"
+    if ! create_archive "$ARCHIVE" "$BOX_MNT" tar czf; then
+        nx_fail "Unable to create archive (see above) from $BOX_MNT"
+    else
+        rm -rf "$MNT_DIR"
+    fi
 }
 
 get_VMS_DIR_and_CMAKE_BUILD_DIR()
@@ -261,11 +263,47 @@ copy_desktop_client()
         "{imageformats,platforminputcontexts,platforms,xcbglintegrations,audio}" \
         "$BOX_DESKTOP_CLIENT_DIR/bin"
     cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
+
+    # TODO: Remove these symlinks when cmake build is fixed.
+    local -r PLUGINS_DIR="${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/plugins"
+    mkdir "$PLUGINS_DIR"
+    local PLUGIN
+    for PLUGIN in audio imageformats platforminputcontexts platforms xcbglintegrations; do
+        ln -s "../bin/$PLUGIN" "$PLUGINS_DIR/$PLUGIN"
+    done
+    ln -s "bin/qml" "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/qml"
+    # Required structure:
+    #     bin/
+    #         desktop_client fonts/ help/ vox/
+    #     plugins/
+    #         audio/ imageformats/ platforminputcontexts/ platforms/ xcbglintegrations/
+    #     qml/
+    #
+    # Actual structure:
+    #     bin/
+    #         desktop_client fonts/ help/ vox/
+    #         qml/
+    #         audio/ imageformats/ platforminputcontexts/ platforms/ xcbglintegrations/
 }
 
 copy_libs()
 {
     cp_libs "*.so!(.debug)"
+}
+
+copy_all()
+{
+    copy_libs
+    copy_mediaserver
+    copy_desktop_client
+    copy_package_libs
+}
+
+copy_build()
+{
+    copy_libs
+    cp_mediaserver_bins "mediaserver"
+    cp_desktop_client_bins "desktop_client"
 }
 
 assert_not_client_only()
@@ -422,9 +460,7 @@ main()
             check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
 
-            copy_libs
-            cp_mediaserver_bins "mediaserver"
-            cp_desktop_client_bins "desktop_client"
+            copy_build
             ;;
         copy-all)
             assert_not_client_only
@@ -432,10 +468,7 @@ main()
             check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR
 
-            copy_libs
-            copy_mediaserver
-            copy_desktop_client
-            copy_package_libs
+            copy_all
 
             nx_echo "SUCCESS: All files copied."
             ;;
@@ -489,7 +522,7 @@ main()
             ;;
         start-c)
             assert_not_server_only
-            box sudo DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            box DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
             box sudo killall -9 desktop_client
@@ -565,8 +598,11 @@ main()
         build)
             "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
             ;;
+        pack-build)
+            do_pack "$1" copy_build
+            ;;
         pack-full)
-            pack_full "$1"
+            do_pack "$1" copy_all
             ;;
         #..........................................................................................
         so)
