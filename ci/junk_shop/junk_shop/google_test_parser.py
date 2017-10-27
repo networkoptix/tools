@@ -104,14 +104,16 @@ class GoogleTestParser(object):
         return True
 
     def _match_suite_finish_signature(self, line):
-        mo = re.match(r'^\[----------\] \d+ tests? from %s \((\d+) ms total\)$' % self.current_suite, line)
+        mo = re.match(r'^(.+)?\[----------\] (.+)?\d+ tests? from %s \((\d+) ms total\)$' % self.current_suite, line)
         if not mo:
             return False
+        if mo.group(1) or mo.group(2):
+            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(2) + ''))
         if self.current_test:
             self._parse_error('test closing tag is missing', line)
             self._handler.on_test_stop(None, None)
             self.current_test = None
-        self._handler.on_suite_stop(mo.group(1))
+        self._handler.on_suite_stop(mo.group(3))
         self._handler.on_stdout_line(line)
         self.current_suite = None
         return True
