@@ -107,7 +107,7 @@ Here <command> can be one of the following:
  cmake [args] # Call "linux-tool.sh cmake bpi [args]".
  gen [args] # Call "linux-tool.sh gen bpi [args]".
  build [args] # Call "linux-tool.sh build bpi [args]".
- pack-short <output.tgz> # Prepare tar with build results at the box.
+ pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
  build-installer [mvn] # Build installer using cmake or (if "mvn" specified) maven.
  test-installer [mvn] original/archives/dir # Build installer and test to equal the original.
@@ -132,7 +132,7 @@ check_box_mounted()
     fi
 }
 
-pack() # archive files...
+pack_files() # archive files...
 {
     local ARCHIVE="$1"
     shift
@@ -149,18 +149,18 @@ pack_full() # archive
 {
     local ARCHIVE="$1"
 
-    pack "$ARCHIVE" \
+    pack_files "$ARCHIVE" \
         "$BOX_INSTALL_DIR" \
         "/etc/init.d/networkoptix*" \
         "/etc/init.d/nx*"
 }
 
 # Pack build results and bpi-specific artifacts.
-pack_short()
+pack_build()
 {
     local ARCHIVE="$1"
 
-    pack "$ARCHIVE" \
+    pack_files "$ARCHIVE" \
         "$BOX_LIBS_DIR"/libappserver2.so \
         "$BOX_LIBS_DIR"/libclient_core.so \
         "$BOX_LIBS_DIR"/libcloud_db_client.so \
@@ -1104,8 +1104,8 @@ main()
         build)
             "$LINUX_TOOL" build bpi "$@"
             ;;
-        pack-short)
-            pack_short "$1"
+        pack-build)
+            pack_build "$1"
             ;;
         pack-full)
             pack_full "$1"
