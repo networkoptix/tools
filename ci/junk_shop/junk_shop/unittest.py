@@ -48,7 +48,6 @@ class TestProcess(GoogleTestEventHandler):
 
     class Level(object):
 
-        @db_session
         def __init__(self, repository, parent_run, root_name, suite=None, test=None):
             self._repository = repository
             self.run = self._produce_test_run(parent_run, root_name, suite, test)
@@ -106,6 +105,7 @@ class TestProcess(GoogleTestEventHandler):
                     data = '[ truncated to %d lines ]\n' % lines.maxlen + data
                 self._repository.add_artifact(run, name, '%s-%s' % (self.run.name, name.replace(' ', '-')), type, data, is_error)
 
+        @db_session
         def _produce_test_run(self, parent_run, root_name, suite, test):
             test_path = ['unit', root_name]
             is_test = False
