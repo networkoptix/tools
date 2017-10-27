@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentTypeError
 import re
 import bz2
+import threading
 from pony.orm import db_session, commit, flush, select, desc, raw_sql, sql_debug
 from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
 from . import models
@@ -146,6 +147,8 @@ class ArtifactTypeFactory(object):
 
 class DbCaptureRepository(object):
 
+    prev_select_mutex = threading.Lock()
+
     def __init__(self, db_config, build_parameters, run_parameters=None):
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
@@ -281,7 +284,8 @@ class DbCaptureRepository(object):
             run = self.test_run.get(path)
             if not run:
                 run = self.add_run(name, parent_run, test)
-                run.prev_outcome = self._pick_prev_outcome(run) or ''
+                with self.prev_select_mutex:  # try to avoid supposed ponyorm error
+                    run.prev_outcome = self._pick_prev_outcome(run) or ''
                 self.test_run[path] = run
         return run
 
