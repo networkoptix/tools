@@ -19,7 +19,10 @@ def parse_maven_output(output):
     return False
 
 @db_session
-def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcome):
+def store_output_and_exit_code(repository, output_file_list, exit_code, parse_maven_outcome):
+    output = ''
+    for f in output_file_list:
+        output += f.read()
     passed = True
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
@@ -48,10 +51,11 @@ def main():
     parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
                         help='Parse output to determine maven outcome')
     parser.add_argument('--signal-failure', action='store_true', help='Signal failed build with exit code 2')
+    parser.add_argument('output_file', type=file, nargs='+', help='Build output file')
     args = parser.parse_args()
     try:
         repository = DbCaptureRepository(args.db_config, args.build_parameters)
-        passed = store_output_and_exit_code(repository, sys.stdin.read(), args.exit_code, args.parse_maven_outcome)
+        passed = store_output_and_exit_code(repository, args.output_file, args.exit_code, args.parse_maven_outcome)
         if not passed and args.signal_failure:
             sys.exit(2)
     except RuntimeError as x:
