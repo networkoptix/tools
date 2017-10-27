@@ -28,13 +28,16 @@ class PlatformRec(object):
 def project_list():
     latest_build_map = {  # (project, branch) -> last build
         (rec[0], rec[1]) : rec[2] for rec in
-        select((build.project, build.branch, max(build.build_num)) for build in models.Build)}
+        select((build.project, build.branch, max(build.build_num))
+               for build in models.Build
+               if exists(build.runs))}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
     project_list = {}  # project -> branch -> build
     platform_map = {}  # (project, branch, platform) -> PlatformRec
     for build, run in select(
             (run.build, run) for run in models.Run
-            if run.build.build_num in build_num_set and run.test.path in ['build', 'unit', 'functional']).order_by(2):
+            if run.build.build_num in build_num_set and
+            run.test.path in ['build', 'unit', 'functional']).order_by(desc(2)):
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue
         project_list.setdefault(build.project, {})[build.branch] = build
