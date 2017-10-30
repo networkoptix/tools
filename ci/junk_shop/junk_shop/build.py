@@ -3,6 +3,7 @@
 # read build output from stdin, exit code as an argument, store all to database
 
 import sys
+import os.path
 import argparse
 import re
 from pony.orm import db_session
