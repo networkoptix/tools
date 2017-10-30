@@ -21,8 +21,12 @@ def parse_maven_output(output):
 @db_session
 def store_output_and_exit_code(repository, output_file_list, exit_code, parse_maven_outcome):
     output = ''
-    for f in output_file_list:
-        output += f.read()
+    for file_path in output_file_list:
+        if os.path.isfile(file_path):
+            with open(file_path) as f:
+                output += f.read()
+        else:
+            print >>sys.stderr, 'Build output file is missing: %s' % file_path
     passed = True
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
@@ -51,7 +55,7 @@ def main():
     parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
                         help='Parse output to determine maven outcome')
     parser.add_argument('--signal-failure', action='store_true', help='Signal failed build with exit code 2')
-    parser.add_argument('output_file', type=file, nargs='+', help='Build output file')
+    parser.add_argument('output_file', nargs='+', help='Build output file')
     args = parser.parse_args()
     try:
         repository = DbCaptureRepository(args.db_config, args.build_parameters)
