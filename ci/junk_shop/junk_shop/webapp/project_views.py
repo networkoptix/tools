@@ -37,7 +37,7 @@ def project_list():
     for build, run in select(
             (run.build, run) for run in models.Run
             if run.build.build_num in build_num_set and
-            run.test.path in ['build', 'unit', 'functional']).order_by(desc(2)):
+            run.test.path in ['build', 'unit', 'functional']).order_by(2):
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue
         project_list.setdefault(build.project, {})[build.branch] = build
