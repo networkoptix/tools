@@ -21,7 +21,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
-: ${BOX_DEVELOP_DIR="/home/ubuntu/develop"} #< Mount point at the box for the workstation "develop".
+: ${BOX_DEVELOP_DIR="/home/$BOX_USER/develop"} #< Mount point at the box for the workstation "develop".
 : ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
 : ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
@@ -502,7 +502,9 @@ main()
             else
                 LIB_NAME="$1"
             fi
-            cp_libs "lib$LIB_NAME.so*"
+            # TODO: #mike: For some libs there may be no "lib" prefix.
+            # TODO: #mike: Make an option to include ".debug".
+            cp_libs "*$LIB_NAME.so"
             ;;
         ini)
             box touch /tmp/nx_media.ini "[&&]" \
