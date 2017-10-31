@@ -31,11 +31,11 @@ def delete_build_changesets(build):
     select(cs for cs in models.BuildChangeSet if cs.build is build).delete()
 
 def load_change_sets(repository, src_dir, build, prev_revision):
-    rev_range = '%s..%s' % (prev_revision, build.revision)
+    rev_range = '%s %% %s' % (build.revision, prev_revision)
     args = ['hg', 'log', '--template', HG_LOG_TEMPLATE, '--rev', rev_range]
     output = subprocess.check_output(args, cwd=src_dir)
     lines = output.splitlines()
-    for line in lines[1:]:  # first revision is the last one included to previous build
+    for line in lines:
         revision, date_str, user, email, desc = line.split('|', 4)
         date = dateutil_parser.parse(date_str)
         print revision, date, user, email, desc
