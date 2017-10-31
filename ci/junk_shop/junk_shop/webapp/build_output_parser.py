@@ -12,6 +12,7 @@ SEVERITY_PATTERNS = [
     (r':\d+:\d+:\s+warning:', 'warning'),
     (r':\d+: Warning:', 'warning'),  # [INFO] {standard input}:50870: Warning: end of file not at end of a line; newline inserted
     (r':\d+: Error:', 'error'),      # [INFO] {standard input}:51067: Error: unknown pseudo-op: `.lbe293'
+    (r'internal compiler error:', 'error'),  # ..qmetatype.h:736:1: internal compiler error: Segmentation fault
     # Windows
     (r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:', 'error'),
     (r':\s+warning\s[A-Z]+\d+\s*:', 'warning'),
