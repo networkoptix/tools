@@ -108,7 +108,7 @@ class GoogleTestParser(object):
         if not mo:
             return False
         if mo.group(1) or mo.group(2):
-            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(2) + ''))
+            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(2) or ''))
         if self.current_test:
             self._parse_error('test closing tag is missing', line)
             self._handler.on_test_stop(None, None)
