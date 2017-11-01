@@ -8,15 +8,18 @@ from .build_output_parser import match_output_line
 
 
 # drop starting unit/ or functional/ part
-def make_test_name(test):
-    return '/'.join(test.path.split('/')[1:])
+def make_test_name(run):
+    if run.test:
+        return '/'.join(run.test.path.split('/')[1:])
+    else:
+        return run.name
 
 
 class InterestingTestRun(object):
 
     def __init__(self, run):
         self.run = run  # models.Run
-        self.test_name = make_test_name(run.test)
+        self.test_name = make_test_name(run)
         self.status = self._make_status_title(run.outcome, run.prev_outcome)
         self.succeeded = run.outcome != 'failed'
         self.output_artifacts = self._pick_output_artifacts(run)
@@ -127,6 +130,7 @@ class BuildPageView(object):
                 for run in root_run.children if
                 root_run.build is self.build and
                 run.outcome == 'failed' and
+                run.test and
                 not exists(child for child in root_run.children if
                                child.path.startswith(run.path) and
                                child is not run)).order_by(1):
