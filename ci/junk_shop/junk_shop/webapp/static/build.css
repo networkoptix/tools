@@ -94,6 +94,9 @@ hr {
 .test-list .output-link {
 	font-size: 90%;
 }
+.test-list .stderr-link a {
+	color: #C22626;
+}
 
 .test-link {
 	text-decoration: none;

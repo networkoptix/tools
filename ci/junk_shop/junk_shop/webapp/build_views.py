@@ -1,6 +1,6 @@
 from collections import namedtuple
 from flask import render_template, abort
-from pony.orm import db_session, select, desc, count
+from pony.orm import db_session, select, desc, count, exists
 from .. import models
 from junk_shop.webapp import app
 from .artifact import decode_artifact_data
@@ -11,6 +11,7 @@ from .build_output_parser import match_output_line
 def make_test_name(test):
     return '/'.join(test.path.split('/')[1:])
 
+
 class InterestingTestRun(object):
 
     def __init__(self, run):
@@ -18,7 +19,7 @@ class InterestingTestRun(object):
         self.test_name = make_test_name(run.test)
         self.status = self._make_status_title(run.outcome, run.prev_outcome)
         self.succeeded = run.outcome != 'failed'
-        self.output_artifact_id = self._pick_output_artifact_id(run)
+        self.output_artifacts = self._pick_output_artifacts(run)
         self.traceback_list = []  # models.Artifact list - coredump tracebacks
 
     def _make_status_title(self, outcome, prev_outcome):
@@ -32,9 +33,10 @@ class InterestingTestRun(object):
             }
         return title_map.get((outcome, prev_outcome), '')
 
-    def _pick_output_artifact_id(self, run):
-        artifact = run.artifacts.filter(lambda artifact: artifact.type.name == 'output').first()
-        return artifact.id if artifact else None
+    def _pick_output_artifacts(self, run):
+        return {
+            artifact.short_name : artifact.id for artifact in
+            run.artifacts.filter(lambda artifact: artifact.type.name == 'output')}
 
 
 class TestsRun(object):
@@ -43,131 +45,176 @@ class TestsRun(object):
         self.stage = stage  # 'unit', 'functional'
         self.failed_count = 0
         self.passed_count = 0
-        self.run_list = []
+        self.run_set = set()  # Run set
+        self.run_list = []  # InterestingTestRun list
 
     def add_run(self, run):
+        if run in self.run_set:
+            return
         if run.outcome == 'passed' and run.prev_outcome != 'failed':
             return
         if run.outcome == 'failed':
             self.failed_count += 1
-        self.run_list.append(InterestingTestRun(run))
+        itr = InterestingTestRun(run)
+        self.run_list.append(itr)
+        self.run_set.add(run)
+        return itr
 
 
-def pick_build_errors(artifact):
-    data = decode_artifact_data(artifact)
-    errors = []
-    for line in data.splitlines():
-        severity = match_output_line(line)
-        if severity == 'error':
-            errors.append(line.decode('utf-8'))
-    return errors
+class BuildPageView(object):
 
-def artifact_as_lines(artifact):
-    data = decode_artifact_data(artifact)
-    return data.splitlines()
+    def __init__(self, project_name, branch_name, build_num):
+        self.project_name = project_name
+        self.branch_name = branch_name
+        self.build_num = build_num
+        self.build = models.Build.get(lambda build:
+            build.project.name == self.project_name and
+            build.branch.name == self.branch_name and
+            build.build_num == self.build_num)
+        if not self.build:
+            abort(404)
+        self.tests_run_map = {}  # platform -> root_run -> TestsRun
+        self.started_at = None
 
-# have to load them separately as tracebacks are attached to top-level unit test runs, not to leaf ones
-def load_tracebacks(build):
-    traceback_map = {}
-    for platform, root_run, run, test, artifact in select(
-            (root_run.platform, root_run, run, run.test, artifact)
-            for root_run in models.Run
-            for run in models.Run
-            for artifact in run.artifacts
-            if root_run.build is build and
-            run.root_run is root_run and
-            root_run.test.path == 'unit' and
-            artifact.type.name == 'traceback'):
-        test_name = make_test_name(test)
-        itr_map = traceback_map.setdefault((platform, root_run), {})  # test_name -> InterestingTestRun
-        itr = itr_map.setdefault(test_name, InterestingTestRun(run))
-        itr.traceback_list.append(artifact)
-    return traceback_map
+    @staticmethod
+    def pick_build_errors(artifact):
+        data = decode_artifact_data(artifact)
+        errors = []
+        for line in data.splitlines():
+            severity = match_output_line(line)
+            if severity == 'error':
+                errors.append(line.decode('utf-8'))
+        return errors
+
+    @staticmethod
+    def artifact_as_lines(artifact):
+        data = decode_artifact_data(artifact)
+        return data.splitlines()
+
+    def produce_tests_run(self, root_run):
+        if not self.started_at or root_run.started_at < self.started_at:
+            started_at = root_run.started_at  # first run for this build
+        run_map = self.tests_run_map.setdefault(root_run.platform, {})
+        return run_map.setdefault(root_run, TestsRun(root_run.test.path))
+
+    def create_leaf_test_runs(self):
+        for root_run, run_count in select(
+                (root_run, count(run))
+                for root_run in models.Run
+                for run in models.Run if
+                run.root_run is root_run and
+                root_run.build is self.build and
+                run.test.is_leaf and
+                run.outcome == 'passed'):
+            tests_run = self.produce_tests_run(root_run)
+            tests_run.passed_count = run_count
+        for run, root_run in select(
+                (run, root_run)
+                for run in models.Run
+                for root_run in models.Run if
+                run.root_run is root_run and
+                root_run.build is self.build and
+                run.test.is_leaf and
+                (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
+            tests_run = self.produce_tests_run(root_run)
+            tests_run.add_run(run)
+
+    # ensure failed runs show up when there is no leafs for them
+    def create_non_leaf_failed_test_runs(self):
+        for run, root_run in select(
+                (run, root_run)
+                for root_run in models.Run
+                for run in root_run.children if
+                root_run.build is self.build and
+                run.outcome == 'failed' and
+                not exists(child for child in root_run.children if
+                               child.path.startswith(run.path) and
+                               child is not run)).order_by(1):
+            tests_run = self.produce_tests_run(root_run)
+            tests_run.add_run(run)
+
+    def load_build_artifacts(self):
+        return {
+            platform: artifact for platform, artifact in select(
+                (run.platform, artifact)
+                for run in models.Run
+                for artifact in run.artifacts
+                if run.build is self.build and
+                run.name == 'build' and
+                artifact.short_name == 'output')}
+
+    def load_build_errors(self):
+        return {
+            platform: self.pick_build_errors(artifact)
+            for platform, artifact in select(
+                (run.platform, artifact)
+                for run in models.Run
+                for artifact in run.artifacts
+                if run.build is self.build and
+                run.name == 'build' and
+                run.outcome == 'failed' and
+                artifact.short_name == 'output')}
+
+    def load_root_run_errors(self):
+        return {
+            (platform, run): self.artifact_as_lines(artifact)
+            for platform, run, artifact in select(
+                (run.platform, run, artifact)
+                for run in models.Run
+                for artifact in run.artifacts
+                if run.build is self.build and
+                artifact.short_name == 'errors')}
+
+    # have to load them separately as tracebacks are attached to top-level unit test runs, not to leaf ones
+    def load_tracebacks(self):
+        traceback_map = {}
+        for platform, root_run, run, test, artifact in select(
+                (root_run.platform, root_run, run, run.test, artifact)
+                for root_run in models.Run
+                for run in models.Run
+                for artifact in run.artifacts
+                if root_run.build is self.build and
+                run.root_run is root_run and
+                root_run.test.path == 'unit' and
+                artifact.type.name == 'traceback'):
+            tests_run = self.produce_tests_run(root_run)
+            itr = tests_run.add_run(run)
+            itr.traceback_list.append(artifact)
+        return traceback_map
+
+    def render_template(self):
+        repository = self.build.repository_url.split('/')[-1]
+        jenkins_build_num = self.build.jenkins_url.rstrip('/').split('/')[-1]
+        changeset_list = list(self.build.changesets.order_by(desc(1)))
+        platform_list = list(select(run.platform for run in models.Run if run.build is self.build))
+
+        traceback_map = self.load_tracebacks()
+        self.create_leaf_test_runs()
+        self.create_non_leaf_failed_test_runs()
+        platform_to_build_artifact = self.load_build_artifacts()
+        build_errors_map = self.load_build_errors()
+        root_run_error_map = self.load_root_run_errors()
+
+        return render_template(
+            'build.html',
+            build=self.build,
+            project_name=self.project_name,
+            branch_name=self.branch_name,
+            started_at=self.started_at,
+            repository=repository,
+            jenkins_build_num=jenkins_build_num,
+            changeset_list=changeset_list,
+            platform_list=platform_list,
+            platform_to_build_artifact=platform_to_build_artifact,
+            build_errors_map=build_errors_map,
+            tests_run_map=self.tests_run_map,
+            root_run_error_map=root_run_error_map,
+            traceback_map=traceback_map,
+            )
 
 
 @app.route('/project/<project_name>/<branch_name>/<int:build_num>')
 @db_session
 def build(project_name, branch_name, build_num):
-    build = models.Build.get(lambda build:
-        build.project.name == project_name and
-        build.branch.name == branch_name and
-        build.build_num == build_num)
-    if not build:
-        abort(404)
-    repository = build.repository_url.split('/')[-1]
-    jenkins_build_num = build.jenkins_url.rstrip('/').split('/')[-1]
-    changeset_list = list(build.changesets.order_by(desc(1)))
-    platform_list = list(select(run.platform for run in models.Run if run.build is build))
-    started_at = None
-    tests_run_map = {}  # platform -> root_run -> TestsRun
-
-    def produce_tests_run(root_run):
-        run_map = tests_run_map.setdefault(root_run.platform, {})
-        return run_map.setdefault(root_run, TestsRun(root_run.test.path))
-
-    for root_run, run_count in select(
-            (root_run, count(run))
-            for root_run in models.Run
-            for run in models.Run if
-            run.root_run is root_run and
-            root_run.build is build and
-            run.test.is_leaf and
-            run.outcome == 'passed'):
-        tests_run = produce_tests_run(root_run)
-        tests_run.passed_count = run_count
-    for run, root_run in select(
-            (run, root_run)
-            for run in models.Run
-            for root_run in models.Run if
-            run.root_run is root_run and
-            root_run.build is build and
-            run.test.is_leaf and
-            (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
-        tests_run = produce_tests_run(root_run)
-        tests_run.add_run(run)
-        if not started_at or root_run.started_at < started_at:
-            started_at = root_run.started_at  # first run for this build
-
-    platform_to_build_artifact = {
-        platform: artifact for platform, artifact in select(
-            (run.platform, artifact)
-            for run in models.Run
-            for artifact in run.artifacts
-            if run.build is build and
-            run.name == 'build' and
-            artifact.short_name == 'output')}
-    failed_builds = {
-        platform: pick_build_errors(artifact)
-        for platform, artifact in select(
-            (run.platform, artifact)
-            for run in models.Run
-            for artifact in run.artifacts
-            if run.build is build and
-            run.name == 'build' and
-            run.outcome == 'failed' and
-            artifact.short_name == 'output')}
-    error_map = {
-        (platform, run): artifact_as_lines(artifact)
-        for platform, run, artifact in select(
-            (run.platform, run, artifact)
-            for run in models.Run
-            for artifact in run.artifacts
-            if run.build is build and
-            artifact.short_name == 'errors')}
-    traceback_map = load_tracebacks(build)
-    return render_template(
-        'build.html',
-        build=build,
-        project_name=project_name,
-        branch_name=branch_name,
-        started_at=started_at,
-        repository=repository,
-        jenkins_build_num=jenkins_build_num,
-        changeset_list=changeset_list,
-        platform_list=platform_list,
-        platform_to_build_artifact=platform_to_build_artifact,
-        failed_builds=failed_builds,
-        tests_run_map=tests_run_map,
-        error_map=error_map,
-        traceback_map=traceback_map,
-        )
+    view = BuildPageView(project_name, branch_name, build_num)
+    return view.render_template()

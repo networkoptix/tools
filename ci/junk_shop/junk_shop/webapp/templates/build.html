@@ -9,23 +9,37 @@
 {% endblock head %}
 
 
-{% macro test_row(root_run, run) %}
+{% macro test_row(root_run, itr) %}
 
   <td>
-    <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=run.run.id) }}">
-      {{ run.test_name }}
+    <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=itr.run.id) }}">
+      {{ itr.test_name }}
     </a>
   </td>
-  <td class="outcome {% if run.succeeded -%} passed {%- else -%} failed {%- endif %}">
-    {{- run.status -}}
+  <td class="outcome {% if itr.succeeded -%} passed {%- else -%} failed {%- endif %}">
+    {{- itr.status -}}
   </td>
-  <td class="error-message">{{ run.run.error_message }}</td>
+  <td class="error-message">{{ itr.run.error_message }}</td>
   <td class="output-link">
-    {% if run.output_artifact_id %}
-      <a class="link" href="{{ url_for('artifact', artifact_id=run.output_artifact_id) }}">
+    {% if itr.output_artifacts.get('stdout') %}
+      <a class="link" href="{{ url_for('artifact', artifact_id=itr.output_artifacts['stdout']) }}">
         Output
       </a>
     {% endif %}
+  </td>
+  <td class="output-link stderr-link">
+    {% if itr.output_artifacts.get('stderr') %}
+      <a class="link" href="{{ url_for('artifact', artifact_id=itr.output_artifacts['stderr']) }}">
+        StdErr
+      </a>
+    {% endif %}
+  </td>
+  <td>
+    {% for artifact in itr.traceback_list %}
+      <a class="link error-link" href="{{ url_for('artifact', artifact_id=artifact.id) }}">
+        {{- artifact.short_name -}}
+      </a>
+    {% endfor %}
   </td>
 
 {% endmacro %}
@@ -112,7 +126,7 @@
         </h2>
         <hr>
         <div class="platform-build-blocks">
-          {% if platform in failed_builds %}
+          {% if platform in build_errors_map %}
             <div class="build-block block">
               <h3>
                 <a class="link" href="{{ url_for('artifact', artifact_id=platform_to_build_artifact[platform].id) }}">
@@ -120,7 +134,7 @@
                 </a>
               </h3>
               <div class="build-errors">
-                {% for line in failed_builds[platform] %}
+                {% for line in build_errors_map[platform] %}
                   {{- line -}} <br/>
                 {% endfor %}
               </div>
@@ -137,9 +151,9 @@
                 {%- endif -%}
                 </a>
               </h3>
-              {% if (platform, root_run) in error_map %}
+              {% if (platform, root_run) in root_run_error_map %}
                 <div class="run-errors">
-                  {% for error in error_map[(platform, root_run)] %}
+                  {% for error in root_run_error_map[(platform, root_run)] %}
                     {{ error }}<br/>
                   {% endfor %}
                 </div>
@@ -161,18 +175,6 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for test_name, run in traceback_map.get((platform, root_run), {})|dictsort %}
-                      <tr>
-                        {{ test_row(root_run, run) }}
-                        <td>
-                          {% for artifact in run.traceback_list %}
-                            <a class="link error-link" href="{{ url_for('artifact', artifact_id=artifact.id) }}">
-                              {{- artifact.short_name -}}
-                            </a>
-                          {% endfor %}
-                        </td>
-                      </tr>
-                    {% endfor %}
                     {% for run in tests_run.run_list %}
                       <tr>
                         {{ test_row(root_run, run) }}
