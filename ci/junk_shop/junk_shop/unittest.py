@@ -267,8 +267,9 @@ class TestProcess(GoogleTestEventHandler):
 
 class TestRunner(object):
 
-    def __init__(self, repository, timeout, bin_dir, binary_list):
+    def __init__(self, repository, timeout, config_path, bin_dir, binary_list):
         self._repository = repository
+        self._config_path = config_path
         self._bin_dir = bin_dir
         self._binary_list = binary_list
         self._timeout = timeout  # timedelta
@@ -287,7 +288,7 @@ class TestRunner(object):
         self._run_pre_checks(self._root_run)
 
     def start(self):
-        config_vars = self._read_current_config(self._bin_dir)
+        config_vars = self._read_current_config()
         self._processes = [
             TestProcess(self._repository, config_vars, self._platform, self._root_run,
                         self._binary_to_test_name(binary_name),
@@ -340,11 +341,10 @@ class TestRunner(object):
         else:
             return binary_name
 
-    def _read_current_config(self, bin_dir):
-        path = os.path.join(bin_dir, '../../../../build_variables/target/current_config.py')
-        assert os.path.isfile(path), 'Current config file is required but is missing: %s' % path
+    def _read_current_config(self):
+        assert os.path.isfile(self._config_path), 'Current config file is required but is missing: %s' % self._config_path
         d = {}
-        execfile(path, d)
+        execfile(self._config_path, d)
         return d
 
     def _handle_timeout(self, run_duration):
@@ -386,6 +386,11 @@ def check_is_dir(dir):
         raise argparse.ArgumentTypeError('%s is not an existing directory' % dir)
     return os.path.abspath(dir)
 
+def check_is_file(path):
+    if not os.path.isfile(path):
+        raise argparse.ArgumentTypeError('%s is not an existing file' % path)
+    return os.path.abspath(path)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
@@ -393,12 +398,13 @@ def main():
     parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('--timeout-sec', type=int, dest='timeout_sec', help='Run timeout, seconds')
+    parser.add_argument('config_path', type=check_is_file, help='Path to current_config.py')
     parser.add_argument('bin_dir', type=check_is_dir, help='Directory to test binaries')
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
-    runner = TestRunner(repository, timeout, args.bin_dir, args.test_binary)
+    runner = TestRunner(repository, timeout, args.config_path, args.bin_dir, args.test_binary)
     try:
         runner.init()
         runner.start()
