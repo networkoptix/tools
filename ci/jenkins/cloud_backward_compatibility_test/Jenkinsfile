@@ -23,6 +23,9 @@ CLOUD_GROUP = 'prod'
 TEST_NODE = 'ci-linux-x64-test'
 DAYS_TO_KEEP_OLD_BUILD = '100'
 
+VM_PORT_BASE = 15000
+VM_NAME_PREFIX = 'funtest-cbc-'
+
 FUN_TESTS_BRANCH = 'vms_3.1_dev'
 NX_REPOSITORY_CREDENTIALS_ID = 'nx-repository-readonly'
 SERVICE_EMAIL_PASSWORD_ID = 'service-email-password'
@@ -136,6 +139,8 @@ def run_test(workspace_dir, distributive) {
 		"--capture-db=\$junk_shop_credentials@$JUNK_SHOP_HOST",
 		"--autotest-email-password=\$service_email_password",
 		"--build-parameters=${build_parameters.join(',')}",
+		"--vm-port-base=$VM_PORT_BASE",
+		"--vm-name-prefix=$VM_NAME_PREFIX",
 		"--run-id-file=$run_id_file",
 	]
 	dir('nx_vms/func_tests') {
