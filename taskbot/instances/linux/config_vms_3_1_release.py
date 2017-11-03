@@ -5,7 +5,7 @@
 
 import os
 
-TASKBOT_BRANCHNAME='vms_3.1_dev'
+TASKBOT_BRANCHNAME='vms_3.1_release'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
