@@ -22,9 +22,9 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${BOX_DEVELOP_DIR="/home/$BOX_USER/develop"} #< Mount point at the box for the workstation "develop".
-: ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/tx1"} #< Should be mounted at the box.
 
-: ${PACKAGES_SRC_DIR="$DEVELOP_DIR/third_party/tx1"} #< Path at the workstation.
+: ${PACKAGES_SRC_PATH="artifacts/tx1"} #< Path relative to VMS_DIR.
+
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at the workstation.
 : ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"} #< Path at the workstation.
 : ${PACKAGE_QT="qt-5.6.2"}
@@ -78,6 +78,7 @@ Here <command> can be one of the following:
  run-tv [args] # Run video_dec_gie with [args].
 
  tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
+ tv-ut [cmake-args] # Build and run unit tests on the workstation.
  tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
 
  clean # Delete all build dirs.
@@ -130,7 +131,7 @@ do_pack() # archive copy_command...
 
     assert_not_client_only
     assert_not_server_only
-    get_VMS_DIR_and_CMAKE_BUILD_DIR
+    get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
     local -r BOX_MNT=$(mktemp -d) #< Override global var BOX_MNT for the following copy_... calls.
 
@@ -143,7 +144,7 @@ do_pack() # archive copy_command...
     fi
 }
 
-get_VMS_DIR_and_CMAKE_BUILD_DIR()
+get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR()
 {
     local DIRS=( $("$LINUX_TOOL" print-dirs "$TARGET_DEVICE") )
 
@@ -152,6 +153,8 @@ get_VMS_DIR_and_CMAKE_BUILD_DIR()
 
     CMAKE_BUILD_DIR=${DIRS[1]}
     [ -z "$CMAKE_BUILD_DIR" ] && nx_fail "Unable to get CMAKE_BUILD_DIR via $LINUX_TOOL print-dirs"
+
+    BOX_VMS_DIR="$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}"
 
     return 0
 }
@@ -419,7 +422,7 @@ main()
         copy-s)
             assert_not_client_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_libs
             cp_mediaserver_bins "mediaserver"
@@ -427,7 +430,7 @@ main()
         copy-s-all)
             assert_not_client_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_libs
             copy_mediaserver
@@ -438,7 +441,7 @@ main()
         copy-c)
             assert_not_server_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_libs
             cp_desktop_client_bins "desktop_client"
@@ -446,7 +449,7 @@ main()
         copy-c-all)
             assert_not_server_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_libs
             copy_desktop_client
@@ -458,7 +461,7 @@ main()
             assert_not_client_only
             assert_not_server_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_build
             ;;
@@ -466,7 +469,7 @@ main()
             assert_not_client_only
             assert_not_server_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_all
 
@@ -475,27 +478,27 @@ main()
         copy-s-ut)
             assert_not_client_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             cp_mediaserver_bins "*_ut"
             ;;
         copy-c-ut)
             assert_not_server_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             cp_desktop_client_bins "*_ut"
             ;;
         server)
             assert_not_client_only
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             cp_libs "libmediaserver_core.so*"
             ;;
         lib)
             check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             if [ "$1" = "" ]; then
                 find_LIB_DIR
                 LIB_NAME=$(basename "$LIB_DIR")
@@ -508,7 +511,8 @@ main()
             ;;
         ini)
             box touch /tmp/nx_media.ini "[&&]" \
-                touch /tmp/analytics.ini "[&&]" \
+                touch /tmp/tegra_video_metadata_plugin.ini "[&&]" \
+                touch /tmp/video_dec_gie.ini "[&&]" \
                 touch /tmp/tegra_video.ini
             ;;
         #..........................................................................................
@@ -558,12 +562,14 @@ main()
                 done
             ;;
         run-tv)
-            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            local BOX_SRC_DIR="$BOX_VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
             box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
         tv)
-            local BOX_SRC_DIR="$BOX_PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            local BOX_SRC_DIR="$BOX_VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
             if [ "$*" = "clean" ]; then
                 box make -C "$BOX_SRC_DIR" clean
                 # No need to attempt copying files.
@@ -575,8 +581,26 @@ main()
                     "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
             fi
             ;;
+        tv-ut)
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            local SRC_DIR="$VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
+            local TV_TEST_BUILD_DIR="$CMAKE_BUILD_DIR/$VIDEO_DEC_GIE_PATH"
+            rm -rf "$TV_TEST_BUILD_DIR"
+            mkdir -p "$TV_TEST_BUILD_DIR" || return $?
+            nx_pushd "$TV_TEST_BUILD_DIR"
+            nx_echo "+ cd $TV_TEST_BUILD_DIR"
+
+            nx_verbose cmake "$SRC_DIR" -GNinja || return $?
+            nx_verbose cmake --build . "$@" || return $?
+            ./*_ut || return $?
+
+            nx_popd
+            rm -rf "$TV_TEST_BUILD_DIR"
+            ;;
         tv-rdep)
-            local SRC_DIR="$PACKAGES_SRC_DIR/$VIDEO_DEC_GIE_PATH"
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            local SRC_DIR="$VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
+
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
             nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
@@ -608,7 +632,7 @@ main()
             ;;
         #..........................................................................................
         so)
-            get_VMS_DIR_and_CMAKE_BUILD_DIR
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             local RECURSIVE=0
             if [ "$1" = "-r" ]; then
