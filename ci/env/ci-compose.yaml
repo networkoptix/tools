@@ -1,0 +1,69 @@
+# docker-compose configuration file for jenkins, linux slave and junk-shop (web and db)
+# based on https://github.com/jenkinsci/docker/blob/master/docker-compose.yml
+# Usage:
+# 1. update uid and gid args for jenkins and slave_ubuntu_* services to match jenkins user id on docker host
+# 3. (for jenkins, optionally) $ export JENKINS_VERSION=2.73.2; export JENKINS_SHA=...
+#    (visit http://mirrors.jenkins.io/war-stable/2.73.2/)
+# 4. (for junk_shop_*) $ export PGPASSWORD=xxxxx; export JUNK_SHOP_DIR=$HOME/develop/devtools/ci/junk_shop
+# 5. $ docker-compose -f <this-file>.yaml up -d
+
+version: '2'
+
+services:
+
+  jenkins:
+    container_name: jenkins
+    image: megatron-jenkins
+    build:
+      context: https://github.com/jenkinsci/docker.git
+      args:
+        uid: 1003
+        gid: 1003
+        JENKINS_VERSION:
+        JENKINS_SHA:
+    environment:
+      JAVA_OPTS: "-Djava.awt.headless=true"
+    ports:
+      - "50000:50000"
+      - "8080:8080"
+    volumes:
+      - /jenkins:/var/jenkins_home
+    links:
+      - slave_ubuntu_14
+
+  junk_shop_web:
+    container_name: junk_shop_web
+    image: junk_shop_web
+    links:
+      - junk_shop_db:database
+    build:
+      context: ${JUNK_SHOP_DIR}
+      dockerfile: ${JUNK_SHOP_DIR}/deploy/Dockerfile
+    ports:
+      - '80:80'
+    environment:
+      JUNK_SHOP_SETTINGS: /app/settings.py
+      PGPASSWORD:
+
+  junk_shop_db:
+    container_name: junk_shop_db
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - PGPASSWORD
+    volumes:
+      - /junk_shop_db/db:/var/lib/postgresql/data
+
+  slave_ubuntu_14:
+    container_name: slave_ubuntu_14
+    image: slave_ubuntu_14
+    build:
+      context: slave_ubuntu_14
+      args:
+        uid: 1003
+        gid: 1003
+    ports:
+      - '2022:22'
+    volumes:
+      - /jenkins_slave/ubuntu_14:/jenkins
