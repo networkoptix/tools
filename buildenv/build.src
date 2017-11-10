@@ -228,8 +228,13 @@ if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
 fi
 
 if [ "$CONF_PARAM_SET" == 0 ]; then
-    MODULES+=(nx_cloud/libvms_gateway_core)
-    MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway_core.so)
+    if [ -d "$SRC_ROOT/nx_cloud/libvms_gateway_core" ]; then
+        MODULES+=(nx_cloud/libvms_gateway_core)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway_core.so)
+    else
+        MODULES+=(nx_cloud/libvms_gateway)
+        MODULE_BIN_PATH+=(lib/$CONFIGURATION/libvms_gateway.so)
+    fi
 
     if [ "$WITH_TRAFFIC_RELAY" == 1 ]; then
         if [[ ! "$VERSION" < "3.1" ]]; then

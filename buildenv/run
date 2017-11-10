@@ -134,9 +134,11 @@ do
 
     if [ ! -z "$WITH_VALGRIND" ]; then
         echo "Writing valgrind output to $VALGRIND_LOG_FILE"
-        #valgrind --leak-check=full --show-leak-kinds=all --vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS
-        #valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
-        valgrind --leak-check=no $COMMON_VALGRIND_ARGS
+        if [ ! -z "$WITH_GDB" ]; then
+            COMMON_VALGRIND_ARGS="--vgdb=yes --vgdb-error=0 $COMMON_VALGRIND_ARGS"
+        fi
+        valgrind --leak-check=full --show-leak-kinds=all --show-reachable=yes $COMMON_VALGRIND_ARGS
+        #valgrind --leak-check=no $COMMON_VALGRIND_ARGS
         #valgrind --tool=exp-dhat --show-top-n=10000 --sort-by=max-blocks-live $COMMON_VALGRIND_ARGS
         #valgrind --tool=exp-dhat --show-top-n=100 $COMMON_VALGRIND_ARGS
         #valgrind --tool=massif $COMMON_VALGRIND_ARGS
