@@ -15,12 +15,8 @@ services:
     container_name: jenkins
     image: megatron-jenkins
     build:
-      context: https://github.com/jenkinsci/docker.git
-      args:
-        uid: 1003
-        gid: 1003
-        JENKINS_VERSION:
-        JENKINS_SHA:
+      context: .
+      dockerfile: jenkins.Dockerfile
     environment:
       JAVA_OPTS: "-Djava.awt.headless=true"
     ports:
@@ -30,6 +26,16 @@ services:
       - /jenkins:/var/jenkins_home
     links:
       - slave_ubuntu_14
+
+  jenkins_base:
+    image: megatron-jenkins-base
+    build:
+      context: https://github.com/jenkinsci/docker.git
+      args:
+        uid: 1003
+        gid: 1003
+        JENKINS_VERSION:
+        JENKINS_SHA:
 
   junk_shop_web:
     container_name: junk_shop_web
@@ -59,7 +65,8 @@ services:
     container_name: slave_ubuntu_14
     image: slave_ubuntu_14
     build:
-      context: slave_ubuntu_14
+      context: .
+      dockerfile: slave_ubuntu_14.Dockerfile
       args:
         uid: 1003
         gid: 1003
