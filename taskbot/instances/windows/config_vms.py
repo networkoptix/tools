@@ -22,6 +22,7 @@ config = {
     'Roman Vasilenko': 'rvasilenko@networkoptix.com',
     'Mikhail Uskov': 'muskov@networkoptix.com',
     'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
+    'George Sovetov': 'gsovetov@networkoptix.com',
     },
   'environment' : {
     'CDB_PATH': '/cygdrive/c/Program Files (x86)/Windows Kits/10/Debuggers/x64/cdb.exe',

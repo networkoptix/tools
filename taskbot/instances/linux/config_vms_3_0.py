@@ -24,6 +24,7 @@ config = {
   'ft_watchers': {
     'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
     'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
+    'George Sovetov': 'gsovetov@networkoptix.com',
     'Alexandra Matveeva': 'amatveeva@networkoptix.com',
     'Roman Vasilenko': 'rvasilenko@networkoptix.com'  },
   'environment' : {
