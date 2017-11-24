@@ -1,10 +1,13 @@
 #!/bin/bash
 set -e
 
-SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
-MS_PATH=$(find /opt -type d -name mediaserver)
-
 TOOL=${1:-help}
+CUSTOMIZATION=$2
+
+SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
+MS_PATH=$(find /opt -type d -name mediaserver | grep /$CUSTOMIZATION | head -1)
+echo Mediaserver path: $MS_PATH
+
 LOG_FILE=valgrind-ms.${TOOL}.$(date +%s)
 ARGS=$($SCRIPT_PATH/args.sh $TOOL $LOG_FILE)
 
