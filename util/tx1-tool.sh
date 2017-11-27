@@ -3,6 +3,8 @@ source "$(dirname "$0")/utils.sh"
 
 nx_load_config "${CONFIG=".tx1-toolrc"}"
 
+: ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
+
 : ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
 : ${DEVELOP_DIR="$HOME/develop"}
@@ -11,8 +13,8 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${TARGET_DEVICE="tx1"} #< Target device for CMake.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
-: ${BOX_USER="ubuntu"}
-: ${BOX_PASSWORD="ubuntu"}
+: ${BOX_USER="nvidia"}
+: ${BOX_PASSWORD="nvidia"}
 : ${BOX_HOST="tx1"} #< Recommented to add "<ip> tx1" to /etc/hosts.
 : ${BOX_PORT="22"}
 : ${BOX_TERMINAL_TITLE="$BOX_HOST"}
@@ -21,28 +23,28 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${BOX_DESKTOP_CLIENT_DIR="$BOX_INSTALL_DIR/desktop_client"}
 : ${BOX_MEDIASERVER_DIR="$BOX_INSTALL_DIR/mediaserver"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
-: ${BOX_DEVELOP_DIR="/home/$BOX_USER/develop"} #< Mount point at the box for the workstation "develop".
+: ${BOX_DEVELOP_DIR="/home/$BOX_USER/develop"} #< Mount point at the box for the workstation's "develop".
 
-: ${PACKAGES_SRC_PATH="artifacts/tx1"} #< Path relative to VMS_DIR.
-
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/tx1"} #< Path at the workstation.
-: ${PACKAGES_ANY_DIR="$DEVELOP_DIR/buildenv/packages/any"} #< Path at the workstation.
-: ${PACKAGE_QT="qt-5.6.2"}
-: ${PACKAGE_QUAZIP="quazip-0.7"}
+: ${PACKAGES_BASE_DIR="$DEVELOP_DIR/buildenv/packages"}
+: ${PACKAGES_DIR="$PACKAGES_BASE_DIR/tx1"} #< Path at the workstation.
+: ${PACKAGES_ANY_DIR="$PACKAGES_BASE_DIR/any"} #< Path at the workstation.
+: ${PACKAGE_GCC_LIBS_DIR="$PACKAGES_BASE_DIR/linux-aarch64/gcc-7.2.0/aarch64-unknown-linux-gnu/sysroot/lib"}
+: ${PACKAGE_QT="qt-5.6.3"}
+: ${PACKAGE_QUAZIP=""} #< Was "quazip-0.7" before 3.2, then made source-only.
 : ${PACKAGE_FFMPEG="ffmpeg-3.1.1"}
 : ${PACKAGE_SIGAR="sigar-1.7"}
 
-#--------------------------------------------------------------------------------------------------
-
-LINUX_TOOL="$(dirname "$0")/linux-tool.sh"
-VIDEO_DEC_GIE_PATH="tegra_multimedia_api/samples/04_video_dec_gie"
+: ${TEGRA_VIDEO_SRC_PATH="artifacts/tx1/tegra_multimedia_api"} #< Relative to VMS_DIR.
+: ${VIDEO_DEC_GIE_SRC_PATH="$TEGRA_VIDEO_SRC_PATH/samples/04_video_dec_gie"} #< Relative to VMS_DIR.
+: ${NVIDIA_MODELS_PATH="$TEGRA_VIDEO_SRC_PATH/data/model"} #< Demo neural networks. Relative to VMS_DIR.
+: ${BOX_NVIDIA_MODELS_DIR="$BOX_MEDIASERVER_DIR/nvidia_models"}
 
 #--------------------------------------------------------------------------------------------------
 
 help()
 {
     cat <<EOF
-Swiss Army Knife for NVidia Tegra (Tx1): execute various commands.
+Swiss Army Knife for NVidia Tegra ($TARGET_DEVICE): execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
@@ -54,17 +56,16 @@ Here <command> can be one of the following:
  sshfs [umount] # Mount/unmount the box root to $BOX_MNT via SSHFS.
  mount # Mount ~/develop to $BOX_DEVELOP_DIR via sshfs. May require workstation password.
 
- ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR.
- tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR.
- copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR.
- copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR.
- copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR.
- copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR.
- copy # Copy mediaserver and desktop_client build (libs and bins) to the box $BOX_INSTALL_DIR.
- copy-all # Copy all mediaserver, desktop_client and artifact files to the box $BOX_INSTALL_DIR.
- copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR.
- copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR.
- server # Copy mediaserver_core lib to the box.
+ ffmpeg-bins # Copy ffmpeg executables from rdep package to the box $BOX_INSTALL_DIR/.
+ tegra_video # Copy libtegra_video.so from rdep package to the box $BOX_LIBS_DIR/.
+ copy-s # Copy mediaserver build result (libs and bins) to the box $BOX_INSTALL_DIR/.
+ copy-s-all # Copy all mediaserver files including artifacts to the box $BOX_INSTALL_DIR/.
+ copy-c # Copy desktop_client build result (libs and bins) to the box $BOX_INSTALL_DIR/.
+ copy-c-all # Copy all desktop_client files including artifacts to the box $BOX_INSTALL_DIR/.
+ copy # Copy mediaserver and desktop_client build (libs and bins) to the box $BOX_INSTALL_DIR/.
+ copy-all # Copy all mediaserver, desktop_client and artifact files to the box $BOX_INSTALL_DIR/.
+ copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR/.
+ copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR/.
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
  ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
@@ -80,11 +81,17 @@ Here <command> can be one of the following:
  tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
  tv-ut [cmake-args] # Build and run unit tests on the workstation.
  tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
+ tvmp # Copy libtegra_video_metadata_plugin.so to the box $BOX_MEDIASERVER_DIR/bin/plugins/.
 
- clean # Delete all build dirs.
- cmake [args] # Call "linux-tool.sh cmake $TARGET_DEVICE [args]".
- gen [args] # Call "linux-tool.sh gen $TARGET_DEVICE [args]".
- build [args] # Call "linux-tool.sh build $TARGET_DEVICE [args]".
+ # Commands which call linux-tool.sh with the proper target:
+ clean # Delete cmake build dir and all maven build dirs.
+ mvn [Release] [args] # Call maven.
+ gen [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+ build # Build via "cmake --build <dir>".
+ cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ build-installer [Release] [mvn] # Build installer using cmake or maven.
+ test-installer [Release] [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
+
  pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
 
@@ -154,7 +161,7 @@ get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR()
     CMAKE_BUILD_DIR=${DIRS[1]}
     [ -z "$CMAKE_BUILD_DIR" ] && nx_fail "Unable to get CMAKE_BUILD_DIR via $LINUX_TOOL print-dirs"
 
-    BOX_VMS_DIR="$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}"
+    BOX_VMS_DIR="$BOX_DEVELOP_DIR${VMS_DIR#$DEVELOP_DIR}"
 
     return 0
 }
@@ -204,7 +211,9 @@ cp_package_libs() # package-name [package-name]...
 {
     local PACKAGE
     for PACKAGE in "$@"; do
-        cp_files "$PACKAGES_DIR/$PACKAGE/lib" "*.so*" "$BOX_LIBS_DIR"
+        if [ ! -z "$PACKAGE" ]; then
+            cp_files "$PACKAGES_DIR/$PACKAGE/lib" "*.so*" "$BOX_LIBS_DIR"
+        fi
     done
 }
 
@@ -247,14 +256,20 @@ copy_package_libs()
         "$PACKAGE_QT" \
         "$PACKAGE_QUAZIP" \
         "$PACKAGE_SIGAR"
+
+    cp_files "$PACKAGE_GCC_LIBS_DIR" "lib{atomic,stdc++}.so*" "$BOX_LIBS_DIR"
 }
 
 copy_mediaserver()
 {
     cp_mediaserver_bins "mediaserver"
-    cp_mediaserver_bins "external.dat" "plugins" "vox" #"nvidia_models" - for tegra_video.
+    cp_mediaserver_bins "external.dat" "plugins" "vox"
     ln -s "../lib" "${BOX_MNT}$BOX_MEDIASERVER_DIR/lib" #< rpath: [$ORIGIN/..lib]
-    #cp_package_libs "tegra_video" #< Deprecated analytics plugin.
+
+    # Tegra analytics.
+    cp_package_libs "tegra_video" #< Tegra-specific plugin for video decoding and neural networks.
+    cp_files "$NVIDIA_MODELS_PATH" "*" "$BOX_NVIDIA_MODELS_DIR" #< Demo neural networks.
+    rm "$BOX_MEDIASERVER_DIR/bin/plugins/libstub_metadata_plugin.so*" #< Stub is not needed.
 }
 
 copy_desktop_client()
@@ -489,13 +504,6 @@ main()
 
             cp_desktop_client_bins "*_ut"
             ;;
-        server)
-            assert_not_client_only
-            check_box_mounted
-            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
-
-            cp_libs "libmediaserver_core.so*"
-            ;;
         lib)
             check_box_mounted
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
@@ -505,8 +513,7 @@ main()
             else
                 LIB_NAME="$1"
             fi
-            # TODO: #mike: For some libs there may be no "lib" prefix.
-            # TODO: #mike: Make an option to include ".debug".
+            # NOTE: For some libs there may be no "lib" prefix.
             cp_libs "*$LIB_NAME.so"
             ;;
         ini)
@@ -563,15 +570,15 @@ main()
             ;;
         run-tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
-            local BOX_SRC_DIR="$BOX_VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
+            local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
             box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
         tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
-            local BOX_SRC_DIR="$BOX_VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
-            if [ "$*" = "clean" ]; then
-                box make -C "$BOX_SRC_DIR" clean
+            local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
+            if [[ $* =~ clean ]]; then
+                box make -C "$BOX_SRC_DIR" "$@"
                 # No need to attempt copying files.
             else
                 box make -C "$BOX_SRC_DIR" "$@" \
@@ -583,8 +590,8 @@ main()
             ;;
         tv-ut)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
-            local SRC_DIR="$VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
-            local TV_TEST_BUILD_DIR="$CMAKE_BUILD_DIR/$VIDEO_DEC_GIE_PATH"
+            local SRC_DIR="$VMS_DIR/$TEGRA_VIDEO_SRC_PATH"
+            local TV_TEST_BUILD_DIR="$CMAKE_BUILD_DIR/$TEGRA_VIDEO_SRC_PATH"
             rm -rf "$TV_TEST_BUILD_DIR"
             mkdir -p "$TV_TEST_BUILD_DIR" || return $?
             nx_pushd "$TV_TEST_BUILD_DIR"
@@ -592,14 +599,15 @@ main()
 
             nx_verbose cmake "$SRC_DIR" -GNinja || return $?
             nx_verbose cmake --build . "$@" || return $?
-            ./*_ut || return $?
+
+            nx_verbose ./tegra_video_ut || return $?
 
             nx_popd
             rm -rf "$TV_TEST_BUILD_DIR"
             ;;
         tv-rdep)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
-            local SRC_DIR="$VMS_DIR/$PACKAGES_SRC_PATH/$VIDEO_DEC_GIE_PATH"
+            local SRC_DIR="$VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
 
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
@@ -611,12 +619,17 @@ main()
             nx_popd
             return $RESULT
             ;;
+        tvmp)
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            cp_files "$CMAKE_BUILD_DIR/bin/plugins" "libtegra_video_metadata_plugin.so" \
+                "$BOX_MEDIASERVER_DIR/bin/plugins"
+            ;;
         #..........................................................................................
         clean)
             "$LINUX_TOOL" clean "$TARGET_DEVICE" "$@"
             ;;
-        cmake)
-            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
+        mvn)
+            "$LINUX_TOOL" mvn "$TARGET_DEVICE" "$@"
             ;;
         gen)
             "$LINUX_TOOL" gen "$TARGET_DEVICE" "$@"
@@ -624,6 +637,16 @@ main()
         build)
             "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
             ;;
+        cmake)
+            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
+            ;;
+        build-installer)
+            "$LINUX_TOOL" build-installer "$TARGET_DEVICE" "$@"
+            ;;
+        test-installer)
+            "$LINUX_TOOL" test-installer "$TARGET_DEVICE" "$@"
+            ;;
+        #..........................................................................................
         pack-build)
             do_pack "$1" copy_build
             ;;
