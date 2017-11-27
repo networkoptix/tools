@@ -68,10 +68,11 @@ def getChangelog(revision, multiline):
     changes = sorted(set(changelog.split('\n\n')))
     changes = [x.strip('\n').replace('"', '\'') for x in changes if x and includeCommit(x)]
 
+    header = getHeader(revision, targetBranch)
     if changes:
-        changes.insert(0, getHeader(revision, targetBranch))
+        changes.insert(0, header)
     else:
-        return 'Merge Changelog is empty!'
+        return header
     
     return '\n'.join(changes).strip('\n')
       
@@ -103,13 +104,15 @@ def main():
     if revision == '.' and targetBranch != currentBranch:
         revision = currentBranch
         
+    changelog = getChangelog(revision, args.multiline)
+        
     if args.preview:
-        print getChangelog(revision, args.multiline)
+        print changelog
         sys.exit(0)
    
     execCommand('hg', 'up', targetBranch)
     execCommand('hg', 'merge',  '--tool=internal:merge', revision)
-    execCommand('hg', 'ci', '-m' + getChangelog(revision, args.multiline))
+    execCommand('hg', 'ci', '-m' + changelog)
     execCommand('hg', 'up', currentBranch)
     sys.exit(0)
     
