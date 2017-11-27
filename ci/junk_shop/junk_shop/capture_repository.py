@@ -66,6 +66,8 @@ class BuildParameters(object):
                     raise ArgumentTypeError('Invalid int for duration_ms: %r' % value)
             if name == 'build_num':
                 value = int(value)
+            if name == 'release' and value not in ['release', 'beta']:
+                raise ArgumentTypeError('Invalid value for "release": %r; allowed are: "release" and "beta"' % value)
             if name == 'duration_ms':
                 value = timedelta(milliseconds=int(duration_ms))
                 name = 'duration'
@@ -76,21 +78,41 @@ class BuildParameters(object):
             parameters.build_num = int(parameters.version.split('.')[-1])
         return parameters
 
-    def __init__(self):
-        self.project = None
-        self.branch = None
-        self.version = None
-        self.build_num = None
-        self.release = None
-        self.configuration = None
-        self.cloud_group = None
-        self.customization = None
-        self.is_incremental = None
-        self.jenkins_url = None
-        self.repository_url = None
-        self.revision = None
-        self.duration = None
-        self.platform = None
+    def __init__(self,
+                 project=None,
+                 branch=None,
+                 version=None,
+                 build_num=None,
+                 release=None,
+                 configuration=None,
+                 cloud_group=None,
+                 customization=None,
+                 is_incremental=None,
+                 jenkins_url=None,
+                 repository_url=None,
+                 revision=None,
+                 duration=None,
+                 platform=None,
+                 ):
+        assert release in [None, 'release', 'beta'], repr(release)
+        self.project = project
+        self.branch = branch
+        self.version = version
+        self.build_num = build_num
+        self.release = release
+        self.configuration = configuration
+        self.cloud_group = cloud_group
+        self.customization = customization
+        self.is_incremental = is_incremental
+        self.jenkins_url = jenkins_url
+        self.repository_url = repository_url
+        self.revision = revision
+        self.duration = duration
+        self.platform = platform
+
+    @property
+    def is_beta(self):
+       return self.release == 'beta'
 
 
 class RunParameters(object):
