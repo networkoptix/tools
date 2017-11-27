@@ -142,7 +142,7 @@ pack_files() # archive files...
         nx_fail "Archive filename not specified."
     fi
 
-    bpi tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
+    box tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
 }
 
 pack_full() # archive
