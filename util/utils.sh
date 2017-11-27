@@ -183,7 +183,7 @@ nx_dyellow()  { echo -en "\033[0;33m"; }
 nx_dblue()    { echo -en "\033[0;34m"; }
 nx_dmagenta() { echo -en "\033[0;35m"; }
 nx_dcyan()    { echo -en "\033[0;36m"; }
-nx_lgray()     { echo -en "\033[0;37m"; }
+nx_lgray()    { echo -en "\033[0;37m"; }
 nx_dgray()    { echo -en "\033[1;30m"; }
 nx_lred()     { echo -en "\033[1;31m"; }
 nx_lgreen()   { echo -en "\033[1;32m"; }
@@ -242,8 +242,83 @@ nx_popd()
     popd >/dev/null || nx_fail
 }
 
+# Concatenate and escape the args except "*" and args in "[]".
+nx_concat_ARGS() # "$@"
+{
+    ARGS=""
+    if [ ! -z "$*" ]; then
+        local ARG
+        for ARG in "$@"; do
+            case "$ARG" in
+                "["*"]") # Anything in square brackets.
+                    ARGS+="${ARG:1:-1} " #< Trim surrounding braces.
+                    ;;
+                *)
+                    local ARG_ESCAPED
+                    printf -v ARG_ESCAPED "%q " "$ARG" #< Perform the escaping.
+                    ARGS+="${ARG_ESCAPED//\\\*/*}" #< Append, unescaping all "*".
+                    ;;
+            esac
+        done
+        ARGS="${ARGS%?}" #< Trim the last space introduced by printf.
+    fi
+}
+
 #--------------------------------------------------------------------------------------------------
 # High-level utils, can use low-level utils.
+
+nx_telnet() # user password host port terminal_title background_rrggbb [command [args...]]
+{
+    local USER="$1"; shift
+    local PASSWORD="$1"; shift
+    local HOST="$1"; shift
+    local PORT="$1"; shift
+    local TERMINAL_TITLE="$1"; shift
+    local BACKGROUND_RRGGBB="$1"; shift
+    local ARGS
+    nx_concat_ARGS "$@"
+
+    local OLD_BACKGROUND
+    nx_get_background OLD_BACKGROUND
+    nx_set_background "$BACKGROUND_RRGGBB"
+    nx_push_title
+    nx_set_title "$TERMINAL_TITLE"
+
+    local -r PROMPT="#"
+    local -r RESULT_FILE="$(mktemp)"
+
+    expect -c "$(cat <<EOF
+        log_user 0
+        set timeout -1
+        spawn telnet "$BOX_HOST" "$BOX_PORT"
+        expect "login:" { send "$USER\\r" }
+        expect "Password:" { send "$PASSWORD\\r" }
+        if {"$ARGS" != ""} {
+            expect "$PROMPT"
+            log_user 1
+            send "$ARGS\\r"
+            expect "$PROMPT"
+            set FD [open "$RESULT_FILE" w]
+            log_user 0
+            send "echo \$?\\r" ;#< Echo command exit status.
+            expect -re {(\\d+)} { puts \$FD "\$expect_out(1,string)" } ;#< Print status to file.
+            close \$FD
+            puts "\\r"
+        } else {
+            expect "$PROMPT"
+            send "alias l='ls -l'\\r"
+            interact
+        }
+EOF
+    )"
+
+    local -r RESULT=$(cat "$RESULT_FILE")
+    rm "$RESULT_FILE"
+
+    nx_pop_title
+    nx_set_background "$OLD_BACKGROUND"
+    return $RESULT
+}
 
 # Execute a command via ssh, or log in via ssh.
 #
@@ -258,23 +333,8 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     local PORT="$1"; shift
     local TERMINAL_TITLE="$1"; shift
     local BACKGROUND_RRGGBB="$1"; shift
-
-    # Concatenate and escape the args except "*" and args in "[]".
-    local ARGS=""
-    if [ ! -z "$*" ]; then
-        for ARG in "$@"; do
-            case "$ARG" in
-                "["*"]") # Anything in square brackets.
-                    ARGS+="${ARG:1:-1} " #< Trim surrounding braces.
-                    ;;
-                *)
-                    printf -v ARG_ESCAPED "%q " "$ARG" #< Perform the escaping.
-                    ARGS+="${ARG_ESCAPED//\\\*/*}" #< Append, unescaping all "*".
-                    ;;
-            esac
-        done
-        ARGS="${ARGS%?}" #< Trim the last space introduced by printf.
-    fi
+    local ARGS
+    nx_concat_ARGS "$@"
 
     local OLD_BACKGROUND
     nx_get_background OLD_BACKGROUND
@@ -284,7 +344,7 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
 
     sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
         -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `#< Do not use known_hosts` \
-        ${ARGS:+"$ARGS"} `#< Omit arg if empty`;
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty`
     local RESULT=$?
 
     nx_pop_title
