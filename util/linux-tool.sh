@@ -11,6 +11,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
 : ${LA_HDW_MX_USER="$USER"} #< Username at la.hdw.mx.
+: ${TARGET=""} #< Default target, if not specified in the arg. If empty, VMS_DIR name is analyzed.
 
 #--------------------------------------------------------------------------------------------------
 
@@ -39,13 +40,13 @@ Here <command> can be one of the following:
 
  share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
  clean # Delete cmake build dir and all maven build dirs.
- mvn target [args] # Call maven.
- gen target [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
- build target # Build via "cmake --build <dir>".
- cmake target [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
- build-installer target [mvn] # Build installer using cmake or (if "mvn" specified) maven.
- test-installer target [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
- print-dirs target # Print VMS_DIR and CMAKE_BUILD_DIR for the specified target, on separate lines.
+ mvn [target] [Release] [args] # Call maven.
+ gen [target] [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+ build [target] # Build via "cmake --build <dir>".
+ cmake [target] [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ build-installer [target] [Release] [mvn] # Build installer using cmake or maven.
+ test-installer [target] [Release] [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
+ print-dirs [target] # Print VMS_DIR and CMAKE_BUILD_DIR for the target, on separate lines.
  tunnel ip1 [ip2]... # Create ssh tunnel to Burbank for the specified Burbank IP addresses.
 EOF
 }
@@ -90,9 +91,9 @@ do_share() # target_path
 # Set global variables depending on the target. Return 1 if the target is not recognized.
 do_get_target() # target
 {
-    TARGET="$1" #< Set the global var.
+    local -r SPECIFIED_TARGET="$1"
 
-    case "$TARGET" in
+    case "$SPECIFIED_TARGET" in
         linux) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="x64"; BOX=""; ARCH="x64";;
         tx1) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< tx1 is cmake-only
         bpi) MVN_TARGET_DIR="target-bpi"; MVN_BUILD_DIR="arm-bpi"; BOX="bpi"; ARCH="arm";;
@@ -102,10 +103,11 @@ do_get_target() # target
         android) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
         ios) nx-fail "Target \"$TARGET\" is not supported yet.";;
         *)
-            unset TARGET
             return 1
             ;;
     esac
+
+    TARGET="$SPECIFIED_TARGET" #< Set the global var.
 }
 
 # [out] TARGET
@@ -114,9 +116,15 @@ do_get_target() # target
 # [in] VMS_DIR
 get_TARGET() # "$1" && shift
 {
-    if [ $# != 0 ]; then
+    if [ $# != 0 ] && [ ! -z "$1" ]; then
         local -r SPECIFIED_TARGET="$1"
         do_get_target "$SPECIFIED_TARGET" && return 0
+    fi
+
+    # If the target is not specified in the arg, use the old value if it exists.
+    if [ ! -z "$TARGET" ]; then
+        nx_echo "+ TARGET=$TARGET"
+        return 1 #< No need for the caller to shift args.
     fi
 
     # No recognized target is supplied in $1: trying auto-detect from VMS_DIR being "*-target".
@@ -125,14 +133,18 @@ get_TARGET() # "$1" && shift
         do_get_target "$DETECTED_TARGET" && return 1 #< No need for the caller to shift args.
     fi
 
-    nx_fail "Target is unknown: either specify it after the verb, or rename VMS_DIR as *-target."
+    nx_fail "Target is unknown: specify after command, set \$DEFAULT_TARGET or rename VMS_DIR as *-target."
 }
 
-do_mvn() # "$@"
+do_mvn() # [target] [Release] "$@"
 {
     find_VMS_DIR
     get_TARGET "$1" && shift
-    nx_verbose mvn -Darch="$ARCH" -Dbox="$BOX" "$@"
+
+    local CONFIG_ARG=""
+    [ "$1" = "Release" ] && { shift; CONFIG_ARG="-Dbuild.configuration=release"; }
+
+    nx_verbose mvn -Darch="$ARCH" -Dbox="$BOX" $CONFIG_ARG "$@"
 }
 
 # Deduce CMake build dir out of VMS_DIR and targetDevice (box). Examples:
@@ -195,8 +207,8 @@ do_gen() # [target] [Release] "$@"
     find_VMS_DIR cd
     get_TARGET "$1" && shift
 
-    local CONFIGURATION_ARG=""
-    [ "$1" = "Release" ] && { shift; CONFIGURATION_ARG="-DCMAKE_BUILD_TYPE=Release"; }
+    local CONFIG_ARG=""
+    [ "$1" = "Release" ] && { shift; CONFIG_ARG="-DCMAKE_BUILD_TYPE=Release"; }
 
     get_CMAKE_BUILD_DIR "$TARGET"
     if [ -d "$CMAKE_BUILD_DIR" ]; then
@@ -216,7 +228,7 @@ do_gen() # [target] [Release] "$@"
     local GENERATOR_ARG=""
     [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
-    nx_verbose cmake "$VMS_DIR" "$@" $GENERATOR_ARG $TARGET_ARG $CONFIGURATION_ARG
+    nx_verbose cmake "$VMS_DIR" "$@" $GENERATOR_ARG $TARGET_ARG $CONFIG_ARG
     local RESULT=$?
 
     nx_popd
@@ -301,7 +313,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     local SRC="$1"; shift
     nx_verbose cmake "$SRC" -GNinja || return $?
     nx_verbose cmake --build . "$@" || return $?
-    ./nx_kit_test
+    ./nx_kit_ut
 }
 
 do_kit() # "$@"
@@ -328,12 +340,12 @@ do_kit() # "$@"
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 }
 
-build_installer_cmake()
+build_installer_cmake() # [Release]
 {
-    do_gen "$TARGET" && do_build "$TARGET" --target "arm-installer"
+    do_gen "$TARGET" "$@" && do_build "$TARGET" --target "arm-installer"
 }
 
-build_installer_mvn()
+build_installer_mvn() # [Release]
 {
     local INSTALLER_PROJECT
     case "$TARGET" in
@@ -343,7 +355,10 @@ build_installer_mvn()
         *) nx_fail "Unsupported target [$TARGET].";;
     esac
 
-    nx_verbose mvn package -Dbox="$BOX" -Darch="$ARCH" --projects :"$INSTALLER_PROJECT"
+    local CONFIG_ARG=""
+    [ "$1" = "Release" ] && { shift; CONFIG_ARG="-Dbuild.configuration=release"; }
+
+    nx_verbose mvn package -Dbox="$BOX" -Darch="$ARCH" $CONFIG_ARG --projects :"$INSTALLER_PROJECT"
 }
 
 list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
@@ -423,7 +438,7 @@ test_installer_zip() # original.zip built.zip built.tar.gz
     nx_echo "SUCCESS: The built .zip contains the proper .tar.gz, and other files equal originals."
 }
 
-do_test_installer() # "$@"
+do_test_installer() # [target] [Release] [checksum] [no-build] [mvn] orig/archives/dir
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -431,6 +446,8 @@ do_test_installer() # "$@"
     local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
     local -r ZIP_MASK="nxwitness-*_update*.zip"
     local -r DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
+
+    local CONFIG=""; [ "$1" = "Release" ] && { shift; CONFIG="Release"; }
 
     local -i CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
     local -i NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
@@ -450,7 +467,7 @@ do_test_installer() # "$@"
     fi
 
     if [ $NO_BUILD = 0 ]; then
-        $BUILD_FUNC || return $?
+        $BUILD_FUNC $CONFIG || return $?
     fi
 
     local BUILT_TAR_GZ
@@ -535,11 +552,11 @@ main()
             do_run_ut "$@"
             ;;
         #..........................................................................................
-        clean)
-            do_clean "$@"
-            ;;
         share)
             do_share "$@"
+            ;;
+        clean)
+            do_clean "$@"
             ;;
         mvn)
             do_mvn "$@"
@@ -556,18 +573,21 @@ main()
         test-installer)
             do_test_installer "$@"
             ;;
-        build-installer) # target [mvn]
+        build-installer) # [target] [Release] [mvn]
             find_VMS_DIR cd
             get_TARGET "$1" && shift
+
+            local CONFIG=""; [ "$1" = "Release" ] && { shift; CONFIG="Release"; }
+
             if [ "$1" = "mvn" ]; then
                 shift
-                build_installer_mvn
+                build_installer_mvn $CONFIG
             else
                 get_CMAKE_BUILD_DIR "$TARGET"
                 if [ ! -d "$CMAKE_BUILD_DIR" ]; then
                     nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
                 fi
-                build_installer_cmake
+                build_installer_cmake $CONFIG
             fi
             ;;
         print-dirs)
