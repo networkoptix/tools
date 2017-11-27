@@ -1,7 +1,8 @@
 FROM ubuntu:14.04
 
 
-ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget mercurial"
+ENV APT_PACKAGES "software-properties-common python-software-properties"
+ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget"
 ENV JAVA_REQUIREMENTS_PACKAGES "ca-certificates-java libasound2"
 ENV PYTHON_PACKAGES "python-dev python-pip python-virtualenv"
 ENV JUNK_SHOP_PACKAGES "libpq-dev gdb"
@@ -20,6 +21,7 @@ ENV FUNTEST_PACKAGES "python-demjson python-opencv"
 RUN set -ex; \
 	apt-get update; \
 	apt-get install -y \
+		${APT_PACKAGES} \
 		${COMMON_PACKAGES} \
 		${JAVA_REQUIREMENTS_PACKAGES} \
 		${PYTHON_PACKAGES} \
@@ -27,6 +29,13 @@ RUN set -ex; \
 		${CMAKE_BUILD_PACKAGES} \
 		${BUILD_PACKAGES} \
 		${FUNTEST_PACKAGES}
+
+
+# Install mercurial from it's own ppa; version available on ubuntu 14 is too old and is incompatible with newer one from jenkins
+RUN set -ex; \
+	add-apt-repository -y ppa:mercurial-ppa/releases \
+	apt-get update \
+	apt-getinstall mercurial
 
 
 # Install java 8
