@@ -81,7 +81,7 @@ Here <command> can be one of the following:
  install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
  install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
 
- ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+ go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
  run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
  kill-c # Stop mobile_client via "killall mobile_client".
  start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
@@ -117,7 +117,7 @@ EOF
 #--------------------------------------------------------------------------------------------------
 
 # Execute a command at the box via ssh, or log in to the box via ssh.
-box() # args...
+go() # args...
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
@@ -142,7 +142,7 @@ pack_files() # archive files...
         nx_fail "Archive filename not specified."
     fi
 
-    box tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
+    go tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
 }
 
 pack_full() # archive
@@ -642,7 +642,7 @@ install_zip() # "$@"
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
     local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
 
-    box \
+    go \
         /etc/init.d/networkoptix-lite-client stop "[&&]" \
         /etc/init.d/networkoptix-mediaserver stop "[&&]" \
         rm -f "$BOX_LOGS_DIR/*.log" "[&&]" \
@@ -651,7 +651,7 @@ install_zip() # "$@"
 
     nx_rsync "$INSTALLER" "${BOX_MNT}$BOX_UPDATES_DIR/"
 
-    box \
+    go \
         cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
         unzip "../$ZIP_FILENAME" "[&&]" \
         chmod +x install.sh "[&&]" \
@@ -708,15 +708,15 @@ main()
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            box umount "$BOX_DEVELOP_DIR" #< Just in case.
-            box mkdir -p "$BOX_DEVELOP_DIR" || exit $?
-            box apt-get install -y sshfs #< Install sshfs.
+            go umount "$BOX_DEVELOP_DIR" #< Just in case.
+            go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            go apt-get install -y sshfs #< Install sshfs.
 
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
             nx_echo
             nx_echo "ATTENTION: Now execute the following command directly at the box:"
             echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
-            #box sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+            #go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
                 #&& echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
@@ -970,14 +970,14 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         ini)
-            box \
+            go \
                 touch /tmp/mobile_client.ini "[&&]" \
                 touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
             ;;
         logs)
-            box \
+            go \
                 touch "$BOX_LOGS_DIR/networkoptix-mediaserver-out.flag" "[&&]" \
                 touch "$BOX_LOGS_DIR/networkoptix-lite-client-out.flag" "[&&]" \
                 touch "$BOX_LOGS_DIR/mediaserver-out.flag" "[&&]" \
@@ -990,35 +990,35 @@ main()
             install_zip "$@"
             ;;
         #..........................................................................................
-        ssh)
-            box "$@"
+        go)
+            go "$@"
             ;;
         run-c)
-            box /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
+            go /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
             ;;
         kill-c)
-            box killall mobile_client
+            go killall mobile_client
             ;;
         start-s)
-            box /etc/init.d/networkoptix-mediaserver start "$@"
+            go /etc/init.d/networkoptix-mediaserver start "$@"
             ;;
         stop-s)
-            box /etc/init.d/networkoptix-mediaserver stop
+            go /etc/init.d/networkoptix-mediaserver stop
             ;;
         start-c)
-            box /etc/init.d/networkoptix-lite-client start "$@"
+            go /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop-c)
-            box /etc/init.d/networkoptix-lite-client stop
+            go /etc/init.d/networkoptix-lite-client stop
             ;;
         start)
-            box \
+            go \
                 /etc/init.d/networkoptix-mediaserver start "$@" "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop)
-            box \
+            go \
                 /etc/init.d/networkoptix-lite-client stop "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-mediaserver stop
@@ -1027,13 +1027,13 @@ main()
             local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             nx_echo "Running: $TEST_NAME $@"
-            box LD_LIBRARY_PATH="$BOX_LIBS_DIR" \
+            go LD_LIBRARY_PATH="$BOX_LIBS_DIR" \
                 "$BOX_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             ;;
         #..........................................................................................
         vdp)
             find_VMS_DIR
-            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
+            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
             ;;
         vdp-rdep)
             find_VMS_DIR
@@ -1043,7 +1043,7 @@ main()
             ;;
         pd)
             find_VMS_DIR
-            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
+            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
             ;;
         pd-rdep)
             find_VMS_DIR
@@ -1056,10 +1056,10 @@ main()
             find_VMS_DIR
             if [ "$1" = "ump" ]; then
                 shift
-                box USE_UMP=1 make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" \
+                go USE_UMP=1 make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" \
                     echo "SUCCESS"
             else
-                box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" echo "SUCCESS"
             fi
             ;;
         cedrus-rdep)
@@ -1070,7 +1070,7 @@ main()
             ;;
         ump)
             find_VMS_DIR
-            box \
+            go \
                 rm -r /tmp/libump "[&&]" \
                 cp -r "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libump" /tmp/ "[&&]" \
                 cd /tmp/libump "[&&]" \
@@ -1080,7 +1080,7 @@ main()
             ;;
         ldp)
             find_VMS_DIR
-            box make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
+            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
             ;;
         ldp-rdep)
             find_VMS_DIR

@@ -53,7 +53,7 @@ Here <command> can be one of the following:
  install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
  uninstall # Uninstall all nx files from the box.
 
- do [command args] # Execute a command at the box via telnet, or log in to the box via telnet.
+ go [command args] # Execute a command at the box via telnet, or log in to the box via telnet.
  start-s [args] # Run mediaserver via "/etc/init.d/S99networkoptix-mediaserver start [args]".
  stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
 
@@ -71,7 +71,7 @@ EOF
 #--------------------------------------------------------------------------------------------------
 
 # Execute a command at the box via ssh, or log in to the box via ssh.
-box() # "$@"
+go() # "$@"
 {
     nx_telnet "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
@@ -240,7 +240,7 @@ install_tar() # "$@"
     find_INSTALLER ".tar.gz" "$@"
     local -r BOX_INSTALLER="$BOX_DEVELOP_DIR/${INSTALLER#$DEVELOP_DIR}"
 
-    box tar zxvf "$BOX_INSTALLER" -C /
+    go tar zxvf "$BOX_INSTALLER" -C /
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -263,10 +263,10 @@ main()
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            box umount "$BOX_DEVELOP_DIR" #< Just in case.
-            box mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            go umount "$BOX_DEVELOP_DIR" #< Just in case.
+            go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
 
-            box mount -o nolock "$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR"
+            go mount -o nolock "$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR"
             #    && echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
@@ -314,13 +314,13 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         logs)
-            box \
+            go \
                 mkdir -p "$BOX_LOGS_DIR" "[&&]" \
                 touch "$BOX_LOGS_DIR/S99networkoptix-mediaserver-out.flag" "[&&]" \
                 touch "$BOX_LOGS_DIR/mediaserver-out.flag"
             ;;
         logs-clean)
-            box rm -rf "$BOX_LOGS_DIR/*.log"
+            go rm -rf "$BOX_LOGS_DIR/*.log"
             ;;
         install-tar)
             install_tar "$@"
@@ -340,17 +340,17 @@ main()
                 /sdcard/cores
                 "/root/mediaserver*.gdb-bt"
             )
-            box rm -rf ${DIRS_TO_REMOVE[@]}
+            go rm -rf ${DIRS_TO_REMOVE[@]}
             ;;
         #..........................................................................................
         do)
-            box "$@"
+            go "$@"
             ;;
         start-s)
-            box /etc/init.d/S99networkoptix-mediaserver start "$@"
+            go /etc/init.d/S99networkoptix-mediaserver start "$@"
             ;;
         stop-s)
-            box /etc/init.d/S99networkoptix-mediaserver stop
+            go /etc/init.d/S99networkoptix-mediaserver stop
             ;;
         #..........................................................................................
         clean)

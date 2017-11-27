@@ -69,7 +69,7 @@ Here <command> can be one of the following:
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
  ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
 
- ssh [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+ go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
  start-s [args] # Run mediaserver exe with [args].
  stop-s # Stop mediaserver via "kill -9".
  start-c [args] # Run desktop_client exe with [args].
@@ -102,7 +102,7 @@ EOF
 #--------------------------------------------------------------------------------------------------
 
 # Execute a command at the box via ssh, or log in to the box via ssh.
-box() # args...
+go() # args...
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
@@ -321,6 +321,9 @@ copy_build()
 {
     copy_libs
     cp_mediaserver_bins "mediaserver"
+    cp_files "$CMAKE_BUILD_DIR/bin/plugins" "libtegra_video_metadata_plugin.so" \
+        "$BOX_MEDIASERVER_DIR/bin/plugins"
+    cp_package_libs "tegra_video" #< Tegra-specific plugin for video decoding and neural networks.
     cp_desktop_client_bins "desktop_client"
 }
 
@@ -410,14 +413,14 @@ main()
                 | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            box umount "$BOX_DEVELOP_DIR" #< Just in case.
-            box mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            go umount "$BOX_DEVELOP_DIR" #< Just in case.
+            go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
 
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
             nx_echo
             nx_echo "ATTENTION: Now execute directly at the box (adjust if using a tunnel):"
             echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
-            #box sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+            #go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
                 #"[&&]" echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
@@ -517,28 +520,28 @@ main()
             cp_libs "*$LIB_NAME.so"
             ;;
         ini)
-            box touch /tmp/nx_media.ini "[&&]" \
+            go touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/tegra_video_metadata_plugin.ini "[&&]" \
                 touch /tmp/video_dec_gie.ini "[&&]" \
                 touch /tmp/tegra_video.ini
             ;;
         #..........................................................................................
-        ssh)
-            box "$@"
+        go)
+            go "$@"
             ;;
         start-s)
             assert_not_client_only
-            box sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
+            go sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            box sudo killall -9 mediaserver
+            go sudo killall -9 mediaserver
             ;;
         start-c)
             assert_not_server_only
-            box DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            go DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
-            box sudo killall -9 desktop_client
+            go sudo killall -9 desktop_client
             ;;
         run-s-ut)
             local TEST_NAME="$1"
@@ -546,7 +549,7 @@ main()
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
             local TEST_PATH="$BOX_MEDIASERVER_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            box \
+            go \
                 for TEST in $TEST_PATH "[;]" \
                 do \
                     echo "[;]" \
@@ -560,7 +563,7 @@ main()
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified. Use \"*_ut\" for all tests."
             local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            box \
+            go \
                 for TEST in $TEST_PATH "[;]" \
                 do \
                     echo "[;]" \
@@ -571,17 +574,17 @@ main()
         run-tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
-            box cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
+            go cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
         tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
             if [[ $* =~ clean ]]; then
-                box make -C "$BOX_SRC_DIR" "$@"
+                go make -C "$BOX_SRC_DIR" "$@"
                 # No need to attempt copying files.
             else
-                box make -C "$BOX_SRC_DIR" "$@" \
+                go make -C "$BOX_SRC_DIR" "$@" \
                     "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
                     "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
                     "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
