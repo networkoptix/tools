@@ -16,11 +16,13 @@ import subprocess
 import sys
 import os
 import argparse
+import re
 
 targetBranch = '.';
 verbose = False
 mergeCommit = 'merge'
-ignoredPrefix = '#'
+projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE', 
+    'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
 def getHeader(merged, current):
     return "Merge: {0} -> {1}".format(merged, current)
@@ -41,6 +43,12 @@ def execCommand(*command):
         sys.exit(code)
     return code
         
+def hasIssueLink(commitText, projectKey):
+    return re.search('([^_]|\A){0}-\d+'.format(projectKey.lower()), commitText.lower()) is not None
+        
+def includeCommit(commitText):
+    return any(hasIssueLink(commitText, projectKey) for projectKey in projectKeys)
+        
 def getChangelog(revision, multiline):
     command = ['hg', 'log', '--template']
     if multiline:
@@ -58,8 +66,7 @@ def getChangelog(revision, multiline):
         print e.output
         return ''
     changes = sorted(set(changelog.split('\n\n')))
-    changes = [x.strip('\n').replace('"', '\'') for x in changes if 
-        x and not x.lower().startswith(mergeCommit) and not x.lower().startswith(ignoredPrefix)]
+    changes = [x.strip('\n').replace('"', '\'') for x in changes if x and includeCommit(x)]
 
     if changes:
         changes.insert(0, getHeader(revision, targetBranch))
