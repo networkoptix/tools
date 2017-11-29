@@ -49,15 +49,16 @@ class CiProject(JenkinsProject):
         input.report()
 
     def stage_init(self, input):
-        job_list = [self._make_platform_job(input.config, platform) for platform in self.platforms]
+        job_list = [self._make_platform_job(input, platform) for platform in self.platforms]
         return input.make_output_state([
             ParallelCommand(job_list),
             ])
 
-    def _make_platform_job(self, config, platform):
-        platform_config = config.platforms[platform]
+    def _make_platform_job(self, input, platform):
+        nx_vms_scm_info = input.scm_info['nx_vms']
+        platform_config = input.config.platforms[platform]
         node = platform_config.build_node
-        workspace_dir = 'psa-vfedorov-%s' % platform
+        workspace_dir = self._make_workspace_dir(nx_vms_scm_info.branch, platform)
         job_command_list = [
             # CleanDirCommand(),
             self.prepare_devtools_command(),
@@ -69,6 +70,12 @@ class CiProject(JenkinsProject):
             self.make_python_stage_command('node', python_path_list=[JUNK_SHOP_DIR], platform=platform),
             ]
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
+
+    def _make_workspace_dir(self, branch, platform):
+        if self.in_assist_mode:
+            return 'psa-vfedorov-%s' % platform
+        else:
+            return 'ci-%s-%s' % (branch, platform)
 
     def stage_node(self, input):
         log.info('Node stage: %s', input.current_node)
