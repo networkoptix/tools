@@ -4,6 +4,7 @@ source "$(dirname "$0")/utils.sh"
 nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".
+: ${TARGET_DEVICE="bpi"} #< Target device for CMake.
 : ${BOX_MNT="/bpi"}
 : ${BOX_USER="root"}
 : ${BOX_INITIAL_PASSWORD="admin"}
@@ -80,6 +81,7 @@ Here <command> can be one of the following:
  logs # Create empty -out.flag files at the box'es log dir to trigger logs with respective names.
  install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
  install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
+ uninstall # Uninstall all nx files from the box.
 
  go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
  run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
@@ -102,15 +104,17 @@ Here <command> can be one of the following:
  ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
  ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
 
- clean # Call "linux-tool.sh clean bpi".
- mvn [args] # Call maven with the required platorm and box.
- cmake [args] # Call "linux-tool.sh cmake bpi [args]".
- gen [args] # Call "linux-tool.sh gen bpi [args]".
- build [args] # Call "linux-tool.sh build bpi [args]".
+ # Commands which call linux-tool.sh with the proper target:
+ clean # Delete cmake build dir and all maven build dirs.
+ mvn [Release] [args] # Call maven.
+ gen [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+ build # Build via "cmake --build <dir>".
+ cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ build-installer [Release] [mvn] # Build installer using cmake or maven.
+ test-installer [Release] [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
+
  pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
- build-installer [mvn] # Build installer using cmake or (if "mvn" specified) maven.
- test-installer [mvn] original/archives/dir # Build installer and test to equal the original.
 EOF
 }
 
@@ -143,16 +147,6 @@ pack_files() # archive files...
     fi
 
     go tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
-}
-
-pack_full() # archive
-{
-    local ARCHIVE="$1"
-
-    pack_files "$ARCHIVE" \
-        "$BOX_INSTALL_DIR" \
-        "/etc/init.d/networkoptix*" \
-        "/etc/init.d/nx*"
 }
 
 # Pack build results and bpi-specific artifacts.
@@ -564,11 +558,6 @@ iface eth0 inet dhcp
 EOF
 }
 
-do_mvn() # "$@"
-{
-    nx_verbose mvn -Dbox=bpi -Darch=arm "$@"
-}
-
 assert_not_client_only()
 {
     if [ "$CLIENT_ONLY" = "1" ]; then
@@ -642,12 +631,15 @@ install_zip() # "$@"
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
     local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
 
-    go \
-        /etc/init.d/networkoptix-lite-client stop "[&&]" \
-        /etc/init.d/networkoptix-mediaserver stop "[&&]" \
-        rm -f "$BOX_LOGS_DIR/*.log" "[&&]" \
-        rm -rf "$BOX_UPDATES_DIR" "[&&]" \
-        mkdir -p "$BOX_UPDATES_DIR/$DISTRIB"
+    go "[ set -x && \
+        if [ -f /etc/init.d/networkoptix-lite-client ]; then \
+            /etc/init.d/networkoptix-lite-client stop; fi && \
+        if [ -f /etc/init.d/networkoptix-mediaserver ]; then \
+            /etc/init.d/networkoptix-mediaserver stop; fi && \
+        { rm -f \"$BOX_LOGS_DIR/*.log\" || true; } && \
+        rm -rf \"$BOX_UPDATES_DIR\" && \
+        mkdir -p \"$BOX_UPDATES_DIR/$DISTRIB\" \
+    ]"
 
     nx_rsync "$INSTALLER" "${BOX_MNT}$BOX_UPDATES_DIR/"
 
@@ -989,6 +981,14 @@ main()
         install-zip)
             install_zip "$@"
             ;;
+        uninstall)
+            local -r DIRS_TO_REMOVE=(
+                "$BOX_INSTALL_DIR"
+                "/etc/init.d/networkoptix*"
+                "/etc/init.d/nx*"
+            )
+            go rm -rf ${DIRS_TO_REMOVE[@]} || true #< Ignore missing files.
+            ;;
         #..........................................................................................
         go)
             go "$@"
@@ -1090,31 +1090,35 @@ main()
             ;;
         #..........................................................................................
         clean)
-            "$LINUX_TOOL" clean bpi "$@"
+            "$LINUX_TOOL" clean "$TARGET_DEVICE" "$@"
             ;;
         mvn)
-            do_mvn "$@"
-            ;;
-        cmake)
-            "$LINUX_TOOL" cmake bpi "$@"
+            "$LINUX_TOOL" mvn "$TARGET_DEVICE" "$@"
             ;;
         gen)
-            "$LINUX_TOOL" gen bpi "$@"
+            "$LINUX_TOOL" gen "$TARGET_DEVICE" "$@"
             ;;
         build)
-            "$LINUX_TOOL" build bpi "$@"
+            "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
             ;;
+        cmake)
+            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
+            ;;
+        build-installer)
+            "$LINUX_TOOL" build-installer "$TARGET_DEVICE" "$@"
+            ;;
+        test-installer)
+            "$LINUX_TOOL" test-installer "$TARGET_DEVICE" "$@"
+            ;;
+        #..........................................................................................
         pack-build)
             pack_build "$1"
             ;;
         pack-full)
-            pack_full "$1"
-            ;;
-        build-installer)
-            "$LINUX_TOOL" build-installer bpi "$@"
-            ;;
-        test-installer)
-            "$LINUX_TOOL" test-installer bpi "$@"
+            pack_files "$1" \
+                "$BOX_INSTALL_DIR" \
+                "/etc/init.d/networkoptix*" \
+                "/etc/init.d/nx*"
             ;;
         #..........................................................................................
         *)
