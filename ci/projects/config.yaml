@@ -14,4 +14,4 @@ platforms:
   mac:
     build_node: mac
   win-x64:
-    build_node: mac
+    build_node: windows
