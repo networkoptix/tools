@@ -18,10 +18,10 @@ from cmake import CMake
 from build import CMakeBuilder
 from junk_shop import DbConfig, BuildParameters, store_output_and_exit_code
 
-
 log = logging.getLogger(__name__)
 
 
+ASSIST_MODE_VMS_BRANCH = 'vms'
 JUNK_SHOP_DIR = 'devtools/ci/junk_shop'
 
 
@@ -55,14 +55,14 @@ class CiProject(JenkinsProject):
             ])
 
     def _make_platform_job(self, input, platform):
-        nx_vms_scm_info = input.scm_info['nx_vms']
+        branch_name = self._nx_vms_branch_name(input.jenkins_env)
         platform_config = input.config.platforms[platform]
         node = platform_config.build_node
-        workspace_dir = self._make_workspace_dir(nx_vms_scm_info.branch, platform)
+        workspace_dir = self._make_workspace_dir(branch_name, platform)
         job_command_list = [
             # CleanDirCommand(),
             self.prepare_devtools_command(),
-            CheckoutCommand('nx_vms', 'vms'),
+            CheckoutCommand('nx_vms', branch_name),
             PrepareVirtualEnvCommand([
                 'devtools/ci/projects/requirements.txt',
                 os.path.join(JUNK_SHOP_DIR, 'requirements.txt'),
@@ -71,11 +71,20 @@ class CiProject(JenkinsProject):
             ]
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
 
-    def _make_workspace_dir(self, branch, platform):
+    def _nx_vms_branch_name(self, jenkins_env):
+        if self.in_assist_mode:
+            return ASSIST_MODE_VMS_BRANCH
+        else:
+            assert jenkins_env.branch_name, (
+                'This scripts are intented to be used in multibranch projects only;'
+                ' env.BRANCH_NAME must be defined')
+            return jenkins_env.branch_name
+
+    def _make_workspace_dir(self, branch_name, platform):
         if self.in_assist_mode:
             return 'psa-vfedorov-%s' % platform
         else:
-            return 'ci-%s-%s' % (branch, platform)
+            return 'ci-%s-%s' % (branch_name, platform)
 
     def stage_node(self, input):
         log.info('Node stage: %s', input.current_node)

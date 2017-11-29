@@ -117,27 +117,33 @@ class JenkinsEnv(object):
             build_number=data['build_number'],
             build_url=data['build_url'],
             executor_number=data['executor_number'],
+            branch_name=data['branch_name'],
             )
 
-    def __init__(self, build_number, build_url, executor_number):
+    def __init__(self, build_number, build_url, executor_number, branch_name):
         assert isinstance(build_number, int), repr(build_number)
         assert isinstance(build_url, basestring), repr(build_url)
         assert isinstance(executor_number, int), repr(executor_number)
+        assert branch_name is None or isinstance(branch_name, basestring), repr(branch_name)
         self.build_number = build_number
         self.build_url = build_url
         self.executor_number = executor_number
+        self.branch_name = branch_name
 
     def to_dict(self):
         return dict(
             build_number=self.build_number,
             build_url=self.build_url,
             executor_number=self.executor_number,
+            branch_name=self.branch_name
             )
+
     def report(self):
         log.info('jenkins_env:')
         log.info('\t' 'build_number: %r' % self.build_number)
         log.info('\t' 'build_url: %r' % self.build_url)
         log.info('\t' 'executor_number: %r' % self.executor_number)
+        log.info('\t' 'branch_name: %r' % self.branch_name)
 
 
 class State(object):
