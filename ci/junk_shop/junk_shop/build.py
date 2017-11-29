@@ -5,6 +5,7 @@
 import sys
 import os.path
 import argparse
+from collections import namedtuple
 import re
 from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
@@ -30,7 +31,9 @@ def load_output_file_list(output_file_list):
     return output
 
 
-def store_output_and_exit_code(db_config, build_parameters, exit_code, parse_maven_outcome, output):
+StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_path')
+
+def store_output_and_exit_code(db_config, build_parameters, output, exit_code, parse_maven_outcome=False):
     repository = DbCaptureRepository(db_config, build_parameters)
     with db_session:
         passed = True
@@ -46,9 +49,9 @@ def store_output_and_exit_code(db_config, build_parameters, exit_code, parse_mav
             exit_code_message = 'Exit code: %d' % exit_code
             repository.add_artifact(
                 run, 'exit code', 'build-exit-code', repository.artifact_type.output, exit_code_message, is_error=not passed)
-        run.outcome = status2outcome(passed)
-        print 'Created %s run %s' % (run.outcome, run.path)
-        return passed
+        outcome = status2outcome(passed)
+        run.outcome = outcome
+        return StoredBuildInfo(passed, outcome, run.path)
 
 
 def main():
@@ -65,14 +68,15 @@ def main():
     args = parser.parse_args()
     try:
         output = load_output_file_list(args.output_file)
-        passed = store_output_and_exit_code(
+        build_info = store_output_and_exit_code(
             args.db_config,
             args.build_parameters,
+            output,
             args.exit_code,
             args.parse_maven_outcome,
-            output,
             )
-        if not passed and args.signal_failure:
+        print 'Created %s run %s' % (build_info.outcome, build_info.run_path)
+        if not build_info.passed and args.signal_failure:
             sys.exit(2)
     except RuntimeError as x:
         print x

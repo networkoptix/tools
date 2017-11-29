@@ -59,8 +59,14 @@ class DbConfig(object):
         user, password, host, _, port = mo.groups()
         return cls(host, user, password, port)
 
-    def __init__(self, host, user, password, port):
+    def __init__(self, host, user, password, port=None):
         self.host = host
         self.user = user
         self.password = password
         self.port = port
+
+    def __repr__(self):
+        if self.port:
+            return '%s:%s' % (self.host, self.port)
+        else:
+            return self.host
