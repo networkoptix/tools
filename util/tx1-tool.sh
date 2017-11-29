@@ -416,6 +416,7 @@ main()
             go umount "$BOX_DEVELOP_DIR" #< Just in case.
             go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
 
+            # TODO: Fix: When using a tunnel, reverse port is "-p 22<IP>" and host "la.hdw.mx".
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
             nx_echo
             nx_echo "ATTENTION: Now execute directly at the box (adjust if using a tunnel):"
