@@ -48,6 +48,7 @@ services:
     ports:
       - '80:80'
     environment:
+      STATIC_PATH: /app/junk_shop/webapp/static
       JUNK_SHOP_SETTINGS: /app/settings.py
       PGPASSWORD:
 
