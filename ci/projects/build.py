@@ -9,7 +9,7 @@ import platform
 from utils import setup_logging, ensure_dir_exists
 from host import CommandResults, LocalHost
 from cmake import CMake
-from junk_shop import DbConfig, BuildParameters, store_output_and_exit_code
+from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
 
 log = logging.getLogger(__name__)
 
@@ -36,9 +36,9 @@ class CMakeBuilder(object):
         self._system = platform.system()
         self._working_dir = os.getcwd()  # python steps are run in working dir
 
-    def build(self, src_dir, build_dir, build_params, clean_build, junk_shop_db_config):
+    def build(self, src_dir, build_dir, build_params, clean_build, junk_shop_repository):
         assert isinstance(build_params, BuildParameters), repr(build_params)
-        assert isinstance(junk_shop_db_config, DbConfig), repr(junk_shop_db_config)
+        assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
         configure_results = self._configure(src_dir, build_dir, build_params, cmake_configuration)
@@ -54,9 +54,9 @@ class CMakeBuilder(object):
                 log.info('Building with cmake failed with exit code: %d', build_results.exit_code)
         else:
             log.info('Configuring with cmake failed with exit code: %d', configure_results.exit_code)
-        build_info = store_output_and_exit_code(junk_shop_db_config, build_params, output, exit_code)
+        build_info = store_output_and_exit_code(junk_shop_repository, output, exit_code)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.path=%r',
-                     junk_shop_db_config, build_info.outcome, build_info.run_path)
+                     junk_shop_repository.db_config, build_info.outcome, build_info.run_path)
 
     def _prepare_build_dir(self, build_dir, clean_build):
         cmake_cache_path = os.path.join(build_dir, 'CMakeCache.txt')

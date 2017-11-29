@@ -2,6 +2,7 @@
 
 # pick changeset log for a run from mercurial, save to junk-shop database
 
+import logging
 import argparse
 import subprocess
 from datetime import datetime, timedelta
@@ -11,6 +12,7 @@ from junk_shop.utils import DbConfig
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 
+log = logging.getLogger(__name__)
 
 HG_LOG_TEMPLATE = r'{node|short}|{date|isodatesec}|{author|person}|{author|email}|{desc|firstline}\n'
 
@@ -38,7 +40,7 @@ def load_change_sets(repository, src_dir, build, prev_revision):
     for line in lines:
         revision, date_str, user, email, desc = line.split('|', 4)
         date = dateutil_parser.parse(date_str)
-        print revision, date, user, email, desc
+        log.info('Changeset: %s %s %s %s %s', revision, date, user, email, desc)
         changeset = models.BuildChangeSet(
             build=build,
             revision=revision,
@@ -47,6 +49,16 @@ def load_change_sets(repository, src_dir, build, prev_revision):
             email=email,
             desc=desc,
             )
+
+@db_session
+def update_build_info(repository, src_dir):
+    build = repository.produce_build()
+    prev_revision = pick_last_revision(repository)
+    log.info('current revision: %s, prev_revision: %s', build.revision, prev_revision)
+    delete_build_changesets(build)
+    if prev_revision:
+        load_change_sets(repository, src_dir, build, prev_revision)
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -58,14 +70,11 @@ def main():
     args = parser.parse_args()
     for param in ['project', 'branch', 'build_num', 'revision']:
         assert getattr(args.build_parameters, param), '%s build parameter is required' % param
+    format = '%(asctime)-15s %(threadName)-15s %(levelname)-7s %(message).500s'
+    logging.basicConfig(level=logging.INFO, format=format)
+
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
-    with db_session:
-        build = repository.produce_build()
-        prev_revision = pick_last_revision(repository)
-        print 'current revision: %s, prev_revision: %s' % (build.revision, prev_revision)
-        delete_build_changesets(build)
-        if prev_revision:
-            load_change_sets(repository, args.src_dir, build, prev_revision)
+    update_build_info(repository, args.src_dir)
 
 
 if __name__ == '__main__':

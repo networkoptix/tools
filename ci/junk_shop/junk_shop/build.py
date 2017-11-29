@@ -33,25 +33,24 @@ def load_output_file_list(output_file_list):
 
 StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_path')
 
-def store_output_and_exit_code(db_config, build_parameters, output, exit_code, parse_maven_outcome=False):
-    repository = DbCaptureRepository(db_config, build_parameters)
-    with db_session:
-        passed = True
-        test = repository.produce_test('build', is_leaf=True)
-        run = repository.add_run('build', test=test)
-        repository.add_artifact(run, 'output', 'build-output', repository.artifact_type.output, output)
-        if parse_maven_outcome:
-            outcome = parse_maven_output(output)
-            if not outcome:
-                passed = False
-        if exit_code is not None and exit_code != 0:
+@db_session
+def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcome=False):
+    passed = True
+    test = repository.produce_test('build', is_leaf=True)
+    run = repository.add_run('build', test=test)
+    repository.add_artifact(run, 'output', 'build-output', repository.artifact_type.output, output)
+    if parse_maven_outcome:
+        outcome = parse_maven_output(output)
+        if not outcome:
             passed = False
-            exit_code_message = 'Exit code: %d' % exit_code
-            repository.add_artifact(
-                run, 'exit code', 'build-exit-code', repository.artifact_type.output, exit_code_message, is_error=not passed)
-        outcome = status2outcome(passed)
-        run.outcome = outcome
-        return StoredBuildInfo(passed, outcome, run.path)
+    if exit_code is not None and exit_code != 0:
+        passed = False
+        exit_code_message = 'Exit code: %d' % exit_code
+        repository.add_artifact(
+            run, 'exit code', 'build-exit-code', repository.artifact_type.output, exit_code_message, is_error=not passed)
+    outcome = status2outcome(passed)
+    run.outcome = outcome
+    return StoredBuildInfo(passed, outcome, run.path)
 
 
 def main():
@@ -68,9 +67,9 @@ def main():
     args = parser.parse_args()
     try:
         output = load_output_file_list(args.output_file)
+        repository = DbCaptureRepository(args.db_config, args.build_parameters)
         build_info = store_output_and_exit_code(
-            args.db_config,
-            args.build_parameters,
+            repository,
             output,
             args.exit_code,
             args.parse_maven_outcome,

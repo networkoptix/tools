@@ -16,7 +16,13 @@ from command import (
     )
 from cmake import CMake
 from build import CMakeBuilder
-from junk_shop import DbConfig, BuildParameters, store_output_and_exit_code
+from junk_shop import (
+    DbConfig,
+    BuildParameters,
+    DbCaptureRepository,
+    update_build_info,
+    store_output_and_exit_code,
+    )
 
 log = logging.getLogger(__name__)
 
@@ -110,10 +116,6 @@ class CiProject(JenkinsProject):
         platform = input.current_command.platform
         nx_vms_scm_info = input.scm_info['nx_vms']
         junk_shop_db_config = self._make_junk_shop_db_config(input)
-
-        cmake = CMake('3.9.6')
-        cmake.ensure_required_cmake_operational()
-
         clean_build = False
         build_params = BuildParameters(
             project=self.project_id,
@@ -128,8 +130,15 @@ class CiProject(JenkinsProject):
             repository_url=nx_vms_scm_info.repository_url,
             revision=nx_vms_scm_info.revision,
             )
+        junk_shop_repository = DbCaptureRepository(junk_shop_db_config, build_params)
+
+        update_build_info(junk_shop_repository, 'nx_vms')
+
+        cmake = CMake('3.9.6')
+        cmake.ensure_required_cmake_operational()
+
         builder = CMakeBuilder(cmake)
-        build_results = builder.build('nx_vms', 'build', build_params, clean_build, junk_shop_db_config)
+        build_results = builder.build('nx_vms', 'build', build_params, clean_build, junk_shop_repository)
 
     def _make_junk_shop_db_config(self, input):
         user, password = input.credentials.junk_shop_db.split(':')

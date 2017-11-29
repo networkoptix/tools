@@ -172,6 +172,7 @@ class DbCaptureRepository(object):
     prev_select_mutex = threading.Lock()
 
     def __init__(self, db_config, build_parameters, run_parameters=None):
+        self.db_config = db_config
         self.build_parameters = build_parameters
         self.run_parameters = run_parameters
         self.artifact_type = ArtifactTypeFactory([
