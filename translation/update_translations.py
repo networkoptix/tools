@@ -7,28 +7,10 @@ from multiprocessing import Process
 import threading
 import subprocess
 
-if os.path.isfile('current_config.py'):
-    sys.path.insert(0, os.getcwd())
-    from current_config import QT_DIR
-    from current_config import PROJECT_SOURCE_DIR
-    os.chdir(PROJECT_SOURCE_DIR)
-    sys.path.pop(0)
-else:
-    buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
-    sys.path.insert(0, buildVarDir)
-    from current_config import QT_DIR
-    sys.path.pop(0)
-
 utilDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'util')
 sys.path.insert(0, utilDir)
 from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
-
-projectDir = os.path.join(os.getcwd(), 'build_utils/python')
-sys.path.insert(0, projectDir)
-from vms_projects import getTranslatableProjects
-sys.path.pop(0)
-
 
 ignored = [
             # QT files
@@ -56,6 +38,30 @@ warnings = [
 
 verbose = False
 results = dict()
+lupdate = None
+
+def isBinary(binary):
+    return any(os.access(os.path.join(path, binary), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
+
+def detectLUpdate():
+    global lupdate
+    if isBinary('lupdate'):
+        lupdate = 'lupdate'
+    elif isBinary('lupdate.exe'):
+        lupdate = 'lupdate.exe'
+    elif os.path.isfile('current_config.py'):
+        sys.path.insert(0, os.getcwd())
+        from current_config import QT_DIR, PROJECT_SOURCE_DIR
+        lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')   
+        os.chdir(PROJECT_SOURCE_DIR)
+        sys.path.pop(0)
+    else:
+        buildVarDir = os.path.join(os.getcwd(), 'build_variables/target')
+        sys.path.insert(0, buildVarDir)
+        if os.path.isfile('current_config.py'):
+            from current_config import QT_DIR
+            lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
+        sys.path.pop(0)
 
 def calculateEntries(prefix, dir, language):
     entries = []
@@ -85,7 +91,6 @@ def update(project, language):
     
     entries = calculateEntries(filename, translationDir, language)
     
-    lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
     command = [lupdate, '-no-obsolete', '-no-ui-lines']
   
     command.append('-locations')
@@ -135,7 +140,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
-    parser.add_argument('-l', '--language', default="")
+    parser.add_argument('-l', '--language', default="en_US")
     args = parser.parse_args()
     global verbose
     verbose = args.verbose
@@ -143,6 +148,17 @@ def main():
     if args.color:
         init_color()
 
+    detectLUpdate()
+    if not lupdate:
+        err('lupdate is not found in PATH')
+        return 1
+    info('Using {0}'.format(lupdate))
+        
+    projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+    sys.path.insert(0, projectDir)
+    from vms_projects import getTranslatableProjects
+    sys.path.pop(0)
+        
     projects = getTranslatableProjects()   
     threads = []
     for project in projects:
