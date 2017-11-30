@@ -30,8 +30,8 @@
 {% endmacro %}
 
 
-{% macro changeset_list(changeset_list, maxlen=1000) %}
-  {% for changeset in changeset_list %}
+{% macro changeset_list(changeset_list, maxlen=1000, limit=None) %}
+  {% for changeset in changeset_list|limit_count(limit) %}
     <div>
       {{ changeset.user }} {{ changeset.revision|format_revision(changeset.build.repository_url) }}: {{ changeset.desc|truncate(maxlen)|format_commit_message }}
     </div>

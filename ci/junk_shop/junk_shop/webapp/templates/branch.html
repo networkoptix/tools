@@ -59,7 +59,9 @@
             </td>
             <td class="changeset-list">
               <div>
-                {{ common_macros.changeset_list(build_changesets_map.get(build, []), 50) }}
+                {% set changeset_list = build_changesets_map.get(build, []) %}
+                {{ common_macros.changeset_list(changeset_list, 50, 10) }}
+                {{ '... and %s more ...' % (changeset_list|length - 10) if changeset_list|length > 10 }}
               </div>
             </td>
             {% for platform in platform_list %}

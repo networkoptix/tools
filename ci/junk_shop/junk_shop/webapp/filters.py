@@ -81,3 +81,12 @@ def decorate_revision(revision, repository_url):
     dashed_repository_name = repository_name.replace('_', '-')
     ref = format.format(repository_name=dashed_repository_name, revision=revision)
     return Markup('<a class="link" href="%s">%s</a>' % (ref, revision))
+
+
+# limit list length to 'length' items
+@app.template_filter('limit_count')
+def limit_count(value, length=None):
+    if length is None:
+        return value
+    else:
+        return value[:length]
