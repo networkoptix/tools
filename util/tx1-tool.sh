@@ -45,7 +45,7 @@ help()
 {
     cat <<EOF
 Swiss Army Knife for NVidia Tegra ($TARGET_DEVICE): execute various commands.
-Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
+Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
 $(basename "$0") [--verbose] <command>
