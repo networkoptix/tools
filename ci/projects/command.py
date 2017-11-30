@@ -224,6 +224,134 @@ class PrepareVirtualEnvCommand(Command):
         return dict(requirements_file_list=self.requirements_file_list)
 
 
+class ProjectParameter(object):
+
+    @staticmethod
+    def from_dict(d):
+        param_types = dict(
+            boolean=BooleanProjectParameter,
+            string=StringProjectParameter,
+            choice=ChoiceProjectParameter,
+            )
+        t = dict['type']
+        param_cls = param_types.get(t)
+        assert param_cls, 'Unknown parameter type: %r' % t
+        return param_cls.from_dict(d)
+
+    def __init__(self, name, description):
+        assert isinstance(name, basestring), repr(name)
+        assert isinstance(description, basestring), repr(description)
+        self.name = name
+        self.description = description
+
+    def to_dict(self):
+        return dict(
+            type=self.type,
+            name=self.name,
+            description=self.description,
+            )
+
+
+class BooleanProjectParameter(ProjectParameter):
+
+    type = 'boolean'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            description=d['description'],
+            default_value=d['default_value'],
+            )
+
+    def __init__(self, name, description, default_value):
+        assert isinstance(default_value, bool), repr(default_value)
+        ProjectParameter.__init__(self, name, description)
+        self.default_value = default_value
+
+    def to_dict(self):
+        return dict(
+            ProjectParameter.to_dict(self),
+            default_value=self.default_value,
+            )
+
+
+class StringProjectParameter(ProjectParameter):
+
+    type = 'string'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            description=d['description'],
+            default_value=d['default_value'],
+            )
+
+    def __init__(self, name, description, default_value):
+        assert isinstance(default_value, basestring), repr(default_value)
+        ProjectParameter.__init__(self, name, description)
+        self.default_value = default_value
+
+    def to_dict(self):
+        return dict(
+            ProjectParameter.to_dict(self),
+            default_value=self.default_value,
+            )
+
+
+class ChoiceProjectParameter(ProjectParameter):
+
+    type = 'choice'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            description=d['description'],
+            choices=d['choices'],
+            )
+
+    def __init__(self, name, description, choices):
+        assert is_list_inst(choices, basestring), repr(choices)
+        ProjectParameter.__init__(self, name, description)
+        self.choices = choices
+
+    def to_dict(self):
+        return dict(
+            ProjectParameter.to_dict(self),
+            choices=self.choices,
+            )
+
+
+class SetProjectPropertiesCommand(Command):
+
+    command_id = 'set_project_properties'
+
+    @classmethod
+    def from_dict(cls, d, command_registry):
+        return cls(
+            parameters=[ProjectParameter.from_dict(p) for p in d['parameters']],
+            enable_concurrent_builds=d['enable_concurrent_builds'],
+            days_to_keep_old_builds=d['days_to_keep_old_builds'],
+            )
+
+    def __init__(self, parameters, enable_concurrent_builds, days_to_keep_old_builds=None):
+        assert is_list_inst(parameters, ProjectParameter), repr(parameters)
+        assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
+        assert days_to_keep_old_builds is None or isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        self.parameters = parameters
+        self.enable_concurrent_builds = enable_concurrent_builds
+        self.days_to_keep_old_builds = days_to_keep_old_builds
+
+    def args_to_dict(self):
+        return dict(
+            parameters=[p.to_dict() for p in self.parameters],
+            enable_concurrent_builds=self.enable_concurrent_builds,
+            days_to_keep_old_builds=self.days_to_keep_old_builds,
+            )
+
+
 class PythonStageCommand(Command):
 
     command_id = 'python_stage'

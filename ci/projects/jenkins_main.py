@@ -38,12 +38,15 @@ def run_project_stage(input_file_path, output_file_path):
 
     with open(input_file_path) as f:
         input = yaml.load(f)
-    pprint_state_dict('input', input)
     input_state = InputState.from_dict(input, command_registry)
 
     project_id = input_state.current_command.project_id
     stage_id = input_state.current_command.stage_id
     in_assist_mode = input_state.current_command.in_assist_mode
+
+    setup_logging(logging.DEBUG if in_assist_mode else logging.INFO)
+
+    pprint_state_dict('input', input)
     log.info('%s %r stage %r on node %r',
                  'Assist' if in_assist_mode else 'Project', project_id, stage_id, input_state.current_node)
 
@@ -64,7 +67,6 @@ def main():
     if not os.path.isfile(args.input):
         println >>sys.stderr, 'Input file is missing: %r' % args.input
         sys.exit(1)
-    setup_logging(logging.DEBUG)
 
     run_project_stage(args.input, args.output)
 

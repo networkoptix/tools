@@ -1,5 +1,4 @@
 import logging
-import os.path
 import sys
 from project import JenkinsProject
 from command import (
@@ -13,6 +12,10 @@ from command import (
     PrepareVirtualEnvCommand,
     ParallelJob,
     ParallelCommand,
+    BooleanProjectParameter,
+    StringProjectParameter,
+    ChoiceProjectParameter,
+    SetProjectPropertiesCommand,
     )
 from cmake import CMake
 from build import CMakeBuilder
@@ -28,34 +31,64 @@ log = logging.getLogger(__name__)
 
 
 ASSIST_MODE_VMS_BRANCH = 'vms'
-JUNK_SHOP_DIR = 'devtools/ci/junk_shop'
+DAYS_TO_KEEP_OLD_BUILDS = 10
 
 
 class CiProject(JenkinsProject):
 
     project_id = 'ci'
-    platforms = ['linux-x64', 'mac', 'win-x64']
-    # platforms = ['linux-x64']
 
     def stage_init(self, input):
+        return input.make_output_state([
+            SetProjectPropertiesCommand(
+                parameters=[
+                    BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
+                    StringProjectParameter('branch', 'nx_vms branch to checkout', default_value='vms'),
+                    ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
+                                               ['build', 'update_properties']),
+                    ],
+                enable_concurrent_builds=False,
+                days_to_keep_old_builds=10,
+                )])
+
+    def _stage_init(self, input):
         return input.make_output_state(command_list=[
             NodeCommand('linux', command_list=[
                 # CleanDirCommand(),
                 self.prepare_devtools_command(),
                 CheckoutScmCommand('jenkins'),
                 # CheckoutCommand('nx_vms', 'vms'),
-                PrepareVirtualEnvCommand([
-                    'devtools/ci/projects/requirements.txt',
-                    os.path.join(JUNK_SHOP_DIR, 'requirements.txt'),
-                    ]),
-                self.make_python_stage_command('report_input', python_path_list=[JUNK_SHOP_DIR]),
+                PrepareVirtualEnvCommand(self.devtools_python_requirements),
+                self.make_python_stage_command('report_input'),
                 ])])
 
     def stage_report_input(self, input):
         input.report()
 
     def stage_init(self, input):
-        job_list = [self._make_platform_job(input, platform) for platform in self.platforms]
+        all_platform_list = sorted(input.config.platforms.keys())
+        parameters = [
+                    ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
+                                               ['build', 'update_properties']),
+                    BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
+                    ]
+        parameters += [BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=True)
+                           for platform in all_platform_list]
+        command_list = [
+            SetProjectPropertiesCommand(
+                parameters=parameters,
+                enable_concurrent_builds=False,
+                days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
+                ),
+            ]
+        if input.params.get('action') == 'build':
+            command_list.append(self.make_python_stage_command('prepare_for_build'))
+        return input.make_output_state(command_list)
+
+    def stage_prepare_for_build(self, input):
+        all_platform_list = sorted(input.config.platforms.keys())
+        platform_list = [p for p in all_platform_list if input.params.get(p)]
+        job_list = [self._make_platform_job(input, platform) for platform in platform_list]
         return input.make_output_state([
             ParallelCommand(job_list),
             ])
@@ -69,11 +102,8 @@ class CiProject(JenkinsProject):
             # CleanDirCommand(),
             self.prepare_devtools_command(),
             CheckoutCommand('nx_vms', branch_name),
-            PrepareVirtualEnvCommand([
-                'devtools/ci/projects/requirements.txt',
-                os.path.join(JUNK_SHOP_DIR, 'requirements.txt'),
-                ]),
-            self.make_python_stage_command('node', python_path_list=[JUNK_SHOP_DIR], platform=platform),
+            PrepareVirtualEnvCommand(self.devtools_python_requirements),
+            self.make_python_stage_command('node', platform=platform),
             ]
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
 
@@ -117,8 +147,12 @@ class CiProject(JenkinsProject):
         nx_vms_scm_info = input.scm_info['nx_vms']
         junk_shop_db_config = self._make_junk_shop_db_config(input)
         clean_build = False
+        if self.in_assist_mode:
+            project = 'assist-ci-%s' % input.jenkins_env.job_name
+        else:
+            project = self.project_id
         build_params = BuildParameters(
-            project=self.project_id,
+            project=project,
             platform=platform,
             build_num=input.jenkins_env.build_number,
             branch=nx_vms_scm_info.branch,
