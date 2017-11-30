@@ -19,17 +19,19 @@ nx_load_config "${CONFIG=".bpi-toolrc"}"
 : ${BOX_LOGS_DIR="$BOX_MEDIASERVER_DIR/var/log"}
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${BOX_DEVELOP_DIR="/root/develop"} #< Mount point at the box for the workstation develop dir.
-: ${BOX_PACKAGES_SRC_DIR="$BOX_DEVELOP_DIR/third_party/bpi"} #< Should be mounted at the box.
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${SDCARD_PARTITION_SECTORS="122879,7043071,81919,"} #< Used to check SD card before accessing it.
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages/bpi"} #< Path at the workstation.
 : ${PACKAGES_SRC_PATH="artifacts/bpi"} #< Path at the workstation to the artifact sources.
 : ${QT_DIR="$DEVELOP_DIR/buildenv/packages/bpi/qt-5.6.2"} #< Path at the workstation.
+: ${BOX_QT_DIR="$BOX_DEVELOP_DIR${QT_DIR#$DEVELOP_DIR}"} #< Path at the workstation.
 : ${BUILD_CONFIG="debug"}
 : ${TARGET_IN_VMS_DIR="build_environment/target-bpi"} #< Path component at the workstation.
 : ${BUILD_DIR="arm-bpi"} #< Path component at the workstation.
 : ${PACKAGE_SUFFIX=""}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
+: ${MEDIASERVER_USER="admin"}
+: ${MEDIASERVER_PORT="7001"}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -50,7 +52,7 @@ help()
 {
     cat <<EOF
 Swiss Army Knife for Banana Pi (Nx1): execute various commands.
-Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
+Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
 $(basename "$0") [--verbose] <command>
@@ -84,10 +86,13 @@ Here <command> can be one of the following:
  uninstall # Uninstall all nx files from the box.
 
  go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
- run-c [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
+ go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
  kill-c # Stop mobile_client via "killall mobile_client".
+ run-s # Run mediaserver from binaries at the workstation.
  start-s [args] # Run mediaserver via "/etc/init.d/networkoptix-mediaserver start [args]".
  stop-s # Stop mediaserver via "/etc/init.d/networkoptix-mediaserver stop".
+ run-c # Run mobile_client from binaries at the workstation.
+ start-lc [args] # Start mobile_client via "mediaserver/var/scripts/start_lite_client [args]".
  start-c [args] # Run mobile_client via "/etc/init.d/networkoptix-lite-client start [args]".
  stop-c # Stop mobile_client via "/etc/init.d/networkoptix-lite-client stop".
  run-ut test_name [args] # Run the unit test with strict expectations.
@@ -120,11 +125,36 @@ EOF
 
 #--------------------------------------------------------------------------------------------------
 
-# Execute a command at the box via ssh, or log in to the box via ssh.
-go() # args...
+do_go()
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
+}
+
+# Execute a command at the box via ssh, or log in to the box via ssh.
+go() # [args...]
+{
+    if [ $GO_VERBOSE = 1 ]; then
+        go_verbose "$@"
+    else
+        do_go "$@"
+    fi
+}
+
+# Execute a command at the box via ssh, logging the call with "set -x".
+go_verbose() # args...
+{
+    local ARGS
+    nx_concat_ARGS "$@"
+    echo "+go $ARGS"
+
+    do_go "$@"
+
+    # Alternative implementation involving "set -x" at the box.
+    #go \
+    #    "[ set -x; nxLogOffKeepingStatus(){ local -r R=\$?; set +x; return \$R; }; ]" \
+    #    "$@" \
+    #    "[ ; { nxLogOffKeepingStatus; } 2>/dev/null ]"
 }
 
 # Check that $BOX_MNT is likely to refer to the box root.
@@ -196,7 +226,7 @@ find_VMS_DIR()
 {
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
         "Run this script from any dir inside your nx_vms repo dir."
-    BOX_VMS_DIR="$BOX_DEVELOP_DIR/${VMS_DIR#$DEVELOP_DIR}"
+    BOX_VMS_DIR="$BOX_DEVELOP_DIR${VMS_DIR#$DEVELOP_DIR}"
 }
 
 # Deduce CMake build dir out of VMS_DIR and targetDevice (box). Examples:
@@ -204,6 +234,8 @@ find_VMS_DIR()
 # nx-bpi -> nx-bpi-build.
 # /C/develop/nx -> nx-win-build-linux
 # [in] VMS_DIR
+# [out] CMAKE_BUILD_DIR
+# [out] BOX_CMAKE_BUILD_DIR
 get_CMAKE_BUILD_DIR()
 {
     local -r TARGET="bpi"
@@ -219,6 +251,7 @@ get_CMAKE_BUILD_DIR()
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
             ;;
     esac
+    BOX_CMAKE_BUILD_DIR="$BOX_DEVELOP_DIR${CMAKE_BUILD_DIR#$DEVELOP_DIR}"
 }
 
 # If not done yet, scan from current dir upwards to find "common_libs" dir; set LIB_DIR to its
@@ -572,6 +605,17 @@ assert_not_server_only()
     fi
 }
 
+stop_all_if_installed()
+{
+    go "[ \
+        if [ -f /etc/init.d/networkoptix-lite-client ]; then \
+            /etc/init.d/networkoptix-lite-client stop; fi && \
+        if [ -f /etc/init.d/networkoptix-mediaserver ]; then \
+            /etc/init.d/networkoptix-mediaserver stop; fi \
+    ]"
+}
+
+# TODO: Change the pattern to ignore non-"_update" zip.
 find_INSTALLER() # .ext [mvn|cmake|archive.file]
 {
     local -r EXT="$1"; shift
@@ -631,11 +675,7 @@ install_zip() # "$@"
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
     local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
 
-    go "[ set -x && \
-        if [ -f /etc/init.d/networkoptix-lite-client ]; then \
-            /etc/init.d/networkoptix-lite-client stop; fi && \
-        if [ -f /etc/init.d/networkoptix-mediaserver ]; then \
-            /etc/init.d/networkoptix-mediaserver stop; fi && \
+    go "[ \
         { rm -f \"$BOX_LOGS_DIR/*.log\" || true; } && \
         rm -rf \"$BOX_UPDATES_DIR\" && \
         mkdir -p \"$BOX_UPDATES_DIR/$DISTRIB\" \
@@ -650,10 +690,25 @@ install_zip() # "$@"
         ./install.sh --verbose
 }
 
+# Set the verbose mode for go() if required by $1; return whether $1 is consumed: define and set
+# global var GO_VERBOSE to either 0 or 1.
+handle_arg_gov()
+{
+    if [ "$1" == "-gov" ]; then
+        declare -r -i GO_VERBOSE=1
+        return 0
+    else
+        declare -r -i GO_VERBOSE=0
+        return 1
+    fi
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
 {
+    handle_arg_gov "$1" && shift
+
     local COMMAND="$1"
     shift
     case "$COMMAND" in
@@ -979,31 +1034,54 @@ main()
             install_tar "$@"
             ;;
         install-zip)
+            stop_all_if_installed
             install_zip "$@"
             ;;
         uninstall)
+            stop_all_if_installed
+
             local -r DIRS_TO_REMOVE=(
                 "$BOX_INSTALL_DIR"
                 "/etc/init.d/networkoptix*"
                 "/etc/init.d/nx*"
             )
-            go rm -rf ${DIRS_TO_REMOVE[@]} || true #< Ignore missing files.
+            for FILE in "${DIRS_TO_REMOVE[@]}"; do
+                go_verbose rm -rf "$FILE" "[||]" true #< Ignore missing files.
+            done
             ;;
         #..........................................................................................
         go)
             go "$@"
             ;;
-        run-c)
-            go /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
+        go-verbose)
+            go_verbose "$@"
             ;;
         kill-c)
             go killall mobile_client
+            ;;
+        run-s)
+            find_VMS_DIR
+            get_CMAKE_BUILD_DIR
+
+            go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
+                "$BOX_CMAKE_BUILD_DIR/bin/mediaserver" -e
             ;;
         start-s)
             go /etc/init.d/networkoptix-mediaserver start "$@"
             ;;
         stop-s)
             go /etc/init.d/networkoptix-mediaserver stop
+            ;;
+        run-c)
+            find_VMS_DIR
+            get_CMAKE_BUILD_DIR
+
+            go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
+                "$BOX_CMAKE_BUILD_DIR/bin/mobile_client" \
+                "[--url=\"http://$MEDIASERVER_USER:$BOX_PASSWORD@localhost:$MEDIASERVER_PORT\"]"
+            ;;
+        start-lc)
+            go /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
             ;;
         start-c)
             go /etc/init.d/networkoptix-lite-client start "$@"
@@ -1018,10 +1096,7 @@ main()
                 /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop)
-            go \
-                /etc/init.d/networkoptix-lite-client stop "[&&]" \
-                echo "[&&]" \
-                /etc/init.d/networkoptix-mediaserver stop
+            stop_all_if_installed
             ;;
         run-ut)
             local TEST_NAME="$1"; shift
