@@ -15,11 +15,14 @@ nx_handle_help() # "$@"
     fi
 }
 
-# Set the verbose mode and return whether $1 is consumed.
+declare -i NX_VERBOSE=0
+
+# Set the verbose mode if required by $1; return whether $1 is consumed: define and set global var
+# NX_VERBOSE to either 0 or 1.
 nx_handle_verbose() # "$@" && shift
 {
     if [ "$1" == "--verbose" -o "$1" == "-v" ]; then
-        NX_VERBOSE="1"
+        NX_VERBOSE=1
         set -x
         return 0
     else
@@ -39,7 +42,7 @@ nx_handle_mock_rsync() # "$@" && shift
             nx_echo
             # Check that all local files exist.
             local FILE
-            local I=0
+            local -i I=0
             for FILE in "$@"; do
                  # Check all args not starting with "-" except the last, which is the remote path.
                 let I='I+1'
@@ -70,7 +73,7 @@ nx_log() # ...
     # will be logged by "set -x".)
     {
         set +x;
-        [ ! -z "$NX_VERBOSE" ] && set -x
+        [ $NX_VERBOSE = 1 ] && set -x
     } 2>/dev/null
 }
 
@@ -81,7 +84,7 @@ nx_log_file_contents() # filename
     {
         set +x;
         local FILE="$1"
-        if [ ! -z "$NX_VERBOSE" ]; then
+        if [ $NX_VERBOSE = 1 ]; then
             echo "<<EOF"
             sudo cat "$FILE"
             echo "EOF"
@@ -95,7 +98,7 @@ nx_log_file_contents() # filename
 nx_verbose() # "$@"
 {
     {
-        if [ -z "$NX_VERBOSE" ]; then
+        if [ $NX_VERBOSE = 0 ]; then
             set -x
         else
             set +x
@@ -106,7 +109,7 @@ nx_verbose() # "$@"
 
     {
         local RESULT=$?
-        if [ -z "$NX_VERBOSE" ]; then
+        if [ $NX_VERBOSE = 0 ]; then
             set +x
         else
             set -x
@@ -127,7 +130,7 @@ nx_show() # VAR_NAME
 nx_echo() # ...
 {
     { set +x; } 2>/dev/null
-    if [ -z "$NX_VERBOSE" ]; then
+    if [ $NX_VERBOSE = 0 ]; then
         echo "$@" |sed "s#$HOME/#~/#g"
     else
         set -x
