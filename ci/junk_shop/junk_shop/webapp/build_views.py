@@ -95,10 +95,14 @@ class BuildPageView(object):
         return data.splitlines()
 
     def produce_tests_run(self, root_run):
-        if not self.started_at or root_run.started_at < self.started_at:
-            started_at = root_run.started_at  # first run for this build
+        self.update_started_at(root_run)
         run_map = self.tests_run_map.setdefault(root_run.platform, {})
         return run_map.setdefault(root_run, TestsRun(root_run.test.path))
+
+    def update_started_at(self, run):
+        print self.started_at, run, run.started_at
+        if not self.started_at or run.started_at < self.started_at:
+            self.started_at = run.started_at  # first run for this build
 
     def create_leaf_test_runs(self):
         for root_run, run_count in select(
@@ -138,14 +142,17 @@ class BuildPageView(object):
             tests_run.add_run(run)
 
     def load_build_artifacts(self):
-        return {
-            platform: artifact for platform, artifact in select(
-                (run.platform, artifact)
+        platform2artifact = {}
+        for run, platform, artifact in select(
+                (run, run.platform, artifact)
                 for run in models.Run
                 for artifact in run.artifacts
                 if run.build is self.build and
                 run.name == 'build' and
-                artifact.short_name == 'output')}
+                artifact.short_name == 'output'):
+            platform2artifact[platform] = artifact
+            self.update_started_at(run)
+        return platform2artifact
 
     def load_build_errors(self):
         return {
