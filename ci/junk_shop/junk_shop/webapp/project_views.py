@@ -57,11 +57,11 @@ def branch(project_name, branch_name):
     page = int(request.args.get('page', 1))
     page_size = DEFAULT_BUILD_LIST_PAGE_SIZE
     query = select(
-        build for build in models.Build
+        (build.build_num, build) for build in models.Build
         if build.project.name == project_name and
            build.branch.name == branch_name)
     rec_count = query.count()
-    build_list = list(query.order_by(desc(1)).page(page, page_size))
+    build_list = [build for build_num, build in query.order_by(desc(1)).page(page, page_size)]
     build_changesets_map = {}  # build -> changeset list
     for changeset in select(build.changesets for build in models.Build if build in build_list).order_by(desc(1)):
         changeset_list = build_changesets_map.setdefault(changeset.build, [])
