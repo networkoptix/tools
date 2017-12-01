@@ -189,7 +189,7 @@ def prepare_test_environment(must_clean_workspace, is_p2p_mode) {
 			$class: 'MercurialSCM',
 			credentialsId: NX_REPOSITORY_CREDENTIALS_ID,
 			installation: '(Default)',
-			revision: 'vms_3.1_dev',
+			revision: 'vms_3.1',
 			source: 'ssh://hg@la.hdw.mx/nx_vms',
 			subdir: 'nx_vms',
 		])
