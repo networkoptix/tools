@@ -124,7 +124,7 @@ class CiProject(JenkinsProject):
             assert input.jenkins_env.branch_name, (
                 'This scripts are intented to be used in multibranch projects only;'
                 ' env.BRANCH_NAME must be defined')
-            return jenkins_env.branch_name
+            return input.jenkins_env.branch_name
 
     def _make_workspace_dir(self, job_name, branch_name, platform):
         if self.in_assist_mode:
