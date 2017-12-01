@@ -7,7 +7,6 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
-: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
 : ${LA_HDW_MX_USER="$USER"} #< Username at la.hdw.mx.
@@ -15,14 +14,17 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-help()
+help_callback()
 {
-    cat <<EOF
+    cat \
+<<EOF
 Swiss Army Knife for Linux: execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
-$(basename "$0") [--verbose] <command>
+ $(basename "$0") <options> <command>
+
+$NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 

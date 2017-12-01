@@ -41,14 +41,19 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-help()
+# TODO: Replace "Release" arg with BUILD_CONFIG env var.
+
+help_callback()
 {
-    cat <<EOF
+    cat \
+<<EOF
 Swiss Army Knife for NVidia Tegra ($TARGET_DEVICE): execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
-$(basename "$0") [--verbose] <command>
+ $(basename "$0") <options> <command>
+
+$NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 
@@ -68,8 +73,11 @@ Here <command> can be one of the following:
  copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR/.
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
  ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+ install-tar x.tgz # Install x.tgz to the box via untarring to the root.
+ uninstall # Uninstall all nx files from the box.
 
  go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
+ go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
  start-s [args] # Run mediaserver exe with [args].
  stop-s # Stop mediaserver via "kill -9".
  start-c [args] # Run desktop_client exe with [args].
@@ -101,8 +109,7 @@ EOF
 
 #--------------------------------------------------------------------------------------------------
 
-# Execute a command at the box via ssh, or log in to the box via ssh.
-go() # args...
+go_callback()
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
@@ -371,6 +378,14 @@ so() # /*RECURSIVE*/0|1 /*TREE*/0|1 libname.so [indent]
     done
 }
 
+install_tar() # archive.tar.gz
+{
+    local -r INSTALLER=$(readlink -f "$1")
+    local -r BOX_INSTALLER="$BOX_DEVELOP_DIR/${INSTALLER#$DEVELOP_DIR}"
+
+    nx_go_verbose sudo tar zxvf "$BOX_INSTALLER" -C /
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -413,15 +428,15 @@ main()
                 | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            go umount "$BOX_DEVELOP_DIR" #< Just in case.
-            go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            nx_go umount "$BOX_DEVELOP_DIR" #< Just in case.
+            nx_go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
 
             # TODO: Fix: When using a tunnel, reverse port is "-p 22<IP>" and host "la.hdw.mx".
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
             nx_echo
             nx_echo "ATTENTION: Now execute directly at the box (adjust if using a tunnel):"
-            echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
-            #go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+            echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty,allow_other
+            #nx_go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
                 #"[&&]" echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
@@ -521,28 +536,39 @@ main()
             cp_libs "*$LIB_NAME.so"
             ;;
         ini)
-            go touch /tmp/nx_media.ini "[&&]" \
+            nx_go touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/tegra_video_metadata_plugin.ini "[&&]" \
                 touch /tmp/video_dec_gie.ini "[&&]" \
                 touch /tmp/tegra_video.ini
             ;;
+        install-tar)
+            install_tar "$@"
+            ;;
+        uninstall)
+            local -r DIRS_TO_REMOVE=(
+                "$BOX_INSTALL_DIR"
+            )
+            for FILE in "${DIRS_TO_REMOVE[@]}"; do
+                nx_go_verbose sudo rm -rf "$FILE" "[||]" true #< Ignore missing files.
+            done
+            ;;
         #..........................................................................................
         go)
-            go "$@"
+            nx_go "$@"
             ;;
         start-s)
             assert_not_client_only
-            go sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
+            nx_go sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            go sudo killall -9 mediaserver
+            nx_go sudo killall -9 mediaserver
             ;;
         start-c)
             assert_not_server_only
-            go DISPLAY=:0 "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            nx_go "[ export DISPLAY=:0; ]" "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
             ;;
         stop-c)
-            go sudo killall -9 desktop_client
+            nx_go sudo killall -9 desktop_client
             ;;
         run-s-ut)
             local TEST_NAME="$1"
@@ -550,7 +576,7 @@ main()
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified."
             local TEST_PATH="$BOX_MEDIASERVER_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            go \
+            nx_go \
                 for TEST in $TEST_PATH "[;]" \
                 do \
                     echo "[;]" \
@@ -564,7 +590,7 @@ main()
             [ -z "$TEST_NAME" ] && nx_fail "Test name not specified. Use \"*_ut\" for all tests."
             local TEST_PATH="$BOX_DESKTOP_CLIENT_DIR/bin/$TEST_NAME"
             nx_echo "Running: $TEST_PATH $@"
-            go \
+            nx_go \
                 for TEST in $TEST_PATH "[;]" \
                 do \
                     echo "[;]" \
@@ -575,17 +601,17 @@ main()
         run-tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
-            go cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
+            nx_go cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
             ;;
         #..........................................................................................
         tv)
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
             if [[ $* =~ clean ]]; then
-                go make -C "$BOX_SRC_DIR" "$@"
+                nx_go make -C "$BOX_SRC_DIR" "$@"
                 # No need to attempt copying files.
             else
-                go make -C "$BOX_SRC_DIR" "$@" \
+                nx_go make -C "$BOX_SRC_DIR" "$@" \
                     "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
                     "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
                     "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \

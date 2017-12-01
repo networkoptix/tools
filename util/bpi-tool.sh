@@ -48,14 +48,17 @@ LINUX_TOOL="$(dirname "$0")/linux-tool.sh"
 
 #--------------------------------------------------------------------------------------------------
 
-help()
+help_callback()
 {
-    cat <<EOF
+    cat \
+<<EOF
 Swiss Army Knife for Banana Pi (Nx1): execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
-$(basename "$0") [--verbose] <command>
+ $(basename "$0") <options> <command>
+
+$NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 
@@ -125,36 +128,10 @@ EOF
 
 #--------------------------------------------------------------------------------------------------
 
-do_go()
+go_callback()
 {
     nx_ssh "$BOX_USER" "$BOX_PASSWORD" "$BOX_HOST" "$BOX_PORT" \
         "$BOX_TERMINAL_TITLE" "$BOX_BACKGROUND_RRGGBB" "$@"
-}
-
-# Execute a command at the box via ssh, or log in to the box via ssh.
-go() # [args...]
-{
-    if [ $GO_VERBOSE = 1 ]; then
-        go_verbose "$@"
-    else
-        do_go "$@"
-    fi
-}
-
-# Execute a command at the box via ssh, logging the call with "set -x".
-go_verbose() # args...
-{
-    local ARGS
-    nx_concat_ARGS "$@"
-    echo "+go $ARGS"
-
-    do_go "$@"
-
-    # Alternative implementation involving "set -x" at the box.
-    #go \
-    #    "[ set -x; nxLogOffKeepingStatus(){ local -r R=\$?; set +x; return \$R; }; ]" \
-    #    "$@" \
-    #    "[ ; { nxLogOffKeepingStatus; } 2>/dev/null ]"
 }
 
 # Check that $BOX_MNT is likely to refer to the box root.
@@ -176,7 +153,7 @@ pack_files() # archive files...
         nx_fail "Archive filename not specified."
     fi
 
-    go tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
+    nx_go tar --absolute-names -czvf "$ARCHIVE" "${FILES[@]}"
 }
 
 # Pack build results and bpi-specific artifacts.
@@ -607,7 +584,7 @@ assert_not_server_only()
 
 stop_all_if_installed()
 {
-    go "[ \
+    nx_go "[ \
         if [ -f /etc/init.d/networkoptix-lite-client ]; then \
             /etc/init.d/networkoptix-lite-client stop; fi && \
         if [ -f /etc/init.d/networkoptix-mediaserver ]; then \
@@ -616,9 +593,9 @@ stop_all_if_installed()
 }
 
 # TODO: Change the pattern to ignore non-"_update" zip.
-find_INSTALLER() # .ext [mvn|cmake|archive.file]
+find_INSTALLER() # mask [mvn|cmake|archive.file]
 {
-    local -r EXT="$1"; shift
+    local -r MASK="$1"; shift
 
     get_CMAKE_BUILD_DIR
     local -r CMAKE_DIR="$CMAKE_BUILD_DIR/edge_firmware"
@@ -648,8 +625,8 @@ find_INSTALLER() # .ext [mvn|cmake|archive.file]
     fi
 
     case $BUILD in
-        mvn) nx_find_file INSTALLER "Installer $EXT (maven)" "$MVN_DIR" -name "*$EXT" ;;
-        cmake) nx_find_file INSTALLER "Installer $EXT (cmake)" "$CMAKE_DIR" -name "*$EXT" ;;
+        mvn) nx_find_file INSTALLER "Installer $MASK (maven)" "$MVN_DIR" -name "$MASK" ;;
+        cmake) nx_find_file INSTALLER "Installer $MASK (cmake)" "$CMAKE_DIR" -name "$MASK" ;;
         *) `# Already found.` ;;
     esac
 
@@ -660,7 +637,7 @@ install_tar() # "$@"
 {
     find_VMS_DIR
     check_box_mounted
-    find_INSTALLER ".tar.gz" "$@"
+    find_INSTALLER "*.tar.gz" "$@"
     nx_verbose tar xfv "$INSTALLER" -C "$BOX_MNT/"
 }
 
@@ -669,13 +646,13 @@ install_zip() # "$@"
     find_VMS_DIR
     check_box_mounted
 
-    find_INSTALLER ".zip" "$@"
+    find_INSTALLER "*_update-*.zip" "$@"
 
     local -r ZIP_FILENAME=$(basename "$INSTALLER")
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
     local -r BOX_UPDATES_DIR="/tmp/mediaserver/updates"
 
-    go "[ \
+    nx_go "[ \
         { rm -f \"$BOX_LOGS_DIR/*.log\" || true; } && \
         rm -rf \"$BOX_UPDATES_DIR\" && \
         mkdir -p \"$BOX_UPDATES_DIR/$DISTRIB\" \
@@ -683,32 +660,17 @@ install_zip() # "$@"
 
     nx_rsync "$INSTALLER" "${BOX_MNT}$BOX_UPDATES_DIR/"
 
-    go \
+    nx_go \
         cd "$BOX_UPDATES_DIR/$DISTRIB" "[&&]" \
         unzip "../$ZIP_FILENAME" "[&&]" \
         chmod +x install.sh "[&&]" \
         ./install.sh --verbose
 }
 
-# Set the verbose mode for go() if required by $1; return whether $1 is consumed: define and set
-# global var GO_VERBOSE to either 0 or 1.
-handle_arg_gov()
-{
-    if [ "$1" == "-gov" ]; then
-        declare -r -i GO_VERBOSE=1
-        return 0
-    else
-        declare -r -i GO_VERBOSE=0
-        return 1
-    fi
-}
-
 #--------------------------------------------------------------------------------------------------
 
 main()
 {
-    handle_arg_gov "$1" && shift
-
     local COMMAND="$1"
     shift
     case "$COMMAND" in
@@ -755,15 +717,15 @@ main()
             local BOX_IP=$(ping -q -c 1 -t 1 $BOX_HOST | grep PING | sed -e "s/).*//" | sed -e "s/.*(//")
             local SUBNET=$(echo "$BOX_IP" |awk 'BEGIN { FS = "." }; { print $1 "." $2 }')
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            go umount "$BOX_DEVELOP_DIR" #< Just in case.
-            go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
-            go apt-get install -y sshfs #< Install sshfs.
+            nx_go umount "$BOX_DEVELOP_DIR" #< Just in case.
+            nx_go mkdir -p "$BOX_DEVELOP_DIR" || exit $?
+            nx_go apt-get install -y sshfs #< Install sshfs.
 
             # TODO: Fix: "sshfs" does not work via sshpass, but works if executed directly at the box.
             nx_echo
             nx_echo "ATTENTION: Now execute the following command directly at the box:"
             echo sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty
-            #go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
+            #nx_go sshfs "$USER@$SELF_IP:$DEVELOP_DIR" "$BOX_DEVELOP_DIR" -o nonempty \
                 #&& echo "$DEVELOP_DIR mounted to the box $BOX_DEVELOP_DIR."
             ;;
         #..........................................................................................
@@ -1017,14 +979,14 @@ main()
             cp_libs "lib$LIB_NAME.so*" "lib $LIB_NAME"
             ;;
         ini)
-            go \
+            nx_go \
                 touch /tmp/mobile_client.ini "[&&]" \
                 touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/ProxyVideoDecoder.ini "[&&]" \
                 touch /tmp/proxydecoder.ini
             ;;
         logs)
-            go \
+            nx_go \
                 touch "$BOX_LOGS_DIR/networkoptix-mediaserver-out.flag" "[&&]" \
                 touch "$BOX_LOGS_DIR/networkoptix-lite-client-out.flag" "[&&]" \
                 touch "$BOX_LOGS_DIR/mediaserver-out.flag" "[&&]" \
@@ -1046,51 +1008,51 @@ main()
                 "/etc/init.d/nx*"
             )
             for FILE in "${DIRS_TO_REMOVE[@]}"; do
-                go_verbose rm -rf "$FILE" "[||]" true #< Ignore missing files.
+                nx_go_verbose rm -rf "$FILE" "[||]" true #< Ignore missing files.
             done
             ;;
         #..........................................................................................
         go)
-            go "$@"
+            nx_go "$@"
             ;;
         go-verbose)
-            go_verbose "$@"
+            nx_go_verbose "$@"
             ;;
         kill-c)
-            go killall mobile_client
+            nx_go killall mobile_client
             ;;
         run-s)
             find_VMS_DIR
             get_CMAKE_BUILD_DIR
 
-            go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
+            nx_go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
                 "$BOX_CMAKE_BUILD_DIR/bin/mediaserver" -e
             ;;
         start-s)
-            go /etc/init.d/networkoptix-mediaserver start "$@"
+            nx_go /etc/init.d/networkoptix-mediaserver start "$@"
             ;;
         stop-s)
-            go /etc/init.d/networkoptix-mediaserver stop
+            nx_go /etc/init.d/networkoptix-mediaserver stop
             ;;
         run-c)
             find_VMS_DIR
             get_CMAKE_BUILD_DIR
 
-            go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
+            nx_go_verbose "[export LD_LIBRARY_PATH=\"$BOX_QT_DIR/lib\";]" \
                 "$BOX_CMAKE_BUILD_DIR/bin/mobile_client" \
                 "[--url=\"http://$MEDIASERVER_USER:$BOX_PASSWORD@localhost:$MEDIASERVER_PORT\"]"
             ;;
         start-lc)
-            go /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
+            nx_go /opt/networkoptix/mediaserver/var/scripts/start_lite_client "$@"
             ;;
         start-c)
-            go /etc/init.d/networkoptix-lite-client start "$@"
+            nx_go /etc/init.d/networkoptix-lite-client start "$@"
             ;;
         stop-c)
-            go /etc/init.d/networkoptix-lite-client stop
+            nx_go /etc/init.d/networkoptix-lite-client stop
             ;;
         start)
-            go \
+            nx_go \
                 /etc/init.d/networkoptix-mediaserver start "$@" "[&&]" \
                 echo "[&&]" \
                 /etc/init.d/networkoptix-lite-client start "$@"
@@ -1102,13 +1064,14 @@ main()
             local TEST_NAME="$1"; shift
             [ -z "$TEST_NAME" ] && fail "Test name not specified."
             nx_echo "Running: $TEST_NAME $@"
-            go LD_LIBRARY_PATH="$BOX_LIBS_DIR" \
+            nx_go LD_LIBRARY_PATH="$BOX_LIBS_DIR" \
                 "$BOX_MEDIASERVER_DIR/ut/$TEST_NAME" "$@"
             ;;
         #..........................................................................................
         vdp)
             find_VMS_DIR
-            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi" "$@" "[&&]" echo "SUCCESS"
+            nx_go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libvdpau-sunxi" "$@" \
+                "[&&]" echo "SUCCESS"
             ;;
         vdp-rdep)
             find_VMS_DIR
@@ -1118,7 +1081,8 @@ main()
             ;;
         pd)
             find_VMS_DIR
-            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder" "$@" "[&&]" echo "SUCCESS"
+            nx_go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/proxy-decoder" "$@" \
+                "[&&]" echo "SUCCESS"
             ;;
         pd-rdep)
             find_VMS_DIR
@@ -1131,10 +1095,11 @@ main()
             find_VMS_DIR
             if [ "$1" = "ump" ]; then
                 shift
-                go USE_UMP=1 make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" \
-                    echo "SUCCESS"
+                nx_go USE_UMP=1 make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" \
+                    "[&&]" echo "SUCCESS"
             else
-                go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" "[&&]" echo "SUCCESS"
+                nx_go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libcedrus" "$@" \
+                    "[&&]" echo "SUCCESS"
             fi
             ;;
         cedrus-rdep)
@@ -1145,7 +1110,7 @@ main()
             ;;
         ump)
             find_VMS_DIR
-            go \
+            nx_go \
                 rm -r /tmp/libump "[&&]" \
                 cp -r "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/libump" /tmp/ "[&&]" \
                 cd /tmp/libump "[&&]" \
@@ -1155,7 +1120,8 @@ main()
             ;;
         ldp)
             find_VMS_DIR
-            go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook" "$@" "[&&]" echo "SUCCESS"
+            nx_go make -C "$BOX_VMS_DIR/$PACKAGES_SRC_PATH/ldpreloadhook" "$@" \
+                "[&&]" echo "SUCCESS"
             ;;
         ldp-rdep)
             find_VMS_DIR
@@ -1197,7 +1163,7 @@ main()
             ;;
         #..........................................................................................
         *)
-            nx_fail "Invalid arguments. Run with -h for help."
+            nx_fail_on_invalid_arguments
             ;;
     esac
 }

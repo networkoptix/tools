@@ -12,14 +12,17 @@ nx_load_config "${CONFIG=".win-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-help()
+help_callback()
 {
-    cat <<EOF
+    cat \
+<<EOF
 Swiss Army Knife for Windows: execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
 Usage: run via Cygwin from any dir inside the proper nx_vms dir:
 
-$(basename "$0") [--verbose] <command>
+ $(basename "$0") <options> <command>
+
+$NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 
@@ -36,6 +39,7 @@ Here <command> can be one of the following:
  stop-c # Stop desktop_client.
  run-ut [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
 
+ share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
  clean # Delete cmake build dir and all maven build dirs.
  mvn [args] # Call maven.
  gen [cmake-args] # Perform cmake generation.
@@ -108,6 +112,28 @@ find_and_pushd_CMAKE_BUILD_DIR() # [-create]
     find_CMAKE_BUILD_DIR "$@"
     nx_pushd "$CMAKE_BUILD_DIR"
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
+}
+
+do_share() # target_path
+{
+    find_VMS_DIR
+    local TARGET_PATH="$1"
+    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
+    if [[ $TARGET_PATH != /* ]]; then # The path is relative, treat as relative to VMS_DIR parent.
+        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
+    else # The path is absolute: use as is.
+        local TARGET_DIR="$TARGET_PATH"
+    fi
+    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
+
+    local BRANCH=$(hg branch)
+    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
+
+    nx_verbose mkdir -p "$TARGET_DIR"
+    nx_verbose hg share "$(w "$VMS_DIR")" "$(w "$TARGET_DIR")" || return $?
+    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
+    cd "$TARGET_DIR"
+    nx_verbose hg update "$BRANCH" || return $?
 }
 
 do_clean()
@@ -265,7 +291,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     local SRC="$1"; shift
     nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || return $?
     nx_verbose cmake --build . "$@" || return $?
-    ./nx_kit_test
+    ./nx_kit_ut
 }
 
 do_kit() # "$@"
@@ -346,8 +372,11 @@ main()
             do_run_ut "$@"
             ;;
         #..........................................................................................
+        share)
+            do_share "$@"
+            ;;
         clean)
-            do_clean
+            do_clean "$@"
             ;;
         mvn)
             do_mvn "$@"

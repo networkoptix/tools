@@ -1,31 +1,55 @@
 #!/bin/bash
 
-# Utilities to be used in various Nx bash scripts.
+# Utilities to be used in various Nx bash scripts. Contains only nx...() functions and NX_... vars.
+
+# TODO: Rename functions using camelStyle.
 
 #--------------------------------------------------------------------------------------------------
 # Low-level utils.
 
-# Call "help" and exit the script if none or typical help command-line arguments are specified.
-# Usage: nx_handle_help "$@"
+# Part of help text describing common options handled by nx_run().
+declare -g -r NX_HELP_TEXT_OPTIONS="$(cat \
+<<EOF
+Here <options> is a combination of the following options, in the listed order:
+ -h, --help # Show this help. Also shown when called without arguments.
+ -v, --verbose # Log execution of this script via "set -x".
+ -gov, --go-verbose # Log commands to be executed remotely via nx_go() (ssh or telnet).
+EOF
+)"
+
+# Call help_callback() and exit the script if none or typical help command-line arguments are
+# specified.
 nx_handle_help() # "$@"
 {
     if [ $# = 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
-        help
+        help_callback
         exit 0
     fi
 }
-
-declare -i NX_VERBOSE=0
 
 # Set the verbose mode if required by $1; return whether $1 is consumed: define and set global var
 # NX_VERBOSE to either 0 or 1.
 nx_handle_verbose() # "$@" && shift
 {
-    if [ "$1" == "--verbose" -o "$1" == "-v" ]; then
-        NX_VERBOSE=1
+    if [ "$1" = "--verbose" -o "$1" = "-v" ]; then
+        declare -g -r -i NX_VERBOSE=1
         set -x
         return 0
     else
+        declare -g -r -i NX_VERBOSE=0
+        return 1
+    fi
+}
+
+# Set the verbose mode for nx_go() if required by $1; return whether $1 is consumed: define and set
+# global var NX_GO_VERBOSE to either 0 or 1.
+nx_handle_go_verbose() # "$@" && shift
+{
+    if [ "$1" = "-gov" -o "$1" = "--go-verbose" ]; then
+        declare -g -r -i NX_GO_VERBOSE=1
+        return 0
+    else
+        declare -g -r -i NX_GO_VERBOSE=0
         return 1
     fi
 }
@@ -178,7 +202,7 @@ nx_set_background() # RRGGBB
 }
 
 # Produce colored output: nx_echo "$(nx_red)Red text$(nx_nocolor)"
-nx_nocolor()  { echo -en "\033[0m"   ; }
+nx_nocolor()  { echo -en "\033[0m"; }
 nx_black()    { echo -en "\033[0;30m"; }
 nx_dred()     { echo -en "\033[0;31m"; }
 nx_dgreen()   { echo -en "\033[0;32m"; }
@@ -224,7 +248,7 @@ nx_save_cursor_pos()
 }
 
 # Sequence to echo to the terminal to restore saved cursor position.
-NX_RESTORE_CURSOR_POS="\033[u"
+declare -r NX_RESTORE_CURSOR_POS="\033[u"
 
 # Restore saved cursor position.
 nx_restore_cursor_pos()
@@ -269,6 +293,12 @@ nx_concat_ARGS() # "$@"
 
 #--------------------------------------------------------------------------------------------------
 # High-level utils, can use low-level utils.
+
+# Call in case of invalid arguments. Prints an appropriate help message.
+nx_fail_on_invalid_arguments()
+{
+    nx_fail "Invalid arguments. Run with -h for help."
+}
 
 nx_telnet() # user password host port terminal_title background_rrggbb [command [args...]]
 {
@@ -321,6 +351,32 @@ EOF
     nx_pop_title
     nx_set_background "$OLD_BACKGROUND"
     return $RESULT
+}
+
+# Execute a command at the box or log in to the box, via calling go_callback().
+nx_go() # "$@"
+{
+    if [ $NX_GO_VERBOSE = 1 ]; then
+        nx_go_verbose "$@"
+    else
+        go_callback "$@"
+    fi
+}
+
+# Same as nx_go(), but logging the command to be called regardless of NX_GO_VERBOSE value.
+nx_go_verbose() # "$@"
+{
+    local ARGS
+    nx_concat_ARGS "$@"
+    echo "+go $ARGS"
+
+    go_callback "$@"
+
+    # Alternative implementation involving "set -x" at the box.
+    #go \
+    #    "[ set -x; nxLogOffKeepingStatus(){ local -r R=\$?; set +x; return \$R; }; ]" \
+    #    "$@" \
+    #    "[ ; { nxLogOffKeepingStatus; } 2>/dev/null ]"
 }
 
 # Execute a command via ssh, or log in via ssh.
@@ -488,7 +544,8 @@ nx_load_config() # "${CONFIG='.<tool-name>rc'}"
     fi
 }
 
-nx_detail_on_exit() # Called by trap.
+# Called by trap.
+nx_detail_on_exit()
 {
     local RESULT=$?
     if [ $RESULT != 0 ]; then
@@ -503,6 +560,7 @@ nx_run()
     trap nx_detail_on_exit EXIT
 
     nx_handle_verbose "$@" && shift
+    nx_handle_go_verbose "$@" && shift
     nx_handle_help "$@"
     nx_handle_mock_rsync "$@" && shift
 
