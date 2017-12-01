@@ -15,3 +15,6 @@ platforms:
     build_node: mac
   win-x64:
     build_node: windows
+
+ci:
+  timeout: 30m

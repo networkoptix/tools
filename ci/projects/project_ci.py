@@ -1,4 +1,6 @@
 import logging
+import os.path
+import glob
 import sys
 from project import JenkinsProject
 from command import (
@@ -25,12 +27,13 @@ from junk_shop import (
     DbCaptureRepository,
     update_build_info,
     store_output_and_exit_code,
+    run_unit_tests,
     )
 
 log = logging.getLogger(__name__)
 
 
-ASSIST_MODE_VMS_BRANCH = 'vms'
+DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2'
 DAYS_TO_KEEP_OLD_BUILDS = 10
 
 
@@ -39,53 +42,55 @@ class CiProject(JenkinsProject):
     project_id = 'ci'
 
     def stage_init(self, input):
-        return input.make_output_state([
-            SetProjectPropertiesCommand(
-                parameters=[
-                    BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
-                    StringProjectParameter('branch', 'nx_vms branch to checkout', default_value='vms'),
-                    ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
-                                               ['build', 'update_properties']),
-                    ],
-                enable_concurrent_builds=False,
-                days_to_keep_old_builds=10,
-                )])
-
-    def _stage_init(self, input):
-        return input.make_output_state(command_list=[
-            NodeCommand('linux', command_list=[
-                # CleanDirCommand(),
-                self.prepare_devtools_command(),
-                CheckoutScmCommand('jenkins'),
-                # CheckoutCommand('nx_vms', 'vms'),
-                PrepareVirtualEnvCommand(self.devtools_python_requirements),
-                self.make_python_stage_command('report_input'),
-                ])])
+        all_platform_list = sorted(input.config.platforms.keys())
+        command_list = [self._set_project_properties_command(all_platform_list)]
+        if self.in_assist_mode and input.params.stage:
+            command_list += [
+                self.make_python_stage_command(input.params.stage),
+                ]
+        elif input.params.action == 'build':
+            command_list += [
+                self._checkout_nx_vms_command(input),
+                self.make_python_stage_command('prepare_for_build'),
+                ]
+        return input.make_output_state(command_list)
 
     def stage_report_input(self, input):
         input.report()
 
-    def stage_init(self, input):
-        all_platform_list = sorted(input.config.platforms.keys())
+    def _set_project_properties_command(self, all_platform_list):
         parameters = [
                     ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                                ['build', 'update_properties']),
+                    BooleanProjectParameter('clean_build', 'Build from stcatch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
+                    BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
                     ]
+        if self.in_assist_mode:
+            parameters += [
+                StringProjectParameter('branch', 'nx_vms branch to checkout and build',
+                                           default_value=DEFAULT_ASSIST_MODE_VMS_BRANCH),
+                StringProjectParameter('stage', 'stage to run', default_value=''),
+                ]
         parameters += [BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=True)
                            for platform in all_platform_list]
-        command_list = [
-            SetProjectPropertiesCommand(
-                parameters=parameters,
-                enable_concurrent_builds=False,
-                days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
-                ),
-            ]
-        if input.params.get('action') == 'build':
-            command_list.append(self.make_python_stage_command('prepare_for_build'))
-        return input.make_output_state(command_list)
+        return SetProjectPropertiesCommand(
+            parameters=parameters,
+            enable_concurrent_builds=False,
+            days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
+            )
+
+    def _checkout_nx_vms_command(self, input):
+        if self.in_assist_mode:
+            branch_name = self._nx_vms_branch_name(input)
+            return CheckoutCommand('nx_vms', branch_name)
+        else:
+            return CheckoutScmCommand('nx_vms')
 
     def stage_prepare_for_build(self, input):
+        junk_shop_repository = self._create_junk_shop_repository(input)
+        update_build_info(junk_shop_repository, 'nx_vms')
+
         all_platform_list = sorted(input.config.platforms.keys())
         platform_list = [p for p in all_platform_list if input.params.get(p)]
         job_list = [self._make_platform_job(input, platform) for platform in platform_list]
@@ -94,37 +99,47 @@ class CiProject(JenkinsProject):
             ])
 
     def _make_platform_job(self, input, platform):
-        branch_name = self._nx_vms_branch_name(input.jenkins_env)
+        branch_name = self._nx_vms_branch_name(input)
         platform_config = input.config.platforms[platform]
         node = platform_config.build_node
-        workspace_dir = self._make_workspace_dir(branch_name, platform)
-        job_command_list = [
-            # CleanDirCommand(),
-            self.prepare_devtools_command(),
-            CheckoutCommand('nx_vms', branch_name),
-            PrepareVirtualEnvCommand(self.devtools_python_requirements),
-            self.make_python_stage_command('node', platform=platform),
-            ]
+        workspace_dir = self._make_workspace_dir(input.jenkins_env.job_name, branch_name, platform)
+        job_command_list = []
+        if input.params.clean or input.params.clean_only:
+            job_command_list += [
+                CleanDirCommand(),
+                ]
+        if not input.params.clean_only:
+            job_command_list += [
+                self.prepare_devtools_command(),
+                self._checkout_nx_vms_command(input),
+                PrepareVirtualEnvCommand(self.devtools_python_requirements),
+                self.make_python_stage_command('node', platform=platform),
+                ]
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
 
-    def _nx_vms_branch_name(self, jenkins_env):
+    def _nx_vms_branch_name(self, input):
         if self.in_assist_mode:
-            return ASSIST_MODE_VMS_BRANCH
+            return input.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
         else:
-            assert jenkins_env.branch_name, (
+            assert input.jenkins_env.branch_name, (
                 'This scripts are intented to be used in multibranch projects only;'
                 ' env.BRANCH_NAME must be defined')
             return jenkins_env.branch_name
 
-    def _make_workspace_dir(self, branch_name, platform):
+    def _make_workspace_dir(self, job_name, branch_name, platform):
         if self.in_assist_mode:
-            return 'psa-vfedorov-%s' % platform
+            return 'psa-%s-%s' % (job_name, platform)
         else:
             return 'ci-%s-%s' % (branch_name, platform)
 
     def stage_node(self, input):
         log.info('Node stage: %s', input.current_node)
-        self._build(input)
+        platform = input.current_command.platform
+        junk_shop_repository = self._create_junk_shop_repository(input, platform)
+
+        build_info = self._build(input, junk_shop_repository)
+        self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
+
         command_list = []
         # command_list = self._list_dirs_commands(input)
         return input.make_output_state(command_list)
@@ -142,15 +157,13 @@ class CiProject(JenkinsProject):
                 ScriptCommand('dir build'),
                 ]
 
-    def _build(self, input):
-        platform = input.current_command.platform
+    def _create_junk_shop_repository(self, input, platform=None):
         nx_vms_scm_info = input.scm_info['nx_vms']
-        junk_shop_db_config = self._make_junk_shop_db_config(input)
-        clean_build = False
         if self.in_assist_mode:
             project = 'assist-ci-%s' % input.jenkins_env.job_name
         else:
             project = self.project_id
+        is_incremental = not (input.params.clean or input.params.clean_build)
         build_params = BuildParameters(
             project=project,
             platform=platform,
@@ -159,21 +172,32 @@ class CiProject(JenkinsProject):
             configuration='release',
             cloud_group='test',
             customization='default',
-            is_incremental=not clean_build,
+            is_incremental=is_incremental,
             jenkins_url=input.jenkins_env.build_url,
             repository_url=nx_vms_scm_info.repository_url,
             revision=nx_vms_scm_info.revision,
             )
-        junk_shop_repository = DbCaptureRepository(junk_shop_db_config, build_params)
+        user, password = input.credentials.junk_shop_db.split(':')
+        db_config = DbConfig(input.config.junk_shop.db_host, user, password)
+        return DbCaptureRepository(db_config, build_params)
 
-        update_build_info(junk_shop_repository, 'nx_vms')
-
+    def _build(self, input, junk_shop_repository):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(cmake)
-        build_results = builder.build('nx_vms', 'build', build_params, clean_build, junk_shop_repository)
+        build_info = builder.build('nx_vms', 'build', input.params.clean_build, junk_shop_repository)
+        return build_info
 
-    def _make_junk_shop_db_config(self, input):
-        user, password = input.credentials.junk_shop_db.split(':')
-        return DbConfig(input.config.junk_shop.db_host, user, password)
+    def _run_unit_tests(self, is_unix, junk_shop_repository, build_info, timeout):
+        if is_unix:
+            ext = ''
+        else:
+            ext = '.exe'
+        test_binary_list = [os.path.basename(path) for path
+                                in glob.glob(os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext))]
+        log.info('Running unit tests: %s', ', '.join(test_binary_list))
+        logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # Prevent from logging unit tests stdout/stderr
+        is_passed = run_unit_tests(
+            junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
+        log.info('Unit tests are %s', 'passed' if is_passed else 'failed')

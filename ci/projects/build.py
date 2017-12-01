@@ -18,15 +18,24 @@ CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=2)
 
 
+class BuildInfo(object):
+
+    def __init__(self, current_config_path, unit_tests_bin_dir):
+        assert isinstance(current_config_path, basestring), repr(current_config_path)
+        assert isinstance(unit_tests_bin_dir, basestring), repr(unit_tests_bin_dir)
+        self.current_config_path = current_config_path
+        self.unit_tests_bin_dir = unit_tests_bin_dir
+
+
 class CMakeBuilder(object):
 
-    PlatformConfig = namedtuple('PlatformConfig', 'build_tool')
+    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix')
 
-    platform_config = dict(
-        Linux=PlatformConfig('Ninja'),
-        Darwin=PlatformConfig('Ninja'),
+    _system_platform_config = dict(
+        Linux=PlatformConfig('Ninja', is_unix=True),
+        Darwin=PlatformConfig('Ninja', is_unix=True),
         # Windows=PlatformConfig('Visual Studio 14 2015 Win64'),  # for older, pre-4.0 branches
-        Windows=PlatformConfig('Visual Studio 15 2017 Win64'),
+        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False),
         )
 
     def __init__(self, cmake):
@@ -36,9 +45,13 @@ class CMakeBuilder(object):
         self._system = platform.system()
         self._working_dir = os.getcwd()  # python steps are run in working dir
 
-    def build(self, src_dir, build_dir, build_params, clean_build, junk_shop_repository):
-        assert isinstance(build_params, BuildParameters), repr(build_params)
+    @property
+    def _platform_config(self):
+        return self._system_platform_config[self._system]
+
+    def build(self, src_dir, build_dir, clean_build, junk_shop_repository):
         assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
+        build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
         configure_results = self._configure(src_dir, build_dir, build_params, cmake_configuration)
@@ -57,6 +70,15 @@ class CMakeBuilder(object):
         build_info = store_output_and_exit_code(junk_shop_repository, output, exit_code)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.path=%r',
                      junk_shop_repository.db_config, build_info.outcome, build_info.run_path)
+        if self._platform_config.is_unix:
+            unit_tests_bin_dir = os.path.join(build_dir, 'bin')
+        else:
+            # Visual studio uses multi-config setup
+            unit_tests_bin_dir = os.path.join(build_dir, cmake_configuration, 'bin')
+        return BuildInfo(
+            current_config_path=os.path.join(build_dir, 'current_config.py'),
+            unit_tests_bin_dir=unit_tests_bin_dir,
+            )
 
     def _prepare_build_dir(self, build_dir, clean_build):
         cmake_cache_path = os.path.join(build_dir, 'CMakeCache.txt')
@@ -69,7 +91,7 @@ class CMakeBuilder(object):
         ensure_dir_exists(build_dir)
 
     def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
-        build_tool = self.platform_config[self._system].build_tool
+        build_tool = self._platform_config.build_tool
         src_full_path = os.path.abspath(src_dir)
         configure_args = [
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,

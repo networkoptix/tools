@@ -1,5 +1,6 @@
 import logging
-from utils import SimpleNamespace, is_list_inst, is_dict_inst
+import datetime
+from utils import SimpleNamespace, is_list_inst, is_dict_inst, str_to_timedelta, timedelta_to_str
 from command import Command, PythonStageCommand
 
 log = logging.getLogger(__name__)
@@ -16,10 +17,22 @@ class Namespace(object):
         return self._items.get(key, default_value)
 
     def items(self):
+        return self._items.items()
+
+    def to_dict(self):
         return self._items
 
     def __contains__(self, key):
         return key in self._items
+
+
+class SloppyNamespace(Namespace):
+
+    def __getattr__(self, name):
+        if name in self._items:
+            return self._items[name]
+        else:
+            return None
 
 
 class PlatformConfig(object):
@@ -62,7 +75,29 @@ class JunkShopConfig(object):
 
     def report(self):
         log.info('\t' 'junk_shop:')
-        log.info('\t\t' '' 'db_host: %r:', self.db_host)
+        log.info('\t\t' 'db_host: %r:', self.db_host)
+
+
+class CiConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            timeout=str_to_timedelta(data['timeout']),
+            )
+
+    def __init__(self, timeout):
+        assert isinstance(timeout, datetime.timedelta), repr(timeout)
+        self.timeout = timeout
+
+    def to_dict(self):
+        return dict(
+            timeout=timedelta_to_str(self.timeout),
+            )
+
+    def report(self):
+        log.info('\t' 'ci:')
+        log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
 
 
 class Config(object):
@@ -73,19 +108,23 @@ class Config(object):
             junk_shop=JunkShopConfig.from_dict(data['junk_shop']),
             platforms={platform_name: PlatformConfig.from_dict(platform_config)
                                for platform_name, platform_config in data['platforms'].items()},
+            ci=CiConfig.from_dict(data['ci']),
             )
 
-    def __init__(self, junk_shop, platforms):
+    def __init__(self, junk_shop, platforms, ci):
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
+        assert isinstance(ci, CiConfig), repr(ci)
         self.junk_shop = junk_shop
         self.platforms = platforms
+        self.ci = ci
 
     def to_dict(self):
         return dict(
             junk_shop=self.junk_shop.to_dict(),
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
+            ci=self.ci.to_dict(),
             )
 
     def report(self):
@@ -95,6 +134,7 @@ class Config(object):
         for platform_name, platform_info in self.platforms.items():
             log.info('\t\t' '%s:', platform_name)
             platform_info.report()
+        self.ci.report()
 
 
 class ScmInfo(object):
@@ -181,7 +221,7 @@ class State(object):
 
     def __init__(self, jenkins_env, params, config, command_list, credentials, scm_info, current_node, workspace_dir, is_unix):
         assert isinstance(jenkins_env, JenkinsEnv), repr(jenkins_env)
-        assert isinstance(params, Namespace), repr(params)
+        assert isinstance(params, SloppyNamespace), repr(params)
         assert isinstance(config, Config), repr(config)
         assert is_list_inst(command_list, Command), repr(command_list)
         assert isinstance(credentials, Namespace), repr(credentials)
@@ -220,7 +260,7 @@ class InputState(State):
     def from_dict(cls, data, command_registry):
         return cls(
             jenkins_env=JenkinsEnv.from_dict(data['jenkins_env']),
-            params=Namespace(data['params']),
+            params=SloppyNamespace(data['params']),
             config=Config.from_dict(data['config']),
             command_list=[command_registry.resolve(command) for command in data['command_list']],
             credentials=Namespace(data['credentials']),
@@ -255,10 +295,10 @@ class OutputState(State):
     def to_dict(self):
         return dict(
             jenkins_env=self.jenkins_env.to_dict(),
-            params=self.params.items(),
+            params=self.params.to_dict(),
             config=self.config.to_dict(),
             command_list=[command.to_dict() for command in self.command_list],
-            credentials=self.credentials.items(),
+            credentials=self.credentials.to_dict(),
             scm={repository_name: scm_info.to_dict() for repository_name, scm_info in self.scm_info.items()},
             current_node=self.current_node,
             workspace_dir=self.workspace_dir,

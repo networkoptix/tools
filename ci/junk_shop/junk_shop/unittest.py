@@ -2,6 +2,7 @@
 
 # run unit tests, store results to database
 
+import logging
 import os.path
 import sys
 import re
@@ -20,6 +21,8 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.platform import create_platform
 from junk_shop.google_test_parser import GoogleTestEventHandler, GoogleTestParser
 
+log = logging.getLogger(__name__)
+
 
 ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
@@ -37,7 +40,7 @@ def add_core_artifacts(platform, repository, binary_path, run, artifact_path):
         with open(artifact_path, 'rb') as f:
             repository.add_artifact(run, fname, fname, repository.artifact_type.core, f.read(), is_error=True)
     else:
-        print 'Core file %r is too large (%r); will not store' % (artifact_path, size)
+        log.info('Core file %r is too large (%r); will not store', artifact_path, size)
     backtrace = platform.extract_core_backtrace(binary_path, artifact_path)
     if backtrace:
         repository.add_artifact(run, '%s-bt' % fname, '%s-bt' % fname, repository.artifact_type.traceback, backtrace, is_error=True)
@@ -74,16 +77,15 @@ class TestProcess(GoogleTestEventHandler):
             add_core_artifacts(platform, self._repository, binary_path, run, artifact_path)
 
         def report(self, name):
-            return
             if not self._stdout_lines and not self._stderr_lines: return
-            print '----- %s -------------' % name
+            log.debug('----- %s -------------', name)
             for line in self._stdout_lines:
-                print line
+                log.debug(line)
             if self._stderr_lines:
-                print '----- stderr -----------'
+                log.debug('----- stderr -----------')
             for line in self._stderr_lines:
-                print line
-            print '----------------------------'
+                log.debug(line)
+            log.debug('----------------------------')
 
         @db_session
         def flush(self, passed=True, duration=None, duration_ms=None):
@@ -157,10 +159,10 @@ class TestProcess(GoogleTestEventHandler):
             thread.start()
             self._threads.append(thread)
         self._started_at = datetime_utc_now()
-        print '%s is started' % self._test_name
+        log.info('%s is started', self._test_name)
 
     def _save_start_error(self, message):
-        print '%s: %s' % (self._test_name, message)
+        log.warning('%s: %s', self._test_name, message)
         level = self._levels.pop()
         level.add_stderr_line(message)
         level.flush(passed=False)
@@ -171,7 +173,7 @@ class TestProcess(GoogleTestEventHandler):
 
     def abort_on_timeout(self, run_duration):
         if not self.is_finished():
-            print 'Aborting %s' % self._test_name
+            log.warning('Aborting %s', self._test_name)
             if self._levels:
                 self._levels[0].add_stdout_line(
                     '[ Aborted by timeout, still running after %s seconds ]' % run_duration.total_seconds())
@@ -195,7 +197,7 @@ class TestProcess(GoogleTestEventHandler):
         passed = return_code == 0 and not has_cores
         level.flush(passed, duration)
         passed = level.passed and passed
-        print '%s is %s' % (self._test_name, status2outcome(passed))
+        log.info('%s is %s', self._test_name, status2outcome(passed))
         return passed
         #print '%s return code: %d' % (self._test_name, return_code)
         
@@ -218,7 +220,7 @@ class TestProcess(GoogleTestEventHandler):
         if self._levels:
             self._levels[0].add_parse_error(message)
         else:
-            print 'parse error: %s' % message
+            log.warning('parse error: %s', message)
 
     def on_stdout_line(self, line):
         self._levels[-1].add_stdout_line(line)
@@ -267,7 +269,7 @@ class TestProcess(GoogleTestEventHandler):
 
 class TestRunner(object):
 
-    def __init__(self, repository, timeout, config_path, bin_dir, binary_list):
+    def __init__(self, repository, config_path, bin_dir, binary_list, timeout):
         self._repository = repository
         self._config_path = config_path
         self._bin_dir = bin_dir
@@ -349,7 +351,7 @@ class TestRunner(object):
 
     def _handle_timeout(self, run_duration):
         error = 'Timed out after %s seconds; aborted' % timedelta_to_str(run_duration)
-        print error
+        log.warning(error)
         self._errors.append(error)
         for process in self._processes:
             process.abort_on_timeout(run_duration)
@@ -358,13 +360,13 @@ class TestRunner(object):
         error_list = self._platform.do_unittests_pre_checks()
         if not error_list: return
         for error in error_list:
-            print 'Environment configuration error:', error
+            log.warning('Environment configuration error: %s', error)
         artifact_type = self._repository.artifact_type.output
         self._repository.add_artifact(root_run, 'warnings', 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
 
     def _clean_core_files(self):
         for path in glob.glob('*.core.*'):
-            print 'Removing old core file %s' % path
+            log.info('Removing old core file %s', path)
             os.remove(path)
 
     def _collect_core_files(self, run):
@@ -373,7 +375,7 @@ class TestRunner(object):
         for path in glob.glob('*.core.*'):
             if path in self._core_files_belonging_to_tests: continue
             error = '[ produced core file: %s ]' % path
-            print error
+            log.info(error)
             self._errors.append(error)
             binary_path = self._platform.extract_core_source_binary(path)
             add_core_artifacts(self._platform, self._repository, binary_path, run, path)
@@ -391,6 +393,26 @@ def check_is_file(path):
         raise argparse.ArgumentTypeError('%s is not an existing file' % path)
     return os.path.abspath(path)
 
+def run_unit_tests(repository, config_path, bin_dir, test_binary_list, timeout):
+    assert timeout is None or isinstance(timeout, timedelta), repr(timeout)
+    runner = TestRunner(repository, config_path, bin_dir, test_binary_list, timeout)
+    try:
+        runner.init()
+        runner.start()
+        runner.wait()
+        return runner.is_passed
+    except Exception as x:
+        runner.add_error('Internal unittest.py error: %r' % x)
+        raise
+    finally:
+        runner.finalize()
+
+
+
+def setup_logging(level=None):
+    format = '%(asctime)-15s %(levelname)-7s %(message)s'
+    logging.basicConfig(level=level or logging.INFO, format=format)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
@@ -403,18 +425,10 @@ def main():
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')
     args = parser.parse_args()
     timeout = timedelta(seconds=args.timeout_sec) if args.timeout_sec else None
+    setup_logging()
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
-    runner = TestRunner(repository, timeout, args.config_path, args.bin_dir, args.test_binary)
-    try:
-        runner.init()
-        runner.start()
-        runner.wait()
-    except Exception as x:
-        runner.add_error('Internal unittest.py error: %r' % x)
-        raise
-    finally:
-        runner.finalize()
-    if not runner.is_passed:
+    is_passed = run_unit_tests(repository, args.config_path, args.bin_dir, args.test_binary, timeout)
+    if not is_passed:
         sys.exit(1)
 
 

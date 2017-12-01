@@ -1,4 +1,6 @@
 import logging
+import datetime
+import re
 import os.path
 import os
 import sys
@@ -22,6 +24,7 @@ class SimpleNamespace:
 
 
 def setup_logging(level=None):
+    #format = '%(asctime)-15s %(name)-10s %(levelname)-7s %(message)s'
     format = '%(asctime)-15s %(levelname)-7s %(message)s'
     logging.basicConfig(level=level or logging.INFO, format=format)
 
@@ -72,3 +75,45 @@ def ensure_dir_exists(path):
     if not os.path.isdir(path):
         log.debug('Creating directory: %s', path)
         os.makedirs(path)
+
+
+TIMEDELTA_REGEXP = re.compile(r'^((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?$')
+
+def str_to_timedelta(duration_str):
+    '''Create datetime from it's string representation
+    >>> str_to_timedelta('1d2h3m4s')
+    datetime.timedelta(1, 7384)
+    >>> str_to_timedelta('61')
+    datetime.timedelta(0, 61)
+    '''
+    match = TIMEDELTA_REGEXP.match(duration_str)
+    try:
+        if not match: return datetime.timedelta(seconds=int(duration_str))
+        timedelta_params = {k: int(v)
+                            for (k, v) in match.groupdict().iteritems() if v}
+        if not timedelta_params:
+            return datetime.timedelta(seconds=int(duration_str))
+        return datetime.timedelta(**timedelta_params)
+    except ValueError:
+        assert False, 'Invalid timedelta: %r' % duration_str
+
+
+def timedelta_to_str(d):
+    '''Create human-readable string from timedelta, inverse for str_time_delta
+    >>> timedelta_to_str(str_to_timedelta('1d2h3m4s'))
+    '1d2h3m4s'
+    >>> timedelta_to_str(str_to_timedelta('62'))
+    '1m2s'
+    '''
+    rem, sec = divmod(d.seconds, 60)
+    hour, min = divmod(rem, 60)
+    s = ''
+    if d.days:
+        s += '%dd' % d.days
+    if hour:
+        s += '%dh' % hour
+    if min:
+        s += '%dm' % min
+    if sec or not s:
+        s += '%ds' % sec
+    return s
