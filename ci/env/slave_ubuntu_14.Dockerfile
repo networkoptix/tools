@@ -33,9 +33,9 @@ RUN set -ex; \
 
 # Install mercurial from it's own ppa; version available on ubuntu 14 is too old and is incompatible with newer one from jenkins
 RUN set -ex; \
-	add-apt-repository -y ppa:mercurial-ppa/releases \
-	apt-get update \
-	apt-getinstall mercurial
+	add-apt-repository -y ppa:mercurial-ppa/releases; \
+	apt-get update; \
+	apt-get install -y mercurial
 
 
 # Install java 8
@@ -44,7 +44,7 @@ ARG JDK_DEB=zulu8.21.0.1-jdk8.0.131-linux_amd64.deb
 RUN set -ex; \
 	cd /tmp; \
 	wget --no-verbose http://cdn.azul.com/zulu/bin/${JDK_DEB}; \
-	dpkg -i ${JDK_DEB}; \
+	dpkg -i ${JDK_DEB} || apt-get install --fix-broken --yes; \
 	rm ${JDK_DEB}
 
 
