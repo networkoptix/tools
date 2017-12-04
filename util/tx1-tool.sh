@@ -276,7 +276,7 @@ copy_mediaserver()
     # Tegra analytics.
     cp_package_libs "tegra_video" #< Tegra-specific plugin for video decoding and neural networks.
     cp_files "$NVIDIA_MODELS_PATH" "*" "$BOX_NVIDIA_MODELS_DIR" #< Demo neural networks.
-    rm "$BOX_MEDIASERVER_DIR/bin/plugins/libstub_metadata_plugin.so*" #< Stub is not needed.
+    rm "$BOX_MEDIASERVER_DIR/bin/plugins"/libstub_metadata_plugin.so* #< Stub is not needed.
 }
 
 copy_desktop_client()
@@ -290,6 +290,7 @@ copy_desktop_client()
     cp_files "$PACKAGES_DIR/$PACKAGE_QT" "qml" "$BOX_DESKTOP_CLIENT_DIR/bin"
 
     # TODO: Remove these symlinks when cmake build is fixed.
+    cp_desktop_client_bins "qt.conf"
     local -r PLUGINS_DIR="${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/plugins"
     mkdir "$PLUGINS_DIR"
     local PLUGIN
