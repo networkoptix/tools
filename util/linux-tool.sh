@@ -2,7 +2,7 @@
 set -o pipefail
 source "$(dirname $0)/utils.sh"
 
-nx_load_config "${CONFIG=".tx1-toolrc"}"
+nx_load_config "${CONFIG=".linux-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
@@ -57,6 +57,7 @@ EOF
 
 # If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
+# [in] DEVELOP_DIR
 find_VMS_DIR() # [cd]
 {
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
@@ -557,6 +558,7 @@ main()
         share)
             do_share "$@"
             ;;
+        #..........................................................................................
         clean)
             do_clean "$@"
             ;;
@@ -571,9 +573,6 @@ main()
             ;;
         cmake)
             do_gen "$@" && do_build "$TARGET"
-            ;;
-        test-installer)
-            do_test_installer "$@"
             ;;
         build-installer) # [target] [Release] [mvn]
             find_VMS_DIR cd
@@ -592,6 +591,9 @@ main()
                 build_installer_cmake $CONFIG
             fi
             ;;
+        test-installer)
+            do_test_installer "$@"
+            ;;
         print-dirs)
             find_VMS_DIR
             get_TARGET "$1" && shift
@@ -602,6 +604,7 @@ main()
             echo "$VMS_DIR"
             echo "$CMAKE_BUILD_DIR"
             ;;
+        #..........................................................................................
         tunnel) # ip1 [ip2]...
             local SUBNET="10.0."
             local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
