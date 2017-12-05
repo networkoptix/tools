@@ -6,7 +6,7 @@ from collections import namedtuple
 import datetime
 import shutil
 import platform
-from utils import setup_logging, ensure_dir_exists
+from utils import setup_logging, ensure_dir_exists, ensure_dir_missing
 from host import CommandResults, LocalHost
 from cmake import CMake
 from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
@@ -89,6 +89,7 @@ class CMakeBuilder(object):
             log.info('Removing cmake cache file: %s', cmake_cache_path)
             os.remove(cmake_cache_path)
         ensure_dir_exists(build_dir)
+        ensure_dir_missing(os.path.join(build_dir, 'distrib'))
 
     def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
         build_tool = self._platform_config.build_tool

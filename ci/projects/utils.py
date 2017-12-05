@@ -4,6 +4,8 @@ import re
 import os.path
 import os
 import sys
+import shutil
+
 import requests
 
 log = logging.getLogger(__name__)
@@ -75,6 +77,11 @@ def ensure_dir_exists(path):
     if not os.path.isdir(path):
         log.debug('Creating directory: %s', path)
         os.makedirs(path)
+
+def ensure_dir_missing(path):
+    if os.path.isdir(path):
+        log.debug('Removing directory: %s', path)
+        shutil.rmtree(path)
 
 
 TIMEDELTA_REGEXP = re.compile(r'^((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?$')
