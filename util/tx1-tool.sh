@@ -276,7 +276,7 @@ copy_mediaserver()
     # Tegra analytics.
     cp_package_libs "tegra_video" #< Tegra-specific plugin for video decoding and neural networks.
     cp_files "$NVIDIA_MODELS_PATH" "*" "$BOX_NVIDIA_MODELS_DIR" #< Demo neural networks.
-    rm "$BOX_MEDIASERVER_DIR/bin/plugins"/libstub_metadata_plugin.so* #< Stub is not needed.
+    rm "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin/plugins"/libstub_metadata_plugin.so* #< Stub is not needed.
 }
 
 copy_desktop_client()
