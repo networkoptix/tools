@@ -1,15 +1,11 @@
-{% import "common_macros.html" as common_macros %}
+{% macro platform_list_as_string(platform_list) %}
+  {%- for platform in platform_list -%}
+    {{ platform }}
+    {%- if not loop.last %}, {% endif -%}
+  {%- endfor -%}
+{% endmacro -%}
 
-{% extends "layout.html" %}
-{% block title -%} {{ project_name }} / {{ branch_name }} / {{ build.version }} {%- endblock %}
-
-{% block head %}
-  {{ super() }}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='build.css') }}">
-{% endblock head %}
-
-
-{% macro test_row(root_run, itr) %}
+{%- macro test_row(root_run, itr) %}
 
   <td>
     <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=itr.run.id) }}">
@@ -42,76 +38,48 @@
     {% endfor %}
   </td>
 
-{% endmacro %}
+{% endmacro -%}
 
 
-{% block contents %}
+{%- if failed_build_platform_list -%}
+  Build#{{ build.build_num }} is failed for {{ platform_list_as_string(failed_build_platform_list) }}
+{%- elif failed_tests_platform_list -%}
+  Tests for build#{{ build.build_num }} are failed for {{ platform_list_as_string(failed_tests_platform_list) }}
+{%- else -%}
+  Build#{{ build.build_num }} is succeeded
+{%- endif %}
 
-    {{ common_macros.breadcrumbs([
-      ('Projects',  url_for('project_list')),
-      (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
-    ]) }}
+<html>
+  <head>
+    <style>
+      .error { color: #C22626; weight: bold; }
+      .failed { color: #C22626; }
+      .passed { color: #3A911E; }
+	  .test-counts { display: inline-block; float: right; }
+    </style>
+  </head>
+  <body>
 
-    <h2>{{ build.version }}</h2>
-    <hr>
+    {%- if test_mode %}
+      <p>Test mode: this email would be sent to the following recipients:<br/>
+        {%- if recipient_list -%}
+          {%- for email in recipient_list %}
+            {{ email }}<br/>
+          {%- endfor %}
+        {%- else %}
+          none (changeset list is empty)
+        {% endif -%}
+      </p>
+    {% endif -%}
 
-    <div class="build-info">
-      <div>
-        <div class="title">Started at</div>
-        <div class="markup-value">{{ started_at|format_datetime }}</div>
-      </div>
-      {% if build.version %}
-        <div>
-          <div class="title">Version</div>
-          <div class="value">{{ build.version }}</div>
-        </div>
-      {% endif %}
-      {% if build.revision %}
-        <div>
-          <div class="title">Revision</div>
-          <div class="value">{{ repository }} #{{ build.revision|decorate_revision(build.repository_url) }}</div>
-        </div>
-      {% endif %}
-      {% if build.is_incremental is not none %}
-        <div>
-          <div class="title">Build</div>
-          <div class="value"> {%- if build.is_incremental -%} Incremental {%- else -%} Full {%- endif -%} </div>
-        </div>
-      {% endif %}
-      {% if build.jenkins_url %}
-        <div>
-          <div class="title">Jenkins page</div>
-          <div class="value">
-            <a href="{{ build.jenkins_url }}">Build #{{ jenkins_build_num }}</a>
-          </div>
-        </div>
-      {% endif %}
-      {% if build.cloud_group %}
-        <div>
-          <div class="title">Cloud group</div>
-          <div class="value">{{ build.cloud_group.name }}</div>
-        </div>
-      {% endif %}
-      {% if build.configuration %}
-        <div>
-          <div class="title">Configuration</div>
-          <div class="value">{{ build.configuration }}</div>
-        </div>
-      {% endif %}
-      {% if build.customization %}
-        <div>
-          <div class="title">Customization</div>
-          <div class="value">{{ build.customization.name }}</div>
-        </div>
-      {% endif %}
-    </div>
-
-    {% if changeset_list %}
-      <div class="commit-block block">
-        <h3>Commits</h3>
-        {{ common_macros.changeset_list(changeset_list) }}
-      </div>
-    {% endif %}
+    {%- if changeset_list %}
+      <p>After these commits:</p>
+      <p>
+        {%- for changeset in changeset_list|limit_count(10) %}
+          {{ changeset.user }} {{ changeset.revision|format_revision(changeset.build.repository_url) }}: {{ changeset.desc|truncate(500)|format_commit_message }} <br/>
+        {%- endfor %}
+      </p>
+    {% endif -%}
 
     {% for platform in platform_list %}
       <h2 class="platform-name">
@@ -132,7 +100,7 @@
                 Build errors
               </a>
             </h3>
-            <div class="build-errors">
+            <div class="error">
               {% for line in platform.build_error_list %}
                 {{- line -}} <br/>
               {% endfor %}
@@ -151,7 +119,7 @@
               </a>
             </h3>
             {% if stage.error_list %}
-              <div class="run-errors">
+              <div class="error">
                 {% for error in stage.error_list %}
                   {{ error }}<br/>
                 {% endfor %}
@@ -187,4 +155,5 @@
       </div>
     {% endfor %}
 
-{% endblock contents %}
+  </body>
+</html>

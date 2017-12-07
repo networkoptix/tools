@@ -1,7 +1,7 @@
 from flask import request, render_template
 from pony.orm import db_session, select
 from .. import models
-from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator
+from .utils import DEFAULT_RUN_LIST_PAGE_SIZE, paginator, get_or_abort
 from junk_shop.webapp import app
 from .run import load_root_run_node_list, load_run_node_tree
 
@@ -30,7 +30,7 @@ def run_children(run_id):
 @app.route('/run/<int:run_id>')
 @db_session
 def run(run_id):
-    run = models.Run[run_id]
+    run = get_or_abort(models.Run, run_id)
     return render_template(
         'run.html',
         run_name=run.name,

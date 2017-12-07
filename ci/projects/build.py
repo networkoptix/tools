@@ -6,7 +6,7 @@ from collections import namedtuple
 import datetime
 import shutil
 import platform
-from utils import setup_logging, ensure_dir_exists, ensure_dir_missing
+from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
 from host import CommandResults, LocalHost
 from cmake import CMake
 from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
@@ -20,22 +20,26 @@ BUILD_TIMEOUT = datetime.timedelta(hours=2)
 
 class BuildInfo(object):
 
-    def __init__(self, current_config_path, unit_tests_bin_dir):
+    def __init__(self, is_succeeded, artifact_mask_list, current_config_path, unit_tests_bin_dir):
+        assert isinstance(is_succeeded, bool), repr(is_succeeded)
+        assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
         assert isinstance(current_config_path, basestring), repr(current_config_path)
         assert isinstance(unit_tests_bin_dir, basestring), repr(unit_tests_bin_dir)
+        self.is_succeeded = is_succeeded
+        self.artifact_mask_list = artifact_mask_list
         self.current_config_path = current_config_path
         self.unit_tests_bin_dir = unit_tests_bin_dir
 
 
 class CMakeBuilder(object):
 
-    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix')
+    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix artifact_mask_list')
 
     _system_platform_config = dict(
-        Linux=PlatformConfig('Ninja', is_unix=True),
-        Darwin=PlatformConfig('Ninja', is_unix=True),
+        Linux=PlatformConfig('Ninja', is_unix=True, artifact_mask_list=['distrib/*.deb']),
+        Darwin=PlatformConfig('Ninja', is_unix=True, artifact_mask_list=['distrib/*.dmg']),
         # Windows=PlatformConfig('Visual Studio 14 2015 Win64'),  # for older, pre-4.0 branches
-        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False),
+        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False, artifact_mask_list=['distrib/*.msi', 'distrib/*.exe']),
         )
 
     def __init__(self, cmake):
@@ -76,6 +80,8 @@ class CMakeBuilder(object):
             # Visual studio uses multi-config setup
             unit_tests_bin_dir = os.path.join(build_dir, cmake_configuration, 'bin')
         return BuildInfo(
+            is_succeeded=build_info.passed,
+            artifact_mask_list=[os.path.join(build_dir, mask) for mask in self._platform_config.artifact_mask_list],
             current_config_path=os.path.join(build_dir, 'current_config.py'),
             unit_tests_bin_dir=unit_tests_bin_dir,
             )
@@ -89,12 +95,18 @@ class CMakeBuilder(object):
             log.info('Removing cmake cache file: %s', cmake_cache_path)
             os.remove(cmake_cache_path)
         ensure_dir_exists(build_dir)
-        ensure_dir_missing(os.path.join(build_dir, 'distrib'))
+        cleaner = 'nx_vms/build_utils/python/clear_cmake_build.py'
+        if os.path.isfile(cleaner):
+            log.info('Cleaning previous distributives using %s', cleaner)
+            self._host.run_command([cleaner, '--build-dir', build_dir])
+        else:
+            ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
     def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
         build_tool = self._platform_config.build_tool
         src_full_path = os.path.abspath(src_dir)
         configure_args = [
+            '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
             '-DcloudGroup=%s' % build_params.cloud_group,
             '-Dcustomization=%s' % build_params.customization,

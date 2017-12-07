@@ -126,6 +126,24 @@ class UnstashCommand(Command):
         return dict(name=self.name)
 
 
+class ArchiveArtifactsCommand(Command):
+
+    command_id = 'archive_artifacts'
+
+    @classmethod
+    def from_dict(cls, d, command_registry):
+        return cls(
+            artifact_mask_list=d['artifact_mask_list'],
+            )
+
+    def __init__(self, artifact_mask_list):
+        assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
+        self.artifact_mask_list = artifact_mask_list
+
+    def args_to_dict(self):
+        return dict(artifact_mask_list=self.artifact_mask_list)
+
+
 class CleanDirCommand(Command):
 
     command_id = 'clean_dir'

@@ -75,12 +75,12 @@ def save_url_to_file(source_url, dest_path):
 
 def ensure_dir_exists(path):
     if not os.path.isdir(path):
-        log.debug('Creating directory: %s', path)
+        log.info('Creating directory: %s', path)
         os.makedirs(path)
 
 def ensure_dir_missing(path):
     if os.path.isdir(path):
-        log.debug('Removing directory: %s', path)
+        log.info('Removing directory: %s', path)
         shutil.rmtree(path)
 
 

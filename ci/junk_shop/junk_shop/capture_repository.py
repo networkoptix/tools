@@ -1,9 +1,8 @@
-import os
 from argparse import ArgumentTypeError
 import re
 import bz2
 import threading
-from pony.orm import db_session, commit, flush, select, desc, raw_sql, sql_debug
+from pony.orm import db_session, commit, flush, select, desc, raw_sql
 from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
 from . import models
 
@@ -83,7 +82,7 @@ class BuildParameters(object):
                  branch=None,
                  version=None,
                  build_num=None,
-                 release=None,
+                 release='beta',
                  configuration=None,
                  cloud_group=None,
                  customization=None,
@@ -94,7 +93,7 @@ class BuildParameters(object):
                  duration=None,
                  platform=None,
                  ):
-        assert release in [None, 'release', 'beta'], repr(release)
+        assert release in ['release', 'beta'], repr(release)
         self.project = project
         self.branch = branch
         self.version = version
@@ -182,11 +181,7 @@ class DbCaptureRepository(object):
             ArtifactType('core', 'application/octet-stream'),
             ArtifactType('core-traceback', 'text/plain', '.txt'),
             ])
-        if 'SQL_DEBUG' in os.environ:
-            sql_debug(True)
-        models.db.bind('postgres', host=db_config.host, user=db_config.user,
-                       password=db_config.password, port=db_config.port)
-        models.db.generate_mapping(create_tables=True)
+        db_config.bind(models.db)
         self.test_run = {}  # test path -> models.Run
 
     def _select_run_children(self, parent):

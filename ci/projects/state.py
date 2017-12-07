@@ -1,6 +1,6 @@
 import logging
-import datetime
-from utils import SimpleNamespace, is_list_inst, is_dict_inst, str_to_timedelta, timedelta_to_str
+from utils import SimpleNamespace, is_list_inst, is_dict_inst
+from config import Config
 from command import Command, PythonStageCommand
 
 log = logging.getLogger(__name__)
@@ -33,108 +33,6 @@ class SloppyNamespace(Namespace):
             return self._items[name]
         else:
             return None
-
-
-class PlatformConfig(object):
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            build_node=data['build_node'],
-            )
-
-    def __init__(self, build_node):
-        assert isinstance(build_node, basestring), repr(build_node)
-        self.build_node = build_node
-
-    def to_dict(self):
-        return dict(
-            build_node=self.build_node,
-            )
-
-    def report(self):
-        log.info('\t\t\t' 'build_node: %r', self.build_node)
-
-
-class JunkShopConfig(object):
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            db_host=data['db_host'],
-            )
-
-    def __init__(self, db_host):
-        assert isinstance(db_host, basestring), repr(db_host)
-        self.db_host = db_host
-
-    def to_dict(self):
-        return dict(
-            db_host=self.db_host
-            )
-
-    def report(self):
-        log.info('\t' 'junk_shop:')
-        log.info('\t\t' 'db_host: %r:', self.db_host)
-
-
-class CiConfig(object):
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            timeout=str_to_timedelta(data['timeout']),
-            )
-
-    def __init__(self, timeout):
-        assert isinstance(timeout, datetime.timedelta), repr(timeout)
-        self.timeout = timeout
-
-    def to_dict(self):
-        return dict(
-            timeout=timedelta_to_str(self.timeout),
-            )
-
-    def report(self):
-        log.info('\t' 'ci:')
-        log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
-
-
-class Config(object):
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            junk_shop=JunkShopConfig.from_dict(data['junk_shop']),
-            platforms={platform_name: PlatformConfig.from_dict(platform_config)
-                               for platform_name, platform_config in data['platforms'].items()},
-            ci=CiConfig.from_dict(data['ci']),
-            )
-
-    def __init__(self, junk_shop, platforms, ci):
-        assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
-        assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
-        assert isinstance(ci, CiConfig), repr(ci)
-        self.junk_shop = junk_shop
-        self.platforms = platforms
-        self.ci = ci
-
-    def to_dict(self):
-        return dict(
-            junk_shop=self.junk_shop.to_dict(),
-            platforms={platform_name: platform_config.to_dict()
-                               for platform_name, platform_config in self.platforms.items()},
-            ci=self.ci.to_dict(),
-            )
-
-    def report(self):
-        log.info('config:')
-        self.junk_shop.report()
-        log.info('\t' 'platforms:')
-        for platform_name, platform_info in self.platforms.items():
-            log.info('\t\t' '%s:', platform_name)
-            platform_info.report()
-        self.ci.report()
 
 
 class ScmInfo(object):

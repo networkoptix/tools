@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+from flask import abort
+
 
 DEFAULT_RUN_LIST_PAGE_SIZE = 20
 PAGINATOR_PAGE_LIMIT = 11  # how many pages show in paginator, max
@@ -37,3 +39,9 @@ def paginator(current_page, rec_count, page_size):
         first_page=1,
         last_page=page_count,
         )
+
+def get_or_abort(Model, id):
+    instance = Model.get(id=id)
+    if not instance:
+        abort(404)
+    return instance

@@ -1,8 +1,11 @@
+import os
 import re
 import pytz
 import tzlocal
 from datetime import datetime
 from argparse import ArgumentTypeError
+
+from pony.orm import sql_debug
 
 
 class SimpleNamespace:
@@ -70,3 +73,10 @@ class DbConfig(object):
             return '%s:%s' % (self.host, self.port)
         else:
             return self.host
+
+    def bind(self, db):
+        if 'SQL_DEBUG' in os.environ:
+            sql_debug(True)
+        db.bind('postgres', host=self.host, user=self.user,
+                    password=self.password, port=self.port)
+        db.generate_mapping(create_tables=True)

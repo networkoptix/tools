@@ -141,7 +141,7 @@ class LinuxPlatform(PosixPlatform):
         file_ver = self.get_file_utility_version()
         self._is_file_utility_old = file_ver <= (5, 14)
         if self._is_file_utility_old:
-            log.warning('"file" utility it too old: %s, does not support -P argument', '.'.join(map(str, file_ver)))
+            log.warning('"file" utility is too old: %s, does not support -P argument', '.'.join(map(str, file_ver)))
 
     @property
     def expected_core_pattern(self):

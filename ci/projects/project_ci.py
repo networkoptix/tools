@@ -2,6 +2,16 @@ import logging
 import os.path
 import glob
 import sys
+
+from junk_shop import (
+    models,
+    DbConfig,
+    BuildParameters,
+    DbCaptureRepository,
+    update_build_info,
+    store_output_and_exit_code,
+    run_unit_tests,
+    )
 from project import JenkinsProject
 from command import (
     ScriptCommand,
@@ -9,6 +19,7 @@ from command import (
     CheckoutScmCommand,
     StashCommand,
     UnstashCommand,
+    ArchiveArtifactsCommand,
     CleanDirCommand,
     NodeCommand,
     PrepareVirtualEnvCommand,
@@ -21,14 +32,7 @@ from command import (
     )
 from cmake import CMake
 from build import CMakeBuilder
-from junk_shop import (
-    DbConfig,
-    BuildParameters,
-    DbCaptureRepository,
-    update_build_info,
-    store_output_and_exit_code,
-    run_unit_tests,
-    )
+from email_sender import EmailSender
 
 log = logging.getLogger(__name__)
 
@@ -96,6 +100,7 @@ class CiProject(JenkinsProject):
         job_list = [self._make_platform_job(input, platform) for platform in platform_list]
         return input.make_output_state([
             ParallelCommand(job_list),
+            self.make_python_stage_command('finalize'),
             ])
 
     def _make_platform_job(self, input, platform):
@@ -126,6 +131,12 @@ class CiProject(JenkinsProject):
                 ' env.BRANCH_NAME must be defined')
             return input.jenkins_env.branch_name
 
+    def _project_name(self, input):
+        if self.in_assist_mode:
+            return 'assist-ci-%s' % input.jenkins_env.job_name
+        else:
+            return self.project_id
+
     def _make_workspace_dir(self, job_name, branch_name, platform):
         if self.in_assist_mode:
             return 'psa-%s-%s' % (job_name, platform)
@@ -140,7 +151,7 @@ class CiProject(JenkinsProject):
         build_info = self._build(input, junk_shop_repository)
         self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
 
-        command_list = []
+        command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
         # command_list = self._list_dirs_commands(input)
         return input.make_output_state(command_list)
 
@@ -159,10 +170,7 @@ class CiProject(JenkinsProject):
 
     def _create_junk_shop_repository(self, input, platform=None):
         nx_vms_scm_info = input.scm_info['nx_vms']
-        if self.in_assist_mode:
-            project = 'assist-ci-%s' % input.jenkins_env.job_name
-        else:
-            project = self.project_id
+        project = self._project_name(input)
         is_incremental = not (input.params.clean or input.params.clean_build)
         build_params = BuildParameters(
             project=project,
@@ -177,9 +185,12 @@ class CiProject(JenkinsProject):
             repository_url=nx_vms_scm_info.repository_url,
             revision=nx_vms_scm_info.revision,
             )
-        user, password = input.credentials.junk_shop_db.split(':')
-        db_config = DbConfig(input.config.junk_shop.db_host, user, password)
+        db_config = self._db_config(input)
         return DbCaptureRepository(db_config, build_params)
+
+    def _db_config(self, input):
+        user, password = input.credentials.junk_shop_db.split(':')
+        return DbConfig(input.config.junk_shop.db_host, user, password)
 
     def _build(self, input, junk_shop_repository):
         cmake = CMake('3.9.6')
@@ -201,3 +212,14 @@ class CiProject(JenkinsProject):
         is_passed = run_unit_tests(
             junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
+
+    def stage_finalize(self, input):
+        nx_vms_scm_info = input.scm_info['nx_vms']
+        db_config = self._db_config(input)
+        db_config.bind(models.db)
+        smtp_password = input.credentials.service_email
+        project = self._project_name(input)
+        branch = nx_vms_scm_info.branch
+        build_num = input.jenkins_env.build_number
+        sender = EmailSender(input.config)
+        sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)

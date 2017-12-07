@@ -11,7 +11,7 @@ app.config.from_object('junk_shop.webapp.default_config')
 if 'JUNK_SHOP_SETTINGS' in os.environ:
     app.config.from_envvar('JUNK_SHOP_SETTINGS')
 
-from . import filters
+from ..filters import JinjaFilters
 from . import views
 from . import project_views
 from . import build_views
@@ -19,6 +19,14 @@ from . import run_views
 from . import branch_views
 from . import version_list_views
 from . import metrics_views
+
+
+filters_config = JinjaFilters.Config(
+    app.config.get('JIRA_URL'),
+    app.config.get('SCM_BROWSER_URL_FORMAT'),
+    )
+filters = JinjaFilters(filters_config)
+filters.install(app.jinja_env)
 
 
 # our container may be started before db, must wait until it is available

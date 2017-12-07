@@ -4,11 +4,10 @@ from fnmatch import fnmatch
 from functools import partial
 from pony.orm import db_session, desc, select
 from flask import render_template
-from ..utils import param_to_bool
+from ..utils import param_to_bool, timedelta_to_str
 from .. import models
 from junk_shop.webapp import app
 from .utils import format_bytes
-from .filters import format_timedelta
 
 
 # How many measured versions are taken to measure which server_count is to show
@@ -60,7 +59,7 @@ class DurationPoint(Point):
     def text(self):
         if self.y is None:
             return None
-        return format_timedelta(datetime.timedelta(seconds=self.y))
+        return timedelta_to_str(datetime.timedelta(seconds=self.y))
 
 
 class BytesPoint(Point):
