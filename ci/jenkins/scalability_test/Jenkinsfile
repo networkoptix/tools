@@ -165,7 +165,8 @@ def stash_ci_distributive(upstream_ci_project_name, upstream_ci_branch) {
 		branch: upstream_ci_branch,
 		build: dist_info.build,
 		version: dist_info.version,
-		customization: 'default',
+		// customization: 'default',
+		customization: 'hanwha',  // hardcoded for 3.1.1 for now
 		path: null,
 	]
 }
