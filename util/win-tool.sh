@@ -181,7 +181,7 @@ do_gen() # "$@"
         nx_verbose rm "$CMAKE_CACHE"
     fi
 
-    nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64
+    nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64 -DrdepSync=OFF
     local RESULT=$?
 
     nx_popd
