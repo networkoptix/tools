@@ -425,6 +425,24 @@ nx_sshfs() # user password host port host_path mnt_point
         -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no `# Do not use known_hosts`
 }
 
+nx_get_SELF_IP() # subnet-regex
+{
+    local -r SUBNET="$1"
+
+    local AWK
+    local TOOL
+    case "$(uname -s)" in
+        CYGWIN*) TOOL="ipconfig"; AWK='/  IPv4 Address/{print $14}';;
+        *) TOOL="ifconfig"; AWK='/inet addr/{print substr($2,6)}';;
+    esac
+
+    SELF_IP=$($TOOL |awk "$AWK" |grep "$SUBNET")
+
+    if ! [[ $SELF_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        nx_fail "Unable to get self IP address for subnet regex \"$SUBNET\"."
+    fi
+}
+
 # Return in the specified variable the array of files found by 'find' command.
 nx_find_files() # FILES_ARRAY_VAR find_args...
 {

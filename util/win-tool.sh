@@ -2,6 +2,7 @@
 source "$(dirname $0)/utils.sh"
 
 nx_load_config "${CONFIG=".win-toolrc"}"
+: ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${UBUNTU_DEVELOP_DIR="/S/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
@@ -45,6 +46,8 @@ Here <command> can be one of the following:
  gen [cmake-args] # Perform cmake generation.
  build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
  cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
+ tunnel [args] # Call "$LINUX_TOOL tunnel [args]".
+ tunnel-s [args] # Call "$LINUX_TOOL tunnel-s [args]".
 EOF
 }
 
@@ -392,6 +395,12 @@ main()
             [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="Release"; }
             do_gen "$@" || exit $?
             do_build $CONFIGURATION_ARG
+            ;;
+        tunnel)
+            "$LINUX_TOOL" tunnel "$@"
+            ;;
+        tunnel-s)
+            "$LINUX_TOOL" tunnel-s "$@"
             ;;
         #..........................................................................................
         *)

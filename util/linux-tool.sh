@@ -9,8 +9,12 @@ nx_load_config "${CONFIG=".linux-toolrc"}"
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
-: ${LA_HDW_MX_USER="$USER"} #< Username at la.hdw.mx.
 : ${TARGET=""} #< Default target, if not specified in the arg. If empty, VMS_DIR name is analyzed.
+: ${SSH_MEDIATOR_HOST="la.hdw.mx"}
+: ${SSH_MEDIATOR_USER="$USER"}
+: ${TUNNEL_BACKGROUND_RRGGBB="600000"}
+: ${TUNNEL_S_DEFAULT_PORT=7001}
+: ${TUNNEL_SELF_IP_SUBNET_REFEX="10\\.0\\."}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -606,19 +610,71 @@ main()
             ;;
         #..........................................................................................
         tunnel) # ip1 [ip2]...
-            local SUBNET="10.0."
-            local SELF_IP=$(ifconfig |awk '/inet addr/{print substr($2,6)}' |grep "$SUBNET")
-            local ID=${SELF_IP##*.} #< Take the last byte of SELF_IP.
+            local SELF_IP
+            nx_get_SELF_IP "$TUNNEL_SELF_IP_SUBNET_REFEX"
+            local -i -r ID=${SELF_IP##*.} #< Take the last byte of SELF_IP.
+            nx_echo "Detected localhost as $SELF_IP, using $ID as port suffix"
             [ "$*" = "" ] && nx_fail "List of host IP addresses not specified."
+            local -i -r FWD_PORT=22
+            local -i -r BACK_PORT=$FWD_PORT$ID
+
             local HOSTS_ARGS=""
-            local PORT_PREFIX=22
+            local TITLE=""
+            local -i PORT_PREFIX=22
             for IP in "$@"; do
-                nx_echo "Tunnelling $IP as localhost:$PORT_PREFIX$ID"
-                HOSTS_ARG="$HOSTS_ARG -L$PORT_PREFIX$ID:$IP:22"
+                local -i NEW_PORT=$PORT_PREFIX$ID
+                local TUNNEL_DESCRIPTION="localhost:$NEW_PORT->$IP:$FWD_PORT"
+                nx_echo "Tunnelling $TUNNEL_DESCRIPTION"
+                HOSTS_ARG="$HOSTS_ARG -L$NEW_PORT:$IP:$FWD_PORT"
+                TITLE="$TITLE$TUNNEL_DESCRIPTION, "
                 ((PORT_PREFIX+=1))
             done
+            local -r TUNNEL_BACK_DESCRIPTION="$SSH_MEDIATOR_HOST:$BACK_PORT->localhost:$FWD_PORT"
+            echo "Tunnelling $TUNNEL_BACK_DESCRIPTION"
+            TITLE="${TITLE}$TUNNEL_BACK_DESCRIPTION"
 
-            nx_verbose ssh$HOSTS_ARG -R22$ID:localhost:22 $LA_HDW_MX_USER@la.hdw.mx
+            nx_push_title
+            nx_set_title "$TITLE"
+            local OLD_BACKGROUND
+            nx_get_background OLD_BACKGROUND
+            nx_set_background "$TUNNEL_BACKGROUND_RRGGBB"
+
+            nx_verbose ssh$HOSTS_ARG -R$BACK_PORT:localhost:$FWD_PORT \
+                -t "$SSH_MEDIATOR_USER@$SSH_MEDIATOR_HOST" \
+                'echo "Press ^C to stop"; sleep infinity'
+
+            nx_set_background "$OLD_BACKGROUND"
+            nx_pop_title
+            ;;
+        tunnel-s) # ip1 [port]
+            if [[ $# != 1 && $# != 2 ]]; then
+                nx_fail "Invalid command args."
+            fi
+            local -r IP="$1"
+            if [[ $# = 1 ]]; then
+                local -r -i FWD_PORT="$TUNNEL_S_DEFAULT_PORT"
+            else
+                local -r -i FWD_PORT="$2"
+            fi
+
+            local -r -i PORT_PREFIX=22
+            local -r ID=${IP##*.} #< Take the last byte of IP.
+            local -r NEW_PORT=$PORT_PREFIX$ID
+
+            local -r TUNNEL_DESCRIPTION="localhost:$NEW_PORT->$IP:$FWD_PORT"
+            nx_echo "Tunnelling $TUNNEL_DESCRIPTION"
+            nx_push_title
+            nx_set_title "$TUNNEL_DESCRIPTION"
+            local OLD_BACKGROUND
+            nx_get_background OLD_BACKGROUND
+            nx_set_background "$TUNNEL_BACKGROUND_RRGGBB"
+
+            nx_verbose ssh -L$NEW_PORT:$IP:$FWD_PORT \
+                -t "$SSH_MEDIATOR_USER@$SSH_MEDIATOR_HOST" \
+                'echo "Press ^C to stop"; sleep infinity'
+
+            nx_set_background "$OLD_BACKGROUND"
+            nx_pop_title
             ;;
         #..........................................................................................
         *)
