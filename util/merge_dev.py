@@ -23,6 +23,20 @@ mergeCommit = 'merge'
 projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE',
     'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
+def print_command(command):
+    print '>> {0}'.format(subprocess.list2cmdline(command))
+
+def execute_command(command, verbose = False):
+    if verbose:
+        print_command(command)
+    try:
+        subprocess.check_output(command, stderr = subprocess.STDOUT)
+    except Exception as e:
+        if not verbose:
+            print_command(command)
+        print "Error: {0}".format(e.output)
+        raise
+
 def getHeader(merged, current):
     return "Merge: {0} -> {1}".format(merged, current)
 
@@ -102,10 +116,10 @@ def main():
         print changelog
         sys.exit(0)
 
-    execCommand('hg', 'up', targetBranch)
-    execCommand('hg', 'merge',  '--tool=internal:merge', revision)
-    execCommand('hg', 'ci', '-m' + changelog)
-    execCommand('hg', 'up', currentBranch)
+    execute_command(['hg', 'up', targetBranch], verbose)
+    execute_command(['hg', 'merge',  '--tool=internal:merge', revision], verbose)
+    execute_command(['hg', 'ci', '-m' + changelog], verbose)
+    execute_command(['hg', 'up', currentBranch], verbose)
     sys.exit(0)
 
 if __name__ == "__main__":
