@@ -128,13 +128,17 @@
         {% if platform.build_error_list %}
           <div class="build-block block">
             <h3>
-              <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
+              {% if platform.build_artifact %}
+                <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
+                  Build errors
+                </a>
+              {% else %}
                 Build errors
-              </a>
+              {% endif %}
             </h3>
             <div class="build-errors">
               {% for line in platform.build_error_list %}
-                {{- line -}} <br/>
+                {{- line|truncate -}} <br/>
               {% endfor %}
             </div>
           </div>

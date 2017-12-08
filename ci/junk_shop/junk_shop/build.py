@@ -11,6 +11,7 @@ from pony.orm import db_session
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
+from junk_shop.build_output_parser import parse_output_lines
 
 
 def parse_maven_output(output):
@@ -31,6 +32,15 @@ def load_output_file_list(output_file_list):
     return output
 
 
+def pick_severity_lines(severity, output):
+    for s, line in parse_output_lines(output.splitlines()):
+        if s == severity:
+            yield line
+
+def get_severity_output(severity, output):
+    return '\n'.join(pick_severity_lines(severity, output))
+
+
 StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_path')
 
 @db_session
@@ -39,6 +49,12 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
     repository.add_artifact(run, 'output', 'build-output', repository.artifact_type.output, output)
+    errors = get_severity_output('error', output)
+    warnings = get_severity_output('warning', output)
+    if errors:
+        repository.add_artifact(run, 'errors', 'build-errors', repository.artifact_type.output, errors, is_error=True)
+    if warnings:
+        repository.add_artifact(run, 'warnings', 'build-warnings', repository.artifact_type.output, warnings)
     if parse_maven_outcome:
         outcome = parse_maven_output(output)
         if not outcome:

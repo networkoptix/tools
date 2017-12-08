@@ -3,7 +3,6 @@ from functools import total_ordering
 from pony.orm import select, desc, count, exists
 from . import models
 from .artifact import decode_artifact_data
-from .build_output_parser import match_output_line
 
 
 # drop starting unit/ or functional/ part
@@ -65,27 +64,28 @@ class TestsStage(Stage):
         Stage.__init__(self, root_run, error_list)
         self.failed_count = 0
         self.passed_count = 0
-        self._visited_run_set = set()  # Run set, runs we have already added
+        self._visited_run_set = {}  # models.Run -> TestRun, runs we have already added
         self.run_list = []  # TestRun list
 
     def add_run(self, run):
-        if run in self._visited_run_set:
-            return
+        tr = self._visited_run_set.get(run)
+        if tr:
+            return tr
         if run.outcome == 'passed' and run.prev_outcome != 'failed':
-            return
+            return None
         if run.outcome == 'failed':
             self.failed_count += 1
         tr = TestRun(run)
         self.run_list.append(tr)
-        self._visited_run_set.add(run)
+        self._visited_run_set[run] = tr
         return tr
 
 
 class Platform(object):
 
-    def __init__(self, name, build_artifact=None):
+    def __init__(self, name):
         self.name = name
-        self.build_artifact = build_artifact
+        self.build_artifact = None
         self.build_error_list = []
         self.stage_list = []
 
@@ -120,13 +120,10 @@ class BuildInfoLoader(object):
         self.failed_build_platform_set = set()  # platform name set
         self.failed_tests_platform_set = set()
 
-    def produce_platform(self, platform_model, build_artifact=None):
+    def produce_platform(self, platform_model):
         platform = self.platform_map.get(platform_model)
-        if platform:
-            if build_artifact:
-                platform.build_artifact = build_artifact
-        else:
-            platform = Platform(platform_model.name, build_artifact)
+        if not platform:
+            platform = Platform(platform_model.name)
             self.platform_map[platform_model] = platform
         return platform
 
@@ -193,32 +190,28 @@ class BuildInfoLoader(object):
                 for run in models.Run
                 for artifact in run.artifacts
                 if run.build is self.build and
-                run.name == 'build' and
-                artifact.short_name == 'output'):
+                run.name == 'build'):
             self.update_started_at(run)
-            platform = self.produce_platform(run.platform, artifact)
+            platform = self.produce_platform(run.platform)
+            if artifact.short_name == 'output':
+                platform.build_artifact = artifact
+            if artifact.short_name == 'errors':
+                platform.build_error_list = self.artifact_as_lines(artifact)
             if run.outcome == 'failed':
-                platform.build_error_list = list(self.pick_build_errors(artifact))
                 self.failed_build_platform_set.add(run.platform.name)
-
-    @classmethod
-    def pick_build_errors(cls, artifact):
-        for line in cls.artifact_as_lines(artifact):
-            severity = match_output_line(line)
-            if severity == 'error':
-                yield line.decode('utf-8')
 
     @staticmethod
     def artifact_as_lines(artifact):
         data = decode_artifact_data(artifact)
         return data.splitlines()
 
-    def load_stage_errors(self):
+    def load_test_stage_errors(self):
         for root_run, artifact in select(
                 (root_run, artifact)
                 for root_run in models.Run
                 for artifact in root_run.artifacts
                 if root_run.build is self.build and
+                root_run.name != 'build' and
                 artifact.short_name == 'errors'):
             stage = self.produce_stage(root_run, Stage)
             stage.error_list = self.artifact_as_lines(artifact)
@@ -237,7 +230,8 @@ class BuildInfoLoader(object):
                 artifact.type.name == 'traceback'):
             stage = self.produce_stage(root_run, TestsStage)
             tr = stage.add_run(run)
-            tr.traceback_list.append(artifact)
+            if tr:
+                tr.traceback_list.append(artifact)
 
     def load_build_info(self):
         repository = self.build.repository_url.split('/')[-1]
@@ -248,7 +242,7 @@ class BuildInfoLoader(object):
         self.create_leaf_test_runs()
         self.create_non_leaf_failed_test_runs()
         self.load_build_artifacts()
-        self.load_stage_errors()
+        self.load_test_stage_errors()
 
         platform_list = [value for key, value in sorted(self.platform_map.items())]
 

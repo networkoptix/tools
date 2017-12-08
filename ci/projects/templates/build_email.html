@@ -61,14 +61,15 @@
   <body>
 
     {%- if test_mode %}
-      <p>Test mode: this email would be sent to the following recipients:<br/>
+      <p>Test mode: this email would be sent to the following recipients:</p>
+      <p>
         {%- if recipient_list -%}
           {%- for email in recipient_list %}
-            {{ email }}<br/>
+            {{ email|escape }}<br/>
           {%- endfor %}
         {%- else %}
           none (changeset list is empty)
-        {% endif -%}
+        {%- endif %}
       </p>
     {% endif -%}
 
@@ -102,7 +103,7 @@
             </h3>
             <div class="error">
               {% for line in platform.build_error_list %}
-                {{- line -}} <br/>
+                {{- line|truncate -}} <br/>
               {% endfor %}
             </div>
           </div>
