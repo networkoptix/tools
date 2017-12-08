@@ -26,7 +26,7 @@ class EmailSender(object):
         if test_mode:
             recipient_list = self._config.email.ci_admins
         else:
-            recipient_list = offender_list
+            recipient_list = offender_list + self._config.email.ci_admins
         if recipient_list:
             self.send_email(smtp_password, subject_and_html, recipient_list)
         else:
