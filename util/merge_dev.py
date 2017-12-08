@@ -19,9 +19,8 @@ import argparse
 import re
 
 targetBranch = '.';
-verbose = False
 mergeCommit = 'merge'
-projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE', 
+projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE',
     'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
 def getHeader(merged, current):
@@ -32,24 +31,15 @@ def getCurrentBranch():
 
 def commandLine(command):
     return '>> ' + ' '.join(command).replace('\n', '\\n')
-    
-def execCommand(*command):
-    if verbose:
-        print commandLine(command[0])
-    
-    code = subprocess.call(command)
-    if code != 0:
-        print "Subprocess returned code {0}. Terminating...".format(code)
-        sys.exit(code)
-    return code
-        
+
 def hasIssueLink(commitText, projectKey):
     return re.search('([^_]|\A){0}-\d+'.format(projectKey.lower()), commitText.lower()) is not None
-        
-def includeCommit(commitText):
-    return any(hasIssueLink(commitText, projectKey) for projectKey in projectKeys)
-        
-def getChangelog(revision, multiline):
+
+def includeCommit(commitText, all_commits):
+    return (not commitText.lower().startswith(mergeCommit)
+        and (all_commits or any(hasIssueLink(commitText, projectKey) for projectKey in projectKeys)))
+
+def getChangelog(revision, multiline, verbose, all_commits):
     command = ['hg', 'log', '--template']
     if multiline:
         command += ['{desc}\n\n']
@@ -66,16 +56,17 @@ def getChangelog(revision, multiline):
         print e.output
         return ''
     changes = sorted(set(changelog.split('\n\n')))
-    changes = [x.strip('\n').replace('"', '\'') for x in changes if x and includeCommit(x)]
+    changes = [x.strip('\n').replace('"', '\'') for x in changes
+        if x and (includeCommit(x, all_commits))]
 
     header = getHeader(revision, targetBranch)
     if changes:
         changes.insert(0, header)
     else:
         return header
-    
+
     return '\n'.join(changes).strip('\n')
-      
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--target', type=str, help="Target branch")
@@ -83,38 +74,39 @@ def main():
     parser.add_argument('-p', '--preview', action='store_true', help="preview changes")
     parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-m', '--multiline', action='store_true', help="multiline changelog")
+    parser.add_argument('-a', '--all-commits', action='store_true', help="add all commits to changelog")
     args = parser.parse_args()
 
     global verbose
     verbose = args.verbose
-    
+
     currentBranch = getCurrentBranch()
-    
+
     global targetBranch
     target = args.target
     if target:
         targetBranch = target
-    else:      
+    else:
         targetBranch = currentBranch
-       
+
     revision = args.rev
     if not revision:
         revision = '.'
 
     if revision == '.' and targetBranch != currentBranch:
         revision = currentBranch
-        
-    changelog = getChangelog(revision, args.multiline)
-        
+
+    changelog = getChangelog(revision, args.multiline, args.verbose, args.all_commits)
+
     if args.preview:
         print changelog
         sys.exit(0)
-   
+
     execCommand('hg', 'up', targetBranch)
     execCommand('hg', 'merge',  '--tool=internal:merge', revision)
     execCommand('hg', 'ci', '-m' + changelog)
     execCommand('hg', 'up', currentBranch)
     sys.exit(0)
-    
+
 if __name__ == "__main__":
     main()
