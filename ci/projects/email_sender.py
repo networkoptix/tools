@@ -42,7 +42,7 @@ class EmailSender(object):
             test_mode=test_mode,
             recipient_list=offender_list,
             **build_info._asdict())
-        return (offender_list, subject_and_html)
+        return (list(offender_list), subject_and_html)
 
     def send_email(self, smtp_password, subject_and_html, recipient_list):
         lines = subject_and_html.splitlines()
