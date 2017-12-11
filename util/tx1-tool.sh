@@ -537,7 +537,7 @@ main()
             cp_libs "*$LIB_NAME.so"
             ;;
         ini)
-            nx_go touch /tmp/nx_media.ini "[&&]" \
+            nx_go_verbose touch /tmp/nx_media.ini "[&&]" \
                 touch /tmp/tegra_video_metadata_plugin.ini "[&&]" \
                 touch /tmp/video_dec_gie.ini "[&&]" \
                 touch /tmp/tegra_video.ini
