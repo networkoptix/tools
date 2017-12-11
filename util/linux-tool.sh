@@ -6,6 +6,7 @@ nx_load_config "${CONFIG=".linux-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
+: ${CMAKE_BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${CMAKE_GEN="Ninja"} #< Used for cmake generator and (lower-case) for "m" command.
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
@@ -161,13 +162,16 @@ do_mvn() # [target] [Release] "$@"
 # [in] VMS_DIR
 get_CMAKE_BUILD_DIR() # target
 {
+    if [ ! -z "${CMAKE_BUILD_DIR:+x}" ]; then #< CMAKE_BUILD_DIR is defined and not empty.
+        return 1
+    fi
     local TARGET="$1"
     case "$VMS_DIR" in
         *-"$TARGET")
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             ;;
         "$WIN_DEVELOP_DIR"/*)
-            VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
+            local -r VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
             CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX-$TARGET"
             ;;
         *)
