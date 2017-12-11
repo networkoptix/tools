@@ -17,7 +17,7 @@ email:
   smtp:
     host: smtp.gmail.com:587
     user: service@networkoptix.com
-  from_address: service@networkoptix.com
+  from_address: autotest@networkoptix.com
   ci_admins:
     - vfedorov@networkoptix.com
 
