@@ -47,6 +47,7 @@ class EmailSender(object):
     def send_email(self, smtp_password, subject_and_html, recipient_list):
         lines = subject_and_html.splitlines()
         assert lines[1] == '', lines[:2]  # email template must consist of subject and body delimited by empty line
+        assert lines[0]  # Subject must not be empty
         subject = lines[0]
         html = '\n'.join(lines[2:])
         message = MIMEText(html, 'html', _charset='utf-8')

@@ -41,7 +41,7 @@ def get_severity_output(severity, output):
     return '\n'.join(pick_severity_lines(severity, output))
 
 
-StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_path')
+StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_id')
 
 @db_session
 def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcome=False):
@@ -52,9 +52,9 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
     errors = get_severity_output('error', output)
     warnings = get_severity_output('warning', output)
     if errors:
-        repository.add_artifact(run, 'errors', 'build-errors', repository.artifact_type.output, errors, is_error=True)
+        repository.add_artifact(run, 'build-errors', 'build-errors', repository.artifact_type.output, errors, is_error=True)
     if warnings:
-        repository.add_artifact(run, 'warnings', 'build-warnings', repository.artifact_type.output, warnings)
+        repository.add_artifact(run, 'build-warnings', 'build-warnings', repository.artifact_type.output, warnings)
     if parse_maven_outcome:
         outcome = parse_maven_output(output)
         if not outcome:
@@ -66,7 +66,7 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
             run, 'exit code', 'build-exit-code', repository.artifact_type.output, exit_code_message, is_error=not passed)
     outcome = status2outcome(passed)
     run.outcome = outcome
-    return StoredBuildInfo(passed, outcome, run.path)
+    return StoredBuildInfo(passed, outcome, run.id)
 
 
 def main():
@@ -90,7 +90,7 @@ def main():
             args.exit_code,
             args.parse_maven_outcome,
             )
-        print 'Created %s run %s' % (build_info.outcome, build_info.run_path)
+        print 'Created %s run#%d' % (build_info.outcome, build_info.run_id)
         if not build_info.passed and args.signal_failure:
             sys.exit(2)
     except RuntimeError as x:

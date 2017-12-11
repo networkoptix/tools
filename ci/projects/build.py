@@ -20,15 +20,17 @@ BUILD_TIMEOUT = datetime.timedelta(hours=2)
 
 class BuildInfo(object):
 
-    def __init__(self, is_succeeded, artifact_mask_list, current_config_path, unit_tests_bin_dir):
+    def __init__(self, is_succeeded, artifact_mask_list, current_config_path, unit_tests_bin_dir, run_id):
         assert isinstance(is_succeeded, bool), repr(is_succeeded)
         assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
         assert isinstance(current_config_path, basestring), repr(current_config_path)
         assert isinstance(unit_tests_bin_dir, basestring), repr(unit_tests_bin_dir)
+        assert isinstance(run_id, int), repr(run_id)
         self.is_succeeded = is_succeeded
         self.artifact_mask_list = artifact_mask_list
         self.current_config_path = current_config_path
         self.unit_tests_bin_dir = unit_tests_bin_dir
+        self.run_id = run_id
 
 
 class CMakeBuilder(object):
@@ -72,8 +74,8 @@ class CMakeBuilder(object):
         else:
             log.info('Configuring with cmake failed with exit code: %d', configure_results.exit_code)
         build_info = store_output_and_exit_code(junk_shop_repository, output, exit_code)
-        log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.path=%r',
-                     junk_shop_repository.db_config, build_info.outcome, build_info.run_path)
+        log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
+                     junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
         if self._platform_config.is_unix:
             unit_tests_bin_dir = os.path.join(build_dir, 'bin')
         else:
@@ -84,6 +86,7 @@ class CMakeBuilder(object):
             artifact_mask_list=[os.path.join(build_dir, mask) for mask in self._platform_config.artifact_mask_list],
             current_config_path=os.path.join(build_dir, 'current_config.py'),
             unit_tests_bin_dir=unit_tests_bin_dir,
+            run_id=build_info.run_id,
             )
 
     def _prepare_build_dir(self, build_dir, clean_build):

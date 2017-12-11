@@ -3,6 +3,8 @@ import os.path
 import glob
 import sys
 
+from pony.orm import db_session
+
 from junk_shop import (
     models,
     DbConfig,
@@ -151,7 +153,12 @@ class CiProject(JenkinsProject):
         build_info = self._build(input, junk_shop_repository)
         self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
 
-        command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
+        if self._has_artifacts(build_info.artifact_mask_list):
+            command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
+        else:
+            self._save_artifacts_missing_error(junk_shop_repository, build_info)
+            command_list = []
+
         # command_list = self._list_dirs_commands(input)
         return input.make_output_state(command_list)
 
@@ -212,6 +219,21 @@ class CiProject(JenkinsProject):
         is_passed = run_unit_tests(
             junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
+
+    def _has_artifacts(self, artifact_mask_list):
+        for mask in artifact_mask_list:
+            if glob.glob(mask):
+                return True
+        else:
+            return False
+
+    @db_session
+    def _save_artifacts_missing_error(self, repository, build_info):
+        run = models.Run[build_info.run_id]
+        errors = 'No artifacts were produced matching masks: {}'.format(', '.join(build_info.artifact_mask_list))
+        log.error(errors)
+        repository.add_artifact(
+            run, 'errors', 'errors', repository.artifact_type.output, errors, is_error=True)
 
     def stage_finalize(self, input):
         nx_vms_scm_info = input.scm_info['nx_vms']

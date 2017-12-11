@@ -1,0 +1,124 @@
+{% macro test_row(root_run, itr) %}
+
+  <td>
+    <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=itr.run.id) }}">
+      {{ itr.test_name }}
+    </a>
+  </td>
+  <td class="outcome {% if itr.succeeded -%} passed {%- else -%} failed {%- endif %}">
+    {{- itr.status -}}
+  </td>
+  <td class="error-message">{{ itr.run.error_message }}</td>
+  <td class="output-link">
+    {% if itr.output_artifacts.get('stdout') %}
+      <a class="link" href="{{ url_for('artifact', artifact_id=itr.output_artifacts['stdout']) }}">
+        Output
+      </a>
+    {% endif %}
+  </td>
+  <td class="output-link stderr-link">
+    {% if itr.output_artifacts.get('stderr') %}
+      <a class="link" href="{{ url_for('artifact', artifact_id=itr.output_artifacts['stderr']) }}">
+        StdErr
+      </a>
+    {% endif %}
+  </td>
+  <td>
+    {% for artifact in itr.traceback_list %}
+      <a class="link error-link" href="{{ url_for('artifact', artifact_id=artifact.id) }}">
+        {{- artifact.short_name -}}
+      </a>
+    {% endfor %}
+  </td>
+
+{% endmacro %}
+
+
+{% macro build_platform_list(platform_list) %}
+
+  {% for platform in platform_list %}
+    <h2 class="platform-name">
+      {%- if platform.build_artifact -%}
+        <a class="link" href="{{ url_for('run', run_id=platform.build_artifact.run.id) }}">
+        {{- platform.name -}}
+        </a>
+      {%- else -%}
+        {{- platform.name -}}
+      {%- endif -%}
+    </h2>
+    <hr>
+    <div class="platform-build-blocks">
+      {% if platform.error_list or platform.build_error_list %}
+        <div class="build-block block">
+          <h3>
+            {% if platform.build_artifact %}
+              <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
+                Build errors
+              </a>
+            {% else %}
+              Build errors
+            {% endif %}
+          </h3>
+          {% if platform.error_list %}
+            <div class="run-errors">
+              {% for error in platform.error_list %}
+                {{ error }}<br/>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="build-errors">
+            {% for line in platform.build_error_list %}
+              {{- line|truncate -}} <br/>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+      {% for stage in platform.stage_list|sort %}
+        <div class="build-block block">
+          <h3>
+            <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
+            {%- if stage.stage_name == 'unit' -%}
+              Unit&nbsp;Tests
+            {%- elif stage.stage_name == 'functional' -%}
+              Functional&nbsp;Tests
+            {%- endif -%}
+            </a>
+          </h3>
+          <div class="test-counts">
+            <span class="passed">{{ stage.passed_count }}</span>
+            {% if stage.failed_count %}
+              / <span class="failed">{{ stage.failed_count }}</span>
+            {% endif %}
+          </div>
+          {% if stage.error_list %}
+            <div class="run-errors">
+              {% for error in stage.error_list %}
+                {{ error }}<br/>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if stage.run_list %}
+            <table class="test-list">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for run in stage.run_list %}
+                  <tr>
+                    {{ test_row(stage.root_run, run) }}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+
+{% endmacro %}

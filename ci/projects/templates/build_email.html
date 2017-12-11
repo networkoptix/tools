@@ -1,4 +1,7 @@
-{% macro platform_list_as_string(platform_list) %}
+{%- import "common_macros.html" as common_macros -%}
+{%- import "build_macros.html" as build_macros -%}
+
+{%- macro platform_list_as_string(platform_list) %}
   {%- for platform in platform_list -%}
     {{ platform }}
     {%- if not loop.last %}, {% endif -%}
@@ -40,28 +43,50 @@
 
 {% endmacro -%}
 
+{%- macro title() -%}
 
-{%- if failed_build_platform_list -%}
-  Build#{{ build.build_num }} is failed for {{ platform_list_as_string(failed_build_platform_list) }}
-{%- elif failed_tests_platform_list -%}
-  Tests for build#{{ build.build_num }} are failed for {{ platform_list_as_string(failed_tests_platform_list) }}
-{%- else -%}
-  Build#{{ build.build_num }} is succeeded
-{%- endif %}
+  {%- set build_name -%}
+    build#{{ build.build_num }}
+  {%- endset -%}
+
+  {%- if failed_build_platform_list -%}
+    {{ caller(build_name|capitalize) }} is failed for {{ platform_list_as_string(failed_build_platform_list) }}
+  {%- elif failed_tests_platform_list -%}
+    Tests for {{ caller(build_name) }} are failed for {{ platform_list_as_string(failed_tests_platform_list) }}
+  {%- else -%}
+    {{ caller(build_name|capitalize) }} is succeeded
+  {%- endif -%}
+
+{%- endmacro -%}
+
+{{- project_name }} / {{ branch_name -}}: {# make single space #}
+{%- call(build_name) title() -%}
+  {{- build_name -}}
+{%- endcall %}
 
 <html>
   <head>
     <style>
-      .error { color: #C22626; weight: bold; }
-      .failed { color: #C22626; }
+      .run-errors, .build-errors { color: #C22626; weight: bold; }
+      .failed, .stderr-link a, .error-link { color: #C22626; }
       .passed { color: #3A911E; }
-	  .test-counts { display: inline-block; float: right; }
+	  .test-counts { font-size: 1.3em; }
+      .run-errors { margin: 1em; }
     </style>
   </head>
   <body>
 
+    <h3>
+      {{- project_name }} / {{ branch_name -}}: {# make single space #}
+      {% call(build_name) title() -%}
+        <a href="{{ url_for('build', project_name=project_name, branch_name=branch_name, build_num=build.build_num) }}">
+          {{- build_name -}}
+        </a>
+      {%- endcall %}
+    </h3>
+
     {%- if test_mode %}
-      <p>Test mode: this email would be sent to the following recipients:</p>
+      <p><i>Test mode: this email would be sent to the following recipients:</i></p>
       <p>
         {%- if recipient_list -%}
           {%- for email in recipient_list %}
@@ -77,84 +102,12 @@
       <p>After these commits:</p>
       <p>
         {%- for changeset in changeset_list|limit_count(10) %}
-          {{ changeset.user }} {{ changeset.revision|format_revision(changeset.build.repository_url) }}: {{ changeset.desc|truncate(500)|format_commit_message }} <br/>
+          {{ common_macros.changeset_line(changeset, maxlen=500) }} <br/>
         {%- endfor %}
       </p>
     {% endif -%}
 
-    {% for platform in platform_list %}
-      <h2 class="platform-name">
-        {%- if platform.build_artifact -%}
-          <a class="link" href="{{ url_for('run', run_id=platform.build_artifact.run.id) }}">
-          {{- platform.name -}}
-          </a>
-        {%- else -%}
-          {{- platform.name -}}
-        {%- endif -%}
-      </h2>
-      <hr>
-      <div class="platform-build-blocks">
-        {% if platform.build_error_list %}
-          <div class="build-block block">
-            <h3>
-              <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
-                Build errors
-              </a>
-            </h3>
-            <div class="error">
-              {% for line in platform.build_error_list %}
-                {{- line|truncate -}} <br/>
-              {% endfor %}
-            </div>
-          </div>
-        {% endif %}
-        {% for stage in platform.stage_list|sort %}
-          <div class="build-block block">
-            <h3>
-              <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
-              {%- if stage.stage_name == 'unit' -%}
-                Unit&nbsp;Tests
-              {%- elif stage.stage_name == 'functional' -%}
-                Functional&nbsp;Tests
-              {%- endif -%}
-              </a>
-            </h3>
-            {% if stage.error_list %}
-              <div class="error">
-                {% for error in stage.error_list %}
-                  {{ error }}<br/>
-                {% endfor %}
-              </div>
-            {% endif %}
-            <div class="test-counts">
-              <span class="passed">{{ stage.passed_count }}</span>
-              {% if stage.failed_count %}
-                / <span class="failed">{{ stage.failed_count }}</span>
-              {% endif %}
-            </div>
-            {% if stage.run_list %}
-              <table class="test-list">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Status</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for run in stage.run_list %}
-                    <tr>
-                      {{ test_row(stage.root_run, run) }}
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
-    {% endfor %}
+    {{ build_macros.build_platform_list(platform_list) }}
 
   </body>
 </html>
