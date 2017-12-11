@@ -53,7 +53,7 @@ class EmailSender(object):
         message = MIMEText(html, 'html', _charset='utf-8')
         message['Subject'] = subject
         message['From'] = self._config.email.from_address
-        message['To'] = ' '.join(recipient_list)
+        message['To'] = ', '.join(recipient_list)
         log.info('Sending email to %r; Subject: %s', recipient_list, subject)
         server = smtplib.SMTP(self._config.email.smtp.host)
         try:
