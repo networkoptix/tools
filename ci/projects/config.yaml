@@ -43,6 +43,11 @@ platforms:
     run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
+  edge1:
+    build_node: linux
+    run_unit_tests: no
+    artifact_mask_list:
+      - distrib/*.tar.gz
 
 ci:
   timeout: 30m
