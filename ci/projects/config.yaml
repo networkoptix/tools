@@ -43,6 +43,16 @@ platforms:
     run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
+  bananapi:
+    build_node: linux
+    run_unit_tests: no
+    artifact_mask_list:
+      - distrib/*.tar.gz
+  rpi:
+    build_node: linux
+    run_unit_tests: no
+    artifact_mask_list:
+      - distrib/*.tar.gz
   edge1:
     build_node: linux
     run_unit_tests: no
