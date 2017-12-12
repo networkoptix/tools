@@ -46,7 +46,7 @@ class CMake(object):
         env = add_env_element(env or os.environ, 'PATH', cmake_bin_dir)
         log.debug('cmake path: %r', env['PATH'])
         args = ['cmake'] + cmake_args
-        return self._host.run_command(args, cwd=cwd, env=env, check_retcode=check_retcode, timeout=timeout)
+        return self._host.run_command(args, cwd=cwd, env=env, check_retcode=check_retcode, timeout=timeout, merge_stderr=True)
 
     @property
     def _cmake_base_name(self):

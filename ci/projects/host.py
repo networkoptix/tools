@@ -197,7 +197,7 @@ class LocalHost(Host):
     def host(self):
         return 'localhost'
 
-    def run_command(self, args, input=None, cwd=None, env=None, check_retcode=True, log_output=True, timeout=None):
+    def run_command(self, args, input=None, cwd=None, env=None, check_retcode=True, log_output=True, timeout=None, merge_stderr=False):
         assert is_list_inst(args, (str, unicode)), repr(args)
         timeout = timeout or PROCESS_TIMEOUT
         args = map(str, args)
@@ -217,7 +217,7 @@ class LocalHost(Host):
             shell=not is_unix,  # under windows PATH is ignored if shell=False
             )
         stdout_buffer = []
-        stderr_buffer = []
+        stderr_buffer = stdout_buffer if merge_stderr else []
         stdout_thread = threading.Thread(target=self._read_thread, args=(log.debug, pipe.stdout, stdout_buffer, log_output))
         stderr_thread = threading.Thread(target=self._read_thread, args=(log.error, pipe.stderr, stderr_buffer, True))
         stdout_thread.daemon = True
