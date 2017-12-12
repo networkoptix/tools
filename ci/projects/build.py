@@ -6,7 +6,10 @@ from collections import namedtuple
 import datetime
 import shutil
 import platform
+import yaml
+
 from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
+from config import Config
 from host import CommandResults, LocalHost
 from cmake import CMake
 from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
@@ -18,30 +21,35 @@ CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=2)
 
 
-class BuildInfo(object):
+class BuildInfo(namedtuple(
+    'BuildInfo', 'is_succeeded, artifact_mask_list, current_config_path, version, unit_tests_bin_dir, run_id')):
 
-    def __init__(self, is_succeeded, artifact_mask_list, current_config_path, unit_tests_bin_dir, run_id):
+    def __init__(self, is_succeeded, artifact_mask_list, current_config_path, version, unit_tests_bin_dir, run_id):
         assert isinstance(is_succeeded, bool), repr(is_succeeded)
         assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
         assert isinstance(current_config_path, basestring), repr(current_config_path)
+        assert version is None or isinstance(version, basestring), repr(version)
         assert isinstance(unit_tests_bin_dir, basestring), repr(unit_tests_bin_dir)
         assert isinstance(run_id, int), repr(run_id)
-        self.is_succeeded = is_succeeded
-        self.artifact_mask_list = artifact_mask_list
-        self.current_config_path = current_config_path
-        self.unit_tests_bin_dir = unit_tests_bin_dir
-        self.run_id = run_id
+        super(BuildInfo, self).__init__(
+            is_succeeded=is_succeeded,
+            artifact_mask_list=artifact_mask_list,
+            current_config_path=current_config_path,
+            version=version,
+            unit_tests_bin_dir=unit_tests_bin_dir,
+            run_id=run_id,
+            )
 
 
 class CMakeBuilder(object):
 
-    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix artifact_mask_list')
+    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix')
 
     _system_platform_config = dict(
-        Linux=PlatformConfig('Ninja', is_unix=True, artifact_mask_list=['distrib/*.deb']),
-        Darwin=PlatformConfig('Ninja', is_unix=True, artifact_mask_list=['distrib/*.dmg']),
+        Linux=PlatformConfig('Ninja', is_unix=True),
+        Darwin=PlatformConfig('Ninja', is_unix=True),
         # Windows=PlatformConfig('Visual Studio 14 2015 Win64'),  # for older, pre-4.0 branches
-        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False, artifact_mask_list=['distrib/*.msi', 'distrib/*.exe']),
+        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False),
         )
 
     def __init__(self, cmake):
@@ -55,7 +63,7 @@ class CMakeBuilder(object):
     def _platform_config(self):
         return self._system_platform_config[self._system]
 
-    def build(self, src_dir, build_dir, clean_build, junk_shop_repository):
+    def build(self, junk_shop_repository, platform_config, src_dir, build_dir, clean_build):
         assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
         build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
@@ -74,6 +82,7 @@ class CMakeBuilder(object):
         else:
             log.info('Configuring with cmake failed with exit code: %d', configure_results.exit_code)
         build_info = store_output_and_exit_code(junk_shop_repository, output, exit_code)
+        cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
         if self._platform_config.is_unix:
@@ -83,8 +92,9 @@ class CMakeBuilder(object):
             unit_tests_bin_dir = os.path.join(build_dir, cmake_configuration, 'bin')
         return BuildInfo(
             is_succeeded=build_info.passed,
-            artifact_mask_list=[os.path.join(build_dir, mask) for mask in self._platform_config.artifact_mask_list],
+            artifact_mask_list=[os.path.join(build_dir, mask) for mask in platform_config.artifact_mask_list],
             current_config_path=os.path.join(build_dir, 'current_config.py'),
+            version=cmake_build_info.get('version'),
             unit_tests_bin_dir=unit_tests_bin_dir,
             run_id=build_info.run_id,
             )
@@ -108,6 +118,11 @@ class CMakeBuilder(object):
     def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
         build_tool = self._platform_config.build_tool
         src_full_path = os.path.abspath(src_dir)
+        target_device = self._platform2target_device(build_params.platform)
+        if target_device:
+            target_device_args = ['-DtargetDevice={}'.format(target_device)]
+        else:
+            target_device_args = []
         configure_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
@@ -115,8 +130,8 @@ class CMakeBuilder(object):
             '-Dcustomization=%s' % build_params.customization,
             '-DbuildNumber=%d' % build_params.build_num,
             '-Dbeta=%s' % ('TRUE' if build_params.is_beta else 'FALSE'),
-            '-G',
-            build_tool,
+            ] + target_device_args + [
+            '-G', build_tool,
             src_full_path,
             ]
         # if build_params.target_device:
@@ -134,9 +149,21 @@ class CMakeBuilder(object):
         return self._cmake.run_cmake(
             build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
 
+    def _platform2target_device(self, platform):
+        if platform in ['linux-x64', 'win-x64', 'mac']:
+            return None  # targetDevice is not specified for them
+        return platform
+
     @property
     def _env(self):
         return dict(os.environ, environment=self._working_dir)
+
+    def _read_cmake_build_info_file(self, build_dir):
+        path = os.path.join(build_dir, 'build_info.txt')
+        if not os.path.isfile(path):
+            return {}
+        with open(path) as f:
+            return dict([line.split('=') for line in f.read().splitlines()])
 
 
 def test_me():
@@ -147,14 +174,26 @@ def test_me():
     sys.path.append(os.path.expanduser('~/proj/devtools/ci/junk_shop'))
     from junk_shop import BuildParameters, store_output_and_exit_code
 
+    config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+    config = Config.from_dict(yaml.load(open(config_path)))
+    db_config = DbConfig.from_string(sys.argv[1])
+    project = sys.argv[2]
+    branch = sys.argv[3]
+    platform = sys.argv[4]
     build_params = BuildParameters(
+        project=project,
+        branch=branch,
+        platform=platform,
         cloud_group='test',
         customization='default',
         build_num=1000,
         configuration='release',
         )
+    repository = DbCaptureRepository(db_config, build_params)
     builder = CMakeBuilder(cmake)
-    builder.build('nx_vms', 'build', build_params)
+    build_dir = 'build-{}'.format(platform)
+    build_info = builder.build(repository, config.platforms[platform], 'nx_vms', build_dir, clean_build=False)
+    log.info('Build info: %r', build_info)
 
 
 if __name__ == '__main__':

@@ -148,10 +148,12 @@ class CiProject(JenkinsProject):
     def stage_node(self, input):
         log.info('Node stage: %s', input.current_node)
         platform = input.current_command.platform
+        platform_config = input.config.platforms[platform]
         junk_shop_repository = self._create_junk_shop_repository(input, platform)
 
-        build_info = self._build(input, junk_shop_repository)
-        self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
+        build_info = self._build(input, junk_shop_repository, platform_config)
+        if platform_config.run_unit_tests and build_info.is_succeeded:
+            self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
 
         if self._has_artifacts(build_info.artifact_mask_list):
             command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
@@ -199,12 +201,12 @@ class CiProject(JenkinsProject):
         user, password = input.credentials.junk_shop_db.split(':')
         return DbConfig(input.config.junk_shop.db_host, user, password)
 
-    def _build(self, input, junk_shop_repository):
+    def _build(self, input, junk_shop_repository, platform_config):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(cmake)
-        build_info = builder.build('nx_vms', 'build', input.params.clean_build, junk_shop_repository)
+        build_info = builder.build(junk_shop_repository, platform_config, 'nx_vms', 'build', input.params.clean_build)
         return build_info
 
     def _run_unit_tests(self, is_unix, junk_shop_repository, build_info, timeout):
