@@ -105,6 +105,7 @@
         {%- for changeset in changeset_list|limit_count(10) %}
           {{ common_macros.changeset_line(changeset, maxlen=500) }} <br/>
         {%- endfor %}
+        {{ '... and %s more ...' % (changeset_list|length - 10) if changeset_list|length > 10 }}
       </p>
     {% endif -%}
 
