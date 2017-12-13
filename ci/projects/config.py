@@ -14,28 +14,28 @@ class PlatformConfig(object):
     def from_dict(cls, data):
         return cls(
             build_node=data['build_node'],
-            run_unit_tests=data['run_unit_tests'],
+            should_run_unit_tests=data['should_run_unit_tests'],
             artifact_mask_list=data['artifact_mask_list'],
             )
 
-    def __init__(self, build_node, run_unit_tests, artifact_mask_list):
+    def __init__(self, build_node, should_run_unit_tests, artifact_mask_list):
         assert isinstance(build_node, basestring), repr(build_node)
-        assert isinstance(run_unit_tests, bool), repr(run_unit_tests)
+        assert isinstance(should_run_unit_tests, bool), repr(should_run_unit_tests)
         assert is_list_inst(artifact_mask_list,  basestring), repr(artifact_mask_list)
         self.build_node = build_node
-        self.run_unit_tests = run_unit_tests
+        self.should_run_unit_tests = should_run_unit_tests
         self.artifact_mask_list = artifact_mask_list
 
     def to_dict(self):
         return dict(
             build_node=self.build_node,
-            run_unit_tests=self.run_unit_tests,
+            should_run_unit_tests=self.should_run_unit_tests,
             artifact_mask_list=self.artifact_mask_list,
             )
 
     def report(self):
         log.info('\t\t\t' 'build_node: %r', self.build_node)
-        log.info('\t\t\t' 'run_unit_tests: %r', self.run_unit_tests)
+        log.info('\t\t\t' 'should_run_unit_tests: %r', self.should_run_unit_tests)
         log.info('\t\t\t' 'artifact_mask_list: %r', self.artifact_mask_list)
 
 

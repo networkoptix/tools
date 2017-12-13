@@ -117,7 +117,35 @@ class JenkinsEnv(object):
 
 class State(object):
 
-    def __init__(self, jenkins_env, params, config, command_list, credentials, scm_info, current_node, workspace_dir, is_unix):
+    @classmethod
+    def from_dict(cls, data, command_registry):
+        return cls(
+            jenkins_env=JenkinsEnv.from_dict(data['jenkins_env']),
+            params=SloppyNamespace(data['params']),
+            config=Config.from_dict(data['config']),
+            command_list=[command_registry.resolve(command) for command in data['command_list']],
+            credentials=Namespace(data['credentials']),
+            scm_info={repository: ScmInfo.from_dict(info) for repository, info in data.get('scm', {}).items()},
+            current_node=data['current_node'],
+            workspace_dir=data['workspace_dir'],
+            is_unix=data['is_unix'],
+            current_command=PythonStageCommand.from_dict(data['current_command'], command_registry),
+            )
+
+    def __init__(
+            self,
+            jenkins_env,
+            params,
+            config,
+            command_list,
+            credentials,
+            scm_info,
+            current_node,
+            workspace_dir,
+            is_unix,
+            current_command,
+            ):
+        assert isinstance(current_command, PythonStageCommand), repr(current_command)
         assert isinstance(jenkins_env, JenkinsEnv), repr(jenkins_env)
         assert isinstance(params, SloppyNamespace), repr(params)
         assert isinstance(config, Config), repr(config)
@@ -136,6 +164,7 @@ class State(object):
         self.current_node = current_node
         self.workspace_dir = workspace_dir
         self.is_unix = is_unix
+        self.current_command = current_command
 
     def report(self):
         self.jenkins_env.report()
@@ -151,45 +180,6 @@ class State(object):
             log.info('\t' '%s: %r', repository, info)
         log.info('current_node: %r', self.current_node)
 
-
-class InputState(State):
-
-    @classmethod
-    def from_dict(cls, data, command_registry):
-        return cls(
-            jenkins_env=JenkinsEnv.from_dict(data['jenkins_env']),
-            params=SloppyNamespace(data['params']),
-            config=Config.from_dict(data['config']),
-            command_list=[command_registry.resolve(command) for command in data['command_list']],
-            credentials=Namespace(data['credentials']),
-            scm_info={repository: ScmInfo.from_dict(info) for repository, info in data.get('scm', {}).items()},
-            current_node=data['current_node'],
-            workspace_dir=data['workspace_dir'],
-            is_unix=data['is_unix'],
-            current_command=PythonStageCommand.from_dict(data['current_command'], command_registry),
-            )
-
-    def __init__(self, jenkins_env, params, config, command_list, credentials, scm_info, current_node, workspace_dir, is_unix, current_command):
-        assert isinstance(current_command, PythonStageCommand), repr(current_command)
-        State.__init__(self, jenkins_env, params, config, command_list, credentials, scm_info, current_node, workspace_dir, is_unix)
-        self.current_command = current_command
-
-    def make_output_state(self, command_list=None):
-        return OutputState(
-            self.jenkins_env,
-            self.params,
-            self.config,
-            command_list or self.command_list,
-            self.credentials,
-            self.scm_info,
-            self.current_node,
-            self.workspace_dir,
-            self.is_unix,
-            )
-
-
-class OutputState(State):
-
     def to_dict(self):
         return dict(
             jenkins_env=self.jenkins_env.to_dict(),
@@ -201,4 +191,18 @@ class OutputState(State):
             current_node=self.current_node,
             workspace_dir=self.workspace_dir,
             is_unix=self.is_unix,
+            )
+
+    def make_output_state(self, command_list=None):
+        return State(
+            self.jenkins_env,
+            self.params,
+            self.config,
+            command_list or self.command_list,
+            self.credentials,
+            self.scm_info,
+            self.current_node,
+            self.workspace_dir,
+            self.is_unix,
+            self.current_command,
             )

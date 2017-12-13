@@ -1,7 +1,7 @@
 import logging
 import os.path
-from command import UnstashCommand, CheckoutCommand, PythonStageCommand
-from state import InputState, OutputState
+from utils import is_list_inst
+from command import Command, UnstashCommand, CheckoutCommand, PythonStageCommand
 
 log = logging.getLogger(__name__)
 
@@ -11,16 +11,25 @@ JUNK_SHOP_DIR = 'devtools/ci/junk_shop'
 
 class JenkinsProject(object):
 
-    def __init__(self, in_assist_mode):
+    def __init__(self, input_state, in_assist_mode):
+        self.state = input_state
+        self.config = self.state.config
+        self.params = self.state.params
+        self.jenkins_env = self.state.jenkins_env
+        self.current_node = self.state.current_node
+        self.current_command = self.state.current_command
+        self.is_unix = self.state.is_unix
+        self.scm_info = self.state.scm_info
+        self.credentials = self.state.credentials
         self.in_assist_mode = in_assist_mode
 
-    def run(self, stage_id, input_state):
+    def run(self, stage_id):
         fn = self._get_stage_method(stage_id)
         assert fn, 'Unknown stage: %r' % stage_id
-        output_state = fn(input_state)
-        assert output_state is None or isinstance(output_state, OutputState), (
-            'Method %r must return OutputState instance, but returned: %r' % (method_name, output_state))
-        return output_state or input_state.make_output_state()
+        command_list = fn()
+        assert command_list is None or is_list_inst(command_list, Command), (
+            'Method %r must return Command instance list or None, but returned: %r' % (method_name, command_list))
+        return self.state.make_output_state(command_list)
 
     def _get_stage_method(self, stage_id):
         method_name = 'stage_%s' % stage_id

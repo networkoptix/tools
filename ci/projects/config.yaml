@@ -24,38 +24,38 @@ email:
 platforms:
   linux-x64:
     build_node: linux
-    run_unit_tests: yes
+    should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.deb
   mac:
     build_node: mac
-    run_unit_tests: yes
+    should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.dmg
   win-x64:
     build_node: windows
-    run_unit_tests: yes
+    should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.msi
       - distrib/*.exe
   bpi:
     build_node: linux
-    run_unit_tests: no
+    should_run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
   bananapi:
     build_node: linux
-    run_unit_tests: no
+    should_run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
   rpi:
     build_node: linux
-    run_unit_tests: no
+    should_run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
   edge1:
     build_node: linux
-    run_unit_tests: no
+    should_run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
 

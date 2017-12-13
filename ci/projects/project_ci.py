@@ -47,22 +47,22 @@ class CiProject(JenkinsProject):
 
     project_id = 'ci'
 
-    def stage_init(self, input):
-        all_platform_list = sorted(input.config.platforms.keys())
+    def stage_init(self):
+        all_platform_list = sorted(self.config.platforms.keys())
         command_list = [self._set_project_properties_command(all_platform_list)]
-        if self.in_assist_mode and input.params.stage:
+        if self.in_assist_mode and self.params.stage:
             command_list += [
-                self.make_python_stage_command(input.params.stage),
+                self.make_python_stage_command(self.params.stage),
                 ]
-        elif input.params.action == 'build':
+        elif self.params.action == 'build':
             command_list += [
-                self._checkout_nx_vms_command(input),
+                self.checkout_nx_vms_command,
                 self.make_python_stage_command('prepare_for_build'),
                 ]
-        return input.make_output_state(command_list)
+        return command_list
 
-    def stage_report_input(self, input):
-        input.report()
+    def stage_report_state(self):
+        self.state.report()
 
     def _set_project_properties_command(self, all_platform_list):
         parameters = [
@@ -86,86 +86,90 @@ class CiProject(JenkinsProject):
             days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
             )
 
-    def _checkout_nx_vms_command(self, input):
+    @property
+    def checkout_nx_vms_command(self):
         if self.in_assist_mode:
-            branch_name = self._nx_vms_branch_name(input)
+            branch_name = self.nx_vms_branch_name
             return CheckoutCommand('nx_vms', branch_name)
         else:
             return CheckoutScmCommand('nx_vms')
 
-    def stage_prepare_for_build(self, input):
-        junk_shop_repository = self._create_junk_shop_repository(input)
+    def stage_prepare_for_build(self):
+        junk_shop_repository = self.create_junk_shop_repository()
         update_build_info(junk_shop_repository, 'nx_vms')
 
-        all_platform_list = sorted(input.config.platforms.keys())
-        platform_list = [p for p in all_platform_list if input.params.get(p)]
-        job_list = [self._make_platform_job(input, platform) for platform in platform_list]
-        return input.make_output_state([
+        all_platform_list = sorted(self.config.platforms.keys())
+        platform_list = [p for p in all_platform_list if self.params.get(p)]
+        job_list = [self.make_platform_job(platform) for platform in platform_list]
+        return [
             ParallelCommand(job_list),
             self.make_python_stage_command('finalize'),
-            ])
+            ]
 
-    def _make_platform_job(self, input, platform):
-        branch_name = self._nx_vms_branch_name(input)
-        platform_config = input.config.platforms[platform]
+    def make_platform_job(self, platform):
+        branch_name = self.nx_vms_branch_name
+        platform_config = self.config.platforms[platform]
         node = platform_config.build_node
-        workspace_dir = self._make_workspace_dir(input.jenkins_env.job_name, branch_name, platform)
+        workspace_dir = self.workspace_dir(self.jenkins_env.job_name, branch_name, platform)
         job_command_list = []
-        if input.params.clean or input.params.clean_only:
+        if self.params.clean or self.params.clean_only:
             job_command_list += [
                 CleanDirCommand(),
                 ]
-        if not input.params.clean_only:
+        if not self.params.clean_only:
             job_command_list += [
                 self.prepare_devtools_command(),
-                self._checkout_nx_vms_command(input),
+                self.checkout_nx_vms_command,
                 PrepareVirtualEnvCommand(self.devtools_python_requirements),
                 self.make_python_stage_command('node', platform=platform),
                 ]
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
 
-    def _nx_vms_branch_name(self, input):
+    @property
+    def nx_vms_branch_name(self):
         if self.in_assist_mode:
-            return input.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
+            return self.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
         else:
-            assert input.jenkins_env.branch_name, (
+            assert self.jenkins_env.branch_name, (
                 'This scripts are intented to be used in multibranch projects only;'
                 ' env.BRANCH_NAME must be defined')
-            return input.jenkins_env.branch_name
+            return self.jenkins_env.branch_name
 
-    def _project_name(self, input):
+    @property
+    def project_name(self):
         if self.in_assist_mode:
-            return 'assist-ci-%s' % input.jenkins_env.job_name
+            return 'assist-ci-%s' % self.jenkins_env.job_name
         else:
             return self.project_id
 
-    def _make_workspace_dir(self, job_name, branch_name, platform):
+    def workspace_dir(self, job_name, branch_name, platform):
         if self.in_assist_mode:
             return 'psa-%s-%s' % (job_name, platform)
         else:
             return 'ci-%s-%s' % (branch_name, platform)
 
-    def stage_node(self, input):
-        log.info('Node stage: %s', input.current_node)
-        platform = input.current_command.platform
-        platform_config = input.config.platforms[platform]
-        junk_shop_repository = self._create_junk_shop_repository(input, platform)
+    def stage_node(self):
+        log.info('Node stage: %s', self.current_node)
+        platform = self.current_command.platform
+        platform_config = self.config.platforms[platform]
+        junk_shop_repository = self.create_junk_shop_repository(platform)
 
-        build_info = self._build(input, junk_shop_repository, platform_config)
-        if platform_config.run_unit_tests and build_info.is_succeeded:
-            self._run_unit_tests(input.is_unix, junk_shop_repository, build_info, input.config.ci.timeout)
+        build_info = self._build(junk_shop_repository, platform_config)
+        if platform_config.should_run_unit_tests and build_info.is_succeeded:
+            self.run_unit_tests(self.is_unix, junk_shop_repository, build_info, self.config.ci.timeout)
 
-        if self._has_artifacts(build_info.artifact_mask_list):
+        if self.has_artifacts(build_info.artifact_mask_list):
             command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
         else:
-            self._save_artifacts_missing_error(junk_shop_repository, build_info)
+            self.save_artifacts_missing_error(junk_shop_repository, build_info)
             command_list = []
 
-        # command_list = self._list_dirs_commands(input)
-        return input.make_output_state(command_list)
+        # command_list = self.list_dirs_commands
+        return command_list
 
-    def _list_dirs_commands(self, input):
-        if input.is_unix:
+    @property
+    def list_dirs_commands(self):
+        if self.is_unix:
             return [
                 ScriptCommand('pwd'),
                 ScriptCommand('ls -alh'),
@@ -177,39 +181,39 @@ class CiProject(JenkinsProject):
                 ScriptCommand('dir build'),
                 ]
 
-    def _create_junk_shop_repository(self, input, platform=None):
-        nx_vms_scm_info = input.scm_info['nx_vms']
-        project = self._project_name(input)
-        is_incremental = not (input.params.clean or input.params.clean_build)
+    def create_junk_shop_repository(self, platform=None):
+        nx_vms_scm_info = self.scm_info['nx_vms']
+        project = self.project_name
+        is_incremental = not (self.params.clean or self.params.clean_build)
         build_params = BuildParameters(
             project=project,
             platform=platform,
-            build_num=input.jenkins_env.build_number,
+            build_num=self.jenkins_env.build_number,
             branch=nx_vms_scm_info.branch,
             configuration='release',
             cloud_group='test',
             customization='default',
             is_incremental=is_incremental,
-            jenkins_url=input.jenkins_env.build_url,
+            jenkins_url=self.jenkins_env.build_url,
             repository_url=nx_vms_scm_info.repository_url,
             revision=nx_vms_scm_info.revision,
             )
-        db_config = self._db_config(input)
-        return DbCaptureRepository(db_config, build_params)
+        return DbCaptureRepository(self.db_config, build_params)
 
-    def _db_config(self, input):
-        user, password = input.credentials.junk_shop_db.split(':')
-        return DbConfig(input.config.junk_shop.db_host, user, password)
+    @property
+    def db_config(self):
+        user, password = self.credentials.junk_shop_db.split(':')
+        return DbConfig(self.config.junk_shop.db_host, user, password)
 
-    def _build(self, input, junk_shop_repository, platform_config):
+    def _build(self, junk_shop_repository, platform_config):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(cmake)
-        build_info = builder.build(junk_shop_repository, platform_config, 'nx_vms', 'build', input.params.clean_build)
+        build_info = builder.build(junk_shop_repository, platform_config, 'nx_vms', 'build', self.params.clean_build)
         return build_info
 
-    def _run_unit_tests(self, is_unix, junk_shop_repository, build_info, timeout):
+    def run_unit_tests(self, is_unix, junk_shop_repository, build_info, timeout):
         if is_unix:
             ext = ''
         else:
@@ -222,7 +226,7 @@ class CiProject(JenkinsProject):
             junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
-    def _has_artifacts(self, artifact_mask_list):
+    def has_artifacts(self, artifact_mask_list):
         for mask in artifact_mask_list:
             if glob.glob(mask):
                 return True
@@ -230,20 +234,19 @@ class CiProject(JenkinsProject):
             return False
 
     @db_session
-    def _save_artifacts_missing_error(self, repository, build_info):
+    def save_artifacts_missing_error(self, repository, build_info):
         run = models.Run[build_info.run_id]
         errors = 'No artifacts were produced matching masks: {}'.format(', '.join(build_info.artifact_mask_list))
         log.error(errors)
         repository.add_artifact(
             run, 'errors', 'errors', repository.artifact_type.output, errors, is_error=True)
 
-    def stage_finalize(self, input):
-        nx_vms_scm_info = input.scm_info['nx_vms']
-        db_config = self._db_config(input)
-        db_config.bind(models.db)
-        smtp_password = input.credentials.service_email
-        project = self._project_name(input)
+    def stage_finalize(self):
+        nx_vms_scm_info = self.scm_info['nx_vms']
+        self.db_config.bind(models.db)
+        smtp_password = self.credentials.service_email
+        project = self.project_name
         branch = nx_vms_scm_info.branch
-        build_num = input.jenkins_env.build_number
-        sender = EmailSender(input.config)
+        build_num = self.jenkins_env.build_number
+        sender = EmailSender(self.config)
         sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
