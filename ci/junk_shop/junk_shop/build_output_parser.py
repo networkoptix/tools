@@ -37,7 +37,7 @@ class MultiLinePattern(Pattern):
     def match_context(self, line_list):
         mo = self.regexp.search('\n'.join(line_list))
         if not mo:
-            return (None, None)
+            return None
         matched_line_count = len(mo.group(0).splitlines())
         return (matched_line_count, self.severity)
 
@@ -65,6 +65,7 @@ PATTERN_LIST = [
     SingleLinePattern('warning', r'\[WARNING\]'),
     SingleLinePattern('warning', r'SKIPPED'),
     SingleLinePattern('success', r'SUCCESS'),
+    MultiLinePattern('error', r'^CMake Error: .+\n(\s+.+\n)+\w+.+'),
     ]
 
 
@@ -77,10 +78,10 @@ def match_line(line):
 
 def match_context(line_list):
     for pattern in PATTERN_LIST:
-        severity = pattern.match_context(line_list)
-        if severity:
-            return severity
-    return None
+        matched_line_count_and_severity = pattern.match_context(line_list)
+        if matched_line_count_and_severity:
+            return matched_line_count_and_severity
+    return (None, None)
 
 def parse_output_lines(line_list):
     context = []
