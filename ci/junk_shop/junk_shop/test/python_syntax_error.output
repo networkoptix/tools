@@ -1,0 +1,16 @@
+none	Project "J:\workspace\ci-vms_3.2-win-x64\build\ALL_BUILD.vcxproj" (1) is building "J:\workspace\ci-vms_3.2-win-x64\build\wixsetup\wixsetup.vcxproj" (67) on node 1 (default targets).
+none	InitializeBuildStatus:
+none	  Touching "x64\Release\wixsetup\wixsetup.tlog\unsuccessfulbuild".
+none	CustomBuild:
+none	  Creating installer...
+error	    File "wix-gen.py", line 55
+error	      'ClientQml.wxs',
+error	                    ^
+error	  SyntaxError: invalid syntax
+error	C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(171,5): error MSB6006: "cmd.exe" exited with code 1. [J:\workspace\ci-vms_3.2-win-x64\build\wixsetup\wixsetup.vcxproj]
+none	Done Building Project "J:\workspace\ci-vms_3.2-win-x64\build\wixsetup\wixsetup.vcxproj" (default targets) -- FAILED.
+none	Done Building Project "J:\workspace\ci-vms_3.2-win-x64\build\ALL_BUILD.vcxproj" (default targets) -- FAILED.
+none	
+none	Build FAILED.
+none	
+none	"J:\workspace\ci-vms_3.2-win-x64\build\ALL_BUILD.vcxproj" (default target) (1) ->
