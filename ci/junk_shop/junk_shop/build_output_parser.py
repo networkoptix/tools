@@ -52,6 +52,7 @@ PATTERN_LIST = [
     SingleLinePattern('warning', r':\d+: Warning:'),  # [INFO] {standard input}:50870: Warning: end of file not at end of a line; newline inserted
     SingleLinePattern('error', r':\d+: Error:'),      # [INFO] {standard input}:51067: Error: unknown pseudo-op: `.lbe293'
     SingleLinePattern('error', r'internal compiler error:'),  # ..qmetatype.h:736:1: internal compiler error: Segmentation fault
+    MultiLinePattern('error', r'^FAILED:.+(\n.+ld: cannot find.+)+\ncollect2: error: .+'),
     # Windows
     SingleLinePattern('error', r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
     SingleLinePattern('warning', r':\s+warning\s[A-Z]+\d+\s*:'),
@@ -87,16 +88,16 @@ def parse_output_lines(line_list):
     context = []
     for line in line_list:
         line = line.rstrip('\r\n')
-        severity = match_line(line)
+        context = (context + [line])[-CONTEXT_SIZE:]  # drop oldest lines out of context
+        matched_line_count, severity = match_context(context)
         if severity:
-            yield (severity, line)
+            for line in context[-matched_line_count:]:
+                yield severity, line
             context = []
         else:
-            context = (context + [line])[-CONTEXT_SIZE:]  # drop oldest lines out of context
-            matched_line_count, severity = match_context(context)
+            severity = match_line(line)
             if severity:
-                for line in context[-matched_line_count:]:
-                    yield severity, line
+                yield (severity, line)
                 context = []
 
 
