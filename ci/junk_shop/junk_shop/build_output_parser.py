@@ -46,13 +46,13 @@ PATTERN_LIST = [
     # Linux
     SingleLinePattern('error', r':\d+:\d+:\s+(\S+\s+)?error:'),
     SingleLinePattern('error', r':\s+error:'),
-    SingleLinePattern('error', r':\s+undefined reference to'),
+    #SingleLinePattern('error', r':\s+undefined reference to'),  # must be cought by multiline rule below
     SingleLinePattern('error', r'\s+Error\s+\d+'),
     SingleLinePattern('warning', r':\d+:\d+:\s+warning:'),
     SingleLinePattern('warning', r':\d+: Warning:'),  # [INFO] {standard input}:50870: Warning: end of file not at end of a line; newline inserted
     SingleLinePattern('error', r':\d+: Error:'),      # [INFO] {standard input}:51067: Error: unknown pseudo-op: `.lbe293'
     SingleLinePattern('error', r'internal compiler error:'),  # ..qmetatype.h:736:1: internal compiler error: Segmentation fault
-    MultiLinePattern('error', r'^FAILED:.+(\n.+ld: cannot find.+)+\ncollect2: error: .+'),
+    MultiLinePattern('error', r'^FAILED:.+(\n.+)+\ncollect2: error: .+'),
     MultiLinePattern('error', r'^FAILED:.+(\n.+)+\nninja: build stopped: subcommand failed.'),
     # Windows
     SingleLinePattern('error', r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
@@ -72,34 +72,40 @@ PATTERN_LIST = [
 
 
 def match_line(line):
-    for pattern in PATTERN_LIST:
+    for rule_idx, pattern in enumerate(PATTERN_LIST):
         severity = pattern.match_line(line)
         if severity:
-            return severity
-    return None
+            return (rule_idx, severity)
+    return (None, None)
 
 def match_context(line_list):
-    for pattern in PATTERN_LIST:
+    for rule_idx, pattern in enumerate(PATTERN_LIST):
         matched_line_count_and_severity = pattern.match_context(line_list)
         if matched_line_count_and_severity:
-            return matched_line_count_and_severity
-    return (None, None)
+            return (rule_idx,) + matched_line_count_and_severity
+    return (None, None, None)
 
 def parse_output_lines(line_list):
     context = []
     for line in line_list:
         line = line.rstrip('\r\n')
         context = (context + [line])[-CONTEXT_SIZE:]  # drop oldest lines out of context
-        matched_line_count, severity = match_context(context)
+        rule_idx, matched_line_count, severity = match_context(context)
         if severity:
-            for line in context[-matched_line_count:]:
-                yield severity, line
+            for l in context[:-matched_line_count]:
+                yield (None, None, l)  # todo: move to function and use yield from when moved to python3
+            for l in context[-matched_line_count:]:
+                yield (severity, rule_idx, l)
             context = []
         else:
-            severity = match_line(line)
+            rule_idx, severity = match_line(line)
             if severity:
-                yield (severity, line)
+                for l in context[:-1]:
+                    yield (None, None, l)
+                yield (severity, rule_idx, line)
                 context = []
+    for line in context:
+        yield (None, None, line)
 
 
 def test_output():
@@ -107,10 +113,10 @@ def test_output():
     parser.add_argument('severities', help='Which severities to reports, one chars for each: ewsn (n=none)')
     parser.add_argument('file', type=file, help='Build output to parse')
     args = parser.parse_args()
-    for severity, line in parse_output_lines(args.file):
+    for severity, rule_idx, line in parse_output_lines(args.file):
         ch = severity[0] if severity else 'n'
         if ch in args.severities:
-            print (severity or 'none').ljust(7), line.rstrip()
+            print '%s\t%s\t%s' % (severity or 'none', rule_idx if rule_idx is not None else '-', line.rstrip())
 
 if __name__ == '__main__':
     test_output()

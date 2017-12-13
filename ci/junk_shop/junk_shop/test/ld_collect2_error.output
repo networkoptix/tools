@@ -1,0 +1,8 @@
+none	[4243/4338] Building CXX object client/mobile_client/CMakeFiles/mobile_client.dir/src/resources/moc_camera_access_rights_helper.cpp.o
+none	[4244/4338] Building CXX object client/mobile_client/CMakeFiles/mobile_client.dir/src/resources/moc_media_resource_helper.cpp.o
+none	[4245/4338] Building CXX object client/mobile_client/CMakeFiles/mobile_client.dir/src/resources/moc_resource_helper.cpp.o
+error	FAILED: : && /usr/bin/c++ -fPIC -O2 -DNDEBUG  -rdynamic -Wl,--no-undefined -Wl,-rpath-link,/jenkins/workspace/ci-vms-linux-x64/packages/linux-x64/qt-5.6.2-2/lib -Wl,-rpath-link,/jenkins/workspace/ci-vms-linux-x64/build/lib -shared -Wl,-soname,libnx_client_desktop.so -o lib/libnx_client_desktop.so @CMakeFiles/nx_client_desktop.rsp  && :
+error	/usr/bin/ld: cannot find -lGL
+error	/usr/bin/ld: cannot find -lGLU
+error	collect2: error: ld returned 1 exit status
+none	ninja: build stopped: subcommand failed.

@@ -33,7 +33,7 @@ def load_output_file_list(output_file_list):
 
 
 def pick_severity_lines(severity, output):
-    for s, line in parse_output_lines(output.splitlines()):
+    for s, rule_idx, line in parse_output_lines(output.splitlines()):
         if s == severity:
             yield line
 

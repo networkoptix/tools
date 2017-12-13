@@ -1,0 +1,12 @@
+none	-- Generating J:/workspace/ci-vms-win-x64/build/unit_tests/nx_network_ut/nx_network_ut.qrc
+none	-- Generating J:/workspace/ci-vms-win-x64/build/unit_tests/mediaserver_core_ut/mediaserver_core_ut.qrc
+none	-- Generating J:/workspace/ci-vms-win-x64/build/unit_tests/cloud_db_ut/cloud_db_ut.qrc
+none	-- Generating J:/workspace/ci-vms-win-x64/build/build_info.txt
+none	-- Configuring done
+none	-- Build files have been written to: J:/workspace/ci-vms-win-x64/build
+error	CMake Error: The inter-target dependency graph contains the following strongly connected component (cycle):
+error	  "wixsetup" of type UTILITY
+error	    depends on "generate_update_packages" (strong)
+error	  "generate_update_packages" of type UTILITY
+error	    depends on "wixsetup" (strong)
+error	At least one of these targets is not a STATIC_LIBRARY.  Cyclic dependencies are allowed only among static libraries.
