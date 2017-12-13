@@ -9,7 +9,7 @@ junk_shop:
   db_host: megatron
 
 services:
-  junk_shop_url: http://megatron/
+  junk_shop_url: http://junkshop.enk.me/
   jira_url: https://networkoptix.atlassian.net/browse
   scm_browser_url_format: http://enk.me:8082/{repository_name}/revision/{revision}
 
