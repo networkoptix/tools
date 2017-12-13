@@ -53,6 +53,7 @@ PATTERN_LIST = [
     SingleLinePattern('error', r':\d+: Error:'),      # [INFO] {standard input}:51067: Error: unknown pseudo-op: `.lbe293'
     SingleLinePattern('error', r'internal compiler error:'),  # ..qmetatype.h:736:1: internal compiler error: Segmentation fault
     MultiLinePattern('error', r'^FAILED:.+(\n.+ld: cannot find.+)+\ncollect2: error: .+'),
+    MultiLinePattern('error', r'^FAILED:.+(\n.+)+\nninja: build stopped: subcommand failed.'),
     # Windows
     SingleLinePattern('error', r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
     SingleLinePattern('warning', r':\s+warning\s[A-Z]+\d+\s*:'),
