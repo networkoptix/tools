@@ -68,6 +68,7 @@ PATTERN_LIST = [
     SingleLinePattern('warning', r'SKIPPED'),
     SingleLinePattern('success', r'SUCCESS'),
     MultiLinePattern('error', r'^CMake Error: .+\n(\s+.+\n)+\w+.+'),
+    MultiLinePattern('error', r'^CMake Error at .+:\n(.*\n)+-- Configuring incomplete.+'),
     ]
 
 
