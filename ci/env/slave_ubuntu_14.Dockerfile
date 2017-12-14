@@ -15,7 +15,7 @@ ENV PYTHON_PACKAGES "python-dev python-pip python-virtualenv"
 ENV JUNK_SHOP_PACKAGES "libpq-dev gdb"
 ENV CMAKE_BUILD_PACKAGES "rsync ninja-build"
 
-ENV BUILD_PACKAGES_ZLIB "zlib1g-dev"
+ENV BUILD_PACKAGES_ZLIB "zlib1g-dev zlib1g-dev:i386"
 ENV BUILD_PACKAGES_OPENAL "libopenal-dev libopenal-dev:i386"
 ENV BUILD_PACKAGES_MESA "mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev"
 ENV BUILD_PACKAGES_MESA_I386 "libgl1-mesa-glx:i386"
