@@ -47,6 +47,10 @@ class CiProject(JenkinsProject):
 
     project_id = 'ci'
 
+    def __init__(self, input_state, in_assist_mode):
+        JenkinsProject.__init__(self, input_state, in_assist_mode)
+        self._build_error_list = []
+
     def stage_init(self):
         all_platform_list = sorted(self.config.platforms.keys())
         command_list = [self._set_project_properties_command(all_platform_list)]
@@ -161,11 +165,17 @@ class CiProject(JenkinsProject):
         if self.has_artifacts(build_info.artifact_mask_list):
             command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
         else:
-            self.save_artifacts_missing_error(junk_shop_repository, build_info)
+            error = 'No artifacts were produced matching masks: {}'.format(', '.join(build_info.artifact_mask_list))
+            self.add_build_error(error)
             command_list = []
 
+        self.save_build_errors_artifact(junk_shop_repository, build_info)
         # command_list = self.list_dirs_commands
         return command_list
+
+    def add_build_error(self, error):
+        log.error(error)
+        self._build_error_list.append(error)
 
     @property
     def list_dirs_commands(self):
@@ -218,8 +228,11 @@ class CiProject(JenkinsProject):
             ext = ''
         else:
             ext = '.exe'
-        test_binary_list = [os.path.basename(path) for path
-                                in glob.glob(os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext))]
+        unit_test_mask_list = os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext)
+        test_binary_list = [os.path.basename(path) for path in glob.glob(unit_test_mask_list)]
+        if not test_binary_list:
+            self.add_build_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
+            return
         log.info('Running unit tests: %s', ', '.join(test_binary_list))
         logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # Prevent from logging unit tests stdout/stderr
         is_passed = run_unit_tests(
@@ -240,6 +253,14 @@ class CiProject(JenkinsProject):
         log.error(errors)
         repository.add_artifact(
             run, 'errors', 'errors', repository.artifact_type.output, errors, is_error=True)
+
+    @db_session
+    def save_build_errors_artifact(self, repository, build_info):
+        if not self._build_error_list:
+            return
+        run = models.Run[build_info.run_id]
+        repository.add_artifact(
+            run, 'errors', 'errors', repository.artifact_type.output, '\n'.join(self._build_error_list), is_error=True)
 
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
