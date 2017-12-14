@@ -27,6 +27,11 @@ platforms:
     should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.deb
+  linux-x86:
+    build_node: linux
+    should_run_unit_tests: no
+    artifact_mask_list:
+      - distrib/*.deb
   mac:
     build_node: mac
     should_run_unit_tests: yes
