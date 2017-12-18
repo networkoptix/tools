@@ -7,7 +7,7 @@
 # 4. (for junk_shop_*) $ export PGPASSWORD=xxxxx; export JUNK_SHOP_DIR=$HOME/develop/devtools/ci/junk_shop
 # 5. $ docker-compose -f <this-file>.yaml up -d
 
-version: '2'
+version: '2.1'
 
 services:
 
@@ -26,6 +26,9 @@ services:
       - /jenkins:/var/jenkins_home
     links:
       - slave_ubuntu_14
+    networks:
+      internal_v6:
+        ipv6_address: 2001:3984:3989::11
 
   jenkins_base:
     image: megatron-jenkins-base
@@ -75,3 +78,16 @@ services:
       - '2022:22'
     volumes:
       - /jenkins_slave/ubuntu_14:/jenkins
+    networks:
+      internal_v6:
+        ipv6_address: 2001:3984:3989::10
+
+networks:
+  internal_v6:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+      -
+        subnet: 2001:3984:3989::/64
