@@ -11,6 +11,7 @@ app.config.from_object('junk_shop.webapp.default_config')
 if 'JUNK_SHOP_SETTINGS' in os.environ:
     app.config.from_envvar('JUNK_SHOP_SETTINGS')
 
+from . import commands
 from ..filters import JinjaFilters
 from . import views
 from . import project_views
