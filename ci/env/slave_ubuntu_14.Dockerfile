@@ -35,8 +35,6 @@ RUN set -ex; \
 	apt-get update; \
 	apt-get install -y \
 		${APT_PACKAGES} \
-		${X32_PACKAGES} \
-		${MULTILIB_PACKAGES} \
 		${COMMON_PACKAGES} \
 		${JAVA_REQUIREMENTS_PACKAGES} \
 		${PYTHON_PACKAGES} \
@@ -51,9 +49,14 @@ RUN set -ex; \
 		${BUILD_PACKAGES_X11_SCREEN_SAVER_EXTENSION_LIB} \
 		${BUILD_PACKAGES_GSTREAMER} \
 		${BUILD_PACKAGES_XSLT} \
-		${BUILD_PACKAGES_X_I386} \
 		${BUILD_PACKAGES_INSTALLER_TOOLS} \
 		${FUNTEST_PACKAGES}
+
+RUN set -ex; \
+	apt-get install -y \
+		${X32_PACKAGES} \
+		${MULTILIB_PACKAGES} \
+		${BUILD_PACKAGES_X_I386}
 
 
 # Install mercurial from it's own ppa; version available on ubuntu 14 is too old and is incompatible with newer one from jenkins
