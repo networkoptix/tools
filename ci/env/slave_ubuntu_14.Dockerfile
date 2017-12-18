@@ -59,6 +59,11 @@ RUN set -ex; \
 		${BUILD_PACKAGES_X_I386}
 
 
+RUN set -ex; \
+	add-apt-repository -y ppa:ubuntu-toolchain-r/test; \
+	apt-get update; \
+	apt-get install -y gcc-7 g++-7
+
 # Install mercurial from it's own ppa; version available on ubuntu 14 is too old and is incompatible with newer one from jenkins
 RUN set -ex; \
 	add-apt-repository -y ppa:mercurial-ppa/releases; \
