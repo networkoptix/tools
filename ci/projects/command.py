@@ -306,7 +306,7 @@ class StringProjectParameter(ProjectParameter):
             default_value=d['default_value'],
             )
 
-    def __init__(self, name, description, default_value):
+    def __init__(self, name, description, default_value=''):
         assert isinstance(default_value, basestring), repr(default_value)
         ProjectParameter.__init__(self, name, description)
         self.default_value = default_value
@@ -370,6 +370,26 @@ class SetProjectPropertiesCommand(Command):
             )
 
 
+class SetBuildResultCommand(Command):
+
+    command_id = 'set_build_result'
+
+    @classmethod
+    def from_dict(cls, d, command_registry):
+        return cls(
+            build_result=d['build_result'],
+            )
+
+    def __init__(self, build_result):
+        assert build_result in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED'], repr(build_result)
+        self.build_result = build_result
+
+    def args_to_dict(self):
+        return dict(
+            build_result=self.build_result,
+            )
+
+
 class PythonStageCommand(Command):
 
     command_id = 'python_stage'
@@ -415,6 +435,7 @@ def register_all_commands(command_registry):
             ParallelCommand,
             NodeCommand,
             PrepareVirtualEnvCommand,
+            SetBuildResultCommand,
             PythonStageCommand,
             ]:
         command_registry.register(command_cls)

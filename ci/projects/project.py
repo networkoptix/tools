@@ -1,7 +1,7 @@
 import logging
 import os.path
 from utils import is_list_inst
-from command import Command, UnstashCommand, CheckoutCommand, PythonStageCommand
+from command import Command, UnstashCommand, CheckoutCommand, PythonStageCommand, StringProjectParameter
 
 log = logging.getLogger(__name__)
 
@@ -54,3 +54,11 @@ class JenkinsProject(object):
             os.path.join(JUNK_SHOP_DIR, 'requirements.txt'),
             ]
 
+    @property
+    def default_parameters(self):
+        if self.in_assist_mode:
+            return [
+                StringProjectParameter('project_id', 'project_id to test', default_value='ci'),
+                ]
+        else:
+            return []

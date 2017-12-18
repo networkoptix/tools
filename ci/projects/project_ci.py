@@ -30,6 +30,7 @@ from command import (
     BooleanProjectParameter,
     StringProjectParameter,
     ChoiceProjectParameter,
+    SetBuildResultCommand,
     SetProjectPropertiesCommand,
     )
 from cmake import CMake
@@ -54,6 +55,7 @@ class CiProject(JenkinsProject):
     def stage_init(self):
         all_platform_list = sorted(self.config.platforms.keys())
         command_list = [self._set_project_properties_command(all_platform_list)]
+
         if self.in_assist_mode and self.params.stage:
             command_list += [
                 self.make_python_stage_command(self.params.stage),
@@ -69,10 +71,10 @@ class CiProject(JenkinsProject):
         self.state.report()
 
     def _set_project_properties_command(self, all_platform_list):
-        parameters = [
+        parameters = self.default_parameters + [
                     ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                                ['build', 'update_properties']),
-                    BooleanProjectParameter('clean_build', 'Build from stcatch', default_value=False),
+                    BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
                     BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
                     ]
@@ -160,7 +162,7 @@ class CiProject(JenkinsProject):
 
         build_info = self._build(junk_shop_repository, platform_config)
         if platform_config.should_run_unit_tests and build_info.is_succeeded:
-            self.run_unit_tests(self.is_unix, junk_shop_repository, build_info, self.config.ci.timeout)
+            self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 
         if self.has_artifacts(build_info.artifact_mask_list):
             command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
@@ -223,8 +225,8 @@ class CiProject(JenkinsProject):
         build_info = builder.build(junk_shop_repository, platform_config, 'nx_vms', 'build', self.params.clean_build)
         return build_info
 
-    def run_unit_tests(self, is_unix, junk_shop_repository, build_info, timeout):
-        if is_unix:
+    def run_unit_tests(self, junk_shop_repository, build_info, timeout):
+        if self.is_unix:
             ext = ''
         else:
             ext = '.exe'
@@ -270,4 +272,11 @@ class CiProject(JenkinsProject):
         branch = nx_vms_scm_info.branch
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
-        sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
+        build_info = sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
+        if build_info.has_failed_builds:
+            build_result = 'FAILURE'
+        elif build_info.has_failed_tests:
+            build_result = 'UNSTABLE'
+        else:
+            return
+        return [SetBuildResultCommand(build_result)]

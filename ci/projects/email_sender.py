@@ -8,11 +8,24 @@ import yaml
 from pony.orm import db_session
 
 from junk_shop import models, DbConfig, BuildInfoLoader
-from utils import setup_logging
+from utils import is_list_inst, setup_logging
 from config import Config
 from template_renderer import TemplateRenderer
 
 log = logging.getLogger(__name__)
+
+
+class BuildInfo(object):
+
+    def __init__(self, has_failed_builds, has_failed_tests, offender_email_list, subject_and_html):
+        assert isinstance(has_failed_builds, bool), repr(has_failed_builds)
+        assert isinstance(has_failed_tests, bool), repr(has_failed_tests)
+        assert is_list_inst(offender_email_list, basestring), repr(offender_email_list)
+        assert isinstance(subject_and_html, basestring), repr(subject_and_html)
+        self.has_failed_builds = has_failed_builds
+        self.has_failed_tests = has_failed_tests
+        self.offender_email_list = offender_email_list
+        self.subject_and_html = subject_and_html
 
 
 class EmailSender(object):
@@ -22,27 +35,33 @@ class EmailSender(object):
         self._renderer = TemplateRenderer(config.services)
 
     def render_and_send_email(self, smtp_password, project, branch, build_num, test_mode=True):
-        offender_list, subject_and_html = self.render_email(project, branch, build_num, test_mode)
+        build_info = self.render_email(project, branch, build_num, test_mode)
         if test_mode:
             recipient_list = self._config.email.ci_admins
         else:
-            recipient_list = offender_list + self._config.email.ci_admins
+            recipient_list = build_info.offender_email_list + self._config.email.ci_admins
         if recipient_list:
-            self.send_email(smtp_password, subject_and_html, recipient_list)
+            self.send_email(smtp_password, build_info.subject_and_html, recipient_list)
         else:
             log.warning('No recipients in changesets for build %s / %s #%d', project, branch, build_num)
+        return build_info
 
     @db_session
     def render_email(self, project, branch, build_num, test_mode=True):
         loader = BuildInfoLoader(project, branch, build_num)
         build_info = loader.load_build_info()
-        offender_list = set('{} <{}>'.format(changeset.user, changeset.email) for changeset in build_info.changeset_list)
+        offender_email_list = set('{} <{}>'.format(changeset.user, changeset.email) for changeset in build_info.changeset_list)
         subject_and_html = self._renderer.render(
             'build_email.html',
             test_mode=test_mode,
-            recipient_list=offender_list,
+            recipient_list=offender_email_list,
             **build_info._asdict())
-        return (list(offender_list), subject_and_html)
+        return BuildInfo(
+            has_failed_builds=bool(build_info.failed_build_platform_list),
+            has_failed_tests=bool(build_info.failed_tests_platform_list),
+            offender_email_list=list(offender_email_list),
+            subject_and_html=subject_and_html,
+            )
 
     def send_email(self, smtp_password, subject_and_html, recipient_list):
         lines = subject_and_html.splitlines()
@@ -77,10 +96,10 @@ def test_me():
     branch = sys.argv[5]
     build_num = int(sys.argv[6])
     sender = EmailSender(config)
-    offender_list, subject_and_html = sender.render_email(project, branch, build_num, test_mode=True)
-    print subject_and_html
+    build_info = sender.render_email(project, branch, build_num, test_mode=True)
+    print build_info.subject_and_html
     if smtp_password and recipient:
-        sender.send_email(smtp_password, subject_and_html, [recipient])
+        sender.send_email(smtp_password, build_info.subject_and_html, [recipient])
 
 if __name__ == '__main__':
     test_me()
