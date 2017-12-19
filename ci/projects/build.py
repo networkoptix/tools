@@ -9,7 +9,7 @@ import platform
 import yaml
 
 from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
-from config import Config
+from config import PlatformConfig, Config, PlatformBranchConfig, BranchConfig
 from host import CommandResults, LocalHost
 from cmake import CMake
 from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
@@ -63,12 +63,14 @@ class CMakeBuilder(object):
     def _platform_config(self):
         return self._system_platform_config[self._system]
 
-    def build(self, junk_shop_repository, platform_config, src_dir, build_dir, clean_build):
+    def build(self, junk_shop_repository, platform_config, branch_config, src_dir, build_dir, clean_build):
         assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
+        assert isinstance(platform_config, PlatformConfig), repr(platform_config)
+        assert branch_config is None or isinstance(branch_config, PlatformBranchConfig), repr(branch_config)
         build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        configure_results = self._configure(src_dir, build_dir, build_params, cmake_configuration)
+        configure_results = self._configure(src_dir, build_dir, branch_config, build_params, cmake_configuration)
         exit_code = configure_results.exit_code
         output = configure_results.stdout
         if configure_results.exit_code == 0:
@@ -115,14 +117,17 @@ class CMakeBuilder(object):
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
-    def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
+    def _configure(self, src_dir, build_dir, branch_config, build_params, cmake_configuration):
         build_tool = self._platform_config.build_tool
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
+        platform_args = []
         if target_device:
-            target_device_args = ['-DtargetDevice={}'.format(target_device)]
-        else:
-            target_device_args = []
+            platform_args += ['-DtargetDevice={}'.format(target_device)]
+        if branch_config and branch_config.c_compiler:
+            platform_args += ['-DCMAKE_C_COMPILER={}'.format(branch_config.c_compiler)]
+        if branch_config and branch_config.cxx_compiler:
+            platform_args += ['-DCMAKE_CXX_COMPILER={}'.format(branch_config.cxx_compiler)]
         configure_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
@@ -130,7 +135,7 @@ class CMakeBuilder(object):
             '-Dcustomization=%s' % build_params.customization,
             '-DbuildNumber=%d' % build_params.build_num,
             '-Dbeta=%s' % ('TRUE' if build_params.is_beta else 'FALSE'),
-            ] + target_device_args + [
+            ] + platform_args + [
             '-G', build_tool,
             src_full_path,
             ]
@@ -180,6 +185,11 @@ def test_me():
     project = sys.argv[2]
     branch = sys.argv[3]
     platform = sys.argv[4]
+    if len(sys.argv) >= 6:
+        branch_config = BranchConfig.from_dict(yaml.load(open(sys.argv[5])))
+        platform_branch_config = branch_config.platforms.get(platform)
+    else:
+        platform_branch_config = None
     build_params = BuildParameters(
         project=project,
         branch=branch,
@@ -192,7 +202,7 @@ def test_me():
     repository = DbCaptureRepository(db_config, build_params)
     builder = CMakeBuilder(cmake)
     build_dir = 'build-{}'.format(platform)
-    build_info = builder.build(repository, config.platforms[platform], 'nx_vms', build_dir, clean_build=False)
+    build_info = builder.build(repository, config.platforms[platform], platform_branch_config, 'nx_vms', build_dir, clean_build=False)
     log.info('Build info: %r', build_info)
 
 

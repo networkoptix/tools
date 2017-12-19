@@ -1,12 +1,23 @@
 import logging
 import os.path
+import yaml
+
 from utils import is_list_inst
-from command import Command, UnstashCommand, CheckoutCommand, PythonStageCommand, StringProjectParameter
+from command import (
+    Command,
+    StashCommand,
+    UnstashCommand,
+    CheckoutCommand,
+    PythonStageCommand,
+    StringProjectParameter,
+    )
+from config import BranchConfig
 
 log = logging.getLogger(__name__)
 
 
 JUNK_SHOP_DIR = 'devtools/ci/junk_shop'
+BRANCH_CONFIG_PATH = 'nx_vms/ci/config.yaml'
 
 
 class JenkinsProject(object):
@@ -41,6 +52,14 @@ class JenkinsProject(object):
         return PythonStageCommand(
             self.project_id, stage_id, python_path_list, in_assist_mode=self.in_assist_mode, **kw)
 
+    @property
+    def initial_stash_command_list(self):
+        if self.in_assist_mode:
+            return [StashCommand('nx_vms_ci', ['nx_vms/ci/**'])]
+        else:
+            return []
+
+    @property
     def prepare_devtools_command(self):
         if self.in_assist_mode:
             return UnstashCommand('devtools')
@@ -62,3 +81,8 @@ class JenkinsProject(object):
                 ]
         else:
             return []
+
+    @property
+    def branch_config(self):
+        with open(BRANCH_CONFIG_PATH) as f:
+            return BranchConfig.from_dict(yaml.load(f))

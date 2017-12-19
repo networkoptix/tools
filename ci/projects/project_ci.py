@@ -61,8 +61,7 @@ class CiProject(JenkinsProject):
                 self.make_python_stage_command(self.params.stage),
                 ]
         elif self.params.action == 'build':
-            command_list += [
-                self.checkout_nx_vms_command,
+            command_list += self.initial_stash_command_list + self.prepare_nx_vms_command_list + [
                 self.make_python_stage_command('prepare_for_build'),
                 ]
         return command_list
@@ -93,12 +92,15 @@ class CiProject(JenkinsProject):
             )
 
     @property
-    def checkout_nx_vms_command(self):
+    def prepare_nx_vms_command_list(self):
         if self.in_assist_mode:
             branch_name = self.nx_vms_branch_name
-            return CheckoutCommand('nx_vms', branch_name)
+            return [
+                CheckoutCommand('nx_vms', branch_name),
+                UnstashCommand('nx_vms_ci'),
+                ]
         else:
-            return CheckoutScmCommand('nx_vms')
+            return [CheckoutScmCommand('nx_vms')]
 
     def stage_prepare_for_build(self):
         junk_shop_repository = self.create_junk_shop_repository()
@@ -124,8 +126,8 @@ class CiProject(JenkinsProject):
                 ]
         if not self.params.clean_only:
             job_command_list += [
-                self.prepare_devtools_command(),
-                self.checkout_nx_vms_command,
+                self.prepare_devtools_command,
+                ] + self.prepare_nx_vms_command_list + [
                 PrepareVirtualEnvCommand(self.devtools_python_requirements),
                 self.make_python_stage_command('node', platform=platform),
                 ]
@@ -158,9 +160,10 @@ class CiProject(JenkinsProject):
         log.info('Node stage: %s', self.current_node)
         platform = self.current_command.platform
         platform_config = self.config.platforms[platform]
+        platform_branch_config = self.branch_config.platforms.get(platform)
         junk_shop_repository = self.create_junk_shop_repository(platform)
 
-        build_info = self._build(junk_shop_repository, platform_config)
+        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config)
         if platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 
@@ -172,7 +175,7 @@ class CiProject(JenkinsProject):
             command_list = []
 
         self.save_build_errors_artifact(junk_shop_repository, build_info)
-        # command_list = self.list_dirs_commands
+        # command_list = self.list_dirs_command_list
         return command_list
 
     def add_build_error(self, error):
@@ -180,7 +183,7 @@ class CiProject(JenkinsProject):
         self._build_error_list.append(error)
 
     @property
-    def list_dirs_commands(self):
+    def list_dirs_command_list(self):
         if self.is_unix:
             return [
                 ScriptCommand('pwd'),
@@ -217,12 +220,13 @@ class CiProject(JenkinsProject):
         user, password = self.credentials.junk_shop_db.split(':')
         return DbConfig(self.config.junk_shop.db_host, user, password)
 
-    def _build(self, junk_shop_repository, platform_config):
+    def _build(self, junk_shop_repository, platform_branch_config, platform_config):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(cmake)
-        build_info = builder.build(junk_shop_repository, platform_config, 'nx_vms', 'build', self.params.clean_build)
+        build_info = builder.build(
+            junk_shop_repository, platform_config, platform_branch_config, 'nx_vms', 'build', self.params.clean_build)
         return build_info
 
     def run_unit_tests(self, junk_shop_repository, build_info, timeout):

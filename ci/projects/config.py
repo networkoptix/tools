@@ -1,3 +1,4 @@
+import sys
 import logging
 import os.path
 import datetime
@@ -7,6 +8,8 @@ from utils import setup_logging, is_list_inst, is_dict_inst, str_to_timedelta, t
 
 log = logging.getLogger(__name__)
 
+
+# configuration common for all branches, stored in devtools/ci/projects/config.yaml
 
 class PlatformConfig(object):
 
@@ -223,12 +226,74 @@ class Config(object):
         self.ci.report()
 
 
+# configuration specific for a branch, stored in nx_vms/ci/config.yaml (may be missing, defaults are used then)
+
+
+class PlatformBranchConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            c_compiler=data.get('c_compiler'),
+            cxx_compiler=data.get('cxx_compiler'),
+            )
+
+    def __init__(self, c_compiler, cxx_compiler):
+        assert c_compiler is None or isinstance(c_compiler, basestring), repr(c_compiler)
+        assert cxx_compiler is None or isinstance(cxx_compiler, basestring), repr(cxx_compiler)
+        self.c_compiler = c_compiler
+        self.cxx_compiler = cxx_compiler
+
+    def to_dict(self):
+        return dict(
+            c_compiler=self.c_compiler,
+            cxx_compiler=self.cxx_compiler,
+            )
+
+    def report(self):
+        log.info('\t\t\t' 'c_compiler: %r', self.c_compiler)
+        log.info('\t\t\t' 'cxx_compiler: %r', self.cxx_compiler)
+
+
+class BranchConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            platforms={platform_name: PlatformBranchConfig.from_dict(platform_config)
+                               for platform_name, platform_config in data['platforms'].items()},
+            )
+
+    def __init__(self, platforms):
+        assert is_dict_inst(platforms, basestring, PlatformBranchConfig), repr(platforms)
+        self.platforms = platforms
+
+    def to_dict(self):
+        return dict(
+            platforms={platform_name: platform_config.to_dict()
+                               for platform_name, platform_config in self.platforms.items()},
+            )
+
+    def report(self):
+        log.info('branch config:')
+        log.info('\t' 'platforms:')
+        for platform_name, platform_info in self.platforms.items():
+            log.info('\t\t' '%s:', platform_name)
+            platform_info.report()
+
+
 def test_me():
     setup_logging(logging.DEBUG)
-    config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
-    config = Config.from_dict(yaml.load(open(config_path)))
-    config = Config.from_dict(config.to_dict())
-    config.report()
+    if len(sys.argv) == 1:
+        config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+        config = Config.from_dict(yaml.load(open(config_path)))
+        config = Config.from_dict(config.to_dict())
+        config.report()
+    else:
+        branch_config_path = sys.argv[1]
+        branch_config = BranchConfig.from_dict(yaml.load(open(branch_config_path)))
+        branch_config = BranchConfig.from_dict(branch_config.to_dict())
+        branch_config.report()
 
 if __name__ == '__main__':
     test_me()
