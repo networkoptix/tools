@@ -342,6 +342,34 @@ class ChoiceProjectParameter(ProjectParameter):
             )
 
 
+class MultiChoiceProjectParameter(ProjectParameter):
+
+    type = 'multi_choice'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            description=d['description'],
+            choices=d['choices'],
+            selected_choices=d['selected_choices'],
+            )
+
+    def __init__(self, name, description, choices, selected_choices=None):
+        assert is_list_inst(choices, basestring), repr(choices)
+        assert selected_choices is None or is_list_inst(selected_choices, basestring), repr(selected_choices)
+        ProjectParameter.__init__(self, name, description)
+        self.choices = choices
+        self.selected_choices = selected_choices or []
+
+    def to_dict(self):
+        return dict(
+            ProjectParameter.to_dict(self),
+            choices=self.choices,
+            selected_choices=self.selected_choices,
+            )
+
+
 class SetProjectPropertiesCommand(Command):
 
     command_id = 'set_project_properties'
