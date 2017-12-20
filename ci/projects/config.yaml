@@ -87,7 +87,8 @@ platforms:
 ci:
   timeout: 30m
 
-# if failed tests are only those in the list, email is sent only to their watcher
+# if SOME failed tests are in this list, email is sent to their watcher TOO
+# if ALL failed tests are in this list, email is sent ONLY to their watcher
 tests_watchers:
   cloud:
     watcher_email: Andrey Kolesnikov <akolesnikov@networkoptix.com>

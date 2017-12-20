@@ -326,7 +326,7 @@ class BranchConfig(object):
 
     def report(self):
         log.info('branch config:')
-        log.info('\t' 'platforms:')
+        log.info('\t' 'platforms: %s', '' if self.platforms else 'none' )
         for platform_name, platform_info in self.platforms.items():
             log.info('\t\t' '%s:', platform_name)
             platform_info.report()
@@ -339,11 +339,14 @@ def test_me():
         config = Config.from_dict(yaml.load(open(config_path)))
         config = Config.from_dict(config.to_dict())
         config.report()
+        return
+    if sys.argv[1] == 'default':
+        branch_config = BranchConfig.make_default()
     else:
         branch_config_path = sys.argv[1]
         branch_config = BranchConfig.from_dict(yaml.load(open(branch_config_path)))
-        branch_config = BranchConfig.from_dict(branch_config.to_dict())
-        branch_config.report()
+    branch_config = BranchConfig.from_dict(branch_config.to_dict())
+    branch_config.report()
 
 if __name__ == '__main__':
     test_me()
