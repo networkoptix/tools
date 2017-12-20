@@ -102,6 +102,7 @@ BuildInfo = namedtuple('BuildInfo', [
     'platform_list',
     'failed_build_platform_list',
     'failed_tests_platform_list',
+    'failed_test_list',
     ])
 
 
@@ -120,6 +121,7 @@ class BuildInfoLoader(object):
         self.started_at = None  # minimal started_at field from all Runs
         self.failed_build_platform_set = set()  # platform name set
         self.failed_tests_platform_set = set()
+        self.failed_test_set = set()  # failed test list from all platforms
 
     def produce_platform(self, platform_model):
         platform = self.platform_map.get(platform_model)
@@ -155,8 +157,8 @@ class BuildInfoLoader(object):
             stage = self.produce_stage(root_run, TestsStage)
             stage.passed_count = run_count
         # load 'interesting' leaf test runs
-        for run, root_run in select(
-                (run, root_run)
+        for run, test, root_run in select(
+                (run, run.test, root_run)
                 for run in models.Run
                 for root_run in models.Run if
                 run.root_run is root_run and
@@ -167,11 +169,12 @@ class BuildInfoLoader(object):
             stage.add_run(run)
             if run.outcome == 'failed':
                 self.failed_tests_platform_set.add(root_run.platform.name)
+                self.failed_test_set.add(test.path)
 
     # ensure failed runs show up when there is no leafs for them
     def create_non_leaf_failed_test_runs(self):
-        for run, root_run in select(
-                (run, root_run)
+        for run, test, root_run in select(
+                (run, run.test, root_run)
                 for root_run in models.Run
                 for run in root_run.children if
                 root_run.build is self.build and
@@ -183,6 +186,7 @@ class BuildInfoLoader(object):
             stage = self.produce_stage(root_run, TestsStage)
             stage.add_run(run)
             self.failed_tests_platform_set.add(root_run.platform.name)
+            self.failed_test_set.add(test.path)
 
     def load_build_artifacts(self):
         platform2artifact = {}
@@ -260,4 +264,5 @@ class BuildInfoLoader(object):
             platform_list=platform_list,
             failed_build_platform_list=list(self.failed_build_platform_set),
             failed_tests_platform_list=list(self.failed_tests_platform_set),
+            failed_test_list=list(self.failed_test_set),
             )
