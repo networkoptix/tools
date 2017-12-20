@@ -21,6 +21,26 @@ email:
   ci_admins:
     - vfedorov@networkoptix.com
 
+customization_list:
+  - default
+  - default_cn
+  - default_zh_CN
+  - cox
+  - digitalwatchdog
+  - digitalwatchdog_global
+  - hanwha
+  - ipera
+  - ionetworks
+  - nutech
+  - ras
+  - senturian
+  - systemk
+  - tricom
+  - ust
+  - vista
+  - vmsdemoblue
+  - vmsdemoorange
+
 platforms:
   linux-x64:
     build_node: linux
@@ -66,3 +86,17 @@ platforms:
 
 ci:
   timeout: 30m
+
+# if failed tests are only those in the list, email is sent only to their watcher
+tests_watchers:
+  cloud:
+    watcher_email: Andrey Kolesnikov <akolesnikov@networkoptix.com>
+    test_list:
+      - unit/cloud_connectivity_ut/*
+      - unit/vms_gateway_ut/*
+      - unit/nx_network_ut/*
+      - unit/cloud_db_ut/*
+      - unit/connection_mediator_ut/*
+      - unit/cloud_connect_integration_tests/*
+      - unit/traffic_relay_ut/*
+      - unit/relaying_ut/*

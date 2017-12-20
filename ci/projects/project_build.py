@@ -73,6 +73,16 @@ class BuildProject(JenkinsProject):
         return parameters
 
     @property
+    def nx_vms_branch_name(self):
+        if self.in_assist_mode:
+            return self.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
+        else:
+            assert self.jenkins_env.branch_name, (
+                'This scripts are intented to be used in multibranch projects only;'
+                ' env.BRANCH_NAME must be defined')
+            return self.jenkins_env.branch_name
+
+    @property
     def prepare_nx_vms_command_list(self):
         if self.in_assist_mode:
             branch_name = self.nx_vms_branch_name

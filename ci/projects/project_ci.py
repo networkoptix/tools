@@ -79,16 +79,6 @@ class CiProject(BuildProject):
         return ParallelJob(platform, [NodeCommand(node, workspace_dir, job_command_list)])
 
     @property
-    def nx_vms_branch_name(self):
-        if self.in_assist_mode:
-            return self.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
-        else:
-            assert self.jenkins_env.branch_name, (
-                'This scripts are intented to be used in multibranch projects only;'
-                ' env.BRANCH_NAME must be defined')
-            return self.jenkins_env.branch_name
-
-    @property
     def project_name(self):
         if self.in_assist_mode:
             return 'assist-ci-%s' % self.jenkins_env.job_name

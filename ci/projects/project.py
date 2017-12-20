@@ -4,6 +4,8 @@ import logging
 import os.path
 import yaml
 
+from cached_property import cached_property
+
 from utils import is_list_inst
 from command import (
     Command,
@@ -79,12 +81,17 @@ class JenkinsProject(object):
     def default_parameters(self):
         if self.in_assist_mode:
             return [
-                StringProjectParameter('project_id', 'project_id to test', default_value='ci'),
+                StringProjectParameter('project', 'project id to test', default_value='ci'),
                 ]
         else:
             return []
 
-    @property
+    @cached_property
     def branch_config(self):
-        with open(BRANCH_CONFIG_PATH) as f:
-            return BranchConfig.from_dict(yaml.load(f))
+        if os.path.exists(BRANCH_CONFIG_PATH):
+            with open(BRANCH_CONFIG_PATH) as f:
+                config = BranchConfig.from_dict(yaml.load(f))
+        else:
+            config = BranchConfig.make_default()
+        config.report()
+        return config

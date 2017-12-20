@@ -179,6 +179,35 @@ class CiConfig(object):
         log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
 
 
+class TestsWatchersConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            watcher_email=data['watcher_email'],
+            test_list=data['test_list'],
+            )
+
+    def __init__(self, watcher_email, test_list):
+        assert isinstance(watcher_email, basestring), repr(watcher_email)
+        assert is_list_inst(test_list, basestring), repr(test_list)
+        assert test_list  # Must not be empty
+        self.watcher_email = watcher_email
+        self.test_list = test_list
+
+    def to_dict(self):
+        return dict(
+            watcher_email=self.watcher_email,
+            test_list=self.test_list,
+            )
+
+    def report(self):
+        log.info('\t\t\t' 'watcher_email: %r', self.watcher_email)
+        log.info('\t\t\t' 'test_list:')
+        for test in self.test_list:
+            log.info('\t\t\t\t' '%r', test)
+
+
 class Config(object):
 
     @classmethod
@@ -187,31 +216,40 @@ class Config(object):
             junk_shop=JunkShopConfig.from_dict(data['junk_shop']),
             services=ServicesConfig.from_dict(data['services']),
             email=EmailConfig.from_dict(data['email']),
+            customization_list=data['customization_list'],
             platforms={platform_name: PlatformConfig.from_dict(platform_config)
                                for platform_name, platform_config in data['platforms'].items()},
             ci=CiConfig.from_dict(data['ci']),
+            tests_watchers={name: TestsWatchersConfig.from_dict(twc)
+                                for name, twc in data['tests_watchers'].items()},
             )
 
-    def __init__(self, junk_shop, services, email, platforms, ci):
+    def __init__(self, junk_shop, services, email, customization_list, platforms, ci, tests_watchers):
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert isinstance(services, ServicesConfig), repr(services)
         assert isinstance(email, EmailConfig), repr(email)
+        assert is_list_inst(customization_list, basestring), repr(customization_list)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
         assert isinstance(ci, CiConfig), repr(ci)
+        assert is_dict_inst(tests_watchers, basestring, TestsWatchersConfig), repr(tests_watchers)
         self.junk_shop = junk_shop
         self.services = services
         self.email = email
+        self.customization_list = customization_list
         self.platforms = platforms
         self.ci = ci
+        self.tests_watchers = tests_watchers
 
     def to_dict(self):
         return dict(
             junk_shop=self.junk_shop.to_dict(),
             services=self.services.to_dict(),
             email=self.email.to_dict(),
+            customization_list=self.customization_list,
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
             ci=self.ci.to_dict(),
+            tests_watchers={name: twc.to_dict() for name, twc in self.tests_watchers.items()},
             )
 
     def report(self):
@@ -219,15 +257,21 @@ class Config(object):
         self.junk_shop.report()
         self.services.report()
         self.email.report()
+        log.info('\t' 'customization_list:')
+        for customization in self.customization_list:
+            log.info('\t\t' '%r', customization)
         log.info('\t' 'platforms:')
         for platform_name, platform_info in self.platforms.items():
             log.info('\t\t' '%s:', platform_name)
             platform_info.report()
         self.ci.report()
+        log.info('\t' 'tests_watchers:')
+        for name, twc in self.tests_watchers.items():
+            log.info('\t\t' '%s:', name)
+            twc.report()
 
 
 # configuration specific for a branch, stored in nx_vms/ci/config.yaml (may be missing, defaults are used then)
-
 
 class PlatformBranchConfig(object):
 
@@ -256,6 +300,12 @@ class PlatformBranchConfig(object):
 
 
 class BranchConfig(object):
+
+    @classmethod
+    def make_default(cls):
+        return cls(
+            platforms={},
+            )
 
     @classmethod
     def from_dict(cls, data):
