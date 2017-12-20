@@ -1,3 +1,5 @@
+# CI project for multibranch pipeline - build/test single customization, every platform on every commit
+
 import logging
 import os.path
 import glob
@@ -14,24 +16,17 @@ from junk_shop import (
     store_output_and_exit_code,
     run_unit_tests,
     )
-from project import JenkinsProject
+from project_build import BuildProject
 from command import (
     ScriptCommand,
-    CheckoutCommand,
-    CheckoutScmCommand,
-    StashCommand,
-    UnstashCommand,
     ArchiveArtifactsCommand,
     CleanDirCommand,
     NodeCommand,
     PrepareVirtualEnvCommand,
     ParallelJob,
     ParallelCommand,
-    BooleanProjectParameter,
-    StringProjectParameter,
-    ChoiceProjectParameter,
     SetBuildResultCommand,
-    SetProjectPropertiesCommand,
+    BooleanProjectParameter,
     )
 from cmake import CMake
 from build import CMakeBuilder
@@ -40,75 +35,25 @@ from email_sender import EmailSender
 log = logging.getLogger(__name__)
 
 
-DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2'
-DAYS_TO_KEEP_OLD_BUILDS = 10
-
-
-class CiProject(JenkinsProject):
+class CiProject(BuildProject):
 
     project_id = 'ci'
 
-    def __init__(self, input_state, in_assist_mode):
-        JenkinsProject.__init__(self, input_state, in_assist_mode)
-        self._build_error_list = []
-
-    def stage_init(self):
-        all_platform_list = sorted(self.config.platforms.keys())
-        command_list = [self._set_project_properties_command(all_platform_list)]
-
-        if self.in_assist_mode and self.params.stage:
-            command_list += [
-                self.make_python_stage_command(self.params.stage),
-                ]
-        elif self.params.action == 'build':
-            command_list += self.initial_stash_command_list + self.prepare_nx_vms_command_list + [
-                self.make_python_stage_command('prepare_for_build'),
-                ]
-        return command_list
-
-    def stage_report_state(self):
-        self.state.report()
-
-    def _set_project_properties_command(self, all_platform_list):
-        parameters = self.default_parameters + [
-                    ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
-                                               ['build', 'update_properties']),
-                    BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
-                    BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
-                    BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
-                    ]
-        if self.in_assist_mode:
-            parameters += [
-                StringProjectParameter('branch', 'nx_vms branch to checkout and build',
-                                           default_value=DEFAULT_ASSIST_MODE_VMS_BRANCH),
-                StringProjectParameter('stage', 'stage to run', default_value=''),
-                ]
-        parameters += [BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=True)
-                           for platform in all_platform_list]
-        return SetProjectPropertiesCommand(
-            parameters=parameters,
-            enable_concurrent_builds=False,
-            days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
-            )
+    def get_project_parameters(self):
+        return BuildProject.get_project_parameters(self) + [
+            BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=True)
+            for platform in self.all_platform_list
+            ]
 
     @property
-    def prepare_nx_vms_command_list(self):
-        if self.in_assist_mode:
-            branch_name = self.nx_vms_branch_name
-            return [
-                CheckoutCommand('nx_vms', branch_name),
-                UnstashCommand('nx_vms_ci'),
-                ]
-        else:
-            return [CheckoutScmCommand('nx_vms')]
+    def requested_platform_list(self):
+        return [p for p in self.all_platform_list if self.params.get(p)]
 
     def stage_prepare_for_build(self):
         junk_shop_repository = self.create_junk_shop_repository()
         update_build_info(junk_shop_repository, 'nx_vms')
 
-        all_platform_list = sorted(self.config.platforms.keys())
-        platform_list = [p for p in all_platform_list if self.params.get(p)]
-        job_list = [self.make_platform_job(platform) for platform in platform_list]
+        job_list = [self.make_platform_job(platform) for platform in self.requested_platform_list]
         return [
             ParallelCommand(job_list),
             self.make_python_stage_command('finalize'),

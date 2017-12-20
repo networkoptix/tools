@@ -7,7 +7,7 @@ import platform
 import shutil
 import tarfile
 import zipfile
-from utils import setup_logging, add_env_element, save_url_to_file
+from utils import setup_logging, prepend_env_element, save_url_to_file
 from host import LocalHost
 
 log = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class CMake(object):
     def run_cmake(self, cmake_args, env=None, cwd=None, check_retcode=True, timeout=None):
         cmake_bin_dir = os.path.join(
             os.getcwd(), CMAKE_ROOT_DIR, self._cmake_base_name, self.platform_config[self._system].bin_dir)
-        env = add_env_element(env or os.environ, 'PATH', cmake_bin_dir)
+        env = prepend_env_element(env or os.environ, 'PATH', cmake_bin_dir)
         log.debug('cmake path: %r', env['PATH'])
         args = ['cmake'] + cmake_args
         return self._host.run_command(args, cwd=cwd, env=env, check_retcode=check_retcode, timeout=timeout, merge_stderr=True)

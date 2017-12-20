@@ -53,14 +53,14 @@ def is_dict_inst(d, key_cls, value_cls):
 def quote(s, char='"'):
     return '%c%s%c' % (char, s, char)
 
-def add_env_element(env, name, value):
+def prepend_env_element(env, name, value):
     old_value = env.get(name)
     if old_value:
         old_list = old_value.split(os.pathsep)
     else:
         old_list = []
     env = env.copy()
-    env[name] = os.pathsep.join(old_list + [value])
+    env[name] = os.pathsep.join([value] + old_list)
     return env
 
 def save_url_to_file(source_url, dest_path):

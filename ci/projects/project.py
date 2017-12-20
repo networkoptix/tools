@@ -1,3 +1,5 @@
+# Base class for jenkins projects
+
 import logging
 import os.path
 import yaml
