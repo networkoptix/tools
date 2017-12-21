@@ -10,7 +10,8 @@ while [ "x$(cat $TASKBOT_VAR/var/ready.task || echo $LAST_SLOW_TASK)" \
          = "x$LAST_SLOW_TASK" ]
 do
     # Wait loop
-    date +"%Y-%m-%d %H:%M:%S  last=$LAST_SLOW_TASK ready=$(cat $TASKBOT_VAR/var/ready.task || echo missing)  : No changes"
+    date +"%Y-%m-%d %H:%M:%S : No changes"
+    echo "  TASKBOT_VAR=$TASKBOT_VAR last=$LAST_SLOW_TASK ready=$(cat $TASKBOT_VAR/var/ready.task || echo missing)"
     WAIT=300
     while [ $WAIT -gt 0 ]; do
         echo -n .
