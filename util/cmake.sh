@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PARTS="Clouds DesktopClient MediaServer MobileClient TestCamera Tests TrayTool"
 if [[ "$1" == *-h* ]]; then
 cat <<END
 Usage: [OPTION=value] $0 [cmake-options]
@@ -10,8 +11,13 @@ Options:
     R   = 1 for release build (used only with B)
     RD  = RDep sync option, default is OFF
     UP  = 1 fot mercurial pull & update
-    W   = Include only some components into build.
+    W   = Flags to include only some parts into build.
+Examples:
+    DB=../nx_vms-3.0 $0 -Dcustomization=hanwha
+    C=1 UP=1 W=MC B=mediaserver R=1 $0
+Part flags:
 END
+for PART in $PARTS; do echo "    ${PART:0:1}   = $PART"; done
 exit 0
 fi
 
@@ -40,12 +46,13 @@ if [ $W ]; then
     done
 fi
 
+SOURCE_DIR="$PWD"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
-cmake .. $OPTIONS "$@"
+cmake $SOURCE_DIR $OPTIONS "$@"
 
 if [ "$B" ]; then
     OPTIONS="--build ."
-    [ "$R" ] && OPTIONS="--config Release"
+    [ "$R" ] && OPTIONS+=" --config Release"
     cmake $OPTIONS --target "$B" "$@"
 fi

@@ -42,7 +42,7 @@ EXTRA=debug
 [ "$R" ] && EXTRA=release
 
 if [ $WINDIR ]; then
-    DIR=$(dirname $(find . -name $1.exe | grep $EXTRA | head -1))
+    DIR=$(dirname $(find . -name $1.exe | grep -i $EXTRA | head -1))
     PATH=$DEFAULT_DEVELOP/buildenv/packages/windows-x64/qt-${Q:-5.6.1-1}/bin
     $DIR/$@
     exit 0

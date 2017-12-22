@@ -6,9 +6,9 @@ cat <<END
 Runs tail with grep on mediaserver log file with grep.
 Usage: [OPTION=VALUE ...] $0 [paterns ...]
 Options:
-    DIR - config directory to use, default $HOME/develop/mediaserveri\$SRC
-    WIN - service name on windows
-    SRC - integer is for mediaserver id, "c" is for client
+    D   = config directory to use, default $HOME/develop/mediaserveri\$SRC
+    W   = service name on windows
+    S   = integer is for mediaserver id, "c" is for client
 END
 exit 0
 fi
@@ -16,15 +16,17 @@ fi
 set -e
 [ $X ] && set -x
 
-if [ ! "$DIR" ]; then
-    if [ "$WIN" ]; then
-        DIR="/c/Users/mux/AppData/Local/*/*$WIN*"
+if [ "$D" ]; then
+    DIRECTORY="$D"
+else
+    if [ "$W" ]; then
+        DIRECTORY="/c/Users/mux/AppData/Local/*/*$W*"
     else
-        SRC=${SRC:-*}
-        if [ $SRC == c ]; then
-            DIR="$HOME/.local/share/Network*/*"
+        SOURCE=${S:-*}
+        if [ "$SOURCE" == c ]; then
+            DIRECTIRY="$HOME/.local/share/Network*/*"
         else
-            DIR="$HOME/develop/mediaserver$SRC"
+            DIRECTORY="$HOME/develop/mediaserver$SOURCE"
         fi
     fi
 fi
@@ -41,4 +43,4 @@ while [ ! -z "$1" ]; do
 done
 
 set -x
-tail -F $DIR/log/log_file.log | grep $GREP_OPTIONS "$PATTERN"
+tail -F $DIRECTORY/log/log_file.log | grep $GREP_OPTIONS "$PATTERN"
