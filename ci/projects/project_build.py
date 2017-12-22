@@ -1,6 +1,7 @@
 # base project for CI and Release projects
 
 import logging
+import os.path
 import glob
 
 from pony.orm import db_session
@@ -11,6 +12,7 @@ from junk_shop import (
     BuildParameters,
     DbCaptureRepository,
     update_build_info,
+    run_unit_tests,
 )
 
 from project import JenkinsProject
@@ -26,6 +28,7 @@ from command import (
     StringProjectParameter,
     ChoiceProjectParameter,
     SetProjectPropertiesCommand,
+    SetBuildResultCommand,
 )
 from cmake import CMake
 from build import CMakeBuilder
@@ -188,6 +191,8 @@ class BuildProject(JenkinsProject):
             run, 'errors', 'errors', repository.artifact_type.output, '\n'.join(self._build_error_list), is_error=True)
 
     def post_build_actions(self, junk_shop_repository, build_info):
+        if not build_info.is_succeeded:
+            return None
         if self.has_artifacts(build_info.artifact_mask_list):
             command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
         else:
@@ -204,3 +209,28 @@ class BuildProject(JenkinsProject):
                 return True
         else:
             return False
+
+    def run_unit_tests(self, junk_shop_repository, build_info, timeout):
+        if self.is_unix:
+            ext = ''
+        else:
+            ext = '.exe'
+        unit_test_mask_list = os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext)
+        test_binary_list = [os.path.basename(path) for path in glob.glob(unit_test_mask_list)]
+        if not test_binary_list:
+            self.add_build_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
+            return
+        log.info('Running unit tests: %s', ', '.join(test_binary_list))
+        logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # Prevent from logging unit tests stdout/stderr
+        is_passed = run_unit_tests(
+            junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
+        log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
+
+    def make_set_build_result_command_list(self, build_info):
+        if build_info.has_failed_builds:
+            build_result = SetBuildResultCommand.brFAILURE
+        elif build_info.has_failed_tests:
+            build_result = SetBuildResultCommand.brUNSTABLE
+        else:
+            return None
+        return [SetBuildResultCommand(build_result)]

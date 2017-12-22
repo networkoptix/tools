@@ -5,16 +5,12 @@ import os.path
 import glob
 import sys
 
-from junk_shop import (
-    models,
-    run_unit_tests,
-    )
+from junk_shop import models
 from project_build import BuildProject
 from command import (
     ScriptCommand,
     CleanDirCommand,
     ParallelCommand,
-    SetBuildResultCommand,
     BooleanProjectParameter,
     )
 from email_sender import EmailSender
@@ -82,22 +78,6 @@ class CiProject(BuildProject):
 
         return self.post_build_actions(junk_shop_repository, build_info)
 
-    def run_unit_tests(self, junk_shop_repository, build_info, timeout):
-        if self.is_unix:
-            ext = ''
-        else:
-            ext = '.exe'
-        unit_test_mask_list = os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext)
-        test_binary_list = [os.path.basename(path) for path in glob.glob(unit_test_mask_list)]
-        if not test_binary_list:
-            self.add_build_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
-            return
-        log.info('Running unit tests: %s', ', '.join(test_binary_list))
-        logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # Prevent from logging unit tests stdout/stderr
-        is_passed = run_unit_tests(
-            junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
-        log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
-
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
         self.db_config.bind(models.db)
@@ -107,10 +87,4 @@ class CiProject(BuildProject):
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
-        if build_info.has_failed_builds:
-            build_result = SetBuildResultCommand.brFAILURE
-        elif build_info.has_failed_tests:
-            build_result = SetBuildResultCommand.brUNSTABLE
-        else:
-            return
-        return [SetBuildResultCommand(build_result)]
+        return self.make_set_build_result_command_list(build_info)

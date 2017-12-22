@@ -104,6 +104,9 @@ class ReleaseProject(BuildProject):
         junk_shop_repository = self.create_junk_shop_repository(platform=platform, customization=customization)
 
         build_info = self._build(junk_shop_repository, platform_branch_config, platform_config)
+        if platform_config.should_run_unit_tests and build_info.is_succeeded:
+            self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
+
         return self.post_build_actions(junk_shop_repository, build_info)
 
     def stage_finalize(self):
@@ -114,10 +117,4 @@ class ReleaseProject(BuildProject):
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_email(project, branch, build_num, test_mode=self.in_assist_mode)
-        if build_info.has_failed_builds:
-            build_result = SetBuildResultCommand.brFAILURE
-        elif build_info.has_failed_tests:
-            build_result = SetBuildResultCommand.brUNSTABLE
-        else:
-            return
-        return [SetBuildResultCommand(build_result)]
+        return self.make_set_build_result_command_list(build_info)
