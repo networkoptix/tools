@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
-BUILD_TIMEOUT = datetime.timedelta(hours=2)
+BUILD_TIMEOUT = datetime.timedelta(hours=4)
 
 
 class BuildInfo(namedtuple(
