@@ -1,0 +1,39 @@
+<html>
+<body onload="setup()">
+
+<form>
+    <textarea rows="1" cols="120" id="server"></textarea>
+    <br><br>
+    <textarea rows="5" cols="120" id="query"></textarea>
+    <br><br>
+    <input type="button" onclick="run()" value="Execute query!">
+</form>
+
+<script>
+    var serverField = document.getElementById("server");
+    var queryField = document.getElementById("query");
+        
+    function setup()
+    {
+        serverField.value = 
+            "http://" +
+            "statlord:razdvatri@" + 
+            "stats.networkoptix.com/statserver/api/sqlFormat/";
+            
+        queryField.value = 
+            "SELECT count(id) as serverCount\n" +
+            "FROM mediaservers\n" +
+            "WHERE 1\n" +
+            "LIMIT 100";
+    }
+        
+    function run()
+    {
+        var query = queryField.value.replace("\n", " ");
+        var url = serverField.value + encodeURI(query);
+        window.open(url, 800, 600); //< Just for window view.
+    }
+</script>
+
+</body>
+</html>
