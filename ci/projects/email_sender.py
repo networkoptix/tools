@@ -75,12 +75,12 @@ class EmailSender(object):
         for name, twc in self._config.tests_watchers.items():
             if (build_info.failed_test_list and
                 all(test_in_mask_list(test, twc.test_list) for test in build_info.failed_test_list)):
-                log.info('All failed tests are in %r wather list belonging to %r', name, twc.watcher_email)
+                log.info('All failed tests are in %r watcher list belonging to %r', name, twc.watcher_email)
                 return [twc.watcher_email]
         email_list = build_info.offender_email_list
         for name, twc in self._config.tests_watchers.items():
             if any(test_in_mask_list(test, twc.test_list) for test in build_info.failed_test_list):
-                log.info('Some failed tests are in %r wather list belonging to %r', name, twc.watcher_email)
+                log.info('Some failed tests are in %r watcher list belonging to %r', name, twc.watcher_email)
                 email_list.append(twc.watcher_email)
         return email_list
 

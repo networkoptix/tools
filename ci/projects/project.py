@@ -39,9 +39,9 @@ class JenkinsProject(object):
         self.in_assist_mode = in_assist_mode
 
     def run(self, stage_id):
-        fn = self._get_stage_method(stage_id)
-        assert fn, 'Unknown stage: %r' % stage_id
-        command_list = fn()
+        stage_method = self._get_stage_method(stage_id)
+        assert stage_method, 'Unknown stage: %r' % stage_id
+        command_list = stage_method(**self.current_command.custom_info)
         assert command_list is None or is_list_inst(command_list, Command), (
             'Method %r must return Command instance list or None, but returned: %r' % (method_name, command_list))
         return self.state.make_output_state(command_list)
@@ -54,7 +54,7 @@ class JenkinsProject(object):
         assert self._get_stage_method(stage_id), 'Unknown stage: %r' % stage_id
         python_path_list = [JUNK_SHOP_DIR] + (python_path_list or [])
         return PythonStageCommand(
-            self.project_id, stage_id, python_path_list, in_assist_mode=self.in_assist_mode, **kw)
+            self.project_id, stage_id, self.in_assist_mode, python_path_list, **kw)
 
     @property
     def initial_stash_command_list(self):
@@ -81,7 +81,7 @@ class JenkinsProject(object):
     def default_parameters(self):
         if self.in_assist_mode:
             return [
-                StringProjectParameter('project', 'project id to test', default_value='ci'),
+                StringProjectParameter('project', 'project id to test', default_value=self.project_id),
                 ]
         else:
             return []

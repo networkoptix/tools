@@ -9,13 +9,17 @@ import pprint
 from utils import setup_logging
 from command import CommandRegistry, register_all_commands
 from state import State
+from project_configure import ConfigureProject
 from project_ci import CiProject
+from project_release import ReleaseProject
 
 log = logging.getLogger(__name__)
 
 
 all_projects = [
+    ConfigureProject,
     CiProject,
+    ReleaseProject,
     ]
 
 

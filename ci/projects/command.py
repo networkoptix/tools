@@ -402,6 +402,11 @@ class SetBuildResultCommand(Command):
 
     command_id = 'set_build_result'
 
+    brSUCCESS = 'SUCCESS'
+    brFAILURE = 'FAILURE'
+    brUNSTABLE = 'UNSTABLE'
+    brABORTED = 'ABORTED'
+
     @classmethod
     def from_dict(cls, d, command_registry):
         return cls(
@@ -409,7 +414,7 @@ class SetBuildResultCommand(Command):
             )
 
     def __init__(self, build_result):
-        assert build_result in ['SUCCESS', 'FAILURE', 'UNSTABLE', 'ABORTED'], repr(build_result)
+        assert build_result in [self.brSUCCESS, self.brFAILURE, self.brUNSTABLE, self.brABORTED], repr(build_result)
         self.build_result = build_result
 
     def args_to_dict(self):
@@ -427,18 +432,21 @@ class PythonStageCommand(Command):
         return cls(
             project_id=d['project_id'],
             stage_id=d['stage_id'],
+            in_assist_mode=d['in_assist_mode'],
             python_path_list=d.get('python_path_list'),
             **{key: value for key, value in d.items()
-                   if key not in ['project_id', 'stage_id', 'python_path_list']}
+                   if key not in ['command_id', 'project_id', 'stage_id', 'in_assist_mode', 'python_path_list']}
             )
 
-    def __init__(self, project_id, stage_id, python_path_list=None, **kw):
+    def __init__(self, project_id, stage_id, in_assist_mode, python_path_list=None, **kw):
         assert isinstance(project_id, basestring), repr(project_id)
         assert isinstance(stage_id, basestring), repr(stage_id)
+        assert isinstance(in_assist_mode, bool), repr(in_assist_mode)
         assert python_path_list is None or is_list_inst(python_path_list, basestring), repr(python_path_list)
         self.project_id = project_id
         self.stage_id = stage_id
-        self.python_path_list = python_path_list or []
+        self.in_assist_mode = in_assist_mode
+        self.python_path_list = python_path_list or []  # used by Commander
         self.custom_info = kw
         for key, value in self.custom_info.items():
             setattr(self, key, value)
@@ -448,6 +456,7 @@ class PythonStageCommand(Command):
             self.custom_info,
             project_id=self.project_id,
             stage_id=self.stage_id,
+            in_assist_mode=self.in_assist_mode,
             python_path_list=self.python_path_list,
             )
 
