@@ -117,4 +117,6 @@ class ReleaseProject(BuildProject):
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_email(project, branch, build_num, test_mode=self.in_assist_mode)
+        # do not send, commiters have nothing to do with this release build
+        # todo: retrieve user who requested this build from jenkins env and send email to him/her
         return self.make_set_build_result_command_list(build_info)
