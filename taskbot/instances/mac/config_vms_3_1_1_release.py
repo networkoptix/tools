@@ -5,7 +5,7 @@
 
 import os
 
-TASKBOT_BRANCHNAME='vms_3.1.1_dev'
+TASKBOT_BRANCHNAME='vms_3.1.1_release'
 TASKBOT_ROOT = os.path.join(os.environ['HOME'], 'taskbot')
 TASKBOT_VAR = os.path.join(
   TASKBOT_ROOT, TASKBOT_BRANCHNAME)
@@ -20,8 +20,8 @@ config = {
   'max_output_size': 3 * 1024 * 1024,
   'watchers': {
     'Mikhail Uskov': 'muskov@networkoptix.com',
-    'Vsevolod Fedorov': 'vfedorov@networkoptix.com',
-    'George Sovetov': 'gsovetov@networkoptix.com',
+    'Roman Vasilenko': 'rvasilenko@networkoptix.com',
+    'Andrey Kolesnikov': 'akolesnikov@networkoptix.com',
     },
   'environment' : {
     'TASKBOT_BRANCHNAME': TASKBOT_BRANCHNAME,
