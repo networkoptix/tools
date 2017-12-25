@@ -26,6 +26,7 @@ class Branch(db.Entity):
 
 class Platform(db.Entity):
     name = Required(str)
+    order_num = Required(int, default=100)
     runs = Set('Run')
 
 class RunParameter(db.Entity):

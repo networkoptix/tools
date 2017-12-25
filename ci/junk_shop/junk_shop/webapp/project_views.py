@@ -43,7 +43,7 @@ def project_list():
         project_list.setdefault(build.project, {})[build.branch] = build
         rec = platform_map.setdefault((build.project, build.branch, run.platform), PlatformRec(build, run))
         rec.set_run(run)
-    platform_list = models.Platform.select()
+    platform_list = models.Platform.select().order_by(models.Platform.order_num)
     return render_template(
         'project_list.html',
         platform_list=platform_list,
@@ -76,7 +76,7 @@ def branch(project_name, branch_name):
         run.root_run.platform.name for run in models.Run
         if run.root_run.build.project.name == project_name and run.root_run.build.branch.name == branch_name and
            run.test.path.startswith('functional/scalability_test.py') and run.test.is_leaf and exists(run.metrics)))
-    platform_list = list(select(run.platform for run in models.Run if run.build in build_list))
+    platform_list = list(select(run.platform for run in models.Run if run.build in build_list).order_by(models.Platform.order_num))
     return render_template(
         'branch.html',
         paginator=paginator(page, rec_count, page_size),
