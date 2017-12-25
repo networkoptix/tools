@@ -19,6 +19,7 @@ class CloudGroup(db.Entity):
 class Customization(db.Entity):
     name = Required(str)
     builds = Set('Build')
+    runs = Set('Run')
 
 class Branch(db.Entity):
     name = Required(str)
@@ -93,6 +94,7 @@ class Run(db.Entity):
     error_message = Optional(str)
     started_at = Required(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)
+    customization = Optional(Customization)
     platform = Optional(Platform)
     children = Set('Run')
     artifacts = Set('Artifact')

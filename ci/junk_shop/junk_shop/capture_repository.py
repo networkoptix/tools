@@ -208,6 +208,7 @@ class DbCaptureRepository(object):
     def _set_paramerers(self, run):
         if self.build_parameters:
             run.build = self.produce_build()
+            run.customization = self._produce_build_parameter('customization')
             run.platform = self._produce_build_parameter('platform')
         if self.run_parameters:
             for name, value in self.run_parameters.items():
