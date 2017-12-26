@@ -25,7 +25,7 @@ ENV BUILD_PACKAGES_X11_SCREEN_SAVER_EXTENSION_LIB "libxss-dev libxss-dev:i386"
 ENV BUILD_PACKAGES_GSTREAMER "libgstreamer0.10 libgstreamer0.10-0:i386 libgstreamer-plugins-base0.10-0:i386"
 ENV BUILD_PACKAGES_XSLT "libxslt1.1 libxslt1.1:i386"
 ENV BUILD_PACKAGES_X_I386 "libxrender1:i386 libxcomposite1:i386"
-ENV BUILD_PACKAGES_INSTALLER_TOOLS "zip"
+ENV BUILD_PACKAGES_INSTALLER_TOOLS "zip fakeroot"
 
 ENV FUNTEST_PACKAGES "python-demjson python-opencv"
 
