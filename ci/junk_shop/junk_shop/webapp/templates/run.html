@@ -22,7 +22,7 @@
     (project_name + ' / ' + branch_name, url_for('branch', project_name=project_name, branch_name=branch_name)),
   ]) }}
 
-  <h2>{{ run_version }} / {{ platform_name }} / {{ run_name }}</h2>
+  <h2>{{ run.build.build_num }} {%- if run.customization %} / {{ run.customization.name }} {% endif -%} / {{ platform_name }} / {{ run.name }}</h2>
 
   <hr>
 

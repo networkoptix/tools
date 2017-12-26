@@ -21,7 +21,7 @@
 
   {% else %}
 
-    <table class="project-list platforms-wide">
+    <table class="project-list {{ matrix_macros.platform_width_class(platform_list) }}">
       <thead>
         <tr>
           <th></th>
@@ -63,6 +63,6 @@
       </tbody>
     </table>
 
-{% endif %}
+  {% endif %}
 
 {% endblock contents %}

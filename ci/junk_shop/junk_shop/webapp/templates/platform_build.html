@@ -15,13 +15,14 @@
   {{ common_macros.breadcrumbs([
     ('Projects',  url_for('project_list')),
     (build.project.name + ' / ' + build.branch.name, url_for('branch', project_name=build.project.name, branch_name=build.branch.name)),
+    (build.build_num, url_for('build', project_name=build.project.name, branch_name=build.branch.name, build_num=build.build_num)),
   ]) }}
 
-  <h2>{{ build.build_num }}</h2>
+  <h2>{{ customization.name }} / {{ platform.name }}</h2>
   <hr>
 
   {{ build_macros.build_info_block(build, started_at) }}
   {{ build_macros.changeset_list_block(changeset_list) }}
-  {{ build_macros.build_platform_list(platform_list) }}
+  {{ build_macros.build_platform_block(platform, show_succeeded_builds=True) }}
 
 {% endblock contents %}

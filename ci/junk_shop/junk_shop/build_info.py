@@ -94,11 +94,7 @@ class Platform(object):
 
 BuildInfo = namedtuple('BuildInfo', [
     'build',
-    'project_name',
-    'branch_name',
     'started_at',
-    'repository',
-    'jenkins_build_num',
     'changeset_list',
     'platform_list',
     'failed_build_platform_list',
@@ -106,17 +102,28 @@ BuildInfo = namedtuple('BuildInfo', [
     'failed_test_list',
     ])
 
+PlatformBuildInfo = namedtuple('PlatformBuildInfo', [
+    'build',
+    'started_at',
+    'customization',
+    'platform',
+    ])
+
 
 class BuildInfoLoader(object):
 
-    def __init__(self, project_name, branch_name, build_num):
-        self.project_name = project_name
-        self.branch_name = branch_name
-        self.build_num = build_num
-        self.build = models.Build.get(lambda build:
-            build.project.name == self.project_name and
-            build.branch.name == self.branch_name and
-            build.build_num == self.build_num)
+    @classmethod
+    def from_project_branch_num(cls, project_name, branch_name, build_num):
+        build = models.Build.get(lambda build:
+            build.project.name == project_name and
+            build.branch.name == branch_name and
+            build.build_num == build_num)
+        return cls(build)
+
+    def __init__(self, build, customization=None, platform=None):
+        self.build = build
+        self.customization = customization
+        self.platform = platform
         self.platform_map = {}  # models.Platform -> Platform
         self.stage_map = {}  # models.Run (root run) -> Stage
         self.started_at = None  # minimal started_at field from all Runs
@@ -124,16 +131,21 @@ class BuildInfoLoader(object):
         self.failed_tests_platform_set = set()
         self.failed_test_set = set()  # failed test list from all platforms
 
-    def produce_platform(self, platform_model):
+    def _is_run_wanted(self, root_run):
+        if not self.customization or not self.platform:
+            return True
+        return root_run.customization is self.customization and root_run.platform is self.platform
+
+    def _produce_platform(self, platform_model):
         platform = self.platform_map.get(platform_model)
         if not platform:
             platform = Platform(platform_model.name, platform_model.order_num)
             self.platform_map[platform_model] = platform
         return platform
 
-    def produce_stage(self, root_run, stage_cls):
-        self.update_started_at(root_run)
-        platform = self.produce_platform(root_run.platform)
+    def _produce_stage(self, root_run, stage_cls):
+        self._update_started_at(root_run)
+        platform = self._produce_platform(root_run.platform)
         stage = self.stage_map.get(root_run)
         if not stage:
             stage = stage_cls(root_run)
@@ -141,11 +153,11 @@ class BuildInfoLoader(object):
             self.stage_map[root_run] = stage
         return stage
 
-    def update_started_at(self, run):
+    def _update_started_at(self, run):
         if not self.started_at or run.started_at < self.started_at:
             self.started_at = run.started_at  # this is first run for this build
 
-    def create_leaf_test_runs(self):
+    def _create_leaf_test_runs(self):
         # load 'passed' leaf test run counts
         for root_run, run_count in select(
                 (root_run, count(run))
@@ -155,7 +167,8 @@ class BuildInfoLoader(object):
                 root_run.build is self.build and
                 run.test.is_leaf and
                 run.outcome == 'passed'):
-            stage = self.produce_stage(root_run, TestsStage)
+            if not self._is_run_wanted(root_run): continue
+            stage = self._produce_stage(root_run, TestsStage)
             stage.passed_count = run_count
         # load 'interesting' leaf test runs
         for run, test, root_run in select(
@@ -166,14 +179,15 @@ class BuildInfoLoader(object):
                 root_run.build is self.build and
                 run.test.is_leaf and
                 (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
-            stage = self.produce_stage(root_run, TestsStage)
+            if not self._is_run_wanted(root_run): continue
+            stage = self._produce_stage(root_run, TestsStage)
             stage.add_run(run)
             if run.outcome == 'failed':
                 self.failed_tests_platform_set.add(root_run.platform.name)
                 self.failed_test_set.add(test.path)
 
     # ensure failed runs show up when there is no leafs for them
-    def create_non_leaf_failed_test_runs(self):
+    def _create_non_leaf_failed_test_runs(self):
         for run, test, root_run in select(
                 (run, run.test, root_run)
                 for root_run in models.Run
@@ -184,12 +198,13 @@ class BuildInfoLoader(object):
                 not exists(child for child in root_run.children if
                                child.path.startswith(run.path) and
                                child is not run)).order_by(1):
-            stage = self.produce_stage(root_run, TestsStage)
+            if not self._is_run_wanted(root_run): continue
+            stage = self._produce_stage(root_run, TestsStage)
             stage.add_run(run)
             self.failed_tests_platform_set.add(root_run.platform.name)
             self.failed_test_set.add(test.path)
 
-    def load_build_artifacts(self):
+    def _load_build_artifacts(self):
         platform2artifact = {}
         for run, artifact in select(
                 (run, artifact)
@@ -197,23 +212,24 @@ class BuildInfoLoader(object):
                 for artifact in run.artifacts
                 if run.build is self.build and
                 run.name == 'build'):
-            self.update_started_at(run)
-            platform = self.produce_platform(run.platform)
+            if not self._is_run_wanted(run): continue
+            self._update_started_at(run)
+            platform = self._produce_platform(run.platform)
             if artifact.short_name == 'output':
                 platform.build_artifact = artifact
             if artifact.short_name == 'errors':
-                platform.error_list = self.artifact_as_lines(artifact)
+                platform.error_list = self._artifact_as_lines(artifact)
             if artifact.short_name == 'build-errors':
-                platform.build_error_list = self.artifact_as_lines(artifact)
+                platform.build_error_list = self._artifact_as_lines(artifact)
             if run.outcome == 'failed':
                 self.failed_build_platform_set.add(run.platform.name)
 
     @staticmethod
-    def artifact_as_lines(artifact):
+    def _artifact_as_lines(artifact):
         data = decode_artifact_data(artifact)
         return data.splitlines()
 
-    def load_test_stage_errors(self):
+    def _load_test_stage_errors(self):
         for root_run, artifact in select(
                 (root_run, artifact)
                 for root_run in models.Run
@@ -221,12 +237,13 @@ class BuildInfoLoader(object):
                 if root_run.build is self.build and
                 root_run.name != 'build' and
                 artifact.short_name == 'errors'):
-            stage = self.produce_stage(root_run, Stage)
-            stage.error_list = self.artifact_as_lines(artifact)
+            if not self._is_run_wanted(root_run): continue
+            stage = self._produce_stage(root_run, Stage)
+            stage.error_list = self._artifact_as_lines(artifact)
             self.failed_tests_platform_set.add(root_run.platform.name)
 
     # have to load them separately as tracebacks are attached to top-level unit test runs, not to leaf ones
-    def load_tracebacks(self):
+    def _load_tracebacks(self):
         for root_run, run, artifact in select(
                 (root_run, run, artifact)
                 for root_run in models.Run
@@ -236,34 +253,45 @@ class BuildInfoLoader(object):
                 run.root_run is root_run and
                 root_run.test.path == 'unit' and
                 artifact.type.name == 'traceback'):
-            stage = self.produce_stage(root_run, TestsStage)
+            if not self._is_run_wanted(root_run): continue
+            stage = self._produce_stage(root_run, TestsStage)
             tr = stage.add_run(run)
             if tr:
                 tr.traceback_list.append(artifact)
 
-    def load_build_info(self):
-        repository = self.build.repository_url.split('/')[-1]
-        jenkins_build_num = self.build.jenkins_url.rstrip('/').split('/')[-1]
+    def _load_build_data(self):
+        self._load_tracebacks()
+        self._create_leaf_test_runs()
+        self._create_non_leaf_failed_test_runs()
+        self._load_build_artifacts()
+        self._load_test_stage_errors()
+    
+    def load_build_platform_list(self):
+        self._load_build_data()
+
         changeset_list = list(self.build.changesets.order_by(desc(1)))
-
-        self.load_tracebacks()
-        self.create_leaf_test_runs()
-        self.create_non_leaf_failed_test_runs()
-        self.load_build_artifacts()
-        self.load_test_stage_errors()
-
         platform_list = [value for key, value in sorted(self.platform_map.items(), key=lambda (key, value): value.order_num)]
 
         return BuildInfo(
             build=self.build,
-            project_name=self.project_name,
-            branch_name=self.branch_name,
             started_at=self.started_at,
-            repository=repository,
-            jenkins_build_num=jenkins_build_num,
             changeset_list=changeset_list,
             platform_list=platform_list,
             failed_build_platform_list=list(self.failed_build_platform_set),
             failed_tests_platform_list=list(self.failed_tests_platform_set),
             failed_test_list=list(self.failed_test_set),
+            )
+
+    def load_build_platform(self):
+        assert self.customization and self.platform  # this method intended only for platform build
+        self._load_build_data()
+
+        assert len(self.platform_map) == 1, repr(self.platform_map)
+        platform = self.platform_map.popitem()[1]
+
+        return PlatformBuildInfo(
+            build=self.build,
+            started_at=self.started_at,
+            customization=self.customization,
+            platform=platform,
             )

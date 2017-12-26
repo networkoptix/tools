@@ -51,8 +51,8 @@ class EmailSender(object):
 
     @db_session
     def render_email(self, project, branch, build_num, test_mode=True):
-        loader = BuildInfoLoader(project, branch, build_num)
-        build_info = loader.load_build_info()
+        loader = BuildInfoLoader.from_project_branch_num(project, branch, build_num)
+        build_info = loader.load_build_platform_list()
         offender_email_list = set('{} <{}>'.format(changeset.user, changeset.email) for changeset in build_info.changeset_list)
         subject_and_html = self._renderer.render(
             'build_email.html',

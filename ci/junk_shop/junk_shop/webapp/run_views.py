@@ -33,7 +33,7 @@ def run(run_id):
     run = get_or_abort(models.Run, run_id)
     return render_template(
         'run.html',
-        run_name=run.name,
+        run=run,
         project_name=run.build.project.name,
         branch_name=run.build.branch.name,
         platform_name=run.platform.name,

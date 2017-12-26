@@ -3,7 +3,9 @@
 
   <div class="tests-block" align="center">
     {% if rec.run %}
-      <a href="{{ url_for('run', run_id=rec.run.id) }}"
+      {% set build = rec.run.build %}
+      <a href="{{ url_for('platform_build', project_name=build.project.name, branch_name=build.branch.name, build_num=build.build_num,
+                                            customization_name=rec.run.customization.name, platform_name=rec.run.platform.name) }}"
          class="outcome outcome-{{ rec.run.outcome|default('not-run', true) }} has-run">
          {{ name }}
       </a>
@@ -70,4 +72,13 @@
       {{ run_link('functional', element.functional if element else None) }}
     </div>
   </div>
+{% endmacro %}
+
+
+{% macro platform_width_class(platform_list) %}
+  {%- if platform_list|length <= 5 -%}
+    platforms-narrow
+  {%- else -%}
+    platforms-wide
+  {%- endif -%}
 {% endmacro %}

@@ -18,6 +18,7 @@ class CloudGroup(db.Entity):
 
 class Customization(db.Entity):
     name = Required(str)
+    order_num = Required(int, default=100)
     builds = Set('Build')
     runs = Set('Run')
 
@@ -71,6 +72,15 @@ class Build(db.Entity):
     composite_key(project, branch, build_num)
     runs = Set('Run')
     changesets = Set('BuildChangeSet')
+
+    @property
+    def jenkins_build_num(self):
+        return self.jenkins_url.rstrip('/').split('/')[-1]
+
+    @property
+    def repository(self):
+        return self.repository_url.split('/')[-1]
+
 
 class BuildChangeSet(db.Entity):
     _table_ = 'build_changeset'

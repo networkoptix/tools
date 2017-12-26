@@ -1,26 +1,12 @@
 from flask import request, render_template
 from pony.orm import db_session, select, desc, exists
-from ..utils import SimpleNamespace
 from .. import models
 from junk_shop.webapp import app
 from .utils import paginator
+from .matrix_cell import MatrixCell
 
 
 DEFAULT_BUILD_LIST_PAGE_SIZE = 10
-
-
-class PlatformRec(object):
-
-    def __init__(self, build, run):
-        self.version = build.version
-        self.started_at = run.started_at
-        self.build = None
-        self.unit = None
-        self.functional = None
-
-    def set_run(self, run):
-        setattr(self, run.test.path, SimpleNamespace(run=run))
-        self.started_at = min(filter(None, [self.started_at, run.started_at]))
 
 
 @app.route('/project/')
@@ -33,7 +19,7 @@ def project_list():
                if exists(build.runs))}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
     project_list = {}  # project -> branch -> build
-    platform_map = {}  # (project, branch, platform) -> PlatformRec
+    platform_map = {}  # (project, branch, platform) -> MatrixCell
     for build, run in select(
             (run.build, run) for run in models.Run
             if run.build.build_num in build_num_set and
@@ -41,8 +27,8 @@ def project_list():
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue
         project_list.setdefault(build.project, {})[build.branch] = build
-        rec = platform_map.setdefault((build.project, build.branch, run.platform), PlatformRec(build, run))
-        rec.set_run(run)
+        cell = platform_map.setdefault((build.project, build.branch, run.platform), MatrixCell())
+        cell.add_run(run)
     platform_list = models.Platform.select().order_by(models.Platform.order_num)
     return render_template(
         'project_list.html',
@@ -66,12 +52,12 @@ def branch(project_name, branch_name):
     for changeset in select(build.changesets for build in models.Build if build in build_list).order_by(desc(1)):
         changeset_list = build_changesets_map.setdefault(changeset.build, [])
         changeset_list.append(changeset)
-    platform_map = {}  # (build, platform) -> PlatformRec
+    platform_map = {}  # (build, platform) -> MatrixCell
     for build, run in select(
             (run.build, run) for run in models.Run
             if run.build in build_list and run.test.path in ['build', 'unit', 'functional']).order_by(2):
-        rec = platform_map.setdefault((build, run.platform), PlatformRec(build, run))
-        rec.set_run(run)
+        cell = platform_map.setdefault((build, run.platform), MatrixCell())
+        cell.add_run(run)
     scalability_platform_list = list(select(
         run.root_run.platform.name for run in models.Run
         if run.root_run.build.project.name == project_name and run.root_run.build.branch.name == branch_name and

@@ -1,3 +1,6 @@
+{% import "common_macros.html" as common_macros %}
+
+
 {% macro test_row(root_run, itr) %}
 
   <td>
@@ -34,6 +37,95 @@
 {% endmacro %}
 
 
+{% macro build_platform_block(platform, show_succeeded_builds=False) %}
+
+  <div class="platform-build-blocks">
+    {% if platform.error_list or platform.build_error_list %}
+      <div class="build-block block">
+        <h3>
+          {% if platform.build_artifact %}
+            <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
+              Build errors
+            </a>
+          {% else %}
+            Build errors
+          {% endif %}
+        </h3>
+        {% if platform.error_list %}
+          <div class="run-errors">
+            {% for error in platform.error_list %}
+              {{ error }}<br/>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="build-errors">
+          {% for line in platform.build_error_list %}
+            {{- line|truncate -}} <br/>
+          {% endfor %}
+        </div>
+      </div>
+    {% elif show_succeeded_builds %}
+      <div class="build-block block">
+        <h3>
+          {% if platform.build_artifact %}
+            <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
+              Build succeeded
+            </a>
+          {% else %}
+            Build succeeded
+          {% endif %}
+        </h3>
+      </div>
+    {% endif %}
+    {% for stage in platform.stage_list|sort %}
+      <div class="build-block block">
+        <h3>
+          <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
+          {%- if stage.stage_name == 'unit' -%}
+            Unit&nbsp;Tests
+          {%- elif stage.stage_name == 'functional' -%}
+            Functional&nbsp;Tests
+          {%- endif -%}
+          </a>
+        </h3>
+        <div class="test-counts">
+          <span class="passed">{{ stage.passed_count }}</span>
+          {% if stage.failed_count %}
+            / <span class="failed">{{ stage.failed_count }}</span>
+          {% endif %}
+        </div>
+        {% if stage.error_list %}
+          <div class="run-errors">
+            {% for error in stage.error_list %}
+              {{ error }}<br/>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if stage.run_list %}
+          <table class="test-list">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for run in stage.run_list %}
+                <tr>
+                  {{ test_row(stage.root_run, run) }}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+{% endmacro %}
+
 {% macro build_platform_list(platform_list) %}
 
   {% for platform in platform_list %}
@@ -47,78 +139,75 @@
       {%- endif -%}
     </h2>
     <hr>
-    <div class="platform-build-blocks">
-      {% if platform.error_list or platform.build_error_list %}
-        <div class="build-block block">
-          <h3>
-            {% if platform.build_artifact %}
-              <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
-                Build errors
-              </a>
-            {% else %}
-              Build errors
-            {% endif %}
-          </h3>
-          {% if platform.error_list %}
-            <div class="run-errors">
-              {% for error in platform.error_list %}
-                {{ error }}<br/>
-              {% endfor %}
-            </div>
-          {% endif %}
-          <div class="build-errors">
-            {% for line in platform.build_error_list %}
-              {{- line|truncate -}} <br/>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-      {% for stage in platform.stage_list|sort %}
-        <div class="build-block block">
-          <h3>
-            <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
-            {%- if stage.stage_name == 'unit' -%}
-              Unit&nbsp;Tests
-            {%- elif stage.stage_name == 'functional' -%}
-              Functional&nbsp;Tests
-            {%- endif -%}
-            </a>
-          </h3>
-          <div class="test-counts">
-            <span class="passed">{{ stage.passed_count }}</span>
-            {% if stage.failed_count %}
-              / <span class="failed">{{ stage.failed_count }}</span>
-            {% endif %}
-          </div>
-          {% if stage.error_list %}
-            <div class="run-errors">
-              {% for error in stage.error_list %}
-                {{ error }}<br/>
-              {% endfor %}
-            </div>
-          {% endif %}
-          {% if stage.run_list %}
-            <table class="test-list">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for run in stage.run_list %}
-                  <tr>
-                    {{ test_row(stage.root_run, run) }}
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </div>
+    {{ build_platform_block(platform) }}
   {% endfor %}
+
+{% endmacro %}
+
+
+{% macro build_info_block(build, started_at) %}
+
+  <div class="build-info">
+    <div>
+      <div class="title">Started at</div>
+      <div class="markup-value">{{ started_at|format_datetime }}</div>
+    </div>
+    {% if build.version %}
+      <div>
+        <div class="title">Version</div>
+        <div class="value">{{ build.version }}</div>
+      </div>
+    {% endif %}
+    {% if build.revision %}
+      <div>
+        <div class="title">Revision</div>
+        <div class="value">{{ build.repository }} #{{ build.revision|decorate_revision(build.repository_url) }}</div>
+      </div>
+    {% endif %}
+    {% if build.is_incremental is not none %}
+      <div>
+        <div class="title">Build</div>
+        <div class="value"> {%- if build.is_incremental -%} Incremental {%- else -%} Full {%- endif -%} </div>
+      </div>
+    {% endif %}
+    {% if build.jenkins_url %}
+      <div>
+        <div class="title">Jenkins page</div>
+        <div class="value">
+          <a href="{{ build.jenkins_url }}">Build #{{ build.jenkins_build_num }}</a>
+        </div>
+      </div>
+    {% endif %}
+    {% if build.cloud_group %}
+      <div>
+        <div class="title">Cloud group</div>
+        <div class="value">{{ build.cloud_group.name }}</div>
+      </div>
+    {% endif %}
+    {% if build.configuration %}
+      <div>
+        <div class="title">Configuration</div>
+        <div class="value">{{ build.configuration }}</div>
+      </div>
+    {% endif %}
+    {% if build.customization %}
+      <div>
+        <div class="title">Customization</div>
+        <div class="value">{{ build.customization.name }}</div>
+      </div>
+    {% endif %}
+  </div>
+
+{% endmacro %}
+
+
+{% macro changeset_list_block(changeset_list) %}
+
+  {% if changeset_list %}
+    <div class="commit-block block">
+      <h3>Commits</h3>
+      {{ common_macros.changeset_list(changeset_list) }}
+    </div>
+  {% endif %}
 
 {% endmacro %}

@@ -60,7 +60,7 @@
 {%- endmacro -%}
 
 [CI] {# make single space #}
-{{- project_name }} / {{ branch_name -}}: {# make single space #}
+{{- build.project.name }} / {{ build.branch.name -}}: {# make single space #}
 {%- call(build_name) title() -%}
   {{- build_name -}}
 {%- endcall %}
@@ -78,9 +78,9 @@
   <body>
 
     <h3>
-      {{- project_name }} / {{ branch_name -}}: {# make single space #}
+      {{- build.project.name }} / {{ build.branch.name -}}: {# make single space #}
       {% call(build_name) title() -%}
-        <a href="{{ url_for('build', project_name=project_name, branch_name=branch_name, build_num=build.build_num) }}">
+        <a href="{{ url_for('build', project_name=build.project.name, branch_name=build.branch.name, build_num=build.build_num) }}">
           {{- build_name -}}
         </a>
       {%- endcall %}
