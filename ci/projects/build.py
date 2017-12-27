@@ -10,9 +10,9 @@ import yaml
 
 from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
 from config import PlatformConfig, Config, PlatformBranchConfig, BranchConfig
-from host import CommandResults, LocalHost
+from host import ProcessTimeoutError, CommandResults, LocalHost
 from cmake import CMake
-from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_exit_code
+from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_error
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +39,22 @@ class BuildInfo(namedtuple(
             unit_tests_bin_dir=unit_tests_bin_dir,
             run_id=run_id,
             )
+
+
+class CMakeResults(object):
+
+    @classmethod
+    def from_command_results(cls, results):
+        if results.exit_code != 0:
+            error_message = 'Exit code: %d' % results.exit_code
+        else:
+            error_message = None
+        return cls(results.stdout, error_message, succeeded=results.exit_code==0)
+
+    def __init__(self, output, error_message, succeeded):
+        self.output = output
+        self.error_message = error_message
+        self.succeeded = succeeded
 
 
 class CMakeBuilder(object):
@@ -71,19 +87,21 @@ class CMakeBuilder(object):
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
         configure_results = self._configure(src_dir, build_dir, branch_config, build_params, cmake_configuration)
-        exit_code = configure_results.exit_code
-        output = configure_results.stdout
-        if configure_results.exit_code == 0:
+        succeeded = configure_results.succeeded
+        error_message = configure_results.error_message
+        output = configure_results.output
+        if configure_results.succeeded:
             build_results = self._build(build_dir, cmake_configuration)
-            exit_code = build_results.exit_code
-            output += '\n' + build_results.stdout
-            if build_results.exit_code == 0:
+            output += '\n' + build_results.output
+            if build_results.succeeded:
                 log.info('Building with cmake succeeded')
             else:
-                log.info('Building with cmake failed with exit code: %d', build_results.exit_code)
+                succeeded = False
+                error_message = build_results.error_message
+                log.info('Building with cmake failed: %s', build_results.error_message)
         else:
-            log.info('Configuring with cmake failed with exit code: %d', configure_results.exit_code)
-        build_info = store_output_and_exit_code(junk_shop_repository, output, exit_code)
+            log.info('Configuring with cmake failed: %s', configure_results.error_message)
+        build_info = store_output_and_error(junk_shop_repository, output, succeeded, error_message)
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
@@ -142,7 +160,7 @@ class CMakeBuilder(object):
         # if build_params.target_device:
         #     configure_args.append('-DtargetDevice=%s' % build_params.target_device)
         log.info('Configuring with cmake: %s', self._host.args2cmdline(configure_args))
-        return self._cmake.run_cmake(
+        return self._run_cmake(
             configure_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=CONFIGURE_TIMEOUT)
 
     def _build(self, build_dir, cmake_configuration):
@@ -151,8 +169,16 @@ class CMakeBuilder(object):
             '--config', cmake_configuration,
             ]
         log.info('Building with cmake: %s', self._host.args2cmdline(build_args))
-        return self._cmake.run_cmake(
+        return self._run_cmake(
             build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
+
+    def _run_cmake(self, *args, **kw):
+        try:
+            command_results = self._cmake.run_cmake(*args, **kw)
+            return CMakeResults.from_command_results(command_results)
+        except ProcessTimeoutError as x:
+            error_message = 'Timed out after %s' % x.timeout
+            return CMakeResults(x.output, error_message, succeeded=False)
 
     def _platform2target_device(self, platform):
         if platform in ['linux-x64', 'win-x64', 'mac']:
@@ -175,9 +201,6 @@ def test_me():
     setup_logging(logging.DEBUG)
     cmake = CMake('3.9.6')
     cmake.ensure_required_cmake_operational()
-
-    sys.path.append(os.path.expanduser('~/proj/devtools/ci/junk_shop'))
-    from junk_shop import BuildParameters, store_output_and_exit_code
 
     config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
     config = Config.from_dict(yaml.load(open(config_path)))

@@ -44,8 +44,8 @@ def get_severity_output(severity, output):
 StoredBuildInfo = namedtuple('StoredBuildInfo', 'passed outcome run_id')
 
 @db_session
-def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcome=False):
-    passed = True
+def store_output_and_error(repository, output, succeeded, error_message, parse_maven_outcome=False):
+    passed = succeeded
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
     repository.add_artifact(run, 'output', 'build-output', repository.artifact_type.output, output)
@@ -59,44 +59,9 @@ def store_output_and_exit_code(repository, output, exit_code, parse_maven_outcom
         outcome = parse_maven_output(output)
         if not outcome:
             passed = False
-    if exit_code is not None and exit_code != 0:
-        passed = False
-        exit_code_message = 'Exit code: %d' % exit_code
+    if error_message:
         repository.add_artifact(
-            run, 'exit code', 'build-exit-code', repository.artifact_type.output, exit_code_message, is_error=not passed)
+            run, 'error', 'build-error', repository.artifact_type.output, error_message, is_error=True)
     outcome = status2outcome(passed)
     run.outcome = outcome
     return StoredBuildInfo(passed, outcome, run.id)
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
-                        help='Capture postgres database credentials')
-    parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
-                        help='Build parameters')
-    parser.add_argument('--exit-code', type=int, dest='exit_code', help='Exit code from the build to store to db')
-    parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
-                        help='Parse output to determine maven outcome')
-    parser.add_argument('--signal-failure', action='store_true', help='Exit with code 2 if this build is failed one')
-    parser.add_argument('output_file', nargs='+', help='Build output file')
-    args = parser.parse_args()
-    try:
-        output = load_output_file_list(args.output_file)
-        repository = DbCaptureRepository(args.db_config, args.build_parameters)
-        build_info = store_output_and_exit_code(
-            repository,
-            output,
-            args.exit_code,
-            args.parse_maven_outcome,
-            )
-        print 'Created %s run#%d' % (build_info.outcome, build_info.run_id)
-        if not build_info.passed and args.signal_failure:
-            sys.exit(2)
-    except RuntimeError as x:
-        print x
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()

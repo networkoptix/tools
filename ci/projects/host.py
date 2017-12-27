@@ -14,10 +14,11 @@ import errno
 import glob
 import platform
 import shutil
+
 import pytz
 import tzlocal
-from utils import quote, is_list_inst
 
+from utils import quote, is_list_inst
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +28,12 @@ PROCESS_TIMEOUT = datetime.timedelta(hours=1)
 
 class ProcessError(subprocess.CalledProcessError):
 
+    def __init__(self, cmd, stdout, stderr, exit_code=None):
+        subprocess.CalledProcessError.__init__(self, exit_code, cmd, stderr)
+        self.exit_code = exit_code
+        self.stdout = stdout
+        self.stderr = stderr
+
     def __str__(self):
         return 'Command "%s" returned non-zero exit status %d:\n%s' % (self.cmd, self.returncode, self.output)
 
@@ -34,10 +41,11 @@ class ProcessError(subprocess.CalledProcessError):
         return 'ProcessError(%s)' % self
 
 
-class ProcessTimeoutError(subprocess.CalledProcessError):
+class ProcessTimeoutError(ProcessError):
 
-    def __init__(self, cmd, timeout):
-        subprocess.CalledProcessError.__init__(self, returncode=None, cmd=cmd)
+    def __init__(self, cmd, stdout, stderr, timeout):
+        assert timeout is None or isinstance(timeout, datetime.timedelta), repr(timeout)
+        ProcessError.__init__(self, cmd, stdout, stderr)
         self.timeout = timeout
 
     def __str__(self):
@@ -199,6 +207,7 @@ class LocalHost(Host):
 
     def run_command(self, args, input=None, cwd=None, env=None, check_retcode=True, log_output=True, timeout=None, merge_stderr=False):
         assert is_list_inst(args, (str, unicode)), repr(args)
+        assert timeout is None or isinstance(timeout, datetime.timedelta), repr(timeout)
         timeout = timeout or PROCESS_TIMEOUT
         args = map(str, args)
         if input:
@@ -244,16 +253,20 @@ class LocalHost(Host):
                 if not stdout_thread.isAlive():
                     stderr_thread.join(timeout=timeout.total_seconds())
                 if stdout_thread.isAlive() or stderr_thread.isAlive():
-                    pipe.kill()
-                    raise ProcessTimeoutError(subprocess.list2cmdline(args), timeout)
+                    log.debug('Timed out')
+                    pipe.kill()  # won't work under windows; todo
+                    pipe.wait()
+                    if stdout_thread.isAlive():
+                        stdout_thread.join()
+                    if stderr_thread.isAlive():
+                        stderr_thread.join()
+                    raise ProcessTimeoutError(subprocess.list2cmdline(args), ''.join(stdout_buffer), ''.join(stderr_buffer), timeout)
         finally:
-            stdout_thread.join()
-            stderr_thread.join()
             pipe.stdout.close()
             pipe.stderr.close()
         retcode = pipe.wait()
         if check_retcode and retcode:
-            raise ProcessError(retcode, args[0], output=''.join(stderr_buffer))
+            raise ProcessError(subprocess.list2cmdline(args), ''.join(stdout_buffer), ''.join(stderr_buffer), retcode)
         return CommandResults(retcode, ''.join(stdout_buffer), ''.join(stderr_buffer))
 
     def _read_thread(self, logger, f, buffer, log_lines):
