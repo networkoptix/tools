@@ -70,6 +70,7 @@ PATTERN_LIST = [
     MultiLinePattern('error', r'^CMake Error: .+\n(\s+.+\n)+\w+.+'),
     MultiLinePattern('error', r'^CMake Error at .+:\n(.*\n)+-- Configuring incomplete.+'),
     MultiLinePattern('error', r'^\s*File ".+", line \d+\n(.*\n)+\s*SyntaxError: invalid syntax'),
+    MultiLinePattern('error', r'^(rsync: .+\n)+rsync error: .+\n(.+\n)*>> \[.+\]: FAILED'),
     ]
 
 

@@ -1,0 +1,11 @@
+none	  Rsync = /usr/bin/rsync
+none	-- Syncing package linux-arm/gcc-7.2.0
+none	receiving incremental file list
+error	rsync: send_files failed to open "/rdep/packages/linux-arm/gcc-7.2.0/arm-unknown-linux-gnueabihf/sysroot/usr/libexec/pt_chown" (in buildenv): Permission denied (13)
+error	rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1655) [generator=3.1.0]
+error	Synching gcc-7.2.0...
+error	Sync failed for gcc-7.2.0
+error	>> [linux-arm/gcc-7.2.0]: FAILED
+none	-- Syncing package linux-arm/glib-2.0
+none	Synching glib-2.0...
+none	Package glib-2.0 downloaded for target linux-arm

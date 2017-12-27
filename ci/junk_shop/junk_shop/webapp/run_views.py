@@ -34,11 +34,7 @@ def run(run_id):
     return render_template(
         'run.html',
         run=run,
-        project_name=run.build.project.name,
-        branch_name=run.build.branch.name,
-        platform_name=run.platform.name,
-        run_version=run.build.version,
-        run_id=run.id,
+        build=run.build,
         run_node=load_run_node_tree(run),
         )
 

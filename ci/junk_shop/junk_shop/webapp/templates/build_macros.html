@@ -40,16 +40,12 @@
 {% macro build_platform_block(platform, show_succeeded_builds=False) %}
 
   <div class="platform-build-blocks">
-    {% if platform.error_list or platform.build_error_list %}
+    {% if not platform.succeeded %}
       <div class="build-block block">
         <h3>
-          {% if platform.build_artifact %}
-            <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
-              Build errors
-            </a>
-          {% else %}
+          <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
             Build errors
-          {% endif %}
+          </a>
         </h3>
         {% if platform.error_list %}
           <div class="run-errors">
@@ -67,13 +63,9 @@
     {% elif show_succeeded_builds %}
       <div class="build-block block">
         <h3>
-          {% if platform.build_artifact %}
-            <a class="link" href="{{ url_for('artifact', artifact_id=platform.build_artifact.id) }}">
-              Build succeeded
-            </a>
-          {% else %}
+          <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
             Build succeeded
-          {% endif %}
+          </a>
         </h3>
       </div>
     {% endif %}
