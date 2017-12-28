@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 
 CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
+DEFAULT_GENERATOR = 'Ninja'
 
 
 class BuildInfo(namedtuple(
@@ -59,34 +60,35 @@ class CMakeResults(object):
 
 class CMakeBuilder(object):
 
-    PlatformConfig = namedtuple('PlatformConfig', 'build_tool is_unix')
+    PlatformConfig = namedtuple('PlatformConfig', 'is_unix')
 
     _system_platform_config = dict(
-        Linux=PlatformConfig('Ninja', is_unix=True),
-        Darwin=PlatformConfig('Ninja', is_unix=True),
-        # Windows=PlatformConfig('Visual Studio 14 2015 Win64'),  # for older, pre-4.0 branches
-        Windows=PlatformConfig('Visual Studio 15 2017 Win64', is_unix=False),
+        Linux=PlatformConfig(is_unix=True),
+        Darwin=PlatformConfig(is_unix=True),
+        Windows=PlatformConfig(is_unix=False),
         )
 
-    def __init__(self, cmake):
+    def __init__(self, platform_config, branch_config, cmake):
+        assert isinstance(platform_config, PlatformConfig), repr(platform_config)
+        assert branch_config is None or isinstance(branch_config, PlatformBranchConfig), repr(branch_config)
         assert isinstance(cmake, CMake), repr(cmake)
+        self._platform_config = platform_config
+        self._branch_config = branch_config
         self._cmake = cmake
         self._host = LocalHost()
         self._system = platform.system()
         self._working_dir = os.getcwd()  # python steps are run in working dir
 
     @property
-    def _platform_config(self):
-        return self._system_platform_config[self._system]
+    def _is_unix(self):
+        return self._system_platform_config[self._system].is_unix
 
-    def build(self, junk_shop_repository, platform_config, branch_config, src_dir, build_dir, clean_build):
+    def build(self, junk_shop_repository, src_dir, build_dir, clean_build):
         assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
-        assert isinstance(platform_config, PlatformConfig), repr(platform_config)
-        assert branch_config is None or isinstance(branch_config, PlatformBranchConfig), repr(branch_config)
         build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        configure_results = self._configure(src_dir, build_dir, branch_config, build_params, cmake_configuration)
+        configure_results = self._configure(src_dir, build_dir, build_params, cmake_configuration)
         succeeded = configure_results.succeeded
         error_message = configure_results.error_message
         output = configure_results.output
@@ -105,14 +107,14 @@ class CMakeBuilder(object):
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
-        if self._platform_config.is_unix:
+        if self._is_unix:
             unit_tests_bin_dir = os.path.join(build_dir, 'bin')
         else:
             # Visual studio uses multi-config setup
             unit_tests_bin_dir = os.path.join(build_dir, cmake_configuration, 'bin')
         return BuildInfo(
             is_succeeded=build_info.passed,
-            artifact_mask_list=[os.path.join(build_dir, mask) for mask in platform_config.artifact_mask_list],
+            artifact_mask_list=[os.path.join(build_dir, mask) for mask in self._platform_config.artifact_mask_list],
             current_config_path=os.path.join(build_dir, 'current_config.py'),
             version=cmake_build_info.get('version'),
             unit_tests_bin_dir=unit_tests_bin_dir,
@@ -135,17 +137,17 @@ class CMakeBuilder(object):
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
-    def _configure(self, src_dir, build_dir, branch_config, build_params, cmake_configuration):
-        build_tool = self._platform_config.build_tool
+    def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
+        build_tool = self._platform_config.generator or DEFAULT_GENERATOR
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
         platform_args = []
         if target_device:
             platform_args += ['-DtargetDevice={}'.format(target_device)]
-        if branch_config and branch_config.c_compiler:
-            platform_args += ['-DCMAKE_C_COMPILER={}'.format(branch_config.c_compiler)]
-        if branch_config and branch_config.cxx_compiler:
-            platform_args += ['-DCMAKE_CXX_COMPILER={}'.format(branch_config.cxx_compiler)]
+        if self._branch_config and self._branch_config.c_compiler:
+            platform_args += ['-DCMAKE_C_COMPILER={}'.format(self._branch_config.c_compiler)]
+        if self._branch_config and self._branch_config.cxx_compiler:
+            platform_args += ['-DCMAKE_CXX_COMPILER={}'.format(self._branch_config.cxx_compiler)]
         configure_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
@@ -181,7 +183,7 @@ class CMakeBuilder(object):
             return CMakeResults(x.output, error_message, succeeded=False)
 
     def _platform2target_device(self, platform):
-        if platform in ['linux-x64', 'win-x64', 'mac']:
+        if platform in ['linux-x64', 'win-x64', 'win-x86', 'mac']:
             return None  # targetDevice is not specified for them
         return platform
 
@@ -223,9 +225,9 @@ def test_me():
         configuration='release',
         )
     repository = DbCaptureRepository(db_config, build_params)
-    builder = CMakeBuilder(cmake)
+    builder = CMakeBuilder(config.platforms[platform], platform_branch_config, cmake)
     build_dir = 'build-{}'.format(platform)
-    build_info = builder.build(repository, config.platforms[platform], platform_branch_config, 'nx_vms', build_dir, clean_build=False)
+    build_info = builder.build(repository, 'nx_vms', build_dir, clean_build=False)
     log.info('Build info: %r', build_info)
 
 

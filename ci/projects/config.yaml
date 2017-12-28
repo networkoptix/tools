@@ -59,6 +59,14 @@ platforms:
       - distrib/*.dmg
   win-x64:
     build_node: windows
+    generator: Visual Studio 15 2017 Win64
+    should_run_unit_tests: yes
+    artifact_mask_list:
+      - distrib/*.msi
+      - distrib/*.exe
+  win-x86:
+    build_node: windows
+    generator: Visual Studio 15 2017
     should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.msi

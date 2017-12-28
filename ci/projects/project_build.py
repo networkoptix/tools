@@ -173,9 +173,8 @@ class BuildProject(JenkinsProject):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
-        builder = CMakeBuilder(cmake)
-        build_info = builder.build(
-            junk_shop_repository, platform_config, platform_branch_config, 'nx_vms', 'build', self.params.clean_build)
+        builder = CMakeBuilder(platform_config, platform_branch_config, cmake)
+        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', self.params.clean_build)
         return build_info
 
     def add_build_error(self, error):

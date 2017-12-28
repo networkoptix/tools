@@ -19,27 +19,32 @@ class PlatformConfig(object):
             build_node=data['build_node'],
             should_run_unit_tests=data['should_run_unit_tests'],
             artifact_mask_list=data['artifact_mask_list'],
+            generator=data.get('generator'),
             )
 
-    def __init__(self, build_node, should_run_unit_tests, artifact_mask_list):
+    def __init__(self, build_node, should_run_unit_tests, artifact_mask_list, generator):
         assert isinstance(build_node, basestring), repr(build_node)
         assert isinstance(should_run_unit_tests, bool), repr(should_run_unit_tests)
         assert is_list_inst(artifact_mask_list,  basestring), repr(artifact_mask_list)
+        assert generator is None or isinstance(generator, basestring), repr(generator)
         self.build_node = build_node
         self.should_run_unit_tests = should_run_unit_tests
         self.artifact_mask_list = artifact_mask_list
+        self.generator = generator
 
     def to_dict(self):
         return dict(
             build_node=self.build_node,
             should_run_unit_tests=self.should_run_unit_tests,
             artifact_mask_list=self.artifact_mask_list,
+            generator=self.generator,
             )
 
     def report(self):
         log.info('\t\t\t' 'build_node: %r', self.build_node)
         log.info('\t\t\t' 'should_run_unit_tests: %r', self.should_run_unit_tests)
         log.info('\t\t\t' 'artifact_mask_list: %r', self.artifact_mask_list)
+        log.info('\t\t\t' 'generator: %r', self.generator)
 
 
 class JunkShopConfig(object):
