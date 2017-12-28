@@ -77,10 +77,13 @@ services:
     ports:
       - '2022:22'
     volumes:
-      - /jenkins_slave/ubuntu_14:/jenkins
+      - slave_ubuntu_14_workspace:/jenkins
     networks:
       internal_v6:
         ipv6_address: 2001:3984:3989::10
+
+volumes:
+  slave_ubuntu_14_workspace:
 
 networks:
   internal_v6:
