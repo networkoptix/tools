@@ -7,7 +7,9 @@ import os.path
 import argparse
 from collections import namedtuple
 import re
+
 from pony.orm import db_session
+
 from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository

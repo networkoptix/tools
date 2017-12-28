@@ -2,17 +2,20 @@ import logging
 import os.path
 import os
 import sys
+import glob
 from collections import namedtuple
 import datetime
 import shutil
 import platform
 import yaml
 
+from pony.orm import db_session
+
 from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
 from config import PlatformConfig, Config, PlatformBranchConfig, BranchConfig
 from host import ProcessTimeoutError, CommandResults, LocalHost
 from cmake import CMake
-from junk_shop import DbConfig, BuildParameters, DbCaptureRepository, store_output_and_error
+from junk_shop import DbConfig, models, BuildParameters, DbCaptureRepository, store_output_and_error
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +23,7 @@ log = logging.getLogger(__name__)
 CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
 DEFAULT_GENERATOR = 'Ninja'
+LOGS_DIR = 'build_logs'
 
 
 class BuildInfo(namedtuple(
@@ -104,6 +108,7 @@ class CMakeBuilder(object):
         else:
             log.info('Configuring with cmake failed: %s', configure_results.error_message)
         build_info = store_output_and_error(junk_shop_repository, output, succeeded, error_message)
+        self._store_log_artifacts(junk_shop_repository, build_dir, build_info)
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
@@ -197,6 +202,17 @@ class CMakeBuilder(object):
             return {}
         with open(path) as f:
             return dict([line.split('=') for line in f.read().splitlines()])
+
+    @db_session
+    def _store_log_artifacts(self, repository, build_dir, build_info):
+        run = models.Run[build_info.run_id]
+        for path in glob.glob(os.path.join(build_dir, LOGS_DIR, '*.log')):
+            with open(path) as f:
+                data = f.read()
+            if not data.strip(): continue
+            file_name, ext = os.path.splitext(os.path.basename(path))
+            repository.add_artifact(run, file_name, file_name, repository.artifact_type.log, data)
+            log.info('build log %r is stored to junk-shop database', path)
 
 
 def test_me():
