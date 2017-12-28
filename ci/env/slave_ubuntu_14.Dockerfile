@@ -9,7 +9,7 @@ ENV X32_PACKAGES "libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1"
 # requirements for running linux-x86 compiler on x86 platform
 ENV MULTILIB_PACKAGES "gcc-multilib g++-multilib"
 
-ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget"
+ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget nano"
 ENV JAVA_REQUIREMENTS_PACKAGES "ca-certificates-java libasound2"
 ENV PYTHON_PACKAGES "python-dev python-pip python-virtualenv"
 ENV JUNK_SHOP_PACKAGES "libpq-dev gdb"
