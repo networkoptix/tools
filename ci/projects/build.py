@@ -194,7 +194,10 @@ class CMakeBuilder(object):
 
     @property
     def _env(self):
-        return dict(os.environ, environment=self._working_dir)
+        return dict(os.environ,
+                    environment=self._working_dir,
+                    NINJA_STATUS='[%s/%t] %es ',
+                    )
 
     def _read_cmake_build_info_file(self, build_dir):
         path = os.path.join(build_dir, 'build_info.txt')

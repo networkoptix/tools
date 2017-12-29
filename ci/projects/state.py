@@ -130,6 +130,8 @@ class State(object):
             workspace_dir=data['workspace_dir'],
             is_unix=data['is_unix'],
             current_command=PythonStageCommand.from_dict(data['current_command'], command_registry),
+            clean_stamp=data.get('clean_stamp'),
+            clean_build_stamp=data.get('clean_build_stamp'),
             )
 
     def __init__(
@@ -144,6 +146,8 @@ class State(object):
             workspace_dir,
             is_unix,
             current_command,
+            clean_stamp,
+            clean_build_stamp,
             ):
         assert isinstance(current_command, PythonStageCommand), repr(current_command)
         assert isinstance(jenkins_env, JenkinsEnv), repr(jenkins_env)
@@ -155,6 +159,8 @@ class State(object):
         assert isinstance(current_node, basestring), repr(current_node)
         assert isinstance(workspace_dir, basestring), repr(workspace_dir)
         assert isinstance(is_unix, bool), repr(is_unix)
+        assert clean_stamp is None or isinstance(clean_stamp, int), repr(clean_stamp)
+        assert clean_build_stamp is None or isinstance(clean_build_stamp, int), repr(clean_build_stamp)
         self.jenkins_env = jenkins_env
         self.params = params
         self.config = config
@@ -165,6 +171,8 @@ class State(object):
         self.workspace_dir = workspace_dir
         self.is_unix = is_unix
         self.current_command = current_command
+        self.clean_stamp = clean_stamp  # last time when 'clean' flag was used
+        self.clean_build_stamp = clean_build_stamp  # same for clean_build flag
 
     def report(self):
         self.jenkins_env.report()
@@ -179,6 +187,8 @@ class State(object):
         for repository, info in self.scm_info.items():
             log.info('\t' '%s: %r', repository, info)
         log.info('current_node: %r', self.current_node)
+        log.info('clean_stamp: %r', self.clean_stamp)
+        log.info('clean_build_stamp: %r', self.clean_build_stamp)
 
     def to_dict(self):
         return dict(
@@ -191,6 +201,8 @@ class State(object):
             current_node=self.current_node,
             workspace_dir=self.workspace_dir,
             is_unix=self.is_unix,
+            clean_stamp=self.clean_stamp,
+            clean_build_stamp=self.clean_build_stamp,
             )
 
     def make_output_state(self, command_list=None):
@@ -205,4 +217,6 @@ class State(object):
             self.workspace_dir,
             self.is_unix,
             self.current_command,
+            self.clean_stamp,
+            self.clean_build_stamp,
             )

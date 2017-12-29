@@ -19,6 +19,7 @@ from project import JenkinsProject
 from command import (
     CheckoutCommand,
     CheckoutScmCommand,
+    CleanDirCommand,
     UnstashCommand,
     PrepareVirtualEnvCommand,
     ArchiveArtifactsCommand,
@@ -127,13 +128,16 @@ class BuildProject(JenkinsProject):
                 CleanDirCommand(),
                 ]
         if not self.params.clean_only:
-            job_command_list += [
-                self.prepare_devtools_command,
-                ] + self.prepare_nx_vms_command_list + [
-                PrepareVirtualEnvCommand(self.devtools_python_requirements),
-                self.make_python_stage_command('node', platform=platform, **kw),
-                ]
+            job_command_list += self.make_node_stage_command_list(platform=platform, **kw)
         return ParallelJob(job_name, [NodeCommand(node, workspace_dir, job_command_list)])
+
+    def make_node_stage_command_list(self, **kw):
+        return [
+            self.prepare_devtools_command,
+            ] + self.prepare_nx_vms_command_list + [
+            PrepareVirtualEnvCommand(self.devtools_python_requirements),
+            self.make_python_stage_command('node', **kw),
+            ]
 
     @property
     def prepare_nx_vms_command_list(self):
@@ -169,12 +173,12 @@ class BuildProject(JenkinsProject):
             revision=nx_vms_scm_info.revision,
             )
 
-    def _build(self, junk_shop_repository, platform_branch_config, platform_config):
+    def _build(self, junk_shop_repository, platform_branch_config, platform_config, clean_build):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(platform_config, platform_branch_config, cmake)
-        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', self.params.clean_build)
+        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', clean_build)
         return build_info
 
     def add_build_error(self, error):

@@ -254,7 +254,7 @@ class DbCaptureRepository(object):
             if name == 'duration_ms':
                 name = 'duration'
             value = self._produce_build_parameter(name)
-            if value:
+            if value is not None:
                 setattr(build, name, value)
         return build
 

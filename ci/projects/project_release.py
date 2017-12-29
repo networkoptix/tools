@@ -103,7 +103,7 @@ class ReleaseProject(BuildProject):
         platform_branch_config = self.branch_config.platforms.get(platform)
         junk_shop_repository = self.create_junk_shop_repository(platform=platform, customization=customization)
 
-        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config)
+        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config, self.params.clean_build)
         if platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 
