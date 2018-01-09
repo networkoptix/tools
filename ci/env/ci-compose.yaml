@@ -67,6 +67,7 @@ services:
 
   slave_ubuntu_14:
     container_name: slave_ubuntu_14
+    hostname: ubuntu_14
     image: slave_ubuntu_14
     build:
       context: .
@@ -78,7 +79,10 @@ services:
       - '2022:22'
     volumes:
       - slave_ubuntu_14_workspace:/jenkins
-      - /ubuntu_14_home:/home
+      - /ubuntu_14_home/home:/home
+      - /ubuntu_14_home/etc/passwd:/etc/passwd
+      - /ubuntu_14_home/etc/shadow:/etc/shadow
+      - /ubuntu_14_home/etc/group:/etc/group
     networks:
       internal_v6:
         ipv6_address: 2001:3984:3989::10
