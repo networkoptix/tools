@@ -78,6 +78,7 @@ services:
       - '2022:22'
     volumes:
       - slave_ubuntu_14_workspace:/jenkins
+      - /ubuntu_14_home:/home
     networks:
       internal_v6:
         ipv6_address: 2001:3984:3989::10
