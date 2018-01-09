@@ -15,12 +15,13 @@ from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_
 from config import PlatformConfig, Config, PlatformBranchConfig, BranchConfig
 from host import ProcessTimeoutError, CommandResults, LocalHost
 from cmake import CMake
-from junk_shop import DbConfig, models, BuildParameters, DbCaptureRepository, store_output_and_error
+from junk_shop import DbConfig, models, BuildParameters, DbCaptureRepository, store_output_and_error, datetime_utc_now
+from junk_shop import utils as junk_shop_utils
 
 log = logging.getLogger(__name__)
 
 
-CONFIGURE_TIMEOUT = datetime.timedelta(hours=2)
+GENERATE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
 DEFAULT_GENERATOR = 'Ninja'
 LOGS_DIR = 'build_logs'
@@ -92,11 +93,11 @@ class CMakeBuilder(object):
         build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        configure_results = self._configure(src_dir, build_dir, build_params, cmake_configuration)
-        succeeded = configure_results.succeeded
-        error_message = configure_results.error_message
-        output = configure_results.output
-        if configure_results.succeeded:
+        generate_results = self._generate(src_dir, build_dir, build_params, cmake_configuration)
+        succeeded = generate_results.succeeded
+        error_message = generate_results.error_message
+        output = generate_results.output
+        if generate_results.succeeded:
             build_results = self._build(build_dir, cmake_configuration)
             output += '\n' + build_results.output
             if build_results.succeeded:
@@ -106,7 +107,7 @@ class CMakeBuilder(object):
                 error_message = build_results.error_message
                 log.info('Building with cmake failed: %s', build_results.error_message)
         else:
-            log.info('Configuring with cmake failed: %s', configure_results.error_message)
+            log.info('Generating with cmake failed: %s', generate_results.error_message)
         build_info = store_output_and_error(junk_shop_repository, output, succeeded, error_message)
         self._store_log_artifacts(junk_shop_repository, build_dir, build_info)
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
@@ -142,7 +143,7 @@ class CMakeBuilder(object):
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
-    def _configure(self, src_dir, build_dir, build_params, cmake_configuration):
+    def _generate(self, src_dir, build_dir, build_params, cmake_configuration):
         build_tool = self._platform_config.generator or DEFAULT_GENERATOR
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
@@ -153,7 +154,7 @@ class CMakeBuilder(object):
             platform_args += ['-DCMAKE_C_COMPILER={}'.format(self._branch_config.c_compiler)]
         if self._branch_config and self._branch_config.cxx_compiler:
             platform_args += ['-DCMAKE_CXX_COMPILER={}'.format(self._branch_config.cxx_compiler)]
-        configure_args = [
+        generate_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
             '-DcloudGroup=%s' % build_params.cloud_group,
@@ -165,10 +166,10 @@ class CMakeBuilder(object):
             src_full_path,
             ]
         # if build_params.target_device:
-        #     configure_args.append('-DtargetDevice=%s' % build_params.target_device)
-        log.info('Configuring with cmake: %s', self._host.args2cmdline(configure_args))
-        return self._run_cmake(
-            configure_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=CONFIGURE_TIMEOUT)
+        #     generate_args.append('-DtargetDevice=%s' % build_params.target_device)
+        log.info('Generating with cmake: %s', self._host.args2cmdline(generate_args))
+        return self._run_timed_cmake(
+            'Generation', generate_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=GENERATE_TIMEOUT)
 
     def _build(self, build_dir, cmake_configuration):
         build_args = [
@@ -176,8 +177,15 @@ class CMakeBuilder(object):
             '--config', cmake_configuration,
             ]
         log.info('Building with cmake: %s', self._host.args2cmdline(build_args))
-        return self._run_cmake(
-            build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
+        return self._run_timed_cmake(
+            'Build', build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
+
+    def _run_timed_cmake(self, stage_name, *args, **kw):
+        start_time = datetime_utc_now()
+        results = self._run_cmake(*args, **kw)
+        duration = datetime_utc_now() - start_time
+        results.output += '\n' + '-- %s duration: %s\n' % (stage_name, junk_shop_utils.timedelta_to_str(duration))
+        return results
 
     def _run_cmake(self, *args, **kw):
         try:
