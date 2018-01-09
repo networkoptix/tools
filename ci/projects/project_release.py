@@ -70,9 +70,11 @@ class ReleaseProject(BuildProject):
         return BuildProject.create_build_parameters(
             self, platform, customization,
             release=self.params.release,
-            cloud_group=self.params.cloud_group)
+            cloud_group=self.params.cloud_group,
+            )
 
     def stage_prepare_for_build(self):
+        self.clean_stamps.init_master(self.params)
         self.init_build_info()
 
         log.info('requested platform_list = %r', self.requested_platform_list)
@@ -97,13 +99,19 @@ class ReleaseProject(BuildProject):
         else:
             return 'release-{}-{}-{}'.format(self.nx_vms_branch_name, customization, platform)
 
-    def stage_node(self, customization, platform):
-        log.info('Node stage: node=%s, customization=%s, platform=%s', self.current_node, customization, platform)
+    def stage_node(self, customization, platform, phase=1):
+        log.info('Node stage: node=%s, phase#%s, customization=%s, platform=%s', self.current_node, phase, customization, platform)
+
+        if self.clean_stamps.check_must_clean_node():
+            assert phase == 1, repr(phase)  # must never happen on phase 2
+            return [CleanDirCommand()] + self.make_node_stage_command_list(platform=platform, customization=customization, phase=2)
+
         platform_config = self.config.platforms[platform]
         platform_branch_config = self.branch_config.platforms.get(platform)
         junk_shop_repository = self.create_junk_shop_repository(platform=platform, customization=customization)
+        clean_build = self.clean_stamps.must_do_clean_build(self.params)
 
-        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config, self.params.clean_build)
+        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config, clean_build)
         if platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 

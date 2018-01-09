@@ -33,6 +33,7 @@ from command import (
 )
 from cmake import CMake
 from build import CMakeBuilder
+from clean_stamps import CleanStamps
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +48,7 @@ class BuildProject(JenkinsProject):
     def __init__(self, input_state, in_assist_mode):
         JenkinsProject.__init__(self, input_state, in_assist_mode)
         self._build_error_list = []
+        self.clean_stamps = CleanStamps(self.state)
 
     def stage_init(self):
         command_list = [self.set_project_properties_command]
