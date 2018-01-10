@@ -25,6 +25,7 @@ GENERATE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
 DEFAULT_GENERATOR = 'Ninja'
 LOGS_DIR = 'build_logs'
+PARALLEL_JOB_COUNT = 10
 
 
 class BuildInfo(namedtuple(
@@ -152,7 +153,6 @@ class CMakeBuilder(object):
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
     def _generate(self, src_dir, build_dir, build_params, cmake_configuration):
-        build_tool = self._platform_config.generator or DEFAULT_GENERATOR
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
         platform_args = []
@@ -173,7 +173,7 @@ class CMakeBuilder(object):
         if build_params.add_qt_pdb is not None:
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         generate_args += platform_args + [
-            '-G', build_tool,
+            '-G', self._build_tool,
             src_full_path,
             ]
         # if build_params.target_device:
@@ -187,9 +187,18 @@ class CMakeBuilder(object):
             '--build', '.',
             '--config', cmake_configuration,
             ]
+        if self._build_tool == 'Ninja':
+            build_args += [
+            '--',
+            '-j', str(PARALLEL_JOB_COUNT),
+            ]
         log.info('Building with cmake: %s', self._host.args2cmdline(build_args))
         return self._run_timed_cmake(
             'Build', build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
+
+    @property
+    def _build_tool(self):
+        return self._platform_config.generator or DEFAULT_GENERATOR
 
     def _run_timed_cmake(self, stage_name, *args, **kw):
         start_time = datetime_utc_now()
