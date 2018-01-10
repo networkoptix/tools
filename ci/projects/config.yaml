@@ -66,6 +66,8 @@ platforms:
     artifact_mask_list:
       - distrib/*.msi
       - distrib/*.exe
+      - distrib/*.zip
+      - distrib/*.pdb
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
@@ -73,6 +75,8 @@ platforms:
     artifact_mask_list:
       - distrib/*.msi
       - distrib/*.exe
+      - distrib/*.zip
+      - distrib/*.pdb
   bpi:
     build_node: linux
     should_run_unit_tests: no
