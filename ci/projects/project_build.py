@@ -101,6 +101,7 @@ class BuildProject(JenkinsProject):
                     BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
                     BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
+                    BooleanProjectParameter('add_qt_pdb', 'Tell me if you known what this parameter means', default_value=False),
                     ]
         return parameters
 
@@ -169,6 +170,7 @@ class BuildProject(JenkinsProject):
             configuration='release',
             cloud_group=cloud_group,
             customization=customization,
+            add_qt_pdb=self.params.add_qt_pdb,
             is_incremental=is_incremental,
             jenkins_url=self.jenkins_env.build_url,
             repository_url=nx_vms_scm_info.repository_url,

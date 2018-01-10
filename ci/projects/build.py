@@ -63,6 +63,14 @@ class CMakeResults(object):
         self.succeeded = succeeded
 
 
+def bool_to_cmake_param(value):
+    assert isinstance(value, bool), repr(value)
+    if value:
+        return 'TRUE'
+    else:
+        return 'FALSE'
+
+
 class CMakeBuilder(object):
 
     PlatformConfig = namedtuple('PlatformConfig', 'is_unix')
@@ -160,8 +168,11 @@ class CMakeBuilder(object):
             '-DcloudGroup=%s' % build_params.cloud_group,
             '-Dcustomization=%s' % build_params.customization,
             '-DbuildNumber=%d' % build_params.build_num,
-            '-Dbeta=%s' % ('TRUE' if build_params.is_beta else 'FALSE'),
-            ] + platform_args + [
+            '-Dbeta=%s' % bool_to_cmake_param(build_params.is_beta),
+            ]
+        if build_params.add_qt_pdb is not None:
+            generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
+        generate_args += platform_args + [
             '-G', build_tool,
             src_full_path,
             ]
@@ -248,6 +259,7 @@ def test_me():
         platform=platform,
         cloud_group='test',
         customization='default',
+        add_qt_pdb=True,
         build_num=1000,
         configuration='release',
         )

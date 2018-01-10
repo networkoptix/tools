@@ -21,6 +21,7 @@ class BuildParameters(object):
         'configuration=debug',
         'cloud_group=demo',
         'customization=default'
+        'add_qt_pdb=false',
         'is_incremental=true',
         'jenkins_url=http://la.hdw.mx/jenkins/job/test/16299/'
         'repository_url=ssh://hg@hdw.mx/nx_vms',
@@ -37,6 +38,7 @@ class BuildParameters(object):
         'configuration',
         'cloud_group',
         'customization',
+        'add_qt_pdb',
         'is_incremental',
         'jenkins_url',
         'repository_url',
@@ -58,7 +60,7 @@ class BuildParameters(object):
                 raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
             if value == 'null':
                 raise ArgumentTypeError('Got null value for %r parameter' % name)
-            if name == 'is_incremental':
+            if name in ['add_qt_pdb', 'is_incremental']:
                 value = param_to_bool(value)
             if name in ['duration_ms', 'build_num']:
                 if not re.match(r'^\d+$', value):
@@ -86,6 +88,7 @@ class BuildParameters(object):
                  configuration=None,
                  cloud_group=None,
                  customization=None,
+                 add_qt_pdb=None,
                  is_incremental=None,
                  jenkins_url=None,
                  repository_url=None,
@@ -94,6 +97,8 @@ class BuildParameters(object):
                  platform=None,
                  ):
         assert release in ['release', 'beta'], repr(release)
+        assert add_qt_pdb is None or isinstance(add_qt_pdb, bool), repr(add_qt_pdb)
+        assert is_incremental is None or isinstance(is_incremental, bool), repr(is_incremental)
         self.project = project
         self.branch = branch
         self.version = version
@@ -102,6 +107,7 @@ class BuildParameters(object):
         self.configuration = configuration
         self.cloud_group = cloud_group
         self.customization = customization
+        self.add_qt_pdb = add_qt_pdb
         self.is_incremental = is_incremental
         self.jenkins_url = jenkins_url
         self.repository_url = repository_url
@@ -269,7 +275,7 @@ class DbCaptureRepository(object):
             )
         model = param2model.get(name)
         if not model:
-            if name in ['build_num', 'duration', 'is_incremental']:
+            if name in ['build_num', 'duration', 'is_incremental', 'add_qt_pdb']:
                 return value
             else:
                 return value or ''  # str fields do not accept None

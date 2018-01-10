@@ -64,6 +64,7 @@ class Build(db.Entity):
     configuration = Optional(str)  # release, debug
     cloud_group = Optional(CloudGroup)
     customization = Optional(Customization)
+    add_qt_pdb = Optional(bool)
     is_incremental = Optional(bool)
     jenkins_url = Optional(str)
     repository_url = Optional(str)
