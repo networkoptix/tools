@@ -101,7 +101,7 @@ class BuildProject(JenkinsProject):
                     BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
                     BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
-                    BooleanProjectParameter('add_qt_pdb', 'Tell me if you known what this parameter means', default_value=False),
+                    BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
                     ]
         return parameters
 
