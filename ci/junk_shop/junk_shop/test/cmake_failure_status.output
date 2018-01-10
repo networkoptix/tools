@@ -1,0 +1,8 @@
+none	[398/404] 1030.383s  Linking CXX shared library bin/plugins/libhikvision_metadata_plugin.so
+none	[399/404] 1058.614s  Linking CXX executable bin/mediaserver_core_ut
+error	FAILED: cd /jenkins/workspace/ci-vms-linux-x64/build/debsetup/mediaserver-deb && /jenkins/workspace/ci-vms-linux-x64/build/debsetup/mediaserver-deb/build-dist.sh
+error	Creating distribution in deb (will be deleted on success).
+error	  See the log in /jenkins/workspace/ci-vms-linux-x64/build/build_logs/server-build-dist.log
+error	FAILURE (status 1); see the error message(s) above.
+error	ninja: build stopped: subcommand failed.
+none	

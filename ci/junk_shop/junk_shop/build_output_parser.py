@@ -63,7 +63,6 @@ PATTERN_LIST = [
     MultiLinePattern('error', r'^FAILED:.+\n:.+\nUndefined symbols.+\n(\s+.+\n)+ld: .+$'),
     # Common
     SingleLinePattern('error', r'\[ERROR\]'),
-    SingleLinePattern('error', r'FAILURE'),
     SingleLinePattern('warning', r'\[WARNING\]'),
     SingleLinePattern('warning', r'SKIPPED'),
     SingleLinePattern('success', r'SUCCESS'),
