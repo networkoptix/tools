@@ -85,7 +85,7 @@ services:
       - /ubuntu_14_home/etc/group:/etc/group
     networks:
       internal_v6:
-        ipv6_address: 2001:3984:3989::10
+#        ipv6_address: fd00::10
 
 volumes:
   slave_ubuntu_14_workspace:
@@ -97,5 +97,4 @@ networks:
     ipam:
       driver: default
       config:
-      -
-        subnet: 2001:3984:3989::/64
+      - subnet: fd00::/64
