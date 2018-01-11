@@ -25,7 +25,7 @@ GENERATE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
 DEFAULT_GENERATOR = 'Ninja'
 LOGS_DIR = 'build_logs'
-PARALLEL_JOB_COUNT = 10
+PARALLEL_JOB_COUNT = 20
 
 
 class BuildInfo(namedtuple(
