@@ -57,6 +57,8 @@ PATTERN_LIST = [
     # Windows
     SingleLinePattern('error', r':\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
     SingleLinePattern('warning', r':\s+warning\s[A-Z]+\d+\s*:'),
+    MultiLinePattern('error', r'ALL_BUILD\.vcxproj.+->\n(.+\n)*(.*error.*:.+\n)*.*error.*:.+'),
+    SingleLinePattern('error', r'CUSTOMBUILD.*error.*:.+'),
     # Mac
     SingleLinePattern('error', r'ERROR:'),
     # FAILED: : && /home/.../arm-linux-gnueabihf-g++ -fPIC -O3 ... \nld: symbol(s) not found for architecture 
