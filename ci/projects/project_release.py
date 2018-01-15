@@ -90,10 +90,10 @@ class ReleaseProject(BuildProject):
 
     def make_parallel_job(self, customization, platform):
         job_name = '{}-{}'.format(customization, platform)
-        workspace_dir = self.workspace_dir(customization, platform)
+        workspace_dir = self.make_workspace_dir(customization, platform)
         return BuildProject.make_parallel_job(self, job_name, workspace_dir, platform, customization=customization)
 
-    def workspace_dir(self, customization, platform):
+    def make_workspace_dir(self, customization, platform):
         if self.in_assist_mode:
             return 'psa-release-{}-{}-{}'.format(self.jenkins_env.job_name, customization, platform)
         else:

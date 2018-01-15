@@ -83,6 +83,10 @@ def ensure_dir_missing(path):
         log.info('Removing directory: %s', path)
         shutil.rmtree(path)
 
+def prepare_empty_dir(path):
+    ensure_dir_missing(path)
+    ensure_dir_exists(path)
+
 
 TIMEDELTA_REGEXP = re.compile(r'^((?P<days>\d+?)d)?((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?$')
 

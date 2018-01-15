@@ -55,10 +55,10 @@ class CiProject(BuildProject):
 
     def make_parallel_job(self, platform):
         job_name = platform
-        workspace_dir = self.workspace_dir(platform)
+        workspace_dir = self.make_workspace_dir(platform)
         return BuildProject.make_parallel_job(self, job_name, workspace_dir, platform)
 
-    def workspace_dir(self, platform):
+    def make_workspace_dir(self, platform):
         if self.in_assist_mode:
             return 'psa-ci-{}-{}'.format(self.jenkins_env.job_name, platform)
         else:

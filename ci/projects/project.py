@@ -34,6 +34,7 @@ class JenkinsProject(object):
         self.current_node = self.state.current_node
         self.current_command = self.state.current_command
         self.is_unix = self.state.is_unix
+        self.workspace_dir = self.state.workspace_dir
         self.scm_info = self.state.scm_info
         self.credentials = self.state.credentials
         self.in_assist_mode = in_assist_mode

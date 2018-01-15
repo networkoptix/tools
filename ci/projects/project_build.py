@@ -14,7 +14,7 @@ from junk_shop import (
     update_build_info,
     run_unit_tests,
 )
-
+from utils import prepare_empty_dir
 from project import JenkinsProject
 from command import (
     CheckoutCommand,
@@ -227,10 +227,13 @@ class BuildProject(JenkinsProject):
         if not test_binary_list:
             self.add_build_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
             return
-        log.info('Running unit tests: %s', ', '.join(test_binary_list))
+        unit_tests_dir = os.path.join(self.workspace_dir, 'unit_tests')
+        bin_dir = os.path.abspath(build_info.unit_tests_bin_dir)
+        prepare_empty_dir(unit_tests_dir)
+        log.info('Running unit tests in %r: %s', unit_tests_dir, ', '.join(test_binary_list))
         logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # Prevent from logging unit tests stdout/stderr
         is_passed = run_unit_tests(
-            junk_shop_repository, build_info.current_config_path, build_info.unit_tests_bin_dir, test_binary_list, timeout)
+            junk_shop_repository, build_info.current_config_path, unit_tests_dir, bin_dir, test_binary_list, timeout)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
     def make_set_build_result_command_list(self, build_info):

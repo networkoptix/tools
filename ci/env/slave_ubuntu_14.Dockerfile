@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 
 ENV APT_PACKAGES "software-properties-common python-software-properties"
 
-ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget nano"
+ENV COMMON_PACKAGES "bzip2 unzip xz-utils wget nano mc"
 ENV JAVA_REQUIREMENTS_PACKAGES "ca-certificates-java libasound2"
 ENV PYTHON_PACKAGES "python-dev python-pip python-virtualenv"
 ENV JUNK_SHOP_PACKAGES "libpq-dev gdb"
