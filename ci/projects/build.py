@@ -82,10 +82,12 @@ class CMakeBuilder(object):
         Windows=PlatformConfig(is_unix=False),
         )
 
-    def __init__(self, platform_config, branch_config, cmake):
+    def __init__(self, executor_number, platform_config, branch_config, cmake):
+        assert isinstance(executor_number, int), repr(executor_number)
         assert isinstance(platform_config, PlatformConfig), repr(platform_config)
         assert branch_config is None or isinstance(branch_config, PlatformBranchConfig), repr(branch_config)
         assert isinstance(cmake, CMake), repr(cmake)
+        self._executor_number = executor_number
         self._platform_config = platform_config
         self._branch_config = branch_config
         self._cmake = cmake
@@ -225,6 +227,7 @@ class CMakeBuilder(object):
         return dict(os.environ,
                     environment=self._working_dir,
                     NINJA_STATUS='[%s/%t] %es  ',
+                    _MSPDBSRV_ENDPOINT_='endpoint-%s' % self._executor_number,
                     )
 
     def _read_cmake_build_info_file(self, build_dir):
@@ -273,7 +276,7 @@ def test_me():
         configuration='release',
         )
     repository = DbCaptureRepository(db_config, build_params)
-    builder = CMakeBuilder(config.platforms[platform], platform_branch_config, cmake)
+    builder = CMakeBuilder(1, config.platforms[platform], platform_branch_config, cmake)
     build_dir = 'build-{}'.format(platform)
     build_info = builder.build(repository, 'nx_vms', build_dir, clean_build=False)
     log.info('Build info: %r', build_info)

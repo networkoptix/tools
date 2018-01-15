@@ -181,7 +181,7 @@ class BuildProject(JenkinsProject):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
-        builder = CMakeBuilder(platform_config, platform_branch_config, cmake)
+        builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, cmake)
         build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', clean_build)
         return build_info
 
