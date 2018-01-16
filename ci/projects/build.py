@@ -227,7 +227,7 @@ class CMakeBuilder(object):
         return dict(os.environ,
                     environment=self._working_dir,
                     NINJA_STATUS='[%s/%t] %es  ',
-                    _MSPDBSRV_ENDPOINT_='endpoint-%s' % self._executor_number,
+                    _MSPDBSRV_ENDPOINT_='executor_%s' % self._executor_number,
                     )
 
     def _read_cmake_build_info_file(self, build_dir):
