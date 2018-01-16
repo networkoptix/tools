@@ -15,7 +15,7 @@ from email_sender import EmailSender
 log = logging.getLogger(__name__)
 
 
-DEFAULT_CUSTOMIZATION = 'default'
+DEFAULT_CUSTOMIZATION = 'hanwha'
 DEFAULT_CLOUD_GROUP = 'test'
 DEFAULT_RELEASE = 'beta'
 
