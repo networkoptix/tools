@@ -25,8 +25,9 @@ class CiProject(BuildProject):
     project_id = 'ci'
 
     def get_project_parameters(self):
+        default_platforms = set(self.config.ci.platforms)
         return BuildProject.get_project_parameters(self) + [
-            BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=True)
+            BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=platform in default_platforms)
             for platform in self.all_platform_list
             ]
 

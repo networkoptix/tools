@@ -77,7 +77,7 @@ class TestProcess(GoogleTestEventHandler):
             add_core_artifacts(platform, self._repository, binary_path, run, artifact_path)
 
         def report(self, name):
-            stderr_lines = self._stderr_lines[:]  # make copy as it is still appended into by another (stderr) thread
+            stderr_lines = list(self._stderr_lines)  # make copy as it is still appended into by another (stderr) thread
             if not self._stdout_lines and not stderr_lines: return
             log.debug('----- %s -------------', name)
             for line in self._stdout_lines:

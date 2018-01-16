@@ -54,11 +54,6 @@ platforms:
     artifact_mask_list:
       - distrib/*.deb
       - distrib/*.zip
-  mac:
-    build_node: mac
-    should_run_unit_tests: yes
-    artifact_mask_list:
-      - distrib/*.dmg
   win-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
@@ -77,12 +72,17 @@ platforms:
       - distrib/*.exe
       - distrib/*.zip
       - distrib/*.pdb
-  bpi:
+  mac:
+    build_node: mac
+    should_run_unit_tests: yes
+    artifact_mask_list:
+      - distrib/*.dmg
+  bananapi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
       - distrib/*.tar.gz
-  bananapi:
+  bpi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
@@ -100,6 +100,11 @@ platforms:
 
 ci:
   timeout: 30m
+  platforms:
+    - win-x64
+    - linux-x64
+    - mac
+    - edge1
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher

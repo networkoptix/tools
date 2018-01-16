@@ -168,20 +168,25 @@ class CiConfig(object):
     def from_dict(cls, data):
         return cls(
             timeout=str_to_timedelta(data['timeout']),
+            platforms=data['platforms'],
             )
 
-    def __init__(self, timeout):
+    def __init__(self, timeout, platforms):
         assert isinstance(timeout, datetime.timedelta), repr(timeout)
+        assert is_list_inst(platforms, basestring), repr(platforms)
         self.timeout = timeout
+        self.platforms = platforms
 
     def to_dict(self):
         return dict(
             timeout=timedelta_to_str(self.timeout),
+            platforms=self.platforms,
             )
 
     def report(self):
         log.info('\t' 'ci:')
         log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
+        log.info('\t\t' 'platforms: %s', ', '.join(self.platforms))
 
 
 class TestsWatchersConfig(object):
