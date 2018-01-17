@@ -10,6 +10,7 @@ nx_load_config "${CONFIG=".win-toolrc"}"
 : ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR="x64"} #< Name of the directories inside "nx_vms".
 : ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
+: ${TEMP_DIR="$(dirname $(mktemp `# dry run` -u))"}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -25,14 +26,10 @@ Usage: run via Cygwin from any dir inside the proper nx_vms dir:
 
 $NX_HELP_TEXT_OPTIONS
 
-Here <command> can be one of the following:
-
- ini # Create empty .ini files (to be filled with defauls) in $TEMP - should point to %TEMP%.
+Here <command> can be one of the following (if not, redirected to $(basename "$LINUX_TOOL")):
 
  apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
  apidoc-rdep # Run tests and deploy apidoctool from devtools to packages/any.
- kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
- kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
  start-s [Release] [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
@@ -40,14 +37,11 @@ Here <command> can be one of the following:
  stop-c # Stop desktop_client.
  run-ut [Release] [all|test_name] [args] # Run all or the specified unit test via ctest.
 
- share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
  clean # Delete cmake build dir and all maven build dirs.
  mvn [args] # Call maven.
  gen [cmake-args] # Perform cmake generation.
  build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
  cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
- tunnel [args] # Call "$LINUX_TOOL tunnel [args]".
- tunnel-s [args] # Call "$LINUX_TOOL tunnel-s [args]".
 EOF
 }
 
@@ -117,28 +111,6 @@ find_and_pushd_CMAKE_BUILD_DIR() # [-create]
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
 }
 
-do_share() # target_path
-{
-    find_VMS_DIR
-    local TARGET_PATH="$1"
-    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
-    if [[ $TARGET_PATH != /* ]]; then # The path is relative, treat as relative to VMS_DIR parent.
-        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
-    else # The path is absolute: use as is.
-        local TARGET_DIR="$TARGET_PATH"
-    fi
-    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
-
-    local BRANCH=$(hg branch)
-    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
-
-    nx_verbose mkdir -p "$TARGET_DIR"
-    nx_verbose hg share "$(w "$VMS_DIR")" "$(w "$TARGET_DIR")" || return $?
-    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
-    cd "$TARGET_DIR"
-    nx_verbose hg update "$BRANCH" || return $?
-}
-
 do_clean()
 {
     find_CMAKE_BUILD_DIR
@@ -184,7 +156,7 @@ do_gen() # "$@"
         nx_verbose rm "$CMAKE_CACHE"
     fi
 
-    nx_verbose cmake $(w "$VMS_DIR") "$@" -Ax64 -DrdepSync=OFF
+    nx_verbose cmake $(w "$VMS_DIR") -Ax64 -DrdepSync=OFF "$@"
     local RESULT=$?
 
     nx_popd
@@ -292,24 +264,24 @@ do_apidoc_rdep() # "$@"
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
     local SRC="$1"; shift
-    nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc.exe || return $?
+    nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc || return $?
     nx_verbose cmake --build . "$@" || return $?
-    ./nx_kit_ut
+    ./nx_kit_*
 }
 
 do_kit() # "$@"
 {
-    find_CMAKE_BUILD_DIR -create
+    find_VMS_DIR
 
-    # Recreate nx_kit build dir inside cmake build dir.
-    local KIT_BUILD_DIR="$CMAKE_BUILD_DIR/$NX_KIT_DIR"
+    # Recreate nx_kit build dir in $TEMP_DIR.
+    local KIT_BUILD_DIR="$TEMP_DIR/nx_kit-build"
     rm -rf "$KIT_BUILD_DIR"
     mkdir -p "$KIT_BUILD_DIR" || exit $?
     nx_pushd "$KIT_BUILD_DIR"
     nx_echo "+ cd $KIT_BUILD_DIR"
 
     local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
-    build_and_test_nx_kit $(w "$KIT_SRC_DIR") || { local RESULT=$?; nx_popd; exit $?; }
+    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; exit $?; }
 
     nx_popd
     rm -rf "$KIT_BUILD_DIR"
@@ -328,27 +300,12 @@ main()
     local COMMAND="$1"
     shift
     case "$COMMAND" in
-        ini)
-            touch $TEMP/nx_media.ini
-            touch $TEMP/analytics.ini
-            touch $TEMP/mobile_client.ini
-            touch $TEMP/nx_media.ini
-            ;;
         #..........................................................................................
         apidoc)
             do_apidoc "$@"
             ;;
         apidoc-rdep)
             do_apidoc_rdep "$@"
-            ;;
-        kit)
-            do_kit "$@"
-            ;;
-        kit-rdep)
-            nx_pushd "$PACKAGES_DIR/any/nx_kit"
-            rdep -u || exit $?
-            nx_echo "SUCCESS: nx_kit uploaded via rdep"
-            nx_popd
             ;;
         #..........................................................................................
         start-s)
@@ -360,24 +317,26 @@ main()
             nx_popd
             ;;
         stop-s)
-            // TODO: IMPLEMENT
+            # TODO: IMPLEMENT
             nx_fail "Command not implemented yet."
             ;;
         start-c)
-            // TODO: IMPLEMENT
+            # TODO: IMPLEMENT
             nx_fail "Command not implemented yet."
+            #local CONFIGURATION="Debug"
+            #[ "$1" == "Release" ] && { shift; CONFIGURATION="Release"; }
+            #find_and_pushd_CMAKE_BUILD_DIR
+            #PATH="$PATH:$PACKAGES_DIR/windows-x64/qt-5.6.1-1/bin"
+            #nx_verbose "$CONFIGURATION"/bin/desktop_client
             ;;
         stop-c)
-            // TODO: Decide on better impl.
+            # TODO: Decide on better impl.
             nx_fail "Command not implemented yet."
             ;;
         run-ut)
             do_run_ut "$@"
             ;;
         #..........................................................................................
-        share)
-            do_share "$@"
-            ;;
         clean)
             do_clean "$@"
             ;;
@@ -396,15 +355,9 @@ main()
             do_gen "$@" || exit $?
             do_build $CONFIGURATION_ARG
             ;;
-        tunnel)
-            "$LINUX_TOOL" tunnel "$@"
-            ;;
-        tunnel-s)
-            "$LINUX_TOOL" tunnel-s "$@"
-            ;;
         #..........................................................................................
         *)
-            nx_fail "Invalid arguments. Run with -h for help."
+            "$LINUX_TOOL" "$COMMAND" "$@"
             ;;
     esac
 }
