@@ -129,7 +129,7 @@ class BuildProject(JenkinsProject):
 
     def make_parallel_job(self, job_name, workspace_dir, platform, **kw):
         platform_config = self.config.platforms[platform]
-        node = platform_config.build_node
+        node = self._get_build_node_label(platform_config)
         job_command_list = []
         if self.params.clean or self.params.clean_only:
             job_command_list += [
@@ -138,6 +138,13 @@ class BuildProject(JenkinsProject):
         if not self.params.clean_only:
             job_command_list += self.make_node_stage_command_list(platform=platform, **kw)
         return ParallelJob(job_name, [NodeCommand(node, workspace_dir, job_command_list)])
+
+    def _get_build_node_label(self, platform_config):
+        if self.in_assist_mode:
+            suffix = 'psa'
+        else:
+            suffix = self.project_id
+        return '{}-{}'.format(platform_config.build_node, suffix)
 
     def make_node_stage_command_list(self, **kw):
         return [
