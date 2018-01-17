@@ -98,12 +98,17 @@ class BuildProject(JenkinsProject):
         parameters += [
                     ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                                ['build', 'update_properties']),
+                    BooleanProjectParameter('run_unit_tests', 'Run unit tests', default_value=self.run_unit_tests_by_default),
                     BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
                     BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
                     BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
                     ]
         return parameters
+
+    @property
+    def run_unit_tests_by_default(self):
+        return True
 
     @property
     def project_name(self):

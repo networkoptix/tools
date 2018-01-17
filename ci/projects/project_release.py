@@ -52,6 +52,10 @@ class ReleaseProject(BuildProject):
             ]
 
     @property
+    def run_unit_tests_by_default(self):
+        return False
+
+    @property
     def requested_platform_list(self):
         platform_list = self.params.get('platform_list')
         if not platform_list:
@@ -112,7 +116,7 @@ class ReleaseProject(BuildProject):
         clean_build = self.clean_stamps.must_do_clean_build(self.params)
 
         build_info = self._build(junk_shop_repository, platform_branch_config, platform_config, clean_build)
-        if platform_config.should_run_unit_tests and build_info.is_succeeded:
+        if self.params.run_unit_tests and platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 
         return self.post_build_actions(junk_shop_repository, build_info)
