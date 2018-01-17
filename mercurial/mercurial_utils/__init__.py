@@ -1,0 +1,1 @@
+from .commit_message_checker import CommitMessageChecker

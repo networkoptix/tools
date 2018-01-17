@@ -1,6 +1,10 @@
 from mercurial import cmdutil, commands, revset
 from mercurial.i18n import _
 
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from mercurial_utils import CommitMessageChecker
+
 cmdtable = {}
 command = cmdutil.command(cmdtable)
 
@@ -34,20 +38,14 @@ def merge_commit(ui, repo, *pats, **opts):
         return
 
     message = "Merge: {0} -> {1}\n".format(other.branch(), branch)
-
+    message_checker = CommitMessageChecker()
     match = revset.match(ui, "(::{0} - ::{1})".format(other.branch(), branch), repo)
-    empty = True
     for rev in match(repo, set(range(len(repo)))):
-        empty = False
         description = repo[rev].description()
-        if description.startswith("#") or description.startswith("Merge:"):
-            continue
-        message += description
-        message += "\n"
-
-    if empty:
-        ui.write_err("Merge changelog is empty!")
-        return
+        if description:
+            summary = description.split('\n')[0].strip()
+            if message_checker.is_commit_message_accepted(summary):
+                message += summary + "\n"
 
     options = opts
     options["message"] = message
