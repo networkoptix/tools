@@ -40,6 +40,9 @@ class CMake(object):
         self._setup_cmake()
         assert self._is_required_cmake_operational(), 'CMake version %s is still not operational after it has been setup' % self._cmake_version
 
+    def get_cmake_cmdline(self, cmake_args):
+        return self._host.args2cmdline(['cmake'] + cmake_args)
+
     def run_cmake(self, cmake_args, env=None, cwd=None, check_retcode=True, timeout=None):
         cmake_bin_dir = os.path.join(
             os.getcwd(), CMAKE_ROOT_DIR, self._cmake_base_name, self.platform_config[self._system].bin_dir)

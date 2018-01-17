@@ -183,7 +183,7 @@ class CMakeBuilder(object):
         # if build_params.target_device:
         #     generate_args.append('-DtargetDevice=%s' % build_params.target_device)
         log.info('Generating with cmake: %s', self._host.args2cmdline(generate_args))
-        return self._run_timed_cmake(
+        return self._run_and_decorate_cmake(
             'Generation', generate_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=GENERATE_TIMEOUT)
 
     def _build(self, build_dir, cmake_configuration):
@@ -197,23 +197,25 @@ class CMakeBuilder(object):
             '-j', str(PARALLEL_JOB_COUNT),
             ]
         log.info('Building with cmake: %s', self._host.args2cmdline(build_args))
-        return self._run_timed_cmake(
+        return self._run_and_decorate_cmake(
             'Build', build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
 
     @property
     def _build_tool(self):
         return self._platform_config.generator or DEFAULT_GENERATOR
 
-    def _run_timed_cmake(self, stage_name, *args, **kw):
+    def _run_and_decorate_cmake(self, stage_name, cmake_args, **kw):
         start_time = datetime_utc_now()
-        results = self._run_cmake(*args, **kw)
+        results = self._run_cmake(cmake_args, **kw)
         duration = datetime_utc_now() - start_time
-        results.output += '\n' + '-- %s duration: %s\n' % (stage_name, junk_shop_utils.timedelta_to_str(duration))
+        cmdline_info = '-- command line: %s' % self._cmake.get_cmake_cmdline(cmake_args)
+        duration_info = '-- %s duration: %s\n' % (stage_name, junk_shop_utils.timedelta_to_str(duration))
+        results.output = '\n'.join([cmdline_info, results.output, duration_info])
         return results
 
-    def _run_cmake(self, *args, **kw):
+    def _run_cmake(self, cmake_args, **kw):
         try:
-            command_results = self._cmake.run_cmake(*args, **kw)
+            command_results = self._cmake.run_cmake(cmake_args, **kw)
             return CMakeResults.from_command_results(command_results)
         except ProcessTimeoutError as x:
             error_message = 'Timed out after %s' % x.timeout
