@@ -195,7 +195,8 @@ class BuildProject(JenkinsProject):
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, cmake)
-        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', self.params.run_unit_tests, clean_build)
+        build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
+        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', build_tests, clean_build)
         return build_info
 
     def add_build_error(self, error):
