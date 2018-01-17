@@ -167,12 +167,13 @@ class CMakeBuilder(object):
         generate_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
-            '-DwithTests=%s' % bool_to_cmake_param(build_tests),
             '-DcloudGroup=%s' % build_params.cloud_group,
             '-Dcustomization=%s' % build_params.customization,
             '-DbuildNumber=%d' % build_params.build_num,
             '-Dbeta=%s' % bool_to_cmake_param(build_params.is_beta),
             ]
+        if not build_tests:
+            generate_args += ['-DwithTests=%s' % bool_to_cmake_param(False)]
         if build_params.add_qt_pdb is not None:
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         generate_args += platform_args + [
