@@ -99,12 +99,12 @@ class CMakeBuilder(object):
     def _is_unix(self):
         return self._system_platform_config[self._system].is_unix
 
-    def build(self, junk_shop_repository, src_dir, build_dir, clean_build):
+    def build(self, junk_shop_repository, src_dir, build_dir, build_tests, clean_build):
         assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
         build_params = junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        generate_results = self._generate(src_dir, build_dir, build_params, cmake_configuration)
+        generate_results = self._generate(src_dir, build_dir, build_params, build_tests, cmake_configuration)
         succeeded = generate_results.succeeded
         error_message = generate_results.error_message
         output = generate_results.output
@@ -154,7 +154,7 @@ class CMakeBuilder(object):
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
-    def _generate(self, src_dir, build_dir, build_params, cmake_configuration):
+    def _generate(self, src_dir, build_dir, build_params, build_tests, cmake_configuration):
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
         platform_args = []
@@ -167,6 +167,7 @@ class CMakeBuilder(object):
         generate_args = [
             '-DdeveloperBuild=OFF',
             '-DCMAKE_BUILD_TYPE=%s' % cmake_configuration,
+            '-DwithTests=%s' % bool_to_cmake_param(build_tests),
             '-DcloudGroup=%s' % build_params.cloud_group,
             '-Dcustomization=%s' % build_params.customization,
             '-DbuildNumber=%d' % build_params.build_num,
@@ -278,7 +279,7 @@ def test_me():
     repository = DbCaptureRepository(db_config, build_params)
     builder = CMakeBuilder(1, config.platforms[platform], platform_branch_config, cmake)
     build_dir = 'build-{}'.format(platform)
-    build_info = builder.build(repository, 'nx_vms', build_dir, clean_build=False)
+    build_info = builder.build(repository, 'nx_vms', build_dir, build_tests=True, clean_build=False)
     log.info('Build info: %r', build_info)
 
 
