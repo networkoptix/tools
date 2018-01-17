@@ -291,6 +291,15 @@ nx_concat_ARGS() # "$@"
     fi
 }
 
+# If cygwin, convert cygwin path to windows path for external tools; otherwise, return path as is.
+nx_path() # "$@"
+{
+    case "$(uname -s)" in
+        CYGWIN*) cygpath -w "$@";;
+        *) echo "$@";;
+    esac
+}
+
 #--------------------------------------------------------------------------------------------------
 # High-level utils, can use low-level utils.
 
@@ -437,9 +446,12 @@ nx_get_SELF_IP() # subnet-regex
     esac
 
     SELF_IP=$($TOOL |awk "$AWK" |grep "$SUBNET")
+    # Using the first line only. and cut possible trailing '\r' on Windows.
+    SELF_IP=${SELF_IP%%$'\n'*}
+    SELF_IP=${SELF_IP%%$'\r'*}
 
     if ! [[ $SELF_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        nx_fail "Unable to get self IP address for subnet regex \"$SUBNET\"."
+        nx_fail "Self IP address \"$SELF_IP\" does not match subnet regex \"$SUBNET\"."
     fi
 }
 
@@ -567,7 +579,7 @@ nx_detail_on_exit()
 {
     local RESULT=$?
     if [ $RESULT != 0 ]; then
-        nx_echo "The script FAILED (status $RESULT)."
+        nx_echo "The script FAILED (status $RESULT)." >&2
     fi
     return $RESULT
 }
