@@ -105,6 +105,8 @@ ci:
     - linux-x64
     - mac
     - edge1
+  nightly_schedule: 'H 3 * * *'
+
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher

@@ -380,21 +380,29 @@ class SetProjectPropertiesCommand(Command):
             parameters=[ProjectParameter.from_dict(p) for p in d['parameters']],
             enable_concurrent_builds=d['enable_concurrent_builds'],
             days_to_keep_old_builds=d['days_to_keep_old_builds'],
+            poll_scm=d['poll_scm'],
+            cron=d['cron'],
             )
 
-    def __init__(self, parameters, enable_concurrent_builds, days_to_keep_old_builds=None):
+    def __init__(self, parameters, enable_concurrent_builds, days_to_keep_old_builds=None, poll_scm=None, cron=None):
         assert is_list_inst(parameters, ProjectParameter), repr(parameters)
         assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
         assert days_to_keep_old_builds is None or isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        assert poll_scm is None or isinstance(poll_scm, basestring), repr(poll_scm)
+        assert cron is None or isinstance(cron, basestring), repr(cron)
         self.parameters = parameters
         self.enable_concurrent_builds = enable_concurrent_builds
         self.days_to_keep_old_builds = days_to_keep_old_builds
+        self.poll_scm = poll_scm  # cron tab format if not None
+        self.cron = cron  # cron tab format if not None
 
     def args_to_dict(self):
         return dict(
             parameters=[p.to_dict() for p in self.parameters],
             enable_concurrent_builds=self.enable_concurrent_builds,
             days_to_keep_old_builds=self.days_to_keep_old_builds,
+            poll_scm=self.poll_scm,
+            cron=self.cron,
             )
 
 

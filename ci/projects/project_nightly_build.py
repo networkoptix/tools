@@ -5,6 +5,7 @@ import logging
 from project import JenkinsProject
 from command import (
     StringProjectParameter,
+    ChoiceProjectParameter,
     SetProjectPropertiesCommand,
     BooleanParameterValue,
     BuildJobCommand,
@@ -23,22 +24,26 @@ class NightlyBuildProject(JenkinsProject):
     project_id = 'nightly_build'
 
     def stage_init(self):
-        return [
-            self.make_project_properties_command(),
-            self.make_build_job_command(),
-            ]
+        commands = [self.make_project_properties_command()]
+        if self.params.action == 'build':
+            commands += [self.make_build_job_command()]
+        return commands
 
     def make_project_properties_command(self):
-        parameters = self.default_parameters
+        parameters = self.default_parameters + [
+            ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
+                                   ['build', 'update_properties']),
+            ]
         if self.in_assist_mode:
             parameters += [
                 StringProjectParameter('branch', 'nx_vms branch to checkout and build',
                                        default_value=DEFAULT_ASSIST_MODE_VMS_BRANCH),
                 ]
         return SetProjectPropertiesCommand(
+            parameters=parameters,
             enable_concurrent_builds=False,
             days_to_keep_old_builds=DAYS_TO_KEEP_OLD_BUILDS,
-            parameters=parameters,
+            cron=self.config.ci.nightly_schedule,
             )
 
     def make_build_job_command(self):

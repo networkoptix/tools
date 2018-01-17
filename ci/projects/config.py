@@ -169,24 +169,29 @@ class CiConfig(object):
         return cls(
             timeout=str_to_timedelta(data['timeout']),
             platforms=data['platforms'],
+            nightly_schedule=data['nightly_schedule'],
             )
 
-    def __init__(self, timeout, platforms):
+    def __init__(self, timeout, platforms, nightly_schedule):
         assert isinstance(timeout, datetime.timedelta), repr(timeout)
         assert is_list_inst(platforms, basestring), repr(platforms)
+        assert isinstance(nightly_schedule, basestring), repr(nightly_schedule)
         self.timeout = timeout
         self.platforms = platforms
+        self.nightly_schedule = nightly_schedule
 
     def to_dict(self):
         return dict(
             timeout=timedelta_to_str(self.timeout),
             platforms=self.platforms,
+            nightly_schedule=self.nightly_schedule
             )
 
     def report(self):
         log.info('\t' 'ci:')
         log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
         log.info('\t\t' 'platforms: %s', ', '.join(self.platforms))
+        log.info('\t\t' 'nightly_schedule: %r', self.nightly_schedule)
 
 
 class TestsWatchersConfig(object):
