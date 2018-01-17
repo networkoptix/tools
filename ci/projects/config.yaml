@@ -105,7 +105,7 @@ ci:
     - linux-x64
     - mac
     - edge1
-  nightly_schedule: 'H 3 * * *'
+  nightly_schedule: 'H 0 * * *'
 
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
