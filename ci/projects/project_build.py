@@ -183,7 +183,7 @@ class BuildProject(JenkinsProject):
             configuration='release',
             cloud_group=cloud_group,
             customization=customization,
-            add_qt_pdb=self.params.add_qt_pdb,
+            add_qt_pdb=self.params.add_qt_pdb or release == 'release',  # ENV-155 Always add qt pdb for releases
             is_incremental=is_incremental,
             jenkins_url=self.jenkins_env.build_url,
             repository_url=nx_vms_scm_info.repository_url,
