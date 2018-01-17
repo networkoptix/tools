@@ -10,7 +10,7 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
 : ${CORES_ARG="-j12"}
-: ${TARGET_DEVICE="tx1"} #< Target device for CMake.
+: ${TARGET="tx1"} #< Target device for CMake.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="nvidia"}
@@ -41,13 +41,13 @@ nx_load_config "${CONFIG=".tx1-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-# TODO: Replace "Release" arg with BUILD_CONFIG env var.
+# TODO: Replace "[Release]" arg with BUILD_CONFIG env var. Do it in all *-tool.sh.
 
 help_callback()
 {
     cat \
 <<EOF
-Swiss Army Knife for NVidia Tegra ($TARGET_DEVICE): execute various commands.
+Swiss Army Knife for NVidia Tegra ($TARGET): execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
@@ -72,14 +72,14 @@ Here <command> can be one of the following:
  copy-s-ut # Copy unit test bins to the box $BOX_MEDIASERVER_DIR/.
  copy-c-ut # Copy unit test bins to the box $BOX_DESKTOP_CLIENT_DIR/.
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
- ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
+ ini # Create empty .ini files at the box in ~/.config/nx_ini (to be filled with defauls).
  install-tar x.tgz # Install x.tgz to the box via untarring to the root.
  uninstall # Uninstall all nx files from the box.
 
  go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
  go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
  start-s [args] # Run mediaserver exe with [args].
- stop-s # Stop mediaserver via "kill -9".
+ stop-s # Stop mediaserver via "pkill -9".
  start-c [args] # Run desktop_client exe with [args].
  stop-c # Stop desktop_client via "kill -9".
  run-s-ut mask [args] # Run unit test(s) (use mask \"*_ut\" for all) in server dir.
@@ -160,7 +160,7 @@ do_pack() # archive copy_command...
 
 get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR()
 {
-    local DIRS=( $("$LINUX_TOOL" print-dirs "$TARGET_DEVICE") )
+    local DIRS=( $("$LINUX_TOOL" print-dirs "$TARGET") )
 
     VMS_DIR=${DIRS[0]}
     [ -z "$VMS_DIR" ] && nx_fail "Unable to get VMS_DIR via $LINUX_TOOL print-dirs"
@@ -537,10 +537,15 @@ main()
             cp_libs "*$LIB_NAME.so"
             ;;
         ini)
-            nx_go_verbose touch /tmp/nx_media.ini "[&&]" \
-                touch /tmp/tegra_video_metadata_plugin.ini "[&&]" \
-                touch /tmp/video_dec_gie.ini "[&&]" \
-                touch /tmp/tegra_video.ini
+            local INI_DIR="/home/$BOX_USER/.config/nx_ini"
+            nx_go_verbose \
+                touch "$INI_DIR/nx_media.ini" "[&&]" \
+                touch "$INI_DIR/nx_streaming.ini" "[&&]" \
+                touch "$INI_DIR/plugins.ini" "[&&]" \
+                touch "$INI_DIR/mediaserver.ini" "[&&]" \
+                touch "$INI_DIR/tegra_video_metadata_plugin.ini" "[&&]" \
+                touch "$INI_DIR/video_dec_gie.ini" "[&&]" \
+                touch "$INI_DIR/tegra_video.ini"
             ;;
         install-tar)
             install_tar "$@"
@@ -557,12 +562,15 @@ main()
         go)
             nx_go "$@"
             ;;
+        go-verbose)
+            nx_go_verbose "$@"
+            ;;
         start-s)
             assert_not_client_only
             nx_go sudo "$BOX_MEDIASERVER_DIR/bin/mediaserver" -e "$@"
             ;;
         stop-s)
-            nx_go sudo killall -9 mediaserver
+            nx_go sudo pkill -9 mediaserver
             ;;
         start-c)
             assert_not_server_only
@@ -613,7 +621,7 @@ main()
                 # No need to attempt copying files.
             else
                 nx_go make -C "$BOX_SRC_DIR" "$@" \
-                    "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR..." \
+                    "[&&]" echo "Compiled OK; copying to $BOX_INSTALL_DIR/..." \
                     "[&&]" cp "$BOX_SRC_DIR/libtegra_video.so" "$BOX_LIBS_DIR/" \
                     "[&&]" cp "$BOX_SRC_DIR/video_dec_gie" "$BOX_MEDIASERVER_DIR/bin/" \
                     "[&&]" echo "SUCCESS: libtegra_video.so and video_dec_gie copied."
@@ -657,25 +665,25 @@ main()
             ;;
         #..........................................................................................
         clean)
-            "$LINUX_TOOL" clean "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" clean "$TARGET" "$@"
             ;;
         mvn)
-            "$LINUX_TOOL" mvn "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" mvn "$TARGET" "$@"
             ;;
         gen)
-            "$LINUX_TOOL" gen "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" gen "$TARGET" "$@"
             ;;
         build)
-            "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" build "$TARGET" "$@"
             ;;
         cmake)
-            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" cmake "$TARGET" "$@"
             ;;
         build-installer)
-            "$LINUX_TOOL" build-installer "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" build-installer "$TARGET" "$@"
             ;;
         test-installer)
-            "$LINUX_TOOL" test-installer "$TARGET_DEVICE" "$@"
+            "$LINUX_TOOL" test-installer "$TARGET" "$@"
             ;;
         #..........................................................................................
         pack-build)
