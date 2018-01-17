@@ -398,6 +398,119 @@ class SetProjectPropertiesCommand(Command):
             )
 
 
+class ParameterValue(object):
+
+    @staticmethod
+    def from_dict(d):
+        param_types = dict(
+            boolean=BooleanParameterValue,
+            string=StringParameterValue,
+            choice=MultiChoiceParameterValue,
+            )
+        t = dict['type']
+        param_cls = param_types.get(t)
+        assert param_cls, 'Unknown parameter type: %r' % t
+        return param_cls.from_dict(d)
+
+    def __init__(self, name, value):
+        assert isinstance(name, basestring), repr(name)
+        self.name = name
+        self.value = value
+
+    def to_dict(self):
+        return dict(
+            type=self.type,
+            name=self.name,
+            value=self.value_to_dict(self.value),
+            )
+
+    def value_to_dict(self, value):
+        return value
+
+
+class BooleanParameterValue(ParameterValue):
+
+    type = 'boolean'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            value=d['value'],
+            )
+
+    def __init__(self, name, value):
+        assert isinstance(value, bool), repr(value)
+        ParameterValue.__init__(self, name, value)
+
+
+class StringParameterValue(ParameterValue):
+
+    type = 'string'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            value=d['value'],
+            )
+
+    def __init__(self, name, value):
+        assert isinstance(value, basestring), repr(value)
+        ParameterValue.__init__(self, name, value)
+
+
+class MultiChoiceParameterValue(ParameterValue):
+
+    type = 'multi_choice'
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(
+            name=d['name'],
+            value=d['value'].split(','),
+            )
+
+    def __init__(self, name, value):
+        assert is_list_inst(value, basestring), repr(value)
+        ParameterValue.__init__(self, name, value)
+
+    def value_to_dict(self, value):
+        return ','.join(value)
+
+
+class BuildJobCommand(Command):
+
+    command_id = 'build_job'
+
+    @classmethod
+    def from_dict(cls, d, command_registry):
+        return cls(
+            job=d['job'],
+            parameters=[ParameterValue.from_dict(p) for p in d['parameters']],
+            wait_for_completion=d['wait'],
+            propagate_errors=d['propagate'],
+            )
+
+    def __init__(self, job, parameters, wait_for_completion=True, propagate_errors=True):
+        assert isinstance(job, basestring), repr(job)  # 'ci/vms_3.2'
+        assert is_list_inst(parameters, ParameterValue), repr(parameters)
+        assert isinstance(wait_for_completion, bool), repr(wait_for_completion)
+        assert isinstance(propagate_errors, bool), repr(propagate_errors)
+        self.job = job
+        self.parameters = parameters
+        self.wait_for_completion = wait_for_completion
+        self.propagate_errors = propagate_errors
+
+    def args_to_dict(self):
+        return dict(
+            job=self.job,
+            parameters=[p.to_dict() for p in self.parameters],
+            wait_for_completion=self.wait_for_completion,
+            propagate_errors=self.propagate_errors,
+            )
+
+
 class SetBuildResultCommand(Command):
 
     command_id = 'set_build_result'

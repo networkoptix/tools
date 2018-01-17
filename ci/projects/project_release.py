@@ -39,7 +39,7 @@ class ReleaseProject(BuildProject):
 
     project_id = 'release'
 
-    days_to_keep_old_builds = 30
+    days_to_keep_old_builds = DAYS_TO_KEEP_OLD_BUILDS
 
     def get_project_parameters(self):
         return BuildProject.get_project_parameters(self) + [

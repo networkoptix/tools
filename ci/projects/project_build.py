@@ -38,12 +38,13 @@ from clean_stamps import CleanStamps
 log = logging.getLogger(__name__)
 
 
-DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2'
+DEFAULT_DAYS_TO_KEEP_OLD_BUILDS = 10
+DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2_dev'
 
 
 class BuildProject(JenkinsProject):
 
-    days_to_keep_old_builds = 10
+    days_to_keep_old_builds = DEFAULT_DAYS_TO_KEEP_OLD_BUILDS
 
     def __init__(self, input_state, in_assist_mode):
         JenkinsProject.__init__(self, input_state, in_assist_mode)

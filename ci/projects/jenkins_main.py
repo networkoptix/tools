@@ -12,6 +12,7 @@ from state import State
 from project_configure import ConfigureProject
 from project_ci import CiProject
 from project_release import ReleaseProject
+from project_nightly_build import NightlyBuildProject
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ all_projects = [
     ConfigureProject,
     CiProject,
     ReleaseProject,
+    NightlyBuildProject,
     ]
 
 
