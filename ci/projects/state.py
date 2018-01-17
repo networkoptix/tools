@@ -1,7 +1,7 @@
 import logging
 from utils import SimpleNamespace, is_list_inst, is_dict_inst
 from config import Config
-from command import Command, PythonStageCommand
+from command import Command, SetBuildResultCommand, PythonStageCommand
 
 log = logging.getLogger(__name__)
 
@@ -132,6 +132,7 @@ class State(object):
             current_command=PythonStageCommand.from_dict(data['current_command'], command_registry),
             clean_stamp=data.get('clean_stamp'),
             clean_build_stamp=data.get('clean_build_stamp'),
+            job_result=data.get('job_result', {}),
             )
 
     def __init__(
@@ -148,6 +149,7 @@ class State(object):
             current_command,
             clean_stamp,
             clean_build_stamp,
+            job_result,
             ):
         assert isinstance(current_command, PythonStageCommand), repr(current_command)
         assert isinstance(jenkins_env, JenkinsEnv), repr(jenkins_env)
@@ -161,6 +163,8 @@ class State(object):
         assert isinstance(is_unix, bool), repr(is_unix)
         assert clean_stamp is None or isinstance(clean_stamp, int), repr(clean_stamp)
         assert clean_build_stamp is None or isinstance(clean_build_stamp, int), repr(clean_build_stamp)
+        assert is_dict_inst(job_result, basestring, basestring), repr(job_result)
+        assert all(result in SetBuildResultCommand.known_results for result in job_result.values()), repr(job_result)
         self.jenkins_env = jenkins_env
         self.params = params
         self.config = config
@@ -173,6 +177,7 @@ class State(object):
         self.current_command = current_command
         self.clean_stamp = clean_stamp  # last time when 'clean' flag was used
         self.clean_build_stamp = clean_build_stamp  # same for clean_build flag
+        self.job_result = job_result
 
     def report(self):
         self.jenkins_env.report()
@@ -189,6 +194,9 @@ class State(object):
         log.info('current_node: %r', self.current_node)
         log.info('clean_stamp: %r', self.clean_stamp)
         log.info('clean_build_stamp: %r', self.clean_build_stamp)
+        log.info('job_result:')
+        for job, result in self.job_result.items():
+            log.info('\t' '%s: %r', job, result)
 
     def to_dict(self):
         return dict(
@@ -203,6 +211,7 @@ class State(object):
             is_unix=self.is_unix,
             clean_stamp=self.clean_stamp,
             clean_build_stamp=self.clean_build_stamp,
+            job_result=self.job_result,
             )
 
     def make_output_state(self, command_list=None):
@@ -219,4 +228,5 @@ class State(object):
             self.current_command,
             self.clean_stamp,
             self.clean_build_stamp,
+            self.job_result,
             )

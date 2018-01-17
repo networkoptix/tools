@@ -26,7 +26,10 @@ class NightlyBuildProject(JenkinsProject):
     def stage_init(self):
         commands = [self.make_project_properties_command()]
         if self.params.action == 'build':
-            commands += [self.make_build_job_command()]
+            commands += [
+                self.make_build_job_command(),
+                self.make_python_stage_command('set_status'),
+                ]
         return commands
 
     def make_project_properties_command(self):
@@ -51,9 +54,13 @@ class NightlyBuildProject(JenkinsProject):
             BooleanParameterValue('clean', True),
             ]
         return BuildJobCommand(
-            job='{}/{}'.format(DOWNSTREAM_PROJECT, self.branch_name),
+            job=self.downstream_job,
             parameters=parameters,
             )
+
+    @property
+    def downstream_job(self):
+        return '{}/{}'.format(DOWNSTREAM_PROJECT, self.branch_name)
 
     @property
     def branch_name(self):
@@ -64,3 +71,7 @@ class NightlyBuildProject(JenkinsProject):
                 'This scripts are intented to be used in multibranch projects only;'
                 ' env.BRANCH_NAME must be defined')
             return self.jenkins_env.branch_name
+
+    def stage_set_status(self):
+        result = self.state.job_result[self.downstream_job]
+        return [SetBuildResultCommand(result)]

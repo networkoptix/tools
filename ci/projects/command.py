@@ -497,25 +497,21 @@ class BuildJobCommand(Command):
             job=d['job'],
             parameters=[ParameterValue.from_dict(p) for p in d['parameters']],
             wait_for_completion=d['wait'],
-            propagate_errors=d['propagate'],
             )
 
-    def __init__(self, job, parameters, wait_for_completion=True, propagate_errors=True):
+    def __init__(self, job, parameters, wait_for_completion=True):
         assert isinstance(job, basestring), repr(job)  # 'ci/vms_3.2'
         assert is_list_inst(parameters, ParameterValue), repr(parameters)
         assert isinstance(wait_for_completion, bool), repr(wait_for_completion)
-        assert isinstance(propagate_errors, bool), repr(propagate_errors)
         self.job = job
         self.parameters = parameters
         self.wait_for_completion = wait_for_completion
-        self.propagate_errors = propagate_errors
 
     def args_to_dict(self):
         return dict(
             job=self.job,
             parameters=[p.to_dict() for p in self.parameters],
             wait_for_completion=self.wait_for_completion,
-            propagate_errors=self.propagate_errors,
             )
 
 
@@ -527,6 +523,8 @@ class SetBuildResultCommand(Command):
     brFAILURE = 'FAILURE'
     brUNSTABLE = 'UNSTABLE'
     brABORTED = 'ABORTED'
+
+    known_results = [brSUCCESS, brFAILURE, brUNSTABLE, brABORTED]
 
     @classmethod
     def from_dict(cls, d, command_registry):
