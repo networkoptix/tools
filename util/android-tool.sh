@@ -6,29 +6,31 @@ nx_load_config "${CONFIG=".android-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-help()
+help_callback()
 {
     cat <<EOF
 Swiss Army Knife for Android Mobile Client: execute various commands.
 Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside nx_vms:
 
-$(basename "$0") [--verbose] <command>
+$(basename "$0") <options> <command>
+
+$NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 
-devices # Check that the Android device is connected.
+ devices # Check that the Android device is connected.
 
-deploy # Rebuild apk, reinstall apk, launch the app.
-run # Lanuch the app.
-stop # Force-stop the app.
-log # Show Mobile Client log via filtering "adb logcat".
-uninstall # Uninstall apk from Android device.
-install # Install apk to Android device.
+ deploy # Rebuild apk, reinstall apk, launch the app.
+ run # Lanuch the app.
+ stop # Force-stop the app.
+ log # Show Mobile Client log via filtering "adb logcat".
+ uninstall # Uninstall apk from Android device.
+ install # Install apk to Android device.
 
-java # After changing .java: copy sources so that "deploy" will rebuild classes.
-rebuild [args] # Perform "hg purge --all" and "mvn clean package ... [args]", excluding unit tests.
-unpack <path/to/new/dir> # Unpack existing .apk, including dex2jar.
+ java # After changing .java: copy sources so that "deploy" will rebuild classes.
+ rebuild [args] # Perform "hg purge --all" and "mvn clean package ... [args]", excluding unit tests.
+ unpack <path/to/new/dir> # Unpack existing .apk, including dex2jar.
 EOF
 }
 
