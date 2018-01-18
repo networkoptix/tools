@@ -88,6 +88,7 @@ platforms:
     should_run_unit_tests: yes
     artifact_mask_list:
       - distrib/*.dmg
+      - distrib/*.zip  # update
   bananapi:
     build_node: linux
     should_run_unit_tests: no
