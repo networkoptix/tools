@@ -113,9 +113,8 @@ class ReleaseProject(BuildProject):
         platform_config = self.config.platforms[platform]
         platform_branch_config = self.branch_config.platforms.get(platform)
         junk_shop_repository = self.create_junk_shop_repository(platform=platform, customization=customization)
-        clean_build = self.clean_stamps.must_do_clean_build(self.params)
 
-        build_info = self._build(junk_shop_repository, platform_branch_config, platform_config, clean_build)
+        build_info = self.build(junk_shop_repository, platform_branch_config, platform_config)
         if self.params.run_unit_tests and platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 

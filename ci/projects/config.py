@@ -162,6 +162,30 @@ class EmailConfig(object):
             log.info('\t\t\t' '%r', email)
 
 
+class BuildConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            rebuild_cause_file_patterns=data['rebuild_cause_file_patterns'],
+            )
+
+    def __init__(self, rebuild_cause_file_patterns):
+        assert is_list_inst(rebuild_cause_file_patterns, basestring), repr(rebuild_cause_file_patterns)
+        self.rebuild_cause_file_patterns = rebuild_cause_file_patterns
+
+    def to_dict(self):
+        return dict(
+            rebuild_cause_file_patterns=self.rebuild_cause_file_patterns,
+            )
+
+    def report(self):
+        log.info('\t' 'build:')
+        log.info('\t\t' 'rebuild_cause_file_patterns:')
+        for patterns in self.rebuild_cause_file_patterns:
+            log.info('\t\t\t' '%r', patterns)
+
+
 class CiConfig(object):
 
     @classmethod
@@ -231,6 +255,7 @@ class Config(object):
             junk_shop=JunkShopConfig.from_dict(data['junk_shop']),
             services=ServicesConfig.from_dict(data['services']),
             email=EmailConfig.from_dict(data['email']),
+            build=BuildConfig.from_dict(data['build']),
             customization_list=data['customization_list'],
             platforms={platform_name: PlatformConfig.from_dict(platform_config)
                                for platform_name, platform_config in data['platforms'].items()},
@@ -239,10 +264,11 @@ class Config(object):
                                 for name, twc in data['tests_watchers'].items()},
             )
 
-    def __init__(self, junk_shop, services, email, customization_list, platforms, ci, tests_watchers):
+    def __init__(self, junk_shop, services, email, build, customization_list, platforms, ci, tests_watchers):
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert isinstance(services, ServicesConfig), repr(services)
         assert isinstance(email, EmailConfig), repr(email)
+        assert isinstance(build, BuildConfig), repr(build)
         assert is_list_inst(customization_list, basestring), repr(customization_list)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
         assert isinstance(ci, CiConfig), repr(ci)
@@ -250,6 +276,7 @@ class Config(object):
         self.junk_shop = junk_shop
         self.services = services
         self.email = email
+        self.build = build
         self.customization_list = customization_list
         self.platforms = platforms
         self.ci = ci
@@ -260,6 +287,7 @@ class Config(object):
             junk_shop=self.junk_shop.to_dict(),
             services=self.services.to_dict(),
             email=self.email.to_dict(),
+            build=self.build.to_dict(),
             customization_list=self.customization_list,
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
@@ -272,6 +300,7 @@ class Config(object):
         self.junk_shop.report()
         self.services.report()
         self.email.report()
+        self.build.report()
         log.info('\t' 'customization_list:')
         for customization in self.customization_list:
             log.info('\t\t' '%r', customization)

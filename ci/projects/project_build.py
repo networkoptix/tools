@@ -3,6 +3,7 @@
 import logging
 import os.path
 import glob
+import re
 
 from pony.orm import db_session
 
@@ -34,6 +35,7 @@ from command import (
 from cmake import CMake
 from build import CMakeBuilder
 from clean_stamps import CleanStamps
+from diff_parser import load_hg_changes
 
 log = logging.getLogger(__name__)
 
@@ -66,7 +68,8 @@ class BuildProject(JenkinsProject):
 
     def init_build_info(self):
         junk_shop_repository = self.create_junk_shop_repository()
-        update_build_info(junk_shop_repository, 'nx_vms')
+        revision_info = update_build_info(junk_shop_repository, 'nx_vms')
+        self.scm_info['nx_vms'].set_prev_revision(revision_info.prev_revision)  # will be needed later
 
     def stage_report_state(self):
         self.state.report()
@@ -190,14 +193,42 @@ class BuildProject(JenkinsProject):
             revision=nx_vms_scm_info.revision,
             )
 
-    def _build(self, junk_shop_repository, platform_branch_config, platform_config, clean_build):
+    def build(self, junk_shop_repository, platform_branch_config, platform_config):
         cmake = CMake('3.9.6')
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, cmake)
+        clean_build = self._is_rebuild_required()
         build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
         build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', build_tests, clean_build)
         return build_info
+
+    def _is_rebuild_required(self):
+        if self.clean_stamps.must_do_clean_build(self.params):
+            return True
+        nx_vms_scm_info = self.scm_info['nx_vms']
+        if not nx_vms_scm_info.prev_revision:
+            log.info('Unable to determine previous revision for nx_vms project; will do full rebuild')
+            return True
+        changes = load_hg_changes(
+            repository_dir=os.path.join(self.workspace_dir, 'nx_vms'),
+            prev_revision=nx_vms_scm_info.prev_revision,
+            current_revision=nx_vms_scm_info.revision,
+            )
+        if self._do_paths_match_rebuild_cause_pattern('added', changes.added_file_list):
+            return True
+        if self._do_paths_match_rebuild_cause_pattern('removed', changes.removed_file_list):
+            return True
+        return False
+
+    def _do_paths_match_rebuild_cause_pattern(self, change_kind, path_list):
+        for path in path_list:
+            for pattern in self.config.build.rebuild_cause_file_patterns:
+                if re.search(pattern, path, re.IGNORECASE):
+                    log.info('File %r is %s since last build, matching rebuild cause pattern %r; will do full rebuild',
+                             path, change_kind, pattern)
+                    return True
+        return False
 
     def add_build_error(self, error):
         log.error(error)

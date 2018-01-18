@@ -6,8 +6,11 @@ import logging
 import argparse
 import subprocess
 from datetime import datetime, timedelta
+from collections import namedtuple
+
 import dateutil.parser as dateutil_parser
 from pony.orm import db_session, select, desc
+
 from junk_shop.utils import DbConfig
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
@@ -15,6 +18,9 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 log = logging.getLogger(__name__)
 
 HG_LOG_TEMPLATE = r'{node|short}|{date|isodatesec}|{author|person}|{author|email}|{desc|firstline}\n'
+
+
+RevisionInfo = namedtuple('RevisionInfo', 'prev_revision current_revision')
 
 
 def pick_last_revision(repository):
@@ -58,6 +64,10 @@ def update_build_info(repository, src_dir):
     delete_build_changesets(build)
     if prev_revision:
         load_change_sets(repository, src_dir, build, prev_revision)
+    return RevisionInfo(
+        prev_revision=prev_revision,
+        current_revision=build.revision,
+        )
 
 
 def main():

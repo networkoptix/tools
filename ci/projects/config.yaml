@@ -1,4 +1,5 @@
 
+# credentials stored by jenkins and required by our projects
 credentials:
   - id: junk_shop_db
     type: name_and_password
@@ -6,7 +7,7 @@ credentials:
     type: password
 
 junk_shop:
-  db_host: megatron
+  db_host: megatron  # host of junk_shop database
 
 services:
   junk_shop_url: http://junkshop.enk.me/
@@ -18,8 +19,18 @@ email:
     host: smtp.gmail.com:587
     user: service@networkoptix.com
   from_address: autotest@networkoptix.com
+  # who receives emails about broken CI system itself
   ci_admins:
     - vfedorov@networkoptix.com
+
+build:
+  # if any file matching this regexp patterns is added or removed since previous build, do full rebuild:
+  rebuild_cause_file_patterns:
+    - ^ci/
+    - ^build_utils/
+    - \.cmake$
+    - CMakeLists.txt
+    - \.vcxproj$
 
 customization_list:
   - default
@@ -100,11 +111,13 @@ platforms:
 
 ci:
   timeout: 30m
+  # default platforms to build by CI project
   platforms:
     - win-x64
     - linux-x64
     - mac
     - edge1
+  # cron schedule to do clean build at night:
   nightly_schedule: 'H 0 * * *'
 
 

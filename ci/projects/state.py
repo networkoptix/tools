@@ -43,25 +43,34 @@ class ScmInfo(object):
             branch=data['branch'],
             repository_url=data['MERCURIAL_REPOSITORY_URL'],
             revision=data['MERCURIAL_REVISION_SHORT'],
+            prev_revision=data.get('prev_revision'),
             )
 
-    def __init__(self, branch, repository_url, revision):
+    def __init__(self, branch, repository_url, revision, prev_revision=None):
         assert branch is None or isinstance(branch, basestring), repr(branch)
         assert isinstance(repository_url, basestring), repr(repository_url)
         assert isinstance(revision, basestring), repr(revision)
+        assert prev_revision is None or isinstance(prev_revision, basestring), repr(prev_revision)
         self.branch = branch
         self.repository_url = repository_url
         self.revision = revision
+        self.prev_revision = prev_revision
 
     def __repr__(self):
-        return '<branch=%r repository_url=%r revision=%r>' % (self.branch, self.repository_url, self.revision)
+        return '<branch=%r repository_url=%r revision=%r prev_revision=%r>' % (
+            self.branch, self.repository_url, self.revision, self.prev_revision)
 
     def to_dict(self):
         return dict(
             branch=self.branch,
             MERCURIAL_REPOSITORY_URL=self.repository_url,
             MERCURIAL_REVISION_SHORT=self.revision,
+            prev_revision=self.prev_revision,
             )
+
+    def set_prev_revision(self, prev_revision):
+        assert prev_revision is None or isinstance(prev_revision, basestring), repr(prev_revision)
+        self.prev_revision = str(prev_revision)
 
 
 class JenkinsEnv(object):
