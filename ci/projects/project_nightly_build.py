@@ -9,6 +9,7 @@ from command import (
     SetProjectPropertiesCommand,
     BooleanParameterValue,
     BuildJobCommand,
+    SetBuildResultCommand,
     )
 
 log = logging.getLogger(__name__)
