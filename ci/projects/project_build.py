@@ -40,6 +40,8 @@ from diff_parser import load_hg_changes
 log = logging.getLogger(__name__)
 
 
+CMAKE_VERSION = '3.10.2'
+
 DEFAULT_DAYS_TO_KEEP_OLD_BUILDS = 10
 DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2_dev'
 
@@ -194,7 +196,7 @@ class BuildProject(JenkinsProject):
             )
 
     def build(self, junk_shop_repository, platform_branch_config, platform_config):
-        cmake = CMake('3.9.6')
+        cmake = CMake(CMAKE_VERSION)
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, cmake)
