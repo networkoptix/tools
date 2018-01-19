@@ -3,6 +3,7 @@
 # run unit tests, store results to database
 
 import logging
+import os
 import os.path
 import sys
 import re
@@ -298,14 +299,20 @@ class TestRunner(object):
 
     def start(self):
         config_vars = self._read_current_config()
-        self._processes = [
-            TestProcess(self._repository, config_vars, self._work_dir, self._platform, self._root_run,
-                        self._binary_to_test_name(binary_name),
-                        os.path.join(self._bin_dir, binary_name))
-            for binary_name in self._binary_list]
         self._clean_core_files()
+        self._processes = [self._create_test_process(config_vars, binary_name) for binary_name in self._binary_list]
         for process in self._processes:
             process.start()
+
+    def _create_test_process(self, config_vars, binary_name):
+        test_name = self._binary_to_test_name(binary_name)
+        executable_path = os.path.join(self._bin_dir, binary_name)
+        work_dir = os.path.join(self._work_dir, test_name)
+        if not os.path.isdir(work_dir):
+            log.info('Creating test work directory: %s', work_dir)
+            os.makedirs(work_dir)
+        return TestProcess(
+            self._repository, config_vars, work_dir, self._platform, self._root_run, test_name, executable_path)
 
     def wait(self):
         self._passed = True
