@@ -23,7 +23,7 @@ def load_hg_changes(repository_dir, prev_revision, current_revision):
     host = LocalHost()
     diff_text = host.get_command_output(
         ['hg', 'diff', '--rev', prev_revision, '--rev', current_revision],
-        cwd=repository_dir)
+        cwd=repository_dir, log_output=False)
     return parse_diff(diff_text)
     
 def parse_diff(diff_text):
