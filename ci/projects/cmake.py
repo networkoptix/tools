@@ -13,6 +13,8 @@ from host import LocalHost
 log = logging.getLogger(__name__)
 
 
+CMAKE_VERSION = '3.10.2'
+
 CMAKE_ROOT_DIR = 'cmake'
 CMAKE_DIST_URL = 'https://cmake.org/files'
 CMAKE_CHECK_TIMEOUT = datetime.timedelta(minutes=1)
@@ -93,7 +95,7 @@ class CMake(object):
 
 def test_me():
     setup_logging(logging.DEBUG)
-    cmake = CMake('3.9.6')
+    cmake = CMake(CMAKE_VERSION)
     cmake.ensure_required_cmake_operational()
 
 
