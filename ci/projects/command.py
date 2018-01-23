@@ -134,14 +134,20 @@ class ArchiveArtifactsCommand(Command):
     def from_dict(cls, d, command_registry):
         return cls(
             artifact_mask_list=d['artifact_mask_list'],
+            artifacts_dir=d['artifacts_dir'],
             )
 
-    def __init__(self, artifact_mask_list):
+    def __init__(self, artifact_mask_list, artifacts_dir=None):
         assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
+        assert artifacts_dir is None or isinstance(artifacts_dir, basestring), repr(artifacts_dir)
         self.artifact_mask_list = artifact_mask_list
+        self.artifacts_dir = artifacts_dir
 
     def args_to_dict(self):
-        return dict(artifact_mask_list=self.artifact_mask_list)
+        return dict(
+            artifact_mask_list=self.artifact_mask_list,
+            artifacts_dir=self.artifacts_dir,
+            )
 
 
 # copy artifacts from upstream job

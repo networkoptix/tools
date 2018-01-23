@@ -66,58 +66,58 @@ platforms:
     build_node: linux
     should_run_unit_tests: yes
     artifact_mask_list:
-      - distrib/*.deb
-      - distrib/*.zip
+      - '*.deb'
+      - '*.zip'
   linux-x86:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - distrib/*.deb
-      - distrib/*.zip
+      - '*.deb'
+      - '*.zip'
   win-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
     should_run_unit_tests: yes
     artifact_mask_list:
-      - distrib/*.msi
-      - distrib/*.exe
-      - distrib/*.zip
-      - distrib/*.pdb
+      - '*.msi'
+      - '*.exe'
+      - '*.zip'
+      - '*.pdb'
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
     should_run_unit_tests: yes
     artifact_mask_list:
-      - distrib/*.msi
-      - distrib/*.exe
-      - distrib/*.zip
-      - distrib/*.pdb
+      - '*.msi'
+      - '*.exe'
+      - '*.zip'
+      - '*.pdb'
   mac:
     build_node: mac
     should_run_unit_tests: yes
     artifact_mask_list:
-      - distrib/*.dmg
-      - distrib/*.zip  # update
+      - '*.dmg'
+      - '*.zip'  # update
   bananapi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - distrib/*.tar.gz
+      - '*.tar.gz'
   bpi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - distrib/*.tar.gz
+      - '*.tar.gz'
   rpi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - distrib/*.tar.gz
+      - '*.tar.gz'
   edge1:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - distrib/*.tar.gz
+      - '*.tar.gz'
 
 ci:
   timeout: 30m

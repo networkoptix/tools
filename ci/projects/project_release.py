@@ -11,7 +11,6 @@ from command import (
     CheckoutCommand,
     CheckoutScmCommand,
     UnstashCommand,
-    ArchiveArtifactsCommand,
     CleanDirCommand,
     ParallelCommand,
     ChoiceProjectParameter,

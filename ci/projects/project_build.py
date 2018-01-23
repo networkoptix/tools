@@ -218,9 +218,12 @@ class BuildProject(NxVmsProject):
     def post_build_actions(self, junk_shop_repository, build_info):
         if not build_info.is_succeeded:
             return None
-        if self.has_artifacts(build_info.artifact_mask_list):
+        if self.has_artifacts(build_info.artifacts_dir, build_info.artifact_mask_list):
             build_info_path = self._save_build_info_artifact()
-            command_list = [ArchiveArtifactsCommand([build_info_path] + build_info.artifact_mask_list)]
+            command_list = [
+                ArchiveArtifactsCommand([build_info_path]),
+                ArchiveArtifactsCommand(build_info.artifact_mask_list, build_info.artifacts_dir),
+                ]
         else:
             error = 'No artifacts were produced matching masks: {}'.format(', '.join(build_info.artifact_mask_list))
             self.add_build_error(error)
@@ -241,9 +244,9 @@ class BuildProject(NxVmsProject):
             yaml.dump(build_info, f)
         return path
 
-    def has_artifacts(self, artifact_mask_list):
+    def has_artifacts(self, artifacts_dir, artifact_mask_list):
         for mask in artifact_mask_list:
-            if glob.glob(mask):
+            if glob.glob(os.path.join(artifacts_dir, mask)):
                 return True
         else:
             return False
