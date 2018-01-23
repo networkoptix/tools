@@ -21,7 +21,7 @@ class TestProject(JenkinsProject):
                 enable_concurrent_builds=False,
                 days_to_keep_old_builds=2,
                 ),
-            self.prepare_devtools_command,
+            ] + self.prepare_devtools_command_list + [
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             self.make_python_stage_command('node'),
             ]

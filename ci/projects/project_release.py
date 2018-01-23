@@ -10,7 +10,6 @@ from command import (
     ScriptCommand,
     CheckoutCommand,
     CheckoutScmCommand,
-    StashCommand,
     UnstashCommand,
     ArchiveArtifactsCommand,
     CleanDirCommand,

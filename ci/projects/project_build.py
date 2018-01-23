@@ -137,9 +137,7 @@ class BuildProject(NxVmsProject):
         return '{}-{}'.format(platform_config.build_node, suffix)
 
     def make_node_stage_command_list(self, **kw):
-        return [
-            self.prepare_devtools_command,
-            ] + self.prepare_nx_vms_command_list + [
+        return self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             self.make_python_stage_command('node', **kw),
             ]

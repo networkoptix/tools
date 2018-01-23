@@ -71,8 +71,7 @@ class FunTestProject(NxVmsProject):
         return self.config.fun_tests.platforms
 
     def make_parallel_job(self, platform):
-        job_command_list = self.prepare_nx_vms_command_list + [
-            self.prepare_devtools_command,
+        job_command_list = self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             UnstashCommand(DIST_STASH),
             self.make_python_stage_command('run_tests'),

@@ -58,11 +58,11 @@ class JenkinsProject(object):
             self.project_id, stage_id, self.in_assist_mode, python_path_list, **kw)
 
     @property
-    def prepare_devtools_command(self):
+    def prepare_devtools_command_list(self):
         if self.in_assist_mode:
-            return UnstashCommand('devtools')
+            return [UnstashCommand('devtools')]
         else:
-            return CheckoutCommand('devtools')
+            return [CheckoutCommand('devtools')]
 
     @property
     def devtools_python_requirements(self):

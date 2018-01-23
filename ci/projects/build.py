@@ -116,6 +116,7 @@ class CMakeBuilder(object):
         error_message = generate_results.error_message
         output = generate_results.output
         if generate_results.succeeded:
+            self._run_post_generate_cleaning(build_dir)
             build_results = self._build(build_dir, cmake_configuration)
             output += '\n' + build_results.output
             if build_results.succeeded:
@@ -161,6 +162,13 @@ class CMakeBuilder(object):
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
+    def _run_post_generate_cleaning(self, build_dir):
+        if self._generator == 'Ninja':
+            cleaner = 'devtools/ninja_clean/ninja_clean.py'
+            if os.path.isfile(cleaner):
+                log.info('Cleaning using %s', cleaner)
+                self._host.run_command([cleaner, '--build-dir', build_dir])
+
     def _generate(self, src_dir, build_dir, build_params, build_tests, cmake_configuration):
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
@@ -184,7 +192,7 @@ class CMakeBuilder(object):
         if build_params.add_qt_pdb is not None:
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         generate_args += platform_args + [
-            '-G', self._build_tool,
+            '-G', self._generator,
             src_full_path,
             ]
         # if build_params.target_device:
@@ -198,7 +206,7 @@ class CMakeBuilder(object):
             '--build', '.',
             '--config', cmake_configuration,
             ]
-        if self._build_tool == 'Ninja':
+        if self._generator == 'Ninja':
             build_args += [
             '--',
             '-j', str(PARALLEL_JOB_COUNT),
@@ -208,7 +216,7 @@ class CMakeBuilder(object):
             'Build', build_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=BUILD_TIMEOUT)
 
     @property
-    def _build_tool(self):
+    def _generator(self):
         return self._platform_config.generator or DEFAULT_GENERATOR
 
     def _run_and_decorate_cmake(self, stage_name, cmake_args, **kw):
