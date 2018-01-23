@@ -29,7 +29,14 @@ PARALLEL_JOB_COUNT = 20
 
 
 class BuildInfo(namedtuple(
-    'BuildInfo', 'is_succeeded, artifact_mask_list, current_config_path, version, unit_tests_bin_dir, run_id')):
+    'BuildInfo', [
+        'is_succeeded',
+        'artifact_mask_list',
+        'current_config_path',
+        'version',
+        'unit_tests_bin_dir',
+        'run_id',
+        ])):
 
     def __init__(self, is_succeeded, artifact_mask_list, current_config_path, version, unit_tests_bin_dir, run_id):
         assert isinstance(is_succeeded, bool), repr(is_succeeded)

@@ -4,6 +4,7 @@ import logging
 import os.path
 import glob
 import re
+import yaml
 
 from pony.orm import db_session
 
@@ -44,6 +45,7 @@ CMAKE_VERSION = '3.10.2'
 
 DEFAULT_DAYS_TO_KEEP_OLD_BUILDS = 10
 DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2_dev'
+BUILD_INFO_FILE = 'build_info.yaml'
 
 
 class BuildProject(JenkinsProject):
@@ -248,7 +250,8 @@ class BuildProject(JenkinsProject):
         if not build_info.is_succeeded:
             return None
         if self.has_artifacts(build_info.artifact_mask_list):
-            command_list = [ArchiveArtifactsCommand(build_info.artifact_mask_list)]
+            build_info_path = self._save_build_info_artifact()
+            command_list = [ArchiveArtifactsCommand([build_info_path] + build_info.artifact_mask_list)]
         else:
             error = 'No artifacts were produced matching masks: {}'.format(', '.join(build_info.artifact_mask_list))
             self.add_build_error(error)
@@ -256,6 +259,18 @@ class BuildProject(JenkinsProject):
 
         self.save_build_errors_artifact(junk_shop_repository, build_info)
         return command_list
+
+    def _save_build_info_artifact(self):
+        build_info = dict(
+            project=self.project_name,
+            branch=self.nx_vms_branch_name,
+            build_num=self.jenkins_env.build_number,
+            platform_list=self.requested_platform_list,
+            )
+        path = BUILD_INFO_FILE
+        with open(path, 'w') as f:
+            yaml.dump(build_info, f)
+        return path
 
     def has_artifacts(self, artifact_mask_list):
         for mask in artifact_mask_list:
