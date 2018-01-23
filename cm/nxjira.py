@@ -93,7 +93,7 @@ class JiraReply(object):
         return self.ok and self.data['fields']['status']['statusCategory']["name"] != "To Do"
 
     def is_rejected(self):
-        return self.ok and self.resolution() == "Rejected"
+        return self.ok and (self.resolution() == "Rejected" or self.resolution() == "Won't Do")
 
     def is_duplicate(self):
         return self.ok and self.resolution() == "Duplicate"
