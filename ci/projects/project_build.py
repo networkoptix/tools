@@ -17,12 +17,9 @@ from junk_shop import (
     run_unit_tests,
 )
 from utils import prepare_empty_dir
-from project import JenkinsProject
+from project_nx_vms import BUILD_INFO_FILE, NxVmsProject
 from command import (
-    CheckoutCommand,
-    CheckoutScmCommand,
     CleanDirCommand,
-    UnstashCommand,
     PrepareVirtualEnvCommand,
     ArchiveArtifactsCommand,
     NodeCommand,
@@ -42,18 +39,15 @@ log = logging.getLogger(__name__)
 
 
 CMAKE_VERSION = '3.10.2'
-
 DEFAULT_DAYS_TO_KEEP_OLD_BUILDS = 10
-DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2_dev'
-BUILD_INFO_FILE = 'build_info.yaml'
 
 
-class BuildProject(JenkinsProject):
+class BuildProject(NxVmsProject):
 
     days_to_keep_old_builds = DEFAULT_DAYS_TO_KEEP_OLD_BUILDS
 
     def __init__(self, input_state, in_assist_mode):
-        JenkinsProject.__init__(self, input_state, in_assist_mode)
+        NxVmsProject.__init__(self, input_state, in_assist_mode)
         self._build_error_list = []
         self.clean_stamps = CleanStamps(self.state)
 
@@ -65,7 +59,7 @@ class BuildProject(JenkinsProject):
                 self.make_python_stage_command(self.params.stage),
                 ]
         elif self.params.action == 'build':
-            command_list += self.initial_stash_command_list + self.prepare_nx_vms_command_list + [
+            command_list += self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
                 self.make_python_stage_command('prepare_for_build'),
                 ]
         return command_list
@@ -99,8 +93,6 @@ class BuildProject(JenkinsProject):
         parameters = self.default_parameters
         if self.in_assist_mode:
             parameters += [
-                StringProjectParameter('branch', 'nx_vms branch to checkout and build',
-                                           default_value=DEFAULT_ASSIST_MODE_VMS_BRANCH),
                 StringProjectParameter('stage', 'stage to run', default_value=''),
                 ]
         parameters += [
@@ -124,16 +116,6 @@ class BuildProject(JenkinsProject):
             return 'assist-ci-%s' % self.jenkins_env.job_name
         else:
             return self.project_id
-
-    @property
-    def nx_vms_branch_name(self):
-        if self.in_assist_mode:
-            return self.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
-        else:
-            assert self.jenkins_env.branch_name, (
-                'This scripts are intented to be used in multibranch projects only;'
-                ' env.BRANCH_NAME must be defined')
-            return self.jenkins_env.branch_name
 
     def make_parallel_job(self, job_name, workspace_dir, platform, **kw):
         platform_config = self.config.platforms[platform]
@@ -161,17 +143,6 @@ class BuildProject(JenkinsProject):
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             self.make_python_stage_command('node', **kw),
             ]
-
-    @property
-    def prepare_nx_vms_command_list(self):
-        if self.in_assist_mode:
-            branch_name = self.nx_vms_branch_name
-            return [
-                CheckoutCommand('nx_vms', branch_name),
-                UnstashCommand('nx_vms_ci'),
-                ]
-        else:
-            return [CheckoutScmCommand('nx_vms')]
 
     def create_junk_shop_repository(self, **kw):
         build_parameters = self.create_build_parameters(**kw)

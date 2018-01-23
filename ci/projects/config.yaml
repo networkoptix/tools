@@ -32,6 +32,15 @@ build:
     - CMakeLists.txt
     - \.vcxproj$
 
+fun_tests:
+  platforms:
+    - linux-x64
+    - win-x64
+  node: funtest
+  binaries_url: rsync://noptix.enk.me/buildenv/test/
+  enable_concurrent_builds: False
+  days_to_keep_old_builds: 10
+
 customization_list:
   - default
   - default_cn

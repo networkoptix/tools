@@ -186,6 +186,48 @@ class BuildConfig(object):
             log.info('\t\t\t' '%r', patterns)
 
 
+class FunTestsConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            platforms=data['platforms'],
+            node=data['node'],
+            binaries_url=data['binaries_url'],
+            enable_concurrent_builds=data['enable_concurrent_builds'],
+            days_to_keep_old_builds=data['days_to_keep_old_builds'],
+            )
+
+    def __init__(self, platforms, node, binaries_url, enable_concurrent_builds, days_to_keep_old_builds):
+        assert is_list_inst(platforms, basestring), repr(platforms)
+        assert isinstance(node, basestring), repr(node)
+        assert isinstance(binaries_url, basestring), repr(binaries_url)
+        assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
+        assert isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        self.platforms = platforms
+        self.node = node
+        self.binaries_url = binaries_url
+        self.enable_concurrent_builds = enable_concurrent_builds
+        self.days_to_keep_old_builds = days_to_keep_old_builds
+
+    def to_dict(self):
+        return dict(
+            platforms=self.platforms,
+            node=self.node,
+            binaries_url=self.binaries_url,
+            enable_concurrent_builds=self.enable_concurrent_builds,
+            days_to_keep_old_builds=self.days_to_keep_old_builds,
+            )
+
+    def report(self):
+        log.info('\t' 'fun_tests:')
+        log.info('\t\t' 'platforms: %r', self.platforms)
+        log.info('\t\t' 'node: %r', self.node)
+        log.info('\t\t' 'binaries_url: %r', self.binaries_url)
+        log.info('\t\t' 'enable_concurrent_builds: %r', self.enable_concurrent_builds)
+        log.info('\t\t' 'days_to_keep_old_builds: %r', self.days_to_keep_old_builds)
+
+
 class CiConfig(object):
 
     @classmethod
@@ -256,6 +298,7 @@ class Config(object):
             services=ServicesConfig.from_dict(data['services']),
             email=EmailConfig.from_dict(data['email']),
             build=BuildConfig.from_dict(data['build']),
+            fun_tests=FunTestsConfig.from_dict(data['fun_tests']),
             customization_list=data['customization_list'],
             platforms={platform_name: PlatformConfig.from_dict(platform_config)
                                for platform_name, platform_config in data['platforms'].items()},
@@ -264,11 +307,12 @@ class Config(object):
                                 for name, twc in data['tests_watchers'].items()},
             )
 
-    def __init__(self, junk_shop, services, email, build, customization_list, platforms, ci, tests_watchers):
+    def __init__(self, junk_shop, services, email, build, fun_tests, customization_list, platforms, ci, tests_watchers):
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert isinstance(services, ServicesConfig), repr(services)
         assert isinstance(email, EmailConfig), repr(email)
         assert isinstance(build, BuildConfig), repr(build)
+        assert isinstance(fun_tests, FunTestsConfig), repr(fun_tests)
         assert is_list_inst(customization_list, basestring), repr(customization_list)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
         assert isinstance(ci, CiConfig), repr(ci)
@@ -277,6 +321,7 @@ class Config(object):
         self.services = services
         self.email = email
         self.build = build
+        self.fun_tests = fun_tests
         self.customization_list = customization_list
         self.platforms = platforms
         self.ci = ci
@@ -288,6 +333,7 @@ class Config(object):
             services=self.services.to_dict(),
             email=self.email.to_dict(),
             build=self.build.to_dict(),
+            fun_tests=self.fun_tests.to_dict(),
             customization_list=self.customization_list,
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
@@ -301,6 +347,7 @@ class Config(object):
         self.services.report()
         self.email.report()
         self.build.report()
+        self.fun_tests.report()
         log.info('\t' 'customization_list:')
         for customization in self.customization_list:
             log.info('\t\t' '%r', customization)

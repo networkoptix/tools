@@ -58,13 +58,6 @@ class JenkinsProject(object):
             self.project_id, stage_id, self.in_assist_mode, python_path_list, **kw)
 
     @property
-    def initial_stash_command_list(self):
-        if self.in_assist_mode:
-            return [StashCommand('nx_vms_ci', ['nx_vms/ci/**'])]
-        else:
-            return []
-
-    @property
     def prepare_devtools_command(self):
         if self.in_assist_mode:
             return UnstashCommand('devtools')

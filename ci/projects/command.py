@@ -144,6 +144,48 @@ class ArchiveArtifactsCommand(Command):
         return dict(artifact_mask_list=self.artifact_mask_list)
 
 
+# copy artifacts from upstream job
+class CopyArtifactsCommand(Command):
+
+    command_id = 'copy_artifacts'
+    selCompleted = 'completed'
+    selSuccessful = 'successful'
+    selStable = 'stable'
+    selSpecificBuild = 'specific_build'
+    selUpstream = 'upstream'  # upstream build that triggered this job
+    all_selectors = [selCompleted, selSuccessful, selStable, selSpecificBuild, selUpstream]
+
+    @classmethod
+    def from_dict(cls, d, command_registry):
+        return cls(
+            project_name=d['project_name'],
+            target_dir=d['target_dir'],
+            selector=d['selector'],
+            build_num=d['build_num'],
+            )
+
+    def __init__(self, project_name, target_dir, selector, build_num=None):
+        assert isinstance(project_name, basestring), repr(project_name)
+        assert isinstance(target_dir, basestring), repr(target_dir)
+        assert selector in self.all_selectors, repr(selector)
+        if selector == self.selSpecificBuild:
+            assert isinstance(build_num, int), repr(build_num)
+        else:
+            assert build_num is None, repr(build_num)  # must be None for selectors other than specific build
+        self.project_name = project_name
+        self.target_dir = target_dir
+        self.selector = selector
+        self.build_num = build_num
+
+    def args_to_dict(self):
+        return dict(
+            project_name=self.project_name,
+            target_dir=self.target_dir,
+            selector=self.selector,
+            build_num=self.build_num,
+            )
+
+
 class CleanDirCommand(Command):
 
     command_id = 'clean_dir'
