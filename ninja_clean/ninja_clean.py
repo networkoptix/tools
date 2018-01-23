@@ -94,10 +94,12 @@ def find_extra_files(build_dir, known_files):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--build-dir", type=str, help="Ninja build directory.",
+        default=os.getcwd())
     parser.add_argument("--list", action="store_true", help="List unknown files.")
     args = parser.parse_args()
 
-    build_dir = os.getcwd()
+    build_dir = os.path.abspath(args.build_dir)
 
     build_files = get_files_from_build_ninja(build_dir)
     known_files = get_files_from_list_file(build_dir, os.path.join(build_dir, "known_files.txt"))
