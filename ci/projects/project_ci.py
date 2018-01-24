@@ -80,7 +80,7 @@ class CiProject(BuildProject):
         if self.params.run_unit_tests and platform_config.should_run_unit_tests and build_info.is_succeeded:
             self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
 
-        return self.post_build_actions(junk_shop_repository, build_info)
+        return self.post_build_actions(junk_shop_repository, build_info, DEFAULT_CUSTOMIZATION, DEFAULT_CLOUD_GROUP)
 
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']

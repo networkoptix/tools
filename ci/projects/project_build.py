@@ -215,11 +215,11 @@ class BuildProject(NxVmsProject):
         repository.add_artifact(
             run, 'errors', 'errors', repository.artifact_type.output, '\n'.join(self._build_error_list), is_error=True)
 
-    def post_build_actions(self, junk_shop_repository, build_info):
+    def post_build_actions(self, junk_shop_repository, build_info, customization, cloud_group):
         if not build_info.is_succeeded:
             return None
         if self.has_artifacts(build_info.artifacts_dir, build_info.artifact_mask_list):
-            build_info_path = self._save_build_info_artifact()
+            build_info_path = self._save_build_info_artifact(customization, cloud_group)
             command_list = [
                 ArchiveArtifactsCommand([build_info_path]),
                 ArchiveArtifactsCommand(build_info.artifact_mask_list, build_info.artifacts_dir),
@@ -232,12 +232,14 @@ class BuildProject(NxVmsProject):
         self.save_build_errors_artifact(junk_shop_repository, build_info)
         return command_list
 
-    def _save_build_info_artifact(self):
+    def _save_build_info_artifact(self, customization, cloud_group):
         build_info = dict(
             project=self.project_name,
             branch=self.nx_vms_branch_name,
             build_num=self.jenkins_env.build_number,
             platform_list=self.requested_platform_list,
+            customization=customization,
+            cloud_group=cloud_group,
             )
         path = BUILD_INFO_FILE
         with open(path, 'w') as f:
