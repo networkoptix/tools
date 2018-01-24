@@ -85,6 +85,7 @@ def bool_to_cmake_param(value):
 class CMakeBuilder(object):
 
     PlatformConfig = namedtuple('PlatformConfig', 'is_unix')
+    CommandLog = namedtuple('CommandLog', 'file_name contents')
 
     _system_platform_config = dict(
         Linux=PlatformConfig(is_unix=True),
@@ -92,26 +93,28 @@ class CMakeBuilder(object):
         Windows=PlatformConfig(is_unix=False),
         )
 
-    def __init__(self, executor_number, platform_config, branch_config, cmake):
+    def __init__(self, executor_number, platform_config, branch_config, junk_shop_repository, cmake):
         assert isinstance(executor_number, int), repr(executor_number)
         assert isinstance(platform_config, PlatformConfig), repr(platform_config)
         assert branch_config is None or isinstance(branch_config, PlatformBranchConfig), repr(branch_config)
+        assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
         assert isinstance(cmake, CMake), repr(cmake)
         self._executor_number = executor_number
         self._platform_config = platform_config
         self._branch_config = branch_config
+        self._junk_shop_repository = junk_shop_repository
         self._cmake = cmake
         self._host = LocalHost()
         self._system = platform.system()
         self._working_dir = os.getcwd()  # python steps are run in working dir
+        self._command_logs = []  # CommandLog list
 
     @property
     def _is_unix(self):
         return self._system_platform_config[self._system].is_unix
 
-    def build(self, junk_shop_repository, src_dir, build_dir, build_tests, clean_build):
-        assert isinstance(junk_shop_repository, DbCaptureRepository), repr(junk_shop_repository)
-        build_params = junk_shop_repository.build_parameters
+    def build(self, src_dir, build_dir, build_tests, clean_build):
+        build_params = self._junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
         generate_results = self._generate(src_dir, build_dir, build_params, build_tests, cmake_configuration)
@@ -130,11 +133,11 @@ class CMakeBuilder(object):
                 log.info('Building with cmake failed: %s', build_results.error_message)
         else:
             log.info('Generating with cmake failed: %s', generate_results.error_message)
-        build_info = store_output_and_error(junk_shop_repository, output, succeeded, error_message)
-        self._store_log_artifacts(junk_shop_repository, build_dir, build_info)
+        build_info = store_output_and_error(self._junk_shop_repository, output, succeeded, error_message)
+        self._store_log_artifacts(build_dir, build_info)
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
-                     junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
+                     self._junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
         if self._is_unix:
             unit_tests_bin_dir = os.path.join(build_dir, 'bin')
         else:
@@ -162,7 +165,9 @@ class CMakeBuilder(object):
         cleaner = 'nx_vms/build_utils/python/clear_cmake_build.py'
         if os.path.isfile(cleaner):
             log.info('Cleaning previous distributives using %s', cleaner)
-            self._host.run_command([cleaner, '--build-dir', build_dir])
+            output = self._host.get_command_output(['python', cleaner, '--build-dir', build_dir])
+            file_name = os.path.splitext(os.path.split(cleaner)[1])[0]
+            self._add_command_log(file_name, output)
         else:
             ensure_dir_missing(os.path.join(build_dir, 'distrib'))  # todo: remove when cleaner is merged to all branches
 
@@ -171,7 +176,8 @@ class CMakeBuilder(object):
             cleaner = 'devtools/ninja_clean/ninja_clean.py'
             if os.path.isfile(cleaner):
                 log.info('Cleaning using %s', cleaner)
-                self._host.run_command([cleaner, '--build-dir', build_dir])
+                output = self._host.get_command_output(['python', cleaner, '--build-dir', build_dir])
+                self._add_command_log('ninja_clean', output)
 
     def _generate(self, src_dir, build_dir, build_params, build_tests, cmake_configuration):
         src_full_path = os.path.abspath(src_dir)
@@ -260,16 +266,30 @@ class CMakeBuilder(object):
         with open(path) as f:
             return dict([line.split('=') for line in f.read().splitlines()])
 
+    def _add_command_log(self, file_name, contents):
+        self._command_logs.append(self.CommandLog(file_name, contents.strip()))
+
     @db_session
-    def _store_log_artifacts(self, repository, build_dir, build_info):
+    def _store_log_artifacts(self, build_dir, build_info):
         run = models.Run[build_info.run_id]
         for path in glob.glob(os.path.join(build_dir, LOGS_DIR, '*.log')):
             with open(path) as f:
                 data = f.read()
             if not data.strip(): continue
             file_name, ext = os.path.splitext(os.path.basename(path))
-            repository.add_artifact(run, file_name, file_name, repository.artifact_type.log, data)
+            self._junk_shop_repository.add_artifact(
+                run, file_name, file_name, self._junk_shop_repository.artifact_type.log, data)
             log.info('build log %r is stored to junk-shop database', path)
+        for command_log in self._command_logs:
+            self._junk_shop_repository.add_artifact(
+                run, command_log.file_name, command_log.file_name, self._junk_shop_repository.artifact_type.log, command_log.contents)
+            log.info('log %r is stored to junk-shop database', command_log.file_name)
+
+    @db_session
+    def _add_log_artifact(self, build_info, file_name, contents):
+        run = models.Run[build_info.run_id]
+        self._junk_shop_repository.add_artifact(run, file_name, file_name, self._junk_shop_repository.artifact_type.log, contents)
+        log.info('log %r is stored to junk-shop database', file_name)
 
 
 def test_me():
@@ -299,9 +319,9 @@ def test_me():
         configuration='release',
         )
     repository = DbCaptureRepository(db_config, build_params)
-    builder = CMakeBuilder(1, config.platforms[platform], platform_branch_config, cmake)
+    builder = CMakeBuilder(1, config.platforms[platform], platform_branch_config, repository, cmake)
     build_dir = 'build-{}'.format(platform)
-    build_info = builder.build(repository, 'nx_vms', build_dir, build_tests=True, clean_build=False)
+    build_info = builder.build('nx_vms', build_dir, build_tests=True, clean_build=False)
     log.info('Build info: %r', build_info)
 
 

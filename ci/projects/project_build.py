@@ -170,10 +170,10 @@ class BuildProject(NxVmsProject):
         cmake = CMake(CMAKE_VERSION)
         cmake.ensure_required_cmake_operational()
 
-        builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, cmake)
+        builder = CMakeBuilder(self.jenkins_env.executor_number, platform_config, platform_branch_config, junk_shop_repository, cmake)
         clean_build = self._is_rebuild_required()
         build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
-        build_info = builder.build(junk_shop_repository, 'nx_vms', 'build', build_tests, clean_build)
+        build_info = builder.build('nx_vms', 'build', build_tests, clean_build)
         return build_info
 
     def _is_rebuild_required(self):
