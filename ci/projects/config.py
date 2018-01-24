@@ -193,19 +193,28 @@ class FunTestsConfig(object):
         return cls(
             platforms=data['platforms'],
             node=data['node'],
+            timeout=str_to_timedelta(data['timeout']),
+            port_base=data['port_base'],
+            port_range=data['port_range'],
             binaries_url=data['binaries_url'],
             enable_concurrent_builds=data['enable_concurrent_builds'],
             days_to_keep_old_builds=data['days_to_keep_old_builds'],
             )
 
-    def __init__(self, platforms, node, binaries_url, enable_concurrent_builds, days_to_keep_old_builds):
+    def __init__(self, platforms, node, timeout, port_base, port_range, binaries_url, enable_concurrent_builds, days_to_keep_old_builds):
         assert is_list_inst(platforms, basestring), repr(platforms)
         assert isinstance(node, basestring), repr(node)
+        assert isinstance(timeout, datetime.timedelta), repr(timeout)
+        assert isinstance(port_base, int), repr(port_base)
+        assert isinstance(port_range, int), repr(port_range)
         assert isinstance(binaries_url, basestring), repr(binaries_url)
         assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
         assert isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
         self.platforms = platforms
         self.node = node
+        self.timeout = timeout
+        self.port_base = port_base
+        self.port_range = port_range
         self.binaries_url = binaries_url
         self.enable_concurrent_builds = enable_concurrent_builds
         self.days_to_keep_old_builds = days_to_keep_old_builds
@@ -214,6 +223,9 @@ class FunTestsConfig(object):
         return dict(
             platforms=self.platforms,
             node=self.node,
+            timeout=timedelta_to_str(self.timeout),
+            port_base=self.port_base,
+            port_range=self.port_range,
             binaries_url=self.binaries_url,
             enable_concurrent_builds=self.enable_concurrent_builds,
             days_to_keep_old_builds=self.days_to_keep_old_builds,
@@ -223,6 +235,9 @@ class FunTestsConfig(object):
         log.info('\t' 'fun_tests:')
         log.info('\t\t' 'platforms: %r', self.platforms)
         log.info('\t\t' 'node: %r', self.node)
+        log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
+        log.info('\t\t' 'port_base: %r', self.port_base)
+        log.info('\t\t' 'port_range: %r', self.port_range)
         log.info('\t\t' 'binaries_url: %r', self.binaries_url)
         log.info('\t\t' 'enable_concurrent_builds: %r', self.enable_concurrent_builds)
         log.info('\t\t' 'days_to_keep_old_builds: %r', self.days_to_keep_old_builds)

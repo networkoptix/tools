@@ -35,8 +35,11 @@ build:
 fun_tests:
   platforms:
     - linux-x64
-    - win-x64
+  #  - win-x64
   node: funtest
+  timeout: 1h
+  port_base: 20000  # base for REST API ports forwarded from vm to host
+  port_range: 100  # how many forwarded ports one functional tests run may require, max
   binaries_url: rsync://noptix.enk.me/buildenv/test/
   enable_concurrent_builds: False
   days_to_keep_old_builds: 10
