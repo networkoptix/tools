@@ -105,22 +105,22 @@ platforms:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - '*.tar.gz'
+      - '*.zip'
   bpi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - '*.tar.gz'
+      - '*.zip'
   rpi:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - '*.tar.gz'
+      - '*.zip'
   edge1:
     build_node: linux
     should_run_unit_tests: no
     artifact_mask_list:
-      - '*.tar.gz'
+      - '*.zip'
 
 ci:
   timeout: 30m
