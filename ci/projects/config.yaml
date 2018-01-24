@@ -129,7 +129,7 @@ ci:
     - win-x64
     - linux-x64
     - mac
-    - edge1
+    - bpi
   # cron schedule to do clean build at night:
   nightly_schedule: 'H 0 * * *'
 
