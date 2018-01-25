@@ -17,6 +17,7 @@ class TestProject(JenkinsProject):
     project_id = 'test'
 
     def stage_init(self):
+        self.state.report()
         job_command_list = [
             SetProjectPropertiesCommand(
                 parameters=self.default_parameters,
@@ -27,9 +28,7 @@ class TestProject(JenkinsProject):
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             self.make_python_stage_command('node'),
             ]
-        return [
-            NodeCommand('funtest', command_list=job_command_list)
-            ]
+        return [NodeCommand('funtest', command_list=job_command_list)]
 
     def stage_node(self):
         log.info('executor_number=%r', self.jenkins_env.executor_number)

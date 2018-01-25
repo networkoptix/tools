@@ -73,6 +73,41 @@ class ScmInfo(object):
         self.prev_revision = str(prev_revision)
 
 
+# user triggered this job, None for jobs triggered by timer or upstream job
+class BuildUser(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        if not data:
+            return None
+        return cls(
+            id=data['id'],
+            email=data['email'],
+            full_name=data['full_name'],
+            )
+
+    def __init__(self, id, email, full_name):
+        assert isinstance(id, basestring), repr(id)
+        assert isinstance(email, basestring), repr(email)
+        assert isinstance(full_name, basestring), repr(full_name)
+        self.id = id
+        self.email = email
+        self.full_name = full_name
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            email=self.email,
+            full_name=self.full_name,
+            )
+
+    def report(self):
+        log.info('\t' 'build user:')
+        log.info('\t\t' 'id: %r' % self.id)
+        log.info('\t\t' 'email: %r' % self.email)
+        log.info('\t\t' 'full_name: %r' % self.full_name)
+
+
 class JenkinsEnv(object):
 
     @classmethod
@@ -84,21 +119,24 @@ class JenkinsEnv(object):
             build_url=data['build_url'],
             executor_number=data['executor_number'],
             branch_name=data['branch_name'],
+            build_user=BuildUser.from_dict(data['build_user']),
             )
 
-    def __init__(self, job_path, build_number, node_name, build_url, executor_number, branch_name):
+    def __init__(self, job_path, build_number, node_name, build_url, executor_number, branch_name, build_user):
         assert isinstance(job_path, basestring), repr(job_path)
         assert isinstance(build_number, int), repr(build_number)
         assert isinstance(node_name, basestring), repr(node_name)
         assert isinstance(build_url, basestring), repr(build_url)
         assert isinstance(executor_number, int), repr(executor_number)
         assert branch_name is None or isinstance(branch_name, basestring), repr(branch_name)
+        assert build_user is None or isinstance(build_user, BuildUser), repr(build_user)
         self.job_path = job_path
         self.build_number = build_number
         self.node_name= node_name
         self.build_url = build_url
         self.executor_number = executor_number
         self.branch_name = branch_name
+        self.build_user = build_user
 
     def to_dict(self):
         return dict(
@@ -107,7 +145,8 @@ class JenkinsEnv(object):
             node_name=self.node_name,
             build_url=self.build_url,
             executor_number=self.executor_number,
-            branch_name=self.branch_name
+            branch_name=self.branch_name,
+            build_user=self.build_user.to_dict() if self.build_user else None,
             )
 
     def report(self):
@@ -118,6 +157,10 @@ class JenkinsEnv(object):
         log.info('\t' 'build_url: %r' % self.build_url)
         log.info('\t' 'executor_number: %r' % self.executor_number)
         log.info('\t' 'branch_name: %r' % self.branch_name)
+        if self.build_user:
+            self.build_user.report()
+        else:
+            log.info('\t' 'build_user: None')
 
     @property
     def job_name(self):
