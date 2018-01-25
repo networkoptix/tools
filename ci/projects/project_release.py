@@ -126,11 +126,14 @@ class ReleaseProject(BuildProject):
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
         self.db_config.bind(models.db)
+        smtp_password = self.credentials.service_email
         project = self.project_name
         branch = nx_vms_scm_info.branch
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_email(project, branch, build_num, test_mode=self.in_assist_mode)
-        # do not send, commiters have nothing to do with this release build
-        # todo: retrieve user who requested this build from jenkins env and send email to him/her
+        build_user = self.jenkins_env.build_user
+        if build_user:
+            recipient_list = ['{} <{}>'.format(build_user.full_name, build_user.email)]
+            sender.send_email(smtp_password, build_info.subject_and_html, recipient_list)
         return self.make_set_build_result_command_list(build_info)
