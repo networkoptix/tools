@@ -547,12 +547,12 @@ class BuildJobCommand(Command):
             wait_for_completion=d['wait'],
             )
 
-    def __init__(self, job, parameters, wait_for_completion=True):
+    def __init__(self, job, parameters=None, wait_for_completion=True):
         assert isinstance(job, basestring), repr(job)  # 'ci/vms_3.2'
-        assert is_list_inst(parameters, ParameterValue), repr(parameters)
+        assert parameters is None or is_list_inst(parameters, ParameterValue), repr(parameters)
         assert isinstance(wait_for_completion, bool), repr(wait_for_completion)
         self.job = job
-        self.parameters = parameters
+        self.parameters = parameters or []
         self.wait_for_completion = wait_for_completion
 
     def args_to_dict(self):
