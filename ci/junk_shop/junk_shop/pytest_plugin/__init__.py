@@ -21,8 +21,6 @@ def pytest_configure(config):
     build_parameters = config.getoption('--build-parameters')
     run_parameters = config.getoption('--run-parameters')
     run_id_file = config.getoption('--run-id-file')
-    if config.getvalue('capturelog') and db_config:
-        raise pytest.UsageError('--capture-db and capturelog plugin are mutually exclusive; add --nocapturelog option')
     if db_config:
         repository = DbCaptureRepository(db_config, build_parameters, run_parameters)
         config.pluginmanager.register(DbCapturePlugin(config, repository, run_id_file), JUNK_SHOP_PLUGIN_NAME)

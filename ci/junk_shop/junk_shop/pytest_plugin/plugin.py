@@ -38,7 +38,6 @@ class LogCapturer(object):
 class DbCapturePlugin(object):
 
     def __init__(self, config, db_capture_repository, run_id_file=None):
-        assert not config.getvalue('capturelog')  # mutually exclusive
         self.capture_manager = config.pluginmanager.getplugin('capturemanager')
         self.repo = db_capture_repository
         self.run_id_file = run_id_file
