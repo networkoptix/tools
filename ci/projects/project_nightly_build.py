@@ -2,7 +2,7 @@
 
 import logging
 
-from project import JenkinsProject
+from project_nx_vms import NxVmsProject
 from command import (
     StringProjectParameter,
     ChoiceProjectParameter,
@@ -17,10 +17,9 @@ log = logging.getLogger(__name__)
 
 DOWNSTREAM_PROJECT = 'ci'
 DAYS_TO_KEEP_OLD_BUILDS = 30
-DEFAULT_ASSIST_MODE_VMS_BRANCH = 'vms_3.2_dev'
 
 
-class NightlyBuildProject(JenkinsProject):
+class NightlyBuildProject(NxVmsProject):
 
     project_id = 'nightly_build'
 
@@ -38,11 +37,6 @@ class NightlyBuildProject(JenkinsProject):
             ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                    ['build', 'update_properties']),
             ]
-        if self.in_assist_mode:
-            parameters += [
-                StringProjectParameter('branch', 'nx_vms branch to checkout and build',
-                                       default_value=DEFAULT_ASSIST_MODE_VMS_BRANCH),
-                ]
         return SetProjectPropertiesCommand(
             parameters=parameters,
             enable_concurrent_builds=False,
@@ -61,17 +55,7 @@ class NightlyBuildProject(JenkinsProject):
 
     @property
     def downstream_job(self):
-        return '{}/{}'.format(DOWNSTREAM_PROJECT, self.branch_name)
-
-    @property
-    def branch_name(self):
-        if self.in_assist_mode:
-            return self.params.branch or DEFAULT_ASSIST_MODE_VMS_BRANCH
-        else:
-            assert self.jenkins_env.branch_name, (
-                'This scripts are intented to be used in multibranch projects only;'
-                ' env.BRANCH_NAME must be defined')
-            return self.jenkins_env.branch_name
+        return '{}/{}'.format(DOWNSTREAM_PROJECT, self.nx_vms_branch_name)
 
     def stage_set_status(self):
         result = self.state.job_result[self.downstream_job]
