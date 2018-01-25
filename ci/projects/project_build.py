@@ -58,11 +58,14 @@ class BuildProject(NxVmsProject):
             command_list += [
                 self.make_python_stage_command(self.params.stage),
                 ]
-        elif self.params.action == 'build':
+        elif self.must_actually_do_build():
             command_list += self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
                 self.make_python_stage_command('prepare_for_build'),
                 ]
         return command_list
+
+    def must_actually_do_build(self):
+        return self.params.action == 'build'
 
     def init_build_info(self):
         junk_shop_repository = self.create_junk_shop_repository()

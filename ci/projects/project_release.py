@@ -49,6 +49,11 @@ class ReleaseProject(BuildProject):
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
 
+    def must_actually_do_build(self):
+        if not self.jenkins_env.build_user:
+            return False  # do not build if triggered by multibranch scan, just update parameters
+        return super(ReleaseProject, self).must_actually_do_build()
+
     @property
     def run_unit_tests_by_default(self):
         return False
