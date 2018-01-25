@@ -1,3 +1,5 @@
+import sys
+import os
 import logging
 
 from command import (
@@ -26,8 +28,11 @@ class TestProject(JenkinsProject):
             self.make_python_stage_command('node'),
             ]
         return [
-            NodeCommand('linux', command_list=job_command_list)
+            NodeCommand('funtest', command_list=job_command_list)
             ]
 
     def stage_node(self):
         log.info('executor_number=%r', self.jenkins_env.executor_number)
+        log.info('executable=%r', sys.executable)
+        log.info('argv=%r', sys.argv)
+        log.info('PATH=%r', os.environ['PATH'])
