@@ -10,7 +10,7 @@ udt_VERSION=4.11
 qt_VERSION=5.2.1
 sasl2_VERSION=2.1.26
 openldap_VERSION=2.4.42
-festival_VERSION=2.4
+festival_VERSION=2.1
 ffmpeg_VERSION=3.1.1
 #qt_VERSION=5.4.1
 
@@ -1576,7 +1576,7 @@ function festival_generateTarballName()
 
     #Generating tar.gz
     mkdir ./$artifactName-$artifactVersion 2>/dev/null
-    cp -rf $THIRD_PARTY_SRC_DIR/speech_synthesis/2.1/* \
+    cp -rf $THIRD_PARTY_SRC_DIR/speech_synthesis/$festival_VERSION/* \
         ./$artifactName-$artifactVersion || return 2
     tar czf $artifactName-$artifactVersion.tar.gz $artifactName-$artifactVersion || return 3
 
@@ -1592,11 +1592,11 @@ function festival_generate_config()
     export CC_OTHER_FLAGS="-fpermissive -fPIC $festival_CXXFLAGS"
 
     cd speech_tools
-    ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 1
+    ./configure --host=arm >>$LOG_FILE_PATH 2>&1 || return 1
     cd -
 
     cd festival
-    ./configure --host=x86_64 --target=arm >>$LOG_FILE_PATH 2>&1 || return 2
+    ./configure --host=arm >>$LOG_FILE_PATH 2>&1 || return 2
     cd -
 
     unset CC CXX CC_OTHER_FLAGS

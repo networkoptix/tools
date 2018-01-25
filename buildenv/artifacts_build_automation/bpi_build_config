@@ -1,5 +1,5 @@
 export BOX=bpi
-export TOOLCHAIN_PATH=$NETOPTIX_DEV_DIR/buildenv/packages/bpi/gcc-4.8.3
+export TOOLCHAIN_PATH=$environment/packages/bpi/gcc-4.8.3
 export HOST=arm-linux-gnueabihf
 export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
 #export CROSS_PREFIX=/usr/local/codesourcery/arm-2013.11/bin/arm-none-linux-gnueabi-
@@ -11,6 +11,8 @@ export SYSROOT_DIR="$NETOPTIX_DEV_DIR/buildenv/packages/bpi/sysroot"
 
 export common_CXXFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
 export common_CFLAGS="-mfloat-abi=hard -mcpu=cortex-a15 -mfpu=neon-vfpv4"
+#export common_CFLAGS="-march=armv7-a -mtune=cortex-a15"
+#export common_CXXFLAGS="$common_CFLAGS"
 
 export qt_CXXFLAGS="-fno-omit-frame-pointer"
 

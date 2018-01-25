@@ -1,5 +1,5 @@
 export BOX=rpi
-export TOOLCHAIN_PATH=/usr/local/raspberrypi-tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian
+export TOOLCHAIN_PATH=$environment/packages/rpi/gcc-4.9.4
 export HOST=arm-linux-gnueabihf
 export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
 export ARCH=arm

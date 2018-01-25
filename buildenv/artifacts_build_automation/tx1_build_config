@@ -1,6 +1,6 @@
-export BOX=tx1-aarch64
-export TOOLCHAIN_PATH=$NETOPTIX_DEV_DIR/buildenv/packages/tx1/gcc-5.4.1
-export HOST=aarch64-linux-gnu
+export BOX=tx1
+export TOOLCHAIN_PATH=$NETOPTIX_DEV_DIR/buildenv/packages/linux-aarch64/gcc-7.2.0
+export HOST=aarch64-unknown-linux-gnu
 export CROSS_PREFIX=$TOOLCHAIN_PATH/bin/$HOST-
 export ARCH=aarch64
 export ARCH_SPEC_SUFFIX=armv8-a

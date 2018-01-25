@@ -27,11 +27,11 @@ def get_files_from_build_ninja(build_dir):
                     for group in match.groups():
                         for item in group.split():
                             if os.path.isabs(item):
-                                item = os.path.relpath(item, build_dir)
+                                item = os.path.relpath(os.path.realpath(item), build_dir)
                                 if item.startswith('..'):
                                     continue
 
-                            result.add(os.path.normpath(item))
+                            result.add(item)
                     break
     except (FileNotFoundError, IOError):
         sys.exit("Cannot open {}".format(os.path.join(build_dir, "build.ninja")))
