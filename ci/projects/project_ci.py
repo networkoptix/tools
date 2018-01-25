@@ -9,6 +9,7 @@ from command import (
     CleanDirCommand,
     ParallelCommand,
     BooleanProjectParameter,
+    BuildJobCommand,
     )
 from email_sender import EmailSender
 
@@ -18,6 +19,7 @@ log = logging.getLogger(__name__)
 DEFAULT_CUSTOMIZATION = 'hanwha'
 DEFAULT_CLOUD_GROUP = 'test'
 DEFAULT_RELEASE = 'beta'
+DOWNSTREAM_FUNTEST_PROJECT = 'funtest'
 
 
 class CiProject(BuildProject):
@@ -91,4 +93,9 @@ class CiProject(BuildProject):
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
-        return self.make_set_build_result_command_list(build_info)
+        return self.make_set_build_result_command_list(build_info) + [self._make_funtest_job_command()]
+
+    def _make_funtest_job_command(self):
+        return BuildJobCommand(
+            job='{}/{}'.format(DOWNSTREAM_FUNTEST_PROJECT, self.nx_vms_branch_name),
+            )
