@@ -1,4 +1,6 @@
+import os
 import pytest
+
 from ..utils import DbConfig
 from ..capture_repository import BuildParameters, RunParameters, DbCaptureRepository
 from .plugin import DbCapturePlugin
@@ -18,6 +20,10 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     db_config = config.getoption('--capture-db')
+    if not db_config:
+        db_config_str = os.environ.get('JUNK_SHOP_CAPTURE_DB')
+        if db_config_str:
+            db_config = DbConfig.from_string(db_config_str)
     build_parameters = config.getoption('--build-parameters')
     run_parameters = config.getoption('--run-parameters')
     run_id_file = config.getoption('--run-id-file')
