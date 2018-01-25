@@ -1,8 +1,13 @@
+import logging
 from collections import namedtuple
 from functools import total_ordering
+
 from pony.orm import select, desc, count, exists
+
 from . import models
 from .artifact import decode_artifact_data
+
+log = logging.getLogger(__name__)
 
 
 # drop starting unit/ or functional/ part
@@ -149,6 +154,9 @@ class BuildInfoLoader(object):
         return platform
 
     def _produce_stage(self, root_run, stage_cls):
+        if not root_run.platform:
+            log.error('root_run#%s platform is not defined', root_run.id)
+            return None
         self._update_started_at(root_run)
         platform = self._produce_platform(root_run.platform)
         stage = self.stage_map.get(root_run)
@@ -174,6 +182,7 @@ class BuildInfoLoader(object):
                 run.outcome == 'passed'):
             if not self._is_run_wanted(root_run): continue
             stage = self._produce_stage(root_run, TestsStage)
+            if not stage: continue
             stage.passed_count = run_count
         # load 'interesting' leaf test runs
         for run, test, root_run in select(
@@ -186,6 +195,7 @@ class BuildInfoLoader(object):
                 (run.outcome == 'failed' or run.prev_outcome == 'failed')).order_by(1):
             if not self._is_run_wanted(root_run): continue
             stage = self._produce_stage(root_run, TestsStage)
+            if not stage: continue
             stage.add_run(run)
             if run.outcome == 'failed':
                 self.failed_tests_platform_set.add(root_run.platform.name)
