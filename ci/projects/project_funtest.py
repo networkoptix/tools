@@ -7,6 +7,7 @@ import os.path
 import logging
 import glob
 import yaml
+from datetime import timedelta
 
 from utils import ensure_dir_missing, ensure_dir_exists, prepare_empty_dir
 from project_nx_vms import BUILD_INFO_FILE, NxVmsProject
@@ -163,6 +164,7 @@ class FunTestProject(NxVmsProject):
             log.info('Will run all tests')
         vm_name_prefix = 'funtest-%s-' % self.jenkins_env.executor_number
         vm_port_base = self.config.fun_tests.port_base + self.jenkins_env.executor_number * self.config.fun_tests.port_range
+        timeout = self.config.fun_tests.timeout
         build_parameters = [
             'project=%s' % build_info['project'],
             'branch=%s' % build_info['branch'],
@@ -177,7 +179,7 @@ class FunTestProject(NxVmsProject):
             '--reinstall',
             '--cloud-group=%s' % build_info['cloud_group'],
             '--customization=%s' % build_info['customization'],
-            '--timeout=%d' % self.config.fun_tests.timeout.total_seconds(),
+            '--timeout=%d' % timeout.total_seconds(),
             '--build-parameters=%s' % ','.join(build_parameters),
             '--vm-port-base=%s' % vm_port_base,
             '--vm-name-prefix=%s' % vm_name_prefix,
@@ -194,6 +196,7 @@ class FunTestProject(NxVmsProject):
             cwd=os.path.join(self.workspace_dir, 'nx_vms/func_tests'),
             env=env,
             check_retcode=False,
+            timeout=timeout + timedelta(minutes=10),  # give pytest some time to handle timeout itself
             )
         log.info('Functional tests %s' % ('PASSED' if result.exit_code == 0 else 'FAILED'))
         for line in result.stdout.splitlines():
