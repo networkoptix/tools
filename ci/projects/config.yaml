@@ -32,6 +32,17 @@ build:
     - CMakeLists.txt
     - \.vcxproj$
 
+ci:
+  timeout: 30m
+  # default platforms to build by CI project
+  platforms:
+    - win-x64
+    - linux-x64
+    - mac
+    - bpi
+  # cron schedule to do clean build at night:
+  nightly_schedule: 'H 0 * * *'
+
 fun_tests:
   platforms:
     - linux-x64
@@ -121,18 +132,6 @@ platforms:
     should_run_unit_tests: no
     artifact_mask_list:
       - '*.zip'
-
-ci:
-  timeout: 30m
-  # default platforms to build by CI project
-  platforms:
-    - win-x64
-    - linux-x64
-    - mac
-    - bpi
-  # cron schedule to do clean build at night:
-  nightly_schedule: 'H 0 * * *'
-
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher
