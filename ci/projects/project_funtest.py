@@ -152,6 +152,7 @@ class FunTestProject(NxVmsProject):
     def _pick_server_deb_path(self):
         path_list = glob.glob(os.path.join(self.workspace_dir, DIST_DIR, '*-server-*-linux64*.deb'))
         assert len(path_list) <= 1, repr(path_list)  # fix glob above - it must not return more than 1 path
+        assert path_list, 'No artifacts to test were found'
         return path_list[0]
 
     def _run_tests(self, build_info, platform, server_deb_path):

@@ -360,14 +360,14 @@ class BuildProject(NxVmsProject):
             for platform in self.requested_platform_list:
                 for suffix in ['distributive', 'update']:
                     name = 'dist-%s-%s-%s' % (customization, platform, suffix)
-                    dir = os.path.join('dist', name)
+                    dir = 'dist'
                     if separate_customizations:
                         dir = os.path.join(dir, customization)
                     command_list.append(UnstashCommand(name, dir, ignore_missing=True))
         build_info_path = self._save_build_info_artifact()
         command_list += [
             ArchiveArtifactsCommand([build_info_path]),
-            ArchiveArtifactsCommand(['dist/**']),
+            ArchiveArtifactsCommand(['**'], 'dist'),
             ]
         command_list += self._make_set_build_result_command_list(build_info)
         return command_list
