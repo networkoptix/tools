@@ -162,6 +162,9 @@ class FunTestProject(NxVmsProject):
         else:
             test_list = []
             log.info('Will run all tests')
+        customization_list = build_info['customization_list']
+        assert len(customization_list) == 1, repr(customization_list)  # we currently support only one customization
+        customization = customization_list[0]
         vm_name_prefix = 'funtest-%s-' % self.jenkins_env.executor_number
         vm_port_base = self.config.fun_tests.port_base + self.jenkins_env.executor_number * self.config.fun_tests.port_range
         timeout = self.config.fun_tests.timeout
@@ -169,7 +172,7 @@ class FunTestProject(NxVmsProject):
             'project=%s' % build_info['project'],
             'branch=%s' % build_info['branch'],
             'build_num=%s' % build_info['build_num'],
-            'customization=%s' % build_info['customization'],
+            'customization=%s' % customization,
             'platform=%s' % platform,
             ]
         options = [
@@ -178,7 +181,7 @@ class FunTestProject(NxVmsProject):
             '--mediaserver-dist-path=%s' % server_deb_path,
             '--reinstall',
             '--cloud-group=%s' % build_info['cloud_group'],
-            '--customization=%s' % build_info['customization'],
+            '--customization=%s' % customization,
             '--timeout=%d' % timeout.total_seconds(),
             '--build-parameters=%s' % ','.join(build_parameters),
             '--vm-port-base=%s' % vm_port_base,

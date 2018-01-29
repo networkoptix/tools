@@ -70,7 +70,7 @@ class ScmInfo(object):
 
     def set_prev_revision(self, prev_revision):
         assert prev_revision is None or isinstance(prev_revision, basestring), repr(prev_revision)
-        self.prev_revision = str(prev_revision)
+        self.prev_revision = str(prev_revision) if prev_revision else None
 
 
 # user triggered this job, None for jobs triggered by timer or upstream job

@@ -34,17 +34,32 @@ class CiProject(BuildProject):
             ]
 
     @property
+    def days_to_keep_old_builds(self):
+        return self.config.ci.days_to_keep_old_builds
+
+    @property
+    def enable_concurrent_builds(self):
+        return self.config.ci.enable_concurrent_builds
+
+    @property
     def requested_platform_list(self):
         return [p for p in self.all_platform_list if self.params.get(p)]
 
-    def create_build_parameters(self, platform=None):
-        return BuildProject.create_build_parameters(
-            self,
-            platform,
-            customization=DEFAULT_CUSTOMIZATION,
-            release=DEFAULT_RELEASE,
-            cloud_group=DEFAULT_CLOUD_GROUP,
-            )
+    @property
+    def customization(self):
+        return DEFAULT_CUSTOMIZATION
+
+    @property
+    def requested_customization_list(self):
+        return [self.customization]
+
+    @property
+    def release(self):
+        return DEFAULT_RELEASE
+
+    @property
+    def cloud_group(self):
+        return DEFAULT_CLOUD_GROUP
 
     def stage_prepare_for_build(self):
         self.clean_stamps.init_master(self.params)
@@ -74,15 +89,7 @@ class CiProject(BuildProject):
             assert phase == 1, repr(phase)  # must never happen on phase 2
             return [CleanDirCommand()] + self.make_node_stage_command_list(platform=platform, phase=2)
 
-        platform_config = self.config.platforms[platform]
-        platform_branch_config = self.branch_config.platforms.get(platform)
-        junk_shop_repository = self.create_junk_shop_repository(platform=platform)
-
-        build_info = self.build(junk_shop_repository, platform_branch_config, platform_config)
-        if self.params.run_unit_tests and platform_config.should_run_unit_tests and build_info.is_succeeded:
-            self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
-
-        return self.post_build_actions(junk_shop_repository, build_info, DEFAULT_CUSTOMIZATION, DEFAULT_CLOUD_GROUP)
+        return self.run_build_node_job(DEFAULT_CUSTOMIZATION, platform)
 
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
@@ -93,9 +100,10 @@ class CiProject(BuildProject):
         build_num = self.jenkins_env.build_number
         sender = EmailSender(self.config)
         build_info = sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
-        return self.make_set_build_result_command_list(build_info) + [self._make_funtest_job_command()]
+        return self.do_final_processing(build_info, separate_customizations=False) + [self._make_funtest_job_command()]
 
     def _make_funtest_job_command(self):
         return BuildJobCommand(
             job='{}/{}'.format(DOWNSTREAM_FUNTEST_PROJECT, self.nx_vms_branch_name),
+            wait_for_completion=False,
             )

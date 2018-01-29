@@ -18,32 +18,42 @@ class PlatformConfig(object):
         return cls(
             build_node=data['build_node'],
             should_run_unit_tests=data['should_run_unit_tests'],
-            artifact_mask_list=data['artifact_mask_list'],
+            distributive_mask_list=data['distributive_mask_list'],
+            update_mask_list=data['update_mask_list'],
+            publish_dir=data['publish_dir'],
             generator=data.get('generator'),
             )
 
-    def __init__(self, build_node, should_run_unit_tests, artifact_mask_list, generator):
+    def __init__(self, build_node, should_run_unit_tests, distributive_mask_list, update_mask_list, publish_dir, generator):
         assert isinstance(build_node, basestring), repr(build_node)
         assert isinstance(should_run_unit_tests, bool), repr(should_run_unit_tests)
-        assert is_list_inst(artifact_mask_list,  basestring), repr(artifact_mask_list)
+        assert is_list_inst(distributive_mask_list,  basestring), repr(distributive_mask_list)
+        assert is_list_inst(update_mask_list,  basestring), repr(update_mask_list)
+        assert isinstance(publish_dir, basestring), repr(publish_dir)
         assert generator is None or isinstance(generator, basestring), repr(generator)
         self.build_node = build_node
         self.should_run_unit_tests = should_run_unit_tests
-        self.artifact_mask_list = artifact_mask_list
+        self.distributive_mask_list = distributive_mask_list
+        self.update_mask_list = update_mask_list
+        self.publish_dir = publish_dir
         self.generator = generator
 
     def to_dict(self):
         return dict(
             build_node=self.build_node,
             should_run_unit_tests=self.should_run_unit_tests,
-            artifact_mask_list=self.artifact_mask_list,
+            distributive_mask_list=self.distributive_mask_list,
+            update_mask_list=self.update_mask_list,
+            publish_dir=self.publish_dir,
             generator=self.generator,
             )
 
     def report(self):
         log.info('\t\t\t' 'build_node: %r', self.build_node)
         log.info('\t\t\t' 'should_run_unit_tests: %r', self.should_run_unit_tests)
-        log.info('\t\t\t' 'artifact_mask_list: %r', self.artifact_mask_list)
+        log.info('\t\t\t' 'distributive_mask_list: %r', self.distributive_mask_list)
+        log.info('\t\t\t' 'update_mask_list: %r', self.update_mask_list)
+        log.info('\t\t\t' 'publish_dir: %r', self.publish_dir)
         log.info('\t\t\t' 'generator: %r', self.generator)
 
 
@@ -186,7 +196,48 @@ class BuildConfig(object):
             log.info('\t\t\t' '%r', patterns)
 
 
-class FunTestsConfig(object):
+class UnitTestsConfig(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            timeout=str_to_timedelta(data['timeout']),
+            )
+
+    def __init__(self, timeout):
+        assert isinstance(timeout, datetime.timedelta), repr(timeout)
+        self.timeout = timeout
+
+    def to_dict(self):
+        return dict(
+            timeout=timedelta_to_str(self.timeout),
+            )
+
+    def report(self):
+        log.info('\t' 'unit_tests:')
+        log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
+
+
+class ProjectConfig(object):
+
+    def __init__(self, enable_concurrent_builds, days_to_keep_old_builds):
+        assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
+        assert isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        self.enable_concurrent_builds = enable_concurrent_builds
+        self.days_to_keep_old_builds = days_to_keep_old_builds
+
+    def to_dict(self):
+        return dict(
+            enable_concurrent_builds=self.enable_concurrent_builds,
+            days_to_keep_old_builds=self.days_to_keep_old_builds,
+            )
+
+    def report(self):
+        log.info('\t\t' 'enable_concurrent_builds: %r', self.enable_concurrent_builds)
+        log.info('\t\t' 'days_to_keep_old_builds: %r', self.days_to_keep_old_builds)
+
+
+class FunTestsConfig(ProjectConfig):
 
     @classmethod
     def from_dict(cls, data):
@@ -208,27 +259,23 @@ class FunTestsConfig(object):
         assert isinstance(port_base, int), repr(port_base)
         assert isinstance(port_range, int), repr(port_range)
         assert isinstance(binaries_url, basestring), repr(binaries_url)
-        assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
-        assert isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        ProjectConfig.__init__(self, enable_concurrent_builds, days_to_keep_old_builds)
         self.platforms = platforms
         self.node = node
         self.timeout = timeout
         self.port_base = port_base
         self.port_range = port_range
         self.binaries_url = binaries_url
-        self.enable_concurrent_builds = enable_concurrent_builds
-        self.days_to_keep_old_builds = days_to_keep_old_builds
 
     def to_dict(self):
         return dict(
+            ProjectConfig.to_dict(self),
             platforms=self.platforms,
             node=self.node,
             timeout=timedelta_to_str(self.timeout),
             port_base=self.port_base,
             port_range=self.port_range,
             binaries_url=self.binaries_url,
-            enable_concurrent_builds=self.enable_concurrent_builds,
-            days_to_keep_old_builds=self.days_to_keep_old_builds,
             )
 
     def report(self):
@@ -239,40 +286,63 @@ class FunTestsConfig(object):
         log.info('\t\t' 'port_base: %r', self.port_base)
         log.info('\t\t' 'port_range: %r', self.port_range)
         log.info('\t\t' 'binaries_url: %r', self.binaries_url)
-        log.info('\t\t' 'enable_concurrent_builds: %r', self.enable_concurrent_builds)
-        log.info('\t\t' 'days_to_keep_old_builds: %r', self.days_to_keep_old_builds)
+        ProjectConfig.report(self)
 
 
-class CiConfig(object):
+class CiConfig(ProjectConfig):
 
     @classmethod
     def from_dict(cls, data):
         return cls(
-            timeout=str_to_timedelta(data['timeout']),
             platforms=data['platforms'],
             nightly_schedule=data['nightly_schedule'],
+            enable_concurrent_builds=data['enable_concurrent_builds'],
+            days_to_keep_old_builds=data['days_to_keep_old_builds'],
             )
 
-    def __init__(self, timeout, platforms, nightly_schedule):
-        assert isinstance(timeout, datetime.timedelta), repr(timeout)
+    def __init__(self, platforms, nightly_schedule, enable_concurrent_builds, days_to_keep_old_builds):
         assert is_list_inst(platforms, basestring), repr(platforms)
         assert isinstance(nightly_schedule, basestring), repr(nightly_schedule)
-        self.timeout = timeout
+        assert isinstance(enable_concurrent_builds, bool), repr(enable_concurrent_builds)
+        assert isinstance(days_to_keep_old_builds, int), repr(days_to_keep_old_builds)
+        ProjectConfig.__init__(self, enable_concurrent_builds, days_to_keep_old_builds)
         self.platforms = platforms
         self.nightly_schedule = nightly_schedule
 
     def to_dict(self):
         return dict(
-            timeout=timedelta_to_str(self.timeout),
+            ProjectConfig.to_dict(self),
             platforms=self.platforms,
-            nightly_schedule=self.nightly_schedule
+            nightly_schedule=self.nightly_schedule,
             )
 
     def report(self):
         log.info('\t' 'ci:')
-        log.info('\t\t' 'timeout: %s', timedelta_to_str(self.timeout))
         log.info('\t\t' 'platforms: %s', ', '.join(self.platforms))
         log.info('\t\t' 'nightly_schedule: %r', self.nightly_schedule)
+        ProjectConfig.report(self)
+
+
+class ReleaseConfig(ProjectConfig):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            enable_concurrent_builds=data['enable_concurrent_builds'],
+            days_to_keep_old_builds=data['days_to_keep_old_builds'],
+            )
+
+    def __init__(self, enable_concurrent_builds, days_to_keep_old_builds):
+        ProjectConfig.__init__(self, enable_concurrent_builds, days_to_keep_old_builds)
+
+    def to_dict(self):
+        return dict(
+            ProjectConfig.to_dict(self),
+            )
+
+    def report(self):
+        log.info('\t' 'release:')
+        ProjectConfig.report(self)
 
 
 class TestsWatchersConfig(object):
@@ -313,33 +383,39 @@ class Config(object):
             services=ServicesConfig.from_dict(data['services']),
             email=EmailConfig.from_dict(data['email']),
             build=BuildConfig.from_dict(data['build']),
+            unit_tests=UnitTestsConfig.from_dict(data['unit_tests']),
+            ci=CiConfig.from_dict(data['ci']),
+            release=ReleaseConfig.from_dict(data['release']),
             fun_tests=FunTestsConfig.from_dict(data['fun_tests']),
             customization_list=data['customization_list'],
             platforms={platform_name: PlatformConfig.from_dict(platform_config)
                                for platform_name, platform_config in data['platforms'].items()},
-            ci=CiConfig.from_dict(data['ci']),
             tests_watchers={name: TestsWatchersConfig.from_dict(twc)
                                 for name, twc in data['tests_watchers'].items()},
             )
 
-    def __init__(self, junk_shop, services, email, build, fun_tests, customization_list, platforms, ci, tests_watchers):
+    def __init__(self, junk_shop, services, email, build, unit_tests, ci, release, fun_tests, customization_list, platforms, tests_watchers):
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert isinstance(services, ServicesConfig), repr(services)
         assert isinstance(email, EmailConfig), repr(email)
         assert isinstance(build, BuildConfig), repr(build)
+        assert isinstance(unit_tests, UnitTestsConfig), repr(unit_tests)
+        assert isinstance(ci, CiConfig), repr(ci)
+        assert isinstance(release, ReleaseConfig), repr(release)
         assert isinstance(fun_tests, FunTestsConfig), repr(fun_tests)
         assert is_list_inst(customization_list, basestring), repr(customization_list)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
-        assert isinstance(ci, CiConfig), repr(ci)
         assert is_dict_inst(tests_watchers, basestring, TestsWatchersConfig), repr(tests_watchers)
         self.junk_shop = junk_shop
         self.services = services
         self.email = email
         self.build = build
+        self.unit_tests = unit_tests
+        self.ci = ci
+        self.release = release
         self.fun_tests = fun_tests
         self.customization_list = customization_list
         self.platforms = platforms
-        self.ci = ci
         self.tests_watchers = tests_watchers
 
     def to_dict(self):
@@ -348,11 +424,13 @@ class Config(object):
             services=self.services.to_dict(),
             email=self.email.to_dict(),
             build=self.build.to_dict(),
+            unit_tests=self.unit_tests.to_dict(),
+            ci=self.ci.to_dict(),
+            release=self.release.to_dict(),
             fun_tests=self.fun_tests.to_dict(),
             customization_list=self.customization_list,
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
-            ci=self.ci.to_dict(),
             tests_watchers={name: twc.to_dict() for name, twc in self.tests_watchers.items()},
             )
 
@@ -362,6 +440,9 @@ class Config(object):
         self.services.report()
         self.email.report()
         self.build.report()
+        self.unit_tests.report()
+        self.ci.report()
+        self.release.report()
         self.fun_tests.report()
         log.info('\t' 'customization_list:')
         for customization in self.customization_list:
@@ -370,7 +451,6 @@ class Config(object):
         for platform_name, platform_info in self.platforms.items():
             log.info('\t\t' '%s:', platform_name)
             platform_info.report()
-        self.ci.report()
         log.info('\t' 'tests_watchers:')
         for name, twc in self.tests_watchers.items():
             log.info('\t\t' '%s:', name)

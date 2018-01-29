@@ -21,8 +21,6 @@ from email_sender import EmailSender
 log = logging.getLogger(__name__)
 
 
-DAYS_TO_KEEP_OLD_BUILDS = 30
-
 CLOUD_GROUP_LIST = [
     'test',
     'tmp',
@@ -36,8 +34,6 @@ CLOUD_GROUP_LIST = [
 class ReleaseProject(BuildProject):
 
     project_id = 'release'
-
-    days_to_keep_old_builds = DAYS_TO_KEEP_OLD_BUILDS
 
     def get_project_parameters(self):
         return BuildProject.get_project_parameters(self) + [
@@ -59,6 +55,14 @@ class ReleaseProject(BuildProject):
         return False
 
     @property
+    def days_to_keep_old_builds(self):
+        return self.config.release.days_to_keep_old_builds
+
+    @property
+    def enable_concurrent_builds(self):
+        return self.config.release.enable_concurrent_builds
+
+    @property
     def requested_platform_list(self):
         platform_list = self.params.get('platform_list')
         if not platform_list:
@@ -66,19 +70,23 @@ class ReleaseProject(BuildProject):
         return [p for p in self.all_platform_list if p in platform_list.split(',')]
 
     @property
+    def release(self):
+        return self.params.release
+
+    @property
+    def cloud_group(self):
+        return self.params.cloud_group
+
+    @property
+    def customization(self):
+        return None
+
+    @property
     def requested_customization_list(self):
         customization_list = self.params.get('customization_list')
-        log.info('params customization_list = %r', customization_list)
         if not customization_list:
             return []
         return [c for c in self.config.customization_list if c in customization_list.split(',')]
-
-    def create_build_parameters(self, platform=None, customization=None):
-        return BuildProject.create_build_parameters(
-            self, platform, customization,
-            release=self.params.release,
-            cloud_group=self.params.cloud_group,
-            )
 
     def stage_prepare_for_build(self):
         self.clean_stamps.init_master(self.params)
@@ -113,15 +121,7 @@ class ReleaseProject(BuildProject):
             assert phase == 1, repr(phase)  # must never happen on phase 2
             return [CleanDirCommand()] + self.make_node_stage_command_list(platform=platform, customization=customization, phase=2)
 
-        platform_config = self.config.platforms[platform]
-        platform_branch_config = self.branch_config.platforms.get(platform)
-        junk_shop_repository = self.create_junk_shop_repository(platform=platform, customization=customization)
-
-        build_info = self.build(junk_shop_repository, platform_branch_config, platform_config)
-        if self.params.run_unit_tests and platform_config.should_run_unit_tests and build_info.is_succeeded:
-            self.run_unit_tests(junk_shop_repository, build_info, self.config.ci.timeout)
-
-        return self.post_build_actions(junk_shop_repository, build_info, customization, self.params.cloud_group)
+        return self.run_build_node_job(customization, platform)
 
     def stage_finalize(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
@@ -136,4 +136,4 @@ class ReleaseProject(BuildProject):
         if build_user:
             recipient_list = ['{} <{}>'.format(build_user.full_name, build_user.email)]
             sender.send_email(smtp_password, build_info.subject_and_html, recipient_list)
-        return self.make_set_build_result_command_list(build_info)
+        return self.do_final_processing(build_info, separate_customizations=True)

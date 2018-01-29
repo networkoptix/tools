@@ -32,17 +32,15 @@ class BuildInfo(namedtuple(
     'BuildInfo', [
         'is_succeeded',
         'artifacts_dir',
-        'artifact_mask_list',
         'current_config_path',
         'version',
         'unit_tests_bin_dir',
         'run_id',
         ])):
 
-    def __init__(self, is_succeeded, artifacts_dir, artifact_mask_list, current_config_path, version, unit_tests_bin_dir, run_id):
+    def __init__(self, is_succeeded, artifacts_dir, current_config_path, version, unit_tests_bin_dir, run_id):
         assert isinstance(is_succeeded, bool), repr(is_succeeded)
         assert isinstance(artifacts_dir, basestring), repr(artifacts_dir)
-        assert is_list_inst(artifact_mask_list, basestring), repr(artifact_mask_list)
         assert isinstance(current_config_path, basestring), repr(current_config_path)
         assert version is None or isinstance(version, basestring), repr(version)
         assert isinstance(unit_tests_bin_dir, basestring), repr(unit_tests_bin_dir)
@@ -50,7 +48,6 @@ class BuildInfo(namedtuple(
         super(BuildInfo, self).__init__(
             is_succeeded=is_succeeded,
             artifacts_dir=artifacts_dir,
-            artifact_mask_list=artifact_mask_list,
             current_config_path=current_config_path,
             version=version,
             unit_tests_bin_dir=unit_tests_bin_dir,
@@ -146,7 +143,6 @@ class CMakeBuilder(object):
         return BuildInfo(
             is_succeeded=build_info.passed,
             artifacts_dir=os.path.join(build_dir, 'distrib'),
-            artifact_mask_list=self._platform_config.artifact_mask_list,
             current_config_path=os.path.join(build_dir, 'current_config.py'),
             version=cmake_build_info.get('version'),
             unit_tests_bin_dir=unit_tests_bin_dir,

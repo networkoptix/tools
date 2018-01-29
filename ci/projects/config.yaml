@@ -32,8 +32,10 @@ build:
     - CMakeLists.txt
     - \.vcxproj$
 
-ci:
+unit_tests:
   timeout: 30m
+
+ci:
   # default platforms to build by CI project
   platforms:
     - win-x64
@@ -42,6 +44,12 @@ ci:
     - bpi
   # cron schedule to do clean build at night:
   nightly_schedule: 'H 0 * * *'
+  enable_concurrent_builds: False
+  days_to_keep_old_builds: 3
+
+release:
+  enable_concurrent_builds: False
+  days_to_keep_old_builds: 20
 
 fun_tests:
   platforms:
@@ -79,59 +87,81 @@ platforms:
   linux-x64:
     build_node: linux
     should_run_unit_tests: yes
-    artifact_mask_list:
+    publish_dir: linux
+    distributive_mask_list:
       - '*.deb'
+    update_mask_list:
       - '*.zip'
   linux-x86:
     build_node: linux
     should_run_unit_tests: no
-    artifact_mask_list:
+    publish_dir: linux
+    distributive_mask_list:
       - '*.deb'
+    update_mask_list:
       - '*.zip'
   win-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
     should_run_unit_tests: yes
-    artifact_mask_list:
+    publish_dir: windows
+    distributive_mask_list:
       - '*.msi'
       - '*.exe'
-      - '*.zip'
       - '*.pdb'
+    update_mask_list:
+      - '*.zip'
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
     should_run_unit_tests: yes
-    artifact_mask_list:
+    publish_dir: windows
+    distributive_mask_list:
       - '*.msi'
       - '*.exe'
-      - '*.zip'
       - '*.pdb'
+    update_mask_list:
+      - '*.zip'
   mac:
     build_node: mac
     should_run_unit_tests: yes
-    artifact_mask_list:
+    publish_dir: macos
+    distributive_mask_list:
       - '*.dmg'
-      - '*.zip'  # update
+    update_mask_list:
+      - '*.zip'
   bananapi:
     build_node: linux
     should_run_unit_tests: no
-    artifact_mask_list:
+    publish_dir: arm
+    distributive_mask_list:
       - '*.zip'
+    update_mask_list:
+      - '*update-*.zip'
   bpi:
     build_node: linux
     should_run_unit_tests: no
-    artifact_mask_list:
+    publish_dir: arm
+    distributive_mask_list:
       - '*.zip'
+    update_mask_list:
+      - '*update-*.zip'
   rpi:
     build_node: linux
     should_run_unit_tests: no
-    artifact_mask_list:
+    publish_dir: arm
+    distributive_mask_list:
       - '*.zip'
+    update_mask_list:
+      - '*update-*.zip'
   edge1:
     build_node: linux
     should_run_unit_tests: no
-    artifact_mask_list:
+    publish_dir: arm
+    distributive_mask_list:
       - '*.zip'
+    update_mask_list:
+      - '*update-*.zip'
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher

@@ -96,16 +96,23 @@ class StashCommand(Command):
         return cls(
             name=d['name'],
             pattern_list=d['pattern_list'],
+            dir=d['dir'],
             )
 
-    def __init__(self, name, pattern_list):
+    def __init__(self, name, pattern_list, dir=None):
         assert isinstance(name, basestring), repr(name)
         assert is_list_inst(pattern_list, basestring), repr(pattern_list)
+        assert dir is None or isinstance(dir, basestring), repr(dir)
         self.name = name
         self.pattern_list = pattern_list
+        self.dir = dir
 
     def args_to_dict(self):
-        return dict(name=self.name, pattern_list=self.pattern_list)
+        return dict(
+            name=self.name,
+            pattern_list=self.pattern_list,
+            dir=self.dir,
+            )
 
         
 class UnstashCommand(Command):
@@ -116,14 +123,24 @@ class UnstashCommand(Command):
     def from_dict(cls, d, command_registry):
         return cls(
             name=d['name'],
+            dir=d['dir'],
+            ignore_missing=d['ignore_missing'],
             )
 
-    def __init__(self, name):
+    def __init__(self, name, dir=None, ignore_missing=False):
         assert isinstance(name, basestring), repr(name)
+        assert dir is None or isinstance(dir, basestring), repr(dir)
+        assert isinstance(ignore_missing, bool), repr(ignore_missing)
         self.name = name
+        self.dir = dir
+        self.ignore_missing = ignore_missing
 
     def args_to_dict(self):
-        return dict(name=self.name)
+        return dict(
+            name=self.name,
+            dir=self.dir,
+            ignore_missing=self.ignore_missing,
+            )
 
 
 class ArchiveArtifactsCommand(Command):

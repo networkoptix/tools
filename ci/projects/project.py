@@ -44,7 +44,7 @@ class JenkinsProject(object):
         assert stage_method, 'Unknown stage: %r' % stage_id
         command_list = stage_method(**self.current_command.custom_info)
         assert command_list is None or is_list_inst(command_list, Command), (
-            'Method %r must return Command instance list or None, but returned: %r' % (method_name, command_list))
+            'Method %r must return Command instance list or None, but returned: %r' % (stage_method, command_list))
         return self.state.make_output_state(command_list)
 
     def _get_stage_method(self, stage_id):
