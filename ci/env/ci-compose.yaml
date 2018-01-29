@@ -78,7 +78,7 @@ services:
     ports:
       - '2022:22'
     volumes:
-      - slave_ubuntu_14_workspace:/jenkins
+      - /jenkins_slave/ubuntu_14:/jenkins
       - /ubuntu_14_home/home:/home
       - /ubuntu_14_home/etc/passwd:/etc/passwd
       - /ubuntu_14_home/etc/shadow:/etc/shadow
@@ -86,9 +86,6 @@ services:
     networks:
       internal_v6:
 #        ipv6_address: fd00::10
-
-volumes:
-  slave_ubuntu_14_workspace:
 
 networks:
   internal_v6:
