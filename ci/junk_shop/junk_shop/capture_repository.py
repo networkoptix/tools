@@ -29,23 +29,23 @@ class BuildParameters(object):
         'duration_ms=1234',
         'platform=linux-x64',
         ])
-    known_parameters = [
-        'project',
-        'branch',
-        'version',
-        'build_num',
-        'release',
-        'configuration',
-        'cloud_group',
-        'customization',
-        'add_qt_pdb',
-        'is_incremental',
-        'jenkins_url',
-        'repository_url',
-        'revision',
-        'duration_ms',
-        'platform',
-        ]
+    known_parameters = {
+        'project': str,
+        'branch': str,
+        'version': str,
+        'build_num': int,
+        'release': str,
+        'configuration': str,
+        'cloud_group': str,
+        'customization': str,
+        'add_qt_pdb': bool,
+        'is_incremental': bool,
+        'jenkins_url': str,
+        'repository_url': str,
+        'revision': str,
+        'duration_ms': int,
+        'platform': str,
+        }
 
     @classmethod
     def from_string(cls, parameters_str):
@@ -57,7 +57,7 @@ class BuildParameters(object):
                 raise ArgumentTypeError(error_msg)
             name, value = l
             if name not in cls.known_parameters:
-                raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters)))
+                raise ArgumentTypeError('Unknown build parameter: %r. Known are: %s' % (name, ', '.join(cls.known_parameters.keys())))
             if value == 'null':
                 raise ArgumentTypeError('Got null value for %r parameter' % name)
             if name in ['add_qt_pdb', 'is_incremental']:
@@ -254,17 +254,21 @@ class DbCaptureRepository(object):
                 project=project,
                 branch=branch,
                 build_num=build_num,
-                version=self._produce_build_parameter('version'))
-        for name in BuildParameters.known_parameters:
+                version=self._produce_build_parameter('version') or '')
+        for name, t in BuildParameters.known_parameters.items():
             if name in ['project', 'branch', 'build_num']: continue
             if name == 'duration_ms':
                 name = 'duration'
             value = self._produce_build_parameter(name)
             if value is not None:
+                t = self._get_parameter_type(name)
+                if t is str and value is None:
+                    value = ''  # pony str fields do not accept None
                 setattr(build, name, value)
         return build
 
     def _produce_build_parameter(self, name):
+        t = self._get_parameter_type(name)
         value = getattr(self.build_parameters, name)
         param2model = dict(
             project=models.Project,
@@ -275,16 +279,18 @@ class DbCaptureRepository(object):
             )
         model = param2model.get(name)
         if not model:
-            if name in ['build_num', 'duration', 'is_incremental', 'add_qt_pdb']:
-                return value
-            else:
-                return value or ''  # str fields do not accept None
+            return value
         if not value:
             return None
         rec = model.get(name=value)
         if not rec:
             rec = model(name=value)
         return rec
+
+    def _get_parameter_type(self, name):
+        if name == 'duration':
+            name = 'duration_ms'
+        return BuildParameters.known_parameters[name]
 
     def produce_run(self, parent, name):
         run = self._select_run_children(parent).filter(name=name).get()
