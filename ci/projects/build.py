@@ -38,6 +38,17 @@ class BuildInfo(namedtuple(
         'run_id',
         ])):
 
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            is_succeeded=data['is_succeeded'],
+            artifacts_dir=data['artifacts_dir'],
+            current_config_path=data['current_config_path'],
+            version=data['version'],
+            unit_tests_bin_dir=data['unit_tests_bin_dir'],
+            run_id=data['run_id'],
+            )
+
     def __init__(self, is_succeeded, artifacts_dir, current_config_path, version, unit_tests_bin_dir, run_id):
         assert isinstance(is_succeeded, bool), repr(is_succeeded)
         assert isinstance(artifacts_dir, basestring), repr(artifacts_dir)

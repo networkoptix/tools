@@ -6,6 +6,7 @@ import abc
 import glob
 import re
 import yaml
+import pprint
 
 from pony.orm import db_session
 
@@ -34,7 +35,7 @@ from command import (
     SetBuildResultCommand,
 )
 from cmake import CMake
-from build import CMakeBuilder
+from build import BuildInfo, CMakeBuilder
 from clean_stamps import CleanStamps
 from diff_parser import load_hg_changes
 
@@ -42,6 +43,7 @@ log = logging.getLogger(__name__)
 
 
 CMAKE_VERSION = '3.10.2'
+PLATFORM_BUILD_INFO_PATH = 'platform_build_info.yaml'
 
 
 # build and run tests on single node for single customization/platofrm
@@ -65,8 +67,15 @@ class BuildNodeJob(object):
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
 
-    def run(self, clean_build, build_tests, run_unit_tests, unit_tests_timeout):
-        build_info = self._build(clean_build, build_tests)
+    def run(self, do_build, clean_build, build_tests, run_unit_tests, unit_tests_timeout):
+        if do_build:
+            build_info = self._build(clean_build, build_tests)
+        else:
+            build_info = self._load_platform_build_info()
+            log.info('Build is skipped')
+            log.debug('Build Info:')
+            for line in pprint.pformat(dict(build_info._asdict())).splitlines():
+                log.debug('\t%s' % line.rstrip())
         if build_info.is_succeeded and run_unit_tests:
             self._run_unit_tests(build_info, unit_tests_timeout)
         if not build_info.is_succeeded:
@@ -89,7 +98,13 @@ class BuildNodeJob(object):
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
         build_info = builder.build('nx_vms', 'build', build_tests, clean_build)
+        with open(PLATFORM_BUILD_INFO_PATH, 'w') as f:
+            yaml.dump(dict(build_info._asdict()), f, default_flow_style=False)
         return build_info
+
+    def _load_platform_build_info(self):
+        with open(PLATFORM_BUILD_INFO_PATH) as f:
+            return BuildInfo.from_dict(yaml.load(f))
 
     def _run_unit_tests(self, build_info, timeout):
         if self._is_unix:
@@ -236,6 +251,7 @@ class BuildProject(NxVmsProject):
         parameters += [
                     ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                                ['build', 'update_properties']),
+                    BooleanProjectParameter('do_build', 'Do actual build', default_value=True),
                     BooleanProjectParameter('run_unit_tests', 'Run unit tests', default_value=self.run_unit_tests_by_default),
                     BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
                     BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
@@ -323,7 +339,7 @@ class BuildProject(NxVmsProject):
             platform_config,
             platform_branch_config,
             )
-        command_list = job.run(clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
+        command_list = job.run(self.params.do_build, clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
         return command_list
             
     def _is_rebuild_required(self):
