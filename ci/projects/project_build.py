@@ -42,7 +42,6 @@ from diff_parser import load_hg_changes
 log = logging.getLogger(__name__)
 
 
-CMAKE_VERSION = '3.10.2'
 PLATFORM_BUILD_INFO_PATH = 'platform_build_info.yaml'
 
 
@@ -50,6 +49,7 @@ PLATFORM_BUILD_INFO_PATH = 'platform_build_info.yaml'
 class BuildNodeJob(object):
 
     def __init__(self,
+                 cmake_version,
                  executor_number,
                  db_config,
                  is_unix,
@@ -58,6 +58,7 @@ class BuildNodeJob(object):
                  platform_config,
                  platform_branch_config,
                  ):
+        self._cmake_version = cmake_version
         self._executor_number = executor_number
         self._db_config = db_config
         self._is_unix = is_unix
@@ -93,7 +94,7 @@ class BuildNodeJob(object):
         return self._repository.build_parameters.platform
 
     def _build(self, clean_build, build_tests):
-        cmake = CMake(CMAKE_VERSION)
+        cmake = CMake(self._cmake_version)
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
@@ -331,6 +332,7 @@ class BuildProject(NxVmsProject):
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
         build_parameters = self._build_parameters(customization, platform)
         job = BuildNodeJob(
+            self.config.build.cmake_version,
             self.jenkins_env.executor_number,
             self.db_config,
             self.is_unix,

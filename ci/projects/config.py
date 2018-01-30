@@ -177,20 +177,25 @@ class BuildConfig(object):
     @classmethod
     def from_dict(cls, data):
         return cls(
+            cmake_version=data['cmake_version'],
             rebuild_cause_file_patterns=data['rebuild_cause_file_patterns'],
             )
 
-    def __init__(self, rebuild_cause_file_patterns):
+    def __init__(self, cmake_version, rebuild_cause_file_patterns):
+        assert isinstance(cmake_version, basestring), repr(cmake_version)
         assert is_list_inst(rebuild_cause_file_patterns, basestring), repr(rebuild_cause_file_patterns)
+        self.cmake_version = cmake_version
         self.rebuild_cause_file_patterns = rebuild_cause_file_patterns
 
     def to_dict(self):
         return dict(
+            cmake_version=self.cmake_version,
             rebuild_cause_file_patterns=self.rebuild_cause_file_patterns,
             )
 
     def report(self):
         log.info('\t' 'build:')
+        log.info('\t\t' 'cmake_version: %r', self.cmake_version)
         log.info('\t\t' 'rebuild_cause_file_patterns:')
         for patterns in self.rebuild_cause_file_patterns:
             log.info('\t\t\t' '%r', patterns)
