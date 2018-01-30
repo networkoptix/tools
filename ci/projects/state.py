@@ -229,7 +229,7 @@ class State(object):
         self.current_command = current_command
         self.clean_stamp = clean_stamp  # last time when 'clean' flag was used
         self.clean_build_stamp = clean_build_stamp  # same for clean_build flag
-        self.job_result = job_result
+        self.job_result = job_result  # result of BuildJobCommand, job -> build_result
 
     def report(self):
         self.jenkins_env.report()
