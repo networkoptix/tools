@@ -18,7 +18,8 @@ def project_list():
                for build in models.Build
                if exists(build.runs))}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
-    project_list = {}  # project -> branch -> build
+    project_map = {}  # project -> branch set
+    branch_map = {}  # (project, branch) -> build
     platform_map = {}  # (project, branch, platform) -> MatrixCell
     for build, run in select(
             (run.build, run) for run in models.Run
@@ -26,14 +27,22 @@ def project_list():
             run.test.path in ['build', 'unit', 'functional']).order_by(2):
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue
-        project_list.setdefault(build.project, {})[build.branch] = build
+        project_map.setdefault(build.project, set()).add(build.branch)
+        branch_map[(build.project, build.branch)] = build
         cell = platform_map.setdefault((build.project, build.branch, run.platform), MatrixCell())
         cell.add_run(run)
     platform_list = models.Platform.select().order_by(models.Platform.order_num)
+    ordered_project_list = models.Project.select().order_by(models.Project.order_num)
+    ordered_branch_list = models.Branch.select().order_by(models.Branch.order_num)
+    project_list = [project for project in ordered_project_list if project in project_map]
+    project_branch_list = {project: [branch for branch in ordered_branch_list if branch in project_map[project]]
+                               for project in project_list}
     return render_template(
         'project_list.html',
         platform_list=platform_list,
         project_list=project_list,
+        project_branch_list=project_branch_list,
+        branch_map=branch_map,
         platform_map=platform_map,
         )
 

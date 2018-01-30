@@ -9,6 +9,7 @@ db = Database()
 
 class Project(db.Entity):
     name = Required(str)
+    order_num = Required(int, default=100)
     builds = Set('Build')
 
 class CloudGroup(db.Entity):
@@ -24,6 +25,7 @@ class Customization(db.Entity):
 
 class Branch(db.Entity):
     name = Required(str)
+    order_num = Required(int, default=1000)
     builds = Set('Build')
 
 class Platform(db.Entity):

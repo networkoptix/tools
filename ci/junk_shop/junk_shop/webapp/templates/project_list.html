@@ -34,11 +34,13 @@
         </tr>
       </thead>
       <tbody>
-        {% for project, branch_list in project_list|dictsort %}
+        {% for project in project_list %}
+          {% set branch_list = project_branch_list[project] %}
           <tr class="project-title-row">
             <td colspan="{{ platform_list|length + 2}}">{{ project.name }}</td>
           </tr>
-          {% for branch, build in branch_list|dictsort %}
+          {% for branch in branch_list %}
+            {% set build = branch_map[(project, branch)] %}
             <tr>
               <td class="axiz">
                 <a class="link"
