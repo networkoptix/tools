@@ -25,7 +25,7 @@ services:
     volumes:
       - /jenkins:/var/jenkins_home
     links:
-      - slave_ubuntu_14
+      - slave_ubuntu_16
     networks:
       internal_v6:
         ipv6_address: 2001:3984:3989::11
@@ -65,24 +65,24 @@ services:
     volumes:
       - /junk_shop_db/db:/var/lib/postgresql/data
 
-  slave_ubuntu_14:
-    container_name: slave_ubuntu_14
-    hostname: ubuntu_14
-    image: slave_ubuntu_14
+  slave_ubuntu_16:
+    container_name: slave_ubuntu_16
+    hostname: ubuntu_16
+    image: slave_ubuntu_16
     build:
       context: .
-      dockerfile: slave_ubuntu_14.Dockerfile
+      dockerfile: slave_ubuntu_16.Dockerfile
       args:
         uid: 1003
         gid: 1003
     ports:
       - '2022:22'
     volumes:
-      - /jenkins_slave/ubuntu_14:/jenkins
-      - /ubuntu_14_home/home:/home
-      - /ubuntu_14_home/etc/passwd:/etc/passwd
-      - /ubuntu_14_home/etc/shadow:/etc/shadow
-      - /ubuntu_14_home/etc/group:/etc/group
+      - /jenkins_slave/ubuntu_16:/jenkins
+      - /ubuntu_16_home/home:/home
+      - /ubuntu_16_home/etc/passwd:/etc/passwd
+      - /ubuntu_16_home/etc/shadow:/etc/shadow
+      - /ubuntu_16_home/etc/group:/etc/group
     networks:
       internal_v6:
 #        ipv6_address: fd00::10
