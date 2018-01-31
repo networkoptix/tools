@@ -81,6 +81,12 @@ RUN set -ex; \
 	apt-get install -y mercurial
 
 
+# Install webadmin build requirements (npm, nodejs and Co)
+RUN set -ex; \
+	apt-get install -y git npm ruby-compass python-yaml; \
+	npm install -g n; \
+	n stable
+
 # Install ssh server
 ENV TERM xterm
 RUN set -ex; \
