@@ -94,6 +94,7 @@ class BuildNodeJob(object):
         return self._repository.build_parameters.platform
 
     def _build(self, clean_build, build_tests):
+        log.info('Executor number: %s', self._executor_number)
         cmake = CMake(self._cmake_version)
         cmake.ensure_required_cmake_operational()
 
