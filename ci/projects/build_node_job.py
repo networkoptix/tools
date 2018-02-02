@@ -38,14 +38,15 @@ class BuildNodeJob(object):
                  build_parameters,
                  platform_config,
                  platform_branch_config,
+                 webadmin_external_dir,
                  ):
         self._cmake_version = cmake_version
         self._executor_number = executor_number
-        self._db_config = db_config
         self._is_unix = is_unix
         self._workspace_dir = workspace_dir
         self._platform_config = platform_config
         self._platform_branch_config = platform_branch_config
+        self._webadmin_external_dir = webadmin_external_dir
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
 
@@ -80,7 +81,7 @@ class BuildNodeJob(object):
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
-        build_info = builder.build('nx_vms', 'build', build_tests, clean_build)
+        build_info = builder.build('nx_vms', 'build', self._webadmin_external_dir, build_tests, clean_build)
         with open(PLATFORM_BUILD_INFO_PATH, 'w') as f:
             yaml.dump(dict(build_info._asdict()), f, default_flow_style=False)
         return build_info

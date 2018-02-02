@@ -33,8 +33,14 @@ from clean_stamps import CleanStamps
 from diff_parser import load_hg_changes
 from email_sender import EmailSender
 from build_node_job import BuildNodeJob
+from webadmin import WEBADMIN_STASH_NAME, BuildWebAdminJob
 
 log = logging.getLogger(__name__)
+
+
+WEBADMIN_NODE = 'webadmin'
+WEBADMIN_EXTERNAL_DIR = 'webadmin-external'
+WEBADMIN_PLATFORM_NAME = 'webadmin'
 
 
 class BuildProject(NxVmsProject):
@@ -139,10 +145,12 @@ class BuildProject(NxVmsProject):
             ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
                                        ['build', 'update_properties']),
             BooleanProjectParameter('do_build', 'Do actual build', default_value=True),
+            BooleanProjectParameter('build_webadmin', 'Build webadmin', default_value=True),
+            BooleanProjectParameter('deploy_webadmin', 'Deploy webadmin (external.dat) to rdep', default_value=True),
             BooleanProjectParameter('run_unit_tests', 'Run unit tests', default_value=self.run_unit_tests_by_default),
             BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
             BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
-            BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
+            BooleanProjectParameter('clean_only', 'Clean workspaces instead of build', default_value=False),
             BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
             ]
         return parameters
@@ -153,6 +161,15 @@ class BuildProject(NxVmsProject):
         self.clean_stamps.init_master(self.params)
         self._init_build_info()
 
+        workspace_dir = self._make_workspace_name('webadmin')
+        job_command_list = self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+            PrepareVirtualEnvCommand(self.devtools_python_requirements),
+            self.make_python_stage_command('build_webadmin'),
+            ]
+        return ([NodeCommand(WEBADMIN_NODE, workspace_dir, job_command_list)] +
+                 self._make_platform_build_command_list())
+
+    def _make_platform_build_command_list(self):
         job_list = [self._make_parallel_job(customization, platform)
                         for platform in self.requested_platform_list
                         for customization in self.requested_customization_list]
@@ -167,8 +184,8 @@ class BuildProject(NxVmsProject):
         revision_info = update_build_info(repository, 'nx_vms')
         self.scm_info['nx_vms'].set_prev_revision(revision_info.prev_revision)  # will be needed later
 
-    def _create_junk_shop_repository(self):
-        return DbCaptureRepository(self.db_config, self._make_build_parameters(self.customization))
+    def _create_junk_shop_repository(self, platform=None):
+        return DbCaptureRepository(self.db_config, self._make_build_parameters(self.customization, platform))
 
     # values for models.Build fields and models.Run roots
     def _make_build_parameters(self, customization, platform=None):
@@ -200,6 +217,7 @@ class BuildProject(NxVmsProject):
                 ]
         if not self.params.clean_only:
             job_command_list += self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+                UnstashCommand(WEBADMIN_STASH_NAME, dir=WEBADMIN_EXTERNAL_DIR),
                 PrepareVirtualEnvCommand(self.devtools_python_requirements),
                 self.make_python_stage_command('node', customization=customization, platform=platform),
                 ]
@@ -216,12 +234,24 @@ class BuildProject(NxVmsProject):
 
     # create unique workspace dir name for parallel job used for building and running unit tests
     def _make_build_workspace_name(self, customization, platform):
-        workspace_name = '{}-{}-{}'.format(
-            self.project_id, self.nx_vms_branch_name, self.make_build_job_name(customization, platform))
+        job_name = self.make_build_job_name(customization, platform)
+        return self._make_workspace_name(job_name)
+
+    def _make_workspace_name(self, job_name):
+        workspace_name = '{}-{}-{}'.format(self.project_id, self.nx_vms_branch_name, job_name)
         if self.in_assist_mode:
             return 'psa-{}-{}'.format(self.jenkins_env.job_name, workspace_name)
         else:
             return workspace_name
+
+
+    # build_webadmin ===============================================================================
+    def stage_build_webadmin(self):
+        job = BuildWebAdminJob(self.workspace_dir, self._create_junk_shop_repository(platform=WEBADMIN_PLATFORM_NAME))
+        build_webadmin = self.params.build_webadmin is None or self.params.build_webadmin
+        deploy_webadmin = self.params.deploy_webadmin is None or self.params.deploy_webadmin
+        command_list = job.run(do_build=build_webadmin, deploy=deploy_webadmin)
+        return command_list
 
 
     # node =========================================================================================
@@ -233,20 +263,20 @@ class BuildProject(NxVmsProject):
             return [CleanDirCommand()] + self.make_node_stage_command_list(customization=customization, platform=platform, phase=2)
 
         platform_config = self.config.platforms[platform]
-        platform_branch_config = self.branch_config.platforms.get(platform)
         clean_build = self._is_rebuild_required()
         build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
         build_parameters = self._make_build_parameters(customization, platform)
         job = BuildNodeJob(
-            self.config.build.cmake_version,
-            self.jenkins_env.executor_number,
-            self.db_config,
-            self.is_unix,
-            self.workspace_dir,
-            build_parameters,
-            platform_config,
-            platform_branch_config,
+            cmake_version=self.config.build.cmake_version,
+            executor_number=self.jenkins_env.executor_number,
+            db_config=self.db_config,
+            is_unix=self.is_unix,
+            workspace_dir=self.workspace_dir,
+            build_parameters=build_parameters,
+            platform_config=platform_config,
+            platform_branch_config=self.branch_config.platforms.get(platform),
+            webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
             )
         command_list = job.run(self.params.do_build, clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
         return command_list
