@@ -3,12 +3,8 @@
 import logging
 import os.path
 import abc
-import glob
 import re
 import yaml
-import pprint
-
-from pony.orm import db_session
 
 from junk_shop import (
     models,
@@ -16,9 +12,8 @@ from junk_shop import (
     BuildParameters,
     DbCaptureRepository,
     update_build_info,
-    run_unit_tests,
 )
-from utils import ensure_dir_missing, prepare_empty_dir
+from utils import ensure_dir_missing
 from project_nx_vms import BUILD_INFO_FILE, NxVmsProject
 from command import (
     CleanDirCommand,
@@ -26,148 +21,20 @@ from command import (
     ArchiveArtifactsCommand,
     NodeCommand,
     ParallelJob,
+    ParallelCommand,
     BooleanProjectParameter,
     StringProjectParameter,
     ChoiceProjectParameter,
     SetProjectPropertiesCommand,
-    StashCommand,
     UnstashCommand,
     SetBuildResultCommand,
 )
-from cmake import CMake
-from build import BuildInfo, CMakeBuilder
 from clean_stamps import CleanStamps
 from diff_parser import load_hg_changes
+from email_sender import EmailSender
+from build_node_job import BuildNodeJob
 
 log = logging.getLogger(__name__)
-
-
-PLATFORM_BUILD_INFO_PATH = 'platform_build_info.yaml'
-
-
-# build and run tests on single node for single customization/platofrm
-class BuildNodeJob(object):
-
-    def __init__(self,
-                 cmake_version,
-                 executor_number,
-                 db_config,
-                 is_unix,
-                 workspace_dir,
-                 build_parameters,
-                 platform_config,
-                 platform_branch_config,
-                 ):
-        self._cmake_version = cmake_version
-        self._executor_number = executor_number
-        self._db_config = db_config
-        self._is_unix = is_unix
-        self._workspace_dir = workspace_dir
-        self._platform_config = platform_config
-        self._platform_branch_config = platform_branch_config
-        self._error_list = []
-        self._repository = DbCaptureRepository(db_config, build_parameters)
-
-    def run(self, do_build, clean_build, build_tests, run_unit_tests, unit_tests_timeout):
-        if do_build:
-            build_info = self._build(clean_build, build_tests)
-        else:
-            build_info = self._load_platform_build_info()
-            log.info('Build is skipped')
-            log.debug('Build Info:')
-            for line in pprint.pformat(dict(build_info._asdict())).splitlines():
-                log.debug('\t%s' % line.rstrip())
-        if build_info.is_succeeded and run_unit_tests:
-            self._run_unit_tests(build_info, unit_tests_timeout)
-        if not build_info.is_succeeded:
-            return None
-        command_list = self._make_post_build_actions(build_info)
-        self._save_errors_artifact(build_info)
-        return command_list
-
-    @property
-    def _customization(self):
-        return self._repository.build_parameters.customization
-
-    @property
-    def _platform(self):
-        return self._repository.build_parameters.platform
-
-    def _build(self, clean_build, build_tests):
-        log.info('Executor number: %s', self._executor_number)
-        cmake = CMake(self._cmake_version)
-        cmake.ensure_required_cmake_operational()
-
-        builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
-        build_info = builder.build('nx_vms', 'build', build_tests, clean_build)
-        with open(PLATFORM_BUILD_INFO_PATH, 'w') as f:
-            yaml.dump(dict(build_info._asdict()), f, default_flow_style=False)
-        return build_info
-
-    def _load_platform_build_info(self):
-        with open(PLATFORM_BUILD_INFO_PATH) as f:
-            return BuildInfo.from_dict(yaml.load(f))
-
-    def _run_unit_tests(self, build_info, timeout):
-        if self._is_unix:
-            ext = ''
-        else:
-            ext = '.exe'
-        unit_test_mask_list = os.path.join(build_info.unit_tests_bin_dir, '*_ut%s' % ext)
-        test_binary_list = [os.path.basename(path) for path in glob.glob(unit_test_mask_list)]
-        if not test_binary_list:
-            self._add_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
-            return
-        unit_tests_dir = os.path.join(self._workspace_dir, 'unit_tests')
-        bin_dir = os.path.abspath(build_info.unit_tests_bin_dir)
-        prepare_empty_dir(unit_tests_dir)
-        log.info('Running unit tests in %r: %s', unit_tests_dir, ', '.join(test_binary_list))
-        logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # prevent unit tests from logging stdout/stderr
-        is_passed = run_unit_tests(
-            self._repository, build_info.current_config_path, unit_tests_dir, bin_dir, test_binary_list, timeout)
-        log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
-
-    def _make_post_build_actions(self, build_info):
-        return (
-            self._make_stash_command_list(
-                'dist-%s-%s-distributive' % (self._customization, self._platform),
-                build_info.artifacts_dir, self._platform_config.distributive_mask_list,
-                exclude_list=self._platform_config.update_mask_list) +
-            self._make_stash_command_list(
-                'dist-%s-%s-update' % (self._customization, self._platform),
-                build_info.artifacts_dir, self._platform_config.update_mask_list)
-            )
-
-    def _make_stash_command_list(self, stash_name, artifacts_dir, artifact_mask_list, exclude_list=None):
-        artifact_list = list(self._list_artifacts(artifacts_dir, artifact_mask_list, exclude_list))
-        if not artifact_list:
-            error = 'No artifacts were produced matching masks: {}'.format(', '.join(artifact_mask_list))
-            self._add_error(error)
-            return []
-        return [StashCommand(stash_name, artifact_list, artifacts_dir)]
- 
-    def _list_artifacts(self, artifacts_dir, include_list, exclude_list=None):
-        if exclude_list:
-            exclude_set = set(self._list_artifacts(artifacts_dir, exclude_list))
-        else:
-            exclude_set = set()
-        for mask in include_list:
-            for path in glob.glob(os.path.join(artifacts_dir, mask)):
-                relative_path = os.path.relpath(path, artifacts_dir)
-                if relative_path not in exclude_set:
-                    yield relative_path
-
-    def _add_error(self, error):
-        log.error(error)
-        self._error_list.append(error)
-
-    @db_session
-    def _save_errors_artifact(self, build_info):
-        if not self._error_list:
-            return
-        run = models.Run[build_info.run_id]
-        self._repository.add_artifact(
-            run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._error_list), is_error=True)
 
 
 class BuildProject(NxVmsProject):
@@ -179,24 +46,9 @@ class BuildProject(NxVmsProject):
         self._build_error_list = []
         self.clean_stamps = CleanStamps(self.state)
 
-    def stage_init(self):
-        command_list = [self.set_project_properties_command]
-
-        if self.in_assist_mode and self.params.stage:
-            command_list += [
-                self.make_python_stage_command(self.params.stage),
-                ]
-        elif self.must_actually_do_build():
-            command_list += self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
-                self.make_python_stage_command('prepare_for_build'),
-                ]
-        return command_list
-
+    # do all the stuff, or just update project projerties
     def must_actually_do_build(self):
         return self.params.action == 'build'
-
-    def stage_report_state(self):
-        self.state.report()
 
     @property
     def db_config(self):
@@ -236,35 +88,18 @@ class BuildProject(NxVmsProject):
     def cloud_group(self):
         pass
 
-    @property
-    def set_project_properties_command(self):
-        return SetProjectPropertiesCommand(
-            parameters=self.get_project_parameters(),
-            enable_concurrent_builds=False,
-            days_to_keep_old_builds=self.days_to_keep_old_builds,
-            )
-
-    def get_project_parameters(self):
-        parameters = self.default_parameters
-        if self.in_assist_mode:
-            parameters += [
-                StringProjectParameter('stage', 'stage to run', default_value=''),
-                ]
-        parameters += [
-                    ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
-                                               ['build', 'update_properties']),
-                    BooleanProjectParameter('do_build', 'Do actual build', default_value=True),
-                    BooleanProjectParameter('run_unit_tests', 'Run unit tests', default_value=self.run_unit_tests_by_default),
-                    BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
-                    BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
-                    BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
-                    BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
-                    ]
-        return parameters
+    @abc.abstractproperty
+    def must_store_artifacts_in_different_customization_dirs(self):
+        pass
 
     @property
     def run_unit_tests_by_default(self):
         return True
+
+    # create unique name for parallel job used for building and running unit tests
+    @abc.abstractmethod
+    def make_build_job_name(self, customization, platform):
+        pass
 
     @property
     def project_name(self):
@@ -273,15 +108,70 @@ class BuildProject(NxVmsProject):
         else:
             return self.project_id
 
-    def init_build_info(self):
+
+    # init  ========================================================================================
+    def stage_init(self):
+        log.info('requested platform_list = %r', self.requested_platform_list)
+        log.info('requested customization_list = %r', self.requested_customization_list)
+
+        command_list = [self._set_project_properties_command]
+
+        if self.in_assist_mode and self.params.stage:
+            command_list += [
+                self.make_python_stage_command(self.params.stage),
+                ]
+        elif self.must_actually_do_build():
+            command_list += self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
+                self.make_python_stage_command('prepare_for_build'),
+                ]
+        return command_list
+
+    @property
+    def _set_project_properties_command(self):
+        return SetProjectPropertiesCommand(
+            parameters=self.get_project_parameters(),
+            enable_concurrent_builds=False,
+            days_to_keep_old_builds=self.days_to_keep_old_builds,
+            )
+
+    def get_project_parameters(self):
+        parameters = self.default_parameters + [
+            ChoiceProjectParameter('action', 'Action to perform: build or just update project properties',
+                                       ['build', 'update_properties']),
+            BooleanProjectParameter('do_build', 'Do actual build', default_value=True),
+            BooleanProjectParameter('run_unit_tests', 'Run unit tests', default_value=self.run_unit_tests_by_default),
+            BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
+            BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
+            BooleanProjectParameter('clean_only', 'Clean workspaces instead build', default_value=False),
+            BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
+            ]
+        return parameters
+
+
+    # prepare_for_build ============================================================================
+    def stage_prepare_for_build(self):
+        self.clean_stamps.init_master(self.params)
+        self._init_build_info()
+
+        job_list = [self._make_parallel_job(customization, platform)
+                        for platform in self.requested_platform_list
+                        for customization in self.requested_customization_list]
+        return [
+            ParallelCommand(job_list),
+            self.make_python_stage_command('finalize'),
+            ]
+
+    # create models.Build and create models.BuildChangeSet records for it
+    def _init_build_info(self):
         repository = self._create_junk_shop_repository()
         revision_info = update_build_info(repository, 'nx_vms')
         self.scm_info['nx_vms'].set_prev_revision(revision_info.prev_revision)  # will be needed later
 
     def _create_junk_shop_repository(self):
-        return DbCaptureRepository(self.db_config, self._build_parameters(self.customization))
+        return DbCaptureRepository(self.db_config, self._make_build_parameters(self.customization))
 
-    def _build_parameters(self, customization, platform=None):
+    # values for models.Build fields and models.Run roots
+    def _make_build_parameters(self, customization, platform=None):
         nx_vms_scm_info = self.scm_info['nx_vms']
         is_incremental = not (self.params.clean or self.params.clean_build)
         return BuildParameters(
@@ -300,7 +190,7 @@ class BuildProject(NxVmsProject):
             revision=nx_vms_scm_info.revision,
             )
 
-    def make_parallel_job(self, job_name, workspace_dir, platform, **kw):
+    def _make_parallel_job(self, customization, platform):
         platform_config = self.config.platforms[platform]
         node = self._get_build_node_label(platform_config)
         job_command_list = []
@@ -309,7 +199,12 @@ class BuildProject(NxVmsProject):
                 CleanDirCommand(),
                 ]
         if not self.params.clean_only:
-            job_command_list += self.make_node_stage_command_list(platform=platform, **kw)
+            job_command_list += self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+                PrepareVirtualEnvCommand(self.devtools_python_requirements),
+                self.make_python_stage_command('node', customization=customization, platform=platform),
+                ]
+        job_name = self.make_build_job_name(customization, platform)
+        workspace_dir = self._make_build_workspace_name(customization, platform)
         return ParallelJob(job_name, [NodeCommand(node, workspace_dir, job_command_list)])
 
     def _get_build_node_label(self, platform_config):
@@ -319,19 +214,30 @@ class BuildProject(NxVmsProject):
             suffix = self.project_id
         return '{}-{}'.format(platform_config.build_node, suffix)
 
-    def make_node_stage_command_list(self, **kw):
-        return self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
-            PrepareVirtualEnvCommand(self.devtools_python_requirements),
-            self.make_python_stage_command('node', **kw),
-            ]
+    # create unique workspace dir name for parallel job used for building and running unit tests
+    def _make_build_workspace_name(self, customization, platform):
+        workspace_name = '{}-{}-{}'.format(
+            self.project_id, self.nx_vms_branch_name, self.make_build_job_name(customization, platform))
+        if self.in_assist_mode:
+            return 'psa-{}-{}'.format(self.jenkins_env.job_name, workspace_name)
+        else:
+            return workspace_name
 
-    def run_build_node_job(self, customization, platform):
+
+    # node =========================================================================================
+    def stage_node(self, customization, platform, phase=1):
+        log.info('Node stage: node=%s, phase#%s, customization=%s, platform=%s', self.current_node, phase, customization, platform)
+
+        if self.clean_stamps.check_must_clean_node():
+            assert phase == 1, repr(phase)  # must never happen on phase 2
+            return [CleanDirCommand()] + self.make_node_stage_command_list(customization=customization, platform=platform, phase=2)
+
         platform_config = self.config.platforms[platform]
         platform_branch_config = self.branch_config.platforms.get(platform)
         clean_build = self._is_rebuild_required()
         build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
-        build_parameters = self._build_parameters(customization, platform)
+        build_parameters = self._make_build_parameters(customization, platform)
         job = BuildNodeJob(
             self.config.build.cmake_version,
             self.jenkins_env.executor_number,
@@ -372,25 +278,49 @@ class BuildProject(NxVmsProject):
                     return True
         return False
 
-    def do_final_processing(self, build_info, separate_customizations):
+
+    # finalize =====================================================================================
+    def stage_finalize(self):
+        self.db_config.bind(models.db)
+
+        sender = EmailSender(self.config)
+        nx_vms_scm_info = self.scm_info['nx_vms']
+        build_info = self.send_result_email(
+            sender,
+            smtp_password=self.credentials.service_email,
+            project=self.project_name,
+            branch=nx_vms_scm_info.branch,
+            build_num=self.jenkins_env.build_number,
+            )
+
         ensure_dir_missing('dist')
-        command_list = []
+        return self.make_final_processing_command_list(build_info)
+
+    @abc.abstractmethod
+    def send_result_email(self, sender, smtp_password, project, branch, build_num):
+        pass
+
+    def make_final_processing_command_list(self, build_info):
+        return (self._make_artifact_artchiving_command_list(build_info) +
+                self._make_set_build_result_command_list(build_info))
+
+    def _make_artifact_artchiving_command_list(self, build_info):
+        unstash_command_list = []
         for customization in self.requested_customization_list:
             for platform in self.requested_platform_list:
                 for suffix in ['distributive', 'update']:
                     name = 'dist-%s-%s-%s' % (customization, platform, suffix)
                     dir = 'dist'
-                    if separate_customizations:
+                    if self.must_store_artifacts_in_different_customization_dirs:
                         dir = os.path.join(dir, customization)
-                    command_list.append(UnstashCommand(name, dir, ignore_missing=True))
+                    unstash_command_list.append(UnstashCommand(name, dir, ignore_missing=True))
         build_info_path = self._save_build_info_artifact()
-        command_list += [
+        return unstash_command_list + [
             ArchiveArtifactsCommand([build_info_path]),
             ArchiveArtifactsCommand(['**'], 'dist'),
             ]
-        command_list += self._make_set_build_result_command_list(build_info)
-        return command_list
 
+    # build_info file left along with artifacts
     def _save_build_info_artifact(self):
         build_info = dict(
             project=self.project_name,
