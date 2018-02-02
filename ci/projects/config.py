@@ -11,6 +11,31 @@ log = logging.getLogger(__name__)
 
 # configuration common for all branches, stored in devtools/ci/projects/config.yaml
 
+
+class Credential(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            id=data['id'],
+            type=data['type'],
+            )
+
+    def __init__(self, id, type):
+        self.id = id
+        self.type = type
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            type=self.type,
+            )
+
+    def report(self):
+        log.info('\t\t\t' 'id: %r', self.id)
+        log.info('\t\t\t' 'type: %r', self.type)
+
+
 class PlatformConfig(object):
 
     @classmethod
@@ -384,6 +409,7 @@ class Config(object):
     @classmethod
     def from_dict(cls, data):
         return cls(
+            credentials=[Credential.from_dict(d) for d in data['credentials']],
             junk_shop=JunkShopConfig.from_dict(data['junk_shop']),
             services=ServicesConfig.from_dict(data['services']),
             email=EmailConfig.from_dict(data['email']),
@@ -399,7 +425,8 @@ class Config(object):
                                 for name, twc in data['tests_watchers'].items()},
             )
 
-    def __init__(self, junk_shop, services, email, build, unit_tests, ci, release, fun_tests, customization_list, platforms, tests_watchers):
+    def __init__(self, credentials, junk_shop, services, email, build, unit_tests, ci, release, fun_tests, customization_list, platforms, tests_watchers):
+        assert is_list_inst(credentials, Credential), repr(credentials)
         assert isinstance(junk_shop, JunkShopConfig), repr(junk_shop)
         assert isinstance(services, ServicesConfig), repr(services)
         assert isinstance(email, EmailConfig), repr(email)
@@ -411,6 +438,7 @@ class Config(object):
         assert is_list_inst(customization_list, basestring), repr(customization_list)
         assert is_dict_inst(platforms, basestring, PlatformConfig), repr(platforms)
         assert is_dict_inst(tests_watchers, basestring, TestsWatchersConfig), repr(tests_watchers)
+        self.credentials = credentials
         self.junk_shop = junk_shop
         self.services = services
         self.email = email
@@ -425,6 +453,7 @@ class Config(object):
 
     def to_dict(self):
         return dict(
+            credentials=[c.to_dict() for c in self.credentials],
             junk_shop=self.junk_shop.to_dict(),
             services=self.services.to_dict(),
             email=self.email.to_dict(),
@@ -441,6 +470,9 @@ class Config(object):
 
     def report(self):
         log.info('config:')
+        log.info('\t' 'credentials:')
+        for c in self.credentials:
+            c.report()
         self.junk_shop.report()
         self.services.report()
         self.email.report()
