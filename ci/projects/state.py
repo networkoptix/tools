@@ -35,6 +35,56 @@ class SloppyNamespace(Namespace):
             return None
 
 
+class SshKeyCredential(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            key_path=data['key_path'],
+            user=data['user'],
+            )
+
+    def __init__(self, key_path, user):
+        self.key_path = key_path
+        self.user = user
+
+    def __repr__(self):
+        return '<key_path=%r, user=%r>' % (self.key_path, self.user)
+
+    def to_dict(self):
+        return dict(
+            key_path=self.key_path,
+            user=self.user,
+            )
+
+
+class Credentials(Namespace):
+
+    @classmethod
+    def from_dict(cls, data, config):
+        return cls({
+            t.id: cls.credential_from_dict(data, t) for t in config.credentials
+            })
+
+    @staticmethod
+    def credential_from_dict(data, t):
+        value = data[t.id]
+        if t.type == 'ssh_key':
+            return SshKeyCredential.from_dict(value)
+        else:
+            return value
+
+    def to_dict(self):
+        return {key: self.credential_to_dict(value) for (key, value) in self._items.items()}
+
+    @staticmethod
+    def credential_to_dict(value):
+        if isinstance(value, SshKeyCredential):
+            return value.to_dict()
+        else:
+            return value
+
+
 class ScmInfo(object):
 
     @classmethod
@@ -171,12 +221,13 @@ class State(object):
 
     @classmethod
     def from_dict(cls, data, command_registry):
+        config = Config.from_dict(data['config'])
         return cls(
             jenkins_env=JenkinsEnv.from_dict(data['jenkins_env']),
             params=SloppyNamespace(data['params']),
-            config=Config.from_dict(data['config']),
+            config=config,
             command_list=[command_registry.resolve(command) for command in data['command_list']],
-            credentials=Namespace(data['credentials']),
+            credentials=Credentials.from_dict(data['credentials'], config),
             scm_info={repository: ScmInfo.from_dict(info) for repository, info in data.get('scm', {}).items()},
             current_node=data['current_node'],
             workspace_dir=data['workspace_dir'],

@@ -5,6 +5,8 @@ credentials:
     type: name_and_password
   - id: service_email
     type: password
+  - id: rdep_publish
+    type: ssh_key
 
 junk_shop:
   db_host: megatron  # host of junk_shop database

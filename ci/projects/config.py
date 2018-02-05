@@ -22,6 +22,8 @@ class Credential(object):
             )
 
     def __init__(self, id, type):
+        assert isinstance(id, basestring), repr(id)
+        assert type in ['name_and_password', 'password', 'ssh_key'], repr(type)
         self.id = id
         self.type = type
 
