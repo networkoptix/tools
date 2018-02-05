@@ -216,15 +216,18 @@ class BuildProject(NxVmsProject):
                 CleanDirCommand(),
                 ]
         if not self.params.clean_only:
-            job_command_list += self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
-                CleanDirCommand(WEBADMIN_EXTERNAL_DIR),  # clean from previous builds
-                UnstashCommand(WEBADMIN_STASH_NAME, dir=WEBADMIN_EXTERNAL_DIR),
-                PrepareVirtualEnvCommand(self.devtools_python_requirements),
-                self.make_python_stage_command('node', customization=customization, platform=platform),
-                ]
+            job_command_list += self._make_node_stage_command_list(customization, platform)
         job_name = self.make_build_job_name(customization, platform)
         workspace_dir = self._make_build_workspace_name(customization, platform)
         return ParallelJob(job_name, [NodeCommand(node, workspace_dir, job_command_list)])
+
+    def _make_node_stage_command_list(self, customization, platform, phase=1):
+         return self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+             CleanDirCommand(WEBADMIN_EXTERNAL_DIR),  # clean from previous builds
+             UnstashCommand(WEBADMIN_STASH_NAME, dir=WEBADMIN_EXTERNAL_DIR),
+             PrepareVirtualEnvCommand(self.devtools_python_requirements),
+             self.make_python_stage_command('node', customization=customization, platform=platform, phase=phase),
+             ]
 
     def _get_build_node_label(self, platform_config):
         if self.in_assist_mode:
@@ -261,7 +264,7 @@ class BuildProject(NxVmsProject):
 
         if self.clean_stamps.check_must_clean_node():
             assert phase == 1, repr(phase)  # must never happen on phase 2
-            return [CleanDirCommand()] + self.make_node_stage_command_list(customization=customization, platform=platform, phase=2)
+            return [CleanDirCommand()] + self._make_node_stage_command_list(customization, platform, phase=2)
 
         platform_config = self.config.platforms[platform]
         clean_build = self._is_rebuild_required()
