@@ -217,6 +217,7 @@ class BuildProject(NxVmsProject):
                 ]
         if not self.params.clean_only:
             job_command_list += self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+                CleanDirCommand(WEBADMIN_EXTERNAL_DIR),  # clean from previous builds
                 UnstashCommand(WEBADMIN_STASH_NAME, dir=WEBADMIN_EXTERNAL_DIR),
                 PrepareVirtualEnvCommand(self.devtools_python_requirements),
                 self.make_python_stage_command('node', customization=customization, platform=platform),

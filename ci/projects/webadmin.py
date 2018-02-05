@@ -18,8 +18,8 @@ log = logging.getLogger(__name__)
 BUILD_DIR = 'build-webadmin'
 BUILD_SCRIPT_PATH = 'nx_vms/webadmin/build.sh'
 DEPLOY_SCRIPT_PATH = 'nx_vms/webadmin/deploy.sh'
-SERVER_EXTERNAL_DIR = 'server-external/bin'
-SERVER_EXTERNAL_NAME = 'external.dat'
+SERVER_EXTERNAL_DIR = 'server-external'
+SERVER_EXTERNAL_SUB_PATH = 'bin/external.dat'
 WEBADMIN_STASH_NAME = 'webadmin'
 
 
@@ -33,11 +33,11 @@ class BuildWebAdminJob(object):
     def run(self, do_build, deploy):
         if do_build:
             run_id = self._do_build()
-        result_path = os.path.join(self._build_dir, SERVER_EXTERNAL_DIR, SERVER_EXTERNAL_NAME)
+        result_path = os.path.join(self._build_dir, SERVER_EXTERNAL_DIR, SERVER_EXTERNAL_SUB_PATH)
         assert os.path.isfile(result_path), 'Webadmin was not built: build result is missing: %r' % result_path
         if do_build and deploy:
             self._deploy(run_id)
-        return [StashCommand(WEBADMIN_STASH_NAME, [SERVER_EXTERNAL_NAME], os.path.join(BUILD_DIR, SERVER_EXTERNAL_DIR))]
+        return [StashCommand(WEBADMIN_STASH_NAME, [SERVER_EXTERNAL_SUB_PATH], os.path.join(BUILD_DIR, SERVER_EXTERNAL_DIR))]
 
     def _do_build(self):
         prepare_empty_dir(self._build_dir)

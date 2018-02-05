@@ -215,13 +215,18 @@ class CleanDirCommand(Command):
 
     @classmethod
     def from_dict(cls, d, command_registry):
-        return cls()
+        return cls(
+            dir=d['dir'],
+            )
 
-    def __init__(self):
-        pass
+    def __init__(self, dir=None):
+        assert dir is None or isinstance(dir, basestring), repr(dir)
+        self.dir = dir
 
     def args_to_dict(self):
-        return dict()
+        return dict(
+            dir=self.dir
+            )
 
 
 class ParallelJob(object):
