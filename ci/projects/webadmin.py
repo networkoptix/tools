@@ -8,8 +8,9 @@ from pony.orm import db_session, flush
 
 from junk_shop.utils import status2outcome
 from junk_shop import models
-from utils import prepare_empty_dir
+from utils import prepare_empty_dir, ensure_dir_exists
 from command import StashCommand
+from state import SshKeyCredential
 from host import LocalHost
 
 log = logging.getLogger(__name__)
@@ -18,14 +19,21 @@ log = logging.getLogger(__name__)
 BUILD_DIR = 'build-webadmin'
 BUILD_SCRIPT_PATH = 'nx_vms/webadmin/build.sh'
 DEPLOY_SCRIPT_PATH = 'nx_vms/webadmin/deploy.sh'
+RDEP_CONFIGURE_PATH = 'nx_vms/build_utils/python/rdep_configure.py'
 SERVER_EXTERNAL_DIR = 'server-external'
 SERVER_EXTERNAL_SUB_PATH = 'bin/external.dat'
 WEBADMIN_STASH_NAME = 'webadmin'
 
+RDEP_CONFIG_TEMPLATE = '''
+ssh = ssh -l {user} -i {key_path}
+'''
+
 
 class BuildWebAdminJob(object):
 
-    def __init__(self, workspace_dir, repository):
+    def __init__(self, ssh_key_credential, workspace_dir, repository):
+        assert isinstance(ssh_key_credential, SshKeyCredential), repr(ssh_key_credential)
+        self._ssh_key_credential = ssh_key_credential
         self._workspace_dir = workspace_dir
         self._repository = repository
         self._host = LocalHost()
@@ -53,19 +61,36 @@ class BuildWebAdminJob(object):
         return self._store_build_output(result.stdout, is_succeeded)
 
     def _deploy(self, run_id):
+        self._prepare_packages_dir()
         deploy_script_path = os.path.join(self._workspace_dir, DEPLOY_SCRIPT_PATH)
-        env = dict(os.environ,
-                   environment=self._workspace_dir)
         result = self._host.run_command(
             [deploy_script_path],
             cwd=self._build_dir,
-            env=env,
+            env=self._rdep_env,
             check_retcode=False,
             merge_stderr=True,
             )
         is_succeeded = result.exit_code == 0
         log.info('Webadmin deployment is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
         self._store_artifact(run_id, 'deploy', result.stdout, is_error=not is_succeeded)
+
+    def _prepare_packages_dir(self):
+        packages_dir = os.path.join(self._workspace_dir, 'packages')
+        ensure_dir_exists(packages_dir)
+        config_path = os.path.join(packages_dir, '.rdep')
+        if not os.path.exists(config_path):
+            rdep_configure_path = os.path.join(self._workspace_dir, RDEP_CONFIGURE_PATH)
+            self._host.run_command([rdep_configure_path], env=self._rdep_env)
+            with open(config_path, 'a') as f:
+                f.write(RDEP_CONFIG_TEMPLATE.format(
+                    user=self._ssh_key_credential.user,
+                    key_path=self._ssh_key_credential.key_path,
+                    ))
+
+    @property
+    def _rdep_env(self):
+        return dict(os.environ,
+                    environment=self._workspace_dir)
 
     @property
     def _build_dir(self):

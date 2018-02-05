@@ -251,7 +251,11 @@ class BuildProject(NxVmsProject):
 
     # build_webadmin ===============================================================================
     def stage_build_webadmin(self):
-        job = BuildWebAdminJob(self.workspace_dir, self._create_junk_shop_repository(platform=WEBADMIN_PLATFORM_NAME))
+        job = BuildWebAdminJob(
+            self.credentials.rdep_publish,
+            self.workspace_dir,
+            self._create_junk_shop_repository(platform=WEBADMIN_PLATFORM_NAME),
+            )
         build_webadmin = self.params.build_webadmin is None or self.params.build_webadmin
         deploy_webadmin = self.params.deploy_webadmin is None or self.params.deploy_webadmin
         command_list = job.run(do_build=build_webadmin, deploy=deploy_webadmin)
