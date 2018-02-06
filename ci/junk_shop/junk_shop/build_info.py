@@ -130,10 +130,19 @@ class BuildInfoLoader(object):
             build.build_num == build_num)
         return cls(build)
 
-    def __init__(self, build, customization=None, platform=None):
+    @classmethod
+    def for_full_build(cls, build):
+        return cls(build, is_full_build_mode=True)
+
+    @classmethod
+    def for_build_customzation_platform(cls, build, customization, platform):
+        return cls(build, customization, platform, is_full_build_mode=False)
+
+    def __init__(self, build, customization=None, platform=None, is_full_build_mode=True):
         self.build = build
         self.customization = customization
         self.platform = platform
+        self.is_full_build_mode = is_full_build_mode
         self.platform_map = {}  # models.Platform -> Platform
         self.stage_map = {}  # models.Run (root run) -> Stage
         self.started_at = None  # minimal started_at field from all Runs
@@ -142,7 +151,7 @@ class BuildInfoLoader(object):
         self.failed_test_set = set()  # failed test list from all platforms
 
     def _is_run_wanted(self, root_run):
-        if not self.customization or not self.platform:
+        if self.is_full_build_mode:
             return True
         return root_run.customization is self.customization and root_run.platform is self.platform
 
@@ -299,7 +308,7 @@ class BuildInfoLoader(object):
             )
 
     def load_build_platform(self):
-        assert self.customization and self.platform  # this method intended only for platform build
+        assert not self.is_full_build_mode  # this method intended only for particular customization/platform of a build
         self._load_build_data()
 
         assert len(self.platform_map) == 1, repr(self.platform_map)

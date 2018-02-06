@@ -18,7 +18,7 @@
     (build.build_num, url_for('build', project_name=build.project.name, branch_name=build.branch.name, build_num=build.build_num)),
   ]) }}
 
-  <h2>{{ customization.name }} / {{ platform.name }}</h2>
+  <h2>{% if customization %}{{ customization.name }} / {% endif %}{{ platform.name }}</h2>
   <hr>
 
   {{ build_macros.build_info_block(build, started_at) }}

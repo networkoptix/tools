@@ -14,6 +14,13 @@ class CustomizationRow(object):
         self.platform2cell = {}  # models.Platform -> MatrixCell
 
 
+class WebadminPhonyCustomization(object):
+
+    def __init__(self):
+        self.name = ''
+        self.order_num = 0  # must appear first
+
+
 # any build with many customization must be shown as matrix
 # and build for 'release' project must be shown as matrix even if ordered for a single customization
 def is_release_build(build):
@@ -26,6 +33,8 @@ def render_release_build(build):
             (run.customization, run.platform, run) for run in  models.Run
             if run.build is build and
             run.test.path in ['build', 'unit', 'functional']):
+        if not customization:
+            customization = WebadminPhonyCustomization()
         row = customization2row.setdefault(customization, CustomizationRow(customization))
         cell = row.platform2cell.setdefault(platform, MatrixCell())
         cell.add_run(run)
@@ -41,12 +50,12 @@ def render_release_build(build):
         )
 
 def render_ci_build(build):
-    loader = BuildInfoLoader(build)
+    loader = BuildInfoLoader.for_full_build(build)
     build_info = loader.load_build_platform_list()
     return render_template('build.html', **build_info._asdict())
 
 def render_platform_build(build, customization, platform):
-    loader = BuildInfoLoader(build, customization, platform)
+    loader = BuildInfoLoader.for_build_customzation_platform(build, customization, platform)
     build_platform_info = loader.load_build_platform()
     return render_template('platform_build.html', **build_platform_info._asdict())
 
@@ -73,8 +82,13 @@ def platform_build(project_name, branch_name, build_num, customization_name, pla
         build.project.name == project_name and
         build.branch.name == branch_name and
         build.build_num == build_num)
-    customization = models.Customization.get(name=customization_name)
     platform = models.Platform.get(name=platform_name)
-    if not build or not customization or not platform:
+    if not build or not platform:
         abort(404)
+    if customization_name == 'none':
+        customization = None
+    else:
+        customization = models.Customization.get(name=customization_name)
+        if not customization:
+            abort(404)
     return render_platform_build(build, customization, platform)
