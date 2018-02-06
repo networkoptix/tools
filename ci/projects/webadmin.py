@@ -3,6 +3,7 @@
 import os
 import os.path
 import logging
+import errno
 
 from pony.orm import db_session, flush
 
@@ -50,29 +51,43 @@ class BuildWebAdminJob(object):
     def _do_build(self):
         prepare_empty_dir(self._build_dir)
         build_script_path = os.path.join(self._workspace_dir, BUILD_SCRIPT_PATH)
-        result = self._host.run_command(
-            [build_script_path],
-            cwd=self._build_dir,
-            check_retcode=False,
-            merge_stderr=True,
-            )
-        is_succeeded = result.exit_code == 0
-        log.info('Webadmin build is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
-        return self._store_build_output(result.stdout, is_succeeded)
+        try:
+            result = self._host.run_command(
+                [build_script_path],
+                cwd=self._build_dir,
+                check_retcode=False,
+                merge_stderr=True,
+                )
+            is_succeeded = result.exit_code == 0
+            log.info('Webadmin build is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
+            return self._store_build_output(result.stdout, is_succeeded)
+        except OSError as x:
+            if x.errno != errno.EACCES:
+                raise
+            error = 'Permission denied when executing %r; this script is broken' % build_script_path
+            log.error(error)
+            return self._store_build_output(error, is_succeeded=False)
 
     def _deploy(self, run_id):
         self._prepare_packages_dir()
         deploy_script_path = os.path.join(self._workspace_dir, DEPLOY_SCRIPT_PATH)
-        result = self._host.run_command(
-            [deploy_script_path],
-            cwd=self._build_dir,
-            env=self._rdep_env,
-            check_retcode=False,
-            merge_stderr=True,
-            )
-        is_succeeded = result.exit_code == 0
-        log.info('Webadmin deployment is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
-        self._store_artifact(run_id, 'deploy', result.stdout, is_error=not is_succeeded)
+        try:
+            result = self._host.run_command(
+                [deploy_script_path],
+                cwd=self._build_dir,
+                env=self._rdep_env,
+                check_retcode=False,
+                merge_stderr=True,
+                )
+            is_succeeded = result.exit_code == 0
+            log.info('Webadmin deployment is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
+            self._store_artifact(run_id, 'deploy', result.stdout, is_error=not is_succeeded)
+        except OSError as x:
+            if x.errno != errno.EACCES:
+                raise
+            error = 'Permission denied when executing %r; this script is broken' % deploy_script_path
+            log.error(error)
+            self._store_artifact(run_id, 'deploy', error, is_error=True)
 
     def _prepare_packages_dir(self):
         packages_dir = os.path.join(self._workspace_dir, 'packages')
