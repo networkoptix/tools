@@ -69,6 +69,10 @@ class ReleaseProject(BuildProject):
         return True
 
     @property
+    def add_qt_pdb_by_default(self):
+        return True
+
+    @property
     def run_unit_tests_by_default(self):
         return False
 

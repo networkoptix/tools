@@ -99,6 +99,10 @@ class BuildProject(NxVmsProject):
         pass
 
     @property
+    def add_qt_pdb_by_default(self):
+        return False
+
+    @property
     def run_unit_tests_by_default(self):
         return True
 
@@ -151,7 +155,8 @@ class BuildProject(NxVmsProject):
             BooleanProjectParameter('clean_build', 'Build from scratch', default_value=False),
             BooleanProjectParameter('clean', 'Clean workspaces before build', default_value=False),
             BooleanProjectParameter('clean_only', 'Clean workspaces instead of build', default_value=False),
-            BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means', default_value=False),
+            BooleanProjectParameter('add_qt_pdb', 'Tell me if you know what this parameter means',
+                                        default_value=self.add_qt_pdb_by_default),
             ]
         return parameters
 
