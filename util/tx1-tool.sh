@@ -648,6 +648,7 @@ main()
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local SRC_DIR="$VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
 
+            nx_echo "Copying from $SRC_DIR/ to $PACKAGES_DIR/tegra_video/"
             nx_rsync "$SRC_DIR/libtegra_video.so" "$PACKAGES_DIR/tegra_video/lib/" || exit $?
             nx_rsync "$SRC_DIR/tegra_video.h" "$PACKAGES_DIR/tegra_video/include/" || exit $?
             nx_rsync "$SRC_DIR/video_dec_gie" "$PACKAGES_DIR/tegra_video/bin/" || exit $?
