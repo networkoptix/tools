@@ -81,13 +81,16 @@ class BuildWebAdminJob(object):
                 )
             is_succeeded = result.exit_code == 0
             log.info('Webadmin deployment is %s' % ('SUCCEEDED' if is_succeeded else 'FAILED'))
-            self._store_artifact(run_id, 'deploy', result.stdout, is_error=not is_succeeded)
+            self._store_artifact(run_id, 'deploy', 'deployment-output', result.stdout, is_error=not is_succeeded)
+            if not is_succeeded:
+                self._store_artifact(run_id, 'errors', 'deployment-errors', 'Deployment is failed', is_error=True)
         except OSError as x:
             if x.errno != errno.EACCES:
                 raise
             error = 'Permission denied when executing %r; this script is broken' % deploy_script_path
             log.error(error)
-            self._store_artifact(run_id, 'deploy', error, is_error=True)
+            self._store_artifact(run_id, 'deploy', 'deployment-error', error, is_error=True)
+            self._store_artifact(run_id, 'errors', 'deployment-errors', error, is_error=True)
 
     def _prepare_packages_dir(self):
         packages_dir = os.path.join(self._workspace_dir, 'packages')
@@ -122,6 +125,8 @@ class BuildWebAdminJob(object):
         return run.id
 
     @db_session
-    def _store_artifact(self, run_id, name, output, is_error):
+    def _store_artifact(self, run_id, short_name, full_name, output, is_error):
         run = models.Run[run_id]
-        self._repository.add_artifact(run, name, name, self._repository.artifact_type.output, output, is_error)
+        if is_error:
+            run.outcome = status2outcome(False)  # build errors are only shown for failed outcomes
+        self._repository.add_artifact(run, short_name, full_name, self._repository.artifact_type.output, output, is_error)
