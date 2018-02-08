@@ -13,6 +13,7 @@ if 'JUNK_SHOP_SETTINGS' in os.environ:
 
 from . import commands
 from ..filters import JinjaFilters
+from . import robots_views
 from . import views
 from . import project_views
 from . import build_views
