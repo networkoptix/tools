@@ -4,6 +4,7 @@ import os
 import os.path
 import logging
 import errno
+import ConfigParser
 
 from pony.orm import db_session, flush
 
@@ -24,10 +25,7 @@ RDEP_CONFIGURE_PATH = 'nx_vms/build_utils/python/rdep_configure.py'
 SERVER_EXTERNAL_DIR = 'server-external'
 SERVER_EXTERNAL_SUB_PATH = 'bin/external.dat'
 WEBADMIN_STASH_NAME = 'webadmin'
-
-RDEP_CONFIG_TEMPLATE = '''
-ssh = ssh -l {user} -i {key_path}
-'''
+RDEP_SSH_COMMAND_TEMPLATE = 'ssh -l {user} -i {key_path}'
 
 
 class BuildWebAdminJob(object):
@@ -99,11 +97,14 @@ class BuildWebAdminJob(object):
         if not os.path.exists(config_path):
             rdep_configure_path = os.path.join(self._workspace_dir, RDEP_CONFIGURE_PATH)
             self._host.run_command([rdep_configure_path], env=self._rdep_env)
-            with open(config_path, 'a') as f:
-                f.write(RDEP_CONFIG_TEMPLATE.format(
-                    user=self._ssh_key_credential.user,
-                    key_path=self._ssh_key_credential.key_path,
-                    ))
+        config = ConfigParser.ConfigParser()
+        config.read(config_path)
+        config.set('General', 'ssh', RDEP_SSH_COMMAND_TEMPLATE.format(
+            user=self._ssh_key_credential.user,
+            key_path=self._ssh_key_credential.key_path,
+            ))
+        with open(config_path, 'w') as f:
+            config.write(f)
 
     @property
     def _rdep_env(self):
