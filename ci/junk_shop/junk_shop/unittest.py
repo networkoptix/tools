@@ -31,7 +31,7 @@ CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than th
 GTEST_ARGUMENTS = [
     '--gtest_filter=-NxCritical.All3',
     '--gtest_shuffle',
-    '--log-level=DEBUG2',
+    '--log-level=DEBUG1',
     ]
 
 def add_core_artifacts(platform, repository, binary_path, run, artifact_path):
