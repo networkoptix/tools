@@ -40,34 +40,36 @@
 {% macro build_platform_block(platform, show_succeeded_builds=False) %}
 
   <div class="platform-build-blocks">
-    {% if not platform.succeeded %}
-      <div class="build-block block">
-        <h3>
-          <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
-            Build errors
-          </a>
-        </h3>
-        {% if platform.error_list %}
-          <div class="run-errors">
-            {% for error in platform.error_list %}
-              {{ error }}<br/>
+    {% if platform.build_run %}
+      {% if not platform.succeeded %}
+        <div class="build-block block">
+          <h3>
+            <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
+              Build errors
+            </a>
+          </h3>
+          {% if platform.error_list %}
+            <div class="run-errors">
+              {% for error in platform.error_list %}
+                {{ error }}<br/>
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="build-errors">
+            {% for line in platform.build_error_list %}
+              {{- line|truncate -}} <br/>
             {% endfor %}
           </div>
-        {% endif %}
-        <div class="build-errors">
-          {% for line in platform.build_error_list %}
-            {{- line|truncate -}} <br/>
-          {% endfor %}
         </div>
-      </div>
-    {% elif show_succeeded_builds %}
-      <div class="build-block block">
-        <h3>
-          <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
-            Build succeeded
-          </a>
-        </h3>
-      </div>
+      {% elif show_succeeded_builds %}
+        <div class="build-block block">
+          <h3>
+            <a class="link" href="{{ url_for('run', run_id=platform.build_run.id) }}">
+              Build succeeded
+            </a>
+          </h3>
+        </div>
+      {% endif %}
     {% endif %}
     {% for stage in platform.stage_list|sort %}
       <div class="build-block block">
