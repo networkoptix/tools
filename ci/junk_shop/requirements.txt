@@ -4,3 +4,4 @@ python-dateutil
 tzlocal
 psycopg2
 pony
+pathlib2==2.1.0

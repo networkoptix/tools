@@ -15,7 +15,10 @@ import argparse
 import subprocess
 import signal
 import threading
+
+from pathlib2 import Path
 from pony.orm import db_session, commit
+
 from junk_shop.utils import DbConfig, datetime_utc_now, timedelta_to_str, status2outcome
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
@@ -33,6 +36,7 @@ GTEST_ARGUMENTS = [
     '--gtest_shuffle',
     '--log-level=DEBUG1',
     ]
+
 
 def add_core_artifacts(platform, repository, binary_path, run, artifact_path):
     fname = os.path.basename(artifact_path)
@@ -261,14 +265,14 @@ class TestProcess(GoogleTestEventHandler):
         if sys.platform == 'win32':
             return False
         has_cores = False
-        for path in glob.glob('*.core.*'):
-            binary_path = self._platform.extract_core_source_binary(path)
+        for path in Path(self._work_dir).rglob('*.core.*'):
+            binary_path = self._platform.extract_core_source_binary(str(path))
             if binary_path != self._binary_path:
-                core_fname = path.split('.')[0]
+                core_fname = str(path.name).split('.')[0]
                 # core file name is truncated by linux to TASK_COMM_LEN - 1 (currently 16-1, will be 20-1)
                 if not self._test_name.startswith(core_fname): continue  # not our core
             level.add_stdout_line('[ produced core file: %s ]' % path)
-            level.add_core_artifacts(self._platform, binary_path or self._binary_path, path)
+            level.add_core_artifacts(self._platform, binary_path or self._binary_path, str(path))
             self.my_core_files.add(path)
             has_cores = True
         return has_cores
@@ -379,20 +383,20 @@ class TestRunner(object):
         self._repository.add_artifact(root_run, 'warnings', 'warnings', artifact_type, '\n'.join(error_list), is_error=True)
 
     def _clean_core_files(self):
-        for path in glob.glob('*.core.*'):
+        for path in Path(self._work_dir).rglob('*.core.*'):
             log.info('Removing old core file %s', path)
-            os.remove(path)
+            os.remove(str(path))
 
     def _collect_core_files(self, run):
         has_cores = False
         messages = []
-        for path in glob.glob('*.core.*'):
+        for path in Path(self._work_dir).rglob('*.core.*'):
             if path in self._core_files_belonging_to_tests: continue
             error = '[ produced core file: %s ]' % path
             log.info(error)
             self._errors.append(error)
-            binary_path = self._platform.extract_core_source_binary(path)
-            add_core_artifacts(self._platform, self._repository, binary_path, run, path)
+            binary_path = self._platform.extract_core_source_binary(str(path))
+            add_core_artifacts(self._platform, self._repository, binary_path, run, str(path))
             has_cores = True
         return has_cores
 
