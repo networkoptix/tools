@@ -6,6 +6,7 @@ import os
 import sys
 import shutil
 
+from pyvalid.validators import Validator
 import requests
 
 log = logging.getLogger(__name__)
@@ -31,23 +32,63 @@ def setup_logging(level=None):
     logging.basicConfig(level=level or logging.INFO, format=format)
 
 
-def is_list_inst(l, cls):
-    if type(l) is not list:
-        return False
-    for value in l:
-        if not isinstance(value, cls):
-            return False
-    return True
+class NxValidator(Validator):
 
-def is_dict_inst(d, key_cls, value_cls):
-    if type(d) is not dict:
-        return False
-    for key, value in d.items():
-        if not isinstance(key, key_cls):
+    @property
+    def __name__(self):
+        return repr(self)
+
+    @staticmethod
+    def _is_instance_of(value, t):
+        if isinstance(t, Validator):
+            return t(value)
+        else:
+            return isinstance(value, t)
+
+
+class list_inst(NxValidator):
+
+    def __init__(self, value_type):
+        self._value_type = value_type
+
+    def __repr__(self):
+        return 'list(%s)' % self._value_type.__name__
+
+    def __call__(self, value):
+        if type(value) is not list:
             return False
-        if not isinstance(value, value_cls):
+        for v in value:
+            if not self._is_instance_of(v, self._value_type):
+                return False
+        return True
+
+
+def is_list_inst(value, value_type):
+    return list_inst(value_type)(value)
+
+
+class dict_inst(NxValidator):
+
+    def __init__(self, key_type, value_type):
+        self._key_type = key_type
+        self._value_type = value_type
+
+    def __repr__(self):
+        return 'dict(%s -> %s)' % (self._key_type.__name__, self._value_type.__name__)
+
+    def __call__(self, value):
+        if type(value) is not dict:
             return False
-    return True
+        for key, value in value.items():
+            if not self._is_instance_of(key, self._key_type):
+                return False
+            if not self._is_instance_of(value, self._value_type):
+                return False
+        return True
+
+
+def is_dict_inst(value, key_type, value_type):
+    return dict_inst(key_type, value_type)(value)
 
 
 def quote(s, char='"'):

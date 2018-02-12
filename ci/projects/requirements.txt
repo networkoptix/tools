@@ -8,3 +8,4 @@ tzlocal
 psycopg2
 pony
 cached-property
+-e git+https://github.com/vsevolod-fedorov/pyvalid.git#egg=pyvalid
