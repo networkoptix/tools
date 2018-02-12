@@ -11,6 +11,7 @@ from pony.orm import db_session
 from pyvalid import accepts, returns
 
 from junk_shop import (
+    models,
     DbCaptureRepository,
     run_unit_tests,
 )
