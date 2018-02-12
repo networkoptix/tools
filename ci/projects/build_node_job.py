@@ -5,25 +5,92 @@ import os.path
 import pprint
 import glob
 import yaml
+from collections import namedtuple
 
 from pony.orm import db_session
+from pyvalid import accepts, returns
 
 from junk_shop import (
     DbCaptureRepository,
     run_unit_tests,
 )
-from utils import prepare_empty_dir
+from utils import prepare_empty_dir, list_inst, dict_inst
 from command import (
     StashCommand,
     )
 from cmake import CMake
 from build import BuildInfo, CMakeBuilder
 
-
 log = logging.getLogger(__name__)
 
 
-PLATFORM_BUILD_INFO_PATH = 'platform_build_info.yaml'
+BUILD_INFO_STASH_NAME_FORMAT = 'build-info-{}-{}'  # customization, platform
+BUILD_INFO_FILE_NAME_FORMAT = 'build_info_{}_{}.yaml'  # customization, platform
+
+
+class PlatformBuildInfo(namedtuple(
+    'PlatformBuildInfo', [
+        'customization',
+        'platform',
+        'is_succeeded',
+        'current_config_path',
+        'unit_tests_bin_dir',
+        'artifacts_dir',
+        'typed_artifact_list',  # artifact type (str: distributive, update) -> file list (str list)
+        ])):
+
+    @classmethod
+    def from_build_info(cls, customization, platform, build_info, typed_artifact_list):
+        return cls(
+            customization=customization,
+            platform=platform,
+            is_succeeded=build_info.is_succeeded,
+            current_config_path=build_info.current_config_path,
+            unit_tests_bin_dir=build_info.unit_tests_bin_dir,
+            artifacts_dir=build_info.artifacts_dir,
+            typed_artifact_list=typed_artifact_list,
+            )
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            customization=data['customization'],
+            platform=data['platform'],
+            is_succeeded=data['is_succeeded'],
+            current_config_path=data['current_config_path'],
+            unit_tests_bin_dir=data['unit_tests_bin_dir'],
+            artifacts_dir=data['artifacts_dir'],
+            typed_artifact_list=data['typed_artifact_list'],
+            )
+
+    @accepts(
+        object,
+        customization=basestring,
+        platform=basestring,
+        is_succeeded=bool,
+        current_config_path=basestring,
+        unit_tests_bin_dir=basestring,
+        artifacts_dir=basestring,
+        typed_artifact_list=dict_inst(basestring, list_inst(basestring))
+        )
+    def __init__(self, customization, platform, is_succeeded, current_config_path, unit_tests_bin_dir, artifacts_dir, typed_artifact_list):
+        super(PlatformBuildInfo, self).__init__(
+            customization=customization,
+            platform=platform,
+            is_succeeded=is_succeeded,
+            current_config_path=current_config_path,
+            unit_tests_bin_dir=unit_tests_bin_dir,
+            artifacts_dir=artifacts_dir,
+            typed_artifact_list=typed_artifact_list,
+            )
+
+    def to_dict(self):
+        return dict(self._asdict())
+
+    def report(self):
+        log.debug('Platform Build Info:')
+        for line in pprint.pformat(self.to_dict()).splitlines():
+            log.debug('\t%s' % line.rstrip())
 
 
 # build and run tests on single node for single customization/platofrm
@@ -52,20 +119,19 @@ class BuildNodeJob(object):
 
     def run(self, do_build, clean_build, build_tests, run_unit_tests, unit_tests_timeout):
         if do_build:
-            build_info = self._build(clean_build, build_tests)
+            platform_build_info, run_id = self._build(clean_build, build_tests)
         else:
-            build_info = self._load_platform_build_info()
+            platform_build_info = self._load_platform_build_info()
+            run_id = None  # do not save errors artifact if there were no build
             log.info('Build is skipped')
-            log.debug('Build Info:')
-            for line in pprint.pformat(dict(build_info._asdict())).splitlines():
-                log.debug('\t%s' % line.rstrip())
-        if build_info.is_succeeded and run_unit_tests:
-            self._run_unit_tests(build_info, unit_tests_timeout)
-        if not build_info.is_succeeded:
+            platform_build_info.report()
+        if platform_build_info.is_succeeded and run_unit_tests:
+            self._run_unit_tests(platform_build_info, unit_tests_timeout)
+        self._save_errors_artifact(run_id)
+        if platform_build_info.is_succeeded:
+            return list(self._make_stash_command_list(platform_build_info))
+        else:
             return None
-        command_list = self._make_post_build_actions(build_info)
-        self._save_errors_artifact(build_info)
-        return command_list
 
     @property
     def _customization(self):
@@ -75,6 +141,10 @@ class BuildNodeJob(object):
     def _platform(self):
         return self._repository.build_parameters.platform
 
+    @property
+    def _platform_build_info_path(self):
+        return BUILD_INFO_FILE_NAME_FORMAT.format(self._customization, self._platform)
+
     def _build(self, clean_build, build_tests):
         log.info('Executor number: %s', self._executor_number)
         cmake = CMake(self._cmake_version)
@@ -82,13 +152,19 @@ class BuildNodeJob(object):
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
         build_info = builder.build('nx_vms', 'build', self._webadmin_external_dir, build_tests, clean_build)
-        with open(PLATFORM_BUILD_INFO_PATH, 'w') as f:
-            yaml.dump(dict(build_info._asdict()), f, default_flow_style=False)
-        return build_info
+        typed_artifact_list = self._make_artifact_list(build_info)
+        platform_build_info = PlatformBuildInfo.from_build_info(
+            self._customization, self._platform, build_info, typed_artifact_list)
+        self._save_platform_build_info(platform_build_info)
+        return (platform_build_info, build_info.run_id)
 
     def _load_platform_build_info(self):
-        with open(PLATFORM_BUILD_INFO_PATH) as f:
-            return BuildInfo.from_dict(yaml.load(f))
+        with open(self._platform_build_info_path) as f:
+            return PlatformBuildInfo.from_dict(yaml.load(f))
+
+    def _save_platform_build_info(self, platform_build_info):
+        with open(self._platform_build_info_path, 'w') as f:
+            yaml.dump(platform_build_info.to_dict(), f, default_flow_style=False)
 
     def _run_unit_tests(self, build_info, timeout):
         if self._is_unix:
@@ -109,44 +185,44 @@ class BuildNodeJob(object):
             self._repository, build_info.current_config_path, unit_tests_dir, bin_dir, test_binary_list, timeout)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
-    def _make_post_build_actions(self, build_info):
-        return (
-            self._make_stash_command_list(
-                'dist-%s-%s-distributive' % (self._customization, self._platform),
-                build_info.artifacts_dir, self._platform_config.distributive_mask_list,
-                exclude_list=self._platform_config.update_mask_list) +
-            self._make_stash_command_list(
-                'dist-%s-%s-update' % (self._customization, self._platform),
-                build_info.artifacts_dir, self._platform_config.update_mask_list)
-            )
+    def _make_stash_command_list(self, platform_build_info):
+        platform_build_info_stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(self._customization, self._platform)
+        yield StashCommand(platform_build_info_stash_name, [self._platform_build_info_path])
+        for t, artifact_list in platform_build_info.typed_artifact_list.items():
+            stash_name = 'dist-%s-%s-%s' % (self._customization, self._platform, t)
+            yield StashCommand(stash_name, artifact_list, platform_build_info.artifacts_dir)
 
-    def _make_stash_command_list(self, stash_name, artifacts_dir, artifact_mask_list, exclude_list=None):
-        artifact_list = list(self._list_artifacts(artifacts_dir, artifact_mask_list, exclude_list))
-        if not artifact_list:
-            error = 'No artifacts were produced matching masks: {}'.format(', '.join(artifact_mask_list))
-            self._add_error(error)
-            return []
-        return [StashCommand(stash_name, artifact_list, artifacts_dir)]
+    def _make_artifact_list(self, build_info):
+        dir = build_info.artifacts_dir
+        config = self._platform_config
+        return dict(
+            distributive=self._list_artifacts(dir, config.distributive_mask_list, exclude_list=config.update_mask_list),
+            update=self._list_artifacts(dir, config.update_mask_list),
+            )
 
     def _list_artifacts(self, artifacts_dir, include_list, exclude_list=None):
         if exclude_list:
             exclude_set = set(self._list_artifacts(artifacts_dir, exclude_list))
         else:
             exclude_set = set()
+        artifact_list = []
         for mask in include_list:
             for path in glob.glob(os.path.join(artifacts_dir, mask)):
                 relative_path = os.path.relpath(path, artifacts_dir)
                 if relative_path not in exclude_set:
-                    yield relative_path
+                    artifact_list.append(relative_path)
+        if not artifact_list:
+            self._add_error('No artifacts were produced matching masks: {}'.format(', '.join(include_list)))
+        return artifact_list
 
     def _add_error(self, error):
         log.error(error)
         self._error_list.append(error)
 
     @db_session
-    def _save_errors_artifact(self, build_info):
-        if not self._error_list:
+    def _save_errors_artifact(self, run_id):
+        if not run_id or not self._error_list:
             return
-        run = models.Run[build_info.run_id]
+        run = models.Run[run_id]
         self._repository.add_artifact(
             run, 'errors', 'errors', self._repository.artifact_type.output, '\n'.join(self._error_list), is_error=True)

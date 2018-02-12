@@ -32,7 +32,7 @@ from command import (
 from clean_stamps import CleanStamps
 from diff_parser import load_hg_changes
 from email_sender import EmailSender
-from build_node_job import BuildNodeJob
+from build_node_job import BUILD_INFO_STASH_NAME_FORMAT, BUILD_INFO_FILE_NAME_FORMAT, BuildNodeJob
 from webadmin import WEBADMIN_STASH_NAME, BuildWebAdminJob
 
 log = logging.getLogger(__name__)
@@ -180,6 +180,7 @@ class BuildProject(NxVmsProject):
                         for customization in self.requested_customization_list]
         return [
             ParallelCommand(job_list),
+            ] + list(self._unstash_platform_build_info_command_list) + [
             self.make_python_stage_command('finalize'),
             ]
 
@@ -240,6 +241,13 @@ class BuildProject(NxVmsProject):
         else:
             suffix = self.project_id
         return '{}-{}'.format(platform_config.build_node, suffix)
+
+    @property
+    def _unstash_platform_build_info_command_list(self):
+        for customization in self.requested_customization_list:
+            for platform in self.requested_platform_list:
+                stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(customization, platform)
+                yield UnstashCommand(stash_name, ignore_missing=True)
 
     # create unique workspace dir name for parallel job used for building and running unit tests
     def _make_build_workspace_name(self, customization, platform):
@@ -325,7 +333,23 @@ class BuildProject(NxVmsProject):
     # finalize =====================================================================================
     def stage_finalize(self):
         self.db_config.bind(models.db)
+        platform_build_info_map = dict(self._load_platform_build_info_map())  # (customization, name) -> platform build info
+        build_info = self._load_build_info_and_send_email()
+        ensure_dir_missing('dist')
+        return self.make_final_processing_command_list(build_info)
 
+    def _load_platform_build_info_map(self):
+        for customization in self.requested_customization_list:
+            for platform in self.requested_platform_list:
+                file_name = BUILD_INFO_FILE_NAME_FORMAT.format(customization, platform)
+                with open(file_name) as f:
+                    yield ((customization, platform), yaml.load(f))
+
+    @abc.abstractmethod
+    def send_result_email(self, sender, smtp_password, project, branch, build_num):
+        pass
+
+    def _load_build_info_and_send_email(self):
         sender = EmailSender(self.config)
         nx_vms_scm_info = self.scm_info['nx_vms']
         build_info = self.send_result_email(
@@ -335,19 +359,13 @@ class BuildProject(NxVmsProject):
             branch=nx_vms_scm_info.branch,
             build_num=self.jenkins_env.build_number,
             )
-
-        ensure_dir_missing('dist')
-        return self.make_final_processing_command_list(build_info)
-
-    @abc.abstractmethod
-    def send_result_email(self, sender, smtp_password, project, branch, build_num):
-        pass
+        return build_info
 
     def make_final_processing_command_list(self, build_info):
-        return (self._make_artifact_artchiving_command_list(build_info) +
+        return (self._make_artifact_archiving_command_list(build_info) +
                 self._make_set_build_result_command_list(build_info))
 
-    def _make_artifact_artchiving_command_list(self, build_info):
+    def _make_artifact_archiving_command_list(self, build_info):
         unstash_command_list = []
         for customization in self.requested_customization_list:
             for platform in self.requested_platform_list:
