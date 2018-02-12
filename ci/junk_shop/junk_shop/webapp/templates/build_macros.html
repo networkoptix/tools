@@ -57,7 +57,7 @@
           {% endif %}
           <div class="build-errors">
             {% for line in platform.build_error_list %}
-              {{- line|truncate -}} <br/>
+              {{- line -}} <br/>
             {% endfor %}
           </div>
         </div>
