@@ -136,7 +136,7 @@ class Rdep:
 
         return command
 
-    def _load_timestamps_for_fast_check(self):
+    def load_timestamps_for_fast_check(self):
         self._timestamps = {}
         try:
             config = ConfigParser.ConfigParser()
@@ -165,7 +165,12 @@ class Rdep:
             ts = self._stored_timestamp(target, package)
             package_ts = PackageConfig(dst).get_timestamp()
 
-            if not ts is None and ts <= package_ts:
+            if package_ts is None and ts is None:
+                self._verbose_message(
+                    "Treat package {0}/{1} as not found due to fast check".format(target, package))
+                return self.SYNC_NOT_FOUND
+
+            if not package_ts is None and not ts is None and ts <= package_ts:
                 self._verbose_message(
                     "Skipping package {0}/{1} due to fast check".format(target, package))
                 return self.SYNC_SUCCESS
@@ -245,7 +250,7 @@ class Rdep:
 
     def sync_packages(self, packages):
         if self.fast_check:
-            self._load_timestamps_for_fast_check()
+            self.load_timestamps_for_fast_check()
 
         for package in packages:
             if not self.sync_package(package):
