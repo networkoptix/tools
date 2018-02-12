@@ -8,10 +8,13 @@ import subprocess
 import tempfile
 import posixpath
 import platform
+import ConfigParser
 
 from rdep_config import RdepConfig, RepositoryConfig, PackageConfig
 
 OS_IS_WINDOWS = sys.platform.startswith("win32") or sys.platform.startswith("cygwin")
+
+TIMESTAMPS_FILE = "timestamps.dat"
 
 # Workaround against rsync bug:
 # all paths with semicolon are counted as remote,
@@ -75,6 +78,7 @@ class Rdep:
         self.verbose = False
         self.targets = None
         self.force = False
+        self.fast_check = False
 
     def _verbose_message(self, message):
         if self.verbose:
@@ -132,10 +136,39 @@ class Rdep:
 
         return command
 
+    def _load_timestamps_for_fast_check(self):
+        self._timestamps = {}
+        try:
+            config = ConfigParser.ConfigParser()
+            config.read(os.path.join(self.root, TIMESTAMPS_FILE))
+
+            for package, timestamp in config.items('Timestamps'):
+                try:
+                    self._timestamps[package] = int(timestamp)
+                except:
+                    pass
+        except:
+            pass
+
+    def _stored_timestamp(self, target, package):
+        try:
+            return self._timestamps[posixpath.join(target, package)]
+        except:
+            return None
+
     def _try_sync(self, target, package):
         url = self._repo_config.get_url()
         src = posixpath.join(url, target, package)
         dst = os.path.join(self.root, target, package)
+
+        if self.fast_check:
+            ts = self._stored_timestamp(target, package)
+            package_ts = PackageConfig(dst).get_timestamp()
+
+            if not ts is None and ts <= package_ts:
+                self._verbose_message(
+                    "Skipping package {0}/{1} due to fast check".format(target, package))
+                return self.SYNC_SUCCESS
 
         self._verbose_message(
             "root {0}\nurl {1}\ntarget {2}\npackage {3}\nsrc {4}\ndst {5}"
@@ -211,6 +244,9 @@ class Rdep:
         return True
 
     def sync_packages(self, packages):
+        if self.fast_check:
+            self._load_timestamps_for_fast_check()
+
         for package in packages:
             if not self.sync_package(package):
                 return False
@@ -342,7 +378,7 @@ class Rdep:
 
     def sync_timestamps(self):
         url = self._repo_config.get_url()
-        url = posixpath.join(url, "timestamps.dat")
+        url = posixpath.join(url, TIMESTAMPS_FILE)
 
         command = [ self._config.get_rsync("rsync"), url, self.root ]
         self._verbose_rsync(command)
@@ -363,6 +399,11 @@ def main():
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
     parser.add_argument("--init", metavar="URL", help="Init repository in the current dir with the specified URL.")
     parser.add_argument("--sync-timestamps", help="Sync timestamps file.", action="store_true")
+    parser.add_argument(
+        "--fast-check",
+        action="store_true",
+        help="Use timestamps file to check if package is outdated.")
+
     parser.add_argument("packages", nargs='*',  help="Packages to sync.")
 
     args = parser.parse_args()
@@ -380,6 +421,7 @@ def main():
     rdep = Rdep(root)
     rdep.verbose = args.verbose
     rdep.force = args.force
+    rdep.fast_check = args.fast_check
 
     if args.sync_timestamps:
         return rdep.sync_timestamps()
