@@ -340,6 +340,18 @@ class Rdep:
             print >> sys.stderr, "Package {0} not found.".format(package)
         print path
 
+    def sync_timestamps(self):
+        url = self._repo_config.get_url()
+        url = posixpath.join(url, "timestamps.dat")
+
+        command = [ self._config.get_rsync("rsync"), url, self.root ]
+        self._verbose_rsync(command)
+        try:
+            output = subprocess.check_output(command)
+        except:
+            print "Could not sync timestamps file."
+            return False
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root",               help="Repository root.")
@@ -350,6 +362,7 @@ def main():
     parser.add_argument("-t", "--target",       help="Target.")
     parser.add_argument("--print-path",         help="Print package dir and exit.",         action="store_true")
     parser.add_argument("--init", metavar="URL", help="Init repository in the current dir with the specified URL.")
+    parser.add_argument("--sync-timestamps", help="Sync timestamps file.", action="store_true")
     parser.add_argument("packages", nargs='*',  help="Packages to sync.")
 
     args = parser.parse_args()
@@ -367,6 +380,10 @@ def main():
     rdep = Rdep(root)
     rdep.verbose = args.verbose
     rdep.force = args.force
+
+    if args.sync_timestamps:
+        return rdep.sync_timestamps()
+
     if args.target:
         rdep.targets = [ args.target ]
 
