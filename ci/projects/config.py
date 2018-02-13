@@ -114,21 +114,25 @@ class ServicesConfig(object):
             junk_shop_url=data['junk_shop_url'].rstrip('/'),
             jira_url=data['jira_url'],
             scm_browser_url_format=data['scm_browser_url_format'],
+            deployment_path=data['deployment_path'],
             )
 
-    def __init__(self, junk_shop_url, jira_url, scm_browser_url_format):
+    def __init__(self, junk_shop_url, jira_url, scm_browser_url_format, deployment_path):
         assert isinstance(junk_shop_url, basestring), repr(junk_shop_url)
         assert isinstance(jira_url, basestring), repr(jira_url)
         assert isinstance(scm_browser_url_format, basestring), repr(scm_browser_url_format)
+        assert isinstance(deployment_path, basestring), repr(deployment_path)
         self.junk_shop_url = junk_shop_url
         self.jira_url = jira_url
         self.scm_browser_url_format = scm_browser_url_format
+        self.deployment_path = deployment_path
 
     def to_dict(self):
         return dict(
             junk_shop_url=self.junk_shop_url,
             jira_url=self.jira_url,
             scm_browser_url_format=self.scm_browser_url_format,
+            deployment_path=self.deployment_path,
             )
 
     def report(self):
@@ -136,6 +140,7 @@ class ServicesConfig(object):
         log.info('\t\t' 'junk_shop_url: %r:', self.junk_shop_url)
         log.info('\t\t' 'jira_url: %r:', self.jira_url)
         log.info('\t\t' 'scm_browser_url_format: %r:', self.scm_browser_url_format)
+        log.info('\t\t' 'deployment_path: %r:', self.deployment_path)
 
 
 class EmailSmtpConfig(object):

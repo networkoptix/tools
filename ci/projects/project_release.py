@@ -7,6 +7,7 @@ from command import (
     ChoiceProjectParameter,
     MultiChoiceProjectParameter,
     )
+from deploy import deploy_artifacts
 
 log = logging.getLogger(__name__)
 
@@ -88,6 +89,19 @@ class ReleaseProject(BuildProject):
             MultiChoiceProjectParameter('customization_list', 'Customizations to build',
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
+
+    def deploy_artifacts(self, platform_build_info_map):
+        credentials = self.credentials.deploy
+        deploy_artifacts(
+            config=self.config,
+            artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
+            ssh_key_file=credentials.key_path,
+            build_num=self.jenkins_env.build_number,
+            branch=self.nx_vms_branch_name,
+            customization_list=self.requested_customization_list,
+            platform_list=self.requested_platform_list,
+            platform_build_info_map=platform_build_info_map,
+            )
 
     def send_result_email(self, sender, smtp_password, project, branch, build_num):
         build_info = sender.render_email(project, branch, build_num, test_mode=self.in_assist_mode)

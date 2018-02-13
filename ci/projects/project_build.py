@@ -32,7 +32,7 @@ from command import (
 from clean_stamps import CleanStamps
 from diff_parser import load_hg_changes
 from email_sender import EmailSender
-from build_node_job import BUILD_INFO_STASH_NAME_FORMAT, BUILD_INFO_FILE_NAME_FORMAT, BuildNodeJob
+from build_node_job import BUILD_INFO_STASH_NAME_FORMAT, BUILD_INFO_FILE_NAME_FORMAT, PlatformBuildInfo, BuildNodeJob
 from webadmin import WEBADMIN_STASH_NAME, BuildWebAdminJob
 
 log = logging.getLogger(__name__)
@@ -180,7 +180,8 @@ class BuildProject(NxVmsProject):
                         for customization in self.requested_customization_list]
         return [
             ParallelCommand(job_list),
-            ] + list(self._unstash_platform_build_info_command_list) + [
+            CleanDirCommand('dist'),
+            ] + list(self._unstash_results_command_list) + [
             self.make_python_stage_command('finalize'),
             ]
 
@@ -243,11 +244,17 @@ class BuildProject(NxVmsProject):
         return '{}-{}'.format(platform_config.build_node, suffix)
 
     @property
-    def _unstash_platform_build_info_command_list(self):
+    def _unstash_results_command_list(self):
         for customization in self.requested_customization_list:
             for platform in self.requested_platform_list:
                 stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(customization, platform)
-                yield UnstashCommand(stash_name, ignore_missing=True)
+                yield UnstashCommand(stash_name, ignore_missing=True)  # unstash platform build info
+                for t in ['distributive', 'update']:
+                    name = 'dist-%s-%s-%s' % (customization, platform, t)
+                    dir = 'dist'
+                    if self.must_store_artifacts_in_different_customization_dirs:
+                        dir = os.path.join(dir, customization)
+                    yield UnstashCommand(name, dir, ignore_missing=True)
 
     # create unique workspace dir name for parallel job used for building and running unit tests
     def _make_build_workspace_name(self, customization, platform):
@@ -334,8 +341,8 @@ class BuildProject(NxVmsProject):
     def stage_finalize(self):
         self.db_config.bind(models.db)
         platform_build_info_map = dict(self._load_platform_build_info_map())  # (customization, name) -> platform build info
+        self.deploy_artifacts(platform_build_info_map)
         build_info = self._load_build_info_and_send_email()
-        ensure_dir_missing('dist')
         return self.make_final_processing_command_list(build_info)
 
     def _load_platform_build_info_map(self):
@@ -343,7 +350,10 @@ class BuildProject(NxVmsProject):
             for platform in self.requested_platform_list:
                 file_name = BUILD_INFO_FILE_NAME_FORMAT.format(customization, platform)
                 with open(file_name) as f:
-                    yield ((customization, platform), yaml.load(f))
+                    yield ((customization, platform), PlatformBuildInfo.from_dict(yaml.load(f)))
+
+    def deploy_artifacts(self, platform_build_info_map):
+        pass
 
     @abc.abstractmethod
     def send_result_email(self, sender, smtp_password, project, branch, build_num):
@@ -366,17 +376,8 @@ class BuildProject(NxVmsProject):
                 self._make_set_build_result_command_list(build_info))
 
     def _make_artifact_archiving_command_list(self, build_info):
-        unstash_command_list = []
-        for customization in self.requested_customization_list:
-            for platform in self.requested_platform_list:
-                for suffix in ['distributive', 'update']:
-                    name = 'dist-%s-%s-%s' % (customization, platform, suffix)
-                    dir = 'dist'
-                    if self.must_store_artifacts_in_different_customization_dirs:
-                        dir = os.path.join(dir, customization)
-                    unstash_command_list.append(UnstashCommand(name, dir, ignore_missing=True))
         build_info_path = self._save_build_info_artifact()
-        return unstash_command_list + [
+        return [
             ArchiveArtifactsCommand([build_info_path]),
             ArchiveArtifactsCommand(['**'], 'dist'),
             ]

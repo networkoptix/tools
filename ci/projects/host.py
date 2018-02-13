@@ -345,6 +345,18 @@ class LocalHost(Host):
 
 class RemoteSshHost(Host):
 
+    @classmethod
+    def from_path(cls, name, path, key_file_path=None):
+        l = path.split(':')
+        userhost = l[0].split('@')
+        if len(userhost) > 1:
+            assert len(userhost) == 2, repr(path)
+            user, host = userhost
+        else:
+            host = userhost
+            user = None
+        return cls(name, host, user, key_file_path)
+
     def __init__(self, name, host, user, key_file_path=None, ssh_config_path=None, proxy_host=None):
         assert proxy_host is None or isinstance(proxy_host, Host), repr(proxy_host)
         self._proxy_host = proxy_host or LocalHost()
