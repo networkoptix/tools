@@ -129,10 +129,7 @@ class BuildNodeJob(object):
         if platform_build_info.is_succeeded and run_unit_tests:
             self._run_unit_tests(platform_build_info, unit_tests_timeout)
         self._save_errors_artifact(run_id)
-        if platform_build_info.is_succeeded:
-            return list(self._make_stash_command_list(platform_build_info))
-        else:
-            return None
+        return list(self._make_stash_command_list(platform_build_info))
 
     @property
     def _customization(self):
@@ -189,6 +186,8 @@ class BuildNodeJob(object):
     def _make_stash_command_list(self, platform_build_info):
         platform_build_info_stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(self._customization, self._platform)
         yield StashCommand(platform_build_info_stash_name, [self._platform_build_info_path])
+        if not platform_build_info.is_succeeded:
+            return
         for t, artifact_list in platform_build_info.typed_artifact_list.items():
             stash_name = 'dist-%s-%s-%s' % (self._customization, self._platform, t)
             yield StashCommand(stash_name, artifact_list, platform_build_info.artifacts_dir)
