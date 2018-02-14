@@ -7,7 +7,7 @@ from command import (
     ChoiceProjectParameter,
     MultiChoiceProjectParameter,
     )
-from deploy import deploy_artifacts
+from deploy import Deployer
 
 log = logging.getLogger(__name__)
 
@@ -91,13 +91,14 @@ class ReleaseProject(BuildProject):
             ]
 
     def deploy_artifacts(self, platform_build_info_map):
-        credentials = self.credentials.deploy
-        deploy_artifacts(
+        deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
-            ssh_key_file=credentials.key_path,
+            ssh_key_file=self.credentials.deploy.key_path,
             build_num=self.jenkins_env.build_number,
             branch=self.nx_vms_branch_name,
+            )
+        deployer.deploy_artifacts(
             customization_list=self.requested_customization_list,
             platform_list=self.requested_platform_list,
             platform_build_info_map=platform_build_info_map,

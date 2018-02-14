@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 
 BUILD_INFO_STASH_NAME_FORMAT = 'build-info-{}-{}'  # customization, platform
 BUILD_INFO_FILE_NAME_FORMAT = 'build_info_{}_{}.yaml'  # customization, platform
+QT_PDB_NAME = 'qt_pdb.zip'
 
 
 class PlatformBuildInfo(namedtuple(
@@ -37,7 +38,7 @@ class PlatformBuildInfo(namedtuple(
         'current_config_path',
         'unit_tests_bin_dir',
         'artifacts_dir',
-        'typed_artifact_list',  # artifact type (str: distributive, update) -> file list (str list)
+        'typed_artifact_list',  # artifact type (str: distributive, update, qtpdb, misc) -> file list (str list)
         ])):
 
     @classmethod
@@ -196,8 +197,14 @@ class BuildNodeJob(object):
         dir = build_info.artifacts_dir
         config = self._platform_config
         return dict(
-            distributive=self._list_artifacts(dir, config.distributive_mask_list, exclude_list=config.update_mask_list),
-            update=self._list_artifacts(dir, config.update_mask_list),
+            distributive=self._list_artifacts(
+                dir, config.distributive_mask_list, exclude_list=config.update_mask_list + [QT_PDB_NAME]),
+            update=self._list_artifacts(
+                dir, config.update_mask_list, exclude_list=[QT_PDB_NAME]),
+            qtpdb=self._list_artifacts(
+                dir, [QT_PDB_NAME]),
+            misc=self._list_artifacts(
+                dir, '*', exclude_list=config.distributive_mask_list + config.update_mask_list + [QT_PDB_NAME]),
             )
 
     def _list_artifacts(self, artifacts_dir, include_list, exclude_list=None):

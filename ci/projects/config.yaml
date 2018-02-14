@@ -97,7 +97,7 @@ platforms:
     distributive_mask_list:
       - '*.deb'
     update_mask_list:
-      - '*.zip'
+      - '*_update-*.zip'
   linux-x86:
     build_node: linux
     should_run_unit_tests: no
@@ -105,29 +105,27 @@ platforms:
     distributive_mask_list:
       - '*.deb'
     update_mask_list:
-      - '*.zip'
+      - '*_update-*.zip'
   win-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:
-      - '*.msi'
+      - '*-servertool-*.msi'
       - '*.exe'
-      - '*.pdb'
     update_mask_list:
-      - '*.zip'
+      - '*_update-*.zip'
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:
-      - '*.msi'
+      - '*-servertool-*.msi'
       - '*.exe'
-      - '*.pdb'
     update_mask_list:
-      - '*.zip'
+      - '*_update-*.zip'
   mac:
     build_node: mac
     should_run_unit_tests: yes
@@ -135,7 +133,7 @@ platforms:
     distributive_mask_list:
       - '*.dmg'
     update_mask_list:
-      - '*.zip'
+      - '*_update-*.zip'
   bananapi:
     build_node: linux
     should_run_unit_tests: no
@@ -143,7 +141,7 @@ platforms:
     distributive_mask_list:
       - '*.zip'
     update_mask_list:
-      - '*update-*.zip'
+      - '*_update-*.zip'
   bpi:
     build_node: linux
     should_run_unit_tests: no
@@ -151,7 +149,7 @@ platforms:
     distributive_mask_list:
       - '*.zip'
     update_mask_list:
-      - '*update-*.zip'
+      - '*_update-*.zip'
   rpi:
     build_node: linux
     should_run_unit_tests: no
@@ -159,7 +157,7 @@ platforms:
     distributive_mask_list:
       - '*.zip'
     update_mask_list:
-      - '*update-*.zip'
+      - '*_update-*.zip'
   edge1:
     build_node: linux
     should_run_unit_tests: no
@@ -167,7 +165,7 @@ platforms:
     distributive_mask_list:
       - '*.zip'
     update_mask_list:
-      - '*update-*.zip'
+      - '*_update-*.zip'
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher

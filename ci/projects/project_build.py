@@ -166,24 +166,10 @@ class BuildProject(NxVmsProject):
         self.clean_stamps.init_master(self.params)
         self._init_build_info()
 
-        workspace_dir = self._make_workspace_name('webadmin')
-        job_command_list = self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
-            PrepareVirtualEnvCommand(self.devtools_python_requirements),
-            self.make_python_stage_command('build_webadmin'),
-            ]
-        return ([NodeCommand(WEBADMIN_NODE, workspace_dir, job_command_list)] +
-                 self._make_platform_build_command_list())
-
-    def _make_platform_build_command_list(self):
-        job_list = [self._make_parallel_job(customization, platform)
-                        for platform in self.requested_platform_list
-                        for customization in self.requested_customization_list]
         return [
-            ParallelCommand(job_list),
-            CleanDirCommand('dist'),
-            ] + list(self._unstash_results_command_list) + [
-            self.make_python_stage_command('finalize'),
-            ]
+            self._make_webadmin_build_command(),
+            self._make_platform_build_command(),
+            ] + self._make_finalize_command_list()
 
     # create models.Build and create models.BuildChangeSet records for it
     def _init_build_info(self):
@@ -213,6 +199,29 @@ class BuildProject(NxVmsProject):
             repository_url=nx_vms_scm_info.repository_url,
             revision=nx_vms_scm_info.revision,
             )
+
+    def _make_webadmin_build_command(self):
+        workspace_dir = self._make_workspace_name('webadmin')
+        job_command_list = self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
+            PrepareVirtualEnvCommand(self.devtools_python_requirements),
+            self.make_python_stage_command('build_webadmin'),
+            ]
+        return NodeCommand(WEBADMIN_NODE, workspace_dir, job_command_list)
+
+    def _make_platform_build_command(self):
+        job_list = [self._make_parallel_job(customization, platform)
+                        for platform in self.requested_platform_list
+                        for customization in self.requested_customization_list]
+        return ParallelCommand(job_list)
+
+    def _make_finalize_command_list(self):
+        if self.params.clean_only:
+            return []
+        return [
+            CleanDirCommand('dist'),
+            ] + list(self._unstash_results_command_list) + [
+            self.make_python_stage_command('finalize'),
+            ]
 
     def _make_parallel_job(self, customization, platform):
         platform_config = self.config.platforms[platform]
@@ -249,7 +258,7 @@ class BuildProject(NxVmsProject):
             for platform in self.requested_platform_list:
                 stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(customization, platform)
                 yield UnstashCommand(stash_name, ignore_missing=True)  # unstash platform build info
-                for t in ['distributive', 'update']:
+                for t in ['distributive', 'update', 'qtpdb']:
                     name = 'dist-%s-%s-%s' % (customization, platform, t)
                     dir = 'dist'
                     if self.must_store_artifacts_in_different_customization_dirs:
