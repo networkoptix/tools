@@ -44,6 +44,7 @@ def get_package_timestamp(package_dir: str):
 
 def dump_timestamps(root_dir: str, timestamps_file: str):
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.add_section('Timestamps')
     for package in get_packages(root_dir):
         ts = get_package_timestamp(os.path.join(root_dir, package))
