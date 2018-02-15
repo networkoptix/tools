@@ -90,7 +90,7 @@ class ReleaseProject(BuildProject):
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
 
-    def deploy_artifacts(self, platform_build_info_map):
+    def deploy_artifacts(self, build_info_path, platform_build_info_map):
         deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
@@ -101,13 +101,9 @@ class ReleaseProject(BuildProject):
         deployer.deploy_artifacts(
             customization_list=self.requested_customization_list,
             platform_list=self.requested_platform_list,
+            build_info_path=build_info_path,
             platform_build_info_map=platform_build_info_map,
             )
 
-    def send_result_email(self, sender, smtp_password, project, branch, build_num):
-        build_info = sender.render_email(project, branch, build_num, test_mode=self.in_assist_mode)
-        build_user = self.jenkins_env.build_user
-        if build_user:
-            recipient_list = ['{} <{}>'.format(build_user.full_name, build_user.email)]
-            sender.send_email(smtp_password, build_info.subject_and_html, recipient_list)
-        return build_info
+    def make_email_recipient_list(self, build_info):
+        return self.build_user_email_list

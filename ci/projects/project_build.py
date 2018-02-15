@@ -6,12 +6,15 @@ import abc
 import re
 import yaml
 
+from pony.orm import db_session
+
 from junk_shop import (
     models,
     DbConfig,
     BuildParameters,
     DbCaptureRepository,
     update_build_info,
+    BuildInfoLoader,
 )
 from utils import ensure_dir_missing
 from project_nx_vms import BUILD_INFO_FILE, NxVmsProject
@@ -350,9 +353,37 @@ class BuildProject(NxVmsProject):
     def stage_finalize(self):
         self.db_config.bind(models.db)
         platform_build_info_map = dict(self._load_platform_build_info_map())  # (customization, name) -> platform build info
-        self.deploy_artifacts(platform_build_info_map)
-        build_info = self._load_build_info_and_send_email()
-        return self.make_final_processing_command_list(build_info)
+        email_sender = EmailSender(self.config)
+        with db_session:
+            build_info = self._load_build_info()
+            build_info_path = self._save_build_info_artifact(build_info)
+            email_recipient_list = self.make_email_recipient_list(build_info)
+            subject_and_html = email_sender.render_email(build_info, email_recipient_list, test_mode=self.in_assist_mode)
+            command_list = (
+                self._make_artifact_archiving_command_list(build_info_path) +
+                self.make_postprocess_command_list(build_info.failed_build_platform_list) +
+                self._make_set_build_result_command_list(build_info))
+        self.deploy_artifacts(build_info_path, platform_build_info_map)
+        email_sender.send_email(self.credentials.service_email, subject_and_html, email_recipient_list)
+        return command_list
+
+    def deploy_artifacts(self, build_info_path, platform_build_info_map):
+        pass
+
+    @abc.abstractmethod
+    def make_email_recipient_list(self, build_info):
+        pass
+
+    def make_postprocess_command_list(self, failed_build_platform_list):
+        return []
+
+    @property
+    def build_user_email_list(self):
+        build_user = self.jenkins_env.build_user
+        if build_user:
+            return ['{} <{}>'.format(build_user.full_name, build_user.email)]
+        else:
+            return []
 
     def _load_platform_build_info_map(self):
         for customization in self.requested_customization_list:
@@ -361,38 +392,17 @@ class BuildProject(NxVmsProject):
                 with open(file_name) as f:
                     yield ((customization, platform), PlatformBuildInfo.from_dict(yaml.load(f)))
 
-    def deploy_artifacts(self, platform_build_info_map):
-        pass
-
-    @abc.abstractmethod
-    def send_result_email(self, sender, smtp_password, project, branch, build_num):
-        pass
-
-    def _load_build_info_and_send_email(self):
-        sender = EmailSender(self.config)
+    def _load_build_info(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
-        build_info = self.send_result_email(
-            sender,
-            smtp_password=self.credentials.service_email,
-            project=self.project_name,
-            branch=nx_vms_scm_info.branch,
+        loader = BuildInfoLoader.from_project_branch_num(
+            project_name=self.project_name,
+            branch_name=nx_vms_scm_info.branch,
             build_num=self.jenkins_env.build_number,
             )
-        return build_info
-
-    def make_final_processing_command_list(self, build_info):
-        return (self._make_artifact_archiving_command_list(build_info) +
-                self._make_set_build_result_command_list(build_info))
-
-    def _make_artifact_archiving_command_list(self, build_info):
-        build_info_path = self._save_build_info_artifact()
-        return [
-            ArchiveArtifactsCommand([build_info_path]),
-            ArchiveArtifactsCommand(['**'], 'dist'),
-            ]
+        return loader.load_build_platform_list()
 
     # build_info file left along with artifacts
-    def _save_build_info_artifact(self):
+    def _save_build_info_artifact(self, build_info):
         build_info = dict(
             project=self.project_name,
             branch=self.nx_vms_branch_name,
@@ -400,11 +410,19 @@ class BuildProject(NxVmsProject):
             platform_list=self.requested_platform_list,
             customization_list=self.requested_customization_list,
             cloud_group=self.cloud_group,
+            failed_build_platform_list=map(str, build_info.failed_build_platform_list),  # avoid !!python/unicode in yaml
+            failed_tests_platform_list=map(str, build_info.failed_tests_platform_list),
             )
         path = BUILD_INFO_FILE
         with open(path, 'w') as f:
             yaml.dump(build_info, f)
         return path
+
+    def _make_artifact_archiving_command_list(self, build_info_path):
+        return [
+            ArchiveArtifactsCommand([build_info_path]),
+            ArchiveArtifactsCommand(['**'], 'dist'),
+            ]
 
     def _make_set_build_result_command_list(self, build_info):
         if build_info.has_failed_builds:

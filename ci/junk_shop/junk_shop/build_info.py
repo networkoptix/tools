@@ -102,7 +102,7 @@ class Platform(object):
         return self.build_run.outcome == 'passed'
 
 
-BuildInfo = namedtuple('BuildInfo', [
+class BuildInfo(namedtuple('BuildInfo', [
     'build',
     'started_at',
     'changeset_list',
@@ -110,7 +110,21 @@ BuildInfo = namedtuple('BuildInfo', [
     'failed_build_platform_list',
     'failed_tests_platform_list',
     'failed_test_list',
-    ])
+    ])):
+
+    @property
+    def has_failed_builds(self):
+        return bool(self.failed_build_platform_list)
+
+    @property
+    def has_failed_tests(self):
+        bool(self.failed_tests_platform_list)
+
+    @property
+    def changeset_email_list(self):
+        return set('{} <{}>'.format(changeset.user, changeset.email)
+                       for changeset in self.changeset_list)
+
 
 PlatformBuildInfo = namedtuple('PlatformBuildInfo', [
     'build',

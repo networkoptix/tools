@@ -7,6 +7,7 @@ from command import (
     BooleanProjectParameter,
     BuildJobCommand,
     )
+from test_watcher_selector import make_email_recipient_list
 
 log = logging.getLogger(__name__)
 
@@ -63,13 +64,19 @@ class CiProject(BuildProject):
             for platform in self.all_platform_list
             ]
 
-    def send_result_email(self, sender, smtp_password, project, branch, build_num):
-        build_info = sender.render_and_send_email(smtp_password, project, branch, build_num, test_mode=self.in_assist_mode)
-        return build_info
+    def make_email_recipient_list(self, build_info):
+        if self.in_assist_mode:
+            return self.build_user_email_list
+        if not build_info.has_failed_builds and build_info.has_failed_tests:
+            return make_email_recipient_list(self.config.tests_watchers, build_info)
+        return build_info.changeset_email_list
 
-    def make_final_processing_command_list(self, build_info):
-        return (BuildProject.make_final_processing_command_list(self, build_info) +
-                [self._make_funtest_job_command()])
+    def make_postprocess_command_list(self, failed_build_platform_list):
+        # do we have any platform to test which is built?
+        if set(self.config.fun_tests.platforms) - set(failed_build_platform_list):
+            return [self._make_funtest_job_command()]
+        else:
+            return []
     
     def _make_funtest_job_command(self):
         return BuildJobCommand(
