@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import argparse
 import configparser
-import subprocess
-import shutil
+import getpass
+import os
 import re
+import shutil
+import subprocess
+import sys
 
 class SysrootConfig:
     def __init__(self):
-        self.sysroot_dir = None
+        self.arch_prefix = None
+        self.auto_install = False
         self.force_remove = False
         self.packages = []
-        self.arch_prefix = None
+        self.recursive_symlinks = False
+        self.sysroot_dir = None
+        self.verbose = False
 
 def read_config(config_file: str):
     parser = configparser.ConfigParser()
@@ -29,12 +33,13 @@ def read_config(config_file: str):
 
     try:
         config.arch_prefix = parser["Sysroot"]["arch_prefix"]
+        config.recursive_symlinks = parser["Sysroot"]["recursive_symlinks"]
     except KeyError:
         pass
 
     return config
 
-def check_packages(packages: list):
+def check_packages(packages: list, auto_install: bool):
     print("Checking packages...")
 
     p = subprocess.Popen(["dpkg-query", "-Wf=${package} "], stdout=subprocess.PIPE)
@@ -55,9 +60,17 @@ def check_packages(packages: list):
 
     if missing_packages:
         print("Some packages are not installed in the system.")
-        print("Please install them using the following command:")
-        print("apt install " + " ".join(missing_packages))
-        sys.exit(1)
+        command = "apt-get install " + " ".join(missing_packages)
+        if getpass.getuser() != 'root':
+            command = 'sudo ' + command
+        if auto_install:
+            if os.system(command) != 0:
+                sys.exit("Unable to install required packages.")
+            else:
+                check_packages(packages, auto_install=False)
+        else:
+            print("Please install them using the following command:\n  " + command)
+            sys.exit(1)
 
 def get_package_files_list(package: str):
     p = subprocess.Popen(["dpkg-query", "-L", package], stdout=subprocess.PIPE)
@@ -65,16 +78,17 @@ def get_package_files_list(package: str):
     if result[1]:
         sys.exit("Cannot list files for package {}.".format(package))
     
-    return result[0].decode("utf-8").split(sep='\n')
+    return result[0].decode("utf-8").split('\n') 
 
-def copy_file(src: str, dst: str):
+def copy_file(src: str, dst: str, verbose: bool):
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     try:
         shutil.copyfile(src, dst)
-    except:
+        if verbose: print("  copy {} -> {}".format(src, dst))
+    except (IOError, OSError):
         sys.exit("Cannot copy {} to {}".format(src, dst))
 
-def create_symlinks(lib_path: str, additional_symlink: str = ""):
+def create_symlinks(lib_path: str, additional_symlink: str = "", verbose: bool = False):
     path, base_name = os.path.split(lib_path)
 
     splitted = base_name.split(".so.")
@@ -87,16 +101,20 @@ def create_symlinks(lib_path: str, additional_symlink: str = ""):
     short_name = os.path.join(path, splitted[0] + ".so")
     if os.path.isfile(short_name):
         os.remove(short_name)
+    if verbose: 
+        print("  link {} -> {}".format(short_name, base_name))
     os.symlink(base_name, short_name)
     if additional_symlink == short_name:
         additional_symlink = ""
 
     version_suffix = splitted[1]
-    splitted = version_suffix.split(".", maxsplit=1)
+    splitted = version_suffix.split(".", 1)
     if len(splitted) == 2:
         medium_name = short_name + "." + splitted[0]
         if os.path.isfile(medium_name):
             os.remove(medium_name)
+        if verbose: 
+            print("  link {} -> {}".format(medium_name, base_name))
         os.symlink(base_name, medium_name)
         if additional_symlink == medium_name:
             additional_symlink = ""
@@ -104,9 +122,11 @@ def create_symlinks(lib_path: str, additional_symlink: str = ""):
     if additional_symlink:
         if os.path.isfile(additional_symlink):
             os.remove(additional_symlink)
+        if verbose: 
+            print("  link {} -> {}".format(additional_symlink, base_name))
         os.symlink(base_name, additional_symlink)
 
-def copy_library(src: str, dst: str):
+def copy_library(src: str, dst: str, config: SysrootConfig):
     if os.path.islink(src):
         lib = os.readlink(src)
         lib_path = lib
@@ -116,11 +136,20 @@ def copy_library(src: str, dst: str):
             print("{} points to inexistent file {}".format(src, lib))
             return
 
-        dst = os.path.join(os.path.dirname(dst), os.path.basename(lib))
-        copy_file(lib_path, dst)
-        create_symlinks(dst, additional_symlink=src)
+        real_dst = os.path.join(os.path.dirname(dst), os.path.basename(lib))
+        if config.recursive_symlinks:
+            copy_library(lib_path, real_dst, config)
+            if not os.path.islink(dst):
+                base_name = os.path.basename(real_dst)
+                if config.verbose:
+                    print("  link {} -> {}".format(dst, base_name))
+                os.symlink(base_name, dst)
+        else:
+            copy_file(lib_path, real_dst, config.verbose)
+        create_symlinks(real_dst, additional_symlink=src)
+
     elif os.path.isfile(src):
-        copy_file(src, dst)
+        copy_file(src, dst, config.verbose)
     else:
         print("{} is not a file".format(src))
 
@@ -133,10 +162,10 @@ def copy_files(package: str, config: SysrootConfig):
         if file.endswith(".h") or file.endswith(".hpp"):
             if file.startswith("/usr/share"):
                 continue
-            copy_file(file, config.sysroot_dir + file)
-        elif file.endswith(".so"):
-            if file.startswith("/usr/lib/"):
-                copy_library(file, config.sysroot_dir + file)
+            copy_file(file, config.sysroot_dir + file, config.verbose)
+        elif file.endswith(".so") or (config.recursive_symlinks and ".so." in file):
+            if file.startswith("/usr/lib/") or file.startswith("/lib/"):
+                copy_library(file, config.sysroot_dir + file, config)
             else:
                 print("Ignoring library in non-handled location: {}".format(file))
         elif file.endswith(".pc"):
@@ -148,16 +177,16 @@ def copy_files(package: str, config: SysrootConfig):
                 else:
                     dst = os.path.join(config.sysroot_dir, "usr/lib", config.arch_prefix, 
                         "pkgconfig", os.path.basename(file))
-                    copy_file(file, dst)
+                    copy_file(file, dst, config.verbose)
                 continue
 
-            copy_file(file, config.sysroot_dir + file)
+            copy_file(file, config.sysroot_dir + file, config.verbose)
 
 def make_sysroot(config: SysrootConfig):
     if not config.packages:
         sys.exit("No packages specified in the config.")
 
-    check_packages(config.packages)
+    check_packages(config.packages, config.auto_install)
 
     print("Copying files...")
 
@@ -213,15 +242,30 @@ def validate_pkg_config(config: SysrootConfig):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", type=str, required=True, help="Config file name.")
-    parser.add_argument("-o", "--output-dir", type=str, required=True, help="Output directory.")
+    parser.add_argument("-a", "--auto-install", action="store_true", 
+        help="Auto install missing packages.")
+    parser.add_argument("-c", "--config", type=str, required=True, 
+        help="Config file name.")
     parser.add_argument("-f", "--force-remove", action="store_true",
         help="Remove sysroot directory if it already exists.")
+    parser.add_argument("-o", "--output-dir", type=str, required=True, 
+        help="Output directory.")
+    parser.add_argument("-v", "--verbose", action="store_true",
+        help="Enable verbose output.")
+    
     args = parser.parse_args()
-
     config = read_config(args.config)
-    config.sysroot_dir = args.output_dir
+
+    config.auto_install = args.auto_install
     config.force_remove = args.force_remove
+    config.sysroot_dir = args.output_dir
+    config.verbose = args.verbose
+
+    if config.verbose:
+        print("Options:")
+        for option in vars(config).items():
+            print("  {}: {}".format(*option))
+
     make_sysroot(config)
     validate_pkg_config(config)
 
