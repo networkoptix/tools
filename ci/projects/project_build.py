@@ -209,7 +209,7 @@ class BuildProject(NxVmsProject):
             PrepareVirtualEnvCommand(self.devtools_python_requirements),
             self.make_python_stage_command('build_webadmin'),
             ]
-        return NodeCommand(WEBADMIN_NODE, workspace_dir, job_command_list)
+        return NodeCommand(self._get_node_label(WEBADMIN_NODE), workspace_dir, job_command_list)
 
     def _make_platform_build_command(self):
         job_list = [self._make_parallel_job(customization, platform)
@@ -228,7 +228,7 @@ class BuildProject(NxVmsProject):
 
     def _make_parallel_job(self, customization, platform):
         platform_config = self.config.platforms[platform]
-        node = self._get_build_node_label(platform_config)
+        node = self._get_node_label(platform_config.build_node)
         job_command_list = []
         if self.params.clean or self.params.clean_only:
             job_command_list += [
@@ -248,12 +248,12 @@ class BuildProject(NxVmsProject):
              self.make_python_stage_command('node', customization=customization, platform=platform, phase=phase),
              ]
 
-    def _get_build_node_label(self, platform_config):
+    def _get_node_label(self, base_label):
         if self.in_assist_mode:
             suffix = 'psa'
         else:
             suffix = self.project_id
-        return '{}-{}'.format(platform_config.build_node, suffix)
+        return '{}-{}'.format(base_label, suffix)
 
     @property
     def _unstash_results_command_list(self):
