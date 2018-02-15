@@ -8,7 +8,9 @@ Usage: [OPTION=VALUE ...] $0 [paterns ...]
 Options:
     D   = config directory to use, default $HOME/develop/mediaserveri\$SRC
     W   = service name on windows
+    L   = service name on linux
     S   = integer is for mediaserver id, "c" is for client
+    E   = search for existing log files
 END
 exit 0
 fi
@@ -21,6 +23,8 @@ if [ "$D" ]; then
 else
     if [ "$W" ]; then
         DIRECTORY="/c/Users/mux/AppData/Local/*/*$W*"
+    elif [ "$L" ]; then\
+        DIRECTORY=/opt/*$L*/mediaserver/var
     else
         SOURCE=${S:-*}
         if [ "$SOURCE" == c ]; then
@@ -42,5 +46,10 @@ while [ ! -z "$1" ]; do
     shift
 done
 
-set -x
-tail -F $DIRECTORY/log/log_file.log | grep $GREP_OPTIONS "$PATTERN"
+if [ "$E" ]; then
+    set -x
+    cat $DIRECTORY/log/log_file* | sort | grep $GREP_OPTIONS "$PATTERN"
+else
+    set -x
+    tail -F $DIRECTORY/log/log_file.log | grep $GREP_OPTIONS "$PATTERN"
+fi
