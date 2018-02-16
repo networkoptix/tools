@@ -1,0 +1,7 @@
+- name: Start guest
+  command: >
+    virsh start {{ inventory_hostname }}
+  args:
+    chdir: /var/cloud-init/{{ inventory_hostname }}/
+
+- include: "running_to_{{ guest_state }}.yml"

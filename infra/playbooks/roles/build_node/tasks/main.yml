@@ -1,0 +1,135 @@
+- name: Use amd64 architecture
+  lineinfile:
+    dest: /var/lib/dpkg/arch
+    line: amd64
+    create: yes
+
+# TODO Move i386 packages into separate file
+- name: Use i386 architecture
+  lineinfile:
+    dest: /var/lib/dpkg/arch
+    line: i386
+    create: yes
+  register: add_i386_architecture
+
+- name: Install all packeges
+  apt:
+    name: "{{ item }}"
+    update_cache: "{{ add_i386_architecture.changed }}"
+    state: present
+  with_items:
+  # Common
+  - software-properties-common
+  - python-software-properties
+  - bzip2
+  - unzip
+  - xz-utils
+  - wget
+  - less
+  - nano
+  - mc
+  - screen
+  # java requirements # todo: do we need them??
+  - ca-certificates-java
+  - libasound2
+  # python
+  - python-dev
+  - python-pip
+  - python-virtualenv
+  # Junk Shop requirements
+  - libpq-dev
+  - gdb
+  # Build System common
+  - rsync
+  - ninja-build
+  # Build packages start #??
+  # zlib
+  - zlib1g-dev
+  # openal
+  - libopenal-dev
+  # mesa
+  - mesa-common-dev
+  - libgl1-mesa-dev
+  - libglu1-mesa-dev
+  # ldap
+  - libldap2-dev
+  # xfixes
+  - libxfixes-dev
+  # x11 screen saver extension lib
+  - libxss-dev
+  # gstreamer
+  - libgstreamer0.10-0
+  - libgstreamer-plugins-base0.10-0
+  # xslt
+  - libxslt1.1
+  # installer
+  - zip
+  - fakeroot
+  # Build packages end
+  # x86 cross-compilers
+  - libc6:i386
+  - libncurses5:i386
+  - libstdc++6:i386
+  - lib32z1
+  # multilib, linux-x86 compiler on x86 platform
+  - gcc-multilib
+  - g++-multilib
+  # i386 gstreamer
+  - libgstreamer0.10-0:i386
+  - libgstreamer-plugins-base0.10-0:i386
+  # i386 x
+  - libxrender1:i386
+  - libxcomposite1:i386
+  # i386 other
+  - libglib2.0-dev:i386
+  - libopenal-dev:i386
+  - libglu1-mesa:i386
+  - libldap2-dev:i386
+  - libxss-dev:i386
+  - libxfixes-dev:i386
+  - libxslt1.1:i386
+  - libpng12-0:i386
+  # functional tests
+  - python-demjson
+  - python-opencv
+
+- name: Install Ubuntu Toolchain repository
+  apt_repository:
+    repo: ppa:ubuntu-toolchain-r/test
+    state: present
+  register: add_ubuntu_toolchain_repo
+
+- name: Install Ubuntu Toolchain packages
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items:
+  - gcc-7
+  - g++-7
+  - gcc-7-multilib
+  - g++-7-multilib
+
+- include_tasks: "{{ ansible_distribution_release }}_mercurial.yml"
+
+# TODO Move NodeJS packages into separate file
+- name: Install webadmin build requirements (npm, nodejs and Co)
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items:
+  - git
+  - npm
+  - ruby-compass
+  - python-yaml
+
+- name: Install N for NodeJS
+  npm:
+    name: n
+    global: yes
+
+- name: Install NodeJS
+  command: n stable
+  register: r
+  changed_when: "'installed' in r.stdout"

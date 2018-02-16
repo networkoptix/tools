@@ -1,0 +1,19 @@
+---
+- include_tasks: "{{ ansible_distribution | lower }}_install_libvirtd.yml"
+
+- name: Enable and start libvirtd service
+  service:
+    name: libvirtd
+    state: started
+    enabled: yes
+
+
+- name: Test libvirtd operational
+  shell: virt-host-validate
+  register: result
+  failed_when: >
+    'FAIL' in result.stdout | default("")
+  changed_when: false
+
+# TODO Add section with user permissions related to libvirt if needed
+# libvirt-related groups are: libvirt, kvm

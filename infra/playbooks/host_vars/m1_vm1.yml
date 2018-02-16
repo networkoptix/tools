@@ -1,0 +1,24 @@
+kvm_host: megatron-1
+guest_state: running
+
+guest_extra_disk_size_gb: "1000"
+guest_memory_kib: "104857600"  # 100 GiB
+guest_cpus: 36
+
+network:
+  bridge_source_dev: eno1
+  bridge_target_dev: macvtap0
+  bridge_model_type: rtl8139
+  bridge_alias_name: net1
+  bridge_address_slot: '03'
+
+interfaces:
+- name:             ens3
+  type:             static
+  # 10.0.0.101 - 10.0.0.150 /22
+  options:
+    address:        "{{ ansible_ssh_host }}"
+    netmask:        "{{ office_net_netmask }}"
+    gateway:        "{{ office_net_gateway }}"
+    dns-search:     "{{ office_net_dns_search }}"
+    dns-nameservers: "{{ office_net_dns_nameservers }}"

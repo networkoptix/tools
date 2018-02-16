@@ -1,0 +1,15 @@
+#cloud-config
+password: password
+chpasswd: { expire: False }
+ssh_pwauth: True
+ssh_authorized_keys:
+{% for key in ssh_authorized_keys %}
+- {{ key}}
+{% endfor %}
+
+users: {{ guest_initial_users | to_json }}
+ge_update: false
+package_upgrade: false
+locale: en_US.UTF-8
+
+packages: {{ guest_initial_packages | to_json }}

@@ -1,0 +1,20 @@
+---
+- name: "Install {{ ansible_distribution }} libvirt packages"
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - qemu-kvm
+  - libvirt0
+  - virt-manager
+  - bridge-utils
+  - libguestfs-tools
+  - lxc
+  - lxctl
+
+# Ansible expects this symlink in one of its modules.
+- name: "Fix missing /usr/bin/qemu-kvm link on {{ ansible_distribution }}"
+  file:
+    dest: /usr/bin/qemu-kvm
+    src: /usr/bin/qemu-system-x86_64
+    state: link

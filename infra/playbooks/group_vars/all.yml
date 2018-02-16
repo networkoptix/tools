@@ -1,0 +1,4 @@
+office_net_gateway: "10.0.2.103"
+office_net_netmask: "255.255.252.0"
+office_net_dns_search: "noptix.local"
+office_net_dns_nameservers: "10.0.2.103"

@@ -1,0 +1,35 @@
+- name: Setup libvirt on KVM hosts
+  hosts: kvm_host
+  become: true
+  become_method: sudo
+
+  roles:
+  - role: kvm_host
+
+- name: Create guest VMs
+  hosts: virtual
+  become: true
+  become_method: sudo
+  # We don't know status of guest, so if we try to gather facts (=connect),
+  # but this guest is not crated yet, we'll fail entire section.
+  # That's why don't collect facts here.
+  # All facts will be collected in kvm_guest.
+  gather_facts: no
+
+  roles:
+  - role: kvm_guest
+
+- name: Setup guest
+  hosts: build
+  become: true
+  become_method: sudo
+  gather_facts: yes
+
+  # We don't use secrets yet.
+  # Uncomment this line if you want to check 
+  # vars_files:
+  # - secrets.yml
+
+  roles:
+  - role: build_node
+  - role: jenkins_slave

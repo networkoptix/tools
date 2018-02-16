@@ -1,0 +1,71 @@
+- name: Download Base Image
+  get_url:
+    url: https://cloud-images.ubuntu.com/xenial/20180205/xenial-server-cloudimg-amd64-disk1.img
+    dest: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
+  when: guest_distribution == "Ubuntu" and guest_distribution_release == "xenial"
+
+# This is not needed since it looks like Ubuntu's .img is .qcow2 actually
+# - name: Convert Base Image
+#   when: guest_distribution == "Ubuntu" and guest_distribution_release == "xenial"
+
+- name: Clean cloud-init folder
+  file:
+    path: "/var/cloud-init/{{ inventory_hostname }}"
+    state: absent
+
+- name: Delete guest disk image
+  file:
+    path: /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
+    state: absent
+
+- name: Delete guest ci boot image
+  file:
+    path: /var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso
+    state: absent
+
+- name: Prepare guest disk image
+  copy:
+    src: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
+    dest: /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
+    remote_src: yes
+
+- name: Resize guest disk image
+  command: >
+    qemu-img resize /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
+    +{{ guest_extra_disk_size_gb }}GB
+
+- name: Create cloud-init folder
+  file:
+    path: "/var/cloud-init/{{ inventory_hostname }}"
+    state: directory
+
+- name: "Generate guest ci boot image: meta-data"
+  template:
+    src: meta-data.j2
+    dest: "/var/cloud-init/{{ inventory_hostname }}/meta-data"
+
+- name: "Generate guest ci boot image: user-data"
+  template:
+    src: user-data.j2
+    dest: "/var/cloud-init/{{ inventory_hostname }}/user-data"
+
+- name: "Generate guest ci boot image: gen ISO"
+  command: >
+    genisoimage -output /var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso
+    -volid cidata -joliet -r user-data meta-data
+  args:
+    chdir: "/var/cloud-init/{{ inventory_hostname }}/"
+
+- name: Render domain definition from template
+  template:
+    src: domain.xml.j2
+    # TODO find proper place for these files
+    dest: "/var/cloud-init/{{ inventory_hostname }}/domain.xml"
+
+- name: Define guest
+  command: >
+    virsh define domain.xml
+  args:
+    chdir: "/var/cloud-init/{{ inventory_hostname }}/"
+
+- include: "shut_off_to_{{ guest_state }}.yml"

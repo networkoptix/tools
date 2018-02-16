@@ -1,0 +1,72 @@
+# TODO complete jenkins setup (ubuntu user -> jenkins user)
+
+- name: "Add jenkins group {{ jenkins_group }}"
+  group:
+    name: "{{ jenkins_group }}"
+    state: present
+
+- name: "Add jenkins user {{ jenkins_user }}"
+  user:
+    name: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    home: "{{ jenkins_home }}"
+    createhome: yes
+    shell: /bin/bash
+
+
+- name: "Create .ssh in {{ jenkins_user }} home dir"
+  file:
+    path: "{{ jenkins_home }}/.ssh/"
+    state: directory
+
+- name: Configure pub keys
+  lineinfile:
+    path: "{{ jenkins_home }}/.ssh/authorized_keys"
+    line: "{{ item }}"
+    create: true
+  with_items: "{{ jenkins_authorized_keys }}"
+
+- name: Configure ssh private key
+  copy:
+    content: "{{ hg_readonly_key }}"
+    dest: "{{ jenkins_home }}/.ssh/hg.readonly_key"
+    mode: 0600
+
+- name: Configure HG connection for cloning from enk.me
+  copy:
+    dest: "{{ jenkins_home }}/.hgrc"
+    content: |
+      [ui]
+      ssh = ssh -i ~/.ssh/hg.readonly_key
+
+- name: Configure .rdeprc for publishing artifacts
+  copy:
+    dest: "{{ jenkins_home }}/.rdeprc"
+    content: |
+      [General]
+      name = Jenkins Builder
+
+- name: Ensure enk.me is a known host
+  lineinfile:
+    dest: "{{ jenkins_home }}/.ssh/known_hosts"
+    create: yes
+    state: present
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa enk.me') }}"
+
+- name: Set ownership for entire jenkins home directory
+  file:
+    path: "{{ jenkins_home }}"
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    recurse: true
+    state: directory
+
+# Uncomment me to check that this setup is correct
+# - name: Clone repo (initial clone is quite long)
+#   become: true
+#   become_user: ubuntu
+#   hg:
+#     # repo: ssh://hg@hdw.mx/nx_vms
+#     repo: ssh://hg@enk.me/nx_vms
+#     dest: /home/ubuntu/nx_vms
+#     revision: default
