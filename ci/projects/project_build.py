@@ -109,11 +109,6 @@ class BuildProject(NxVmsProject):
     def run_unit_tests_by_default(self):
         return True
 
-    # create unique name for parallel job used for building and running unit tests
-    @abc.abstractmethod
-    def make_build_job_name(self, customization, platform):
-        pass
-
     @property
     def project_name(self):
         if self.in_assist_mode:
@@ -212,9 +207,7 @@ class BuildProject(NxVmsProject):
         return NodeCommand(self._get_node_label(WEBADMIN_NODE), workspace_dir, job_command_list)
 
     def _make_platform_build_command(self):
-        job_list = [self._make_parallel_job(customization, platform)
-                        for platform in self.requested_platform_list
-                        for customization in self.requested_customization_list]
+        job_list = [self._make_parallel_job(platform) for platform in self.requested_platform_list]
         return ParallelCommand(job_list)
 
     def _make_finalize_command_list(self):
@@ -226,7 +219,7 @@ class BuildProject(NxVmsProject):
             self.make_python_stage_command('finalize'),
             ]
 
-    def _make_parallel_job(self, customization, platform):
+    def _make_parallel_job(self, platform):
         platform_config = self.config.platforms[platform]
         node = self._get_node_label(platform_config.build_node)
         job_command_list = []
@@ -235,17 +228,17 @@ class BuildProject(NxVmsProject):
                 CleanDirCommand(),
                 ]
         if not self.params.clean_only:
-            job_command_list += self._make_node_stage_command_list(customization, platform)
-        job_name = self.make_build_job_name(customization, platform)
-        workspace_dir = self._make_build_workspace_name(customization, platform)
+            job_command_list += self._make_node_stage_command_list(platform)
+        job_name = platform
+        workspace_dir = self._make_workspace_name(job_name)
         return ParallelJob(job_name, [NodeCommand(node, workspace_dir, job_command_list)])
 
-    def _make_node_stage_command_list(self, customization, platform, phase=1):
+    def _make_node_stage_command_list(self, platform, phase=1):
          return self.prepare_devtools_command_list + self.prepare_nx_vms_command_list + [
              CleanDirCommand(WEBADMIN_EXTERNAL_DIR),  # clean from previous builds
              UnstashCommand(WEBADMIN_STASH_NAME, dir=WEBADMIN_EXTERNAL_DIR),
              PrepareVirtualEnvCommand(self.devtools_python_requirements),
-             self.make_python_stage_command('node', customization=customization, platform=platform, phase=phase),
+             self.make_python_stage_command('node', platform=platform, phase=phase),
              ]
 
     def _get_node_label(self, base_label):
@@ -267,11 +260,6 @@ class BuildProject(NxVmsProject):
                     if self.must_store_artifacts_in_different_customization_dirs:
                         dir = os.path.join(dir, customization)
                     yield UnstashCommand(name, dir, ignore_missing=True)
-
-    # create unique workspace dir name for parallel job used for building and running unit tests
-    def _make_build_workspace_name(self, customization, platform):
-        job_name = self.make_build_job_name(customization, platform)
-        return self._make_workspace_name(job_name)
 
     def _make_workspace_name(self, job_name):
         workspace_name = '{}-{}-{}'.format(self.project_id, self.nx_vms_branch_name, job_name)
@@ -295,15 +283,31 @@ class BuildProject(NxVmsProject):
 
 
     # node =========================================================================================
-    def stage_node(self, customization, platform, phase=1):
-        log.info('Node stage: node=%s, phase#%s, customization=%s, platform=%s', self.current_node, phase, customization, platform)
+    def stage_node(self, platform, phase=1):
+        log.info('Node stage: node=%s, phase#%s, platform=%s', self.current_node, phase, platform)
 
         if self.clean_stamps.check_must_clean_node():
             assert phase == 1, repr(phase)  # must never happen on phase 2
-            return [CleanDirCommand()] + self._make_node_stage_command_list(customization, platform, phase=2)
+            return [CleanDirCommand()] + self._make_node_stage_command_list(platform, phase=2)
 
-        platform_config = self.config.platforms[platform]
         clean_build = self._is_rebuild_required()
+        return [self.make_python_stage_command('build', platform=platform, customization_idx=0, clean_build=clean_build)]
+
+
+    def stage_build(self, platform, customization_idx, clean_build):
+        customization = self.requested_customization_list[customization_idx]
+        stash_command_list = self._run_build_job(platform, customization, clean_build)
+        customization_idx = customization_idx + 1
+        if customization_idx < len(self.requested_customization_list):
+            return stash_command_list + [
+                self.make_python_stage_command(
+                    'build', platform=platform, customization_idx=customization_idx, clean_build=False)
+                ]
+        else:
+            return stash_command_list
+
+    def _run_build_job(self, platform, customization, clean_build):
+        platform_config = self.config.platforms[platform]
         build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
         build_parameters = self._make_build_parameters(customization, platform)
@@ -318,9 +322,9 @@ class BuildProject(NxVmsProject):
             platform_branch_config=self.branch_config.platforms.get(platform),
             webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
             )
-        command_list = job.run(self.params.do_build, clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
-        return command_list
-            
+        stash_command_list = job.run(self.params.do_build, clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
+        return stash_command_list
+
     def _is_rebuild_required(self):
         if self.clean_stamps.must_do_clean_build(self.params):
             return True

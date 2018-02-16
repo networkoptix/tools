@@ -77,9 +77,6 @@ class ReleaseProject(BuildProject):
     def run_unit_tests_by_default(self):
         return False
 
-    def make_build_job_name(self, customization, platform):
-        return '{}-{}'.format(customization, platform)
-
     def get_project_parameters(self):
         return BuildProject.get_project_parameters(self) + [
             ChoiceProjectParameter('release', 'Build beta or release', ['beta', 'release']),

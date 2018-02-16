@@ -54,9 +54,6 @@ class CiProject(BuildProject):
     def must_store_artifacts_in_different_customization_dirs(self):
         return False
 
-    def make_build_job_name(self, customization, platform):
-        return platform
-
     def get_project_parameters(self):
         default_platforms = set(self.config.ci.platforms)
         return BuildProject.get_project_parameters(self) + [
