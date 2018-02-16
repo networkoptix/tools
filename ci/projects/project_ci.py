@@ -1,12 +1,14 @@
 # CI project for multibranch pipeline - build/test single customization, every platform on every commit
 
 import logging
+import os.path
 
 from project_build import BuildProject
 from command import (
     BooleanProjectParameter,
     BuildJobCommand,
     )
+from host import LocalHost
 from test_watcher_selector import make_email_recipient_list
 
 log = logging.getLogger(__name__)
@@ -60,6 +62,19 @@ class CiProject(BuildProject):
             BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=platform in default_platforms)
             for platform in self.all_platform_list
             ]
+
+    def must_skip_this_build(self):
+        nx_vms_scm_info = self.scm_info['nx_vms']
+        host = LocalHost()
+        head = host.get_command_output(
+            ['hg', 'heads', nx_vms_scm_info.branch, '--template={node|short}'],
+            cwd=os.path.join(self.workspace_dir, 'nx_vms'),
+            )
+        if nx_vms_scm_info.revision == head:
+            return False
+        log.warning('Checked out nx_vms revision is %s, but head is already %s; skipping this build',
+                        nx_vms_scm_info.revision, head)
+        return True
 
     def make_email_recipient_list(self, build_info):
         if self.in_assist_mode:

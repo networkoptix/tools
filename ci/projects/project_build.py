@@ -158,10 +158,17 @@ class BuildProject(NxVmsProject):
             ]
         return parameters
 
+    # Check if this build must be skipped. Called after nx_vms repo is inited/updated
+    # For CI build is skipped if there are more commits to nx_vms repo.
+    def must_skip_this_build(self):
+        return False
+
 
     # prepare_for_build ============================================================================
     def stage_prepare_for_build(self):
         self.clean_stamps.init_master(self.params)
+        if self.must_skip_this_build():
+            return None
         self._init_build_info()
 
         return [
