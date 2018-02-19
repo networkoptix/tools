@@ -1,4 +1,4 @@
-<domain type='kvm'>
+<domain type='{{ kvm_domain_type }}'>
   <name>{{ inventory_hostname }}</name>
   <memory unit='KiB'>{{ guest_memory_kib }}</memory>
   <vcpu placement='static'>{{ guest_cpus }}</vcpu>
@@ -7,7 +7,9 @@
   </resource>
   <os>
     <type arch='x86_64' machine='pc-i440fx-2.8'>hvm</type>
-    <boot dev='hd'/>
+{% for dev in boot_devices %}
+    <boot dev='{{ dev }}'/>
+{% endfor %}
   </os>
   <features>
     <acpi/>
@@ -31,53 +33,27 @@
   </pm>
   <devices>
     <emulator>/usr/bin/qemu-kvm</emulator>
-    <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
-      <source file='/var/lib/libvirt/images/{{ inventory_hostname }}.qcow2'/>
-      <backingStore/>
-      <target dev='vda' bus='virtio'/>
-      <alias name='virtio-disk0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
-    </disk>
-    <disk type='file' device='cdrom'>
-      <driver name='qemu' type='raw'/>
-      <source file='/var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso'/>
-      <backingStore/>
-      <target dev='{{ cloud_init_cdrom_dev }}' bus='ide'/>
+{% if graphics is defined and graphics == true %}
+    <graphics type='spice' autoport='yes'/>
+{% endif %}
+{% for disk in disks %}
+    <disk type='file' device='{{ disk.device }}'>
+      <driver name='qemu' type='{{ disk.driver_type }}'/>
+      <source file='{{ disk.source_file }}'/>
+{%   if disk.target_bus | lower == 'virtio' %}
+      <target dev='vd{{ "abcdefghijklmnopqrstuvwxyz"[loop.index0] }}' bus='{{ disk.target_bus }}'/>
+{%   elif disk.target_bus | lower == 'sata'
+       or disk.target_bus | lower == 'scsi'
+       or disk.target_bus | lower == 'sd' %}
+      <target dev='sd{{ "abcdefghijklmnopqrstuvwxyz"[loop.index0] }}' bus='{{ disk.target_bus }}'/>
+{%   elif disk.target_bus | lower == 'ide' %}
+      <target dev='hd{{ "abcdefghijklmnopqrstuvwxyz"[loop.index0] }}' bus='{{ disk.target_bus }}'/>
+{%   endif %}
+{%   if disk.readonly is defined and disk.readonly == true %}
       <readonly/>
-      <alias name='ide0-0-0'/>
-      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+{%   endif %}
     </disk>
-    <controller type='usb' index='0' model='ich9-ehci1'>
-      <alias name='usb'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x7'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci1'>
-      <alias name='usb'/>
-      <master startport='0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0' multifunction='on'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci2'>
-      <alias name='usb'/>
-      <master startport='2'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x1'/>
-    </controller>
-    <controller type='usb' index='0' model='ich9-uhci3'>
-      <alias name='usb'/>
-      <master startport='4'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x2'/>
-    </controller>
-    <controller type='pci' index='0' model='pci-root'>
-      <alias name='pci.0'/>
-    </controller>
-    <controller type='ide' index='0'>
-      <alias name='ide'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
-    </controller>
-    <controller type='virtio-serial' index='0'>
-      <alias name='virtio-serial0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
-    </controller>
+{% endfor %}
 
     <interface type='direct'>
       <source dev='{{network.bridge_source_dev}}' mode='bridge'/>
@@ -86,67 +62,14 @@
       <alias name='{{network.bridge_alias_name}}'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x{{network.bridge_address_slot}}' function='0x0'/>
     </interface>
-
-    <serial type='pty'>
-      <source path='/dev/pts/4'/>
-      <target port='0'/>
-      <alias name='serial0'/>
-    </serial>
-    <console type='pty' tty='/dev/pts/4'>
-      <source path='/dev/pts/4'/>
-      <target type='serial' port='0'/>
-      <alias name='serial0'/>
-    </console>
     <channel type='unix'>
       <source mode='bind' path='/var/lib/libvirt/qemu/channel/target/domain-12-debian9/org.qemu.guest_agent.0'/>
       <target type='virtio' name='org.qemu.guest_agent.0' state='disconnected'/>
       <alias name='channel0'/>
       <address type='virtio-serial' controller='0' bus='0' port='1'/>
     </channel>
-    <channel type='spicevmc'>
-      <target type='virtio' name='com.redhat.spice.0' state='disconnected'/>
-      <alias name='channel1'/>
-      <address type='virtio-serial' controller='0' bus='0' port='2'/>
-    </channel>
-    <input type='tablet' bus='usb'>
-      <alias name='input0'/>
-      <address type='usb' bus='0' port='1'/>
-    </input>
-    <input type='mouse' bus='ps2'>
-      <alias name='input1'/>
-    </input>
-    <input type='keyboard' bus='ps2'>
-      <alias name='input2'/>
-    </input>
-    <graphics type='spice' port='5900' autoport='yes' listen='127.0.0.1'>
-      <listen type='address' address='127.0.0.1'/>
-      <image compression='off'/>
-    </graphics>
-    <sound model='ich6'>
-      <alias name='sound0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
-    </sound>
-    <video>
-      <model type='qxl' ram='65536' vram='65536' vgamem='16384' heads='1' primary='yes'/>
-      <alias name='video0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
-    </video>
-    <redirdev bus='usb' type='spicevmc'>
-      <alias name='redir0'/>
-      <address type='usb' bus='0' port='2'/>
-    </redirdev>
-    <redirdev bus='usb' type='spicevmc'>
-      <alias name='redir1'/>
-      <address type='usb' bus='0' port='3'/>
-    </redirdev>
-    <memballoon model='virtio'>
-      <alias name='balloon0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
-    </memballoon>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
   </devices>
-  <seclabel type='none' model='none'/>
-  <seclabel type='dynamic' model='dac' relabel='yes'>
-    <label>+64055:+64055</label>
-    <imagelabel>+64055:+64055</imagelabel>
-  </seclabel>
 </domain>

@@ -1,9 +1,24 @@
+kvm_domain_type : kvm
+
 guest_distribution: Ubuntu
 guest_distribution_release: "xenial"
 guest_extra_disk_size_gb: "50"
 guest_memory_kib: "4194304"
 
 cloud_init_cdrom_dev: hda
+
+boot_devices:
+- hd
+
+disks:
+- device: disk
+  driver_type: qcow2
+  source_file: /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
+  target_bus: virtio
+- device: cdrom
+  driver_type: raw
+  source_file: /var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso
+  target_bus: ide
 
 # this is for default user and should be removed
 ssh_authorized_keys:
