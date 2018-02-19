@@ -3,7 +3,7 @@ kvm_domain_type : kvm
 guest_distribution: Ubuntu
 guest_distribution_release: "xenial"
 guest_extra_disk_size_gb: "50"
-guest_memory_kib: "4194304"
+guest_memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
 
 cloud_init_cdrom_dev: hda
 
