@@ -2,7 +2,7 @@ kvm_host: megatron-2
 guest_state: running
 
 guest_extra_disk_size_gb: "1000"
-guest_memory_kib: "104857600"  # 100 GiB
+guest_memory_kib: "{{ 100 * 1024 * 1024 }}"  # 100 GiB
 guest_cpus: 36
 
 network:

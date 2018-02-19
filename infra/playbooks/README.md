@@ -80,7 +80,7 @@ described. This is production version!
 
 `./inventory-local.ini` is inventory file where all hosts and groups of hosts are
 described. This is local version. And this file is not committed. So you need to
-crate it manually if you want to set up local environment for testing and
+create it manually if you want to set up local environment for testing and
 debugging purposes. Fill `./inventory-local.ini` using `./inventory-prod.ini`
 as reference.
 

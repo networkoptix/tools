@@ -32,13 +32,6 @@
     dest: "{{ jenkins_home }}/.ssh/hg.readonly_key"
     mode: 0600
 
-- name: Configure HG connection for cloning from enk.me
-  copy:
-    dest: "{{ jenkins_home }}/.hgrc"
-    content: |
-      [ui]
-      ssh = ssh -i ~/.ssh/hg.readonly_key
-
 - name: Configure .rdeprc for publishing artifacts
   copy:
     dest: "{{ jenkins_home }}/.rdeprc"
@@ -62,6 +55,13 @@
     state: directory
 
 # Uncomment me to check that this setup is correct
+# Need to add hg_readonly_key in secrets.yaml and uncomment secrets vars in play
+# - name: Configure HG connection for cloning from enk.me
+#   copy:
+#     dest: "{{ jenkins_home }}/.hgrc"
+#     content: |
+#       [ui]
+#       ssh = ssh -i ~/.ssh/hg.readonly_key
 # - name: Clone repo (initial clone is quite long)
 #   become: true
 #   become_user: ubuntu
