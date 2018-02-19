@@ -4,9 +4,11 @@
   failed_when: false
   register: domstate
   delegate_to: "{{ kvm_host }}"
+  check_mode: no
 
 - include: "{{ domstate.rc and 'undefined' or domstate.stdout | regex_replace(' ', '_') }}_to_{{ guest_state }}.yml"
   delegate_to: "{{ kvm_host }}"
+  check_mode: no
 
 - name: Wait for {{ inventory_hostname }} to become reachable
   wait_for_connection:
@@ -19,6 +21,7 @@
     line: 127.0.0.1 {{ inventory_hostname }}
     path: /etc/hosts
   when: "guest_state == 'running'"
+  check_mode: no
 
 - name: Gather facts if guest is running
   setup:
@@ -28,3 +31,4 @@
 - name: Eject Cloud init CD
   command: "virsh change-media {{ inventory_hostname }} {{ cloud_init_cdrom_dev }} --eject"
   failed_when: no
+  check_mode: no

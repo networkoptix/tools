@@ -26,12 +26,6 @@
     create: true
   with_items: "{{ jenkins_authorized_keys }}"
 
-- name: Configure ssh private key
-  copy:
-    content: "{{ hg_readonly_key }}"
-    dest: "{{ jenkins_home }}/.ssh/hg.readonly_key"
-    mode: 0600
-
 - name: Configure .rdeprc for publishing artifacts
   copy:
     dest: "{{ jenkins_home }}/.rdeprc"
@@ -56,6 +50,11 @@
 
 # Uncomment me to check that this setup is correct
 # Need to add hg_readonly_key in secrets.yaml and uncomment secrets vars in play
+# - name: Configure ssh private key
+#   copy:
+#     content: "{{ hg_readonly_key }}"
+#     dest: "{{ jenkins_home }}/.ssh/hg.readonly_key"
+#     mode: 0600
 # - name: Configure HG connection for cloning from enk.me
 #   copy:
 #     dest: "{{ jenkins_home }}/.hgrc"

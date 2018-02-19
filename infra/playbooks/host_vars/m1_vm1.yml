@@ -1,4 +1,4 @@
-kvm_host: megatron-1
+kvm_host: alpha
 guest_state: running
 
 guest_extra_disk_size_gb: "1000"
