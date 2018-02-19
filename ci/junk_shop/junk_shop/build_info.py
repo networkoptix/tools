@@ -266,7 +266,7 @@ class BuildInfoLoader(object):
     @staticmethod
     def _artifact_as_lines(artifact):
         data = decode_artifact_data(artifact)
-        return data.splitlines()
+        return data.decode('utf-8').splitlines()
 
     def _load_test_stage_errors(self):
         for root_run, artifact in select(
