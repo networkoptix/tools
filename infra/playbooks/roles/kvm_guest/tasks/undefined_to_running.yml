@@ -1,73 +1,63 @@
 - name: Download Base Image
   get_url:
-    url: https://cloud-images.ubuntu.com/xenial/20180205/xenial-server-cloudimg-amd64-disk1.img
-    dest: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
-  when: guest_distribution == "Ubuntu" and guest_distribution_release == "xenial"
+    url: "{{ kvm_guest__base_image_url }}"
+    dest: "{{ kvm_guest__base_image_path }}"
 
-# This is not needed since it looks like Ubuntu's .img is .qcow2 actually
+# TODO:
+# Ubuntu is distributed in .img that is .qcow2 actually
+# But other distribs probably require conversion
 # - name: Convert Base Image
-#   when: guest_distribution == "Ubuntu" and guest_distribution_release == "xenial"
+#   when: kvm_guest__distribution != "Ubuntu"
 
-- name: Clean cloud-init folder
+- name: Clean previous data
   file:
-    path: "/var/cloud-init/{{ inventory_hostname }}"
+    path: "{{ kvm_guest__metainfo_path }}"
     state: absent
-
-- name: Delete guest disk image
-  file:
-    path: /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
-    state: absent
-
-- name: Delete guest ci boot image
-  file:
-    path: /var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso
-    state: absent
+  with_items:
+  - "{{ kvm_guest__metainfo_path }}"
+  - "{{ kvm_guest__cloud_init_image_file }}"
+  # TODO: should we prune it?
+  - "{{ kvm_guest__system_image_file }}"
 
 - name: Prepare guest disk image
   copy:
     src: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
-    dest: /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
+    dest: "{{ kvm_guest__system_image_file }}"
     remote_src: yes
 
 - name: Resize guest disk image
   command: >
-    qemu-img resize /var/lib/libvirt/images/{{ inventory_hostname }}.qcow2
-    +{{ guest_extra_disk_size_gb }}GB
+    qemu-img resize {{ kvm_guest__system_image_file }}
+    +{{ kvm_guest__extra_system_image_size_gb }}GB
 
 - name: Create cloud-init folder
   file:
-    path: "/var/cloud-init/{{ inventory_hostname }}"
+    path: "{{ kvm_guest__metainfo_path }}"
     state: directory
 
 - name: "Generate guest ci boot image: meta-data"
   template:
     src: meta-data.j2
-    dest: "/var/cloud-init/{{ inventory_hostname }}/meta-data"
+    dest: "{{ kvm_guest__metainfo_path }}/meta-data"
 
 - name: "Generate guest ci boot image: user-data"
   template:
     src: user-data.j2
-    dest: "/var/cloud-init/{{ inventory_hostname }}/user-data"
+    dest: "{{ kvm_guest__metainfo_path }}/user-data"
 
 - name: "Generate guest ci boot image: gen ISO"
   command: >
-    genisoimage -output /var/lib/libvirt/images/{{ inventory_hostname }}-cidata.iso
+    genisoimage -output {{ kvm_guest__cloud_init_image_file }}
     -volid cidata -joliet -r user-data meta-data
   args:
-    chdir: "/var/cloud-init/{{ inventory_hostname }}/"
+    chdir: "{{ kvm_guest__metainfo_path }}/"
   check_mode: no
 
-- name: Render domain definition from template
-  template:
-    src: domain.xml.j2
-    # TODO find proper place for these files
-    dest: "/var/cloud-init/{{ inventory_hostname }}/domain.xml"
+- name: "Define {{ kvm_guest__hostname }}"
+  virt:
+    name: "{{ kvm_guest__hostname }}"
+    command: define
+    xml: "{{ lookup('template', 'domain.xml.j2') }}"
+    # uri: qemu:///system
 
-- name: Define guest
-  command: >
-    virsh define domain.xml
-  args:
-    chdir: "/var/cloud-init/{{ inventory_hostname }}/"
-  check_mode: no
-
-- include: "shut_off_to_{{ guest_state }}.yml"
+- include: "shut_off_to_{{ kvm_guest__state }}.yml"

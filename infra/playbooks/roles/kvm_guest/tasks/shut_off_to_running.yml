@@ -1,8 +1,6 @@
-- name: Start guest
-  command: >
-    virsh start {{ inventory_hostname }}
-  args:
-    chdir: /var/cloud-init/{{ inventory_hostname }}/
-  check_mode: no
+- name: "Start {{ kvm_guest__hostname }}"
+  virt:
+    name: "{{ kvm_guest__hostname }}"
+    state: running
 
-- include: "running_to_{{ guest_state }}.yml"
+- include: "running_to_{{ kvm_guest__state }}.yml"

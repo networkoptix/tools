@@ -1,34 +1,35 @@
-- name: "Check status of {{ inventory_hostname }}"
-  command: "virsh domstate {{ inventory_hostname }}"
+# FIXME: use virt state
+- name: "Check status of {{ kvm_guest__hostname }}"
+  command: "virsh domstate {{ kvm_guest__hostname }}"
   changed_when: false
   failed_when: false
   register: domstate
   delegate_to: "{{ kvm_host }}"
   check_mode: no
 
-- include: "{{ domstate.rc and 'undefined' or domstate.stdout | regex_replace(' ', '_') }}_to_{{ guest_state }}.yml"
+- include: "{{ domstate.rc and 'undefined' or domstate.stdout | regex_replace(' ', '_') }}_to_{{ kvm_guest__state }}.yml"
   delegate_to: "{{ kvm_host }}"
   check_mode: no
 
-- name: Wait for {{ inventory_hostname }} to become reachable
+- name: Wait for {{ kvm_guest__hostname }} to become reachable
   wait_for_connection:
     sleep: 1
     delay: 0
-  when: "guest_state == 'running'"
+  when: "kvm_guest__state == 'running'"
 
 - name: Add guest's inventory name to /etc/hosts
   lineinfile:
-    line: 127.0.0.1 {{ inventory_hostname }}
+    line: 127.0.0.1 {{ kvm_guest__hostname }}
     path: /etc/hosts
-  when: "guest_state == 'running'"
+  when: "kvm_guest__state == 'running'"
   check_mode: no
 
 - name: Gather facts if guest is running
   setup:
-  when: "guest_state == 'running'"
+  when: "kvm_guest__state == 'running'"
 
 # FIXME: Works for manual eject, but doesn't work in Ansible
 - name: Eject Cloud init CD
-  command: "virsh change-media {{ inventory_hostname }} {{ cloud_init_cdrom_dev }} --eject"
+  command: "virsh change-media {{ kvm_guest__hostname }} {{ kvm_guest__cloud_init_cdrom_dev }} --eject"
   failed_when: no
   check_mode: no

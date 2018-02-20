@@ -1,13 +1,13 @@
-<domain type='{{ kvm_domain_type }}'>
-  <name>{{ inventory_hostname }}</name>
-  <memory unit='KiB'>{{ guest_memory_kib }}</memory>
-  <vcpu placement='static'>{{ guest_cpus }}</vcpu>
+<domain type='{{ kvm_guest__domain_type }}'>
+  <name>{{ kvm_guest__hostname }}</name>
+  <memory unit='KiB'>{{ kvm_guest__memory_kib }}</memory>
+  <vcpu placement='static'>{{ kvm_guest__cpus }}</vcpu>
   <resource>
     <partition>/machine</partition>
   </resource>
   <os>
     <type arch='x86_64' machine='pc-i440fx-2.8'>hvm</type>
-{% for dev in boot_devices %}
+{% for dev in kvm_guest__boot_devices %}
     <boot dev='{{ dev }}'/>
 {% endfor %}
   </os>
@@ -33,10 +33,10 @@
   </pm>
   <devices>
     <emulator>/usr/bin/qemu-kvm</emulator>
-{% if graphics is defined and graphics == true %}
+{% if kvm_guest__graphics is defined and kvm_guest__graphics == true %}
     <graphics type='spice' autoport='yes'/>
 {% endif %}
-{% for disk in disks %}
+{% for disk in kvm_guest__disks %}
     <disk type='file' device='{{ disk.device }}'>
       <driver name='qemu' type='{{ disk.driver_type }}'/>
       <source file='{{ disk.source_file }}'/>
