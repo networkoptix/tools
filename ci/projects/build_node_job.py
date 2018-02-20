@@ -75,7 +75,16 @@ class PlatformBuildInfo(namedtuple(
         artifacts_dir=basestring,
         typed_artifact_list=dict_inst(basestring, list_inst(basestring))
         )
-    def __init__(self, customization, platform, is_succeeded, current_config_path, unit_tests_bin_dir, artifacts_dir, typed_artifact_list):
+    def __init__(
+            self,
+            customization,
+            platform,
+            is_succeeded,
+            current_config_path,
+            unit_tests_bin_dir,
+            artifacts_dir,
+            typed_artifact_list,
+            ):
         super(PlatformBuildInfo, self).__init__(
             customization=customization,
             platform=platform,
@@ -190,8 +199,14 @@ class BuildNodeJob(object):
         if not platform_build_info.is_succeeded:
             return
         for t, artifact_list in platform_build_info.typed_artifact_list.items():
+            if not artifact_list:
+                continue
             stash_name = 'dist-%s-%s-%s' % (self._customization, self._platform, t)
-            yield StashCommand(stash_name, artifact_list, platform_build_info.artifacts_dir)
+            if t == 'unit_tests':
+                dir = platform_build_info.unit_tests_bin_dir
+            else:
+                dir = platform_build_info.artifacts_dir
+            yield StashCommand(stash_name, artifact_list, dir)
 
     def _make_artifact_list(self, build_info):
         dir = build_info.artifacts_dir
@@ -199,12 +214,14 @@ class BuildNodeJob(object):
         return dict(
             distributive=self._list_artifacts(
                 dir, config.distributive_mask_list, exclude_list=config.update_mask_list + [QT_PDB_NAME]),
+            unit_tests=self._list_artifacts(
+                build_info.unit_tests_bin_dir, ['appserver2_ut']),
             update=self._list_artifacts(
                 dir, config.update_mask_list, exclude_list=[QT_PDB_NAME]),
             qtpdb=self._list_artifacts(
                 dir, [QT_PDB_NAME]),
             misc=self._list_artifacts(
-                dir, '*', exclude_list=config.distributive_mask_list + config.update_mask_list + [QT_PDB_NAME]),
+                dir, ['*'], exclude_list=config.distributive_mask_list + config.update_mask_list + [QT_PDB_NAME]),
             )
 
     def _list_artifacts(self, artifacts_dir, include_list, exclude_list=None):

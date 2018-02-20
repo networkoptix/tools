@@ -8,6 +8,7 @@ import logging
 import glob
 import yaml
 from datetime import timedelta
+import shutil
 
 from utils import ensure_dir_missing, ensure_dir_exists, prepare_empty_dir
 from project_nx_vms import BUILD_INFO_FILE, NxVmsProject
@@ -127,7 +128,8 @@ class FunTestProject(NxVmsProject):
         log.info('Running functional tests for platform %r; executor#%s', platform, self.jenkins_env.executor_number)
         build_info = self._load_build_info()
         prepare_empty_dir(WORK_DIR)
-        self._pick_binaries()
+        self._pick_aux_binaries()
+        self._copy_appserver2_ut(build_info, platform)
         server_deb_path = self._pick_server_deb_path()
         log.info('Will test distributive %s', server_deb_path)
         if not server_deb_path:
@@ -140,7 +142,7 @@ class FunTestProject(NxVmsProject):
         with open(os.path.join(DIST_DIR, BUILD_INFO_FILE)) as f:
             return yaml.load(f)
 
-    def _pick_binaries(self):
+    def _pick_aux_binaries(self):
         bin_dir = os.path.join(self.workspace_dir, BIN_DIR)
         binaries_url = self.config.fun_tests.binaries_url
         log.info('copying aux binaries from %r to %r', binaries_url, bin_dir)
@@ -155,6 +157,19 @@ class FunTestProject(NxVmsProject):
         assert path_list, 'No artifacts to test were found'
         return path_list[0]
 
+    def _get_customization(self, build_info):
+        customization_list = build_info['customization_list']
+        assert len(customization_list) == 1, repr(customization_list)  # we currently support only one customization
+        return customization_list[0]
+
+    def _copy_appserver2_ut(self, build_info, platform):
+        fname = 'appserver2_ut'
+        customization = self._get_customization(build_info)
+        src = os.path.join(self.workspace_dir, DIST_DIR, 'unit_tests', customization, platform, fname)
+        dest = os.path.join(self.workspace_dir, BIN_DIR, fname)
+        log.info('Copying %r to %r', src, dest)
+        shutil.copyfile(src, dest)
+
     def _run_tests(self, build_info, platform, server_deb_path):
         if self.params.tests:
             test_list = self.params.tests.split(' ')
@@ -163,9 +178,7 @@ class FunTestProject(NxVmsProject):
         else:
             test_list = []
             log.info('Will run all tests')
-        customization_list = build_info['customization_list']
-        assert len(customization_list) == 1, repr(customization_list)  # we currently support only one customization
-        customization = customization_list[0]
+        customization = self._get_customization(build_info)
         vm_name_prefix = 'funtest-%s-' % self.jenkins_env.executor_number
         vm_port_base = self.config.fun_tests.port_base + self.jenkins_env.executor_number * self.config.fun_tests.port_range
         timeout = self.config.fun_tests.timeout
