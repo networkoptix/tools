@@ -133,3 +133,32 @@
   command: n stable
   register: r
   changed_when: "'installed' in r.stdout"
+
+- name: Set Kernel core pattern for current session
+  copy:
+    dest: "/proc/sys/kernel/core_pattern"
+    content: "%e.core.%t.%p"
+
+- name: Set Kernel core pattern for system
+  lineinfile:
+    path: /etc/sysctl.conf
+    create: yes
+    state: present
+    insertafter: EOF
+    line: "kernel.core_pattern=%e.core.%t.%p"
+
+- name: Set limits for user
+  lineinfile:
+    path: /etc/security/limits.conf
+    create: yes
+    state: present
+    insertafter: EOF
+    line: "{{ item }}"
+  with_items:
+  # NOTE: these values are copied from old slave
+  # maximum number of open files
+  - "{{ build_user }} soft nofile 16384"
+  - "{{ build_user }} hard nofile 20480"
+  # limits the core file size (KB)
+  - "{{ build_user }} soft core unlimited"
+  - "{{ build_user }} hard core unlimited"
