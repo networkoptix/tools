@@ -1,0 +1,13 @@
+---
+- name: Add all infra hosts into /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item }}"
+    state: present
+  with_items:
+  # rack net does not have dns and won't have
+  # FIXME: Unhardcode and make templated based on host vars
+  - 192.168.13.2 cinas
+  - 192.168.13.3 alpha
+  - 192.168.13.4 beta
+  - 192.168.13.5 gamma

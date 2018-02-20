@@ -1,0 +1,6 @@
+---
+
+script:
+  # TODO: Write real tests, but running Docker within Docker ends up being a
+  # problem and that's necessary to test various versions of Ubuntu/Debian.
+  - 'exit 0'

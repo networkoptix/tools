@@ -1,0 +1,88 @@
+---
+- name: "Add depcon group {{ depcon_group }}"
+  group:
+    name: "{{ depcon_group }}"
+    state: present
+
+- name: "Add depcon user {{ depcon_user }}"
+  user:
+    name: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    home: "{{ depcon_home }}"
+    createhome: yes
+    shell: /bin/bash
+
+- name: Add depcon user to 'docker' group
+  user:
+    name: '{{ item }}'
+    groups: 'docker'
+    append: True
+  with_items:
+  - "{{ depcon_user }}"
+
+- name: "Create .ssh in {{ depcon_user }} home dir"
+  file:
+    path: "{{ depcon_home }}/.ssh/"
+    state: directory
+
+- name: Configure pub keys
+  lineinfile:
+    path: "{{ depcon_home }}/.ssh/authorized_keys"
+    line: "{{ item }}"
+    create: true
+  with_items: "{{ depcon_authorized_keys }}"
+
+- name: Set ownership for entire depcon home directory
+  file:
+    path: "{{ depcon_home }}"
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    recurse: true
+    state: directory
+
+- name: Install nfs client
+  apt:
+    pkg: nfs-common
+    state: present
+
+- name: Create mount dir
+  file:
+    path: "{{ depcon_home }}/beta-builds"
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    recurse: true
+    state: directory
+
+- name: Mount nfs directory
+  mount:
+    path: "{{ depcon_home }}/beta-builds"
+    src: "{{ nfsserver }}:/share/NFSv=4/beta-builds"
+    boot: yes
+    state: mounted
+    fstype: nfs
+
+- name: Create compose file
+  template:
+    src: compose.yaml.j2
+    dest: "{{ depcon_home }}/compose.yaml"
+  notify:
+  - Restart Depcon
+
+- name: Create SystemD Unit
+  include_role:
+    name: tumf.systemd-service
+  vars:
+    systemd_service_name: "depcon"
+    systemd_service_Service_User: "{{ depcon_user }}"
+    systemd_service_Unit_Description: NX Deployment Console
+    systemd_service_Unit_Requires: docker.service
+    systemd_service_Unit_After: docker.service
+    systemd_service_Service_ExecStartPre:
+    - /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml down -v
+    - /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml rm -v
+    systemd_service_Service_ExecStart: >-
+      /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml up
+    systemd_service_Service_ExecStop: >-
+      /usr/local/bin/docker-compose -f  {{ depcon_home }}/compose.yaml down -v
+  notify:
+  - Restart Depcon

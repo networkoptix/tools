@@ -1,0 +1,16 @@
+deployment_console:
+  image: "{{ depcon_main_docker_image }}"
+  restart: always
+  ports:
+  - "{{ depcon_port }}:80"
+  volumes:
+  - "{{ depcon_home }}/var:/app/var"
+  - "{{ depcon_home }}/beta-builds:/vol/ftp/beta-builds"
+  links:
+  - rabbit
+rabbit:
+  image: "{{ depcon_rabbit_docker_image }}"
+  restart: always
+  volumes:
+  #this is where the logs for rabbit should be written
+  - "{{ depcon_home }}/var/log:/var/log/rabbitmq"
