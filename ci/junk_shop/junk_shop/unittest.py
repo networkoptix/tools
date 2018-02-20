@@ -31,12 +31,26 @@ log = logging.getLogger(__name__)
 ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
 
-GTEST_ARGUMENTS = [
-    '--gtest_filter=-NxCritical.All3',
-    '--gtest_shuffle',
-    '--log-level=DEBUG1',
-    ]
+DEFAULT_LOG_LEVEL = 'DEBUG1'
 
+TEST_LOG_LEVEL = dict(
+    nx_network_ut='DEBUG2',
+    cloud_connectivity_ut='DEBUG2',
+    traffic_relay_ut='DEBUG2',
+    connection_mediator_ut='DEBUG2',
+    cloud_db_ut='DEBUG2',
+    relaying_ut='DEBUG2',
+    vms_gateway_ut='DEBUG2',
+    )
+
+
+def gtest_arguments(test_name):
+    log_level = TEST_LOG_LEVEL.get(test_name, DEFAULT_LOG_LEVEL)
+    return [
+        '--gtest_filter=-NxCritical.All3',
+        '--gtest_shuffle',
+        '--log-level=%s' % log_level,
+        ]
 
 def add_core_artifacts(platform, repository, binary_path, run, artifact_path):
     fname = os.path.basename(artifact_path)
@@ -147,7 +161,7 @@ class TestProcess(GoogleTestEventHandler):
         args = [
             self._binary_path,
             '--tmp=%s' % self._work_dir,
-            ] + GTEST_ARGUMENTS
+            ] + gtest_arguments(self._test_name)
         self._levels[0].add_stdout_line('[ command line: "%s" ]' % subprocess.list2cmdline(args))
         if not os.path.exists(self._binary_path):
             self._save_start_error('File %r is missing' % self._binary_path)
