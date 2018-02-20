@@ -267,6 +267,8 @@ class BuildProject(NxVmsProject):
                     if self.must_store_artifacts_in_different_customization_dirs:
                         dir = os.path.join(dir, customization)
                     yield UnstashCommand(name, dir, ignore_missing=True)
+                yield UnstashCommand('dist-%s-%s-%s' % (customization, platform, 'unit_tests'),
+                                         os.path.join('dist', 'unit_tests', customization, platform), ignore_missing=True)
 
     def _make_workspace_name(self, job_name):
         workspace_name = '{}-{}-{}'.format(self.project_id, self.nx_vms_branch_name, job_name)
@@ -315,7 +317,7 @@ class BuildProject(NxVmsProject):
 
     def _run_build_job(self, platform, customization, clean_build):
         platform_config = self.config.platforms[platform]
-        build_tests = self.params.run_unit_tests is None or self.params.run_unit_tests
+        build_tests = True  # always build - we need appserver2_ut for functional tess
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
         build_parameters = self._make_build_parameters(customization, platform)
         job = BuildNodeJob(
