@@ -35,14 +35,6 @@
     create: true
   with_items: "{{ depcon_authorized_keys }}"
 
-# - name: Set ownership for entire depcon home directory
-#   file:
-#     path: "{{ depcon_home }}"
-#     owner: "{{ depcon_user }}"
-#     group: "{{ depcon_group }}"
-#     recurse: true
-#     state: directory
-
 - name: Install nfs client
   apt:
     pkg: nfs-common

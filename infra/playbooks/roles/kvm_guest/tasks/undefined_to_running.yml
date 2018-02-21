@@ -58,6 +58,5 @@
     name: "{{ kvm_guest__hostname }}"
     command: define
     xml: "{{ lookup('template', 'domain.xml.j2') }}"
-    # uri: qemu:///system
 
 - include: "shut_off_to_{{ kvm_guest__state }}.yml"
