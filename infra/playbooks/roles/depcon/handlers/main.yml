@@ -1,6 +1,5 @@
 ---
-
 - name: Restart Depcon
   service:
-    name: 'depcon.name'
+    name: 'depcon'
     state: 'restarted'

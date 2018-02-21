@@ -29,9 +29,6 @@
   become_method: sudo
   gather_facts: yes
 
-  # vars_files:
-  # - secrets.yml
-
   roles:
   - role: build_node
   - role: jenkins_slave
@@ -41,6 +38,9 @@
   become: true
   become_method: sudo
   gather_facts: yes
+
+  vars_files:
+  - secrets/depcon.yml
 
   roles:
   - role: nickjj.docker

@@ -24,6 +24,9 @@
   file:
     path: "{{ depcon_home }}/.ssh/"
     state: directory
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    mode: "u+rwx,g-rwx,o-rwx"
 
 - name: Configure pub keys
   lineinfile:
@@ -32,13 +35,13 @@
     create: true
   with_items: "{{ depcon_authorized_keys }}"
 
-- name: Set ownership for entire depcon home directory
-  file:
-    path: "{{ depcon_home }}"
-    owner: "{{ depcon_user }}"
-    group: "{{ depcon_group }}"
-    recurse: true
-    state: directory
+# - name: Set ownership for entire depcon home directory
+#   file:
+#     path: "{{ depcon_home }}"
+#     owner: "{{ depcon_user }}"
+#     group: "{{ depcon_group }}"
+#     recurse: true
+#     state: directory
 
 - name: Install nfs client
   apt:
@@ -61,6 +64,58 @@
     state: mounted
     fstype: nfs
 
+- name: Install awscli requirements
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - python-pip
+
+- name: Install requirements for docker login & pull
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - awscli
+  - docker-py
+
+- name: Create AWS RC directory
+  file:
+    path: "{{ depcon_home }}/.aws"
+    state: directory
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    mode: "u+rwx,g+rwx,o-rwx"
+
+- name: Create AWS config file
+  template:
+    src: "aws/config.j2"
+    dest: "{{ depcon_home }}/.aws/config"
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    mode: "u+rwx,g+rwx,o-rwx"
+
+- name: Create AWS credentials file
+  template:
+    src: "aws/credentials.j2"
+    dest: "{{ depcon_home }}/.aws/credentials"
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    mode: "u+rwx,g+rwx,o-rwx"
+
+- name: Docker login AWS ECR
+  shell: "eval $(aws ecr get-login --no-include-email)"
+  become: true
+  become_user: "{{ depcon_user }}"
+
+# Pull before compose: Avoid case when SystemD says that service is up but
+# there is no running containers.
+- name: Docker pull depcon image
+  become: true
+  become_user: "{{ depcon_user }}"
+  docker_image:
+    name: "{{ depcon_main_docker_image }}"
+
 - name: Create compose file
   template:
     src: compose.yaml.j2
@@ -74,7 +129,8 @@
   vars:
     systemd_service_name: "depcon"
     systemd_service_Service_User: "{{ depcon_user }}"
-    systemd_service_Unit_Description: NX Deployment Console
+    systemd_service_Service_WorkingDirectory: "{{ depcon_home }}"
+    systemd_service_Unit_Description: NX  Deployment Console
     systemd_service_Unit_Requires: docker.service
     systemd_service_Unit_After: docker.service
     systemd_service_Service_ExecStartPre:
@@ -86,3 +142,7 @@
       /usr/local/bin/docker-compose -f  {{ depcon_home }}/compose.yaml down -v
   notify:
   - Restart Depcon
+
+- service:
+    name: depcon
+    state: started
