@@ -45,3 +45,13 @@
   roles:
   - role: nickjj.docker
   - role: depcon
+
+- name: Setup Jenkins Master(s)
+  hosts: jenkins
+
+  roles:
+  - role: geerlingguy.java
+    become: true
+    become_method: sudo
+  - role: geerlingguy.jenkins
+    become: true
