@@ -10,6 +10,7 @@ from command import (
     )
 from host import LocalHost
 from test_watcher_selector import make_email_recipient_list
+from mercurial import MercurialWriter
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ DEFAULT_CUSTOMIZATION = 'hanwha'
 DEFAULT_CLOUD_GROUP = 'test'
 DEFAULT_RELEASE = 'beta'
 DOWNSTREAM_FUNTEST_PROJECT = 'funtest'
+HG_BOOKMARK_FORMAT = '{branch}_stable'
 
 
 class CiProject(BuildProject):
@@ -75,6 +77,17 @@ class CiProject(BuildProject):
         log.warning('Checked out nx_vms revision is %s, but head is already %s; skipping this build',
                         nx_vms_scm_info.revision, head)
         return True
+
+    def post_process(self, build_info, build_info_path, platform_build_info_map):
+        # set bookmark if all platform are built successfuly
+        if build_info.failed_build_platform_list:
+            return
+        writer = MercurialWriter(
+            repository_dir=os.path.join(self.workspace_dir, 'nx_vms'),
+            repository_url=self.config.services.mercurial_repository_url.rstrip('/') + '/nx_vms',
+            ssh_key_path=self.credentials.jenkins_hg_push.key_path,
+            )
+        writer.set_bookmark(HG_BOOKMARK_FORMAT.format(branch=self.nx_vms_branch_name))
 
     def make_email_recipient_list(self, build_info):
         if self.in_assist_mode:

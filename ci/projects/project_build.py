@@ -380,11 +380,11 @@ class BuildProject(NxVmsProject):
                 self._make_artifact_archiving_command_list(build_info_path) +
                 self.make_postprocess_command_list(build_info.failed_build_platform_list) +
                 self._make_set_build_result_command_list(build_info))
-        self.deploy_artifacts(build_info_path, platform_build_info_map)
+        self.post_process(build_info, build_info_path, platform_build_info_map)
         email_sender.send_email(self.credentials.service_email, subject_and_html, email_recipient_list)
         return command_list
 
-    def deploy_artifacts(self, build_info_path, platform_build_info_map):
+    def post_process(self, build_info, build_info_path, platform_build_info_map):
         pass
 
     @abc.abstractmethod

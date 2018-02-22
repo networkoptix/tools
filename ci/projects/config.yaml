@@ -9,6 +9,8 @@ credentials:
     type: ssh_key
   - id: deploy
     type: ssh_key
+  - id: jenkins_hg_push
+    type: ssh_key
 
 junk_shop:
   db_host: megatron  # host of junk_shop database
@@ -18,6 +20,7 @@ services:
   jira_url: https://networkoptix.atlassian.net/browse
   scm_browser_url_format: http://enk.me:8082/{repository_name}/revision/{revision}
   deployment_path: jenkins@qanas:/data/beta-builds
+  mercurial_repository_url: ssh://hg@hdw.mx/
 
 email:
   smtp:

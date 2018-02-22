@@ -93,7 +93,7 @@ class ReleaseProject(BuildProject):
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
 
-    def deploy_artifacts(self, build_info_path, platform_build_info_map):
+    def post_process(self, build_info, build_info_path, platform_build_info_map):
         deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,

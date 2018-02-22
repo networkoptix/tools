@@ -111,17 +111,20 @@ class ServicesConfig(object):
     @classmethod
     def from_dict(cls, data):
         return cls(
+            mercurial_repository_url=data['mercurial_repository_url'],
             junk_shop_url=data['junk_shop_url'].rstrip('/'),
             jira_url=data['jira_url'],
             scm_browser_url_format=data['scm_browser_url_format'],
             deployment_path=data['deployment_path'],
             )
 
-    def __init__(self, junk_shop_url, jira_url, scm_browser_url_format, deployment_path):
+    def __init__(self, mercurial_repository_url, junk_shop_url, jira_url, scm_browser_url_format, deployment_path):
+        assert isinstance(mercurial_repository_url, basestring), repr(mercurial_repository_url)
         assert isinstance(junk_shop_url, basestring), repr(junk_shop_url)
         assert isinstance(jira_url, basestring), repr(jira_url)
         assert isinstance(scm_browser_url_format, basestring), repr(scm_browser_url_format)
         assert isinstance(deployment_path, basestring), repr(deployment_path)
+        self.mercurial_repository_url = mercurial_repository_url
         self.junk_shop_url = junk_shop_url
         self.jira_url = jira_url
         self.scm_browser_url_format = scm_browser_url_format
@@ -129,6 +132,7 @@ class ServicesConfig(object):
 
     def to_dict(self):
         return dict(
+            mercurial_repository_url=self.mercurial_repository_url,
             junk_shop_url=self.junk_shop_url,
             jira_url=self.jira_url,
             scm_browser_url_format=self.scm_browser_url_format,
@@ -137,6 +141,7 @@ class ServicesConfig(object):
 
     def report(self):
         log.info('\t' 'services:')
+        log.info('\t\t' 'mercurial_repository_url: %r:', self.mercurial_repository_url)
         log.info('\t\t' 'junk_shop_url: %r:', self.junk_shop_url)
         log.info('\t\t' 'jira_url: %r:', self.jira_url)
         log.info('\t\t' 'scm_browser_url_format: %r:', self.scm_browser_url_format)
