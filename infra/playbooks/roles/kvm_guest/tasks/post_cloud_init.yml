@@ -1,0 +1,24 @@
+- name: Get Cloud init CD dev name
+  xml:
+    xmlstring: "{{ domain_xml }}"
+    xpath: '/domain/devices/disk[source/@file="/var/lib/libvirt/images/testvm-cidata.iso"]/target'
+    content: attribute
+    attribute: dev
+  when: "kvm_guest__state != 'undefined'"
+  register: _cloud_init_cd_info
+  delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
+  failed_when: false # xml module fails when it can't find xml node
+
+- name: Eject Cloud init CD
+  become: true
+  become_method: sudo
+  command: >-
+    virsh change-media {{ kvm_guest__hostname }}
+    {{ _cloud_init_cd_info.matches[0].target.dev }} --eject
+  when:
+  - _cloud_init_cd_info.matches is defined
+  - _cloud_init_cd_info.matches[0].target.dev is defined
+  - >-
+    _cloud_init_cd_info.matches[0].target.tray is undefined or
+    _cloud_init_cd_info.matches[0].target.tray != 'open'
+  delegate_to: "{{ kvm_host }}"

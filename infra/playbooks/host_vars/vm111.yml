@@ -2,16 +2,16 @@ kvm_host: alpha
 kvm_guest__state: running
 
 kvm_guest__extra_system_image_size_gb: "2"
-kvm_guest__memory_kib: "{{ 1 * 1024 * 1024 }}"
+kvm_guest__memory: "{{ 1 * 1024 * 1024 }}"
 kvm_guest__cpus: 1
 
 networks:
-- bridge_source_dev: eno1
-  bridge_model_type: rtl8139
-  bridge_address_slot: '03'
-- bridge_source_dev: eno2
-  bridge_model_type: rtl8139
-  bridge_address_slot: '09'
+- source_dev: eno1
+  model_type: rtl8139
+  address_slot: 3
+- source_dev: eno2
+  model_type: rtl8139
+  address_slot: 9
 
 interfaces:
 - name:             ens3

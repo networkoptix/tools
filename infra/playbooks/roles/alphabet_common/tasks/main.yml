@@ -11,3 +11,11 @@
   - 192.168.13.3 alpha
   - 192.168.13.4 beta
   - 192.168.13.5 gamma
+
+- name: Install Ansible required packages (Debian)
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - python-lxml
+  when: ansible_os_family == 'Debian'

@@ -1,0 +1,61 @@
+- name: Download Base Image
+  get_url:
+    url: "{{ kvm_guest__base_image_url }}"
+    dest: "{{ kvm_guest__base_image_path }}"
+  delegate_to: "{{ kvm_host }}"
+
+# TODO:
+# Ubuntu is distributed in .img that is .qcow2 actually
+# But other distribs probably require conversion
+# - name: Convert Base Image
+#   when: kvm_guest__distribution != "Ubuntu"
+
+- name: Clean previous data
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ kvm_guest__metainfo_path }}"
+  - "{{ kvm_guest__cloud_init_image_file }}"
+  # TODO: should we prune it?
+  - "{{ kvm_guest__system_image_file }}"
+  delegate_to: "{{ kvm_host }}"
+
+- name: Prepare guest disk image
+  copy:
+    src: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
+    dest: "{{ kvm_guest__system_image_file }}"
+    remote_src: yes
+  delegate_to: "{{ kvm_host }}"
+
+- name: Resize guest disk image
+  command: >
+    qemu-img resize {{ kvm_guest__system_image_file }}
+    +{{ kvm_guest__extra_system_image_size_gb }}GB
+  delegate_to: "{{ kvm_host }}"
+
+- name: Create cloud-init folder
+  file:
+    path: "{{ kvm_guest__metainfo_path }}"
+    state: directory
+  delegate_to: "{{ kvm_host }}"
+
+- name: "Generate guest ci boot image: meta-data"
+  template:
+    src: meta-data.j2
+    dest: "{{ kvm_guest__metainfo_path }}/meta-data"
+  delegate_to: "{{ kvm_host }}"
+
+- name: "Generate guest ci boot image: user-data"
+  template:
+    src: user-data.j2
+    dest: "{{ kvm_guest__metainfo_path }}/user-data"
+  delegate_to: "{{ kvm_host }}"
+
+- name: "Generate guest ci boot image: gen ISO"
+  command: >
+    genisoimage -output {{ kvm_guest__cloud_init_image_file }}
+    -volid cidata -joliet -r user-data meta-data
+  args:
+    chdir: "{{ kvm_guest__metainfo_path }}/"
+  delegate_to: "{{ kvm_host }}"

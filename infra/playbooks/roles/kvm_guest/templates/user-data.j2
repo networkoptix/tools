@@ -1,7 +1,6 @@
 #cloud-config
 password: password
 chpasswd: { expire: False }
-ssh_pwauth: True
 ssh_authorized_keys: {{ kvm_guest__default_user_ssh_authorized_keys | to_json }}
 locale: en_US.UTF-8
 

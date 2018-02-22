@@ -1,6 +1,0 @@
-- name: "Start {{ kvm_guest__hostname }}"
-  virt:
-    name: "{{ kvm_guest__hostname }}"
-    state: running
-
-- include: "running_to_{{ kvm_guest__state }}.yml"

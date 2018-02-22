@@ -4,6 +4,7 @@ kvm_guest__distribution: Ubuntu
 kvm_guest__distribution_release: "xenial"
 kvm_guest__extra_system_image_size_gb: "50"
 kvm_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
+kvm_guest__memory: "{{ kvm_guest__memory_kib }}"
 kvm_guest__cpus: 4
 kvm_guest__hostname: "{{ inventory_hostname }}"
 
@@ -13,7 +14,6 @@ kvm_guest__metainfo_path: "/var/cloud-init/{{ kvm_guest__hostname }}"
 kvm_guest__storage_pool_path: /var/lib/libvirt/images
 kvm_guest__system_image_file: "{{ kvm_guest__storage_pool_path }}/{{ kvm_guest__hostname }}.qcow2"
 kvm_guest__cloud_init_image_file: "{{ kvm_guest__storage_pool_path }}/{{ kvm_guest__hostname }}-cidata.iso"
-kvm_guest__cloud_init_cdrom_dev: hda
 
 kvm_guest__boot_devices:
 - hd
