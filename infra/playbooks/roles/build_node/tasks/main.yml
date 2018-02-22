@@ -104,6 +104,7 @@
     name: "{{ item }}"
     update_cache: yes
     state: present
+  # FIXME We need to have g++ v7.2 but 5.4.0 is installed
   with_items:
   - gcc-7
   - g++-7
