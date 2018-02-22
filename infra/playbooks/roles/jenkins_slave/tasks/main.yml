@@ -38,7 +38,11 @@
     dest: "{{ jenkins_home }}/.ssh/known_hosts"
     create: yes
     state: present
-    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa enk.me') }}"
+    regexp: "^{{ item | regex_escape() }}"
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa {{ item }}') }}"
+  with_items:
+  - enk.me
+  - hdw.mx
 
 - name: Set ownership for entire jenkins home directory
   file:

@@ -134,11 +134,6 @@
   register: r
   changed_when: "'installed' in r.stdout"
 
-- name: Set Kernel core pattern for current session
-  copy:
-    dest: "/proc/sys/kernel/core_pattern"
-    content: "%e.core.%t.%p"
-
 - name: Set Kernel core pattern for system
   lineinfile:
     path: /etc/sysctl.conf
@@ -146,6 +141,11 @@
     state: present
     insertafter: EOF
     line: "kernel.core_pattern=%e.core.%t.%p"
+  register: sysctl_conf
+
+- name: Reload sysctl
+  command: sysctl --system
+  when: "{{ sysctl_conf.changed }}"
 
 - name: Set limits for user
   lineinfile:
