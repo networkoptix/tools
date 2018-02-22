@@ -106,6 +106,10 @@ class BuildProject(NxVmsProject):
         return False
 
     @property
+    def custom_cmake_args(self):
+        return ''
+
+    @property
     def run_unit_tests_by_default(self):
         return True
 
@@ -331,7 +335,7 @@ class BuildProject(NxVmsProject):
             platform_branch_config=self.branch_config.platforms.get(platform),
             webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
             )
-        stash_command_list = job.run(self.params.do_build, clean_build, build_tests, run_unit_tests, self.config.unit_tests.timeout)
+        stash_command_list = job.run(self.params.do_build, clean_build, self.custom_cmake_args, build_tests, run_unit_tests, self.config.unit_tests.timeout)
         return stash_command_list
 
     def _is_rebuild_required(self):

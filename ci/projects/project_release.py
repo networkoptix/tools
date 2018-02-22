@@ -4,6 +4,7 @@ import logging
 
 from project_build import BuildProject
 from command import (
+    StringProjectParameter,
     ChoiceProjectParameter,
     MultiChoiceProjectParameter,
     )
@@ -74,6 +75,10 @@ class ReleaseProject(BuildProject):
         return True
 
     @property
+    def custom_cmake_args(self):
+        return self.params.custom_cmake_args
+
+    @property
     def run_unit_tests_by_default(self):
         return False
 
@@ -81,6 +86,7 @@ class ReleaseProject(BuildProject):
         return BuildProject.get_project_parameters(self) + [
             ChoiceProjectParameter('release', 'Build beta or release', ['beta', 'release']),
             ChoiceProjectParameter('cloud_group', 'Cloud group', CLOUD_GROUP_LIST),
+            StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
             MultiChoiceProjectParameter('platform_list', 'Platforms to build',
                                             choices=self.all_platform_list, selected_choices=['linux-x64']),
             MultiChoiceProjectParameter('customization_list', 'Customizations to build',

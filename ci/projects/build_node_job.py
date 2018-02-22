@@ -128,9 +128,9 @@ class BuildNodeJob(object):
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
 
-    def run(self, do_build, clean_build, build_tests, run_unit_tests, unit_tests_timeout):
+    def run(self, do_build, clean_build, custom_cmake_args, build_tests, run_unit_tests, unit_tests_timeout):
         if do_build:
-            platform_build_info, run_id = self._build(clean_build, build_tests)
+            platform_build_info, run_id = self._build(clean_build, custom_cmake_args, build_tests)
         else:
             platform_build_info = self._load_platform_build_info()
             run_id = None  # do not save errors artifact if there were no build
@@ -153,13 +153,13 @@ class BuildNodeJob(object):
     def _platform_build_info_path(self):
         return BUILD_INFO_FILE_NAME_FORMAT.format(self._customization, self._platform)
 
-    def _build(self, clean_build, build_tests):
+    def _build(self, clean_build, custom_cmake_args, build_tests):
         log.info('Executor number: %s', self._executor_number)
         cmake = CMake(self._cmake_version)
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
-        build_info = builder.build('nx_vms', 'build', self._webadmin_external_dir, build_tests, clean_build)
+        build_info = builder.build('nx_vms', 'build', self._webadmin_external_dir, custom_cmake_args, build_tests, clean_build)
         typed_artifact_list = self._make_artifact_list(build_info)
         platform_build_info = PlatformBuildInfo.from_build_info(
             self._customization, self._platform, build_info, typed_artifact_list)

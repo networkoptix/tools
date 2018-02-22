@@ -121,11 +121,11 @@ class CMakeBuilder(object):
     def _is_unix(self):
         return self._system_platform_config[self._system].is_unix
 
-    def build(self, src_dir, build_dir, webadmin_external_dir, build_tests, clean_build):
+    def build(self, src_dir, build_dir, webadmin_external_dir, custom_cmake_args, build_tests, clean_build):
         build_params = self._junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        generate_results = self._generate(src_dir, build_dir, webadmin_external_dir, build_params, build_tests, cmake_configuration)
+        generate_results = self._generate(src_dir, build_dir, webadmin_external_dir, build_params, custom_cmake_args, build_tests, cmake_configuration)
         succeeded = generate_results.succeeded
         error_message = generate_results.error_message
         output = generate_results.output
@@ -186,7 +186,7 @@ class CMakeBuilder(object):
                 output = self._host.get_command_output(['python', cleaner, '--build-dir', build_dir])
                 self._add_command_log('ninja_clean', output)
 
-    def _generate(self, src_dir, build_dir, webadmin_external_dir, build_params, build_tests, cmake_configuration):
+    def _generate(self, src_dir, build_dir, webadmin_external_dir, build_params, custom_cmake_args, build_tests, cmake_configuration):
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
         platform_args = []
@@ -209,6 +209,8 @@ class CMakeBuilder(object):
             generate_args += ['-DwithTests=%s' % bool_to_cmake_param(False)]
         if build_params.add_qt_pdb is not None:
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
+        if custom_cmake_args:
+            generate_args += custom_cmake_args.split(' ')
         generate_args += platform_args + [
             '-G', self._generator,
             src_full_path,
@@ -311,11 +313,15 @@ def test_me():
     project = sys.argv[2]
     branch = sys.argv[3]
     platform = sys.argv[4]
-    if len(sys.argv) >= 6:
+    if len(sys.argv) >= 6 and sys.argv[5]:
         branch_config = BranchConfig.from_dict(yaml.load(open(sys.argv[5])))
         platform_branch_config = branch_config.platforms.get(platform)
     else:
         platform_branch_config = None
+    if len(sys.argv) >= 7 and sys.argv[6]:
+        custom_cmake_args = sys.argv[6]
+    else:
+        custom_cmake_args = ''
     build_params = BuildParameters(
         project=project,
         branch=branch,
@@ -329,7 +335,7 @@ def test_me():
     repository = DbCaptureRepository(db_config, build_params)
     builder = CMakeBuilder(1, config.platforms[platform], platform_branch_config, repository, cmake)
     build_dir = 'build-{}'.format(platform)
-    build_info = builder.build('nx_vms', build_dir, build_tests=True, clean_build=False)
+    build_info = builder.build('nx_vms', build_dir, 'webadmin-external', custom_cmake_args, build_tests=True, clean_build=False)
     log.info('Build info: %r', build_info)
 
 
