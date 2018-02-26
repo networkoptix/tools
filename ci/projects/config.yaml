@@ -117,6 +117,7 @@ platforms:
     distributive_mask_list:
       - '*-servertool-*.msi'
       - '*.exe'
+      - '*_debug-*.zip'
     update_mask_list:
       - '*_update-*.zip'
   win-x86:
@@ -127,6 +128,7 @@ platforms:
     distributive_mask_list:
       - '*-servertool-*.msi'
       - '*.exe'
+      - '*_debug-*.zip'
     update_mask_list:
       - '*_update-*.zip'
   mac:
