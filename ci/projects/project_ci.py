@@ -68,15 +68,23 @@ class CiProject(BuildProject):
     def must_skip_this_build(self):
         nx_vms_scm_info = self.scm_info['nx_vms']
         host = LocalHost()
+        result = host.run_command(
+            ['hg', 'incoming', '--branch', nx_vms_scm_info.branch],
+            cwd=os.path.join(self.workspace_dir, 'nx_vms'),
+            check_retcode=False,
+            )
+        if result.exit_code == 0:
+            log.warning('Have incoming commits for repository nx_vms; skipping this build')
+            return True
         head = host.get_command_output(
             ['hg', 'heads', nx_vms_scm_info.branch, '--template={node|short}'],
             cwd=os.path.join(self.workspace_dir, 'nx_vms'),
             )
-        if nx_vms_scm_info.revision == head:
-            return False
-        log.warning('Checked out nx_vms revision is %s, but head is already %s; skipping this build',
-                        nx_vms_scm_info.revision, head)
-        return True
+        if nx_vms_scm_info.revision != head:
+            log.warning('Checked out nx_vms revision is %s, but head is already %s; skipping this build',
+                            nx_vms_scm_info.revision, head)
+            return True
+        return False
 
     def post_process(self, build_info, build_info_path, platform_build_info_map):
         # set bookmark if all platform are built successfuly
