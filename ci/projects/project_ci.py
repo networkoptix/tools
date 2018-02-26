@@ -58,6 +58,10 @@ class CiProject(BuildProject):
     def must_store_artifacts_in_different_customization_dirs(self):
         return False
 
+    @property
+    def deploy_webadmin_for_version(self):
+        return True
+
     def get_project_parameters(self):
         default_platforms = set(self.config.ci.platforms)
         return BuildProject.get_project_parameters(self) + [

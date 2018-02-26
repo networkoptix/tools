@@ -114,6 +114,10 @@ class BuildProject(NxVmsProject):
         return True
 
     @property
+    def deploy_webadmin_for_version(self):
+        return False
+
+    @property
     def project_name(self):
         if self.in_assist_mode:
             return 'assist-ci-%s' % self.jenkins_env.job_name
@@ -291,7 +295,11 @@ class BuildProject(NxVmsProject):
             )
         build_webadmin = self.params.build_webadmin is None or self.params.build_webadmin
         deploy_webadmin = self.params.deploy_webadmin is None or self.params.deploy_webadmin
-        command_list = job.run(do_build=build_webadmin, deploy=deploy_webadmin)
+        command_list = job.run(
+            do_build=build_webadmin,
+            deploy=deploy_webadmin,
+            deploy_for_version=self.deploy_webadmin_for_version,
+            )
         return command_list
 
 

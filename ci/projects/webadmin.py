@@ -37,13 +37,13 @@ class BuildWebAdminJob(object):
         self._repository = repository
         self._host = LocalHost()
 
-    def run(self, do_build, deploy):
+    def run(self, do_build, deploy, deploy_for_version):
         if do_build:
             run_id = self._do_build()
         result_path = os.path.join(self._build_dir, SERVER_EXTERNAL_DIR, SERVER_EXTERNAL_SUB_PATH)
         assert os.path.isfile(result_path), 'Webadmin was not built: build result is missing: %r' % result_path
         if do_build and deploy:
-            self._deploy(run_id)
+            self._deploy(run_id, deploy_for_version)
         return [StashCommand(WEBADMIN_STASH_NAME, [SERVER_EXTERNAL_SUB_PATH], os.path.join(BUILD_DIR, SERVER_EXTERNAL_DIR))]
 
     def _do_build(self):
@@ -66,12 +66,15 @@ class BuildWebAdminJob(object):
             log.error(error)
             return self._store_build_output(error, is_succeeded=False)
 
-    def _deploy(self, run_id):
+    def _deploy(self, run_id, deploy_for_version):
         self._prepare_packages_dir()
         deploy_script_path = os.path.join(self._workspace_dir, DEPLOY_SCRIPT_PATH)
+        args = [deploy_script_path]
+        if deploy_for_version:
+            args += ['--deploy-release-version']
         try:
             result = self._host.run_command(
-                [deploy_script_path],
+                args,
                 cwd=self._build_dir,
                 env=self._rdep_env,
                 check_retcode=False,
