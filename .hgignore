@@ -1,6 +1,7 @@
 subinclude:apidoctool/.hgignore
 subinclude:rdep/.hgignore
 subinclude:infra/playbooks/.hgignore
+subinclude:infra/jenkins_jobs/.hgignore
 
 syntax: glob
 .idea

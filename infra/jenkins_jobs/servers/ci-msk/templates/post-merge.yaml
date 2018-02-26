@@ -1,0 +1,27 @@
+- job-template:
+    name: post-merge.{project-name}.{branch-name}.build
+    id: ci-msk/post-merge
+
+    scm:
+    - hg-brb:
+        branch-name: '{branch-name}'
+        project-name: '{project-name}'
+
+    triggers:
+    - pollscm:
+        cron: "H/5 * * * *"
+
+    builders:
+    - shell:
+        !include-raw-escape: '../builders/{project-name}-build.sh'
+    - shell:
+        !include-raw-escape: '../builders/{project-name}-publish.sh'
+
+    publishers:
+    - archive:
+        allow-empty: true
+        artifacts: '**/nosetests.xml,logs/*'
+        latest-only: false
+    - description-setter:
+        regexp: "'Description string: (.*)'"
+        regexp-for-failed: "'Description string: (.*)'"

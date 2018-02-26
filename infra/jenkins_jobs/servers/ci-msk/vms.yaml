@@ -1,0 +1,10 @@
+- project:
+    name: vms post merge automatic builds
+
+    project-name: vms
+    branch-name:
+    - default
+    - 3.2_dev
+
+    jobs:
+    - ci-msk/post-merge

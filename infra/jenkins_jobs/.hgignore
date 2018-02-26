@@ -1,0 +1,7 @@
+syntax: glob
+
+.tox
+output
+*.pyc
+*.ini
+!tox.ini

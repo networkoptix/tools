@@ -1,0 +1,10 @@
+- scm:
+    name: hg-brb
+    scm:
+    - hg:
+        revision: '{branch-name}'
+        url: 'ssh://hg@hdw.mx/{project-name}'
+        credentials-id: '< FIXME: add real credentials >'
+        clean: false
+        subdir: '{project-name}'
+        disable-changelog: false
