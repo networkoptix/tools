@@ -93,13 +93,19 @@ class CiProject(BuildProject):
     def post_process(self, build_info, build_info_path, platform_build_info_map):
         # set bookmark if all platform are built successfuly
         if build_info.failed_build_platform_list:
+            log.info("Not all platform were built successfully; won't set a bookmark")
             return
+        if set(build_info.platform_list) < set(self.requested_platform_list):
+            log.warning("Not all platform builds were finished and stored to junk-shop; won't set a bookmark")
+            return
+        bookmark_name = HG_BOOKMARK_FORMAT.format(branch=self.nx_vms_branch_name)
+        log.info('All platforms were built successfully; setting bookmark %r', bookmark_name)
         writer = MercurialWriter(
             repository_dir=os.path.join(self.workspace_dir, 'nx_vms'),
             repository_url=self.config.services.mercurial_repository_url.rstrip('/') + '/nx_vms',
             ssh_key_path=self.credentials.jenkins_hg_push.key_path,
             )
-        writer.set_bookmark(HG_BOOKMARK_FORMAT.format(branch=self.nx_vms_branch_name))
+        writer.set_bookmark(bookmark_name)
 
     def make_email_recipient_list(self, build_info):
         if self.in_assist_mode:

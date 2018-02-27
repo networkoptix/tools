@@ -377,7 +377,7 @@ class BuildProject(NxVmsProject):
     # finalize =====================================================================================
     def stage_finalize(self):
         self.db_config.bind(models.db)
-        platform_build_info_map = dict(self._load_platform_build_info_map())  # (customization, name) -> platform build info
+        platform_build_info_map = dict(self._load_platform_build_info_map())  # (customization, platform) -> platform build info
         email_sender = EmailSender(self.config)
         with db_session:
             build_info = self._load_build_info()
