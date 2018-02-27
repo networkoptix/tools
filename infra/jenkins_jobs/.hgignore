@@ -1,7 +1,9 @@
 syntax: glob
 
-.tox
+*.tox
 output
 *.pyc
-*.ini
-!tox.ini
+
+syntax: regexp
+
+^(?!tox)\.ini
