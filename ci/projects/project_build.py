@@ -269,14 +269,21 @@ class BuildProject(NxVmsProject):
             for platform in self.requested_platform_list:
                 stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(customization, platform)
                 yield UnstashCommand(stash_name, ignore_missing=True)  # unstash platform build info
-                for t in ['distributive', 'update', 'qtpdb']:
+                for t in ['distributive', 'update', 'unit_tests', 'qtpdb']:
                     name = 'dist-%s-%s-%s' % (customization, platform, t)
                     dir = 'dist'
-                    if self.must_store_artifacts_in_different_customization_dirs:
-                        dir = os.path.join(dir, customization)
+                    subdir = self._make_artifact_subdir(t, customization, platform)
+                    if subdir:
+                        dir = os.path.join(dir, subdir)
                     yield UnstashCommand(name, dir, ignore_missing=True)
-                yield UnstashCommand('dist-%s-%s-%s' % (customization, platform, 'unit_tests'),
-                                         os.path.join('dist', 'unit_tests', customization, platform), ignore_missing=True)
+
+    def _make_artifact_subdir(self, t, customization, platform):
+        if t == 'unit_tests':
+            return os.path.join('unit_tests', customization, platform)
+        if self.must_store_artifacts_in_different_customization_dirs:
+            return customization
+        else:
+            return None
 
     def _make_workspace_name(self, job_name):
         workspace_name = '{}-{}-{}'.format(self.project_id, self.nx_vms_branch_name, job_name)
@@ -381,7 +388,7 @@ class BuildProject(NxVmsProject):
         email_sender = EmailSender(self.config)
         with db_session:
             build_info = self._load_build_info()
-            build_info_path = self._save_build_info_artifact(build_info)
+            build_info_path = self._save_build_info_artifact(platform_build_info_map, build_info)
             email_recipient_list = self.make_email_recipient_list(build_info)
             subject_and_html = email_sender.render_email(build_info, email_recipient_list, test_mode=self.in_assist_mode)
             command_list = (
@@ -427,7 +434,21 @@ class BuildProject(NxVmsProject):
         return loader.load_build_platform_list()
 
     # build_info file left along with artifacts
-    def _save_build_info_artifact(self, build_info):
+    def _save_build_info_artifact(self, platform_build_info_map, build_info):
+        file_list = []
+        for (customization, platform), platform_build_info in platform_build_info_map.items():
+            for t, artifact_list in platform_build_info.typed_artifact_list.items():
+                subdir = self._make_artifact_subdir(t, customization, platform)
+                for fname in artifact_list:
+                    if subdir:
+                        path = os.path.join(subdir, fname)
+                    else:
+                        path = fname
+                    file_list.append(dict(
+                        path=path,
+                        type=t,
+                        customization=customization,
+                        platform=platform))
         build_info = dict(
             project=self.project_name,
             branch=self.nx_vms_branch_name,
@@ -437,10 +458,11 @@ class BuildProject(NxVmsProject):
             cloud_group=self.cloud_group,
             failed_build_platform_list=map(str, build_info.failed_build_platform_list),  # avoid !!python/unicode in yaml
             failed_tests_platform_list=map(str, build_info.failed_tests_platform_list),
+            file_list=file_list,
             )
         path = BUILD_INFO_FILE
         with open(path, 'w') as f:
-            yaml.dump(build_info, f)
+            yaml.dump(build_info, f, default_flow_style=False)
         return path
 
     def _make_artifact_archiving_command_list(self, build_info_path):
