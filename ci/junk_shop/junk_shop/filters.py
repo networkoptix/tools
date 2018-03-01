@@ -22,7 +22,7 @@ class JinjaFilters(object):
             if name.startswith('_') or name == 'install': continue
             jinja_env.filters[name] = getattr(self, name)
 
-    def to_indent(self, value):
+    def to_ident(self, value):
         assert value, repr(value)
         assert isinstance(value, (str, unicode)), repr(value)
         result, repl_count = re.subn(r'[\s.-]+', '_', value)

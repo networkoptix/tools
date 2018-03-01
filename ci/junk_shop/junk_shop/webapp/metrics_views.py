@@ -10,8 +10,8 @@ from junk_shop.webapp import app
 from .utils import format_bytes
 
 
-# How many measured versions are taken to measure which server_count is to show
-MERGE_DURATION_DYNAMICS_LAST_VERSION_COUNT = 60
+# How many measured builds are taken to measure which server_count is to show
+MERGE_DURATION_DYNAMICS_LAST_BUILD_COUNT = 60
 # How many server count traces to show in merge time dynamics graph
 MAX_SERVER_COUNT_TRACES = 6
 
@@ -107,12 +107,12 @@ def fnmatch_list(name, pattern_list):
     return False
 
 
-def load_branch_platform_version_run_parameters(branch_name, platform_name, version):
+def load_branch_platform_build_run_parameters(branch_name, platform_name, build_num):
     parameters = {}  # name -> value set
     for (name, value) in select(
             (pv.run_parameter.name, pv.value)
             for run in models.Run for pv in run.run_parameters
-            if run.version == version and
+            if run.build_num == build_num and
                run.branch.name == branch_name and
                run.platform.name == platform_name):
         parameters.setdefault(name, set()).add(param_to_int(value))
@@ -130,9 +130,9 @@ def load_branch_platform_run_parameters(project_name, branch_name, platform_name
     return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
 
 
-# branch/platform/version page  =====================================================================
+# branch/platform/build page  =====================================================================
 
-def load_branch_platform_version_metrics(branch_name, platform_name, version):
+def load_branch_platform_build_metrics(branch_name, platform_name, build_num):
     accumulators = {}
     for use_lws, server_count, metric_name, metric_value in select(
             (use_lws_param.value, server_count_param.value, mv.metric.name, mv.value)
@@ -140,7 +140,7 @@ def load_branch_platform_version_metrics(branch_name, platform_name, version):
             for run in mv.run
             for use_lws_param in run.root_run.run_parameters
             for server_count_param in run.root_run.run_parameters
-            if run.root_run.version == version and
+            if run.root_run.build_num == build_num and
                run.root_run.branch.name == branch_name and
                run.root_run.platform.name == platform_name and
                use_lws_param.run_parameter.name == 'use_lightweight_servers' and
@@ -150,7 +150,7 @@ def load_branch_platform_version_metrics(branch_name, platform_name, version):
         acc.add_value(metric_value)
     return accumulators
 
-def generate_branch_platform_version_traces(accumulators):
+def generate_branch_platform_build_traces(accumulators):
     all_metric_names = sorted(set(metric_name for _, _, metric_name in accumulators))
     for use_lws in [True, False]:
         for metric_name in all_metric_names:
@@ -176,15 +176,15 @@ def generate_branch_platform_version_traces(accumulators):
             trace_name = metric_name.replace('host_memory_usage.', '')
             yield MetricTrace(trace_name, points, visible, yaxis, metric_name=metric_name, use_lws=use_lws)
 
-def load_branch_platform_version_metric_traces(branch_name, platform_name, version):
+def load_branch_platform_build_metric_traces(branch_name, platform_name, build_num):
 
     def pred(use_lws, is_memory_usage, trace):
         if not use_lws and trace.metric_name == 'total_bytes_sent': return False
         return (trace.use_lws == use_lws and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
 
-    accumulators = load_branch_platform_version_metrics(branch_name, platform_name, version)
-    trace_list = list(generate_branch_platform_version_traces(accumulators))
+    accumulators = load_branch_platform_build_metrics(branch_name, platform_name, build_num)
+    trace_list = list(generate_branch_platform_build_traces(accumulators))
     lws_traces = dict(
         has_total_bytes_sent=True,
         merge_duration=filter(partial(pred, True, False), trace_list),
@@ -197,16 +197,16 @@ def load_branch_platform_version_metric_traces(branch_name, platform_name, versi
         )
     return (lws_traces, full_traces)
 
-@app.route('/branch/<branch_name>/<platform_name>/<version>/metrics')
+@app.route('/branch/<branch_name>/<platform_name>/<build_num>/metrics')
 @db_session
-def branch_platform_version_metrics(branch_name, platform_name, version):
-    lws_traces, full_traces = load_branch_platform_version_metric_traces(branch_name, platform_name, version)
-    run_parameters = load_branch_platform_version_run_parameters(branch_name, platform_name, version)
+def branch_platform_build_metrics(branch_name, platform_name, build_num):
+    lws_traces, full_traces = load_branch_platform_build_metric_traces(branch_name, platform_name, build_num)
+    run_parameters = load_branch_platform_build_run_parameters(branch_name, platform_name, build_num)
     return render_template(
-        'branch_platform_version_metrics.html',
+        'branch_platform_build_metrics.html',
         branch_name=branch_name,
         platform_name=platform_name,
-        version=version,
+        build_num=build_num,
         lws_traces=lws_traces,
         full_traces=full_traces,
         run_parameters=run_parameters,
@@ -216,9 +216,9 @@ def branch_platform_version_metrics(branch_name, platform_name, version):
 # branch/platform page  =============================================================================
 
 def load_branch_platform_metrics(project_name, branch_name, platform_name):
-    accumulators = {}  # (metric_name, version, server_count) -> MetricAcculumator
-    for metric_name, version, use_lws, server_count, metric_value in select(
-            (mv.metric.name, run.root_run.build.version, use_lws_param.value, server_count_param.value, mv.value)
+    accumulators = {}  # (metric_name, build_num, server_count) -> MetricAcculumator
+    for metric_name, build_num, use_lws, server_count, metric_value in select(
+            (mv.metric.name, run.root_run.build.build_num, use_lws_param.value, server_count_param.value, mv.value)
             for mv in models.MetricValue
             for run in mv.run
             for use_lws_param in run.root_run.run_parameters
@@ -232,19 +232,19 @@ def load_branch_platform_metrics(project_name, branch_name, platform_name):
                 mv.metric.name.startswith('host_memory_usage.'))
             ):
         server_count = int(server_count)
-        acc = accumulators.setdefault((metric_name, param_to_bool(use_lws), version, server_count), MetricAccumulator())
+        acc = accumulators.setdefault((metric_name, param_to_bool(use_lws), build_num, server_count), MetricAccumulator())
         acc.add_value(metric_value)
     return accumulators
 
 def generate_branch_platform_traces(accumulators):
-    all_versions = set(version for _, _, version, _ in accumulators)
-    versions = sorted(all_versions)[-MERGE_DURATION_DYNAMICS_LAST_VERSION_COUNT:]
-    versions_set = set(versions)
+    all_build_nums = set(build_num for _, _, build_num, _ in accumulators)
+    build_nums = sorted(all_build_nums)[-MERGE_DURATION_DYNAMICS_LAST_BUILD_COUNT:]
+    build_nums_set = set(build_nums)
     all_metrics = sorted(set(metric_name for metric_name, _, _, _ in accumulators))
     for use_lws in [True, False]:
         last_server_counts = {}
-        for _, acc_use_lws, version, server_count in accumulators:
-            if acc_use_lws == use_lws and version in versions_set:
+        for _, acc_use_lws, build_num, server_count in accumulators:
+            if acc_use_lws == use_lws and build_num in build_nums_set:
                 last_server_counts[server_count] = last_server_counts.get(server_count, 0) + 1
         # show greatest server counts from last runs, in descending order
         show_server_counts = sorted(last_server_counts, reverse=True)[:MAX_SERVER_COUNT_TRACES]
@@ -255,13 +255,13 @@ def generate_branch_platform_traces(accumulators):
                 else:
                     Point = BytesPoint
                 point_list = []
-                for version in versions:
-                    acc = accumulators.get((metric_name, use_lws, version, server_count))
+                for build_num in build_nums:
+                    acc = accumulators.get((metric_name, use_lws, build_num, server_count))
                     if acc:
                         value = acc.mean
                     else:
                         value = None
-                    point_list.append(Point(version, value))
+                    point_list.append(Point(build_num, value))
                 trace_name = '%d servers' % server_count
                 if metric_name.startswith('host_memory_usage.'):
                     trace_name += ' - ' + metric_name.replace('host_memory_usage.', '')
