@@ -12,7 +12,7 @@ class MercurialWriter(object):
         self._host = LocalHost()
 
     def set_bookmark(self, bookmark):
-        self._run_hg_command(['bookmark', bookmark])
+        self._run_hg_command(['bookmark', '--force', bookmark])
         self._run_hg_command(['push', '-B', bookmark], check_retcode=False)  # hg returns 1 when pushing only bookmarks
 
     def _run_hg_command(self, args, check_retcode=True):
