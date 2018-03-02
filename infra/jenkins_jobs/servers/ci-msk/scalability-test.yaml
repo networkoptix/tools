@@ -1,0 +1,148 @@
+# run scalability test as downstream job
+
+- builder:
+    name: wget-artifact
+    builders:
+      - shell: |
+          cd {dest-dir}
+          wget --auth-no-challenge --user=$upstream_user --password=$upstream_password --no-verbose --timestamping \
+              {upstream_jenkins}/job/{upstream_project}/job/{branch}/{build_num}/artifact/{artifact}
+
+- builder:
+    name: bathon
+    builders:
+      - shell: |
+          {venv}/bin/python -c "{command}"
+
+
+- builder:
+    name: run-scalability-test
+    builders:
+      - extended-bash:
+          headers: |
+            inject USE_LIGHTWEIGHT_SERVERS {use_lightweight_servers}
+            inject SERVER_COUNT {server_count}
+          script:
+            !include-raw-escape: scripts/run-scalability-test.sh
+
+
+- job-template:
+    name: '{branch}-scalability'
+    node: scalability
+#    node: spin_ubuntu_16
+    triggers:
+      - pollurl:
+          cron: '* * * * *'
+          polling-node: poller
+          urls:
+            - url: '{upstream_jenkins}/job/{upstream_project}/job/{branch}/lastSuccessfulBuild/artifact/build_info.yaml'
+              username: $upstream_user
+              password: $upstream_password
+              check-content:
+                - simple: true
+    wrappers:
+      - build-keeper:
+          policy: by-day
+          build-period: 10
+      - timeout:
+          timeout: 180  # minutes
+      - timestamps
+      - credentials-binding:
+          - username-password-separated:
+              credential-id: megatron-jenkins-login
+              username: upstream_user
+              password: upstream_password
+          - username-password:
+              credential-id: junk_shop_db
+              variable: junk_shop_db_credentials
+    scm:
+      - hg-la:
+          project-name: devtools
+          branch-name: default
+      - hg-la:
+          project-name: nx_vms
+          branch-name: '{branch}'
+    builders:
+      - shell: |
+          echo "Running {name} for {branch} from {upstream_project} user=[$upstream_user] password=[$upstream_password]"
+          rm -r dist/build_info.yaml || true
+          mkdir -p dist work
+          virtualenv --system-site-packages work/venv
+          . work/venv/bin/activate
+          pip install -r devtools/ci/junk_shop/requirements.txt
+          pip install -r nx_vms/func_tests/requirements.txt
+      - wget-artifact:
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          build_num: lastSuccessfulBuild
+          dest-dir: dist
+          artifact: build_info.yaml
+      - bathon:
+          venv: work/venv
+          command:
+            !include-raw: scripts/process-build-info.py
+      - inject:
+            properties-file: scalability.envfile
+      - wget-artifact:
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          build_num: $build_num
+          dest-dir: dist
+          artifact: $server_deb_path
+      - wget-artifact:
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          build_num: $build_num
+          dest-dir: dist
+          artifact: $appserver2_ut_path
+      - shell: |
+          mkdir -p bin
+          chmod +x $(pwd)/dist/appserver2_ut  # wget does not preserve permissions
+          ln -sf $(pwd)/dist/appserver2_ut bin/appserver2_ut
+          ln -sf $(pwd)/dist/$(basename $server_deb_path) bin/mediaserver.deb
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 50
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 100
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 150
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 200
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 250
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 20
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 40
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 60
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 80
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 100
+
+
+- project:
+    name: scalability_test
+    customization: hanwha
+    platform: linux-x64
+    upstream_jenkins: http://jenkins.enk.me
+    upstream_project: ci
+    jobs:
+      - '{branch}-scalability':
+          branch: vms_3.2_dev
+      - '{branch}-scalability':
+          branch: vms

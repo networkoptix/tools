@@ -1,0 +1,69 @@
+- builder:
+    # Helper macros to concatenate 2 text blocks which could come from
+    # different sources (from files by !include-raw-escape: and typed inline)
+    # This macros is needed to build macros from below with included list
+    # of core includes.
+    #
+    name: __combine_shell
+    builders:
+    - shell: |
+        {head}
+        {tail}
+
+- builder:
+    name: extended-bash
+    #
+    # Very cool wrapper for bash scripts that exposes some core functionality and
+    # could be easily extended without copy-pasting original scripts.
+    #
+    # So using it you can execute script and inject results to jenkins env easily
+    #
+    # NOTE: headers should be used for including existing sh files which should contain
+    #       only function declaration (and no self-executive code) for easier debugging
+    #       and extending.
+    #
+    #
+    # Core things
+    #
+    #   inject <VAR_NAME> [<VAR_VALUE>]         injects some k-v to into jenkins env
+    #                                           DON'T `inject VAR_NAME=VAR_VALUE`
+    # sample usage:
+    #
+    # builders:
+    # - extended-bash:
+    #     headers: ''
+    #     script: |
+    #       if [ $JOB_NAME -eq 'my.job' ] ; then
+    #         inject MY_VARIABLE 42
+    #       fi
+    #
+    # builders:
+    # - extended-bash:
+    #     headers:
+    #       !include-raw-escape:
+    #         - functions-definition.sh
+    #         - some-other-functions-definitions.sh
+    #         - more-headers.sh
+    #     script: |
+    #       importedFunction arg1 arg2
+
+    builders:
+
+    # create file with list of future injections or clean it if exists
+    - shell: echo > inject-with-bash.envfile
+
+    - __combine_shell:
+        # includes all core functionality
+        head:
+          !include-raw-escape:
+            - 'includes/jenkins.lib.sh'
+            - 'includes/strings.lib.sh'
+        # entry points for additional imports and raw script
+        tail: |
+          {headers}
+          {script}
+
+    # inject file and remove it
+    - inject-properties-file:
+        properties-file: 'inject-with-bash.envfile'
+    - shell: rm -vf inject-with-bash.envfile
