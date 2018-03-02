@@ -31,15 +31,9 @@
     node: scalability
 #    node: spin_ubuntu_16
     triggers:
-      - pollurl:
-          cron: '* * * * *'
-          polling-node: poller
-          urls:
-            - url: '{upstream_jenkins}/job/{upstream_project}/job/{branch}/lastSuccessfulBuild/artifact/build_info.yaml'
-              username: $upstream_user
-              password: $upstream_password
-              check-content:
-                - simple: true
+      - reverse:
+          jobs: ci/{branch}
+          result: unstable  # failed tests must not prevent us from running
     wrappers:
       - build-keeper:
           policy: by-day
@@ -137,7 +131,6 @@
 
 - project:
     name: scalability_test
-    customization: hanwha
     platform: linux-x64
     upstream_jenkins: http://jenkins.enk.me
     upstream_project: ci
