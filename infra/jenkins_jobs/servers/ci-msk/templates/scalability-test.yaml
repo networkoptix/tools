@@ -70,21 +70,21 @@
           chmod +x $(pwd)/dist/appserver2_ut  # wget does not preserve permissions
           ln -sf $(pwd)/dist/appserver2_ut bin/appserver2_ut
           ln -sf $(pwd)/dist/$(basename $server_deb_path) bin/mediaserver.deb
-#      - run-scalability-test:
-#          use_lightweight_servers: 'true'
-#          server_count: 50
-#      - run-scalability-test:
-#          use_lightweight_servers: 'true'
-#          server_count: 100
-#      - run-scalability-test:
-#          use_lightweight_servers: 'true'
-#          server_count: 150
-#      - run-scalability-test:
-#          use_lightweight_servers: 'true'
-#          server_count: 200
-#      - run-scalability-test:
-#          use_lightweight_servers: 'true'
-#          server_count: 250
+      - run-scalability-test:
+          use_lightweight_servers: 'true'
+          server_count: 50
+      - run-scalability-test:
+          use_lightweight_servers: 'true'
+          server_count: 100
+      - run-scalability-test:
+          use_lightweight_servers: 'true'
+          server_count: 150
+      - run-scalability-test:
+          use_lightweight_servers: 'true'
+          server_count: 200
+      - run-scalability-test:
+          use_lightweight_servers: 'true'
+          server_count: 250
       - run-scalability-test:
           use_lightweight_servers: 'false'
           server_count: 20
