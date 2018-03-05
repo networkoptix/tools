@@ -97,7 +97,7 @@ class ReleaseProject(BuildProject):
         deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
-            ssh_key_file=self.credentials.deploy.key_path,
+            ssh_key_file=None,  # default key from .ssh is ok
             build_num=self.jenkins_env.build_number,
             branch=self.nx_vms_branch_name,
             )
