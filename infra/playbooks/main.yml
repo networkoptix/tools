@@ -48,6 +48,17 @@
   - role: nickjj.docker
   - role: depcon
 
+- name: Setup Megatron temporary shelter
+  hosts: mega_shelter
+  become: true
+  become_method: sudo
+  gather_facts: yes
+
+  roles:
+  - role: sudoers_nopassword
+  - role: ANXS.generic-users
+  - role: nickjj.docker
+
 - name: Setup Jenkins Master(s)
   hosts: jenkins
 

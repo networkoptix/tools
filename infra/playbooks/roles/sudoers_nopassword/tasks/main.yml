@@ -1,0 +1,6 @@
+- name: Allow sudoers to run sudo without password
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: present
+    regexp: "^{{ '%sudo' | regex_escape() }}"
+    line: "%sudo   ALL=(ALL) NOPASSWD:ALL"

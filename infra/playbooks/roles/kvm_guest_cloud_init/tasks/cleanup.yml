@@ -5,6 +5,7 @@
     content: attribute
     attribute: dev
   when: "kvm_guest__state == 'running'"
+  failed_when: false
   register: _cloud_init_cd_info
   delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
 

@@ -4,14 +4,17 @@ kvm_guest__state: running
 kvm_guest__type: linux
 kvm_guest__distribution: Ubuntu
 kvm_guest__distribution_release: "xenial"
-kvm_guest__extra_system_image_size_gb: "1000"
-kvm_guest__memory: "{{ 100 * 1024 * 1024 }}"  # 100 GiB
-kvm_guest__cpus: 36
+kvm_guest__extra_system_image_size_gb: "120"
+kvm_guest__memory: "{{ 10 * 1024 * 1024 }}"
+kvm_guest__cpus: 2
 
 networks:
 - source_dev: eno1
   model_type: rtl8139
   address_slot: 3
+- source_dev: eno2
+  model_type: rtl8139
+  address_slot: 9
 
 interfaces:
 - name:             ens3
@@ -23,3 +26,13 @@ interfaces:
     gateway:        "{{ office_net_gateway }}"
     dns-search:     "{{ office_net_dns_search }}"
     dns-nameservers: "{{ office_net_dns_nameservers }}"
+- name:             ens9
+  type:             static
+  # 192.168.13.101-192.168.13.150 /24
+  # FIXME: get rid of hardcode
+  options:
+    address:        "192.168.13.112"
+    netmask:        "255.255.255.0"
+
+# FIXME We need dedicated name in local network (office)
+jenkins_hostname: "{{ ansible_ssh_host }}"
