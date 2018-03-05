@@ -34,17 +34,18 @@ class Deployer(object):
             for platform in platform_list:
                 platform_config = self._config.platforms[platform]
                 platform_build_info = platform_build_info_map[(customization, platform)]
-                self._deploy_platform_artifacts(platform_config, customization, platform, platform_build_info, src_dir, target_dir)
+                self._deploy_platform_artifacts(platform_config, customization, platform, platform_build_info, src_root_dir, src_dir, target_dir)
 
     def _deploy_build_info(self, build_info_path, target_dir):
         src_dir, name = os.path.split(build_info_path)
         self._put_file(src_dir, target_dir, name)
 
-    def _deploy_platform_artifacts(self, platform_config, customization, platform, platform_build_info, src_dir, target_dir):
+    def _deploy_platform_artifacts(self, platform_config, customization, platform, platform_build_info, src_root_dir, src_dir, target_dir):
         self._deploy_distributives(platform_config, customization, platform_build_info, src_dir, target_dir)
         self._deploy_updates(platform_config, customization, platform_build_info, src_dir, target_dir)
+        self._deploy_unit_tests(platform_config, customization, platform, platform_build_info, src_root_dir, target_dir)
         self._deploy_qtpdb(platform_config, customization, platform, platform_build_info, src_dir, target_dir)
-        self._deploy_misc(platform_config, customization, platform, platform_build_info, src_dir, target_dir)
+        self._deploy_misc(platform_config, customization, platform, platform_build_info, src_root_dir, target_dir)
 
     def _deploy_distributives(self, platform_config, customization, platform_build_info, src_dir, target_root_dir):
         # to <build-num>-<branch>/<customization>/<platform-publish-dir>/
@@ -64,8 +65,16 @@ class Deployer(object):
         for name in platform_build_info.typed_artifact_list.get('qtpdb', []):
             self._put_file(src_dir, target_dir, name)
 
-    def _deploy_misc(self, platform_config, customization, platform, platform_build_info, src_dir, target_root_dir):
+    def _deploy_unit_tests(self, platform_config, customization, platform, platform_build_info, src_root_dir, target_root_dir):
+        # to <build-num>-<branch>/<customization>/unit_tests/<platform>
+        src_dir = os.path.join(src_root_dir, 'unit_tests', customization, platform)
+        target_dir = os.path.join(target_root_dir, customization, 'unit_tests', platform)
+        for name in platform_build_info.typed_artifact_list.get('unit_tests', []):
+            self._put_file(src_dir, target_dir, name)
+
+    def _deploy_misc(self, platform_config, customization, platform, platform_build_info, src_root_dir, target_root_dir):
         # to <build-num>-<branch>/<customization>/misc/<platform>
+        src_dir = os.path.join(src_root_dir, 'misc', customization, platform)
         target_dir = os.path.join(target_root_dir, customization, 'misc', platform)
         for name in platform_build_info.typed_artifact_list.get('misc', []):
             self._put_file(src_dir, target_dir, name)

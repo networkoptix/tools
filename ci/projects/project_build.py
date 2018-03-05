@@ -269,7 +269,7 @@ class BuildProject(NxVmsProject):
             for platform in self.requested_platform_list:
                 stash_name = BUILD_INFO_STASH_NAME_FORMAT.format(customization, platform)
                 yield UnstashCommand(stash_name, ignore_missing=True)  # unstash platform build info
-                for t in ['distributive', 'update', 'unit_tests', 'qtpdb']:
+                for t in ['distributive', 'update', 'unit_tests', 'qtpdb', 'misc']:
                     name = 'dist-%s-%s-%s' % (customization, platform, t)
                     dir = 'dist'
                     subdir = self._make_artifact_subdir(t, customization, platform)
@@ -278,8 +278,8 @@ class BuildProject(NxVmsProject):
                     yield UnstashCommand(name, dir, ignore_missing=True)
 
     def _make_artifact_subdir(self, t, customization, platform):
-        if t == 'unit_tests':
-            return os.path.join('unit_tests', customization, platform)
+        if t in ['unit_tests', 'misc']:
+            return os.path.join(t, customization, platform)
         if self.must_store_artifacts_in_different_customization_dirs:
             return customization
         else:
