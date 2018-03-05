@@ -1,0 +1,24 @@
+- builder:
+    name: run-scalability-test
+    # A wrapper for starting scalability test
+    #
+    # Required template variables:
+    #   use_lightweight_servers
+    #   server_count
+    #
+    # Required environment variables:
+    #   $build_num
+    #   $platform
+    #   $customization
+    #   $branch
+    #   $junk_shop_db_credentials
+    builders:
+    - extended-bash:
+        headers: |
+          #!/bin/bash
+          set -ex
+
+          export USE_LIGHTWEIGHT_SERVERS={use_lightweight_servers}
+          export SERVER_COUNT={server_count}
+        script:
+          !include-raw-escape: ../builders/run-scalability-test.sh

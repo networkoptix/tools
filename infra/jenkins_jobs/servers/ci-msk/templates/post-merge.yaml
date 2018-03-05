@@ -3,7 +3,7 @@
     id: ci-msk/post-merge
 
     scm:
-    - hg-brb:
+    - hg-la:
         branch-name: '{branch-name}'
         project-name: '{project-name}'
 

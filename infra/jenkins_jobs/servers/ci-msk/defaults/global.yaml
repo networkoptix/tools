@@ -14,5 +14,3 @@
       numToKeep: -1
       artifactDaysToKeep: -1
       artifactNumToKeep: -1
-
-    hg_default_credentials: '< FIXME: add real credentials >'

@@ -44,7 +44,7 @@ options=(
     "--tests-config-file=$workspace_dir/$TEST_CONFIG_PATH"
     )
 
-. work/venv/bin/activate
+source work/venv/bin/activate
 
 export PYTHONPATH=$workspace_dir/devtools/ci/junk_shop
 export PYTEST_PLUGINS=junk_shop.pytest_plugin

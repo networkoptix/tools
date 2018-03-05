@@ -1,0 +1,32 @@
+- builder:
+    name: setup-scalability-env
+    builders:
+    - shell: |
+        #! /bin/bash
+        set -ex
+
+        if [ -f dist/build_info.yaml ] ; then
+          rm dist/build_info.yaml
+        fi
+        mkdir -p dist work
+        virtualenv --system-site-packages work/venv
+
+        source work/venv/bin/activate
+          pip install -r devtools/ci/junk_shop/requirements.txt
+          pip install -r nx_vms/func_tests/requirements.txt
+
+    - wget-artifact:
+        upstream_jenkins: '{upstream_jenkins}'
+        upstream_project: '{upstream_project}'
+        branch: '{branch}'
+        build_num: lastSuccessfulBuild
+        dest-dir: dist
+        artifact: build_info.yaml
+
+    - inline-python:
+        venv: work/venv
+        command:
+          !include-raw: ../builders/process-build-info.py
+
+    - inject:
+        properties-file: scalability.envfile

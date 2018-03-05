@@ -1,0 +1,112 @@
+# run scalability test as downstream job
+
+- job-template:
+    name: '{branch}-scalability'
+    node: scalability # spin_ubuntu_16
+
+    description: |
+      Run scalability tests using {upstream_jenkins} Jenkins artifacts.
+
+    wrappers:
+    - build-keeper:
+        policy: by-day
+        build-period: 10
+    - timeout:
+        timeout: 180  # minutes
+    - timestamps
+    - credentials-binding:
+      - username-password-separated:
+          credential-id: megatron-jenkins-login
+          username: upstream_user
+          password: upstream_password
+      - username-password:
+          credential-id: junk_shop_db
+          variable: junk_shop_db_credentials
+
+    triggers:
+    - reverse:
+        jobs: ci/{branch}
+        result: unstable  # failed tests must not prevent us from running
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '{branch}'
+
+    builders:
+
+      - setup-scalability-env:
+          platform: '{platform}'
+          name: '{name}'
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          upstream_user: $upstream_user
+          upstream_password: $upstream_password
+
+      - wget-artifact:
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          build_num: $build_num
+          dest-dir: dist
+          artifact: $server_deb_path
+      - wget-artifact:
+          upstream_jenkins: '{upstream_jenkins}'
+          upstream_project: '{upstream_project}'
+          branch: '{branch}'
+          build_num: $build_num
+          dest-dir: dist
+          artifact: $appserver2_ut_path
+
+      - shell: |
+          #!/bin/bash
+          set -ex
+
+          mkdir -p bin
+          chmod +x $(pwd)/dist/appserver2_ut  # wget does not preserve permissions
+          ln -sf $(pwd)/dist/appserver2_ut bin/appserver2_ut
+          ln -sf $(pwd)/dist/$(basename $server_deb_path) bin/mediaserver.deb
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 50
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 100
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 150
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 200
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 250
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 20
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 40
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 60
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 80
+      - run-scalability-test:
+          use_lightweight_servers: 'false'
+          server_count: 100
+
+    publishers:
+    - archive:
+        allow-empty: true
+        artifacts: 'scalability.envfile'
+        latest-only: false
+    - archive:
+        allow-empty: true
+        artifacts: 'dist/build_info.yaml'
+        latest-only: false
