@@ -1,0 +1,12 @@
+- name: "Download image {{ item.name }} (may take a lot of time)"
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.pool }}/{{ item.name }}"
+    checksum: "{{ item.checksum.method }}:{{ item.checksum.value }}"
+  when: item.checksum is defined
+
+- name: "Download image {{ item.name }} (may take a lot of time)"
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.pool }}/{{ item.name }}"
+  when: item.checksum is not defined

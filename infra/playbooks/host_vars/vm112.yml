@@ -1,6 +1,9 @@
 kvm_host: alpha
 kvm_guest__state: running
 
+kvm_guest__type: linux
+kvm_guest__distribution: Ubuntu
+kvm_guest__distribution_release: "xenial"
 kvm_guest__extra_system_image_size_gb: "5"
 kvm_guest__memory: "{{ 2 * 1024 * 1024 }}"
 kvm_guest__cpus: 2

@@ -1,0 +1,25 @@
+- name: Prepare system images
+  include_tasks: prepare_image.yml
+  when: kvm_guest__current_state == 'undefined'
+
+- name: "Define {{ kvm_guest__hostname }}"
+  virt:
+    name: "{{ kvm_guest__hostname }}"
+    command: define
+    xml: "{{ lookup('template', 'domain.xml.j2') }}"
+  delegate_to: "{{ kvm_host }}"
+  when: kvm_guest__current_state == 'undefined'
+
+- name: "Stop {{ kvm_guest__hostname }}"
+  virt:
+    name: "{{ kvm_guest__hostname }}"
+    command: destroy
+  delegate_to: "{{ kvm_host }}"
+  when: kvm_guest__current_state == 'running'
+
+- name: Gather all facts about host and its VM
+  include_tasks: get_facts.yml
+
+- assert:
+    that:
+    - kvm_guest__current_state == 'shutdown'

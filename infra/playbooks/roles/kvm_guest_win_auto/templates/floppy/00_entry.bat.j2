@@ -1,0 +1,26 @@
+REM TODO: add users, configure network and do other kind of things.
+REM At this step the following variables are available
+REM
+REM users:
+REM {% for user in kvm_guest__initial_users %}
+REM   name: {{ user.name }}
+REM   password: {{ user.password }}
+REM   sudo: {{ user.sudo }}
+REM   group: {{ user.group }}
+REM   shell: {{ user.shell }}
+REM
+REM   ssh keys:
+REM   {% for key in user["ssh-authorized-keys"] %}
+REM     pubkey: {{ key }}
+REM   {% endfor %}
+REM {% endfor %}
+REM
+REM required packages
+REM {% for package in kvm_guest__initial_packages %}
+REM   package name: {{ package }}
+REM {% endfor %}
+REM
+REM ...
+REM
+REM
+REM TODO: We need to implement user creation and network configuration somehow

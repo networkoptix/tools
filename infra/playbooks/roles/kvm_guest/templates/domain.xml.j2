@@ -61,7 +61,7 @@
     <graphics type='spice' autoport='yes'/>
 {% endif %}
 
-{% for disk in kvm_guest__disks %}
+{% for disk in kvm_guest__disks_final %}
   {# Type of disk: file|block|dir|network|volume #}
   {# Only files are supported for now #}
   {% set disk_type   = "file" %}
@@ -84,12 +84,14 @@
       "scsi"  : "sd",
       "sd"    : "sd",
       "ide"   : "hd",
+      "fdc"   : "fd",
     }[ target_bus | lower ] ~ "abcdefghijklmnopqrstuvwxyz"[loop.index0] %}
   {% set readonly    = disk.readonly is defined and disk.readonly == true %}
 
   {# When disk is represented as file on host #}
   {% if disk_type == "file" %}
     <disk type='{{ disk_type }}' device='{{ disk_device }}'>
+      {# FIXME this is a workaround for floppy, it definetely has some driver #}
       <driver name='{{ driver_name }}' type='{{ driver_type }}'/>
       <source file='{{ source_file }}'/>
       <target dev='{{ target_dev }}' bus='{{ target_bus }}'/>
@@ -122,6 +124,10 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
+    {# required for mostly Windows #}
+    <graphics type='spice' autoport='yes'>
+      <listen type='address'/>
+    </graphics>
 
   </devices>
 

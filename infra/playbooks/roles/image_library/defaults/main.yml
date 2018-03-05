@@ -1,0 +1,27 @@
+packer_home: /var/lib/packer
+libvirt_pool: /var/lib/libvirt/images
+force_rebuild_win_server: true
+build_win2018_server: false
+
+images:
+- name: "14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_EN-US.ISO"
+  # Windows 2018 server installation media
+  pool: "/var/lib/libvirt/images"
+  url: "http://care.dlservice.microsoft.com/dl/download/1/4/9/149D5452-9B29-4274-B6B3-5361DBDA30BC/14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_EN-US.ISO"
+  checksum:
+    method: md5
+    value: 70721288bbcdfe3239d8f8c0fae55f1f
+
+- name: "virtio-win_amd64.vfd"
+  # Official Virtio drivers for Windows by Fedora
+  pool: "/var/lib/libvirt/images"
+  url: "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win_amd64.vfd"
+  checksum:
+    method: md5
+    value: fb42f188b5da8515850a9a12d9f40028
+
+- name: "xenial-server-cloudimg-amd64-disk1.img"
+  # ubuntu xenial cloud init base image
+  pool: "/var/lib/libvirt/images"
+  # The is that they save only latest +/- few days ISOs
+  url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-disk1.img

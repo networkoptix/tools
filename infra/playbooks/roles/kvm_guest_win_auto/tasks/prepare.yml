@@ -1,0 +1,70 @@
+- name: Unmount
+  mount:
+    path: "{{ kvm_guest__metainfo_path }}/floppy"
+    state: absent
+  delegate_to: "{{ kvm_host }}"
+
+- name: Clean previous data
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ kvm_guest__metainfo_path }}"
+  - "{{ kvm_guest__metainfo_boot_image }}"
+  delegate_to: "{{ kvm_host }}"
+
+- name: Create VM init folder
+  file:
+    path: "{{ kvm_guest__metainfo_path }}"
+    state: directory
+  delegate_to: "{{ kvm_host }}"
+
+- name: Make floppy image
+  command: sudo /sbin/mkfs.msdos -C {{ kvm_guest__metainfo_boot_image }} 1440
+  delegate_to: "{{ kvm_host }}"
+
+- name: Prepare mount
+  file:
+    path: "{{ kvm_guest__metainfo_path }}/floppy"
+    state: directory
+  delegate_to: "{{ kvm_host }}"
+
+- name: Mount
+  mount:
+    path: "{{ kvm_guest__metainfo_path }}/floppy"
+    src: "{{ kvm_guest__metainfo_boot_image }}"
+    state: mounted
+    opts: loop,rw
+    fstype: auto
+  delegate_to: "{{ kvm_host }}"
+
+- name: "Generate guest"
+  template:
+    src: "floppy/{{ item }}.j2"
+    dest: "{{ kvm_guest__metainfo_path }}/floppy/{{ item }}"
+  delegate_to: "{{ kvm_host }}"
+  with_items:
+  - 00_entry.bat
+
+- name: Copy just files (w/o templating)
+  copy:
+    src: files/floppy
+    dest: "{{ kvm_guest__metainfo_path }}"
+    directory_mode: yes
+  delegate_to: "{{ kvm_host }}"
+
+- name: Unmount
+  mount:
+    path: "{{ kvm_guest__metainfo_path }}/floppy"
+    state: absent
+  delegate_to: "{{ kvm_host }}"
+
+- set_fact:
+    kvm_guest__floppy_disk_spec:
+      device: floppy
+      driver_type: raw
+      source_file: "{{ kvm_guest__metainfo_boot_image }}"
+      target_bus: fdc
+
+- set_fact:
+    kvm_guest__disks_final: "{{ kvm_guest__disks + [ kvm_guest__floppy_disk_spec ] }}"

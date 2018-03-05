@@ -17,9 +17,6 @@
     kvm_guest__current_state: "undefined"
   when: domstate.status is undefined
 
-- debug:
-    msg: 'Current state is "{{ kvm_guest__current_state }}"'
-
 - name: Wait for VM connection
   wait_for_connection:
     sleep: 1
@@ -43,11 +40,3 @@
   set_fact:
     domain_xml: "{{ dumpxml.stdout }}"
   when: dumpxml is defined
-
-# - name: Wait for {{ kvm_guest__hostname }} to become reachable
-
-
-# - name: Gather facts if guest is running
-#   setup:
-#   when: "kvm_guest__current_state == 'running'"
-#   failed_when: false

@@ -1,0 +1,23 @@
+- name: Get VM init floppy dev name
+  xml:
+    xmlstring: "{{ domain_xml }}"
+    xpath: '/domain/devices/disk[source/@file="{{ kvm_guest__metainfo_boot_image }}"]/target'
+    content: attribute
+    attribute: dev
+  when: "kvm_guest__state == 'running'"
+  register: _vm_init_media_info
+  delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
+
+- name: Eject Cloud init CD
+  become: true
+  become_method: sudo
+  command: >-
+    virsh change-media {{ kvm_guest__hostname }}
+    {{ _vm_init_media_info.matches[0].target.dev }} --eject
+  when:
+  - _vm_init_media_info.matches is defined
+  - _vm_init_media_info.matches[0].target.dev is defined
+  - >-
+    _vm_init_media_info.matches[0].target.tray is undefined or
+    _vm_init_media_info.matches[0].target.tray != 'open'
+  delegate_to: "{{ kvm_host }}"

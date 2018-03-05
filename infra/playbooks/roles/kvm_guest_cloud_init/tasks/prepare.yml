@@ -1,0 +1,41 @@
+- name: Clean previous data
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ kvm_guest__metainfo_path }}"
+  - "{{ kvm_guest__metainfo_boot_image }}"
+  delegate_to: "{{ kvm_host }}"
+
+- name: Create cloud-init dir
+  file:
+    path: "{{ kvm_guest__metainfo_path }}"
+    state: directory
+  delegate_to: "{{ kvm_host }}"
+
+- name: "Generate cloud-init files"
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ kvm_guest__metainfo_path }}/{{ item }}"
+  delegate_to: "{{ kvm_host }}"
+  with_items:
+  - meta-data
+  - user-data
+
+- name: "Generate guest cloud-init boot image"
+  command: >
+    genisoimage -output {{ kvm_guest__metainfo_boot_image }}
+    -volid cidata -joliet -r user-data meta-data
+  args:
+    chdir: "{{ kvm_guest__metainfo_path }}/"
+  delegate_to: "{{ kvm_host }}"
+
+- set_fact:
+    kvm_guest__cloud_init_disk_spec:
+      device: cdrom
+      driver_type: raw
+      source_file: "{{ kvm_guest__metainfo_boot_image }}"
+      target_bus: ide
+
+- set_fact:
+    kvm_guest__disks_final: "{{ kvm_guest__disks + [ kvm_guest__cloud_init_disk_spec ] }}"

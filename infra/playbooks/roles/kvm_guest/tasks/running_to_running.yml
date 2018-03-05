@@ -1,8 +1,0 @@
-- name: Add guest's inventory name to /etc/hosts
-  lineinfile:
-    line: 127.0.0.1 {{ kvm_guest__hostname }}
-    path: /etc/hosts
-  when: "kvm_guest__state == 'running'"
-  check_mode: no
-
-- include: post_cloud_init.yml

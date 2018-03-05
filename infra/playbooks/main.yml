@@ -6,6 +6,8 @@
   roles:
   - role: alphabet_common
   - role: kvm_host
+  # TODO we need to move base images to NAS and extract image creation project
+  - role: image_library
 
 - name: Create guest VMs
   hosts: virtual

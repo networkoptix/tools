@@ -1,20 +1,17 @@
 kvm_guest__domain_type : kvm
 
-kvm_guest__distribution: Ubuntu
-kvm_guest__distribution_release: "xenial"
+kvm_guest__type: linux
 kvm_guest__extra_system_image_size_gb: "50"
 kvm_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
 kvm_guest__memory: "{{ kvm_guest__memory_kib }}"
 kvm_guest__cpus: 4
 kvm_guest__hostname: "{{ inventory_hostname }}"
 
-kvm_guest__base_image_url: https://cloud-images.ubuntu.com/xenial/20180205/xenial-server-cloudimg-amd64-disk1.img
-kvm_guest__base_image_path: /var/lib/libvirt/images/xenial-server-cloudimg-amd64-disk1.img
-kvm_guest__metainfo_path: "/var/cloud-init/{{ kvm_guest__hostname }}"
+kvm_guest__base_image: xenial-server-cloudimg-amd64-disk1.img
 kvm_guest__storage_pool_path: /var/lib/libvirt/images
 kvm_guest__system_image_file: "{{ kvm_guest__storage_pool_path }}/{{ kvm_guest__hostname }}.qcow2"
-kvm_guest__cloud_init_image_file: "{{ kvm_guest__storage_pool_path }}/{{ kvm_guest__hostname }}-cidata.iso"
 
+# TODO it looks like we don't need to configure booting order at all
 kvm_guest__boot_devices:
 - hd
 
@@ -23,25 +20,3 @@ kvm_guest__disks:
   driver_type: qcow2
   source_file: "{{ kvm_guest__system_image_file }}"
   target_bus: virtio
-- device: cdrom
-  driver_type: raw
-  source_file: "{{ kvm_guest__cloud_init_image_file }}"
-  target_bus: ide
-
-# this is for default user and should be removed
-kvm_guest__default_user_ssh_authorized_keys:
-- ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com
-
-kvm_guest__initial_users:
-- default
-- name: iremizov
-  sudo: ALL=(ALL) NOPASSWD:ALL
-  groups: users, admin, sudo
-  ssh-import-id: None
-  shell: /bin/bash
-  ssh-authorized-keys:
-  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com"
-
-kvm_guest__initial_packages:
-- openssh-server
-- python-minimal

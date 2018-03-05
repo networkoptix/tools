@@ -1,0 +1,21 @@
+{
+  "vm_name": "win2016server-base",
+  "iso_url":
+    "/var/lib/libvirt/images/14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_EN-US.ISO",
+  "iso_checksum_type": "md5",
+  "iso_checksum": "70721288bbcdfe3239d8f8c0fae55f1f",
+  "vbox_guest_additions_upload_or_attach_or_disable": "upload",
+  "cpus": "4",
+  "memory": "8192",
+  "boot_wait": "20s",
+  "_comment":
+    "@iremizov Here should be sysprep command, but it didn't work for me..",
+  "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
+  "winrm_or_ssh_or_none": "ssh",
+  "ssh_username": "vagrant",
+  "ssh_password": "vagrant",
+  "ssh_wait_timeout": "6h",
+  "winrm_username": "vagrant",
+  "winrm_password": "vagrant",
+  "winrm_timeout": "6h"
+}

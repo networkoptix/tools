@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+  <!--
+  Stage: Install system from installation media (copy image).
+
+  During this configuration pass, the Windows image is copied to the destination
+  computer after the settings in the windowsPE configuration pass are processed.
+
+  1. Define language.
+  2. Format disk and create partitions.
+  3. Install Windows into newly created partition.
+  4. Enter product key (actually, no, because we install WS2016 eval)
+  -->
+  <settings pass="windowsPE">
+
+    <!-- look for drivers on floppy -->
+    <component
+      name="Microsoft-Windows-PnpCustomizationsWinPE"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS"
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <DriverPaths>
+        <PathAndCredentials wcm:keyValue="1" wcm:action="add">
+          <Path>A:\</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+    </component>
+
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-International-Core-WinPE"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <SetupUILanguage>
+        <UILanguage>en-US</UILanguage>
+      </SetupUILanguage>
+      <InputLocale>en-US</InputLocale>
+      <SystemLocale>en-US</SystemLocale>
+      <UILanguage>en-US</UILanguage>
+      <UILanguageFallback>en-US</UILanguageFallback>
+      <UserLocale>en-US</UserLocale>
+    </component>
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-Setup"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <CreatePartition wcm:action="add">
+              <Type>Primary</Type>
+              <Order>1</Order>
+              <Size>350</Size>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Order>2</Order>
+              <Type>Primary</Type>
+              <Extend>true</Extend>
+            </CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <ModifyPartition wcm:action="add">
+              <Active>true</Active>
+              <Format>NTFS</Format>
+              <Label>boot</Label>
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+            </ModifyPartition>
+            <ModifyPartition wcm:action="add">
+              <Format>NTFS</Format>
+              <Label>Windows 2016</Label>
+              <Letter>C</Letter>
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+      <ImageInstall>
+        <OSImage>
+          <InstallFrom>
+            <MetaData wcm:action="add">
+              <Key>/IMAGE/NAME </Key>
+              <Value>Windows Server 2016 SERVERSTANDARD</Value>
+            </MetaData>
+          </InstallFrom>
+          <InstallTo>
+            <DiskID>0</DiskID>
+            <PartitionID>2</PartitionID>
+          </InstallTo>
+        </OSImage>
+      </ImageInstall>
+
+      <UserData>
+        <ProductKey>
+          <!--
+          Do not uncomment the Key element if you are using trial ISOs.
+
+          You must uncomment the Key element (and optionally insert your own
+          key) if you are using retail or volume license ISOs
+
+          Below is product Key from
+          http://technet.microsoft.com/en-us/library/jj612867.aspx
+          -->
+          <!--<Key>WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY</Key>-->
+          <WillShowUI>OnError</WillShowUI>
+        </ProductKey>
+        <AcceptEula>true</AcceptEula>
+        <FullName>Vagrant</FullName>
+        <Organization>Vagrant</Organization>
+      </UserData>
+    </component>
+  </settings>
+
+  <!--
+  Stage: Tune image that was copied on prev step.
+
+  This configuration pass is used to apply updates, drivers, or
+  language packs to a Windows image during first reboot.
+  -->
+  <settings pass="offlineServicing">
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-LUA-Settings"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <EnableLUA>false</EnableLUA>
+    </component>
+  </settings>
+
+  <!--
+  Stage: Customize System according to target PC.
+
+  This configuration pass is used to create and configure information in the
+  Windows image, and is specific to the hardware that the Windows image is
+  installing to.
+
+  Here we provide some settings specific to this installation.
+
+  1. Define machine name and it's location.
+  2. Skip activation and other kind of dialogues.
+  -->
+  <settings pass="specialize">
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-Shell-Setup"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <OEMInformation>
+        <HelpCustomized>false</HelpCustomized>
+      </OEMInformation>
+      <ComputerName>vagrant-2016</ComputerName>
+      <TimeZone>Pacific Standard Time</TimeZone>
+      <RegisteredOwner/>
+    </component>
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-ServerManager-SvrMgrNc"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <DoNotOpenServerManagerAtLogon>true</DoNotOpenServerManagerAtLogon>
+    </component>
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-IE-ESC"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <IEHardenAdmin>false</IEHardenAdmin>
+      <IEHardenUser>false</IEHardenUser>
+    </component>
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-OutOfBoxExperience"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <DoNotOpenInitialConfigurationTasksAtLogon
+        >true</DoNotOpenInitialConfigurationTasksAtLogon>
+    </component>
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-Security-SPP-UX"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+  </settings>
+
+  <!--
+  NOTE: auditSystem and auditUser are not used because they require system to
+  be sysprepped with /audit flag. This means that these steps may run only when
+  a computer is configured to boot to audit mode.
+  We don't want system to boot and reboot.
+  We need it to be ready out of the box.
+  -->
+
+  <!--
+  Stage: First logon (aka out of box experience)
+
+  Configures settings that are applied during the end-user first-boot
+  experience, also called Out-Of-Box Experience (OOBE). The oobeSystem
+  configuration pass settings are processed before a user first logs on to
+  Windows.
+
+  1. Setup user and install minimal required stuff.
+  2. Skip activation and other kind of dialogues.
+  -->
+  <settings pass="oobeSystem">
+    <component
+      xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      name="Microsoft-Windows-Shell-Setup"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <!-- Hide all banners -->
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <NetworkLocation>Home</NetworkLocation>
+        <ProtectYourPC>1</ProtectYourPC>
+      </OOBE>
+      <!-- Setup users -->
+      <UserAccounts>
+        <AdministratorPassword>
+          <Value>vagrant</Value>
+          <PlainText>true</PlainText>
+        </AdministratorPassword>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Password>
+              <Value>vagrant</Value>
+              <PlainText>true</PlainText>
+            </Password>
+            <Group>administrators</Group>
+            <DisplayName>Vagrant</DisplayName>
+            <Name>vagrant</Name>
+            <Description>Vagrant User</Description>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+      <RegisteredOwner/>
+      <!-- Force user to login so FirstLogonCommands will trigger -->
+      <AutoLogon>
+        <Password>
+          <Value>vagrant</Value>
+          <PlainText>true</PlainText>
+        </Password>
+        <Enabled>true</Enabled>
+        <Username>vagrant</Username>
+      </AutoLogon>
+      <!-- Install different kind of software, entry point for scripted conf -->
+      <FirstLogonCommands>
+        <!-- entry point-->
+        <SynchronousCommand wcm:action="add">
+          <Description>Entry point</Description>
+          <CommandLine>cmd.exe /c a:\00_entry.bat</CommandLine>
+          <Order>1</Order>
+          <RequiresUserInput>true</RequiresUserInput>
+        </SynchronousCommand>
+      </FirstLogonCommands>
+    </component>
+
+  </settings>
+
+  <!--
+  FIXME: we probably have a bug below: WS2012R2 != WS2016EVAL
+  But it looks like everything works.
+  @iremizov: do we need this line at all?
+  -->
+  <cpi:offlineImage
+    xmlns:cpi="urn:schemas-microsoft-com:cpi"
+    cpi:source="wim:c:/wim/install.wim#Windows Server 2012 R2 SERVERSTANDARD"/>
+</unattend>

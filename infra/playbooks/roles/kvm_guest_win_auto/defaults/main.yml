@@ -1,0 +1,24 @@
+kvm_guest__metainfo_path: "/var/lib/guest-init/{{ kvm_guest__hostname }}"
+kvm_guest__metainfo_boot_image: "{{ kvm_guest__storage_pool_path }}/{{ kvm_guest__hostname }}-floppy.vfd"
+
+# this is for default user and should be removed
+kvm_guest__default_user_ssh_authorized_keys:
+- ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com
+
+kvm_guest__initial_users:
+- name: iremizov
+  # TODO is there a way to provide encrypted passwords for lonux and windows in the same way
+  password: password
+  # TODO Does windows have sudo or something like this??
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  group: administrator
+  # TODO add via scripts?
+  shell: /bin/bash
+  # TODO add via scripts?
+  ssh-authorized-keys:
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com"
+
+# TODO add via scripts?
+kvm_guest__initial_packages:
+- openssh-server
+- python-minimal

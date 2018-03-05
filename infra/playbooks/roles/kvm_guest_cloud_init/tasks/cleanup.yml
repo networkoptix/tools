@@ -1,13 +1,12 @@
 - name: Get Cloud init CD dev name
   xml:
     xmlstring: "{{ domain_xml }}"
-    xpath: '/domain/devices/disk[source/@file="/var/lib/libvirt/images/testvm-cidata.iso"]/target'
+    xpath: '/domain/devices/disk[source/@file="{{ kvm_guest__metainfo_boot_image }}"]/target'
     content: attribute
     attribute: dev
-  when: "kvm_guest__state != 'undefined'"
+  when: "kvm_guest__state == 'running'"
   register: _cloud_init_cd_info
   delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
-  failed_when: false # xml module fails when it can't find xml node
 
 - name: Eject Cloud init CD
   become: true
@@ -22,3 +21,10 @@
     _cloud_init_cd_info.matches[0].target.tray is undefined or
     _cloud_init_cd_info.matches[0].target.tray != 'open'
   delegate_to: "{{ kvm_host }}"
+
+# For some reasons cloud-init doesn't add hostname to /etc/hosts
+- name: Add guest's inventory name to /etc/hosts
+  lineinfile:
+    line: 127.0.0.1 {{ kvm_guest__hostname }}
+    path: /etc/hosts
+  when: "kvm_guest__state == 'running'"
