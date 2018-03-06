@@ -37,10 +37,11 @@ class LogCapturer(object):
 
 class DbCapturePlugin(object):
 
-    def __init__(self, config, db_capture_repository, run_id_file=None):
+    def __init__(self, config, db_capture_repository, run_id_file=None, run_name=None):
         self.capture_manager = config.pluginmanager.getplugin('capturemanager')
         self.repo = db_capture_repository
         self.run_id_file = run_id_file
+        self.run_name = run_name
         self.log_capturer = None
         self.root_run = None
         self.current_test_run = None
@@ -52,7 +53,7 @@ class DbCapturePlugin(object):
         
     @db_session
     def pytest_sessionstart(self, session):
-        self.root_run = self._produce_test_run()
+        self.root_run = self._produce_root_run()
         self.log_capturer = LogCapturer(LOG_FORMAT)
         if self.run_id_file:
             with open(self.run_id_file, 'w') as f:
@@ -158,6 +159,11 @@ class DbCapturePlugin(object):
             if not current_test_run.outcome:
                 current_test_run.outcome = 'passed'
             self.current_test_run = None
+
+    def _produce_root_run(self):
+        test_path = [self.run_name or 'functional']
+        run = self.repo.produce_test_run(self.root_run, test_path)
+        return models.Run[run.id]  # ensure it is from current transaction
 
     def _produce_test_run(self, nodeid=None, is_test=False):
         test_path = ['functional']
