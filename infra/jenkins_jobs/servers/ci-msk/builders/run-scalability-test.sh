@@ -19,7 +19,7 @@ workspace_dir="$(pwd)"
 
 test_params=(
     merge_timeout=1h
-    cameras_per_serve=20
+    cameras_per_server=20
     users_per_server=4
     properties_per_camera=5
 	use_lightweight_servers=$USE_LIGHTWEIGHT_SERVERS
@@ -40,6 +40,7 @@ options=(
     "--capture-db=$junk_shop_db_credentials@$JUNK_SHOP_HOST"
     "--build-parameters=$(join_by ',' ${build_parameters[@]})"
     "--run-parameters=$(join_by ',' ${test_params[@]})"
+    "--run-name=scalability"
     "--test-parameters=scalability_test.$(join_by ',scalability_test.' ${test_params[@]})"
     "--tests-config-file=$workspace_dir/$TEST_CONFIG_PATH"
     )
