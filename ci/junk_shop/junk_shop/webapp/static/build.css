@@ -113,3 +113,12 @@ hr {
 .test-list .error-link:hover {
 	text-decoration: underline;
 }
+
+.scalability-link-block {
+	padding: 10px;
+	font-size: 110%;
+}
+.scalability-link-block a {
+	font-weight: bold;
+	font-style: italic;
+}

@@ -22,6 +22,6 @@
 
   {{ build_macros.build_info_block(build, started_at) }}
   {{ build_macros.changeset_list_block(changeset_list) }}
-  {{ build_macros.build_platform_list(platform_list) }}
+  {{ build_macros.build_platform_list(build, platform_list, scalability_platform_set) }}
 
 {% endblock contents %}

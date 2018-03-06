@@ -107,13 +107,14 @@ def fnmatch_list(name, pattern_list):
     return False
 
 
-def load_branch_platform_build_run_parameters(branch_name, platform_name, build_num):
+def load_branch_platform_build_run_parameters(project_name, branch_name, platform_name, build_num):
     parameters = {}  # name -> value set
     for (name, value) in select(
             (pv.run_parameter.name, pv.value)
             for run in models.Run for pv in run.run_parameters
-            if run.build_num == build_num and
-               run.branch.name == branch_name and
+            if run.build.project.name == project_name and
+               run.build.branch.name == branch_name and
+               run.build.build_num == build_num and
                run.platform.name == platform_name):
         parameters.setdefault(name, set()).add(param_to_int(value))
     return [RunParameter(name, sorted(values)) for name, values in parameters.items()]
@@ -132,7 +133,7 @@ def load_branch_platform_run_parameters(project_name, branch_name, platform_name
 
 # branch/platform/build page  =====================================================================
 
-def load_branch_platform_build_metrics(branch_name, platform_name, build_num):
+def load_branch_platform_build_metrics(project_name, branch_name, platform_name, build_num):
     accumulators = {}
     for use_lws, server_count, metric_name, metric_value in select(
             (use_lws_param.value, server_count_param.value, mv.metric.name, mv.value)
@@ -140,8 +141,9 @@ def load_branch_platform_build_metrics(branch_name, platform_name, build_num):
             for run in mv.run
             for use_lws_param in run.root_run.run_parameters
             for server_count_param in run.root_run.run_parameters
-            if run.root_run.build_num == build_num and
-               run.root_run.branch.name == branch_name and
+            if run.root_run.build.project.name == project_name and
+               run.root_run.build.branch.name == branch_name and
+               run.root_run.build.build_num == build_num and
                run.root_run.platform.name == platform_name and
                use_lws_param.run_parameter.name == 'use_lightweight_servers' and
                server_count_param.run_parameter.name == 'server_count'
@@ -176,14 +178,14 @@ def generate_branch_platform_build_traces(accumulators):
             trace_name = metric_name.replace('host_memory_usage.', '')
             yield MetricTrace(trace_name, points, visible, yaxis, metric_name=metric_name, use_lws=use_lws)
 
-def load_branch_platform_build_metric_traces(branch_name, platform_name, build_num):
+def load_branch_platform_build_metric_traces(project_name, branch_name, platform_name, build_num):
 
     def pred(use_lws, is_memory_usage, trace):
         if not use_lws and trace.metric_name == 'total_bytes_sent': return False
         return (trace.use_lws == use_lws and
                 trace.metric_name.startswith('host_memory_usage.') == is_memory_usage)
 
-    accumulators = load_branch_platform_build_metrics(branch_name, platform_name, build_num)
+    accumulators = load_branch_platform_build_metrics(project_name, branch_name, platform_name, build_num)
     trace_list = list(generate_branch_platform_build_traces(accumulators))
     lws_traces = dict(
         has_total_bytes_sent=True,
@@ -197,13 +199,14 @@ def load_branch_platform_build_metric_traces(branch_name, platform_name, build_n
         )
     return (lws_traces, full_traces)
 
-@app.route('/branch/<branch_name>/<platform_name>/<build_num>/metrics')
+@app.route('/branch/<project_name>/<branch_name>/<platform_name>/<build_num>/metrics')
 @db_session
-def branch_platform_build_metrics(branch_name, platform_name, build_num):
-    lws_traces, full_traces = load_branch_platform_build_metric_traces(branch_name, platform_name, build_num)
-    run_parameters = load_branch_platform_build_run_parameters(branch_name, platform_name, build_num)
+def branch_platform_build_metrics(project_name, branch_name, platform_name, build_num):
+    lws_traces, full_traces = load_branch_platform_build_metric_traces(project_name, branch_name, platform_name, build_num)
+    run_parameters = load_branch_platform_build_run_parameters(project_name, branch_name, platform_name, build_num)
     return render_template(
         'branch_platform_build_metrics.html',
+        project_name=project_name,
         branch_name=branch_name,
         platform_name=platform_name,
         build_num=build_num,

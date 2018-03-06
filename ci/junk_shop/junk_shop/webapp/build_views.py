@@ -1,6 +1,6 @@
 from collections import namedtuple
 from flask import render_template, abort
-from pony.orm import db_session, select, count, desc
+from pony.orm import db_session, select, count, desc, exists
 from junk_shop.webapp import app
 from .. import models
 from ..build_info import BuildInfoLoader
@@ -49,15 +49,28 @@ def render_release_build(build):
         customization_list=customization_list,
         )
 
+def load_scalability_platform_set(build):
+    return set(select(
+        run.root_run.platform.name for run in models.Run
+        if run.root_run.build is build and
+           run.test.path.startswith('functional/scalability_test.py') and run.test.is_leaf and exists(run.metrics)))
+
 def render_ci_build(build):
     loader = BuildInfoLoader.for_full_build(build)
     build_info = loader.load_build_platform_list()
-    return render_template('build.html', **build_info._asdict())
+    scalability_platform_set = load_scalability_platform_set(build)
+    print 'scalability_platform_set:', scalability_platform_set
+    return render_template('build.html',
+                               scalability_platform_set=scalability_platform_set,
+                               **build_info._asdict())
 
 def render_platform_build(build, customization, platform):
     loader = BuildInfoLoader.for_build_customzation_platform(build, customization, platform)
     build_platform_info = loader.load_build_platform()
-    return render_template('platform_build.html', **build_platform_info._asdict())
+    scalability_platform_set = load_scalability_platform_set(build)
+    return render_template('platform_build.html',
+                               scalability_platform_set=scalability_platform_set,
+                               **build_platform_info._asdict())
 
 
 @app.route('/project/<project_name>/<branch_name>/<int:build_num>')

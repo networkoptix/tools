@@ -75,8 +75,9 @@ def test_me():
         print make_email_recipient_list(config.tests_watchers, build_info)
 
         sender = EmailSender(config)
-        print 'subject and html:'
         subject_and_html = sender.render_email(build_info, [recipient], test_mode=True)
+        print 'subject and html:'
+        print subject_and_html
         if smtp_password and recipient:
             sender.send_email(smtp_password, subject_and_html, [recipient])
 
