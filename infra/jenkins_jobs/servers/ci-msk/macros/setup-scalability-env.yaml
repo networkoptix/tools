@@ -2,7 +2,7 @@
     name: setup-scalability-env
     builders:
     - shell: |
-        #! /bin/bash
+        #!/bin/bash
         set -ex
 
         if [ -f dist/build_info.yaml ] ; then
