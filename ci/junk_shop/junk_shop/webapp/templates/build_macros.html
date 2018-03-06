@@ -148,8 +148,8 @@
 
     {% if platform.name in scalability_platform_set %}
       <div class="scalability-link-block">
-        <a href="{{ url_for('branch_platform_build_metrics', 
-                                project_name=build.project.name, branch_name=build.branch.name, platform_name=platform.name, build_num=build.build_num) }}"
+        <a href="{{ url_for('build_platform_metrics', 
+                                project_name=build.project.name, branch_name=build.branch.name, build_num=build.build_num, platform_name=platform.name) }}"
            class="link">
           Metrics
         </a>
