@@ -52,7 +52,7 @@ class Stage(object):
 
     def __init__(self, root_run, error_list=None):
         self.root_run = root_run  # models.Run
-        self.stage_name = root_run.test.path  # 'build', 'unit' or 'functional'
+        self.stage_name = root_run.name  # 'build', 'unit', 'functional' or 'scalability'
         self.error_list = error_list
 
     def __eq__(self, other):
@@ -71,6 +71,10 @@ class TestsStage(Stage):
         self.passed_count = 0
         self._visited_run_set = {}  # models.Run -> TestRun, runs we have already added
         self.run_list = []  # TestRun list
+        if self.stage_name == 'scalability':
+            self.run_parameters = {p.run_parameter.name: p.value for p in root_run.run_parameters}
+        else:
+            self.run_parameters = {}
 
     def add_run(self, run):
         tr = self._visited_run_set.get(run)

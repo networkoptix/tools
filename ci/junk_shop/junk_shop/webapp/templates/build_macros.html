@@ -84,6 +84,16 @@
           {%- endif -%}
           </a>
         </h3>
+        {%- if stage.stage_name == 'scalability' -%}
+          <br/>
+           {{ stage.run_parameters.server_count }}
+          {% if stage.run_parameters.use_lightweight_servers == 'true' -%}
+            lightweight
+          {%- else -%}
+            full
+          {%- endif %}
+          servers
+        {%- endif -%}
         <div class="test-counts">
           <span class="passed">{{ stage.passed_count }}</span>
           {% if stage.failed_count %}
