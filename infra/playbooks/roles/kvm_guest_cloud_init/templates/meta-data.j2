@@ -6,13 +6,12 @@ network-interfaces: |
   auto lo
   iface lo inet loopback
 
-{% for iface in interfaces %}
-  auto {{ iface.name }}
-  iface {{ iface.name }} inet {{ iface.type }}
-{% if "options" in iface %}
-{% for prop, value in iface.options.iteritems() %}
+{% for network in networks %}
+  auto {{ network.config.name }}
+  iface {{ network.config.name }} inet {{ network.config.type }}
+  {% if "options" in network.config %}
+    {% for prop, value in network.config.options.iteritems() %}
     {{ prop }} {{ value }}
-{% endfor %}
-{% endif %}
-
+    {% endfor %}
+  {% endif %}
 {% endfor %}

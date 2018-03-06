@@ -54,7 +54,7 @@
     win2016server.json
   args:
     chdir: "{{ packer_home }}"
-  creates: "{{ packer_home }}/output-qemu/win2016server-base"
+    creates: "{{ packer_home }}/output-qemu/win2016server-base"
   when: base_image.stat.exists == False or force_rebuild_win_server == True
   register: packer
 

@@ -1,2 +1,3 @@
 ansible==2.4.0
 Ansible-Lint>=3.0.1
+pywinrm>=0.2.2

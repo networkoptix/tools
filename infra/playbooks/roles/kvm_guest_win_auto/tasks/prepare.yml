@@ -45,6 +45,9 @@
   delegate_to: "{{ kvm_host }}"
   with_items:
   - 00_entry.bat
+  - setup_networks.ps1
+  - setup_users.ps1
+  - install_packages.ps1
 
 - name: Copy just files (w/o templating)
   copy:

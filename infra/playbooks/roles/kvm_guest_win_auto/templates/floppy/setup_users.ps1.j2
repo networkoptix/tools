@@ -1,0 +1,35 @@
+# DEBUG INFO
+#
+# {{ kvm_guest__initial_users | to_json }}
+#
+
+{% for user in kvm_guest__initial_users %}
+  {% set name = user.name %}
+
+  {% if user.password is defined %}
+    {% set password = user.password %}
+$password = ConvertTo-SecureString -AsPlainText -String '{{ user.password }}' -Force
+New-LocalUser -Name {{ name }} -Password $password -AccountNeverExpires -PasswordNeverExpires
+  {% endif %}
+
+  {% if user.password is not defined %}
+New-LocalUser -Name {{ name }} -NoPassword -AccountNeverExpires
+  {% endif %}
+
+  {% for group in user.groups | default([]) %}
+Add-LocalGroupMember -Group '{{ group }}' -Member '{{ name }}'
+  {% endfor %}
+
+  {% if 'ssh-authorized-keys' in user %}
+  {# TODO #}
+  {% endif %}
+
+  {% if 'shell' in user %}
+  {# TODO #}
+  {% endif %}
+
+  {% if 'sudo' in user %}
+  {# TODO ??? #}
+  {% endif %}
+
+{% endfor %}

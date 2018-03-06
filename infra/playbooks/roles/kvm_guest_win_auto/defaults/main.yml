@@ -11,7 +11,7 @@ kvm_guest__initial_users:
   password: password
   # TODO Does windows have sudo or something like this??
   sudo: ALL=(ALL) NOPASSWD:ALL
-  group: administrator
+  groups: [administrator]
   # TODO add via scripts?
   shell: /bin/bash
   # TODO add via scripts?

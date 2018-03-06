@@ -14,7 +14,7 @@
 
 - name: Pause before gathering facts
   pause:
-    seconds: 5
+    seconds: 1
   when: state.changed
 
 - name: Gather all facts about host and its VM

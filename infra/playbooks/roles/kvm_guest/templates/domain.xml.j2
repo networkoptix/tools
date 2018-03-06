@@ -87,14 +87,22 @@
       "fdc"   : "fd",
     }[ target_bus | lower ] ~ "abcdefghijklmnopqrstuvwxyz"[loop.index0] %}
   {% set readonly    = disk.readonly is defined and disk.readonly == true %}
-
+  {% set tray_is_open= disk.source_file is not defined %}
   {# When disk is represented as file on host #}
   {% if disk_type == "file" %}
     <disk type='{{ disk_type }}' device='{{ disk_device }}'>
       {# FIXME this is a workaround for floppy, it definetely has some driver #}
       <driver name='{{ driver_name }}' type='{{ driver_type }}'/>
+      {% if not tray_is_open %}
       <source file='{{ source_file }}'/>
-      <target dev='{{ target_dev }}' bus='{{ target_bus }}'/>
+      {% endif %}
+      <target
+        dev='{{ target_dev }}'
+        bus='{{ target_bus }}'
+        {% if tray_is_open %}
+        tray='open'
+        {% endif %}
+        />
     {% if readonly %}
       <readonly/>
     {% endif %}
@@ -105,26 +113,30 @@
 
 {% for network in networks %}
   {# Only bridges for now #}
-  {% set source_mode  = "bridge" %}
-  {% set source_dev   = network.source_dev %}
-  {% set model_type   = network.model_type | default("e1000") %}
-  {% set address_slot = network.address_slot %}
+  {% set source_mode      = "bridge" %}
+  {% set source_dev       = network.source_dev %}
+  {% set model_type       = network.model_type | default("e1000") %}
+  {% set address_domain   = 0 %}
+  {% set address_bus      = 0 %}
+  {% set address_slot     = network.address_slot %}
+  {% set address_function = 0 %}
     <interface type='direct'>
       <source dev='{{ source_dev }}' mode='{{ source_mode }}'/>
       <model type='{{ model_type }}'/>
       {# mask for vals: domain=0x0000 bus=0x00 slot=0x00 function=0x0 #}
-      <address type='pci'
-               domain='{{ "%#0.4x" | format(0) }}'
-               bus='{{ "%#0.2x" | format(0) }}'
-               slot='{{ "%#0.2x" | format(address_slot) }}'
-               function='{{ "%#0.1x" | format(0) }}'/>
+      <address
+        type='pci'
+        domain='{{    "%#0.4x" | format(address_domain)   }}'
+        bus='{{       "%#0.2x" | format(address_bus)      }}'
+        slot='{{      "%#0.2x" | format(address_slot)     }}'
+        function='{{  "%#0.1x" | format(address_function) }}'/>
     </interface>
 {% endfor %}
 
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-    {# required for mostly Windows #}
+    
     <graphics type='spice' autoport='yes'>
       <listen type='address'/>
     </graphics>
