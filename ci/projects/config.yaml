@@ -110,6 +110,7 @@ platforms:
   win-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
+    toolset: host=x64
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:
@@ -121,6 +122,7 @@ platforms:
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
+    toolset: host=x64
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:

@@ -49,21 +49,24 @@ class PlatformConfig(object):
             update_mask_list=data['update_mask_list'],
             publish_dir=data['publish_dir'],
             generator=data.get('generator'),
+            toolset=data.get('toolset'),
             )
 
-    def __init__(self, build_node, should_run_unit_tests, distributive_mask_list, update_mask_list, publish_dir, generator):
+    def __init__(self, build_node, should_run_unit_tests, distributive_mask_list, update_mask_list, publish_dir, generator, toolset):
         assert isinstance(build_node, basestring), repr(build_node)
         assert isinstance(should_run_unit_tests, bool), repr(should_run_unit_tests)
         assert is_list_inst(distributive_mask_list,  basestring), repr(distributive_mask_list)
         assert is_list_inst(update_mask_list,  basestring), repr(update_mask_list)
         assert isinstance(publish_dir, basestring), repr(publish_dir)
         assert generator is None or isinstance(generator, basestring), repr(generator)
+        assert toolset is None or isinstance(toolset, basestring), repr(toolset)
         self.build_node = build_node
         self.should_run_unit_tests = should_run_unit_tests
         self.distributive_mask_list = distributive_mask_list
         self.update_mask_list = update_mask_list
         self.publish_dir = publish_dir
         self.generator = generator
+        self.toolset = toolset
 
     def to_dict(self):
         return dict(
@@ -73,6 +76,7 @@ class PlatformConfig(object):
             update_mask_list=self.update_mask_list,
             publish_dir=self.publish_dir,
             generator=self.generator,
+            toolset=self.toolset,
             )
 
     def report(self):
@@ -82,6 +86,7 @@ class PlatformConfig(object):
         log.info('\t\t\t' 'update_mask_list: %r', self.update_mask_list)
         log.info('\t\t\t' 'publish_dir: %r', self.publish_dir)
         log.info('\t\t\t' 'generator: %r', self.generator)
+        log.info('\t\t\t' 'toolset: %r', self.toolset)
 
 
 class JunkShopConfig(object):

@@ -211,10 +211,10 @@ class CMakeBuilder(object):
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         if custom_cmake_args:
             generate_args += custom_cmake_args.split(' ')
-        generate_args += platform_args + [
-            '-G', self._generator,
-            src_full_path,
-            ]
+        generate_args += platform_args + ['-G', self._generator]
+        if self._platform_config.toolset:
+            generate_args += ['-T', self._platform_config.toolset]
+        generate_args += [src_full_path]
         # if build_params.target_device:
         #     generate_args.append('-DtargetDevice=%s' % build_params.target_device)
         log.info('Generating with cmake: %s', self._host.args2cmdline(generate_args))
