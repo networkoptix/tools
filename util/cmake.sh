@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PARTS="Clouds DesktopClient MediaServer MobileClient TestCamera Tests TrayTool"
+PART_LIST="Clouds DesktopClient Distributions MediaServer MobileClient TestCamera Tests TrayTool"
 if [[ "$1" == *-h* ]]; then
 cat <<END
 Usage: [OPTION=value] $0 [cmake-options]
@@ -11,13 +11,13 @@ Options:
     R   = 1 for release build (used only with B)
     RD  = RDep sync option, default is OFF
     UP  = 1 fot mercurial pull & update
-    W   = Flags to include only some parts into build.
+    W   = Space separated parts to include (see parts section)
 Examples:
-    DB=../nx_vms-3.0 $0 -Dcustomization=hanwha
-    C=1 UP=1 W=MC B=mediaserver R=1 $0
-Part flags:
+    BD=../nx_vms-3.0 UP=1 $0 -Dcustomization=hanwha
+    C=1 W=Med,Des,Tes B=mediaserver R=1 $0
+Parts:
 END
-for PART in $PARTS; do echo "    ${PART:0:1}   = $PART"; done
+for PART in $PART_LIST; do echo "    $PART"; done
 exit 0
 fi
 
@@ -35,14 +35,14 @@ BUILD_DIR=${BD:-"./build"}
 [[ "$UP" ]] && hg pull && hg update
 [[ "$R" ]] && OPTIONS+="--config Release"
 
-PARTS="Clouds DesktopClient MediaServer MobileClient TestCamera Tests TrayTool"
-if [ $W ]; then
-    for WITH in $PARTS; do
-        if [[ $W == *${WITH:0:1}* ]]; then
-            OPTIONS+=" -Dwith$WITH=ON"
-        else
-            OPTIONS+=" -Dwith$WITH=OFF"
-        fi
+WITH_LIST="${W//,/ }"
+if [ "$WITH_LIST" ]; then
+    for PART in $PART_LIST; do
+        VALUE=OFF
+        for WITH in $WITH_LIST; do
+            [[ $PART == $WITH* ]] && VALUE=ON
+        done
+        OPTIONS+=" -Dwith$PART=$VALUE"
     done
 fi
 
