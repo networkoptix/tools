@@ -38,7 +38,10 @@ CONFIG = dict(
     zip_path = '7z',
     vs_path = 'devenv',
     data_dir = 'c:/develop/dumptool/',
-    dist_url = 'http://beta.networkoptix.com/beta-builds/daily/',
+    dist_urls = [
+        'http://beta.networkoptix.com/beta-builds/daily/',
+        'http://beta.enk.me/beta-builds/daily/',
+    ],
     ext = dict(
         dump = 'dmp',
         report = 'cdb-bt',
@@ -268,21 +271,26 @@ class DumpAnalyzer(object):
     def fetch_urls(self):
         '''Fetches URLs of required resourses.
         '''
-        out = self.fetch_url_data(
-            CONFIG['dist_url'], ['''>(%s\-%s[^<]*)<''' % (self.build, re.escape(self.branch))])
-        if len(out) == 0:
+        dist_url, out = None, None
+        for url in CONFIG['dist_urls']:
+            out = self.fetch_url_data(
+                url, ['''>(%s\-%s[^<]*)<''' % (self.build, re.escape(self.branch))])
+            if len(out) > 0:
+                dist_url = url
+                break;
+        if not dist_url:
             print "No distributive found for build %s. Dump analyze imposible" % self.build
             return False
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
-        build_url = os.path.join(CONFIG['dist_url'], build_path)
+        build_url = os.path.join(dist_url, build_path)
         self.log("build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
-              build_url, CONFIG['dist_url'], build_path), level=2)
+              build_url, dist_url, build_path), level=2)
         suffixes = list(s % self.dist for s in CONFIG['dist_suffixes']) +\
            list(s % {'module': self.dist} for s in CONFIG['pdb_suffixes'])
         out = self.fetch_url_data(
             build_url, ('''>([a-zA-Z0-9-_\.]+%s)<''' % r for r in suffixes),
-            os.path.join(CONFIG['dist_url'], update_path))
+            os.path.join(dist_url, update_path))
         self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
         self.target_path = os.path.join(self.build_path, 'target')
@@ -294,6 +302,8 @@ class DumpAnalyzer(object):
         '''Downloads file from :url to :local directory, apply :processor if any.
         '''
         path = os.path.join(local, os.path.basename(url))
+        if 'nodl' in self.debug:
+           return path
         if not os.path.isfile(path):
             self.log('Download: %s to %s' % (url, path))
             with open(path, 'wb') as f:
@@ -333,6 +343,8 @@ class DumpAnalyzer(object):
            .zip - just extract to the target exe directory.
         '''
         def run(*command):
+            if 'nodl' in self.debug:
+                return 0
             try:
                 return subprocess.check_output(command)
             except (IOError, WindowsError, subprocess.CalledProcessError) as e:
@@ -386,7 +398,7 @@ class DumpAnalyzer(object):
             self.log('Open with Visual Studio in %s' % self.module_dir())
             os.chdir(self.module_dir())
             dump_name = os.path.basename(self.dump_path)
-            subprocess.check_output([CONFIG['vs_path'], dump_name])
+            subprocess.Popen([CONFIG['vs_path'], dump_name])
             return 'Done'
         report_path = report_name(self.dump_path)
         self.log('Loading debug information: ' + self.module_dir())
@@ -435,7 +447,7 @@ def analyseDump(*args, **kwargs):
     return resultDict(dump, reportText) if format == 'dict' else reportText
 
 def main():
-    args, kwargs = list(), dict()
+    args, kwargs = list(), dict(verbose='2')
     for arg in sys.argv[1:]:
         s = arg.split('=', 2)
         if len(s) == 1: args.append(s[0])
