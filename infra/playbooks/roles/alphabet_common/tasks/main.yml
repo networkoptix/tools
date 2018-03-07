@@ -20,10 +20,13 @@
   - python-lxml
   when: ansible_os_family == 'Debian'
 
-- name: Install packages required by Ansible (Debian)
-  apt:
-    name: "{{ item }}"
+- name: Ensure enk.me is a known host
+  lineinfile:
+    dest: "/etc/ssh/ssh_known_hosts"
+    create: yes
     state: present
+    regexp: "^{{ item | regex_escape() }}"
+    line: "{{ lookup('pipe', 'ssh-keyscan -t rsa {{ item }}') }}"
   with_items:
-  - python-lxml
-  when: ansible_os_family == 'Debian'
+  - enk.me
+  - hdw.mx

@@ -10,13 +10,11 @@ depcon_authorized_keys:
 - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2GTgZueHB0EBo5kwLSyK82aXRhF32Vn70IcZV4ORN51RBFiwpaH/5eSmTVJUsK4dOd7KCGZNOtVWQQk+xuGJtw+jktjQ4MB3yXWmfYsAhk81+AE0nZ/33XVGHYcbYOfsV85ZTRiv9Xww4KEy57AhfZtbeFTrHWa10Z8vBjjotzW2RAjTjLnzr0Ea2wgnRQoehixmXaPj8efxR3bKbG044pf/LAkpiMJsqliecXO+LZEbaQtVlK6/eKAV9yHlh4q3oZSB8XAyDa7WNBKkfzRjAMJQvuwtQQ+1crtQyyZRkJamYxoRbY7zTNzZyFsJiXMK0ikKvEYWSPRwCQ0rxHADXQ== seva@sol
 - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDITSwFZ652L+QvMlvIs0cABLocqb5sHEYc3pAKtWYeMhWCXqKT5C8IojZNYD3k3zNNOoGc/CuVeTuPE6izAV9SF1vFqsEYovFq2RQ2CuHjXA15HRcHKYlbGt/Gg1Qy/uKCiyRijpYAkliXZ9l3DMafvPhYa065+NUPTjR30KAbG6RTSCZ019u2dkSAvFQ729pxhx0uQZDqAxjp5nzBY8Ft1PL2JBE5L1ROwKzH3XUI0wHfY0BMCGTUHRJXuWoCZeJ2bsEqVb8sFWj55FQ16c2EdCDox4UL5RkfF8hkQ/ma90IAR+HZCoskzIAtPAbkD3re2vZboIGpqDydhSwAAnbj ivigasin@barsik.local
 
-# FIXME: need credentials
-depcon_main_docker_image: 009544449203.dkr.ecr.us-east-1.amazonaws.com/webtools/deployment_console:2.0-msk
-depcon_rabbit_docker_image: rabbitmq:3-management
-
 nfsserver: cinas
 
+depcon_rev: '38d6c64'
 # these vars are mandatory but they do not have any defaults
 # aws_region:
 # aws_access_key_id:
 # aws_secret_access_key:
+# hg_auth_private_key:

@@ -21,6 +21,8 @@
   - "{{ depcon_user }}"
 
 - name: "Create .ssh in {{ depcon_user }} home dir"
+  become: true
+  become_user: "{{ depcon_user }}"
   file:
     path: "{{ depcon_home }}/.ssh/"
     state: directory
@@ -29,11 +31,45 @@
     mode: "u+rwx,g-rwx,o-rwx"
 
 - name: Configure pub keys
+  become: true
+  become_user: "{{ depcon_user }}"
   lineinfile:
     path: "{{ depcon_home }}/.ssh/authorized_keys"
     line: "{{ item }}"
     create: true
   with_items: "{{ depcon_authorized_keys }}"
+
+- name: Install Mercurial
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - mercurial
+
+- name: Configure ssh private key
+  become: true
+  become_user: "{{ depcon_user }}"
+  copy:
+    content: "{{ hg_auth_private_key }}"
+    dest: "{{ depcon_home }}/.ssh/hg.readonly_key"
+    mode: 0600
+
+- name: Configure HG connection for cloning from enk.me
+  become: true
+  become_user: "{{ depcon_user }}"
+  copy:
+    dest: "{{ depcon_home }}/.hgrc"
+    content: |
+      [ui]
+      ssh = ssh -i ~/.ssh/hg.readonly_key
+
+- name: Clone repo
+  become: true
+  become_user: "{{ depcon_user }}"
+  hg:
+    repo: ssh://hg@enk.me/deployment_console
+    dest: "{{ depcon_home }}/src"
+    revision: "{{ depcon_rev }}"
 
 - name: Install nfs client
   apt:
@@ -42,7 +78,7 @@
 
 - name: Create mount dir
   file:
-    path: "{{ depcon_home }}/beta-builds"
+    path: "/vol/ftp/beta-builds"
     owner: "{{ depcon_user }}"
     group: "{{ depcon_group }}"
     recurse: true
@@ -50,7 +86,7 @@
 
 - name: Mount nfs directory
   mount:
-    path: "{{ depcon_home }}/beta-builds"
+    path: "/vol/ftp/beta-builds"
     src: "{{ nfsserver }}:/share/NFSv=4/beta-builds"
     boot: yes
     state: mounted
@@ -100,20 +136,81 @@
   become: true
   become_user: "{{ depcon_user }}"
 
-# Pull before compose: Avoid case when SystemD says that service is up but
-# there is no running containers.
-- name: Docker pull depcon image
+# webadmin build requirements (npm, nodejs and Co)
+- name: Install npm
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items:
+  - npm
+
+- name: Install N for NodeJS
+  npm:
+    name: n
+    global: yes
+
+- name: Install NodeJS
+  command: n stable
+  register: r
+  changed_when: "'installed' in r.stdout"
+
+- name: Install compass
+  apt:
+    name: ruby-compass
+    state: present
+
+- name: Install global build requirements
+  npm:
+    name: '{{ item }}'
+    global: yes
+  with_items:
+  - grunt
+  - grunt-cli
+  - bower
+  - compass
+
+- name: Install npm packages
   become: true
   become_user: "{{ depcon_user }}"
-  docker_image:
-    name: "{{ depcon_main_docker_image }}"
+  command: "npm install"
+  args:
+    chdir: "{{ depcon_home }}/src/front_end"
 
-- name: Create compose file
-  template:
-    src: compose.yaml.j2
-    dest: "{{ depcon_home }}/compose.yaml"
-  notify:
-  - Restart Depcon
+- name: Install bower packages
+  become: true
+  become_user: "{{ depcon_user }}"
+  command: "bower install"
+  args:
+    chdir: "{{ depcon_home }}/src/front_end"
+
+- name: build frontend
+  become: true
+  become_user: "{{ depcon_user }}"
+  command: "./make.sh build"
+  args:
+    chdir: "{{ depcon_home }}/src"
+  register: res
+  # On success rc != 0
+  failed_when: '"Done, without errors." not in res.stdout'
+
+- name: Create some required directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ depcon_user }}"
+    group: "{{ depcon_group }}"
+    mode: "777"
+  with_items:
+  - "/srv/containers/depcon/var/db"
+  - "/srv/containers/depcon/var/log"
+
+- name: Docker build
+  become: true
+  become_user: "{{ depcon_user }}"
+  command: "/usr/local/bin/docker-compose -f docker-compose.yml build"
+  args:
+    chdir: "{{ depcon_home }}/src/"
 
 - name: Create SystemD Unit
   include_role:
@@ -126,12 +223,12 @@
     systemd_service_Unit_Requires: docker.service
     systemd_service_Unit_After: docker.service
     systemd_service_Service_ExecStartPre:
-    - /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml down -v
-    - /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml rm -v
+    - /usr/local/bin/docker-compose -f {{ depcon_home }}/src/docker-compose.yml down -v
+    - /usr/local/bin/docker-compose -f {{ depcon_home }}/src/docker-compose.yml rm -v
     systemd_service_Service_ExecStart: >-
-      /usr/local/bin/docker-compose -f {{ depcon_home }}/compose.yaml up
+      /usr/local/bin/docker-compose -f {{ depcon_home }}/src/docker-compose.yml up
     systemd_service_Service_ExecStop: >-
-      /usr/local/bin/docker-compose -f  {{ depcon_home }}/compose.yaml down -v
+      /usr/local/bin/docker-compose -f  {{ depcon_home }}/src/docker-compose.yml down -v
   notify:
   - Restart Depcon
 
