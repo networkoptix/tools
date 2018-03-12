@@ -1,0 +1,30 @@
+.main {
+    width:100%;
+}
+
+.vdebug-instance {
+    display: flex;
+    width: 100%;
+}
+
+.vdebug-raw, .vdebug-overlayed {
+    width:50%;
+}
+
+.item-wrapper {
+    height: 300px;
+    
+}
+
+.item-image {
+    width:400px;
+}
+
+.info-row{
+    display: block;
+    font-family: monospace;
+}
+
+.equal-timestamps{
+    background: #7FFF00;
+}
