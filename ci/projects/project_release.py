@@ -2,7 +2,7 @@
 
 import logging
 
-from project_build import BuildProject
+from project_build import VERSION_FILE, BuildProject
 from command import (
     StringProjectParameter,
     ChoiceProjectParameter,
@@ -105,6 +105,7 @@ class ReleaseProject(BuildProject):
             customization_list=self.requested_customization_list,
             platform_list=self.requested_platform_list,
             build_info_path=build_info_path,
+            version_path=VERSION_FILE,
             platform_build_info_map=platform_build_info_map,
             )
 

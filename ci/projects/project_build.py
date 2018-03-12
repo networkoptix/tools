@@ -41,6 +41,7 @@ from webadmin import WEBADMIN_STASH_NAME, BuildWebAdminJob
 log = logging.getLogger(__name__)
 
 
+VERSION_FILE = 'version'
 WEBADMIN_NODE = 'webadmin'
 WEBADMIN_EXTERNAL_DIR = 'webadmin-external'
 WEBADMIN_PLATFORM_NAME = 'webadmin'
@@ -435,8 +436,15 @@ class BuildProject(NxVmsProject):
 
     # build_info file left along with artifacts
     def _save_build_info_artifact(self, platform_build_info_map, build_info):
+        version = None
         file_list = []
         for (customization, platform), platform_build_info in platform_build_info_map.items():
+            if version is None:
+                version = platform_build_info.version
+            else:
+                assert platform_build_info.version == version, (
+                    'Different platforms/customizations ended up with different versions: %r != %r'
+                    % version, platform_build_info.version)
             for t, artifact_list in platform_build_info.typed_artifact_list.items():
                 subdir = self._make_artifact_subdir(t, customization, platform)
                 for fname in artifact_list:
@@ -453,6 +461,7 @@ class BuildProject(NxVmsProject):
             project=self.project_name,
             branch=self.nx_vms_branch_name,
             build_num=self.jenkins_env.build_number,
+            version=version,
             platform_list=self.requested_platform_list,
             customization_list=self.requested_customization_list,
             cloud_group=self.cloud_group,
@@ -463,6 +472,8 @@ class BuildProject(NxVmsProject):
         path = BUILD_INFO_FILE
         with open(path, 'w') as f:
             yaml.dump(build_info, f, default_flow_style=False)
+        with open(VERSION_FILE, 'w') as f:
+            f.write(version)
         return path
 
     def _make_artifact_archiving_command_list(self, build_info_path):

@@ -18,7 +18,7 @@ class Deployer(object):
         self._host = RemoteSshHost.from_path('deploy', self._config.services.deployment_path, key_file_path=ssh_key_file)
         self._created_target_dirs = set()
 
-    def deploy_artifacts(self, customization_list, platform_list, build_info_path, platform_build_info_map):
+    def deploy_artifacts(self, customization_list, platform_list, build_info_path, version_path, platform_build_info_map):
         target_root_dir = self._config.services.deployment_path.split(':')[1]
         target_dir = os.path.join(
             target_root_dir,
@@ -26,6 +26,7 @@ class Deployer(object):
             )
         src_root_dir = 'dist'
         self._deploy_build_info(build_info_path, target_dir)
+        self._deploy_version_file(version_path, target_dir)
         for customization in customization_list:
             if self._artifacts_stored_in_different_customization_dirs:
                 src_dir = os.path.join(src_root_dir, customization)
@@ -38,6 +39,10 @@ class Deployer(object):
 
     def _deploy_build_info(self, build_info_path, target_dir):
         src_dir, name = os.path.split(build_info_path)
+        self._put_file(src_dir, target_dir, name)
+
+    def _deploy_version_file(self, version_path, target_dir):
+        src_dir, name = os.path.split(version_path)
         self._put_file(src_dir, target_dir, name)
 
     def _deploy_platform_artifacts(self, platform_config, customization, platform, platform_build_info, src_root_dir, src_dir, target_dir):
