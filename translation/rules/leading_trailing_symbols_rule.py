@@ -3,6 +3,7 @@ from validation_rule import ValidationRule, Levels
 leading = [' ', '<', '&lt;']
 trailing = [' '] #colons, dots will possibly be here
 
+
 class LeadingTrailingSymbolsRule(ValidationRule):
     def __str__(self):
         return "Check leading and trailing symbols and other forbidden symbols"

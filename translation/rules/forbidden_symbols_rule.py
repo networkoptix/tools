@@ -4,6 +4,7 @@ from validation_rule import ValidationRule, Levels
 
 forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>', '&amp;']
 
+
 class ForbiddenSymbolsRule(ValidationRule):
     def __str__(self):
         return "Check forbidden symbols"

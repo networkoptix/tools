@@ -1,8 +1,7 @@
 from validation_rule import ValidationRule, Levels
 
-exclusions = [
-    'QnStreamQualityStrings'
-    ]
+exceptions = ['QnStreamQualityStrings']
+
 
 class AtLeastOneAlphaRule(ValidationRule):
     def __str__(self):
@@ -16,7 +15,7 @@ class AtLeastOneAlphaRule(ValidationRule):
 
     @staticmethod
     def ignore(contextName, message):
-        for exclusion in exclusions:
+        for exclusion in exceptions:
             if exclusion in contextName:
                 return True
         return False

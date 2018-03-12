@@ -18,7 +18,7 @@ invalid_terms = {
     'media server': 'server'
 }
 
-exclusions = [
+exceptions = [
     'system tray',
     'system administrator',
     'system partitions',
@@ -39,7 +39,7 @@ class GlossaryRule(ValidationRule):
         return Levels.INFO
 
     def valid_text(self, text):
-        for exclusion in exclusions:
+        for exclusion in exceptions:
             if exclusion in text:
                 return True
 

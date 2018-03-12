@@ -1,6 +1,6 @@
 from validation_rule import ValidationRule, Levels
 
-exclusions = [
+exceptions = [
     'nx::vms::event::StringsHelper',
     'QnTimeStrings',
     'LocalFiles',
@@ -30,7 +30,7 @@ class NumerusFormRule(ValidationRule):
 
     @staticmethod
     def ignore(contextName, message):
-        for exclusion in exclusions:
+        for exclusion in exceptions:
             if exclusion in contextName:
                 return True
         return not ValidationRule.is_numerus(message)

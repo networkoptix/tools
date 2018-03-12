@@ -3,8 +3,8 @@
 from validation_rule import ValidationRule, Levels
 
 the = "the"
-exclusions = ['I/O', 'Internet', 'App', 'Latest', 'USB']
-text_exclusions = ['settings', 'license server']
+exceptions = ['I/O', 'Internet', 'App', 'Latest', 'USB']
+text_exceptions = ['settings', 'license server']
 
 
 class TheSubjectRule(ValidationRule):
@@ -21,7 +21,7 @@ class TheSubjectRule(ValidationRule):
         if the not in text.lower():
             return True
 
-        for exclusion in text_exclusions:
+        for exclusion in text_exceptions:
             if exclusion in text.lower():
                 return True
 
@@ -32,7 +32,7 @@ class TheSubjectRule(ValidationRule):
                 continue
             if not awaiting:
                 continue
-            if word[0].upper() == word[0] and word not in exclusions:
+            if word[0].upper() == word[0] and word not in exceptions:
                 self.lastErrorText = u"Capital {0} after \"the\" found in: \"{1}\"".format(
                     word, text)
                 return False
