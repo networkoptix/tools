@@ -1,9 +1,11 @@
 import re
 
+
 class Levels:
     CRITICAL = "critical"
     WARNING = "warning"
     INFO = "info"
+
 
 class ValidationRule:
     def __init__(self):
@@ -20,15 +22,19 @@ class ValidationRule:
         return self.valid_text(source.text)
 
     def valid_translations(self, contextName, message):
-        translation = message.find('translation')
         return all(self.valid_text(text) for text in ValidationRule.translation_texts(message))
 
     def valid_message(self, contextName, message):
-        return self.valid_source(contextName, message) and self.valid_translations(contextName, message)
-        
+        return (self.valid_source(contextName, message) and
+                self.valid_translations(contextName, message))
+
     @staticmethod
     def is_numerus(message):
         return message.get('numerus') == 'yes'
+
+    @staticmethod
+    def translation_source(message):
+        return message.find('source').text
 
     @staticmethod
     def translation_texts(message):
