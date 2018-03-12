@@ -3,8 +3,9 @@
 from validation_rule import ValidationRule, Levels
 
 the = "the"
-exclusions = ['I/O', 'Internet', 'App', 'Latest']
+exclusions = ['I/O', 'Internet', 'App', 'Latest', 'USB']
 text_exclusions = ['settings', 'license server']
+
 
 class TheSubjectRule(ValidationRule):
     def __str__(self):
@@ -16,14 +17,14 @@ class TheSubjectRule(ValidationRule):
     def level(self):
         return Levels.INFO
 
-    def valid_text(self, text):     
-        if not the in text.lower():
+    def valid_text(self, text):
+        if the not in text.lower():
             return True
-        
+
         for exclusion in text_exclusions:
             if exclusion in text.lower():
                 return True
-        
+
         awaiting = False
         for word in ValidationRule.words(text):
             if word.lower() == the:
@@ -31,8 +32,9 @@ class TheSubjectRule(ValidationRule):
                 continue
             if not awaiting:
                 continue
-            if word[0].upper() == word[0] and not word in exclusions:
-                self.lastErrorText = u"Capital {0} after \"the\" found in: \"{1}\"".format(word, text)
+            if word[0].upper() == word[0] and word not in exclusions:
+                self.lastErrorText = u"Capital {0} after \"the\" found in: \"{1}\"".format(
+                    word, text)
                 return False
             awaiting = False
 

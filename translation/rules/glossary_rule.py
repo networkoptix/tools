@@ -10,21 +10,23 @@ case_sensitive = [
     'System', "Systems",
     'B', 'KB', 'MB', 'GB', 'TB',
     'kHz'
-    ]
+]
 
 invalid_terms = {
     'low-res': 'Lo-Res',
     'qnt': 'Qty',
     'media server': 'server'
-    }
+}
 
 exclusions = [
     'system tray',
     'system administrator',
     'system partitions',
     'system presets',
+    'system performance',
     'operating system',
     '<b>']
+
 
 class GlossaryRule(ValidationRule):
     def __str__(self):
@@ -46,7 +48,7 @@ class GlossaryRule(ValidationRule):
             idx = plain_text.find(term.lower())
             if idx < 0:
                 continue
-            substr = text[idx:idx+len(term)]
+            substr = text[idx:idx + len(term)]
             if idx > 0 and text[idx - 1].isalpha():
                 continue
 
@@ -55,12 +57,14 @@ class GlossaryRule(ValidationRule):
                 continue
 
             if substr != term:
-                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(substr, term, text)
+                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(
+                    substr, term, text)
                 return False
 
         for term, fix in invalid_terms.items():
             if term.lower() in plain_text:
-                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(term, fix, text)
+                self.lastErrorText = u"Invalid term {0} instead of {1} found in: \"{2}\"".format(
+                    term, fix, text)
                 return False
 
         return True
