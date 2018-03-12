@@ -1,5 +1,7 @@
 from validation_rule import ValidationRule, Levels
 
+exceptions = ['Language Name']
+
 
 class EnUsCorrectionRule(ValidationRule):
     def __str__(self):
@@ -13,6 +15,7 @@ class EnUsCorrectionRule(ValidationRule):
 
     def valid_message(self, contextName, message):
         valid = (ValidationRule.is_numerus(message) or
+                 ValidationRule.translation_source(message) in exceptions or
                  len(list(ValidationRule.translation_texts(message))) == 0)
         if not valid:
             self.lastErrorText = u"En-US correction in:\n\"{0}\"".format(
