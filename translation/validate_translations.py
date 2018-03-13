@@ -36,16 +36,13 @@ language = None
 errorsOnly = False
 
 
-def printCritical(text, context, filename):
-    err(u'*** Context: {0} ***\n{1}'.format(context, text))
-
-
-def printWarning(text, context, filename):
-    warn(u'*** Context: {0} ***\n{1}'.format(context, text))
-
-
-def printInfo(text, context, filename):
-    info(u'*** Context: {0} ***\n{1}'.format(context, text))
+def printLeveled(text, level):
+    if level == Levels.CRITICAL:
+        err(text)
+    elif level == Levels.WARNING:
+        warn(text)
+    else:
+        info(text)
 
 
 class ValidationResult():
@@ -114,26 +111,22 @@ Context: {0}\nSource: {1}\nTarget: {2}'''.format(context, source, target))
     return result
 
 
-def handleRuleError(rule, context, filename, result):
-    if rule.level() == Levels.CRITICAL:
+def handleRuleError(text, level, context, result):
+    if level == Levels.CRITICAL:
         result.error += 1
-        printCritical(rule.last_error_text(), context, filename)
-    elif rule.level() == Levels.WARNING:
+    elif level == Levels.WARNING:
         result.warned += 1
-        printWarning(rule.last_error_text(), context, filename)
-    elif rule.level() == Levels.INFO:
-        printInfo(rule.last_error_text(), context, filename)
 
-
-def handleRule(message, rule, contextName, filename, result):
-    if not rule.valid_message(contextName, message):
-        handleRuleError(rule, contextName, filename, result)
+    message = u'*** Context: {0} ***\n{1}'.format(context, text)
+    printLeveled(message, level)
 
 
 def validateXml(root, filename):
     result = ValidationResult()
 
     applied_rules = list(get_validation_rules(filename))
+
+    diagnostics = []
 
     for context in root:
         contextName = context.find('name').text
@@ -148,7 +141,8 @@ def validateXml(root, filename):
             for rule in applied_rules:
                 if errorsOnly and rule.level() != Levels.CRITICAL:
                     continue
-                handleRule(message, rule, contextName, filename, result)
+                if not rule.valid_message(contextName, message):
+                    diagnostics.append((contextName, rule.last_error_text(), rule.level()))
 
             hasNumerusForm = False
             for numerusform in translation.iter('numerusform'):
@@ -159,6 +153,13 @@ def validateXml(root, filename):
 
             if not hasNumerusForm:
                 result = checkText(source.text, translation.text, contextName, result)
+
+    if diagnostics:
+        max_level = max(diagnostics, key=lambda x: x[2])
+        printLeveled(u"\nValidating {}...".format(filename), max_level[2])
+        for context, text, level in diagnostics:
+            handleRuleError(text, level, context, result)
+
     return result
 
 

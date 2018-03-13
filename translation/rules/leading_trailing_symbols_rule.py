@@ -1,7 +1,7 @@
 from validation_rule import ValidationRule, Levels
 
 leading = [' ', '<', '&lt;']
-trailing = [' '] #colons, dots will possibly be here
+trailing = [' ']    # Colons, dots will possibly be here.
 
 
 class LeadingTrailingSymbolsRule(ValidationRule):
@@ -17,12 +17,14 @@ class LeadingTrailingSymbolsRule(ValidationRule):
     def valid_text(self, text):
         for substring in leading:
             if text.startswith(substring):
-                self.lastErrorText = u"Invalid leading substring {0} found in text:\n\"{1}\"".format(substring, text)
+                self.lastErrorText = (u"Invalid leading substring {0} found in text:\n\"{1}\""
+                                      .format(substring, text))
                 return False
 
         for substring in trailing:
             if text.endswith(substring):
-                self.lastErrorText = u"Invalid trailing substring {0} found in text:\n\"{1}\"".format(substring, text)
+                self.lastErrorText = (u"Invalid trailing substring {0} found in text:\n\"{1}\""
+                                      .format(substring, text))
                 return False
 
         return True

@@ -18,7 +18,8 @@ class ForbiddenSymbolsRule(ValidationRule):
     def valid_text(self, text):
         for substring in forbidden:
             if substring in text:
-                self.lastErrorText = u"Invalid substring {0} found in:\n\"{1}\"".format(substring, text)
+                self.lastErrorText = (u"Invalid substring {0} found in:\n\"{1}\""
+                                      .format(substring, text))
                 return False
         return True
 
