@@ -1,7 +1,5 @@
 from validation_rule import ValidationRule, Levels
 
-exceptions = ['QnStreamQualityStrings']
-
 
 class AtLeastOneAlphaRule(ValidationRule):
     def __str__(self):
@@ -13,20 +11,9 @@ class AtLeastOneAlphaRule(ValidationRule):
     def level(self):
         return Levels.WARNING
 
-    @staticmethod
-    def ignore(contextName, message):
-        for exclusion in exceptions:
-            if exclusion in contextName:
-                return True
-        return False
-
     def valid_text(self, text):
         valid = any(c.isalpha() for c in text)
         if not valid:
             self.lastErrorText = u"No alphabet characters found in:\n\"{0}\"".format(text)
         return valid
 
-    def valid_translations(self, contextName, message):
-        if AtLeastOneAlphaRule.ignore(contextName, message):
-            return True
-        return ValidationRule.valid_translations(self, contextName, message)

@@ -16,12 +16,12 @@ def get_validation_rules(filename):
     yield ContractionsRule()
     yield GlossaryRule()
     yield LeadingTrailingSymbolsRule()
-    yield AtLeastOneAlphaRule()
     yield TheSubjectRule()
     yield LowercaseRule()
     yield NumerusFormRule()
     if 'en_US' in filename:
         yield EnUsCorrectionRule()
+        yield AtLeastOneAlphaRule()
 
 
 if __name__ == "__main__":
