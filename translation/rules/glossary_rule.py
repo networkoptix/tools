@@ -25,6 +25,7 @@ exceptions = [
     'system presets',
     'system performance',
     'operating system',
+    'a. u. b.',
     '<b>']
 
 
@@ -39,8 +40,8 @@ class GlossaryRule(ValidationRule):
         return Levels.INFO
 
     def valid_text(self, text):
-        for exclusion in exceptions:
-            if exclusion in text:
+        for exception in exceptions:
+            if exception in text:
                 return True
 
         plain_text = text.lower()

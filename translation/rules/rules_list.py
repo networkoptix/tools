@@ -9,6 +9,8 @@ from the_subject_rule import TheSubjectRule
 from lowercase_rule import LowercaseRule
 from numerus_form_rule import NumerusFormRule
 from en_us_correction_rule import EnUsCorrectionRule
+from substitutions_rule import SubstitutionsRule
+from keep_symbols_rule import KeepSymbolsRule
 
 
 def get_validation_rules(filename):
@@ -17,11 +19,14 @@ def get_validation_rules(filename):
     yield GlossaryRule()
     yield LeadingTrailingSymbolsRule()
     yield TheSubjectRule()
-    yield LowercaseRule()
     yield NumerusFormRule()
+    yield SubstitutionsRule()
+    yield KeepSymbolsRule()
     if 'en_US' in filename:
         yield EnUsCorrectionRule()
         yield AtLeastOneAlphaRule()
+    if 'de_DE' not in filename and 'ja_JP' not in filename:
+        yield LowercaseRule()
 
 
 if __name__ == "__main__":

@@ -2,7 +2,25 @@
 
 from validation_rule import ValidationRule, Levels
 
-forbidden = ['  ', '&apos;', 'href', '<html', '<br>', '<br/>', '&amp;']
+forbidden = [
+    '  ',   # Double space.
+    '&apos;',
+    'href',
+    '\t',
+    '&amp;',
+    'Ctrl+', 'Shift+', 'Alt+',
+    '<html'
+]
+
+
+def symbolText(symbol):
+    if symbol == '\t':
+        return '\\t'
+    if symbol == '\n':
+        return '\\n'
+    if symbol == '  ':
+        return '<Double space>'
+    return symbol
 
 
 class ForbiddenSymbolsRule(ValidationRule):
@@ -19,7 +37,6 @@ class ForbiddenSymbolsRule(ValidationRule):
         for substring in forbidden:
             if substring in text:
                 self.lastErrorText = (u"Invalid substring {0} found in:\n\"{1}\""
-                                      .format(substring, text))
+                                      .format(symbolText(substring), text))
                 return False
         return True
-

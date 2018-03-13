@@ -27,14 +27,6 @@ sys.path.insert(0, projectDir)
 from vms_projects import getTranslatableProjects
 sys.path.pop(0)
 
-critical = ['\t', '%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9', '<b>', '<b/>']
-warned = ['\n', '\t', '<html', '<b>', '<br>', '<b/>', '<br/>']
-substitution = ['%1', '%2', '%3', '%4', '%5', '%6', '%7', '%8', '%9']
-
-verbose = False
-language = None
-errorsOnly = False
-
 
 def printLeveled(text, level):
     if level == Levels.CRITICAL:
@@ -45,85 +37,7 @@ def printLeveled(text, level):
         info(text)
 
 
-class ValidationResult():
-    error = 0
-    warned = 0
-    unfinished = 0
-    total = 0
-
-
-def symbolText(symbol):
-    if symbol == '\t':
-        return '\\t'
-    if symbol == '\n':
-        return '\\n'
-    return symbol
-
-
-def checkSymbol(symbol, source, target, context, out):
-    # Ignoring incomplete translations
-    if not target:
-        return True
-
-    occurences = source.count(symbol)
-    valid = target.count(symbol) == occurences
-    if not valid:
-        out(u'''Invalid translation string, error on {0} count:\n
-Context: {1}\nSource: {2}\nTarget: {3}'''.format(
-            symbolText(symbol),
-            context,
-            source, target))
-
-    return valid
-
-
-def checkText(source, target, context, result):
-    if source.startswith('Ctrl+') or source.startswith('Shift+') or source.startswith('Alt+'):
-        if target and target != source:
-            err(u'''Invalid shortcut translation form \n
-Context: {0}\nSource: {1}\nTarget: {2}'''.format(context, source, target))
-            result.error += 1
-
-    for symbol in critical:
-        if not checkSymbol(symbol, source, target, context, err):
-            result.error += 1
-            break
-
-    # Check if %2 does not exist without %1
-    hasPreviuosSubstitution = True
-    for symbol in substitution:
-        hasCurrentSubstitution = source.count(symbol) > 0
-        if hasCurrentSubstitution and not hasPreviuosSubstitution:
-            err(u'Invalid substitution form \nContext: {0}\nSource: {1}'.format(context, source))
-            result.error += 1
-            break
-        hasPreviuosSubstitution = hasCurrentSubstitution
-
-    if verbose:
-        for symbol in warned:
-            if not checkSymbol(symbol, source, target, context, warn):
-                result.warned += 1
-                break
-            if not checkSymbol(symbol, source, '', context, warn):
-                result.warned += 1
-                break
-
-    return result
-
-
-def handleRuleError(text, level, context, result):
-    if level == Levels.CRITICAL:
-        result.error += 1
-    elif level == Levels.WARNING:
-        result.warned += 1
-
-    message = u'*** Context: {0} ***\n{1}'.format(context, text)
-    printLeveled(message, level)
-
-
-def validateXml(root, filename):
-    result = ValidationResult()
-
+def validateXml(root, filename, errorsOnly):
     applied_rules = list(get_validation_rules(filename))
 
     diagnostics = []
@@ -131,59 +45,28 @@ def validateXml(root, filename):
     for context in root:
         contextName = context.find('name').text
         for message in context.iter('message'):
-            result.total += 1
-            source = message.find('source')
-
-            translation = message.find('translation')
-            if translation.get('type') == 'unfinished':
-                result.unfinished += 1
-
             for rule in applied_rules:
                 if errorsOnly and rule.level() != Levels.CRITICAL:
                     continue
                 if not rule.valid_message(contextName, message):
                     diagnostics.append((contextName, rule.last_error_text(), rule.level()))
 
-            hasNumerusForm = False
-            for numerusform in translation.iter('numerusform'):
-                hasNumerusForm = True
-                if not numerusform.text:
-                    continue
-                result = checkText(source.text, numerusform.text, contextName, result)
-
-            if not hasNumerusForm:
-                result = checkText(source.text, translation.text, contextName, result)
-
     if diagnostics:
         max_level = max(diagnostics, key=lambda x: x[2])
         printLeveled(u"\nValidating {}...".format(filename), max_level[2])
         for context, text, level in diagnostics:
-            handleRuleError(text, level, context, result)
+            message = u'*** Context: {0} ***\n{1}'.format(context, text)
+            printLeveled(message, level)
 
-    return result
 
-
-def validate(path):
+def validateFile(path, errorsOnly):
     name = os.path.basename(path)
-    if verbose:
-        info('Validating {0}...'.format(name))
     tree = ET.parse(path)
     root = tree.getroot()
-    result = validateXml(root, name)
-
-    if result.error > 0:
-        err('{0}: {1} errors found\n\n'.format(name, result.error))
-
-    if verbose:
-        if result.unfinished > 0:
-            if not errorsOnly:
-                warn('{0}: {1} of {2} translations are unfinished'.format(
-                    name, result.unfinished, result.total))
-        else:
-            green('{0}: ok'.format(name))
+    validateXml(root, name, errorsOnly)
 
 
-def validateProject(project, translationDir):
+def validateProject(project, translationDir, language, errorsOnly):
     entries = []
 
     for entry in os.listdir(translationDir):
@@ -205,25 +88,15 @@ def validateProject(project, translationDir):
         entries.append(path)
 
     for path in entries:
-        validate(path)
+        validateFile(path, errorsOnly)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--color', action='store_true', help="colorized output")
-    parser.add_argument('-v', '--verbose', action='store_true', help="verbose output")
     parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")
     parser.add_argument('-l', '--language', help="check only selected language")
     args = parser.parse_args()
-
-    global verbose
-    verbose = args.verbose
-
-    global language
-    language = args.language
-
-    global errorsOnly
-    errorsOnly = args.errors_only
 
     if args.color:
         init_color()
@@ -234,7 +107,7 @@ def main():
     for project in projects:
         projectDir = os.path.join(rootDir, project.path)
         translationDir = os.path.join(projectDir, 'translations')
-        validateProject(project.name, translationDir)
+        validateProject(project.name, translationDir, args.language, args.errors_only)
 
     info("Validation finished.")
 
