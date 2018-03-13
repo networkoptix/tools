@@ -116,9 +116,9 @@ platforms:
     distributive_mask_list:
       - '*-servertool-*.msi'
       - '*.exe'
-      - '*_debug-*.zip'
     update_mask_list:
       - '*_update-*.zip'
+      - '*_debug-*.zip'  # strange, but pdbs go to updates dir
   win-x86:
     build_node: windows
     generator: Visual Studio 15 2017
@@ -128,9 +128,9 @@ platforms:
     distributive_mask_list:
       - '*-servertool-*.msi'
       - '*.exe'
-      - '*_debug-*.zip'
     update_mask_list:
       - '*_update-*.zip'
+      - '*_debug-*.zip'  # strange, but pdbs go to updates dir
   mac:
     build_node: mac
     should_run_unit_tests: yes

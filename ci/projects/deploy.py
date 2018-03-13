@@ -38,10 +38,12 @@ class Deployer(object):
                 self._deploy_platform_artifacts(platform_config, customization, platform, platform_build_info, src_root_dir, src_dir, target_dir)
 
     def _deploy_build_info(self, build_info_path, target_dir):
+        # to <build-num>-<branch>/dev/build_info.yaml
         src_dir, name = os.path.split(build_info_path)
-        self._put_file(src_dir, target_dir, name)
+        self._put_file(src_dir, os.path.join(target_dir, 'dev'), name)
 
     def _deploy_version_file(self, version_path, target_dir):
+        # to <build-num>-<branch>/version
         src_dir, name = os.path.split(version_path)
         self._put_file(src_dir, target_dir, name)
 
@@ -65,22 +67,22 @@ class Deployer(object):
             self._put_file(src_dir, target_dir, name)
 
     def _deploy_qtpdb(self, platform_config, customization, platform, platform_build_info, src_dir, target_root_dir):
-        # to <build-num>-<branch>/qtpdb/<platform>
-        target_dir = os.path.join(target_root_dir, 'qtpdb', platform)
+        # to <build-num>-<branch>/dev/qtpdb/<platform>
+        target_dir = os.path.join(target_root_dir, 'dev', 'qtpdb', platform)
         for name in platform_build_info.typed_artifact_list.get('qtpdb', []):
             self._put_file(src_dir, target_dir, name)
 
     def _deploy_unit_tests(self, platform_config, customization, platform, platform_build_info, src_root_dir, target_root_dir):
-        # to <build-num>-<branch>/<customization>/unit_tests/<platform>
+        # to <build-num>-<branch>/dev/<customization>/unit_tests/<platform>
         src_dir = os.path.join(src_root_dir, 'unit_tests', customization, platform)
-        target_dir = os.path.join(target_root_dir, customization, 'unit_tests', platform)
+        target_dir = os.path.join(target_root_dir, 'dev', customization, 'unit_tests', platform)
         for name in platform_build_info.typed_artifact_list.get('unit_tests', []):
             self._put_file(src_dir, target_dir, name)
 
     def _deploy_misc(self, platform_config, customization, platform, platform_build_info, src_root_dir, target_root_dir):
-        # to <build-num>-<branch>/<customization>/misc/<platform>
+        # to <build-num>-<branch>/dev/<customization>/misc/<platform>
         src_dir = os.path.join(src_root_dir, 'misc', customization, platform)
-        target_dir = os.path.join(target_root_dir, customization, 'misc', platform)
+        target_dir = os.path.join(target_root_dir, 'dev', customization, 'misc', platform)
         for name in platform_build_info.typed_artifact_list.get('misc', []):
             self._put_file(src_dir, target_dir, name)
 
