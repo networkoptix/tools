@@ -8,8 +8,6 @@ nx_load_config "${CONFIG=".tx2-toolrc"}"
 : ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
 : ${DEVELOP_DIR="$HOME/develop"}
-: ${MVN_BUILD_DIR=""} #< Path component at the workstation; can be empty.
-: ${CORES_ARG="-j12"}
 : ${TARGET="tx1"} #< Target device for CMake.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
@@ -94,12 +92,10 @@ Here <command> can be one of the following:
 
  # Commands which call linux-tool.sh with the proper target:
  clean # Delete cmake build dir and all maven build dirs.
- mvn [Release] [args] # Call maven.
  gen [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
  build # Build via "cmake --build <dir>".
  cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
  build-installer [Release] [mvn] # Build installer using cmake or maven.
- test-installer [Release] [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
 
  pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
@@ -276,13 +272,13 @@ copy_mediaserver()
 
     # Tegra analytics.
     cp_package_libs "tegra_video" #< Tegra-specific plugin for video decoding and neural networks.
-    cp_files "$NVIDIA_MODELS_PATH" "*" "$BOX_NVIDIA_MODELS_DIR" #< Demo neural networks.
+    cp_files "$VMS_DIR/$NVIDIA_MODELS_PATH" "*" "$BOX_NVIDIA_MODELS_DIR" #< Demo neural networks.
     rm "${BOX_MNT}$BOX_MEDIASERVER_DIR/bin/plugins"/libstub_metadata_plugin.so* #< Stub is not needed.
 }
 
 copy_desktop_client()
 {
-    cp_desktop_client_bins "desktop_client"
+    cp_desktop_client_bins "client-bin"
     cp_desktop_client_bins "fonts" "vox" "help"
     ln -s "../lib" "${BOX_MNT}$BOX_DESKTOP_CLIENT_DIR/lib" #< rpath: [$ORIGIN/..lib]
     cp_files "$PACKAGES_DIR/$PACKAGE_QT/plugins" \
@@ -675,9 +671,6 @@ main()
         clean)
             "$LINUX_TOOL" clean "$TARGET" "$@"
             ;;
-        mvn)
-            "$LINUX_TOOL" mvn "$TARGET" "$@"
-            ;;
         gen)
             "$LINUX_TOOL" gen "$TARGET" "$@"
             ;;
@@ -689,9 +682,6 @@ main()
             ;;
         build-installer)
             "$LINUX_TOOL" build-installer "$TARGET" "$@"
-            ;;
-        test-installer)
-            "$LINUX_TOOL" test-installer "$TARGET" "$@"
             ;;
         #..........................................................................................
         pack-build)
