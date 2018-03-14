@@ -6,7 +6,7 @@ kvm_guest__distribution: Ubuntu
 kvm_guest__distribution_release: "xenial"
 kvm_guest__extra_system_image_size_gb: "50"
 kvm_guest__memory: "{{ 16 * 1024 * 1024 }}"
-kvm_guest__cpus: 14
+kvm_guest__cpus: 36
 
 networks:
 - source_dev: eno1
