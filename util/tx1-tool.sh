@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${CONFIG=".tx1-toolrc"}"
+nx_load_config "${CONFIG=".tx2-toolrc"}"
 
 : ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 
@@ -90,6 +90,7 @@ Here <command> can be one of the following:
  tv-ut [cmake-args] # Build and run unit tests on the workstation.
  tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
  tvmp # Copy libtegra_video_metadata_plugin.so to the box $BOX_MEDIASERVER_DIR/bin/plugins/.
+ d # Copy libdeepstream_metadata_plugin.so to the box $BOX_MEDIASERVER_DIR/bin/plugins/.
 
  # Commands which call linux-tool.sh with the proper target:
  clean # Delete cmake build dir and all maven build dirs.
@@ -664,6 +665,12 @@ main()
             cp_files "$CMAKE_BUILD_DIR/bin/plugins" "libtegra_video_metadata_plugin.so" \
                 "$BOX_MEDIASERVER_DIR/bin/plugins"
             ;;
+        d)
+            get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
+            cp_files "$CMAKE_BUILD_DIR/bin/plugins" "libdeepstream_metadata_plugin.so" \
+                "$BOX_MEDIASERVER_DIR/bin/plugins"
+            ;;
+
         #..........................................................................................
         clean)
             "$LINUX_TOOL" clean "$TARGET" "$@"
