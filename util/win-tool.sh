@@ -7,10 +7,7 @@ nx_load_config "${CONFIG=".win-toolrc"}"
 : ${UBUNTU_DEVELOP_DIR="/S/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the target dir.
-: ${BUILD_CONFIG=""} #< Path component after "bin/" and "lib/".
 : ${MVN_BUILD_DIR="x64"} #< Name of the directories inside "nx_vms".
-: ${NX_KIT_DIR="open/artifacts/nx_kit"} #< Path inside "nx_vms".
-: ${TEMP_DIR="$(dirname $(mktemp `# dry run` -u))"}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -39,7 +36,7 @@ Here <command> can be one of the following (if not, redirected to $(basename "$L
 
  clean # Delete cmake build dir and all maven build dirs.
  mvn [args] # Call maven.
- gen [cmake-args] # Perform cmake generation.
+ gen [Release] [cmake-args] # Perform cmake generation.
  build [Release] [args] # Build via "cmake --build <dir> [--config Release] [args]".
  cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
 EOF
@@ -147,16 +144,19 @@ do_clean()
     nx_popd
 }
 
-do_gen() # "$@"
+do_gen() # [Release] "$@"
 {
     find_and_pushd_CMAKE_BUILD_DIR -create
+
+    local CONFIGURATION_ARG=""
+    [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="-DCMAKE_BUILD_TYPE=Release"; }
 
     local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
     if [ -f "$CMAKE_CACHE" ]; then
         nx_verbose rm "$CMAKE_CACHE"
     fi
 
-    nx_verbose cmake $(w "$VMS_DIR") -Ax64 -DrdepSync=OFF "$@"
+    nx_verbose cmake $(w "$VMS_DIR") -Ax64 $CONFIGURATION_ARG "$@"
     local RESULT=$?
 
     nx_popd
@@ -261,38 +261,6 @@ do_apidoc_rdep() # "$@"
     nx_popd
 }
 
-build_and_test_nx_kit() # nx_kit_src_dir "$@"
-{
-    local SRC="$1"; shift
-    nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc || return $?
-    nx_verbose cmake --build . "$@" || return $?
-    ./nx_kit_*
-}
-
-do_kit() # "$@"
-{
-    find_VMS_DIR
-
-    # Recreate nx_kit build dir in $TEMP_DIR.
-    local KIT_BUILD_DIR="$TEMP_DIR/nx_kit-build"
-    rm -rf "$KIT_BUILD_DIR"
-    mkdir -p "$KIT_BUILD_DIR" || exit $?
-    nx_pushd "$KIT_BUILD_DIR"
-    nx_echo "+ cd $KIT_BUILD_DIR"
-
-    local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
-    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; exit $?; }
-
-    nx_popd
-    rm -rf "$KIT_BUILD_DIR"
-
-    nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || exit $?
-    nx_echo
-    nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
-}
-
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -352,7 +320,7 @@ main()
         cmake)
             local CONFIGURATION_ARG=""
             [ "$1" == "Release" ] && { shift; CONFIGURATION_ARG="Release"; }
-            do_gen "$@" || exit $?
+            do_gen $CONFIGURATION_ARG "$@" || exit $?
             do_build $CONFIGURATION_ARG
             ;;
         #..........................................................................................
