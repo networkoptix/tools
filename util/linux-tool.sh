@@ -51,7 +51,7 @@ Here <command> can be one of the following:
  share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
  clean # Delete cmake build dir and all maven build dirs.
  mvn [target] [Release] [args] # Call maven.
- gen [target] [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
+ gen [target] [Release] [cache] [cmake-args] # Perform cmake generation. linux-x64 target: "linux".
  build [target] # Build via "cmake --build <dir>".
  cmake [target] [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
  distrib [target] [Release] [mvn] # Build distribution using cmake or maven.
@@ -111,7 +111,7 @@ do_get_target() # target
         linux) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="x64"; BOX=""; ARCH="x64";;
         tx1) MVN_TARGET_DIR=""; MVN_BUILD_DIR=""; BOX=""; ARCH="";; #< tx1 is cmake-only
         bpi) MVN_TARGET_DIR="target-bpi"; MVN_BUILD_DIR="arm-bpi"; BOX="bpi"; ARCH="arm";;
-        edge1) MVN_TARGET_DIR="target-edge1"; MVN_BUILD_DIR="arm-edge1"; BOX="edge1"; ARCH="arm";;
+        edge1) MVN_TARGET_DIR="target-edge1"; MVN_BUILD_DIR="arm-edge1"; BOX="edge1"; ARCH="arm"; CUSTOMIZATION="digitalwatchdog";;
         rpi) MVN_TARGET_DIR="target-rpi"; MVN_BUILD_DIR="arm-rpi"; BOX="rpi"; ARCH="arm";;
         bananapi) MVN_TARGET_DIR="target-bananapi"; MVN_BUILD_DIR="arm-bananapi"; BOX="bananapi"; ARCH="arm";;
         android-arm) MVN_TARGET_DIR="target"; MVN_BUILD_DIR="arm"; BOX="android"; ARCH="arm";;
@@ -229,7 +229,7 @@ do_clean() # [target]
     done
 }
 
-do_gen() # [target] [Release] "$@"
+do_gen() # [target] [Release] [cache] "$@"
 {
     find_VMS_DIR cd
     get_TARGET "$1" && shift
@@ -237,12 +237,17 @@ do_gen() # [target] [Release] "$@"
     local CONFIG_ARG=""
     [ "$1" = "Release" ] && { shift; CONFIG_ARG="-DCMAKE_BUILD_TYPE=Release"; }
 
+    local -i CACHE_ARG=0
+    [ "$1" = "cache" ] && { shift; CACHE_ARG=1; }
+
     get_CMAKE_BUILD_DIR "$TARGET"
     if [ -d "$CMAKE_BUILD_DIR" ]; then
         nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
-        local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
-        if [ -f "$CMAKE_CACHE" ]; then
-            nx_verbose rm "$CMAKE_CACHE"
+        if [ $CACHE_ARG = 0 ]; then
+            local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
+            if [ -f "$CMAKE_CACHE" ]; then
+                nx_verbose rm "$CMAKE_CACHE"
+            fi
         fi
     fi
     mkdir -p "$CMAKE_BUILD_DIR"
@@ -255,9 +260,14 @@ do_gen() # [target] [Release] "$@"
     local GENERATOR_ARG=""
     [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
 
+    local CUSTOMIZATION_ARG=""
+    [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
+
     # TODO: Add convenient option to enable rdepSync.
 
-    nx_verbose cmake "$VMS_DIR" -DrdepSync=OFF "$@" $GENERATOR_ARG $TARGET_ARG $CONFIG_ARG
+    nx_verbose cmake "$VMS_DIR" \
+        -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
+        $CUSTOMIZATION_ARG "$@" $GENERATOR_ARG $TARGET_ARG $CONFIG_ARG
     local RESULT=$?
 
     nx_popd
