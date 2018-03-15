@@ -1,4 +1,4 @@
-libvirt_guest__init_data_path: "/var/cloud-init/{{ libvirt_guest__hostname }}"
+libvirt_guest__init_data_path: "/var/lib/guest-init/{{ libvirt_guest__hostname }}"
 libvirt_guest__init_media_img: "{{ libvirt_guest__storage_pool_path }}/{{ libvirt_guest__hostname }}-cidata.iso"
 
 # this is for default user and should be removed
