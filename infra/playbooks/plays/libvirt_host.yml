@@ -1,10 +1,10 @@
 - name: Setup libvirt on KVM hosts
-  hosts: kvm_host
+  hosts: libvirt_host
   become: true
   become_method: sudo
 
   roles:
   - role: alphabet_common
-  - role: kvm_host
+  - role: libvirt_host
   # TODO we need to move base images to NAS and extract image creation project
   - role: image_library

@@ -4,7 +4,7 @@ net stop sshd
 net start sshd
 mkdir -p ~/.ssh/
 
-{% for key in kvm_guest__default_user_ssh_authorized_keys %}
+{% for key in libvirt_guest__default_user_ssh_authorized_keys %}
 echo '{{ key }}' >> ~/.ssh/authorized_keys
 {% endfor %}
 

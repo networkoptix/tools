@@ -5,17 +5,17 @@
   # We don't know status of guest, so if we try to gather facts (=connect),
   # but this guest is not crated yet, we'll fail entire section.
   # That's why don't collect facts here.
-  # All facts will be collected in kvm_guest.
+  # All facts will be collected in libvirt_guest.
   gather_facts: no
 
   vars_files:
   - ../secrets/windows_build.yml
 
   roles:
-  - role: kvm_guest
+  - role: libvirt_guest
   - role: windows_build_node
     become: false
     when:
-    - kvm_guest__state is defined
-    - kvm_guest__state == 'running'
-    - kvm_guest__type  == 'windows'
+    - libvirt_guest__state is defined
+    - libvirt_guest__state == 'running'
+    - libvirt_guest__type  == 'windows'

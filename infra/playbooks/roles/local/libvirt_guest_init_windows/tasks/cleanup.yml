@@ -4,19 +4,19 @@
 # - name: Get init Floppy dev name
 #   xml:
 #     xmlstring: "{{ domain_xml }}"
-#     xpath: '/domain/devices/disk[source/@file="{{ kvm_guest__metainfo_boot_image }}"]/target'
+#     xpath: '/domain/devices/disk[source/@file="{{ libvirt_guest__init_media_img }}"]/target'
 #     content: attribute
 #     attribute: dev
-#   when: "kvm_guest__state == 'running'"
+#   when: "libvirt_guest__state == 'running'"
 #   failed_when: false
 #   register: _guest_init_media_info
-#   delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
+#   delegate_to: "{{ libvirt_host }}" # packages may be not installed on guest yet
 #
 # - name: Eject Init Media
 #   become: true
 #   become_method: sudo
 #   command: >-
-#     virsh change-media {{ kvm_guest__hostname }}
+#     virsh change-media {{ libvirt_guest__hostname }}
 #     {{ _guest_init_media_info.matches[0].target.dev }} --eject
 #   when:
 #   - _guest_init_media_info.matches is defined
@@ -24,4 +24,4 @@
 #   - >-
 #     _guest_init_media_info.matches[0].target.tray is undefined or
 #     _guest_init_media_info.matches[0].target.tray != 'open'
-#   delegate_to: "{{ kvm_host }}"
+#   delegate_to: "{{ libvirt_host }}"

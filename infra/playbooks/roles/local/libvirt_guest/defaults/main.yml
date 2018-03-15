@@ -1,0 +1,22 @@
+libvirt_guest__domain_type : kvm
+
+libvirt_guest__type: linux
+libvirt_guest__extra_system_image_size_gb: "50"
+libvirt_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
+libvirt_guest__memory: "{{ libvirt_guest__memory_kib }}"
+libvirt_guest__cpus: 4
+libvirt_guest__hostname: "{{ inventory_hostname }}"
+
+libvirt_guest__base_image: xenial-server-cloudimg-amd64-disk1.img
+libvirt_guest__storage_pool_path: /var/lib/libvirt/images
+libvirt_guest__system_image_file: "{{ libvirt_guest__storage_pool_path }}/{{ libvirt_guest__hostname }}.qcow2"
+
+# TODO it looks like we don't need to configure booting order at all
+libvirt_guest__boot_devices:
+- hd
+
+libvirt_guest__disks:
+- device: disk
+  driver_type: qcow2
+  source_file: "{{ libvirt_guest__system_image_file }}"
+  target_bus: virtio

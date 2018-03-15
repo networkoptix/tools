@@ -1,0 +1,30 @@
+- name: Define VM when it's undefined
+  include_tasks: change_to_shutdown.yml
+  when: libvirt_guest__current_state == 'undefined'
+
+- name: "Start {{ libvirt_guest__hostname }}"
+  virt:
+    name: "{{ libvirt_guest__hostname }}"
+    state: running
+  delegate_to: "{{ libvirt_host }}"
+  register: state
+  when: >-
+    libvirt_guest__current_state == 'shutdown' or
+    libvirt_guest__current_state == 'paused'
+
+- name: Pause before gathering facts
+  pause:
+    seconds: 1
+  when: state.changed
+
+- name: Gather all facts about host and its VM
+  include_tasks: get_facts.yml
+  when: state.changed
+
+- assert:
+    that:
+    - libvirt_guest__current_state == 'running'
+
+- include_role:
+    name: "libvirt_guest_init_{{ libvirt_guest__type }}"
+    tasks_from: cleanup

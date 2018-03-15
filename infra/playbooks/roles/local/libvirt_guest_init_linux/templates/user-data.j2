@@ -1,0 +1,11 @@
+#cloud-config
+password: password
+chpasswd: { expire: False }
+ssh_authorized_keys: {{ libvirt_guest__default_user_ssh_authorized_keys | to_json }}
+locale: en_US.UTF-8
+
+users: {{ libvirt_guest__initial_users | to_json }}
+
+package_update: false
+package_upgrade: false
+packages: {{ libvirt_guest__initial_packages | to_json }}

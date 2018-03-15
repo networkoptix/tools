@@ -1,5 +1,0 @@
-- name: Gather all facts about host and its VM
-  include_tasks: get_facts.yml
-
-- name: "Change VM state to {{ kvm_guest__state }}"
-  include_tasks: "change_to_{{ kvm_guest__state }}.yml"

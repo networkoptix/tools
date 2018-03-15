@@ -2,18 +2,18 @@
   hosts: jenkins
 
   roles:
-  - role: kvm_guest
+  - role: libvirt_guest
     become: true
     become_method: sudo
   - role: alphabet_common
     become: true
     become_method: sudo
-    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
   - role: geerlingguy.java
     become: true
     become_method: sudo
-    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
   - role: geerlingguy.jenkins
     become: true
     become_method: sudo
-    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'

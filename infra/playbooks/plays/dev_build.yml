@@ -5,13 +5,13 @@
   # We don't know status of guest, so if we try to gather facts (=connect),
   # but this guest is not crated yet, we'll fail entire section.
   # That's why don't collect facts here.
-  # All facts will be collected in kvm_guest.
+  # All facts will be collected in libvirt_guest.
   gather_facts: no
 
   roles:
-  - role: kvm_guest
+  - role: libvirt_guest
   - role: alphabet_common
-    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
 
 - name: Setup mshevchenko custom build machine
   hosts: dev_build

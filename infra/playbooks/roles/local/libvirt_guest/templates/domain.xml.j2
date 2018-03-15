@@ -4,9 +4,9 @@
   https://libvirt.org/formatdomain.html
 #}
 
-<domain type='{{ kvm_guest__domain_type }}'>
+<domain type='{{ libvirt_guest__domain_type }}'>
 
-  <name>{{ kvm_guest__hostname }}</name>
+  <name>{{ libvirt_guest__hostname }}</name>
   {#
     TODO: allow custom units or swithc to smth. handy
     - "b" or "bytes" for bytes,
@@ -19,16 +19,16 @@
     - "TB" for terabytes (1012 or 1,000,000,000,000 bytes),
     - "T" or "TiB" for tebibytes (240 or 1,099,511,627,776 bytes).
   #}
-  {% set memory_unit = kvm_guest__memory_unit | default("KiB") %}
-  <memory unit='{{ memory_unit }}'>{{ kvm_guest__memory }}</memory>
+  {% set memory_unit = libvirt_guest__memory_unit | default("KiB") %}
+  <memory unit='{{ memory_unit }}'>{{ libvirt_guest__memory }}</memory>
   {# TODO: add maxMemory and currentMemory (?) #}
-  <vcpu placement='static'>{{ kvm_guest__cpus }}</vcpu>
+  <vcpu placement='static'>{{ libvirt_guest__cpus }}</vcpu>
   <resource>
     <partition>/machine</partition>
   </resource>
   <os>
     <type arch='x86_64' machine='pc-i440fx-2.8'>hvm</type>
-{% for dev in kvm_guest__boot_devices %}
+{% for dev in libvirt_guest__boot_devices %}
     <boot dev='{{ dev }}'/>
 {% endfor %}
   </os>
@@ -57,11 +57,11 @@
   <devices>
     <emulator>/usr/bin/qemu-kvm</emulator>
 
-{% if kvm_guest__graphics is defined and kvm_guest__graphics == true %}
+{% if libvirt_guest__graphics is defined and libvirt_guest__graphics == true %}
     <graphics type='spice' autoport='yes'/>
 {% endif %}
 
-{% for disk in kvm_guest__disks_final %}
+{% for disk in libvirt_guest__disks_final %}
   {# Type of disk: file|block|dir|network|volume #}
   {# Only files are supported for now #}
   {% set disk_type   = "file" %}

@@ -1,4 +1,4 @@
-- import_playbook: plays/kvm_host.yml
+- import_playbook: plays/libvirt_host.yml
 - import_playbook: plays/build_vm_win.yml
 - import_playbook: plays/build_vm_lin.yml
 - import_playbook: plays/depcon.yml

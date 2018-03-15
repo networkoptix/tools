@@ -1,12 +1,12 @@
-kvm_host: gamma
-kvm_guest__state: running
+libvirt_host: gamma
+libvirt_guest__state: running
 
-kvm_guest__type: linux
-kvm_guest__distribution: Ubuntu
-kvm_guest__distribution_release: "xenial"
-kvm_guest__extra_system_image_size_gb: "50"
-kvm_guest__memory: "{{ 16 * 1024 * 1024 }}"
-kvm_guest__cpus: 36
+libvirt_guest__type: linux
+libvirt_guest__distribution: Ubuntu
+libvirt_guest__distribution_release: "xenial"
+libvirt_guest__extra_system_image_size_gb: "50"
+libvirt_guest__memory: "{{ 16 * 1024 * 1024 }}"
+libvirt_guest__cpus: 36
 
 networks:
 - source_dev: eno1
@@ -34,4 +34,4 @@ networks:
       address:        "192.168.13.109"
       netmask:        "255.255.255.0"
 
-kvm_guest__base_image_url: https://cloud-images.ubuntu.com/xenial/20180215/xenial-server-cloudimg-amd64-disk1.img
+libvirt_guest__base_image_url: https://cloud-images.ubuntu.com/xenial/20180215/xenial-server-cloudimg-amd64-disk1.img

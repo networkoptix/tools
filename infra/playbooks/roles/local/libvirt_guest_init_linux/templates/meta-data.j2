@@ -1,6 +1,6 @@
-instance-id: {{ kvm_guest__hostname }}
-hostname: "{{ kvm_guest__hostname }}"
-local-hostname: "{{ kvm_guest__hostname }}"
+instance-id: {{ libvirt_guest__hostname }}
+hostname: "{{ libvirt_guest__hostname }}"
+local-hostname: "{{ libvirt_guest__hostname }}"
 
 network-interfaces: |
   auto lo

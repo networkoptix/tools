@@ -1,12 +1,12 @@
-kvm_host: beta
-kvm_guest__state: running
+libvirt_host: beta
+libvirt_guest__state: running
 
-kvm_guest__type: linux
-kvm_guest__distribution: Ubuntu
-kvm_guest__distribution_release: "xenial"
-kvm_guest__extra_system_image_size_gb: "1000"
-kvm_guest__memory: "{{ 100 * 1024 * 1024 }}"  # 100 GiB
-kvm_guest__cpus: 36
+libvirt_guest__type: linux
+libvirt_guest__distribution: Ubuntu
+libvirt_guest__distribution_release: "xenial"
+libvirt_guest__extra_system_image_size_gb: "1000"
+libvirt_guest__memory: "{{ 100 * 1024 * 1024 }}"  # 100 GiB
+libvirt_guest__cpus: 36
 
 networks:
 - source_dev: eno1
