@@ -2,8 +2,6 @@ libvirt_host: alpha
 libvirt_guest__state: running
 
 libvirt_guest__type: linux
-libvirt_guest__distribution: Ubuntu
-libvirt_guest__distribution_release: "xenial"
 libvirt_guest__extra_system_image_size_gb: "2"
 libvirt_guest__memory: "{{ 3 * 1024 * 1024 }}"
 libvirt_guest__cpus: 1
