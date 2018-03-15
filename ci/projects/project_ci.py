@@ -15,7 +15,6 @@ from mercurial import MercurialWriter
 log = logging.getLogger(__name__)
 
 
-DEFAULT_CUSTOMIZATION = 'hanwha'
 DEFAULT_CLOUD_GROUP = 'test'
 DEFAULT_RELEASE = 'beta'
 DOWNSTREAM_FUNTEST_PROJECT = 'funtest'
@@ -40,7 +39,7 @@ class CiProject(BuildProject):
 
     @property
     def customization(self):
-        return DEFAULT_CUSTOMIZATION
+        return self.branch_config.ci.customization
 
     @property
     def requested_customization_list(self):
@@ -63,7 +62,10 @@ class CiProject(BuildProject):
         return True
 
     def get_project_parameters(self):
-        default_platforms = set(self.config.ci.platforms)
+        if self.branch_config.ci.platform_list:
+            default_platforms = set(self.branch_config.ci.platform_list)
+        else:
+            default_platforms = set(self.config.ci.platforms)
         return BuildProject.get_project_parameters(self) + [
             BooleanProjectParameter(platform, 'Build platform %s' % platform, default_value=platform in default_platforms)
             for platform in self.all_platform_list

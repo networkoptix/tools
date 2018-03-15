@@ -128,19 +128,16 @@ class BuildProject(NxVmsProject):
 
     # init  ========================================================================================
     def stage_init(self):
-        log.info('requested platform_list = %r', self.requested_platform_list)
-        log.info('requested customization_list = %r', self.requested_customization_list)
+        return self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
+            self.make_python_stage_command('set_properties'),
+            ]
 
+
+    # set_properties  ========================================================================================
+    def stage_set_properties(self):
         command_list = [self._set_project_properties_command]
-
-        if self.in_assist_mode and self.params.stage:
-            command_list += [
-                self.make_python_stage_command(self.params.stage),
-                ]
-        elif self.must_actually_do_build():
-            command_list += self.initial_stash_nx_vms_command_list + self.prepare_nx_vms_command_list + [
-                self.make_python_stage_command('prepare_for_build'),
-                ]
+        if self.must_actually_do_build():
+            command_list += [self.make_python_stage_command('prepare_for_build')]
         return command_list
 
     @property
@@ -175,6 +172,9 @@ class BuildProject(NxVmsProject):
 
     # prepare_for_build ============================================================================
     def stage_prepare_for_build(self):
+        log.info('requested platform_list = %r', self.requested_platform_list)
+        log.info('requested customization_list = %r', self.requested_customization_list)
+
         self.clean_stamps.init_master(self.params)
         if self.must_skip_this_build():
             return None
@@ -348,6 +348,7 @@ class BuildProject(NxVmsProject):
             workspace_dir=self.workspace_dir,
             build_parameters=build_parameters,
             platform_config=platform_config,
+            branch_config=self.branch_config,
             platform_branch_config=self.branch_config.platforms.get(platform),
             webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
             )

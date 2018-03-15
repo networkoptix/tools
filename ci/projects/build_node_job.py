@@ -73,7 +73,7 @@ class PlatformBuildInfo(namedtuple(
         customization=basestring,
         platform=basestring,
         is_succeeded=bool,
-        version=basestring,
+        version=[basestring, None],
         current_config_path=basestring,
         unit_tests_bin_dir=basestring,
         artifacts_dir=basestring,
@@ -121,6 +121,7 @@ class BuildNodeJob(object):
                  workspace_dir,
                  build_parameters,
                  platform_config,
+                 branch_config,
                  platform_branch_config,
                  webadmin_external_dir,
                  ):
@@ -129,6 +130,7 @@ class BuildNodeJob(object):
         self._is_unix = is_unix
         self._workspace_dir = workspace_dir
         self._platform_config = platform_config
+        self._branch_config = branch_config
         self._platform_branch_config = platform_branch_config
         self._webadmin_external_dir = webadmin_external_dir
         self._error_list = []

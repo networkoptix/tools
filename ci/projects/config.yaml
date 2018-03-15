@@ -171,6 +171,14 @@ platforms:
       - '*.zip'
     update_mask_list:
       - '*_update-*.zip'
+  tx1:
+    build_node: linux
+    should_run_unit_tests: no
+    publish_dir: arm
+    distributive_mask_list:
+      - '*.tgz'
+      - '*.zip'
+    update_mask_list: []
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher
