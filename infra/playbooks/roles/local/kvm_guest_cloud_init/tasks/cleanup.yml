@@ -1,27 +1,31 @@
-- name: Get Cloud init CD dev name
-  xml:
-    xmlstring: "{{ domain_xml }}"
-    xpath: '/domain/devices/disk[source/@file="{{ kvm_guest__metainfo_boot_image }}"]/target'
-    content: attribute
-    attribute: dev
-  when: "kvm_guest__state == 'running'"
-  failed_when: false
-  register: _cloud_init_cd_info
-  delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
-
-- name: Eject Cloud init CD
-  become: true
-  become_method: sudo
-  command: >-
-    virsh change-media {{ kvm_guest__hostname }}
-    {{ _cloud_init_cd_info.matches[0].target.dev }} --eject
-  when:
-  - _cloud_init_cd_info.matches is defined
-  - _cloud_init_cd_info.matches[0].target.dev is defined
-  - >-
-    _cloud_init_cd_info.matches[0].target.tray is undefined or
-    _cloud_init_cd_info.matches[0].target.tray != 'open'
-  delegate_to: "{{ kvm_host }}"
+# It looks like cloud-init will try to activate installation one more time
+# if reboot happens.
+# So it would be safer to keep CD in tray.
+#
+# - name: Get Cloud init CD dev name
+#   xml:
+#     xmlstring: "{{ domain_xml }}"
+#     xpath: '/domain/devices/disk[source/@file="{{ kvm_guest__metainfo_boot_image }}"]/target'
+#     content: attribute
+#     attribute: dev
+#   when: "kvm_guest__state == 'running'"
+#   failed_when: false
+#   register: _cloud_init_cd_info
+#   delegate_to: "{{ kvm_host }}" # packages may be not installed on guest yet
+#
+# - name: Eject Cloud init CD
+#   become: true
+#   become_method: sudo
+#   command: >-
+#     virsh change-media {{ kvm_guest__hostname }}
+#     {{ _cloud_init_cd_info.matches[0].target.dev }} --eject
+#   when:
+#   - _cloud_init_cd_info.matches is defined
+#   - _cloud_init_cd_info.matches[0].target.dev is defined
+#   - >-
+#     _cloud_init_cd_info.matches[0].target.tray is undefined or
+#     _cloud_init_cd_info.matches[0].target.tray != 'open'
+#   delegate_to: "{{ kvm_host }}"
 
 # For some reasons cloud-init doesn't add hostname to /etc/hosts
 - name: Add guest's inventory name to /etc/hosts
