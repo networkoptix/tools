@@ -33,5 +33,3 @@ networks:
     options:
       address:        "192.168.13.109"
       netmask:        "255.255.255.0"
-
-libvirt_guest__base_image_url: https://cloud-images.ubuntu.com/xenial/20180215/xenial-server-cloudimg-amd64-disk1.img
