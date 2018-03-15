@@ -1,5 +1,6 @@
 ---
 - name: Add all infra hosts into /etc/hosts
+  become: "kvm_guest__type is not defined or kvm_guest__type != 'windows'"
   lineinfile:
     path: /etc/hosts
     line: "{{ item }}"
@@ -18,9 +19,12 @@
     state: present
   with_items:
   - python-lxml
-  when: ansible_os_family == 'Debian'
+  when:
+  - ansible_os_family is defined
+  - ansible_os_family == 'Debian'
 
 - name: Ensure enk.me is a known host
+  become: "kvm_guest__type is not defined or kvm_guest__type != 'windows'"
   lineinfile:
     dest: "/etc/ssh/ssh_known_hosts"
     create: yes

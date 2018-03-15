@@ -18,6 +18,7 @@
   when: domstate.status is undefined
 
 - name: Wait for VM connection
+  become: false
   wait_for_connection:
     sleep: 1
     delay: 0

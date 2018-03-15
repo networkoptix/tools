@@ -15,7 +15,7 @@
 
       "vm_name": "{{ user `vm_name`}}",
       "headless": true,
-      "disk_size": 16384,
+      "disk_size": 40960,
       "boot_wait": "{{user `boot_wait`}}",
       "communicator": "{{user `winrm_or_ssh_or_none`}}",
       "ssh_username": "{{user `ssh_username`}}",
@@ -46,7 +46,7 @@
 
       "vm_name": "{{ user `vm_name`}}",
       "headless": true,
-      "disk_size": 16384,
+      "disk_size": 40960,
       "boot_wait": "{{user `boot_wait`}}",
       "communicator": "{{user `winrm_or_ssh_or_none`}}",
       "ssh_username": "{{user `ssh_username`}}",
@@ -76,7 +76,7 @@
 
       "vm_name": "{{ user `vm_name`}}",
       "headless": true,
-      "disk_size": 16384,
+      "disk_size": 40960,
       "boot_wait": "{{user `boot_wait`}}",
       "communicator": "{{user `winrm_or_ssh_or_none`}}",
       "ssh_username": "{{user `ssh_username`}}",
@@ -108,7 +108,7 @@
 
       "vm_name": "{{ user `vm_name`}}",
       "headless": true,
-      "disk_size": 16384,
+      "disk_size": 40960,
       "boot_wait": "{{user `boot_wait`}}",
       "communicator": "{{user `winrm_or_ssh_or_none`}}",
       "ssh_username": "{{user `ssh_username`}}",
@@ -136,11 +136,11 @@
     "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
     "_note": "winrm connector is not recommended because it hangs sometimes..",
     "winrm_or_ssh_or_none": "winrm",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
+    "ssh_username": "jenkins",
+    "ssh_password": "password",
     "ssh_wait_timeout": "6h",
-    "winrm_username": "vagrant",
-    "winrm_password": "vagrant",
+    "winrm_username": "jenkins",
+    "winrm_password": "password",
     "winrm_timeout": "10000s"
   }
 }

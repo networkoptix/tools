@@ -12,10 +12,10 @@
     "@iremizov Here should be sysprep command, but it didn't work for me..",
   "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c \"Packer Shutdown\"",
   "winrm_or_ssh_or_none": "ssh",
-  "ssh_username": "vagrant",
-  "ssh_password": "vagrant",
+  "ssh_username": "jenkins",
+  "ssh_password": "password",
   "ssh_wait_timeout": "6h",
-  "winrm_username": "vagrant",
-  "winrm_password": "vagrant",
+  "winrm_username": "jenkins",
+  "winrm_password": "password",
   "winrm_timeout": "6h"
 }

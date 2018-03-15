@@ -20,7 +20,9 @@
   delegate_to: "{{ kvm_host }}"
 
 - name: Make floppy image
-  command: sudo /sbin/mkfs.msdos -C {{ kvm_guest__metainfo_boot_image }} 1440
+  become: true
+  become_method: sudo
+  command: '/sbin/mkfs.msdos -C {{ kvm_guest__metainfo_boot_image }} 1440'
   delegate_to: "{{ kvm_host }}"
 
 - name: Prepare mount
@@ -38,18 +40,16 @@
     fstype: auto
   delegate_to: "{{ kvm_host }}"
 
-- name: "Generate guest"
+- name: Generate guest init scripts (from templates)
   template:
     src: "floppy/{{ item }}.j2"
     dest: "{{ kvm_guest__metainfo_path }}/floppy/{{ item }}"
   delegate_to: "{{ kvm_host }}"
   with_items:
-  - 00_entry.bat
+  - add_default_keys.sh
   - setup_networks.ps1
-  - setup_users.ps1
-  - install_packages.ps1
 
-- name: Copy just files (w/o templating)
+- name: Copy guest init scripts (w/o templating)
   copy:
     src: files/floppy
     dest: "{{ kvm_guest__metainfo_path }}"

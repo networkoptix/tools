@@ -13,7 +13,7 @@
 # In KVM Domain definition we plugged Eth device into PCI bus and we know exact
 # location of every net adapter.
 $network_adapter = Get-NetAdapterHardwareInfo | where { $_.BusNumber -eq {{ address_bus }}  -and $_.SlotNumber -eq {{ address_slot }} -and $_.FunctionNumber -eq {{ address_function }}  } | Get-NetAdapter
-# Windows does not have standard repr forma for mac address, use InterfaceIndex
+# Windows does not have standard repr format for mac address, use InterfaceIndex
 $net_config = Get-WmiObject -Class 'Win32_NetworkAdapterConfiguration' | Where-Object { $_.interfaceIndex -eq $network_adapter.InterfaceIndex }
 
   {% if network.config.type == 'static' %}

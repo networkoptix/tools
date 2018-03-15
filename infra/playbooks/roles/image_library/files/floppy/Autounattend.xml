@@ -118,8 +118,8 @@
           <WillShowUI>OnError</WillShowUI>
         </ProductKey>
         <AcceptEula>true</AcceptEula>
-        <FullName>Vagrant</FullName>
-        <Organization>Vagrant</Organization>
+        <FullName>jenkins</FullName>
+        <Organization>jenkins</Organization>
       </UserData>
     </component>
   </settings>
@@ -167,7 +167,7 @@
       <OEMInformation>
         <HelpCustomized>false</HelpCustomized>
       </OEMInformation>
-      <ComputerName>vagrant-2016</ComputerName>
+      <ComputerName>Win2016-build</ComputerName>
       <TimeZone>Pacific Standard Time</TimeZone>
       <RegisteredOwner/>
     </component>
@@ -256,19 +256,19 @@
       <!-- Setup users -->
       <UserAccounts>
         <AdministratorPassword>
-          <Value>vagrant</Value>
+          <Value>password</Value>
           <PlainText>true</PlainText>
         </AdministratorPassword>
         <LocalAccounts>
           <LocalAccount wcm:action="add">
             <Password>
-              <Value>vagrant</Value>
+              <Value>password</Value>
               <PlainText>true</PlainText>
             </Password>
             <Group>administrators</Group>
-            <DisplayName>Vagrant</DisplayName>
-            <Name>vagrant</Name>
-            <Description>Vagrant User</Description>
+            <DisplayName>jenkins</DisplayName>
+            <Name>jenkins</Name>
+            <Description>jenkins User</Description>
           </LocalAccount>
         </LocalAccounts>
       </UserAccounts>
@@ -276,18 +276,18 @@
       <!-- Force user to login so FirstLogonCommands will trigger -->
       <AutoLogon>
         <Password>
-          <Value>vagrant</Value>
+          <Value>password</Value>
           <PlainText>true</PlainText>
         </Password>
         <Enabled>true</Enabled>
-        <Username>vagrant</Username>
+        <Username>jenkins</Username>
       </AutoLogon>
       <!-- Install different kind of software, entry point for scripted conf -->
       <FirstLogonCommands>
         <!-- entry point-->
         <SynchronousCommand wcm:action="add">
           <Description>Entry point</Description>
-          <CommandLine>cmd.exe /c a:\00_entry.bat</CommandLine>
+          <CommandLine>cmd.exe /c a:\setup.bat</CommandLine>
           <Order>1</Order>
           <RequiresUserInput>true</RequiresUserInput>
         </SynchronousCommand>

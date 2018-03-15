@@ -19,11 +19,19 @@
   # All facts will be collected in kvm_guest.
   gather_facts: no
 
+  vars_files:
+  - secrets/windows_build.yml
+
   roles:
   - role: kvm_guest
   - role: alphabet_common
-    when: >-
-      kvm_guest__state is undefined or kvm_guest__state == 'running'
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: windows_build_node
+    become: false
+    when:
+    - kvm_guest__state is defined
+    - kvm_guest__state == 'running'
+    - kvm_guest__type  == 'windows'
 
 - name: Setup guest
   hosts: build

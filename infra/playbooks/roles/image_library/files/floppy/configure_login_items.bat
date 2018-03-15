@@ -8,3 +8,6 @@ REM ============================================================================
 REM TODO It would be very cool to configure real autorun scripts for floppy
 REM drives that fires once disk is inserted.
 xcopy a:\run_floppy_autorun.bat C:\ProgramData\Microsoft\Windows\"Start Menu"\Programs\StartUp /O /X /E /H /K
+
+REM Windows can't automagically resize partitions when qemu img size changes.
+xcopy a:\resize_partition.ps1 C:\ProgramData\Microsoft\Windows\"Start Menu"\Programs\StartUp /O /X /E /H /K

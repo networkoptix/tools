@@ -1,0 +1,46 @@
+- name: Configure private key
+  copy:
+    content: "{{ mercurial_ppk }}"
+    dest: /home/Users/jenkins/mercurial.ppk
+
+- name:
+  copy:
+    content: |-
+      [ui]
+      ssh="C:\Program Files\TortoiseHg\lib\TortoisePlink.exe" -i "C:\Users\jenkins\mercurial.ppk"
+    dest: /home/Users/jenkins/.hgrc
+
+- name: add hdw.mx to known hosts
+  command: >-
+    REG ADD "HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\SshHostKeys"
+    /v "rsa2@22:hdw.mx"
+    /t REG_SZ
+    /d "0x10001,0xb749b9935e43493fa9f1b76f265d65c7975ae28970220534a64addd5473d718f43b8021b5fd9dabcdb7d9c33b904c205e3ebb1985ae2f1ca11761be7fcf2951cc6146860d296b4daaa9391e558df775776c1ddec7fd4f2598fa858546f02261bf1d365e44a89b2d9e2e4587d8045446daf5ffcf15bd7bfd5ea94b1b92eb720aca54c58bab418ef796897236f5e1379718127522a8fd5c489be8d162e596f8f11ad43c4964608e9ad8badf7e9b77d57189f3e91fb0f89d6635003c17076ad416eadf8b46cf5cf1358ab2799e9cdf730794d8fd443797c935517d18c5d245966028175f53d2dcacc00dd64df3d11b655b7549700c33d0a041239c1d0678355fb7d"
+    /f
+
+- name: Set CMD PATH variable (1)
+  command: >-
+    REG ADD "HKEY_CURRENT_USER\Environment"
+    /v Path
+    /t REG_SZ
+    /d "C:\Python27;C:\Python27\Scripts;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64"
+    /f
+
+- name: Set CMD PATH variable (2)
+  command: >-
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+    /v Path
+    /t REG_EXPAND_SZ
+    /d "C:\Python27;C:\Python27\Scripts;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64"
+    /f
+
+- name: Set CMD PATH variable (3)
+  command: >-
+    SETX PATH "C:\Python27;C:\Python27\Scripts;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SystemRoot%\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64"
+
+- name: Info
+  debug:
+    msg: >-
+      It's possible that setting PATH env. var. will not take effect.
+      Make sure that environment is correct or override it in Jenkins
+      (url is http://<jenkins.url>/computer/<host.name>/configure ).
