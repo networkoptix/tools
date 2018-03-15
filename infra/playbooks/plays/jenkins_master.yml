@@ -1,0 +1,19 @@
+- name: Setup Jenkins Master(s)
+  hosts: jenkins
+
+  roles:
+  - role: kvm_guest
+    become: true
+    become_method: sudo
+  - role: alphabet_common
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: geerlingguy.java
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: geerlingguy.jenkins
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'

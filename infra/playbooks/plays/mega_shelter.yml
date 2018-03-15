@@ -1,0 +1,32 @@
+- name: Setup Megatron temporary shelter
+  hosts: mega_shelter
+  gather_facts: no
+
+  vars:
+    genericusers_users:
+    - name: "vfedorov"
+      shell: "/bin/bash"
+      system: no
+      ssh_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCq7CdnsyrorRTrpWRzImyaNdj3eCJFKi3TsSbpVAHX5C1gZbUJgESaXPDaHXqPoA93ciNdERcjVGX04aTby/kk90oU9ADajGG5nwTikSbz5C2F/Dev/3L5iZ/JwTITwsy1uWltHpfAJUTqSbD06BgBIj7pnrAaYf7O7V1vHuNV5hrf8HIRa+HDfoabGCSEPximIE2SKhrQBhOiv7DPUC14XvzSbmMj7e9+KdfHpW1epnVm6B/sJl7l5hFhnBr3HJWSEa5f8sB5fE8TDvShE30tnMWyQJuFM96Li3Yt3lkSwO3U5U5CQtZMjQyrk1cqJSvE3RJSieOlC4Wb0sD/0PXB seva@spin
+      - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA2GTgZueHB0EBo5kwLSyK82aXRhF32Vn70IcZV4ORN51RBFiwpaH/5eSmTVJUsK4dOd7KCGZNOtVWQQk+xuGJtw+jktjQ4MB3yXWmfYsAhk81+AE0nZ/33XVGHYcbYOfsV85ZTRiv9Xww4KEy57AhfZtbeFTrHWa10Z8vBjjotzW2RAjTjLnzr0Ea2wgnRQoehixmXaPj8efxR3bKbG044pf/LAkpiMJsqliecXO+LZEbaQtVlK6/eKAV9yHlh4q3oZSB8XAyDa7WNBKkfzRjAMJQvuwtQQ+1crtQyyZRkJamYxoRbY7zTNzZyFsJiXMK0ikKvEYWSPRwCQ0rxHADXQ== seva@sol
+      groups:
+      - sudo
+      append: "yes"
+
+  roles:
+  - role: kvm_guest
+    become: true
+    become_method: sudo
+  - role: alphabet_common
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: ANXS.generic-users
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: nickjj.docker
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'

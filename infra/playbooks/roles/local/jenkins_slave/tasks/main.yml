@@ -51,25 +51,3 @@
     group: "{{ jenkins_group }}"
     recurse: true
     state: directory
-
-# Uncomment me to check that this setup is correct
-# Need to add hg_readonly_key in secrets.yaml and uncomment secrets vars in play
-# - name: Configure ssh private key
-#   copy:
-#     content: "{{ hg_readonly_key }}"
-#     dest: "{{ jenkins_home }}/.ssh/hg.readonly_key"
-#     mode: 0600
-# - name: Configure HG connection for cloning from enk.me
-#   copy:
-#     dest: "{{ jenkins_home }}/.hgrc"
-#     content: |
-#       [ui]
-#       ssh = ssh -i ~/.ssh/hg.readonly_key
-# - name: Clone repo (initial clone is quite long)
-#   become: true
-#   become_user: ubuntu
-#   hg:
-#     # repo: ssh://hg@hdw.mx/nx_vms
-#     repo: ssh://hg@enk.me/nx_vms
-#     dest: /home/ubuntu/nx_vms
-#     revision: default

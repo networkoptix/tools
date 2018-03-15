@@ -1,0 +1,25 @@
+- name: Create Deployment Console
+  hosts: depcon
+  # We don't know status of guest, so if we try to gather facts (=connect),
+  # but this guest is not crated yet, we'll fail entire section.
+  # That's why don't collect facts here.
+  # All facts will be collected in kvm_guest.
+  gather_facts: no
+
+  vars_files:
+  - ../secrets/depcon.yml
+
+  roles:
+  - role: kvm_guest
+    become: true
+    become_method: sudo
+  - role: alphabet_common
+    become: true
+    become_method: sudo
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: nickjj.docker
+    become: true
+    become_method: sudo
+  - role: depcon
+    become: true
+    become_method: sudo

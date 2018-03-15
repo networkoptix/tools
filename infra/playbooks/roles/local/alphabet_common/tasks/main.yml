@@ -1,6 +1,5 @@
 ---
 - name: Add all infra hosts into /etc/hosts
-  become: "kvm_guest__type is not defined or kvm_guest__type != 'windows'"
   lineinfile:
     path: /etc/hosts
     line: "{{ item }}"
@@ -23,8 +22,7 @@
   - ansible_os_family is defined
   - ansible_os_family == 'Debian'
 
-- name: Ensure enk.me is a known host
-  become: "kvm_guest__type is not defined or kvm_guest__type != 'windows'"
+- name: Add mercurial repos to known host
   lineinfile:
     dest: "/etc/ssh/ssh_known_hosts"
     create: yes
@@ -34,3 +32,10 @@
   with_items:
   - enk.me
   - hdw.mx
+
+- name: Allow sudoers to run sudo without password
+  lineinfile:
+    dest: "/etc/sudoers"
+    state: present
+    regexp: "^{{ '%sudo' | regex_escape() }}"
+    line: "%sudo   ALL=(ALL) NOPASSWD:ALL"

@@ -1,0 +1,18 @@
+- name: Create linux (Ubuntu Xenial) build VMs
+  hosts: build_vm_lin
+  become: true
+  become_method: sudo
+  # We don't know status of guest, so if we try to gather facts (=connect),
+  # but this guest is not crated yet, we'll fail entire section.
+  # That's why don't collect facts here.
+  # All facts will be collected in kvm_guest.
+  gather_facts: no
+
+  roles:
+  - role: kvm_guest
+  - role: alphabet_common
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: build_node
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'
+  - role: jenkins_slave
+    when: kvm_guest__state is undefined or kvm_guest__state == 'running'

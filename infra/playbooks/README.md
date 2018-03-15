@@ -67,7 +67,7 @@ You will be prompted for new password
 
 Repo is organized accordingly to "Ansible best practices", see
 http://docs.ansible.com/ansible/latest/playbooks_best_practices.html
-for general information.
+for general information. But we also split upstream roles and local ones.
 
 Here are details about this repo.
 
@@ -85,7 +85,8 @@ debugging purposes. Fill `./inventory-local.ini` using `./inventory-prod.ini`
 as reference.
 
 `main.yml` is play and main entry point. Execution of this play means running
-entire playbook on all managed hosts.
+entire playbook on all managed hosts. This playbook consists of smaller
+playbooks located in `./plays` and dedicated to particular task.
 
 `secrets.yml` is secret file that contains sensitive information for production
 infrastructure. For example, passwords and ssh keys. Keep this file encrypted or
@@ -97,52 +98,9 @@ reference for setting up local testing and debugging infrastructures.
 `host_vars` and `group_vars` are directories where YAML files with host-specific
 or group-specific information is located.
 
-`roles` is directory for holding different roles.
+`roles/galaxy` is directory for holding ansible-galaxy roles.
 
-## Roles and role variables
-
-### Setting up KVM and libvirt on host
-
-`roles/kvm_host`
-
-Does not require any variables.
-
-Works on Debian9 only. Supports Ubuntu 16.04
-
-### Defining and managing KVM guest lifecycle
-
-`roles/kvm_guest`
-
-See variables in roles/kvm_guest/defaults/main.yml
-
-Note: guest specification is defined in guest variables, but this role is
-delegated to (executed on) kvm_host. kvm_host is required variable for guest
-vars and kvm_host hostname must match with on of hosts from inventory file.
-And that host must be provisioned with kvm_host role.
-
-### Setting up Build node
-
-`roles/build_node`
-
-Does not require any variables.
-
-Works on Ubuntu 16.04.
-
-Currently this role is "all-in-one for linux platform" allows building
-
-* amd64
-* i386 in cross env
-* nodejs projects
-
-### Setting up node as Jenkins slave
-
-`roles/jenkins_slave`
-
-Creates Jenkins user and configures environment such as authorized keys and some
-secrets/sensitive data.
-
-Optional requirements are jenkins home, name, and group as well as ssh keys.
-Se more in `roles/jenkins_slave/defaults/main.yml`
+`roles/local` is directory for holding local roles.
 
 ## Known issues
 
