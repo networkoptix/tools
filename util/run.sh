@@ -74,7 +74,7 @@ else
 fi
 
 # Setup required PATH variables from rdep packages and
-export PATH="$PWD/cmake_build/bin:$PWD/build/bin:$PWD/build_environment/target/bin/$EXTRA:$PATH"
+export PATH="$PWD/build-$EXTRA/bin:$PWD/build/bin:$PWD/build_environment/target/bin/$EXTRA:$PATH"
 set +x
 BUILD_LIB_DIRS="$PWD/build_environment/target$ARCH/lib/$EXTRA"
 RDEP_LIB_DIRS=$(find "$PWD/../buildenv/packages/" -name lib -o -name platforms \
@@ -92,7 +92,7 @@ fi
 if [ "$C" ]; then $GDB $@ $C
 elif [ "$D" ]; then $GDB $GDB_ARGS $@
 elif [ "$DS" ]; then gdbserver :$DS $@
-elif [ "$ST" ]; then strace $@ $REDIRECT
-elif [ "$V" ]; then valgrind $V $@ $REDIRECT
-elif [ "$T" ]; then time $@ $REDIRECT
+elif [ "$ST" ]; then strace $@
+elif [ "$V" ]; then valgrind $V $@
+elif [ "$T" ]; then time $@
 else $@; fi
