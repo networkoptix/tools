@@ -8,3 +8,4 @@
         clean: true
         subdir: '{project-name}'
         disable-changelog: false
+        installation: default

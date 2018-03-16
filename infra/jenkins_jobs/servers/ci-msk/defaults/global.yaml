@@ -2,6 +2,7 @@
     name: global
     description: 'Do not edit this job through the web!'
     project-type: freestyle
+    nas: seva@10.0.3.91:/home/seva/media/test-nas
 
     wrappers:
     - timeout:
