@@ -1,0 +1,13 @@
+SIGSEGV, Segmentation fault
+
+#0  0x7c91f454 in ?? ()
+#1  0x759963e8 in recv () at ../src/nx/network/system_socket.cpp:635
+#2  0x76aa0c28 in readSocketNonBlock () at ../src/proxy/proxy_connection.cpp:614
+#3  0x76aa0c8e in doProxyData () at ../src/proxy/proxy_connection.cpp:98
+#4  0x76aa0e64 in doRawProxy () at ../src/proxy/proxy_connection.cpp:520
+#5  0x76aa34aa in run () at ../src/proxy/proxy_connection.cpp:497
+#6  0x7623d776 in execute () at ../src/network/tcp_connection_processor.cpp:508
+#7  0x76ac7a3a in processRequest () at ../src/network/universal_request_processor.cpp:241
+#8  0x76ac7da2 in run () at ../src/network/universal_request_processor.cpp:201
+#9  0x736aece8 in ?? () from /usr/local/apps/digitalwatchdog/mediaserver/bin/../lib/libQt5Core.so.5
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

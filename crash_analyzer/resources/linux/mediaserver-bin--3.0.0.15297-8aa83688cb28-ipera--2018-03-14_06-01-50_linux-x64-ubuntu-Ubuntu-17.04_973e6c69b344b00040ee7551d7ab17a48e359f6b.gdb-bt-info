@@ -1,0 +1,9 @@
+SIGFPE, Arithmetic exception
+
+#0  0x00007f7d38b27f35 in QnMotionEstimation::scaleFrame(unsigned char const*, int, int, int, unsigned char*, unsigned char*, unsigned char*) () from /opt/ipera/mediaserver/bin/../lib/libcommon.so
+#1  0x00007f7d38b29775 in QnMotionEstimation::analizeFrame(std::shared_ptr<QnCompressedVideoData> const&) () from /opt/ipera/mediaserver/bin/../lib/libcommon.so
+#2  0x00007f7d38eb82bc in QnLiveStreamProvider::onGotVideoFrame(std::shared_ptr<QnCompressedVideoData> const&, QnLiveStreamParams const&, bool) () from /opt/ipera/mediaserver/bin/../lib/libcommon.so
+#3  0x00007f7d38ec3909 in CLServerPushStreamReader::run() () from /opt/ipera/mediaserver/bin/../lib/libcommon.so
+#4  0x00007f7d3a460163 in ?? () from /opt/ipera/mediaserver/bin/../lib/libQt5Core.so.5
+#5  0x00007f7d3a19e6da in start_thread (arg=) at pthread_create.c:456
+#6  0x00007f7d396b4d7f in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:105

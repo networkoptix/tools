@@ -1,0 +1,12 @@
+8, Arithmetic exception
+
+#0  __libc_do_syscall () at ../ports/sysdeps/unix/sysv/linux/arm/eabi/libc-do-syscall.S:44
+#1  0xb2596710 in raise (sig=) at ../nptl/sysdeps/unix/sysv/linux/pt-raise.c:46
+#2  0xb243ff36 in __aeabi_ldiv0 () from /lib/arm-linux-gnueabihf/libgcc_s.so.1
+#3  0xb552dd08 in QnMotionEstimation::scaleFrame(unsigned char const*, int, int, int, unsigned char*, unsigned char*, unsigned char*) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#4  0xb552ea80 in QnMotionEstimation::analizeFrame(std::shared_ptr<QnCompressedVideoData> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#5  0xb586a1d4 in QnLiveStreamProvider::onGotVideoFrame(std::shared_ptr<QnCompressedVideoData> const&, QnLiveStreamParams const&, bool) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#6  0xb58650e4 in CLServerPushStreamReader::run() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#7  0xb2728384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#8  0xb2728384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

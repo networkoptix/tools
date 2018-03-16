@@ -1,0 +1,2140 @@
+ExceptionAddress: 000007feed78c5c4 (dinput!hresDupPtszPptsz+0x0000000000000060)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000000
+   Parameter[1]: 0000000000000004
+Attempt to read from address 0000000000000004
+
+rax=000000007ffffffe rbx=0000000000000001 rcx=0000000061de6610
+rdx=000000007ffffffd rsi=0000000055c4a340 rdi=ffffffff9e2199f4
+rip=000007feed78c5c4 rsp=00000000001e9380 rbp=0000000000000000
+ r8=0000000000000000  r9=0000000061de6610 r10=0000000000000000
+r11=0000000000000000 r12=ffffffffffffffff r13=0000000080004005
+r14=0000000000000104 r15=0000000000000000
+iopl=0         nv up ei pl nz na pe nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010202
+dinput!hresDupPtszPptsz+0x60:
+000007fe`ed78c5c4 0fb7040f        movzx   eax,word ptr [rdi+rcx] ds:00000000`00000004=????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+dinput!hresDupPtszPptsz
+dinput!CHid_Init
+dinput!CHid_New
+dinput!DIWdm_JoyHidMapping
+dinput!JoyReg_GetConfigInternal
+dinput!JoyReg_GetConfig
+dinput!CJoyCfg_GetConfig
+winmm!joyOpen
+winmm!joyGetPosEx
+winmm!joyGetPos
+DW_Spectrum!nx::client::plugins::io_device::joystick::driver::MmWinDriver::enumerateJoysticks
+DW_Spectrum!nx::client::plugins::io_device::joystick::Manager::applyMappingsAndCaptureJoysticks
+DW_Spectrum!nx::client::plugins::io_device::joystick::Manager::notifyHardwareConfigurationChanged
+DW_Spectrum!nx::client::plugins::io_device::joystick::driver::JoystickEventFilter::nativeEventFilter
+Qt5Core!QAbstractEventDispatcher::filterNativeEvent
+qwindows
+qwindows
+user32!UserCallWinProcCheckWow
+user32!DispatchClientMessage
+user32!_fnINDEVICECHANGE
+ntdll!KiUserCallbackDispatcherContinue
+user32!NtUserPeekMessage
+user32!PeekMessageW
+Qt5Core!QEventDispatcherWin32::processEvents
+qwindows!qt_plugin_query_metadata
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+DW_Spectrum!runApplication
+DW_Spectrum!main
+DW_Spectrum!WinMain
+DW_Spectrum!invoke_main
+DW_Spectrum!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+
+.  0  Id: 129c.1918 Suspend: 0 Teb: 000007ff`fffde000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+KERNELBASE!g_SbTableEntry_CreateFileDowngradeSwitch_Scenario
+0x0
+0x0
+0x0
+
+   1  Id: 129c.8fc Suspend: 0 Teb: 000007ff`fffdc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<QSharedPointer<TextToWaveServer::SynthetiseSpeechTask> >::pop
+DW_Spectrum!TextToWaveServer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: 129c.16e8 Suspend: 0 Teb: 000007ff`fffda000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: 129c.1904 Suspend: 0 Teb: 000007ff`fffd7000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   4  Id: 129c.1924 Suspend: 0 Teb: 000007ff`fffd5000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   5  Id: 129c.1330 Suspend: 0 Teb: 000007ff`fffd3000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   6  Id: 129c.1460 Suspend: 0 Teb: 000007ff`fff0e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   7  Id: 129c.1de4 Suspend: 0 Teb: 000007ff`fff0c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   8  Id: 129c.1ff4 Suspend: 0 Teb: 000007ff`fff0a000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   9  Id: 129c.1f04 Suspend: 0 Teb: 000007ff`fff08000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!nx::cloud::gateway::VmsGatewayProcess::exec
+nx_utils!std::_Func_class<void>::operator()
+nx_utils!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()<>
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  10  Id: 129c.1878 Suspend: 0 Teb: 000007ff`fff06000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+ntdll!TppWaiterpThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  11  Id: 129c.bf4 Suspend: 0 Teb: 000007ff`fff04000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  12  Id: 129c.12d8 Suspend: 0 Teb: 000007ff`fff02000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  13  Id: 129c.15d0 Suspend: 0 Teb: 000007ff`ffefe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+nx_network!nx::network::aio::PollSet::poll
+DW_Spectrum!QnMulticastModuleFinder::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  14  Id: 129c.1d54 Suspend: 0 Teb: 000007ff`ffefc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  15  Id: 129c.1d44 Suspend: 0 Teb: 000007ff`ffefa000 Unfrozen
+Call Site
+user32!NtUserGetMessage
+user32!GetMessageA
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  16  Id: 129c.13b4 Suspend: 0 Teb: 000007ff`ffef8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  17  Id: 129c.140c Suspend: 0 Teb: 000007ff`ffef6000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnThreadedChunksMergeTool::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  18  Id: 129c.11e4 Suspend: 0 Teb: 000007ff`ffef4000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnThreadedChunksMergeTool::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  19  Id: 129c.1838 Suspend: 0 Teb: 000007ff`ffeea000 Unfrozen
+Call Site
+ntdll!NtRequestWaitReplyPort
+dwmapi!CPortClient::SendComplexSyncRequestNative
+dwmapi!CPortClient::SendComplexSyncRequest
+dwmapi!CApiPortClient::SendRequest
+dwmapi!DwmFlush
+ig75icd64
+
+  20  Id: 129c.1e78 Suspend: 0 Teb: 000007ff`ffef2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  21  Id: 129c.1890 Suspend: 0 Teb: 000007ff`ffef0000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: 129c.1d60 Suspend: 0 Teb: 000007ff`ffeee000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: 129c.1e2c Suspend: 0 Teb: 000007ff`ffeec000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: 129c.14b8 Suspend: 0 Teb: 000007ff`ffee4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploadThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: 129c.1f70 Suspend: 0 Teb: 000007ff`ffee0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Qml!QQmlDirParser::typeNamespace
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: 129c.abc Suspend: 0 Teb: 000007ff`ffede000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: 129c.15a0 Suspend: 0 Teb: 000007ff`ffeda000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnResourceDiscoveryManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: 129c.6ec Suspend: 0 Teb: 000007ff`ffee2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: 129c.1458 Suspend: 0 Teb: 000007ff`ffed4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  30  Id: 129c.1340 Suspend: 0 Teb: 000007ff`ffed2000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  31  Id: 129c.1dbc Suspend: 0 Teb: 000007ff`ffed0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  32  Id: 129c.c98 Suspend: 0 Teb: 000007ff`ffec4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  33  Id: 129c.ee8 Suspend: 0 Teb: 000007ff`ffec2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  34  Id: 129c.1150 Suspend: 0 Teb: 000007ff`ffec0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  35  Id: 129c.1294 Suspend: 0 Teb: 000007ff`ffdf6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+DW_Spectrum!QnTCPConnectionProcessor::readRequest
+DW_Spectrum!QnDesktopCameraConnection::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  36  Id: 129c.1958 Suspend: 0 Teb: 000007ff`ffdf8000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  37  Id: 129c.ef4 Suspend: 0 Teb: 000007ff`ffebc000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  38  Id: 129c.56c Suspend: 0 Teb: 000007ff`ffee6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  39  Id: 129c.1d5c Suspend: 0 Teb: 000007ff`ffeba000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  40  Id: 129c.1f7c Suspend: 0 Teb: 000007ff`ffeb6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  41  Id: 129c.1710 Suspend: 0 Teb: 000007ff`ffedc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  42  Id: 129c.1304 Suspend: 0 Teb: 000007ff`ffed8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  43  Id: 129c.4c8 Suspend: 0 Teb: 000007ff`ffed6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  44  Id: 129c.1b0c Suspend: 0 Teb: 000007ff`ffece000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  45  Id: 129c.19bc Suspend: 0 Teb: 000007ff`ffecc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  46  Id: 129c.15cc Suspend: 0 Teb: 000007ff`ffeca000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  47  Id: 129c.1e8c Suspend: 0 Teb: 000007ff`ffec8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  48  Id: 129c.1f3c Suspend: 0 Teb: 000007ff`ffec6000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  49  Id: 129c.908 Suspend: 0 Teb: 000007ff`ffebe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  50  Id: 129c.10f0 Suspend: 0 Teb: 000007ff`ffeb8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  51  Id: 129c.1044 Suspend: 0 Teb: 000007ff`ffe9a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  52  Id: 129c.1c4c Suspend: 0 Teb: 000007ff`ffe98000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  53  Id: 129c.1608 Suspend: 0 Teb: 000007ff`ffe96000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  54  Id: 129c.e94 Suspend: 0 Teb: 000007ff`ffe92000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  55  Id: 129c.15ec Suspend: 0 Teb: 000007ff`ffe90000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  56  Id: 129c.1fe0 Suspend: 0 Teb: 000007ff`ffe8e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  57  Id: 129c.17a4 Suspend: 0 Teb: 000007ff`ffe8c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  58  Id: 129c.1268 Suspend: 0 Teb: 000007ff`ffe8a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  59  Id: 129c.13bc Suspend: 0 Teb: 000007ff`ffe88000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  60  Id: 129c.d28 Suspend: 0 Teb: 000007ff`ffe84000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  61  Id: 129c.b20 Suspend: 0 Teb: 000007ff`ffe82000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  62  Id: 129c.1f98 Suspend: 0 Teb: 000007ff`ffe80000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  63  Id: 129c.17b0 Suspend: 0 Teb: 000007ff`ffe7e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  64  Id: 129c.1e88 Suspend: 0 Teb: 000007ff`ffe7c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  65  Id: 129c.1614 Suspend: 0 Teb: 000007ff`ffe7a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  66  Id: 129c.1ac0 Suspend: 0 Teb: 000007ff`ffe78000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  67  Id: 129c.e0c Suspend: 0 Teb: 000007ff`ffe76000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  68  Id: 129c.176c Suspend: 0 Teb: 000007ff`ffe74000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  69  Id: 129c.1bc8 Suspend: 0 Teb: 000007ff`ffe72000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  70  Id: 129c.121c Suspend: 0 Teb: 000007ff`ffe70000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  71  Id: 129c.f00 Suspend: 0 Teb: 000007ff`ffe6e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  72  Id: 129c.984 Suspend: 0 Teb: 000007ff`ffe6c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  73  Id: 129c.1cfc Suspend: 0 Teb: 000007ff`ffe6a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  74  Id: 129c.670 Suspend: 0 Teb: 000007ff`ffe68000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  75  Id: 129c.1fa4 Suspend: 0 Teb: 000007ff`ffe66000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  76  Id: 129c.16f0 Suspend: 0 Teb: 000007ff`ffe64000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  77  Id: 129c.1734 Suspend: 0 Teb: 000007ff`ffe62000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  78  Id: 129c.1748 Suspend: 0 Teb: 000007ff`ffe60000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  79  Id: 129c.69c Suspend: 0 Teb: 000007ff`ffe5e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  80  Id: 129c.ee0 Suspend: 0 Teb: 000007ff`ffe5c000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  81  Id: 129c.1ab8 Suspend: 0 Teb: 000007ff`ffe5a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  82  Id: 129c.de0 Suspend: 0 Teb: 000007ff`ffe58000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  83  Id: 129c.1db4 Suspend: 0 Teb: 000007ff`ffe56000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  84  Id: 129c.f18 Suspend: 0 Teb: 000007ff`ffe54000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  85  Id: 129c.8f0 Suspend: 0 Teb: 000007ff`ffe52000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  86  Id: 129c.1eb4 Suspend: 0 Teb: 000007ff`ffe50000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  87  Id: 129c.f04 Suspend: 0 Teb: 000007ff`ffe4e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  88  Id: 129c.1b48 Suspend: 0 Teb: 000007ff`ffe4c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  89  Id: 129c.1864 Suspend: 0 Teb: 000007ff`ffe4a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  90  Id: 129c.1988 Suspend: 0 Teb: 000007ff`ffe48000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  91  Id: 129c.1adc Suspend: 0 Teb: 000007ff`ffe46000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  92  Id: 129c.1ed8 Suspend: 0 Teb: 000007ff`ffe44000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  93  Id: 129c.1fac Suspend: 0 Teb: 000007ff`ffe42000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  94  Id: 129c.f38 Suspend: 0 Teb: 000007ff`ffe40000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  95  Id: 129c.14e8 Suspend: 0 Teb: 000007ff`ffe3e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  96  Id: 129c.1548 Suspend: 0 Teb: 000007ff`ffe3c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  97  Id: 129c.1594 Suspend: 0 Teb: 000007ff`ffe3a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  98  Id: 129c.3d0 Suspend: 0 Teb: 000007ff`ffe38000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  99  Id: 129c.1f34 Suspend: 0 Teb: 000007ff`ffe36000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 100  Id: 129c.14f8 Suspend: 0 Teb: 000007ff`ffe34000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 101  Id: 129c.1950 Suspend: 0 Teb: 000007ff`ffe32000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 102  Id: 129c.151c Suspend: 0 Teb: 000007ff`ffe30000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 103  Id: 129c.19b8 Suspend: 0 Teb: 000007ff`ffe2e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 104  Id: 129c.18a4 Suspend: 0 Teb: 000007ff`ffe2c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 105  Id: 129c.bb0 Suspend: 0 Teb: 000007ff`ffe2a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 106  Id: 129c.418 Suspend: 0 Teb: 000007ff`ffe28000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 107  Id: 129c.1390 Suspend: 0 Teb: 000007ff`ffe26000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 108  Id: 129c.1f5c Suspend: 0 Teb: 000007ff`ffe24000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 109  Id: 129c.183c Suspend: 0 Teb: 000007ff`ffe22000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 110  Id: 129c.514 Suspend: 0 Teb: 000007ff`ffe20000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 111  Id: 129c.1fcc Suspend: 0 Teb: 000007ff`ffe1e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 112  Id: 129c.19dc Suspend: 0 Teb: 000007ff`ffe1c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 113  Id: 129c.1d20 Suspend: 0 Teb: 000007ff`ffe1a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 114  Id: 129c.588 Suspend: 0 Teb: 000007ff`ffe18000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 115  Id: 129c.1e34 Suspend: 0 Teb: 000007ff`ffe16000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 116  Id: 129c.348 Suspend: 0 Teb: 000007ff`ffe14000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 117  Id: 129c.10a0 Suspend: 0 Teb: 000007ff`ffe12000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 118  Id: 129c.1ccc Suspend: 0 Teb: 000007ff`ffe10000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 119  Id: 129c.19c0 Suspend: 0 Teb: 000007ff`ffe0e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 120  Id: 129c.14d0 Suspend: 0 Teb: 000007ff`ffe0c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 121  Id: 129c.4ec Suspend: 0 Teb: 000007ff`ffe0a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 122  Id: 129c.1f1c Suspend: 0 Teb: 000007ff`ffe08000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 123  Id: 129c.120c Suspend: 0 Teb: 000007ff`ffe06000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 124  Id: 129c.1948 Suspend: 0 Teb: 000007ff`ffe04000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 125  Id: 129c.1acc Suspend: 0 Teb: 000007ff`ffe02000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 126  Id: 129c.16dc Suspend: 0 Teb: 000007ff`ffe00000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 127  Id: 129c.1f4c Suspend: 0 Teb: 000007ff`ffdfe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 128  Id: 129c.15f0 Suspend: 0 Teb: 000007ff`ffdfc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 129  Id: 129c.1b3c Suspend: 0 Teb: 000007ff`ffdfa000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 130  Id: 129c.1328 Suspend: 0 Teb: 000007ff`ffdf4000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 131  Id: 129c.11d4 Suspend: 0 Teb: 000007ff`ffdf2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 132  Id: 129c.c08 Suspend: 0 Teb: 000007ff`ffdf0000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 133  Id: 129c.1b40 Suspend: 0 Teb: 000007ff`ffdee000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 134  Id: 129c.15c4 Suspend: 0 Teb: 000007ff`ffdec000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnSleep::msleep
+DW_Spectrum!QnRtspClientArchiveDelegate::open
+DW_Spectrum!QnArchiveStreamReader::init
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 135  Id: 129c.848 Suspend: 0 Teb: 000007ff`ffdea000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 136  Id: 129c.17f4 Suspend: 0 Teb: 000007ff`ffde8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 137  Id: 129c.1c2c Suspend: 0 Teb: 000007ff`ffde6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploader::ensureQueueLessThen
+DW_Spectrum!QnVideoStreamDisplay::processDecodedFrame
+DW_Spectrum!QnVideoStreamDisplay::display
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 138  Id: 129c.1e64 Suspend: 0 Teb: 000007ff`ffdd4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 139  Id: 129c.1728 Suspend: 0 Teb: 000007ff`fff00000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 140  Id: 129c.1bac Suspend: 0 Teb: 000007ff`ffee8000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 141  Id: 129c.16a0 Suspend: 0 Teb: 000007ff`ffeb4000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+winmm!joyMonitorThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

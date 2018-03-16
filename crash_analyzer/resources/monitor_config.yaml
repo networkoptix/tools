@@ -1,0 +1,27 @@
+# Crash Monitor configuration
+
+options:
+    format: gdb-bt # For windows should be: dmp
+    min_version: 3.2
+    dump_count_limit:
+        create_case: 2
+        max_attachments: 10
+
+crashServer:
+    url: http://stats.networkoptix.com/crashserver/api/
+    login: statlord
+    password: razdvatri
+
+jira:
+    url: https://networkoptix.atlassian.net/
+    login: service@networkoptix.com
+    password: kbnUk06boqBkwU
+
+cache:
+    directory: ./cache
+    size_limit: 50G
+
+dumpTool: # Windows only
+    directory: ./cache/dumptool
+    size_limit: 100G
+

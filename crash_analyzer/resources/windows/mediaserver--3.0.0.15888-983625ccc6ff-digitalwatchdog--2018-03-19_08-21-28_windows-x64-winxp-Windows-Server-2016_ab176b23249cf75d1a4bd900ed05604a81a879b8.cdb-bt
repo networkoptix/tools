@@ -1,0 +1,3740 @@
+ExceptionAddress: 00000000c0000120
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000008
+   Parameter[1]: 00000000c0000120
+Attempt to execute non-executable address 00000000c0000120
+
+rax=00000000ffffffff rbx=000001adc810ce80 rcx=0000000053db2e80
+rdx=0000000053db2e80 rsi=0000000000000001 rdi=000001ae29341fd0
+rip=00000000c0000120 rsp=000001ad991cfc30 rbp=000001ad991cfcf9
+ r8=0000000053db2ce8  r9=0000000000002484 r10=0000000000000000
+r11=000001ad991cfd70 r12=0000000000000000 r13=000001adc810ce80
+r14=0000000000000000 r15=0000000000000000
+iopl=0         nv up ei pl nz na pe nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010202
+00000000`c0000120 ??              ???
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+0x0
+0x0
+0x0
+mediaserver
+Qt5Core!QMetaObject::activate
+
+
+   0  Id: 6d48.1854 Suspend: 0 Teb: 0000001b`3d68e000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+Qt5Core!QArrayData::shared_null
+Qt5Core!QArrayData::shared_null
+Qt5Core!QArrayData::shared_null
+Qt5Core!QArrayData::shared_null
+Qt5Core!QArrayData::shared_null
+0x0
+Qt5Core!QArrayData::shared_null
+Qt5Core!QArrayData::shared_null
+
+   1  Id: 6d48.2b48 Suspend: 0 Teb: 0000001b`3d696000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   2  Id: 6d48.2568 Suspend: 0 Teb: 0000001b`3d698000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+sechost!ScSendResponseReceiveControls
+sechost!ScDispatcherLoop
+sechost!StartServiceCtrlDispatcherW
+mediaserver
+0x0
+0x0
+
+   3  Id: 6d48.6f0c Suspend: 0 Teb: 0000001b`3d6a0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+mediaserver
+0x0
+0x0
+
+   4  Id: 6d48.1b08 Suspend: 0 Teb: 0000001b`3d6a8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+mediaserver
+
+   5  Id: 6d48.6a28 Suspend: 0 Teb: 0000001b`3d6aa000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+   6  Id: 6d48.5740 Suspend: 0 Teb: 0000001b`3d6ac000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+   7  Id: 6d48.5694 Suspend: 0 Teb: 0000001b`3d6ae000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+   8  Id: 6d48.598 Suspend: 0 Teb: 0000001b`3d6b0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+   9  Id: 6d48.527c Suspend: 0 Teb: 0000001b`3d6b2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  10  Id: 6d48.5e34 Suspend: 0 Teb: 0000001b`3d6b4000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  11  Id: 6d48.2b38 Suspend: 0 Teb: 0000001b`3d6b6000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  12  Id: 6d48.1bb0 Suspend: 0 Teb: 0000001b`3d6b8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  13  Id: 6d48.6e88 Suspend: 0 Teb: 0000001b`3d6ba000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  14  Id: 6d48.5648 Suspend: 0 Teb: 0000001b`3d6bc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  15  Id: 6d48.35e4 Suspend: 0 Teb: 0000001b`3d6be000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  16  Id: 6d48.6c50 Suspend: 0 Teb: 0000001b`3d6c0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  17  Id: 6d48.57bc Suspend: 0 Teb: 0000001b`3d6c2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  18  Id: 6d48.2284 Suspend: 0 Teb: 0000001b`3d6c4000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  19  Id: 6d48.4e00 Suspend: 0 Teb: 0000001b`3d6c6000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  20  Id: 6d48.3ecc Suspend: 0 Teb: 0000001b`3d6c8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+0x0
+0x0
+0x0
+
+  21  Id: 6d48.2bb4 Suspend: 0 Teb: 0000001b`3d6ca000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+0x0
+0x0
+0x0
+0x0
+
+  22  Id: 6d48.5ea8 Suspend: 0 Teb: 0000001b`3d6cc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+0x0
+0x0
+0x0
+0x0
+
+  23  Id: 6d48.3d98 Suspend: 0 Teb: 0000001b`3d6ce000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: 6d48.6538 Suspend: 0 Teb: 0000001b`3d6d0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: 6d48.3f68 Suspend: 0 Teb: 0000001b`3d6d2000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: 6d48.30f4 Suspend: 0 Teb: 0000001b`3d6d4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: 6d48.2098 Suspend: 0 Teb: 0000001b`3d6d6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: 6d48.2d78 Suspend: 0 Teb: 0000001b`3d6d8000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: 6d48.3a94 Suspend: 0 Teb: 0000001b`3d6da000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  30  Id: 6d48.4f30 Suspend: 0 Teb: 0000001b`3d6dc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+
+  31  Id: 6d48.15dc Suspend: 0 Teb: 0000001b`3d6de000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  32  Id: 6d48.5bc0 Suspend: 0 Teb: 0000001b`3d6e0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+
+  33  Id: 6d48.2618 Suspend: 0 Teb: 0000001b`3d6e2000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+  34  Id: 6d48.3e18 Suspend: 0 Teb: 0000001b`3d6e6000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+mediaserver
+0x0
+0x0
+
+  35  Id: 6d48.61bc Suspend: 0 Teb: 0000001b`3d6e8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+
+  36  Id: 6d48.52d0 Suspend: 0 Teb: 0000001b`3d6f2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  37  Id: 6d48.4f3c Suspend: 0 Teb: 0000001b`3d6f4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+mediaserver
+0x0
+0x0
+0x0
+
+  38  Id: 6d48.1e8c Suspend: 0 Teb: 0000001b`3d6f6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  39  Id: 6d48.4a44 Suspend: 0 Teb: 0000001b`3d6f8000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+
+  40  Id: 6d48.6dd8 Suspend: 0 Teb: 0000001b`3d6fa000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::_Cnd_waitX
+nx_network!std::condition_variable::wait
+nx_network!std::condition_variable::wait
+nx_network!nx::utils::detail::shared_future_state_base<std::pair<unsigned long,AbstractStreamSocket *> >::wait
+nx_network!nx::utils::detail::shared_future_state<std::pair<unsigned long,AbstractStreamSocket * __ptr64> >::get
+
+  41  Id: 6d48.53b4 Suspend: 0 Teb: 0000001b`3d6fc000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  42  Id: 6d48.7a4 Suspend: 0 Teb: 0000001b`3d6fe000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+nx_network!nx::network::aio::PollSet::poll
+
+  43  Id: 6d48.b4c Suspend: 0 Teb: 0000001b`3d700000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!do_wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+msvcp140!_Xtime_diff_to_millis
+0x0
+
+  44  Id: 6d48.2fc0 Suspend: 0 Teb: 0000001b`3d746000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+0x0
+
+  45  Id: 6d48.6e64 Suspend: 0 Teb: 0000001b`3d748000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QListData::shared_null
+0x0
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  46  Id: 6d48.3b98 Suspend: 0 Teb: 0000001b`3d752000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+0x0
+
+  47  Id: 6d48.48a0 Suspend: 0 Teb: 0000001b`3d754000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QListData::shared_null
+0x0
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  48  Id: 6d48.f10 Suspend: 0 Teb: 0000001b`3d76c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+0x0
+
+  49  Id: 6d48.5a5c Suspend: 0 Teb: 0000001b`3d76e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  50  Id: 6d48.2638 Suspend: 0 Teb: 0000001b`3d78c000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+  51  Id: 6d48.2be0 Suspend: 0 Teb: 0000001b`3d78e000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+  52  Id: 6d48.355c Suspend: 0 Teb: 0000001b`3d790000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!MSAFD_WSPPoll
+mswsock!guard_dispatch_icall_nop
+ws2_32!WSAIoctl
+ws2_32!WSAPoll
+nx_network!nx::network::acceptWithTimeout
+0x0
+0x0
+0x0
+0x0
+
+  53  Id: 6d48.4c88 Suspend: 0 Teb: 0000001b`3d604000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+  54  Id: 6d48.518c Suspend: 0 Teb: 0000001b`3d612000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  55  Id: 6d48.30d4 Suspend: 0 Teb: 0000001b`3d616000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  56  Id: 6d48.5274 Suspend: 0 Teb: 0000001b`3d620000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  57  Id: 6d48.2d18 Suspend: 0 Teb: 0000001b`3d62a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!QElapsedTimer::elapsed
+Qt5Core!operator<
+
+  58  Id: 6d48.4804 Suspend: 0 Teb: 0000001b`3d632000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  59  Id: 6d48.6750 Suspend: 0 Teb: 0000001b`3d636000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  60  Id: 6d48.82c Suspend: 0 Teb: 0000001b`3d65e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  61  Id: 6d48.3c90 Suspend: 0 Teb: 0000001b`3d662000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  62  Id: 6d48.39d0 Suspend: 0 Teb: 0000001b`3d67c000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+  63  Id: 6d48.6660 Suspend: 0 Teb: 0000001b`3d688000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  64  Id: 6d48.28c8 Suspend: 0 Teb: 0000001b`3d760000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+  65  Id: 6d48.5b6c Suspend: 0 Teb: 0000001b`3d762000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  66  Id: 6d48.5254 Suspend: 0 Teb: 0000001b`3d764000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+  67  Id: 6d48.473c Suspend: 0 Teb: 0000001b`3d766000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  68  Id: 6d48.3d54 Suspend: 0 Teb: 0000001b`3d770000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  69  Id: 6d48.5a1c Suspend: 0 Teb: 0000001b`3d774000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  70  Id: 6d48.6eb4 Suspend: 0 Teb: 0000001b`3d778000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  71  Id: 6d48.19a0 Suspend: 0 Teb: 0000001b`3d77a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  72  Id: 6d48.25e4 Suspend: 0 Teb: 0000001b`3d77c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  73  Id: 6d48.2b9c Suspend: 0 Teb: 0000001b`3d77e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  74  Id: 6d48.5278 Suspend: 0 Teb: 0000001b`3d782000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  75  Id: 6d48.214c Suspend: 0 Teb: 0000001b`3d788000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  76  Id: 6d48.4d70 Suspend: 0 Teb: 0000001b`3d792000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  77  Id: 6d48.2838 Suspend: 0 Teb: 0000001b`3d796000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  78  Id: 6d48.28dc Suspend: 0 Teb: 0000001b`3d79c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  79  Id: 6d48.5e28 Suspend: 0 Teb: 0000001b`3d7a0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  80  Id: 6d48.30e4 Suspend: 0 Teb: 0000001b`3d7a6000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  81  Id: 6d48.6608 Suspend: 0 Teb: 0000001b`3d7a8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  82  Id: 6d48.5d78 Suspend: 0 Teb: 0000001b`3d7b0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  83  Id: 6d48.1898 Suspend: 0 Teb: 0000001b`3d7bc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  84  Id: 6d48.187c Suspend: 0 Teb: 0000001b`3d7ca000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  85  Id: 6d48.49dc Suspend: 0 Teb: 0000001b`3d7cc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  86  Id: 6d48.5a78 Suspend: 0 Teb: 0000001b`3d7ce000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  87  Id: 6d48.5954 Suspend: 0 Teb: 0000001b`3d7d0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  88  Id: 6d48.3ce8 Suspend: 0 Teb: 0000001b`3d7d8000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  89  Id: 6d48.6eac Suspend: 0 Teb: 0000001b`3d7dc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  90  Id: 6d48.5cec Suspend: 0 Teb: 0000001b`3d7e0000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  91  Id: 6d48.2130 Suspend: 0 Teb: 0000001b`3d7e2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  92  Id: 6d48.6d94 Suspend: 0 Teb: 0000001b`3d7e4000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  93  Id: 6d48.6f58 Suspend: 0 Teb: 0000001b`3d7e6000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  94  Id: 6d48.3178 Suspend: 0 Teb: 0000001b`3d7ec000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  95  Id: 6d48.5940 Suspend: 0 Teb: 0000001b`3d7f2000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  96  Id: 6d48.5470 Suspend: 0 Teb: 0000001b`3d624000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+  97  Id: 6d48.3690 Suspend: 0 Teb: 0000001b`3d626000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+  98  Id: 6d48.6b10 Suspend: 0 Teb: 0000001b`3d62e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+  99  Id: 6d48.2c74 Suspend: 0 Teb: 0000001b`3d638000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 100  Id: 6d48.67e4 Suspend: 0 Teb: 0000001b`3d63e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!QElapsedTimer::elapsed
+Qt5Core!operator<
+
+ 101  Id: 6d48.6a24 Suspend: 0 Teb: 0000001b`3d654000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QBasicMutex::lockInternal
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+
+ 102  Id: 6d48.3f74 Suspend: 0 Teb: 0000001b`3d664000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!QElapsedTimer::elapsed
+Qt5Core!operator<
+
+ 103  Id: 6d48.1878 Suspend: 0 Teb: 0000001b`3d684000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+mediaserver
+0x0
+0x0
+0x0
+
+ 104  Id: 6d48.1734 Suspend: 0 Teb: 0000001b`3d74a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 105  Id: 6d48.64fc Suspend: 0 Teb: 0000001b`3d74e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 106  Id: 6d48.39bc Suspend: 0 Teb: 0000001b`3d758000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 107  Id: 6d48.c8 Suspend: 0 Teb: 0000001b`3d768000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 108  Id: 6d48.6018 Suspend: 0 Teb: 0000001b`3d7fc000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 109  Id: 6d48.6e20 Suspend: 0 Teb: 0000001b`3d60c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 110  Id: 6d48.3020 Suspend: 0 Teb: 0000001b`3d622000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 111  Id: 6d48.2310 Suspend: 0 Teb: 0000001b`3d64a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 112  Id: 6d48.5d5c Suspend: 0 Teb: 0000001b`3d66e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 113  Id: 6d48.167c Suspend: 0 Teb: 0000001b`3d680000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 114  Id: 6d48.4fd8 Suspend: 0 Teb: 0000001b`3d68a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 115  Id: 6d48.504 Suspend: 0 Teb: 0000001b`3d69a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 116  Id: 6d48.1494 Suspend: 0 Teb: 0000001b`3d702000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 117  Id: 6d48.3290 Suspend: 0 Teb: 0000001b`3d744000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 118  Id: 6d48.6224 Suspend: 0 Teb: 0000001b`5fc95000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 119  Id: 6d48.4ae8 Suspend: 0 Teb: 0000001b`5fc99000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 120  Id: 6d48.3674 Suspend: 0 Teb: 0000001b`5fc9d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 121  Id: 6d48.3e64 Suspend: 0 Teb: 0000001b`5fc9f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 122  Id: 6d48.1f4c Suspend: 0 Teb: 0000001b`5fca1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 123  Id: 6d48.2988 Suspend: 0 Teb: 0000001b`5fca3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 124  Id: 6d48.60c0 Suspend: 0 Teb: 0000001b`5fca7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 125  Id: 6d48.22e8 Suspend: 0 Teb: 0000001b`5fcab000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 126  Id: 6d48.4e34 Suspend: 0 Teb: 0000001b`5fcb3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 127  Id: 6d48.409c Suspend: 0 Teb: 0000001b`5fcb7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 128  Id: 6d48.2524 Suspend: 0 Teb: 0000001b`5fcbb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 129  Id: 6d48.6470 Suspend: 0 Teb: 0000001b`5fcbf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 130  Id: 6d48.4710 Suspend: 0 Teb: 0000001b`5fcc1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 131  Id: 6d48.4f34 Suspend: 0 Teb: 0000001b`5fcc3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 132  Id: 6d48.1934 Suspend: 0 Teb: 0000001b`5fcc5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 133  Id: 6d48.2648 Suspend: 0 Teb: 0000001b`5fcc7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 134  Id: 6d48.481c Suspend: 0 Teb: 0000001b`5fccb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 135  Id: 6d48.68e0 Suspend: 0 Teb: 0000001b`5fccf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 136  Id: 6d48.29f4 Suspend: 0 Teb: 0000001b`5fcd3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 137  Id: 6d48.2d34 Suspend: 0 Teb: 0000001b`5fcd7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 138  Id: 6d48.1440 Suspend: 0 Teb: 0000001b`5fcf7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 139  Id: 6d48.36a0 Suspend: 0 Teb: 0000001b`5fcf9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 140  Id: 6d48.609c Suspend: 0 Teb: 0000001b`5fcfb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 141  Id: 6d48.5394 Suspend: 0 Teb: 0000001b`5fcfd000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 142  Id: 6d48.3c78 Suspend: 0 Teb: 0000001b`5fcff000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 143  Id: 6d48.16bc Suspend: 0 Teb: 0000001b`5fd01000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!guard_dispatch_icall_nop
+ws2_32!send
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::send
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+
+ 144  Id: 6d48.28cc Suspend: 0 Teb: 0000001b`5fd03000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 145  Id: 6d48.64ec Suspend: 0 Teb: 0000001b`5fd05000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 146  Id: 6d48.4c14 Suspend: 0 Teb: 0000001b`5fd07000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 147  Id: 6d48.160c Suspend: 0 Teb: 0000001b`5fd09000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!guard_dispatch_icall_nop
+ws2_32!send
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::send
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+
+ 148  Id: 6d48.3a80 Suspend: 0 Teb: 0000001b`5fd11000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 149  Id: 6d48.5668 Suspend: 0 Teb: 0000001b`5fd15000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 150  Id: 6d48.35b8 Suspend: 0 Teb: 0000001b`5fd17000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 151  Id: 6d48.3634 Suspend: 0 Teb: 0000001b`5fd19000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 152  Id: 6d48.1040 Suspend: 0 Teb: 0000001b`5fd1b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 153  Id: 6d48.5d48 Suspend: 0 Teb: 0000001b`5fd1d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 154  Id: 6d48.678c Suspend: 0 Teb: 0000001b`5fd21000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 155  Id: 6d48.6774 Suspend: 0 Teb: 0000001b`5fd25000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 156  Id: 6d48.1b10 Suspend: 0 Teb: 0000001b`5fd29000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 157  Id: 6d48.672c Suspend: 0 Teb: 0000001b`5fd2d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 158  Id: 6d48.13c8 Suspend: 0 Teb: 0000001b`5fd31000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 159  Id: 6d48.366c Suspend: 0 Teb: 0000001b`5fd35000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 160  Id: 6d48.36d4 Suspend: 0 Teb: 0000001b`5fd37000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 161  Id: 6d48.6db0 Suspend: 0 Teb: 0000001b`5fd39000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 162  Id: 6d48.555c Suspend: 0 Teb: 0000001b`5fd3b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 163  Id: 6d48.6f04 Suspend: 0 Teb: 0000001b`5fd3d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 164  Id: 6d48.5c08 Suspend: 0 Teb: 0000001b`5fd41000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 165  Id: 6d48.32c8 Suspend: 0 Teb: 0000001b`5fd45000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 166  Id: 6d48.3bb4 Suspend: 0 Teb: 0000001b`5fd59000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 167  Id: 6d48.571c Suspend: 0 Teb: 0000001b`5fd5d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 168  Id: 6d48.6590 Suspend: 0 Teb: 0000001b`5fd5f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 169  Id: 6d48.40d4 Suspend: 0 Teb: 0000001b`5fd61000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 170  Id: 6d48.363c Suspend: 0 Teb: 0000001b`5fd63000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 171  Id: 6d48.2ef0 Suspend: 0 Teb: 0000001b`5fd65000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 172  Id: 6d48.4cf4 Suspend: 0 Teb: 0000001b`5fd73000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::_Cnd_waitX
+nx_network!std::condition_variable::wait
+nx_network!std::condition_variable::wait
+nx_network!nx::utils::detail::shared_future_state_base<std::pair<unsigned long,unsigned __int64> >::wait
+nx_network!nx::utils::detail::shared_future_state<std::pair<unsigned long,unsigned __int64> >::get
+0x0
+
+ 173  Id: 6d48.5968 Suspend: 0 Teb: 0000001b`5fd75000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 174  Id: 6d48.9c0 Suspend: 0 Teb: 0000001b`5fd77000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 175  Id: 6d48.44a0 Suspend: 0 Teb: 0000001b`5fd79000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 176  Id: 6d48.5ec4 Suspend: 0 Teb: 0000001b`5fd7b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 177  Id: 6d48.4b00 Suspend: 0 Teb: 0000001b`5fda3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 178  Id: 6d48.1d34 Suspend: 0 Teb: 0000001b`5fda5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 179  Id: 6d48.3a2c Suspend: 0 Teb: 0000001b`5fda7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 180  Id: 6d48.5b40 Suspend: 0 Teb: 0000001b`5fc06000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 181  Id: 6d48.2980 Suspend: 0 Teb: 0000001b`5fc08000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 182  Id: 6d48.3fc8 Suspend: 0 Teb: 0000001b`5fc42000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 183  Id: 6d48.4d48 Suspend: 0 Teb: 0000001b`5fc44000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 184  Id: 6d48.5a44 Suspend: 0 Teb: 0000001b`5fc46000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 185  Id: 6d48.3b0 Suspend: 0 Teb: 0000001b`5fc48000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 186  Id: 6d48.31d4 Suspend: 0 Teb: 0000001b`5fc4a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 187  Id: 6d48.37f4 Suspend: 0 Teb: 0000001b`5fc4c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 188  Id: 6d48.241c Suspend: 0 Teb: 0000001b`5fc4e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 189  Id: 6d48.3d60 Suspend: 0 Teb: 0000001b`5fc50000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 190  Id: 6d48.34f4 Suspend: 0 Teb: 0000001b`5fc52000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 191  Id: 6d48.50e8 Suspend: 0 Teb: 0000001b`5fc54000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 192  Id: 6d48.d04 Suspend: 0 Teb: 0000001b`5fc56000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 193  Id: 6d48.5770 Suspend: 0 Teb: 0000001b`5fc58000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 194  Id: 6d48.a30 Suspend: 0 Teb: 0000001b`5fc84000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 195  Id: 6d48.3c28 Suspend: 0 Teb: 0000001b`5fc8c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 196  Id: 6d48.1a50 Suspend: 0 Teb: 0000001b`5fd8f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 197  Id: 6d48.1238 Suspend: 0 Teb: 0000001b`5fded000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 198  Id: 6d48.4e54 Suspend: 0 Teb: 0000001b`5fc3a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 199  Id: 6d48.2074 Suspend: 0 Teb: 0000001b`5fc68000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 200  Id: 6d48.6fa0 Suspend: 0 Teb: 0000001b`5fc6a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 201  Id: 6d48.15cc Suspend: 0 Teb: 0000001b`5fc70000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 202  Id: 6d48.1a00 Suspend: 0 Teb: 0000001b`5fc72000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 203  Id: 6d48.4d40 Suspend: 0 Teb: 0000001b`5fc74000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 204  Id: 6d48.3d80 Suspend: 0 Teb: 0000001b`5fc97000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 205  Id: 6d48.6f18 Suspend: 0 Teb: 0000001b`5fcd9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 206  Id: 6d48.5280 Suspend: 0 Teb: 0000001b`5fcdb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 207  Id: 6d48.43d0 Suspend: 0 Teb: 0000001b`5fd2b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 208  Id: 6d48.3730 Suspend: 0 Teb: 0000001b`5fd2f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 209  Id: 6d48.2ea0 Suspend: 0 Teb: 0000001b`5fd43000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 210  Id: 6d48.2514 Suspend: 0 Teb: 0000001b`5fd4b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 211  Id: 6d48.63b0 Suspend: 0 Teb: 0000001b`5fd55000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 212  Id: 6d48.63cc Suspend: 0 Teb: 0000001b`5fd57000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 213  Id: 6d48.34a4 Suspend: 0 Teb: 0000001b`5fdab000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 214  Id: 6d48.6e48 Suspend: 0 Teb: 0000001b`5fdad000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 215  Id: 6d48.158c Suspend: 0 Teb: 0000001b`5fdb7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 216  Id: 6d48.23b4 Suspend: 0 Teb: 0000001b`5fdb9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 217  Id: 6d48.59e8 Suspend: 0 Teb: 0000001b`5fdbb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 218  Id: 6d48.e0c Suspend: 0 Teb: 0000001b`5fdbd000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 219  Id: 6d48.4d2c Suspend: 0 Teb: 0000001b`5fdbf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 220  Id: 6d48.6fdc Suspend: 0 Teb: 0000001b`5fdc1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 221  Id: 6d48.3c2c Suspend: 0 Teb: 0000001b`5fdcf000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 222  Id: 6d48.3354 Suspend: 0 Teb: 0000001b`5fdd1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 223  Id: 6d48.4f50 Suspend: 0 Teb: 0000001b`5fdd3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 224  Id: 6d48.2bdc Suspend: 0 Teb: 0000001b`5fdd5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 225  Id: 6d48.3044 Suspend: 0 Teb: 0000001b`5fdd7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 226  Id: 6d48.2b00 Suspend: 0 Teb: 0000001b`5fdd9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 227  Id: 6d48.5df4 Suspend: 0 Teb: 0000001b`5fddb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 228  Id: 6d48.26bc Suspend: 0 Teb: 0000001b`5fddd000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 229  Id: 6d48.3a40 Suspend: 0 Teb: 0000001b`5fde1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 230  Id: 6d48.7ec Suspend: 0 Teb: 0000001b`5fde3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 231  Id: 6d48.4bcc Suspend: 0 Teb: 0000001b`5fde5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 232  Id: 6d48.523c Suspend: 0 Teb: 0000001b`5fde7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 233  Id: 6d48.1fbc Suspend: 0 Teb: 0000001b`5fde9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 234  Id: 6d48.5994 Suspend: 0 Teb: 0000001b`5fdef000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 235  Id: 6d48.6d34 Suspend: 0 Teb: 0000001b`5fdf1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 236  Id: 6d48.5cd0 Suspend: 0 Teb: 0000001b`5fdf3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 237  Id: 6d48.2408 Suspend: 0 Teb: 0000001b`5fdf5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 238  Id: 6d48.13c Suspend: 0 Teb: 0000001b`5fdf7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 239  Id: 6d48.5be4 Suspend: 0 Teb: 0000001b`5fdf9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 240  Id: 6d48.57e8 Suspend: 0 Teb: 0000001b`5fc00000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+0x0
+
+ 241  Id: 6d48.5530 Suspend: 0 Teb: 0000001b`5fc02000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 242  Id: 6d48.fe8 Suspend: 0 Teb: 0000001b`5fd9d000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 243  Id: 6d48.579c Suspend: 0 Teb: 0000001b`5fd9f000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+
+ 244  Id: 6d48.11a4 Suspend: 0 Teb: 0000001b`5fc88000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+0x0
+
+ 245  Id: 6d48.3838 Suspend: 0 Teb: 0000001b`5fc8a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 246  Id: 6d48.51d4 Suspend: 0 Teb: 0000001b`5fc34000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 247  Id: 6d48.1da0 Suspend: 0 Teb: 0000001b`5fc3e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 248  Id: 6d48.367c Suspend: 0 Teb: 0000001b`5fc5e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 249  Id: 6d48.3e0c Suspend: 0 Teb: 0000001b`5fc60000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 250  Id: 6d48.35c Suspend: 0 Teb: 0000001b`5fc62000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 251  Id: 6d48.4a78 Suspend: 0 Teb: 0000001b`5fc66000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 252  Id: 6d48.3814 Suspend: 0 Teb: 0000001b`5fc6e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 253  Id: 6d48.6690 Suspend: 0 Teb: 0000001b`5fc76000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 254  Id: 6d48.2f70 Suspend: 0 Teb: 0000001b`5fc78000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 255  Id: 6d48.16d0 Suspend: 0 Teb: 0000001b`5fc7a000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 256  Id: 6d48.2fcc Suspend: 0 Teb: 0000001b`5fc7c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 257  Id: 6d48.2cb8 Suspend: 0 Teb: 0000001b`5fc7e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 258  Id: 6d48.4948 Suspend: 0 Teb: 0000001b`5fc80000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 259  Id: 6d48.3c80 Suspend: 0 Teb: 0000001b`5fc86000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 260  Id: 6d48.64cc Suspend: 0 Teb: 0000001b`5fcef000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 261  Id: 6d48.2a54 Suspend: 0 Teb: 0000001b`5fce5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 262  Id: 6d48.44f0 Suspend: 0 Teb: 0000001b`5fce1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 263  Id: 6d48.157c Suspend: 0 Teb: 0000001b`5fce7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 264  Id: 6d48.5a18 Suspend: 0 Teb: 0000001b`5fcf3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 265  Id: 6d48.2a8c Suspend: 0 Teb: 0000001b`5fcf5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 266  Id: 6d48.5010 Suspend: 0 Teb: 0000001b`5fd0b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 267  Id: 6d48.4a20 Suspend: 0 Teb: 0000001b`5fd13000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 268  Id: 6d48.6580 Suspend: 0 Teb: 0000001b`5fd51000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 269  Id: 6d48.ae8 Suspend: 0 Teb: 0000001b`5fd53000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 270  Id: 6d48.5844 Suspend: 0 Teb: 0000001b`5fc0e000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 271  Id: 6d48.5ca8 Suspend: 0 Teb: 0000001b`5fc10000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 272  Id: 6d48.6dc4 Suspend: 0 Teb: 0000001b`5fdc9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 273  Id: 6d48.4db8 Suspend: 0 Teb: 0000001b`5fc90000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::_Cnd_waitX
+nx_network!std::condition_variable::wait
+nx_network!std::condition_variable::wait
+nx_network!nx::utils::detail::shared_future_state_base<std::pair<unsigned long,unsigned __int64> >::wait
+nx_network!nx::utils::detail::shared_future_state<std::pair<unsigned long,unsigned __int64> >::get
+0x0
+
+ 274  Id: 6d48.3c40 Suspend: 0 Teb: 0000001b`5fd6b000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 275  Id: 6d48.6358 Suspend: 0 Teb: 0000001b`5fdfb000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 276  Id: 6d48.1ab4 Suspend: 0 Teb: 0000001b`5fd81000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 277  Id: 6d48.13b8 Suspend: 0 Teb: 0000001b`5fd83000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 278  Id: 6d48.1a84 Suspend: 0 Teb: 0000001b`5fd8d000 Unfrozen
+Call Site
+win32u!NtUserGetMessage
+user32!GetMessageW
+perfdisk!PerfdiskPnpNotification
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 279  Id: 6d48.49d4 Suspend: 0 Teb: 0000001b`5fc38000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 280  Id: 6d48.2f34 Suspend: 0 Teb: 0000001b`5fd9b000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+0x0
+0x0
+
+ 281  Id: 6d48.59b8 Suspend: 0 Teb: 0000001b`5fc20000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QThread::wait
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+mediaserver
+0x0
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+mediaserver
+0x0
+mediaserver
+0x0
+
+#282  Id: 6d48.2484 Suspend: 0 Teb: 0000001b`5fc22000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+ntdll!`string'
+0x0
+ntdll!`string'
+0x0
+
+ 283  Id: 6d48.46d4 Suspend: 0 Teb: 0000001b`5fc6c000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QBasicMutex::unlockInternal
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!operator<
+
+ 284  Id: 6d48.4c94 Suspend: 0 Teb: 0000001b`5fc92000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QBasicMutex::unlockInternal
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!operator<
+
+ 285  Id: 6d48.2430 Suspend: 0 Teb: 0000001b`5fcb9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QBasicMutex::unlockInternal
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!operator<
+
+ 286  Id: 6d48.5440 Suspend: 0 Teb: 0000001b`5fd27000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QBasicMutex::unlockInternal
+mediaserver
+0x0
+0x0
+0x0
+mediaserver
+0x0
+0x0
+0x0
+Qt5Core!operator<
+
+ 287  Id: 6d48.37c0 Suspend: 0 Teb: 0000001b`5fd87000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::_Cnd_waitX
+nx_network!std::condition_variable::wait
+nx_network!std::condition_variable::wait
+nx_network!nx::utils::detail::shared_future_state_base<std::pair<unsigned long,unsigned __int64> >::wait
+nx_network!nx::utils::detail::shared_future_state<std::pair<unsigned long,unsigned __int64> >::get
+0x0
+
+ 288  Id: 6d48.4578 Suspend: 0 Teb: 0000001b`5fd99000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_network!std::_Cnd_waitX
+nx_network!std::condition_variable::wait
+nx_network!std::condition_variable::wait
+nx_network!nx::utils::detail::shared_future_state_base<std::pair<unsigned long,unsigned __int64> >::wait
+nx_network!nx::utils::detail::shared_future_state<std::pair<unsigned long,unsigned __int64> >::get
+0x0
+
+ 289  Id: 6d48.1784 Suspend: 0 Teb: 0000001b`5fda1000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+msvcp140!_Thrd_sleep
+mediaserver
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+ 290  Id: 6d48.54d4 Suspend: 0 Teb: 0000001b`5fda9000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

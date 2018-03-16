@@ -1,0 +1,16 @@
+11, Segmentation fault
+
+#0  0xb48fd1e4 in ec2::QnDistributedMutexManager::messageBus() const () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
+#1  0xb48f9844 in ec2::QnDistributedMutex::at_newPeerFound(QnUuid, Qn::PeerType) () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
+#2  0xb48fa5cc in _ZN9QtPrivate11QSlotObjectIMN3ec218QnDistributedMutexEFv6QnUuidN2Qn8PeerTypeEENS_4ListIJS3_S5_EEEvE4implEiPNS_15QSlotObjectBaseEP7QObjectPPvPb () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
+#3  0xb2374a78 in QMetaObject::activate(QObject*, int, int, void**) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#4  0xb490a600 in ec2::QnDistributedMutexManager::peerFound(QnUuid, Qn::PeerType) () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
+#5  0xb48fddfc in _ZN9QtPrivate11QSlotObjectIMN3ec225QnDistributedMutexManagerEFv6QnUuidN2Qn8PeerTypeEENS_4ListIJS3_S5_EEEvE4implEiPNS_15QSlotObjectBaseEP7QObjectPPvPb () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
+#6  0xb2372200 in QMetaCallEvent::placeMetaCall(QObject*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#7  0xb2375bdc in QObject::event(QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#8  0xb23465d0 in QCoreApplication::notify(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#9  0xb23464fc in QCoreApplication::notifyInternal2(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#10 0xb2348a88 in QCoreApplicationPrivate::sendPostedEvents(QObject*, int, QThreadData*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#11 0x00480d0c in ?? ()
+#12 0x00480d0c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

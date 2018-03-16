@@ -1,0 +1,3926 @@
+ExceptionAddress: 000007feebe1c5c4 (dinput!hresDupPtszPptsz+0x0000000000000060)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000000
+   Parameter[1]: 0000000000000004
+Attempt to read from address 0000000000000004
+
+rax=000000007ffffffe rbx=0000000000000001 rcx=000000005d0c5be0
+rdx=000000007ffffffd rsi=000000004e304ef0 rdi=ffffffffa2f3a424
+rip=000007feebe1c5c4 rsp=00000000003091a0 rbp=0000000000000000
+ r8=0000000000000000  r9=000000005d0c5be0 r10=0000000000000000
+r11=0000000000000000 r12=ffffffffffffffff r13=0000000080004005
+r14=0000000000000104 r15=0000000000000000
+iopl=0         nv up ei pl nz na pe nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010202
+dinput!hresDupPtszPptsz+0x60:
+000007fe`ebe1c5c4 0fb7040f        movzx   eax,word ptr [rdi+rcx] ds:00000000`00000004=????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+dinput!hresDupPtszPptsz
+dinput!CHid_Init
+dinput!CHid_New
+dinput!DIWdm_JoyHidMapping
+dinput!JoyReg_GetConfigInternal
+dinput!JoyReg_GetConfig
+dinput!CJoyCfg_GetConfig
+winmm!joyOpen
+winmm!joyGetPosEx
+winmm!joyGetPos
+DW_Spectrum!nx::client::plugins::io_device::joystick::driver::MmWinDriver::enumerateJoysticks
+DW_Spectrum!nx::client::plugins::io_device::joystick::Manager::applyMappingsAndCaptureJoysticks
+DW_Spectrum!nx::client::plugins::io_device::joystick::Manager::notifyHardwareConfigurationChanged
+DW_Spectrum!nx::client::plugins::io_device::joystick::driver::JoystickEventFilter::nativeEventFilter
+Qt5Core!QAbstractEventDispatcher::filterNativeEvent
+qwindows
+qwindows
+user32!UserCallWinProcCheckWow
+user32!DispatchClientMessage
+user32!_fnINDEVICECHANGE
+ntdll!KiUserCallbackDispatcherContinue
+user32!NtUserPeekMessage
+user32!PeekMessageW
+Qt5Core!QEventDispatcherWin32::processEvents
+qwindows!qt_plugin_query_metadata
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+DW_Spectrum!runApplication
+DW_Spectrum!main
+DW_Spectrum!WinMain
+DW_Spectrum!invoke_main
+DW_Spectrum!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+
+.  0  Id: 1984.1b48 Suspend: 0 Teb: 000007ff`fffde000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+KERNELBASE!g_SbTableEntry_CreateFileDowngradeSwitch_Scenario
+0x0
+0x0
+0x0
+
+   1  Id: 1984.16f0 Suspend: 0 Teb: 000007ff`fffdc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<QSharedPointer<TextToWaveServer::SynthetiseSpeechTask> >::pop
+DW_Spectrum!TextToWaveServer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: 1984.10b0 Suspend: 0 Teb: 000007ff`fffda000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: 1984.b1c Suspend: 0 Teb: 000007ff`fffd8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   4  Id: 1984.ab8 Suspend: 0 Teb: 000007ff`fffd6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   5  Id: 1984.6c0 Suspend: 0 Teb: 000007ff`fffd4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   6  Id: 1984.154c Suspend: 0 Teb: 000007ff`fff0e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   7  Id: 1984.638 Suspend: 0 Teb: 000007ff`fff0c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   8  Id: 1984.1030 Suspend: 0 Teb: 000007ff`fff0a000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   9  Id: 1984.13dc Suspend: 0 Teb: 000007ff`fff08000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!nx::cloud::gateway::VmsGatewayProcess::exec
+nx_utils!std::_Func_class<void>::operator()
+nx_utils!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()<>
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  10  Id: 1984.670 Suspend: 0 Teb: 000007ff`fff06000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+ntdll!TppWaiterpThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  11  Id: 1984.5e4 Suspend: 0 Teb: 000007ff`fff04000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  12  Id: 1984.186c Suspend: 0 Teb: 000007ff`fff02000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  13  Id: 1984.1658 Suspend: 0 Teb: 000007ff`ffefe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!_GSHandlerCheck_SEH
+ws2_32!DPROVIDER::WSPSelect
+ws2_32!select
+nx_network!nx::network::aio::PollSet::poll
+DW_Spectrum!QnMulticastModuleFinder::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  14  Id: 1984.107c Suspend: 0 Teb: 000007ff`ffefc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  15  Id: 1984.18d4 Suspend: 0 Teb: 000007ff`ffefa000 Unfrozen
+Call Site
+user32!NtUserGetMessage
+user32!GetMessageA
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  16  Id: 1984.1188 Suspend: 0 Teb: 000007ff`ffef8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  17  Id: 1984.1a1c Suspend: 0 Teb: 000007ff`ffef6000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnThreadedChunksMergeTool::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  18  Id: 1984.4c0 Suspend: 0 Teb: 000007ff`ffef4000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum!QnThreadedChunksMergeTool::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  19  Id: 1984.14c4 Suspend: 0 Teb: 000007ff`ffeea000 Unfrozen
+Call Site
+ntdll!NtRequestWaitReplyPort
+dwmapi!CPortClient::SendComplexSyncRequestNative
+dwmapi!CPortClient::SendComplexSyncRequest
+dwmapi!CApiPortClient::SendRequest
+dwmapi!DwmFlush
+ig75icd64
+
+  20  Id: 1984.13a0 Suspend: 0 Teb: 000007ff`ffef2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  21  Id: 1984.1ad0 Suspend: 0 Teb: 000007ff`ffef0000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: 1984.1a48 Suspend: 0 Teb: 000007ff`ffeee000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: 1984.f18 Suspend: 0 Teb: 000007ff`ffeec000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: 1984.11a0 Suspend: 0 Teb: 000007ff`ffee4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!DecodedPictureToOpenGLUploadThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: 1984.19c0 Suspend: 0 Teb: 000007ff`ffee0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Qml!QQmlDirParser::typeNamespace
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: 1984.e6c Suspend: 0 Teb: 000007ff`ffede000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: 1984.19a4 Suspend: 0 Teb: 000007ff`ffeda000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnResourceDiscoveryManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: 1984.1b14 Suspend: 0 Teb: 000007ff`ffee2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: 1984.eec Suspend: 0 Teb: 000007ff`ffed4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  30  Id: 1984.760 Suspend: 0 Teb: 000007ff`ffed2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  31  Id: 1984.189c Suspend: 0 Teb: 000007ff`ffed0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  32  Id: 1984.199c Suspend: 0 Teb: 000007ff`ffec4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  33  Id: 1984.1684 Suspend: 0 Teb: 000007ff`ffec2000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  34  Id: 1984.18a4 Suspend: 0 Teb: 000007ff`ffec0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  35  Id: 1984.1b78 Suspend: 0 Teb: 000007ff`ffdf6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+nx_network!nx::network::BufferedStreamSocket::recv
+DW_Spectrum!QnTCPConnectionProcessor::readRequest
+DW_Spectrum!QnDesktopCameraConnection::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  36  Id: 1984.1720 Suspend: 0 Teb: 000007ff`ffdf8000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  37  Id: 1984.394 Suspend: 0 Teb: 000007ff`ffee6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  38  Id: 1984.15d4 Suspend: 0 Teb: 000007ff`ffee8000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  39  Id: 1984.188c Suspend: 0 Teb: 000007ff`ffed8000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  40  Id: 1984.1970 Suspend: 0 Teb: 000007ff`ffed6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  41  Id: 1984.e90 Suspend: 0 Teb: 000007ff`ffec6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  42  Id: 1984.1c9c Suspend: 0 Teb: 000007ff`ffc66000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  43  Id: 1984.1cbc Suspend: 0 Teb: 000007ff`ffedc000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  44  Id: 1984.194c Suspend: 0 Teb: 000007ff`ffece000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  45  Id: 1984.f28 Suspend: 0 Teb: 000007ff`fff00000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  46  Id: 1984.520 Suspend: 0 Teb: 000007ff`ffeca000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  47  Id: 1984.1f54 Suspend: 0 Teb: 000007ff`ffec8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  48  Id: 1984.e08 Suspend: 0 Teb: 000007ff`ffebe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  49  Id: 1984.e0c Suspend: 0 Teb: 000007ff`ffebc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  50  Id: 1984.1c58 Suspend: 0 Teb: 000007ff`ffeb8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  51  Id: 1984.668 Suspend: 0 Teb: 000007ff`ffeb6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  52  Id: 1984.f1c Suspend: 0 Teb: 000007ff`ffeb4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  53  Id: 1984.1c1c Suspend: 0 Teb: 000007ff`ffeb2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  54  Id: 1984.1eac Suspend: 0 Teb: 000007ff`ffeb0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  55  Id: 1984.10c0 Suspend: 0 Teb: 000007ff`ffeae000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  56  Id: 1984.be4 Suspend: 0 Teb: 000007ff`ffeac000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  57  Id: 1984.1dd0 Suspend: 0 Teb: 000007ff`ffeaa000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  58  Id: 1984.1eb8 Suspend: 0 Teb: 000007ff`ffea8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  59  Id: 1984.17ac Suspend: 0 Teb: 000007ff`ffea6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  60  Id: 1984.1f20 Suspend: 0 Teb: 000007ff`ffea4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  61  Id: 1984.1ee0 Suspend: 0 Teb: 000007ff`ffea2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  62  Id: 1984.1ddc Suspend: 0 Teb: 000007ff`ffea0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  63  Id: 1984.1dec Suspend: 0 Teb: 000007ff`ffe9e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  64  Id: 1984.1ae0 Suspend: 0 Teb: 000007ff`ffe9c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  65  Id: 1984.19b8 Suspend: 0 Teb: 000007ff`ffe9a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  66  Id: 1984.610 Suspend: 0 Teb: 000007ff`ffe98000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  67  Id: 1984.1584 Suspend: 0 Teb: 000007ff`ffe96000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  68  Id: 1984.18b0 Suspend: 0 Teb: 000007ff`ffe94000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  69  Id: 1984.1c78 Suspend: 0 Teb: 000007ff`ffe92000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  70  Id: 1984.1d64 Suspend: 0 Teb: 000007ff`ffe90000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  71  Id: 1984.176c Suspend: 0 Teb: 000007ff`ffe8e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  72  Id: 1984.13d4 Suspend: 0 Teb: 000007ff`ffe84000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  73  Id: 1984.1c50 Suspend: 0 Teb: 000007ff`ffe82000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  74  Id: 1984.1d00 Suspend: 0 Teb: 000007ff`ffe80000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  75  Id: 1984.17f4 Suspend: 0 Teb: 000007ff`ffe7e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  76  Id: 1984.1388 Suspend: 0 Teb: 000007ff`ffe7c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  77  Id: 1984.10a4 Suspend: 0 Teb: 000007ff`ffe7a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  78  Id: 1984.1334 Suspend: 0 Teb: 000007ff`ffe78000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  79  Id: 1984.19e0 Suspend: 0 Teb: 000007ff`ffe76000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  80  Id: 1984.179c Suspend: 0 Teb: 000007ff`ffe74000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  81  Id: 1984.1a6c Suspend: 0 Teb: 000007ff`ffe72000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  82  Id: 1984.1d08 Suspend: 0 Teb: 000007ff`ffe8c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  83  Id: 1984.1dcc Suspend: 0 Teb: 000007ff`ffe70000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  84  Id: 1984.1654 Suspend: 0 Teb: 000007ff`ffe6c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  85  Id: 1984.1518 Suspend: 0 Teb: 000007ff`ffe6a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  86  Id: 1984.163c Suspend: 0 Teb: 000007ff`ffe68000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  87  Id: 1984.142c Suspend: 0 Teb: 000007ff`ffe66000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  88  Id: 1984.1d98 Suspend: 0 Teb: 000007ff`ffe64000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  89  Id: 1984.8f8 Suspend: 0 Teb: 000007ff`ffe62000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  90  Id: 1984.1dbc Suspend: 0 Teb: 000007ff`ffe60000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  91  Id: 1984.129c Suspend: 0 Teb: 000007ff`ffe5e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  92  Id: 1984.cd8 Suspend: 0 Teb: 000007ff`ffe5c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnAdaptiveSleep::terminatedSleep
+DW_Spectrum!QnCamDisplay::doSmartSleep
+DW_Spectrum!QnCamDisplay::display
+DW_Spectrum!QnCamDisplay::processData
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  93  Id: 1984.1458 Suspend: 0 Teb: 000007ff`ffe5a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nx_network!nx::network::CommunicatingSocket<AbstractStreamSocket>::recv
+DW_Spectrum!QnRtspClient::readSocketWithBuffering
+DW_Spectrum!QnRtspClient::readBinaryResponce
+DW_Spectrum!QnRtspIoDevice::read
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextDataInternal
+DW_Spectrum!QnRtspClientArchiveDelegate::getNextData
+DW_Spectrum!QnSyncPlayArchiveDelegate::getNextData
+DW_Spectrum!QnArchiveStreamReader::getNextPacket
+DW_Spectrum!QnArchiveStreamReader::getNextData
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  94  Id: 1984.1d88 Suspend: 0 Teb: 000007ff`ffe58000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  95  Id: 1984.1860 Suspend: 0 Teb: 000007ff`ffe56000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  96  Id: 1984.1954 Suspend: 0 Teb: 000007ff`ffe54000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  97  Id: 1984.10bc Suspend: 0 Teb: 000007ff`ffe52000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  98  Id: 1984.7d4 Suspend: 0 Teb: 000007ff`ffe50000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  99  Id: 1984.1fc0 Suspend: 0 Teb: 000007ff`ffe4e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 100  Id: 1984.dbc Suspend: 0 Teb: 000007ff`ffe4c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 101  Id: 1984.1e68 Suspend: 0 Teb: 000007ff`ffe4a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 102  Id: 1984.116c Suspend: 0 Teb: 000007ff`ffe48000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 103  Id: 1984.1a40 Suspend: 0 Teb: 000007ff`ffe46000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 104  Id: 1984.19e4 Suspend: 0 Teb: 000007ff`ffe44000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 105  Id: 1984.3cc Suspend: 0 Teb: 000007ff`ffe42000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 106  Id: 1984.e8c Suspend: 0 Teb: 000007ff`ffe40000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 107  Id: 1984.1f6c Suspend: 0 Teb: 000007ff`ffe3e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 108  Id: 1984.e4c Suspend: 0 Teb: 000007ff`ffe3c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 109  Id: 1984.1d8c Suspend: 0 Teb: 000007ff`ffe3a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 110  Id: 1984.19b4 Suspend: 0 Teb: 000007ff`ffe38000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 111  Id: 1984.168c Suspend: 0 Teb: 000007ff`ffe36000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 112  Id: 1984.1d44 Suspend: 0 Teb: 000007ff`ffe8a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 113  Id: 1984.424 Suspend: 0 Teb: 000007ff`ffe88000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 114  Id: 1984.1158 Suspend: 0 Teb: 000007ff`ffe30000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 115  Id: 1984.1c7c Suspend: 0 Teb: 000007ff`ffe2e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 116  Id: 1984.6b8 Suspend: 0 Teb: 000007ff`ffe2c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 117  Id: 1984.1a70 Suspend: 0 Teb: 000007ff`ffe2a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 118  Id: 1984.1ecc Suspend: 0 Teb: 000007ff`ffe86000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 119  Id: 1984.1fbc Suspend: 0 Teb: 000007ff`ffe6e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 120  Id: 1984.15f8 Suspend: 0 Teb: 000007ff`ffe24000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 121  Id: 1984.968 Suspend: 0 Teb: 000007ff`ffe22000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 122  Id: 1984.19cc Suspend: 0 Teb: 000007ff`ffe20000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 123  Id: 1984.104 Suspend: 0 Teb: 000007ff`ffe1e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 124  Id: 1984.1c44 Suspend: 0 Teb: 000007ff`ffe1c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 125  Id: 1984.1ff4 Suspend: 0 Teb: 000007ff`ffe1a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 126  Id: 1984.b28 Suspend: 0 Teb: 000007ff`ffe18000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 127  Id: 1984.1bf8 Suspend: 0 Teb: 000007ff`ffe16000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 128  Id: 1984.1f64 Suspend: 0 Teb: 000007ff`ffe14000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 129  Id: 1984.1a38 Suspend: 0 Teb: 000007ff`ffe12000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 130  Id: 1984.c28 Suspend: 0 Teb: 000007ff`ffe10000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 131  Id: 1984.170c Suspend: 0 Teb: 000007ff`ffe0e000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 132  Id: 1984.13e8 Suspend: 0 Teb: 000007ff`ffe0c000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 133  Id: 1984.1c24 Suspend: 0 Teb: 000007ff`ffe0a000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 134  Id: 1984.55c Suspend: 0 Teb: 000007ff`ffe34000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 135  Id: 1984.ec0 Suspend: 0 Teb: 000007ff`ffe32000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 136  Id: 1984.1440 Suspend: 0 Teb: 000007ff`ffe04000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 137  Id: 1984.ecc Suspend: 0 Teb: 000007ff`ffe02000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 138  Id: 1984.1f70 Suspend: 0 Teb: 000007ff`ffe00000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 139  Id: 1984.1e18 Suspend: 0 Teb: 000007ff`ffdfe000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 140  Id: 1984.1c20 Suspend: 0 Teb: 000007ff`ffdfc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 141  Id: 1984.1980 Suspend: 0 Teb: 000007ff`ffdfa000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 142  Id: 1984.1f9c Suspend: 0 Teb: 000007ff`ffdf4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 143  Id: 1984.17f0 Suspend: 0 Teb: 000007ff`ffdf2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 144  Id: 1984.1538 Suspend: 0 Teb: 000007ff`ffdf0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 145  Id: 1984.17cc Suspend: 0 Teb: 000007ff`ffdee000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 146  Id: 1984.aa4 Suspend: 0 Teb: 000007ff`ffdec000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum!QnSafeQueue<std::shared_ptr<QnAbstractDataPacket> >::pop
+DW_Spectrum!QnAbstractDataConsumer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 147  Id: 1984.c8c Suspend: 0 Teb: 000007ff`ffdea000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!QnSemaphore::tryAcquire
+DW_Spectrum!QnLongRunnable::pauseDelay
+DW_Spectrum!QnAbstractArchiveStreamReader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 148  Id: 1984.1f00 Suspend: 0 Teb: 000007ff`ffde6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 149  Id: 1984.1e0c Suspend: 0 Teb: 000007ff`ffc5c000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 150  Id: 1984.19e8 Suspend: 0 Teb: 000007ff`ffdba000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 151  Id: 1984.15c4 Suspend: 0 Teb: 000007ff`ffdb4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 152  Id: 1984.10f0 Suspend: 0 Teb: 000007ff`ffdc0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 153  Id: 1984.1ebc Suspend: 0 Teb: 000007ff`ffc8a000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 154  Id: 1984.1960 Suspend: 0 Teb: 000007ff`ffd1e000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 155  Id: 1984.17a0 Suspend: 0 Teb: 000007ff`ffc90000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 156  Id: 1984.350 Suspend: 0 Teb: 000007ff`ffd28000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 157  Id: 1984.12a4 Suspend: 0 Teb: 000007ff`ffca6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 158  Id: 1984.1b08 Suspend: 0 Teb: 000007ff`ffd3a000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 159  Id: 1984.1c18 Suspend: 0 Teb: 000007ff`ffdd4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 160  Id: 1984.dac Suspend: 0 Teb: 000007ff`ffcba000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjectsExImplementation
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum!QnThumbnailsLoader::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 161  Id: 1984.c9c Suspend: 0 Teb: 000007ff`ffd90000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 162  Id: 1984.1f7c Suspend: 0 Teb: 000007ff`ffd88000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 163  Id: 1984.5e0 Suspend: 0 Teb: 000007ff`ffd82000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 164  Id: 1984.1ab8 Suspend: 0 Teb: 000007ff`ffd72000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 165  Id: 1984.644 Suspend: 0 Teb: 000007ff`ffd2a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 166  Id: 1984.d20 Suspend: 0 Teb: 000007ff`ffd12000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 167  Id: 1984.810 Suspend: 0 Teb: 000007ff`ffd08000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 168  Id: 1984.620 Suspend: 0 Teb: 000007ff`ffcda000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 169  Id: 1984.11f4 Suspend: 0 Teb: 000007ff`ffd78000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 170  Id: 1984.1ab0 Suspend: 0 Teb: 000007ff`ffd70000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 171  Id: 1984.1cd8 Suspend: 0 Teb: 000007ff`ffd00000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 172  Id: 1984.1f5c Suspend: 0 Teb: 000007ff`ffcfc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 173  Id: 1984.1570 Suspend: 0 Teb: 000007ff`ffe28000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 174  Id: 1984.1e5c Suspend: 0 Teb: 000007ff`ffdc4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 175  Id: 1984.1b9c Suspend: 0 Teb: 000007ff`ffdaa000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 176  Id: 1984.8e8 Suspend: 0 Teb: 000007ff`ffda6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 177  Id: 1984.1fa8 Suspend: 0 Teb: 000007ff`ffdd6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 178  Id: 1984.870 Suspend: 0 Teb: 000007ff`ffdb8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 179  Id: 1984.1c5c Suspend: 0 Teb: 000007ff`ffd8c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 180  Id: 1984.1ee8 Suspend: 0 Teb: 000007ff`ffd56000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 181  Id: 1984.1c88 Suspend: 0 Teb: 000007ff`ffd38000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 182  Id: 1984.1c40 Suspend: 0 Teb: 000007ff`ffcfa000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 183  Id: 1984.8f0 Suspend: 0 Teb: 000007ff`ffcf6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 184  Id: 1984.1d38 Suspend: 0 Teb: 000007ff`ffcf4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 185  Id: 1984.1a00 Suspend: 0 Teb: 000007ff`ffdcc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 186  Id: 1984.1978 Suspend: 0 Teb: 000007ff`ffdb6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 187  Id: 1984.1218 Suspend: 0 Teb: 000007ff`ffdb0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 188  Id: 1984.8d8 Suspend: 0 Teb: 000007ff`ffd9c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 189  Id: 1984.338 Suspend: 0 Teb: 000007ff`ffd58000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 190  Id: 1984.1aa4 Suspend: 0 Teb: 000007ff`ffd50000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 191  Id: 1984.1ed8 Suspend: 0 Teb: 000007ff`ffd42000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 192  Id: 1984.1e64 Suspend: 0 Teb: 000007ff`ffd40000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 193  Id: 1984.4c8 Suspend: 0 Teb: 000007ff`ffd1c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 194  Id: 1984.8dc Suspend: 0 Teb: 000007ff`ffd1a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 195  Id: 1984.1fc4 Suspend: 0 Teb: 000007ff`ffd18000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 196  Id: 1984.160c Suspend: 0 Teb: 000007ff`ffd0a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 197  Id: 1984.1f04 Suspend: 0 Teb: 000007ff`ffcec000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 198  Id: 1984.1930 Suspend: 0 Teb: 000007ff`ffcd4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 199  Id: 1984.18ec Suspend: 0 Teb: 000007ff`ffcd0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 200  Id: 1984.1760 Suspend: 0 Teb: 000007ff`ffccc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 201  Id: 1984.1a04 Suspend: 0 Teb: 000007ff`ffdde000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 202  Id: 1984.b4c Suspend: 0 Teb: 000007ff`ffdce000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 203  Id: 1984.1f28 Suspend: 0 Teb: 000007ff`ffd76000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 204  Id: 1984.1c38 Suspend: 0 Teb: 000007ff`ffd52000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 205  Id: 1984.1a08 Suspend: 0 Teb: 000007ff`ffd4e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 206  Id: 1984.984 Suspend: 0 Teb: 000007ff`ffd44000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 207  Id: 1984.1d18 Suspend: 0 Teb: 000007ff`ffd26000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 208  Id: 1984.157c Suspend: 0 Teb: 000007ff`ffd0c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 209  Id: 1984.e38 Suspend: 0 Teb: 000007ff`ffde2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 210  Id: 1984.1a90 Suspend: 0 Teb: 000007ff`ffd7a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 211  Id: 1984.1a4c Suspend: 0 Teb: 000007ff`ffd3e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 212  Id: 1984.1428 Suspend: 0 Teb: 000007ff`ffdda000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 213  Id: 1984.5f0 Suspend: 0 Teb: 000007ff`ffdb2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 214  Id: 1984.1e60 Suspend: 0 Teb: 000007ff`ffd96000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 215  Id: 1984.1434 Suspend: 0 Teb: 000007ff`ffd66000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 216  Id: 1984.1e70 Suspend: 0 Teb: 000007ff`ffd62000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 217  Id: 1984.1764 Suspend: 0 Teb: 000007ff`ffd36000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 218  Id: 1984.1150 Suspend: 0 Teb: 000007ff`ffd06000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 219  Id: 1984.1ca8 Suspend: 0 Teb: 000007ff`ffd04000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 220  Id: 1984.172c Suspend: 0 Teb: 000007ff`ffcf2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 221  Id: 1984.1f78 Suspend: 0 Teb: 000007ff`ffeba000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 222  Id: 1984.31c Suspend: 0 Teb: 000007ff`ffd02000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 223  Id: 1984.11cc Suspend: 0 Teb: 000007ff`ffcf8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 224  Id: 1984.1a68 Suspend: 0 Teb: 000007ff`ffce6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 225  Id: 1984.1e30 Suspend: 0 Teb: 000007ff`ffd5a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 226  Id: 1984.1044 Suspend: 0 Teb: 000007ff`ffd34000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 227  Id: 1984.17dc Suspend: 0 Teb: 000007ff`ffce8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 228  Id: 1984.e14 Suspend: 0 Teb: 000007ff`ffce0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 229  Id: 1984.ea0 Suspend: 0 Teb: 000007ff`ffdc2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 230  Id: 1984.1818 Suspend: 0 Teb: 000007ff`ffda0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 231  Id: 1984.1398 Suspend: 0 Teb: 000007ff`ffd84000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 232  Id: 1984.1d7c Suspend: 0 Teb: 000007ff`ffd7c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 233  Id: 1984.cc Suspend: 0 Teb: 000007ff`ffd6c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 234  Id: 1984.1f10 Suspend: 0 Teb: 000007ff`ffd5c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 235  Id: 1984.1e1c Suspend: 0 Teb: 000007ff`ffd54000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 236  Id: 1984.1dd8 Suspend: 0 Teb: 000007ff`ffd4a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 237  Id: 1984.1520 Suspend: 0 Teb: 000007ff`ffd46000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 238  Id: 1984.1910 Suspend: 0 Teb: 000007ff`ffcf0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 239  Id: 1984.15a4 Suspend: 0 Teb: 000007ff`ffcee000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 240  Id: 1984.1cb8 Suspend: 0 Teb: 000007ff`ffcea000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 241  Id: 1984.131c Suspend: 0 Teb: 000007ff`ffdca000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 242  Id: 1984.1f4c Suspend: 0 Teb: 000007ff`ffdae000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 243  Id: 1984.858 Suspend: 0 Teb: 000007ff`ffd9e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 244  Id: 1984.6ec Suspend: 0 Teb: 000007ff`ffd7e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 245  Id: 1984.1a14 Suspend: 0 Teb: 000007ff`ffd68000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 246  Id: 1984.1e88 Suspend: 0 Teb: 000007ff`ffd4c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 247  Id: 1984.16ec Suspend: 0 Teb: 000007ff`ffd3c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 248  Id: 1984.1fdc Suspend: 0 Teb: 000007ff`ffd20000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 249  Id: 1984.15cc Suspend: 0 Teb: 000007ff`ffecc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 250  Id: 1984.1bbc Suspend: 0 Teb: 000007ff`ffe06000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 251  Id: 1984.f38 Suspend: 0 Teb: 000007ff`ffdd0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 252  Id: 1984.1c30 Suspend: 0 Teb: 000007ff`ffda4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 253  Id: 1984.12bc Suspend: 0 Teb: 000007ff`ffd74000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 254  Id: 1984.10f4 Suspend: 0 Teb: 000007ff`ffd64000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 255  Id: 1984.173c Suspend: 0 Teb: 000007ff`ffd24000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 256  Id: 1984.1c3c Suspend: 0 Teb: 000007ff`ffd16000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 257  Id: 1984.538 Suspend: 0 Teb: 000007ff`ffe26000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 258  Id: 1984.15f0 Suspend: 0 Teb: 000007ff`ffe08000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 259  Id: 1984.1ad8 Suspend: 0 Teb: 000007ff`ffde8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 260  Id: 1984.1bb0 Suspend: 0 Teb: 000007ff`ffde0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 261  Id: 1984.1e00 Suspend: 0 Teb: 000007ff`ffd98000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 262  Id: 1984.1af4 Suspend: 0 Teb: 000007ff`ffd86000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 263  Id: 1984.1be8 Suspend: 0 Teb: 000007ff`ffcde000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 264  Id: 1984.18a0 Suspend: 0 Teb: 000007ff`ffcc8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 265  Id: 1984.16fc Suspend: 0 Teb: 000007ff`ffdd8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 266  Id: 1984.1ffc Suspend: 0 Teb: 000007ff`ffd8a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 267  Id: 1984.1c94 Suspend: 0 Teb: 000007ff`ffd60000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 268  Id: 1984.648 Suspend: 0 Teb: 000007ff`ffd5e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 269  Id: 1984.1a50 Suspend: 0 Teb: 000007ff`ffdac000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 270  Id: 1984.1894 Suspend: 0 Teb: 000007ff`ffd9a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 271  Id: 1984.15f4 Suspend: 0 Teb: 000007ff`ffd8e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 272  Id: 1984.4f0 Suspend: 0 Teb: 000007ff`ffd6e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 273  Id: 1984.1958 Suspend: 0 Teb: 000007ff`ffddc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 274  Id: 1984.1fb8 Suspend: 0 Teb: 000007ff`ffdd2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 275  Id: 1984.e7c Suspend: 0 Teb: 000007ff`ffdbc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 276  Id: 1984.904 Suspend: 0 Teb: 000007ff`ffd92000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 277  Id: 1984.1ce0 Suspend: 0 Teb: 000007ff`ffda2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 278  Id: 1984.14a4 Suspend: 0 Teb: 000007ff`ffce2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 279  Id: 1984.1d80 Suspend: 0 Teb: 000007ff`ffcd8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 280  Id: 1984.2d8 Suspend: 0 Teb: 000007ff`ffcd6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 281  Id: 1984.1bec Suspend: 0 Teb: 000007ff`ffde4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 282  Id: 1984.e80 Suspend: 0 Teb: 000007ff`ffd48000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 283  Id: 1984.1efc Suspend: 0 Teb: 000007ff`ffdc8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 284  Id: 1984.13b8 Suspend: 0 Teb: 000007ff`ffd32000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 285  Id: 1984.177c Suspend: 0 Teb: 000007ff`ffd30000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 286  Id: 1984.1cd4 Suspend: 0 Teb: 000007ff`ffd2c000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 287  Id: 1984.1ec4 Suspend: 0 Teb: 000007ff`ffd22000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 288  Id: 1984.1a20 Suspend: 0 Teb: 000007ff`ffd14000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 289  Id: 1984.166c Suspend: 0 Teb: 000007ff`ffd10000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 290  Id: 1984.1fcc Suspend: 0 Teb: 000007ff`ffcfe000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 291  Id: 1984.1798 Suspend: 0 Teb: 000007ff`ffdc6000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 292  Id: 1984.1c70 Suspend: 0 Teb: 000007ff`ffda8000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 293  Id: 1984.1dc0 Suspend: 0 Teb: 000007ff`ffd2e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 294  Id: 1984.1bb4 Suspend: 0 Teb: 000007ff`ffd0e000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 295  Id: 1984.1c90 Suspend: 0 Teb: 000007ff`ffce4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 296  Id: 1984.19d0 Suspend: 0 Teb: 000007ff`ffcdc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 297  Id: 1984.18dc Suspend: 0 Teb: 000007ff`ffcd2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 298  Id: 1984.640 Suspend: 0 Teb: 000007ff`ffcce000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 299  Id: 1984.de0 Suspend: 0 Teb: 000007ff`ffcca000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 300  Id: 1984.1634 Suspend: 0 Teb: 000007ff`ffcc2000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 301  Id: 1984.4b8 Suspend: 0 Teb: 000007ff`ffdbe000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 302  Id: 1984.1a74 Suspend: 0 Teb: 000007ff`ffd94000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 303  Id: 1984.10fc Suspend: 0 Teb: 000007ff`ffd80000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 304  Id: 1984.1fd0 Suspend: 0 Teb: 000007ff`ffd6a000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 305  Id: 1984.1118 Suspend: 0 Teb: 000007ff`ffcc4000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 306  Id: 1984.1918 Suspend: 0 Teb: 000007ff`ffcc0000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 307  Id: 1984.190c Suspend: 0 Teb: 000007ff`ffcbe000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 308  Id: 1984.19a8 Suspend: 0 Teb: 000007ff`ffcbc000 Unfrozen
+Call Site
+ntdll!NtWaitForKeyedEvent
+ntdll!RtlSleepConditionVariableCS
+kernel32!SleepConditionVariableCS
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_codec_parser
+avcodec_57!av_register_bitstream_filter
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 309  Id: 1984.1bc Suspend: 0 Teb: 000007ff`ffcc6000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 310  Id: 1984.1490 Suspend: 0 Teb: 000007ff`ffcb8000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+ 311  Id: 1984.1e98 Suspend: 0 Teb: 000007ff`ffcb6000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+winmm!joyMonitorThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

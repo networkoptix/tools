@@ -1,0 +1,185 @@
+GNU gdb (crosstool-NG - Ambarella Linaro Multilib GCC [CortexA9 & ARMv6k] 2014.06) 7.7.1-2014.06-1
+Copyright (C) 2014 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "arm-linux-gnueabihf".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://bugs.launchpad.net/gcc-linaro>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /opt/digitalwatchdog/mediaserver/bin/mediaserver...done.
+[New LWP 434]
+[New LWP 435]
+[New LWP 436]
+[New LWP 437]
+[New LWP 522]
+[New LWP 523]
+[New LWP 524]
+[New LWP 525]
+[New LWP 526]
+[New LWP 527]
+[New LWP 529]
+[New LWP 531]
+[New LWP 535]
+[New LWP 536]
+[New LWP 537]
+[New LWP 538]
+[New LWP 539]
+[New LWP 540]
+[New LWP 541]
+[New LWP 542]
+[New LWP 545]
+[New LWP 557]
+[New LWP 558]
+[New LWP 2370]
+[New LWP 20155]
+[New LWP 20171]
+[New LWP 528]
+[New LWP 20186]
+[New LWP 547]
+[New LWP 409]
+(gdb) 
+Thread 30 (LWP 409):
+#0  0x734efbb2 in ?? ()
+#1  0x73723c24 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 29 (LWP 547):
+#0  0x7368d85e in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 28 (LWP 20186):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 27 (LWP 528):
+#0  0x734ecc82 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 26 (LWP 20171):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 25 (LWP 20155):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 24 (LWP 2370):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 23 (LWP 558):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 22 (LWP 557):
+#0  0x7368f184 in ?? ()
+#1  0x7368a888 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 21 (LWP 545):
+#0  0x7368d360 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 20 (LWP 542):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 19 (LWP 541):
+#0  0x734f3ba2 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 18 (LWP 540):
+#0  0x7368d85e in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 17 (LWP 539):
+#0  0x7368f184 in ?? ()
+#1  0x7368a888 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 16 (LWP 538):
+#0  0x7368d85e in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 15 (LWP 537):
+#0  0x734ecc82 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 14 (LWP 536):
+#0  0x7345e774 in ?? ()
+#1  0x734ecd7a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 13 (LWP 535):
+#0  0x7345e774 in ?? ()
+#1  0x734ecd7a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 12 (LWP 531):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 11 (LWP 529):
+#0  0x734ecc82 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 10 (LWP 527):
+#0  0x7368f184 in ?? ()
+#1  0x7368a888 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 9 (LWP 526):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 8 (LWP 525):
+#0  0x7368f184 in ?? ()
+#1  0x7368a888 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 7 (LWP 524):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 6 (LWP 523):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 5 (LWP 522):
+#0  0x734ecc82 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 4 (LWP 437):
+#0  0x7368f184 in ?? ()
+#1  0x7368ab4c in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 3 (LWP 436):
+#0  0x734e7aa0 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 2 (LWP 435):
+#0  0x734f3ba2 in ?? ()
+#1  0x00000000 in ?? ()
+
+Thread 1 (LWP 434):
+#0  0x76452a1c in ?? ()
+#1  0x763f572a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+(gdb) quit

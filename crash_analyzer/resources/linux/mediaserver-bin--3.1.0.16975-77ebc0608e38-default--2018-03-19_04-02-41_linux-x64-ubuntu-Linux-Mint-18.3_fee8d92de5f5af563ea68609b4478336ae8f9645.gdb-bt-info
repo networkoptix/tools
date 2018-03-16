@@ -1,0 +1,14 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007f7f2e14b897 in QMutex::lock() () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#1  0x00007f7f2fff3b77 in DeviceFileCatalog::fileDir(DeviceFileCatalog::Chunk const&) const () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#2  0x00007f7f2fff3d76 in DeviceFileCatalog::fullFileName(DeviceFileCatalog::Chunk const&) const () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#3  0x00007f7f2fe936e5 in QnServerArchiveDelegate::switchToChunk(DeviceFileCatalog::TruncableChunk const&, QSharedPointer<DeviceFileCatalog> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#4  0x00007f7f2fe93d92 in QnServerArchiveDelegate::seekInternal(long long, bool, bool) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#5  0x00007f7f2fe94101 in QnServerArchiveDelegate::seek(long long, bool) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#6  0x00007f7f2d132d55 in QnThumbnailsArchiveDelegate::getNextData() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#7  0x00007f7f2d137b71 in QnThumbnailsStreamReader::getNextData() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#8  0x00007f7f2d13822f in QnThumbnailsStreamReader::run() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#9  0x00007f7f2e153163 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#10 0x00007f7f281f46ba in start_thread (arg=) at pthread_create.c:333
+#11 0x00007f7f2dae141d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

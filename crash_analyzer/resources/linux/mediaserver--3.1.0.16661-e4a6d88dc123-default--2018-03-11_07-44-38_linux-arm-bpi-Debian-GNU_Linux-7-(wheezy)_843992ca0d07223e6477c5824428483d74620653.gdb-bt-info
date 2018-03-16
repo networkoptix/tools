@@ -1,0 +1,8 @@
+4, Illegal instruction
+
+#0  0xb5f45278 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#1  0xb636e6a0 in QnRtspDataConsumer::processData(std::shared_ptr<QnAbstractDataPacket> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#2  0xb520cba0 in QnAbstractDataConsumer::run() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
+#3  0xb20eb384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#4  0xb20eb384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

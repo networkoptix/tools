@@ -1,0 +1,15 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007f9b5275e897 in QMutex::lock() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libQt5Core.so.5
+#1  0x00007f9b4fb53bc4 in nx::network::aio::AIOThread::cancelPostedCalls(nx::network::Pollable*, bool) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#2  0x00007f9b4fb56619 in nx::network::aio::AIOService::cancelPostedCallsNonSafe(QnMutexLocker*, nx::network::Pollable*, bool) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#3  0x00007f9b4fb5673c in nx::network::aio::AIOService::cancelPostedCalls(nx::network::Pollable*, bool) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#4  0x00007f9b4fa1af69 in nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<AbstractDatagramSocket> >::stopPollingSocket(nx::network::aio::EventType) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#5  0x00007f9b4fa1b51b in nx::network::CommunicatingSocket<AbstractDatagramSocket>::cancelIOSync(nx::network::aio::EventType) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#6  0x00007f9b515d5cf7 in nx::vms::discovery::UdpMulticastFinder::sendModuleInformation(std::_Rb_tree_iterator<std::pair<HostAddress const, std::unique_ptr<nx::network::UDPSocket, std::default_delete<nx::network::UDPSocket> > > >) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libcommon.so
+#7  0x00007f9b515d60f8 in ?? () from /opt/digitalwatchdog/mediaserver/bin/../lib/libcommon.so
+#8  0x00007f9b4fb46b3f in nx::network::aio::detail::AioTaskQueue::processPostedCalls() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#9  0x00007f9b4fb54f25 in nx::network::aio::AIOThread::run() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_network.so
+#10 0x00007f9b52766163 in ?? () from /opt/digitalwatchdog/mediaserver/bin/../lib/libQt5Core.so.5
+#11 0x00007f9b4c8a06ba in start_thread (arg=) at pthread_create.c:333
+#12 0x00007f9b520f441d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

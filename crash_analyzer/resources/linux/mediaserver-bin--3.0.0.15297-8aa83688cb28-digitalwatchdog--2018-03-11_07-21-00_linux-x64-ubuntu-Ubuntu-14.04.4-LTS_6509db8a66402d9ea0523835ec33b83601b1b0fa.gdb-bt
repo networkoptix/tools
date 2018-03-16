@@ -1,0 +1,90 @@
+GNU gdb (Ubuntu 7.7.1-0ubuntu5~14.04.2) 7.7.1
+Copyright (C) 2014 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /opt/digitalwatchdog/mediaserver/bin/mediaserver-bin...(no debugging symbols found)...done.
+[New LWP 2098]
+[New LWP 2100]
+[New LWP 10677]
+[New LWP 2105]
+[New LWP 2124]
+[New LWP 1226]
+[New LWP 1251]
+[New LWP 2044]
+[New LWP 2125]
+[New LWP 2091]
+[New LWP 2107]
+[New LWP 1225]
+[New LWP 10881]
+[New LWP 2099]
+[New LWP 2087]
+[New LWP 2042]
+[New LWP 2050]
+[New LWP 2095]
+[New LWP 28372]
+[New LWP 2084]
+[New LWP 2089]
+[New LWP 2090]
+[New LWP 2047]
+[New LWP 2101]
+[New LWP 2103]
+[New LWP 2093]
+[New LWP 2097]
+[New LWP 9336]
+[New LWP 32087]
+[New LWP 2109]
+[New LWP 2061]
+[New LWP 2063]
+[New LWP 13755]
+[New LWP 2083]
+[New LWP 913]
+[New LWP 2104]
+[New LWP 2045]
+[New LWP 2119]
+[New LWP 1224]
+[New LWP 2102]
+[New LWP 2108]
+[New LWP 2106]
+[New LWP 2062]
+[New LWP 2088]
+[New LWP 1221]
+[New LWP 2092]
+[New LWP 1223]
+[New LWP 14084]
+[New LWP 2096]
+[New LWP 9337]
+[New LWP 1214]
+[New LWP 2086]
+[New LWP 2094]
+[New LWP 9339]
+[New LWP 26188]
+[New LWP 32066]
+[New LWP 1222]
+[New LWP 2043]
+[New LWP 28370]
+[New LWP 2118]
+[New LWP 1213]
+[New LWP 2046]
+[New LWP 13804]
+[New LWP 13831]
+[New LWP 27462]
+[New LWP 13839]
+[New LWP 10681]
+[New LWP 10870]
+[New LWP 13812]
+[New LWP 14076]
+[New LWP 14032]
+(gdb) 
+Thread 71 (LWP 14032):
+#0  0x00007f67f61a9414 in ?? ()
+(gdb) quit

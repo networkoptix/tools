@@ -1,0 +1,434 @@
+ExceptionAddress: 0000000000000000
+   ExceptionCode: 80000003 (Break instruction exception)
+  ExceptionFlags: 00000000
+NumberParameters: 0
+
+Minidump doesn't have an exception context
+Unable to get exception context, HRESULT 0x80004002
+
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+nx_utils!dumpCrtError
+VCRUNTIME140!_purecall
+Qt5Core!QObject::~QObject
+Qt5Core!QMetaObject::Connection::operator void * __ptr64 QMetaObject::Connection::* __ptr64
+FlyView!QtSharedPointer::ExternalRefCountData::destroy
+FlyView!QSharedPointer<QnResourceDisplay>::deref
+FlyView!QSharedPointer<QnResourceDisplay>::deref
+FlyView!QSharedPointer<QnResourceDisplay>::{dtor}
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::deleteNode2
+Qt5Core!QHashData::free_helper
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::freeData
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::{dtor}
+FlyView!QnWorkbenchNavigator::~QnWorkbenchNavigator
+FlyView!QnWorkbenchNavigator::`scalar deleting destructor'
+FlyView!QScopedPointerDeleter<QnWorkbenchNavigator>::cleanup
+FlyView!QScopedPointer<QnWorkbenchNavigator,QScopedPointerDeleter<QnWorkbenchNavigator> >::reset
+FlyView!QnWorkbenchContext::~QnWorkbenchContext
+FlyView!QnWorkbenchContext::`scalar deleting destructor'
+FlyView!QScopedPointerDeleter<QnWorkbenchContext>::cleanup
+FlyView!QScopedPointer<QnWorkbenchContext,QScopedPointerDeleter<QnWorkbenchContext> >::{dtor}
+FlyView!nx::client::desktop::runApplication
+FlyView!main
+FlyView!WinMain
+FlyView!invoke_main
+FlyView!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+
+.  0  Id: b8.d2c Suspend: 1 Teb: 00007ff6`2f6ae000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+nx_utils!dumpCrtError
+VCRUNTIME140!_purecall
+Qt5Core!QObject::~QObject
+Qt5Core!QMetaObject::Connection::operator void * __ptr64 QMetaObject::Connection::* __ptr64
+FlyView!QtSharedPointer::ExternalRefCountData::destroy
+FlyView!QSharedPointer<QnResourceDisplay>::deref
+FlyView!QSharedPointer<QnResourceDisplay>::deref
+FlyView!QSharedPointer<QnResourceDisplay>::{dtor}
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::deleteNode2
+Qt5Core!QHashData::free_helper
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::freeData
+FlyView!QHash<QSharedPointer<QnResourceDisplay>,bool>::{dtor}
+FlyView!QnWorkbenchNavigator::~QnWorkbenchNavigator
+FlyView!QnWorkbenchNavigator::`scalar deleting destructor'
+FlyView!QScopedPointerDeleter<QnWorkbenchNavigator>::cleanup
+FlyView!QScopedPointer<QnWorkbenchNavigator,QScopedPointerDeleter<QnWorkbenchNavigator> >::reset
+FlyView!QnWorkbenchContext::~QnWorkbenchContext
+FlyView!QnWorkbenchContext::`scalar deleting destructor'
+FlyView!QScopedPointerDeleter<QnWorkbenchContext>::cleanup
+FlyView!QScopedPointer<QnWorkbenchContext,QScopedPointerDeleter<QnWorkbenchContext> >::{dtor}
+FlyView!nx::client::desktop::runApplication
+FlyView!main
+FlyView!WinMain
+FlyView!invoke_main
+FlyView!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   1  Id: b8.f9c Suspend: 0 Teb: 00007ff6`2f6ac000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+FlyView!QnSafeQueue<QSharedPointer<TextToWaveServer::SynthetiseSpeechTask> >::pop
+FlyView!TextToWaveServer::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: b8.eb4 Suspend: 0 Teb: 00007ff6`2f6aa000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: b8.15cc Suspend: 0 Teb: 00007ff6`2f6a8000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   4  Id: b8.1718 Suspend: 0 Teb: 00007ff6`2f6a5000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   5  Id: b8.164c Suspend: 0 Teb: 00007ff6`2f6a3000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt!EpollWin32::poll
+udt!EpollImpl::wait
+udt!CEPoll::wait
+udt!CUDTUnited::epoll_wait
+udt!CUDT::epoll_wait
+nx_network!nx::network::aio::`anonymous namespace'::UdtEpollWrapper::epollWait
+nx_network!nx::network::aio::UnifiedPollSet::poll
+nx_network!nx::network::aio::AIOThread::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   6  Id: b8.15dc Suspend: 0 Teb: 00007ff6`2f4de000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network!nx::network::DnsResolver::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   7  Id: b8.17ec Suspend: 0 Teb: 00007ff6`2f4dc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   8  Id: b8.82c Suspend: 0 Teb: 00007ff6`2f4da000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   9  Id: b8.12b8 Suspend: 0 Teb: 00007ff6`2f4d8000 Unfrozen
+Call Site
+ntdll!ZwWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_utils!std::_Cnd_waitX
+nx_utils!std::condition_variable::wait
+nx_utils!std::condition_variable::wait
+nx_utils!nx::utils::detail::shared_future_state_base<int>::wait
+nx_utils!nx::utils::detail::shared_future_state<int>::get
+nx_utils!nx::utils::future<int>::get
+nx_utils!nx::utils::Service::runMainLoop
+FlyView!nx::cloud::gateway::VmsGatewayProcess::serviceMain
+nx_utils!nx::utils::Service::exec
+FlyView!<lambda_8a3188bca82d3b020b78b9dacd933e47>::operator()
+nx_utils!std::_Func_class<void>::operator()
+nx_utils!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()<>
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  10  Id: b8.1578 Suspend: 0 Teb: 00007ff6`2f4d6000 Unfrozen
+Call Site
+ntdll!ZwRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  11  Id: b8.15ac Suspend: 0 Teb: 00007ff6`2f4d4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils!nx::utils::StandaloneTimerManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  12  Id: b8.108 Suspend: 0 Teb: 00007ff6`2f4d0000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  13  Id: b8.1394 Suspend: 0 Teb: 00007ff6`2f4ce000 Unfrozen
+Call Site
+user32!NtUserGetMessage
+user32!GetMessageA
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  14  Id: b8.3b4 Suspend: 0 Teb: 00007ff6`2f4cc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  15  Id: b8.10c Suspend: 0 Teb: 00007ff6`2f4c6000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+nvoglv64
+0x0
+0x0
+
+  16  Id: b8.22c Suspend: 0 Teb: 00007ff6`2f4c4000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjects
+nvoglv64
+0x0
+
+  17  Id: b8.2c8 Suspend: 0 Teb: 00007ff6`2f4c2000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+kernel32!WaitForMultipleObjects
+nvoglv64
+
+  18  Id: b8.10f4 Suspend: 0 Teb: 00007ff6`2f4c0000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjects
+nvoglv64
+0x0
+0x0
+
+  19  Id: b8.155c Suspend: 0 Teb: 00007ff6`2f4ac000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  20  Id: b8.1648 Suspend: 0 Teb: 00007ff6`2f4a6000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+FlyView!QnResourceDiscoveryManager::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  21  Id: b8.784 Suspend: 0 Teb: 00007ff6`2f490000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+user32!MsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: b8.13a8 Suspend: 0 Teb: 00007ff6`2f48e000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!RtlFreeUnicodeString
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: b8.e3c Suspend: 0 Teb: 00007ff6`2f4bc000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+udt!CUDTUnited::garbageCollect
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: b8.760 Suspend: 0 Teb: 00007ff6`2f4d2000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  25  Id: b8.330 Suspend: 0 Teb: 00007ff6`2f4ba000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  26  Id: b8.12c4 Suspend: 0 Teb: 00007ff6`2f4aa000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: b8.f54 Suspend: 0 Teb: 00007ff6`2f4a4000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!JSC::JSProxy::visitChildren
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: b8.ce4 Suspend: 0 Teb: 00007ff6`2f4be000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!RtlFreeUnicodeString
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: b8.13dc Suspend: 0 Teb: 00007ff6`2f4a0000 Unfrozen
+Call Site
+ntdll!ZwWaitForWorkViaWorkerFactory
+ntdll!RtlFreeUnicodeString
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  30  Id: b8.d64 Suspend: 0 Teb: 00007ff6`2f494000 Unfrozen
+Call Site
+ntdll!ZwWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  31  Id: b8.ffc Suspend: 0 Teb: 00007ff6`2f498000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+combase!WaitCoalesced
+combase!CROIDTable::WorkerThreadLoop
+combase!CRpcThread::WorkerLoop
+combase!CRpcThreadCache::RpcWorkerThreadEntry
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  32  Id: b8.de4 Suspend: 0 Teb: 00007ff6`2f4ca000 Unfrozen
+Call Site
+ntdll!NtGetContextThread

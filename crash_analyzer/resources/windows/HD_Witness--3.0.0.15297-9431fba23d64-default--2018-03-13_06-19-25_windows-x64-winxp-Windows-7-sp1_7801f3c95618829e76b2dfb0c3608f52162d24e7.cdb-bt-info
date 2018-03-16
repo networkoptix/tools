@@ -1,0 +1,16 @@
+c0000005 (Access violation)
+
+nx_network!nx::network::BufferedStreamSocket::shutdown
+Client!QnTCPConnectionProcessor::pleaseStop
+Client!QnLongRunnable::stop
+Client!QnDesktopCameraConnectionProcessor::~QnDesktopCameraConnectionProcessor
+Client!QnDesktopCameraConnectionProcessor::`scalar deleting destructor'
+Client!std::_Ref_count_base::_Decref
+Client!std::_Ptr_base<QnDesktopCameraConnectionProcessor>::_Decref
+Client!std::shared_ptr<QnDesktopCameraConnectionProcessor>::{dtor}
+Client!std::shared_ptr<QnDesktopCameraConnectionProcessor>::reset
+Client!QnDesktopCameraConnection::run
+Qt5Core!QThread::start
+ucrtbase!crt_at_quick_exit
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

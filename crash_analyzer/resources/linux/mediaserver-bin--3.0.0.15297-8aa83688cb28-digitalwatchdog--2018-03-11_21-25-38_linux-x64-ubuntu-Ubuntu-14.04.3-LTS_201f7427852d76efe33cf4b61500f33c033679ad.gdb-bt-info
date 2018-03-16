@@ -1,0 +1,8 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007fa6996aa130 in FrameTypeExtractor::getFrameType(unsigned char const*, int) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libcommon.so
+#1  0x00007fa697bfd2b6 in QnArchiveStreamReader::getNextData() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_streaming.so
+#2  0x00007fa697bf9d9f in QnAbstractArchiveStreamReader::run() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_streaming.so
+#3  0x00007fa69acf0163 in ?? () from /opt/digitalwatchdog/mediaserver/bin/../lib/libQt5Core.so.5
+#4  0x00007fa69aa2f182 in start_thread (arg=) at pthread_create.c:312
+#5  0x00007fa699f3c47d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111

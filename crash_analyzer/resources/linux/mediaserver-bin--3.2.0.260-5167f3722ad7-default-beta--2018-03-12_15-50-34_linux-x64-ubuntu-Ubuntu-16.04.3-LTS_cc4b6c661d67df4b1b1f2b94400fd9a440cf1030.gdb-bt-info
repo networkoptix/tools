@@ -1,0 +1,28 @@
+SIGSEGV, Segmentation fault
+
+#0  0x0000000000000000 in ?? ()
+#1  0x00007f7d84e9c20c in ?? () from /opt/networkoptix/mediaserver/bin/plugins/libaxis_metadata_plugin.so
+#2  0x00007f7da23474c7 in soap_closesock () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#3  0x00007f7da235aa69 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#4  0x00007f7da235acb9 in soap_connect_command () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#5  0x00007f7da28b2c1f in EventBindingProxy::GetServiceCapabilities(char const*, char const*, _onvifEvents__GetServiceCapabilities*, _onvifEvents__GetServiceCapabilitiesResponse*) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#6  0x00007f7d84f76fba in nx::axis::CameraController::readSupportedEvents() () from /opt/networkoptix/mediaserver/bin/plugins/libaxis_metadata_plugin.so
+#7  0x00007f7d84f9956c in nx::mediaserver_plugins::metadata::axis::Plugin::fetchSupportedEvents(nx::sdk::CameraInfo const&) () from /opt/networkoptix/mediaserver/bin/plugins/libaxis_metadata_plugin.so
+#8  0x00007f7d84f9a761 in nx::mediaserver_plugins::metadata::axis::Plugin::obtainCameraManager(nx::sdk::CameraInfo const&, nx::sdk::Error*) () from /opt/networkoptix/mediaserver/bin/plugins/libaxis_metadata_plugin.so
+#9  0x00007f7da1f1ea61 in nx::mediaserver::metadata::ManagerPool::createMetadataManager(QnSharedResourcePointer<QnSecurityCamResource> const&, nx::sdk::metadata::Plugin*) const () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#10 0x00007f7da1f22612 in nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource(QnSharedResourcePointer<QnSecurityCamResource> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#11 0x00007f7da1f23ce2 in nx::mediaserver::metadata::ManagerPool::handleResourceChanges(QnSharedResourcePointer<QnResource> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#12 0x00007f7da12b49e6 in QObject::event(QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#13 0x00007f7da1288d4c in QCoreApplication::notify(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#14 0x00007f7da1288c85 in QCoreApplication::notifyInternal2(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#15 0x00007f7da128aaca in QCoreApplicationPrivate::sendPostedEvents(QObject*, int, QThreadData*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#16 0x00007f7da12daff3 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#17 0x00007f7d98c69197 in g_main_context_dispatch () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#18 0x00007f7d98c693f0 in ?? () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#19 0x00007f7d98c6949c in g_main_context_iteration () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#20 0x00007f7da12da63c in QEventDispatcherGlib::processEvents(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#21 0x00007f7da1286bdb in QEventLoop::exec(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#22 0x00007f7da10a84ba in QThread::exec() () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#23 0x00007f7da10ad163 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#24 0x00007f7d9edd96ba in start_thread (arg=) at pthread_create.c:333
+(More stack frames follow...)

@@ -1,0 +1,23 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007f5c1dd4977f in QObjectPrivate::addConnection(int, QObjectPrivate::Connection*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#1  0x00007f5c1dd4adfc in QObjectPrivate::connectImpl(QObject const*, int, QObject const*, void**, QtPrivate::QSlotObjectBase*, Qt::ConnectionType, int const*, QMetaObject const*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#2  0x00007f5c1dd4b1a4 in QObject::connectImpl(QObject const*, void**, QObject const*, void**, QtPrivate::QSlotObjectBase*, Qt::ConnectionType, int const*, QMetaObject const*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#3  0x00007f5c1f86fe04 in nx::mediaserver::metadata::EventHandler::EventHandler() () from /opt/hanwha/mediaserver/bin/../lib/libmediaserver_core.so
+#4  0x00007f5c1f8724b9 in nx::mediaserver::metadata::ManagerPool::createMetadataHandler(QnSharedResourcePointer<QnResource> const&, QnUuid const&) () from /opt/hanwha/mediaserver/bin/../lib/libmediaserver_core.so
+#5  0x00007f5c1f87415e in nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource(QnSharedResourcePointer<QnSecurityCamResource> const&) () from /opt/hanwha/mediaserver/bin/../lib/libmediaserver_core.so
+#6  0x00007f5c1f875905 in nx::mediaserver::metadata::ManagerPool::handleResourceChanges(QnSharedResourcePointer<QnResource> const&) () from /opt/hanwha/mediaserver/bin/../lib/libmediaserver_core.so
+#7  0x00007f5c1dd469e6 in QObject::event(QEvent*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#8  0x00007f5c1dd1ad4c in QCoreApplication::notify(QObject*, QEvent*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#9  0x00007f5c1dd1ac85 in QCoreApplication::notifyInternal2(QObject*, QEvent*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#10 0x00007f5c1dd1caca in QCoreApplicationPrivate::sendPostedEvents(QObject*, int, QThreadData*) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#11 0x00007f5c1dd6cff3 in ?? () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#12 0x00007f5c15a55197 in g_main_context_dispatch () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#13 0x00007f5c15a553f0 in ?? () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#14 0x00007f5c15a5549c in g_main_context_iteration () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#15 0x00007f5c1dd6c63c in QEventDispatcherGlib::processEvents(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#16 0x00007f5c1dd18bdb in QEventLoop::exec(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#17 0x00007f5c1db3a4ba in QThread::exec() () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#18 0x00007f5c1db3f163 in ?? () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
+#19 0x00007f5c179356ba in start_thread (arg=) at pthread_create.c:333
+#20 0x00007f5c1d4cd41d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

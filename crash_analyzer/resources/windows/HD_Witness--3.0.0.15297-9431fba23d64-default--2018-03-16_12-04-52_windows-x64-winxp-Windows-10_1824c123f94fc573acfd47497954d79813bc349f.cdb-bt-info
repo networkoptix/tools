@@ -1,0 +1,34 @@
+c0000005 (Access violation)
+
+KERNELBASE!RaiseException
+VCRUNTIME140!__RethrowException
+VCRUNTIME140!__CxxCallCatchBlock
+ntdll!RcConsolidateFrames
+Client!QList<QnSharedResourcePointer<QnVirtualCameraResource> >::node_construct
+Client!QList<QnSharedResourcePointer<QnVirtualCameraResource> >::append
+Client!QList<QnSharedResourcePointer<QnVirtualCameraResource> >::push_back
+Client!QnResourcePool::getResources<QnVirtualCameraResource>
+Client!QnResourcePool::ensureCache
+Client!QnResourcePool::getAllServers
+Client!<lambda_d715786e2891df6cb7cc9bb1a40755d2>::operator()
+Qt5Core!QMetaObject::activate
+Qt5Core!QTimer::timeout
+Qt5Core!QObject::event
+Qt5Widgets!QApplicationPrivate::notify_helper
+Qt5Widgets!QApplication::notify
+Qt5Core!QCoreApplication::notifyInternal2
+Qt5Core!QEventDispatcherWin32Private::sendTimerEvent
+Qt5Core!QEventDispatcherWin32::processEvents
+user32!UserCallWinProcCheckWow
+user32!DispatchMessageWorker
+Qt5Core!QEventDispatcherWin32::processEvents
+qwindows!qt_plugin_query_metadata
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+Client!runApplication
+Client!main
+Client!WinMain
+Client!invoke_main
+Client!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

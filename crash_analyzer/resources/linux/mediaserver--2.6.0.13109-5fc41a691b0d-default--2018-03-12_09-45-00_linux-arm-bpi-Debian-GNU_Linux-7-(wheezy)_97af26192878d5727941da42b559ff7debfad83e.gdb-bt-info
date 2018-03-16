@@ -1,0 +1,7 @@
+11, Segmentation fault
+
+#0  0xb27ce584 in QMutex::lock() () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
+#1  0xb27ce584 in QMutex::lock() () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
+#2  0xb29f2170 in QMetaObject::activate(QObject*, int, int, void**) () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
+#3  0xb29f2170 in QMetaObject::activate(QObject*, int, int, void**) () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

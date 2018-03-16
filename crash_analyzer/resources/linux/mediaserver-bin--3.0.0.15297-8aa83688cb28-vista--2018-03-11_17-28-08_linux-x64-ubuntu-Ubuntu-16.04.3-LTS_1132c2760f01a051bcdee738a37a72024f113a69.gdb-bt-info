@@ -1,0 +1,8 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007fc3f09aa130 in FrameTypeExtractor::getFrameType(unsigned char const*, int) () from /opt/vista-qulu/mediaserver/bin/../lib/libcommon.so
+#1  0x00007fc3eeeda2b6 in QnArchiveStreamReader::getNextData() () from /opt/vista-qulu/mediaserver/bin/../lib/libnx_streaming.so
+#2  0x00007fc3eeed6d9f in QnAbstractArchiveStreamReader::run() () from /opt/vista-qulu/mediaserver/bin/../lib/libnx_streaming.so
+#3  0x00007fc3f202e163 in ?? () from /opt/vista-qulu/mediaserver/bin/../lib/libQt5Core.so.5
+#4  0x00007fc3f1d6a6ba in start_thread (arg=) at pthread_create.c:333
+#5  0x00007fc3f126a41d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

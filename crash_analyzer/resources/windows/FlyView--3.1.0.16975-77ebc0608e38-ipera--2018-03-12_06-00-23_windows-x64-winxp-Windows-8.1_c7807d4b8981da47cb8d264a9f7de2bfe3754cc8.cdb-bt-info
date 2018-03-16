@@ -1,0 +1,27 @@
+c0000005 (Access violation)
+
+Client!QtSharedPointer::CustomDeleter<QnResourceDisplay,QtSharedPointer::NormalDeleter>::execute
+Client!QtSharedPointer::ExternalRefCountWithCustomDeleter<QnResourceDisplay,QtSharedPointer::NormalDeleter>::deleter
+Client!QtSharedPointer::ExternalRefCountData::destroy
+Client!QSharedPointer<QnResourceDisplay>::deref
+Client!QSharedPointer<QnResourceDisplay>::deref
+Client!QSharedPointer<QnResourceDisplay>::{dtor}
+Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::deleteNode2
+Qt5Core!QHashData::free_helper
+Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::freeData
+Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::{dtor}
+Client!QnWorkbenchNavigator::~QnWorkbenchNavigator
+Client!QnWorkbenchNavigator::`scalar deleting destructor'
+Client!QScopedPointerDeleter<QnWorkbenchNavigator>::cleanup
+Client!QScopedPointer<QnWorkbenchNavigator,QScopedPointerDeleter<QnWorkbenchNavigator> >::reset
+Client!QnWorkbenchContext::~QnWorkbenchContext
+Client!QnWorkbenchContext::`scalar deleting destructor'
+Client!QScopedPointerDeleter<QnWorkbenchContext>::cleanup
+Client!QScopedPointer<QnWorkbenchContext,QScopedPointerDeleter<QnWorkbenchContext> >::{dtor}
+Client!nx::client::desktop::runApplication
+Client!main
+Client!WinMain
+Client!invoke_main
+Client!__scrt_common_main_seh
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

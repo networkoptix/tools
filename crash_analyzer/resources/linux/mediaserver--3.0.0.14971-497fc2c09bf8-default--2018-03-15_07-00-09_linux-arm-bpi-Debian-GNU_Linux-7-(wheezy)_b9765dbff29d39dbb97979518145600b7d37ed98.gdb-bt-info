@@ -1,0 +1,13 @@
+11, Segmentation fault
+
+#0  0xb42ed5d4 in CRcvBuffer::getRcvDataSize() const () from /opt/networkoptix/mediaserver/bin/../lib/libudt.so
+#1  0xb42e71bc in CUDT::recv(char*, int) () from /opt/networkoptix/mediaserver/bin/../lib/libudt.so
+#2  0xb42d6904 in CUDT::recv(int, char*, int, int) () from /opt/networkoptix/mediaserver/bin/../lib/libudt.so
+#3  0xb4e9157c in nx::network::UdtStreamSocket::recv(void*, unsigned int, int) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
+#4  0xb4e9b28c in void nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::processRecvEvent<nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType)::{lambda(int, unsigned int)#4}, nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType)::{lambda(nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>*)#5}>(nx::network::aio::EventType, bool&, nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType)::{lambda(int, unsigned int)#4} const&, nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType)::{lambda(nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>*)#5} const&) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
+#5  0xb4e9bdfc in nx::network::aio::AsyncSocketImplHelper<nx::network::UdtStreamSocket>::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
+#6  0xb4e20490 in nx::network::aio::detail::AioTaskQueue::processSocketEvents(long long) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
+#7  0xb4e2d558 in nx::network::aio::AIOThread::run() () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
+#8  0xb2665384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#9  0xb2665384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)

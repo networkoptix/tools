@@ -1,0 +1,9 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007fc8333deae4 in QnTCPConnectionProcessor::sendData(char const*, int) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libcommon.so
+#1  0x00007fc8333dec13 in QnTCPConnectionProcessor::sendBuffer(QnByteArray const&) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libcommon.so
+#2  0x00007fc835dd8efe in QnRtspDataConsumer::processData(std::shared_ptr<QnAbstractDataPacket> const&) () from /opt/digitalwatchdog/mediaserver/bin/../lib/libmediaserver_core.so
+#3  0x00007fc8319cafaf in QnAbstractDataConsumer::run() () from /opt/digitalwatchdog/mediaserver/bin/../lib/libnx_streaming.so
+#4  0x00007fc834ad5163 in ?? () from /opt/digitalwatchdog/mediaserver/bin/../lib/libQt5Core.so.5
+#5  0x00007fc834814184 in start_thread (arg=) at pthread_create.c:312
+#6  0x00007fc833d20ffd in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:111

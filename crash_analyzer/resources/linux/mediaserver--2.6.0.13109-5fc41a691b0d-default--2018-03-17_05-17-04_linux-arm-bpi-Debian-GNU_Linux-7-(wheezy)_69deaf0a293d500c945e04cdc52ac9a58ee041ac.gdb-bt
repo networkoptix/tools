@@ -1,0 +1,361 @@
+GNU gdb (GDB) 7.4.1-debian
+Copyright (C) 2012 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "arm-linux-gnueabihf".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /opt/networkoptix/mediaserver/bin/mediaserver...done.
+[New LWP 1257]
+[New LWP 1262]
+[New LWP 1279]
+[New LWP 1309]
+[New LWP 1315]
+[New LWP 1282]
+[New LWP 1286]
+[New LWP 1316]
+[New LWP 1336]
+[New LWP 1312]
+[New LWP 1254]
+[New LWP 1285]
+[New LWP 1271]
+[New LWP 1255]
+[New LWP 1253]
+[New LWP 1256]
+[New LWP 1250]
+[New LWP 1252]
+[New LWP 1310]
+[New LWP 1281]
+[New LWP 1249]
+[New LWP 1251]
+[New LWP 1283]
+[New LWP 1272]
+[New LWP 1264]
+[New LWP 1278]
+[New LWP 1284]
+[New LWP 1247]
+[New LWP 1280]
+[New LWP 1260]
+[New LWP 1314]
+[New LWP 1246]
+[New LWP 1259]
+[New LWP 1313]
+[New LWP 1248]
+[New LWP 1275]
+[New LWP 1274]
+[New LWP 4963]
+[New LWP 1277]
+[New LWP 1263]
+[New LWP 1273]
+[New LWP 4776]
+[New LWP 1245]
+[New LWP 4083]
+[New LWP 1261]
+[New LWP 1311]
+[New LWP 1241]
+[New LWP 1317]
+[New LWP 4999]
+[New LWP 1276]
+(gdb) 
+Thread 50 (LWP 1276):
+#0  0xb25ba5a0 in ?? ()
+#1  0xb27fd640 in ?? ()
+#2  0xb27fd640 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 49 (LWP 4999):
+#0  0xb27767e4 in ?? ()
+#1  0xb27767d4 in ?? ()
+#2  0xb27767d4 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 48 (LWP 1317):
+#0  0xb27767e4 in ?? ()
+#1  0xb27767d4 in ?? ()
+#2  0xb27767d4 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 47 (LWP 1241):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 46 (LWP 1311):
+#0  0xb2776e24 in ?? ()
+#1  0xb2776e14 in ?? ()
+#2  0xb2776e14 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 45 (LWP 1261):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 44 (LWP 4083):
+#0  0xb27767e4 in ?? ()
+#1  0xb27767d4 in ?? ()
+#2  0xb27767d4 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 43 (LWP 1245):
+#0  0xb2776e24 in ?? ()
+#1  0xb2776e14 in ?? ()
+#2  0xb2776e14 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 42 (LWP 4776):
+#0  0xb27767e4 in ?? ()
+#1  0xb27767d4 in ?? ()
+#2  0xb27767d4 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 41 (LWP 1273):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 40 (LWP 1263):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 39 (LWP 1277):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 38 (LWP 4963):
+#0  0xb27767e4 in ?? ()
+#1  0xb27767d4 in ?? ()
+#2  0xb27767d4 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 37 (LWP 1274):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 36 (LWP 1275):
+#0  0xb2776e24 in ?? ()
+#1  0xb2776e14 in ?? ()
+#2  0xb2776e14 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 35 (LWP 1248):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 34 (LWP 1313):
+#0  0xb3aa71c0 in ?? ()
+#1  0x00000144 in ?? ()
+#2  0x00000144 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 33 (LWP 1259):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 32 (LWP 1246):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 31 (LWP 1314):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 30 (LWP 1260):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 29 (LWP 1280):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 28 (LWP 1247):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 27 (LWP 1284):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 26 (LWP 1278):
+#0  0xb25bd224 in ?? ()
+#1  0xb25bd214 in ?? ()
+#2  0xb25bd214 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 25 (LWP 1264):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 24 (LWP 1272):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 23 (LWP 1283):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 22 (LWP 1251):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 21 (LWP 1249):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 20 (LWP 1281):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 19 (LWP 1310):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 18 (LWP 1252):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 17 (LWP 1250):
+#0  0xb2540f96 in ?? ()
+#1  0xb25b3ed0 in ?? ()
+#2  0xb25b3ed0 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 16 (LWP 1256):
+#0  0xb25bd224 in ?? ()
+#1  0xb25bd214 in ?? ()
+#2  0xb25bd214 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 15 (LWP 1253):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 14 (LWP 1255):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 13 (LWP 1271):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 12 (LWP 1285):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 11 (LWP 1254):
+#0  0xb2776e24 in ?? ()
+#1  0xb2776e14 in ?? ()
+#2  0xb2776e14 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 10 (LWP 1312):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 9 (LWP 1336):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 8 (LWP 1316):
+#0  0xb2778416 in ?? ()
+#1  0xb277427a in ?? ()
+#2  0xb277427a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 7 (LWP 1286):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 6 (LWP 1282):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 5 (LWP 1315):
+#0  0xb2776e24 in ?? ()
+#1  0xb2776e14 in ?? ()
+#2  0xb2776e14 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 4 (LWP 1309):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 3 (LWP 1279):
+#0  0xb259ada4 in ?? ()
+#1  0xb259ad94 in ?? ()
+#2  0xb259ad94 in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 2 (LWP 1262):
+#0  0xb2778414 in ?? ()
+#1  0xb277402e in ?? ()
+#2  0xb277402e in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+
+Thread 1 (LWP 1257):
+#0  0xb2540f96 in ?? ()
+#1  0xb254ef8a in ?? ()
+#2  0xb254ef8a in ?? ()
+Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+(gdb) quit

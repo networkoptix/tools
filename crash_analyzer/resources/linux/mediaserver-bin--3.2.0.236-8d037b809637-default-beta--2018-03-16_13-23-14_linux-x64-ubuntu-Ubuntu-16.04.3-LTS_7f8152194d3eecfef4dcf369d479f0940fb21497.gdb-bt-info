@@ -1,0 +1,9 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007f2732ffbd91 in CUDT::~CUDT() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/../lib/libudt.so
+#1  0x00007f2732fe8ed4 in CUDTSocket::~CUDTSocket() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/../lib/libudt.so
+#2  0x00007f2732fea9f0 in CUDTUnited::removeSocket(int, std::vector<CMultiplexer, std::allocator<CMultiplexer> >*) () from /opt/networkoptix/mediaserver/bin/../lib/../lib/../lib/libudt.so
+#3  0x00007f2732feb025 in CUDTUnited::checkBrokenSockets() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/../lib/libudt.so
+#4  0x00007f2732feb328 in CUDTUnited::garbageCollect(void*) () from /opt/networkoptix/mediaserver/bin/../lib/../lib/../lib/libudt.so
+#5  0x00007f273b0e06ba in start_thread (arg=) at pthread_create.c:333
+#6  0x00007f273cc9541d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

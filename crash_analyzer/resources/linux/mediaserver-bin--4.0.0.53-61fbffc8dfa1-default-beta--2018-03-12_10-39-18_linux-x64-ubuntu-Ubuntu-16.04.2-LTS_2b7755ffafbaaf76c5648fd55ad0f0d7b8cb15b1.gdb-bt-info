@@ -1,0 +1,12 @@
+SIGSEGV, Segmentation fault
+
+#0  0x00007fb7b7c4ff52 in void nx::utils::assertCrash<char const (&) [128], int, char const (&) [80], char const*&>(char const (&) [128], int&&, char const (&) [80], char const*&) () from /opt/networkoptix/mediaserver/bin/../lib/../lib/libnx_network.so
+#1  0x00007fb7b7c5038d in nx::network::CommunicatingSocket<nx::network::AbstractStreamSocket>::~CommunicatingSocket() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/libnx_network.so
+#2  0x00007fb7b7c3e850 in nx::network::TCPSocket::~TCPSocket() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/libnx_network.so
+#3  0x00007fb7b7bea0e3 in nx::network::deprecated::SslSocket::~SslSocket() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/libnx_network.so
+#4  0x00007fb7b7bf6b3e in nx::network::deprecated::MixedSslSocket::~MixedSslSocket() () from /opt/networkoptix/mediaserver/bin/../lib/../lib/libnx_network.so
+#5  0x00007fb7be2e7881 in QnUniversalRequestProcessor::processRequest(bool) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#6  0x00007fb7be2e8b6b in QnUniversalRequestProcessor::run() () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
+#7  0x00007fb7bd496163 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
+#8  0x00007fb7b765e6ba in start_thread (arg=) at pthread_create.c:333
+#9  0x00007fb7bcda03dd in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109

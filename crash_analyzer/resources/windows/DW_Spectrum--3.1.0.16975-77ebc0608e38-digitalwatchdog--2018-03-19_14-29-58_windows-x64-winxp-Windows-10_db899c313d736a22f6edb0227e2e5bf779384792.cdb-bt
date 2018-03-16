@@ -1,0 +1,485 @@
+ExceptionAddress: 00007ffadbe096db (atig6txx+0x00000000000196db)
+   ExceptionCode: c0000005 (Access violation)
+  ExceptionFlags: 00000000
+NumberParameters: 2
+   Parameter[0]: 0000000000000000
+   Parameter[1]: 0000000000000000
+Attempt to read from address 0000000000000000
+
+rax=0000000001001403 rbx=0000000000000000 rcx=0000000000000000
+rdx=00000050981fe280 rsi=00000050981fe310 rdi=0000000000000000
+rip=00007ffadbe096db rsp=00000050981fe200 rbp=00000050981fe2b0
+ r8=0000000000001800  r9=0000000000000000 r10=000001f2b6bd1440
+r11=00000050981fe280 r12=0000000000000000 r13=ffffffff9e0112ef
+r14=00000050981fe280 r15=0000000000000044
+iopl=0         nv up ei ng nz na po cy
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010287
+atig6txx+0x196db:
+00007ffa`dbe096db 488b07          mov     rax,qword ptr [rdi] ds:00000000`00000000=????????????????
+
+  *** Stack trace for last set context - .thread/.cxr resets it
+Call Site
+atig6txx
+0x0
+0x0
+0x0
+
+
+   0  Id: e30.2304 Suspend: 0 Teb: 00000050`95bd9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Quick!QSGRenderLoop::setInstance
+Qt5Gui!QWindow::event
+Qt5Widgets!QApplicationPrivate::notify_helper
+Qt5Widgets!QApplication::notify
+Qt5Core!QCoreApplication::notifyInternal2
+Qt5Gui!QGuiApplicationPrivate::processExposeEvent
+Qt5Gui!QWindowSystemInterface::sendWindowSystemEvents
+Qt5Gui!QWindowSystemInterface::flushWindowSystemEvents
+qwindows
+qwindows
+qwindows
+user32!UserCallWinProcCheckWow
+user32!CallWindowProcW
+opengl32!wglWndProc
+user32!UserCallWinProcCheckWow
+user32!DispatchClientMessage
+user32!_fnDWORD
+ntdll!KiUserCallbackDispatcherContinue
+win32u!NtUserDispatchMessage
+user32!DispatchMessageWorker
+Qt5Core!QEventDispatcherWin32::processEvents
+qwindows!qt_plugin_query_metadata
+Qt5Core!QEventLoop::exec
+Qt5Core!QCoreApplication::exec
+DW_Spectrum
+0x0
+0x0
+
+   1  Id: e30.2db0 Suspend: 0 Teb: 00000050`95bdb000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   2  Id: e30.28ac Suspend: 0 Teb: 00000050`95bdd000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   3  Id: e30.e58 Suspend: 0 Teb: 00000050`95bdf000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   4  Id: e30.31f0 Suspend: 0 Teb: 00000050`95be1000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+   5  Id: e30.1694 Suspend: 0 Teb: 00000050`95be3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+   6  Id: e30.3cf0 Suspend: 0 Teb: 00000050`95be5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+
+   7  Id: e30.2998 Suspend: 0 Teb: 00000050`95be7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+
+   8  Id: e30.2c74 Suspend: 0 Teb: 00000050`95be9000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+
+   9  Id: e30.27f4 Suspend: 0 Teb: 00000050`95beb000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+
+  10  Id: e30.33f4 Suspend: 0 Teb: 00000050`95bed000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+udt
+0x0
+0x0
+0x0
+0x0
+
+  11  Id: e30.17e4 Suspend: 0 Teb: 00000050`95bef000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+udt
+0x0
+0x0
+0x0
+0x0
+
+  12  Id: e30.3684 Suspend: 0 Teb: 00000050`95bf1000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+0x0
+nx_network
+0x0
+0x0
+0x0
+0x0
+0x0
+udt
+0x0
+0x0
+0x0
+0x0
+
+  13  Id: e30.3bc4 Suspend: 0 Teb: 00000050`95bf3000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+udt
+0x0
+0x0
+0x0
+0x0
+
+  14  Id: e30.2038 Suspend: 0 Teb: 00000050`95bf5000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_network
+0x0
+0x0
+0x0
+0x0
+Qt5Core!QAbstractDeclarativeData::setWidgetParent
+Qt5Core!QEventDispatcherWin32::`default constructor closure'
+0x0
+0x0
+
+  15  Id: e30.2764 Suspend: 0 Teb: 00000050`95bf7000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  16  Id: e30.21ec Suspend: 0 Teb: 00000050`95bf9000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  17  Id: e30.e00 Suspend: 0 Teb: 00000050`95bfb000 Unfrozen
+Call Site
+ntdll!NtWaitForAlertByThreadId
+ntdll!RtlSleepConditionVariableSRW
+KERNELBASE!SleepConditionVariableSRW
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait_for
+msvcp140!Concurrency::details::stl_condition_variable_win7::wait
+msvcp140!do_wait
+nx_utils
+
+  18  Id: e30.32bc Suspend: 0 Teb: 00000050`95bfd000 Unfrozen
+Call Site
+ntdll!NtRemoveIoCompletion
+mswsock!SockAsyncThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  19  Id: e30.156c Suspend: 0 Teb: 00000050`95a00000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+nx_utils
+0x0
+0x0
+
+  20  Id: e30.1d28 Suspend: 0 Teb: 00000050`95a02000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+mswsock!SockWaitForSingleObject
+mswsock!WSPSelect
+ws2_32!select
+nx_network
+
+  21  Id: e30.105c Suspend: 0 Teb: 00000050`95a04000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5WebKit!WTF::ThreadCondition::signal
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!QDRTNode::QDRTNode
+Qt5WebKit!WTF::waitForThreadCompletion
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  22  Id: e30.1ed4 Suspend: 0 Teb: 00000050`95a06000 Unfrozen
+Call Site
+win32u!NtUserGetMessage
+user32!GetMessageA
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  23  Id: e30.33d4 Suspend: 0 Teb: 00000050`95a08000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+OpenAL32!alcCaptureSamples
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  24  Id: e30.858 Suspend: 0 Teb: 00000050`95a0a000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum
+0x0
+
+  25  Id: e30.3c90 Suspend: 0 Teb: 00000050`95a0c000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+DW_Spectrum
+0x0
+
+  26  Id: e30.b38 Suspend: 0 Teb: 00000050`95a0e000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  27  Id: e30.3874 Suspend: 0 Teb: 00000050`95a10000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  28  Id: e30.1b70 Suspend: 0 Teb: 00000050`95a12000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+combase!WaitCoalesced
+combase!CROIDTable::WorkerThreadLoop
+combase!CRpcThread::WorkerLoop
+combase!CRpcThreadCache::RpcWorkerThreadEntry
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  29  Id: e30.2a0c Suspend: 0 Teb: 00000050`95a14000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+DW_Spectrum
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+
+  30  Id: e30.3688 Suspend: 0 Teb: 00000050`95a18000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+Qt5Qml!QQmlDirParser::typeNamespace
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  31  Id: e30.2dc0 Suspend: 0 Teb: 00000050`95a1a000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+winmm!timeThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  32  Id: e30.2d94 Suspend: 0 Teb: 00000050`95a1c000 Unfrozen
+Call Site
+ntdll!NtWaitForMultipleObjects
+KERNELBASE!WaitForMultipleObjectsEx
+CoreMessaging!Microsoft::CoreUI::Dispatch::WaitArray::Callback_WaitAny
+CoreMessaging!Microsoft::CoreUI::Dispatch::WaitArray::Callback_DoWait
+CoreMessaging!Microsoft::CoreUI::Dispatch::WaitController::Callback_DoGeneralWait
+CoreMessaging!Microsoft::CoreUI::Dispatch::WaitController::Callback_OnDispatch
+CoreMessaging!Microsoft::CoreUI::Dispatch::EventLoop::Callback_RunCoreLoop
+CoreMessaging!Microsoft::CoreUI::Dispatch::EventLoop::Callback_Run
+CoreMessaging!Microsoft::CoreUI::Messaging::MessageSession$R::Microsoft__CoreUI__IExportMessageSession_Impl::Run
+CoreMessaging!Microsoft::CoreUI::IExportMessageSession$X__ExportAdapter::Run
+inputhost!MessagingThread::ThreadProc
+inputhost!MessagingThread::MessagingThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  33  Id: e30.33e4 Suspend: 0 Teb: 00000050`95a1e000 Unfrozen
+Call Site
+ntdll!NtDelayExecution
+KERNELBASE!SleepEx
+WINMMBASE!joyMonitorThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  34  Id: e30.3f44 Suspend: 0 Teb: 00000050`95a20000 Unfrozen
+Call Site
+ntdll!NtWaitForWorkViaWorkerFactory
+ntdll!TppWorkerThread
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+  35  Id: e30.cf8 Suspend: 0 Teb: 00000050`95a22000 Unfrozen
+Call Site
+win32u!NtUserMsgWaitForMultipleObjectsEx
+user32!RealMsgWaitForMultipleObjectsEx
+Qt5Core!QEventDispatcherWin32::processEvents
+Qt5Core!QEventLoop::exec
+Qt5Core!QThread::exec
+DW_Spectrum
+0x0
+0x0
+0x0
+
+  36  Id: e30.17f4 Suspend: 0 Teb: 00000050`95a24000 Unfrozen
+Call Site
+ntdll!NtWaitForSingleObject
+KERNELBASE!WaitForSingleObjectEx
+Qt5Core!QWaitCondition::wait
+Qt5Core!QThreadPoolPrivate::reset
+Qt5Core!QThread::start
+ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart
+
+# 37  Id: e30.2bc8 Suspend: 0 Teb: 00000050`95a26000 Unfrozen
+Call Site
+ntdll!NtGetContextThread
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
