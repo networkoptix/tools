@@ -437,15 +437,20 @@ class BuildProject(NxVmsProject):
 
     # build_info file left along with artifacts
     def _save_build_info_artifact(self, platform_build_info_map, build_info):
+        version_customization = None
+        version_platform = None
         version = None
         file_list = []
         for (customization, platform), platform_build_info in platform_build_info_map.items():
             if version is None:
                 version = platform_build_info.version
+                version_customization = customization
+                version_platform = platform
             else:
                 assert platform_build_info.version == version, (
-                    'Different platforms/customizations ended up with different versions: %r != %r'
-                    % version, platform_build_info.version)
+                    'Different platforms/customizations ended up with different versions: %s/%s: %r != %s/%s: %r'
+                    % (version_customization, version_platform, version,
+                       customization, platform, platform_build_info.version))
             for t, artifact_list in platform_build_info.typed_artifact_list.items():
                 subdir = self._make_artifact_subdir(t, customization, platform)
                 for fname in artifact_list:
