@@ -1,7 +1,7 @@
 #!/bin/bash
 source "$(dirname $0)/utils.sh"
 
-nx_load_config "${CONFIG=".android-toolrc"}"
+nx_load_config "${RC=".android-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 
 #--------------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ help_callback()
 {
     cat <<EOF
 Swiss Army Knife for Android Mobile Client: execute various commands.
-Use ~/$CONFIG to override workstation-dependent environment variables (see them in this script).
+Use ~/$RC to override workstation-dependent environment variables (see them in this script).
 Usage: run from any dir inside nx_vms:
 
 $(basename "$0") <options> <command>

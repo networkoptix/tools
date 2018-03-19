@@ -1,14 +1,13 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${CONFIG=".tx2-toolrc"}"
+nx_load_config "${RC=".tx1-toolrc"}"
 
 : ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 
 : ${CLIENT_ONLY=""} #< Prohibit non-client copy commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server copy commands. Useful for "frankensteins".
 : ${DEVELOP_DIR="$HOME/develop"}
-: ${TARGET="tx1"} #< Target device for CMake.
 
 : ${BOX_MNT="/tx1"} #< Path at the workstation to which the box root is mounted.
 : ${BOX_USER="nvidia"}
@@ -39,14 +38,16 @@ nx_load_config "${CONFIG=".tx2-toolrc"}"
 
 #--------------------------------------------------------------------------------------------------
 
-# TODO: Replace "[Release]" arg with BUILD_CONFIG env var. Do it in all *-tool.sh.
+export TARGET="tx1"
+
+#--------------------------------------------------------------------------------------------------
 
 help_callback()
 {
     cat \
 <<EOF
 Swiss Army Knife for NVidia Tegra ($TARGET): execute various commands.
-Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
+Use ~/$RC to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
  $(basename "$0") <options> <command>
@@ -89,13 +90,6 @@ Here <command> can be one of the following:
  tv-rdep # Copy libtegra_video.so, tegra_video.h and video_dec_gie to the artifact and "rdep -u".
  tvmp # Copy libtegra_video_metadata_plugin.so to the box $BOX_MEDIASERVER_DIR/bin/plugins/.
  d # Copy libdeepstream_metadata_plugin.so to the box $BOX_MEDIASERVER_DIR/bin/plugins/.
-
- # Commands which call linux-tool.sh with the proper target:
- clean # Delete cmake build dir and all maven build dirs.
- gen [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
- build # Build via "cmake --build <dir>".
- cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
- build-installer [Release] [mvn] # Build installer using cmake or maven.
 
  pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
@@ -668,22 +662,6 @@ main()
             ;;
 
         #..........................................................................................
-        clean)
-            "$LINUX_TOOL" clean "$TARGET" "$@"
-            ;;
-        gen)
-            "$LINUX_TOOL" gen "$TARGET" "$@"
-            ;;
-        build)
-            "$LINUX_TOOL" build "$TARGET" "$@"
-            ;;
-        cmake)
-            "$LINUX_TOOL" cmake "$TARGET" "$@"
-            ;;
-        build-installer)
-            "$LINUX_TOOL" build-installer "$TARGET" "$@"
-            ;;
-        #..........................................................................................
         pack-build)
             do_pack "$1" copy_build
             ;;
@@ -721,7 +699,7 @@ main()
             ;;
         #..........................................................................................
         *)
-            nx_fail "Invalid arguments. Run with -h for help."
+            "$LINUX_TOOL" "$COMMAND" "$@"
             ;;
     esac
 }

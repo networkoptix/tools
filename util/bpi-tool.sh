@@ -1,10 +1,10 @@
 #!/bin/bash
 source "$(dirname "$0")/utils.sh"
 
-nx_load_config "${CONFIG=".bpi-toolrc"}"
+nx_load_config "${RC=".bpi-toolrc"}"
+: ${LINUX_TOOL="$(dirname "$0")/linux-tool.sh"}
 : ${CLIENT_ONLY=""} #< Prohibit non-client commands. Useful for "frankensteins".
 : ${SERVER_ONLY=""} #< Prohibit non-server commands. Useful for "frankensteins".
-: ${TARGET_DEVICE="bpi"} #< Target device for CMake.
 : ${BOX_MNT="/bpi"}
 : ${BOX_USER="root"}
 : ${BOX_INITIAL_PASSWORD="admin"}
@@ -44,7 +44,7 @@ FW_CONFIG="/etc/fw_env.config"
 IP_DHCP_LINE="iface eth0 inet dhcp"
 IP_STATIC_LINE="iface eth0 inet static"
 
-LINUX_TOOL="$(dirname "$0")/linux-tool.sh"
+export TARGET="bpi"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ help_callback()
     cat \
 <<EOF
 Swiss Army Knife for Banana Pi (Nx1): execute various commands.
-Use ~/$CONFIG to override workstation-dependent environment vars (see them in this script).
+Use ~/$RC to override workstation-dependent environment vars (see them in this script).
 Usage: run from any dir inside the proper nx_vms dir:
 
  $(basename "$0") <options> <command>
@@ -84,8 +84,8 @@ Here <command> can be one of the following:
  lib [<name>] # Copy the specified (or pwd-guessed common_libs/<name>) library to the box.
  ini # Create empty .ini files at the box in /tmp (to be filled with defauls).
  logs # Create empty -out.flag files at the box'es log dir to trigger logs with respective names.
- install-tar [mvn|cmake|x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
- install-zip [mvn|cmake|x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
+ install-tar [x.tar.gz] # Install x.tar.gz to the box via untarring to the root.
+ install-zip [x.zip] # Install .zip to the box: unzip to /tmp and run "install.sh".
  uninstall # Uninstall all nx files from the box.
 
  go [command args] # Execute a command at the box via ssh, or log in to the box via ssh.
@@ -111,15 +111,6 @@ Here <command> can be one of the following:
  ump # Rebuild libUMP at the box and install it to the box.
  ldp [args] # Make ldpreloadhook.so at the box and intall it to the box, passing [args] to "make".
  ldp-rdep # Deploy ldpreloadhook.so to packages/bpi via "rdep -u".
-
- # Commands which call linux-tool.sh with the proper target:
- clean # Delete cmake build dir and all maven build dirs.
- mvn [Release] [args] # Call maven.
- gen [Release] [cmake-args] # Perform cmake generation. For linux-x64, use target "linux".
- build # Build via "cmake --build <dir>".
- cmake [Release] [gen-args] # Perform cmake generation, then build via "cmake --build".
- build-installer [Release] [mvn] # Build installer using cmake or maven.
- test-installer [Release] [checksum] [no-build] [mvn] orig/archives/dir # Test if built matches orig.
 
  pack-build <output.tgz> # Prepare tar with build results at the box.
  pack-full <output.tgz> # Prepare tar with complete /opt/networkoptix/ at the box.
@@ -215,7 +206,6 @@ find_VMS_DIR()
 # [out] BOX_CMAKE_BUILD_DIR
 get_CMAKE_BUILD_DIR()
 {
-    local -r TARGET="bpi"
     case "$VMS_DIR" in
         *-"$TARGET")
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
@@ -593,42 +583,20 @@ stop_all_if_installed()
 }
 
 # TODO: Change the pattern to ignore non-"_update" zip.
-find_INSTALLER() # mask [mvn|cmake|archive.file]
+find_INSTALLER() # mask [archive.file]
 {
     local -r MASK="$1"; shift
 
     get_CMAKE_BUILD_DIR
     local -r CMAKE_DIR="$CMAKE_BUILD_DIR/edge_firmware"
-    local -r MVN_DIR="$VMS_DIR/edge_firmware/rpi/target-bpi"
 
-    local BUILD="" #< mvn|cmake
-    if [ $# -ge 1 ]; then
-        case "$1" in
-            mvn|cmake)
-                BUILD="$1"
-                ;;
-            *)
-                INSTALLER="$1"
-                ;;
-        esac
+    local INSTALLER
+    if [ $# -ge 1 ]
+    then
+        INSTALLER="$1"
     else
-        # Auto-detect cmake vs msn, producing an error if none or both are present.
-        if [ -d "$CMAKE_DIR" ] && [ ! -d "$MVN_DIR" ]; then # cmake only
-            BUILD=cmake
-        elif [ -d "$MVN_DIR" ] && [ ! -d "$CMAKE_DIR" ]; then # mvn only
-            BUILD=mvn
-        elif [ ! -d "$MVN_DIR" ] && [ ! -d "$CMAKE_DIR" ]; then # none
-            nx_fail "Unable to find either maven or cmake installer directory."
-        else # both
-            nx_fail "Both maven and cmake installer directories exist, specify manually."
-        fi
+        nx_find_file INSTALLER "Installer $MASK" "$CMAKE_DIR" -name "$MASK";;
     fi
-
-    case $BUILD in
-        mvn) nx_find_file INSTALLER "Installer $MASK (maven)" "$MVN_DIR" -name "$MASK" ;;
-        cmake) nx_find_file INSTALLER "Installer $MASK (cmake)" "$CMAKE_DIR" -name "$MASK" ;;
-        *) `# Already found.` ;;
-    esac
 
     nx_echo "Installing $INSTALLER"
 }
@@ -637,7 +605,7 @@ install_tar() # "$@"
 {
     find_VMS_DIR
     check_box_mounted
-    find_INSTALLER "*.tar.gz" "$@"
+    find_INSTALLER "*.tar.gz"
     nx_verbose tar xfv "$INSTALLER" -C "$BOX_MNT/"
 }
 
@@ -646,7 +614,7 @@ install_zip() # "$@"
     find_VMS_DIR
     check_box_mounted
 
-    find_INSTALLER "*_update-*.zip" "$@"
+    find_INSTALLER "*_update-*.zip"
 
     local -r ZIP_FILENAME=$(basename "$INSTALLER")
     local -r DISTRIB="${ZIP_FILENAME%.zip}" #< Remove ".zip" suffix.
@@ -1130,28 +1098,6 @@ main()
             rdep -u
             ;;
         #..........................................................................................
-        clean)
-            "$LINUX_TOOL" clean "$TARGET_DEVICE" "$@"
-            ;;
-        mvn)
-            "$LINUX_TOOL" mvn "$TARGET_DEVICE" "$@"
-            ;;
-        gen)
-            "$LINUX_TOOL" gen "$TARGET_DEVICE" "$@"
-            ;;
-        build)
-            "$LINUX_TOOL" build "$TARGET_DEVICE" "$@"
-            ;;
-        cmake)
-            "$LINUX_TOOL" cmake "$TARGET_DEVICE" "$@"
-            ;;
-        build-installer)
-            "$LINUX_TOOL" build-installer "$TARGET_DEVICE" "$@"
-            ;;
-        test-installer)
-            "$LINUX_TOOL" test-installer "$TARGET_DEVICE" "$@"
-            ;;
-        #..........................................................................................
         pack-build)
             pack_build "$1"
             ;;
@@ -1163,7 +1109,7 @@ main()
             ;;
         #..........................................................................................
         *)
-            nx_fail_on_invalid_arguments
+            "$LINUX_TOOL" "$COMMAND" "$@"
             ;;
     esac
 }
