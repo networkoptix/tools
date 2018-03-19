@@ -761,7 +761,7 @@ main()
                 CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             fi
             local -r TEST_CAMERA_EXE="$CMAKE_BUILD_DIR/bin/testcamera.exe"
-            PATH="$QT_DIR:$PATH"
+            PATH="$QT_DIR\bin:$CMAKE_BUILD_DIR/bin:$PATH"
 
             if [ $SHOW_HELP = 1 ]
             then
