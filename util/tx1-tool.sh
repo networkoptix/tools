@@ -470,7 +470,7 @@ main()
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
 
             copy_libs
-            cp_desktop_client_bins "desktop_client"
+            cp_desktop_client_bins "client-bin"
             ;;
         copy-c-all)
             assert_not_server_only
@@ -565,10 +565,10 @@ main()
             ;;
         start-c)
             assert_not_server_only
-            nx_go "[ export DISPLAY=:0; ]" "$BOX_DESKTOP_CLIENT_DIR/bin/desktop_client" "$@"
+            nx_go "[ export DISPLAY=:0; ]" "$BOX_DESKTOP_CLIENT_DIR/bin/client-bin" "$@"
             ;;
         stop-c)
-            nx_go sudo killall -9 desktop_client
+            nx_go sudo killall -9 client-bin
             ;;
         run-s-ut)
             local TEST_NAME="$1"
