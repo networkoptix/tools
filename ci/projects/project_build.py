@@ -478,8 +478,9 @@ class BuildProject(NxVmsProject):
         path = BUILD_INFO_FILE
         with open(path, 'w') as f:
             yaml.dump(build_info, f, default_flow_style=False)
-        with open(VERSION_FILE, 'w') as f:
-            f.write(version)
+        if version:
+            with open(VERSION_FILE, 'w') as f:
+                f.write(version)
         return path
 
     def _make_artifact_archiving_command_list(self, build_info_path):
