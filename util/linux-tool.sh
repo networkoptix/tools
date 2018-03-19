@@ -8,11 +8,13 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
+: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.6.1-1"}
+: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.6.2-2"}
 : ${CMAKE_BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 if nx_is_cygwin
 then
-    : ${CMAKE_GEN=""}
+    : ${CMAKE_GEN="Visual Studio 14 2015 Win64"}
 else
     : ${CMAKE_GEN="Ninja"}
 fi
@@ -25,6 +27,7 @@ fi
 : ${TESTCAMERA_SELF_IP_SUBNET_PREFIX="192\\.168\\."}
 : ${TEMP_DIR="$(dirname $(mktemp `# dry run` -u))"}
 : ${CUSTOMIZATION=""}
+: ${NINJA_CLEAN_TOOL="$(dirname "$0")/../ninja_clean/ninja_clean.py"}
 
 #--------------------------------------------------------------------------------------------------
 
@@ -75,10 +78,10 @@ EOF
 
 # [out] TARGET
 # [out] CUSTOMIZATION
+# [out] QT_DIR
 # [in] VMS_DIR
 get_TARGET()
 {
-    # If the target is already defined, use its value.
     if [ -z "$TARGET" ]
     then
         if nx_is_cygwin
@@ -89,17 +92,28 @@ get_TARGET()
             if [[ "$VMS_DIR" =~ ^.+-([^-]+)$ ]]
             then
                 TARGET="${BASH_REMATCH[1]}"
+                if [ "$TARGET" = "win" ] #< TODO: #mshevchenko
+                then
+                    TARGET="linux"
+                fi
+            else
+                TARGET="linux"
             fi
         fi
     fi
 
+    # If the target is already defined, use its value.
+
     case "$TARGET" in
-        windows|linux|tx1|bpi|rpi|bananapi|android-arm) `# Do nothing #`;;
+        windows) QT_DIR="$WINDOWS_QT_DIR";;
+        linux) QT_DIR="$LINUX_QT_DIR";;
+        tx1|bpi|rpi|bananapi|android-arm) `# Do nothing #`;;
         edge1) CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
     esac
 
+    # Assertion: target "windows" is supported only in cygwin.
     if nx_is_cygwin
     then
         if [ "$TARGET" != "windows" ]
@@ -169,19 +183,24 @@ get_CMAKE_BUILD_DIR()
 {
     if [ ! -z "${CMAKE_BUILD_DIR:+x}" ]
     then #< CMAKE_BUILD_DIR is defined and not empty.
-        return 1
+        return 0
     fi
 
+    case "$TARGET" in
+        windows|linux) local -r TARGET_SUFFIX="";;
+        *) local -r TARGET_SUFFIX="-$TARGET";;
+    esac
+
     case "$VMS_DIR" in
-        *-"$TARGET")
+        *"$TARGET_SUFFIX")
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             ;;
         "$WIN_DEVELOP_DIR"/*)
             local -r VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
-            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX-$TARGET"
+            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX$TARGET_SUFFIX"
             ;;
         *)
-            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
+            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX$TARGET_SUFFIX"
             ;;
     esac
 }
@@ -218,19 +237,22 @@ do_gen() # [cache] "$@"
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
-        windows) local -r TARGET_ARG="-Ax64";;
+        windows) local -r TARGET_ARG="-Tv140";;
         *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
     esac
 
     local GENERATOR_ARG=""
-    [ ! -z "$CMAKE_GEN" ] && GENERATOR_ARG="-G$CMAKE_GEN"
+    if [ ! -z "$CMAKE_GEN" ]
+    then
+        GENERATOR_ARG="-G$CMAKE_GEN"
+    fi
 
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
-        $CUSTOMIZATION_ARG $GENERATOR_ARG $TARGET_ARG $CONFIG_ARG "$@"
+        $CUSTOMIZATION_ARG ${GENERATOR_ARG:+"$GENERATOR_ARG"} $TARGET_ARG $CONFIG_ARG "$@"
     local RESULT=$?
 
     nx_popd
@@ -393,9 +415,23 @@ do_kit() # "$@"
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 }
 
-build_distrib() #
+do_cmake() # "$@"
 {
-    do_gen "$@" -DwithDistributions=ON && do_build
+    do_gen "$@" || return $?
+
+    if ! nx_is_cygwin
+    then
+        ( cd "$CMAKE_BUILD_DIR"
+            nx_verbose "$NINJA_CLEAN_TOOL"
+        ) || return $?
+    fi
+
+    do_build
+}
+
+build_distrib() # "$@"
+{
+    do_cmake "$@" -DwithDistributions=ON
 }
 
 list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
@@ -688,12 +724,11 @@ main()
                     find_VMS_DIR cd
                     get_CMAKE_BUILD_DIR
 
-                    PATH="$PATH:$PACKAGES_DIR/windows-x64/qt-5.6.1-1/bin"
+                    PATH="$QT_DIR/bin:$PATH"
                     nx_verbose "$CONFIG"/bin/mediaserver -e
                     ;;
-                *)
+                *) nx_fail "Command not implemented yet.";;
             esac
-            nx_fail "Command not implemented yet."
             ;;
         stop-s)
             # TODO: Decide on better impl.
@@ -726,7 +761,7 @@ main()
                 CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             fi
             local -r TEST_CAMERA_EXE="$CMAKE_BUILD_DIR/bin/testcamera.exe"
-            PATH="$PATH:$PACKAGES_DIR/windows-x64/qt-5.6.1-1/bin:$CMAKE_BUILD_DIR/bin"
+            PATH="$QT_DIR:$PATH"
 
             if [ $SHOW_HELP = 1 ]
             then
@@ -750,12 +785,10 @@ main()
             do_build "$@"
             ;;
         cmake)
-            do_gen "$@" && do_build
+            do_cmake "$@"
             ;;
         distrib)
-            find_VMS_DIR cd
-            get_CMAKE_BUILD_DIR
-            build_distrib
+            build_distrib "$@"
             ;;
         test-distrib)
             do_test_distrib "$@"
