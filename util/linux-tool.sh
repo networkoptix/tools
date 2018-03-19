@@ -592,11 +592,11 @@ printRepos()
         # Check if the repo dir is mounted from a Windows filesystem.
         local WIN_DIR=$(mount |grep "$HOME/develop/$REPO " |awk '{print $1}')
         if [ ! -z "$WIN_DIR" ]
-    then
+        then
             local EXTRA
             local WIN_REPO=$(basename "$WIN_DIR")
             if [ "$WIN_REPO" != "$REPO" ]
-    then
+            then
                 EXTRA=" $WIN_REPO"
             fi
             EXTRAS+=( ["$REPO"]="win$EXTRA" ) #< Add key-value.
@@ -615,31 +615,31 @@ printRepos()
     for DIR in *
     do
         if [ ! -d "$DIR" ]
-    then
+        then
             continue
         fi
 
         local -i IS_PREFIX=0
         local -i IS_EQUAL=0
         for REPO in "${REPOS[@]}"
-    do
+        do
             if [[ $DIR =~ ^$REPO.+ ]]
-    then
+            then
                 IS_PREFIX=1
             fi
             if [ "$DIR" = "$REPO" ]
-    then
+            then
                 IS_EQUAL=1
             fi
         done
 
         if [ $IS_PREFIX == 1 ] && [ $IS_EQUAL == 0 ]
-    then
+        then
             # Check CMakeCache.txt to have: CMAKE_HOME_DIRECTORY:INTERNAL=<CMAKE_SRC_DIR>
             local CMAKE_SRC_DIR=$(cat "$DIR/CMakeCache.txt" 2>/dev/null \
                 |grep 'CMAKE_HOME_DIRECTORY:INTERNAL' |awk 'BEGIN { FS="=" }; { print $2 }')
             if [ -z "$CMAKE_SRC_DIR" ]
-    then
+            then
                 OTHER_DIRS+=( "$DIR" )
             else
                 BUILD_DIRS["$(basename "$CMAKE_SRC_DIR")"]+="$DIR "
@@ -652,15 +652,15 @@ printRepos()
     do
         local BUILD_DIR_STR=""
         if [ ! -z "${BUILD_DIRS[$REPO]}" ]
-    then
+        then
             local DIRS=( ${BUILD_DIRS[$REPO]} ) #< Split by spaces into array.
             if [ ${#DIRS[@]} = 1 ]
-    then
+            then
                 BUILD_DIR_STR=" $(nx_dcyan)=> $(nx_lcyan)${BUILD_DIRS[$REPO]}"
             else
                 BUILD_DIR_STR=" $(nx_dcyan)=>$(nx_lcyan)"$'\n'
                 for DIR in "${DIRS[@]}"
-    do
+                do
                     BUILD_DIR_STR+="    $DIR"$'\n'
                 done
             fi
@@ -668,7 +668,7 @@ printRepos()
 
         local EXTRA_STR=""
         if [ ! -z "${EXTRAS[$REPO]}" ]
-    then
+        then
             EXTRA_STR="$(nx_lgray)[${EXTRAS[$REPO]}] "
         fi
 
@@ -754,22 +754,23 @@ main()
 
             local VIDEO_FILE="$1"; shift
 
-            # TODO: #mshevchenko: Make compatible with Linux; prohibit other targets.
-            if [ -z "${CMAKE_BUILD_DIR:+x}" ]
-            then #< CMAKE_BUILD_DIR is not defined or empty.
-                find_VMS_DIR
-                CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+            find_VMS_DIR
+            get_CMAKE_BUILD_DIR
+
+            local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
+            
+            if nx_is_cygwin
+            then
+                PATH="$QT_DIR\bin:$CMAKE_BUILD_DIR/bin:$PATH"
             fi
-            local -r TEST_CAMERA_EXE="$CMAKE_BUILD_DIR/bin/testcamera.exe"
-            PATH="$QT_DIR\bin:$CMAKE_BUILD_DIR/bin:$PATH"
 
             if [ $SHOW_HELP = 1 ]
             then
-                "$TEST_CAMERA_EXE" || true
+                "$TEST_CAMERA_BIN" || true
             else
                 local SELF_IP
                 nx_get_SELF_IP "$TESTCAMERA_SELF_IP_SUBNET_PREFIX"
-                nx_verbose "$TEST_CAMERA_EXE" --local-interface="$SELF_IP" "$@" \
+                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" "$@" \
                     "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
             fi
             ;;
