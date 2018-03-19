@@ -38,12 +38,12 @@
 
 - name: Prepare cloud-init media
   include_role:
-    name: libvirt_guest_cloud_init
+    name: libvirt_guest_init_linux
     tasks_from: prepare
   when: libvirt_guest__type == 'linux'
 
 - name: Prepare win-init media
   include_role:
-    name: libvirt_guest_win_auto
+    name: libvirt_guest_init_windows
     tasks_from: prepare
   when: libvirt_guest__type == 'windows'

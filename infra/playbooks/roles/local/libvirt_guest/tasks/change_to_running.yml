@@ -26,5 +26,11 @@
     - libvirt_guest__current_state == 'running'
 
 - include_role:
-    name: "libvirt_guest_init_{{ libvirt_guest__type }}"
+    name: "libvirt_guest_init_linux"
     tasks_from: cleanup
+  when: libvirt_guest__type == 'linux'
+
+- include_role:
+    name: "libvirt_guest_init_windows"
+    tasks_from: cleanup
+  when: libvirt_guest__type == 'windows'

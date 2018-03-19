@@ -1,6 +1,5 @@
 libvirt_guest__domain_type : kvm
 
-libvirt_guest__type: linux
 libvirt_guest__extra_system_image_size_gb: "50"
 libvirt_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
 libvirt_guest__memory: "{{ libvirt_guest__memory_kib }}"

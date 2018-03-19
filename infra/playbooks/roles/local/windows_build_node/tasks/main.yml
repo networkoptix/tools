@@ -20,8 +20,7 @@
 
 - name: Install virtualenv
   command: >-
-    C:\Python27\Scripts\pip.exe install virtualenv
-
+    /cygdrive/c/Python27/Scripts/pip.exe install virtualenv
 
 - name: Set CMD PATH variable (1)
   command: >-
