@@ -492,8 +492,6 @@ class BuildProject(NxVmsProject):
     def _make_set_build_result_command_list(self, build_info):
         if build_info.has_failed_builds:
             build_result = SetBuildResultCommand.brFAILURE
-        elif build_info.has_failed_tests:
-            build_result = SetBuildResultCommand.brUNSTABLE
         else:
             return []
         return [SetBuildResultCommand(build_result)]

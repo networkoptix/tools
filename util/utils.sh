@@ -291,13 +291,22 @@ nx_concat_ARGS() # "$@"
     fi
 }
 
+nx_is_cygwin()
+{
+    case "$(uname -s)" in
+        CYGWIN*) return 0;;
+        *) return 1;;
+    esac
+}
+
 # If cygwin, convert cygwin path to windows path for external tools; otherwise, return path as is.
 nx_path() # "$@"
 {
-    case "$(uname -s)" in
-        CYGWIN*) cygpath -w "$@";;
-        *) echo "$@";;
-    esac
+    if nx_is_cygwin; then
+        cygpath -w "$@"
+    else
+        echo "$@"
+    fi
 }
 
 #--------------------------------------------------------------------------------------------------
