@@ -15,11 +15,15 @@
 
 
 - name: "Create .ssh in {{ jenkins_user }} home dir"
+  become: true
+  become_user: "{{ jenkins_user }}"
   file:
     path: "{{ jenkins_home }}/.ssh/"
     state: directory
 
 - name: Configure pub keys
+  become: true
+  become_user: "{{ jenkins_user }}"
   lineinfile:
     path: "{{ jenkins_home }}/.ssh/authorized_keys"
     line: "{{ item }}"
@@ -27,6 +31,8 @@
   with_items: "{{ jenkins_authorized_keys }}"
 
 - name: Configure .rdeprc for publishing artifacts
+  become: true
+  become_user: "{{ jenkins_user }}"
   copy:
     dest: "{{ jenkins_home }}/.rdeprc"
     content: |
@@ -34,6 +40,8 @@
       name = Jenkins Builder
 
 - name: Ensure enk.me is a known host
+  become: true
+  become_user: "{{ jenkins_user }}"
   lineinfile:
     dest: "{{ jenkins_home }}/.ssh/known_hosts"
     create: yes
@@ -43,11 +51,3 @@
   with_items:
   - enk.me
   - hdw.mx
-
-- name: Set ownership for entire jenkins home directory
-  file:
-    path: "{{ jenkins_home }}"
-    owner: "{{ jenkins_user }}"
-    group: "{{ jenkins_group }}"
-    recurse: true
-    state: directory

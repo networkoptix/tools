@@ -78,3 +78,25 @@
   - role: build_node
   - role: jenkins_slave
   - role: dev_build_node
+
+- name: Setup mpodstrechny custom build machine
+  hosts: dev_build
+  become: true
+  become_method: sudo
+  gather_facts: yes
+
+  vars:
+    build_user: mpodstrechny
+    jenkins_user: mpodstrechny
+    jenkins_group: mpodstrechny
+    jenkins_home: /home/mpodstrechny
+    # added jenkins key: just in case...
+    jenkins_authorized_keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7t07Sl3znH+sPzBlhAgVWnpHLndsCGj0lTIJQo5YKWjlp1g4p6L0uFB4pgCM5zRyucF4PRmcAfYyAWKZ6N+Et4kB9BpdcpxGWX6evJ4RtA+iOED3SYZZoC/Y9rz+5RrH37tsgBFN1cW/CBuWq3xi0CEX/fD6r8sZy22fFJ9JPHFSDBsepWJPn8xJm0xNB05XYkbRoegMJxThf7XrvHgshhpNoiz9VVkje7jyGQC6ijAdMOHuR1p7RlLZpNyMCm9HKAq8L8uX5sKNBIpbc/GoQS9RGYI7iV9Cpq0F2ogKNYkT3cDC5L05cSqIwjTNYxZK9w+1YR22f/GZuMRu53C2R jenkins@megatron
+    - ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAoGT65TU34jR3doZ/MN8fZaX8oskNLbrMslZj9lj8wuKXWX29ahgf602qjBty/p253Xp1ySwI57azwe7TWhDKlnxxMhz+zpVJqHOHFKCRBML2omvtDYr3aEW1IqGmznFSEDAxIoVswhM41DSv95j6xj/Apri763Duuz4UV7WxJtNJAxSqc8gsEZi5pPz80gASOH2nD3+C7yxe279vIe+9JAOiGzQg5hJJsapDt5q0VH1ix+MRebAuujrkGHCKsuUHI3bbQfOmyDkJPq90zxT2jS/SFHoPAApXwGgtqPc2BbSSfv8g177V1gA33oiEog03oFfwF9DQ5CQRIZ8Rie1aLQ== rsa-key-20151119
+    - ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAh3I9pK25gS0D7nmNPyOnHb/k+L6KN0LihTLtqHsseAM+vu9oAN7N9SioJUCvawSnWYEWa4gWLnyIZnvfBuhBfXOtmv/5qvLM2ONChBpG+eOuoSGx0w+gpejjKtOyn8TSLbYBlrsFHcYzOotKaEYpg4FpSGmL0RteMnXBiYLeNROU1SUFyX4yeG17JMeH+R3OWVOEWOj8TxmBtgsFIm80KwRDMy7szEk21bsu160MfDNPfv19UXFNdmaWXqdM0OB7gPdhUefUMLyt5lv26sIgh/ZVJJ05sLBs85b3EV6p3pDL48GIhwUhKL79x7rach8OSWjbrBNm3dXti/y7kJlIuQ== mpodstrechny
+
+  roles:
+  - role: build_node
+  - role: jenkins_slave
+  - role: dev_build_node

@@ -1,24 +1,3 @@
-- name: Install nfs client
-  apt:
-    pkg: nfs-common
-    state: present
-
-- name: Create mount dir
-  file:
-    path: "/mnt/nfs/beta-builds"
-    owner: "{{ jenkins_user }}"
-    group: "{{ jenkins_group }}"
-    recurse: true
-    state: directory
-
-- name: Mount nfs directory
-  mount:
-    path: "/mnt/nfs/beta-builds"
-    src: "{{ nfsserver }}:/share/NFSv=4/beta-builds"
-    boot: yes
-    state: mounted
-    fstype: nfs
-
 - name: Add to sudo group
   user:
     name: '{{ item }}'
