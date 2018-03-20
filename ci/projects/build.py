@@ -146,17 +146,12 @@ class CMakeBuilder(object):
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      self._junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
-        if self._is_unix:
-            unit_tests_bin_dir = os.path.join(build_dir, 'bin')
-        else:
-            # Visual studio uses multi-config setup
-            unit_tests_bin_dir = os.path.join(build_dir, cmake_configuration, 'bin')
         return BuildInfo(
             is_succeeded=build_info.passed,
             artifacts_dir=os.path.join(build_dir, 'distrib'),
             current_config_path=os.path.join(build_dir, 'current_config.py'),
             version=cmake_build_info.get('version'),
-            unit_tests_bin_dir=unit_tests_bin_dir,
+            unit_tests_bin_dir=os.path.join(build_dir, 'bin'),
             run_id=build_info.run_id,
             )
 
