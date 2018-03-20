@@ -442,7 +442,7 @@ class BuildProject(NxVmsProject):
         version = None
         file_list = []
         for (customization, platform), platform_build_info in platform_build_info_map.items():
-            if platform_build_info_map.is_succeeded:
+            if platform_build_info.is_succeeded:
                 if version is None:
                     version = platform_build_info.version
                     version_customization = customization
