@@ -75,7 +75,7 @@ class CiProject(BuildProject):
         nx_vms_scm_info = self.scm_info['nx_vms']
         host = LocalHost()
         result = host.run_command(
-            ['hg', 'incoming', '--branch', nx_vms_scm_info.branch],
+            ['hg', 'incoming', '--branch', self.nx_vms_branch_name],
             cwd=os.path.join(self.workspace_dir, 'nx_vms'),
             check_retcode=False,
             )
@@ -83,7 +83,7 @@ class CiProject(BuildProject):
             log.warning('Have incoming commits for repository nx_vms; skipping this build')
             return True
         head = host.get_command_output(
-            ['hg', 'heads', nx_vms_scm_info.branch, '--template={node|short}'],
+            ['hg', 'heads', self.nx_vms_branch_name, '--template={node|short}'],
             cwd=os.path.join(self.workspace_dir, 'nx_vms'),
             )
         if nx_vms_scm_info.revision != head:

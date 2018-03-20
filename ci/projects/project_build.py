@@ -107,6 +107,10 @@ class BuildProject(NxVmsProject):
         return False
 
     @property
+    def checkout_nx_vms_revision(self):
+        return None
+
+    @property
     def custom_cmake_args(self):
         return ''
 
@@ -125,6 +129,9 @@ class BuildProject(NxVmsProject):
         else:
             return self.project_id
 
+    @property
+    def prepare_nx_vms_command_list(self):
+        return self.make_prepare_nx_vms_command_list(self.checkout_nx_vms_revision)
 
     # init  ========================================================================================
     def stage_init(self):
@@ -427,10 +434,9 @@ class BuildProject(NxVmsProject):
                     yield ((customization, platform), PlatformBuildInfo.from_dict(yaml.load(f)))
 
     def _load_build_info(self):
-        nx_vms_scm_info = self.scm_info['nx_vms']
         loader = BuildInfoLoader.from_project_branch_num(
             project_name=self.project_name,
-            branch_name=nx_vms_scm_info.branch,
+            branch_name=self.nx_vms_branch_name,
             build_num=self.jenkins_env.build_number,
             )
         return loader.load_build_platform_list()

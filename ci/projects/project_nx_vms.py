@@ -43,13 +43,14 @@ class NxVmsProject(JenkinsProject):
         else:
             return []
 
-    @property
-    def prepare_nx_vms_command_list(self):
+    def make_prepare_nx_vms_command_list(self, revision=None):
         if self.in_assist_mode:
             branch_name = self.nx_vms_branch_name
             return [
-                CheckoutCommand('nx_vms', branch_name),
+                CheckoutCommand('nx_vms', revision or branch_name),
                 UnstashCommand('nx_vms_ci'),
                 ]
+        elif revision:
+            CheckoutCommand('nx_vms', revision),
         else:
             return [CheckoutScmCommand('nx_vms')]

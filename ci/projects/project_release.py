@@ -75,6 +75,10 @@ class ReleaseProject(BuildProject):
         return True
 
     @property
+    def checkout_nx_vms_revision(self):
+        return self.params.get('revision') or None
+
+    @property
     def custom_cmake_args(self):
         return self.params.custom_cmake_args
 
@@ -86,6 +90,7 @@ class ReleaseProject(BuildProject):
         return BuildProject.get_project_parameters(self) + [
             ChoiceProjectParameter('release', 'Build beta or release', ['beta', 'release']),
             ChoiceProjectParameter('cloud_group', 'Cloud group', CLOUD_GROUP_LIST),
+            StringProjectParameter('revision', 'Specific revision to checkout (optional)', default_value=''),
             StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
             MultiChoiceProjectParameter('platform_list', 'Platforms to build',
                                             choices=self.all_platform_list, selected_choices=['linux-x64']),
