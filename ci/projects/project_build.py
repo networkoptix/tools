@@ -447,10 +447,11 @@ class BuildProject(NxVmsProject):
                 version_customization = customization
                 version_platform = platform
             else:
-                assert platform_build_info.version == version, (
-                    'Different platforms/customizations ended up with different versions: %s/%s: %r != %s/%s: %r'
-                    % (version_customization, version_platform, version,
-                       customization, platform, platform_build_info.version))
+                if platform_build_info.version is not None:
+                    assert platform_build_info.version == version, (
+                        'Different platforms/customizations ended up with different versions: %s/%s: %r != %s/%s: %r'
+                        % (version_customization, version_platform, version,
+                               customization, platform, platform_build_info.version))
             for t, artifact_list in platform_build_info.typed_artifact_list.items():
                 subdir = self._make_artifact_subdir(t, customization, platform)
                 for fname in artifact_list:
