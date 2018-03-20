@@ -758,7 +758,7 @@ main()
             get_CMAKE_BUILD_DIR
 
             local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
-            
+
             if nx_is_cygwin
             then
                 PATH="$QT_DIR\bin:$CMAKE_BUILD_DIR/bin:$PATH"
@@ -770,7 +770,7 @@ main()
             else
                 local SELF_IP
                 nx_get_SELF_IP "$TESTCAMERA_SELF_IP_SUBNET_PREFIX"
-                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" "$@" \
+                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" --no-secondary "$@" \
                     "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
             fi
             ;;
