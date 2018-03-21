@@ -3,9 +3,11 @@
 import os.path
 import logging
 import sys
+import time
 import argparse
 import yaml
 import pprint
+
 from utils import setup_logging
 from command import CommandRegistry, register_all_commands
 from state import State
@@ -46,6 +48,13 @@ def run_project_stage(input_file_path, output_file_path):
     command_registry = CommandRegistry()
     register_all_commands(command_registry)
 
+    for i in range(100):
+        if os.path.exists(input_file_path) and os.stat(input_file_path).st_size:
+            break
+        print('Input state file %r is empty, waiting for it to be synced...' % input_file_path)
+        time.sleep(1)
+    else:
+        assert False, 'Input state file %r is still missing or empty' % input_file_path
     with open(input_file_path) as f:
         input = yaml.load(f)
     input_state = State.from_dict(input, command_registry)
