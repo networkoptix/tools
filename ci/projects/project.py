@@ -60,7 +60,10 @@ class JenkinsProject(object):
     @property
     def prepare_devtools_command_list(self):
         if self.in_assist_mode:
-            return [UnstashCommand('devtools')]
+            return [
+                CheckoutCommand('devtools'),
+                UnstashCommand('devtools-ci'),
+                ]
         else:
             return [CheckoutCommand('devtools')]
 
