@@ -129,8 +129,11 @@ class FunTestProject(NxVmsProject):
         build_info = self._load_build_info()
         prepare_empty_dir(WORK_DIR)
         self._pick_aux_binaries()
-        self._copy_appserver2_ut(build_info, platform)
         server_deb_path = self._pick_server_deb_path()
+        if not server_deb_path:
+            log.warning('No server deb files were produced by upstream job; nothing to test')
+            return
+        self._copy_appserver2_ut(build_info, platform)
         log.info('Will test distributive %s', server_deb_path)
         if not server_deb_path:
             log.error('Build %s/%s #%s did not produce server distributive',
@@ -154,8 +157,10 @@ class FunTestProject(NxVmsProject):
     def _pick_server_deb_path(self):
         path_list = glob.glob(os.path.join(self.workspace_dir, DIST_DIR, '*-server-*-linux64*.deb'))
         assert len(path_list) <= 1, repr(path_list)  # fix glob above - it must not return more than 1 path
-        assert path_list, 'No artifacts to test were found'
-        return path_list[0]
+        if path_list:
+            return path_list[0]
+        else:
+            return None
 
     def _get_customization(self, build_info):
         customization_list = build_info['customization_list']
