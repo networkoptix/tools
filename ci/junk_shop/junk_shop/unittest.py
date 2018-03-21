@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 
 ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
+POPEN_BUF_SIZE = 1024*1024  # 1M
 
 DEFAULT_LOG_LEVEL = 'DEBUG1'
 
@@ -173,6 +174,7 @@ class TestProcess(GoogleTestEventHandler):
                 env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                bufsize=POPEN_BUF_SIZE,  # do not freeze tests while python does something
                 )
         except OSError as x:
             self._save_start_error('Error starting %r: %s' % (self._binary_path, x))
