@@ -9,17 +9,21 @@
   vars_files:
   - ../secrets/depcon.yml
 
-  roles:
-  - role: libvirt_guest
-    become: true
-    become_method: sudo
-  - role: alphabet_common
-    become: true
-    become_method: sudo
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
-  - role: nickjj.docker
-    become: true
-    become_method: sudo
-  - role: depcon
-    become: true
-    become_method: sudo
+  # IMPORTANT: Following lines are commented and disabled for stability reasons
+  # Current configs and roles are outdated.
+  # Running some of these tasks will destroy depcon service
+  #
+  # roles:
+  # - role: libvirt_guest
+  #   become: true
+  #   become_method: sudo
+  # - role: alphabet_common
+  #   become: true
+  #   become_method: sudo
+  #   when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+  # - role: nickjj.docker
+  #   become: true
+  #   become_method: sudo
+  # - role: depcon
+  #   become: true
+  #   become_method: sudo
