@@ -3,9 +3,7 @@
 options:
     format: gdb-bt # For windows should be: dmp
     min_version: 3.2
-    dump_count_limit:
-        create_case: 2
-        max_attachments: 10
+    min_report_count: 2
 
 crashServer:
     url: http://stats.networkoptix.com/crashserver/api/
@@ -16,6 +14,7 @@ jira:
     url: https://networkoptix.atlassian.net/
     login: service@networkoptix.com
     password: kbnUk06boqBkwU
+    file_limit: 3
 
 cache:
     directory: ./cache
