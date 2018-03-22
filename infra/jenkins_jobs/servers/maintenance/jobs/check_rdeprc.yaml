@@ -1,0 +1,23 @@
+- job:
+    name: check_rdeprc
+    description: |
+      Check if .rdeprc in ubuntu_16 home is still valid
+
+    node: master
+
+    logrotate:
+      daysToKeep: 7
+      numToKeep: -1
+      artifactDaysToKeep: -1
+      artifactNumToKeep: -1
+
+    triggers:
+    - timed: H/5 * * * *
+
+    wrappers:
+    - timestamps
+
+    builders:
+    - shell: |
+        ssh megatron cat /jenkins_slave/ubuntu_16/.rdeprc
+        ssh megatron grep -w name /jenkins_slave/ubuntu_16/.rdeprc

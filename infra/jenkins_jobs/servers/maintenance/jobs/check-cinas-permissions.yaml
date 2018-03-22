@@ -1,12 +1,9 @@
-- project:
-    name: infra-check
-    jobs:
-      - check-cinas-permissions
-
-
 - job:
     name: check-cinas-permissions
-    description: Check if cinas beta-builds directory still has proper permissions, and jenkins is able to write to it
+    description: >
+      Check if cinas beta-builds directory still has proper permissions, and
+      jenkins is able to write to it
+
     node: megatron-host
     logrotate:
       daysToKeep: 10
