@@ -4,6 +4,8 @@
     project-type: freestyle
     nas: seva@10.0.3.91:/home/seva/media/test-nas
 
+    node: non-existing # node must be set explicitly!
+
     wrappers:
     - timeout:
         timeout: 30
