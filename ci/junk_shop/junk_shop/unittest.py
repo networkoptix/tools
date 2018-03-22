@@ -216,7 +216,7 @@ class TestProcess(GoogleTestEventHandler):
         if self._aborted:
             for level in self._levels:
                 level.add_stdout_line('[ aborted ]')
-        self._parser.finish(self._aborted)
+        self._parser.finish(is_aborted=self._aborted or return_code != 0)
         duration = datetime_utc_now() - self._started_at
         level = self._levels.pop()
         level.add_stdout_line('[ return code: %d ]' % return_code)
@@ -229,7 +229,7 @@ class TestProcess(GoogleTestEventHandler):
         #print '%s return code: %d' % (self._test_name, return_code)
         
     def _read_thread(self, f, processor):
-        for line in f:
+        for line in iter(f.readline, ''):
             processor(line.rstrip('\r\n'))
 
     def _process_stderr_line(self, line):
