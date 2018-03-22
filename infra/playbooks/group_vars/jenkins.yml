@@ -1,0 +1,59 @@
+jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
+
+# We want all jenkins installation to share the same list of plugins
+# TODO: freeze versions
+# NOTE: Ansible module related to jenkins doesn't panic when it tries to install
+# non-existing plugin. So it just silently says that plugin is added. That's why
+# it's important to provide correct plugin name and verify that this plugin will
+# be installed as expected.
+# The easiest way to add plugin is following:
+# - Get http://ftp-chi.osuosl.org/pub/jenkins/updates/current/update-center.json
+# - Find required plugin in update-center.json This is 100% proven way to find
+#   correct plugin name
+# - add plugin to the list
+# - run playbook 2 times:
+#   - in first run it will install plugins
+#   - in the second run it must not install anything, and if entire play is done
+#     right, Ansible will report "changed=0" in "PLAY RECAP" section .. or you
+#     may check "Install Jenkins plugins" section of play.
+#
+# NOTE: check "<jenkins url>/administrativeMonitor/OldData/manage" that
+# all required plugins are installed. Optional plugins like "greenballs" are
+# not listed there for obvious reasons.
+jenkins_plugins:
+# job types
+- jenkins-multijob-plugin
+# scm
+- git
+- mercurial
+- multiple-scms
+# credentials
+- credentials
+- credentials-binding
+# wrappers, conditions and parameters
+- job-restrictions
+- nodelabelparameter
+- next-build-number
+- parameter-separator
+- build-keeper-plugin
+- build-timeout
+# build steps
+- envinject
+- copyartifact
+- ws-cleanup # workspace-cleanup
+- cmakebuilder
+- conditional-buildstep
+- description-setter
+# post-build actions
+- rebuild
+- naginator
+# audit
+- jobConfigHistory
+# beautifiers
+# NOTE: switch to "Safe HTML" in Markup Formatter section
+# in <jenkins url>/configureSecurity/
+- antisamy-markup-formatter
+- greenballs
+- ansicolor
+- console-badge
+- timestamper

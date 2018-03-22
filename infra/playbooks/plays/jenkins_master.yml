@@ -1,6 +1,11 @@
 - name: Setup Jenkins Master(s)
   hosts: jenkins
-
+  # We don't know status of guest, so if we try to gather facts (=connect),
+  # but this guest is not crated yet, we'll fail entire section.
+  # That's why don't collect facts here.
+  # All facts will be collected in libvirt_guest.
+  gather_facts: no
+  
   roles:
   - role: libvirt_guest
     become: true
