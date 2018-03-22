@@ -82,9 +82,9 @@
       - run-scalability-test:
           use_lightweight_servers: 'true'
           server_count: 200
-      - run-scalability-test:
-          use_lightweight_servers: 'true'
-          server_count: 250
+#      - run-scalability-test:
+#          use_lightweight_servers: 'true'
+#          server_count: 250
       - run-scalability-test:
           use_lightweight_servers: 'false'
           server_count: 20
