@@ -20,7 +20,6 @@
     builders:
       - shell: |
           #!/bin/bash -xe
-          cat "$0"
           FILE_PATH=/mnt/beta-builds/daily/jenkins-check-cinas-permissions
           touch "$FILE_PATH"
           ls $(dirname "$FILE_PATH") | grep $(basename "$FILE_PATH")
