@@ -1,0 +1,31 @@
+- project:
+    name: infra-check
+    jobs:
+      - check-cinas-permissions
+
+
+- job:
+    name: check-cinas-permissions
+    description: Check if cinas beta-builds directory still has proper permissions, and jenkins is able to write to there
+    node: megatron-host
+    logrotate:
+      daysToKeep: 10
+
+    wrappers:
+    - timestamps
+
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          cat "$0"
+          FILE_PATH=/mnt/beta-builds/daily/jenkins-check-cinas-permissions
+          touch "$FILE_PATH"
+          ls $(dirname "$FILE_PATH") | grep $(basename "$FILE_PATH")
+          rm "$FILE_PATH"
+
+    publishers:
+      - email-ext:
+          recipients: vfedorov@networkoptix.com, iremizov@networkoptix.com
+          subject: '[CI failure] CI NAS permissions check'
+          attach-build-log: true
+          fixed: true
