@@ -6,13 +6,16 @@
 
 - job:
     name: check-cinas-permissions
-    description: Check if cinas beta-builds directory still has proper permissions, and jenkins is able to write to there
+    description: Check if cinas beta-builds directory still has proper permissions, and jenkins is able to write to it
     node: megatron-host
     logrotate:
       daysToKeep: 10
 
+    triggers:
+      - timed: 'H/5 * * * *'
+
     wrappers:
-    - timestamps
+      - timestamps
 
     builders:
       - shell: |
