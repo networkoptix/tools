@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import argparse
 import logging
@@ -9,9 +9,17 @@ import unittest
 
 from pprint import pformat, pprint
 
-LOG_FORMAT='%(asctime)s %(levelname)-8s %(name)s: %(message)s'
+def setup_logging(level: str = 'debug', path: str = '-'):
+    '''Sets up application log :level and :path.
+    '''
+    logging.basicConfig(
+        level = getattr(logging, level.upper(), None) or int(args.level),
+        stream = sys.stdout if path == '-' else open(path, 'w'),
+        format = '%(asctime)s %(levelname)-8s %(name)s: %(message)s')
 
-def is_ascii_printable(s):
+    logging.info('Log is configured for level: {}, file: {}'.format(level, path))
+
+def is_ascii_printable(s: str):
     try:
         s.encode('ascii')
     except (UnicodeDecodeError, UnicodeEncodeError):
@@ -19,40 +27,33 @@ def is_ascii_printable(s):
     else:
         return all(c in string.printable for c in s)
 
-def file_content(path):
+def file_content(path: str) -> str:
     with open(path, 'r') as f:
         return f.read().replace('\r', '')
 
-def resource_path(name):
+def resource_path(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
-def resource_content(name):
+def resource_content(name: str) -> str:
     return file_content(resource_path(name))
 
-def assert_eq(expected, actual, name=''):
+def assert_eq(expected, actual, name: str = ''):
     assert expected == actual, 'mismatch: {}\nExpected:\n{}\nActual:\n{}'.format(
         name, pformat(expected), pformat(actual))
-
-def setup_logging(level=0):
-    logging.basicConfig(level=level, format=LOG_FORMAT, stream=sys.stdout)
-    logging.info('Log is configured for level: {}'.format(level))
 
 class TestCase(unittest.TestCase):
     def setUp(self):
         print('-' * 70)
         print('{}.{}'.format(type(self).__name__, self._testMethodName))
 
-def run_ut():
+def run_unit_tests():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-l', '--log-level', type=str, default="info")
-    parser.add_argument('module', nargs='?', help="TestCase[.test]")
+    parser.add_argument('-l', '--log-level', type = str, default = "info")
+    parser.add_argument('module', nargs='?', help = "TestCase[.test]")
 
-    args = parser.parse_args()
-    setup_logging(
-        getattr(logging, args.log_level.upper(), None) or int(args.log_level))
+    arguments = parser.parse_args()
+    setup_logging(arguments.log_level)
 
     sys.argv = sys.argv[:1]
-    if args.module:
-        sys.argv.append(args.module)
-
-    unittest.main(verbosity=0)
+    if arguments.module: sys.argv.append(arguments.module)
+    unittest.main(verbosity = 0)

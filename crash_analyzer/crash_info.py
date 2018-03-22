@@ -1,11 +1,28 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+import hashlib
+import os
+
+from typing import List, Tuple
 
 class Error(Exception):
     pass
 
-class Description(object):
-    def __init__(self, name):
-        '''Created dump description by it's canonical name:
+class Reason(object):
+    def __init__(self, component: str, code: str, stack: List[str]):
+        self.component = component
+        self.code = code
+        self.stack = stack
+
+    def __str__(self):
+        return '{}, code: {}, stack: {} frames'.format(self.component, self.code, len(self.stack))
+
+    def crash_id(self) -> str:
+        return hashlib.sha256('\n\n'.join(self.component, self.code, '\n'.join(self.stack)))
+
+class Report(object):
+    def __init__(self, name: str):
+        '''Created crash report description by it's canonical name:
            <binary>--<version>.<build>-<changeset>-<customization>--<etc>.<format>
         '''
         def component(string):
@@ -47,10 +64,13 @@ class Description(object):
         if len(self.format) > 10:
             raise Error('Invalid format: ' + self.format)
 
-    def describe_bt(self, content, describer):
+    def __str__(self):
+        return self.name
+
+    def analyze_bt(self, content: str, describer: object) -> Reason:
         '''Extracts error code and call stack by rules in describer.
         '''
-        def cut(content, begin, end, is_header=False):
+        def cut(content, begin, end, is_header = False):
             content = content.replace('\r', '')
             try:
                 start = content.index(begin) + len(begin)
@@ -60,11 +80,11 @@ class Description(object):
                 stop = content.index(end or '\n', start)
                 return content[start:stop]
 
-            except ValueError, IndexError:
+            except (ValueError, IndexError):
                 return None
 
-        self.code = cut(content, describer.code_begin, describer.code_end)
-        if not self.code:
+        code = cut(content, describer.code_begin, describer.code_end)
+        if not code:
             raise Error('Unable to get Error Code for: ' + self.name)
 
         stack_content = cut(content, describer.stack_begin, describer.stack_end, True)
@@ -91,10 +111,9 @@ class Description(object):
         if not resolved_lines:
             raise Error('Unresolved Call Stack for: ' + self.name)
 
-        self.stack = transformed_stack
-        return self.code, self.stack
+        return Reason(self.component, code, transformed_stack)
 
-    def describe_linux_gdb_bt(self, content):
+    def analyze_linux_gdb_bt(self, content: str) -> Reason:
         '''Extracts error code and call stack by rules from linux gdb bt output.
         '''
         class GdbDescriber:
@@ -134,9 +153,9 @@ class Description(object):
                 # Gdb replaces function names with ?? if they are not avaliable.
                 return line.startswith('#') and line.find('??') == -1
 
-        return self.describe_bt(content, GdbDescriber)
+        return self.analyze_bt(content, GdbDescriber)
 
-    def describe_windows_cdb_bt(self, content):
+    def analyze_windows_cdb_bt(self, content: str) -> Reason:
         '''Extracts error code and call stack by rules from windows cdb bt output.
         '''
         class CdbDescriber:
@@ -168,5 +187,30 @@ class Description(object):
 
                 return len(split) > 1 #< Function name is present.
 
-        return self.describe_bt(content, CdbDescriber)
+        return self.analyze_bt(content, CdbDescriber)
 
+    def crash_id(self):
+        '''Generates error code and stack based crash id to find similar cases.
+        '''
+        return hashlib.sha256(self.code + '\n\n' + '\n'.join(self.stack))
+
+
+def analyze(report_path: str) -> Tuple[Report, Reason]:
+    '''Describes report by file name and it's format.
+    '''
+    report = Report(os.path.basename(report_path))
+    report.files = [report_path]
+    with open(report_path, 'r') as f:
+        content = f.read()
+
+    if report.format == 'gdb-bt':
+        reason = report.analyze_linux_gdb_bt(content)
+
+    elif report.format == 'cdb-bt':
+        reason = report.analyze_windows_cdb_bt(content)
+
+    # TODO: Add support for dmp.
+    else:
+        raise Error('Dump format is not supported: ' + report_path)
+
+    return report, reason
