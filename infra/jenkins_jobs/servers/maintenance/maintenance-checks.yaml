@@ -1,0 +1,5 @@
+- project:
+    name: maintenance-checks
+    jobs:
+      - check-cinas-permissions:
+          recipients: vfedorov@networkoptix.com, iremizov@networkoptix.com

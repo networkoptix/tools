@@ -1,4 +1,4 @@
-- job:
+- job-template:
     name: check-cinas-permissions
     description: >
       Check if cinas beta-builds directory still has proper permissions, and
@@ -7,6 +7,8 @@
     node: megatron-host
     logrotate:
       daysToKeep: 10
+
+    file_path: '/mnt/beta-builds/daily/jenkins-check-cinas-permissions'
 
     triggers:
       - timed: 'H/5 * * * *'
@@ -17,14 +19,13 @@
     builders:
       - shell: |
           #!/bin/bash -xe
-          FILE_PATH=/mnt/beta-builds/daily/jenkins-check-cinas-permissions
-          touch "$FILE_PATH"
-          ls $(dirname "$FILE_PATH") | grep $(basename "$FILE_PATH")
-          rm "$FILE_PATH"
+          touch "{file_path}"
+          ls $(dirname "{file_path}") | grep $(basename "{file_path}")
+          rm "{file_path}"
 
     publishers:
       - email-ext:
-          recipients: vfedorov@networkoptix.com, iremizov@networkoptix.com
+          recipients: '{recipients}'
           subject: '[CI failure] CI NAS permissions check'
           attach-build-log: true
           fixed: true
