@@ -35,14 +35,17 @@ def runtime_config_file(config):
 
 def check_config(config):
     config_file_path = config_file(config)
+    print 'Using config {}'.format(config_file_path)
     if os.path.isfile(config_file_path):
         return
 
     if not os.path.exists(config_path):
         os.makedirs(config_path)
+
+    posix_path = os.path.normpath(config_path).replace('\\', '/')
     id = str(uuid.uuid4())
     with open(config_file_path, 'w') as conf:
-        conf.write(config_template.format(id, config_path, config))
+        conf.write(config_template.format(id, posix_path, config))
 
 
 def run_server(config):
