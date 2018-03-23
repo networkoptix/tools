@@ -6,6 +6,9 @@
   # All facts will be collected in libvirt_guest.
   gather_facts: no
 
+  vars_files:
+  - ../secrets/jenkins_credentials.yml
+
   roles:
   - role: libvirt_guest
     become: true
