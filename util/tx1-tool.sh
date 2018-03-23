@@ -84,6 +84,7 @@ Here <command> can be one of the following:
  run-s-ut mask [args] # Run unit test(s) (use mask \"*_ut\" for all) in server dir.
  run-c-ut mask [args] # Run unit test(s) (use mask \"*_ut\" for all) in desktop_client dir.
  run-tv [args] # Run video_dec_gie with [args].
+ log [grep-args] # Do "tail -F" for log_file.log, grepping with specified args.
 
  tv [args] # Build on the box: libtegra_video_so and video_dec_gie, via "make" with [args].
  tv-ut [cmake-args] # Build and run unit tests on the workstation.
@@ -612,6 +613,15 @@ main()
             get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR
             local BOX_SRC_DIR="$BOX_VMS_DIR/$VIDEO_DEC_GIE_SRC_PATH"
             nx_go cd "$BOX_SRC_DIR" "[&&]" ./video_dec_gie "$@"
+            ;;
+        log)
+            local -r LOG="$BOX_MEDIASERVER_DIR/var/log/log_file.log"
+            if [[ $# == 0 ]]
+            then 
+                nx_go tail -F "$LOG"
+            else
+                nx_go tail -F "$LOG" "[|]" grep "$@"
+            fi
             ;;
         #..........................................................................................
         tv)
