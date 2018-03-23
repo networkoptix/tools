@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import json
 import logging
 import os
 
@@ -13,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class CrashInfo(utils.TestCase):
     def test_describe_path(self):
-        name_records = json.loads(utils.resource_content("names.json"))
+        name_records = utils.resource_parse("names.json")
         for name, expected_report in name_records.items():
             logger.debug(name)
             report = crash_info.Report(name)

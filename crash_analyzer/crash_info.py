@@ -3,6 +3,7 @@
 import hashlib
 import os
 
+from glob import glob
 from typing import List, Tuple
 
 class Error(Exception):
@@ -18,7 +19,8 @@ class Reason(object):
         return '{}, code: {}, stack: {} frames'.format(self.component, self.code, len(self.stack))
 
     def crash_id(self) -> str:
-        return hashlib.sha256('\n\n'.join(self.component, self.code, '\n'.join(self.stack)))
+        description = '\n\n'.join((self.component, self.code, '\n'.join(self.stack)))
+        return hashlib.sha256(description.encode('utf-8')).hexdigest()
 
 class Report(object):
     def __init__(self, name: str):
@@ -27,9 +29,6 @@ class Report(object):
         '''
         def component(string):
             return 'Server' if ('server' in string) else 'Client'
-
-        def team(string):
-            return 'Server' if ('server' in string) else 'GUI'
 
         def format(string):
             return string.split('.')[-1:][0]
@@ -54,7 +53,6 @@ class Report(object):
             self.name = name
             self.binary = split[0]
             self.component = component(split[0])
-            self.team = team(split[0])
             self.format = format(split[-1])
             set_build_info(split[1])
 
@@ -85,11 +83,11 @@ class Report(object):
 
         code = cut(content, describer.code_begin, describer.code_end)
         if not code:
-            raise Error('Unable to get Error Code for: ' + self.name)
+            raise Error('Unable to get Error Code from: ' + self.name)
 
         stack_content = cut(content, describer.stack_begin, describer.stack_end, True)
         if not stack_content:
-            raise Error('Unable to get Call Stack for: ' + self.name)
+            raise Error('Unable to get Call Stack from: ' + self.name)
 
         stack = []
         for line in stack_content.split('\n'):
@@ -109,7 +107,7 @@ class Report(object):
                 resolved_lines += 1
 
         if not resolved_lines:
-            raise Error('Unresolved Call Stack for: ' + self.name)
+            raise Error('Unresolved Call Stack in: ' + self.name)
 
         return Reason(self.component, code, transformed_stack)
 
@@ -128,7 +126,7 @@ class Report(object):
                 return any(line.startswith(p) for p in (
                     '#', #< Stack frame.
                     'Backtrace stopped', #< Error during unwind.
-                    '(More stack' #< Trancation.
+                    '(More stack', #< Trancation.
                 ))
 
             @staticmethod
@@ -189,17 +187,16 @@ class Report(object):
 
         return self.analyze_bt(content, CdbDescriber)
 
-    def crash_id(self):
-        '''Generates error code and stack based crash id to find similar cases.
+    def find_files(self, directory):
+        '''Sets files by matches in :directory.
         '''
-        return hashlib.sha256(self.code + '\n\n' + '\n'.join(self.stack))
-
+        self.files = glob(os.path.join(directory, self.name[:-len(self.format)] + '*'))
+        return self.files
 
 def analyze(report_path: str) -> Tuple[Report, Reason]:
     '''Describes report by file name and it's format.
     '''
     report = Report(os.path.basename(report_path))
-    report.files = [report_path]
     with open(report_path, 'r') as f:
         content = f.read()
 

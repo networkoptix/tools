@@ -6,6 +6,7 @@ import os
 import string
 import sys
 import unittest
+import yaml
 
 from pprint import pformat, pprint
 
@@ -31,11 +32,17 @@ def file_content(path: str) -> str:
     with open(path, 'r') as f:
         return f.read().replace('\r', '')
 
+def file_parse(path: str):
+    return yaml.load(file_content(path))
+
 def resource_path(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
 def resource_content(name: str) -> str:
     return file_content(resource_path(name))
+
+def resource_parse(name: str):
+    return yaml.load(resource_content(name))
 
 def assert_eq(expected, actual, name: str = ''):
     assert expected == actual, 'mismatch: {}\nExpected:\n{}\nActual:\n{}'.format(
