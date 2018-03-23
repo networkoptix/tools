@@ -3,11 +3,20 @@
     content: "{{ mercurial_ppk }}"
     dest: /home/Users/jenkins/mercurial.ppk
 
+- name: "Download hg long filenames extension"
+  # see https://www.mercurial-scm.org/wiki/Win32LongFileNamesExtension
+  get_url:
+    url: "https://bitbucket.org/remleduff/win32lfn/raw/397c0cfe3615787acb344b5a2d44e3160b5833bc/src/win32lfn.py"
+    dest: "/home/Users/jenkins/win32lfn.py"
+
 - name:
   copy:
     content: |-
       [ui]
       ssh="C:\Program Files\TortoiseHg\lib\TortoisePlink.exe" -i "C:\Users\jenkins\mercurial.ppk"
+
+      [extensions]
+      win32lfn = C:\Users\jenkins\win32lfn.py
     dest: /home/Users/jenkins/.hgrc
 
 - name: add hdw.mx to known hosts
