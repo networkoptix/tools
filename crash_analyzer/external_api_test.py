@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import json
 import os
-import yaml
 
 from typing import List, Tuple
 
@@ -10,7 +8,7 @@ import crash_info
 import external_api
 import utils
 
-CONFIG = yaml.load(utils.resource_content('monitor_config.yaml'))
+CONFIG = utils.resource_parse('monitor_config.yaml')
 
 class CrashServer(utils.TestCase):
     def setUp(self):
@@ -42,11 +40,13 @@ class Jira(utils.TestCase):
         try:
             self.api.update(case, [report])
             issue = self.api._jira.issue(case)
-            # Werify newly created case
+            # Verify newly created case.
             self.assertTrue(issue.key.startswith('VMS-'))
-            self.assertEqual(u'Open', issue.fields.status.name)
-            self.assertEqual(u'TEST-RUN Server has crashed: SEGFAULT', issue.fields.summary)
-            self.assertEqual(u'Call Stack:\n{code}\nf1\nf2\n{code}', issue.fields.description)
+            self.assertEqual('Open', issue.fields.status.name)
+            self.assertEqual('TEST-RUN Server has crashed: SEGFAULT', issue.fields.summary)
+            self.assertEqual('Call Stack:\n{code}\nf1\nf2\n{code}', issue.fields.description)
+            self.assertEqual('Server', issue.fields.customfield_10200.value)
+            self.assertEqual(set([u'Server']), set(c.name for c in issue.fields.components))
             self.assertEqual(set([u'3.1']), set(v.name for v in issue.fields.versions))
             self.assertEqual(set([u'3.1_hotfix']), set(v.name for v in issue.fields.fixVersions))
             self.assertEqual(set([u'1234']), self._attachments(issue))
@@ -84,7 +84,7 @@ class Jira(utils.TestCase):
     @staticmethod
     def _analyze(name: str) -> Tuple[crash_info.Report, crash_info.Reason]:
         report = crash_info.Report(name)
-        report.files = [utils.resource_path('jira/' + name)]
+        report.find_files(utils.resource_path('jira'))
         reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'])
         return report, reason
 

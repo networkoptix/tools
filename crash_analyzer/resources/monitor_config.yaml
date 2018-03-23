@@ -1,9 +1,12 @@
-# Crash Monitor configuration
+# Crash Monitor Example Configuration
 
 options:
-    format: gdb-bt # For windows should be: dmp
-    min_version: 3.2
+    format: "*-bt" # gdb-bt for linux, dmp for windows
+    min_version: "2.4" # supposed to be 3.2
     min_report_count: 2
+    directory: ./tmp
+    reports_each_run: 100
+    stand_by_sleep_s: 60 # 1 minute
 
 crashServer:
     url: http://stats.networkoptix.com/crashserver/api/
@@ -15,10 +18,6 @@ jira:
     login: service@networkoptix.com
     password: kbnUk06boqBkwU
     file_limit: 3
-
-cache:
-    directory: ./cache
-    size_limit: 50G
 
 dumpTool: # Windows only
     directory: ./cache/dumptool

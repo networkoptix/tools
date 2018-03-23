@@ -17,7 +17,8 @@ python3 -m pip install pyaml jira
 ## Run Tests
 
 ```
-./crash_info_test.py      # Crash report stack extraction.
-./external_api_test.py    # External server API (functional test).
+./crash_info_test.py      # Crash report stack extraction UT.
+./external_api_test.py    # External server API FT.
+./monitor_test.py         # Monitoring system UT.
 ```
 

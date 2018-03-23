@@ -55,13 +55,15 @@ class Jira(object):
     def create(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         '''Creates JIRA case by crash :report.
         '''
+        TEAM_BY_COMPONENT = dict(Server = 'Server', Client = 'GUI')
         issue = self._jira.create_issue(
             project = 'VMS',
             issuetype = {'name': 'Bug'},
             summary = self._prefix + '{r.component} has crashed: {r.code}'.format(r = reason),
             versions = [{'name': report.version}],
             fixVersions = [{'name': report.version + '_hotfix'}],
-            customfield_10200 = {"value": report.team},
+            components = [{'name': reason.component}],
+            customfield_10200 = {"value": TEAM_BY_COMPONENT[reason.component]},
             description = '\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
 
         logger.info("New JIRA case {}: {}".format(issue.key, issue.fields.summary))
@@ -78,17 +80,17 @@ class Jira(object):
             min_fix = min(v.name for v in issue.fields.fixVersions)
             max_repro = max(d.version for d in reports)
             if min_fix > max_repro:
-                logging.debug('JIRA case {} is already fixed'.format(key))
+                logger.debug('JIRA case {} is already fixed'.format(key))
                 return
             else:
                 self._transition(issue, 'Reopen')
-                logging.info('Reopen JIRA case {} for version {}'.format(key, max_repro))
+                logger.info('Reopen JIRA case {} for version {}'.format(key, max_repro))
 
         issueVersions = set(v.name for v in issue.fields.versions)
         newVersions = issueVersions | set(d.version for d in reports)
         if issueVersions != newVersions:
             issue.update(fields = {'versions': list({'name': v} for v in newVersions) })
-            logging.debug('JIRA case {} is updated for versions: {}'.format(
+            logger.debug('JIRA case {} is updated for versions: {}'.format(
                 key, ', '.join(newVersions)))
 
         self._attach_files(key, sum((d.files for d in reports), []))
