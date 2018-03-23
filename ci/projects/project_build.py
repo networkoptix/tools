@@ -2,6 +2,8 @@
 
 import logging
 import os.path
+import os
+import glob
 import abc
 import re
 import yaml
@@ -42,6 +44,7 @@ log = logging.getLogger(__name__)
 
 
 VERSION_FILE = 'version'
+BUILD_INFO_FILE_NAME_GLOB = 'build_info*.yaml'  # build infos for platforms and for whole build
 WEBADMIN_NODE = 'webadmin'
 WEBADMIN_EXTERNAL_DIR = 'webadmin-external'
 WEBADMIN_PLATFORM_NAME = 'webadmin'
@@ -185,12 +188,18 @@ class BuildProject(NxVmsProject):
         self.clean_stamps.init_master(self.params)
         if self.must_skip_this_build():
             return None
+        self._cleanup_previous_build_info_files()
         self._init_build_info()
 
         return [
             self._make_webadmin_build_command(),
             self._make_platform_build_command(),
             ] + self._make_finalize_command_list()
+
+    def _cleanup_previous_build_info_files(self):
+        for fname in glob.glob(BUILD_INFO_FILE_NAME_GLOB):
+            log.debug('Removing build info from previous build: %r', fname)
+            os.remove(fname)
 
     # create models.Build and create models.BuildChangeSet records for it
     def _init_build_info(self):
@@ -299,7 +308,6 @@ class BuildProject(NxVmsProject):
             return 'psa-{}-{}'.format(self.jenkins_env.job_name, workspace_name)
         else:
             return workspace_name
-
 
     # build_webadmin ===============================================================================
     def stage_build_webadmin(self):
@@ -430,6 +438,10 @@ class BuildProject(NxVmsProject):
         for customization in self.requested_customization_list:
             for platform in self.requested_platform_list:
                 file_name = BUILD_INFO_FILE_NAME_FORMAT.format(customization, platform)
+                if not os.path.exists(file_name):
+                    log.warning('Build info for %s/%s is missing (probably due to failed CI subjob); skipping.',
+                                    customization, platform)
+                    continue
                 with open(file_name) as f:
                     yield ((customization, platform), PlatformBuildInfo.from_dict(yaml.load(f)))
 
