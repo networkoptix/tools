@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 ARTIFACT_LINE_COUNT_LIMIT = 100000
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
-POPEN_BUF_SIZE = 1024*1024  # 1M
+POPEN_BUF_SIZE = 10*1024*1024  # 10M
 
 DEFAULT_LOG_LEVEL = 'DEBUG1'
 
