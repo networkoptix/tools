@@ -151,12 +151,22 @@ do_pack() # archive copy_command...
 
 get_VMS_DIR_and_CMAKE_BUILD_DIR_and_BOX_VMS_DIR()
 {
-    local DIRS=( $("$LINUX_TOOL" print-dirs "$TARGET") )
+    local DIRS=()
+    while IFS="" read -r -d $'\n'; do
+        DIRS+=("$REPLY")
+    done < <("$LINUX_TOOL" print-dirs)
 
-    VMS_DIR=${DIRS[0]}
+    # Skipping lines starting with "+".
+    local -i i=0
+    while [[ $i < ${#DIRS[@]} && ${DIRS[$i]} =~ ^\+ ]]
+    do
+        let i++
+    done
+
+    VMS_DIR=${DIRS[$i]}
     [ -z "$VMS_DIR" ] && nx_fail "Unable to get VMS_DIR via $LINUX_TOOL print-dirs"
 
-    CMAKE_BUILD_DIR=${DIRS[1]}
+    CMAKE_BUILD_DIR=${DIRS[(($i + 1))]}
     [ -z "$CMAKE_BUILD_DIR" ] && nx_fail "Unable to get CMAKE_BUILD_DIR via $LINUX_TOOL print-dirs"
 
     BOX_VMS_DIR="$BOX_DEVELOP_DIR${VMS_DIR#$DEVELOP_DIR}"
