@@ -1,0 +1,263 @@
+- name: Query plugins
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      println(Jenkins.instance.pluginManager.plugins)
+    args: {}
+  register: result
+  changed_when: false
+
+- name: Installed plugins
+  debug:
+    msg: "{{ result.output}}"
+
+- name: Set frontend url
+  when: false  #FIXME: uncomment when jenkins have it's hostname
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      frontend_url = "${frontend_url}"
+
+      Jenkins j = Jenkins.instance
+      JenkinsLocationConfiguration l = j.getExtensionList('jenkins.model.JenkinsLocationConfiguration')[0]
+      save = false
+
+      if(l.url != frontend_url) {
+        println "Current URL is: " + l.url.toString()
+        println "Setting URL to: " + frontend_url.toString()
+        l.url = frontend_url
+        save = true
+      }
+
+      if(save) {
+        l.save()
+        println "Configuration changed"
+      }
+    args:
+      frontend_url: "{{ jenkins_hostname }}"
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+- name: Set system message
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      system_message = "${system_message}"
+
+      Jenkins j = Jenkins.instance
+      save = false
+
+      if(j.systemMessage != system_message) {
+        println "Current SysMessage is: " + j.systemMessage.toString()
+        println "Setting SysMessage to: " + system_message.toString()
+        j.systemMessage = system_message
+        save = true
+      }
+
+      if(save) {
+        j.save()
+        println "Configuration changed"
+      }
+    args:
+      system_message: ""
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+
+- name: Set Markup formatter (OWASP plugin)
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+      import hudson.markup.RawHtmlMarkupFormatter
+
+      formatter = "${formatter}"
+
+      Jenkins j = Jenkins.instance
+      save = false
+
+
+      if (formatter == "raw_html") {
+        if(j.markupFormatter.class.toString() != "class hudson.markup.RawHtmlMarkupFormatter") {
+          println "Current markup formatter cls is: " + j.markupFormatter.class.toString()
+          j.markupFormatter = new RawHtmlMarkupFormatter(false)
+          save = true
+        }
+      }
+
+      if (formatter == "escaped_html") {
+        if(j.markupFormatter.class.toString() != "class hudson.markup.EscapedMarkupFormatter") {
+          println "Current markup formatter cls is: " + j.markupFormatter.class.toString()
+          println "Cannot change"
+        }
+      }
+
+      if(save) {
+        j.save()
+        println "Configuration changed"
+      }
+    args:
+      formatter: "raw_html"
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+- name: Set quiet period and retry counts
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      quiet_period = ${quiet_period}
+      scm_checkout_retry_count = ${scm_checkout_retry_count}
+
+      Jenkins j = Jenkins.instance
+      save = false
+
+      if(j.quietPeriod != quiet_period) {
+        println "Current Jenkins Quiet Period is: " + j.quietPeriod.toString()
+        println "Setting Jenkins Quiet Period to: " + quiet_period.toString()
+        j.quietPeriod = quiet_period
+        save = true
+      }
+
+      if(j.scmCheckoutRetryCount != scm_checkout_retry_count) {
+        println "Current SCM checkout retry count is: " + j.scmCheckoutRetryCount.toString()
+        println "Setting SCM checkout retry count to: " + scm_checkout_retry_count.toString()
+        j.scmCheckoutRetryCount = scm_checkout_retry_count
+        save = true
+      }
+
+      if(save) {
+        j.save()
+        println "Configuration changed"
+      }
+    args:
+      quiet_period: 5
+      scm_checkout_retry_count: 0
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+- name: Set admin email address
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      admin_email = "${admin_email}"
+
+      Jenkins j = Jenkins.instance
+      JenkinsLocationConfiguration l = j.getExtensionList('jenkins.model.JenkinsLocationConfiguration')[0]
+      save = false
+
+      if(l.adminAddress != admin_email) {
+        println "Current Admin Email is: " + l.adminAddress.toString()
+        println "Setting Admin Email to: " + admin_email.toString()
+        l.adminAddress = admin_email
+        save = true
+      }
+
+      if(save) {
+        l.save()
+        println "Configuration changed"
+      }
+    args:
+      admin_email: vfedorov@networkoptix.com
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+- name: Set jnlp port
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      jnlp_slave_port = ${jnlp_slave_port}
+
+      Jenkins j = Jenkins.instance
+      save = false
+
+      if(j.slaveAgentPort != jnlp_slave_port) {
+        println "Current jnlp port is: " + j.slaveAgentPort.toString()
+        println "Setting jnlp port to: " + jnlp_slave_port.toString()
+        if(jnlp_slave_port <= 65535 && jnlp_slave_port >= -1) {
+          j.slaveAgentPort = jnlp_slave_port
+          save = true
+        }
+        else {
+          println "ERROR: JNLP port ${jnlp_slave_port} outside of TCP port range.  Must be within -1 <-> 65535.  Nothing changed."
+        }
+      }
+
+      if(save) {
+        j.save()
+        println "Configuration changed"
+      }
+    args:
+      jnlp_slave_port: -1
+  register: result
+  changed_when: "'Configuration changed' in result.output"
+
+- name: Setup master as build node
+  jenkins_script:
+    user: "{{ jenkins_admin_user }}"
+    password: "{{ jenkins_admin_password }}"
+    url: "{{ jenkins_url }}"
+    script: |
+      import jenkins.model.*
+
+      master_executors = ${master_executors}
+      master_labels = "${master_labels}"
+      master_usage = "${master_usage}"
+
+      Jenkins j = Jenkins.instance
+      save = false
+
+      if(j.numExecutors != master_executors) {
+        println "Current master num executors is: " + j.numExecutors.toString()
+        println "Setting master num executors to: " + master_executors.toString()
+        j.numExecutors = master_executors
+        save = true
+      }
+
+      if(j.labelString != master_labels) {
+        println "Current master labels is: " + j.labelString.toString()
+        println "Setting master labels to: " + master_labels.toString()
+        j.setLabelString(master_labels)
+        save = true
+      }
+
+      if(j.mode.toString() != master_usage) {
+        println "Current master usage is: " + j.mode.toString()
+        println "Setting master usage to: " + master_usage.toString()
+        j.mode = Node.Mode."${master_usage}"
+        save = true
+      }
+
+      if(save) {
+        j.save()
+        println "Configuration changed"
+      }
+    args:
+      master_executors: 20
+      master_labels: ""
+      master_usage: "NORMAL"  # TODO: check one of NORMAL, EXCLUSIVE
+  register: result
+  changed_when: "'Configuration changed' in result.output"

@@ -3,5 +3,6 @@
 - import_playbook: plays/build_vm_lin.yml
 - import_playbook: plays/depcon.yml
 - import_playbook: plays/mega_shelter.yml
-- import_playbook: plays/jenkins_master.yml
+- import_playbook: plays/jenkins_master_deploy.yml
+- import_playbook: plays/jenkins_master_configure.yml
 - import_playbook: plays/dev_build.yml

@@ -1,0 +1,3 @@
+jenkins_admin_user: admin
+jenkins_admin_password: admin
+jenkins_url: http://localhost:8080
