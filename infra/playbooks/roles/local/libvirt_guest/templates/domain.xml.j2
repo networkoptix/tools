@@ -38,7 +38,7 @@
     <vmport state='off'/>
   </features>
   <cpu mode='custom' match='exact'>
-    <model fallback='forbid'>Broadwell</model>
+    <model fallback='forbid'>{{ libvirt_guest__cpu_model | default("Broadwell") }}</model>
   </cpu>
   {# TODO Windows wants offset='localtime' #}
   <clock offset='utc'>
@@ -136,7 +136,7 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-    
+
     <graphics type='spice' autoport='yes'>
       <listen type='address'/>
     </graphics>
