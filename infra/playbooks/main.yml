@@ -1,6 +1,7 @@
 - import_playbook: plays/libvirt_host.yml
 - import_playbook: plays/build_vm_win.yml
 - import_playbook: plays/build_vm_lin.yml
+- import_playbook: plays/functest_vm_lin.yml
 - import_playbook: plays/depcon.yml
 - import_playbook: plays/mega_shelter.yml
 - import_playbook: plays/jenkins_master_deploy.yml
