@@ -6,14 +6,19 @@ import os
 from glob import glob
 from typing import List, Tuple
 
+
 class Error(Exception):
     pass
+
 
 class Reason(object):
     def __init__(self, component: str, code: str, stack: List[str]):
         self.component = component
         self.code = code
         self.stack = stack
+
+    def __repr__(self):
+        return 'Reason({}, {}, {})'.format(repr(self.component), repr(self.code), repr(self.stack))
 
     def __str__(self):
         return '{}, code: {}, stack: {} frames, id: {}'.format(
@@ -23,11 +28,12 @@ class Reason(object):
         description = '\n\n'.join((self.component, self.code, '\n'.join(self.stack)))
         return hashlib.sha256(description.encode('utf-8')).hexdigest()
 
+
 class Report(object):
+    """Created crash report description by it's canonical name:
+       <binary>--<version>.<build>-<changeset>-<customization>--<etc>.<format>
+    """
     def __init__(self, name: str):
-        '''Created crash report description by it's canonical name:
-           <binary>--<version>.<build>-<changeset>-<customization>--<etc>.<format>
-        '''
         def component(string):
             return 'Server' if ('server' in string) else 'Client'
 
@@ -63,13 +69,17 @@ class Report(object):
         if len(self.format) > 10:
             raise Error('Invalid format: ' + self.format)
 
+    def __repr__(self):
+        return 'Report({})'.format(self.name)
+
     def __str__(self):
         return self.name
 
     def analyze_bt(self, content: str, describer: object) -> Reason:
-        '''Extracts error code and call stack by rules in describer.
-        '''
-        def cut(content, begin, end, is_header = False):
+        """Extracts error code and call stack by rules in describer.
+        """
+
+        def cut(content, begin, end, is_header=False):
             content = content.replace('\r', '')
             try:
                 start = content.index(begin) + len(begin)
@@ -91,7 +101,7 @@ class Report(object):
             raise Error('Unable to get Call Stack from: ' + self.name)
 
         stack = []
-        for line in stack_content.split('\n'):
+        for line in stack_content.splitlines():
             line = line.strip()
             if line:
                 if describer.is_new_line(line):
@@ -113,8 +123,9 @@ class Report(object):
         return Reason(self.component, code, transformed_stack)
 
     def analyze_linux_gdb_bt(self, content: str) -> Reason:
-        '''Extracts error code and call stack by rules from linux gdb bt output.
-        '''
+        """Extracts error code and call stack by rules from linux gdb bt output.
+        """
+
         class GdbDescriber:
             code_begin = 'Program terminated with signal '
             code_end = '.'
@@ -125,9 +136,9 @@ class Report(object):
             @staticmethod
             def is_new_line(line):
                 return any(line.startswith(p) for p in (
-                    '#', #< Stack frame.
-                    'Backtrace stopped', #< Error during unwind.
-                    '(More stack', #< Trancation.
+                    '#',  # < Stack frame.
+                    'Backtrace stopped',  # < Error during unwind.
+                    '(More stack',  # < Trancation.
                 ))
 
             @staticmethod
@@ -155,8 +166,9 @@ class Report(object):
         return self.analyze_bt(content, GdbDescriber)
 
     def analyze_windows_cdb_bt(self, content: str) -> Reason:
-        '''Extracts error code and call stack by rules from windows cdb bt output.
-        '''
+        """Extracts error code and call stack by rules from windows cdb bt output.
+        """
+
         class CdbDescriber:
             code_begin = 'ExceptionCode: '
             code_end = '\n'
@@ -182,21 +194,22 @@ class Report(object):
             def is_resolved(line):
                 split = line.split('!')
                 if not any(split[0].startswith(x) for x in (self.component, 'nx_')):
-                    return False #< We expect some of our modules to be resolved.
+                    return False  # < We expect some of our modules to be resolved.
 
-                return len(split) > 1 #< Function name is present.
+                return len(split) > 1  # < Function name is present.
 
         return self.analyze_bt(content, CdbDescriber)
 
     def find_files(self, directory):
-        '''Sets files by matches in :directory.
-        '''
+        """Sets files by matches in :directory.
+        """
         self.files = glob(os.path.join(directory, self.name[:-len(self.format)] + '*'))
         return self.files
 
+
 def analyze(report_path: str) -> Tuple[Report, Reason]:
-    '''Describes report by file name and it's format.
-    '''
+    """Describes report by file name and it's format.
+    """
     report = Report(os.path.basename(report_path))
     with open(report_path, 'r') as f:
         content = f.read()

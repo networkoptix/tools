@@ -10,9 +10,10 @@ import utils
 
 logger = logging.getLogger(__name__)
 
+
 class CrashInfo(utils.TestCase):
     def test_describe_path(self):
-        name_records = utils.resource_parse("names.json")
+        name_records = utils.resource_parse("names.yaml")
         for name, expected_report in name_records.items():
             logger.debug(name)
             report = crash_info.Report(name)
@@ -20,7 +21,7 @@ class CrashInfo(utils.TestCase):
                 self.assertEqual(value, getattr(report, key, False))
 
     def test_describe_path_failures(self):
-        for name in utils.resource_content("names_fail.list").split('\n'):
+        for name in utils.resource_parse("names_fail.yaml"):
             logger.debug(name)
             self.assertRaises(crash_info.Error, lambda: crash_info.Report(name))
 
@@ -41,8 +42,11 @@ class CrashInfo(utils.TestCase):
                 self.assertRaises(crash_info.Error, lambda: crash_info.analyze(dump))
             else:
                 report, reason = crash_info.analyze(dump)
+                print(repr(report), repr(reason))
                 self.assertEqual(code, reason.code)
-                self.assertEqual(stack.strip().split('\n'), reason.stack)
+                self.assertEqual(stack.strip().splitlines(), reason.stack)
+                self.assertEqual(64, len(reason.crash_id()))
+
 
 if __name__ == '__main__':
     utils.run_unit_tests()

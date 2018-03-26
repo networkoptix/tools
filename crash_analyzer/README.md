@@ -26,6 +26,6 @@ TODO: Dumptool refactor and integration + setup instructions.
 
 ## Run Crash Analyzer & Monitor
 
-1. Create config, see example in `resources/monitor_config.yaml`
+1. Create config, see example in `resources/monitor_example_config.yaml`
 2. Run monitor from terminal: `python3 monitor.py <config>`
 3. Keep an eye if it works, check logs from time to time :)

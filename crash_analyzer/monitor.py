@@ -5,13 +5,12 @@ import logging
 import os
 import time
 
-from typing import List
-
 import crash_info
 import external_api
 import utils
 
 logger = logging.getLogger(__name__)
+
 
 class Options:
     def __init__(self, directory: str, **extra):
@@ -37,15 +36,17 @@ class Options:
     def report_path(self, *report):
         return self.path('reports', *report)
 
+
 class Record:
     def __init__(self, name: str, crash_id: str = '', case: str = ''):
         self.name = name
         self.crash_id = crash_id
         self.case = case
 
+
 class Monitor:
     def __init__(self, options: Options,
-            crash_server: external_api.CrashServer, jira: external_api.Jira):
+                 crash_server: external_api.CrashServer, jira: external_api.Jira):
         self._options = options
         self._crash_server = crash_server
         self._jira = jira
@@ -58,8 +59,8 @@ class Monitor:
         self.flush_cache()
 
     def reload_cache(self):
-        '''Reloads runtime cache from file system.
-        '''
+        """Reloads runtime cache from file system.
+        """
         if not os.path.exists(self._options.report_path()):
             os.makedirs(self._options.report_path())
 
@@ -75,8 +76,8 @@ class Monitor:
             self.flush_cache()
 
     def flush_cache(self):
-        '''Flushes runtime cache to file system.
-        '''
+        """Flushes runtime cache to file system.
+        """
         with open(self._options.cache_path(), 'w') as f:
             for name, record in self._records.items():
                 fields = [x for x in [name, record.crash_id, record.case] if x]
@@ -90,8 +91,8 @@ class Monitor:
         # TODO: Clean up oldest crash files in case of HDD overflow.
 
     def download_new_reports(self):
-        '''Downloads all unknown dumps from crash server, returns names.
-        '''
+        """Downloads all unknown dumps from crash server, returns names.
+        """
         new_records = set()
         report_names = self._crash_server.list_all(self._options.format)
         for name in report_names:
@@ -101,10 +102,10 @@ class Monitor:
                 break
 
             if self._records.get(name, None):
-                continue #< Already downloaded.
+                continue  # < Already downloaded.
 
             if crash_info.Report(name).version < self._options.min_version:
-                continue #< Skip uninteresting versions.
+                continue  # < Skip uninteresting versions.
 
             with open(self._options.report_path(name), 'w') as f:
                 f.write(self._crash_server.get(name))
@@ -116,11 +117,11 @@ class Monitor:
         return new_records
 
     def analyze_new_reports(self):
-        '''Analyze all cached crash reports and fill crash_id.
-        '''
+        """Analyze all cached crash reports and fill crash_id.
+        """
         for name, record in self._records.items():
             if record.crash_id:
-                continue #< Analysis is not requred.
+                continue  # < Analysis is not requred.
 
             # TODO: Think about multithreaded solution for dmp.
             try:
@@ -136,8 +137,8 @@ class Monitor:
                 logger.debug('Dump {} is caused by: {}'.format(name, reason))
 
     def upload_to_jira(self):
-        '''Uploads all unuploaded reports.
-        '''
+        """Uploads all unuploaded reports.
+        """
         # These maps could be cached in class fields for performace increase. However currently it
         # is far away from being a bottle neck.
         cases_by_crash_id = dict()
@@ -153,7 +154,7 @@ class Monitor:
             case = cases_by_crash_id.get(crash_id, None)
             if not case:
                 if len(records) < self._options.min_report_count:
-                    continue #< Not enough reports for creating new case.
+                    continue  # < Not enough reports for creating new case.
 
                 reason = self._reasons.get(crash_id, None)
                 if not reason:
@@ -172,8 +173,8 @@ class Monitor:
                 record.case = case
 
     def run_service(self):
-        '''Run a download-analyze-upload loop forever.
-        '''
+        """Run a download-analyze-upload loop forever.
+        """
         logger.info('Service has started')
         while True:
             try:
@@ -197,6 +198,7 @@ class Monitor:
                 self.flush_cache()
                 time.sleep(self._options.stand_by_sleep_s)
 
+
 def main():
     parser = argparse.ArgumentParser('Crash Monitor and Analyzer')
     parser.add_argument('configuration_file');
@@ -211,6 +213,7 @@ def main():
         external_api.Jira(**config['jira']))
 
     monitor.run_service()
+
 
 if __name__ == '__main__':
     main()
