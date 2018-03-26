@@ -24,3 +24,7 @@
   - nano
   - mc
   - screen
+  - git
+
+# TODO: move to common
+- include_tasks: "{{ ansible_distribution_release }}_mercurial.yml"
