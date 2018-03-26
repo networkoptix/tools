@@ -34,7 +34,9 @@ class Deployer(object):
                 src_dir = src_root_dir
             for platform in platform_list:
                 platform_config = self._config.platforms[platform]
-                platform_build_info = platform_build_info_map[(customization, platform)]
+                platform_build_info = platform_build_info_map.get((customization, platform))
+                if not platform_build_info:
+                    continue
                 self._deploy_platform_artifacts(platform_config, customization, platform, platform_build_info, src_root_dir, src_dir, target_dir)
 
     def _deploy_build_info(self, build_info_path, target_dir):
