@@ -47,6 +47,7 @@ jenkins_plugins:
 # post-build actions
 - rebuild
 - naginator
+- email-ext
 # audit
 - jobConfigHistory
 # beautifiers
