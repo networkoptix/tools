@@ -31,10 +31,10 @@ class CrashServer(utils.TestCase):
 class Jira(utils.TestCase):
     def setUp(self):
         utils.TestCase.setUp(self)
-        self.api = external_api.Jira(prefix = 'TEST-RUN ', **CONFIG['jira'])
+        self.api = external_api.Jira(**CONFIG['jira'])
 
     def test_create_and_update(self):
-        report, reason = self._analyze('server--3.1.0.1234-abcd-default--1234.cdb-bt')
+        report, reason = self._analyze('server--3.1.0.1234-abcd-default--1234.gdb-bt')
         case = self.api.create(report, reason)
         issue = self.api._jira.issue(case)
         try:
@@ -43,7 +43,7 @@ class Jira(utils.TestCase):
             # Verify newly created case.
             self.assertTrue(issue.key.startswith('VMS-'))
             self.assertEqual('Open', issue.fields.status.name)
-            self.assertEqual('TEST-RUN Server has crashed: SEGFAULT', issue.fields.summary)
+            self.assertEqual('TEST-RUN Server has crashed on Linux: SEGFAULT', issue.fields.summary)
             self.assertEqual('Call Stack:\n{code}\nf1\nf2\n{code}', issue.fields.description)
             self.assertEqual('Server', issue.fields.customfield_10200.value)
             self.assertEqual(set([u'Server']), set(c.name for c in issue.fields.components))
@@ -56,15 +56,15 @@ class Jira(utils.TestCase):
             issue = self.api._jira.issue(case)
             self.assertEqual(u'Closed', issue.fields.status.name)
 
-            self.api.update(case, self._reports('server--3.1.0.5678-xyzu-default--5678.cdb-bt'))
+            self.api.update(case, self._reports('server--3.1.0.5678-xyzu-default--5678.gdb-bt'))
             issue = self.api._jira.issue(case)
             # No reopen will happen for dump from the same version.
             self.assertEqual(u'Closed', issue.fields.status.name)
             self.assertEqual(set([u'1234']), self._attachments(issue))
 
             self.api.update(case, self._reports(
-                'server--3.2.0.2344-asdf-default--3451.cdb-bt',
-                'server--3.2.0.3452-dfga-default--7634.cdb-bt'))
+                'server--3.2.0.2344-asdf-default--3451.gdb-bt',
+                'server--3.2.0.3452-dfga-default--7634.gdb-bt'))
             issue = self.api._jira.issue(case)
             # Reopen is expected for dumps from new version.
             issue = self.api._jira.issue(case)
@@ -72,7 +72,7 @@ class Jira(utils.TestCase):
             self.assertEqual(set([u'3.1', u'3.2']), set(v.name for v in issue.fields.versions))
             self.assertEqual(set([u'1234', u'3451', u'7634']), self._attachments(issue))
 
-            self.api.update(case, self._reports('server--4.0.0.1111-abcd-default--1111.cdb-bt'))
+            self.api.update(case, self._reports('server--4.0.0.1111-abcd-default--1111.gdb-bt'))
             issue = self.api._jira.issue(case)
             # First dump is replaced by the last one.
             self.assertEqual(set([u'3.1', u'3.2', u'4.0']), set(v.name for v in issue.fields.versions))

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import logging
 import os
 import time
@@ -34,7 +35,7 @@ class Options:
         return self.path('cache.txt')
 
     def report_path(self, *report):
-        return self.path('report', *report)
+        return self.path('reports', *report)
 
 class Record:
     def __init__(self, name: str, crash_id: str = '', case: str = ''):
@@ -59,14 +60,16 @@ class Monitor:
     def reload_cache(self):
         '''Reloads runtime cache from file system.
         '''
-        os.makedirs(self._options.report_path())
+        if not os.path.exists(self._options.report_path()):
+            os.makedirs(self._options.report_path())
+
         self._records = dict()
         try:
             with open(self._options.cache_path(), 'r') as f:
                 for line in f:
-                    split = line.split(' ')
+                    split = line[:-1].split(' ')
                     if split[0]:
-                        self.records[split[0]] = Record(*split)
+                        self._records[split[0]] = Record(*split)
 
         except FileNotFoundError:
             self.flush_cache()
@@ -135,6 +138,8 @@ class Monitor:
     def upload_to_jira(self):
         '''Uploads all unuploaded reports.
         '''
+        # These maps could be cached in class fields for performace increase. However currently it
+        # is far away from being a bottle neck.
         cases_by_crash_id = dict()
         records_by_crash_id = dict()
         for name, record in self._records.items():
@@ -145,13 +150,14 @@ class Monitor:
                     records_by_crash_id.setdefault(record.crash_id, []).append(record)
 
         for crash_id, records in records_by_crash_id.items():
-            if len(records) < self._options.min_report_count:
-                continue #< Not enough reports.
-
             case = cases_by_crash_id.get(crash_id, None)
             if not case:
+                if len(records) < self._options.min_report_count:
+                    continue #< Not enough reports for creating new case.
+
                 reason = self._reasons.get(crash_id, None)
                 if not reason:
+                    logger.error('Unable to get reason for crash id: {}'.format(crash_id))
                     continue
 
                 report = crash_info.Report(records[0].name)

@@ -16,7 +16,8 @@ class Reason(object):
         self.stack = stack
 
     def __str__(self):
-        return '{}, code: {}, stack: {} frames'.format(self.component, self.code, len(self.stack))
+        return '{}, code: {}, stack: {} frames, id: {}'.format(
+            self.component, self.code, len(self.stack), self.crash_id())
 
     def crash_id(self) -> str:
         description = '\n\n'.join((self.component, self.code, '\n'.join(self.stack)))

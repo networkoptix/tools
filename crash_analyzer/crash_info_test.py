@@ -37,7 +37,7 @@ class CrashInfo(utils.TestCase):
             logger.debug(dump)
             try:
                 code, stack = utils.file_content(dump + '-info').split('\n\n')
-            except IOError:
+            except FileNotFoundError:
                 self.assertRaises(crash_info.Error, lambda: crash_info.analyze(dump))
             else:
                 report, reason = crash_info.analyze(dump)

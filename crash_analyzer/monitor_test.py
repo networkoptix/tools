@@ -3,7 +3,6 @@
 import logging
 import os
 import shutil
-import yaml
 
 from glob import glob
 from typing import List
@@ -14,7 +13,6 @@ import utils
 
 class CrashServer:
     def list_all(self, format: str):
-        print(format)
         return list(os.path.basename(f) for f in glob(utils.resource_path('*/*' + format)))
 
     def get(self, name: str):
@@ -43,9 +41,14 @@ class Jira:
         for report in reports:
             case['versions'] = sorted(set(case['versions'] + [report.version]))
             case['attachments'] = sorted(set(case['attachments'] + report.files))
+            logging.debug('Case {} attached {}'.format(key, ', '.join(report.files)))
 
         logging.info('Case {} is updated with {} reports'.format(key, len(reports)))
 
+    def save(self, filename):
+        import yaml #< Debug only.
+        with open(filename, 'w') as f:
+            f.write(yaml.dump(self.cases, default_flow_style=False))
 
 class Monitor(utils.TestCase):
     def setUp(self):
@@ -59,13 +62,23 @@ class Monitor(utils.TestCase):
         del self.monitor
         shutil.rmtree(self.options.directory)
 
-    def test_linux(self): self._test_monitor(format = 'gdb-bt')
-    def test_windows(self): self._test_monitor(format = 'cdb-bt')
-    def test_multisystem(self): self._test_monitor(format = '-bt')
+    def test_linux(self):
+        self._test_monitor(format = 'gdb-bt')
 
-    # TODO: Uncomment and fix these tests.
-    #def test_partial(self): self._test_monitor(format = '-bt', reports_each_run = 5)
-    #def test_remake(self): self._test_monitor(format = '-bt', reports_each_run = 5, remake = True)
+    def test_windows(self):
+        self._test_monitor(format = 'cdb-bt')
+
+    def test_multisystem(self):
+        self._test_monitor(format = '-bt')
+
+    def test_partial(self):
+        self._test_monitor(format = '-bt', reports_each_run = 5)
+
+    def test_remake(self):
+        self._test_monitor(format = '-bt', remake = True)
+
+    def test_remake_partial(self):
+        self._test_monitor(format = '-bt', reports_each_run = 5, remake = True)
 
     def _test_monitor(self, format, remake = False, **options):
         self.options.update(format = ('*-bt' if format == '-bt' else format), **options)

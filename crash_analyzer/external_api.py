@@ -50,20 +50,29 @@ class Jira(object):
     def __init__(self, url: str, login: str, password: str, file_limit: int, prefix: str = ''):
         self._jira = jira.JIRA(server = url, basic_auth = (login, password))
         self._file_limit = file_limit
-        self._prefix = prefix
+        self._prefix = prefix + ' ' if prefix else ''
 
     def create(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         '''Creates JIRA case by crash :report.
         '''
-        TEAM_BY_COMPONENT = dict(Server = 'Server', Client = 'GUI')
+        def team(component: str) -> str:
+            try: return {'Server': 'Server', 'Client': 'GUI'}[component]
+            except KeyError: raise('Unsupported JIRA component:' + component)
+
+        def operation_system(format: str) -> str:
+            try: return {'gdb-bt': 'Linux', 'dmp': 'Windows'}[format]
+            except KeyError: raise('Unsupported JIRA format:' + format)
+
         issue = self._jira.create_issue(
             project = 'VMS',
             issuetype = {'name': 'Bug'},
-            summary = self._prefix + '{r.component} has crashed: {r.code}'.format(r = reason),
+            summary = self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
+                r = reason, os = operation_system(report.format)),
             versions = [{'name': report.version}],
             fixVersions = [{'name': report.version + '_hotfix'}],
             components = [{'name': reason.component}],
-            customfield_10200 = {"value": TEAM_BY_COMPONENT[reason.component]},
+            customfield_10200 = {"value": team(reason.component)},
+            customfield_10009 = "VMS-2022", #< Epic: Crash Monitor
             description = '\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
 
         logger.info("New JIRA case {}: {}".format(issue.key, issue.fields.summary))
@@ -107,6 +116,7 @@ class Jira(object):
         files.sort(key = lambda f: f.created)
         while len(files) > self._file_limit:
             self._jira.delete_attachment(files[0].id)
+            logger.debug('JIRA case {} replaced attachment {}'.format(key, files[0].filename))
             del files[0]
 
     def _transition(self, issue: jira.Issue, *transition_names: List[str]):

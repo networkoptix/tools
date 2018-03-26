@@ -18,8 +18,9 @@ jira:
     login: service@networkoptix.com
     password: kbnUk06boqBkwU
     file_limit: 3
+    prefix: TEST-RUN #< remove in release
 
-dumpTool: # Windows only
+dumpTool: # windows only
     directory: ./cache/dumptool
     size_limit: 100G
 
