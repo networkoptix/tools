@@ -102,6 +102,59 @@ or group-specific information is located.
 
 `roles/local` is directory for holding local roles.
 
+## HOWTO's and tricks:
+
+### Don't enter password every time
+
+Put password in `~/.ansible_vault_pass.txt` in raw.
+
+Export path to vault password file like this:
+
+```
+export ANSIBLE_VAULT_PASSWORD_FILE=~/.ansible_vault_pass.txt
+```
+
+Ansible will automagically decrypt encrypted data using this password in
+background.
+
+### Adding inline vault (encrypt single value in yaml instead of entire file)
+
+Ensure you have exported ansible vault password file.
+
+To encrypt value, run `ansible-vault encrypt_string`, paste data and hit ctrl-D.
+
+Sometimes you will need to hit ctrl-D one more time. This happens when value
+does not contain newline.
+
+Your console should look like this :
+
+```
+$ ansible-vault encrypt_string
+Reading plaintext input from stdin. (ctrl-d to end input)
+-----BEGIN RSA PRIVATE KEY-----
+MIICWQIBAAKBgGkJ6s8fQsG7HfkeU5cBO1khesW2hJeJxk7EUgIfiBNP5omAbsJA
+....
+DsyOb5b5w2JkqKvY+IoCso+iW76HLdi73UY4Luw=
+-----END RSA PRIVATE KEY-----!vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          306462333537653237343233303333343936316363323033303231393865613231383837386
+          ....
+          6335
+Encryption successful
+```
+
+Copy content from `!vault` (incl) to `Encryption successful` (not incl) and
+paste it to target yaml file.
+Extra offset may be removed when necessary:
+
+```yaml
+my_secret_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  306462333537653237343233303333343936316363323033303231393865613231383837386
+  ....
+  6335
+```
+
 ## Known issues
 
 ### KVM setup
