@@ -13,6 +13,13 @@
     createhome: yes
     shell: /bin/bash
 
+- name: Install Java
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - ca-certificates-java
 
 - name: "Create .ssh in {{ jenkins_user }} home dir"
   become: true

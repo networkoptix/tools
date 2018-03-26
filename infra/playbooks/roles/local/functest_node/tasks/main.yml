@@ -1,0 +1,26 @@
+- name: Install packages
+  sudo: yes
+  apt:
+    pkg: "{{item}}"
+    state: present
+    update_cache: yes
+  with_items:
+  - virtualbox
+  - virtualbox-dkms
+  - python
+  - virtualenv
+  - python-demjson
+  - python-opencv
+
+  - libpq-dev
+  - gdb
+
+  # TODO: move to common
+  - bzip2
+  - unzip
+  - xz-utils
+  - wget
+  - less
+  - nano
+  - mc
+  - screen
