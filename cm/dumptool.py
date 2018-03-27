@@ -207,18 +207,18 @@ class DumpAnalyzer(object):
         :verbose - maximal log level (default 0 means no logs).
         '''
         self.dump_path = path
+        self.version = version
+        self.build = build
+        self.branch = branch
+        self.verbose = int(verbose)
+        self.debug = debug.split(',')
+
         if customization:
             aliases = self.CUSTOMIZATIONS_ALIASES
             self.customization = aliases.get(customization, customization)
         else:
             self.customization = 'default'
             self.verify_customization()
-
-        self.version = version
-        self.build = build
-        self.branch = branch
-        self.verbose = int(verbose)
-        self.debug = debug.split(',')
 
     def log(self, message, level=0):
         '''Logs data in case of verbose mode.
@@ -229,8 +229,13 @@ class DumpAnalyzer(object):
     def verify_customization(self):
         for c in self.CUSTOMIZATIONS:
             if c in self.dump_path and self.customization != c:
-                raise UserError('Dump path contains {} while customization is {}'.format(
-                    c, self.customization))
+                if 'fc' in self.debug:
+                    self.customization = c
+                    self.log('Dump path contains {}, customization is fixed'.format(c))
+                else:
+                    raise UserError('Dump path contains {} while customization is {}'
+                        .format(c, self.customization))
+                return
 
     def get_dump_information(self):
         '''Gets initial information from dump.
@@ -288,8 +293,13 @@ class DumpAnalyzer(object):
               build_url, dist_url, build_path), level=2)
         suffixes = list(s % self.dist for s in CONFIG['dist_suffixes']) +\
            list(s % {'module': self.dist} for s in CONFIG['pdb_suffixes'])
+        def link_regexp(suffix):
+            if 'qr' in self.debug:
+                return '''"([a-zA-Z0-9-_\.]+%s)"''' % suffix
+            else:
+                return '''>([a-zA-Z0-9-_\.]+%s)<''' % suffix
         out = self.fetch_url_data(
-            build_url, ('''>([a-zA-Z0-9-_\.]+%s)<''' % r for r in suffixes),
+            build_url, (link_regexp(r) for r in suffixes),
             os.path.join(dist_url, update_path))
         self.dist_urls = list(os.path.join(*e) for e in out)
         self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
