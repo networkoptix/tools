@@ -57,6 +57,10 @@ ci:
 release:
   enable_concurrent_builds: False
   days_to_keep_old_builds: 5
+  hardware_signing:
+    - customization: vista
+      platform: win-x64
+      node: windows-vista-key  # ignored for now
 
 fun_tests:
   platforms:

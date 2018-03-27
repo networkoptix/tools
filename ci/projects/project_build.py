@@ -179,6 +179,9 @@ class BuildProject(NxVmsProject):
     def must_skip_this_build(self):
         return False
 
+    def is_hardware_signing_enabled(self, customization, platform):
+        return False
+
 
     # prepare_for_build ============================================================================
     def stage_prepare_for_build(self):
@@ -366,6 +369,7 @@ class BuildProject(NxVmsProject):
             branch_config=self.branch_config,
             platform_branch_config=self.branch_config.platforms.get(platform),
             webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
+            hardware_signing=self.is_hardware_signing_enabled(customization, platform),
             )
         stash_command_list = job.run(self.params.do_build, clean_build, self.custom_cmake_args, build_tests, run_unit_tests, self.config.unit_tests.timeout)
         return stash_command_list

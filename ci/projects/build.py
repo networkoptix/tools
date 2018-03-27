@@ -121,11 +121,20 @@ class CMakeBuilder(object):
     def _is_unix(self):
         return self._system_platform_config[self._system].is_unix
 
-    def build(self, src_dir, build_dir, webadmin_external_dir, custom_cmake_args, build_tests, clean_build):
+    def build(self, src_dir, build_dir, webadmin_external_dir, custom_cmake_args, build_tests, hardware_signing, clean_build):
         build_params = self._junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
-        generate_results = self._generate(src_dir, build_dir, webadmin_external_dir, build_params, custom_cmake_args, build_tests, cmake_configuration)
+        generate_results = self._generate(
+            src_dir,
+            build_dir,
+            webadmin_external_dir,
+            build_params,
+            custom_cmake_args,
+            build_tests,
+            hardware_signing,
+            cmake_configuration,
+            )
         succeeded = generate_results.succeeded
         error_message = generate_results.error_message
         output = generate_results.output
@@ -181,7 +190,17 @@ class CMakeBuilder(object):
                 output = self._host.get_command_output(['python', cleaner, '--build-dir', build_dir])
                 self._add_command_log('ninja_clean', output)
 
-    def _generate(self, src_dir, build_dir, webadmin_external_dir, build_params, custom_cmake_args, build_tests, cmake_configuration):
+    def _generate(
+            self,
+            src_dir,
+            build_dir,
+            webadmin_external_dir,
+            build_params,
+            custom_cmake_args,
+            build_tests,
+            hardware_signing,
+            cmake_configuration,
+            ):
         src_full_path = os.path.abspath(src_dir)
         target_device = self._platform2target_device(build_params.platform)
         platform_args = []
@@ -204,6 +223,8 @@ class CMakeBuilder(object):
             generate_args += ['-DwithTests=%s' % bool_to_cmake_param(False)]
         if build_params.add_qt_pdb is not None:
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
+        if hardware_signing:
+            generate_args += ['-DhardwareSigning=ON']
         if custom_cmake_args:
             generate_args += custom_cmake_args.split(' ')
         generate_args += platform_args + ['-G', self._generator]

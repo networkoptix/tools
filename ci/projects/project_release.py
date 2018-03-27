@@ -5,6 +5,7 @@ import logging
 from project_build import VERSION_FILE, BuildProject
 from command import (
     StringProjectParameter,
+    BooleanProjectParameter,
     ChoiceProjectParameter,
     MultiChoiceProjectParameter,
     )
@@ -90,6 +91,8 @@ class ReleaseProject(BuildProject):
         return BuildProject.get_project_parameters(self) + [
             ChoiceProjectParameter('release', 'Build beta or release', ['beta', 'release']),
             ChoiceProjectParameter('cloud_group', 'Cloud group', CLOUD_GROUP_LIST),
+            BooleanProjectParameter('hardware_signing',
+                                        'Enable hardware signing, use hardware key to sign files', default_value=False),
             StringProjectParameter('revision', 'Specific revision to checkout (optional)', default_value=''),
             StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
             MultiChoiceProjectParameter('platform_list', 'Platforms to build',
@@ -97,6 +100,11 @@ class ReleaseProject(BuildProject):
             MultiChoiceProjectParameter('customization_list', 'Customizations to build',
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
+
+    def is_hardware_signing_enabled(self, customization, platform):
+        hardware_signing_node_map = {(item.customization, item.platform): item.node
+                                         for item in self.config.release.hardware_signing}
+        return self.params.hardware_signing and (customization, platform) in hardware_signing_node_map
 
     def post_process(self, build_info, build_info_path, platform_build_info_map):
         deployer = Deployer(

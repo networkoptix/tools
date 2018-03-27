@@ -124,6 +124,7 @@ class BuildNodeJob(object):
                  branch_config,
                  platform_branch_config,
                  webadmin_external_dir,
+                 hardware_signing,
                  ):
         self._cmake_version = cmake_version
         self._executor_number = executor_number
@@ -133,6 +134,7 @@ class BuildNodeJob(object):
         self._branch_config = branch_config
         self._platform_branch_config = platform_branch_config
         self._webadmin_external_dir = webadmin_external_dir
+        self._hardware_signing = hardware_signing
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
 
@@ -167,7 +169,15 @@ class BuildNodeJob(object):
         cmake.ensure_required_cmake_operational()
 
         builder = CMakeBuilder(self._executor_number, self._platform_config, self._platform_branch_config, self._repository, cmake)
-        build_info = builder.build('nx_vms', 'build', self._webadmin_external_dir, custom_cmake_args, build_tests, clean_build)
+        build_info = builder.build(
+            'nx_vms',
+            'build',
+            self._webadmin_external_dir,
+            custom_cmake_args,
+            build_tests,
+            self._hardware_signing,
+            clean_build,
+            )
         typed_artifact_list = self._make_artifact_list(build_info)
         platform_build_info = PlatformBuildInfo.from_build_info(
             self._customization, self._platform, build_info, typed_artifact_list)

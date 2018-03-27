@@ -373,6 +373,36 @@ class CiConfig(ProjectConfig):
         ProjectConfig.report(self)
 
 
+
+class HardwareSigning(object):
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            customization=data['customization'],
+            platform=data['platform'],
+            node=data['node'],
+            )
+
+    def __init__(self, customization, platform, node):
+        assert isinstance(customization, basestring), repr(customization)
+        assert isinstance(platform, basestring), repr(platform)
+        assert isinstance(node, basestring), repr(node)
+        self.customization = customization
+        self.platform = platform
+        self.node = node
+
+    def to_dict(self):
+        return dict(
+            customization=self.customization,
+            platform=self.platform,
+            node=self.node,
+            )
+
+    def report(self):
+        log.info('\t\t\t' 'customization: %r platform: %r node: %r', self.customization, self.platform, self.node)
+
+
 class ReleaseConfig(ProjectConfig):
 
     @classmethod
@@ -380,19 +410,26 @@ class ReleaseConfig(ProjectConfig):
         return cls(
             enable_concurrent_builds=data['enable_concurrent_builds'],
             days_to_keep_old_builds=data['days_to_keep_old_builds'],
+            hardware_signing=[HardwareSigning.from_dict(item) for item in data['hardware_signing']],
             )
 
-    def __init__(self, enable_concurrent_builds, days_to_keep_old_builds):
+    def __init__(self, enable_concurrent_builds, days_to_keep_old_builds, hardware_signing):
         ProjectConfig.__init__(self, enable_concurrent_builds, days_to_keep_old_builds)
+        assert is_list_inst(hardware_signing, HardwareSigning), repr(hardware_signing)
+        self.hardware_signing = hardware_signing
 
     def to_dict(self):
         return dict(
             ProjectConfig.to_dict(self),
+            hardware_signing=[item.to_dict() for item in self.hardware_signing],
             )
 
     def report(self):
         log.info('\t' 'release:')
         ProjectConfig.report(self)
+        log.info('\t\t' 'hardware signing:')
+        for item in self.hardware_signing:
+            item.report()
 
 
 class TestsWatchersConfig(object):
