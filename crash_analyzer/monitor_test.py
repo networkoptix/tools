@@ -40,8 +40,9 @@ class Jira:
     def update(self, key: str, reports: List[crash_info.Report]):
         case = self.cases[key]
         for report in reports:
+            attachments = [f.replace('\\', '/') for f in report.files]
             case['versions'] = sorted(set(case['versions'] + [report.version]))
-            case['attachments'] = sorted(set(case['attachments'] + report.files))
+            case['attachments'] = sorted(set(case['attachments'] + attachments))
             logging.debug('Case {} attached {}'.format(key, ', '.join(report.files)))
 
         logging.info('Case {} is updated with {} reports'.format(key, len(reports)))

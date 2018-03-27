@@ -7,13 +7,15 @@ Linux and Windows crash report analyzer.
 
 ### Ubuntu
 
-Limitations: DMP analisys is not avaliable.
-```
-apt install python3-pip             # Python 3 and it's PIP.
-python3 -m pip install pyaml jira   #< Required modules.
-```
+1. Python 3 and it's PIP: `sudo apt install python3-pip`
+2. Install required modules: `sudo python3 -m pip install -r requirements.txt`
+
+NOTE: DMP analisys is not avaliable.
 
 ### Windows
+
+1. Download and install python 3 from https://www.python.org
+2. Install required modules `python.exe -m pip install -r requirements.txt`
 
 TODO: Dumptool refactor and integration + setup instructions.
 

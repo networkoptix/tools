@@ -42,7 +42,6 @@ class CrashInfo(utils.TestCase):
                 self.assertRaises(crash_info.Error, lambda: crash_info.analyze(dump))
             else:
                 report, reason = crash_info.analyze(dump)
-                print(repr(report), repr(reason))
                 self.assertEqual(code, reason.code)
                 self.assertEqual(stack.strip().splitlines(), reason.stack)
                 self.assertEqual(64, len(reason.crash_id()))
