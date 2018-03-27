@@ -6,16 +6,18 @@ import shutil
 from glob import glob
 from typing import List
 
+import pytest
+
 import crash_info
 import monitor
 import utils
 
 
 class CrashServer:
-    def list_all(self, format: str):
-        return list(os.path.basename(f) for f in glob(utils.resource_path('*/*' + format)))
+    def list_all(self, format: str) -> List[str]:
+        return [os.path.basename(f) for f in glob(utils.resource_path('*/*' + format))]
 
-    def get(self, name: str):
+    def get(self, name: str) -> str:
         for f in glob(utils.resource_path('*/' + name)):
             return utils.file_content(f)
 
@@ -53,59 +55,53 @@ class Jira:
             f.write(yaml.dump(self.cases, default_flow_style=False))
 
 
-class Monitor(utils.TestCase):
-    def setUp(self):
-        super().setUp()
-        self.options = monitor.Options(**utils.resource_parse('monitor_example_config.yaml')['options'])
-        self.crash_server = CrashServer()
-        self.jira = Jira()
-        self.monitor = None
+@pytest.fixture
+def fixture():
+    class Fixture:
+        def __init__(self, **options):
+            self.options = monitor.Options(**options)
+            self.crash_server = CrashServer()
+            self.jira = Jira()
+            self.monitor = None
 
-    def tearDown(self):
-        del self.monitor
-        shutil.rmtree(self.options.directory)
+        def new_monitor(self):
+            if self.monitor:
+                self.monitor.flush_cache()
+                self.monitor._records = []  # < Prevents flush after directory removal.
 
-    def test_linux(self):
-        self._test_monitor(format='gdb-bt')
+            self.monitor = monitor.Monitor(self.options, self.crash_server, self.jira)
 
-    def test_windows(self):
-        self._test_monitor(format='cdb-bt')
-
-    def test_multisystem(self):
-        self._test_monitor(format='-bt')
-
-    def test_partial(self):
-        self._test_monitor(format='-bt', reports_each_run=5)
-
-    def test_remake(self):
-        self._test_monitor(format='-bt', remake=True)
-
-    def test_remake_partial(self):
-        self._test_monitor(format='-bt', reports_each_run=5, remake=True)
-
-    def _test_monitor(self, format, remake=False, **options):
-        self.options.update(format=('*-bt' if format == '-bt' else format), **options)
-        self._new_monitor()
-        while True:
-            if not self.monitor.download_new_reports():
-                break
-            if remake:
-                self._new_monitor()
-
-            self.monitor.analyze_new_reports()
-            self.monitor.upload_to_jira()
-            if remake:
-                self._new_monitor()
-
-        expected_cases = {k: v for k, v in utils.resource_parse('cases.yaml').items()
-                          if v['format'].endswith(format)}
-
-        self.assertEqual(expected_cases, self.jira.cases)
-
-    def _new_monitor(self):
-        del self.monitor
-        self.monitor = monitor.Monitor(self.options, self.crash_server, self.jira)
+    f = Fixture(**utils.resource_parse('monitor_example_config.yaml')['options'])
+    yield f
+    f.monitor._records = []  # < Prevents flush after directory removal.
+    shutil.rmtree(f.options.directory)
 
 
-if __name__ == '__main__':
-    utils.run_unit_tests()
+@pytest.mark.parametrize(
+    "format", ['gdb-bt', 'cdb-bt', '-bt']
+)
+@pytest.mark.parametrize(
+    "remake", [True, False]
+)
+@pytest.mark.parametrize(
+    "reports_each_run", [1000, 5]
+)
+def test_monitor(fixture, format: str, remake: bool, reports_each_run: int):
+    fixture.options.update(
+        format=('*-bt' if format == '-bt' else format),
+        reports_each_run=reports_each_run)
+
+    fixture.new_monitor()
+    while True:
+        if not fixture.monitor.download_new_reports():
+            break
+        if remake:
+            fixture.new_monitor()
+
+        fixture.monitor.analyze_new_reports()
+        fixture.monitor.upload_to_jira()
+        if remake:
+            fixture.new_monitor()
+
+    all_cases = utils.resource_parse('cases.yaml').items()
+    assert {k: v for k, v in all_cases if v['format'].endswith(format)} == fixture.jira.cases

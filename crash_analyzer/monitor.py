@@ -56,7 +56,8 @@ class Monitor:
             os.path.abspath(self._options.directory)))
 
     def __del__(self):
-        self.flush_cache()
+        if self._records:
+            self.flush_cache()
 
     def reload_cache(self):
         """Reloads runtime cache from file system.

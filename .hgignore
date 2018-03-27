@@ -21,3 +21,4 @@ sample.mkv
 *.*.*.*_*.*.log
 .cache
 ci/junk_shop/junk_shop/webapp/static/plotly-latest.min.js
+.pytest_cache
