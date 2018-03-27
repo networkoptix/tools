@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import argparse
 import logging
 import os
 import string
 import sys
-import unittest
-from pprint import pformat
+from typing import Any
 
 import yaml
 
@@ -40,6 +38,11 @@ def file_parse(path: str):
     return yaml.load(file_content(path))
 
 
+def file_serialize(value: Any, path: str):
+    with open(path, 'w') as f:
+        f.write(yaml.dump(value, default_flow_style=False))
+
+
 def resource_path(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
@@ -50,36 +53,3 @@ def resource_content(name: str) -> str:
 
 def resource_parse(name: str):
     return yaml.load(resource_content(name))
-
-
-def assert_eq(expected, actual, name: str = ''):
-    assert expected == actual, 'mismatch: {}\nExpected:\n{}\nActual:\n{}'.format(
-        name, pformat(expected), pformat(actual))
-
-
-class TestCase(unittest.TestCase):
-    MAX_DIFF = 1000
-
-    def setUp(self):
-        self.maxDiff = self.MAX_DIFF
-        print('-' * 70)
-        print('{}.{}'.format(type(self).__name__, self._testMethodName))
-
-
-def run_unit_tests():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='store_true', help='more output and logs')
-    parser.add_argument('-l', '--log-level', type=str, default="error")
-    parser.add_argument('module', nargs='?', help="TestCase[.test]")
-
-    arguments = parser.parse_args()
-    if arguments.verbose:
-        arguments.log_level = 'debug'
-        TestCase.MAX_DIFF = None
-
-    sys.argv = sys.argv[:1]
-    if arguments.module:
-        sys.argv.append(arguments.module)
-
-    setup_logging(arguments.log_level)
-    unittest.main(verbosity=0)

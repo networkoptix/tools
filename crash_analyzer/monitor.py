@@ -27,14 +27,11 @@ class Options:
             assert type(getattr(self, key)) == type(value)
             setattr(self, key, value)
 
-    def path(self, *name_parts):
-        return os.path.join(self.directory, *name_parts)
-
     def cache_path(self):
-        return self.path('cache.txt')
+        return os.path.join(self.directory, 'cache.txt')
 
-    def report_path(self, *report):
-        return self.path('reports', *report)
+    def reports_path(self, *report):
+        return os.path.join(self.directory, 'reports')
 
 
 class Record:
@@ -48,12 +45,13 @@ class Monitor:
     def __init__(self, options: Options,
                  crash_server: external_api.CrashServer, jira: external_api.Jira):
         self._options = options
+        self._storage = crash_info.Storage(options.reports_path())
         self._crash_server = crash_server
         self._jira = jira
         self._reasons = dict()
+        self._records = dict()
         self.reload_cache()
-        logger.info('Working directory: {}'.format(
-            os.path.abspath(self._options.directory)))
+        logger.info('Working directory: {}'.format(os.path.abspath(self._options.directory)))
 
     def __del__(self):
         if self._records:
@@ -62,10 +60,8 @@ class Monitor:
     def reload_cache(self):
         """Reloads runtime cache from file system.
         """
-        if not os.path.exists(self._options.report_path()):
-            os.makedirs(self._options.report_path())
-
         self._records = dict()
+        # TODO: Consider to use yaml instead.
         try:
             with open(self._options.cache_path(), 'r') as f:
                 for line in f:
@@ -86,8 +82,8 @@ class Monitor:
 
         for name, record in self._records.items():
             if record.crash_id == 'FAILED' or record.case:
-                for f in crash_info.Report(name).find_files(self._options.directory):
-                    os.remove(f)
+                self._storage.delete(name)
+                record.crash_id == 'FAILED_REMOVED'
 
         # TODO: Clean up oldest crash files in case of HDD overflow.
 
@@ -108,9 +104,7 @@ class Monitor:
             if crash_info.Report(name).version < self._options.min_version:
                 continue  # < Skip uninteresting versions.
 
-            with open(self._options.report_path(name), 'w') as f:
-                f.write(self._crash_server.get(name))
-
+            self._storage.save(name, self._crash_server.get(name))
             self._records[name] = Record(name)
             new_records.add(name)
 
@@ -122,11 +116,12 @@ class Monitor:
         """
         for name, record in self._records.items():
             if record.crash_id:
-                continue  # < Analysis is not requred.
+                continue  # < Analysis is not required.
 
             # TODO: Think about multithreaded solution for dmp.
             try:
-                report, reason = crash_info.analyze(self._options.report_path(name))
+                report = crash_info.Report(name)
+                reason = self._storage.analyze(report)
 
             except crash_info.Error as e:
                 record.crash_id = 'FAILED'
@@ -138,14 +133,14 @@ class Monitor:
                 logger.debug('Dump {} is caused by: {}'.format(name, reason))
 
     def upload_to_jira(self):
-        """Uploads all unuploaded reports.
+        """Uploads all reports which were not uploaded.
         """
-        # These maps could be cached in class fields for performace increase. However currently it
+        # These maps could be cached in class fields for performance increase. However currently it
         # is far away from being a bottle neck.
         cases_by_crash_id = dict()
         records_by_crash_id = dict()
         for name, record in self._records.items():
-            if record.crash_id != 'FAILED':
+            if not record.crash_id.startswith('FAILED'):
                 if record.case:
                     cases_by_crash_id[record.crash_id] = record.case
                 else:
@@ -163,13 +158,12 @@ class Monitor:
                     continue
 
                 report = crash_info.Report(records[0].name)
-                case = self._jira.create(report, reason)
+                case = self._jira.create_issue(report, reason)
 
             reports = list(crash_info.Report(r.name) for r in records)
-            for report in reports:
-                report.find_files(self._options.report_path())
+            if self._jira.update_issue(case, reports):
+                self._jira.attach_files(case, sum((self._storage.files(r) for r in reports), []))
 
-            self._jira.update(case, reports)
             for record in records:
                 record.case = case
 
@@ -202,7 +196,7 @@ class Monitor:
 
 def main():
     parser = argparse.ArgumentParser('Crash Monitor and Analyzer')
-    parser.add_argument('configuration_file');
+    parser.add_argument('configuration_file')
 
     arguments = parser.parse_args()
     config = utils.file_parse(arguments.configuration_file)

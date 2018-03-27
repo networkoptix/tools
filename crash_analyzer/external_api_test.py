@@ -10,6 +10,7 @@ import external_api
 import utils
 
 CONFIG = utils.resource_parse('monitor_example_config.yaml')
+TEST_REASON = crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])
 
 
 @pytest.fixture
@@ -32,26 +33,25 @@ class JiraFixture:
         self.api = external_api.Jira(**CONFIG['jira'])
         self.issue = None
 
-    def create_issue(self, report_name: str):
-        report, reason = self._make_report(report_name)
-        self.issue = self.api._jira.issue(self.api.create(report, reason))
+    def create_issue(self, name: str):
+        self.issue = self.api._jira.issue(self.api.create_issue(
+            crash_info.Report(name),
+            crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])))
 
-    def update_issue(self, report_names: List[str]):
-        self.api.update(self.issue.key, [self._make_report(n)[0] for n in report_names])
+    def update_issue(self, names: List[str]):
+        if self.api.update_issue(self.issue.key, [crash_info.Report(n) for n in names]):
+            self.api.attach_files(self.issue.key, [utils.resource_path('jira/' + n) for n in names])
+
         self.issue = self.api._jira.issue(self.issue.key)
 
-    def delete_issue(self):
-        if self.issue:
-            self.issue.delete()
-
     def attachments(self):
-        return set(v.filename.split('--')[-1].split('.')[0]
-                   for v in self.issue.fields.attachment)
+        names = [a.filename for a in self.issue.fields.attachment]
+        logging.debug('Attachments: {}'.format(names))
+        return set(n.split('--')[-1].split('.')[0] for n in names)
 
     @staticmethod
-    def _make_report(name: str) -> Tuple[crash_info.Report, crash_info.Reason]:
+    def _report(name: str) -> Tuple[crash_info.Report, crash_info.Reason]:
         report = crash_info.Report(name)
-        report.find_files(utils.resource_path('jira'))
         reason = crash_info.Reason(report.component, 'SEGFAULT', ['f1', 'f2'])
         return report, reason
 
@@ -60,7 +60,8 @@ class JiraFixture:
 def jira():
     j = JiraFixture()
     yield j
-    j.delete_issue()
+    if j.issue:
+        j.issue.delete()
 
 
 def test_jira(jira: JiraFixture):
@@ -71,10 +72,10 @@ def test_jira(jira: JiraFixture):
     assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
     assert 'Call Stack:\n{code}\nf1\nf2\n{code}' == jira.issue.fields.description
     assert 'Server' == jira.issue.fields.customfield_10200.value
-    assert set(['Server']) == set(c.name for c in jira.issue.fields.components)
-    assert set(['3.1']) == set(v.name for v in jira.issue.fields.versions)
-    assert set(['3.1_hotfix']) == set(v.name for v in jira.issue.fields.fixVersions)
-    assert set(['1234']) == jira.attachments()
+    assert {'Server'} == {c.name for c in jira.issue.fields.components}
+    assert {'3.1'} == {v.name for v in jira.issue.fields.versions}
+    assert {'3.1_hotfix'} == {v.name for v in jira.issue.fields.fixVersions}
+    assert {'1234'} == jira.attachments()
 
     logging.debug('Suppose case is closed by developer')
     jira.api._transition(jira.issue.key, 'Feedback', 'QA Passed')
@@ -83,7 +84,7 @@ def test_jira(jira: JiraFixture):
     logging.debug('No reopen should happen for dump from the same version')
     jira.update_issue(['server--3.1.0.5678-xyzu-default--5678.gdb-bt'])
     assert 'Closed' == jira.issue.fields.status.name
-    assert set(['1234']) == jira.attachments()
+    assert {'1234'} == jira.attachments()
 
     logging.debug('Reopen is expected for dumps from new version')
     jira.update_issue([
@@ -91,10 +92,10 @@ def test_jira(jira: JiraFixture):
         'server--3.2.0.3452-dfga-default--7634.gdb-bt',
     ])
     assert 'Open' == jira.issue.fields.status.name
-    assert set(['3.1', '3.2']) == set(v.name for v in jira.issue.fields.versions)
-    assert set(['1234', '3451', '7634']) == jira.attachments()
+    assert {'3.1', '3.2'} == {v.name for v in jira.issue.fields.versions}
+    assert {'1234', '3451', '7634'} == jira.attachments()
 
     logging.debug('First dump should be replaced by the last one')
     jira.update_issue(['server--4.0.0.1111-abcd-default--1111.gdb-bt'])
-    assert set(['3.1', '3.2', '4.0']) == set(v.name for v in jira.issue.fields.versions)
-    assert set(['3451', '7634', '1111']) == jira.attachments()
+    assert {'3.1', '3.2', '4.0'} == {v.name for v in jira.issue.fields.versions}
+    assert {'3451', '7634', '1111'} == jira.attachments()
