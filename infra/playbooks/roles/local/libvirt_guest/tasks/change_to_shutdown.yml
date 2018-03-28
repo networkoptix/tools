@@ -4,6 +4,7 @@
 
 - name: Get available options for os machine
   command: '/usr/bin/qemu-kvm -machine help'
+  delegate_to: "{{ libvirt_host }}"
   register: available_machines
   when: libvirt_guest__current_state == 'undefined'
 

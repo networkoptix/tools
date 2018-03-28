@@ -12,6 +12,7 @@
   - role: libvirt_guest
   - role: alphabet_common
     when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
-  - role: functest_node
   - role: jenkins_slave
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+  - role: functest_node
     when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'

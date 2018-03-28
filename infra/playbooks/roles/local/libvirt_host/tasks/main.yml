@@ -15,6 +15,7 @@
     'FAIL' in result.stdout | default("")
   changed_when: false
 
+# https://www.linuxtechi.com/enable-nested-virtualization-kvm-centos-7-rhel-7/
 - name: Configure kvm to enable nested virtualization
   copy:
     content: |

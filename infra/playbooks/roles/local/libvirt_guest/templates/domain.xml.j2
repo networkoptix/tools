@@ -37,19 +37,24 @@
     <apic/>
     <vmport state='off'/>
   </features>
-  <!--
-  TODO: this configuration was suggested in blog post
-  https://www.linuxtechi.com/enable-nested-virtualization-kvm-centos-7-rhel-7/
-  It looks like nested virtualization works even w/ custom cpu.
-  If no bugs will appear, then this reference example may be removed.
-  date: 28.03.2018
-  <cpu mode='host-model' check='partial'>
+  {#
+    libvirt will automagically fill-in CPU model and features (which are crucial
+    for nested VBox) based on host CPU.
+  #}
+  <cpu mode='host-model'>
     <model fallback='allow'/>
   </cpu>
-  -->
+  
+  <!--
+  TODO: this is legacy config used before vbox-in-kvm
+  It's kept as reference temporarily and should be removed after testing
+  VBox works a bit differently and needs host-model cpu features which appear
+  dynamically once VM started.
+  date: 28.03.2018
   <cpu mode='custom' match='exact'>
     <model fallback='forbid'>{{ libvirt_guest__cpu_model | default("Broadwell") }}</model>
   </cpu>
+  -->
   {# TODO Windows wants offset='localtime' #}
   <clock offset='utc'>
     <timer name='rtc' tickpolicy='catchup'/>

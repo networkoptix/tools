@@ -1,5 +1,5 @@
 libvirt_guest__domain_type : kvm
-libvirt_guest_os_machine: pc-i440fx-2.7
+libvirt_guest__os_machine: pc-i440fx-2.7
 
 libvirt_guest__extra_system_image_size_gb: "50"
 libvirt_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
