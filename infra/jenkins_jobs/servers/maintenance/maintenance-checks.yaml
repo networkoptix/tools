@@ -3,3 +3,9 @@
     jobs:
       - check-cinas-permissions:
           recipients: vfedorov@networkoptix.com, iremizov@networkoptix.com
+      - check-hardware-signing:
+          node: spin_win
+          recipients: vfedorov@networkoptix.com
+#          todo: uncomment when deployed, remove previous 2 lines:
+#          node: windows
+#          recipients: vfedorov@networkoptix.com, iremizov@networkoptix.com
