@@ -1,0 +1,15 @@
+<!--
+	Include this into domain.xml devices.
+	This maps hardware usb signing key to vm.
+
+	lsusb on host for usb signing key:
+	Bus 001 Device 006: ID 0529:0620 Aladdin Knowledge Systems Token JC
+-->
+
+	<hostdev mode='subsystem' type='usb' managed='yes'>
+      <source>
+        <vendor id='0x0529'/>
+        <product id='0x0620'/>
+      </source>
+      <address type='usb' bus='0' port='2'/>
+    </hostdev>
