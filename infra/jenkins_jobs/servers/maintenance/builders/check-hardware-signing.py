@@ -10,7 +10,7 @@ import subprocess
 import shutil
 
 
-PASSWORD_ENTERED_EXIT_CODE = 20
+FAILURE_EXIT_CODE = 10
 SIGNED_FILE = 'signed.exe'
 SIGNATURE_MARK = 'Issued by: GlobalSign'
 
@@ -31,10 +31,10 @@ stdout, stderr = p.communicate()
 if stderr:
     print 'signtool verify returned stderr:'
     print stderr
-    sys.exit(10)
+    sys.exit(FAILURE_EXIT_CODE)
 
 if SIGNATURE_MARK in stdout:
     print 'Signature is in place; all OK'
 else:
     print 'Signature is missing; signing is FAILED.'
-    sys.exit(10)
+    sys.exit(FAILURE_EXIT_CODE)
