@@ -27,7 +27,7 @@
     <partition>/machine</partition>
   </resource>
   <os>
-    <type arch='x86_64' machine='pc-i440fx-2.8'>hvm</type>
+    <type arch='x86_64' machine='{{ libvirt_guest__os_machine }}'>hvm</type>
 {% for dev in libvirt_guest__boot_devices %}
     <boot dev='{{ dev }}'/>
 {% endfor %}
@@ -37,6 +37,16 @@
     <apic/>
     <vmport state='off'/>
   </features>
+  <!--
+  TODO: this configuration was suggested in blog post
+  https://www.linuxtechi.com/enable-nested-virtualization-kvm-centos-7-rhel-7/
+  It looks like nested virtualization works even w/ custom cpu.
+  If no bugs will appear, then this reference example may be removed.
+  date: 28.03.2018
+  <cpu mode='host-model' check='partial'>
+    <model fallback='allow'/>
+  </cpu>
+  -->
   <cpu mode='custom' match='exact'>
     <model fallback='forbid'>{{ libvirt_guest__cpu_model | default("Broadwell") }}</model>
   </cpu>
@@ -58,7 +68,9 @@
     <emulator>/usr/bin/qemu-kvm</emulator>
 
 {% if libvirt_guest__graphics is defined and libvirt_guest__graphics == true %}
-    <graphics type='spice' autoport='yes'/>
+    <graphics type='spice' autoport='yes'>
+      <listen type='address'/>
+    </graphics>
 {% endif %}
 
 {% for disk in libvirt_guest__disks_final %}
@@ -136,10 +148,6 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-
-    <graphics type='spice' autoport='yes'>
-      <listen type='address'/>
-    </graphics>
 
   </devices>
 

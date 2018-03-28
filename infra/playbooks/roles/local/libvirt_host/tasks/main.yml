@@ -15,5 +15,33 @@
     'FAIL' in result.stdout | default("")
   changed_when: false
 
+- name: Configure kvm to enable nested virtualization
+  copy:
+    content: |
+      options kvm-intel nested=y
+      options kvm-intel enable_shadow_vmcs=1
+      options kvm-intel enable_apicv=1
+      options kvm-intel ept=1
+    dest: /etc/modprobe.d/kvm-intel.conf
+  register: mod_kvm_intel_conf
+
+# Don't fail here.
+# The problem is that kvm could not be reloaded while VMS are running
+# Automatic stop/start is not acceptable..
+# TODO: write some message?
+- name: Reload mods
+  become: True
+  become_method: sudo
+  command: rmmod kvm-intel
+  when: mod_kvm_intel_conf.changed
+  failed_when: false
+
+- name: Reload mods
+  become: True
+  become_method: sudo
+  command: modprobe kvm-intel
+  when: mod_kvm_intel_conf.changed
+  failed_when: false
+
 # TODO Add section with user permissions related to libvirt if needed
 # libvirt-related groups are: libvirt, kvm

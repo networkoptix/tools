@@ -2,11 +2,22 @@
   include_tasks: prepare_image.yml
   when: libvirt_guest__current_state == 'undefined'
 
+- name: Get available options for os machine
+  command: '/usr/bin/qemu-kvm -machine help'
+  register: available_machines
+  when: libvirt_guest__current_state == 'undefined'
+
+- name : Ensure os machine is available
+  assert:
+    that:
+    - libvirt_guest__os_machine in available_machines.stdout
+
 - name: "Define {{ libvirt_guest__hostname }}"
   virt:
     name: "{{ libvirt_guest__hostname }}"
     command: define
     xml: "{{ lookup('template', 'domain.xml.j2') }}"
+    uri: "{{ libvirt_connection }}"
   delegate_to: "{{ libvirt_host }}"
   when: libvirt_guest__current_state == 'undefined'
 
@@ -14,6 +25,7 @@
   virt:
     name: "{{ libvirt_guest__hostname }}"
     command: destroy
+    uri: "{{ libvirt_connection }}"
   delegate_to: "{{ libvirt_host }}"
   when: libvirt_guest__current_state == 'running'
 

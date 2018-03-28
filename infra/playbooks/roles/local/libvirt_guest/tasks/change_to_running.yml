@@ -6,6 +6,7 @@
   virt:
     name: "{{ libvirt_guest__hostname }}"
     state: running
+    uri: "{{ libvirt_connection }}"
   delegate_to: "{{ libvirt_host }}"
   register: state
   when: >-

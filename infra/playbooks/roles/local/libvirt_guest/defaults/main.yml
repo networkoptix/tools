@@ -1,4 +1,5 @@
 libvirt_guest__domain_type : kvm
+libvirt_guest_os_machine: pc-i440fx-2.7
 
 libvirt_guest__extra_system_image_size_gb: "50"
 libvirt_guest__memory_kib: "{{ 4 * 1024 * 1024 }}"  # 4 GiB
@@ -19,3 +20,5 @@ libvirt_guest__disks:
   driver_type: qcow2
   source_file: "{{ libvirt_guest__system_image_file }}"
   target_bus: virtio
+
+libvirt_connection: "qemu:///system"

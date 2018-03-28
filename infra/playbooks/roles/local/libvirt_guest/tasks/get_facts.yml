@@ -2,6 +2,7 @@
   virt:
     name: "{{ libvirt_guest__hostname }}"
     command: status
+    uri: "{{ libvirt_connection }}"
   register: domstate
   failed_when: false
   delegate_to: "{{ libvirt_host }}"
