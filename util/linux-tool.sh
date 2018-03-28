@@ -14,7 +14,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 if nx_is_cygwin
 then
-    : ${CMAKE_GEN="Visual Studio 14 2015 Win64"}
+    : ${CMAKE_GEN=""}
 else
     : ${CMAKE_GEN="Ninja"}
 fi
@@ -237,7 +237,7 @@ do_gen() # [cache] "$@"
     nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
-        windows) local -r TARGET_ARG="-Tv140";;
+        windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
         *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
     esac
 
@@ -279,7 +279,7 @@ do_build()
         local -r CONFIG_ARG=""
     fi
 
-    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIGURATION_ARG "$@"
+    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
 }
 
 do_run_ut() # [all|TestName] "$@"
