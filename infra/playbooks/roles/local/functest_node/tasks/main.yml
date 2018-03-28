@@ -7,12 +7,12 @@
   with_items:
   - virtualbox
   - virtualbox-dkms
-  - vagrant
   - python
   - virtualenv
   - python-demjson
   - python-opencv
   - python-dev
+  - ffmpeg
 
   - libpq-dev
   - gdb
@@ -27,6 +27,15 @@
   - mc
   - screen
   - git
+
+- name: Get vagrant from hashicorp site
+  get_url:
+    url: https://releases.hashicorp.com/vagrant/{{ vagrant_version }}/vagrant_{{ vagrant_version }}_x86_64.deb
+    dest: /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
+
+- name: Install vagrant
+  sudo: yes
+  command: dpkg -i /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
 
 # TODO: move to common
 - include_tasks: "{{ ansible_distribution_release }}_mercurial.yml"
