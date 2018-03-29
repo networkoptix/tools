@@ -1,476 +1,474 @@
-#!/usr/bin/python
-'''Automatic windows dump analyser tool
+#!/usr/bin/env python3
+"""Automatic windows dump analyser tool
 
 Generates test report (cdb-bt) based on dump (dmp). Binaries and debug
 information gets automatically from jenkins. Takes about a minute to analyse
 (several more if debug information is required).
+"""
 
-Dependencies:
-    msiexec - standart windows tool (comes with windows)
-    7x - zip extracter (comes with buildenv/_setenv.bat)
-    cdb - windows debugger (comes with Windows SDK)
-    dark - wix extractor (comes with wix toolset: wixtoolset.org)
-    devenv - Visual Studio (optional, required for debug=vs)
-
-Usage (Module):
-    > import dumptool
-    > print dumptool.analyseDump('dump.dmp', customization[, branch=BRANCH][, verbose=N])
-    dump.cdb-bt
-
-Usage (Console):
-    $ python dumptool.py dump.dmp [customization] [branch=BRANCH] [verbose=N]
-    dump.cdb-bt
-
-Usage (Visual Studio):
-    $ python dumptool.py dump.dmp debug=vs
-'''
-
+import logging
 import os
 import re
 import shutil
-import string
 import subprocess
-import sys
-import urllib2
+import hashlib
+import urllib.error
+import urllib.parse
+import urllib.request
+from typing import List, Callable
 
-CONFIG = dict(
-    cdb_path = 'cdb',
-    zip_path = '7z',
-    vs_path = 'devenv',
-    data_dir = 'c:/develop/dumptool/',
-    dist_urls = [
-        'http://beta.networkoptix.com/beta-builds/daily/',
-        'http://beta.enk.me/beta-builds/daily/',
-    ],
-    ext = dict(
-        dump = 'dmp',
-        report = 'cdb-bt',
-    ),
-    dist_suffixes = [
-        '''x64[a-z-_]+%s(-only)?\.(msi|exe)''',
-        '''%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)''',
-    ],
-    pdb_suffixes = [
-        '''x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip''',
-        '''(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip''',
-    ],
+import utils
+
+logger = logging.getLogger(__name__)
+
+DIST_URLS = [
+    'http://beta.enk.me/beta-builds/daily/',
+    'http://beta.networkoptix.com/beta-builds/daily/',
+]
+
+DIST_SUFFIXES = [
+    """x64[a-z-_]+%s(-only)?\.(msi|exe)""",
+    """%s-[0-9\.-_]+-win64[a-z-_]*\.(exe|msi)""",
+]
+
+PDB_SUFFIXES = [
+    """x64[a-z-_]+windows-pdb-(all|apps|%(module)s|libs)\.zip""",
+    """(%(module)s|libs)_debug-[0-9\.-_]+-win64[a-z-_]*\.zip""",
+]
+
+CUSTOMIZATIONS = (
+    'default',
+    'default_cn',
+    'default_zh_CN',
+    'digitalwatchdog',
+    'ionetworks',
+    'ipera',
+    'hanwha',
+    'senturian',
+    'systemk',
+    'vista',
+    'vmsdemoblue',
+    'vmsdemoorange',
 )
 
-#CONFIG['zip_path'] = 'C:\\Program Files\\7-Zip\\7z.exe'
-#CONFIG['cdb_path'] = 'C:\\Program Files (x86)\\Windows Kits\\10\\Debuggers\\x64\\cdb.exe'
-#CONFIG['vs_path'] = 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe'
+CUSTOMIZATION_ALIASES = {
+    'dw': 'digitalwatchdog',
+}
+
+
+def deduce_customization(dump_path):
+    for c in CUSTOMIZATIONS:
+        if c in dump_path:
+            return c
+
+    return None
+
 
 class Error(Exception):
-    '''Base error type.
-    '''
+    """Base error type.
+    """
     pass
+
 
 class CdbError(Error):
-    '''Cdb driver related error.
-    '''
+    """Cdb driver related error.
+    """
     pass
+
 
 class UserError(Error):
-    '''Invalid usage, e.g. unsupported format or build number.
-    '''
+    """Invalid usage, e.g. unsupported format or build number.
+    """
     pass
+
 
 class DistError(Error):
-    '''Distribution related errors, e.g. distribution in not found or invalid.
-    '''
+    """Distribution related errors, e.g. distribution in not found or invalid.
+    """
     pass
 
-def report_name(dump_path, safe=False):
-    '''Generates report name based on dump name.
-    '''
-    dump_ext = '.' + CONFIG['ext']['dump']
+
+def report_name(dump_path: str, safe: bool = False):
+    """Generates report name based on dump name.
+    """
+    dump_ext = '.dmp'
     if not dump_path.lower().endswith(dump_ext):
         if safe:
             return ''  # to calls where exceptions aren't wanted
         raise UserError('Only *%s dumps are supported, rejected: %s' % (
             dump_ext, dump_path))
-    report_ext = '.' + CONFIG['ext']['report']
+    report_ext = '.cdb-bt'
     return dump_path[:-len(dump_ext)] + report_ext
 
-def clear_cache(cacheDir, keepFiles):
-    print "Clearing cache dir %s" % (cacheDir,)
-    existing = set(os.listdir(cacheDir))
-    for fname in keepFiles:
-        existing.discard(report_name(fname, True))
-    # remove all files not mentioned in keepFiles
-    for fname in existing:
+
+def clear_cache(cache_dir: str, keep_files: str):
+    existing = set(os.listdir(cache_dir))
+    for name in keep_files:
+        existing.discard(report_name(name, True))
+    for name in existing:
         try:
-            os.remove(os.path.join(cacheDir, fname))
+            os.remove(os.path.join(cache_dir, name))
         except IOError:
             pass
 
-def shell_line(command):
-    return ' '.join(
-        '"%s"' % arg if arg.find(' ') != -1 else arg for arg in command)
 
-class Cdb(object):
-    '''Cdb program driver to analize DMP files.
-    '''
+def shell_line(command: List[str]):
+    return ' '.join('"%s"' % a if (' ' in a) or ('\\' in a) else a for a in command)
 
-    def __init__(self, dump, exe_dir=None, pdb_dirs=None):
-        '''Starts up cdb with :dump, :exe_dir and :pdb_dir.
-        '''
-        self.shell = [CONFIG['cdb_path'], '-z', dump]
+
+class Cdb:
+    """Cdb program driver to analyze DMP files.
+    """
+
+    def __init__(self, dump, exe_dir: str = '', pdb_dir: str = ''):
+        """Starts up cdb with :dump, :exe_dir and :pdb_dir.
+        """
+        self.shell = ['cdb', '-z', dump]
         if exe_dir:
-           self.shell += ['-i', exe_dir]
-        if pdb_dirs:
-           self.shell += ['-y', 'srv*;symsrv*;' + pdb_dirs]
+            self.shell += ['-i', exe_dir]
+
+        if pdb_dir:
+            self.shell += ['-y', 'srv*;symsrv*;' + pdb_dir]
+
         try:
-            self.cdb = subprocess.Popen(self.shell,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        except OSError as e:
-            raise CdbError('Cannot start %s -> %s' % (shell_line(self.shell), e))
+            logger.debug(shell_line(self.shell))
+            self.cdb = subprocess.Popen(self.shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        except OSError as error:
+            raise CdbError('Cannot start %s -> %s' % (shell_line(self.shell), error))
+
         self.execute()
-        if exe_dir or pdb_dirs:
+        if exe_dir or pdb_dir:
             self.execute('.reload /f')
 
     def __enter__(self, *a):
         return self
 
     def __exit__(self, *a):
-        try: self.cdb.communicate('q\n')
-        except: pass
+        try:
+            self.cdb.communicate(b'q\n')
+        except Exception as error:
+            logger.warning('Unable to exit cdb:', error)
 
-    def execute(self, command = None):
-        '''Executes cdb :command and returns collected output.
-        '''
+    def execute(self, command: str = ''):
+        """Executes cdb :command and returns collected output.
+        """
         if command:
-            self.cdb.stdin.write('%s\n' % command)
+            self.cdb.stdin.write(command.encode() + b'\n')
+            self.cdb.stdin.flush()
+
         out = ''
-        def read_ch():
+        while not out.endswith('\n0:'):
             c = self.cdb.stdout.read(1)
             if not c:
                 raise CdbError('\n'.join((
                     '%s ->' % shell_line(self.shell),
                     'Cdb command: %s' % command,
                     'Unexpected eof: %s' % out)))
-            return c
-        while not out.endswith('\n0:'): out += read_ch()
-        while self.cdb.stdout.read(1) != '>': pass
-        return out[1:-3] # cut of prompt
+
+            out += c.decode()
+
+        while self.cdb.stdout.read(1) != b'>':
+            pass
+
+        return out[1:-3]  # < Cut of prompt.
 
     def main_module(self):
-        '''Finds executable name (without extension).
-        '''
+        """Finds executable name (without extension).
+        """
         return self.execute('|').split('\n')[-1].split('\\')[-1][:-4]
 
-    def module_info(self, module, key):
-        '''Returns key-value information about :module.
-        '''
-        name = module.translate(string.maketrans(' .', '__'))
+    def module_info(self, module: str, key: str):
+        """Returns key-value information about :module.
+        """
+        name = module.translate(str.maketrans(' .', '__'))
         for line in self.execute('lmvm%s\n' % name).split('\n'):
             if line.find(key) != -1:
                 return line.split(':')[1].strip()
         raise CdbError("Attribute '%s' is not found" % key)
 
     def report(self):
-        '''Generates text crash report (cdb-bt).
-        '''
+        """Generates text crash report (cdb-bt).
+        """
         return '\n\n'.join([
-            self.execute('.exr -1'), # Error
-            self.execute('.ecxr'), # context
-            self.execute('kc'), # Error stack
-            self.execute('~*kc'), # all threads stacks
+            self.execute('.exr -1'),  # < Error.
+            self.execute('.ecxr'),  # < Context.
+            self.execute('kc'),  # < Error stack.
+            self.execute('~*kc'),  # < All threads stacks.
         ])
 
+
 class DumpAnalyzer(object):
-    '''Provides ability to analize windows DMP dumps.
-    '''
-    CUSTOMIZATIONS_ALIASES = dict(
-        dw='digitalwatchdog'
-    )
-    CUSTOMIZATIONS = (
-        'default',
-        'default_cn',
-        'default_zh_CN',
-        'digitalwatchdog',
-        'ionetworks',
-        'ipera',
-        'hanwha',
-        'senturian',
-        'systemk',
-        'vista',
-        'vmsdemoblue',
-        'vmsdemoorange',
-    )
+    """Provides ability to analize windows DMP dumps.
+    """
 
     def __init__(
-        self, path, customization=None, version=None, build=None, branch='',
-        verbose=0, debug=''):
-        '''Initializes analizer with dump :path and :customization;
-        :version, :build, :branch - optionals to speed up process;
-        :verbose - maximal log level (default 0 means no logs).
-        '''
-        self.dump_path = path
+            self, cache_directory, dump_path,
+            customization: str = '', version: str = '', build: str = None, branch: str = '',
+            debug_mode: bool = False, visual_studio: bool = False):
+        """Initializes analizer with dump :path and :customization;
+        :version, :build, :branch - optionals to speed up process.
+        """
+        self.cache_directory = cache_directory
+        self.dump_path = dump_path
+        self.customization = CUSTOMIZATION_ALIASES.get(customization, customization)
         self.version = version
         self.build = build
         self.branch = branch
-        self.verbose = int(verbose)
-        self.debug = debug.split(',')
+        self.debug_mode = debug_mode
+        self.visual_studio = visual_studio
+        self.module, self.dist, self.build_path, self.target_path = None, None, None, None
 
-        if customization:
-            aliases = self.CUSTOMIZATIONS_ALIASES
-            self.customization = aliases.get(customization, customization)
-        else:
-            self.customization = 'default'
-            self.verify_customization()
+        deduced = deduce_customization(dump_path)
+        if not self.customization:
+            if not deduced:
+                raise UserError('Customization is not selected and can not be deduced')
 
-    def log(self, message, level=0):
-        '''Logs data in case of verbose mode.
-        '''
-        if level < self.verbose:
-            sys.stderr.write('[%i] %s\n' % (level, message))
+            logger.debug('Deduced customization [%s] selected for: %s' % (deduced, dump_path))
+            self.customization = deduced
+            return
 
-    def verify_customization(self):
-        for c in self.CUSTOMIZATIONS:
-            if c in self.dump_path and self.customization != c:
-                if 'fc' in self.debug:
-                    self.customization = c
-                    self.log('Dump path contains {}, customization is fixed'.format(c))
-                else:
-                    raise UserError('Dump path contains {} while customization is {}'
-                        .format(c, self.customization))
-                return
+        if deduced and self.customization != deduced:
+            logger.warning('Selected customization [%s] does not match deduced [%s] for: %s' % (
+                self.customization, deduced, dump_path))
 
     def get_dump_information(self):
-        '''Gets initial information from dump.
-        '''
+        """Gets initial information from dump.
+        """
         with Cdb(self.dump_path) as cdb:
-            self.log('Info run: ' + shell_line(cdb.shell), level=1)
             self.module = cdb.main_module()
-            self.log("CDB reports main module: " + self.module, level=2)
+            logger.debug("CDB reports main module: " + self.module)
             self.version = self.version or cdb.module_info(self.module, 'version')
-            self.log("CDB reports version: " + self.version, level=2)
+            logger.debug("CDB reports version: " + self.version)
+
         self.dist = 'server' if self.module.find('server') != -1 else 'client'
-        self.log('Dump information: %s (%s) %s %s ' % (
+        logger.info('Dump information: %s (%s) %s %s ' % (
             self.module, self.dist, self.version, self.customization))
+
         self.build = self.build or self.version.split('.')[-1]
         if self.build == '0':
-            raise UserError('Build 0 is not supported')
+            raise UserError('Build 0 is not supported for: ' + self.dump_path)
 
-    def fetch_url_data(self, url, regexps, subUrl=None):
-        '''Fetches data from :url by :regexp (must contain single group!).
-        '''
+    def fetch_url_data(self, url: str, regexps: List[str], sub_url: str = '') -> List[str]:
+        """Fetches data from :url by :regexp (must contain single group!).
+        """
         try:
-            page = urllib2.urlopen(url).read().replace('\r\n', '').replace('\n', '')
-        except urllib2.HTTPError as e:
-            raise DistError('%s, url: %s' % (e, url))
+            page = urllib.request.urlopen(url).read().decode().replace('\r\n', '').replace('\n', '')
+        except urllib.error.HTTPError as error:
+            raise DistError('%s, url: %s' % (error, url))
+
         results, failures = [], []
         for regexp in regexps:
-            self.log("Trying regexp '%s'" % regexp, level=2)
             for m in re.finditer(regexp, page):
-                self.log("Regexp '%s' got url '%s'" % (regexp, m.group(1)), level=2)
-                results.append((url, m.group(1)))
+                item = m.group(1)
+                logger.debug("Found distributive '%s' in: %s" % (item, url))
+                results.append((url, item))
             else:
-                self.log("Warning: Unable to find '%s' in %s" % (regexp, url), level=2)
+                logger.debug("Failed to get '%s' in: %s" % (regexp, url))
                 failures.append(regexp)
-        if subUrl and len(failures):
-            results += self.fetch_url_data(subUrl, failures)
+
+        if sub_url and len(failures):
+            results += self.fetch_url_data(sub_url, failures)
+
         return results
 
-    def fetch_urls(self):
-        '''Fetches URLs of required resourses.
-        '''
+    def fetch_urls(self) -> bool:
+        """Fetches URLs of required resources.
+        """
         dist_url, out = None, None
-        for url in CONFIG['dist_urls']:
+        for url in DIST_URLS:
             out = self.fetch_url_data(
-                url, ['''>(%s\-%s[^<]*)<''' % (self.build, re.escape(self.branch))])
+                url, [""">(%s\-%s[^<]*)<""" % (self.build, re.escape(self.branch))])
+
             if len(out) > 0:
                 dist_url = url
-                break;
+                break
+
         if not dist_url:
-            print "No distributive found for build %s. Dump analyze imposible" % self.build
-            return False
+            raise DistError("No distributive found for build %s, analyze impossible" % self.build)
+
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
         build_url = os.path.join(dist_url, build_path)
-        self.log("build_url = '%s',\ndist_url = '%s'\nbuild_path = '%s'" % (
-              build_url, dist_url, build_path), level=2)
-        suffixes = list(s % self.dist for s in CONFIG['dist_suffixes']) +\
-           list(s % {'module': self.dist} for s in CONFIG['pdb_suffixes'])
-        def link_regexp(suffix):
-            if 'qr' in self.debug:
-                return '''"([a-zA-Z0-9-_\.]+%s)"''' % suffix
-            else:
-                return '''>([a-zA-Z0-9-_\.]+%s)<''' % suffix
+        suffixes = list(s % self.dist for s in DIST_SUFFIXES) + \
+                   list(s % {'module': self.dist} for s in PDB_SUFFIXES)
+
         out = self.fetch_url_data(
-            build_url, (link_regexp(r) for r in suffixes),
+            build_url, (""">([a-zA-Z0-9-_\.]+%s)<""" % r for r in suffixes),
             os.path.join(dist_url, update_path))
-        self.dist_urls = list(os.path.join(*e) for e in out)
-        self.build_path = os.path.join(CONFIG['data_dir'],  build_path)
+
+        self.build_path = os.path.join(self.cache_directory, build_path)
         self.target_path = os.path.join(self.build_path, 'target')
         if not os.path.isdir(self.target_path):
             os.makedirs(self.target_path)
-        return True
 
-    def download_url_data(self, url, local):
-        '''Downloads file from :url to :local directory, apply :processor if any.
-        '''
+        return list(os.path.join(*url) for url in out)
+
+    def download_url_data(self, url: str, local: str) -> str:
+        """Downloads file from :url to :local directory, apply :processor if any.
+        """
         path = os.path.join(local, os.path.basename(url))
-        if 'nodl' in self.debug:
-           return path
         if not os.path.isfile(path):
-            self.log('Download: %s to %s' % (url, path))
+            logger.info('Download: %s to %s' % (url, path))
             with open(path, 'wb') as f:
-                f.write(urllib2.urlopen(url).read())
+                f.write(urllib.request.urlopen(url).read())
         else:
-            self.log('Already downloaded: %s' % path, level=1)
+            logger.debug('Already downloaded: %s' % path)
+
         return path
 
-    def find_files_iter(self, condition, path=None):
-        '''Searches file by :condition in :path (build directory by default).
-        '''
+    def find_files_iter(self, condition: Callable, path: str = None):
+        """Searches file by :condition in :path (build directory by default).
+        """
         path = path or self.build_path
         for root, dirs, files in os.walk(path):
             for name in files:
                 if condition(name):
                     yield os.path.join(root, name)
 
-    def find_file(self, name, path=None):
-        '''Searches file by :name in :path (build directory by default).
-        '''
+    def find_file(self, name: str, path: str = None) -> str:
+        """Searches file by :name in :path (build directory by default).
+        """
         path = path or self.build_path
-        for path in self.find_files_iter(lambda n: n == name, path):
+        for path in self.find_files_iter(lambda n: n.endswith(name), path):
             return path
+
         raise DistError("No such file '%s' in '%s'" % (name, path))
 
-    def module_dir(self):
-        '''Returns executable module directory (performs search if needed).
-        '''
+    def module_dir(self) -> str:
+        """Returns executable module directory (performs search if needed).
+        """
         if not hasattr(self, '_module_dir'):
             self._module_dir = os.path.dirname(self.find_file(self.module + '.exe'))
+
         return self._module_dir
 
     def extract_dist(self, path):
-        '''Extract distributive by :path based in it's format:
+        """Extract distributive by :path based in it's format:
            .msi - just extracts to the 'target' directory;
-           .exe - extracts msi by wix toolset and treats msi normaly;
+           .exe - extracts msi by wix toolset and treats msi normally;
            .zip - just extract to the target exe directory.
-        '''
+        """
+
         def run(*command):
-            if 'nodl' in self.debug:
-                return 0
             try:
+                logger.debug(shell_line(command))
                 return subprocess.check_output(command)
-            except (IOError, WindowsError, subprocess.CalledProcessError) as e:
-                raise DistError('Cannot run: %s -> %s' % (shell_line(command), e))
+            except (IOError, WindowsError, subprocess.CalledProcessError) as error:
+                raise DistError(error)
 
         if path.endswith('.exe'):
-            wix_dir = os.path.join(os.path.dirname(path), 'wix');
+            wix_dir = os.path.join(os.path.dirname(path), 'wix')
             if not os.path.isdir(wix_dir):
                 os.mkdir(wix_dir)
-                self.log('Unpack %s to %s' % (path, wix_dir), level=1)
                 run('dark', '-x', wix_dir, path)
-            msi_name = os.path.basename(path.replace('.exe', '.msi'))
-            return self.extract_dist(self.find_file(msi_name, wix_dir))
+
+            return self.extract_dist(self.find_file('.msi', wix_dir))
 
         if path.endswith('.msi'):
             p, d = path.replace('/', '\\'), self.target_path.replace('/', '\\')
-            self.log('Extract %s to %s' % (p, d), level=1)
-            return run('msiexec', '-a', p, '/qb', 'TARGETDIR=' + d)
+            return run('msiexec', '-a', os.path.abspath(p), '/qb', 'TARGETDIR=' + os.path.abspath(d))
 
-        if path.endswith('.zip'):
-            d = self.module_dir()
-            self.log('Unzip %s to %s' % (path, d), level=1)
-            return run(CONFIG['zip_path'], 'x', path, '-o' + d, '-y', '-aos')
+        if path.endswith('.msi') or path.endswith('.zip'):
+            return run('7z', 'x', path, '-o' + self.module_dir(), '-y', '-aos')
 
         raise DistError('Can not extract: %s' % path)
 
     def download_dists(self):
-        '''Downloads required distributives.
-        '''
-        if not self.dist_urls:
-           raise DistError('There are no distributive URLs avaliable')
-        self.log('Found dists urls:\n%s' % '\n'.join(self.dist_urls), level=1)
+        """Downloads required distributions.
+        """
+        urls = self.fetch_urls()
+        if not urls:
+            raise DistError('There are no distributive URLs available')
+
         try:
-            for url in self.dist_urls:
+            for url in urls:
                 path = self.download_url_data(url, self.build_path)
                 self.extract_dist(path)
-            self.log('Download has finished: %s' % self.module_dir(), level=2)
         except DistError:
-            if 'keep' not in self.debug:
-                def logError(f, p, e):
-                    self.log("Warning: %s '%s': %s" % (f, p, repr(e)), level=1)
-                shutil.rmtree(self.build_path, onerror=logError)
+            if not self.debug_mode:
+                logger.debug('Clean up download dir: ' + self.build_path)
+                shutil.rmtree(self.build_path, onerror=lambda f, p, ex: logger.error(
+                    "%s '%s': %s" % (f, p, repr(ex))))
             raise
-        if 'copy' in self.debug or 'cp' in self.debug or 'vs' in self.debug:
-            shutil.copy(self.dump_path, self.module_dir())
 
-    def generate_report(self, asString=False):
-        '''Generates report using cdb with debug information.
-        '''
-        if 'vs' in self.debug:
-            self.log('Open with Visual Studio in %s' % self.module_dir())
-            os.chdir(self.module_dir())
-            dump_name = os.path.basename(self.dump_path)
-            subprocess.Popen([CONFIG['vs_path'], dump_name])
-            return 'Done'
-        report_path = report_name(self.dump_path)
-        self.log('Loading debug information: ' + self.module_dir())
+    def run_visual_studio(self):
+        """Open dump in visual studio.
+        """
+        short_name = 'dump-%s.dmp' % hashlib.sha256(self.dump_path.encode()).hexdigest()[20:]
+        short_path = os.path.join(self.module_dir(), short_name)
+        logger.debug("Copy dump '%s' to '%s'" % (self.dump_path, short_path))
+        shutil.copy(self.dump_path, short_path)
+
+        os.chdir(self.module_dir())
+        logger.info('Open with Visual Studio in: %s' % self.module_dir())
+        subprocess.Popen(['devenv', short_name])
+
+    def generate_report(self, report_path):
+        """Generates report using cdb with debug information.
+        """
+        logger.info('Loading debug information from: ' + self.module_dir())
         pdb_dirs = ';'.join(set(os.path.dirname(f) for f in
-            self.find_files_iter(lambda n: n.lower().endswith(".pdb"))))
+                                self.find_files_iter(lambda n: n.lower().endswith(".pdb"))))
+
         with Cdb(self.dump_path, self.module_dir(), pdb_dirs) as cdb:
-            self.log('Debug run: ' + shell_line(cdb.shell), level=1)
-            self.log('Generating report: ' + report_path)
+            logger.debug('Generating report: ' + report_path)
             report = cdb.report()
             with open(report_path, 'w') as report_file:
                 report_file.write(report)
-        return report if asString else report_path
 
-def analyseDump(*args, **kwargs):
-    '''Generated cdb-bt report based on dmp file.
-    Note: Returns right away in case if dump is already analized.
+        logger.info('Report is written to: ' + report_path)
+        return report
+
+
+def analyse_dump(generate: bool = True, *args, **kwargs):
+    """Generated cdb-bt report based on dmp file.
+    Note: Returns right away in case if dump is already analyzed.
     Returns: cdb-bt report path.
-    '''
-    def resultDict(dump, text):
-        return dict(
-            component = dump.dist,
-            dump = text
-        )
-    format = kwargs.pop('format', 'path')  # possible values: path, str, dict
-    if not format in {'path', 'str', 'dict'}:
-        raise UserError("Wrong format value: %s" % format)
+    """
     dump = DumpAnalyzer(*args, **kwargs)
-    report = report_name(dump.dump_path)
-    def is_rerun_required():
-        debug = kwargs.get('debug', '')
-        return ('rewrite' in debug) or ('vs' in debug)
-    if os.path.isfile(report) and not is_rerun_required():
-        if format == 'dict':
-            dump.get_dump_information()
-            return resultDict(dump, open(report, 'r').read())
-        elif format == 'str':
-            return open(report, 'r').read()
-        else:
-            dump.log('Already processed: ' + report)
-            return report
-    dump.get_dump_information()
-    if not dump.fetch_urls():
-        return dict() if format == 'dict' else ''
-    dump.download_dists()
-    reportText = dump.generate_report(format != 'path')
-    return resultDict(dump, reportText) if format == 'dict' else reportText
+    if generate:
+        report_path = report_name(dump.dump_path)
+        if os.path.isfile(report_path):
+            logger.warning('Already processed: ' + report_path)
+            with open(report_path, 'r') as f:
+                return f.read()
 
-def main():
-    args, kwargs = list(), dict(verbose='2')
-    for arg in sys.argv[1:]:
-        s = arg.split('=', 2)
-        if len(s) == 1: args.append(s[0])
-        else: kwargs[s[0]] = s[1]
-    try:
-        print analyseDump(*args, **kwargs)
-    except Error as e:
-        if 'throw' in kwargs.get('debug', ''): raise
-        sys.stderr.write('%s: %s\n' % (type(e).__name__, e))
-        sys.exit(1)
-    except KeyboardInterrupt:
-        sys.stderr.write('Interrupted\n')
+        dump.get_dump_information()
+        dump.download_dists()
+        return dump.generate_report(report_path)
+
+    dump.get_dump_information()
+    dump.download_dists()
+    dump.run_visual_studio()
+
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    import sys
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dump_path', help='dmp file to analyze')
+    parser.add_argument('customization', nargs='?', help='default: auto deduce by name')
+    parser.add_argument('-g', '--generate', action='store_true', default=False,
+                        help='generate report instead of launching Visual Studio')
+    parser.add_argument('-D', '--debug-mode', action='store_true', default=False)
+    parser.add_argument('-b', '--branch', default='')
+    parser.add_argument('-d', '--cache-directory', default='./dumptool')
+
+    arguments = parser.parse_args()
+    logging.basicConfig(
+        level=(logging.DEBUG if arguments.debug_mode else logging.INFO),
+        format='%(asctime)s %(levelname)8s: %(message)s', stream=sys.stdout)
+
+    try:
+        analyse_dump(**vars(arguments))
+
+    except Error as e:
+        if arguments.debug_mode:
+            raise
+
+        logger.critical(e)
+        sys.exit(1)
+
+    except KeyboardInterrupt:
+        sys.stderr.write('Interrupted\n')
