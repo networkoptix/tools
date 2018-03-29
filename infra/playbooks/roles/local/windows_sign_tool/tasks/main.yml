@@ -1,0 +1,76 @@
+- name: Create metadata dir
+  become: true
+  become_method: sudo
+  file:
+    path: "{{ libvirt_guest__meta_data_path }}"
+    state: directory
+  delegate_to: "{{ libvirt_host }}"
+
+- name:
+  file:
+    path: /cygdrive/c/autosignin/
+    state: directory
+    mode: '777'
+
+- name:
+  copy:
+    src: "{{ item }}"
+    dest: "/cygdrive/c/autosignin/{{ item }}"
+    mode: '777'
+  register: s_resources
+  with_items:
+  - autosignin.py
+  - autosignin.ps1
+  - install.cmd
+
+- name: Generate init scripts using templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "/cygdrive/c/autosignin/{{ item }}"
+    mode: '777'
+  register: s_resources_2
+  with_items:
+  - autosignin.cmd
+
+- name:
+  copy:
+    src: run_autosignin.cmd
+    dest: "/cygdrive/c/ProgramData/Microsoft/Windows/Start Menu/Programs/StartUp/"
+    mode: '777'
+  register: s_startup
+
+- name:
+  become: true
+  become_method: sudo
+  command: lsusb
+  changed_when: false
+  register: lsusb
+  delegate_to: "{{ libvirt_host }}"
+
+- name: Copy hotplug definition
+  become: true
+  become_method: sudo
+  copy:
+    src: hotplug_aladdin_token.xml
+    dest: "{{ libvirt_guest__meta_data_path }}/hotplug_aladdin_token.xml"
+  delegate_to: "{{ libvirt_host }}"
+
+- assert:
+    that:
+    - '"ID 0529:0620 Aladdin Knowledge Systems Token JC" in lsusb.stdout'
+
+- name: Attach aladdin
+  become: true
+  become_method: sudo
+  command: >-
+    virsh attach-device {{ libvirt_guest__hostname }}
+    {{ libvirt_guest__meta_data_path }}/hotplug_aladdin_token.xml
+  when: libvirt_guest__current_state == 'running'
+  delegate_to: "{{ libvirt_host }}"
+  failed_when: false # workaround for already attached devices
+
+- name: Reboot the system when startup files are changed
+  shell: shutdown /r -t 1
+  when: s_resources.changed or  s_resources_2.changed or s_startup.changed
+  async: 1
+  poll: 0

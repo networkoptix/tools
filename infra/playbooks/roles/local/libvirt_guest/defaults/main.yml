@@ -22,3 +22,4 @@ libvirt_guest__disks:
   target_bus: virtio
 
 libvirt_connection: "qemu:///system"
+libvirt_guest__graphics: true

@@ -10,6 +10,7 @@
 
   vars_files:
   - ../secrets/windows_build.yml
+  - ../secrets/autosign.yml
 
   roles:
   - role: libvirt_guest
@@ -19,3 +20,10 @@
     - libvirt_guest__state is defined
     - libvirt_guest__state == 'running'
     - libvirt_guest__type  == 'windows'
+  - role: windows_sign_tool
+    become: false
+    when:
+    - libvirt_guest__state is defined
+    - libvirt_guest__state == 'running'
+    - libvirt_guest__type  == 'windows'
+    - install_sign_tool == true

@@ -1,0 +1,2 @@
+install_sign_tool: false
+libvirt_guest__meta_data_path: "/var/lib/libvirt/metadata/{{ libvirt_guest__hostname }}"
