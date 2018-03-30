@@ -1,0 +1,44 @@
+- name: Check Vagrant version
+  become: yes
+  become_method: sudo
+  shell: vagrant --version | cut -d ' ' -f 2
+  register: check_vagrant_version
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Get Vagrant from hashicorp site
+  get_url:
+    url: >-
+      https://releases.hashicorp.com/vagrant/{{ vagrant_version
+      }}/vagrant_{{ vagrant_version }}_x86_64.deb
+    dest: /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
+  when: >-
+    check_vagrant_version.rc != 0 or
+    vagrant_version not in check_vagrant_version.stdout
+
+- name: Install vagrant
+  become: yes
+  become_method: sudo
+  command: dpkg -i /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
+  when: >-
+    check_vagrant_version.rc != 0 or
+    vagrant_version not in check_vagrant_version.stdout
+
+- name: Get installed Vagrant boxes
+  become: true
+  become_user: "{{ vagrant_user }}"
+  command: vagrant box list
+  register: vagrant_boxes_installed
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Install missing Vagrant boxes
+  become: true
+  become_user: "{{ vagrant_user }}"
+  command: "vagrant box add '{{ vagrant_registry_url }}/{{ box_name }}'"
+  with_items: "{{ vagrant_boxes }}"
+  loop_control:
+    loop_var: box_name
+  when: box_name not in vagrant_boxes_installed.stdout

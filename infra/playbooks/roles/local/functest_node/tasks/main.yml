@@ -1,7 +1,8 @@
 - name: Install packages
-  sudo: yes
+  become: yes
+  become_method: sudo
   apt:
-    pkg: "{{item}}"
+    pkg: "{{ item }}"
     state: present
     update_cache: yes
   with_items:
@@ -28,46 +29,8 @@
   - screen
   - git
 
-# - name: Check Vagrant installed
-#   sudo: yes
-#   command: which vagrant
-#   register: vagrant_installed
-#   failed_when: false
-# #
-#
-- name: Check Vagrant installed
-  sudo: yes
-  shell: vagrant --version | cut -d ' ' -f 2
-  register: chk_vagrant_version
-  changed_when: false
-  failed_when: false
-
-- name: Get vagrant from hashicorp site
-  get_url:
-    url: https://releases.hashicorp.com/vagrant/{{ vagrant_version }}/vagrant_{{ vagrant_version }}_x86_64.deb
-    dest: /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
-  when: chk_vagrant_version.rc != 0 or vagrant_version not in chk_vagrant_version.stdout
-
-- name: Install vagrant
-  sudo: yes
-  command: dpkg -i /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
-  when: chk_vagrant_version.rc != 0 or vagrant_version not in chk_vagrant_version.stdout
-
-- name: Get installed Vagrant boxes
-  become: true
-  become_user: "{{ vagrant_user }}"
-  command: vagrant box list
-  register: vagrant_boxes_installed
-  changed_when: false
-
-- name: Install missing Vagrant boxes
-  become: true
-  become_user: "{{ vagrant_user }}"
-  command: "vagrant box add '{{ vagrant_registry_url }}/{{ box_name }}'"
-  with_items: "{{ vagrant_boxes }}"
-  loop_control:
-    loop_var: box_name
-  when: box_name not in vagrant_boxes_installed.stdout
+- name: "Install vagrant and download boxes for {{ vagrant_user }}"
+  include_tasks: vagrant.yml
 
 # TODO: move to common
 - include_tasks: "{{ ansible_distribution_release }}_mercurial.yml"
