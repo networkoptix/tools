@@ -22,13 +22,13 @@ def make_report_path(dump_path):
 
 
 @pytest.mark.parametrize(
-    'dump_path', list(glob(utils.resource_path('dmp/*.dmp')))
+    'dump', utils.Resource('dmp', '*.dmp').glob()
 )
-def test_analyze(tmp_directory, dump_path):
-    tmp_dump_path = os.path.join(tmp_directory, os.path.basename(dump_path))
-    shutil.copy(dump_path, tmp_dump_path)
+def test_analyze(tmp_directory, dump):
+    tmp_dump_path = os.path.join(tmp_directory, os.path.basename(dump.path))
+    shutil.copy(dump.path, tmp_dump_path)
     try:
-        expected_report = utils.file_content(make_report_path(dump_path))
+        expected_report = utils.File(make_report_path(dump.path)).read_data()
     except FileNotFoundError:
         with pytest.raises(dumptool.DistError):
             dumptool.analyse_dump(dump_path=tmp_dump_path, cache_directory=tmp_directory)
@@ -36,7 +36,7 @@ def test_analyze(tmp_directory, dump_path):
         content = dumptool.analyse_dump(dump_path=tmp_dump_path, cache_directory=tmp_directory)
         assert expected_report == content
         tmp_report_path = make_report_path(tmp_dump_path)
-        assert expected_report == utils.file_content(tmp_report_path)
+        assert expected_report == utils.File(tmp_report_path).read_data()
 
 
 

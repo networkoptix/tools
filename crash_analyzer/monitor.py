@@ -199,7 +199,7 @@ def main():
     parser.add_argument('configuration_file')
 
     arguments = parser.parse_args()
-    config = utils.file_parse(arguments.configuration_file)
+    config = utils.File(arguments.configuration_file).parse()
     utils.setup_logging(**config['logging'])
 
     monitor = Monitor(

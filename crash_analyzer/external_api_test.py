@@ -9,7 +9,9 @@ import crash_info
 import external_api
 import utils
 
-CONFIG = utils.resource_parse('monitor_example_config.yaml')
+logger = logging.getLogger(__name__)
+
+CONFIG = utils.Resource('monitor_example_config.yaml').parse()
 TEST_REASON = crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])
 
 
@@ -40,13 +42,13 @@ class JiraFixture:
 
     def update_issue(self, names: List[str]):
         if self.api.update_issue(self.issue.key, [crash_info.Report(n) for n in names]):
-            self.api.attach_files(self.issue.key, [utils.resource_path('jira/' + n) for n in names])
+            self.api.attach_files(self.issue.key, [utils.Resource('jira', n).path for n in names])
 
         self.issue = self.api._jira.issue(self.issue.key)
 
     def attachments(self):
         names = [a.filename for a in self.issue.fields.attachment]
-        logging.debug('Attachments: {}'.format(names))
+        logger.debug('Attachments: {}'.format(names))
         return set(n.split('--')[-1].split('.')[0] for n in names)
 
     @staticmethod
@@ -77,16 +79,16 @@ def test_jira(jira: JiraFixture):
     assert {'3.1_hotfix'} == {v.name for v in jira.issue.fields.fixVersions}
     assert {'1234'} == jira.attachments()
 
-    logging.debug('Suppose case is closed by developer')
+    logger.debug('Suppose case is closed by developer')
     jira.api._transition(jira.issue.key, 'Feedback', 'QA Passed')
     assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-    logging.debug('No reopen should happen for dump from the same version')
+    logger.debug('No reopen should happen for dump from the same version')
     jira.update_issue(['server--3.1.0.5678-xyzu-default--5678.gdb-bt'])
     assert 'Closed' == jira.issue.fields.status.name
     assert {'1234'} == jira.attachments()
 
-    logging.debug('Reopen is expected for dumps from new version')
+    logger.debug('Reopen is expected for dumps from new version')
     jira.update_issue([
         'server--3.2.0.2344-asdf-default--3451.gdb-bt',
         'server--3.2.0.3452-dfga-default--7634.gdb-bt',

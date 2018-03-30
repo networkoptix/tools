@@ -12,14 +12,16 @@ import crash_info
 import monitor
 import utils
 
+logger = logging.getLogger(__name__)
+
 
 class CrashServer:
     def list_all(self, format: str) -> List[str]:
-        return [os.path.basename(f) for f in glob(utils.resource_path('*/*' + format))]
+        return [os.path.basename(f.path) for f in utils.Resource('*', '*' + format).glob()]
 
     def get(self, name: str) -> str:
-        for f in glob(utils.resource_path('*/' + name)):
-            return utils.file_content(f)
+        for f in utils.Resource('*', name).glob():
+            return f.read_data()
 
         assert False, 'Unable to find file: ' + name
 
@@ -36,7 +38,7 @@ class Jira:
             'format': report.format,
             'versions': [report.version]}
 
-        logging.info('Case {} is created for {}'.format(key, reason))
+        logger.info('Case {} is created for {}'.format(key, reason))
         return key
 
     def update_issue(self, key: str, reports: List[crash_info.Report]):
@@ -44,14 +46,14 @@ class Jira:
         for report in reports:
             case['versions'] = sorted(set(case['versions'] + [report.version]))
 
-        logging.info('Case {} is updated with {} reports'.format(key, len(reports)))
+        logger.info('Case {} is updated with {} reports'.format(key, len(reports)))
         return True
 
     def attach_files(self, key: str, files: List[str]):
         attachments = [f.replace('\\', '/') for f in files]
         case = self.cases[key]
         case['attachments'] = sorted(set(case['attachments'] + attachments))
-        logging.info('Case {} attached {}'.format(key, ', '.join(attachments)))
+        logger.info('Case {} attached {}'.format(key, ', '.join(attachments)))
 
 
 @pytest.fixture
@@ -70,7 +72,7 @@ def fixture():
 
             self.monitor = monitor.Monitor(self.options, self.crash_server, self.jira)
 
-    f = Fixture(**utils.resource_parse('monitor_example_config.yaml')['options'])
+    f = Fixture(**utils.Resource('monitor_example_config.yaml').parse()['options'])
     yield f
     f.monitor._records = []  # < Prevents flush after directory removal.
     shutil.rmtree(f.options.directory)
@@ -102,5 +104,5 @@ def test_monitor(fixture, format: str, remake: bool, reports_each_run: int):
         if remake:
             fixture.new_monitor()
 
-    all_cases = utils.resource_parse('cases.yaml').items()
+    all_cases = utils.Resource('cases.yaml').parse().items()
     assert {k: v for k, v in all_cases if v['format'].endswith(format)} == fixture.jira.cases

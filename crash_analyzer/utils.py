@@ -4,9 +4,12 @@ import logging
 import os
 import string
 import sys
-from typing import Any
+import json
+from glob import glob
 
 import yaml
+
+logger = logging.getLogger(__name__)
 
 
 def setup_logging(level: str = 'debug', path: str = '-'):
@@ -29,27 +32,107 @@ def is_ascii_printable(s: str):
         return all(c in string.printable for c in s)
 
 
-def file_content(path: str) -> str:
-    with open(path, 'r') as f:
-        return f.read().replace('\r', '')
+class File:
+    def __init__(self, *path):
+        self.path = os.path.join(*path)
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, self.path)
+
+    def write(self, action, mode=''):
+        """Executes an :action on a file, opened for writing.
+        """
+        with open(self.path, 'w' + mode) as f:
+            action(f)
+
+    def read(self, action, default=None, mode=''):
+        """Executes an :action on a file, opened for writing.
+        If file does not exist and default provided, it will be returned instead of an exception.
+        """
+        try:
+            with open(self.path, 'r' + mode) as f:
+                return action(f)
+        except FileNotFoundError:
+            if default is None: raise
+            logger.warning('Read "{}" for non-existing file: {}'.format(default, self.path))
+            return default
+
+    def write_data(self, data, mode=''):
+        self.write(lambda f: f.write(data), mode)
+
+    def read_data(self, default=None, mode=''):
+        return self.read(lambda f: f.read(), default, mode)
+
+    def write_json(self, data):
+        self.write(lambda f: json.dump(data, f))
+
+    def read_json(self, default=None):
+        return self.read(lambda f: json.load(f), default)
+
+    def write_yaml(self, data):
+        self.write(lambda f: yaml.dump(data, f))
+
+    def read_yaml(self, default=None):
+        return self.read(lambda f: yaml.load(f), default)
+
+    def write_container(self, generator, brackets='{}'):
+        opener, closer = brackets
+        with open(self.path, 'w') as f:
+            f.write(opener)
+            try:
+                f.write('\n' + next(generator))
+                while True:
+                    f.write(',\n' + next(generator))
+            except StopIteration:
+                f.write('\n' + closer)
+
+    def parse(self):
+        f = self.path.split('.')[-1].lower()
+        if f == 'json':
+            return self.read_json()
+        if f == 'yaml':
+            return self.read_yaml()
+        raise NotImplemented('Unsupported format "{}" file: {}'.format(f, self.path))
 
 
-def file_parse(path: str):
-    return yaml.load(file_content(path))
+class Resource(File):
+    def __init__(self, *path):
+        super().__init__(os.path.dirname(__file__), 'resources', *path)
+
+    def glob(self):
+        return [Resource(p) for p in glob(self.path)]
 
 
-def file_serialize(value: Any, path: str):
-    with open(path, 'w') as f:
-        f.write(yaml.dump(value, default_flow_style=False))
+class CacheSet(set):
+    def __init__(self, *path):
+        super().__init__()
+        self._cache = File(*path)
+        self.update(self._cache.read_json(set()))
+
+    def save(self):
+        self._cache.write_container(('"{}"'.format(i) for i in self), '[]')
 
 
-def resource_path(name: str) -> str:
-    return os.path.join(os.path.dirname(__file__), 'resources', name)
+class CacheDict(dict):
+    def __init__(self, *path):
+        super().__init__()
+        self._cache = File(*path)
+        self.update(self._cache.read_json(dict()))
+
+    def save(self):
+        self._cache.write_container('"{}": "{}"'.format(k, v) for k, v in self.items())
 
 
-def resource_content(name: str) -> str:
-    return file_content(resource_path(name))
 
 
-def resource_parse(name: str):
-    return yaml.load(resource_content(name))
+
+
+
+
+
+
+
+
+
+
+
