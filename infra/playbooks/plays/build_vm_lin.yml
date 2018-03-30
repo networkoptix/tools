@@ -8,8 +8,17 @@
   # All facts will be collected in libvirt_guest.
   gather_facts: no
 
+  vars_files:
+  - ../secrets/infra_storage.yml
+
   roles:
   - role: libvirt_guest
+  - role: samba_share
+    become: true
+    become_method: sudo
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    vars:
+      samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
     when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
   - role: build_node

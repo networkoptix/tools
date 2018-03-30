@@ -1,0 +1,14 @@
+# TODO: most of this is not default stuff, we need to move it accordingly
+samba_group: infra
+samba_user: infra
+samba_gid: 1040
+samba_uid: 1040
+samba_home: '/home/infra'
+
+dir_mode: 0755
+file_mode: 0755
+
+samba_share: "//192.168.13.2/infra"
+samba_mount_path: /mnt/infra
+domain: "cinas"
+samba_mount_user: infra

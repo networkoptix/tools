@@ -3,7 +3,16 @@
   become: true
   become_method: sudo
 
+  vars_files:
+  - ../secrets/infra_storage.yml
+  
   roles:
+  - role: samba_share
+    become: true
+    become_method: sudo
+    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    vars:
+      samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
   - role: libvirt_host
   # TODO we need to move base images to NAS and extract image creation project
