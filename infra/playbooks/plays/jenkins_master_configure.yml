@@ -14,4 +14,4 @@
     become: true
     become_method: sudo
   - role: jenkins_config
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

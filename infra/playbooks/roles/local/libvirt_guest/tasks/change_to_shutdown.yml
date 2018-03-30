@@ -8,6 +8,7 @@
   register: available_machines
   when: libvirt_guest__current_state == 'undefined'
   changed_when: false
+  check_mode: no
 
 - name : Ensure os machine is available
   assert:
@@ -37,3 +38,4 @@
 - assert:
     that:
     - libvirt_guest__current_state == 'shutdown'
+  when: not ansible_check_mode

@@ -25,6 +25,7 @@
 - assert:
     that:
     - libvirt_guest__current_state == 'running'
+  when: not ansible_check_mode
 
 - include_role:
     name: "libvirt_guest_init_linux"

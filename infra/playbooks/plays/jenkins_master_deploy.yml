@@ -16,18 +16,18 @@
   - role: samba_share
     become: true
     become_method: sudo
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
     vars:
       samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
     become: true
     become_method: sudo
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: geerlingguy.java
     become: true
     become_method: sudo
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: geerlingguy.jenkins
     become: true
     become_method: sudo
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

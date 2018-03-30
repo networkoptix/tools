@@ -11,7 +11,7 @@
   roles:
   - role: libvirt_guest
   - role: alphabet_common
-    when: libvirt_guest__state is undefined or libvirt_guest__state == 'running'
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
 
 - name: Setup mshevchenko custom build machine
   hosts: dev_build
