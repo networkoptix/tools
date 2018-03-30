@@ -76,16 +76,16 @@ def fixture():
     shutil.rmtree(f.options.directory)
 
 
-#@pytest.mark.parametrize(
-#    "format", ['gdb-bt', 'cdb-bt', '-bt']
-#)
-#@pytest.mark.parametrize(
-#    "remake", [True, False]
-#)
-#@pytest.mark.parametrize(
-#    "reports_each_run", [1000, 5]
-#)
-def test_monitor(fixture, format: str = 'gdb-bt', remake: bool = False, reports_each_run: int = 1000):
+@pytest.mark.parametrize(
+    "format", ['gdb-bt', 'cdb-bt', '-bt']
+)
+@pytest.mark.parametrize(
+    "remake", [True, False]
+)
+@pytest.mark.parametrize(
+    "reports_each_run", [1000, 5]
+)
+def test_monitor(fixture, format: str, remake: bool, reports_each_run: int):
     fixture.options.update(
         format=('*-bt' if format == '-bt' else format),
         reports_each_run=reports_each_run)
