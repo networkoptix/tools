@@ -3,9 +3,13 @@
 import sys
 import logging
 from datetime import datetime, timedelta
+
 import py
 from pony.orm import db_session, commit
 import pytest
+from _pytest.fixtures import FixtureLookupErrorRepr
+from _pytest._code.code import ReprExceptionInfo
+
 from .. import models
 
 
@@ -143,7 +147,11 @@ class DbCapturePlugin(object):
         if report.failed:
             self.repo.add_artifact(stage_run, 'traceback', '%s.traceback' % stage_name, self.repo.artifact_type.traceback, str(report.longrepr), is_error=True)
             root_run.outcome = current_test_run.outcome = 'failed'
-            message = report.longrepr.reprcrash.message
+            message = None
+            if isinstance(report.longrepr, ReprExceptionInfo):
+                message = report.longrepr.reprcrash.message
+            if isinstance(report.longrepr, FixtureLookupErrorRepr):
+                message = report.longrepr.errorstring
             if message:
                 current_test_run.error_message = message.splitlines()[0]
         if report.outcome == 'skipped':
