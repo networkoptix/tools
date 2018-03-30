@@ -50,7 +50,7 @@ Here <command> can be one of the following:
  apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
  apidoc-rdep # Run tests and deploy apidoctool from devtools to packages/any.
 
- kit [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
+ kit [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
  kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
  start-s [args] # Start mediaserver with [args].
@@ -58,7 +58,7 @@ Here <command> can be one of the following:
  start-c [args] # Start desktop_client with [args].
  stop-c # Stop desktop_client.
  run-ut [all|test_name] [args] # Run all or the specified unit test via ctest.
- testcamera [video-file.ext] [args] # Start testcamera with the primary stream, or show its help.
+ testcamera [video-file.ext] [args] # Start testcamera, or show its help.
 
  share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
  gen [cache] [cmake-args] # Perform cmake generation.
@@ -395,6 +395,14 @@ do_kit() # "$@"
 {
     find_VMS_DIR
 
+    if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
+    then
+        shift
+        local -r -i KEEP_BUILD_DIR=1
+    else
+        local -r -i KEEP_BUILD_DIR=0
+    fi
+
     # Recreate nx_kit build dir in $TEMP_DIR.
     local KIT_BUILD_DIR="$TEMP_DIR/nx_kit-build"
     rm -rf "$KIT_BUILD_DIR"
@@ -406,7 +414,14 @@ do_kit() # "$@"
     build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; return $?; }
 
     nx_popd
-    rm -rf "$KIT_BUILD_DIR"
+    if [[ $KEEP_BUILD_DIR == 0 ]]
+    then
+        rm -rf "$KIT_BUILD_DIR"
+    else
+        nx_echo
+        nx_echo "ATTENTION: Built at $KIT_BUILD_DIR"
+        nx_echo
+    fi
 
     nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
     nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || return $?
@@ -770,7 +785,7 @@ main()
             else
                 local SELF_IP
                 nx_get_SELF_IP "$TESTCAMERA_SELF_IP_SUBNET_PREFIX"
-                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" --no-secondary "$@" \
+                nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" "$@" \
                     "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
             fi
             ;;
