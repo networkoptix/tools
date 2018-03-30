@@ -1,3 +1,4 @@
+# Configure package providers
 - name: Use amd64 architecture
   lineinfile:
     dest: /var/lib/dpkg/arch
@@ -10,12 +11,22 @@
     dest: /var/lib/dpkg/arch
     line: i386
     create: yes
-  register: add_i386_architecture
 
-- name: Install all packeges
+- name: Install Ubuntu Toolchain repository
+  apt_repository:
+    repo: ppa:ubuntu-toolchain-r/test
+    state: present
+
+- name: Install Mercurial repository
+  apt_repository:
+    repo: ppa:mercurial-ppa/releases
+    state: present
+  when: ansible_distribution_release == 'trusty'
+
+- name: Install all packages
   apt:
     name: "{{ item }}"
-    update_cache: "{{ add_i386_architecture.changed }}"
+    update_cache: yes
     state: present
   with_items:
   # Common
@@ -29,7 +40,7 @@
   - nano
   - mc
   - screen
-  # java requirements # todo: do we need them??
+  # java requirements
   - ca-certificates-java
   - libasound2
   # python
@@ -93,33 +104,16 @@
   - python-demjson
   - python-opencv
 
-- name: Install Ubuntu Toolchain repository
-  apt_repository:
-    repo: ppa:ubuntu-toolchain-r/test
-    state: present
-  register: add_ubuntu_toolchain_repo
-
-- name: Install Ubuntu Toolchain packages
-  apt:
-    name: "{{ item }}"
-    update_cache: yes
-    state: present
-  # FIXME We need to have g++ v7.2 but 5.4.0 is installed
-  with_items:
+  # Ubuntu Toolchain packages
   - gcc-7
   - g++-7
   - gcc-7-multilib
   - g++-7-multilib
 
-- include_tasks: "{{ ansible_distribution_release }}_mercurial.yml"
+  - mercurial
 
-# TODO Move NodeJS packages into separate file
-- name: Install webadmin build requirements (npm, nodejs and Co)
-  apt:
-    name: "{{ item }}"
-    update_cache: yes
-    state: present
-  with_items:
+  # TODO Move NodeJS packages into separate file
+  # Install webadmin build requirements (npm, nodejs and Co)
   - git
   - npm
   - ruby-compass
