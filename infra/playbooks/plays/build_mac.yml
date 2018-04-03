@@ -1,0 +1,8 @@
+- name: Setup macOS build machine
+  hosts: build_mac
+  gather_facts: yes
+
+  vars_files: []
+
+  roles:
+  - osx_build_node
