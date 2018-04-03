@@ -54,3 +54,28 @@ def kill_builds(project_name, branch_name, dry_run):
     if not dry_run:
         query.delete()
 
+
+@app.cli.command()
+@click.argument('project_name')
+@click.argument('branch_name')
+@click.argument('build_num')
+@click.option('--dry-run/--no-dry-run')
+@db_session
+def kill_build(project_name, branch_name, build_num, dry_run):
+    '''Remove single build, it's runs and artifacts'''
+    project = models.Project.get(name=project_name)
+    if not project:
+        click.echo('No such project: %r' % project_name)
+        return
+    branch = models.Branch.get(name=branch_name)
+    if not branch:
+        click.echo('No such branch: %r' % branch_name)
+        return
+    build = models.Build.get(project=project, branch=branch, build_num=int(build_num))
+    if not build:
+        click.echo('No such build: %r' % build_num)
+        return
+    click.echo('Deleting build id=%r for project id=%r, brach id=%r' % (build.id, project.id, branch.id))
+    if not dry_run:
+        build.delete()
+
