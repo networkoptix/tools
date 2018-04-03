@@ -33,7 +33,11 @@ class LogCapturer(object):
         root_logger.removeHandler(self._log_handler)
 
     def pick_collected(self):
-        log = self._log_stream.getvalue().strip()
+        try:
+            log = self._log_stream.getvalue().strip()
+        except MemoryError as x:
+            print 'Error: captured log is too large (%r): %r' % (self._log_stream.tell(), x)
+            return None
         self._log_stream.seek(0)
         self._log_stream.truncate()
         return log
