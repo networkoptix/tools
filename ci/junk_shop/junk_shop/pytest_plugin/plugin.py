@@ -106,7 +106,11 @@ class DbCapturePlugin(object):
         else:
             parent_run = self.root_run  # session fixture teardown
             stage_name = '%s-%s' % (self.root_run.name, name)
-        out, err = self.capture_manager.suspendcapture()
+        outerr = self.capture_manager.suspendcapture()
+        if outerr:
+            out, err = outerr
+        else:
+            out = err = None
         log = self.log_capturer.pick_collected()
         if out or err or log:
             run = self.repo.add_run(name=name, parent=parent_run)
