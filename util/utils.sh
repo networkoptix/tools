@@ -83,6 +83,22 @@ nx_handle_mock_rsync() # "$@" && shift
     fi
 }
 
+nx_check_args() # N "$@"
+{
+    if (( $# < 1 ))
+    then
+        nx_fail "INTERNAL ERROR: Not enough args for ${FUNCNAME[0]}() called from ${FUNCNAME[1]}."
+    fi
+
+    local -r -i N="$1"
+    shift
+
+    if (( $# < $N ))
+    then
+        nx_fail "INTERNAL ERROR: Not enough args for ${FUNCNAME[1]}."
+    fi
+}
+
 # Copy the file(s) recursively, showing a progress.
 nx_rsync() # rsync_args...
 {
@@ -254,6 +270,17 @@ declare -r NX_RESTORE_CURSOR_POS="\033[u"
 nx_restore_cursor_pos()
 {
     echo -en "$NX_RESTORE_CURSOR_POS"
+}
+
+# Change directory verbously, but only if the current dir is not the desired one.
+nx_cd() # dir
+{
+    nx_check_args 1 "$@"
+    local -r DIR="$1"
+    if [ "$(readlink -f $(pwd))" != "$(readlink -f "$DIR")" ]
+    then
+        nx_verbose cd "$DIR"
+    fi
 }
 
 nx_pushd() # "$@"

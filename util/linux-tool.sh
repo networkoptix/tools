@@ -48,10 +48,10 @@ Here <command> can be one of the following:
  ini # Create empty .ini files in $TEMP_DIR (to be filled with defauls).
 
  apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
- apidoc-rdep # Run tests and deploy apidoctool from devtools to packages/any.
+ apidoc-rdep # Run apidoctool tests, deploy from devtools to packages/any and upload via "rdep -u".
 
  kit [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
- kit-rdep # Deploy $PACKAGES_DIR/any/nx_kit via "rdep -u".
+ kit-rdep # Upload $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
@@ -89,15 +89,14 @@ get_TARGET()
             TARGET="windows"
         else
             # Trying auto-detect from VMS_DIR being "*-target".
-            if [[ "$VMS_DIR" =~ ^.+-([^-]+)$ ]]
+            TARGET="linux"
+            if [[ $VMS_DIR =~ ^.+-([^-]+)$ ]]
             then
-                TARGET="${BASH_REMATCH[1]}"
-                if [ "$TARGET" = "win" ] #< TODO: #mshevchenko
-                then
-                    TARGET="linux"
-                fi
-            else
-                TARGET="linux"
+                local -r SUFFIX="${BASH_REMATCH[1]}"
+                case "$SUFFIX" in
+                    windows|linux|tx1|bpi|rpi|bananapi|android-arm|edge1) TARGET="$SUFFIX";;
+                    *) `# Suffix is not a recognized target, ignore it. #`;;
+                esac
             fi
         fi
     fi
@@ -126,50 +125,6 @@ get_TARGET()
             nx_fail "On Linux, \"windows\" target is not supported."
         fi
     fi
-
-    export TARGET
-    nx_echo "+ TARGET=$TARGET"
-}
-
-# If not done yet, scan from current dir upwards to find root repository dir (e.g. develop/nx_vms).
-# [in][out] VMS_DIR
-# [in] DEVELOP_DIR
-find_VMS_DIR() # [cd]
-{
-    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
-        "Run this script from any dir inside your nx_vms repo dir."
-    if [ "$1" == "cd" ]
-    then
-        if [ "$(readlink -f $(pwd))" != "$(readlink -f "$VMS_DIR")" ]
-    then
-            nx_verbose cd "$VMS_DIR"
-        fi
-    fi
-
-    get_TARGET
-}
-
-do_share() # target_path
-{
-    find_VMS_DIR
-    local TARGET_PATH="$1"
-    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
-    if [[ $TARGET_PATH != /* ]]
-    then # The path is relative, treat as relative to VMS_DIR parent.
-        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
-    else # The path is absolute: use as is.
-        local TARGET_DIR="$TARGET_PATH"
-    fi
-    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
-
-    local BRANCH=$(hg branch)
-    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
-
-    nx_verbose mkdir -p "$TARGET_DIR"
-    nx_verbose hg share "$(nx_path "$VMS_DIR")" "$(nx_path "$TARGET_DIR")" || return $?
-    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
-    cd "$TARGET_DIR"
-    nx_verbose hg update "$BRANCH" || return $?
 }
 
 ###
@@ -205,20 +160,61 @@ get_CMAKE_BUILD_DIR()
     esac
 }
 
+# Determine value of common variables, including current repository directory: scan from the
+# current dir upwards to find root repository dir (e.g. develop/nx_vms).
+# [in][out] VMS_DIR
+# [in] DEVELOP_DIR
+# [out] TARGET
+# [out] CMAKE_BUILD_DIR
+setup_vars()
+{
+    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
+        "Run this script from any dir inside your nx_vms repo dir."
+    get_TARGET
+    get_CMAKE_BUILD_DIR
+
+    case "$CONFIG" in
+        Release|Debug);;
+        *) nx_fail "Invalid build configuration in \$CONFIG: [$CONFIG].";;
+    esac
+}
+
+do_share() # target_path
+{
+    setup_vars
+    local TARGET_PATH="$1"
+    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
+    if [[ $TARGET_PATH != /* ]]
+    then # The path is relative, treat as relative to VMS_DIR parent.
+        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
+    else # The path is absolute: use as is.
+        local TARGET_DIR="$TARGET_PATH"
+    fi
+    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
+
+    local BRANCH=$(hg branch)
+    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
+
+    nx_verbose mkdir -p "$TARGET_DIR"
+    nx_verbose hg share "$(nx_path "$VMS_DIR")" "$(nx_path "$TARGET_DIR")" || return $?
+    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
+    cd "$TARGET_DIR"
+    nx_verbose hg update "$BRANCH" || return $?
+}
+
 do_gen() # [cache] "$@"
 {
-    find_VMS_DIR cd
+    setup_vars
+    nx_cd "$VMS_DIR"
 
     case "$CONFIG" in
         Release) local -r CONFIG_ARG="-DCMAKE_BUILD_TYPE=$CONFIG";;
         Debug) local -r CONFIG_ARG="";;
-        *) nx_fail "Invalid build configuration in \$CONFIG: [$CONFIG].";;
     esac
 
     local -i CACHE_ARG=0
     [ "$1" = "cache" ] && { shift; CACHE_ARG=1; }
 
-    get_CMAKE_BUILD_DIR
     if [ -d "$CMAKE_BUILD_DIR" ]
     then
         nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
@@ -261,8 +257,8 @@ do_gen() # [cache] "$@"
 
 do_build()
 {
-    find_VMS_DIR cd
-    get_CMAKE_BUILD_DIR
+    setup_vars
+
     if [ ! -d "$CMAKE_BUILD_DIR" ]
     then
         nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
@@ -273,20 +269,19 @@ do_build()
         case "$CONFIG" in
             Release) local -r CONFIG_ARG="--config $CONFIG";;
             Debug) local -r CONFIG_ARG="";;
-            *) nx_fail "Invalid build configuration in \$CONFIG: [$CONFIG].";;
         esac
     else
         local -r CONFIG_ARG=""
     fi
 
+    nx_cd "$VMS_DIR"
     time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
 }
 
 do_run_ut() # [all|TestName] "$@"
 {
-    find_VMS_DIR cd
-    get_CMAKE_BUILD_DIR
-    pushd "$CMAKE_BUILD_DIR"
+    setup_vars
+    nx_verbose cd "$CMAKE_BUILD_DIR"
 
     local TEST_NAME="$1" && shift
 
@@ -299,28 +294,20 @@ do_run_ut() # [all|TestName] "$@"
 
     if [ "$TARGET" == "windows" ]
     then
-        case "$CONFIG" in
-            Release|Debug) local -r CONFIG_ARG="-C $CONFIG";;
-            *) nx_fail "Invalid build configuration in \$CONFIG: [$CONFIG].";;
-        esac
+        local -r CONFIG_ARG="-C $CONFIG"
     else
         local -r CONFIG_ARG=""
     fi
 
     nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
-    local RESULT=$?
-
-    nx_popd
-    return $RESULT
 }
 
 do_apidoc() # [dev|prod] "$@"
 {
-    find_VMS_DIR
+    setup_vars
 
     local TOOL="$1" && shift
 
-    get_CMAKE_BUILD_DIR
     TARGET_DIR_DESCRIPTION="$CMAKE_BUILD_DIR"
     API_XML=$(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/api.xml")
 
@@ -393,7 +380,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
 do_kit() # "$@"
 {
-    find_VMS_DIR
+    setup_vars
 
     if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
     then
@@ -428,6 +415,11 @@ do_kit() # "$@"
     nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || return $?
     nx_echo
     nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
+}
+
+log_build_vars()
+{
+    echo "+ TARGET=$TARGET CONFIG=$CONFIG"
 }
 
 do_cmake() # "$@"
@@ -530,7 +522,8 @@ test_distrib_zip() # original.zip built.zip built.tar.gz
 
 do_test_distrib() # [checksum] [no-build] orig/archives/dir
 {
-    find_VMS_DIR cd
+    setup_vars
+    nx_cd "$VMS_DIR"
 
     local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
     local -r ZIP_MASK="nxwitness-*_update*.zip"
@@ -539,13 +532,10 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     local -i CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
     local -i NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
 
-    # Set BUILD_DIR - dir inside which (at any level) the distrib archives are built.
-    get_CMAKE_BUILD_DIR
     if [ ! -d "$CMAKE_BUILD_DIR" ]
     then
         nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
     fi
-    local -r BUILD_DIR="$CMAKE_BUILD_DIR"
 
     if [ $NO_BUILD = 0 ]
     then
@@ -553,11 +543,11 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     fi
 
     local BUILT_TAR_GZ
-    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$BUILD_DIR" -name "$TAR_GZ_MASK" \
+    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$CMAKE_BUILD_DIR" -name "$TAR_GZ_MASK" \
         ! -name "*$DEBUG_TAR_GZ_SUFFIX"
 
     local BUILT_ZIP
-    nx_find_file BUILT_ZIP "installer .zip" "$BUILD_DIR" -name "$ZIP_MASK"
+    nx_find_file BUILT_ZIP "installer .zip" "$CMAKE_BUILD_DIR" -name "$ZIP_MASK"
 
     local -r ORIGINAL_DIR="$1"
     local -r ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
@@ -594,7 +584,7 @@ printRepos()
     # Allow current dir to be either DEVELOP_DIR or any of its subdirs.
     if [ "$(readlink -f $(pwd))" != "$(readlink -f "$DEVELOP_DIR")" ]
     then
-        find_VMS_DIR
+        setup_vars
         cd "$VMS_DIR/.."
     fi
 
@@ -736,11 +726,11 @@ main()
             # TODO: Implement for linux.
             case "$TARGET" in
                 windows)
-                    find_VMS_DIR cd
-                    get_CMAKE_BUILD_DIR
+                    setup_vars
+                    nx_verbose cd "$CMAKE_BUILD_DIR"
 
                     PATH="$QT_DIR/bin:$PATH"
-                    nx_verbose "$CONFIG"/bin/mediaserver -e
+                    nx_verbose bin/mediaserver -e
                     ;;
                 *) nx_fail "Command not implemented yet.";;
             esac
@@ -769,8 +759,7 @@ main()
 
             local VIDEO_FILE="$1"; shift
 
-            find_VMS_DIR
-            get_CMAKE_BUILD_DIR
+            setup_vars
 
             local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
 
@@ -795,18 +784,23 @@ main()
             ;;
         #..........................................................................................
         gen)
+            log_build_vars
             do_gen "$@"
             ;;
         build)
+            log_build_vars
             do_build "$@"
             ;;
         cmake)
+            log_build_vars
             do_cmake "$@"
             ;;
         distrib)
+            log_build_vars
             build_distrib "$@"
             ;;
         test-distrib)
+            log_build_vars
             do_test_distrib "$@"
             ;;
         #..........................................................................................
@@ -814,8 +808,7 @@ main()
             printRepos
             ;;
         print-dirs)
-            find_VMS_DIR
-            get_CMAKE_BUILD_DIR
+            setup_vars
             if [ ! -d "$CMAKE_BUILD_DIR" ]
             then
                 nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
