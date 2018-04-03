@@ -13,27 +13,29 @@ public final class ApiXmlToVmsCodeExecutor
     extends Executor
 {
     public File vmsPath;
+    public File optionalOutputVmsPath; //< Can be null if should equal to vmsPath.
     public File sourceApiXmlFile;
     public File outputApiXmlFile;
 
     public int execute()
         throws Exception
     {
-        final File connectionFactoryCppFile = new File(
-            vmsPath + CONNECTION_FACTORY_CPP);
+        final File ec2RegistrationCppFile = new File(vmsPath + params.ec2RegistrationCpp());
 
-        final File outputConnectionFactoryCppFile = Utils.insertSuffix(
-            connectionFactoryCppFile, OUTPUT_FILE_EXTRA_SUFFIX);
+        final File outputEc2RegistrationCpp = Utils.insertSuffix(
+            new File(
+                ((optionalOutputVmsPath != null) ? optionalOutputVmsPath : vmsPath)
+                + params.ec2RegistrationCpp()),
+            OUTPUT_FILE_EXTRA_SUFFIX);
 
         System.out.println("apidoctool: inserting apidoc from XML into C++");
         System.out.println("    Input: " + sourceApiXmlFile);
-        System.out.println("    Input: " + connectionFactoryCppFile);
+        System.out.println("    Input: " + ec2RegistrationCppFile);
 
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceApiXmlFile));
 
-        final SourceCodeEditor editor = new SourceCodeEditor(
-            connectionFactoryCppFile);
+        final SourceCodeEditor editor = new SourceCodeEditor(ec2RegistrationCppFile);
 
         final SourceCodeGenerator generator = new SourceCodeGenerator(editor);
 
@@ -42,8 +44,8 @@ public final class ApiXmlToVmsCodeExecutor
 
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
-        editor.saveToFile(outputConnectionFactoryCppFile);
-        System.out.println("    Output: " + outputConnectionFactoryCppFile);
+        editor.saveToFile(outputEc2RegistrationCpp);
+        System.out.println("    Output: " + outputEc2RegistrationCpp);
 
         XmlUtils.writeXmlFile(outputApiXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApiXmlFile);

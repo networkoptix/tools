@@ -53,7 +53,7 @@ public abstract class TestBase
         }
     }
 
-    protected void printFinalMessage()
+    protected final void printFinalMessage()
     {
         System.out.println();
         if (failedTestsCount == 0)
@@ -69,10 +69,19 @@ public abstract class TestBase
         }
     }
 
+    public static void assertEquals(String expected, String actual)
+    {
+        if (!expected.equals(actual))
+        {
+            throw new RuntimeException("Expected [" + expected
+                + "] but got [" + actual + "]");
+        }
+    }
+
     /**
      * @throws RuntimeException If the result is negative.
      */
-    public static void checkFileContentsEqual(File file1, File file2)
+    public static final void assertFileContentsEqual(File file1, File file2)
         throws Exception
     {
         if (!Arrays.equals(
@@ -91,7 +100,7 @@ public abstract class TestBase
      * of each line).
      * @throws RuntimeException If the result is negative.
      */
-    public static void checkTextFilesEqualIgnoringIndents(File file1, File file2)
+    public static final void assertTextFilesEqualIgnoringIndents(File file1, File file2)
         throws Exception
     {
         List<String> lines1 = Utils.readAllLines(file1);
@@ -124,7 +133,7 @@ public abstract class TestBase
         }
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private static final Pattern unindentedLineRegex = Pattern.compile(
         "\\s*(.*)");

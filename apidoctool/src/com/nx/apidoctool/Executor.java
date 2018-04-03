@@ -9,6 +9,7 @@ import java.io.File;
 public abstract class Executor
 {
     public boolean verbose = false;
+    public Params params;
 
     /**
      * Execute the task, using the object public fields as arguments - a kind of named arguments
@@ -17,14 +18,6 @@ public abstract class Executor
      */
     public abstract int execute()
         throws Exception;
-
-    /**
-     * Print paths to all C++ source code files to be accessed, relative to vms-path.
-     */
-    public static void printDeps()
-    {
-        printDep(CONNECTION_FACTORY_CPP);
-    }
 
     //---------------------------------------------------------------------------------------------
 
@@ -36,12 +29,10 @@ public abstract class Executor
 
     protected static final String SYSTEM_API_GROUP_NAME = "System API";
 
-    protected static final String CONNECTION_FACTORY_CPP =
-        "/appserver2/src/connection_factory.cpp";
-
-    //---------------------------------------------------------------------------------------------
-
-    private static void printDep(String filename)
+    /**
+     * Print file path to a vms source file, treated as a relative to the vms source directory.
+     */
+    protected static void printVmsFile(String filename)
     {
         final String relativePath;
         if (filename.charAt(0) == '/')

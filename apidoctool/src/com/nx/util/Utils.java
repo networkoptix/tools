@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -120,10 +119,13 @@ public final class Utils
         return buffer;
     }
 
-    public static void writeStringListToFile(
-        File file, List<String> lines, String lineBreak)
+    /**
+     * Overrites the specified file if it exists. Creates dirs in the path if they do not exist.
+     */
+    public static void writeStringListToFile(File file, List<String> lines, String lineBreak)
         throws IOException
     {
+        file.getParentFile().mkdirs();
         FileWriter writer = new FileWriter(file);
         try
         {
@@ -170,13 +172,26 @@ public final class Utils
      */
     public static File insertSuffix(File file, String suffix)
     {
-        final String[] pathAndExt = matchRegex(Pattern.compile(
-            "(.*)(\\.[^./]+)"), file.getPath());
+        final String[] pathAndExtension = matchRegex(pathAndExtensionPattern, file.getPath());
 
-        if (pathAndExt == null) //< The file has no extension.
+        if (pathAndExtension == null) //< The file has no extension.
             return new File(file + suffix);
 
-        return new File(pathAndExt[0] + suffix + pathAndExt[1]);
+        return new File(pathAndExtension[0] + suffix + pathAndExtension[1]);
+    }
+
+    /**
+     * Change (or add, if there was none) the extension.
+     * @param newExtension Should include leading dot.
+     */
+    public static File replaceExtension(File file, String newExtension)
+    {
+        final String[] pathAndExtension = matchRegex(pathAndExtensionPattern, file.getPath());
+
+        if (pathAndExtension == null) //< The file has no extension.
+            return new File(file + newExtension);
+
+        return new File(pathAndExtension[0] + newExtension);
     }
 
     public static <T> T createObject(Class<T> objClass)
@@ -194,4 +209,9 @@ public final class Utils
             throw new IllegalStateException(e);
         }
     }
+
+    //---------------------------------------------------------------------------------------------
+
+    private static final Pattern pathAndExtensionPattern = Pattern.compile(
+        "(.*)(\\.[^./\\\\]+)");
 }

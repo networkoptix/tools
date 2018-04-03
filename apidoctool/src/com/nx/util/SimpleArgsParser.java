@@ -1,7 +1,9 @@
 package com.nx.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,13 +38,19 @@ public abstract class SimpleArgsParser
 
             if (arg.startsWith("-"))
             {
-                if (i >= args.length)
-                    error("Missing value for \"" + arg + "\".");
-
-                if (map.put(arg, args[i]) != null)
-                    error("Key \"" + arg + "\" is specified more than once.");
-
-                ++i;
+                if (i >= args.length || args[i].startsWith("-"))
+                {
+                    // There is no value for this key.
+                    if (valuelessArgs.contains(arg))
+                        error("Valueless key \"" + arg + "\" is specified more than once.");
+                    valuelessArgs.add(arg);
+                }
+                else
+                {
+                    if (map.put(arg, args[i]) != null)
+                        error("Key \"" + arg + "\" is specified more than once.");
+                    ++i;
+                }
             }
             else
             {
@@ -82,6 +90,12 @@ public abstract class SimpleArgsParser
         error("Action \"" + action + "\" is not supported.");
     }
 
+    public final void reportUnexpectedValuelessArgs()
+    {
+        if (!valuelessArgs.isEmpty())
+            error("Unexpected args without values are specified.");
+    }
+
     /**
      * Report an error if there was no such key.
      */
@@ -95,6 +109,11 @@ public abstract class SimpleArgsParser
         return value;
     }
 
+    public final List<String> getValuelessArgs()
+    {
+        return valuelessArgs;
+    }
+
     /**
      * Report an error if there was no such key.
      */
@@ -106,7 +125,7 @@ public abstract class SimpleArgsParser
     /**
      * @return null If there was no such key.
      */
-    public final File getFileOptional(String key)
+    public final File getOptionalFile(String key)
     {
         final String value = map.get(key);
 
@@ -133,4 +152,5 @@ public abstract class SimpleArgsParser
     private boolean verbose = false;
     private String action;
     private Map<String, String> map = new HashMap<String, String>();
+    private List<String> valuelessArgs = new ArrayList<String>();
 }

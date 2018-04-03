@@ -114,7 +114,7 @@ public final class ApidocCommentParser
                 + expectedFunctionName + ".");
         }
 
-        // TODO: #mike: Fix: Produce an error for missing function name.
+        // TODO: #mshevchenko: Fix: Produce an error for missing function name.
         final String urlPrefix = values[1];
         if (urlPrefix.isEmpty())
         {

@@ -25,7 +25,13 @@ fi
 : ${TUNNEL_S_DEFAULT_PORT=7001}
 : ${TUNNEL_SELF_IP_SUBNET_PREFIX="10\\.0\\."}
 : ${TESTCAMERA_SELF_IP_SUBNET_PREFIX="192\\.168\\."}
-: ${TEMP_DIR="$(dirname $(mktemp `# dry run` -u))"}
+: ${TEMP_DIR="$(dirname $(mktemp `# dry run #` -u))"}
+if nx_is_cygwin
+then
+    : ${INI_FILES_DIR=$(cygpath -u "$LOCALAPPDATA/nx_ini")}
+else
+    : ${INI_FILES_DIR="$HOME/.config/nx_ini"}
+fi
 : ${CUSTOMIZATION=""}
 : ${NINJA_CLEAN_TOOL="$(dirname "$0")/../ninja_clean/ninja_clean.py"}
 
@@ -45,9 +51,9 @@ $NX_HELP_TEXT_OPTIONS
 
 Here <command> can be one of the following:
 
- ini # Create empty .ini files in $TEMP_DIR (to be filled with defauls).
+ ini # Create empty .ini files in $INI_FILES_DIR (to be filled with defauls).
 
- apidoc [dev|prod] # Run apidoctool from devtools or from packages/any to generate api.xml.
+ apidoc dev|prod [<action>|run] [args] # Run apidoctool from devtools or packages/any.
  apidoc-rdep # Run apidoctool tests, deploy from devtools to packages/any and upload via "rdep -u".
 
  kit [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
@@ -302,42 +308,85 @@ do_run_ut() # [all|TestName] "$@"
     nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
 }
 
-do_apidoc() # [dev|prod] "$@"
+do_apidoc() # dev|prod [action] "$@"
 {
     setup_vars
 
-    local TOOL="$1" && shift
-
-    TARGET_DIR_DESCRIPTION="$CMAKE_BUILD_DIR"
-    API_XML=$(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/api.xml")
-
-    local API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
-
-    [ ! -f "$API_TEMPLATE_XML" ] && nx_fail "Cannot open file $API_TEMPLATE_XML"
-
-    local JAR_DEV="$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar"
-    local JAR_PROD="$PACKAGES_DIR/any/apidoctool/apidoctool.jar"
-    if [[ $TOOL = "dev" || ($TOOL = "" && -f "$JAR_DEV") ]]
+    local -r TOOL="$1" && shift
+    if [ "$TOOL" = "dev" ]
     then
-        local -r JAR=$(nx_path "$JAR_DEV")
-        nx_echo "Executing apidoctool from devtools/ in $TARGET_DIR_DESCRIPTION"
-    elif [[ $TOOL = "prod" || $TOOL = "" ]]
+        local -r JAR=$(nx_path "$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar")
+    elif [ "$TOOL" = "prod" ]
     then
-        local -r JAR=$(nx_path "$JAR_PROD")
-        nx_echo "Executing apidoctool from packages/any/ in $TARGET_DIR_DESCRIPTION"
+        local -r JAR=$(nx_path "$PACKAGES_DIR/any/apidoctool/apidoctool.jar")
     else
         nx_fail "Invalid apidoctool location \"$TOOL\": expected \"dev\" or \"prod\"."
     fi
 
-    if [ -z "$1" ]
-    then #< No other args - run apidoctool to generate documentation.
-        nx_verbose java -jar "$JAR" -verbose code-to-xml -vms-path "$(nx_path "$VMS_DIR")" \
-            -template-xml "$(nx_path "$API_TEMPLATE_XML")" -output-xml "$API_XML"
-        RESULT=$?
-    else #< Some args specified - run apidoctool with the specified args.
+    if [ $# = 0 ]
+    then
+        local -r ACTION="code-to-xml"
+    else
+        local -r ACTION="$1" && shift
+    fi
+
+    local -r API_XML=$(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/api.xml")
+
+    local -r API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
+    if [ ! -f "$API_TEMPLATE_XML" ]
+    then
+        nx_fail "Cannot open file $API_TEMPLATE_XML"
+    fi
+
+    if [ "$ACTION" = "run" ]
+    then
         nx_verbose java -jar "$JAR" "$@"
         RESULT=$?
+    else #< Run apidoctool with appropriate args for the action, adding the remaining args, if any.
+        local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
+        local -i OUTPUT_DIR_NEEDED=0
+        case "$ACTION" in
+            code-to-xml)
+                local -r ARGS=(
+                    -vms-path "$(nx_path "$VMS_DIR")"
+                    -template-xml "$(nx_path "$API_TEMPLATE_XML")"
+                    -output-xml "$API_XML"
+                );;
+            test)
+                OUTPUT_DIR_NEEDED=1
+                local -r ARGS=(
+                    -test-path "$(nx_path "$DEVELOP_DIR/devtools/apidoctool/test")"
+                    -output-test-path "$(nx_path "$OUTPUT_DIR")"
+                );;
+            xml-to-code)
+                OUTPUT_DIR_NEEDED=1
+                local -r ARGS=(
+                    -vms-path "$(nx_path "$VMS_DIR")"
+                    -output-vms-path "$(nx_path "$OUTPUT_DIR")"
+                    -source-xml "$(nx_path "$API_TEMPLATE_XML")"
+                    -output-xml "$(nx_path "$OUTPUT_DIR/api.xml")"
+                );;
+            sort-xml)
+                OUTPUT_DIR_NEEDED=1
+                local -r ARGS=(
+                    -group-name "System API"
+                    -source-xml "$API_XML"
+                    -output-xml "$(nx_path "$OUTPUT_DIR/api.xml")"
+                );;
+            print-deps)
+                local -r ARGS=()
+                ;;
+            *) nx_fail "Unsupported action: [$ACTION]";;
+        esac
+        if [ $OUTPUT_DIR_NEEDED = 1 ]
+        then
+            rm -rf "$OUTPUT_DIR"
+            nx_verbose mkdir -p "$OUTPUT_DIR" || return $?
+        fi
+        nx_verbose java -jar "$JAR" -verbose "$ACTION" "${ARGS[@]}" "$@"
+        RESULT=$?
     fi
+
     nx_echo
     nx_verbose cmake -E copy_if_different \
         "$API_XML" $(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/") \
@@ -353,8 +402,14 @@ do_apidoc_rdep() # "$@"
     local -r JAR_PROD="$PACKAGE_DIR/apidoctool.jar"
     local -r TEST_DIR="$DEV_DIR/test"
 
+    local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
+    rm -rf "$OUTPUT_DIR"
+    nx_verbose mkdir -p "$OUTPUT_DIR" || return $?
+
     nx_verbose java -jar "$(nx_path "$JAR_DEV")" \
-        -verbose test -test-path "$(nx_path "$TEST_DIR")" \
+        -verbose test \
+        -test-path "$(nx_path "$TEST_DIR")" \
+        -output-test-path "$(nx_path "$OUTPUT_DIR")" \
         || exit $?
 
     nx_echo
@@ -369,7 +424,7 @@ do_apidoc_rdep() # "$@"
 
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
-    local SRC="$1"; shift
+    local SRC="$1" && shift
 
     # "Makefiles" and "gcc" are needed for cygwin support.
     nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc || return $?
@@ -443,9 +498,9 @@ build_distrib() # "$@"
 
 list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
 {
-    local -r -i CHECKSUM="$1"; shift
-    local -r ARCHIVE="$1"; shift
-    local -r LISTING="$1"; shift
+    local -r -i CHECKSUM="$1" && shift
+    local -r ARCHIVE="$1" && shift
+    local -r LISTING="$1" && shift
 
     if [ $CHECKSUM = 1 ]
     then
@@ -463,9 +518,9 @@ list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
 
 test_distrib_tar_gz() # CHECKSUM original.tar.gz built.tar.gz
 {
-    local -r -i CHECKSUM="$1"; shift
-    local -r ORIGINAL_TAR_GZ="$1"; shift
-    local -r BUILT_TAR_GZ="$1"; shift
+    local -r -i CHECKSUM="$1" && shift
+    local -r ORIGINAL_TAR_GZ="$1" && shift
+    local -r BUILT_TAR_GZ="$1" && shift
 
     if [ $CHECKSUM = 1 ]
     then
@@ -490,9 +545,9 @@ test_distrib_tar_gz() # CHECKSUM original.tar.gz built.tar.gz
 
 test_distrib_zip() # original.zip built.zip built.tar.gz
 {
-    local -r ORIGINAL_ZIP="$1"; shift
-    local -r BUILT_ZIP="$1"; shift
-    local -r BUILT_TAR_GZ="$1"; shift
+    local -r ORIGINAL_ZIP="$1" && shift
+    local -r BUILT_ZIP="$1" && shift
+    local -r BUILT_TAR_GZ="$1" && shift
 
     nx_echo "Comparing .zip archives (.tar.gz compared to the one built):"
 
@@ -692,17 +747,16 @@ printRepos()
 
 main()
 {
-    local COMMAND="$1"
-    shift
+    local COMMAND="$1" && shift
     case "$COMMAND" in
         ini)
-            touch "$TEMP_DIR"/nx_network.ini
-            touch "$TEMP_DIR"/nx_network_debug.ini
-            touch "$TEMP_DIR"/mobile_client.ini
-            touch "$TEMP_DIR"/appserver2.ini
-            touch "$TEMP_DIR"/nx_media.ini
-            touch "$TEMP_DIR"/nx_streaming.ini
-            touch "$TEMP_DIR"/plugins.ini
+            touch "$INI_FILES_DIR"/nx_network.ini
+            touch "$INI_FILES_DIR"/nx_network_debug.ini
+            touch "$INI_FILES_DIR"/mobile_client.ini
+            touch "$INI_FILES_DIR"/appserver2.ini
+            touch "$INI_FILES_DIR"/nx_media.ini
+            touch "$INI_FILES_DIR"/nx_streaming.ini
+            touch "$INI_FILES_DIR"/plugins.ini
             ;;
         #..........................................................................................
         apidoc)
@@ -757,7 +811,7 @@ main()
                 SHOW_HELP=1
             fi
 
-            local VIDEO_FILE="$1"; shift
+            local VIDEO_FILE="$1" && shift
 
             setup_vars
 

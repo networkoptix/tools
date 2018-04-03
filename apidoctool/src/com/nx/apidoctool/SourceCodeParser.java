@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Parses SourceCode to generate Apidoc structure using ApidocCommentParser and
- * ApidocHandler.
+ * Parses SourceCode to generate Apidoc structure using ApidocCommentParser and ApidocHandler.
  */
 public final class SourceCodeParser
 {
@@ -45,8 +44,7 @@ public final class SourceCodeParser
      */
     public int parseCommentsFromSystemApi(
         Apidoc.Group sourceGroup, Apidoc.Group targetGroup)
-        throws Error, ApidocHandler.Error, ApidocCommentParser.Error,
-        SourceCode.Error
+        throws Error, ApidocHandler.Error, ApidocCommentParser.Error, SourceCode.Error
     {
         targetGroup.groupName = sourceGroup.groupName;
         targetGroup.urlPrefix = sourceGroup.urlPrefix;
@@ -55,8 +53,7 @@ public final class SourceCodeParser
         int line = 1;
         while (line <= sourceCode.getLineCount())
         {
-            MatchForRegisterHandler match = MatchForRegisterHandler.create(
-                sourceCode, line);
+            MatchForRegisterHandler match = MatchForRegisterHandler.create(sourceCode, line);
             if (match != null)
             {
                 Apidoc.Function function = createFunctionFromComment(
