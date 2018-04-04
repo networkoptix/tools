@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import hashlib
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -52,6 +53,8 @@ CUSTOMIZATIONS = (
 )
 
 CUSTOMIZATION_ALIASES = {
+	'nx': 'default',
+	'networkoptix': 'default',
     'dw': 'digitalwatchdog',
 }
 
@@ -158,6 +161,7 @@ class Cdb:
 
         out = ''
         while not out.endswith('\n0:'):
+            # TODO: Implement read timeout, so we are sure it newer blocks forever.
             c = self.cdb.stdout.read(1)
             if not c:
                 raise CdbError('\n'.join((
@@ -204,7 +208,8 @@ class DumpAnalyzer(object):
     def __init__(
             self, cache_directory, dump_path,
             customization: str = '', version: str = '', build: str = None, branch: str = '',
-            debug_mode: bool = False, visual_studio: bool = False):
+            subprocess_timout_s: int = 10, debug_mode: bool = False,
+            visual_studio: bool = False):
         """Initializes analizer with dump :path and :customization;
         :version, :build, :branch - optionals to speed up process.
         """
@@ -216,6 +221,7 @@ class DumpAnalyzer(object):
         self.branch = branch
         self.debug_mode = debug_mode
         self.visual_studio = visual_studio
+        self.subprocess_timout_s = subprocess_timout_s
         self.module, self.dist, self.build_path, self.target_path = None, None, None, None
 
         deduced = deduce_customization(dump_path)
@@ -349,10 +355,16 @@ class DumpAnalyzer(object):
            .zip - just extract to the target exe directory.
         """
 
-        def run(*command):
+        def run(command, retry_code = 0, retry_count = 0):
             try:
                 logger.debug(shell_line(command))
-                return subprocess.check_output(command)
+                return subprocess.check_output(command, timeout=self.subprocess_timout_s)
+            except subprocess.CalledProcessError as error:
+                if retry_count and 'status ' + str(retry_code) in str(error):
+                    time.sleep(1)
+                    run(command, retry_code, retry_count - 1)
+                else:
+                    raise
             except (IOError, WindowsError, subprocess.CalledProcessError) as error:
                 raise DistError(error)
 
@@ -360,16 +372,18 @@ class DumpAnalyzer(object):
             wix_dir = os.path.join(os.path.dirname(path), 'wix')
             if not os.path.isdir(wix_dir):
                 os.mkdir(wix_dir)
-                run('dark', '-x', wix_dir, path)
+                run(['dark', '-x', wix_dir, path])
 
             return self.extract_dist(self.find_file('.msi', wix_dir))
 
         if path.endswith('.msi'):
             p, d = path.replace('/', '\\'), self.target_path.replace('/', '\\')
-            return run('msiexec', '-a', os.path.abspath(p), '/qb', 'TARGETDIR=' + os.path.abspath(d))
+            return run(
+                ['msiexec', '-a', os.path.abspath(p), '/qb', 'TARGETDIR=' + os.path.abspath(d)],
+                retry_code=1618, retry_count=self.subprocess_timout_s * 2)
 
         if path.endswith('.msi') or path.endswith('.zip'):
-            return run('7z', 'x', path, '-o' + self.module_dir(), '-y', '-aos')
+            return run(['7z', 'x', path, '-o' + self.module_dir(), '-y', '-aos'])
 
         raise DistError('Can not extract: %s' % path)
 
@@ -380,6 +394,7 @@ class DumpAnalyzer(object):
         if not urls:
             raise DistError('There are no distributive URLs available')
 
+        # TODO: Implement some directory locking for safety.
         try:
             for url in urls:
                 path = self.download_url_data(url, self.build_path)

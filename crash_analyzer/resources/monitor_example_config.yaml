@@ -1,26 +1,27 @@
 # Crash Monitor Example Configuration
 
 options:
-    format: "*-bt" # gdb-bt for linux, dmp for windows
-    min_version: "2.4" # supposed to be 3.2
-    min_report_count: 2
-    directory: ./tmp
-    reports_each_run: 100
-    stand_by_sleep_s: 60 # 1 minute
+    directory: ./tmp #< Local cache directory.
+    #size_limit: 100G #< Maximum cache size.
+    stand_by_sleep_s: 60 # Sleep 1 minute on empty run or failure.
+    min_report_count: 2 #< Dump count to create new issue for crash.
 
-crashServer:
+fetch:
     url: http://stats.networkoptix.com/crashserver/api/
     login: statlord
     password: razdvatri
+    min_version: "2.4" #< Minimal version to download.
+    report_count: 20 #< Do not download more at once.
+    thread_count: 20 #< Download connections count.
 
-jira:
+analyze:
+    subprocess_timout_s: 10 #< Newer wait for child processes longer.
+    #cache_size_limit: 20G #< Maximum size of cached debug information.
+    thread_count: 2
+
+upload:
     url: https://networkoptix.atlassian.net/
     login: service@networkoptix.com
     password: kbnUk06boqBkwU
-    file_limit: 3
-    prefix: TEST-RUN #< remove in release
-
-dumpTool: # windows only
-    directory: ./cache/dumptool
-    size_limit: 100G
-
+    file_limit: 3 #< Maximum attachments count.
+    thread_count: 20 #< Communication connections count.

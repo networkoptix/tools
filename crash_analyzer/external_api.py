@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import requests
+import traceback
 from typing import List, Dict
 
 import crash_info
@@ -33,10 +34,10 @@ class CrashServer:
         if not self._url.endswith('/'):
             self._url += '/'
 
-    def list_all(self, format: str) -> List[str]:
-        """Returns list of all report names in :format from crash server.
+    def list_all(self, **filters: Dict[str, str]) -> List[str]:
+        """Returns list of all report names by :filters.
         """
-        response = self._get('list', extension=format)
+        response = self._get('list', **filters)
         dump_names = []
         for dump in json.loads(response.text):
             path = dump['path'][1:]
@@ -59,6 +60,41 @@ class CrashServer:
         return r
 
 
+def fetch_new_crashes(directory: utils.Directory, report_count: int, known_reports: set = {},
+              min_version: str = '', extension: str = '*',
+              api: type = CrashServer, thread_count: int = 5, **options):
+    """Fetches :count new reports into :directory, which are not present in :known_reports and
+    satisfy :min_version and :extension, returns created file names.
+    """
+    to_download = []
+    for name in api(**options).list_all(extension=extension):
+        if len(to_download) >= report_count:
+            break
+
+        report = crash_info.Report(name)
+        if report.version < min_version or name in known_reports:
+            continue
+
+        to_download.append(name)
+
+    downloaded = []
+    for name, result in zip(to_download, utils.run_concurrent(
+            _fetch_crash, to_download, directory=directory, thread_count=thread_count, **options)):
+        if isinstance(result, CrashServerError):
+            logger.debug(result)
+        elif isinstance(result, Exception):
+            logger.error('Download {} has failed: {}'.format(name, traceback.format_exc()))
+        else:
+            downloaded.append(report)
+
+    return downloaded
+
+
+def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer, **options):
+    content = api(**options).get(name)
+    directory.file(name).write_data(content, 'b')
+
+
 class Jira:
     def __init__(self, url: str, login: str, password: str, file_limit: int, prefix: str = ''):
         self._jira = jira.JIRA(server=url, basic_auth=(login, password))
@@ -76,17 +112,17 @@ class Jira:
             except KeyError:
                 raise ('Unsupported JIRA component:' + component)
 
-        def operation_system(format: str) -> str:
+        def operation_system(extension: str) -> str:
             try:
-                return {'gdb-bt': 'Linux', 'dmp': 'Windows'}[format]
+                return {'gdb-bt': 'Linux', 'dmp': 'Windows'}[extension]
             except KeyError:
-                raise ('Unsupported JIRA format:' + format)
+                raise ('Unsupported JIRA dump extension:' + extension)
 
         issue = self._jira.create_issue(
             project='VMS',
             issuetype={'name': 'Bug'},
             summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
-                r=reason, os=operation_system(report.format)),
+                r=reason, os=operation_system(report.extension)),
             versions=[{'name': report.version}],
             fixVersions=[{'name': report.version + '_hotfix'}],
             components=[{'name': reason.component}],
@@ -97,9 +133,8 @@ class Jira:
         logger.info("New JIRA case {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
 
-    def update_issue(self, key: str, reports: List[crash_info.Report]) -> bool:
+    def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory) -> bool:
         """Update JIRA issue with new crash :reports.
-        Returns True is issue is successfully updated.
         """
         if not reports:
             raise JiraError('Unable to update JIRA case {} with no reports'.format(key))
@@ -110,7 +145,7 @@ class Jira:
             max_repro = max(d.version for d in reports)
             if min_fix > max_repro:
                 logger.debug('JIRA case {} is already fixed'.format(key))
-                return False
+                return
             else:
                 self._transition(issue, 'Reopen')
                 logger.info('Reopen JIRA case {} for version {}'.format(key, max_repro))
@@ -122,9 +157,10 @@ class Jira:
             logger.debug('JIRA case {} is updated for versions: {}'.format(
                 key, ', '.join(new_versions)))
 
-        return True
+        for r in reports:
+            self._attach_files(key, directory.files(r.file_mask()))
 
-    def attach_files(self, key: str, files: List[str]):
+    def _attach_files(self, key: str, files: List[str]):
         """Attaches new :files to JIRA issue.
         """
         for path in files[-self._file_limit:]:

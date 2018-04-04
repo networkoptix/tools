@@ -3,9 +3,14 @@
 import hashlib
 import os
 import re
-from glob import glob
+import logging
+import traceback
+import functools
 from typing import List, Tuple, TypeVar
 
+import utils
+
+logger = logging.getLogger(__name__)
 
 REPORT_NAME_REGEXP = re.compile('''
     (?P<binary> (?: (?!--). )+)
@@ -30,16 +35,16 @@ class Report:
     """Represents crash report by extracting metadata from it's name.
     """
     def __init__(self, name: str):
-        self.name = name
+        self.name = os.path.basename(name)
         match = REPORT_NAME_REGEXP.match(name)
         if not match:
             raise NameError('Unable to parse name: ' + self.name)
 
-        self.binary, version, self.build, self.changeset, self.customization, beta, self.format = \
+        self.binary, version, self.build, self.changeset, self.customization, beta, self.extension = \
             REPORT_NAME_REGEXP.match(name).groups()
 
-        if len(self.format) > 10:
-            raise NameError('Invalid format: ' + self.format)
+        if len(self.extension) > 10:
+            raise NameError('Invalid extension: ' + self.extension)
 
         self.version = version[:-2] if version.endswith('.0') else version
         self.component = 'Server' if ('server' in self.binary) else 'Client'
@@ -47,13 +52,16 @@ class Report:
             self.beta = True
 
     def __repr__(self):
-        return 'Report({})'.format(self.name)
+        return 'Report({})'.format(repr(self.name))
 
     def __str__(self):
         return self.name
 
+    def __eq__(self, rhs):
+        return self.name == rhs.name
+
     def file_mask(self):
-        return self.name[:-len(self.format)] + '*'
+        return self.name[:-len(self.extension)] + '*'
 
 
 class Reason:
@@ -69,8 +77,12 @@ class Reason:
 
     def __str__(self):
         return '{}, code: {}, stack: {} frames, id: {}'.format(
-            self.component, self.code, len(self.stack), self.crash_id())
+            self.component, self.code, len(self.stack), self.crash_id)
 
+    def __eq__(self, rhs):
+        return self.component == rhs.component and self.code == rhs.code and self.stack == rhs.stack
+
+    @property
     def crash_id(self) -> str:
         description = '\n\n'.join((self.component, self.code, '\n'.join(self.stack)))
         return hashlib.sha256(description.encode('utf-8')).hexdigest()
@@ -79,6 +91,7 @@ class Reason:
 def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     """Extracts error code and call stack by rules in describer.
     """
+    logger.debug('Analyzing {} by {}'.format(report, describer.__name__))
     content = content.replace('\r', '')
 
     def cut(begin, end, is_header=False):
@@ -202,49 +215,39 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
     return analyze_bt(report, content, CdbDescriber)
 
 
-ReportOrName = TypeVar('ReportName', str, Report)
+def analyze_files_concurrent(reports: List[Report], **options) -> List[Tuple[str, Reason]]:
+    """Analyzes :reports in :directory, returns list of successful results.
+    """
+    processed = []
+    for report, result in zip(reports, utils.run_concurrent(analyze_file, reports, **options)):
+        if isinstance(result, Error):
+            logger.warning(result)
+        elif isinstance(result, Exception):
+            logger.error(result)
+        else:
+            processed.append((report, result))
+
+    return processed
 
 
-def to_report(report_or_name: object) -> Report:
-    if isinstance(report_or_name, Report):
-        return report_or_name
+def analyze_file(report: Report, directory: utils.Directory, **dump_tool_options):
+    report_file = directory.file(report.name)
+    if report.extension == 'gdb-bt':
+        return analyze_linux_gdb_bt(report, report_file.read_data())
 
-    return Report(report_or_name)
+    if report.extension == 'cdb-bt':
+        return analyze_windows_cdb_bt(report, report_file.read_data())
+
+    if report.extension == 'dmp':
+        from dumptool import analyse_dump
+        content = analyse_dump(path=report_file.path, **dump_tool_options)
+        return analyze_windows_cdb_bt(report, content)
+
+    raise NotImplemented('Dump format is not supported: ' + report.name)
 
 
-class Storage:
-    def __init__(self, directory: str):
-        self._directory = directory
-        if not os.path.exists(directory):
-            os.makedirs(directory)
 
-    def path(self, report: ReportOrName) -> str:
-        return os.path.join(self._directory, to_report(report).name)
 
-    def has_report(self, report: ReportOrName) -> bool:
-        return os.path.isfile(self.path(report))
 
-    def save(self, report: ReportOrName, content: str):
-        with open(self.path(report), 'w') as f:
-            f.write(content)
 
-    def files(self, report: ReportOrName):
-        return glob(os.path.join(self._directory, to_report(report).file_mask()))
 
-    def delete(self, report: ReportOrName):
-        for path in self.files(report):
-            os.remove(path)
-
-    def analyze(self, report: ReportOrName) -> Reason:
-        report = to_report(report)
-        with open(self.path(report), 'r') as f:
-            content = f.read()
-
-        if report.format == 'gdb-bt':
-            return analyze_linux_gdb_bt(report, content)
-
-        if report.format == 'cdb-bt':
-            return analyze_windows_cdb_bt(report, content)
-
-        # TODO: Add support for dmp.
-        raise NotImplemented('Dump format is not supported: ' + report.name)
