@@ -1,14 +1,17 @@
-#!/bin/python3
+#!/bin/python2
 # -*- coding: utf-8 -*-
 
 import sys
 import argparse
 import requests
 import uuid
+import pyfscache
 
 host = 'http://localhost:7001'
 username = 'admin'
 password = 'password'
+
+cache = pyfscache.FSCache('.', minutes=10)
 
 
 def check_status(request, verbose):
@@ -29,6 +32,7 @@ def tile_id_to_pos(tile_id):
     return (0, 0)
 
 
+@cache
 def get_videowall(verbose):
     if verbose:
         print("Requesting videowalls list")
@@ -51,14 +55,22 @@ def get_layout(id, verbose):
     return layouts[0]
 
 
-def get_camera(id, verbose):
-    string_id = str(id)
-    if verbose:
-        print("Looking for camera {}".format(id))
+@cache
+def get_all_cameras(verbose):
     r = requests.get(host + '/ec2/getCamerasEx', auth=(username, password))
     if not check_status(r, verbose):
         return None
-    cameras = r.json()
+    return r.json()
+
+
+def get_camera(id, verbose):
+    if verbose:
+        print("Looking for camera {}".format(id))
+    string_id = str(id)
+    cameras = get_all_cameras(verbose)
+    if not cameras:
+        return None
+
     for camera in cameras:
         if camera['logicalId'] == string_id:
             return camera
