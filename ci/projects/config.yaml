@@ -186,6 +186,22 @@ platforms:
       - '*.tgz'
       - '*.zip'
     update_mask_list: []
+  android-arm:
+    build_node: linux
+    should_run_unit_tests: no
+    publish_dir: android
+    distributive_mask_list:
+      - '*.apk'
+    update_mask_list: []
+  ios:
+    build_node: mac
+    generator: Xcode
+    should_run_unit_tests: no
+    publish_dir: ios
+    distributive_mask_list:
+      - '*.ipa'
+    update_mask_list: []
+
 
 # if SOME failed tests are in this list, email is sent to their watcher TOO
 # if ALL failed tests are in this list, email is sent ONLY to their watcher
