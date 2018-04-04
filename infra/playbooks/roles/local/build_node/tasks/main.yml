@@ -43,7 +43,7 @@
   # java requirements
   - ca-certificates-java
   - libasound2
-  - openjdk-8-jre # android
+  - openjdk-8-jdk-headless # android
   # python
   - python-dev
   - python-pip
