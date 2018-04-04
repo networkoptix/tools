@@ -12,7 +12,7 @@
         policy: by-day
         build-period: 10
     - timeout:
-        timeout: 180  # minutes
+        timeout: 300  # minutes
     - timestamps
     - credentials-binding:
       - username-password-separated:
