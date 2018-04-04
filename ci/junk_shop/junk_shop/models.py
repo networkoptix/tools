@@ -105,7 +105,7 @@ class Run(db.Entity):
     # outcome for the same test from lastest build where tests for this project/branch/platform were run
     prev_outcome = Optional(str)
     error_message = Optional(str)
-    started_at = Required(datetime, sql_type='timestamptz')
+    started_at = Optional(datetime, sql_type='timestamptz')
     duration = Optional(timedelta)
     customization = Optional(Customization)
     platform = Optional(Platform)

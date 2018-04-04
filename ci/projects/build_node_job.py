@@ -7,14 +7,13 @@ import glob
 import yaml
 from collections import namedtuple
 
+from pathlib2 import Path
 from pony.orm import db_session
 from pyvalid import accepts, returns
 
-from junk_shop import (
-    models,
-    DbCaptureRepository,
-    run_unit_tests,
-)
+from junk_shop import models, DbCaptureRepository
+from junk_shop.unittest import run_unit_tests, parse_and_save_results_to_db
+
 from utils import prepare_empty_dir, list_inst, dict_inst
 from command import (
     StashCommand,
@@ -206,9 +205,8 @@ class BuildNodeJob(object):
         bin_dir = os.path.abspath(build_info.unit_tests_bin_dir)
         prepare_empty_dir(unit_tests_dir)
         log.info('Running unit tests in %r: %s', unit_tests_dir, ', '.join(test_binary_list))
-        logging.getLogger('junk_shop.unittest').setLevel(logging.INFO)  # prevent unit tests from logging stdout/stderr
-        is_passed = run_unit_tests(
-            self._repository, build_info.current_config_path, unit_tests_dir, bin_dir, test_binary_list, timeout)
+        run_unit_tests(Path(build_info.current_config_path), Path(unit_tests_dir), Path(bin_dir), test_binary_list, timeout)
+        is_passed = parse_and_save_results_to_db(Path(unit_tests_dir), self._repository)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
     def _make_stash_command_list(self, platform_build_info):

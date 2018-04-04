@@ -24,7 +24,7 @@
         {% endif %}
       </a>
 
-      <span class="run-property">{{ node.run.started_at|format_datetime|default('-', true) }}</span>
+      <span class="run-property">{{ node.run.started_at|format_datetime|default('', true) }}</span>
       {% if node.run.duration is not none %}<span class="run-property">Duration: {{ node.run.duration|format_timedelta }}</span>{% endif %}
 
       {% if node.artifacts %}

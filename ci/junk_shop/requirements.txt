@@ -5,3 +5,4 @@ tzlocal
 psycopg2
 pony
 pathlib2==2.3.0
+pyyaml
