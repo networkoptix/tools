@@ -10,14 +10,7 @@
 
 - name: "Set fact libvirt_guest__current_state for {{ libvirt_guest__hostname }}"
   set_fact:
-    libvirt_guest__current_state: "undefined"
-  when: domstate is undefined
-
-- name: "Set fact libvirt_guest__current_state for {{ libvirt_guest__hostname }}"
-  set_fact:
-    libvirt_guest__current_state: '{{ domstate.status }}'
-  when: domstate is defined
-
+    libvirt_guest__current_state: '{{ domstate.status | default("undefined") }}'
 
 - name: Wait for VM connection
   become: false
@@ -36,10 +29,12 @@
   register: dumpxml
   changed_when: false
   delegate_to: "{{ libvirt_host }}"
-  when: "libvirt_guest__state != 'undefined'"
+  when: "libvirt_guest__current_state != 'undefined'"
   check_mode: no
 
 - name: Register domain.xml as fact
   set_fact:
     domain_xml: "{{ dumpxml.stdout }}"
-  when: dumpxml is defined
+  when: 
+  - dumpxml is defined
+  - libvirt_guest__current_state != 'undefined'
