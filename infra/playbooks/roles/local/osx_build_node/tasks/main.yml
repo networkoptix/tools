@@ -83,8 +83,16 @@
 - name: Install virtualenv package
   become: true
   become_method: sudo
-  # pip module can't install virtualenv, prob. some problems with path vars
+  # FIXME: pip is not on path
   command: /usr/local/bin/pip install virtualenv
+  register: result
+  changed_when: '"Requirement already satisfied" not in result.stdout'
+
+- name: Install system-wide six
+  become: true
+  become_method: sudo
+  # FIXME: pip is not on path
+  command: /usr/local/bin/pip install six
   register: result
   changed_when: '"Requirement already satisfied" not in result.stdout'
 
