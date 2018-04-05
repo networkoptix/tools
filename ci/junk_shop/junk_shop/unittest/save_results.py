@@ -7,7 +7,7 @@ from ..utils import status2outcome, outcome2status
 log = logging.getLogger(__name__)
 
 
-# do not store core files larger than this to not pullute db
+# do not store core files larger than this to not pollute db
 CORE_FILE_SIZE_LIMIT = 100 * 1024*1024
 
 
