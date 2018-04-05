@@ -10,7 +10,14 @@
 
 - name: "Set fact libvirt_guest__current_state for {{ libvirt_guest__hostname }}"
   set_fact:
-    libvirt_guest__current_state: '{{ domstate.status | default("undefined") }}'
+    libvirt_guest__current_state: "undefined"
+  when: domstate is undefined
+
+- name: "Set fact libvirt_guest__current_state for {{ libvirt_guest__hostname }}"
+  set_fact:
+    libvirt_guest__current_state: '{{ domstate.status }}'
+  when: domstate is defined
+
 
 - name: Wait for VM connection
   become: false
