@@ -2,7 +2,7 @@ libvirt_host: alpha
 libvirt_guest__state: running
 
 libvirt_guest__type: windows
-libvirt_guest_copy_on_write: true
+libvirt_guest__copy_on_write: true
 libvirt_guest__extra_system_image_size_gb: "1200"
 libvirt_guest__memory: "{{ 60 * 1024 * 1024 }}"  # 1 GiB
 libvirt_guest__cpus: 30

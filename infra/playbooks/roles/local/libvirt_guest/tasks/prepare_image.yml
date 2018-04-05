@@ -15,8 +15,8 @@
     remote_src: yes
   delegate_to: "{{ libvirt_host }}"
   when: >-
-    libvirt_guest_copy_on_write is undefined or
-    libvirt_guest_copy_on_write == False
+    libvirt_guest__copy_on_write is undefined or
+    libvirt_guest__copy_on_write == False
 
 - name: Create qcow2 guest disk image with backing file (copy-on-write)
   command: >-
@@ -27,8 +27,8 @@
     creates: "{{ libvirt_guest__system_image_file }}"
   delegate_to: "{{ libvirt_host }}"
   when: >-
-    libvirt_guest_copy_on_write is defined and
-    libvirt_guest_copy_on_write == True
+    libvirt_guest__copy_on_write is defined and
+    libvirt_guest__copy_on_write == True
 
 - name: Resize guest system disk image
   command: >-
