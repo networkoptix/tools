@@ -2,7 +2,7 @@ import logging
 
 from pony.orm import db_session, flush
 
-from ..utils import status2outcome, outcome2status
+from ..utils import status2outcome
 
 log = logging.getLogger(__name__)
 
@@ -48,13 +48,18 @@ def save_test_results(repository, test_record_list):
         run.started_at = test_record.test_info.started_at
         run.duration = test_record.test_info.duration
         error_list = test_record.test_info.errors
+        test_passed = True
         if test_record.test_info.exit_code != 0:
             error_list.append('exit code: %d' % test_record.test_info.exit_code)
-            passed = False
+            test_passed = False
         add_output_artifact(repository, run, 'errors', '\n'.join(error_list), is_error=True)
         add_output_artifact(repository, run, 'command line', test_record.test_info.command_line)
         add_output_artifact(repository, run, 'full output', test_record.output_file_path.read_text())
         # core and backtraces
+        for backtrace_path in test_record.backtrace_file_list:
+            name = backtrace_path.name
+            repository.add_artifact(run, name, name, repository.artifact_type.traceback, backtrace_path.read_bytes(), is_error=True)
+            test_passed = False
         for core_file_path in test_record.core_file_list:
             size = core_file_path.stat().st_size
             if size <= CORE_FILE_SIZE_LIMIT:
@@ -62,11 +67,10 @@ def save_test_results(repository, test_record_list):
                 repository.add_artifact(run, name, name, repository.artifact_type.core, core_file_path.read_bytes(), is_error=True)
             else:
                 log.info('Core file "%s" is too large (%rB); will not store', core_file_path, size)
-        for backtrace_path in test_record.backtrace_file_list:
-            name = backtrace_path.name
-            repository.add_artifact(run, name, name, repository.artifact_type.traceback, backtrace_path.read_bytes(), is_error=True)
+            test_passed = False
         # outcome
-        if not outcome2status(run.outcome):
+        if not test_passed:
+            run.outcome = status2outcome(test_passed)
             passed = False
     root_run.outcome = status2outcome(passed)
     return passed
