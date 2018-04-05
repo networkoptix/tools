@@ -18,7 +18,7 @@ class LinesArtifact(object):
         self._line_list = deque(maxlen=self.line_count_limit)
 
     def add(self, line):
-        if len(self._line_list) == self.line_count_limit:
+        if len(self._line_list) >= self.line_count_limit:
             self.is_truncated = True
         self._line_list.append(line)
         self.line_count += 1
@@ -46,6 +46,9 @@ class TestResults(object):
         return lines_artifact
 
 
+# Use GoogleTestParser to parse google test output file.
+# Implement GoogleTestEventHandler methods to construct TestResult tree.
+# Return result tree root.
 class GTestOutputParser(GoogleTestEventHandler):
 
     @classmethod

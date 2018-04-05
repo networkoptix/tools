@@ -22,9 +22,9 @@ def parse_and_save_results_to_db(work_dir, repository):
     print 'Parsing unit test results from %s:' % work_dir
     test_record_list = [produce_test_record(work_dir, test_name) for test_name in run_info.test_list]
     print 'Saving unit test results:'
-    save_test_results(repository, test_record_list)
+    passed = save_test_results(repository, test_record_list)
     print 'Done.'
-    return True
+    return passed
 
 def produce_test_record(work_dir, test_name):
     test_dir_base = work_dir.joinpath(test_name)

@@ -27,6 +27,7 @@ TEST_LOG_LEVEL = dict(
 
 def gtest_arguments(test_name):
     log_level = TEST_LOG_LEVEL.get(test_name, DEFAULT_LOG_LEVEL)
+    # developers asked for these flags to be used for unit tests
     return [
         '--gtest_filter=-NxCritical.All3',
         '--gtest_shuffle',

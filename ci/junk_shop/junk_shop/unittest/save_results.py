@@ -7,7 +7,8 @@ from ..utils import status2outcome, outcome2status
 log = logging.getLogger(__name__)
 
 
-CORE_FILE_SIZE_LIMIT = 100 * 1024*1024  # do not store core files larger than this
+# do not store core files larger than this to not pullute db
+CORE_FILE_SIZE_LIMIT = 100 * 1024*1024
 
 
 def add_output_artifact(repository, run, name, data, is_error=False):

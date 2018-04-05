@@ -41,7 +41,8 @@ def file_path(value):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--timeout', type=str_to_timedelta, dest='timeout', help='Run timeout, in format: 1d2h3m4s')
+    parser.add_argument(
+        '--timeout', type=str_to_timedelta, dest='timeout', help='Run timeout, in format: 1d2h3m4s')
     parser.add_argument('config_path', type=file_path, help='Path to current_config.py')
     parser.add_argument('bin_dir', type=dir_path, help='Directory to test binaries')
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')

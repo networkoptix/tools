@@ -205,7 +205,13 @@ class BuildNodeJob(object):
         bin_dir = os.path.abspath(build_info.unit_tests_bin_dir)
         prepare_empty_dir(unit_tests_dir)
         log.info('Running unit tests in %r: %s', unit_tests_dir, ', '.join(test_binary_list))
-        run_unit_tests(Path(build_info.current_config_path), Path(unit_tests_dir), Path(bin_dir), test_binary_list, timeout)
+        run_unit_tests(
+            config_path=Path(build_info.current_config_path),
+            work_dir=Path(unit_tests_dir),
+            bin_dir=Path(bin_dir),
+            test_binary_list=test_binary_list,
+            timeout=timeout,
+            )
         is_passed = parse_and_save_results_to_db(Path(unit_tests_dir), self._repository)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
