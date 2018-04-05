@@ -2,3 +2,16 @@ office_net_gateway: "10.0.2.103"
 office_net_netmask: "255.255.252.0"
 office_net_dns_search: "noptix.local"
 office_net_dns_nameservers: "10.0.2.103"
+
+# TODO: Put in proper place so it won't affect local deployments
+# administrators:
+# - name: iremizov
+#   sudo: ALL=(ALL) NOPASSWD:ALL
+#   groups: [users, admin, sudo]
+#   ssh_keys:
+#   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com"
+# - name: anikitin
+#   sudo: ALL=(ALL) NOPASSWD:ALL
+#   groups: [users, admin, sudo]
+#   ssh_keys:
+#   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3W67WDUBlUi9RIeUb7BGdeG3zqnbsEduqaXQy2pzhuDR7G07jcTfSMBSLwKWMyfA2i7Tss7rcpa0FDv+vLTMuH0yExM8aW9phQ938MSE7fDGTuZFwQwTlZ2Eerf+pdlYaDBRjjnLepdbIMr74uIxSmuiXpo6akv7tOFQQQBEV939r59AQovCR4S31+Gq/Annwk5era4A4prmHWDHSh/hRA/ush+f9H/kOtA3l78F5LkwNulS2DgG+nq4Q//TXt0ST3UcKE7mSrmACoVzWLNThNRo+d9bxupYNr/t0fTPj44aaErEdIqY9Gsiu5Sf/5IP5IMMJJT6wEvzKeMmeDyhn artem@artem-pc"

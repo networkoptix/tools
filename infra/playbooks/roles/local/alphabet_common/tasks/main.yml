@@ -39,3 +39,18 @@
     state: present
     regexp: "^{{ '%sudo' | regex_escape() }}"
     line: "%sudo   ALL=(ALL) NOPASSWD:ALL"
+
+- name: Setup administrators
+  become: true
+  become_method: sudo
+  include_role:
+    name: ANXS.generic-users
+  vars:
+    genericusers_users:
+    - name: "{{ admin.name }}"
+      ssh_keys: '{{ admin.ssh_keys }}'
+      groups: "{{ admin.groups }}"
+      append: yes
+  with_items: '{{ administrators }}'
+  loop_control:
+    loop_var: admin
