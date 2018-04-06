@@ -72,11 +72,10 @@ class GTestOutputParser(GoogleTestEventHandler):
         return self._levels[0]
 
     def on_parse_error(self, error):
-        message = '%s: %s' % (self._test_name, error)
         if self._levels:
-            self._levels[0].parse_errors.add(message)
+            self._levels[0].parse_errors.add(error)
         else:
-            log.warning('parse error: %s', message)
+            log.warning('parse error: %s', error)
 
     def on_gtest_error(self, line):
         self._levels[-1].gtest_errors.add(line)
