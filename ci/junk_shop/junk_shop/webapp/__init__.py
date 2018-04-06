@@ -18,7 +18,6 @@ from . import views
 from . import project_views
 from . import build_views
 from . import run_views
-from . import version_list_views
 from . import metrics_views
 
 
