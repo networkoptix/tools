@@ -38,7 +38,7 @@ class LogCapturer(object):
         except MemoryError as x:
             # logger is probably already failed by this point, using print
             print 'Error: captured log is too large (%r): %r' % (self._log_stream.tell(), x)
-            return None
+            log = None
         self._log_stream.seek(0)
         self._log_stream.truncate()
         return log
