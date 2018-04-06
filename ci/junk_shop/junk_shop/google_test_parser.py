@@ -7,6 +7,9 @@ import re
 import argparse
 
 
+LOG_PATTERN = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} +\d+ +[A-Z]+ .+'
+
+
 class GoogleTestEventHandler(object):
 
     __metaclass__ = abc.ABCMeta
@@ -119,7 +122,7 @@ class GoogleTestParser(object):
         return True
 
     def _match_suite_start_signature(self, line):
-        mo = re.match(r'^(.+)?\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(.+)?$', line)
+        mo = re.match(r'^(.+)?\[----------\] \d+ tests? from ([\w/]+)(, where .+)?(%s)?$' % LOG_PATTERN, line)
         if not mo:
             return False
         if mo.group(1) or mo.group(4):  # handle log/output lines interleaved with gtest output
