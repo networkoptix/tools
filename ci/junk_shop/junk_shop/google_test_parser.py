@@ -7,7 +7,7 @@ import re
 import argparse
 
 
-LOG_PATTERN = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} +\d+ +[A-Z]+ .+'
+LOG_PATTERN = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} +\w+ +[A-Z]+ .+'
 
 
 class GoogleTestEventHandler(object):
