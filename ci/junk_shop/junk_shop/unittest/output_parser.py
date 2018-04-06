@@ -52,21 +52,22 @@ class TestResults(object):
 class GTestOutputParser(GoogleTestEventHandler):
 
     @classmethod
-    def run(cls, test_name, output_file_path):
+    def run(cls, test_name, output_file_path, is_aborted):
         parser = cls(test_name)
-        return parser.parse(output_file_path)
+        return parser.parse(output_file_path, is_aborted)
 
     def __init__(self, test_name):
         self._levels = [TestResults(test_name)]  # [test binary, suite, test]
 
-    def parse(self, output_file_path):
+    def parse(self, output_file_path, is_aborted):
         parser = GoogleTestParser(self)
         with output_file_path.open() as f:
             for line in iter(f.readline, ''):
                 parser.process_line(line)
+        parser.finish(is_aborted)
         if not self._levels:
             return None
-        if len(self._levels) > 1:
+        if len(self._levels) > 1 and not is_aborted:
             self._levels[0].parse_errors.add('Unexpected end of test output')
         return self._levels[0]
 
@@ -77,7 +78,10 @@ class GTestOutputParser(GoogleTestEventHandler):
         else:
             log.warning('parse error: %s', message)
 
-    def on_stdout_line(self, line):
+    def on_gtest_error(self, line):
+        self._levels[-1].gtest_errors.add(line)
+
+    def on_output_line(self, line):
         self._levels[-1].output_lines.add(line)
 
     def on_suite_start(self, suite_name):

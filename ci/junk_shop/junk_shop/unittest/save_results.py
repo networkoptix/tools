@@ -2,7 +2,7 @@ import logging
 
 from pony.orm import db_session, flush
 
-from ..utils import status2outcome
+from ..utils import status2outcome, outcome2status
 
 log = logging.getLogger(__name__)
 
@@ -50,8 +50,11 @@ def save_test_results(repository, test_record_list):
         error_list = test_record.test_info.errors
         test_passed = True
         if test_record.test_info.exit_code != 0:
-            error_list.append('exit code: %d' % test_record.test_info.exit_code)
-            test_passed = False
+            # do not add exit code error if it is caused by failed gtest (which set it to 1 then)
+            # and it is already caused run.outcome to be failed
+            if outcome2status(run.outcome) or test_record.test_info.exit_code != 1:
+                error_list.append('exit code: %d' % test_record.test_info.exit_code)
+                test_passed = False
         add_output_artifact(repository, run, 'errors', '\n'.join(error_list), is_error=True)
         add_output_artifact(repository, run, 'command line', test_record.test_info.command_line)
         add_output_artifact(repository, run, 'full output', test_record.output_file_path.read_text())

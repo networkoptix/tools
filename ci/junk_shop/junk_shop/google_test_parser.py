@@ -19,7 +19,11 @@ class GoogleTestEventHandler(object):
         pass
 
     @abc.abstractmethod
-    def on_stdout_line(self, line):
+    def on_gtest_error(self, line):
+        pass
+
+    @abc.abstractmethod
+    def on_output_line(self, line):
         pass
 
     @abc.abstractmethod
@@ -45,14 +49,14 @@ class GoogleTestParser(object):
         self._handler = handler
         self.current_suite = None
         self.current_test = None
-        self._last_stdout_line = None
+        self._last_output_line = None
 
     def process_line(self, line):
         line = line.rstrip('\r\n')
         if not self._match_line(line):
-            if not self._last_stdout_line or not self._match_line(self._last_stdout_line + line):
-                self._handler.on_stdout_line(line)
-                self._last_stdout_line = line
+            if not self._last_output_line or not self._match_line(self._last_output_line + line):
+                self._handle_output_line(line)
+                self._last_output_line = line
 
     def finish(self, is_aborted=False):
         if self.current_test:
@@ -88,9 +92,9 @@ class GoogleTestParser(object):
             return False
         # handle log/output lines interleaved with gtest output:
         if mo.group(1) or mo.group(3) or mo.group(4):
-            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or '') + (mo.group(4) or ''))
+            self._handle_output_line((mo.group(1) or '') + (mo.group(3) or '') + (mo.group(4) or ''))
         self._handler.on_test_stop(mo.group(2), mo.group(6))
-        self._handler.on_stdout_line(line)
+        self._handler.on_output_line(line)
         self.current_test = None
         return True
 
@@ -101,7 +105,7 @@ class GoogleTestParser(object):
         if self.current_test:
             self._parse_error('test closing tag is missing', line, suite, test)
         test_name = mo.group(1)
-        self._handler.on_stdout_line(line)
+        self._handler.on_output_line(line)
         self._handler.on_test_start(test_name)
         self.current_test = test_name
         return True
@@ -111,13 +115,13 @@ class GoogleTestParser(object):
         if not mo:
             return False
         if mo.group(1) or mo.group(2):
-            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(2) or ''))
+            self._handle_output_line((mo.group(1) or '') + (mo.group(2) or ''))
         if self.current_test:
             self._parse_error('test closing tag is missing', line)
             self._handler.on_test_stop(None, None)
             self.current_test = None
         self._handler.on_suite_stop(mo.group(3))
-        self._handler.on_stdout_line(line)
+        self._handler.on_output_line(line)
         self.current_suite = None
         return True
 
@@ -126,12 +130,17 @@ class GoogleTestParser(object):
         if not mo:
             return False
         if mo.group(1) or mo.group(4):  # handle log/output lines interleaved with gtest output
-            self._handler.on_stdout_line((mo.group(1) or '') + (mo.group(3) or ''))
+            self._handle_output_line((mo.group(1) or '') + (mo.group(3) or ''))
         suite_name = mo.group(2)
-        self._handler.on_stdout_line(line)
+        self._handler.on_output_line(line)
         self._handler.on_suite_start(suite_name)
         self.current_suite = suite_name
         return True
+
+    def _handle_output_line(self, line):
+        self._handler.on_output_line(line)
+        if not re.match(LOG_PATTERN, line) and line.strip() and self.current_test:
+            self._handler.on_gtest_error(line)
 
     def _parse_error(self, desc, line=None, parsed_suite=None, parsed_test=None):
         error = ('%s: current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
@@ -141,14 +150,19 @@ class GoogleTestParser(object):
 
 class TestEventHandler(GoogleTestEventHandler):
 
-    def __init__(self, print_lines):
-        self._print_lines = print_lines
+    def __init__(self, print_output, print_gtest_errors):
+        self._print_output = print_output
+        self._print_gtest_errors = print_gtest_errors
 
     def on_parse_error(self, error):
         print '*** Parse error: %s ***' % error
 
-    def on_stdout_line(self, line):
-        if self._print_lines:
+    def on_gtest_error(self, line):
+        if self._print_gtest_errors:
+            print '\tGTest: %s' % line.rstrip()
+
+    def on_output_line(self, line):
+        if self._print_output:
             print '\t%s' % line.rstrip()
 
     def on_suite_start(self, suite_name):
@@ -166,10 +180,11 @@ class TestEventHandler(GoogleTestEventHandler):
 
 def test_output():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', '-v', action='store_true', help='Output stdout lines too')
+    parser.add_argument('--print_output', '-s', action='store_true', help='Print output lines too')
+    parser.add_argument('--print_gtest_errors', '-e', action='store_true', help='Print google test errors')
     parser.add_argument('file', help='Google test output to parse')
     args = parser.parse_args()
-    handler = TestEventHandler(print_lines=args.verbose)
+    handler = TestEventHandler(print_output=args.print_output, print_gtest_errors=args.print_gtest_errors)
     parser = GoogleTestParser(handler)
     for line in file(args.file):
         parser.process_line(line)
