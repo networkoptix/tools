@@ -1,6 +1,7 @@
 import logging
 
-from pony.orm import db_session, flush
+import pony.orm
+from pony.orm import db_session
 
 from ..utils import status2outcome, outcome2status
 
@@ -40,7 +41,7 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
 @db_session
 def save_test_results(repository, test_record_list):
     root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
-    flush()  # acquire root_run.id
+    pony.orm.flush()  # acquire root_run.id
     print 'Root run: id=%r' % root_run.id
     passed = True
     for test_record in test_record_list:
@@ -48,13 +49,13 @@ def save_test_results(repository, test_record_list):
         run.started_at = test_record.test_info.started_at
         run.duration = test_record.test_info.duration
         error_list = test_record.test_info.errors
-        test_passed = True
+        fail_it = False
         if test_record.test_info.exit_code != 0:
             # do not add exit code error if it is caused by failed gtest (which set it to 1 then)
             # and it is already caused run.outcome to be failed
             if outcome2status(run.outcome) or test_record.test_info.exit_code != 1:
                 error_list.append('exit code: %d' % test_record.test_info.exit_code)
-                test_passed = False
+                fail_it = True
         add_output_artifact(repository, run, 'errors', '\n'.join(error_list), is_error=True)
         add_output_artifact(repository, run, 'command line', test_record.test_info.command_line)
         add_output_artifact(repository, run, 'full output', test_record.output_file_path.read_text())
@@ -62,7 +63,7 @@ def save_test_results(repository, test_record_list):
         for backtrace_path in test_record.backtrace_file_list:
             name = backtrace_path.name
             repository.add_artifact(run, name, name, repository.artifact_type.traceback, backtrace_path.read_bytes(), is_error=True)
-            test_passed = False
+            fail_it = True
         for core_file_path in test_record.core_file_list:
             size = core_file_path.stat().st_size
             if size <= CORE_FILE_SIZE_LIMIT:
@@ -70,10 +71,10 @@ def save_test_results(repository, test_record_list):
                 repository.add_artifact(run, name, name, repository.artifact_type.core, core_file_path.read_bytes(), is_error=True)
             else:
                 log.info('Core file "%s" is too large (%rB); will not store', core_file_path, size)
-            test_passed = False
+            fail_it = True
         # outcome
-        if not test_passed:
-            run.outcome = status2outcome(test_passed)
+        if fail_it:
+            run.outcome = status2outcome(False)
             passed = False
     root_run.outcome = status2outcome(passed)
     return passed

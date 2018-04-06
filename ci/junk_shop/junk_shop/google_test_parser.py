@@ -180,8 +180,8 @@ class TestEventHandler(GoogleTestEventHandler):
 
 def test_output():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--print_output', '-s', action='store_true', help='Print output lines too')
-    parser.add_argument('--print_gtest_errors', '-e', action='store_true', help='Print google test errors')
+    parser.add_argument('--print-output', '-s', action='store_true', help='Print output lines too')
+    parser.add_argument('--print-gtest-errors', '-e', action='store_true', help='Print google test errors')
     parser.add_argument('file', help='Google test output to parse')
     args = parser.parse_args()
     handler = TestEventHandler(print_output=args.print_output, print_gtest_errors=args.print_gtest_errors)
