@@ -75,6 +75,7 @@ def save_test_results(repository, test_record_list):
         # outcome
         if fail_it:
             run.outcome = status2outcome(False)
+        if not outcome2status(run.outcome):
             passed = False
     root_run.outcome = status2outcome(passed)
     return passed
