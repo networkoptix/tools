@@ -61,7 +61,7 @@ class GTestOutputParser(GoogleTestEventHandler):
 
     def parse(self, output_file_path, is_aborted):
         parser = GoogleTestParser(self)
-        with output_file_path.open() as f:
+        with output_file_path.open('rb') as f:
             for line in iter(f.readline, ''):
                 parser.process_line(line)
         parser.finish(is_aborted)
