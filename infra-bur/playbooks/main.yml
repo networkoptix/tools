@@ -1,0 +1,2 @@
+- import_playbook: ../../infra/playbooks/plays/libvirt_host.yml
+- import_playbook: plays/cloud.yml

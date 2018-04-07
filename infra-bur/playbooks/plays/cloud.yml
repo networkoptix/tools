@@ -1,0 +1,43 @@
+- name: Install docker on host
+  hosts: pi
+
+  roles:
+  - role: nickjj.docker
+    become: true
+    become_method: sudo
+  - role: mysql
+    location: vm201
+    config:
+      port: 13306
+    become: true
+    become_method: sudo
+  - role: mysql
+    location: vm202
+    config:
+      port: 23306
+    become: true
+    become_method: sudo
+  - role: rabbit
+    location: vm201
+    config:
+      port: 15672
+    become: true
+    become_method: sudo
+  - role: rabbit
+    location: vm202
+    config:
+      port: 25672
+    become: true
+    become_method: sudo
+
+- name: Create vms and run docker on them
+  hosts: cloud1 cloud2
+  gather_facts: no
+
+  roles:
+  - role: libvirt_guest
+    become: true
+    become_method: sudo
+  - role: nickjj.docker
+    become: true
+    become_method: sudo

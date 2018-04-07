@@ -1,0 +1,29 @@
+---
+- name: Install pip
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - python-pip
+
+- name: Install docker-py for docker_container task to work
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - docker-py
+
+- name: Run mysql
+  docker_container:
+    name: mysql-{{ location }}
+    image: vigasin/mysql:5.7
+    state: started
+    restart: yes
+    keep_volumes: yes
+    ports:
+    - "{{ config.port }}:3306"
+    env:
+      MYSQL_DATABASES: "clouddb cloudportal"
+      MYSQL_ROOT_PASSWORD: "qweasd123"
+      MYSQL_USER: cloud
+      MYSQL_PASSWORD: qweasd123
