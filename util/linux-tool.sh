@@ -187,7 +187,6 @@ setup_vars()
 
 do_share() # target_path
 {
-    setup_vars
     local TARGET_PATH="$1"
     [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
     if [[ $TARGET_PATH != /* ]]
@@ -210,7 +209,6 @@ do_share() # target_path
 
 do_gen() # [cache] "$@"
 {
-    setup_vars
     nx_cd "$VMS_DIR"
 
     case "$CONFIG" in
@@ -263,7 +261,6 @@ do_gen() # [cache] "$@"
 
 do_build()
 {
-    setup_vars
 
     if [ ! -d "$CMAKE_BUILD_DIR" ]
     then
@@ -291,7 +288,6 @@ do_build()
 
 do_run_ut() # [all|TestName] "$@"
 {
-    setup_vars
     nx_verbose cd "$CMAKE_BUILD_DIR"
 
     local TEST_NAME="$1" && shift
@@ -315,7 +311,6 @@ do_run_ut() # [all|TestName] "$@"
 
 do_apidoc() # dev|prod [action] "$@"
 {
-    setup_vars
 
     local -r TOOL="$1" && shift
     if [ "$TOOL" = "dev" ]
@@ -440,7 +435,6 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
 do_kit() # "$@"
 {
-    setup_vars
 
     if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
     then
@@ -582,7 +576,6 @@ test_distrib_zip() # original.zip built.zip built.tar.gz
 
 do_test_distrib() # [checksum] [no-build] orig/archives/dir
 {
-    setup_vars
     nx_cd "$VMS_DIR"
 
     local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
@@ -644,7 +637,6 @@ printRepos()
     # Allow current dir to be either DEVELOP_DIR or any of its subdirs.
     if [ "$(readlink -f $(pwd))" != "$(readlink -f "$DEVELOP_DIR")" ]
     then
-        setup_vars
         cd "$VMS_DIR/.."
     fi
 
@@ -752,6 +744,8 @@ printRepos()
 
 main()
 {
+    setup_vars
+
     local COMMAND="$1" && shift
     case "$COMMAND" in
         ini)
@@ -782,7 +776,6 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            setup_vars
             nx_verbose cd "$CMAKE_BUILD_DIR"
             case "$TARGET" in
                 windows)
@@ -820,7 +813,6 @@ main()
 
             local VIDEO_FILE="$1" && shift
 
-            setup_vars
 
             local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
 
@@ -869,7 +861,6 @@ main()
             printRepos
             ;;
         print-dirs)
-            setup_vars
             if [ ! -d "$CMAKE_BUILD_DIR" ]
             then
                 nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
