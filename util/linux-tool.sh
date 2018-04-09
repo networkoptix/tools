@@ -281,7 +281,12 @@ do_build()
     fi
 
     nx_cd "$VMS_DIR"
-    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
+    # TODO: Remove when build system is fixed.
+    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@" && \
+        "$VMS_DIR/build_utils/linux/copy_system_library.py" \
+        -c "$PACKAGES_DIR/linux-x64/gcc-7.3.0/bin/x86_64-pc-linux-gnu-gcc" \
+        -o "$CMAKE_BUILD_DIR/lib/" \
+        libstdc++.so.6 libatomic.so.1
 }
 
 do_run_ut() # [all|TestName] "$@"
@@ -777,16 +782,18 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            # TODO: Implement for linux.
+            setup_vars
+            nx_verbose cd "$CMAKE_BUILD_DIR"
             case "$TARGET" in
                 windows)
-                    setup_vars
-                    nx_verbose cd "$CMAKE_BUILD_DIR"
-
                     PATH="$QT_DIR/bin:$PATH"
-                    nx_verbose bin/mediaserver -e
+                    nx_verbose bin/mediaserver -e "$@"
                     ;;
-                *) nx_fail "Command not implemented yet.";;
+                linux)
+                    sudo chown root:root bin/root_tool && sudo chmod u+s bin/root_tool
+                    nx_verbose bin/mediaserver -e "$@"
+                    ;;
+                *) nx_fail "Target [$TARGET] not supported yet.";;
             esac
             ;;
         stop-s)
