@@ -58,7 +58,7 @@ def save_test_results(repository, test_record_list):
                 fail_it = True
         add_output_artifact(repository, run, 'errors', '\n'.join(error_list), is_error=True)
         add_output_artifact(repository, run, 'command line', test_record.test_info.command_line)
-        add_output_artifact(repository, run, 'full output', test_record.output_file_path.read_text())
+        add_output_artifact(repository, run, 'full output', test_record.output_file_path.read_bytes())
         # core and backtraces
         for backtrace_path in test_record.backtrace_file_list:
             name = backtrace_path.name
