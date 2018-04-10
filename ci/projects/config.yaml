@@ -28,6 +28,7 @@ email:
   # who receives emails about broken CI system itself
   ci_admins:
     - vfedorov@networkoptix.com
+    - anikitin@networkoptix.com
 
 build:
   # if any file matching this regexp patterns is added or removed since previous build, do full rebuild:
