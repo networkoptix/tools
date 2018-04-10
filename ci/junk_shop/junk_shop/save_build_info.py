@@ -74,9 +74,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('src_dir', help='Source code directory to load changesets from')
-    parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
+    parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters; project, branch and changeset are the (only) required ones')
+    parser.add_argument('src_dir', help='Source code directory to load changesets from')
     args = parser.parse_args()
     for param in ['project', 'branch', 'build_num', 'revision']:
         assert getattr(args.build_parameters, param), '%s build parameter is required' % param

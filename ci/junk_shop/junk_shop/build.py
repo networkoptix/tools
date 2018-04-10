@@ -8,9 +8,10 @@ import argparse
 from collections import namedtuple
 import re
 
+from pathlib2 import Path
 from pony.orm import db_session
 
-from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome
+from junk_shop.utils import DbConfig, datetime_utc_now, status2outcome, outcome2status
 from junk_shop import models
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from junk_shop.build_output_parser import parse_output_lines
@@ -67,3 +68,39 @@ def store_output_and_error(repository, output, succeeded, error_message, parse_m
     outcome = status2outcome(passed)
     run.outcome = outcome
     return StoredBuildInfo(passed, outcome, run.id)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
+                        help='Capture postgres database credentials')
+    parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
+                        help='Build parameters')
+    parser.add_argument('output_file', type=Path, help='Build output file')
+    parser.add_argument('--outcome', type=outcome2status, default='passed',
+                            help='Build outcome, "passed" of "failed"; default is passed')
+    parser.add_argument('--error-message', help='Build error to store to db')
+    parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',
+                        help='Parse output to determine maven outcome')
+    parser.add_argument('--signal-failure', action='store_true', help='Exit with code 2 if this build is failed one')
+    args = parser.parse_args()
+    try:
+        output = args.output_file.read_text()
+        repository = DbCaptureRepository(args.db_config, args.build_parameters)
+        build_info = store_output_and_error(
+            repository,
+            output,
+            args.outcome,
+            args.error_message,
+            args.parse_maven_outcome,
+            )
+        print 'Created %s run#%d' % (build_info.outcome, build_info.run_id)
+        if not build_info.passed and args.signal_failure:
+            sys.exit(2)
+    except RuntimeError as x:
+        print x
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
