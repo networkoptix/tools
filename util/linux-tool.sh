@@ -261,7 +261,6 @@ do_gen() # [cache] "$@"
 
 do_build()
 {
-
     if [ ! -d "$CMAKE_BUILD_DIR" ]
     then
         nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
@@ -278,12 +277,16 @@ do_build()
     fi
 
     nx_cd "$VMS_DIR"
+    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
+
     # TODO: Remove when build system is fixed.
-    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@" && \
+    if [ "$TARGET" == "linux" ]
+    then
         "$VMS_DIR/build_utils/linux/copy_system_library.py" \
-        -c "$PACKAGES_DIR/linux-x64/gcc-7.3.0/bin/x86_64-pc-linux-gnu-gcc" \
-        -o "$CMAKE_BUILD_DIR/lib/" \
-        libstdc++.so.6 libatomic.so.1
+            -c "$PACKAGES_DIR/linux-x64/gcc-7.3.0/bin/x86_64-pc-linux-gnu-gcc" \
+            -o "$CMAKE_BUILD_DIR/lib/" \
+            libstdc++.so.6 libatomic.so.1
+    fi
 }
 
 do_run_ut() # [all|TestName] "$@"
@@ -311,7 +314,6 @@ do_run_ut() # [all|TestName] "$@"
 
 do_apidoc() # dev|prod [action] "$@"
 {
-
     local -r TOOL="$1" && shift
     if [ "$TOOL" = "dev" ]
     then
@@ -435,7 +437,6 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
 do_kit() # "$@"
 {
-
     if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
     then
         shift
@@ -634,14 +635,10 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
 printRepos()
 {
-    # Allow current dir to be either DEVELOP_DIR or any of its subdirs.
-    if [ "$(readlink -f $(pwd))" != "$(readlink -f "$DEVELOP_DIR")" ]
-    then
-        cd "$VMS_DIR/.."
-    fi
+    cd "$DEVELOP_DIR"
 
-    local -A EXTRAS #< map<repo, extra_info_if_any>
-    local -A BRANCHES #< map<repo, branch>
+    local -a EXTRAS #< map<repo, extra_info_if_any>
+    local -a BRANCHES #< map<repo, branch>
 
     local REPO
     for REPO in $(find * -maxdepth 2 -path "*/.hg/branch" -type f -printf '%H\n')
@@ -659,7 +656,7 @@ printRepos()
             EXTRAS+=( ["$REPO"]="win$EXTRA" ) #< Add key-value.
         fi
 
-        BRANCHES["$REPO"]="$(cat "$REPO/.hg/branch")" #< Add key-value.
+        BRANCHES["$REPO"]=$(cat "$REPO/.hg/branch") #< Add key-value.
     done
 
     # Set REPOS to sorted list of repos formed of BRANCHES keys.
@@ -812,7 +809,6 @@ main()
             fi
 
             local VIDEO_FILE="$1" && shift
-
 
             local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
 
