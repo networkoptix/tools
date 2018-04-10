@@ -92,6 +92,10 @@ class CiProject(BuildProject):
             return True
         return False
 
+    @property
+    def is_signing_enabled(self):
+        return False
+
     def post_process(self, build_info, build_info_path, platform_build_info_map):
         # set bookmark if all platform are built successfuly
         if build_info.failed_build_platform_list:

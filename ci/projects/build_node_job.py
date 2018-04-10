@@ -123,6 +123,7 @@ class BuildNodeJob(object):
                  branch_config,
                  platform_branch_config,
                  webadmin_external_dir,
+                 signing,
                  hardware_signing,
                  ):
         self._cmake_version = cmake_version
@@ -133,6 +134,7 @@ class BuildNodeJob(object):
         self._branch_config = branch_config
         self._platform_branch_config = platform_branch_config
         self._webadmin_external_dir = webadmin_external_dir
+        self._signing = signing
         self._hardware_signing = hardware_signing
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
@@ -174,6 +176,7 @@ class BuildNodeJob(object):
             self._webadmin_external_dir,
             custom_cmake_args,
             build_tests,
+            self._signing,
             self._hardware_signing,
             clean_build,
             )

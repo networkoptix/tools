@@ -121,7 +121,17 @@ class CMakeBuilder(object):
     def _is_unix(self):
         return self._system_platform_config[self._system].is_unix
 
-    def build(self, src_dir, build_dir, webadmin_external_dir, custom_cmake_args, build_tests, hardware_signing, clean_build):
+    def build(
+            self,
+            src_dir,
+            build_dir,
+            webadmin_external_dir,
+            custom_cmake_args,
+            build_tests,
+            signing,
+            hardware_signing,
+            clean_build,
+            ):
         build_params = self._junk_shop_repository.build_parameters
         self._prepare_build_dir(build_dir, clean_build)
         cmake_configuration = build_params.configuration.capitalize()
@@ -132,6 +142,7 @@ class CMakeBuilder(object):
             build_params,
             custom_cmake_args,
             build_tests,
+            signing,
             hardware_signing,
             cmake_configuration,
             )
@@ -198,6 +209,7 @@ class CMakeBuilder(object):
             build_params,
             custom_cmake_args,
             build_tests,
+            signing,
             hardware_signing,
             cmake_configuration,
             ):
@@ -225,6 +237,8 @@ class CMakeBuilder(object):
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         if hardware_signing:
             generate_args += ['-DhardwareSigning=ON']
+        if not signing:
+            generate_args += ['-DcodeSigning=OFF']
         if custom_cmake_args:
             generate_args += custom_cmake_args.split(' ')
         generate_args += platform_args + ['-G', self._generator]

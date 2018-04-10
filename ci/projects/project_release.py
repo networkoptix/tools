@@ -101,6 +101,10 @@ class ReleaseProject(BuildProject):
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
 
+    @property
+    def is_signing_enabled(self):
+        return True
+
     def is_hardware_signing_enabled(self, customization, platform):
         hardware_signing_node_map = {(item.customization, item.platform): item.node
                                          for item in self.config.release.hardware_signing}
