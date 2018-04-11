@@ -118,6 +118,7 @@ def status2outcome(passed):
         return 'failed'
 
 def outcome2status(outcome):
+    assert outcome in ['failed', 'passed'], repr(outcome)
     return outcome == 'passed'
 
 def param_to_bool(value):
