@@ -56,7 +56,7 @@ Here <command> can be one of the following:
  apidoc dev|prod [<action>|run] [args] # Run apidoctool from devtools or packages/any.
  apidoc-rdep # Run apidoctool tests, deploy from devtools to packages/any and upload via "rdep -u".
 
- kit [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
+ kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test, copy src to artifact.
  kit-rdep # Upload $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
  start-s [args] # Start mediaserver with [args].
@@ -332,7 +332,8 @@ do_apidoc() # dev|prod [action] "$@"
         local -r ACTION="$1" && shift
     fi
 
-    local -r API_XML=$(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/api.xml")
+    local -r SOURCE_API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
+    local -r API_XML=$(nx_path "$SOURCE_API_XML")
 
     local -r API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
     if [ ! -f "$API_TEMPLATE_XML" ]
@@ -342,7 +343,7 @@ do_apidoc() # dev|prod [action] "$@"
 
     if [ "$ACTION" = "run" ]
     then
-        nx_verbose java -jar "$JAR" "$@"
+        time nx_verbose java -jar "$JAR" "$@"
         RESULT=$?
     else #< Run apidoctool with appropriate args for the action, adding the remaining args, if any.
         local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
@@ -385,14 +386,18 @@ do_apidoc() # dev|prod [action] "$@"
             rm -rf "$OUTPUT_DIR"
             nx_verbose mkdir -p "$OUTPUT_DIR" || return $?
         fi
-        nx_verbose java -jar "$JAR" -verbose "$ACTION" "${ARGS[@]}" "$@"
+        time nx_verbose java -jar "$JAR" -verbose "$ACTION" "${ARGS[@]}" "$@"
         RESULT=$?
     fi
 
-    nx_echo
-    nx_verbose cmake -E copy_if_different \
-        "$API_XML" $(nx_path "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/") \
-        || exit $?
+    # Copy generated api.xml to resources, if exists and differs.
+    local -r TARGET_API_XML="$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.xml"
+    if [ -f "$SOURCE_API_XML" ] && ! diff "$SOURCE_API_XML" "$TARGET_API_XML" >/dev/null
+    then
+        nx_echo
+        nx_verbose cp "$SOURCE_API_XML" "$TARGET_API_XML" || exit $?
+    fi
+
     return $RESULT
 }
 
@@ -424,19 +429,57 @@ do_apidoc_rdep() # "$@"
     nx_popd
 }
 
+# [in] MSVC 0|1 Whether to use MSVC (cygwin only).
 build_and_test_nx_kit() # nx_kit_src_dir "$@"
 {
-    local SRC="$1" && shift
+    local -r SRC="$1" && shift
 
-    # "Makefiles" and "gcc" are needed for cygwin support.
-    nx_verbose cmake "$SRC" -G 'Unix Makefiles' -DCMAKE_C_COMPILER=gcc || return $?
+    if [[ $MSVC = 1 ]]
+    then
+        local -r GENERATION_ARGS="-Ax64 -Thost=x64"
+        local -r GENERATOR_ARG=""
+        local -r BUILD_ARGS="--config Release"
+        local -r EXE_DIR="Release"
+    else
+        local -r BUILD_ARGS=""
+        local -r EXE_DIR="."
+        if nx_is_cygwin
+        then
+            local -r GENERATION_ARGS="-DCMAKE_C_COMPILER=gcc"
+            local -r GENERATOR_ARG="-GUnix Makefiles"
+        else
+            local -r GENERATION_ARGS=""
+            local -r GENERATOR_ARG="-GNinja"
+        fi
+    fi
 
-    nx_verbose cmake --build . "$@" || return $?
-    ./nx_kit_*
+    nx_verbose cmake "$SRC" -DCMAKE_BUILD_TYPE=Release \
+        ${GENERATOR_ARG:+"$GENERATOR_ARG"} $GENERATION_ARGS "$@" || return $?
+    nx_echo
+    time nx_verbose cmake --build . $BUILD_ARGS || return $?
+    nx_echo
+    "$EXE_DIR"/nx_kit_*
 }
 
 do_kit() # "$@"
 {
+    if (( $# >= 1 )) && [[ $1 = "cygwin" ]]
+    then
+        shift
+        if ! nx_is_cygwin
+        then
+            nx_fail "ERROR: 'cygwin' option is supported only on cygwin."
+        fi
+        local -r -i MSVC=0
+    else
+        if nx_is_cygwin
+        then
+            local -r -i MSVC=1
+        else
+            local -r -i MSVC=0
+        fi
+    fi
+
     if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
     then
         shift
@@ -453,7 +496,7 @@ do_kit() # "$@"
     nx_echo "+ cd $KIT_BUILD_DIR"
 
     local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
-    build_and_test_nx_kit "$KIT_SRC_DIR" || { local RESULT=$?; nx_popd; return $?; }
+    build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
 
     nx_popd
     if [[ $KEEP_BUILD_DIR == 0 ]]
@@ -633,89 +676,141 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     nx_echo "All tests SUCCEEDED."
 }
 
-printRepos()
+# Extract the specified variable value from CMakeCache.txt. Print nothing if CMakeCache.txt does
+# not exist (then return 2), or the variable is not found (then return 1) or has empty value (then
+# return 0).
+printCmakeCacheValue() # cmake_build_dir cmake_var_name
 {
-    cd "$DEVELOP_DIR"
+    local -r BUILD_DIR="$1" && shift
+    local -r CMAKE_VAR_NAME="$1" && shift
 
-    local -a EXTRAS #< map<repo, extra_info_if_any>
-    local -a BRANCHES #< map<repo, branch>
+    local -r CMAKE_CACHE_TXT="$BUILD_DIR/CMakeCache.txt"
+    if [ ! -f "$CMAKE_CACHE_TXT" ]
+    then
+        return 2
+    fi
 
+    cat "$CMAKE_CACHE_TXT" |grep "$CMAKE_VAR_NAME:" |tr -d "\r" `#< Needed on cygwin. #` \
+        |awk 'BEGIN { FS="=" }; { print $2 }'
+    return 0
+}
+
+# Scan current dir for immediate inner dirs which are repos, and extract info about them.
+# [out] REPO_TO_BRANCH: map<repo_dir, branch> Names of current branches.
+# [out] EXTRAS: map<repo_dir, extra_info_if_any> Extra info to be printed to the user.
+scanRepos_REPO_TO_BRANCH_and_EXTRAS()
+{
     local REPO
-    for REPO in $(find * -maxdepth 2 -path "*/.hg/branch" -type f -printf '%H\n')
+    for REPO in $(find * -maxdepth 2 -path "*/.hg/branch" -printf '%H\n')
     do
         # Check if the repo dir is mounted from a Windows filesystem.
         local WIN_DIR=$(mount |grep "$HOME/develop/$REPO " |awk '{print $1}')
         if [ ! -z "$WIN_DIR" ]
         then
-            local EXTRA
+            local EXTRA=""
             local WIN_REPO=$(basename "$WIN_DIR")
             if [ "$WIN_REPO" != "$REPO" ]
             then
                 EXTRA=" $WIN_REPO"
             fi
-            EXTRAS+=( ["$REPO"]="win$EXTRA" ) #< Add key-value.
+            EXTRAS["$REPO"]="win$EXTRA" #< Add key-value.
         fi
 
-        BRANCHES["$REPO"]=$(cat "$REPO/.hg/branch") #< Add key-value.
+        REPO_TO_BRANCH["$REPO"]=$(cat "$REPO/.hg/branch") #< Add key-value.
     done
 
-    # Set REPOS to sorted list of repos formed of BRANCHES keys.
-    IFS=$'\n' eval 'REPOS=($(sort <<<"${!BRANCHES[*]}"))'
+    nx_log_map REPO_TO_BRANCH
+    nx_log_map EXTRAS
+}
 
-    # Fill BUILD_DIRS and OTHER_DIRS - non-cmake-build-dirs which names start with any repo name.
-    local -A BUILD_DIRS #< map<repo, cmake_build_dir>
-    local OTHER_DIRS=()
+# Scan current dir for immediate inner dirs which are cmake-build-dirs.
+# [out] REPO_TO_BUILD_DIRS: map<repo_dir, list<cmake_build_dir>>.
+# [out] BUILD_DIR_TO_CONFIG: map<cmake_build_dir, Debug|Release>.
+# [out] OTHER_DIRS: array<dir> Non-cmake-build-dirs which names start with some repo_dir name.
+scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS() # "${REPOS[@]}"
+{
     local DIR
     for DIR in *
     do
-        if [ ! -d "$DIR" ]
+        if [[ ! -d $DIR ]]
         then
             continue
         fi
+        nx_log_var DIR
 
-        local -i IS_PREFIX=0
-        local -i IS_EQUAL=0
-        for REPO in "${REPOS[@]}"
-        do
-            if [[ $DIR =~ ^$REPO.+ ]]
-            then
-                IS_PREFIX=1
-            fi
-            if [ "$DIR" = "$REPO" ]
-            then
-                IS_EQUAL=1
-            fi
-        done
+        local CMAKE_SRC_DIR=$(printCmakeCacheValue "$DIR" CMAKE_HOME_DIRECTORY)
+        nx_log_var CMAKE_SRC_DIR
 
-        if [ $IS_PREFIX == 1 ] && [ $IS_EQUAL == 0 ]
+        if [[ ! -z $CMAKE_SRC_DIR ]]
         then
-            # Check CMakeCache.txt to have: CMAKE_HOME_DIRECTORY:INTERNAL=<CMAKE_SRC_DIR>
-            local CMAKE_SRC_DIR=$(cat "$DIR/CMakeCache.txt" 2>/dev/null \
-                |grep 'CMAKE_HOME_DIRECTORY:INTERNAL' |awk 'BEGIN { FS="=" }; { print $2 }')
-            if [ -z "$CMAKE_SRC_DIR" ]
+            REPO_TO_BUILD_DIRS["$(basename "$CMAKE_SRC_DIR")"]+="$DIR " #< Add value to key.
+            local CMAKE_CONFIG=$(printCmakeCacheValue "$DIR" CMAKE_BUILD_TYPE)
+            BUILD_DIR_TO_CONFIG["$DIR"]="$CMAKE_CONFIG" #< Add key-value.
+        else
+            local -i SOME_REPO_IS_PREFIX_TO_DIR=0
+            local -i SOME_REPO_IS_EQUAL_TO_DIR=0
+            local REPO
+            for REPO in "$@"
+            do
+                if [[ $DIR =~ ^$REPO.+ ]]
+                then
+                    SOME_REPO_IS_PREFIX_TO_DIR=1
+                fi
+                if [[ $DIR = $REPO ]]
+                then
+                    SOME_REPO_IS_EQUAL_TO_DIR=1
+                fi
+            done
+
+            if [[ $SOME_REPO_IS_PREFIX_TO_DIR = 1 && $SOME_REPO_IS_EQUAL_TO_DIR = 0 ]]
             then
-                OTHER_DIRS+=( "$DIR" )
-            else
-                BUILD_DIRS["$(basename "$CMAKE_SRC_DIR")"]+="$DIR "
+                OTHER_DIRS+=( "$DIR" ) #< Add array item.
             fi
         fi
     done
+
+    nx_log_map REPO_TO_BUILD_DIRS
+    nx_log_map BUILD_DIR_TO_CONFIG
+    nx_log_array OTHER_DIRS
+}
+
+printRepos()
+{
+    cd "$DEVELOP_DIR"
+
+    local -A REPO_TO_BRANCH #< map<repo_dir, branch>
+    local -A EXTRAS #< map<repo_dir, extra_info_if_any>
+    scanRepos_REPO_TO_BRANCH_and_EXTRAS
+
+    # Set REPOS to sorted list of repos formed of REPO_TO_BRANCH keys.
+    IFS=$'\n' eval 'local REPOS=( $(sort <<<"${!REPO_TO_BRANCH[*]}") )'
+
+    # Fill BUILD_DIRS and OTHER_DIRS - non-cmake-build-dirs which names start with any repo name.
+    local -A REPO_TO_BUILD_DIRS #< map<repo_dir, list<cmake_build_dir>>
+    local -A BUILD_DIR_TO_CONFIG #< map<cmake_build_dir, build_configuration>.
+    local OTHER_DIRS=()
+    scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS "${REPOS[@]}"
 
     # Print repo dirs.
     for REPO in "${REPOS[@]}"
     do
         local BUILD_DIR_STR=""
-        if [ ! -z "${BUILD_DIRS[$REPO]}" ]
+        if [ ! -z "${REPO_TO_BUILD_DIRS[$REPO]}" ]
         then
-            local DIRS=( ${BUILD_DIRS[$REPO]} ) #< Split by spaces into array.
-            if [ ${#DIRS[@]} = 1 ]
+            local DIRS=( ${REPO_TO_BUILD_DIRS[$REPO]} ) #< Split by spaces into array.
+            local DIR
+            BUILD_DIR_STR=" $(nx_dcyan)=>"
+            if [[ ${#DIRS[@]} = 1 ]]
             then
-                BUILD_DIR_STR=" $(nx_dcyan)=> $(nx_lcyan)${BUILD_DIRS[$REPO]}"
+                DIR="${DIRS[0]}"
+                local CONFIG_STR="$(nx_lcyan)${BUILD_DIR_TO_CONFIG["$DIR"]::1} "
+                BUILD_DIR_STR+=" $CONFIG_STR$(nx_lgreen)$DIR"
             else
-                BUILD_DIR_STR=" $(nx_dcyan)=>$(nx_lcyan)"$'\n'
+                BUILD_DIR_STR+=$'\n    '
                 for DIR in "${DIRS[@]}"
                 do
-                    BUILD_DIR_STR+="    $DIR"$'\n'
+                    local CONFIG_STR="$(nx_lcyan)${BUILD_DIR_TO_CONFIG["$DIR"]::1} "
+                    BUILD_DIR_STR+="$CONFIG_STR$(nx_lgreen)$DIR"$'\n    '
                 done
             fi
         fi
@@ -723,17 +818,17 @@ printRepos()
         local EXTRA_STR=""
         if [ ! -z "${EXTRAS[$REPO]}" ]
         then
-            EXTRA_STR="$(nx_lgray)[${EXTRAS[$REPO]}] "
+            EXTRA_STR=" $(nx_lgray)[${EXTRAS[$REPO]}]"
         fi
 
-        nx_echo "$EXTRA_STR$(nx_white)$REPO$BUILD_DIR_STR$(nx_dcyan):" \
-            "$(nx_lyellow)${BRANCHES[$REPO]}$(nx_nocolor)"
+        nx_echo "$(nx_white)$REPO$EXTRA_STR$BUILD_DIR_STR$(nx_dcyan):" \
+            "$(nx_lyellow)${REPO_TO_BRANCH[$REPO]}$(nx_nocolor)"
     done
 
     # Print other dirs.
     for DIR in "${OTHER_DIRS[@]}"
     do
-        nx_echo "$(nx_lgreen)$DIR$(nx_nocolor)"
+        nx_echo "$(nx_lred)$DIR$(nx_nocolor)"
     done
 }
 
@@ -741,9 +836,16 @@ printRepos()
 
 main()
 {
-    setup_vars
+    TIMEFORMAT="Time taken: %1lR" #< Output for "time" command. Example: 2m12s
 
-    local COMMAND="$1" && shift
+    local -r COMMAND="$1" && shift
+    case "$COMMAND" in
+        apidoc|kit|start-s|start-c|run-ut|testcamera|share|gen|build|cmake|distrib|test-distrib| \
+        print-dirs)
+            setup_vars
+            ;;
+    esac
+
     case "$COMMAND" in
         ini)
             touch "$INI_FILES_DIR"/nx_network.ini

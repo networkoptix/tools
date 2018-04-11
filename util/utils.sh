@@ -117,6 +117,83 @@ nx_log() # ...
     } 2>/dev/null
 }
 
+# Log var name and value if in verbose mode, otherwise, do nothing.
+nx_log_var() # VAR_NAME
+{
+    # Allow "set -x" to echo the args. If not called under "set -x", do nothing, but suppress
+    # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
+    # will be logged by "set -x".)
+    {
+        set +x;
+
+        if [ $NX_VERBOSE = 1 ]
+        then
+            local -r VAR_NAME="$1"
+            eval local -r VAR_VALUE="\$$VAR_NAME"
+            echo "####### $VAR_NAME: [$VAR_VALUE]"
+
+            set -x
+        fi
+    } 2>/dev/null
+}
+
+# Log array var name and values if in verbose mode, otherwise, do nothing.
+nx_log_array() # ARRAY_NAME
+{
+    # Allow "set -x" to echo the args. If not called under "set -x", do nothing, but suppress
+    # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
+    # will be logged by "set -x".)
+    {
+        set +x;
+
+        if [ $NX_VERBOSE = 1 ]
+        then
+            local -r ARRAY_NAME="$1"
+            eval local -r -a ARRAY_VALUE=("\${$ARRAY_NAME[@]}")
+            echo "####### $ARRAY_NAME: array[${#ARRAY_VALUE[@]}]:"
+            echo "####### {"
+            local ITEM_VALUE
+            for ITEM_VALUE in "${ARRAY_VALUE[@]}"
+            do
+                echo "#######     [$ITEM_VALUE]"
+            done
+            echo "####### }"
+
+            set -x
+        fi
+    } 2>/dev/null
+}
+
+# Log map (dictionary) var name and key-values if in verbose mode, otherwise, do nothing.
+nx_log_map() # ARRAY_NAME
+{
+    # Allow "set -x" to echo the args. If not called under "set -x", do nothing, but suppress
+    # unneeded logging (bash does not allow to define an empty function, and if ":" is used, it
+    # will be logged by "set -x".)
+    {
+        set +x;
+
+        if [ $NX_VERBOSE = 1 ]
+        then
+            local -r MAP_NAME="$1"
+            # Copy a map with name $MAP_NAME to the local map MAP_VALUE.
+            eval $(typeset -A -p $MAP_NAME `# Print "declare -A $MAP_NAME=([key]="value"...)" #` \
+                |sed "s/$MAP_NAME=/MAP_VALUE=/" \
+                |sed 's/declare /local /')
+            echo "####### $MAP_NAME: map[${#MAP_VALUE[@]}]:"
+            echo "####### {"
+            local KEY
+            for KEY in "${!MAP_VALUE[@]}"
+            do
+                echo "#######     [$KEY] -> [${MAP_VALUE["$KEY"]}]"
+            done
+            echo "####### }"
+
+            set -x
+        fi
+    } 2>/dev/null
+}
+
 # Log the contents of the file in verbose mode via "sudo cat", otherwise, do nothing.
 nx_log_file_contents() # filename
 {
@@ -158,10 +235,10 @@ nx_verbose() # "$@"
     } 2>/dev/null
 }
 
-nx_show() # VAR_NAME
+nx_echo_value() # VAR_NAME
 {
-    local VAR_NAME="$1"
-    eval local VAR_VALUE="\$$VAR_NAME"
+    local -r VAR_NAME="$1"
+    eval local -r VAR_VALUE="\$$VAR_NAME"
     echo "####### $VAR_NAME: [$VAR_VALUE]"
 }
 
@@ -446,9 +523,9 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_push_title
     nx_set_title "$TERMINAL_TITLE"
 
-    sshpass -p "$PASSWORD" ssh -p "$PORT" -t "$USER@$HOST" \
-        `# Don't use known_hosts #` -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        ${ARGS:+"$ARGS"} `#< Omit arg if empty`
+    sshpass -p "$PASSWORD" ssh -q -p "$PORT" -t "$USER@$HOST" \
+        `# Do not use known_hosts #` -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty #`
     local RESULT=$?
 
     nx_pop_title
