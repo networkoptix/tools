@@ -70,6 +70,11 @@ def store_output_and_error(repository, output, succeeded, error_message, parse_m
     return StoredBuildInfo(passed, outcome, run.id)
 
 
+def str2status(value):
+    if not value:
+        return True
+    return outcome2status(value)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
@@ -77,7 +82,7 @@ def main():
     parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     parser.add_argument('output_file', type=Path, help='Build output file')
-    parser.add_argument('--outcome', type=outcome2status, default='passed',
+    parser.add_argument('--outcome', type=str2status, default='passed',
                             help='Build outcome, "passed" of "failed"; default is passed')
     parser.add_argument('--error-message', help='Build error to store to db')
     parser.add_argument('--parse-maven-outcome', action='store_true', dest='parse_maven_outcome',

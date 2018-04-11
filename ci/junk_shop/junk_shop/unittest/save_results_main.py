@@ -49,7 +49,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
                         help='Capture postgres database credentials')
-    parser.add_argument('--build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
+    parser.add_argument('build-parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
     args = parser.parse_args()
     work_dir = Path.cwd()
