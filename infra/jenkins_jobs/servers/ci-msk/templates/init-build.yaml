@@ -1,0 +1,59 @@
+# init build record - create build and build_changeset records for new build in junk-shop
+
+- job-template:
+    name: '{project-name}-{branch}-init-build'
+    node: small-linux-{project-name}
+
+    junk_shop_host: '10.0.2.101'
+
+    description: |
+      Create/init build record
+
+    parameters:
+      - bool:
+          name: CLEAN
+          default: false
+          description: remove workspace before build
+      - string:
+          name: CUSTOMIZATION
+          default: ''
+          description: customization, if build only has single on
+      - string:
+          name: ROOT_BUILD_NUMBER
+          description: jenkins BUILD_NUMBER for root build
+      - string:
+          name: ROOT_BUILD_URL
+          description: jenkins BUILD_URL for root build
+
+    wrappers:
+    - timestamps
+    - workspace-cleanup:
+        check-parameter: CLEAN
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: junk_shop_db_credentials
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '{branch}'
+
+    builders:
+
+      - inject:
+          properties-content: |
+            DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
+
+      - init-venv:
+          requirements-files: devtools/ci/junk_shop/requirements.txt
+
+      - init-build:
+          project-name: '{project-name}'
+          branch: '{branch}'
+          build-num: $ROOT_BUILD_NUMBER
+          customization: $CUSTOMIZATION
+          jenkins_url: $ROOT_BUILD_URL

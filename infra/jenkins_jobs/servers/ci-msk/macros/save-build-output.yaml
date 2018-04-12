@@ -1,0 +1,44 @@
+# save build output to junk-shop database
+
+# requirements:
+# scm:
+# * devtools
+# * nx_vms
+# env:
+# * DB_CONFIG
+# parameters:
+# * project-name
+# * branch
+# * build-num
+# * customization - empty string if not required
+# * platform
+# * output-file - path to output file to save
+# * outcome - 'failed', 'passed', or empty string for default one (passed)
+
+- builder:
+    name: save-build-output
+    builders:
+    - extended-bash:
+        headers:
+          !include-raw-escape: includes/join_by.sh
+        script: |
+          set -ex
+
+          if [ ! -f "{output-file}" ]; then
+            echo "{output-file} is missing; will not store"
+            exit 0
+          fi
+          source venv/bin/activate
+            export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+            BUILD_PARAMETERS=(
+                "project={project-name}"
+                "branch={branch}"
+                "build_num={build-num}"
+                "customization={customization}"
+                "platform={platform}"
+                )
+            devtools/ci/junk_shop/junk_shop/build.py \
+                "$DB_CONFIG" \
+                "$(join_by ',' ${{BUILD_PARAMETERS[@]}})" \
+                "{output-file}" \
+                "--outcome={outcome}"

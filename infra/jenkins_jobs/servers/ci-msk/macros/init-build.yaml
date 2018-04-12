@@ -1,0 +1,41 @@
+# create build record in junk-shop database
+# populate it with build parameters
+
+# requirements:
+# scm:
+# * devtools
+# * nx_vms
+# env:
+# * DB_CONFIG
+# parameters:
+# * project-name
+# * branch
+# * build-num
+# * customization
+# * jenkins_url
+
+- builder:
+    name: init-build
+    builders:
+    - extended-bash:
+        headers:
+          !include-raw-escape: includes/join_by.sh
+        script: |
+          set -ex
+
+          source venv/bin/activate
+            export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+            REVISION="$(cd nx_vms && hg id --id)"
+            BUILD_PARAMETERS=(
+                "project={project-name}"
+                "branch={branch}"
+                "build_num={build-num}"
+                "customization={customization}"
+                "jenkins_url={jenkins_url}"
+                "repository_url=ssh://hg@hdw.mx/nx_vms"
+                "revision=$REVISION"
+                )
+            devtools/ci/junk_shop/junk_shop/save_build_info.py \
+                "$DB_CONFIG" \
+                "$(join_by ',' ${{BUILD_PARAMETERS[@]}})" \
+                nx_vms

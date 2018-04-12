@@ -1,0 +1,23 @@
+# Prepare virtual env.
+# Create 'venv' dir if it is not yet exists, install requirements
+
+# requirements:
+# parameters:
+# * requirements-files - space-delimited list of requirements.txt file paths
+
+
+- builder:
+    name: init-venv
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        if [ ! -d venv ]; then
+          virtualenv --system-site-packages venv
+        fi
+
+        source venv/bin/activate
+          for path in {requirements-files}; do
+            pip install -r "$path"
+          done

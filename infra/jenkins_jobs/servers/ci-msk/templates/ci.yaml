@@ -1,150 +1,33 @@
 # continuous integration job - build and test certain platforms on commits
 
-- job-template:
-    name: '{project-name}-{branch}-webadmin'
-    node: webadmin-{project-name}
-
-    parameters:
-      - string:
-          name: UPSTREAM_BUILD_NUMBER
-      - bool:
-          name: CLEAN_BUILD
-          default: false
-          description: make clean build
-
-    wrappers:
-    - timestamps
-    - timeout:
-        timeout: 60
-
-    scm:
-    - hg-la:
-        project-name: devtools
-        branch-name: default
-    - hg-la:
-        project-name: nx_vms
-        branch-name: '{branch}'
-
-    builders:
-
-      - shell: |
-          set -xe
-          if [ ! -d server-external ]; then
-            nx_vms/webadmin/build.sh  2>&1 | tee webadmin-build.log
-          fi
-      - store-to-nas:
-          dir: server-external/bin
-          files: external.dat
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER/dev/web-admin'
-          nas: '{nas}'
-
-
-- job-template:
-    name: '{project-name}-{branch}-{platform}'
-    node: linux-{project-name}
-
-    parameters:
-      - string:
-          name: UPSTREAM_BUILD_NUMBER
-      - bool:
-          name: CLEAN_BUILD
-          default: false
-          description: make clean build
-
-    wrappers:
-    - timestamps
-    - timeout:
-        timeout: 300
-
-    scm:
-    - hg-la:
-        project-name: devtools
-        branch-name: default
-    - hg-la:
-        project-name: nx_vms
-        branch-name: '{branch}'
-
-    builders:
-      - shell: |
-          #!/bin/bash -xe
-          echo "Building {project-name} {platform} for {branch} UPSTREAM_BUILD_NUMBER=[$UPSTREAM_BUILD_NUMBER]"
-          if [[ "$CLEAN_BUILD" == "true" && -d build ]]; then
-            rm -rf build
-          else
-            if [ -d build/distrib ]; then
-              rm -rf build/distrib
-            fi
-          fi
-      - load-from-nas:
-          dir: webadmin-external/bin  # mind 'bin' subdirectory!
-          files: external.dat
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER/dev/web-admin'
-          nas: '{nas}'
-      - inject:
-          properties-content: |
-            environment=$WORKSPACE
-      - cmake:
-          source-dir: nx_vms
-          working-dir: build
-          clean-build-dir: $CLEAN_BUILD  # does not work
-          build-type: Release
-          generator: Ninja
-          installation-name: cmake-3.10
-          other-arguments: |
-            -DdeveloperBuild=OFF
-            -DCMAKE_BUILD_TYPE=Release
-            -DcloudGroup=test
-            -Dcustomization=hanwha
-            -DcustomWebAdminPackageDirectory=$WORKSPACE/webadmin-external
-            -DbuildNumber=$UPSTREAM_BUILD_NUMBER
-            -Dbeta=TRUE
-            -DCMAKE_C_COMPILER=gcc-7
-            -DCMAKE_CXX_COMPILER=g++-7
-          build-tool-invocations:
-            - use-cmake: true
-              environment-variables: |
-                NINJA_STATUS="[%s/%t] %es  "
-                _MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-      # todo: following must only be executed if build was successful:
-      - shell: |
-          #!/bin/bash -ex
-          source build/build_info.txt
-          echo VERSION=$version > inject.env
-          echo $version > version
-      - inject:
-          properties-file: inject.env
-      - store-to-nas:
-          dir: '.'
-          files: version
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER'
-          nas: '{nas}'
-      - store-to-nas:
-          dir: build/distrib
-          files: '*.deb'
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER/hanwha/linux'
-          nas: '{nas}'
-      - store-to-nas:
-          dir: build/distrib
-          files: '*_update-*.zip'
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER/hanwha/updates/$UPSTREAM_BUILD_NUMBER'
-          nas: '{nas}'
-      - store-to-nas:
-          dir: build/bin
-          files: appserver2_ut
-          nas-dir: '{project-name}-{branch}-$UPSTREAM_BUILD_NUMBER/dev/hanwha/linux/unit_test'
-          nas: '{nas}'
-
 
 - job-template:
     name: '{project-name}-{branch}'
     project-type: multijob
     node: runner
+    customization: default
 
     parameters:
+      - bool:
+          name: CLEAN
+          default: false
+          description: remove workspace before build
       - bool:
           name: CLEAN_BUILD
           default: false
           description: make clean build
+      - bool:
+          name: BUILD_WEBADMIN
+          default: true
+          description: Build webadmin
+      - bool:
+          name: DO_BUILD
+          default: true
+          description: Do actually build platforms, or just reuse results from previous build
+      - bool:
+          name: RUN_UNIT_TESTS
+          default: true
+          description: Run unit tests
 
     wrappers:
     - timestamps
@@ -153,13 +36,26 @@
 
     builders:
       - multijob:
+          name: init-build
+          projects:
+            - name: '{project-name}-{branch}-init-build'
+              kill-phase-on: FAILURE
+              predefined-parameters: |
+                CLEAN=$CLEAN
+                CUSTOMIZATION={customization}
+                ROOT_BUILD_NUMBER=$BUILD_NUMBER
+                ROOT_BUILD_URL=$BUILD_URL
+      - multijob:
           name: webadmin
           projects:
             - name: '{project-name}-{branch}-webadmin'
               kill-phase-on: FAILURE
               predefined-parameters: |
-                UPSTREAM_BUILD_NUMBER=$BUILD_NUMBER
+                CLEAN=$CLEAN
                 CLEAN_BUILD=$CLEAN_BUILD
+                CUSTOMIZATION={customization}
+                ROOT_BUILD_NUMBER=$BUILD_NUMBER
+                DO_BUILD=$BUILD_WEBADMIN
       - multijob:
           name: build-and-unittest
           condition: UNSTABLE
@@ -167,10 +63,9 @@
             - name: '{project-name}-{branch}-linux-x64'
               kill-phase-on: NEVER
               predefined-parameters: |
-                UPSTREAM_BUILD_NUMBER=$BUILD_NUMBER
+                CLEAN=$CLEAN
                 CLEAN_BUILD=$CLEAN_BUILD
-            - name: '{project-name}-{branch}-linux-x86'
-              kill-phase-on: NEVER
-              predefined-parameters: |
-                UPSTREAM_BUILD_NUMBER=$BUILD_NUMBER
-                CLEAN_BUILD=$CLEAN_BUILD
+                CUSTOMIZATION={customization}
+                ROOT_BUILD_NUMBER=$BUILD_NUMBER
+                DO_BUILD=$DO_BUILD
+                RUN_UNIT_TESTS=$RUN_UNIT_TESTS

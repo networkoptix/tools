@@ -1,0 +1,168 @@
+# build linux platforms
+
+- job-template:
+    name: '{project-name}-{branch}-{platform}'
+    node: linux-{project-name}
+
+    junk_shop_host: '10.0.2.101'
+
+    description: |
+      Build and run unit tests for {platform} for branch {branch}.
+
+    parameters:
+      - bool:
+          name: CLEAN
+          default: false
+          description: remove workspace before build
+      - bool:
+          name: CLEAN_BUILD
+          default: false
+          description: make clean build
+      - string:
+          name: CUSTOMIZATION
+          default: ''
+          description: customization, if build only has single on
+      - string:
+          name: ROOT_BUILD_NUMBER
+          description: jenkins BUILD_NUMBER for root build
+      - bool:
+          name: DO_BUILD
+          default: true
+          description: Do actually build, or just reuse results from previous build
+      - bool:
+          name: RUN_UNIT_TESTS
+          default: true
+          description: Run unit tests
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 300
+    - workspace-cleanup:
+        check-parameter: CLEAN
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: junk_shop_db_credentials
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '{branch}'
+
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          echo "Building {project-name} {platform} for {branch} ROOT_BUILD_NUMBER=[$ROOT_BUILD_NUMBER]"
+          if [[ "$CLEAN_BUILD" == "true" && -d build ]]; then
+            rm -rf build
+          else
+            if [[ "$DO_BUILD" == "true" && -d build/distrib ]]; then
+              rm -rf build/distrib
+            fi
+          fi
+      - inject:
+          properties-content: |
+            DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
+      - init-venv:
+          requirements-files: devtools/ci/junk_shop/requirements.txt
+      - load-from-nas:
+          dir: webadmin-external/bin  # mind 'bin' subdirectory!
+          files: external.dat
+          nas-dir: '{project-name}-{branch}-$ROOT_BUILD_NUMBER/dev/web-admin'
+          nas: '{nas}'
+
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: $DO_BUILD
+          on-evaluation-failure: dont-run
+          steps:
+            - inject:
+                properties-content: |
+                  environment=$WORKSPACE
+            - cmake:
+                source-dir: nx_vms
+                working-dir: build
+                clean-build-dir: $CLEAN_BUILD  # does not work
+                build-type: Release
+                generator: Ninja
+                installation-name: cmake-3.10
+                other-arguments: |
+                  -DdeveloperBuild=OFF
+                  -DCMAKE_BUILD_TYPE=Release
+                  -DcloudGroup=test
+                  -Dcustomization=hanwha
+                  -DcustomWebAdminPackageDirectory=$WORKSPACE/webadmin-external
+                  -DbuildNumber=$ROOT_BUILD_NUMBER
+                  -Dbeta=TRUE
+                build-tool-invocations:
+                  - use-cmake: true
+                    environment-variables: |
+                      NINJA_STATUS="[%s/%t] %es  "
+                      _MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+            # TODO: capture cmake output somehow and save it to junk-shop
+
+            # todo: following must only be executed if build was successful:
+            - shell: |
+                #!/bin/bash -ex
+                source build/build_info.txt
+                echo VERSION=$version > inject.env
+                echo $version > version
+            - inject:
+                properties-file: inject.env
+            - store-to-nas:
+                dir: '.'
+                files: version
+                nas-dir: '{project-name}-{branch}-$ROOT_BUILD_NUMBER'
+                nas: '{nas}'
+            - store-to-nas:
+                dir: build/distrib
+                files: '*.deb'
+                nas-dir: '{project-name}-{branch}-$ROOT_BUILD_NUMBER/hanwha/linux'
+                nas: '{nas}'
+            - store-to-nas:
+                dir: build/distrib
+                files: '*_update-*.zip'
+                nas-dir: '{project-name}-{branch}-$ROOT_BUILD_NUMBER/hanwha/updates/$ROOT_BUILD_NUMBER'
+                nas: '{nas}'
+            - store-to-nas:
+                dir: build/bin
+                files: appserver2_ut
+                nas-dir: '{project-name}-{branch}-$ROOT_BUILD_NUMBER/dev/hanwha/linux/unit_test'
+                nas: '{nas}'
+
+      - conditional-step:
+          condition-kind: boolean-expression
+          condition-expression: $RUN_UNIT_TESTS
+          on-evaluation-failure: dont-run
+          steps:
+            - shell: echo 'running unit tests...'  # workaround for jjb bug
+            - extended-bash:
+                headers:
+                  !include-raw-escape: ../macros/includes/join_by.sh
+                script: |
+                  set -ex
+
+                  source venv/bin/activate
+                    export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+                    BIN_DIR="$WORKSPACE/build/bin"
+                    CONFIG_PATH="$WORKSPACE/build/current_config.py"
+                    TIMEOUT=30m
+                    TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
+                    mkdir -p unit_tests
+                    cd unit_tests  # unit test runner and saver treat current directory as working one
+                    $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
+                        --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
+                    BUILD_PARAMETERS=(
+                        "project={project-name}"
+                        "branch={branch}"
+                        "build_num=$ROOT_BUILD_NUMBER"
+                        "customization=$CUSTOMIZATION"
+                        "platform={platform}"
+                        )
+                    $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
+                        "$DB_CONFIG" \
+                        "$(join_by ',' ${{BUILD_PARAMETERS[@]}})"
