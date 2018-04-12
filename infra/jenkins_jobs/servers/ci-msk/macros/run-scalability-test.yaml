@@ -18,7 +18,10 @@
           #!/bin/bash
           set -ex
 
+          : ${{JUNK_SHOP_HOST:?}}  # must be injected by job template
           export USE_LIGHTWEIGHT_SERVERS={use_lightweight_servers}
           export SERVER_COUNT={server_count}
         script:
-          !include-raw-escape: ../builders/run-scalability-test.sh
+          !include-raw-escape:
+            - includes/join_by.sh
+            - ../builders/run-scalability-test.sh

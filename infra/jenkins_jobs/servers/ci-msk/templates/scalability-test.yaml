@@ -22,6 +22,11 @@
       - username-password:
           credential-id: junk_shop_db
           variable: junk_shop_db_credentials
+    - inject:
+        # Scalability test is run on remote (burbank) host.
+        # Junk-shop db host is mapped using 'ssh -R 5432:megatron:5432' by agent launch script.
+        properties-content: |
+          JUNK_SHOP_HOST=localhost
 
     triggers:
     - reverse:

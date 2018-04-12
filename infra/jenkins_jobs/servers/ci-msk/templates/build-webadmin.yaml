@@ -21,7 +21,7 @@
       - string:
           name: CUSTOMIZATION
           default: ''
-          description: customization, if build only has single on
+          description: customization, if build only has single one
       - string:
           name: ROOT_BUILD_NUMBER
           description: jenkins BUILD_NUMBER for root build
