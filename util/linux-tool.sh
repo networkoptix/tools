@@ -86,7 +86,7 @@ EOF
 # [out] CUSTOMIZATION
 # [out] QT_DIR
 # [in] VMS_DIR
-get_TARGET()
+get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 {
     if [ -z "$TARGET" ]
     then
@@ -166,6 +166,25 @@ get_CMAKE_BUILD_DIR()
     esac
 }
 
+# Extract the specified variable value from CMakeCache.txt. Print nothing if CMakeCache.txt does
+# not exist (then return 2), or the variable is not found (then return 1) or has empty value (then
+# return 0).
+printCmakeCacheValue() # cmake_build_dir cmake_var_name
+{
+    local -r BUILD_DIR="$1" && shift
+    local -r CMAKE_VAR_NAME="$1" && shift
+
+    local -r CMAKE_CACHE_TXT="$BUILD_DIR/CMakeCache.txt"
+    if [ ! -f "$CMAKE_CACHE_TXT" ]
+    then
+        return 2
+    fi
+
+    cat "$CMAKE_CACHE_TXT" |grep "$CMAKE_VAR_NAME:" |tr -d "\r" `#< Needed on cygwin. #` \
+        |awk 'BEGIN { FS="=" }; { print $2 }'
+    return 0
+}
+
 # Determine value of common variables, including current repository directory: scan from the
 # current dir upwards to find root repository dir (e.g. develop/nx_vms).
 # [in][out] VMS_DIR
@@ -174,10 +193,34 @@ get_CMAKE_BUILD_DIR()
 # [out] CMAKE_BUILD_DIR
 setup_vars()
 {
-    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" \
-        "Run this script from any dir inside your nx_vms repo dir."
-    get_TARGET
-    get_CMAKE_BUILD_DIR
+    local -r HELP="Run this script from any dir inside a vms repo dir or its cmake build dir."
+    nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" "$HELP"
+
+    local -r CMAKE_CACHE_TXT="$VMS_DIR/CMakeCache.txt"
+    if [ -f "$CMAKE_CACHE_TXT" ]
+    then #< This is a cmake build dir: find respective repo dir.
+        CMAKE_BUILD_DIR="$VMS_DIR"
+        VMS_DIR=$(printCmakeCacheValue "$VMS_DIR" CMAKE_HOME_DIRECTORY)
+        if [ -z "VMS_DIR" ]
+        then
+            nx_fail "CMAKE_HOME_DIRECTORY not found in $CMAKE_CACHE_TXT" "$HELP"
+        fi
+        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+    else #< This is not a cmake build dir: test it to be vms project repo dir.
+        local -r CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
+        if [ ! -f "$CMAKE_LISTS_TXT" ]
+        then
+            nx_fail "Cannot find $CMAKE_LISTS_TXT" "$HELP"
+        fi
+
+        if ! grep "project(vms " "$CMAKE_LISTS_TXT" >/dev/null
+        then
+            nx_fail "The parent repo is not \"vms\" project." "$HELP"
+        fi
+
+        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+        get_CMAKE_BUILD_DIR
+    fi
 
     case "$CONFIG" in
         Release|Debug);;
@@ -674,25 +717,6 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     test_distrib_zip "$ORIGINAL_ZIP" "$BUILT_ZIP" "$BUILT_TAR_GZ"
     nx_echo
     nx_echo "All tests SUCCEEDED."
-}
-
-# Extract the specified variable value from CMakeCache.txt. Print nothing if CMakeCache.txt does
-# not exist (then return 2), or the variable is not found (then return 1) or has empty value (then
-# return 0).
-printCmakeCacheValue() # cmake_build_dir cmake_var_name
-{
-    local -r BUILD_DIR="$1" && shift
-    local -r CMAKE_VAR_NAME="$1" && shift
-
-    local -r CMAKE_CACHE_TXT="$BUILD_DIR/CMakeCache.txt"
-    if [ ! -f "$CMAKE_CACHE_TXT" ]
-    then
-        return 2
-    fi
-
-    cat "$CMAKE_CACHE_TXT" |grep "$CMAKE_VAR_NAME:" |tr -d "\r" `#< Needed on cygwin. #` \
-        |awk 'BEGIN { FS="=" }; { print $2 }'
-    return 0
 }
 
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.
