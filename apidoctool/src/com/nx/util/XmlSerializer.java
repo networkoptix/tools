@@ -18,7 +18,8 @@ public final class XmlSerializer
     }
 
     public static <T extends Serializable>
-    T fromDocument(Class<T> objectClass, Document document) throws Serializable.Parser.Error
+    T fromDocument(Class<T> objectClass, Document document)
+        throws Serializable.Parser.Error
     {
         T serializable = Utils.createObject(objectClass);
 
@@ -74,6 +75,7 @@ public final class XmlSerializer
 
     //---------------------------------------------------------------------------------------------
 
+    /** One instance serializes one object. For inner objects, dedicated instances are created. */
     private static final class XmlGenerator implements Serializable.Generator
     {
         private final Element element;
@@ -136,20 +138,20 @@ public final class XmlSerializer
         }
 
         public final void writeStringAttr(
-            String name, String value, Serializable.EmptyPolicy emptyPolicy)
+            String name, String value, Serializable.Emptiness emptiness)
         {
             if (value == null)
                 value = "";
 
             if (value.isEmpty())
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required string attribute is empty: " +
                                 element.getNodeName() + "." + name);
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
@@ -168,19 +170,19 @@ public final class XmlSerializer
             element.setAttribute(name, Boolean.toString(value));
         }
 
-        public void writeString(String name, String value, Serializable.EmptyPolicy emptyPolicy)
+        public void writeString(String name, String value, Serializable.Emptiness emptiness)
         {
             if (value == null)
                 value = "";
             if (value.isEmpty())
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required string value is empty: " +
                                 element.getNodeName() + "." + name);
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
@@ -198,59 +200,73 @@ public final class XmlSerializer
                 return;
             if (value == true && booleanDefault == Serializable.BooleanDefault.TRUE)
                 return;
-            writeString(name, Boolean.toString(value), Serializable.EmptyPolicy.ALLOW_EMPTY);
+            writeString(name, Boolean.toString(value), Serializable.Emptiness.ALLOW);
         }
 
         /**
          * Parse XML string to a list of inner elements.
          */
-        public void writeInnerXml(String name, String parentName, String xml)
+        public void writeInnerXml(String name, String xml, Serializable.Emptiness emptiness)
         {
-            // NOTE: name is unused: inner XML is the contents of the element being serialized.
+            if (xml == null)
+                xml = "";
+
+            if (xml.isEmpty())
+            {
+                switch (emptiness)
+                {
+                    case PROHIBIT:
+                        throw new RuntimeException(
+                            "INTERNAL ERROR: Required inner-xml value is empty: " +
+                                element.getNodeName() + "." + name);
+                    case OMIT:
+                        return;
+                    default:
+                }
+            }
 
             final Document doc;
             try
             {
-                doc = XmlUtils.parseXmlString("<" + parentName + ">" +
-                    xml + "</" + parentName + ">");
+                doc = XmlUtils.parseXmlString("<xml>" + xml + "</xml>");
             }
             catch (IOException e)
             {
                 throw new RuntimeException(
-                    "INTERNAL ERROR: Failed to parse <" + parentName +
-                        "> string as XML:\n" +
-                        xml, e);
+                    "INTERNAL ERROR: Failed to parse <" + name + "> string as XML:\n" + xml, e);
             }
             catch (SAXException e)
             {
                 throw new RuntimeException(
-                    "INTERNAL ERROR: Failed to parse <" + parentName +
-                        "> string as XML:\n" +
-                        xml, e);
+                    "INTERNAL ERROR: Failed to parse <" + name + "> string as XML:\n" + xml, e);
             }
+
+            Element valueElement = element.getOwnerDocument().createElement(name);
 
             final Element rootElement = doc.getDocumentElement();
             for (Node node = rootElement.getFirstChild(); node != null;
                  node = node.getNextSibling())
             {
                 final Node importedNode = element.getOwnerDocument().importNode(node, true);
-                element.appendChild(importedNode);
+                valueElement.appendChild(importedNode);
             }
+
+            element.appendChild(valueElement);
         }
 
         public void writeObject(
-            String name, Serializable object, Serializable.EmptyPolicy emptyPolicy)
+            String name, Serializable object, Serializable.Emptiness emptiness)
         {
             final Element valueElement = toElement(object, name, element.getOwnerDocument());
             if (valueElement.getFirstChild() == null)
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required element is empty: " +
                                 element.getNodeName() + "." + valueElement.getNodeName());
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
@@ -263,17 +279,17 @@ public final class XmlSerializer
         public void writeObjectList(
             String listName,
             List<? extends Serializable> list,
-            Serializable.EmptyPolicy emptyPolicy)
+            Serializable.Emptiness emptiness)
         {
             if (list.isEmpty())
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required list is empty: " +
                                 element.getNodeName() + "." + listName);
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
@@ -291,6 +307,7 @@ public final class XmlSerializer
 
     //---------------------------------------------------------------------------------------------
 
+    /** One instance serializes one object. For inner objects, dedicated instances are created. */
     private static final class XmlParser implements Serializable.Parser
     {
         private final String serializationName;
@@ -308,12 +325,9 @@ public final class XmlSerializer
         /** @param element Can be null, then the object is initialized to its default state. */
         public static void fromElement(Serializable serializable, Element element) throws Error
         {
-            XmlParser parser = new XmlParser(serializable.getSerializationName(), element);
-
+            final XmlParser parser = new XmlParser(serializable.getSerializationName(), element);
             serializable.readFromParser(parser);
-
-            if (!(serializable instanceof Serializable.WithInnerXml))
-                parser.checkForUnsupportedElements();
+            parser.checkForUnsupportedElements();
         }
 
         public String readStringAttr(
@@ -397,20 +411,25 @@ public final class XmlSerializer
             return stringToBoolean(value, serializationName);
         }
 
-        public String readInnerXml(String name, String parentName)
+        public String readInnerXml(String name, Serializable.Presence presence)
+            throws Error
         {
             if (element == null)
                 return "";
 
-            // NOTE: name is unused: inner XML is the contents of the element being serialized.
+            processedElementNames.add(name);
 
-            final String xml = XmlUtils.xmlNodeToString(element).trim();
-            if (xml.equals("<" + parentName + "/>"))
+            final Element childElement = getSingleChildElement(element, name, presence);
+            if (childElement == null)
+                return "";
+
+            final String xml = XmlUtils.xmlNodeToString(childElement).trim();
+            if (xml.equals("<" + name + "/>"))
                 return "";
 
             // Trim opening and closing tags, since only contents is needed.
-            final int openingTagLen = ("<" + parentName + ">").length();
-            final int closingTagLen = ("</" + parentName + ">").length();
+            final int openingTagLen = ("<" + name + ">").length();
+            final int closingTagLen = ("</" + name + ">").length();
             return xml.substring(openingTagLen, xml.length() - closingTagLen);
         }
 

@@ -20,8 +20,8 @@ public final class JsonSerializer
         return toJson(serializable).toString(2);
     }
 
-    public static <T extends Serializable> T
-    fromJson(Class<T> objectClass, String jsonString) throws Serializable.Parser.Error
+    public static <T extends Serializable>
+    T fromJson(Class<T> objectClass, String jsonString) throws Serializable.Parser.Error
     {
         final T serializable = Utils.createObject(objectClass);
 
@@ -53,27 +53,33 @@ public final class JsonSerializer
             this.serializationName = serializationName;
         }
 
-        public void writeStringAttr(
-            String name, String value, Serializable.EmptyPolicy emptyPolicy)
+        private void writeStringField(
+            String name, String value, Serializable.Emptiness emptiness, String fieldTypeName)
         {
             if (value == null)
                 value = "";
 
             if (value.isEmpty())
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
-                            "INTERNAL ERROR: Required string is empty: " +
+                            "INTERNAL ERROR: Required " + fieldTypeName + " is empty: " +
                                 serializationName + "." + name);
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
             }
 
             json.put(name, value);
+        }
+
+        public void writeStringAttr(
+            String name, String value, Serializable.Emptiness emptiness)
+        {
+            writeStringField(name, value, emptiness, "string attribute");
         }
 
         public void writeBooleanAttr(
@@ -86,9 +92,9 @@ public final class JsonSerializer
             json.put(name, value);
         }
 
-        public void writeString(String name, String value, Serializable.EmptyPolicy emptyPolicy)
+        public void writeString(String name, String value, Serializable.Emptiness emptiness)
         {
-            writeStringAttr(name, value, emptyPolicy);
+            writeStringField(name, value, emptiness, "string");
         }
 
         public void writeBoolean(
@@ -97,49 +103,47 @@ public final class JsonSerializer
             writeBooleanAttr(name, value, booleanDefault);
         }
 
-        public void writeInnerXml(String name, String parentName, String xml)
+        public void writeInnerXml(String name, String xml, Serializable.Emptiness emptiness)
         {
-            if (xml == null)
-                xml = "";
-            json.put(name, xml);
+            writeStringField(name, xml, emptiness, "xml");
         }
 
         public void writeObject(
-            String name, Serializable object, Serializable.EmptyPolicy emptyPolicy)
+            String name, Serializable object, Serializable.Emptiness emptiness)
         {
             JSONObject objJson = toJson(object);
             if (objJson.length() == 0)
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required JSON object is empty: " +
-                                serializationName + "." + object.getSerializationName());
-                    case OMIT_EMPTY:
+                                serializationName + "." + name);
+                    case OMIT:
                         return;
                     default:
                         // Do nothing.
                 }
             }
 
-            json.put(object.getSerializationName(), objJson);
+            json.put(name, objJson);
         }
 
         public void writeObjectList(
             String listName,
             List<? extends Serializable> list,
-            Serializable.EmptyPolicy emptyPolicy)
+            Serializable.Emptiness emptiness)
         {
             if (list.isEmpty())
             {
-                switch (emptyPolicy)
+                switch (emptiness)
                 {
-                    case PROHIBIT_EMPTY:
+                    case PROHIBIT:
                         throw new RuntimeException(
                             "INTERNAL ERROR: Required list is empty: " +
                                 serializationName + "." + listName);
-                    case OMIT_EMPTY:
+                    case OMIT:
                         return;
                     default:
                 }
@@ -172,8 +176,8 @@ public final class JsonSerializer
             serializable.readFromParser(parser);
         }
 
-        public String readStringAttr(
-            String attrName, Serializable.Presence presence) throws Error
+        private String readStringField(
+            String attrName, Serializable.Presence presence, String fieldTypeName) throws Error
         {
             if (jsonObject == null)
                 return "";
@@ -182,7 +186,7 @@ public final class JsonSerializer
             {
                 if (presence == Serializable.Presence.REQUIRED)
                 {
-                    throw new Error("Required string field is missing: " +
+                    throw new Error("Required " + fieldTypeName + " field is missing: " +
                         serializationName + "." + attrName);
                 }
                 return "";
@@ -195,21 +199,27 @@ public final class JsonSerializer
             }
             catch (JSONException e)
             {
-                throw new Error("Invalid string field " +
+                throw new Error("Invalid " + fieldTypeName + " field " +
                     serializationName + "." + attrName + ": " + e.getMessage());
             }
 
             if (presence == Serializable.Presence.REQUIRED && value.isEmpty())
             {
-                throw new Error("Required string field is empty: " +
+                throw new Error("Required " + fieldTypeName + " field is empty: " +
                     serializationName + "." + attrName);
             }
 
             return value;
         }
 
+        public String readStringAttr(
+            String attrName, Serializable.Presence presence) throws Error
+        {
+            return readStringField(attrName, presence, "string (attribute)");
+        }
+
         public boolean readBooleanAttr(String attrName, Serializable.BooleanDefault booleanDefault)
-            throws Error
+        throws Error
         {
             if (jsonObject == null)
                 return false;
@@ -237,7 +247,7 @@ public final class JsonSerializer
 
         public String readString(String name, Serializable.Presence presence) throws Error
         {
-            return readStringAttr(name, presence);
+            return readStringField(name, presence, "string");
         }
 
         public boolean readBoolean(String name, Serializable.BooleanDefault booleanDefault)
@@ -246,10 +256,9 @@ public final class JsonSerializer
             return readBooleanAttr(name, booleanDefault);
         }
 
-        public String readInnerXml(String name, String parentName) throws Error
+        public String readInnerXml(String name, Serializable.Presence presence) throws Error
         {
-            // NOTE: parentName is unused: inner XML in JSON is stored as a string.
-            return readString(name, Serializable.Presence.OPTIONAL);
+            return readStringField(name, presence, "string (xml)");
         }
 
         public <T extends Serializable> T readObject(

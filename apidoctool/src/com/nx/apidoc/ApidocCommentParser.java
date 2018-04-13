@@ -114,7 +114,6 @@ public final class ApidocCommentParser
                 + expectedFunctionName + ".");
         }
 
-        // TODO: #mshevchenko: Fix: Produce an error for missing function name.
         final String urlPrefix = values[1];
         if (urlPrefix.isEmpty())
         {
@@ -134,8 +133,7 @@ public final class ApidocCommentParser
         }
 
         function.method = values[0].trim();
-        function.description = new Apidoc.Description();
-        function.description.xml = values[3].trim();
+        function.description = values[3].trim();
 
         if ("".equals(parser.getItem().getAttribute()))
             function.proprietary = false;
@@ -154,8 +152,7 @@ public final class ApidocCommentParser
         assert TAG_PARAM.equals(parser.getItem().getTag());
 
         Apidoc.Param param = new Apidoc.Param();
-        param.description = new Apidoc.Description();
-        param.description.xml = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken();
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.params)
@@ -215,8 +212,7 @@ public final class ApidocCommentParser
                 checkNoAttribute(parser, function.name);
                 Apidoc.Value value = new Apidoc.Value();
                 value.name = getInitialToken(parser, function.name);
-                value.description = new Apidoc.Description();
-                value.description.xml = parser.getItem().getTextAfterInitialToken();
+                value.description = parser.getItem().getTextAfterInitialToken();
                 param.values.add(value);
                 parser.parseNextItem();
             }
@@ -243,9 +239,9 @@ public final class ApidocCommentParser
                 " in function " + functionName + ".");
         }
 
-        // TODO: Consider defining default "format" in the Source Code.
+        // TODO: Consider defining default "format" in the C++ source code.
         param.optional = true;
-        param.description.xml = DEFAULT_FORMAT_DESCRIPTION;
+        param.description = DEFAULT_FORMAT_DESCRIPTION;
         param.values.add(createValue("ubjson",
             "Universal Binary JSON data format."));
         param.values.add(createValue("json",
@@ -261,8 +257,7 @@ public final class ApidocCommentParser
     {
         Apidoc.Value value = new Apidoc.Value();
         value.name = name;
-        value.description = new Apidoc.Description();
-        value.description.xml = description;
+        value.description = description;
         return value;
     }
 
@@ -316,8 +311,7 @@ public final class ApidocCommentParser
         assert "%attribute".equals(parser.getItem().getTag());
 
         Apidoc.Param param = new Apidoc.Param();
-        param.description = new Apidoc.Description();
-        param.description.xml = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken();
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.result.params)
@@ -345,8 +339,7 @@ public final class ApidocCommentParser
         assert TAG_PARAM.equals(parser.getItem().getTag());
 
         Apidoc.Param param = new Apidoc.Param();
-        param.description = new Apidoc.Description();
-        param.description.xml = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken();
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.result.params)

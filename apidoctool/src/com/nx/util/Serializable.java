@@ -6,33 +6,34 @@ import java.util.Map;
 
 /**
  * Base class for value objects serializable to e.g. XML and JSON. Provides interfaces for
- * serializers to implement. The derived class is expected to have a default constructor.
+ * serializers to implement. The derived class is expected to have a default constructor. Each
+ * serializable field of the derived class should be manually accessed in the implementation of the
+ * abstact methods of this class responsible for (de)serialization - Reflection is not used.
  */
 public abstract class Serializable
 {
-    //---------------------------------------------------------------------------------------------
-    // For serializers.
-
     /** Override if serialized item name should be different from the lower-case class name. */
     public String getSerializationName()
     {
         return getClass().getSimpleName().toLowerCase();
     }
 
+    //---------------------------------------------------------------------------------------------
+    // For serializers.
+
     public enum Presence { REQUIRED, OPTIONAL }
-    public enum EmptyPolicy { PROHIBIT_EMPTY, OMIT_EMPTY, ALLOW_EMPTY }
+    public enum Emptiness { PROHIBIT, OMIT, ALLOW }
     public enum BooleanDefault { FALSE, TRUE, NONE }
 
-    /** One instance serializes one object. For inner objects, dedicated instances are created. */
     public interface Generator
     {
-        void writeStringAttr(String name, String value, Serializable.EmptyPolicy emptyPolicy);
+        void writeStringAttr(String name, String value, Emptiness emptiness);
         void writeBooleanAttr(String name, boolean value, BooleanDefault booleanDefault);
-        void writeString(String name, String value, EmptyPolicy mode);
+        void writeString(String name, String value, Emptiness mode);
         void writeBoolean(String name, boolean value, BooleanDefault booleanDefault);
-        void writeInnerXml(String name, String parentName, String xml);
-        void writeObject(String name, Serializable object, EmptyPolicy mode);
-        void writeObjectList(String listName, List<? extends Serializable> list, EmptyPolicy mode);
+        void writeInnerXml(String name, String xml, Emptiness emptiness);
+        void writeObject(String name, Serializable object, Emptiness mode);
+        void writeObjectList(String listName, List<? extends Serializable> list, Emptiness mode);
     }
 
     public interface Parser
@@ -51,14 +52,10 @@ public abstract class Serializable
         }
 
         String readStringAttr(String attrName, Presence presence) throws Error;
-
         boolean readBooleanAttr(String attrName, BooleanDefault booleanDefault) throws Error;
-
         String readString(String name, Presence presence) throws Error;
-
         boolean readBoolean(String name, BooleanDefault booleanDefault) throws Error;
-
-        String readInnerXml(String name, String parentName) throws Error;
+        String readInnerXml(String name, Presence presence) throws Error;
 
         <T extends Serializable>
         T readObject(String name, Class<T> objectClass, Presence presence) throws Error;
@@ -76,28 +73,6 @@ public abstract class Serializable
 
     //---------------------------------------------------------------------------------------------
     // For derived classes.
-
-    /**
-     * Base class for value objects which have an inner xml stored as a string. Such objects can
-     * have only attribute fields, because, when serialized to XML, all inner elements are bound to
-     * the "xml" field.
-     */
-    public abstract static class WithInnerXml extends Serializable
-    {
-        public String xml;
-
-        /** Override calling super if there are any attribute fields. */
-        protected void readFromParser(Parser p) throws Parser.Error
-        {
-            xml = p.readInnerXml("xml", getSerializationName());
-        }
-
-        /** Override calling super if there are any attribute fields. */
-        protected void writeToGenerator(Generator gen)
-        {
-            gen.writeInnerXml("xml", getSerializationName(), xml);
-        }
-    }
 
     /** Implementation should call an appropriate Parser method for each field. */
     protected abstract void readFromParser(Parser p) throws Parser.Error;

@@ -11,26 +11,21 @@ import com.nx.util.Serializable;
  */
 public final class Apidoc extends Serializable
 {
-    public static final class Description extends Serializable.WithInnerXml
-    {
-        // No fields besides xml.
-    }
-
     public static final class Value extends Serializable
     {
         public String name;
-        public Description description; ///< optional
+        public String description; ///< optional
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
             name = p.readString("name", Presence.REQUIRED);
-            description = p.readObject("description", Description.class, Presence.OPTIONAL);
+            description = p.readInnerXml("description", Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeString("name", name, EmptyPolicy.PROHIBIT_EMPTY);
-            g.writeObject("description", description, EmptyPolicy.ALLOW_EMPTY);
+            g.writeString("name", name, Emptiness.PROHIBIT);
+            g.writeInnerXml("description", description, Emptiness.ALLOW);
         }
     }
 
@@ -40,7 +35,7 @@ public final class Apidoc extends Serializable
 
         public boolean proprietary; ///< attribute; optional(default=false)
         public String name;
-        public Description description; ///< optional
+        public String description; ///< optional
         public boolean optional; ///< optional(default=false)
         public List<Value> values; ///< optional
 
@@ -53,7 +48,7 @@ public final class Apidoc extends Serializable
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
-            description = p.readObject("description", Description.class, Presence.OPTIONAL);
+            description = p.readInnerXml("description", Presence.OPTIONAL);
             optional = p.readBoolean("optional", BooleanDefault.FALSE);
             p.readObjectList("values", values, Value.class, Presence.OPTIONAL);
         }
@@ -61,11 +56,11 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
-            g.writeString("name", name, EmptyPolicy.PROHIBIT_EMPTY);
-            g.writeObject("description", description, EmptyPolicy.ALLOW_EMPTY);
+            g.writeString("name", name, Emptiness.PROHIBIT);
+            g.writeInnerXml("description", description, Emptiness.ALLOW);
             g.writeBoolean("optional", optional,
                 omitOptionalFieldIfFalse ? BooleanDefault.FALSE : BooleanDefault.NONE);
-            g.writeObjectList("values", values, EmptyPolicy.OMIT_EMPTY);
+            g.writeObjectList("values", values, Emptiness.OMIT);
         }
     }
 
@@ -81,16 +76,16 @@ public final class Apidoc extends Serializable
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
-            caption = p.readString("caption", Presence.OPTIONAL);
+            caption = p.readInnerXml("caption", Presence.OPTIONAL);
             p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeString("caption", caption, EmptyPolicy.OMIT_EMPTY);
+            g.writeInnerXml("caption", caption, Emptiness.OMIT);
             for (Param param: params)
                 param.omitOptionalFieldIfFalse = true;
-            g.writeObjectList("params", params, EmptyPolicy.OMIT_EMPTY);
+            g.writeObjectList("params", params, Emptiness.OMIT);
         }
     }
 
@@ -101,7 +96,7 @@ public final class Apidoc extends Serializable
         public boolean proprietary; ///< attribute; optional(false)
         public String name;
         public String caption; ///< optional
-        public Description description; ///< optional
+        public String description; ///< optional
         public String permissions; ///< optional
         public String method; ///< optional
         public List<Param> params; ///< optional
@@ -117,7 +112,7 @@ public final class Apidoc extends Serializable
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
             caption = p.readString("caption", Presence.OPTIONAL);
-            description = p.readObject("description", Description.class, Presence.OPTIONAL);
+            description = p.readInnerXml("description", Presence.OPTIONAL);
             permissions = p.readString("permissions", Presence.OPTIONAL);
             method = p.readString("method", Presence.OPTIONAL);
             p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
@@ -127,13 +122,13 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
-            g.writeString("name", name, EmptyPolicy.PROHIBIT_EMPTY);
-            g.writeString("caption", caption, EmptyPolicy.OMIT_EMPTY);
-            g.writeObject("description", description, EmptyPolicy.ALLOW_EMPTY);
-            g.writeString("permissions", permissions, EmptyPolicy.OMIT_EMPTY);
-            g.writeString("method", method, EmptyPolicy.ALLOW_EMPTY);
-            g.writeObjectList("params", params, EmptyPolicy.ALLOW_EMPTY);
-            g.writeObject("result", result, EmptyPolicy.ALLOW_EMPTY);
+            g.writeString("name", name, Emptiness.PROHIBIT);
+            g.writeString("caption", caption, Emptiness.OMIT);
+            g.writeInnerXml("description", description, Emptiness.ALLOW);
+            g.writeString("permissions", permissions, Emptiness.OMIT);
+            g.writeString("method", method, Emptiness.ALLOW);
+            g.writeObjectList("params", params, Emptiness.ALLOW);
+            g.writeObject("result", result, Emptiness.ALLOW);
         }
     }
 
@@ -159,10 +154,10 @@ public final class Apidoc extends Serializable
 
         protected void writeToGenerator(Generator g)
         {
-            g.writeString("groupName", groupName, EmptyPolicy.PROHIBIT_EMPTY);
-            g.writeString("urlPrefix", urlPrefix, EmptyPolicy.ALLOW_EMPTY);
-            g.writeString("groupDescription", groupDescription, EmptyPolicy.PROHIBIT_EMPTY);
-            g.writeObjectList("functions", functions, EmptyPolicy.OMIT_EMPTY);
+            g.writeString("groupName", groupName, Emptiness.PROHIBIT);
+            g.writeString("urlPrefix", urlPrefix, Emptiness.ALLOW);
+            g.writeString("groupDescription", groupDescription, Emptiness.PROHIBIT);
+            g.writeObjectList("functions", functions, Emptiness.OMIT);
         }
     }
 
@@ -182,6 +177,6 @@ public final class Apidoc extends Serializable
 
     protected void writeToGenerator(Generator g)
     {
-        g.writeObjectList("groups", groups, EmptyPolicy.PROHIBIT_EMPTY);
+        g.writeObjectList("groups", groups, Emptiness.PROHIBIT);
     }
 }

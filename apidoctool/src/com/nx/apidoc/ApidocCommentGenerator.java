@@ -35,8 +35,8 @@ public final class ApidocCommentGenerator
         b.append(function.name);
         lines.add(b.toString());
 
-        if (!function.description.xml.isEmpty())
-            addTextToComment(lines, 0, 0, function.description.xml);
+        if (!function.description.isEmpty())
+            addTextToComment(lines, 0, 0, function.description);
 
         if (!function.caption.isEmpty())
             addTextToComment(lines, 0, INNER_INDENT, TAG_CAPTION + " " + function.caption);
@@ -63,7 +63,7 @@ public final class ApidocCommentGenerator
         for (Apidoc.Param param: function.params)
         {
             if (PARAM_FORMAT.equals(param.name) &&
-                DEFAULT_FORMAT_DESCRIPTION.equals(param.description.xml))
+                DEFAULT_FORMAT_DESCRIPTION.equals(param.description))
             {
                 lines.add(COMMENT_PREFIX + TAG_PARAM + ATTR_DEFAULT + " " +
                     PARAM_FORMAT);
@@ -80,13 +80,13 @@ public final class ApidocCommentGenerator
 
                 addTextToComment(lines, 0, INNER_INDENT,
                     TAG_PARAM + attribute + " " +
-                    param.name + " " + param.description.xml);
+                    param.name + " " + param.description);
 
                 for (Apidoc.Value value: param.values)
                 {
                     addTextToComment(lines, INNER_INDENT, INNER_INDENT,
                         TAG_VALUE + " " + value.name + " " +
-                        value.description.xml);
+                        value.description);
                 }
             }
         }
@@ -106,13 +106,13 @@ public final class ApidocCommentGenerator
             // NOTE: Attributes are not supported for Result.Param.
 
             addTextToComment(lines, INNER_INDENT, INNER_INDENT,
-                TAG_PARAM + " " + param.name + " " + param.description.xml);
+                TAG_PARAM + " " + param.name + " " + param.description);
 
             for (Apidoc.Value value: param.values)
             {
                 addTextToComment(lines, 2 * INNER_INDENT, INNER_INDENT,
                     TAG_VALUE + " " + value.name + " " +
-                        value.description.xml);
+                        value.description);
             }
         }
     }
