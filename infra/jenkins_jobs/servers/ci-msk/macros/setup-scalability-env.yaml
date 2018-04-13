@@ -19,7 +19,7 @@
         upstream_jenkins: '{upstream_jenkins}'
         upstream_project: '{upstream_project}'
         branch: '{branch}'
-        build_num: lastBuild
+        build_num: lastCompletedBuild
         dest-dir: dist
         artifact: build_info.yaml
 
