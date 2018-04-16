@@ -2,7 +2,7 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocCommentParser;
-import com.nx.apidoc.ApidocHandler;
+import com.nx.apidoc.ApidocUtils;
 import com.nx.util.SourceCode;
 
 import java.util.ArrayList;
@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Parses SourceCode to generate Apidoc structure using ApidocCommentParser and ApidocHandler.
+ * Parses SourceCode to generate Apidoc structure using ApidocCommentParser and ApidocUtils.
  */
 public final class SourceCodeParser
 {
-    public static final class Error
+    private int mainLine;
+
+    public final class Error
         extends Exception
     {
         public Error(String message, Throwable cause)
@@ -24,7 +26,7 @@ public final class SourceCodeParser
 
         public Error(String message)
         {
-            super(message);
+            super(sourceCode.getFilename() + ":" + mainLine + ": " + message);
         }
     }
 
@@ -42,52 +44,53 @@ public final class SourceCodeParser
     /**
      * @return Number of API functions processed.
      */
-    public int parseCommentsFromSystemApi(
-        Apidoc.Group sourceGroup, Apidoc.Group targetGroup)
-        throws Error, ApidocHandler.Error, ApidocCommentParser.Error, SourceCode.Error
+    public int parseApidocComments(Apidoc apidoc, RegistrationMatcher matcher)
+        throws Error, ApidocUtils.Error, SourceCode.Error
     {
-        targetGroup.groupName = sourceGroup.groupName;
-        targetGroup.urlPrefix = sourceGroup.urlPrefix;
-        targetGroup.groupDescription = sourceGroup.groupDescription;
+        if (verbose)
+            System.out.println("        Processed API functions:");
 
-        int line = 1;
-        while (line <= sourceCode.getLineCount())
+        mainLine = 1;
+        int processedFunctionCount = 0;
+        while (mainLine <= sourceCode.getLineCount())
         {
-            MatchForRegisterHandler match = MatchForRegisterHandler.create(sourceCode, line);
+            RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                Apidoc.Function function = createFunctionFromComment(
-                    match, line, targetGroup.urlPrefix);
-                if (function != null)
+                ApidocCommentParser.FunctionDescription description = createFunctionFromComment();
+                if (description != null && description.function != null)
                 {
+                    Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, description.urlPrefix);
                     if (verbose)
+                        System.out.println("            " + description.function.name);
+
+                    checkFunctionProperties(match, description.function);
+
+                    if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
                     {
-                        if (targetGroup.functions.isEmpty())
-                            System.out.println("    Processed API functions:");
-                        System.out.println("        " + function.name);
+                        throw new Error("Duplicate function found: " + description.function.name +
+                            ", method: " + description.function.method);
                     }
-                    targetGroup.functions.add(function);
+
+                    ++processedFunctionCount;
+                    group.functions.add(description.function);
                 }
             }
-
-            ++line;
+            ++mainLine;
         }
+        if (verbose)
+            System.out.println("        Functions count: " + processedFunctionCount);
 
-        if (targetGroup.functions.isEmpty())
-            System.out.println("    WARNING: No functions were processed.");
-
-        return targetGroup.functions.size();
+        return processedFunctionCount;
     }
 
     //--------------------------------------------------------------------------
 
     /**
-     * @param mainLine Line of code below the Apidoc Comment.
      * @return Null if the comment should not convert to an XML function.
      */
-    private Apidoc.Function createFunctionFromComment(
-        MatchForRegisterHandler match, int mainLine, String expectedUrlPrefix)
-        throws Error, ApidocCommentParser.Error
+    private ApidocCommentParser.FunctionDescription createFunctionFromComment()
+        throws Error
     {
         // Look for an Apidoc Comment end "*/" directly above the main line.
         int line = mainLine - 1;
@@ -112,36 +115,36 @@ public final class SourceCodeParser
         for (int i = line; i < mainLine - 1; ++i)
             commentLines.add(sourceCode.getLine(i));
 
-        final Apidoc.Function function =
-            ApidocCommentParser.createFunctionFromCommentLines(
-                commentLines, expectedUrlPrefix, match.functionName);
-
-        checkFunctionProperties(match, function);
-
-        return function;
+        final ApidocCommentParser.FunctionDescription description;
+        try
+        {
+            description = ApidocCommentParser.createFunctionFromCommentLines(commentLines);
+        }
+        catch (ApidocCommentParser.Error e)
+        {
+            throw new Error(e.getMessage());
+        }
+        return description;
     }
 
-    private static void checkFunctionProperties(
-        MatchForRegisterHandler match, Apidoc.Function function)
+    private void checkFunctionProperties(
+        RegistrationMatch match, Apidoc.Function function)
         throws Error
     {
-        if (function != null)
+        if (match.functionName != null && !function.name.equals(match.functionName))
         {
-            if (!function.name.equals(match.functionName))
-            {
-                throw new Error("Function name in Apidoc Comment \"" +
+            throw new Error("Function name in Apidoc Comment \"" +
                     function.name +
                     "\" does not match C++ code \"" +
                     match.functionName + "\"");
 
-            }
-            if (!function.method.equals(match.method))
-            {
-                throw new Error("Function method in Apidoc Comment \"" +
+        }
+        if (match.method != null && !function.method.equals(match.method))
+        {
+            throw new Error("Function method in Apidoc Comment \"" +
                     function.method +
                     "\" does not match C++ code \"" +
                     match.method + "\"");
-            }
         }
     }
 

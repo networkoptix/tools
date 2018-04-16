@@ -10,16 +10,22 @@ import java.util.regex.Pattern;
  */
 public class SourceCode
 {
+    public String getFilename()
+    {
+        return file.getAbsolutePath();
+    }
+
     public static final class Error
         extends Exception
     {
         private static String makeMessage(File file, int line, String message)
         {
-            String fileRef = "";
+            final String fileLineRef;
             if (file != null)
-                fileRef = " file " + file.getAbsolutePath() + ",";
-
-            return "Error in" + fileRef + " line " + line + ": " + message;
+                fileLineRef = file.getAbsolutePath() + ":" + line;
+            else
+                fileLineRef = "line " + line;
+            return "Error in " + fileLineRef + ": " + message;
         }
 
         public Error(File file, int line, String message, Throwable cause)
@@ -130,20 +136,7 @@ public class SourceCode
         return lineBreak;
     }
 
-    public int getLineIndent(int line)
-    {
-        assert line > 0;
-        assert line <= lines.size();
-
-        final String s = lines.get(line - 1);
-        int indent = 0;
-        while (indent < s.length() && s.charAt(indent) == ' ')
-            ++indent;
-
-        return indent;
-    }
-
-    //--------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------------------------
 
     protected final File file;
     protected final List<String> lines;

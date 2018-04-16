@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This xml file is the expected result of parsing apidoc.cpp. -->
+<apidoc>
+    <groups>
+        <group>
+            <groupName>testGroup</groupName>
+            <urlPrefix>/urlPrefix</urlPrefix>
+            <groupDescription>testGroupDescription</groupDescription>
+            <functions>
+            </functions>
+        </group>
+    </groups>
+</apidoc>

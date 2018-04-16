@@ -1,6 +1,7 @@
 package com.nx.apidoctool;
 
 import com.nx.util.SimpleArgsParser;
+import java.util.ArrayList;
 
 public class Main
 {
@@ -21,12 +22,6 @@ public class Main
 "\n" +
 " sort-xml -group-name <name> -source-xml <file> -output-xml <file>\n" +
 "     Sort the group by function name.\n" +
-"\n" +
-" xml-to-code -vms-path <nx_vms> [-output-vms-path <nx_vms>] -source-xml <file> -output-xml <file>\n" +
-"     Insert Apidoc comments into the code, generated from Apidoc XML. Generated source code\n" +
-"     files are given \"" + Executor.OUTPUT_FILE_EXTRA_SUFFIX + "\" suffix, and are saved to\n" +
-"     the specified -output-vms-path location, or, if omitted, to -vms-path.\n" +
-"     Generated -output-xml file is a copy of -source-xml with processed functions removed.\n" +
 "\n" +
 " code-to-xml -vms-path <nx_vms> -template-xml <file> -output-xml <file> [-output-json <file>]\n" +
 "     Parse Apidoc comments in the code, and generate Apidoc XML, taking the functions not\n" +
@@ -77,21 +72,11 @@ public class Main
             {
                 arg.reportUnexpectedValuelessArgs();
                 final XmlSorter sorter = new XmlSorter();
-                sorter.groupName = arg.get("-group-name");
+                sorter.groupNames = new ArrayList<String>();
+                sorter.groupNames.add(arg.get("-group-name"));
                 sorter.sourceApiXmlFile = arg.getFile("-source-xml");
                 sorter.outputApiXmlFile = arg.getFile("-output-xml");
                 sorter.execute();
-            }
-            else if ("xml-to-code".equals(arg.action()))
-            {
-                final ApiXmlToVmsCodeExecutor executor = new ApiXmlToVmsCodeExecutor();
-                executor.verbose = arg.isVerbose();
-                executor.vmsPath = arg.getFile("-vms-path");
-                executor.optionalOutputVmsPath = arg.getOptionalFile("-output-vms-path");
-                executor.sourceApiXmlFile = arg.getFile("-source-xml");
-                executor.outputApiXmlFile = arg.getFile("-output-xml");
-                executor.params = params;
-                executor.execute();
             }
             else if ("code-to-xml".equals(arg.action()))
             {

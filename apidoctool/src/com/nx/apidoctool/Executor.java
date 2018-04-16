@@ -27,8 +27,6 @@ public abstract class Executor
      */
     protected static final String OUTPUT_FILE_EXTRA_SUFFIX = ".OUT";
 
-    protected static final String SYSTEM_API_GROUP_NAME = "System API";
-
     /**
      * Print file path to a vms source file, treated as a relative to the vms source directory.
      */

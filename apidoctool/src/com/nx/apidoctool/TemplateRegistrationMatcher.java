@@ -5,69 +5,36 @@ import com.nx.util.SourceCode;
 import java.util.regex.Pattern;
 
 /**
- * Parses SourceCode to find a registration line (like "reg...()") of an API function, and then
- * represents the match.
+ * Parses registration for "template" functions - API functions which are registered in C++ code using a C++ template
+ * function with input and output data types as template parameters.
  */
-public final class MatchForRegisterHandler
+public final class TemplateRegistrationMatcher implements RegistrationMatcher
 {
-    public final int indent;
-
-    public final String functionName;
-
-    /**
-     * Empty string if no input data structure is defined for this API function.
-     */
-    public final String inputDataType;
-
-    /**
-     * Empty string if no output data structure is defined for this API function.
-     */
-    public final String outputDataType;
-
-    public final String method;
-
-    //--------------------------------------------------------------------------
-
     /**
      * @return Null if the line is not a registration line.
      */
-    public static MatchForRegisterHandler create(
-        SourceCode sourceCode, int line)
-        throws SourceCode.Error
+    public RegistrationMatch createRegistrationMatch(SourceCode sourceCode, int line) throws SourceCode.Error
     {
         String[] params;
 
-        params = sourceCode.matchMultiline(line,
-            firstLineRegexForGetFunc, groupRegexForGetFunc, lastLineRegex);
+        params = sourceCode.matchMultiline(line, firstLineRegexForGetFunc, groupRegexForGetFunc, lastLineRegex);
         if (params != null)
-        {
-            return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
-                params[2], params[0], params[1], "GET");
-        }
+            return createMatchRegister(params[2], params[0], params[1], "GET");
 
-        params = sourceCode.matchMultiline(line,
-            firstLineRegexForUpdateFunc, groupRegexForUpdateFunc, lastLineRegex);
+        params = sourceCode.matchMultiline(line, firstLineRegexForUpdateFunc, groupRegexForUpdateFunc, lastLineRegex);
         if (params != null)
-        {
-            return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
-                params[1], params[0], "", "POST");
-        }
+            return createMatchRegister(params[1], params[0], "", "POST");
 
-        params = sourceCode.matchMultiline(line,
-            firstLineRegexForFunctor, groupRegexForFunctor, lastLineRegex);
+        params = sourceCode.matchMultiline(line, firstLineRegexForFunctor, groupRegexForFunctor, lastLineRegex);
         if (params != null)
-        {
-            return new MatchForRegisterHandler(sourceCode.getLineIndent(line),
-                params[2], params[0], params[1], "GET");
-        }
+            return createMatchRegister(params[2], params[0], params[1], "GET");
 
         return null;
     }
 
     //--------------------------------------------------------------------------
 
-    private MatchForRegisterHandler(
-        int indent,
+    private static RegistrationMatch createMatchRegister(
         String functionName,
         String inputDataType,
         String outputDataType,
@@ -83,11 +50,7 @@ public final class MatchForRegisterHandler
         if ("std::nullptr_t".equals(inputDataType))
             inputDataType = null;
 
-        this.indent = indent;
-        this.functionName = functionName;
-        this.inputDataType = inputDataType;
-        this.outputDataType = outputDataType;
-        this.method = method;
+        return new RegistrationMatch(functionName, inputDataType, outputDataType, method);
     }
 
     //--------------------------------------------------------------------------

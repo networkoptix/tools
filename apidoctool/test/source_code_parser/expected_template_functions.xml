@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- This xml file is the expected result of parsing apidoc.cpp. -->
 <apidoc>
     <groups>
         <group>
@@ -7,15 +6,14 @@
             <urlPrefix>/urlPrefix</urlPrefix>
             <groupDescription>testGroupDescription</groupDescription>
             <functions>
-<!--============================================================================================-->
                 <function>
                     <name>testFunction1</name>
-                    <description></description>
+                    <description/>
                     <method>POST</method>
                     <params>
                         <param>
                             <name>withProprietaryValues</name>
-                            <description></description>
+                            <description/>
                             <optional>false</optional>
                             <values>
                                 <value>
@@ -25,8 +23,20 @@
                             </values>
                         </param>
                     </params>
+                    <result>
+                        <caption>some result description</caption>
+                        <params>
+                            <param>
+                                <name>someParam</name>
+                                <description>some result param</description>
+                            </param>
+                            <param proprietary="true">
+                                <name>proprietaryParam</name>
+                                <description>proprietary result param</description>
+                            </param>
+                        </params>
+                    </result>
                 </function>
-<!--============================================================================================-->
             </functions>
         </group>
     </groups>

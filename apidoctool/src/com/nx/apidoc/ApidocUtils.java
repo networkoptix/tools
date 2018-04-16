@@ -8,9 +8,9 @@ import java.util.regex.Pattern;
 /**
  * Helper functions for handling Apidoc structure elements.
  */
-public final class ApidocHandler
+public final class ApidocUtils
 {
-    private ApidocHandler() {}
+    private ApidocUtils() {}
 
     public static final class Error
         extends Exception
@@ -29,15 +29,15 @@ public final class ApidocHandler
     /**
      * @throws Error if not found.
      */
-    public static Apidoc.Group getGroupByName(Apidoc apidoc, String groupName)
+    public static Apidoc.Group getGroupByUrlPrefix(Apidoc apidoc, String urlPrefix)
         throws Error
     {
         for (Apidoc.Group group: apidoc.groups)
         {
-            if (group.groupName.equals(groupName))
+            if (group.urlPrefix.equals(urlPrefix))
                 return group;
         }
-        throw new Error("Group not found in Apidoc XML: " + groupName);
+        throw new Error("Group not found in Apidoc XML: " + urlPrefix);
     }
 
     /**
@@ -55,7 +55,7 @@ public final class ApidocHandler
                 return;
             }
         }
-        throw new Error("Group not found in Apidoc XML: " + newGroup.groupName);
+        throw new Error("Group not found in Apidoc XML by url prefix: [" + newGroup.groupName + "]");
     }
 
     private static void replaceFunctionsInGroup(
@@ -89,6 +89,18 @@ public final class ApidocHandler
         sortGroup(group);
     }
 
+    public static void sortGroups(Apidoc apidoc, List<String> groupNames)
+    {
+        if (groupNames == null)
+            throw new IllegalStateException();
+
+        for (Apidoc.Group group: apidoc.groups)
+        {
+            if (groupNames.contains(group.groupName))
+                sortGroup(group);
+        }
+    }
+
     public static void sortGroup(Apidoc.Group group)
     {
         Collections.sort(group.functions, new Comparator<Apidoc.Function>()
@@ -99,6 +111,36 @@ public final class ApidocHandler
                 return f1.name.compareTo(f2.name);
             }
         });
+    }
+
+    /**
+     * @return false if duplicate function found.
+     */
+    public static boolean checkFunctionDuplicate(
+        Apidoc.Group group, Apidoc.Function functionToCheck)
+    {
+        for (Apidoc.Function function: group.functions)
+        {
+            if (function.name.equals(functionToCheck.name) && function.method.equals(functionToCheck.method))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return false if duplicate function found in entire group.
+     */
+    public static void checkNoFunctionDuplicates(Apidoc apidoc) throws Exception
+    {
+        for (Apidoc.Group group: apidoc.groups)
+        {
+            final Set<String> uniques = new HashSet();
+            for (Apidoc.Function function: group.functions)
+            {
+                if (!uniques.add(function.name + function.method))
+                    throw new Exception("Duplicate function found: [" + function.name + "]");
+            }
+        }
     }
 
     /**

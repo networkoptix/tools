@@ -8,8 +8,13 @@ import com.nx.util.ParamsBase;
 public class Params
     extends ParamsBase
 {
-    public String ec2RegistrationCpp() { return ec2RegistrationCpp.toString(); }
-    private final StringBuilder ec2RegistrationCpp = regStringParam("ec2RegistrationCpp",
+    public String templateRegistrationCpp() { return templateRegistrationCpp.toString(); }
+    private final StringBuilder templateRegistrationCpp = regStringParam("templateRegistrationCpp",
         "/appserver2/src/connection_factory.cpp",
-        "A cpp file where /ec2 methods are registered.");
+        "A cpp file where \"template\" methods are registered.");
+
+    public String handlerRegistrationCpp() { return handlerRegistrationCpp.toString(); }
+    private final StringBuilder handlerRegistrationCpp = regStringParam("handlerRegistrationCpp",
+            "/mediaserver_core/src/media_server_process.cpp",
+            "A cpp file where \"handler\" methods are registered.");
 }

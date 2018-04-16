@@ -151,8 +151,8 @@ public final class ApidocTagParser
       //     /*       *
 
     private static final Pattern itemStartRegex = Pattern.compile(
-        "\\s*(?:/\\*)?\\*?\\s*(%[^\\s\\[]+)\\s*(\\[\\w+\\])?\\s*([^\\s]+\\s*)?(.*)");
-      //     /*       *       %tag             [attr]           Token         ...
+        "\\s*(?:/\\*)?\\*?\\s*(%[^\\s\\[]+)\\s*(\\[\\w+\\])?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
+      //     /*       *       %tag             [attr]           Token                  ...
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\*?\\s*([^%]*)");

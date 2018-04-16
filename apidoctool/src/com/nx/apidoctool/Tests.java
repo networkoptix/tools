@@ -1,7 +1,6 @@
 package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
-import com.nx.apidoc.ApidocHandler;
 import com.nx.util.*;
 import org.w3c.dom.Document;
 
@@ -27,8 +26,8 @@ public final class Tests extends TestBase
                 input.close();
             }
 
-            apiXmlSystemApiFunctionsCount = Integer.valueOf(
-                properties.getProperty("apiXmlSystemApiFunctionsCount"));
+            apiXmlFunctionsCount = Integer.valueOf(
+                properties.getProperty("apiXmlFunctionsCount"));
         }
         catch (Throwable e)
         {
@@ -137,113 +136,109 @@ public final class Tests extends TestBase
         assertEquals(stringValue, params.stringParam());
     }
 
-    private void testXml()
+    private void testApidocSerialization()
         throws Exception
     {
-        apiXmlToXml(apiXmlFile, outputApiXmlFile, outputApiJsonFile);
+        final File outputExpectedApiXmlFile = new File(outputTestPath + "/expected_api.xml");
+        final File outputExpectedApiJsonFile = new File(outputTestPath + "/expected_api.json");
 
-        assertFileContentsEqual(apiXmlFile, outputApiXmlFile);
-        assertJsonEqualsXml(outputApiJsonFile, outputApiXmlFile);
+        apiXmlToXml(expectedApiXmlFile, outputExpectedApiXmlFile, outputExpectedApiJsonFile);
+
+        assertFileContentsEqual(expectedApiXmlFile, outputExpectedApiXmlFile);
+        assertJsonEqualsXml(outputExpectedApiJsonFile, outputExpectedApiXmlFile);
     }
 
     private void testSourceCodeEditor()
         throws Exception
     {
+        final File outputCppFile = new File(outputTestPath + "/nx_vms/appserver2/src/connection_factory.cpp");
+        final File cppFile = new File(vmsPath + "/appserver2/src/connection_factory.cpp");
+
         final SourceCodeEditor sourceCodeEditor = new SourceCodeEditor(cppFile);
         sourceCodeEditor.saveToFile(outputCppFile);
 
         assertFileContentsEqual(cppFile, outputCppFile);
     }
 
-    private void testSourceCodeParser()
+    private void testSourceCodeParserTemplate()
         throws Exception
     {
-        System.out.println("test: parsing apidoc in C++ and comparing it to the expected XML");
-        System.out.println("    Sample: " + apidocXmlFile);
-        System.out.println("    Input: " + apidocCppFile);
+        final File templateFunctionsCppFile = new File(sourceCodeParserTestPath + "/template_functions.cpp");
+        final File expectedTemplateFunctionsXmlFile = new File(
+                sourceCodeParserTestPath + "/expected_template_functions.xml");
+        final File outputApidocXmlFile = new File(sourceCodeParserOutputTestPath + "/template_functions.xml");
 
-        // This apidoc will be used as a sample for the function group - the group content is
-        // replaced with the one generated from cpp.
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
-            XmlUtils.parseXmlFile(apidocXmlFile));
+                XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        // Clone the XML file to compare with, for the purpose of normalization.
-        XmlUtils.writeXmlFile(normalizedApidocXmlFile, XmlSerializer.toDocument(apidoc));
+        System.out.println("test: parsing apidoc in \"template\" type C++ and comparing it to the expected XML");
+        System.out.println("    Sample: " + expectedTemplateFunctionsXmlFile);
+        System.out.println("    Input: " + templateFunctionsCppFile);
 
-        // apidocCppFile -> targetGroup: parse C++ code, generate apidoc group.
-        final Apidoc.Group targetGroup = new Apidoc.Group();
-        final Apidoc.Group sourceGroup = ApidocHandler.getGroupByName(apidoc, "testGroup");
-        final SourceCode reader = new SourceCode(apidocCppFile);
+        final SourceCode reader = new SourceCode(templateFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount =
-            sourceCodeParser.parseCommentsFromSystemApi(sourceGroup, targetGroup);
+            sourceCodeParser.parseApidocComments(apidoc, new TemplateRegistrationMatcher());
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
-        // Replace in apidoc the original group with the generated one.
-        sourceGroup.functions.clear();
-        ApidocHandler.replaceFunctions(apidoc, targetGroup);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApidocXmlFile);
 
-        assertFileContentsEqual(outputApidocXmlFile, normalizedApidocXmlFile);
+        assertFileContentsEqual(outputApidocXmlFile, expectedTemplateFunctionsXmlFile);
     }
 
-    private void testApiXmlToVmsCode()
+    private void testSourceCodeParserHandler()
         throws Exception
     {
-        final ApiXmlToVmsCodeExecutor executor = new ApiXmlToVmsCodeExecutor();
-        executor.verbose = verbose;
-        executor.vmsPath = vmsPath;
-        executor.optionalOutputVmsPath = outputVmsPath;
-        executor.sourceApiXmlFile = apiXmlFile;
-        executor.outputApiXmlFile = templateApiXmlFile;
-        executor.params = new Params();
+        final File handlerFunctionsCppFile = new File(sourceCodeParserTestPath + "/handler_functions.cpp");
+        final File expectedHandlerFunctionsXmlFile = new File(
+            sourceCodeParserTestPath + "/expected_handler_functions.xml");
+        final File outputApidocXmlFile = new File(sourceCodeParserOutputTestPath + "/handler_functions.xml");
 
-        final int processedFunctionsCount = executor.execute();
+        final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
+                XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        if (apiXmlSystemApiFunctionsCount != processedFunctionsCount)
-        {
-            throw new RuntimeException("Expected to process " + apiXmlSystemApiFunctionsCount
-                + " API functions but processed " + processedFunctionsCount);
-        }
+        System.out.println("test: parsing apidoc in \"handler\" type C++ and comparing it to the expected XML");
+        System.out.println("    Sample: " + expectedHandlerFunctionsXmlFile);
+        System.out.println("    Input: " + handlerFunctionsCppFile);
+        final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
+        final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
+        final int processedFunctionsCount =
+                sourceCodeParser.parseApidocComments(apidoc, new HandlerRegistrationMatcher());
+        System.out.println("    API functions processed: " + processedFunctionsCount);
+
+        XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
+        System.out.println("    Output: " + outputApidocXmlFile);
+
+        assertFileContentsEqual(outputApidocXmlFile, expectedHandlerFunctionsXmlFile);
     }
 
-    private void testVmsCodeToApiXml()
+    private void VmsCodeToApiXmlExecutor()
         throws Exception
     {
-        // This test should parse source files generated by testXmlToCode().
+        final File apiTemplateXmlFile = new File(testPath + "/api_template.xml");
+        final File generatedApiXmlFile = new File(outputTestPath, "/api.FROM_CPP.xml");
+        final File generatedApiJsonFile = new File(outputTestPath + "/api.FROM_CPP.json");
 
         final VmsCodeToApiXmlExecutor executor = new VmsCodeToApiXmlExecutor();
         executor.verbose = verbose;
-        executor.vmsPath = outputVmsPath;
-        executor.sourceFileExtraSuffix = Executor.OUTPUT_FILE_EXTRA_SUFFIX;
-        executor.templateApiXmlFile = templateApiXmlFile;
+        executor.vmsPath = vmsPath;
+        executor.templateApiXmlFile = apiTemplateXmlFile;
         executor.outputApiXmlFile = generatedApiXmlFile;
         executor.optionalOutputApiJsonFile = generatedApiJsonFile;
         executor.params = new Params();
 
         final int processedFunctionsCount = executor.execute();
-
-        if (apiXmlSystemApiFunctionsCount != processedFunctionsCount)
+        if (apiXmlFunctionsCount != processedFunctionsCount)
         {
-            throw new RuntimeException("Expected to process " + apiXmlSystemApiFunctionsCount
+            throw new RuntimeException("Expected to process " + apiXmlFunctionsCount
                 + " API functions but processed " + processedFunctionsCount);
         }
 
         assertJsonEqualsXml(generatedApiJsonFile, generatedApiXmlFile);
-    }
 
-    private void testOutputApiXmlVsOriginal()
-        throws Exception
-    {
-        final XmlSorter sorter = new XmlSorter();
-        sorter.groupName = Executor.SYSTEM_API_GROUP_NAME;
-        sorter.sourceApiXmlFile = apiXmlFile;
-        sorter.outputApiXmlFile = sortedApiXmlFile;
-        sorter.execute();
-
-        assertTextFilesEqualIgnoringIndents(sortedApiXmlFile, generatedApiXmlFile);
+        assertTextFilesEqualIgnoringIndents(expectedApiXmlFile, generatedApiXmlFile);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -251,70 +246,52 @@ public final class Tests extends TestBase
     private final boolean verbose;
 
     private final File testPath;
+    private final File sourceCodeParserTestPath;
+    private final File sourceCodeParserOutputTestPath;
+    private final File sourceCodeParserApiTemplateXmlFile;
     private final File outputTestPath;
     private final File testPropertiesFile;
-    private final File cppFile;
-    private final File outputCppFile;
-    private final File apidocCppFile;
-    private final File apidocXmlFile;
-    private final File normalizedApidocXmlFile;
-    private final File outputApidocXmlFile;
     private final File vmsPath;
-    private final File outputVmsPath;
-    private final File apiXmlFile;
-    private final File sortedApiXmlFile;
-    private final File outputApiXmlFile;
-    private final File outputApiJsonFile;
-    private final File templateApiXmlFile;
-    private final File generatedApiXmlFile;
-    private final File generatedApiJsonFile;
+    private final File expectedApiXmlFile;
 
-    private int apiXmlSystemApiFunctionsCount;
+    private int apiXmlFunctionsCount;
 
     public Tests(boolean verbose, final File testPath, final File outputTestPath)
     {
         this.verbose = verbose;
         this.testPath = testPath;
         this.outputTestPath = outputTestPath;
+        this.sourceCodeParserTestPath = new File(testPath + "/source_code_parser");
+        this.sourceCodeParserApiTemplateXmlFile = new File(sourceCodeParserTestPath + "/api_template.xml");
+        this.sourceCodeParserOutputTestPath = new File(outputTestPath + "/source_code_parser");
         this.testPropertiesFile = new File(testPath + "/test.properties");
-        this.vmsPath = new File(testPath + "/netoptix_vms");
-        this.outputVmsPath = new File(outputTestPath + "/netoptix_vms");
-        this.cppFile = new File(vmsPath + "/appserver2/src/connection_factory.cpp");
-        this.outputCppFile = new File(outputVmsPath + "/appserver2/src/connection_factory.cpp");
-        this.apidocCppFile = new File(testPath + "/apidoc.cpp");
-        this.apidocXmlFile = new File(testPath + "/apidoc.xml");
-        this.normalizedApidocXmlFile = new File(outputTestPath + "/apidoc.NORM.xml");
-        this.outputApidocXmlFile = new File(outputTestPath + "/apidoc.OUT.xml");
-        this.apiXmlFile = new File(testPath + "/api.xml");
-        this.sortedApiXmlFile = new File(outputTestPath + "/api.SORTED.xml");
-        this.outputApiXmlFile = new File(outputTestPath + "/api.xml");
-        this.outputApiJsonFile = new File(outputTestPath + "/api.json");
-        this.templateApiXmlFile = new File(outputTestPath, "/api.TEMPLATE.xml");
-        this.generatedApiXmlFile = new File(outputTestPath, "/api.FROM_CPP.xml");
-        this.generatedApiJsonFile = new File(outputTestPath + "/api.FROM_CPP.json");
+        this.vmsPath = new File(testPath + "/nx_vms");
+        this.expectedApiXmlFile = new File(testPath + "/expected_api.xml");
+        sourceCodeParserOutputTestPath.mkdirs();
+        sourceCodeParserOutputTestPath.mkdir();
+
 
         readTestProperties();
 
         run("ParamsBase", new Run() { public void run() throws Exception {
             testParamsBase(); } });
 
-        run("Xml", new Run() { public void run() throws Exception {
-            testXml(); } });
+        run("ApidocSerialization", new Run() { public void run() throws Exception {
+            testApidocSerialization(); } });
 
         run("SourceCodeEditor", new Run() { public void run() throws Exception {
             testSourceCodeEditor(); } });
 
-        run("SourceCodeParser", new Run() { public void run() throws Exception {
-            testSourceCodeParser(); } });
+        run("SourceCodeParserTemplate", new Run() { public void run() throws Exception {
+            testSourceCodeParserTemplate(); } });
 
-        run("ApiXmlToVmsCode", new Run() { public void run() throws Exception {
-            testApiXmlToVmsCode(); } });
+        run("SourceCodeParserHanlder", new Run() { public void run() throws Exception {
+            testSourceCodeParserHandler
+                    (); } });
 
-        run("VmsCodeToApiXml", new Run() { public void run() throws Exception {
-            testVmsCodeToApiXml(); } });
 
-        run("OutputApiXmlVsOriginalXml", new Run() { public void run() throws Exception {
-            testOutputApiXmlVsOriginal(); } });
+        run("VmsCodeToApiXmlExecutor", new Run() { public void run() throws Exception {
+            VmsCodeToApiXmlExecutor(); } });
 
         printFinalMessage();
     }

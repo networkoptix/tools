@@ -8,7 +8,8 @@ public final class PrintDepsExecutor
      */
     public int execute()
     {
-        printVmsFile(params.ec2RegistrationCpp());
+        printVmsFile(params.templateRegistrationCpp());
+        printVmsFile(params.handlerRegistrationCpp());
         return 1;
     }
 }

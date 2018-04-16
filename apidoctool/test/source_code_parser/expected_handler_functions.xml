@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<apidoc>
+    <groups>
+        <group>
+            <groupName>testGroup</groupName>
+            <urlPrefix>/urlPrefix</urlPrefix>
+            <groupDescription>testGroupDescription</groupDescription>
+            <functions>
+                <function>
+                    <name>testFunction2</name>
+                    <description/>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>someParam</name>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>regularValue</name>
+                                    <description>Appears in xml.</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>some result description</caption>
+                        <params>
+                            <param>
+                                <name>someParam</name>
+                                <description>some result param</description>
+                            </param>
+                        </params>
+                    </result>
+                </function>
+            </functions>
+        </group>
+    </groups>
+</apidoc>

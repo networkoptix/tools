@@ -13,6 +13,12 @@ public final class ApidocCommentParser
 {
     private ApidocCommentParser() {}
 
+    public static class FunctionDescription 
+    {
+        public String urlPrefix;
+        public Apidoc.Function function;
+    }
+
     public static final class Error
         extends Exception
     {
@@ -30,51 +36,46 @@ public final class ApidocCommentParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    public static Apidoc.Function createFunctionFromCommentLines(
-        List<String> lines,
-        String expectedUrlPrefix,
-        String expectedFunctionName)
-        throws Error
+    public static FunctionDescription createFunctionFromCommentLines(List<String> lines) throws Error
     {
         ApidocTagParser parser = new ApidocTagParser(lines);
         parser.parseNextItem();
 
-        Apidoc.Function function = createFunctionFromApidocItem(
-            parser, expectedUrlPrefix, expectedFunctionName);
-        if (function == null)
+        FunctionDescription description = createFunctionFromApidocItem(parser);
+        if (description.function == null)
             return null;
 
         boolean captionParsed = false;
         boolean permissionsParsed = false;
         boolean returnParsed = false;
-        function.caption = "";
-        function.result = new Apidoc.Result();
-        function.result.caption = "";
+        description.function.caption = "";
+        description.function.result = new Apidoc.Result();
+        description.function.result.caption = "";
 
         parser.parseNextItem();
         while (parser.getItem() != null)
         {
             if (TAG_CAPTION.equals(parser.getItem().getTag()))
             {
-                captionParsed = checkTagOnce(captionParsed, function.name, TAG_CAPTION);
-                checkNoAttribute(parser, function.name);
-                function.caption = parser.getItem().getFullText();
+                captionParsed = checkTagOnce(captionParsed, description.function.name, TAG_CAPTION);
+                checkNoAttribute(parser, description.function.name);
+                description.function.caption = parser.getItem().getFullText();
                 parser.parseNextItem();
             }
             else if (TAG_PERMISSIONS.equals(parser.getItem().getTag()))
             {
-                permissionsParsed = checkTagOnce(permissionsParsed, function.name, TAG_PERMISSIONS);
-                function.permissions = parser.getItem().getFullText();
+                permissionsParsed = checkTagOnce(permissionsParsed, description.function.name, TAG_PERMISSIONS);
+                description.function.permissions = parser.getItem().getFullText();
                 parser.parseNextItem();
             }
             else if (TAG_PARAM.equals(parser.getItem().getTag()))
             {
-                parseFunctionParam(parser, function);
+                parseFunctionParam(parser, description.function);
             }
             else if (TAG_RETURN.equals(parser.getItem().getTag()))
             {
-                returnParsed = checkTagOnce(returnParsed, function.name, TAG_RETURN);
-                parseFunctionResult(parser, function);
+                returnParsed = checkTagOnce(returnParsed, description.function.name, TAG_RETURN);
+                parseFunctionResult(parser, description.function);
             }
             else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
             {
@@ -83,11 +84,11 @@ public final class ApidocCommentParser
             }
             else
             {
-                throwUnknownTag(parser, function.name);
+                throwUnknownTag(parser, description.function.name);
             }
         }
 
-        return function;
+        return description;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -95,54 +96,31 @@ public final class ApidocCommentParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private static Apidoc.Function createFunctionFromApidocItem(
-        ApidocTagParser parser,
-        String expectedUrlPrefix,
-        String expectedFunctionName)
-        throws Error
+    private static FunctionDescription createFunctionFromApidocItem(ApidocTagParser parser) throws Error
     {
         if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
-        {
-            throw new Error("Comment should start with " + TAG_APIDOC + " tag in function "
-                + expectedFunctionName + ".");
-        }
+            throw new Error("Comment should start with " + TAG_APIDOC + " tag.");
 
         String[] values = Utils.matchRegex(functionHeaderRegex, parser.getItem().getFullText());
         if (values == null)
-        {
-            throw new Error("Wrong " + TAG_APIDOC + " function header in function "
-                + expectedFunctionName + ".");
-        }
+            throw new Error("Wrong " + TAG_APIDOC + " function header.");
 
-        final String urlPrefix = values[1];
-        if (urlPrefix.isEmpty())
-        {
-            throw new Error("URL prefix (e.g. \"" + expectedUrlPrefix
-                + "\") is missing in function " + expectedFunctionName + ".");
-        }
-        if (!urlPrefix.equals(expectedUrlPrefix))
-            return null; //< The function belongs to a different group.
+        FunctionDescription result = new FunctionDescription();
+        result.urlPrefix = values[1];
+        result.function = new Apidoc.Function();
 
-        Apidoc.Function function = new Apidoc.Function();
-
-        function.name = values[2];
-        if (!function.name.equals(expectedFunctionName))
-        {
-            throw new Error(TAG_APIDOC + " function name \"" + function.name
-                + "\" does not match C++ code in function " + expectedFunctionName + ".");
-        }
-
-        function.method = values[0].trim();
-        function.description = values[3].trim();
+        result.function.name = values[2];
+        result.function.method = values[0].trim();
+        result.function.description = values[3].trim();
 
         if ("".equals(parser.getItem().getAttribute()))
-            function.proprietary = false;
+            result.function.proprietary = false;
         else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
-            function.proprietary = true;
+            result.function.proprietary = true;
         else
-            throwInvalidAttribute(parser, function.name);
+            throwInvalidAttribute(parser, result.function.name);
 
-        return function;
+        return result;
     }
 
     private static void parseFunctionParam(
@@ -351,9 +329,19 @@ public final class ApidocCommentParser
             }
         }
 
-        checkNoAttribute(parser, function.name);
-        param.proprietary = false;
         param.optional = false;
+        if ("".equals(parser.getItem().getAttribute()))
+        {
+            param.proprietary = false;
+        }
+        else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
+        {
+            param.proprietary = true;
+        }
+        else
+        {
+            throwInvalidAttribute(parser, function.name);
+        }
 
         parser.parseNextItem();
 
