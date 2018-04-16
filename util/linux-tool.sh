@@ -66,7 +66,7 @@ Here <command> can be one of the following:
  run-ut [all|test_name] [args] # Run all or the specified unit test via ctest.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
 
- share target_path # Perform: hg share, update to the current branch and copy ".hg/hgrc".
+ share target_dir [branch] # Do hg share, update and copy ".hg/hgrc". Default branch is target_dir.
  gen [cache] [cmake-args] # Perform cmake generation.
  build # Build via "cmake --build <dir>".
  cmake [gen-args] # Perform cmake generation, then build via "cmake --build".
@@ -228,26 +228,38 @@ setup_vars()
     esac
 }
 
-do_share() # target_path
+do_share() # target_path [branch]
 {
-    local TARGET_PATH="$1"
-    [ -z "$TARGET_PATH" ] && nx_fail "Target path should be specified as the first arg."
-    if [[ $TARGET_PATH != /* ]]
-    then # The path is relative, treat as relative to VMS_DIR parent.
-        local TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
-    else # The path is absolute: use as is.
-        local TARGET_DIR="$TARGET_PATH"
+    if (( $# >= 1 ))
+    then
+        local -r TARGET_PATH="$1" && shift
+    else
+        nx_fail "Target path should be specified as the first arg."
     fi
-    [ -d "$TARGET_DIR" ] && nx_fail "Target dir already exists: $TARGET_DIR"
 
-    local BRANCH=$(hg branch)
-    [ -z "$BRANCH" ] && nx_fail "'hg branch' did not provide any output."
+    if (( $# >= 1 ))
+    then
+        local -r BRANCH="$1" && shift
+    else
+        local -r BRANCH=$(basename "$TARGET_PATH")
+    fi
 
-    nx_verbose mkdir -p "$TARGET_DIR"
+    # Determine TARGET_DIR.
+    if [[ $TARGET_PATH != /* ]]
+    then #< The path is relative, treat as relative to VMS_DIR parent.
+        local -r TARGET_DIR="$VMS_DIR/../$TARGET_PATH"
+    else #< The path is absolute: use as is.
+        local -r TARGET_DIR="$TARGET_PATH"
+    fi
+    if [[ -d $TARGET_DIR ]]
+    then
+        nx_fail "Target dir already exists: $TARGET_DIR"
+    fi
+
     nx_verbose hg share "$(nx_path "$VMS_DIR")" "$(nx_path "$TARGET_DIR")" || return $?
-    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
-    cd "$TARGET_DIR"
+    cd "$TARGET_DIR" || return $?
     nx_verbose hg update "$BRANCH" || return $?
+    nx_verbose cp "$VMS_DIR/.hg/hgrc" "$TARGET_DIR/.hg/" || return $?
 }
 
 do_gen() # [cache] "$@"
