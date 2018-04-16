@@ -247,7 +247,8 @@ public final class XmlSerializer
             for (Node node = rootElement.getFirstChild(); node != null;
                  node = node.getNextSibling())
             {
-                final Node importedNode = element.getOwnerDocument().importNode(node, true);
+                final Node importedNode =
+                    element.getOwnerDocument().importNode(node, /*deep*/ true);
                 valueElement.appendChild(importedNode);
             }
 
