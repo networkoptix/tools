@@ -47,6 +47,13 @@
 # TODO Add section with user permissions related to libvirt if needed
 # libvirt-related groups are: libvirt, kvm
 
+# FIXME: Task with disabling iptables is not applied sometimes with first run.
+# We need to figure out why. Workaround: run playbook one more time.
+# Flushing hanlers is a workaround for this problem: ensure that pending stuff
+# is trigered before buggy block.
+- name: Trigger all pending handlers
+  meta: flush_handlers
+
 - name: Disable iptables on bridges 
   sysctl:
     name: '{{ item }}'
