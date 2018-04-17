@@ -1,0 +1,33 @@
+---
+- name: Install pip
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - python-pip
+
+- name: Install awscli
+  pip:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  with_items:
+  - awscli
+
+- name: Create AWS RC directory
+  file:
+    path: "{{ ansible_env.HOME }}/.aws"
+    state: directory
+    mode: "u+rwx,g+rwx,o-rwx"
+
+- name: Create AWS config file
+  template:
+    src: "aws/config.j2"
+    dest: "{{ ansible_env.HOME }}/.aws/config"
+    mode: "u+rw-,g+---,o-rwx"
+
+- name: Create AWS credentials file
+  template:
+    src: "aws/credentials.j2"
+    dest: "{{ ansible_env.HOME }}/.aws/credentials"
+    mode: "u+rw-,g+--x,o-rwx"

@@ -3,6 +3,7 @@ office_net_netmask: "255.255.255.0"
 office_net_dns_search: "la.hdw.mx"
 office_net_dns_nameservers: "10.1.5.1"
 
+aws_region: us-east-1
 attach_infra_share: false
 
 libvirt_guest__os_machine: pc-i440fx-2.5
