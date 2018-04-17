@@ -7,7 +7,8 @@ libvirt_guest__memory: "{{ 2 * 1024 * 1024 }}"
 libvirt_guest__cpus: 2
 
 networks:
-- source_dev: eno1
+- interface_type: bridge
+  source_bridge: br1
   model_type: rtl8139
   address_slot: 3
   config:
@@ -20,7 +21,8 @@ networks:
       gateway:        "{{ office_net_gateway }}"
       dns-search:     "{{ office_net_dns_search }}"
       dns-nameservers: "{{ office_net_dns_nameservers }}"
-- source_dev: eno2
+- interface_type: bridge
+  source_bridge: br2
   model_type: rtl8139
   address_slot: 9
   config:

@@ -1,0 +1,57 @@
+auto {{ item.device }}
+{% if item.bootproto == 'static' %}
+iface {{ item.device }} inet static
+{% if item.mtu is defined %}
+mtu {{ item.mtu }}
+{% endif %}
+{% if item.address is defined %}
+address {{ item.address }}
+{% endif %}
+{% if item.netmask is defined %}
+netmask {{ item.netmask }}
+{% endif %}
+{% if item.gateway is defined %}
+gateway {{ item.gateway }}
+{% endif %}
+{% if item.ports is defined %}
+bridge_ports {{ item.ports|join(' ') }}
+{% endif %}
+{% if item.stp is defined %}
+bridge_stp {{ item.stp }}
+{% endif %}
+{% endif %}
+
+{% if item.bootproto == 'dhcp' %}
+iface {{ item.device }} inet dhcp
+{% if item.ports is defined %}
+bridge_ports {{ item.ports|join(' ') }}
+{% endif %}
+{% if item.stp is defined %}
+bridge_stp {{ item.stp }}
+{% endif %}
+{% endif %}
+
+{% if item.route is defined %}
+{% for i in item.route %}
+{# Workaround for Ansible bug https://github.com/ansible/ansible/issues/17872. #}
+{% set prefix = ('0.0.0.0/' ~ i.netmask) | ipaddr('prefix') %}
+{% set route = i.network ~ '/' ~ prefix %}
+{% if 'gateway' in i %}
+{% set route = route ~ ' via ' ~ i.gateway %}
+{% else %}
+{% set route = route ~ ' dev ' ~ item.device %}
+{% endif %}
+{% if 'table' in i %}
+{% set route = route ~ ' table ' ~ i.table %}
+{% endif %}
+up ip route add {{ route }}
+down ip route del {{ route }}
+{% endfor %}
+{% endif %}
+
+{% if item.rules is defined %}
+{% for rule in item.rules %}
+up ip rule add {{ rule }}
+down ip rule del {{ rule }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,37 @@
+DEVICE={{ item.device }}
+{% if item.bootproto == 'static' %}
+TYPE=Bridge
+BOOTPROTO=none
+{% if item.stp is defined %}
+STP={{ item.stp }}
+{% endif %}
+{% if item.address is defined %}
+IPADDR={{ item.address }}
+{% endif %}
+{% if item.netmask is defined %}
+NETMASK={{ item.netmask }}
+{% endif %}
+{% if item.gateway is defined %}
+GATEWAY={{ item.gateway }}
+{% endif %}
+{% endif %}
+
+{% if item.bootproto == 'dhcp' %}
+TYPE=bridge
+BOOTPROTO=dhcp
+{% if item.stp is defined %}
+STP={{ item.stp }}
+{% endif %}
+{% endif %}
+
+{% if item.onboot is defined %}
+ONBOOT={{ item.onboot }}
+{% endif %}
+
+{% if ansible_distribution_major_version | int >= 7 %}
+NM_CONTROLLED=no
+{% endif %}
+
+{% if item.mtu is defined %}
+MTU={{ item.mtu }}
+{% endif %}

@@ -17,6 +17,7 @@
     vars:
       samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
+  - role: MichaelRigart.interfaces          
   - role: libvirt_host
   # TODO we need to move base images to NAS and extract image creation project
   - role: image_library
