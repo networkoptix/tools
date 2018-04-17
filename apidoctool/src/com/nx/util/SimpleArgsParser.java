@@ -1,6 +1,7 @@
 package com.nx.util;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +17,19 @@ import java.util.Map;
  */
 public abstract class SimpleArgsParser
 {
-    public SimpleArgsParser(String[] args)
+    private static final String jarName = deduceJarName();
+
+    public SimpleArgsParser(String[] args, String version, String description)
     {
         if (args.length == 0 || (args[0].matches("-h|-help|--help")))
         {
-            showHelp();
+            printHelp(version, description);
+            System.exit(0);
+        }
+
+        if (args[0].matches("-version|--version"))
+        {
+            System.out.println(version);
             System.exit(0);
         }
 
@@ -64,7 +73,12 @@ public abstract class SimpleArgsParser
         }
     }
 
-    protected abstract void showHelp();
+    /**
+     * Print help text to System.out, starting with the example of specific command-line arguments.
+     * Description, help for generic arguments implemented by this class, and command line example
+     * up to generic arguments are all printed before.
+     */
+    protected abstract void printUsageHelp();
 
     public final boolean isVerbose()
     {
@@ -99,7 +113,7 @@ public abstract class SimpleArgsParser
     /**
      * Report an error if there was no such key.
      */
-    public final String get(String key)
+    public final String getString(String key)
     {
         final String value = map.get(key);
 
@@ -119,7 +133,7 @@ public abstract class SimpleArgsParser
      */
     public final File getFile(String key)
     {
-        return new File(get(key));
+        return new File(getString(key));
     }
 
     /**
@@ -145,6 +159,42 @@ public abstract class SimpleArgsParser
         System.err.println("Run with \"-h\" for help.");
 
         System.exit(1);
+    }
+
+    private static String deduceJarName()
+    {
+        final String jarUri;
+        try
+        {
+            jarUri = SimpleArgsParser.class.getProtectionDomain().getCodeSource().getLocation()
+                .toURI().toString();
+        }
+        catch (URISyntaxException e)
+        {
+            throw new RuntimeException("Unable to get .jar file name: " + e.getMessage(), e);
+        }
+
+        return jarUri.substring(jarUri.lastIndexOf('/') + 1);
+    }
+
+    private void printHelp(String version, String description)
+    {
+        final String command = "java -jar " + jarName;
+
+        System.out.println(jarName + " version " + version);
+        System.out.println();
+        System.out.println(description);
+        System.out.println();
+        System.out.print(
+            "Show help:\n" +
+            " " + command + " [-h|-help|--help]\n" +
+            "\n" +
+            "Show version:\n" +
+            " " + command + " -version|--version\n" +
+            "\n" +
+            "Usage:\n" +
+            " " + command + " [-verbose] ");
+        printUsageHelp();
     }
 
     //--------------------------------------------------------------------------

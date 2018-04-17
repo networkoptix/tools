@@ -5,10 +5,13 @@ import java.util.ArrayList;
 
 public class Main
 {
+    private static final String VERSION = "2.0";
+
+    private static final String DESCRIPTION =
+        "Parses Apidoc comments in C++ code and generates api.xml.";
+
     private static final String HELP =
-"This tool allows to parse/generate Apidoc comments in C++ code and api.xml.\n" +
-"Usage:\n" +
-" java -jar apidoctool.jar [-verbose] <command> [<params>]\n" +
+"<command> [<params>]\n" +
 "\n" +
 "<command>:\n" +
 "\n" +
@@ -51,9 +54,9 @@ public class Main
         {
             final Params params = new Params();
 
-            final SimpleArgsParser arg = new SimpleArgsParser(args)
+            final SimpleArgsParser arg = new SimpleArgsParser(args, VERSION, DESCRIPTION)
             {
-                protected void showHelp()
+                protected void printUsageHelp()
                 {
                     System.out.print(HELP);
                     params.printHelp(System.out, /*linePrefix*/ "    ");
@@ -73,7 +76,7 @@ public class Main
                 arg.reportUnexpectedValuelessArgs();
                 final XmlSorter sorter = new XmlSorter();
                 sorter.groupNames = new ArrayList<String>();
-                sorter.groupNames.add(arg.get("-group-name"));
+                sorter.groupNames.add(arg.getString("-group-name"));
                 sorter.sourceApiXmlFile = arg.getFile("-source-xml");
                 sorter.outputApiXmlFile = arg.getFile("-output-xml");
                 sorter.execute();
