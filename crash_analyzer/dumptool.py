@@ -16,6 +16,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import msvcrt
 from typing import List, Callable
 
 import utils
@@ -201,16 +202,41 @@ class Cdb:
         ])
 
 
-class DumpAnalyzer(object):
-    """Provides ability to analize windows DMP dumps.
+class FileLock:
+    """File system lock file.
+    """
+    def __init__(self, path: str, timeout_s: float = 1):
+        self.path = path
+        self.timeout_s = timeout_s
+
+    def __enter__(self):
+        self.handle = open(self.path, 'w+')
+        start = time.monotonic()
+        while True:
+            try:
+                msvcrt.locking(self.handle.fileno(), msvcrt.LK_RLCK, 1)
+            except OSError:
+                self.handle.close()
+                if time.monotonic() - start > self.timeout_s:
+                    raise DistError('Unable to lock file: ' + self.path)
+            else:
+                return self
+
+    def __exit__(self, *args):
+        msvcrt.locking(self.handle.fileno(), msvcrt.LK_UNLCK, 1)
+        self.handle.close()
+
+
+class DumpAnalyzer:
+    """Provides ability to analyze windows DMP dumps.
     """
 
     def __init__(
             self, cache_directory, dump_path,
             customization: str = '', version: str = '', build: str = None, branch: str = '',
-            subprocess_timout_s: int = 10, debug_mode: bool = False,
+            subprocess_timeout_s: int = 10, debug_mode: bool = False,
             visual_studio: bool = False):
-        """Initializes analizer with dump :path and :customization;
+        """Initializes analyzer with dump :path and :customization;
         :version, :build, :branch - optionals to speed up process.
         """
         self.cache_directory = cache_directory
@@ -221,7 +247,7 @@ class DumpAnalyzer(object):
         self.branch = branch
         self.debug_mode = debug_mode
         self.visual_studio = visual_studio
-        self.subprocess_timout_s = subprocess_timout_s
+        self.subprocess_timeout_s = subprocess_timeout_s
         self.module, self.dist, self.build_path, self.target_path = None, None, None, None
 
         deduced = deduce_customization(dump_path)
@@ -269,7 +295,6 @@ class DumpAnalyzer(object):
                 logger.debug("Found distributive '%s' in: %s" % (item, url))
                 results.append((url, item))
             else:
-                logger.debug("Failed to get '%s' in: %s" % (regexp, url))
                 failures.append(regexp)
 
         if sub_url and len(failures):
@@ -304,12 +329,10 @@ class DumpAnalyzer(object):
 
         self.build_path = os.path.join(self.cache_directory, build_path)
         self.target_path = os.path.join(self.build_path, 'target')
-        if not os.path.isdir(self.target_path):
-            os.makedirs(self.target_path)
-
         return list(os.path.join(*url) for url in out)
 
-    def download_url_data(self, url: str, local: str) -> str:
+    @staticmethod
+    def download_url_data(url: str, local: str) -> str:
         """Downloads file from :url to :local directory, apply :processor if any.
         """
         path = os.path.join(local, os.path.basename(url))
@@ -358,7 +381,7 @@ class DumpAnalyzer(object):
         def run(command, retry_code = 0, retry_count = 0):
             try:
                 logger.debug(shell_line(command))
-                return subprocess.check_output(command, timeout=self.subprocess_timout_s)
+                return subprocess.check_output(command, timeout=self.subprocess_timeout_s)
             except subprocess.CalledProcessError as error:
                 if retry_count and 'status ' + str(retry_code) in str(error):
                     time.sleep(1)
@@ -380,7 +403,7 @@ class DumpAnalyzer(object):
             p, d = path.replace('/', '\\'), self.target_path.replace('/', '\\')
             return run(
                 ['msiexec', '-a', os.path.abspath(p), '/qb', 'TARGETDIR=' + os.path.abspath(d)],
-                retry_code=1618, retry_count=self.subprocess_timout_s * 2)
+                retry_code=1618, retry_count=self.subprocess_timeout_s * 2)
 
         if path.endswith('.msi') or path.endswith('.zip'):
             return run(['7z', 'x', path, '-o' + self.module_dir(), '-y', '-aos'])
@@ -394,17 +417,26 @@ class DumpAnalyzer(object):
         if not urls:
             raise DistError('There are no distributive URLs available')
 
-        # TODO: Implement some directory locking for safety.
-        try:
-            for url in urls:
-                path = self.download_url_data(url, self.build_path)
-                self.extract_dist(path)
-        except DistError:
-            if not self.debug_mode:
-                logger.debug('Clean up download dir: ' + self.build_path)
-                shutil.rmtree(self.build_path, onerror=lambda f, p, ex: logger.error(
-                    "%s '%s': %s" % (f, p, repr(ex))))
-            raise
+        if not os.path.isdir(self.build_path):
+            os.makedirs(self.build_path)
+
+        with FileLock(os.path.join(self.build_path, 'lock'), self.subprocess_timeout_s * len(urls)):
+            if os.path.isdir(self.target_path):
+                logging.debug('Skip download of existing build: ' + self.target_path)
+                return
+
+            os.makedirs(self.target_path)
+            try:
+                for url in urls:
+                    path = self.download_url_data(url, self.build_path)
+                    self.extract_dist(path)
+
+            except DistError:
+                if not self.debug_mode:
+                    logger.debug('Clean up download dir: ' + self.build_path)
+                    shutil.rmtree(self.build_path, onerror=lambda f, p, ex: logger.error(
+                        "%s '%s': %s" % (f, p, repr(ex))))
+                raise
 
     def run_visual_studio(self):
         """Open dump in visual studio.

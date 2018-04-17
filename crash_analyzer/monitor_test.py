@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class CrashServerEmulator:
     def __init__(self, url: str, login: str, password: str):
-        logger.debug('Emulate Crash Server {}, credentials {}:{}'.format(url, login, password))
+        self.server = '{}:{} @ {}'.format(login, password, url)
 
     @staticmethod
     def list_all(extension: str) -> List[str]:
@@ -28,7 +28,7 @@ class CrashServerEmulator:
     @staticmethod
     def get(name: str) -> str:
         for f in utils.Resource('*', name).glob():
-            return f.read_data()
+            return f.read_bytes()
 
         assert False, 'Unable to find file: ' + name
 
@@ -36,15 +36,14 @@ class CrashServerEmulator:
 class JiraEmulator:
     def __init__(self, issues, url: str, login: str, password: str, file_limit: int):
         self.issues = issues
-        logger.debug('Emulate Jira API {}, credentials {}:{}, limit {}'.format(
-            url, login, password, file_limit))
+        self.server = '{}:{} @ {} / {}'.format(login, password, url, file_limit)
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         key = reason.crash_id[:10]
         self.issues[key] = {
             'attachments': [],
             'code': reason.code,
-            'format': report.format,
+            'extension': report.extension,
             'versions': [report.version]}
 
         logger.info('Case {} is created for {}'.format(key, reason))
@@ -54,39 +53,34 @@ class JiraEmulator:
         issue = self.issues[key]
         for report in reports:
             issue['versions'] = sorted(set(issue['versions'] + [report.version]))
+            issue['attachments'] = sorted(set(issue['attachments'] + [report.name]))
 
         self.issues[key] = issue
         logger.info('Case {} is updated with {} reports'.format(key, len(reports)))
         return True
 
-    def attach_files(self, key: str, files: List[str]):
-        attachments = [f.replace('\\', '/') for f in files]
-        issue = self.issues[key]
-        issue['attachments'] = sorted(set(issue['attachments'] + attachments))
-        self.issues[key] = issue
-        logger.info('Case {} attached {}'.format(key, ', '.join(attachments)))
+
+class MonitorFixture:
+    def __init__(self, directory: str):
+        self.manager = multiprocessing.Manager()
+        self.issues = self.manager.dict()
+        self.monitor = None
+        self.options = utils.Resource('monitor_example_config.yaml').parse()
+        self.options['options']['directory'] = directory
+        self.options['fetch']['api'] = CrashServerEmulator
+        self.options['upload']['api'] = functools.partial(JiraEmulator, self.issues)
+
+    def new_monitor(self):
+        if self.monitor:
+            self.monitor._records = {}  # < Prevents flush after directory removal.
+
+        self.monitor = monitor.Monitor(**self.options)
 
 
 @pytest.fixture
-def fixture():
-    class Fixture:
-        def __init__(self, directory):
-            self.manager = multiprocessing.Manager()
-            self.issues = self.manager.dict()
-            self.monitor = None
-            self.options = utils.Resource('monitor_example_config.yaml').parse()
-            self.options['options']['directory'] = directory
-            self.options['fetch']['api'] = CrashServerEmulator
-            self.options['upload']['api'] = functools.partial(JiraEmulator, self.issues)
-
-        def new_monitor(self):
-            if self.monitor:
-                self.monitor._records = {}  # < Prevents flush after directory removal.
-
-            self.monitor = monitor.Monitor(**self.options)
-
+def monitor_fixture():
     with utils.TemporaryDirectory() as directory:
-        f = Fixture(directory)
+        f = MonitorFixture(directory.path)
         yield f
         f.monitor._records = []  # < Prevents flush after directory removal.
 
@@ -98,25 +92,28 @@ def fixture():
     "remake", [True, False]
 )
 @pytest.mark.parametrize(
-    "reports_each_run", [1000, 5]
+    "reports_each_run", [1000, 10]
 )
-def test_monitor(fixture, extension: str, remake: bool, reports_each_run: int):
-    fixture.options['fetch'].update(extension=extension, report_count=reports_each_run)
-    fixture.new_monitor()
+def test_monitor(monitor_fixture, extension: str, remake: bool, reports_each_run: int):
+    monitor_fixture.options['fetch'].update(extension=extension, report_count=reports_each_run)
+    monitor_fixture.new_monitor()
 
     def checkpoint():
         if remake:
-            fixture.new_monitor()
+            monitor_fixture.new_monitor()
 
     while True:
-        if not fixture.monitor.fetch():
+        if not monitor_fixture.monitor.fetch():
             break
 
         checkpoint()
-        fixture.monitor.analyze()
+        monitor_fixture.monitor.analyze()
         checkpoint()
-        fixture.monitor.upload()
+        monitor_fixture.monitor.upload()
         checkpoint()
 
-    all_cases = utils.Resource('cases.yaml').parse().items()
-    assert {k: v for k, v in all_cases if v['extension'].endswith(extension)} == fixture.jira.cases
+    actual = {k: v for k, v in monitor_fixture.issues.items()}
+    expected = {k: v for k, v in utils.Resource('expected_issues.yaml').parse().items()
+                if v['extension'].endswith(extension)}
+
+    assert expected == actual

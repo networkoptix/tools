@@ -227,16 +227,17 @@ def analyze_files_concurrent(reports: List[Report], **options) -> List[Tuple[str
         else:
             processed.append((report, result))
 
+    logger.info('Successfully analyzed {} reports'.format(len(processed)))
     return processed
 
 
 def analyze_file(report: Report, directory: utils.Directory, **dump_tool_options):
     report_file = directory.file(report.name)
     if report.extension == 'gdb-bt':
-        return analyze_linux_gdb_bt(report, report_file.read_data())
+        return analyze_linux_gdb_bt(report, report_file.read_string())
 
     if report.extension == 'cdb-bt':
-        return analyze_windows_cdb_bt(report, report_file.read_data())
+        return analyze_windows_cdb_bt(report, report_file.read_string())
 
     if report.extension == 'dmp':
         from dumptool import analyse_dump

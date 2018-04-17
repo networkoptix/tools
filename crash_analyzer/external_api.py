@@ -61,8 +61,8 @@ class CrashServer:
 
 
 def fetch_new_crashes(directory: utils.Directory, report_count: int, known_reports: set = {},
-              min_version: str = '', extension: str = '*',
-              api: type = CrashServer, thread_count: int = 5, **options):
+                      min_version: str = '', extension: str = '*',
+                      api: type = CrashServer, thread_count: int = 5, **options):
     """Fetches :count new reports into :directory, which are not present in :known_reports and
     satisfy :min_version and :extension, returns created file names.
     """
@@ -71,28 +71,30 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
         if len(to_download) >= report_count:
             break
 
-        report = crash_info.Report(name)
-        if report.version < min_version or name in known_reports:
+        if crash_info.Report(name).version < min_version or name in known_reports:
             continue
 
         to_download.append(name)
 
+    logger.info('Found {} new reports on server to fetch'.format(len(to_download)))
     downloaded = []
     for name, result in zip(to_download, utils.run_concurrent(
-            _fetch_crash, to_download, directory=directory, thread_count=thread_count, **options)):
+            _fetch_crash, to_download, directory=directory, thread_count=thread_count, api=api, **options)):
         if isinstance(result, CrashServerError):
             logger.debug(result)
         elif isinstance(result, Exception):
-            logger.error('Download {} has failed: {}'.format(name, traceback.format_exc()))
+            logger.error(result)
         else:
-            downloaded.append(report)
+            downloaded.append(name)
 
+    logger.info('Fetched {} new reports form server'.format(len(downloaded)))
     return downloaded
 
 
 def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer, **options):
     content = api(**options).get(name)
-    directory.file(name).write_data(content, 'b')
+    directory.file(name).write_bytes(content)
+    return len(content)
 
 
 class Jira:
@@ -160,22 +162,19 @@ class Jira:
         for r in reports:
             self._attach_files(key, directory.files(r.file_mask()))
 
-    def _attach_files(self, key: str, files: List[str]):
+    def _attach_files(self, key: str, reports: List[utils.File]):
         """Attaches new :files to JIRA issue.
         """
-        for path in files[-self._file_limit:]:
-            name = os.path.basename(path)
-            with open(path, 'rb') as f:
-                self._jira.add_attachment(key, attachment=f, filename=name)
+        for report in reports[-self._file_limit:]:
+            self._jira.add_attachment(key, attachment=report.path, filename=report.name)
+            logger.debug('JIRA case {} new attachement {}'.format(key, report.name))
 
-            logger.debug('JIRA case {} new attachement {}'.format(key, name))
-
-        files = self._jira.issue(key).fields.attachment
-        files.sort(key=lambda a: a.created)
-        while len(files) > self._file_limit:
-            self._jira.delete_attachment(files[0].id)
-            logger.debug('JIRA case {} replaced attachment {}'.format(key, files[0].filename))
-            del files[0]
+        reports = self._jira.issue(key).fields.attachment
+        reports.sort(key=lambda a: a.created)
+        while len(reports) > self._file_limit:
+            self._jira.delete_attachment(reports[0].id)
+            logger.debug('JIRA case {} replaced attachment {}'.format(key, reports[0].filename))
+            del reports[0]
 
     def _transition(self, issue: jira.Issue, *transition_names: List[str]):
         for name in transition_names:

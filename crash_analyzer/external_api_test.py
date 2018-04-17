@@ -31,10 +31,12 @@ def test_crash_server_concurrent(thread_count):
 
 
 @pytest.mark.parametrize("extension", ['gdb-bt', 'dmp', '*'])
-def test_crash_server_fetch_new(extension):
+def test_fetch_new_crashes(extension):
     with utils.TemporaryDirectory() as directory:
-        assert len(external_api.fetch_new_crashes(
-            directory, extension=extension, **CONFIG['fetch'])) == 20
+        options = dict(CONFIG['fetch'])
+        options.update(report_count=2, extension=extension)
+        new = external_api.fetch_new_crashes(directory, **options)
+        assert 2 == len(new)
 
 
 def _test_crash_server(extension: str):
@@ -63,9 +65,8 @@ class JiraFixture:
             crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])))
 
     def update_issue(self, names: List[str]):
-        if self.api.update_issue(self.issue.key, [crash_info.Report(n) for n in names]):
-            self.api.attach_files(self.issue.key, [utils.Resource('jira', n).path for n in names])
-
+        self.api.update_issue(self.issue.key, [crash_info.Report(n) for n in names],
+                              directory=utils.Resource('jira').directory())
         self.issue = self.api._jira.issue(self.issue.key)
 
     def attachments(self):

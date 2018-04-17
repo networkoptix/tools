@@ -38,9 +38,9 @@ def map_files(action: Callable, directory: str, extension: str):
 )
 def test_analyze_bt(action: Callable, report: str):
     name = crash_info.Report(os.path.basename(report.path))
-    content = report.read_data()
+    content = report.read_string()
     try:
-        code, stack = utils.File(report.path + '-info').read_data().split('\n\n')
+        code, stack = utils.File(report.path + '-info').read_string().split('\n\n')
     except FileNotFoundError:
         with pytest.raises(crash_info.Error):
             print(action(name, content))
@@ -58,5 +58,6 @@ def test_analyze_bt(action: Callable, report: str):
 def test_analyze_files_concurrent(directory, extension):
     reports = [crash_info.Report(r.name) for r in directory.glob('*.' + extension)]
     expected = [crash_info.Report(r.name[:-5]) for r in directory.glob('*.' + extension + '-info')]
-    results = crash_info.analyze_files_concurrent(reports, directory=directory.path, thread_count=2)
+    results = crash_info.analyze_files_concurrent(
+        reports, directory=utils.Directory(directory.path), thread_count=8)
     assert expected == [r for r, _ in results]

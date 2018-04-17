@@ -17,7 +17,7 @@ fetch:
 analyze:
     subprocess_timout_s: 10 #< Newer wait for child processes longer.
     #cache_size_limit: 20G #< Maximum size of cached debug information.
-    thread_count: 2
+    thread_count: 4
 
 upload:
     url: https://networkoptix.atlassian.net/

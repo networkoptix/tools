@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import shutil
-import logging
+from typing import Any, List
 
 import pytest
 
@@ -16,52 +14,42 @@ def _dict_get(name):
 
 
 def test_concurrent():
-    assert {"'one'", "'two'", "'three'", repr(KeyError(4))} == \
-        {repr(r) for r in utils.run_concurrent(_dict_get, [1, 2, 3, 4], thread_count=2)}
+    expected = {"'one'", "'two'", "'three'", repr(KeyError(4))}
+    actual = {repr(r) for r in utils.run_concurrent(_dict_get, [1, 2, 3, 4], thread_count=2)}
+    assert expected == actual
 
 
-@pytest.mark.parametrize("spec, data, args", [
-    ('data', 'hello world', {}),
-    ('data', b'hello world', {'mode': 'b'}),
-    ('json', dict(name='Jack', age=66.6, numbers=[11, 22, 33], alive=True), {}),
-    ('yaml', dict(name='Jill', age=77.7, numbers=[12, 23, 34], alive=False), {}),
+@pytest.mark.parametrize("spec, data", [
+    ('string', 'hello world'),
+    ('bytes', b'hello world'),
+    ('json', dict(name='Jack', age=66.6, numbers=[11, 22, 33], alive=True)),
+    ('yaml', dict(name='Jill', age=77.7, numbers=[12, 23, 34], alive=False)),
 ])
-def test_file_rw(spec, data, args):
-    with utils.TemporaryDirectory() as tmp_directory:
-        f = utils.File(tmp_directory, 'test.file')
-        r, w = getattr(f, 'read_' + spec), getattr(f, 'write_' + spec)
+def test_file_rw(spec: str, data: Any):
+    with utils.TemporaryDirectory() as directory:
+        test_file = directory.file('test.file')
+        read, write = getattr(test_file, 'read_' + spec), getattr(test_file, 'write_' + spec)
 
-        assert data == r(data, **args)
+        assert data == read(data)
         with pytest.raises(FileNotFoundError):
-            print(r(**args))
+            print(read())
 
-        w(data, **args)
-        assert data == r(**args)
+        write(data)
+        assert data == read()
 
-@pytest.mark.parametrize("extension, data", [
-    ('json', ["just", "a", "list"]),
-    ('yaml', ["one", "more", "list"]),
+
+@pytest.mark.parametrize("extension", ['json', 'yaml'])
+@pytest.mark.parametrize("data", [
+    ['just', 'a', 'list', 'of', 1, 'items'],
+    dict(just='a', simple='dict'),
+    dict(more=['complex', 2, 'data', True], structure=3.4),
 ])
-def test_file_parse(extension, data):
-    with utils.TemporaryDirectory() as tmp_directory:
-        f = utils.File('{}/file.{}'.format(tmp_directory, extension))
+def test_file_parse(extension: str, data: List[str]):
+    with utils.TemporaryDirectory() as directory:
+        f = directory.file('file.' + extension)
         with pytest.raises(FileNotFoundError):
             print(f.parse())
 
         getattr(f, 'write_' + extension)(data)
         assert data == f.parse()
 
-
-@pytest.mark.parametrize("make, updates", [
-    (utils.CacheSet, ({"one", "two", "three"}, {"fore"}, {"five"})),
-    (utils.CacheDict, ({"one": "two", "three": "fore"}, {"five": "six"})),
-])
-def test_cache(make, updates):
-    with utils.TemporaryDirectory() as tmp_directory:
-        first = make(tmp_directory, 'test.cache')
-        assert not first
-        for update in updates:
-            first.update(update)
-            first.save()
-            second = make(tmp_directory, 'test.cache')
-            assert first == second

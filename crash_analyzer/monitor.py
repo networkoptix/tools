@@ -12,6 +12,8 @@ import utils
 
 logger = logging.getLogger(__name__)
 
+FAILED_CRASH_ID = 'FAILED'
+
 
 class Options:
     def __init__(self, directory: str, **extra):
@@ -58,29 +60,31 @@ class Monitor:
             self._options.records_file.serialize(self._records)
 
     def fetch(self):
+        logger.info('Fetching new reports from server')
         new_reports = external_api.fetch_new_crashes(
-            self._options.reports_directory, known_reports=self._records, **self._fetch)
+            self._options.reports_directory, known_reports=self._records.keys(), **self._fetch)
 
         if not new_reports:
             return 0
 
-        for report in new_reports:
-            self._records[report.name] = dict(name=report.name)
+        for name in new_reports:
+            self._records[name] = dict(name=name)
 
         self.flush_records()
         return len(new_reports)
 
     def analyze(self):
-        to_analyze = [r['name'] for r in self._records.values() if not r.get('crash_id')]
-        analyzed = {name: reason for name, reason in crash_info.analyze_files_concurrent(
-            to_analyze, derectory=self._options.reports_directory, **self._analyze)}
+        to_analyze = [crash_info.Report(r['name'])
+                      for r in self._records.values() if not r.get('crash_id')]
 
-        if not analyzed:
-            return 0
+        logger.info('Analyze {} reports in local database'.format(len(to_analyze)))
+        analyzed = {report.name: reason for report, reason in crash_info.analyze_files_concurrent(
+            to_analyze, directory=self._options.reports_directory, **self._analyze)}
 
-        for name in to_analyze:
-            reason = analyzed.get(name)
-            self._records[name]['crash_id'] = reason.crash_id if reason else 'FAILED'
+        for report in to_analyze:
+            reason = analyzed.get(report.name)
+            crash_id = reason.crash_id if reason else FAILED_CRASH_ID
+            self._records[report.name]['crash_id'] = crash_id
 
         self.flush_records()
         return len(analyzed)
@@ -89,7 +93,7 @@ class Monitor:
         crashes_by_id = {}
         for name, record in self._records.items():
             crash_id, issue = record.get('crash_id'), record.get('issue')
-            if crash_id:
+            if crash_id and crash_id != FAILED_CRASH_ID:
                 crash_data = crashes_by_id.setdefault(crash_id, {'issue': None, 'reports': []})
                 if issue:
                     crash_data['issue'] = issue
@@ -97,31 +101,33 @@ class Monitor:
                     crash_data['reports'].append(crash_info.Report(name))
 
         crashes_to_push = []
-        for _, data in crashes_by_id:
+        for _, data in crashes_by_id.items():
             if data['reports']:
                 if data['issue'] or len(data['reports']) >= self._options.min_report_count:
                     crashes_to_push.append((data['issue'], data['reports']))
 
+        logger.info('Create or update {} issues with new reports'.format(len(crashes_to_push)))
         for result in utils.run_concurrent(self._jira_sync, crashes_to_push,
                                            directory=self._options.reports_directory, **self._upload):
             if isinstance(result, Exception):
-                logger.error('{} -> {}'.format(result, traceback.format_exc()))
+                logger.error(result)
             else:
                 issue, reports = result
+                logger.info('Issue {} updated with {} new reports'.format(issue, len(reports)))
                 for r in reports:
-                    self._records[r]['issue'] = issue
+                    self._records[r.name]['issue'] = issue
 
         if crashes_to_push:
             self.flush_records()
 
     @staticmethod
-    def _jira_sync(crash_tuple: Tuple[str, List[str]], directory: utils.Directory,
+    def _jira_sync(crash_tuple: Tuple[str, List[crash_info.Report]], directory: utils.Directory,
                    api: type = external_api.Jira, **options):
         jira = api(**options)
         issue, reports = crash_tuple
         if not issue:
-            report = crash_info.Report(reports[0])  # < Any will do.
-            reason = crash_info.analyze_file(report.name, directory)  # < Fast for new reports.
+            report = reports[0]  # < Any will do.
+            reason = crash_info.analyze_file(report, directory)  # < Fast for known reports.
             issue = jira.create_issue(report, reason)
 
         jira.update_issue(issue, reports)

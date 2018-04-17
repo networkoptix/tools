@@ -10,7 +10,7 @@ import random
 import shutil
 import traceback
 from glob import glob
-from typing import Callable, List, Any
+from typing import Callable, Any
 
 import yaml
 
@@ -22,17 +22,16 @@ POWER_SUFFIXES = dict(
     K=1024, M=1024**2, G=1024**3, T=1024*4,
 )
 
+
 def setup_logging(level: str = 'debug', path: str = '-'):
     """Sets up application log :level and :path.
     """
-    LOGGIGNG_SETUP = dict(
-        level=getattr(logging, level.upper(), None) or int(args.level),
+    logging.basicConfig(
+        level=getattr(logging, level.upper(), None) or int(level),
         stream=sys.stdout if path == '-' else open(path, 'w'),
-        format=LOGGING_FORMAT,
-    )
+        format=LOGGING_FORMAT)
 
-    logging.basicConfig(**LOGGIGNG_SETUP)
-    logging.info('Log is configured for level: {}, file: {}'.format(level, path))
+    logging.info('Log is configured with level: {}, file: {}'.format(level, path))
 
 
 def is_ascii_printable(s: str):
@@ -74,22 +73,31 @@ def _concurrent_main(task):
     except Exception as exception:
         result = exception
         logging.debug('Exception: {}'.format(traceback.format_exc()))
+        if getattr(run_concurrent, 'debug', None) == 'raise':
+            raise
 
     return {'result': result, 'logs': log_stream.lines()}
 
 
-def run_concurrent(action: Callable, tasks: list, thread_count: int, map_arguments: bool = False, **kwargs):
+def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
+    results = []
     log_level = logger.getEffectiveLevel()
 
-    def wrap_task(task):
-        return {'action': action, 'argument': task, 'kwargs': kwargs, 'log_level': log_level}
+    def save_result(result, logs):
+        results.append(result)
+        for line in logs:
+            logger.info(line)
 
-    results = []
-    with multiprocessing.Pool(thread_count) as pool:
-        for result in pool.map(_concurrent_main, (wrap_task(t) for t in tasks)):
-            results.append(result['result'])
-            for line in result['logs']:
-                logger.info(line)
+    def wrap_task(t):
+        return {'action': action, 'argument': t, 'kwargs': kwargs, 'log_level': log_level}
+
+    if not hasattr(run_concurrent, 'debug'):
+        with multiprocessing.Pool(thread_count) as pool:
+            for result in pool.map(_concurrent_main, (wrap_task(t) for t in tasks)):
+                save_result(**result)
+    else:
+        for task in tasks:
+            save_result(**_concurrent_main(wrap_task(task)))
 
     return results
 
@@ -132,11 +140,17 @@ class File:
             logger.warning('Read "{}" for non-existing file: {}'.format(default, self.path))
             return default
 
-    def write_data(self, data, mode=''):
-        self.write(lambda f: f.write(data), mode)
+    def write_string(self, data):
+        self.write(lambda f: f.write(data))
 
-    def read_data(self, default=None, mode=''):
-        return self.read(lambda f: f.read(), default, mode)
+    def read_string(self, default=None):
+        return self.read(lambda f: f.read(), default)
+
+    def write_bytes(self, data):
+        self.write(lambda f: f.write(data), 'b')
+
+    def read_bytes(self, default=None):
+        return self.read(lambda f: f.read(), default, 'b')
 
     def write_json(self, data):
         self.write(lambda f: json.dump(data, f))
@@ -199,13 +213,15 @@ class Directory:
 
 class TemporaryDirectory(Directory):
     def __init__(self):
-        super().__init__('./tmp_directroy_' + '{0:5}'.format(random.randint(0, 99999)))
+        super().__init__('./_tmp_directory_' + '{0:0>5}'.format(random.randint(0, 99999)))
 
     def __enter__(self):
+        logging.info('New temporary directory: ' + self.path)
         self.make()
-        return self.path
+        return self
 
     def __exit__(self, *args):
+        logging.info('Remove temporary directory: ' + self.path)
         self.remove()
 
 
@@ -216,25 +232,8 @@ class Resource(File):
 
         super().__init__(*path)
 
+    def directory(self, *path):
+        return Directory(self.path, *path)
+
     def glob(self, *path):
         return [Resource(p) for p in glob(os.path.join(self.path, *path))]
-
-
-class CacheSet(set):
-    def __init__(self, *path):
-        super().__init__()
-        self._cache = File(*path)
-        self.update(self._cache.read_json(set()))
-
-    def save(self):
-        self._cache.write_container(('"{}"'.format(i) for i in self), '[]')
-
-
-class CacheDict(dict):
-    def __init__(self, *path):
-        super().__init__()
-        self._cache = File(*path)
-        self.update(self._cache.read_json(dict()))
-
-    def save(self):
-        self._cache.write_container('"{}": "{}"'.format(k, v) for k, v in self.items())
