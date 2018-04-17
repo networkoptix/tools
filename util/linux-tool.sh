@@ -393,6 +393,26 @@ find_APIDOCTOOL_JAR()
     APIDOCTOOL_JAR="$PACKAGES_DIR/any/$PACKAGE/apidoctool.jar"
 }
 
+find_APIDOCTOOL_PARAMS()
+{
+    local -r LIST=( $(sed -n '/set(apidoctool_params/,/)/p' \
+        "$VMS_DIR/mediaserver_core/CMakeLists.txt") )
+    nx_log_array LIST
+
+    if (( ${#LIST[@]} == 0 ))
+    then
+        APIDOCTOOL_PARAMS=()
+    else
+        local -i i=1 #< Start from item #1, because #0 is the header line.
+        while (( i != ${#LIST[@]} - 1 )) #< Ignore the last item which is ")".
+        do
+            APIDOCTOOL_PARAMS+=( "$(echo "${LIST[$i]}" |sed 's/"//g')" )
+            (( ++i ))
+        done
+    fi
+    nx_log_array APIDOCTOOL_PARAMS
+}
+
 do_apidoc() # dev|prod [action] "$@"
 {
     local -r TOOL="$1" && shift
@@ -414,6 +434,9 @@ do_apidoc() # dev|prod [action] "$@"
     else
         local -r ACTION="$1" && shift
     fi
+
+    local -a APIDOCTOOL_PARAMS
+    find_APIDOCTOOL_PARAMS
 
     local -r API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
     local -r API_JSON="$CMAKE_BUILD_DIR/mediaserver_core/api.json"
@@ -438,22 +461,26 @@ do_apidoc() # dev|prod [action] "$@"
                     -template-xml "$(nx_path "$API_TEMPLATE_XML")"
                     -output-xml $(nx_path "$API_XML")
                     -output-json $(nx_path "$API_JSON")
-                );;
+                    ${APIDOCTOOL_PARAMS[@]}
+                )
+                ;;
             test)
                 OUTPUT_DIR_NEEDED=1
                 local -r ARGS=(
                     -test-path "$(nx_path "$DEVELOP_DIR/devtools/apidoctool/test")"
                     -output-test-path "$(nx_path "$OUTPUT_DIR")"
-                );;
+                )
+                ;;
             sort-xml)
                 OUTPUT_DIR_NEEDED=1
                 local -r ARGS=(
                     -group-name "System API"
                     -source-xml $(nx_path "$API_XML")
                     -output-xml "$(nx_path "$OUTPUT_DIR/api.xml")"
-                );;
+                )
+                ;;
             print-deps)
-                local -r ARGS=()
+                local -r ARGS=( ${APIDOCTOOL_PARAMS[@]} )
                 ;;
             *) nx_fail "Unsupported action: [$ACTION]";;
         esac
