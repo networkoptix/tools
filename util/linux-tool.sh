@@ -367,6 +367,19 @@ do_run_ut() # [all|TestName] "$@"
     nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
 }
 
+find_APIDOCTOOL_JAR()
+{
+    local PACKAGE=$(cat "$VMS_DIR/sync_dependencies.py" \
+        |grep -oE '"any/apidoctool(-[0-9.]+)?' |sed 's$"any/$$g')
+
+    if [ -z "$PACKAGE" ]
+    then
+        PACKAGE="apidoctool"
+    fi
+
+    APIDOCTOOL_JAR="$PACKAGES_DIR/any/$PACKAGE/apidoctool.jar"
+}
+
 do_apidoc() # dev|prod [action] "$@"
 {
     local -r TOOL="$1" && shift
@@ -375,7 +388,9 @@ do_apidoc() # dev|prod [action] "$@"
         local -r JAR=$(nx_path "$DEVELOP_DIR/devtools/apidoctool/out/apidoctool.jar")
     elif [ "$TOOL" = "prod" ]
     then
-        local -r JAR=$(nx_path "$PACKAGES_DIR/any/apidoctool/apidoctool.jar")
+        local APIDOCTOOL_JAR
+        find_APIDOCTOOL_JAR
+        local -r JAR=$(nx_path "$APIDOCTOOL_JAR")
     else
         nx_fail "Invalid apidoctool location \"$TOOL\": expected \"dev\" or \"prod\"."
     fi
