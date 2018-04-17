@@ -367,6 +367,19 @@ do_run_ut() # [all|TestName] "$@"
     nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
 }
 
+copy_if_exists_and_different() # source_file target_file
+{
+    local -r SOURCE_FILE="$1" && shift
+    local -r TARGET_FILE="$1" && shift
+
+    if [ -f "$SOURCE_FILE" ] && \
+        ( [ ! -f "$TARGET_FILE" ] || ! diff "$SOURCE_FILE" "$TARGET_FILE" >/dev/null )
+    then
+        nx_echo
+        nx_verbose cp "$SOURCE_FILE" "$TARGET_FILE" || exit $?
+    fi
+}
+
 find_APIDOCTOOL_JAR()
 {
     local PACKAGE=$(cat "$VMS_DIR/sync_dependencies.py" \
@@ -402,8 +415,8 @@ do_apidoc() # dev|prod [action] "$@"
         local -r ACTION="$1" && shift
     fi
 
-    local -r SOURCE_API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
-    local -r API_XML=$(nx_path "$SOURCE_API_XML")
+    local -r API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
+    local -r API_JSON="$CMAKE_BUILD_DIR/mediaserver_core/api.json"
 
     local -r API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
     if [ ! -f "$API_TEMPLATE_XML" ]
@@ -423,7 +436,8 @@ do_apidoc() # dev|prod [action] "$@"
                 local -r ARGS=(
                     -vms-path "$(nx_path "$VMS_DIR")"
                     -template-xml "$(nx_path "$API_TEMPLATE_XML")"
-                    -output-xml "$API_XML"
+                    -output-xml $(nx_path "$API_XML")
+                    -output-json $(nx_path "$API_JSON")
                 );;
             test)
                 OUTPUT_DIR_NEEDED=1
@@ -431,19 +445,11 @@ do_apidoc() # dev|prod [action] "$@"
                     -test-path "$(nx_path "$DEVELOP_DIR/devtools/apidoctool/test")"
                     -output-test-path "$(nx_path "$OUTPUT_DIR")"
                 );;
-            xml-to-code)
-                OUTPUT_DIR_NEEDED=1
-                local -r ARGS=(
-                    -vms-path "$(nx_path "$VMS_DIR")"
-                    -output-vms-path "$(nx_path "$OUTPUT_DIR")"
-                    -source-xml "$(nx_path "$API_TEMPLATE_XML")"
-                    -output-xml "$(nx_path "$OUTPUT_DIR/api.xml")"
-                );;
             sort-xml)
                 OUTPUT_DIR_NEEDED=1
                 local -r ARGS=(
                     -group-name "System API"
-                    -source-xml "$API_XML"
+                    -source-xml $(nx_path "$API_XML")
                     -output-xml "$(nx_path "$OUTPUT_DIR/api.xml")"
                 );;
             print-deps)
@@ -460,13 +466,10 @@ do_apidoc() # dev|prod [action] "$@"
         RESULT=$?
     fi
 
-    # Copy generated api.xml to resources, if exists and differs.
-    local -r TARGET_API_XML="$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.xml"
-    if [ -f "$SOURCE_API_XML" ] && ! diff "$SOURCE_API_XML" "$TARGET_API_XML" >/dev/null
-    then
-        nx_echo
-        nx_verbose cp "$SOURCE_API_XML" "$TARGET_API_XML" || exit $?
-    fi
+    copy_if_exists_and_different "$API_XML" \
+        "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.xml"
+    copy_if_exists_and_different "$API_JSON" \
+        "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.json"
 
     return $RESULT
 }
