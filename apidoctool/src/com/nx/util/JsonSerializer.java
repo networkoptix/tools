@@ -10,14 +10,19 @@ public final class JsonSerializer
 {
     public static final JSONObject toJson(Serializable serializable)
     {
-        JsonGenerator generator = new JsonGenerator(serializable.getSerializationName());
-        serializable.writeToGenerator(generator);
-        return generator.json;
+        return toJson(serializable, serializable.getSerializationName());
     }
 
     public static final String toJsonString(Serializable serializable)
     {
-        return toJson(serializable).toString(2);
+        return toJson(serializable).toString(/*indentFactor*/ 2);
+    }
+
+    private static final JSONObject toJson(Serializable serializable, String name)
+    {
+        JsonGenerator generator = new JsonGenerator(name);
+        serializable.writeToGenerator(generator);
+        return generator.json;
     }
 
     public static <T extends Serializable>
@@ -36,7 +41,7 @@ public final class JsonSerializer
                 "Invalid JSON for " + serializable.getSerializationName() + ": " + e.getMessage());
         }
 
-        JsonParser.fromJson(serializable, json);
+        JsonParser.fromJson(serializable, json, serializable.getSerializationName());
 
         return serializable;
     }
@@ -45,33 +50,40 @@ public final class JsonSerializer
 
     private static final class JsonGenerator implements Serializable.Generator
     {
-        private final String serializationName;
+        private final String parentName;
         private final JSONObject json = new JSONObject();
 
-        private JsonGenerator(String serializationName)
+        /**
+         * @param parentName Used for error messages.
+         */
+        private JsonGenerator(String parentName)
         {
-            this.serializationName = serializationName;
+            this.parentName = parentName;
         }
 
-        private void writeStringField(
-            String name, String value, Serializable.Emptiness emptiness, String fieldTypeName)
+        private boolean omitIfAllowed(
+            String name, Serializable.Emptiness emptiness, String valueTypeName)
+        {
+            switch (emptiness)
+            {
+                case PROHIBIT:
+                    throw new RuntimeException(
+                        "INTERNAL ERROR: Required " + valueTypeName + " is empty: " +
+                            parentName + "." + name);
+                case OMIT:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void writeStringValue(
+            String name, String value, Serializable.Emptiness emptiness, String valueTypeName)
         {
             if (value == null)
                 value = "";
-
-            if (value.isEmpty())
-            {
-                switch (emptiness)
-                {
-                    case PROHIBIT:
-                        throw new RuntimeException(
-                            "INTERNAL ERROR: Required " + fieldTypeName + " is empty: " +
-                                serializationName + "." + name);
-                    case OMIT:
-                        return;
-                    default:
-                }
-            }
+            if (value.isEmpty() && omitIfAllowed(name, emptiness, valueTypeName))
+                return;
 
             json.put(name, value);
         }
@@ -79,7 +91,7 @@ public final class JsonSerializer
         public void writeStringAttr(
             String name, String value, Serializable.Emptiness emptiness)
         {
-            writeStringField(name, value, emptiness, "string attribute");
+            writeStringValue(name, value, emptiness, "string attribute");
         }
 
         public void writeBooleanAttr(
@@ -94,7 +106,7 @@ public final class JsonSerializer
 
         public void writeString(String name, String value, Serializable.Emptiness emptiness)
         {
-            writeStringField(name, value, emptiness, "string");
+            writeStringValue(name, value, emptiness, "string");
         }
 
         public void writeBoolean(
@@ -105,53 +117,34 @@ public final class JsonSerializer
 
         public void writeInnerXml(String name, String xml, Serializable.Emptiness emptiness)
         {
-            writeStringField(name, xml, emptiness, "xml");
+            if (xml == null)
+                xml = "";
+            if (xml.isEmpty() && omitIfAllowed(name, emptiness, "xml"))
+                return;
+            JSONObject objJson = new JSONObject();
+            objJson.put("xml", xml);
+            json.put(name, objJson);
         }
 
-        public void writeObject(
-            String name, Serializable object, Serializable.Emptiness emptiness)
+        public void writeObject(String name, Serializable object, Serializable.Emptiness emptiness)
         {
-            JSONObject objJson = toJson(object);
-            if (objJson.length() == 0)
-            {
-                switch (emptiness)
-                {
-                    case PROHIBIT:
-                        throw new RuntimeException(
-                            "INTERNAL ERROR: Required JSON object is empty: " +
-                                serializationName + "." + name);
-                    case OMIT:
-                        return;
-                    default:
-                        // Do nothing.
-                }
-            }
-
+            JSONObject objJson = toJson(object, parentName + "." + name);
+            if (objJson.length() == 0 && omitIfAllowed(name, emptiness, "object"))
+                return;
             json.put(name, objJson);
         }
 
         public void writeObjectList(
-            String listName,
-            List<? extends Serializable> list,
-            Serializable.Emptiness emptiness)
+            String listName, List<? extends Serializable> list, Serializable.Emptiness emptiness)
         {
-            if (list.isEmpty())
-            {
-                switch (emptiness)
-                {
-                    case PROHIBIT:
-                        throw new RuntimeException(
-                            "INTERNAL ERROR: Required list is empty: " +
-                                serializationName + "." + listName);
-                    case OMIT:
-                        return;
-                    default:
-                }
-            }
-
+            if (list.isEmpty() && omitIfAllowed(listName, emptiness, "list"))
+                return;
             JSONArray jsonArray = new JSONArray();
-            for (Serializable object: list)
-                jsonArray.put(toJson(object));
+            for (int i = 0; i < list.size(); ++i)
+            {
+                final Serializable object = list.get(i);
+                jsonArray.put(toJson(object, parentName + "." + listName + "[" + i + "]"));
+            }
             json.put(listName, jsonArray);
         }
     }
@@ -160,56 +153,90 @@ public final class JsonSerializer
 
     private static final class JsonParser implements Serializable.Parser
     {
-        private final String serializationName;
+        private final String parentName;
         private final JSONObject jsonObject;
 
-        private JsonParser(String serializationName, JSONObject jsonObject)
+        private JsonParser(String parentName, JSONObject jsonObject)
         {
-            this.serializationName = serializationName;
+            this.parentName = parentName;
             this.jsonObject = jsonObject;
         }
 
-        /** @param jsonObject Can be null, then the object is initialized to its default state. */
-        public static void fromJson(Serializable serializable, JSONObject jsonObject) throws Error
+        /**
+         * @param jsonObject Can be null, then the object is initialized to its default state.
+         * @param parentName Used for error messages.
+         */
+        private static void fromJson(
+            Serializable serializable, JSONObject jsonObject, String parentName)
+            throws Error
         {
-            JsonParser parser = new JsonParser(serializable.getSerializationName(), jsonObject);
+            JsonParser parser = new JsonParser(parentName, jsonObject);
             serializable.readFromParser(parser);
         }
 
-        private String readStringField(
-            String attrName, Serializable.Presence presence, String fieldTypeName) throws Error
+        private boolean isFieldMissing(
+            String name, Serializable.Presence presence, String fieldTypeName) throws Error
         {
-            if (jsonObject == null)
+            if (jsonObject.opt(name) != null)
+                return false;
+
+            if (presence == Serializable.Presence.REQUIRED)
+            {
+                throw new Error("Required " + fieldTypeName + " field is missing: "
+                    + parentName + "." + name);
+            }
+            return true;
+        }
+
+        private String readStringField(
+            String name, Serializable.Presence presence, String fieldTypeName) throws Error
+        {
+            if (jsonObject == null || isFieldMissing(name, presence, fieldTypeName))
                 return "";
 
-            if (jsonObject.opt(attrName) == null)
-            {
-                if (presence == Serializable.Presence.REQUIRED)
-                {
-                    throw new Error("Required " + fieldTypeName + " field is missing: " +
-                        serializationName + "." + attrName);
-                }
-                return "";
-            }
+            final String fullName = parentName + "." + name;
 
             final String value;
             try
             {
-                value = jsonObject.getString(attrName);
+                value = jsonObject.getString(name);
             }
             catch (JSONException e)
             {
-                throw new Error("Invalid " + fieldTypeName + " field " +
-                    serializationName + "." + attrName + ": " + e.getMessage());
+                throw new Error("Invalid " + fieldTypeName + " field " + fullName + ": "
+                    + e.getMessage());
             }
 
             if (presence == Serializable.Presence.REQUIRED && value.isEmpty())
-            {
-                throw new Error("Required " + fieldTypeName + " field is empty: " +
-                    serializationName + "." + attrName);
-            }
+                throw new Error("Required " + fieldTypeName + " field is empty: " + fullName);
 
             return value;
+        }
+
+        private boolean readBooleanField(
+            String name, Serializable.BooleanDefault booleanDefault, String fieldTypeName)
+            throws Error
+        {
+            if (jsonObject == null)
+                return false;
+
+            final String fullName = parentName + "." + name;
+            if (jsonObject.opt(name) == null)
+            {
+                if (booleanDefault == Serializable.BooleanDefault.NONE)
+                    throw new Error("Required " + fieldTypeName + " field is missing: " + fullName);
+                return booleanDefault == Serializable.BooleanDefault.TRUE;
+            }
+
+            try
+            {
+                return jsonObject.getBoolean(name);
+            }
+            catch (JSONException e)
+            {
+                throw new Error("Invalid " + fieldTypeName + " value in " + fullName + ": "
+                    + e.getMessage());
+            }
         }
 
         public String readStringAttr(
@@ -219,30 +246,9 @@ public final class JsonSerializer
         }
 
         public boolean readBooleanAttr(String attrName, Serializable.BooleanDefault booleanDefault)
-        throws Error
+            throws Error
         {
-            if (jsonObject == null)
-                return false;
-
-            if (jsonObject.opt(attrName) == null)
-            {
-                if (booleanDefault == Serializable.BooleanDefault.NONE)
-                {
-                    throw new Error("Required boolean field is missing: " +
-                        serializationName + "." + attrName);
-                }
-                return booleanDefault == Serializable.BooleanDefault.TRUE;
-            }
-
-            try
-            {
-                return jsonObject.getBoolean(attrName);
-            }
-            catch (JSONException e)
-            {
-                throw new Error("Invalid boolean value in " + serializationName + "." + attrName
-                    + ": " + e.getMessage());
-            }
+            return readBooleanField(attrName, booleanDefault, "boolean (attribute)");
         }
 
         public String readString(String name, Serializable.Presence presence) throws Error
@@ -253,12 +259,44 @@ public final class JsonSerializer
         public boolean readBoolean(String name, Serializable.BooleanDefault booleanDefault)
             throws Error
         {
-            return readBooleanAttr(name, booleanDefault);
+            return readBooleanField(name, booleanDefault, "boolean");
         }
 
         public String readInnerXml(String name, Serializable.Presence presence) throws Error
         {
-            return readStringField(name, presence, "string (xml)");
+            if (jsonObject == null || isFieldMissing(name, presence, "object (xml)"))
+                return "";
+
+            final String fullName = parentName + "." + name;
+
+            final JSONObject childJsonObject;
+            try
+            {
+                childJsonObject = jsonObject.getJSONObject(name);
+            }
+            catch (JSONException e)
+            {
+                throw new Error("Invalid object (xml) in " + fullName + ": " + e.getMessage());
+            }
+
+            if (childJsonObject.opt("xml") == null)
+                throw new Error("Required string (xml) field is missing: " + fullName + ".xml");
+
+            final String value;
+            try
+            {
+                value = childJsonObject.getString("xml");
+            }
+            catch (JSONException e)
+            {
+                throw new Error("Invalid string (xml) field " + fullName + ".xml: "
+                    + e.getMessage());
+            }
+
+            if (presence == Serializable.Presence.REQUIRED && value.isEmpty())
+                throw new Error("Required string (xml) field is empty: " + fullName + ".xml");
+
+            return value;
         }
 
         public <T extends Serializable> T readObject(
@@ -266,55 +304,36 @@ public final class JsonSerializer
         {
             final T childObject = Utils.createObject(objectClass);
 
-            if (jsonObject == null)
+            if (jsonObject == null || isFieldMissing(name, presence, "object"))
                 return childObject;
 
-            if (jsonObject.opt(name) == null)
-            {
-                if (presence == Serializable.Presence.REQUIRED)
-                {
-                    throw new Error("Required object is missing: "
-                        + serializationName + "." + name);
-                }
-                return childObject;
-            }
+            final String fullName = parentName + "." + name;
 
-            JSONObject childJsonObject = null;
+            final JSONObject childJsonObject;
             try
             {
                 childJsonObject = jsonObject.getJSONObject(name);
             }
             catch (JSONException e)
             {
-                throw new Error("Invalid object in " + serializationName + "." + name + ": "
-                    + e.getMessage());
+                throw new Error("Invalid object in " + fullName + ": " + e.getMessage());
             }
 
-            fromJson(childObject, childJsonObject);
+            fromJson(childObject, childJsonObject, fullName);
 
             return childObject;
         }
 
         public <T extends Serializable>
         void readObjectList(
-            String listName,
-            List<T> list,
-            Class<T> objectClass,
-            Serializable.Presence presence) throws Error
+            String listName, List<T> list, Class<T> objectClass, Serializable.Presence presence)
+            throws Error
         {
             list.clear();
-            if (jsonObject == null)
+            if (jsonObject == null || isFieldMissing(listName, presence, "array"))
                 return;
 
-            if (jsonObject.opt(listName) == null)
-            {
-                if (presence == Serializable.Presence.REQUIRED)
-                {
-                    throw new Error("Array field not found: " +
-                        serializationName + "." + listName);
-                }
-                return;
-            }
+            final String listFullName = parentName + "." + listName;
 
             final JSONArray jsonArray;
             try
@@ -323,12 +342,12 @@ public final class JsonSerializer
             }
             catch (JSONException e)
             {
-                throw new Error("Invalid array field " + serializationName + "." + listName + ": "
-                    + e.getMessage());
+                throw new Error("Invalid array field " + listFullName + ": " + e.getMessage());
             }
 
             for (int i = 0; i < jsonArray.length(); ++i)
             {
+                final String itemFullName = listFullName + "[" + i + "]";
                 final JSONObject childJsonObject;
                 try
                 {
@@ -336,20 +355,17 @@ public final class JsonSerializer
                 }
                 catch (JSONException e)
                 {
-                    throw new Error("Invalid array item in " + serializationName + "." + listName
-                        + ": " + e.getMessage());
+                    throw new Error("Invalid array item in " + itemFullName + ": "
+                        + e.getMessage());
                 }
 
                 final T childObject = Utils.createObject(objectClass);
-                fromJson(childObject, childJsonObject);
+                fromJson(childObject, childJsonObject, itemFullName);
                 list.add(childObject);
             }
 
             if (list.isEmpty() && presence == Serializable.Presence.REQUIRED)
-            {
-                throw new Error("No array items found in " +
-                    serializationName + "." + listName);
-            }
+                throw new Error("No array items found in " + listFullName);
         }
     }
 }
