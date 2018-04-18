@@ -161,8 +161,11 @@ class CMakeBuilder(object):
                 log.info('Building with cmake failed: %s', build_results.error_message)
         else:
             log.info('Generating with cmake failed: %s', generate_results.error_message)
+        log.info('Storing output to junk-shop db...')
         build_info = store_output_and_error(self._junk_shop_repository, output, succeeded, error_message)
+        log.info('Storing log artifacts to junk-shop db...')
         self._store_log_artifacts(build_dir, build_info)
+        log.info('Reading build info file...')
         cmake_build_info = self._read_cmake_build_info_file(build_dir)
         log.info('Build results are stored to junk-shop database at %r: outcome=%r, run.id=%r',
                      self._junk_shop_repository.db_config, build_info.outcome, build_info.run_id)
