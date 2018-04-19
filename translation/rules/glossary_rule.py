@@ -2,9 +2,9 @@ from validation_rule import ValidationRule, Levels
 
 case_sensitive = [
     'URL', 'Hi-Res', 'Custom-Res',
-    'Id', 'PTZ',
+    'ID', 'PTZ',
     'License Key',
-    'Hardware Id',
+    'Hardware ID',
     'the Internet',
     'the support team',
     'System', "Systems",
