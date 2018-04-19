@@ -26,12 +26,11 @@ public final class Tests extends TestBase
                 input.close();
             }
 
-            apiXmlFunctionsCount = Integer.valueOf(
-                properties.getProperty("apiXmlFunctionsCount"));
+            apiXmlFunctionsCount = Integer.valueOf(properties.getProperty("apiXmlFunctionsCount"));
         }
         catch (Throwable e)
         {
-            System.err.println("");
+            System.err.println();
             System.err.println("FATAL ERROR: Unable to read " + testPropertiesFile + ": "
                 + e.getMessage());
             System.exit(2);
@@ -106,24 +105,24 @@ public final class Tests extends TestBase
     private void testParamsBase()
         throws Exception
     {
-        final TestParams params = new TestParams();
-        assertEquals("default value", params.stringParam());
-        params.printHelp(System.out, "    ");
+        final TestParams testParams = new TestParams();
+        assertEquals("default value", testParams.stringParam());
+        testParams.printHelp(System.out, "    ");
 
-        testParamsBaseInvalidArg(params, "-Dunknown=value");
-        testParamsBaseInvalidArg(params, "-D=missingName");
-        testParamsBaseInvalidArg(params, "-DstringParam");
-        testParamsBaseInvalidArg(params, "noMinusD");
+        testParamsBaseInvalidArg(testParams, "-Dunknown=value");
+        testParamsBaseInvalidArg(testParams, "-D=missingName");
+        testParamsBaseInvalidArg(testParams, "-DstringParam");
+        testParamsBaseInvalidArg(testParams, "noMinusD");
 
         final String stringValue = "Value with 2 spaces,\\backslash,\ttab,\nnewline";
 
-        params.parse(
+        testParams.parse(
             /*optionalFile*/ null,
             Arrays.asList("-DstringParam=" + stringValue),
             /*verbose*/ true);
-        assertEquals(stringValue, params.stringParam());
+        assertEquals(stringValue, testParams.stringParam());
 
-        params.stringParam.setLength(0);
+        testParams.stringParam.setLength(0);
 
         final List<String> testFileText = Arrays.asList(
             "stringParam=Value with 2 spaces,\\\\backslash,\\ttab,\\nnewline",
@@ -131,9 +130,9 @@ public final class Tests extends TestBase
 
         final File testFile = new File(outputTestPath + "/params.properties");
         Utils.writeStringListToFile(testFile, testFileText, /*lineBreak*/ "\n");
-        params.parse(testFile, Collections.<String>emptyList(), /*verbose*/ false);
+        testParams.parse(testFile, Collections.<String>emptyList(), /*verbose*/ false);
 
-        assertEquals(stringValue, params.stringParam());
+        assertEquals(stringValue, testParams.stringParam());
     }
 
     private void testApidocSerialization()
@@ -151,8 +150,8 @@ public final class Tests extends TestBase
     private void testSourceCodeEditor()
         throws Exception
     {
-        final File outputCppFile = new File(outputTestPath + "/nx_vms/appserver2/src/connection_factory.cpp");
-        final File cppFile = new File(vmsPath + "/appserver2/src/connection_factory.cpp");
+        final File outputCppFile = new File(outputVmsPath + params.templateRegistrationCpp());
+        final File cppFile = new File(vmsPath + params.templateRegistrationCpp());
 
         final SourceCodeEditor sourceCodeEditor = new SourceCodeEditor(cppFile);
         sourceCodeEditor.saveToFile(outputCppFile);
@@ -163,15 +162,17 @@ public final class Tests extends TestBase
     private void testSourceCodeParserTemplate()
         throws Exception
     {
-        final File templateFunctionsCppFile = new File(sourceCodeParserTestPath + "/template_functions.cpp");
+        final File templateFunctionsCppFile = new File(
+            sourceCodeParserTestPath + "/template_functions.cpp");
         final File expectedTemplateFunctionsXmlFile = new File(
-                sourceCodeParserTestPath + "/expected_template_functions.xml");
-        final File outputApidocXmlFile = new File(sourceCodeParserOutputTestPath + "/template_functions.xml");
+            sourceCodeParserTestPath + "/expected_template_functions.xml");
+        final File outputApidocXmlFile = new File(
+            sourceCodeParserOutputTestPath + "/template_functions.xml");
 
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
-                XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
+            XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        System.out.println("test: parsing apidoc in \"template\" type C++ and comparing it to the expected XML");
+        System.out.println("test: parsing apidoc in \"template\" functions C++");
         System.out.println("    Sample: " + expectedTemplateFunctionsXmlFile);
         System.out.println("    Input: " + templateFunctionsCppFile);
 
@@ -180,7 +181,6 @@ public final class Tests extends TestBase
         final int processedFunctionsCount =
             sourceCodeParser.parseApidocComments(apidoc, new TemplateRegistrationMatcher());
         System.out.println("    API functions processed: " + processedFunctionsCount);
-
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApidocXmlFile);
@@ -191,21 +191,23 @@ public final class Tests extends TestBase
     private void testSourceCodeParserHandler()
         throws Exception
     {
-        final File handlerFunctionsCppFile = new File(sourceCodeParserTestPath + "/handler_functions.cpp");
+        final File handlerFunctionsCppFile = new File(
+            sourceCodeParserTestPath + "/handler_functions.cpp");
         final File expectedHandlerFunctionsXmlFile = new File(
             sourceCodeParserTestPath + "/expected_handler_functions.xml");
-        final File outputApidocXmlFile = new File(sourceCodeParserOutputTestPath + "/handler_functions.xml");
+        final File outputApidocXmlFile = new File(
+            sourceCodeParserOutputTestPath + "/handler_functions.xml");
 
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
-        System.out.println("test: parsing apidoc in \"handler\" type C++ and comparing it to the expected XML");
+        System.out.println("test: parsing apidoc in \"handler\" functions C++");
         System.out.println("    Sample: " + expectedHandlerFunctionsXmlFile);
         System.out.println("    Input: " + handlerFunctionsCppFile);
         final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
         final int processedFunctionsCount =
-                sourceCodeParser.parseApidocComments(apidoc, new HandlerRegistrationMatcher());
+            sourceCodeParser.parseApidocComments(apidoc, new HandlerRegistrationMatcher());
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
@@ -227,7 +229,7 @@ public final class Tests extends TestBase
         executor.templateApiXmlFile = apiTemplateXmlFile;
         executor.outputApiXmlFile = generatedApiXmlFile;
         executor.optionalOutputApiJsonFile = generatedApiJsonFile;
-        executor.params = new Params();
+        executor.params = params;
 
         final int processedFunctionsCount = executor.execute();
         if (apiXmlFunctionsCount != processedFunctionsCount)
@@ -244,7 +246,7 @@ public final class Tests extends TestBase
     //---------------------------------------------------------------------------------------------
 
     private final boolean verbose;
-
+    private final Params params;
     private final File testPath;
     private final File sourceCodeParserTestPath;
     private final File sourceCodeParserOutputTestPath;
@@ -252,13 +254,15 @@ public final class Tests extends TestBase
     private final File outputTestPath;
     private final File testPropertiesFile;
     private final File vmsPath;
+    private final File outputVmsPath;
     private final File expectedApiXmlFile;
 
     private int apiXmlFunctionsCount;
 
-    public Tests(boolean verbose, final File testPath, final File outputTestPath)
+    public Tests(boolean verbose, Params params, final File testPath, final File outputTestPath)
     {
         this.verbose = verbose;
+        this.params = params;
         this.testPath = testPath;
         this.outputTestPath = outputTestPath;
         this.sourceCodeParserTestPath = new File(testPath + "/source_code_parser");
@@ -266,10 +270,10 @@ public final class Tests extends TestBase
         this.sourceCodeParserOutputTestPath = new File(outputTestPath + "/source_code_parser");
         this.testPropertiesFile = new File(testPath + "/test.properties");
         this.vmsPath = new File(testPath + "/nx_vms");
+        this.outputVmsPath = new File(outputTestPath + "/nx_vms");
         this.expectedApiXmlFile = new File(testPath + "/expected_api.xml");
         sourceCodeParserOutputTestPath.mkdirs();
         sourceCodeParserOutputTestPath.mkdir();
-
 
         readTestProperties();
 

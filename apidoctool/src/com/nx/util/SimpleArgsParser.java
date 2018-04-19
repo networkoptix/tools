@@ -104,12 +104,6 @@ public abstract class SimpleArgsParser
         error("Action \"" + action + "\" is not supported.");
     }
 
-    public final void reportUnexpectedValuelessArgs()
-    {
-        if (!valuelessArgs.isEmpty())
-            error("Unexpected args without values are specified.");
-    }
-
     /**
      * Report an error if there was no such key.
      */

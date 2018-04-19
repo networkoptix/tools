@@ -67,13 +67,11 @@ public class Main
 
             if ("test".equals(arg.action()))
             {
-                arg.reportUnexpectedValuelessArgs();
-                new Tests(
-                    arg.isVerbose(), arg.getFile("-test-path"), arg.getFile("-output-test-path"));
+                new Tests(arg.isVerbose(), params,
+                    arg.getFile("-test-path"), arg.getFile("-output-test-path"));
             }
             else if ("sort-xml".equals(arg.action()))
             {
-                arg.reportUnexpectedValuelessArgs();
                 final XmlSorter sorter = new XmlSorter();
                 sorter.groupNames = new ArrayList<String>();
                 sorter.groupNames.add(arg.getString("-group-name"));

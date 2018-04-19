@@ -4,7 +4,6 @@ subinclude:infra/playbooks/.hgignore
 subinclude:infra/jenkins_jobs/.hgignore
 
 syntax: glob
-.idea
 *.pyc
 testconf_local.py
 ci/crash

@@ -3,6 +3,7 @@ syntax: regexp
 
 syntax: glob
 out
+out_test
 
 # User-specific stuff:
 .idea/workspace.xml
