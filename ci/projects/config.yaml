@@ -11,7 +11,7 @@ credentials:
     type: ssh_key
 
 junk_shop:
-  db_host: 10.0.2.101  # host of junk_shop database
+  db_host: 10.0.0.113  # host of junk_shop database
 
 services:
   junk_shop_url: http://junkshop.enk.me/
