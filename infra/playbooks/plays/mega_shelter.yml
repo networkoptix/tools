@@ -34,6 +34,9 @@
     become: true
     become_method: sudo
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: beta_builds_share
+    become: true
+    become_method: sudo
   - role: ANXS.generic-users
     become: true
     become_method: sudo
