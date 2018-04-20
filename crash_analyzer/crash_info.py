@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 import hashlib
+import logging
 import os
 import re
-import logging
-import traceback
-import functools
-from typing import List, Tuple, TypeVar
+from typing import List, Tuple
 
 import utils
 
@@ -25,26 +23,30 @@ REPORT_NAME_REGEXP = re.compile('''
 class Error(Exception):
     pass
 
-class NameError(Error):
+
+class ReportNameError(Error):
     pass
+
 
 class AnalyzeError(Error):
     pass
 
+
 class Report:
     """Represents crash report by extracting metadata from it's name.
     """
+
     def __init__(self, name: str):
         self.name = os.path.basename(name)
         match = REPORT_NAME_REGEXP.match(name)
         if not match:
-            raise NameError('Unable to parse name: ' + self.name)
+            raise ReportNameError('Unable to parse name: ' + self.name)
 
         self.binary, version, self.build, self.changeset, self.customization, beta, self.extension = \
             REPORT_NAME_REGEXP.match(name).groups()
 
         if len(self.extension) > 10:
-            raise NameError('Invalid extension: ' + self.extension)
+            raise ReportNameError('Invalid extension: ' + self.extension)
 
         self.version = version[:-2] if version.endswith('.0') else version
         self.component = 'Server' if ('server' in self.binary) else 'Client'
@@ -60,13 +62,14 @@ class Report:
     def __eq__(self, rhs):
         return self.name == rhs.name
 
-    def file_mask(self):
+    def file_mask(self) -> str:
         return self.name[:-len(self.extension)] + '*'
 
 
 class Reason:
     """Represents unique crash reason. Several reports may produce the same reason.
     """
+
     def __init__(self, component: str, code: str, stack: List[str]):
         self.component = component
         self.code = code
@@ -79,8 +82,10 @@ class Reason:
         return '{}, code: {}, stack: {} frames, id: {}'.format(
             self.component, self.code, len(self.stack), self.crash_id)
 
-    def __eq__(self, rhs):
-        return self.component == rhs.component and self.code == rhs.code and self.stack == rhs.stack
+    def __eq__(self, other):
+        return self.component == other.component and \
+               self.code == other.code and \
+               self.stack == other.stack
 
     @property
     def crash_id(self) -> str:
@@ -140,6 +145,7 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
 def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
     """Extracts error code and call stack by rules from linux gdb bt output.
     """
+
     class GdbDescriber:
         code_begin = 'Program terminated with signal '
         code_end = '.'
@@ -183,6 +189,7 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
 def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
     """Extracts error code and call stack by rules from windows cdb bt output.
     """
+
     class CdbDescriber:
         code_begin = 'ExceptionCode: '
         code_end = '\n'
@@ -206,20 +213,20 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
 
         @staticmethod
         def is_resolved(line):
-            split = line.split('!')
-            if not any(split[0].startswith(x) for x in (report.component, 'nx_')):
+            module, *name = line.split('!')
+            if not any(module.startswith(x) for x in (report.component, 'nx_')):
                 return False  # < We expect some of our modules to be resolved.
 
-            return len(split) > 1  # < Function name is present.
+            return bool(name)  # < Function name is present.
 
     return analyze_bt(report, content, CdbDescriber)
 
 
-def analyze_files_concurrent(reports: List[Report], **options) -> List[Tuple[str, Reason]]:
+def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[str, Reason]]:
     """Analyzes :reports in :directory, returns list of successful results.
     """
     processed = []
-    for report, result in zip(reports, utils.run_concurrent(analyze_file, reports, **options)):
+    for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, Error):
             logger.warning(result)
         elif isinstance(result, Exception):
@@ -231,7 +238,7 @@ def analyze_files_concurrent(reports: List[Report], **options) -> List[Tuple[str
     return processed
 
 
-def analyze_file(report: Report, directory: utils.Directory, **dump_tool_options):
+def analyze_report(report: Report, directory: utils.Directory, **dump_tool_options) -> Reason:
     report_file = directory.file(report.name)
     if report.extension == 'gdb-bt':
         return analyze_linux_gdb_bt(report, report_file.read_string())
@@ -245,10 +252,3 @@ def analyze_file(report: Report, directory: utils.Directory, **dump_tool_options
         return analyze_windows_cdb_bt(report, content)
 
     raise NotImplemented('Dump format is not supported: ' + report.name)
-
-
-
-
-
-
-

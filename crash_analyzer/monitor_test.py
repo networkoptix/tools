@@ -2,7 +2,6 @@
 
 import logging
 import os
-import shutil
 import  multiprocessing
 import functools
 from typing import List
@@ -16,7 +15,7 @@ import utils
 logger = logging.getLogger(__name__)
 
 
-class CrashServerEmulator:
+class CrashServerMock:
     def __init__(self, url: str, login: str, password: str):
         self.server = '{}:{} @ {}'.format(login, password, url)
 
@@ -33,14 +32,14 @@ class CrashServerEmulator:
         assert False, 'Unable to find file: ' + name
 
 
-class JiraEmulator:
+class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str,
                  file_limit: int, prefix: str = ''):
         self.issues = issues
         self.server = '{}:{} @ {} / {} {}'.format(login, password, url, file_limit, prefix)
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
-        key = reason.crash_id[:10]
+        key = reason.crash_id[:10]  # < Shorter key for easier debug.
         self.issues[key] = {
             'attachments': [],
             'code': reason.code,
@@ -51,6 +50,7 @@ class JiraEmulator:
         return key
 
     def update_issue(self, key: str, reports: List[crash_info.Report]):
+        issue = self.issues[key]
         issue = self.issues[key]
         for report in reports:
             issue['versions'] = sorted(set(issue['versions'] + [report.version]))
@@ -68,8 +68,8 @@ class MonitorFixture:
         self.monitor = None
         self.options = utils.Resource('monitor_example_config.yaml').parse()
         self.options['options']['directory'] = directory
-        self.options['fetch']['api'] = CrashServerEmulator
-        self.options['upload']['api'] = functools.partial(JiraEmulator, self.issues)
+        self.options['fetch']['api'] = CrashServerMock
+        self.options['upload']['api'] = functools.partial(JiraMock, self.issues)
         del self.options['logging']
 
     def new_monitor(self):
@@ -91,28 +91,26 @@ def monitor_fixture():
     "extension", ['gdb-bt', 'cdb-bt', '-bt']
 )
 @pytest.mark.parametrize(
-    "remake", [True, False]
+    "restart_after_each_stage", [True, False]
 )
 @pytest.mark.parametrize(
     "reports_each_run", [1000, 10]
 )
-def test_monitor(monitor_fixture, extension: str, remake: bool, reports_each_run: int):
+def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool, reports_each_run: int):
     monitor_fixture.options['fetch'].update(extension=extension, report_count=reports_each_run)
     monitor_fixture.new_monitor()
 
-    def checkpoint():
-        if remake:
+    def stage_checkpoint():
+        if restart_after_each_stage:
+            # Emulates stop/start scenarios between stages.
             monitor_fixture.new_monitor()
 
-    while True:
-        if not monitor_fixture.monitor.fetch():
-            break
-
-        checkpoint()
+    while monitor_fixture.monitor.fetch():
+        stage_checkpoint()
         monitor_fixture.monitor.analyze()
-        checkpoint()
+        stage_checkpoint()
         monitor_fixture.monitor.upload()
-        checkpoint()
+        stage_checkpoint()
 
     actual = {k: v for k, v in monitor_fixture.issues.items()}
     expected = {k: v for k, v in utils.Resource('expected_issues.yaml').parse().items()

@@ -144,13 +144,13 @@ class Jira:
         issue = self._jira.issue(key)
         if issue.fields.status.name == 'Closed':
             min_fix = min(v.name for v in issue.fields.fixVersions)
-            max_repro = max(d.version for d in reports)
-            if min_fix > max_repro:
+            max_report = max(d.version for d in reports)
+            if min_fix > max_report:
                 logger.debug('JIRA case {} is already fixed'.format(key))
                 return
             else:
                 self._transition(issue, 'Reopen')
-                logger.info('Reopen JIRA case {} for version {}'.format(key, max_repro))
+                logger.info('Reopen JIRA case {} for version {}'.format(key, max_report))
 
         issue_versions = set(v.name for v in issue.fields.versions)
         new_versions = issue_versions | set(d.version for d in reports)

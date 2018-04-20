@@ -19,9 +19,8 @@ import urllib.request
 import msvcrt
 from typing import List, Callable
 
-import utils
-
 logger = logging.getLogger(__name__)
+
 
 DIST_URLS = [
     'http://beta.enk.me/beta-builds/daily/',
@@ -54,8 +53,8 @@ CUSTOMIZATIONS = (
 )
 
 CUSTOMIZATION_ALIASES = {
-	'nx': 'default',
-	'networkoptix': 'default',
+    'nx': 'default',
+    'networkoptix': 'default',
     'dw': 'digitalwatchdog',
 }
 
@@ -231,7 +230,7 @@ class DumpAnalyzer:
     """Provides ability to analyze windows DMP dumps.
     """
     def __init__(
-            self, cache_directory, dump_path,
+            self, cache_directory: str, dump_path: str,
             customization: str = '', version: str = '', build: str = None, branch: str = '',
             subprocess_timeout_s: int = 10, debug_mode: bool = False,
             visual_studio: bool = False):
@@ -370,7 +369,7 @@ class DumpAnalyzer:
 
         return self._module_dir
 
-    def extract_dist(self, path):
+    def extract_dist(self, path: str):
         """Extract distributive by :path based in it's format:
            .msi - just extracts to the 'target' directory;
            .exe - extracts msi by wix toolset and treats msi normally;
@@ -449,7 +448,7 @@ class DumpAnalyzer:
         logger.info('Open with Visual Studio in: %s' % self.module_dir())
         subprocess.Popen(['devenv', short_name])
 
-    def generate_report(self, report_path):
+    def generate_report(self, report_path: str) -> str:
         """Generates report using cdb with debug information.
         """
         logger.info('Loading debug information from: ' + self.module_dir())
@@ -466,7 +465,7 @@ class DumpAnalyzer:
         return report
 
 
-def analyse_dump(generate: bool = True, *args, **kwargs):
+def analyse_dump(generate: bool = True, *args, **kwargs) -> str:
     """Generated cdb-bt report based on dmp file.
     Note: Returns right away in case if dump is already analyzed.
     Returns: cdb-bt report path.

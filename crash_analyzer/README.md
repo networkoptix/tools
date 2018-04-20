@@ -1,6 +1,6 @@
 # Crash Analyzer
 
-Linux and Windows crash report analyzer
+Linux and Windows Crash Report Analyzer
 
 ## Requirements
 

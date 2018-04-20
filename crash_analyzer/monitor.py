@@ -69,7 +69,7 @@ class Monitor:
         if self._records:
             self._options.records_file.serialize(self._records)
 
-    def fetch(self):
+    def fetch(self) -> int:
         logger.info('Fetching new reports from server')
         directory = self._options.reports_directory
         new_reports = external_api.fetch_new_crashes(
@@ -92,12 +92,12 @@ class Monitor:
 
         return len(new_reports)
 
-    def analyze(self):
+    def analyze(self) -> int:
         to_analyze = [crash_info.Report(name)
                       for name, data in self._records.items() if not data.get('crash_id')]
 
         logger.info('Analyze {} reports in local database'.format(len(to_analyze)))
-        reasons = crash_info.analyze_files_concurrent(
+        reasons = crash_info.analyze_reports_concurrent(
             to_analyze, directory=self._options.reports_directory, **self._analyze)
 
         analyzed = {report.name: reason for report, reason in reasons}
@@ -155,7 +155,7 @@ class Monitor:
         issue, reports = crash_tuple
         if not issue:
             report = reports[0]  # < Any will do.
-            reason = crash_info.analyze_file(report, directory)  # < Fast for known reports.
+            reason = crash_info.analyze_report(report, directory)  # < Fast for known reports.
             issue = jira.create_issue(report, reason)
 
         jira.update_issue(issue, reports)
@@ -165,7 +165,7 @@ class Monitor:
 def main():
     try:
         import subprocess
-        change_set = subprocess.check_output('hg id').decode().split()[0]
+        change_set, *_ = subprocess.check_output('hg id').decode().split()
     except (ImportError, OSError):
         change_set = 'UNKNOWN'
 

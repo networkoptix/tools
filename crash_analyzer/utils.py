@@ -170,6 +170,7 @@ class Size:
         return '{:g}{}'.format(value, cls.suffixes[exponent])
 
 
+# TODO: Consider to reimplement by pathlib.
 class File:
     def __init__(self, *path):
         self.path = os.path.join(*path)

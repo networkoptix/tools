@@ -10,11 +10,11 @@ import utils
 
 
 @pytest.mark.parametrize(
-    'name, expected_report', utils.Resource('names.yaml').parse().items()
+    'name, expected_report_fields', utils.Resource('names.yaml').parse().items()
 )
-def test_describe_path(name: str, expected_report: dict):
+def test_describe_path(name: str, expected_report_fields: dict):
     report = crash_info.Report(name)
-    for key, value in expected_report.items():
+    for key, value in expected_report_fields.items():
         assert value == getattr(report, key, False), '{} in {}'.format(key, name)
 
 
@@ -33,7 +33,7 @@ def map_files(action: Callable, directory: str, extension: str):
 
 @pytest.mark.parametrize(
     'action, report',
-    map_files(crash_info.analyze_linux_gdb_bt, 'linux', 'gdb-bt') + \
+    map_files(crash_info.analyze_linux_gdb_bt, 'linux', 'gdb-bt') +
     map_files(crash_info.analyze_windows_cdb_bt, 'windows', 'cdb-bt')
 )
 def test_analyze_bt(action: Callable, report: str):
@@ -55,9 +55,9 @@ def test_analyze_bt(action: Callable, report: str):
     'directory, extension',
     ((utils.Resource('linux'), 'gdb-bt'), (utils.Resource('windows'), 'cdb-bt'))
 )
-def test_analyze_files_concurrent(directory, extension):
+def test_analyze_reports_concurrent(directory: utils.Directory, extension: str):
     reports = [crash_info.Report(r.name) for r in directory.glob('*.' + extension)]
     expected = [crash_info.Report(r.name[:-5]) for r in directory.glob('*.' + extension + '-info')]
-    results = crash_info.analyze_files_concurrent(
+    results = crash_info.analyze_reports_concurrent(
         reports, directory=utils.Directory(directory.path), thread_count=8)
     assert expected == [r for r, _ in results]

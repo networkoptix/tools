@@ -26,12 +26,12 @@ def test_crash_server(extension: str):
 
 @pytest.mark.skip(reason='Helps to find out optimal thread count')
 @pytest.mark.parametrize('thread_count', (1, 5, 10, 20, 30))
-def test_crash_server_concurrent(thread_count):
+def test_crash_server_concurrent(thread_count: int):
     utils.test_concurrent(_test_crash_server, ['dmp'], thread_count)
 
 
 @pytest.mark.parametrize("extension", ['gdb-bt', 'dmp', '*'])
-def test_fetch_new_crashes(extension):
+def test_fetch_new_crashes(extension: str):
     with utils.TemporaryDirectory() as directory:
         options = dict(CONFIG['fetch'])
         options.update(report_count=2, extension=extension)
