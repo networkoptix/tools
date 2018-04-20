@@ -10,6 +10,7 @@ import platform
 import yaml
 
 from pony.orm import db_session
+import faulthandler
 
 from utils import setup_logging, ensure_dir_exists, ensure_dir_missing, is_list_inst
 from config import PlatformConfig, Config, PlatformBranchConfig, BranchConfig
@@ -23,6 +24,7 @@ log = logging.getLogger(__name__)
 
 GENERATE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
+BUILD_SAVE_TIMEOUT = datetime.timedelta(hours=1)  # kill job if saving to junk-shop db timed out
 DEFAULT_GENERATOR = 'Ninja'
 LOGS_DIR = 'build_logs'
 PARALLEL_JOB_COUNT = 20
@@ -161,8 +163,16 @@ class CMakeBuilder(object):
                 log.info('Building with cmake failed: %s', build_results.error_message)
         else:
             log.info('Generating with cmake failed: %s', generate_results.error_message)
+
+        output_path = os.path.join(self._working_dir, 'build-output.log')
+        log.info('Storing build output to %r...', output_path)
+        with open(output_path, 'w') as f:
+            f.write(output)
         log.info('Storing output to junk-shop db...')
+        faulthandler.dump_traceback_later(int(BUILD_SAVE_TIMEOUT.total_seconds()), exit=True)
         build_info = store_output_and_error(self._junk_shop_repository, output, succeeded, error_message)
+        faulthandler.cancel_dump_traceback_later()
+
         log.info('Storing log artifacts to junk-shop db...')
         self._store_log_artifacts(build_dir, build_info)
         log.info('Reading build info file...')

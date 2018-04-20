@@ -9,3 +9,4 @@ psycopg2
 pony
 cached-property
 -e git+https://github.com/vsevolod-fedorov/pyvalid.git#egg=pyvalid
+faulthandler==3.0
