@@ -1,0 +1,62 @@
+set -xe
+
+# must be injected by job template or macros
+: ${JUNK_SHOP_CAPTURE_DB:?}
+: ${AUTOTEST_EMAIL_PASSWORD:?}
+: ${PROJECT:?}
+: ${BRANCH:?}
+: ${BUILD_NUM:?}
+: ${CUSTOMIZATION:?}
+: ${PLATFORM:?}
+: ${CLOUD_GROUP:?}
+: ${WORK_DIR:?}
+: ${BIN_DIR:?}
+: ${MEDIASERVER_DIST_PATH:?}
+: ${TEST_LIST?}  # space-delimited; empty means run all tests
+: ${TIMEOUT_SEC:?}
+: ${SLOT:?}  # aka executor number, 0..
+
+[ -d "$BIN_DIR" ]  # expected to exist
+mkdir -p "$WORK_DIR"
+
+# TODO: restore after pipeline jobs deleted
+#VM_PORT_BASE=20000  # base for REST API ports forwarded from vm to host
+VM_PORT_BASE=30000  # base for REST API ports forwarded from vm to host
+VM_PORT_RANGE=100  # how many forwarded ports one functional tests run may require, max
+
+VM_PORT=$(($VM_PORT_BASE + $SLOT * $VM_PORT_RANGE))
+# TODO: restore after pipeline jobs deleted
+#VM_NAME_PREFIX="funtest-$SLOT-"
+VM_NAME_PREFIX="funtest-X-$SLOT-"
+
+BUILD_PARAMETERS=(
+    "project=$PROJECT"
+    "branch=$BRANCH"
+    "build_num=$BUILD_NUM"
+    "platform=$PLATFORM"
+    "customization=$CUSTOMIZATION"
+    )
+
+OPTIONS=(
+    "--work-dir=$WORK_DIR"
+    "--bin-dir=$BIN_DIR"
+    "--mediaserver-dist-path=$MEDIASERVER_DIST_PATH"
+    "--customization=$CUSTOMIZATION"
+    "--cloud-group=$CLOUD_GROUP"
+    "--timeout=$TIMEOUT_SEC"
+    "--capture-db=$JUNK_SHOP_CAPTURE_DB"
+    "--build-parameters=$(join_by ',' ${BUILD_PARAMETERS[@]})"
+    "--vm-port-base=$VM_PORT"
+    "--vm-name-prefix=$VM_NAME_PREFIX"
+    "--reinstall"
+    )
+
+source venv/bin/activate
+
+export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+export PYTEST_PLUGINS=junk_shop.pytest_plugin
+# JUNK_SHOP_CAPTURE_DB is used by tests
+
+cd nx_vms/func_tests
+
+pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST

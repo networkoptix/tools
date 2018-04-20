@@ -1,0 +1,160 @@
+# run functional tests
+
+# Required template variables:
+#   project-name
+#   branch
+#   platform
+#   upstream-project
+#   junk-shop-host
+#   customization (default one)
+#   cloud-group
+#   binaries_url
+#   job-timeout-minutes
+#   test-timeout-hours
+
+- job-template:
+    name: '{project-name}-{branch}-{platform}-funtest'
+    node: funtest-test
+    os: linux
+
+    description: |
+      Run functional tests for branch {branch} project {upstream-project}.
+
+    copyartifact_filter: 'build_info.yaml, *-server-*-linux64*.deb, unit_tests/**/appserver2_ut'
+
+    parameters:
+      - bool:
+          name: CLEAN
+          default: false
+          description: Clean workspace before build
+      - string:
+          name: UPSTREAM_PROJECT
+          default: '{upstream-project}/{branch}'
+          description: name of upstream project to take artifacts to test from.
+      - string:
+          name: UPSTREAM_BUILD_NUMBER
+          description: BUILD_NUMBER of upstream project to take artifacts to test from. Default is upstream build.
+      - string:
+          name: CUSTOMIZATION
+          default: '{customization}'
+          description: Customization to test.
+      - string:
+          name: TEST_LIST
+          default: ''
+          description: Tests to run, space-delimited list. Empty means run all tests.
+
+    triggers:
+      - reverse:
+          jobs: '{upstream-project}/{branch}'
+          result: failure
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: '{job-timeout-minutes}'
+    - workspace-cleanup:
+        check-parameter: CLEAN
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: JUNK_SHOP_DB_CREDENTIALS
+      - text:
+          credential-id: service_email
+          variable: AUTOTEST_EMAIL_PASSWORD
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '{branch}'
+
+    builders:
+
+      - shell: |
+          set -xe
+          rm -rf dist  # remove distributives from previous runs
+      - conditional-step:
+          condition-kind: not
+          condition-operand:
+            condition-kind: strings-match
+            condition-string1: $UPSTREAM_BUILD_NUMBER
+            condition-string2: ''
+          on-evaluation-failure: dont-run
+          steps:
+            - copyartifact:
+                project: $UPSTREAM_PROJECT
+                which-build: specific-build
+                build-number: $UPSTREAM_BUILD_NUMBER
+                filter: '{copyartifact_filter}'
+                target: dist
+      - conditional-step:
+          condition-kind: strings-match
+          condition-string1: $UPSTREAM_BUILD_NUMBER
+          condition-string2: ''
+          on-evaluation-failure: dont-run
+          steps:
+            - copyartifact:
+                project: $UPSTREAM_PROJECT
+                which-build: upstream-build
+                filter: '{copyartifact_filter}'
+                target: dist
+
+      - parse-build-info:
+          branch: '{branch}'
+          customization: $CUSTOMIZATION
+          platform: '{platform}'
+
+      - inject:
+          properties-content: |
+            JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@{junk-shop-host}
+      - init-venv-linux:
+          requirements-files: >-
+            devtools/ci/junk_shop/requirements.txt
+            nx_vms/func_tests/requirements.txt
+      - extended-bash:
+          headers: ''
+          script: |
+            set -xe
+
+            if [ -z "$SERVER_DEB_PATH" ]; then
+              echo "Error: upstream job $UPSTREAM_PROJECT #$BUILD_NUM did not left mediaserver distributive for customization $CUSTOMIZATION"
+              exit 1
+            fi
+
+            if [ -z "$APPSERVER2_UT_PATH" ]; then
+              echo "Error: upstream job $UPSTREAM_PROJECT #$BUILD_NUM did not left appserver2_ut test for customization $CUSTOMIZATION"
+              exit 1
+            fi
+
+            if [ ! -f "dist/$SERVER_DEB_PATH" ]; then
+              echo "Error: mesiaserver deb file dist/$SERVER_DEB_PATH is missing - \
+                    failed to retrieve artifact from $UPSTREAM_PROJECT/$UPSTREAM_BUILD_NUMBER"
+              exit 1
+            fi
+            inject MEDIASERVER_DIST_PATH "$WORKSPACE/dist/$SERVER_DEB_PATH"
+
+            inject BIN_DIR "$WORKSPACE/funtest/bin"
+            inject WORK_DIR "$WORKSPACE/funtest/work"
+            mkdir -p "$BIN_DIR"
+            rsync -av --delete {binaries_url} "$BIN_DIR/"
+
+            if [ -f "dist/$APPSERVER2_UT_PATH" ]; then
+              cp "dist/$APPSERVER2_UT_PATH" "$BIN_DIR/"
+            else
+              echo "Warning: $APPSERVER2_UT_PATH is missing"
+            fi
+
+      - run-functional-tests:
+          project: '{project-name}'
+          branch: '{branch}'
+          build-num: $BUILD_NUM
+          customization: $CUSTOMIZATION
+          platform: '{platform}'
+          cloud-group: '{cloud-group}'
+          bin-dir: $BIN_DIR
+          work-dir: $WORK_DIR
+          mediaserver-dist-path: $MEDIASERVER_DIST_PATH
+          test-list: "$TEST_LIST"
+          test-timeout-hours: '{test-timeout-hours}'

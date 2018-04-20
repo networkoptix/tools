@@ -67,7 +67,7 @@
       - inject:
           properties-content: |
             DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
-      - init-venv:
+      - init-venv-linux:
           requirements-files: devtools/ci/junk_shop/requirements.txt
       - load-from-nas:
           dir: webadmin-external/bin  # mind 'bin' subdirectory!

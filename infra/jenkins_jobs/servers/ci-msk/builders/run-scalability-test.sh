@@ -1,9 +1,16 @@
 set -xe
 
-: ${JUNK_SHOP_HOST:?}  # must be injected by job template
+# must be injected by job template
+: ${WORKSPACE:?}
+: ${JUNK_SHOP_CAPTURE_DB:?}
+: ${BRANCH:?}
+: ${BUILD_NUM:?}
+: ${CUSTOMIZATION:?}
+: ${PLATFORM:?}
+: ${USE_LIGHTWEIGHT_SERVERS:?}
+: ${SERVER_COUNT:?}
 
-TEST_CONFIG_PATH=devtools/ci/jenkins/scalability_test/test-config.yaml
-WORKSPACE_DIR="$(pwd)"
+TEST_CONFIG_PATH=$WORKSPACE/devtools/ci/jenkins/scalability_test/test-config.yaml
 
 test_params=(
     merge_timeout=1h
@@ -15,27 +22,27 @@ test_params=(
     )
 build_parameters=(
     "project=ci"
-    "branch=$branch"
-    "build_num=$build_num"
-    "platform=$platform"
-    "customization=$customization"
+    "branch=$BRANCH"
+    "build_num=$BUILD_NUM"
+    "platform=$PLATFORM"
+    "customization=$CUSTOMIZATION"
     )
 options=(
-    "--work-dir=$WORKSPACE_DIR/work/test"
-    "--bin-dir=$WORKSPACE_DIR/bin"
+    "--work-dir=$WORKSPACE/work/test"
+    "--bin-dir=$WORKSPACE/bin"
     "--reinstall"
-    "--customization=$customization"
-    "--capture-db=$junk_shop_db_credentials@$JUNK_SHOP_HOST"
+    "--customization=$CUSTOMIZATION"
+    "--capture-db=$JUNK_SHOP_CAPTURE_DB"
     "--build-parameters=$(join_by ',' ${build_parameters[@]})"
     "--run-parameters=$(join_by ',' ${test_params[@]})"
     "--run-name=scalability"
     "--test-parameters=scalability_test.$(join_by ',scalability_test.' ${test_params[@]})"
-    "--tests-config-file=$WORKSPACE_DIR/$TEST_CONFIG_PATH"
+    "--tests-config-file=$TEST_CONFIG_PATH"
     )
 
-source work/venv/bin/activate
+source venv/bin/activate
 
-export PYTHONPATH=$WORKSPACE_DIR/devtools/ci/junk_shop
+export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 export PYTEST_PLUGINS=junk_shop.pytest_plugin
 
 cd nx_vms/func_tests

@@ -1,7 +1,0 @@
-- builder:
-    name: inline-python
-    # A wrapper for inlining python script that must be executed in context of
-    # particular python  virtual environment.
-    builders:
-    - shell: |
-        {venv}/bin/python -c "{command}"

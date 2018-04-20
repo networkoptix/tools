@@ -69,3 +69,14 @@
                 ROOT_BUILD_NUMBER=$BUILD_NUMBER
                 DO_BUILD=$DO_BUILD
                 RUN_UNIT_TESTS=$RUN_UNIT_TESTS
+      - multijob:
+          name: functional tests
+          condition: UNSTABLE
+          projects:
+            - name: '{project-name}-{branch}-linux-x64-funtest'
+              kill-phase-on: NEVER
+              predefined-parameters: |
+                CLEAN=$CLEAN
+                UPSTREAM_PROJECT={project-name}-{branch}-linux-x64
+                UPSTREAM_BUILD_NUMBER=$BUILD_NUMBER
+                CUSTOMIZATION={customization}

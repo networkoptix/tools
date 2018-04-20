@@ -1,0 +1,19 @@
+# params:
+#  * branch
+#  * customization
+#  * platform
+
+- builder:
+    name: parse-build-info
+    builders:
+
+      - inline-python-linux:
+          args:
+            customization: '{customization}'
+            platform: '{platform}'
+            branch: '{branch}'
+          script:
+            !include-raw-escape: ../builders/parse-build-info.py
+
+      - inject:
+          properties-file: build_info.envfile
