@@ -240,7 +240,7 @@ public final class Tests extends TestBase
 
         assertJsonEqualsXml(generatedApiJsonFile, generatedApiXmlFile);
 
-        assertTextFilesEqualIgnoringIndents(expectedApiXmlFile, generatedApiXmlFile);
+        assertFileContentsEqual(expectedApiXmlFile, generatedApiXmlFile);
     }
 
     //---------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public final class ApidocCommentParser
     extends ApidocComment
 {
-    private ApidocCommentParser() {}
+    private int indentLevel = 0;
 
     public static class FunctionDescription 
     {
@@ -34,16 +34,29 @@ public final class ApidocCommentParser
     }
 
     /**
-     * @return Null if the comment should not convert to an XML function.
+     * @return Empty list if the comment should not convert to an XML function.
      */
-    public static FunctionDescription createFunctionFromCommentLines(List<String> lines) throws Error
+    public List<FunctionDescription> createFunctionsFromCommentLines(ApidocTagParser parser) throws Error
     {
-        ApidocTagParser parser = new ApidocTagParser(lines);
         parser.parseNextItem();
 
+        List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
+        if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
+            throw new Error("Comment should start with " + TAG_APIDOC + " tag.");
+
+        while (parser.getItem() != null)
+        {
+            functions.add(createFunctionFromCommentLines(parser));
+        }
+
+        return functions;
+    }
+    /**
+     * @return Null if the comment should not convert to an XML function.
+     */
+    private FunctionDescription createFunctionFromCommentLines(ApidocTagParser parser) throws Error
+    {
         FunctionDescription description = createFunctionFromApidocItem(parser);
-        if (description.function == null)
-            return null;
 
         boolean captionParsed = false;
         boolean permissionsParsed = false;
@@ -53,19 +66,19 @@ public final class ApidocCommentParser
         description.function.result.caption = "";
 
         parser.parseNextItem();
-        while (parser.getItem() != null)
+        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
         {
             if (TAG_CAPTION.equals(parser.getItem().getTag()))
             {
                 captionParsed = checkTagOnce(captionParsed, description.function.name, TAG_CAPTION);
                 checkNoAttribute(parser, description.function.name);
-                description.function.caption = parser.getItem().getFullText();
+                description.function.caption = parser.getItem().getFullText(indentLevel);
                 parser.parseNextItem();
             }
             else if (TAG_PERMISSIONS.equals(parser.getItem().getTag()))
             {
                 permissionsParsed = checkTagOnce(permissionsParsed, description.function.name, TAG_PERMISSIONS);
-                description.function.permissions = parser.getItem().getFullText();
+                description.function.permissions = parser.getItem().getFullText(indentLevel + 1);
                 parser.parseNextItem();
             }
             else if (TAG_PARAM.equals(parser.getItem().getTag()))
@@ -96,12 +109,9 @@ public final class ApidocCommentParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private static FunctionDescription createFunctionFromApidocItem(ApidocTagParser parser) throws Error
+    private FunctionDescription createFunctionFromApidocItem(ApidocTagParser parser) throws Error
     {
-        if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
-            throw new Error("Comment should start with " + TAG_APIDOC + " tag.");
-
-        String[] values = Utils.matchRegex(functionHeaderRegex, parser.getItem().getFullText());
+        String[] values = Utils.matchRegex(functionHeaderRegex, parser.getItem().getFullText(indentLevel));
         if (values == null)
             throw new Error("Wrong " + TAG_APIDOC + " function header.");
 
@@ -123,14 +133,18 @@ public final class ApidocCommentParser
         return result;
     }
 
-    private static void parseFunctionParam(
+    private void parseFunctionParam(
         ApidocTagParser parser, Apidoc.Function function)
         throws Error
     {
         assert TAG_PARAM.equals(parser.getItem().getTag());
 
+        String paramName = parser.getItem().getInitialToken();
+        int paramIndentLevel = paramName.length() - paramName.replace(".", "").length() + 1;
+
+        indentLevel += paramIndentLevel;
         Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.params)
@@ -171,13 +185,15 @@ public final class ApidocCommentParser
         parseParamValues(parser, function, param);
 
         function.params.add(param);
+        indentLevel -= paramIndentLevel;
     }
 
-    private static void parseParamValues(
+    private void parseParamValues(
         ApidocTagParser parser, Apidoc.Function function, Apidoc.Param param)
         throws Error
     {
-        while (parser.getItem() != null)
+        indentLevel++;
+        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
         {
             if (TAG_VALUE.equals(parser.getItem().getTag()))
             {
@@ -190,7 +206,7 @@ public final class ApidocCommentParser
                 checkNoAttribute(parser, function.name);
                 Apidoc.Value value = new Apidoc.Value();
                 value.name = getInitialToken(parser, function.name);
-                value.description = parser.getItem().getTextAfterInitialToken();
+                value.description = parser.getItem().getTextAfterInitialToken(indentLevel);
                 param.values.add(value);
                 parser.parseNextItem();
             }
@@ -204,9 +220,10 @@ public final class ApidocCommentParser
                 break;
             }
         }
+        indentLevel--;
     }
 
-    private static void fillDefaultFormatParam(
+    private void fillDefaultFormatParam(
         Apidoc.Param param, String functionName)
         throws Error
     {
@@ -239,17 +256,18 @@ public final class ApidocCommentParser
         return value;
     }
 
-    private static void parseFunctionResult(
+    private void parseFunctionResult(
         ApidocTagParser parser, Apidoc.Function function)
         throws Error
     {
         assert TAG_RETURN.equals(parser.getItem().getTag());
+        indentLevel++;
         checkNoAttribute(parser, function.name);
-        function.result.caption = parser.getItem().getFullText();
+        function.result.caption = parser.getItem().getFullText(indentLevel);
 
         boolean deprecatedAttributeTagFound = false;
         parser.parseNextItem();
-        while (parser.getItem() != null)
+        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
         {
             if (TAG_PARAM.equals(parser.getItem().getTag()))
             {
@@ -280,16 +298,17 @@ public final class ApidocCommentParser
                     " instead of \"" + TAG_PARAM + "\"" +
                     " in function " + function.name + ".");
         }
+        indentLevel--;
     }
 
-    private static void parseFunctionResultAttributeDeprecated(
+    private void parseFunctionResultAttributeDeprecated(
         ApidocTagParser parser, Apidoc.Function function)
         throws Error
     {
         assert "%attribute".equals(parser.getItem().getTag());
 
         Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.result.params)
@@ -310,14 +329,19 @@ public final class ApidocCommentParser
         function.result.params.add(param);
     }
 
-    private static void parseFunctionResultParam(
+    private void parseFunctionResultParam(
         ApidocTagParser parser, Apidoc.Function function)
         throws Error
     {
         assert TAG_PARAM.equals(parser.getItem().getTag());
 
+        String paramName = parser.getItem().getInitialToken();
+        int paramIndentLevel = paramName.length() - paramName.replace(".", "").length() + 1;
+
+        indentLevel += paramIndentLevel;
+
         Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken();
+        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.result.params)
@@ -348,6 +372,7 @@ public final class ApidocCommentParser
         parseParamValues(parser, function, param);
 
         function.result.params.add(param);
+        indentLevel -= paramIndentLevel;
     }
 
     /**
@@ -409,7 +434,7 @@ public final class ApidocCommentParser
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
-        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?(\\w+)(.*)", Pattern.DOTALL);
+        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?([\\w\\/]+)(.*)", Pattern.DOTALL);
       //     0HttpMthd        1UrlPre   2FnNm 3Txt
       //       GET             /ec2     getRe \nRe
 }

@@ -14,20 +14,20 @@
                     <params>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or
-                                MAC address (not supported for certain cameras).</description>
+                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>startTime</name>
-                            <description>Start time of the interval with bookmarks (in milliseconds since epoch).
-                                Default value is 0. Should be less than endTime.</description>
+                            <description>Start time of the interval with bookmarks (in milliseconds since
+epoch). Default value is 0. Should be less than endTime.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>endTime</name>
                             <description>End time of the interval with bookmarks (in milliseconds since epoch).
-                                Default value is the current time. Should be greater than startTime.</description>
+Default value is the current time. Should be greater than startTime.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -70,8 +70,7 @@
                         </param>
                         <param>
                             <name>limit</name>
-                            <description>Maximum number of bookmarks to return.
-                                Unlimited by default.</description>
+                            <description>Maximum number of bookmarks to return. Unlimited by default.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -81,13 +80,14 @@
                         </param>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -110,7 +110,7 @@
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
@@ -129,8 +129,8 @@
                         </param>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or
-                                MAC address (not supported for certain cameras).</description>
+                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
@@ -145,7 +145,8 @@
                         </param>
                         <param>
                             <name>timeout</name>
-                            <description>Time during which the recorded period should be preserved (in milliseconds).</description>
+                            <description>Time during which the recorded period should be preserved (in
+milliseconds).</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -165,13 +166,14 @@
                         </param>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -194,7 +196,7 @@
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
@@ -203,7 +205,7 @@
                 </function>
                 <function>
                     <name>bookmarks/delete</name>
-                    <description>Remove a bookmark with the specified identifier.</description>
+                    <description>Remove a bookmark with the specified identifsier.</description>
                     <method>GET</method>
                     <params>
                         <param>
@@ -213,13 +215,14 @@
                         </param>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -242,7 +245,7 @@
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
@@ -261,13 +264,14 @@
                         </param>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -290,7 +294,7 @@
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
@@ -309,8 +313,8 @@
                         </param>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or
-                                MAC address (not supported for certain cameras).</description>
+                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
@@ -325,7 +329,8 @@
                         </param>
                         <param>
                             <name>timeout</name>
-                            <description>Time during which the recorded period should be preserved (in milliseconds).</description>
+                            <description>Time during which the recorded period should be preserved (in
+milliseconds).</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -345,13 +350,14 @@
                         </param>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -374,7 +380,7 @@
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
@@ -520,6 +526,16 @@ only the top level data is provided.</description>
                         </param>
                     </params>
                     <result/>
+                </function>
+                <function proprietary="true">
+                    <name>execAction</name>
+                    <description>Execute an action. Action data should be in the internal binary format. This method is going
+to be refactored in next versions.</description>
+                    <method>POST</method>
+                    <params/>
+                    <result>
+                        <caption>XML with the "OK" message or an error code.</caption>
+                    </result>
                 </function>
                 <function>
                     <name>getAccessRights</name>
@@ -2715,8 +2731,9 @@ Match motion on a video by specified rectangle.
 <br/>Format: string with a JSON list of <i>sensors</i>,
 each <i>sensor</i> is a JSON list of <i>rects</i>, each <i>rect</i> is:
 <br/>
-                                <code>{"x": <i>x</i>, "y": <i>y</i>, "width": <i>width</i>,
-"height": <i>height</i>}</code>
+                                <code>
+    {"x": <i>x</i>, "y": <i>y</i>, "width": <i>width</i>,"height": <i>height</i>}
+</code>
                                 <br/>All values are measured in relative portions of a video frame,
 <i>x</i> and <i>width</i> in range [0..43], <i>y</i> and <i>height</i> in range [0..31],
 zero is the left-top corner.
@@ -4395,8 +4412,7 @@ in bytes. Recommended value is 10 gigabytes for local storages and
                         </param>
                         <param>
                             <name>usedForWriting</name>
-                            <description>Whether writing to the storage is
-allowed.</description>
+                            <description>Whether writing to the storage is allowed.</description>
                             <optional>false</optional>
                             <values>
                                 <value>
@@ -4994,13 +5010,14 @@ the result of the corresponding GET function.
                     <params>
                         <param proprietary="true">
                             <name>local</name>
-                            <description>If present, the request should not be redirected to another server.</description>
+                            <description>If present, the request should not be redirected to another
+server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
-                            <description>If present and the requested result format is non-binary,
-                                indentation and spacing will be used to improve readability.</description>
+                            <description>If present and the requested result format is
+non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -5023,14 +5040,14 @@ the result of the corresponding GET function.
                                 <value>
                                     <name>csv</name>
                                     <description>CSV data format. In case of a hierarchical structure,
-                                        only the top level data is provided.</description>
+only the top level data is provided.</description>
                                 </value>
                             </values>
                         </param>
                     </params>
                     <result>
-                        <caption>The amount of free space available for update files in bytes
-                            for each online server in the system, in the specified format.</caption>
+                        <caption>The amount of free space available for update files in bytes for each online server
+in the system, in the specified format.</caption>
                     </result>
                 </function>
             </functions>
@@ -5195,12 +5212,12 @@ Parameters of the generated event, such as "source", "caption" and "description"
 intended to be analyzed by these rules.
 <tt>
                             <br/>Example:
-<pre><![CDATA[
+    <pre><![CDATA[
 http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z&caption=CreditCardUsed&metadata={"cameraRefs":["3A4AD4EA-9269-4B1F-A7AA-2CEC537D0248","3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240"]}
-]]></pre>
-This example triggers a generic event informing the system that a
-credit card has been used on September 16, 2016 at 16:03:41 UTC in a POS
-terminal being watched by the two specified cameras.
+    ]]></pre>
+    This example triggers a generic event informing the system that a
+    credit card has been used on September 16, 2016 at 16:03:41 UTC in a POS
+    terminal being watched by the two specified cameras.
 </tt>
                     </description>
                     <method>GET</method>
@@ -5369,17 +5386,6 @@ stop.</description>
                     </params>
                     <result>
                         <caption>Server event log in the proprietary binary format.</caption>
-                    </result>
-                </function>
-                <function proprietary="true">
-                    <name>execAction</name>
-                    <description>Execute an action. Action data should be in the internal
-                        binary format. This method is going to be refactored in the next
-                        version.</description>
-                    <method>POST</method>
-                    <params/>
-                    <result>
-                        <caption>XML with the "OK" message or an error code.</caption>
                     </result>
                 </function>
                 <function proprietary="true">
@@ -6211,30 +6217,26 @@ levels.</description>
                 </function>
                 <function proprietary="true">
                     <name>manualCamera/add</name>
-                    <description>Manually add camera(s). If several cameras are added, parameters
-                        "url" and "manufacturer" must be defined several times with incrementing
-                        suffix "0", "1", etc.</description>
+                    <description>Manually add camera(s). If several cameras are added, parameters "url" and "manufacturer"
+must be defined several times with incrementing suffix "0", "1", etc.</description>
                     <method>GET</method>
                     <params>
                         <param>
                             <name>url0</name>
-                            <description>Camera url, can be obtained from
-                              "reply.cameras[].url" field in the result of
-                              /api/manualCamera/status.</description>
+                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the result of
+/api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>uniqueId0</name>
-                            <description>Camera physical id, can be obtained from
-                                "reply.cameras[].uniqueId" field in the result of
-                                /api/manualCamera/status.</description>
+                            <description>Camera physical id, can be obtained from "reply.cameras[].uniqueId" field
+in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>manufacturer0</name>
                             <description>Camera manufacturer, can be obtained from
-                              "reply.cameras[].manufacturer" field in the result of
-                              /api/manualCamera/status.</description>
+"reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
@@ -6295,23 +6297,20 @@ content type "application/json". Example of such object:
                         </param>
                         <param>
                             <name>cameras[].url</name>
-                            <description>Camera url, can be obtained from
-                      "reply.cameras[].url" field in the result of
-                      /api/manualCamera/status.</description>
+                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the
+result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameras[].uniqueId</name>
                             <description>Camera physical id, can be obtained from
-                      "reply.cameras[].uniqueId" field in the result of
-                      /api/manualCamera/status.</description>
+"reply.cameras[].uniqueId" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameras[].manufacturer</name>
                             <description>Camera manufacturer, can be obtained from
-                      "reply.cameras[].manufacturer" field in the result of
-                      /api/manualCamera/status.</description>
+"reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                     </params>
@@ -6336,8 +6335,8 @@ content type "application/json". Example of such object:
                         </param>
                         <param>
                             <name>port</name>
-                            <description>Camera(s) IP port to check. Port is auto-detected if this
-                                parameter is omitted.</description>
+                            <description>Camera(s) IP port to check. Port is auto-detected if this parameter is
+omitted.</description>
                             <optional>true</optional>
                         </param>
                         <param>
@@ -6352,9 +6351,9 @@ content type "application/json". Example of such object:
                         </param>
                     </params>
                     <result>
-                        <caption>JSON object with the initial status of camera search process,
-                            including processUuid used for other /api/manualCamera calls, and the
-                            list of objects describing cameras found to the moment.</caption>
+                        <caption>JSON object with the initial status of camera search process, including processUuid
+used for other /api/manualCamera calls, and the list of objects describing cameras found
+to the moment.</caption>
                     </result>
                 </function>
                 <function>
@@ -6364,15 +6363,15 @@ content type "application/json". Example of such object:
                     <params>
                         <param>
                             <name>uuid</name>
-                            <description>Process unique id, can be obtained from "processUuid"
-                                field in the result of /api/manualCamera/search.</description>
+                            <description>Process unique id, can be obtained from "processUuid" field in the result of
+/api/manualCamera/search.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON object with the initial status of camera search process,
-                        including processUuid used for other /api/manualCamera calls, and the
-                        list of objects describing cameras found to the moment.</caption>
+                        <caption>JSON object with the initial status of camera search process, including processUuid
+used for other /api/manualCamera calls, and the list of objects describing cameras found
+to the moment.</caption>
                     </result>
                 </function>
                 <function>
@@ -6382,8 +6381,8 @@ content type "application/json". Example of such object:
                     <params>
                         <param>
                             <name>uuid</name>
-                            <description>Process unique id, can be obtained from "processUuid"
-                              field in the result of /api/manualCamera/search.</description>
+                            <description>Process unique id, can be obtained from "processUuid" field in the result of
+/api/manualCamera/search.</description>
                             <optional>false</optional>
                         </param>
                     </params>
@@ -6771,13 +6770,13 @@ cloud anymore</description>
 Can be called only if server flags include "SF_timeCtrl"
 (server flags can be obtained via /ec2/getMediaServersEx in "flags" field).
 <p>
-Parameters should be passed as a JSON object in POST message body with
-content type "application/json". Example of such object:
+    Parameters should be passed as a JSON object in POST message body with
+    content type "application/json". Example of such object:
 <pre>
                                 <code>
 {
-"dateTime": "2015-02-28T16:37:00",
-"timeZoneId": "Europe/Moscow"
+    "dateTime": "2015-02-28T16:37:00",
+    "timeZoneId": "Europe/Moscow"
 }
 </code>
                             </pre>

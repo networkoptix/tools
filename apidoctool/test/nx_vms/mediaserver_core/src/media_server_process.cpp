@@ -1839,7 +1839,78 @@ void MediaServerProcess::registerRestHandlers(
 
     reg("api/getCameraParam", new QnCameraSettingsRestHandler());
     reg("api/setCameraParam", new QnCameraSettingsRestHandler());
+
+    /**%apidoc GET /api/manualCamera/search
+     * Start searching for the cameras in manual mode.
+     * %param start_ip First IP address in the range to scan.
+     * %param[opt] end_ip Last IP address in the range to scan.
+     * %param[opt] port Camera(s) IP port to check. Port is auto-detected if this parameter is
+     *     omitted.
+     * %param[opt] user Camera(s) username.
+     * %param[opt] password Camera(s) password.
+     * %return JSON object with the initial status of camera search process, including processUuid
+     *     used for other /api/manualCamera calls, and the list of objects describing cameras found
+     *     to the moment.
+     *
+     **%apidoc GET /api/manualCamera/status
+     * Get the current status of the process of searching for the cameras.
+     * %param uuid Process unique id, can be obtained from "processUuid" field in the result of
+     *     /api/manualCamera/search.
+     * %return JSON object with the initial status of camera search process, including processUuid
+     *     used for other /api/manualCamera calls, and the list of objects describing cameras found
+     *     to the moment.
+     *
+     **%apidoc POST /api/manualCamera/stop
+     * Stop manual adding progress.
+     * %param uuid Process unique id, can be obtained from "processUuid" field in the result of
+     *     /api/manualCamera/search.
+     * %return JSON object with error message and error code (0 means OK).
+     *
+     **%apidoc[proprietary] GET /api/manualCamera/add
+     * Manually add camera(s). If several cameras are added, parameters "url" and "manufacturer"
+     * must be defined several times with incrementing suffix "0", "1", etc.
+     * %param url0 Camera url, can be obtained from "reply.cameras[].url" field in the result of
+     *     /api/manualCamera/status.
+     * %param uniqueId0 Camera physical id, can be obtained from "reply.cameras[].uniqueId" field
+     *     in the result of /api/manualCamera/status.
+     * %param manufacturer0 Camera manufacturer, can be obtained from
+     *     "reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.
+     * %param[opt] user Username for the cameras.
+     * %param[opt] password Password for the cameras.
+     * %return JSON object with error message and error code (0 means OK).
+     *
+     **%apidoc POST /api/manualCamera/add
+     * Manually add camera(s).
+     * <p>
+     * Parameters should be passed as a JSON object in POST message body with
+     * content type "application/json". Example of such object:
+     * <pre><code>
+     * {
+     *     "user": "some_user",
+     *     "password": "some_password",
+     *     "cameras":
+     *     [
+     *         {
+     *             "uniqueId": "00-1A-07-00-FF-FF",
+     *             "url": "192.168.0.100",
+     *             "manufacturer": "3100"
+     *         }
+     *     ]
+     * }
+     * </code></pre></p>
+     * %param[opt] user Username for the cameras.
+     * %param[opt] password Password for the cameras.
+     * %param cameras List of objects with fields defined below.
+     *     %param cameras[].url Camera url, can be obtained from "reply.cameras[].url" field in the
+     *         result of /api/manualCamera/status.
+     *     %param cameras[].uniqueId Camera physical id, can be obtained from
+     *         "reply.cameras[].uniqueId" field in the result of /api/manualCamera/status.
+     *     %param cameras[].manufacturer Camera manufacturer, can be obtained from
+     *         "reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.
+     * %return JSON object with error message and error code (0 means OK).
+     */
     reg("api/manualCamera", new QnManualCameraAdditionRestHandler());
+
     reg("api/wearableCamera", new QnWearableCameraRestHandler());
 
     /**%apidoc GET /api/ptz
@@ -1879,18 +1950,18 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc GET /api/createEvent
      * Using this method it is possible to trigger a generic event in the system from a 3rd party
-     *     system. Such event will be handled and logged according to current event rules.
-     *     Parameters of the generated event, such as "source", "caption" and "description", are
-     *     intended to be analyzed by these rules.
-     *     <tt>
-     *        <br/>Example:
-     *        <pre><![CDATA[
+     * system. Such event will be handled and logged according to current event rules.
+     * Parameters of the generated event, such as "source", "caption" and "description", are
+     * intended to be analyzed by these rules.
+     * <tt>
+     *     <br/>Example:
+     *     <pre><![CDATA[
      * http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z&caption=CreditCardUsed&metadata={"cameraRefs":["3A4AD4EA-9269-4B1F-A7AA-2CEC537D0248","3A4AD4EA-9269-4B1F-A7AA-2CEC537D0240"]}
-     *        ]]></pre>
-     *        This example triggers a generic event informing the system that a
-     *        credit card has been used on September 16, 2016 at 16:03:41 UTC in a POS
-     *        terminal being watched by the two specified cameras.
-     *     </tt>
+     *     ]]></pre>
+     *     This example triggers a generic event informing the system that a
+     *     credit card has been used on September 16, 2016 at 16:03:41 UTC in a POS
+     *     terminal being watched by the two specified cameras.
+     * </tt>
      * %param[opt] timestamp Event date and time (as a string containing time in milliseconds since
      *     epoch, or a local time formatted like
      *     <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
@@ -1924,7 +1995,7 @@ void MediaServerProcess::registerRestHandlers(
     static const char kGetTimePath[] = "api/gettime";
     /**%apidoc GET /api/gettime
      * Return server time (in milliseconds since epoch), time zone and authentication realm (realm
-     *     is added for convenience)
+     * is added for convenience)
      * %return JSON data.
      */
     reg(kGetTimePath, new QnTimeRestHandler());
@@ -2080,98 +2151,98 @@ void MediaServerProcess::registerRestHandlers(
      *         %value ExecHttpRequestAction Send HTTP request as an action.
      *     %param actionParams JSON object with action parameters. Only fields that are applicable
      *         to the particular action are used.
-     *     %param actionParams.actionResourceId Additional parameter for event log convenience.
-     *     %param actionParams.url Play Sound / exec HTTP action.
-     *     %param actionParams.emailAddress Email.
-     *     %param actionParams.userGroup Popups and System Health.
-     *         %value EveryOne
-     *         %value AdminOnly
-     *     %param actionParams.fps Frames per second for recording.
-     *     %param actionParams.streamQuality Stream quality for recording.
-     *         %value QualityLowest
-     *         %value QualityLow
-     *         %value QualityNormal
-     *         %value QualityHigh
-     *         %value QualityHighest
-     *         %value QualityPreSet
-     *         %value QualityNotDefined
-     *     %param actionParams.recordingDuration Duration of the recording, in seconds.
-     *     %param actionParams.recordAfter For Bookmark, extension to the recording time, in
-     *         seconds.
-     *     %param actionParams.relayOutputId Camera Output.
-     *     %param actionParams.sayText
-     *     %param actionParams.tags Bookmark.
-     *     %param actionParams.text Text for Show Text Overlay, or message body for Exec HTTP
-     *         Action.
-     *     %param actionParams.durationMs Duration in milliseconds for Bookmark and Show Text
-     *         Overlay.
-     *     %param actionParams.additionalResources JSON list of ids of additional resources; user
-     *         ids for Show On Alarm Layout.
-     *     %param actionParams.forced Alarm Layout - if it must be opened immediately.
-     *         %value true
-     *         %value false
-     *     %param actionParams.presetId Execute PTZ preset action.
-     *     %param actionParams.useSource Alarm Layout - if the source resource should also be used.
-     *     %param actionParams.recordBeforeMs Bookmark start time is adjusted to the left by this
-     *         value in milliseconds.
-     *     %param actionParams.playToClient Text to be pronounced.
-     *     %param actionParams.contentType HTTP action.
+     *         %param actionParams.actionResourceId Additional parameter for event log convenience.
+     *         %param actionParams.url Play Sound / exec HTTP action.
+     *         %param actionParams.emailAddress Email.
+     *         %param actionParams.userGroup Popups and System Health.
+     *             %value EveryOne
+     *             %value AdminOnly
+     *         %param actionParams.fps Frames per second for recording.
+     *         %param actionParams.streamQuality Stream quality for recording.
+     *             %value QualityLowest
+     *             %value QualityLow
+     *             %value QualityNormal
+     *             %value QualityHigh
+     *             %value QualityHighest
+     *             %value QualityPreSet
+     *             %value QualityNotDefined
+     *         %param actionParams.recordingDuration Duration of the recording, in seconds.
+     *         %param actionParams.recordAfter For Bookmark, extension to the recording time, in
+     *             seconds.
+     *         %param actionParams.relayOutputId Camera Output.
+     *         %param actionParams.sayText
+     *         %param actionParams.tags Bookmark.
+     *         %param actionParams.text Text for Show Text Overlay, or message body for Exec HTTP
+     *             Action.
+     *         %param actionParams.durationMs Duration in milliseconds for Bookmark and Show Text
+     *             Overlay.
+     *         %param actionParams.additionalResources JSON list of ids of additional resources; user
+     *             ids for Show On Alarm Layout.
+     *         %param actionParams.forced Alarm Layout - if it must be opened immediately.
+     *             %value true
+     *             %value false
+     *         %param actionParams.presetId Execute PTZ preset action.
+     *         %param actionParams.useSource Alarm Layout - if the source resource should also be used.
+     *         %param actionParams.recordBeforeMs Bookmark start time is adjusted to the left by this
+     *             value in milliseconds.
+     *         %param actionParams.playToClient Text to be pronounced.
+     *         %param actionParams.contentType HTTP action.
      *     %param eventParams JSON object with event parameters.
-     *     %param eventParams.eventType Type of the event.
-     *         %value UndefinedEvent Event type is not defined. Used in rules.
-     *         %value CameraMotionEvent Motion has occurred on a camera.
-     *         %value CameraInputEvent Camera input signal is received.
-     *         %value CameraDisconnectEvent Camera was disconnected.
-     *         %value StorageFailureEvent Storage read error has occurred.
-     *         %value NetworkIssueEvent Network issue: packet lost, RTP timeout, etc.
-     *         %value CameraIpConflictEvent Found some cameras with same IP address.
-     *         %value ServerFailureEvent Connection to server lost.
-     *         %value ServerConflictEvent Two or more servers are running.
-     *         %value ServerStartEvent Server started.
-     *         %value LicenseIssueEvent Not enough licenses.
-     *         %value BackupFinishedEvent Archive backup done.
-     *         %value SystemHealthEvent System health message.
-     *         %value MaxSystemHealthEvent System health message.
-     *         %value AnyCameraEvent Event group.
-     *         %value AnyServerEvent Event group.
-     *         %value AnyBusinessEvent Event group.
-     *         %value UserDefinedEvent Base index for the user-defined events.
-     *     %param eventParams.eventTimestampUsec When did the event occur, in microseconds.
-     *     %param eventParams.eventResourceId Event source - camera or server id.
-     *     %param eventParams.resourceName Name of the resource which caused the event. Used if no
-     *         resource is actually registered in the system. Generic event can provide some
-     *         resource name which doesn't match any resourceId in the system. In this case
-     *         resourceName is filled and resourceId remains empty.
-     *     %param eventParams.sourceServerId Id of a server that generated the event.
-     *     %param eventParams.reasonCode Used in Reasoned Events as a reason code.
-     *         %value NoReason
-     *         %value NetworkNoFrameReason
-     *         %value NetworkConnectionClosedReason
-     *         %value NetworkRtpPacketLossReason
-     *         %value ServerTerminatedReason
-     *         %value ServerStartedReason
-     *         %value StorageIoErrorReason
-     *         %value StorageTooSlowReason
-     *         %value StorageFullReason
-     *         %value LicenseRemoved
-     *         %value BackupFailedNoBackupStorageError
-     *         %value BackupFailedSourceStorageError
-     *         %value BackupFailedSourceFileError
-     *         %value BackupFailedTargetFileError
-     *         %value BackupFailedChunkError
-     *         %value BackupEndOfPeriod
-     *         %value BackupDone
-     *         %value BackupCancelled
-     *         %value NetworkNoResponseFromDevice
-     *     %param eventParams.inputPortId Used for Input events only.
-     *     %param eventParams.caption Short event description. Used for camera/server conflict as
-     *         resource name which cause error. Used in generic events as a short description.
-     *     %param eventParams.description Long event description. Used for camera/server conflict
-     *         as a long description (conflict list). Used in Reasoned Events as reason
-     *         description. Used in generic events as a long description.
-     *     %param eventParams.metadata Camera list which is associated with the event.
-     *         EventResourceId may be a POS terminal, but this is a camera list which should be
-     *         shown with this event.
+     *         %param eventParams.eventType Type of the event.
+     *             %value UndefinedEvent Event type is not defined. Used in rules.
+     *             %value CameraMotionEvent Motion has occurred on a camera.
+     *             %value CameraInputEvent Camera input signal is received.
+     *             %value CameraDisconnectEvent Camera was disconnected.
+     *             %value StorageFailureEvent Storage read error has occurred.
+     *             %value NetworkIssueEvent Network issue: packet lost, RTP timeout, etc.
+     *             %value CameraIpConflictEvent Found some cameras with same IP address.
+     *             %value ServerFailureEvent Connection to server lost.
+     *             %value ServerConflictEvent Two or more servers are running.
+     *             %value ServerStartEvent Server started.
+     *             %value LicenseIssueEvent Not enough licenses.
+     *             %value BackupFinishedEvent Archive backup done.
+     *             %value SystemHealthEvent System health message.
+     *             %value MaxSystemHealthEvent System health message.
+     *             %value AnyCameraEvent Event group.
+     *             %value AnyServerEvent Event group.
+     *             %value AnyBusinessEvent Event group.
+     *             %value UserDefinedEvent Base index for the user-defined events.
+     *         %param eventParams.eventTimestampUsec When did the event occur, in microseconds.
+     *         %param eventParams.eventResourceId Event source - camera or server id.
+     *         %param eventParams.resourceName Name of the resource which caused the event. Used if no
+     *             resource is actually registered in the system. Generic event can provide some
+     *             resource name which doesn't match any resourceId in the system. In this case
+     *             resourceName is filled and resourceId remains empty.
+     *         %param eventParams.sourceServerId Id of a server that generated the event.
+     *         %param eventParams.reasonCode Used in Reasoned Events as a reason code.
+     *             %value NoReason
+     *             %value NetworkNoFrameReason
+     *             %value NetworkConnectionClosedReason
+     *             %value NetworkRtpPacketLossReason
+     *             %value ServerTerminatedReason
+     *             %value ServerStartedReason
+     *             %value StorageIoErrorReason
+     *             %value StorageTooSlowReason
+     *             %value StorageFullReason
+     *             %value LicenseRemoved
+     *             %value BackupFailedNoBackupStorageError
+     *             %value BackupFailedSourceStorageError
+     *             %value BackupFailedSourceFileError
+     *             %value BackupFailedTargetFileError
+     *             %value BackupFailedChunkError
+     *             %value BackupEndOfPeriod
+     *             %value BackupDone
+     *             %value BackupCancelled
+     *             %value NetworkNoResponseFromDevice
+     *         %param eventParams.inputPortId Used for Input events only.
+     *         %param eventParams.caption Short event description. Used for camera/server conflict as
+     *             resource name which cause error. Used in generic events as a short description.
+     *         %param eventParams.description Long event description. Used for camera/server conflict
+     *             as a long description (conflict list). Used in Reasoned Events as reason
+     *             description. Used in generic events as a long description.
+     *         %param eventParams.metadata Camera list which is associated with the event.
+     *             EventResourceId may be a POS terminal, but this is a camera list which should be
+     *             shown with this event.
      *     %param businessRuleId Id of the event rule.
      *     %param aggregationCount Number of identical events groupped into one.
      *     %param[proprietary] flags Combination (via "|") or the following flags:
@@ -2238,8 +2309,8 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc GET /api/iflist
      * Get network settings (list of interfaces) for the server. Can be called only if server flags
-     *     include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx in
-     *     "flags" field).
+     * include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx in
+     * "flags" field).
      * %return List of objects with interface parameters.
      *     %param name Interface name.
      *     %param ipAddr IP address with dot-separated decimal components.
@@ -2260,7 +2331,7 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc GET /api/aggregator
      * This function allows to execute several requests with json content type and returns result
-     *     as a single JSON object
+     * as a single JSON object
      * %param[opt] exec_cmd HTTP url path to execute. This parameter could be repeated several
      *     times to execute several nested methods. All additions parameters after current
      *     "exec_cmd" and before next "exec_cmd" are passed as parameters to the nested method.
@@ -2270,10 +2341,10 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc POST /api/ifconfig
      * Set new network settings (list of interfaces) for the server. Can be called only if server
-     *     flags include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx
-     *     in "flags" field). <p> Parameters should be passed as a JSON array of objects in POST
-     *     message body with content type "application/json". Example of such object can be seen in
-     *     the result of GET /api/iflist function. </p>
+     * flags include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx
+     * in "flags" field). <p> Parameters should be passed as a JSON array of objects in POST
+     * message body with content type "application/json". Example of such object can be seen in
+     * the result of GET /api/iflist function. </p>
      * %permissions Administrator.
      * %param name Interface name.
      * %param ipAddr IP address with dot-separated decimal components.
@@ -2297,8 +2368,8 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc[proprietary] GET /api/settime
      * Set current time on the server machine. Can be called only if server flags include
-     *     "SF_timeCtrl" (server flags can be obtained via /ec2/getMediaServersEx in "flags"
-     *     field).
+     * "SF_timeCtrl" (server flags can be obtained via /ec2/getMediaServersEx in "flags"
+     * field).
      * %permissions Administrator.
      * %param[opt] timezone Time zone identifier, can be obtained via /api/getTimeZones.
      * %param datetime System date and time (as a string containing time in milliseconds since
@@ -2309,20 +2380,20 @@ void MediaServerProcess::registerRestHandlers(
     reg("api/settime", new QnSetTimeRestHandler(), kAdmin); //< deprecated
 
     /**%apidoc POST /api/setTime
-     *  Set current time on the server machine.
-     *      Can be called only if server flags include "SF_timeCtrl"
-     *      (server flags can be obtained via /ec2/getMediaServersEx in "flags" field).
-     *      <p>
-     *          Parameters should be passed as a JSON object in POST message body with
-     *          content type "application/json". Example of such object:
-     *      <pre><code>
-     *      {
-     *          "dateTime": "2015-02-28T16:37:00",
-     *          "timeZoneId": "Europe/Moscow"
-     *      }
-     *      </code>
-     *      </pre>
-     *      </p>
+     * Set current time on the server machine.
+     * Can be called only if server flags include "SF_timeCtrl"
+     * (server flags can be obtained via /ec2/getMediaServersEx in "flags" field).
+     * <p>
+     *     Parameters should be passed as a JSON object in POST message body with
+     *     content type "application/json". Example of such object:
+     * <pre><code>
+     * {
+     *     "dateTime": "2015-02-28T16:37:00",
+     *     "timeZoneId": "Europe/Moscow"
+     * }
+     * </code>
+     * </pre>
+     * </p>
      * %permissions Administrator.
      * %param[opt] timeZoneId Time zone identifier, can be obtained via /api/getTimeZones.
      * %param dateTime Date and time (as string containing time in milliseconds since epoch, or a
@@ -2364,8 +2435,8 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc POST /api/setupLocalSystem
      * Configure server system name and password. This function can be called for server with
-     *     default system name. Otherwise function returns error. This method requires owner
-     *     permissions.
+     * default system name. Otherwise function returns error. This method requires owner
+     * permissions.
      * %permissions Administrator.
      * %param password New password for admin user
      * %param systemName New system name
@@ -2375,8 +2446,8 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc POST /api/setupCloudSystem
      * Configure server system name and attach it to cloud. This function can be called for server
-     *     with default system name. Otherwise function returns error. This method requires owner
-     *     permissions.
+     * with default system name. Otherwise function returns error. This method requires owner
+     * permissions.
      * %permissions Administrator.
      * %param systemName New system name
      * %param cloudAuthKey could authentication key
@@ -2387,15 +2458,15 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc POST /api/mergeSystems
      * Merge two Systems. <br/> The System that joins another System is called the current System,
-     *     the joinable System is called the target System. The <b>URL</b> parameter sets the
-     *     target Server which should be joined with the current System. Other servers, that are
-     *     merged with the target Server will be joined if parameter <b>mergeOneServer</b> is set
-     *     to false. <br/> The method uses digest authentication. Two hashes should be previouly
-     *     calculated: <b>getKey</b> and <b>postKey</b>. Both are mandatory. The calculation
-     *     algorithm is described in <b>Calculating authentication hash</b> section (in the bootom
-     *     of the page). While calculating hashes, username and password of the target Server are
-     *     needed. Digest authentication needs realm and nonce, both can be obtained with <code>GET
-     *     /api/getNonce call</code> call. The lifetime of a nonce is about a few minutes.
+     * the joinable System is called the target System. The <b>URL</b> parameter sets the
+     * target Server which should be joined with the current System. Other servers, that are
+     * merged with the target Server will be joined if parameter <b>mergeOneServer</b> is set
+     * to false. <br/> The method uses digest authentication. Two hashes should be previouly
+     * calculated: <b>getKey</b> and <b>postKey</b>. Both are mandatory. The calculation
+     * algorithm is described in <b>Calculating authentication hash</b> section (in the bootom
+     * of the page). While calculating hashes, username and password of the target Server are
+     * needed. Digest authentication needs realm and nonce, both can be obtained with <code>GET
+     * /api/getNonce call</code> call. The lifetime of a nonce is about a few minutes.
      * %permissions Administrator.
      * %param url URL of one Server in the System to join.
      * %param getKey Authentication hash of the target Server for GET requests.
@@ -2459,8 +2530,8 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc[proprietary] GET /api/execute
      * Execute any script from subfolder "scripts" of media server. Script name provides directly
-     *     in a URL path like "/api/execute/script1.sh". All URL parameters are passed directly to
-     *     a script as an parameters.
+     * in a URL path like "/api/execute/script1.sh". All URL parameters are passed directly to
+     * a script as an parameters.
      * %permissions Administrator.
      * %return JSON with error code.
      */
@@ -2501,8 +2572,9 @@ void MediaServerProcess::registerRestHandlers(
      *     <br/>Format: string with a JSON list of <i>sensors</i>,
      *     each <i>sensor</i> is a JSON list of <i>rects</i>, each <i>rect</i> is:
      *     <br/>
-     *     <code>{"x": <i>x</i>, "y": <i>y</i>, "width": <i>width</i>,
-     *         "height": <i>height</i>}</code>
+     *     <code>
+     *         {"x": <i>x</i>, "y": <i>y</i>, "width": <i>width</i>,"height": <i>height</i>}
+     *     </code>
      *     <br/>All values are measured in relative portions of a video frame,
      *     <i>x</i> and <i>width</i> in range [0..43], <i>y</i> and <i>height</i> in range [0..31],
      *     zero is the left-top corner.
@@ -2535,8 +2607,99 @@ void MediaServerProcess::registerRestHandlers(
     reg("ec2/recordedTimePeriods", new QnMultiserverChunksRestHandler("ec2/recordedTimePeriods")); //< new version
 
     reg("ec2/cameraHistory", new QnCameraHistoryRestHandler());
+
+    /**%apidoc GET /ec2/bookmarks
+     * Read bookmarks using the specified parameters.
+     * %param cameraId Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+     *     /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).
+     * %param[opt] startTime Start time of the interval with bookmarks (in milliseconds since
+     *     epoch). Default value is 0. Should be less than endTime.
+     * %param[opt] endTime End time of the interval with bookmarks (in milliseconds since epoch).
+     *     Default value is the current time. Should be greater than startTime.
+     * %param[opt] sortBy Field to sort the results by. Default value is "startTime".
+     *     %value name Sort bookmarks by name.
+     *     %value startTime Sort bookmarks by start time.
+     *     %value duration Sort bookmarks by duration.
+     *     %value cameraName Sort bookmarks by camera name.
+     * %param[opt] sortOrder Sort order. Default order is ascending.
+     *     %value asc Ascending sort order.
+     *     %value desc Descending sort order.
+     * %param[opt] limit Maximum number of bookmarks to return. Unlimited by default.
+     * %param[opt] filter Text-search filter string.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     *
+     **%apidoc GET /ec2/bookmarks/add
+     * Add a bookmark to the target server.
+     * %param guid Identifier of the bookmark.
+     * %param cameraId Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+     *     /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).
+     * %param name Caption of the bookmark.
+     * %param[opt] description Details of the bookmark.
+     * %param[opt] timeout Time during which the recorded period should be preserved (in
+     *     milliseconds).
+     * %param startTime Start time of the bookmark (in milliseconds since epoch).
+     * %param duration Length of the bookmark (in milliseconds).
+     * %param[opt] tag Applied tag. Several tag parameters could be used to specify multiple tags.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     *
+     **%apidoc GET /ec2/bookmarks/delete
+     * Remove a bookmark with the specified identifsier.
+     * %param guid Identifier of the bookmark.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     *
+     **%apidoc GET /ec2/bookmarks/tags
+     * Return currently used tags.
+     * %param[opt] limit Maximum number of tags to return.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     *
+     **%apidoc GET /ec2/bookmarks/update
+     * Update information for a bookmark.
+     * %param guid Identifier of the bookmark.
+     * %param cameraId Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+     *     /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).
+     * %param name Caption of the bookmark.
+     * %param[opt] description Details of the bookmark.
+     * %param[opt] timeout Time during which the recorded period should be preserved (in
+     *     milliseconds).
+     * %param startTime Start time of the bookmark (in milliseconds since epoch).
+     * %param duration Length of the bookmark (in milliseconds).
+     * %param[opt] tag Applied tag. Serveral tag parameters could be used to specify multiple tags.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     */
     reg("ec2/bookmarks", new QnMultiserverBookmarksRestHandler("ec2/bookmarks"));
+
     reg("api/mergeLdapUsers", new QnMergeLdapUsersRestHandler());
+
+    /**%apidoc[proprietary] GET /ec2/updateInformation/freeSpaceForUpdateFiles
+     * Get free space available for downloading and extracting update files.
+     * %param[proprietary] local If present, the request should not be redirected to another
+     *     server.
+     * %param[proprietary] extraFormatting If present and the requested result format is
+     *     non-binary, indentation and spacing will be used to improve readability.
+     * %param[default] format
+     * %return The amount of free space available for update files in bytes for each online server
+     *     in the system, in the specified format.
+     */
     reg("ec2/updateInformation", new QnUpdateInformationRestHandler());
 
     /**%apidoc GET /ec2/cameraThumbnail
@@ -2612,7 +2775,7 @@ void MediaServerProcess::registerRestHandlers(
 
     /**%apidoc GET /ec2/getHardwareIdsOfServers
      * Return the list of Hardware Ids for each server in the system which is online at the moment
-     *     of executing this function.
+     * of executing this function.
      * %return JSON with an error code, error message and a list of JSON objects in "reply" field:
      *     %param serverId Id of a server.
      *     %param hardwareIds All Hardware Ids of the server, as a list of strings.

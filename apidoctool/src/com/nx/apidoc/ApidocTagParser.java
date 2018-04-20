@@ -2,6 +2,7 @@ package com.nx.apidoc;
 
 import com.nx.util.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -17,18 +18,18 @@ import java.util.regex.Pattern;
  */
 public final class ApidocTagParser
 {
-    public static final class Item
+    public final class Item
     {
         private final String tag;
         private final String attribute;
         private final String initialTokenUntrimmed;
-        private final String textAfterInitialToken;
+        private final List<String> textAfterInitialToken;
 
         protected Item(
             String tag,
             String attribute,
             String initialTokenUntrimmed,
-            String textAfterInitialToken)
+            List<String> textAfterInitialToken)
         {
             assert tag != null;
             assert !tag.isEmpty();
@@ -71,22 +72,49 @@ public final class ApidocTagParser
         /**
          * @return Text following the initial token (if any). Never null.
          */
-        public String getTextAfterInitialToken()
+        public String getTextAfterInitialToken(int indentLevel)
         {
-            return textAfterInitialToken;
+            if (textAfterInitialToken.isEmpty())
+                return "";
+
+            String indentString = "";
+            for (int i = 0; i < indentLevel * 4; ++i)
+                indentString += ' ';
+
+            StringBuilder b = new StringBuilder(textAfterInitialToken.get(0));
+            int line = 1;
+            while (line < textAfterInitialToken.size())
+            {
+                if (!b.toString().isEmpty()) //< skip empty lines
+                    b.append("\n");
+                String continuationTrimmed = textAfterInitialToken.get(line);
+                if (continuationTrimmed.startsWith(indentString))
+                    continuationTrimmed = continuationTrimmed.substring(indentString.length());
+                else if (verbose)
+                {
+                    System.out.println("    WARNING: " + filename + ":" + (firstLineOfItem + line)
+                            + " too small indent");
+                }
+                b.append(continuationTrimmed);
+                ++line;
+            }
+            return b.toString();
         }
 
         /**
          * @return Text including the initial token (if any).
          */
-        public String getFullText()
+        public String getFullText(int indentLevel)
         {
-            return initialTokenUntrimmed + textAfterInitialToken;
+            return initialTokenUntrimmed + getTextAfterInitialToken(indentLevel);
         }
     }
 
-    public ApidocTagParser(List<String> lines)
+    public ApidocTagParser(List<String> lines, String filename, int firstLine, boolean verbose)
     {
+        this.filename = filename;
+        this.firstLine = firstLine;
+        this.verbose = verbose;
         this.lines = lines;
         line = 0;
         item = null;
@@ -107,6 +135,7 @@ public final class ApidocTagParser
         if (line >= lines.size())
             return;
 
+        firstLineOfItem = firstLine + line;
         String[] values = Utils.matchRegex(itemStartRegex, lines.get(line));
         if (values == null)
         {
@@ -115,9 +144,8 @@ public final class ApidocTagParser
         }
 
         ++line;
-        final String text = values[3];
-        StringBuilder b = new StringBuilder(text.trim());
-
+        List<String> textAfterToken = new ArrayList<String>();
+        textAfterToken.add(values[3]);
         while (line < lines.size())
         {
             final String[] continuation = Utils.matchRegex(
@@ -125,12 +153,11 @@ public final class ApidocTagParser
             if (continuation == null)
                 break;
 
-            b.append("\n");
-            b.append(continuation[0].trim());
+            textAfterToken.add(continuation[0]);
             ++line;
         }
 
-        item = new Item(values[0], values[1], values[2], b.toString().trim());
+        item = new Item(values[0], values[1], values[2], textAfterToken);
     }
 
     public Item getItem()
@@ -140,8 +167,12 @@ public final class ApidocTagParser
 
     //--------------------------------------------------------------------------
 
+    private final String filename;
+    private final boolean verbose;
+    private final int firstLine;
     private final List<String> lines;
     private int line;
+    private int firstLineOfItem;
     private Item item;
 
     //--------------------------------------------------------------------------
@@ -151,10 +182,10 @@ public final class ApidocTagParser
       //     /*       *
 
     private static final Pattern itemStartRegex = Pattern.compile(
-        "\\s*(?:/\\*)?\\*?\\s*(%[^\\s\\[]+)\\s*(\\[\\w+\\])?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
-      //     /*       *       %tag             [attr]           Token                  ...
+        "\\s*(?:/\\*)?\\*?\\*?\\s*(%[^\\s\\[]+)\\s*(\\[\\w+\\])?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
+      //     /*       *           %tag             [attr]           Token                  ...
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
-        "\\s*\\*?\\s*([^%]*)");
-      //       *     non-%...
+        "\\s*\\* ([^%]*)");
+      //      *' '     non-%...
 }

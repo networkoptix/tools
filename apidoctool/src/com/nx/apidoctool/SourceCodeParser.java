@@ -2,6 +2,7 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocCommentParser;
+import com.nx.apidoc.ApidocTagParser;
 import com.nx.apidoc.ApidocUtils;
 import com.nx.util.SourceCode;
 
@@ -57,23 +58,33 @@ public final class SourceCodeParser
             RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                ApidocCommentParser.FunctionDescription description = createFunctionFromComment();
-                if (description != null && description.function != null)
+                List<ApidocCommentParser.FunctionDescription> functions = createFunctionsFromComment();
+                if (functions != null && !functions.isEmpty())
                 {
-                    Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, description.urlPrefix);
-                    if (verbose)
-                        System.out.println("            " + description.function.name);
+                    String urlPrefix = functions.get(0).urlPrefix;
+                    Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
 
-                    checkFunctionProperties(match, description.function);
-
-                    if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
+                    for(ApidocCommentParser.FunctionDescription description: functions)
                     {
-                        throw new Error("Duplicate function found: " + description.function.name +
-                            ", method: " + description.function.method);
-                    }
+                        if (!urlPrefix.equals(description.urlPrefix))
+                        {
+                            throw new Error("URL prefix is differ in one apidoc comment: [" + urlPrefix +
+                                    "] and [" + description.urlPrefix + "]");
+                        }
+                        if (verbose)
+                            System.out.println("            " + description.function.name);
 
-                    ++processedFunctionCount;
-                    group.functions.add(description.function);
+                        checkFunctionProperties(match, description.function);
+
+                        if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
+                        {
+                            throw new Error("Duplicate function found: " + description.function.name +
+                                    ", method: " + description.function.method);
+                        }
+
+                        ++processedFunctionCount;
+                        group.functions.add(description.function);
+                    }
                 }
             }
             ++mainLine;
@@ -89,7 +100,7 @@ public final class SourceCodeParser
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private ApidocCommentParser.FunctionDescription createFunctionFromComment()
+    private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment()
         throws Error
     {
         // Look for an Apidoc Comment end "*/" directly above the main line.
@@ -115,23 +126,25 @@ public final class SourceCodeParser
         for (int i = line; i < mainLine - 1; ++i)
             commentLines.add(sourceCode.getLine(i));
 
-        final ApidocCommentParser.FunctionDescription description;
+        final List<ApidocCommentParser.FunctionDescription> functions;
         try
         {
-            description = ApidocCommentParser.createFunctionFromCommentLines(commentLines);
+            ApidocCommentParser parser = new ApidocCommentParser();
+            ApidocTagParser tagParser = new ApidocTagParser(commentLines, sourceCode.getFilename(), line, verbose);
+            functions = parser.createFunctionsFromCommentLines(tagParser);
         }
         catch (ApidocCommentParser.Error e)
         {
             throw new Error(e.getMessage());
         }
-        return description;
+        return functions;
     }
 
     private void checkFunctionProperties(
         RegistrationMatch match, Apidoc.Function function)
         throws Error
     {
-        if (match.functionName != null && !function.name.equals(match.functionName))
+        if (match.functionName != null && !function.name.startsWith(match.functionName))
         {
             throw new Error("Function name in Apidoc Comment \"" +
                     function.name +

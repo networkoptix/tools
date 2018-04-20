@@ -33,6 +33,36 @@
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testFunction2/add</name>
+                    <description>some function description
+{
+    test: "test"
+}</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>someParam</name>
+                            <description>some
+param description
+    with indent
+continue description
+continue description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>someParam.field</name>
+                            <description>description
+continue description
+    with indent
+continue description</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result>
+                        <caption>some result description</caption>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

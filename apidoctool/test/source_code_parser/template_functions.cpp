@@ -9,7 +9,7 @@
  *     %value regularValue Appears in xml.
  *     %value[proprietary] proprietaryValue Such values are ignored, thus, do not appear in xml.
  * %return some result description
- * %param someParam some result param
- * %param[proprietary] proprietaryParam proprietary result param
+ *     %param someParam some result param
+ *     %param[proprietary] proprietaryParam proprietary result param
  */
 regUpdate<ApiDummyData>(dummy, ApiCommand::testFunction1);
