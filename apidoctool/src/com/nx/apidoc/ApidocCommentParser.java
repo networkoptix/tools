@@ -36,7 +36,8 @@ public final class ApidocCommentParser
     /**
      * @return Empty list if the comment should not convert to an XML function.
      */
-    public List<FunctionDescription> createFunctionsFromCommentLines(ApidocTagParser parser) throws Error
+    public List<FunctionDescription> createFunctionsFromCommentLines(ApidocTagParser parser)
+        throws Error
     {
         parser.parseNextItem();
 
@@ -70,14 +71,16 @@ public final class ApidocCommentParser
         {
             if (TAG_CAPTION.equals(parser.getItem().getTag()))
             {
-                captionParsed = checkTagOnce(captionParsed, description.function.name, TAG_CAPTION);
+                captionParsed = checkTagOnce(
+                    captionParsed, description.function.name, TAG_CAPTION);
                 checkNoAttribute(parser, description.function.name);
                 description.function.caption = parser.getItem().getFullText(indentLevel);
                 parser.parseNextItem();
             }
             else if (TAG_PERMISSIONS.equals(parser.getItem().getTag()))
             {
-                permissionsParsed = checkTagOnce(permissionsParsed, description.function.name, TAG_PERMISSIONS);
+                permissionsParsed = checkTagOnce(
+                    permissionsParsed, description.function.name, TAG_PERMISSIONS);
                 description.function.permissions = parser.getItem().getFullText(indentLevel + 1);
                 parser.parseNextItem();
             }
@@ -111,7 +114,8 @@ public final class ApidocCommentParser
      */
     private FunctionDescription createFunctionFromApidocItem(ApidocTagParser parser) throws Error
     {
-        String[] values = Utils.matchRegex(functionHeaderRegex, parser.getItem().getFullText(indentLevel));
+        String[] values = Utils.matchRegex(
+            functionHeaderRegex, parser.getItem().getFullText(indentLevel));
         if (values == null)
             throw new Error("Wrong " + TAG_APIDOC + " function header.");
 

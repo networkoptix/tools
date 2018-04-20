@@ -58,7 +58,8 @@ public final class SourceCodeParser
             RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                List<ApidocCommentParser.FunctionDescription> functions = createFunctionsFromComment();
+                List<ApidocCommentParser.FunctionDescription> functions =
+                    createFunctionsFromComment();
                 if (functions != null && !functions.isEmpty())
                 {
                     String urlPrefix = functions.get(0).urlPrefix;
@@ -68,8 +69,8 @@ public final class SourceCodeParser
                     {
                         if (!urlPrefix.equals(description.urlPrefix))
                         {
-                            throw new Error("URL prefix is differ in one apidoc comment: [" + urlPrefix +
-                                    "] and [" + description.urlPrefix + "]");
+                            throw new Error("URL prefix is differ in one apidoc comment: ["
+                                + urlPrefix + "] and [" + description.urlPrefix + "]");
                         }
                         if (verbose)
                             System.out.println("            " + description.function.name);
@@ -78,8 +79,9 @@ public final class SourceCodeParser
 
                         if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
                         {
-                            throw new Error("Duplicate function found: " + description.function.name +
-                                    ", method: " + description.function.method);
+                            throw new Error(
+                                "Duplicate function found: " + description.function.name +
+                                ", method: " + description.function.method);
                         }
 
                         ++processedFunctionCount;
@@ -130,7 +132,8 @@ public final class SourceCodeParser
         try
         {
             ApidocCommentParser parser = new ApidocCommentParser();
-            ApidocTagParser tagParser = new ApidocTagParser(commentLines, sourceCode.getFilename(), line, verbose);
+            ApidocTagParser tagParser = new ApidocTagParser(
+                commentLines, sourceCode.getFilename(), line, verbose);
             functions = parser.createFunctionsFromCommentLines(tagParser);
         }
         catch (ApidocCommentParser.Error e)
