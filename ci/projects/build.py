@@ -169,9 +169,11 @@ class CMakeBuilder(object):
         with open(output_path, 'w') as f:
             f.write(output)
         log.info('Storing output to junk-shop db...')
-        faulthandler.dump_traceback_later(int(BUILD_SAVE_TIMEOUT.total_seconds()), exit=True)
+        if getattr(faulthandler, 'dump_traceback_later', None):
+            faulthandler.dump_traceback_later(int(BUILD_SAVE_TIMEOUT.total_seconds()), exit=True)
         build_info = store_output_and_error(self._junk_shop_repository, output, succeeded, error_message)
-        faulthandler.cancel_dump_traceback_later()
+        if getattr(faulthandler, 'cancel_dump_traceback_later', None):
+            faulthandler.cancel_dump_traceback_later()
 
         log.info('Storing log artifacts to junk-shop db...')
         self._store_log_artifacts(build_dir, build_info)
