@@ -167,7 +167,7 @@ class Jira:
         """
         for report in reports[-self._file_limit:]:
             self._jira.add_attachment(key, attachment=report.path, filename=report.name)
-            logger.debug('JIRA case {} new attachement {}'.format(key, report.name))
+            logger.debug('JIRA case {} new attachment {}'.format(key, report.name))
 
         reports = self._jira.issue(key).fields.attachment
         reports.sort(key=lambda a: a.created)

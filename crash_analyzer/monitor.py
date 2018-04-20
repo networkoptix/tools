@@ -4,6 +4,7 @@ import argparse
 import logging
 import time
 import traceback
+import hurry.filesize as filesize
 from typing import Tuple, List
 
 import crash_info
@@ -12,14 +13,22 @@ import utils
 
 logger = logging.getLogger(__name__)
 
+NAME = 'Crash Monitor and Analyzer'
+VERSION = '2.0'
 FAILED_CRASH_ID = 'FAILED'
 
 
 class Options:
-    def __init__(self, directory: str, **extra):
+    def __init__(self, directory: str,
+                 reports_size_limit: str = '10G',
+                 dumptool_size_limit: str = '10G',
+                 **extra):
         self.directory = utils.Directory(directory)
         self.records_file = self.directory.file('records.json')
         self.reports_directory = self.directory.directory('reports')
+        self.reports_size_limit = utils.Size(reports_size_limit)
+        self.dumptool_directory = self.directory.directory('dumptool')
+        self.dumptool_size_limit = utils.Size(dumptool_size_limit)
         self.extension = '*'
         self.min_version = '3.2'
         self.min_report_count = 2
@@ -34,8 +43,9 @@ class Monitor:
     def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict):
         self._options = Options(**options)
         self._options.reports_directory.make()
+        self._options.dumptool_directory.make()
         self._fetch, self._upload, self._analyze = fetch, upload, analyze
-        self._analyze['cache_directory'] = self._options.directory.directory('dump_tool').path
+        self._analyze['cache_directory'] = self._options.dumptool_directory.path
         self._records = self._options.records_file.parse(dict())
 
     def run_service(self):
@@ -61,32 +71,49 @@ class Monitor:
 
     def fetch(self):
         logger.info('Fetching new reports from server')
+        directory = self._options.reports_directory
         new_reports = external_api.fetch_new_crashes(
-            self._options.reports_directory, known_reports=self._records.keys(), **self._fetch)
+            directory, known_reports=self._records.keys(), **self._fetch)
 
         if not new_reports:
             return 0
 
         for name in new_reports:
-            self._records[name] = dict(name=name)
+            self._records[name] = dict()
 
         self.flush_records()
+        size = directory.size()
+        if size > self._options.reports_size_limit:
+            logger.info('Reports directory size is {}, remove failed dumps'.format(size))
+            for r in self._records:
+                # TODO: Also remove crash directory is it is not enough.
+                if r.get('crash_id') == FAILED_CRASH_ID:
+                    directory.file(name).remove()
+
         return len(new_reports)
 
     def analyze(self):
-        to_analyze = [crash_info.Report(r['name'])
-                      for r in self._records.values() if not r.get('crash_id')]
+        to_analyze = [crash_info.Report(name)
+                      for name, data in self._records.items() if not data.get('crash_id')]
 
         logger.info('Analyze {} reports in local database'.format(len(to_analyze)))
-        analyzed = {report.name: reason for report, reason in crash_info.analyze_files_concurrent(
-            to_analyze, directory=self._options.reports_directory, **self._analyze)}
+        reasons = crash_info.analyze_files_concurrent(
+            to_analyze, directory=self._options.reports_directory, **self._analyze)
 
+        analyzed = {report.name: reason for report, reason in reasons}
         for report in to_analyze:
             reason = analyzed.get(report.name)
             crash_id = reason.crash_id if reason else FAILED_CRASH_ID
             self._records[report.name]['crash_id'] = crash_id
 
         self.flush_records()
+        cache_size = self._options.dumptool_directory.size()
+        if cache_size > self._options.dumptool_size_limit:
+            logger.info('Dump tool cache has reached {}, clean up'.format(cache_size))
+            for d in self._options.dumptool_directory.directories():
+                if not d.path.endswith('release'):
+                    d.remove()
+
         return len(analyzed)
 
     def upload(self):
@@ -116,6 +143,7 @@ class Monitor:
                 logger.info('Issue {} updated with {} new reports'.format(issue, len(reports)))
                 for r in reports:
                     self._records[r.name]['issue'] = issue
+                    self._options.reports_directory.file(r.name).remove()
 
         if crashes_to_push:
             self.flush_records()
@@ -135,18 +163,22 @@ class Monitor:
 
 
 def main():
-    parser = argparse.ArgumentParser('Crash Monitor and Analyzer')
-    parser.add_argument('configuration_file')
+    try:
+        import subprocess
+        change_set = subprocess.check_output('hg id').decode().split()[0]
+    except (ImportError, OSError):
+        change_set = 'UNKNOWN'
+
+    parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
+    parser.add_argument('config_file')
 
     arguments = parser.parse_args()
-    config = utils.File(arguments.configuration_file).parse()
-    utils.setup_logging(**config['logging'])
+    config = utils.File(arguments.config_file).parse()
+    utils.setup_logging(
+        **config.pop('logging'),
+        title=(parser.prog + ', config: ' + arguments.config_file))
 
-    monitor = Monitor(
-        Options(**config['options']),
-        external_api.CrashServer(**config['crashServer']),
-        external_api.Jira(**config['jira']))
-
+    monitor = Monitor(**config)
     monitor.run_service()
 
 

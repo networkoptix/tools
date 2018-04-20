@@ -230,7 +230,6 @@ class FileLock:
 class DumpAnalyzer:
     """Provides ability to analyze windows DMP dumps.
     """
-
     def __init__(
             self, cache_directory, dump_path,
             customization: str = '', version: str = '', build: str = None, branch: str = '',

@@ -34,9 +34,10 @@ class CrashServerEmulator:
 
 
 class JiraEmulator:
-    def __init__(self, issues, url: str, login: str, password: str, file_limit: int):
+    def __init__(self, issues, url: str, login: str, password: str,
+                 file_limit: int, prefix: str = ''):
         self.issues = issues
-        self.server = '{}:{} @ {} / {}'.format(login, password, url, file_limit)
+        self.server = '{}:{} @ {} / {} {}'.format(login, password, url, file_limit, prefix)
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         key = reason.crash_id[:10]
@@ -69,6 +70,7 @@ class MonitorFixture:
         self.options['options']['directory'] = directory
         self.options['fetch']['api'] = CrashServerEmulator
         self.options['upload']['api'] = functools.partial(JiraEmulator, self.issues)
+        del self.options['logging']
 
     def new_monitor(self):
         if self.monitor:

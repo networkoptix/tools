@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import logging.handlers
 import os
 import string
 import sys
@@ -10,7 +11,7 @@ import random
 import shutil
 import traceback
 from glob import glob
-from typing import Callable, Any
+from typing import Callable, Any, Union, List
 
 import yaml
 
@@ -23,15 +24,36 @@ POWER_SUFFIXES = dict(
 )
 
 
-def setup_logging(level: str = 'debug', path: str = '-'):
+def stream_log_handler(stream_name: str = 'stdout'):
+    streams = dict(stdout=sys.stdout, stderr=sys.stderr)
+    return logging.StreamHandler(streams[stream_name])
+
+
+def rotating_log_handler(base_name: str, max_size_mb: int = 1, backup_count: str = 1):
+    File(base_name).directory().make()
+    return logging.handlers.RotatingFileHandler(base_name, 'a', max_size_mb, backup_count)
+
+
+def setup_logging(level: str = 'debug', title: str = '', stream: str = '', rotating_file: dict = {}):
     """Sets up application log :level and :path.
     """
+    handlers = []
+    if stream:
+        handlers.append(stream_log_handler(stream))
+    if rotating_file:
+        handlers.append(rotating_log_handler(rotating_file))
+
     logging.basicConfig(
         level=getattr(logging, level.upper(), None) or int(level),
-        stream=sys.stdout if path == '-' else open(path, 'w'),
-        format=LOGGING_FORMAT)
+        format=LOGGING_FORMAT, handlers=handlers)
 
-    logging.info('Log is configured with level: {}, file: {}'.format(level, path))
+    logging.info('=' * 80)
+    if title:
+        print(title)
+        logging.info(title)
+
+    logging.info('Log is configured with level: {}, stream: {}, file: {}'.format(
+        level, stream, ', '.join(k + '=' + v for k, v in rotating_file.items())))
 
 
 def is_ascii_printable(s: str):
@@ -107,12 +129,60 @@ def test_concurrent(action: Callable, argument: Any, thread_count: int):
     assert [repr(r) for r in results if isinstance(r, Exception)] == []
 
 
+class Size:
+    step = 1024
+    suffixes = ('', 'K', 'M', 'G', 'T')
+
+    def __init__(self, value: Union[int, str]):
+        if isinstance(value, int):
+            self.bytes = value
+        elif isinstance(value, str):
+            self.bytes = self.str_to_int(value)
+        else:
+            raise TypeError('Unexpected type: ' + type(value).__name__)
+
+    def __eq__(self, other):
+        return self.bytes == other.bytes
+
+    def __lt__(self, other):
+        return self.bytes < other.bytes
+
+    def __str__(self):
+        return self.int_to_str(self.bytes)
+
+    def __repr__(self):
+        return '{}({})'.format(type(self).__name__, repr(str(self)))
+
+    @classmethod
+    def str_to_int(cls, value):
+        value = value.upper()
+        for i, suffix in enumerate(cls.suffixes, 0):
+            if suffix and value.endswith(suffix):
+                return int(float(value[:-len(suffix)]) * (cls.step ** i))
+        return int(value)
+
+    @classmethod
+    def int_to_str(cls, value):
+        exponent = 0
+        while value >= cls.step and exponent < len(cls.suffixes) - 1:
+            value /= cls.step
+            exponent += 1
+        return '{:g}{}'.format(value, cls.suffixes[exponent])
+
+
 class File:
     def __init__(self, *path):
         self.path = os.path.join(*path)
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, repr(self.path))
+
+    def directory(self):
+        return Directory(os.path.dirname(self.path))
+
+    def remove(self):
+        if os.path.isfile(self.path):
+            os.remove(self.path)
 
     @property
     def name(self) -> str:
@@ -153,13 +223,13 @@ class File:
         return self.read(lambda f: f.read(), default, 'b')
 
     def write_json(self, data):
-        self.write(lambda f: json.dump(data, f))
+        self.write(lambda f: json.dump(data, f, indent=4))
 
     def read_json(self, default=None):
         return self.read(lambda f: json.load(f), default)
 
     def write_yaml(self, data):
-        self.write(lambda f: yaml.dump(data, f))
+        self.write(lambda f: yaml.dump(data, f, default_flow_style=False))
 
     def read_yaml(self, default=None):
         return self.read(lambda f: yaml.load(f), default)
@@ -194,18 +264,24 @@ class Directory:
     def __init__(self, *path):
         self.path = os.path.join(*path)
 
-    def file(self, name):
+    def file(self, name: str) -> File:
         return File(self.path, name)
 
-    def files(self, mask: str = '*'):
+    def files(self, mask: str = '*') -> List[File]:
         return [File(f) for f in glob(os.path.join(self.path, mask))]
 
-    def directory(self, *path):
+    def directory(self, *path) -> 'Directory':
         return Directory(self.path, *path)
+
+    def directories(self, mask: str = '*') -> List['Directory']:
+        return [Directory(d) for d in glob(os.path.join(self.path, mask))]
 
     def make(self):
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
+
+    def size(self) -> Size:
+        return Size(os.stat(self.path).st_size)
 
     def remove(self):
         shutil.rmtree(self.path)
@@ -216,12 +292,12 @@ class TemporaryDirectory(Directory):
         super().__init__('./_tmp_directory_' + '{0:0>5}'.format(random.randint(0, 99999)))
 
     def __enter__(self):
-        logging.info('New temporary directory: ' + self.path)
+        logging.info('+++ New temporary directory: ' + self.path)
         self.make()
         return self
 
     def __exit__(self, *args):
-        logging.info('Remove temporary directory: ' + self.path)
+        logging.info('--- Remove temporary directory: ' + self.path)
         self.remove()
 
 
