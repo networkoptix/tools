@@ -10,8 +10,8 @@ logging:
 
 options:
   directory: ./tmp #< Local cache directory.
-  #reports_size_limit: 100G #< Maximum cache size for reports.
-  #dumptool_size_limit: 100G #< Maximum cache size for dumptool.
+  reports_size_limit: 100G #< Maximum cache size for reports.
+  dump_tool_size_limit: 100G #< Maximum cache size for dump_tool.
   stand_by_sleep_s: 60 # Sleep 1 minute on empty run or failure.
   min_report_count: 2 #< Dump count to create new issue for crash.
 
@@ -25,7 +25,6 @@ fetch:
 
 analyze:
   subprocess_timout_s: 10 #< Newer wait for child processes longer.
-  #cache_size_limit: 20G #< Maximum size of cached debug information.
   thread_count: 4
 
 upload:

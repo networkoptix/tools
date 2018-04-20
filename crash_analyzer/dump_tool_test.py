@@ -6,7 +6,7 @@ from typing import List
 
 import pytest
 
-import dumptool
+import dump_tool
 import utils
 
 
@@ -41,10 +41,10 @@ def _test_analyze(directory: utils.Directory, report: utils.File):
     try:
         expected_report = utils.File(make_report_path(report.path)).read_string()
     except FileNotFoundError:
-        with pytest.raises(dumptool.DistError):
-            dumptool.analyse_dump(dump_path=tmp_dump_path, **options)
+        with pytest.raises(dump_tool.DistError):
+            dump_tool.analyse_dump(dump_path=tmp_dump_path, **options)
     else:
-        content = dumptool.analyse_dump(dump_path=tmp_dump_path, **options)
+        content = dump_tool.analyse_dump(dump_path=tmp_dump_path, **options)
         assert expected_report == content
         tmp_report_path = make_report_path(tmp_dump_path)
         assert expected_report == utils.File(tmp_report_path).read_string()

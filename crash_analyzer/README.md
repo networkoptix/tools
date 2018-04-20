@@ -13,8 +13,8 @@ Linux and Windows crash report analyzer
 ### Windows
 
 - Download and install Python 3: <https://www.python.org>
-- Install required modules: `python.exe -m pip install -r requirements.txt`
-- Install dumtool requirements:
+- Install required modules: `python -m pip install -r requirements.txt`
+- Install dump tool requirements:
     - *7x* - Free ZIP extractor, download: <https://www.7-zip.org>
     - *dark* - Wix extractor, part of Wix Toolset: <http://wixtoolset.org/releases>
     - *cdb* - Windows Debugger (for report generation), part of Windows SDK: 
@@ -28,15 +28,16 @@ Linux and Windows crash report analyzer
 
 ## Run Tests
 
-- Run all unit and functional tests: `python3 -m pytest`.
+- Run all unit and functional tests: `python -m pytest`.
+- NOTE: Normally all tests take up to 5 minutes to pass.
 - NOTE: Internet access to crash server and JIRA is required for `external_api_test.py`.
 
 ## Use Dump Tool manually
 
-- See: `python.exe dumptool.py -h`
+- See: `python dump_tool.py -h`
 
 ## Run Crash Analyzer and Monitor
 
 - Create config, see example in `resources/monitor_example_config.yaml`.
-- Run monitor from terminal: `python3 monitor.py <config>`.
+- Run monitor from terminal: `python monitor.py <config>`.
 - Keep an eye if it works, check logs from time to time :)

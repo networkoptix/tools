@@ -493,13 +493,13 @@ if __name__ == '__main__':
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('dump_path', help='dmp file to analyze')
+    parser.add_argument('dump_path', help='dmp file path to analyze')
     parser.add_argument('customization', nargs='?', help='default: auto deduce by name')
     parser.add_argument('-g', '--generate', action='store_true', default=False,
                         help='generate report instead of launching Visual Studio')
     parser.add_argument('-D', '--debug-mode', action='store_true', default=False)
     parser.add_argument('-b', '--branch', default='')
-    parser.add_argument('-d', '--cache-directory', default='./dumptool')
+    parser.add_argument('-d', '--cache-directory', default='./dump_tool_cache')
 
     arguments = parser.parse_args()
     logging.basicConfig(

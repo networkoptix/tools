@@ -240,7 +240,7 @@ def analyze_file(report: Report, directory: utils.Directory, **dump_tool_options
         return analyze_windows_cdb_bt(report, report_file.read_string())
 
     if report.extension == 'dmp':
-        from dumptool import analyse_dump
+        from dump_tool import analyse_dump
         content = analyse_dump(path=report_file.path, **dump_tool_options)
         return analyze_windows_cdb_bt(report, content)
 

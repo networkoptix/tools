@@ -21,14 +21,14 @@ FAILED_CRASH_ID = 'FAILED'
 class Options:
     def __init__(self, directory: str,
                  reports_size_limit: str = '10G',
-                 dumptool_size_limit: str = '10G',
+                 dump_tool_size_limit: str = '10G',
                  **extra):
         self.directory = utils.Directory(directory)
         self.records_file = self.directory.file('records.json')
         self.reports_directory = self.directory.directory('reports')
         self.reports_size_limit = utils.Size(reports_size_limit)
-        self.dumptool_directory = self.directory.directory('dumptool')
-        self.dumptool_size_limit = utils.Size(dumptool_size_limit)
+        self.dump_tool_directory = self.directory.directory('dump_tool')
+        self.dump_tool_size_limit = utils.Size(dump_tool_size_limit)
         self.extension = '*'
         self.min_version = '3.2'
         self.min_report_count = 2
@@ -43,9 +43,9 @@ class Monitor:
     def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict):
         self._options = Options(**options)
         self._options.reports_directory.make()
-        self._options.dumptool_directory.make()
+        self._options.dump_tool_directory.make()
         self._fetch, self._upload, self._analyze = fetch, upload, analyze
-        self._analyze['cache_directory'] = self._options.dumptool_directory.path
+        self._analyze['cache_directory'] = self._options.dump_tool_directory.path
         self._records = self._options.records_file.parse(dict())
 
     def run_service(self):
@@ -107,10 +107,10 @@ class Monitor:
             self._records[report.name]['crash_id'] = crash_id
 
         self.flush_records()
-        cache_size = self._options.dumptool_directory.size()
-        if cache_size > self._options.dumptool_size_limit:
+        cache_size = self._options.dump_tool_directory.size()
+        if cache_size > self._options.dump_tool_size_limit:
             logger.info('Dump tool cache has reached {}, clean up'.format(cache_size))
-            for d in self._options.dumptool_directory.directories():
+            for d in self._options.dump_tool_directory.directories():
                 if not d.path.endswith('release'):
                     d.remove()
 
