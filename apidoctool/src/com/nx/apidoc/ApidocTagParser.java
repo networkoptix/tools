@@ -82,21 +82,21 @@ public final class ApidocTagParser
                 indentString += ' ';
 
             StringBuilder b = new StringBuilder(textAfterInitialToken.get(0));
-            int line = 1;
-            while (line < textAfterInitialToken.size())
+            for (int line = 1; line < textAfterInitialToken.size(); line++)
             {
                 if (!b.toString().isEmpty()) //< skip empty lines
                     b.append("\n");
                 String continuationTrimmed = textAfterInitialToken.get(line);
                 if (continuationTrimmed.startsWith(indentString))
+                {
                     continuationTrimmed = continuationTrimmed.substring(indentString.length());
+                }
                 else if (verbose)
                 {
                     System.out.println("    WARNING: " + filename + ":" + (firstLineOfItem + line)
-                            + " too small indent");
+                            + ": Too small indent.");
                 }
                 b.append(continuationTrimmed);
-                ++line;
             }
             return b.toString();
         }
@@ -136,7 +136,7 @@ public final class ApidocTagParser
             return;
 
         firstLineOfItem = firstLine + line;
-        String[] values = Utils.matchRegex(itemStartRegex, lines.get(line));
+        final String[] values = Utils.matchRegex(itemStartRegex, lines.get(line));
         if (values == null)
         {
             throw new ApidocCommentParser.Error(
@@ -144,7 +144,7 @@ public final class ApidocTagParser
         }
 
         ++line;
-        List<String> textAfterToken = new ArrayList<String>();
+        final List<String> textAfterToken = new ArrayList<String>();
         textAfterToken.add(values[3]);
         while (line < lines.size())
         {
@@ -187,5 +187,5 @@ public final class ApidocTagParser
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\* ([^%]*)");
-      //      *' '     non-%...
+      //    *' '  non-%...
 }

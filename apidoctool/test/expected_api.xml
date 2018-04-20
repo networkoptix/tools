@@ -6513,14 +6513,6 @@ database backup could not been created.</caption>
                         <caption>JSON object with module information.</caption>
                     </result>
                 </function>
-                <function proprietary="true">
-                    <name>onEvent</name>
-                    <description>Process an event from an external system. Reserved for future
-                      use.</description>
-                    <method>POST</method>
-                    <params/>
-                    <result/>
-                </function>
                 <function>
                     <name>ping</name>
                     <description>Ping the server</description>

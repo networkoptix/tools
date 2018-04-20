@@ -41,14 +41,12 @@ public final class ApidocCommentParser
     {
         parser.parseNextItem();
 
-        List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
+        final List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
         if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
             throw new Error("Comment should start with " + TAG_APIDOC + " tag.");
 
         while (parser.getItem() != null)
-        {
             functions.add(createFunctionFromCommentLines(parser));
-        }
 
         return functions;
     }
@@ -359,17 +357,11 @@ public final class ApidocCommentParser
 
         param.optional = false;
         if ("".equals(parser.getItem().getAttribute()))
-        {
             param.proprietary = false;
-        }
         else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
-        {
             param.proprietary = true;
-        }
         else
-        {
             throwInvalidAttribute(parser, function.name);
-        }
 
         parser.parseNextItem();
 
@@ -439,6 +431,6 @@ public final class ApidocCommentParser
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
         "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?([\\w\\/]+)(.*)", Pattern.DOTALL);
-      //     0HttpMthd        1UrlPre   2FnNm 3Txt
-      //       GET             /ec2     getRe \nRe
+      //     0HttpMthd        1UrlPre   2FnNm      3Txt
+      //       GET             /ec2     getRe      \nRe
 }

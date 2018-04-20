@@ -5,8 +5,8 @@ import com.nx.util.SourceCode;
 import java.util.regex.Pattern;
 
 /**
- * Parses registration for "handler" functions - API functions which are registered in C++ code using a dedicated
- * handler which implements the function.
+ * Parses registration for "handler" functions - API functions which are registered in C++ code
+ * using a dedicated handler which implements the function.
  */
 public final class HandlerRegistrationMatcher implements RegistrationMatcher
 {

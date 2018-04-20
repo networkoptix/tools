@@ -8,17 +8,17 @@ import java.util.List;
 
 public final class JsonSerializer
 {
-    public static final JSONObject toJson(Serializable serializable)
+    public static JSONObject toJson(Serializable serializable)
     {
         return toJson(serializable, serializable.getSerializationName());
     }
 
-    public static final String toJsonString(Serializable serializable)
+    public static String toJsonString(Serializable serializable)
     {
         return toJson(serializable).toString(/*indentFactor*/ 2);
     }
 
-    private static final JSONObject toJson(Serializable serializable, String name)
+    private static JSONObject toJson(Serializable serializable, String name)
     {
         JsonGenerator generator = new JsonGenerator(name);
         serializable.writeToGenerator(generator);

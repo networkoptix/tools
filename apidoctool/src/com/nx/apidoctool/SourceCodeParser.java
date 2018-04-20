@@ -58,14 +58,14 @@ public final class SourceCodeParser
             RegistrationMatch match = matcher.createRegistrationMatch(sourceCode, mainLine);
             if (match != null)
             {
-                List<ApidocCommentParser.FunctionDescription> functions =
+                final List<ApidocCommentParser.FunctionDescription> functions =
                     createFunctionsFromComment();
                 if (functions != null && !functions.isEmpty())
                 {
-                    String urlPrefix = functions.get(0).urlPrefix;
-                    Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
+                    final String urlPrefix = functions.get(0).urlPrefix;
+                    final Apidoc.Group group = ApidocUtils.getGroupByUrlPrefix(apidoc, urlPrefix);
 
-                    for(ApidocCommentParser.FunctionDescription description: functions)
+                    for (ApidocCommentParser.FunctionDescription description: functions)
                     {
                         if (!urlPrefix.equals(description.urlPrefix))
                         {
@@ -131,8 +131,8 @@ public final class SourceCodeParser
         final List<ApidocCommentParser.FunctionDescription> functions;
         try
         {
-            ApidocCommentParser parser = new ApidocCommentParser();
-            ApidocTagParser tagParser = new ApidocTagParser(
+            final ApidocCommentParser parser = new ApidocCommentParser();
+            final ApidocTagParser tagParser = new ApidocTagParser(
                 commentLines, sourceCode.getFilename(), line, verbose);
             functions = parser.createFunctionsFromCommentLines(tagParser);
         }
