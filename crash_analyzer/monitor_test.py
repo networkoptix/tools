@@ -49,9 +49,9 @@ class JiraMock:
         logger.info('Case {} is created for {}'.format(key, reason))
         return key
 
-    def update_issue(self, key: str, reports: List[crash_info.Report]):
+    def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory):
         issue = self.issues[key]
-        issue = self.issues[key]
+        assert directory
         for report in reports:
             issue['versions'] = sorted(set(issue['versions'] + [report.version]))
             issue['attachments'] = sorted(set(issue['attachments'] + [report.name]))

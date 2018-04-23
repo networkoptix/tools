@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import jira
+import jira.exceptions
 import json
 import logging
-import os
 import requests
-import traceback
 from typing import List, Dict
 
 import crash_info
@@ -141,7 +140,11 @@ class Jira:
         if not reports:
             raise JiraError('Unable to update JIRA case {} with no reports'.format(key))
 
-        issue = self._jira.issue(key)
+        try:
+            issue = self._jira.issue(key)
+        except jira.exceptions.JIRAError:
+            raise JiraError('Unable to update JIRA case {} witch does not exist'.format(key))
+
         if issue.fields.status.name == 'Closed':
             min_fix = min(v.name for v in issue.fields.fixVersions)
             max_report = max(d.version for d in reports)
@@ -182,3 +185,9 @@ class Jira:
                 if transition['name'].startswith(name):
                     self._jira.transition_issue(issue, transition['id'])
                     continue
+
+
+def example_jira():
+    config = utils.Resource('monitor_example_config.yaml').parse()['upload']
+    config.pop('thread_count')
+    return Jira(**config)._jira

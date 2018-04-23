@@ -24,24 +24,36 @@ POWER_SUFFIXES = dict(
 )
 
 
+class Error(Exception):
+    pass
+
+
+class KeyboardInterruptError(Error):
+    pass
+
+
 def stream_log_handler(stream_name: str = 'stdout'):
     streams = dict(stdout=sys.stdout, stderr=sys.stderr)
     return logging.StreamHandler(streams[stream_name])
 
 
-def rotating_log_handler(base_name: str, max_size_mb: int = 1, backup_count: str = 1):
+def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 1):
     File(base_name).directory().make()
-    return logging.handlers.RotatingFileHandler(base_name, 'a', max_size_mb, backup_count)
+    return logging.handlers.RotatingFileHandler(
+        base_name, 'a', Size(max_size).bytes, backup_count)
 
 
 def setup_logging(level: str = 'debug', title: str = '', stream: str = '', rotating_file: dict = {}):
     """Sets up application log :level and :path.
     """
     handlers = []
+    details = 'Level: {}'.format(level)
     if stream:
         handlers.append(stream_log_handler(stream))
+        details += ', stream: {}'.format(stream)
     if rotating_file:
-        handlers.append(rotating_log_handler(rotating_file))
+        handlers.append(rotating_log_handler(**rotating_file))
+        details += ', ' + ', '.join('{}: {}'.format(*i) for i in rotating_file.items())
 
     logging.basicConfig(
         level=getattr(logging, level.upper(), None) or int(level),
@@ -52,8 +64,7 @@ def setup_logging(level: str = 'debug', title: str = '', stream: str = '', rotat
         print(title)
         logging.info(title)
 
-    logging.info('Log is configured with level: {}, stream: {}, file: {}'.format(
-        level, stream, ', '.join(k + '=' + v for k, v in rotating_file.items())))
+    logging.info(details)
 
 
 def is_ascii_printable(s: str):
@@ -73,6 +84,19 @@ def parse_number(number: str):
     return int(s)
 
 
+def update_dict(dictionary: dict, request: str):
+    """Updates dictionary values, by string syntax in request:
+        s1.v1=abc   -> dictionary['s1']['v1'] = 'abc'
+        s2.s3.v2=3  -> dictionary['s2']['s3']['v2'] = 3
+        v3=[1,2,3]  -> dictionary['v3'] = [1, 2, 3]
+    """
+    key, value = request.split('=')
+    *path, name = key.split('.')
+    for item in path:
+        dictionary = dictionary.setdefault(item, {})
+    dictionary[name] = yaml.load(value)
+
+
 class BufferedStream:
     def __init__(self):
         self.buffers = []
@@ -86,20 +110,37 @@ class BufferedStream:
 
 def _concurrent_main(task):
     log_stream = BufferedStream()
-    logging.basicConfig(level=task['log_level'], stream=log_stream, format=LOGGING_FORMAT)
+    debug = getattr(run_concurrent, 'debug', None)
+    if not debug:
+        logging.basicConfig(level=task['log_level'], stream=log_stream, format=LOGGING_FORMAT)
+
     action, argument, kwargs = task['action'], task['argument'], task['kwargs']
     try:
         logging.debug('Do {}.{} with {}'.format(action.__module__, action.__name__, argument))
         result = action(argument, **kwargs)
         logging.debug('Result: {}'.format(result))
+
+    except KeyboardInterrupt:
+        # This is a Python bug. When waiting for a condition in threading.Condition.wait(),
+        # KeyboardInterrupt is never sent.
+        # For some reasons, only exceptions inherited from the base Exception class are
+        # handled normally.
+        raise KeyboardInterruptError
+
     except Exception as exception:
         result = exception
         logging.debug('Exception: {}'.format(traceback.format_exc()))
-        if getattr(run_concurrent, 'debug', None) == 'raise':
+        if debug == 'raise':
             raise
 
     return {'result': result, 'logs': log_stream.lines()}
 
+	
+def _concurent_setup():
+	if not getattr(run_concurrent, 'debug', None):
+		sys.stdout = open(os.devnull, 'w')
+		sys.stderr = open(os.devnull, 'w')
+	
 
 def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
     results = []
@@ -114,7 +155,7 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
         return {'action': action, 'argument': t, 'kwargs': kwargs, 'log_level': log_level}
 
     if not hasattr(run_concurrent, 'debug'):
-        with multiprocessing.Pool(thread_count) as pool:
+        with multiprocessing.Pool(thread_count, initializer=_concurent_setup) as pool:
             for result in pool.map(_concurrent_main, (wrap_task(t) for t in tasks)):
                 save_result(**result)
     else:

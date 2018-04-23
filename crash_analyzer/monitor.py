@@ -4,7 +4,6 @@ import argparse
 import logging
 import time
 import traceback
-import hurry.filesize as filesize
 from typing import Tuple, List
 
 import crash_info
@@ -49,7 +48,7 @@ class Monitor:
         self._records = self._options.records_file.parse(dict())
 
     def run_service(self):
-        logging.info('Starting service...')
+        logger.info('Starting service...')
         while True:
             try:
                 self.analyze()
@@ -57,13 +56,14 @@ class Monitor:
                 while not self.fetch():
                     time.sleep(self._options.stand_by_sleep_s)
 
-            except InterruptedError:
-                logging.info('Service has stopped')
+            except (KeyboardInterrupt, utils.KeyboardInterruptError):
+                logger.info('Service has stopped')
                 return
 
             except Exception:
                 logger.critical(traceback.format_exc())
                 time.sleep(self._options.stand_by_sleep_s)
+                # TODO: raise when amazon watch is configured.
 
     def flush_records(self):
         if self._records:
@@ -86,9 +86,9 @@ class Monitor:
         if size > self._options.reports_size_limit:
             logger.info('Reports directory size is {}, remove failed dumps'.format(size))
             for r in self._records:
-                # TODO: Also remove crash directory is it is not enough.
                 if r.get('crash_id') == FAILED_CRASH_ID:
                     directory.file(name).remove()
+                # TODO: Also remove crash directory if it is not enough.
 
         return len(new_reports)
 
@@ -155,10 +155,11 @@ class Monitor:
         issue, reports = crash_tuple
         if not issue:
             report = reports[0]  # < Any will do.
-            reason = crash_info.analyze_report(report, directory)  # < Fast for known reports.
+            reason = crash_info.analyze_report(
+                report, directory, cache_directory=None)  # < Newer use dump tool.
             issue = jira.create_issue(report, reason)
 
-        jira.update_issue(issue, reports)
+        jira.update_issue(issue, reports, directory=directory)
         return issue, reports
 
 
@@ -171,12 +172,22 @@ def main():
 
     parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
     parser.add_argument('config_file')
+    parser.add_argument('-o', '--override', action='append', default=[],
+                        help='SECTION.KEY=VALUE to override config')
 
     arguments = parser.parse_args()
     config = utils.File(arguments.config_file).parse()
+    for override in arguments.override:
+        utils.update_dict(config, override)
+
     utils.setup_logging(
         **config.pop('logging'),
         title=(parser.prog + ', config: ' + arguments.config_file))
+
+    def debug(run_concurrent=None):
+        if run_concurrent:
+            utils.run_concurrent.debug = run_concurrent
+    debug(**config.pop('debug', {}))
 
     monitor = Monitor(**config)
     monitor.run_service()

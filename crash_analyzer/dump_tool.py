@@ -91,13 +91,13 @@ class DistError(Error):
     pass
 
 
-def report_name(dump_path: str, safe: bool = False):
+def report_name(dump_path: str, empty_on_failure: bool = False) -> str:
     """Generates report name based on dump name.
     """
     dump_ext = '.dmp'
     if not dump_path.lower().endswith(dump_ext):
-        if safe:
-            return ''  # to calls where exceptions aren't wanted
+        if empty_on_failure:
+            return ''  # < For calls where exceptions aren't wanted.
         raise UserError('Only *%s dumps are supported, rejected: %s' % (
             dump_ext, dump_path))
     report_ext = '.cdb-bt'
@@ -107,7 +107,7 @@ def report_name(dump_path: str, safe: bool = False):
 def clear_cache(cache_dir: str, keep_files: str):
     existing = set(os.listdir(cache_dir))
     for name in keep_files:
-        existing.discard(report_name(name, True))
+        existing.discard(report_name(name, empty_on_failure=True))
     for name in existing:
         try:
             os.remove(os.path.join(cache_dir, name))
@@ -119,7 +119,7 @@ def shell_line(command: List[str]):
     return ' '.join('"%s"' % a if (' ' in a) or ('\\' in a) else a for a in command)
 
 
-class Cdb:
+class CdbSession:
     """Cdb program driver to analyze DMP files.
     """
 
@@ -246,7 +246,10 @@ class DumpAnalyzer:
         self.debug_mode = debug_mode
         self.visual_studio = visual_studio
         self.subprocess_timeout_s = subprocess_timeout_s
-        self.module, self.dist, self.build_path, self.target_path = None, None, None, None
+        self.module = None
+        self.dist = None
+        self.build_path = None
+        self.target_path = None
 
         deduced = deduce_customization(dump_path)
         if not self.customization:
@@ -264,7 +267,7 @@ class DumpAnalyzer:
     def get_dump_information(self):
         """Gets initial information from dump.
         """
-        with Cdb(self.dump_path) as cdb:
+        with CdbSession(self.dump_path) as cdb:
             self.module = cdb.main_module()
             logger.debug("CDB reports main module: " + self.module)
             self.version = self.version or cdb.module_info(self.module, 'version')
@@ -313,7 +316,7 @@ class DumpAnalyzer:
                 break
 
         if not dist_url:
-            raise DistError("No distributive found for build %s, analyze impossible" % self.build)
+            raise DistError("No distributive found for build %s, analysis is impossible" % self.build)
 
         build_path = '%s/%s/windows/' % (out[0][1], self.customization)
         update_path = '%s/%s/updates/%s/' % (out[0][1], self.customization, self.build)
@@ -455,7 +458,7 @@ class DumpAnalyzer:
         pdb_dirs = ';'.join(set(os.path.dirname(f) for f in
                                 self.find_files_iter(lambda n: n.lower().endswith(".pdb"))))
 
-        with Cdb(self.dump_path, self.module_dir(), pdb_dirs) as cdb:
+        with CdbSession(self.dump_path, self.module_dir(), pdb_dirs) as cdb:
             logger.debug('Generating report: ' + report_path)
             report = cdb.report()
             with open(report_path, 'w') as report_file:
@@ -496,15 +499,19 @@ if __name__ == '__main__':
     parser.add_argument('customization', nargs='?', help='default: auto deduce by name')
     parser.add_argument('-g', '--generate', action='store_true', default=False,
                         help='generate report instead of launching Visual Studio')
-    parser.add_argument('-D', '--debug-mode', action='store_true', default=False)
-    parser.add_argument('-b', '--branch', default='')
     parser.add_argument('-d', '--cache-directory', default='./dump_tool_cache')
+    parser.add_argument('-b', '--branch', default='')
+    parser.add_argument('-v', '--verbose', action='store_true', default=False,
+                        help='enable all logs')
+    parser.add_argument('-D', '--debug-mode', action='store_true', default=False,
+                        help='use for this script debug only')
 
     arguments = parser.parse_args()
     logging.basicConfig(
-        level=(logging.DEBUG if arguments.debug_mode else logging.INFO),
+        level=(logging.DEBUG if arguments.verbose else logging.INFO),
         format='%(asctime)s %(levelname)8s: %(message)s', stream=sys.stdout)
 
+    del arguments.verbose
     try:
         analyse_dump(**vars(arguments))
 
