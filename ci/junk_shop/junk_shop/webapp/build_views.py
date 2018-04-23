@@ -67,6 +67,8 @@ def render_ci_build(build):
 def render_platform_build(build, customization, platform):
     loader = BuildInfoLoader.for_build_customzation_platform(build, customization, platform)
     build_platform_info = loader.load_build_platform()
+    if not build_platform_info:
+        abort(404)
     scalability_platform_set = load_scalability_platform_set(build)
     return render_template('platform_build.html',
                                scalability_platform_set=scalability_platform_set,

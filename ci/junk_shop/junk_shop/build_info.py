@@ -329,6 +329,8 @@ class BuildInfoLoader(object):
         assert not self.is_full_build_mode  # this method intended only for particular customization/platform of a build
         self._load_build_data()
 
+        if not self.platform_map:
+            return None
         assert len(self.platform_map) == 1, repr(self.platform_map)
         platform = self.platform_map.popitem()[1]
 
