@@ -125,6 +125,7 @@ class BuildNodeJob(object):
                  webadmin_external_dir,
                  signing,
                  hardware_signing,
+                 use_trusted_timestamping,
                  ):
         self._cmake_version = cmake_version
         self._executor_number = executor_number
@@ -136,6 +137,7 @@ class BuildNodeJob(object):
         self._webadmin_external_dir = webadmin_external_dir
         self._signing = signing
         self._hardware_signing = hardware_signing
+        self._use_trusted_timestamping = use_trusted_timestamping
         self._error_list = []
         self._repository = DbCaptureRepository(db_config, build_parameters)
 
@@ -178,6 +180,7 @@ class BuildNodeJob(object):
             build_tests,
             self._signing,
             self._hardware_signing,
+            self._use_trusted_timestamping,
             clean_build,
             )
         typed_artifact_list = self._make_artifact_list(build_info)

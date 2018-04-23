@@ -183,6 +183,10 @@ class BuildProject(NxVmsProject):
     def is_signing_enabled(self):
         pass
 
+    @property
+    def use_trusted_timestamping(self):
+        return False
+
     def is_hardware_signing_enabled(self, customization, platform):
         return False
 
@@ -375,6 +379,7 @@ class BuildProject(NxVmsProject):
             webadmin_external_dir=os.path.join(self.workspace_dir, WEBADMIN_EXTERNAL_DIR),
             signing=self.is_signing_enabled,
             hardware_signing=self.is_hardware_signing_enabled(customization, platform),
+            use_trusted_timestamping=self.use_trusted_timestamping,
             )
         stash_command_list = job.run(self.params.do_build, clean_build, self.custom_cmake_args, build_tests, run_unit_tests, self.config.unit_tests.timeout)
         return stash_command_list

@@ -93,6 +93,8 @@ class ReleaseProject(BuildProject):
             ChoiceProjectParameter('cloud_group', 'Cloud group', CLOUD_GROUP_LIST),
             BooleanProjectParameter('hardware_signing',
                                         'Enable hardware signing, use hardware key to sign files', default_value=False),
+            BooleanProjectParameter('trusted_timestamping',
+                                        'Use trusted timestamping.', default_value=False),
             StringProjectParameter('revision', 'Specific revision to checkout (optional)', default_value=''),
             StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
             MultiChoiceProjectParameter('platform_list', 'Platforms to build',
@@ -104,6 +106,10 @@ class ReleaseProject(BuildProject):
     @property
     def is_signing_enabled(self):
         return True
+
+    @property
+    def use_trusted_timestamping(self):
+        return self.params.trusted_timestamping
 
     def is_hardware_signing_enabled(self, customization, platform):
         hardware_signing_node_map = {(item.customization, item.platform): item.node

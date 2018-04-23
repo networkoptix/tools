@@ -132,6 +132,7 @@ class CMakeBuilder(object):
             build_tests,
             signing,
             hardware_signing,
+            use_trusted_timestamping,
             clean_build,
             ):
         build_params = self._junk_shop_repository.build_parameters
@@ -146,6 +147,7 @@ class CMakeBuilder(object):
             build_tests,
             signing,
             hardware_signing,
+            use_trusted_timestamping,
             cmake_configuration,
             )
         succeeded = generate_results.succeeded
@@ -226,6 +228,7 @@ class CMakeBuilder(object):
             build_tests,
             signing,
             hardware_signing,
+            use_trusted_timestamping,
             cmake_configuration,
             ):
         src_full_path = os.path.abspath(src_dir)
@@ -252,7 +255,9 @@ class CMakeBuilder(object):
             generate_args += ['-DaddQtPdb=%s' % bool_to_cmake_param(build_params.add_qt_pdb)]
         if hardware_signing:
             generate_args += ['-DhardwareSigning=ON']
-        if not signing:
+        if signing:
+            generate_args += ['-DtrustedTimestamping=%s' % bool_to_cmake_param(use_trusted_timestamping)]
+        else:
             generate_args += ['-DcodeSigning=OFF']
         if custom_cmake_args:
             generate_args += custom_cmake_args.split(' ')
