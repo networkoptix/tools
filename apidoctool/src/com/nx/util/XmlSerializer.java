@@ -277,6 +277,28 @@ public final class XmlSerializer
             element.appendChild(valueElement);
         }
 
+        public void writeEnum(
+            String name, Enum value, Class enumClass, Serializable.EnumDefault enumDefault)
+        {
+            if (value == enumClass.getEnumConstants()[0])
+            {
+                switch (enumDefault)
+                {
+                    case PROHIBIT:
+                        throw new RuntimeException(
+                            "INTERNAL ERROR: Required enum value equals default: " +
+                                 element.getNodeName() + "." + name);
+                    case OMIT:
+                        return;
+                    default:
+                }
+            }
+
+            Element valueElement = element.getOwnerDocument().createElement(name);
+            valueElement.setTextContent(value.toString());
+            element.appendChild(valueElement);
+        }
+
         public void writeObjectList(
             String listName,
             List<? extends Serializable> list,
@@ -409,7 +431,7 @@ public final class XmlSerializer
             if (value.isEmpty())
                 return booleanDefault == Serializable.BooleanDefault.TRUE;
 
-            return stringToBoolean(value, serializationName);
+            return stringToBoolean(value, name);
         }
 
         public String readInnerXml(String name, Serializable.Presence presence)
@@ -452,6 +474,27 @@ public final class XmlSerializer
             return childObject;
         }
 
+        public <E extends Enum<E>>
+        E readEnum(
+            String name, List<String> values, Class<E> enumClass, Serializable.Presence presence)
+            throws Error
+        {
+            final String stringValue = readString(name, presence);
+
+            if (stringValue.isEmpty())
+                return enumClass.getEnumConstants()[0];
+
+            try
+            {
+                return enumClass.getEnumConstants()[values.indexOf(stringValue)];
+            }
+            catch (Exception e)
+            {
+                throw new Error("Invalid enum value \"" + stringValue + "\" in element "
+                    + element.getNodeName() + "." + name);
+            }
+        }
+
         public <T extends Serializable>
         void readObjectList(
             String listName, List<T> list,
@@ -486,8 +529,8 @@ public final class XmlSerializer
                 {
                     if (!childElementName.equals(node.getNodeName()))
                     {
-                        throw new Error("Unsupported element \"" + listName +
-                            "." + node.getNodeName() + "\" found.");
+                        throw new Error("Unsupported element " + listName +
+                            "." + node.getNodeName() + " found.");
                     }
 
                     // Reusing initially created innerElement.
@@ -517,8 +560,8 @@ public final class XmlSerializer
                 {
                     if (!processedElementNames.contains(node.getNodeName()))
                     {
-                        throw new Error("Unsupported element \"" + element.getNodeName() +
-                            "." + node.getNodeName() + "\" found.");
+                        throw new Error("Unsupported element " + element.getNodeName() +
+                            "." + node.getNodeName() + " found.");
                     }
                 }
             }
@@ -550,7 +593,7 @@ public final class XmlSerializer
             return result;
         }
 
-        private static boolean stringToBoolean(String value, String serializationName) throws Error
+        private boolean stringToBoolean(String value, String name) throws Error
         {
             if ("0".equals(value) || "false".equals(value))
             {
@@ -562,8 +605,8 @@ public final class XmlSerializer
             }
             else
             {
-                throw new Error("Invalid boolean value \"" +
-                    value + "\" in object \"" + serializationName + "\".");
+                throw new Error("Invalid boolean value \""
+                    + value + "\" in element " + element.getNodeName()+ "." + name);
             }
         }
     }

@@ -11,6 +11,64 @@ import com.nx.util.Serializable;
  */
 public final class Apidoc extends Serializable
 {
+    public enum Type
+    {
+        UNKNOWN,
+        STRING,
+        BOOLEAN,
+        INTEGER,
+        FLOAT,
+        UUID,
+        OBJECT,
+        ARRAY,
+        ENUM,
+        OPTION,
+        FLAGS,
+        BINARY,
+        STRING_ARRAY,
+        OBJECT_JSON,
+        ARRAY_JSON,
+        TEXT;
+
+        public static Type fromString(String value)
+        {
+            if (value.isEmpty())
+                return values()[0];
+
+            return values()[stringValues.indexOf(value)];
+        }
+
+        public String toString()
+        {
+            return stringValues.get(ordinal());
+        }
+
+        public static final List<String> stringValues = new ArrayList<String>();
+
+        static
+        {
+            for (Type value: values())
+            {
+                final StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (String segment: value.name().split("_"))
+                {
+                    if (first)
+                    {
+                        sb.append(segment.toLowerCase());
+                        first = false;
+                    }
+                    else
+                    {
+                        sb.append(segment.charAt(0));
+                        sb.append(segment.substring(1).toLowerCase());
+                    }
+                }
+                stringValues.add(sb.toString());
+            }
+        }
+    }
+
     public static final class Value extends Serializable
     {
         public String name;
@@ -35,6 +93,7 @@ public final class Apidoc extends Serializable
 
         public boolean proprietary; ///< attribute; optional(default=false)
         public String name;
+        public Type type;
         public String description; ///< optional
         public boolean optional; ///< optional(default=false)
         public List<Value> values; ///< optional
@@ -48,6 +107,7 @@ public final class Apidoc extends Serializable
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
+            type = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             description = p.readInnerXml("description", Presence.OPTIONAL);
             optional = p.readBoolean("optional", BooleanDefault.FALSE);
             p.readObjectList("values", values, Value.class, Presence.OPTIONAL);
@@ -57,6 +117,7 @@ public final class Apidoc extends Serializable
         {
             g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
             g.writeString("name", name, Emptiness.PROHIBIT);
+            g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
             g.writeInnerXml("description", description, Emptiness.ALLOW);
             g.writeBoolean("optional", optional,
                 omitOptionalFieldIfFalse ? BooleanDefault.FALSE : BooleanDefault.NONE);
@@ -67,6 +128,7 @@ public final class Apidoc extends Serializable
     public static final class Result extends Serializable
     {
         public String caption; ///< optional
+        public Type type;
         public List<Param> params; ///< optional
 
         public Result()
@@ -77,12 +139,14 @@ public final class Apidoc extends Serializable
         protected void readFromParser(Parser p) throws Parser.Error
         {
             caption = p.readInnerXml("caption", Presence.OPTIONAL);
+            type = p.readEnum("type", Type.stringValues, Type.class, Presence.OPTIONAL);
             p.readObjectList("params", params, Param.class, Presence.OPTIONAL);
         }
 
         protected void writeToGenerator(Generator g)
         {
             g.writeInnerXml("caption", caption, Emptiness.OMIT);
+            g.writeEnum("type", type, Type.class, EnumDefault.OMIT);
             for (Param param: params)
                 param.omitOptionalFieldIfFalse = true;
             g.writeObjectList("params", params, Emptiness.OMIT);

@@ -43,6 +43,7 @@
                     <params>
                         <param>
                             <name>someParam</name>
+                            <type>object</type>
                             <description>some
 param description
     with indent
@@ -52,6 +53,7 @@ continue description</description>
                         </param>
                         <param>
                             <name>someParam.field</name>
+                            <type>integer</type>
                             <description>description
 continue description
     with indent
@@ -61,6 +63,7 @@ continue description</description>
                     </params>
                     <result>
                         <caption>some result description</caption>
+                        <type>string</type>
                     </result>
                 </function>
             </functions>

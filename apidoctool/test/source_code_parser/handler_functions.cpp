@@ -11,15 +11,15 @@
  * {
  *     test: "test"
  * }
- * %param someParam some
+ * %param:object someParam some
  *     param description
  *         with indent
  *     continue description
  *     continue description
- *     %param someParam.field description
+ *     %param:integer someParam.field  description
  *         continue description
  *             with indent
  *         continue description
- * %return some result description
+ * %return: string some result description
  */
 reg("urlPrefix/testFunction2", new onTestFunction2());

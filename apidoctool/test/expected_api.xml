@@ -14,24 +14,28 @@
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>startTime</name>
-                            <description>Start time of the interval with bookmarks (in milliseconds since
-epoch). Default value is 0. Should be less than endTime.</description>
+                            <type>string</type>
+                            <description>Start time of the interval with bookmarks (in milliseconds
+since epoch). Default value is 0. Should be less than endTime.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>endTime</name>
-                            <description>End time of the interval with bookmarks (in milliseconds since epoch).
-Default value is the current time. Should be greater than startTime.</description>
+                            <type>string</type>
+                            <description>End time of the interval with bookmarks (in milliseconds since
+epoch). Default value is the current time. Should be greater than startTime.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>sortBy</name>
+                            <type>enum</type>
                             <description>Field to sort the results by. Default value is "startTime".</description>
                             <optional>true</optional>
                             <values>
@@ -55,6 +59,7 @@ Default value is the current time. Should be greater than startTime.</descriptio
                         </param>
                         <param>
                             <name>sortOrder</name>
+                            <type>enum</type>
                             <description>Sort order. Default order is ascending.</description>
                             <optional>true</optional>
                             <values>
@@ -70,28 +75,33 @@ Default value is the current time. Should be greater than startTime.</descriptio
                         </param>
                         <param>
                             <name>limit</name>
+                            <type>integer</type>
                             <description>Maximum number of bookmarks to return. Unlimited by default.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>filter</name>
+                            <type>string</type>
                             <description>Text-search filter string.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -124,38 +134,45 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>guid</name>
+                            <type>uuid</type>
                             <description>Identifier of the bookmark.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>name</name>
+                            <type>string</type>
                             <description>Caption of the bookmark.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>description</name>
+                            <type>string</type>
                             <description>Details of the bookmark.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>timeout</name>
+                            <type>integer</type>
                             <description>Time during which the recorded period should be preserved (in
 milliseconds).</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>startTime</name>
+                            <type>integer</type>
                             <description>Start time of the bookmark (in milliseconds since epoch).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>duration</name>
+                            <type>integer</type>
                             <description>Length of the bookmark (in milliseconds).</description>
                             <optional>false</optional>
                         </param>
@@ -166,18 +183,21 @@ milliseconds).</description>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -205,28 +225,32 @@ only the top level data is provided.</description>
                 </function>
                 <function>
                     <name>bookmarks/delete</name>
-                    <description>Remove a bookmark with the specified identifsier.</description>
+                    <description>Remove a bookmark with the specified identifier.</description>
                     <method>GET</method>
                     <params>
                         <param>
                             <name>guid</name>
+                            <type>uuid</type>
                             <description>Identifier of the bookmark.</description>
                             <optional>false</optional>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -259,23 +283,27 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>limit</name>
+                            <type>integer</type>
                             <description>Maximum number of tags to return.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -308,60 +336,72 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>guid</name>
+                            <type>uuid</type>
                             <description>Identifier of the bookmark.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>name</name>
+                            <type>string</type>
                             <description>Caption of the bookmark.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>description</name>
+                            <type>string</type>
                             <description>Details of the bookmark.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>timeout</name>
+                            <type>integer</type>
                             <description>Time during which the recorded period should be preserved (in
 milliseconds).</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>startTime</name>
+                            <type>integer</type>
                             <description>Start time of the bookmark (in milliseconds since epoch).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>duration</name>
+                            <type>integer</type>
                             <description>Length of the bookmark (in milliseconds).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>tag</name>
-                            <description>Applied tag. Serveral tag parameters could be used to specify multiple tags.</description>
+                            <type>string</type>
+                            <description>Applied tag. Serveral tag parameters could be used to specify
+multiple tags.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -394,93 +434,101 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>time</name>
-                            <description>Timestamp of the requested image (in milliseconds since epoch). The special
-value "latest", which is the default value, requires to retrieve the latest thumbnail.
-The special value "now" requires to retrieve the thumbnail corresponding to the current
-time.</description>
+                            <type>string</type>
+                            <description>Timestamp of the requested image (in milliseconds since epoch).
+The special value "latest", which is the default value, requires to retrieve the latest
+thumbnail. The special value "now" requires to retrieve the thumbnail corresponding to
+the current time.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>rotate</name>
-                            <description>Image orientation. Can be 0, 90, 180 or 270 degrees. If the parameter is
-absent or equals -1, the image will be rotated as defined in the camera settings.</description>
+                            <type>integer</type>
+                            <description>Image orientation. Can be 0, 90, 180 or 270 degrees. If the
+parameter is absent or equals -1, the image will be rotated as defined in the camera
+settings.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>height</name>
-                            <description>Desired image height. Should be not less than 128, or equal to -1 (the
-default value) which implies the original frame size, and in this case the width should
-also be omitted or set to -1.</description>
+                            <type>integer</type>
+                            <description>Desired image height. Should be not less than 128, or equal to
+-1 (the default value) which implies the original frame size, and in this case the width
+should also be omitted or set to -1.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>width</name>
-                            <description>Desired image width. Should be not less than 128, or equal to -1 (the
-default value) which implies autosizing: if the height is specified, the width will be
-calculated based on the aspect ratio, otherwise, the original frame size will be used.</description>
+                            <type>integer</type>
+                            <description>Desired image width. Should be not less than 128, or equal to -1
+(the default value) which implies autosizing: if the height is specified, the width will
+be calculated based on the aspect ratio, otherwise, the original frame size will be
+used.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>imageFormat</name>
+                            <type>enum</type>
                             <description>Format of the requested image. Default value is "JpgFormat".</description>
                             <optional>true</optional>
                             <values>
                                 <value>
-                                    <name>PngFormat</name>
+                                    <name>png</name>
                                     <description>PNG</description>
                                 </value>
                                 <value>
-                                    <name>JpgFormat</name>
+                                    <name>jpg</name>
                                     <description>JPEG</description>
                                 </value>
                                 <value>
-                                    <name>TiffFormat</name>
+                                    <name>tif</name>
                                     <description>TIFF</description>
                                 </value>
                                 <value>
-                                    <name>RawFormat</name>
-                                    <description>Raw video frame. Makes the request much more lightweight for Edge
-servers.</description>
+                                    <name>raw</name>
+                                    <description>Raw video frame. Makes the request much more lightweight for Edge servers.</description>
                                 </value>
                             </values>
                         </param>
                         <param>
-                            <name>method</name>
-                            <description>Getting a thumbnail at the exact timestamp is costly, so, it can be
-rounded to the nearest keyframe, thus, the default value is "KeyFrameAfterMethod".</description>
+                            <name>roundMethod</name>
+                            <type>enum</type>
+                            <description>Getting a thumbnail at the exact timestamp is costly, so, it
+can be rounded to the nearest keyframe, thus, the default value is
+"KeyFrameAfterMethod".</description>
                             <optional>true</optional>
                             <values>
                                 <value>
-                                    <name>KeyFrameBeforeMethod</name>
-                                    <description>Get the thumbnail from the nearest keyframe before the given
-time.</description>
+                                    <name>before</name>
+                                    <description>Get the thumbnail from the nearest keyframe before the given time.</description>
                                 </value>
                                 <value>
-                                    <name>PreciseMethod</name>
+                                    <name>precise</name>
                                     <description>Get the thumbnail as near to given time as possible.</description>
                                 </value>
                                 <value>
-                                    <name>KeyFrameAfterMethod</name>
-                                    <description>Get the thumbnail from the nearest keyframe after the given
-time.</description>
+                                    <name>after</name>
+                                    <description>Get the thumbnail from the nearest keyframe after the given time.</description>
                                 </value>
                             </values>
                         </param>
                         <param>
                             <name>aspectRatio</name>
-                            <description>Allows to avoid scaling the image to the aspect ratio from camera
-settings.</description>
+                            <type>enum</type>
+                            <description>Allows to avoid scaling the image to the aspect ratio from
+camera settings.</description>
                             <optional>true</optional>
                             <values>
                                 <value>
                                     <name>auto</name>
-                                    <description>Default value. Honor aspect ratio from camera settings.</description>
+                                    <description>Default value. Use aspect ratio from camera settings (if any).</description>
                                 </value>
                                 <value>
                                     <name>source</name>
@@ -490,18 +538,21 @@ settings.</description>
                         </param>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -1889,14 +1940,18 @@ of executing this function.</description>
                     <method>GET</method>
                     <params/>
                     <result>
-                        <caption>JSON with an error code, error message and a list of JSON objects in "reply" field:</caption>
+                        <caption>JSON with an error code, error message and a list of JSON objects in "reply"
+field:</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>serverId</name>
+                                <type>uuid</type>
                                 <description>Id of a server.</description>
                             </param>
                             <param>
                                 <name>hardwareIds</name>
+                                <type>stringArray</type>
                                 <description>All Hardware Ids of the server, as a list of strings.</description>
                             </param>
                         </params>
@@ -2703,6 +2758,7 @@ only the top level data is provided.</description>
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).
 This parameter can be used several times to define a list of cameras.</description>
@@ -2710,6 +2766,7 @@ This parameter can be used several times to define a list of cameras.</descripti
                         </param>
                         <param>
                             <name>startTime</name>
+                            <type>string</type>
                             <description>Start time of the interval (as a string containing time in
 milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
@@ -2718,16 +2775,18 @@ milliseconds since epoch, or a local time formatted like
                         </param>
                         <param>
                             <name>endTime</name>
-                            <description>End time of the interval (as a string containing time in milliseconds
-since epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>End time of the interval (as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>filter</name>
-                            <description>This parameter is used for motion search ("periodsType" must be 1).
-Match motion on a video by specified rectangle.
+                            <type>arrayJson</type>
+                            <description>This parameter is used for motion search ("periodsType" must
+be 1). Match motion on a video by specified rectangle.
 <br/>Format: string with a JSON list of <i>sensors</i>,
 each <i>sensor</i> is a JSON list of <i>rects</i>, each <i>rect</i> is:
 <br/>
@@ -2746,6 +2805,7 @@ zero is the left-top corner.
                         </param>
                         <param proprietary="true">
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -2765,13 +2825,15 @@ zero is the left-top corner.
                         </param>
                         <param>
                             <name>detail</name>
-                            <description>Chunk detail level, in microseconds. Time periods that are shorter than
-the detail level are discarded. You can treat the detail level as the amount of
-microseconds per screen pixel.</description>
+                            <type>integer</type>
+                            <description>Chunk detail level, in microseconds. Time periods that are
+shorter than the detail level are discarded. You can treat the detail level as the
+amount of microseconds per screen pixel.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>periodsType</name>
+                            <type>integer</type>
                             <description>Chunk type.</description>
                             <optional>true</optional>
                             <values>
@@ -2787,29 +2849,33 @@ microseconds per screen pixel.</description>
                         </param>
                         <param>
                             <name>keepSmallChunks</name>
-                            <description>If specified, standalone chunks smaller than the detail level
-are not removed from the result.</description>
+                            <type>option</type>
+                            <description>If specified, standalone chunks smaller than the detail
+level are not removed from the result.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>limit</name>
+                            <type>integer</type>
                             <description>Maximum number of chunks to return.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>flat</name>
+                            <type>option</type>
                             <description>If specified, do not group chunk lists by server.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON object with an error code, error message and the list of JSON objects in
-"reply" field: if no "flat" parameter is specified, "reply" field is the list which
+                        <caption>JSON object with an error code, error message and the list of JSON objects
+in "reply" field: if no "flat" parameter is specified, "reply" field is the list which
 contains for each server its GUID (as "guid" field) and the list of chunks (as "periods"
 field); if "flat" parameter is specified, "reply" field is just the list of chunks.
 <br/>Each chunk is a pair of <code>(durationMs, startTimeMs)</code>. Chunks are merged
 for all requested cameras. Start time and duration are in milliseconds since epoch.
 Duration of -1 means the last chunk is being recorded now.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5010,18 +5076,21 @@ the result of the corresponding GET function.
                     <params>
                         <param proprietary="true">
                             <name>local</name>
+                            <type>option</type>
                             <description>If present, the request should not be redirected to another
 server.</description>
                             <optional>true</optional>
                         </param>
                         <param proprietary="true">
                             <name>extraFormatting</name>
+                            <type>option</type>
                             <description>If present and the requested result format is
 non-binary, indentation and spacing will be used to improve readability.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>format</name>
+                            <type>enum</type>
                             <description>Data format. Default value is "json".</description>
                             <optional>true</optional>
                             <values>
@@ -5055,7 +5124,7 @@ in the system, in the specified format.</caption>
         <group>
             <groupName>Server API</groupName>
             <urlPrefix>/api</urlPrefix>
-            <groupDescription>This group contains functions related to a single server</groupDescription>
+            <groupDescription>This group contains functions related to a single server.</groupDescription>
             <functions>
                 <function>
                     <name>activateLicense</name>
@@ -5064,12 +5133,14 @@ in the system, in the specified format.</caption>
                     <params>
                         <param>
                             <name>key</name>
+                            <type>string</type>
                             <description>License serial number</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON data.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5080,14 +5151,16 @@ as a single JSON object</description>
                     <params>
                         <param>
                             <name>exec_cmd</name>
-                            <description>HTTP url path to execute. This parameter could be repeated several
-times to execute several nested methods. All additions parameters after current
+                            <type>string</type>
+                            <description>HTTP url path to execute. This parameter could be repeated
+several times to execute several nested methods. All additions parameters after current
 "exec_cmd" and before next "exec_cmd" are passed as parameters to the nested method.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
                         <caption>Merged JSON data from nested methods.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5097,16 +5170,18 @@ times to execute several nested methods. All additions parameters after current
                     <params>
                         <param>
                             <name>from</name>
-                            <description>Start time of a time interval (as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>Start time of a time interval (as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>to</name>
-                            <description>End time of a time interval(as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>End time of a time interval(as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>true</optional>
@@ -5114,6 +5189,7 @@ epoch, or a local time formatted like
                     </params>
                     <result>
                         <caption>Tail of the server log file in text format</caption>
+                        <type>text</type>
                     </result>
                 </function>
                 <function>
@@ -5123,6 +5199,7 @@ epoch, or a local time formatted like
                     <params>
                         <param>
                             <name>action</name>
+                            <type>enum</type>
                             <description>What to do and what to report about the backup process.</description>
                             <optional>true</optional>
                             <values>
@@ -5135,7 +5212,7 @@ epoch, or a local time formatted like
                                     <description>Stop backup.</description>
                                 </value>
                                 <value>
-                                    <name>any other value or no parameter</name>
+                                    <name>&lt;any_other_value_or_no_parameter&gt;</name>
                                     <description>Report the backup process status.</description>
                                 </value>
                             </values>
@@ -5143,6 +5220,7 @@ epoch, or a local time formatted like
                     </params>
                     <result>
                         <caption>Bakcup process progress status or an error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5152,6 +5230,7 @@ epoch, or a local time formatted like
                     <params/>
                     <result>
                         <caption>JSON with error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5162,23 +5241,27 @@ epoch, or a local time formatted like
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>user</name>
+                            <type>string</type>
                             <description>User name.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>New password to set.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON result with error code</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5189,11 +5272,13 @@ epoch, or a local time formatted like
                     <params>
                         <param>
                             <name>systemName</name>
+                            <type>string</type>
                             <description>System display name. It affects all servers in the system.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>port</name>
+                            <type>integer</type>
                             <description>Server API port. It affects the current server only.</description>
                             <optional>true</optional>
                         </param>
@@ -5224,8 +5309,9 @@ http://127.0.0.1:7001/api/createEvent?timestamp=2016-09-16T16:02:41Z&caption=Cre
                     <params>
                         <param>
                             <name>timestamp</name>
-                            <description>Event date and time (as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>Event date and time (as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected). If "timestamp" is absent, the current server date and
 time is used.</description>
@@ -5233,41 +5319,46 @@ time is used.</description>
                         </param>
                         <param>
                             <name>source</name>
-                            <description>Name of the device which has triggered the event. It can be used in a
-filter in event rules to assign different actions to different devices. Also, the user
-could see this name in the notifications panel. Example: "POS terminal 5".</description>
+                            <type>string</type>
+                            <description>Name of the device which has triggered the event. It can be used
+in a filter in event rules to assign different actions to different devices. Also, the
+user could see this name in the notifications panel. Example: "POS terminal 5".</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>caption</name>
-                            <description>Short event description. It can be used in a filter in event rules to
-assign actions depending on this text.</description>
+                            <type>string</type>
+                            <description>Short event description. It can be used in a filter in event
+rules to assign actions depending on this text.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>description</name>
-                            <description>Long event description. It can be used as a filter in event rules to
-assign actions depending on this text.</description>
+                            <type>string</type>
+                            <description>Long event description. It can be used as a filter in event
+rules to assign actions depending on this text.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>metadata</name>
-                            <description>Additional information associated with the event, in the form of a JSON
-object. Currently this object can specify the only field "cameraRefs", but other fields
-could be added in the future. <ul>
-                                    <li>"cameraRefs" specifies a number of cameras which
-are linked to the event (e.g. the event will appear on their timelines), in the form of
-a list of camera ids (can be obtained from "id" field via /ec2/getCamerasEx or
-/ec2/getCameras?extraFormatting). </li>
+                            <type>objectJson</type>
+                            <description>Additional information associated with the event, in the
+form of a JSON object. Currently this object can specify the only field "cameraRefs",
+but other fields could be added in the future. <ul>
+                                    <li>"cameraRefs" specifies a number
+of cameras which are linked to the event (e.g. the event will appear on their
+timelines), in the form of a list of camera ids (can be obtained from "id" field via
+/ec2/getCamerasEx or /ec2/getCameras?extraFormatting). </li>
                                 </ul>
                             </description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>state</name>
-                            <description>Generic events can be used either with "long" actions like "do recording",
-or instant actions like "send email". This parameter should be specified in case "long"
-actions are going to be used with generic events.</description>
+                            <type>enum</type>
+                            <description>Generic events can be used either with "long" actions like
+"do recording", or instant actions like "send email". This parameter should be specified
+in case "long" actions are going to be used with generic events.</description>
                             <optional>true</optional>
                             <values>
                                 <value>
@@ -5286,17 +5377,20 @@ stop.</description>
                     </params>
                     <result>
                         <caption>JSON result with error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
                     <name>detachFromCloud</name>
-                    <description>Detach media server from cloud. Local admin user is enabled, admin password is changed to new value (if specified), all cloud users are disabled. Cloud link is removed.
-                        Function can be called either via GET or POST method. POST data should be a json object.</description>
+                    <description>Detach media server from cloud. Local admin user is enabled, admin password is changed to
+new value (if specified), all cloud users are disabled. Cloud link is removed. Function can
+be called either via GET or POST method. POST data should be a json object.</description>
                     <permissions>Administrator.</permissions>
-                    <method>GET, POST</method>
+                    <method>POST</method>
                     <params>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>Set new admin password after detach.</description>
                             <optional>true</optional>
                         </param>
@@ -5312,6 +5406,7 @@ stop.</description>
                     <params/>
                     <result>
                         <caption>JSON with a list of the discovered peers.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5321,12 +5416,14 @@ stop.</description>
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>type</name>
+                            <type>enum</type>
                             <description>Diagnostics to perform.</description>
                             <optional>false</optional>
                             <values>
@@ -5351,6 +5448,7 @@ stop.</description>
                     </params>
                     <result>
                         <caption>JSON object with an error code, error message and diagnostics result.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function proprietary="true">
@@ -5360,32 +5458,38 @@ stop.</description>
                     <params>
                         <param>
                             <name>from</name>
+                            <type>string</type>
                             <description>Start of time period (in milliseconds since epoch).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>to</name>
+                            <type>string</type>
                             <description>End of time period (in milliseconds since epoch).</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>event</name>
+                            <type>enum</type>
                             <description>Event type.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>action</name>
+                            <type>enum</type>
                             <description>Action type.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>brule_id</name>
+                            <type>uuid</type>
                             <description>Event rule id.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
                         <caption>Server event log in the proprietary binary format.</caption>
+                        <type>binary</type>
                     </result>
                 </function>
                 <function proprietary="true">
@@ -5398,30 +5502,34 @@ a script as an parameters.</description>
                     <params/>
                     <result>
                         <caption>JSON with error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
                     <name>getCameraParam</name>
-                    <description>Read camera parameters. For instance: brightness, contrast e.t.c.
-                        Parameters to read should be specified.</description>
+                    <description>Read camera parameters. For instance: brightness, contrast e.t.c. Parameters to read should
+be specified.</description>
                     <method>GET</method>
                     <params>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or
-                                MAC address (not supported for certain cameras).</description>
+                            <type>string</type>
+                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>&lt;any name&gt;</name>
+                            <name>&lt;any_name&gt;</name>
+                            <type>string</type>
                             <description>Parameter name to read. Request can contain one or more
-                                parameters.</description>
+parameters.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>Required parameter values in form of paramName=paramValue, each
-                        parameter on a new line.</caption>
+                        <caption>Required parameter values in form of paramName=paramValue, each parameter on
+a new line.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5432,49 +5540,58 @@ a script as an parameters.</description>
                     <params>
                         <param>
                             <name>from</name>
-                            <description>Start time of a time interval (as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>Start time of a time interval (as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>to</name>
-                            <description>End time of a time interval (as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>End time of a time interval (as a string containing time in
+milliseconds since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
-/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).
-Used to filter events log by a single camera.</description>
+                            <type>string</type>
+                            <description>Camera id (can be obtained from "id" field via
+/ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or MAC address (not supported for
+certain cameras). Used to filter events log by a single camera.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>event_type</name>
+                            <type>enum</type>
                             <description>Filter events log by specified event type.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>action_type</name>
+                            <type>enum</type>
                             <description>Filter events log by specified action type.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>brule_id</name>
-                            <description>Filter events log by specified event rule (keep only records generated
-via that event rule). This id could be obtained via /ec2/getEventRules.</description>
+                            <type>uuid</type>
+                            <description>Filter events log by specified event rule (keep only records
+generated via that event rule). This id could be obtained via /ec2/getEventRules.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON with an error code, error message and a list of JSON objects in "reply" field:</caption>
+                        <caption>JSON with an error code, error message and a list of JSON objects in "reply"
+field:</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>actionType</name>
+                                <type>enum</type>
                                 <description>Type of the action.</description>
                                 <values>
                                     <value>
@@ -5541,23 +5658,29 @@ via that event rule). This id could be obtained via /ec2/getEventRules.</descrip
                             </param>
                             <param>
                                 <name>actionParams</name>
-                                <description>JSON object with action parameters. Only fields that are applicable
-to the particular action are used.</description>
+                                <type>object</type>
+                                <description>JSON object with action parameters. Only fields that are
+applicable to the particular action are used.</description>
                             </param>
                             <param>
                                 <name>actionParams.actionResourceId</name>
-                                <description>Additional parameter for event log convenience.</description>
+                                <type>uuid</type>
+                                <description>Additional parameter for event log
+convenience.</description>
                             </param>
                             <param>
                                 <name>actionParams.url</name>
+                                <type>string</type>
                                 <description>Play Sound / exec HTTP action.</description>
                             </param>
                             <param>
                                 <name>actionParams.emailAddress</name>
+                                <type>string</type>
                                 <description>Email.</description>
                             </param>
                             <param>
                                 <name>actionParams.userGroup</name>
+                                <type>enum</type>
                                 <description>Popups and System Health.</description>
                                 <values>
                                     <value>
@@ -5572,10 +5695,12 @@ to the particular action are used.</description>
                             </param>
                             <param>
                                 <name>actionParams.fps</name>
+                                <type>integer</type>
                                 <description>Frames per second for recording.</description>
                             </param>
                             <param>
                                 <name>actionParams.streamQuality</name>
+                                <type>enum</type>
                                 <description>Stream quality for recording.</description>
                                 <values>
                                     <value>
@@ -5610,42 +5735,52 @@ to the particular action are used.</description>
                             </param>
                             <param>
                                 <name>actionParams.recordingDuration</name>
-                                <description>Duration of the recording, in seconds.</description>
-                            </param>
-                            <param>
-                                <name>actionParams.recordAfter</name>
-                                <description>For Bookmark, extension to the recording time, in
+                                <type>integer</type>
+                                <description>Duration of the recording, in
 seconds.</description>
                             </param>
                             <param>
+                                <name>actionParams.recordAfter</name>
+                                <type>integer</type>
+                                <description>For Bookmark, extension to the recording
+time, in seconds.</description>
+                            </param>
+                            <param>
                                 <name>actionParams.relayOutputId</name>
+                                <type>string</type>
                                 <description>Camera Output.</description>
                             </param>
                             <param>
                                 <name>actionParams.sayText</name>
+                                <type>string</type>
                                 <description/>
                             </param>
                             <param>
                                 <name>actionParams.tags</name>
+                                <type>string</type>
                                 <description>Bookmark.</description>
                             </param>
                             <param>
                                 <name>actionParams.text</name>
-                                <description>Text for Show Text Overlay, or message body for Exec HTTP
-Action.</description>
+                                <type>string</type>
+                                <description>Text for Show Text Overlay, or message body for
+Exec HTTP Action.</description>
                             </param>
                             <param>
                                 <name>actionParams.durationMs</name>
-                                <description>Duration in milliseconds for Bookmark and Show Text
-Overlay.</description>
+                                <type>integer</type>
+                                <description>Duration in milliseconds for Bookmark and
+Show Text Overlay.</description>
                             </param>
                             <param>
                                 <name>actionParams.additionalResources</name>
-                                <description>JSON list of ids of additional resources; user
-ids for Show On Alarm Layout.</description>
+                                <type>arrayJson</type>
+                                <description>JSON list of ids of additional
+resources; user ids for Show On Alarm Layout.</description>
                             </param>
                             <param>
                                 <name>actionParams.forced</name>
+                                <type>boolean</type>
                                 <description>Alarm Layout - if it must be opened immediately.</description>
                                 <values>
                                     <value>
@@ -5660,31 +5795,39 @@ ids for Show On Alarm Layout.</description>
                             </param>
                             <param>
                                 <name>actionParams.presetId</name>
+                                <type>string</type>
                                 <description>Execute PTZ preset action.</description>
                             </param>
                             <param>
                                 <name>actionParams.useSource</name>
-                                <description>Alarm Layout - if the source resource should also be used.</description>
+                                <type>boolean</type>
+                                <description>Alarm Layout - if the source resource should
+also be used.</description>
                             </param>
                             <param>
                                 <name>actionParams.recordBeforeMs</name>
-                                <description>Bookmark start time is adjusted to the left by this
-value in milliseconds.</description>
+                                <type>integer</type>
+                                <description>Bookmark start time is adjusted to the
+left by this value in milliseconds.</description>
                             </param>
                             <param>
                                 <name>actionParams.playToClient</name>
+                                <type>boolean</type>
                                 <description>Text to be pronounced.</description>
                             </param>
                             <param>
                                 <name>actionParams.contentType</name>
+                                <type>string</type>
                                 <description>HTTP action.</description>
                             </param>
                             <param>
                                 <name>eventParams</name>
+                                <type>object</type>
                                 <description>JSON object with event parameters.</description>
                             </param>
                             <param>
                                 <name>eventParams.eventType</name>
+                                <type>enum</type>
                                 <description>Type of the event.</description>
                                 <values>
                                     <value>
@@ -5763,25 +5906,31 @@ value in milliseconds.</description>
                             </param>
                             <param>
                                 <name>eventParams.eventTimestampUsec</name>
-                                <description>When did the event occur, in microseconds.</description>
+                                <type>integer</type>
+                                <description>When did the event occur, in
+microseconds.</description>
                             </param>
                             <param>
                                 <name>eventParams.eventResourceId</name>
+                                <type>uuid</type>
                                 <description>Event source - camera or server id.</description>
                             </param>
                             <param>
                                 <name>eventParams.resourceName</name>
-                                <description>Name of the resource which caused the event. Used if no
-resource is actually registered in the system. Generic event can provide some
-resource name which doesn't match any resourceId in the system. In this case
-resourceName is filled and resourceId remains empty.</description>
+                                <type>string</type>
+                                <description>Name of the resource which caused the event.
+Used if no resource is actually registered in the system. Generic event can
+provide some resource name which doesn't match any resourceId in the system. In
+this case resourceName is filled and resourceId remains empty.</description>
                             </param>
                             <param>
                                 <name>eventParams.sourceServerId</name>
+                                <type>uuid</type>
                                 <description>Id of a server that generated the event.</description>
                             </param>
                             <param>
                                 <name>eventParams.reasonCode</name>
+                                <type>enum</type>
                                 <description>Used in Reasoned Events as a reason code.</description>
                                 <values>
                                     <value>
@@ -5864,35 +6013,43 @@ resourceName is filled and resourceId remains empty.</description>
                             </param>
                             <param>
                                 <name>eventParams.inputPortId</name>
+                                <type>string</type>
                                 <description>Used for Input events only.</description>
                             </param>
                             <param>
                                 <name>eventParams.caption</name>
-                                <description>Short event description. Used for camera/server conflict as
-resource name which cause error. Used in generic events as a short description.</description>
+                                <type>string</type>
+                                <description>Short event description. Used for camera/server
+conflict as resource name which cause error. Used in generic events as a short
+description.</description>
                             </param>
                             <param>
                                 <name>eventParams.description</name>
-                                <description>Long event description. Used for camera/server conflict
-as a long description (conflict list). Used in Reasoned Events as reason
-description. Used in generic events as a long description.</description>
+                                <type>string</type>
+                                <description>Long event description. Used for
+camera/server conflict as a long description (conflict list). Used in Reasoned
+Events as reason description. Used in generic events as a long description.</description>
                             </param>
                             <param>
                                 <name>eventParams.metadata</name>
-                                <description>Camera list which is associated with the event.
-EventResourceId may be a POS terminal, but this is a camera list which should be
-shown with this event.</description>
+                                <type>arrayJson</type>
+                                <description>Camera list which is associated with the
+event. EventResourceId may be a POS terminal, but this is a camera list which
+should be shown with this event.</description>
                             </param>
                             <param>
                                 <name>businessRuleId</name>
+                                <type>uuid</type>
                                 <description>Id of the event rule.</description>
                             </param>
                             <param>
                                 <name>aggregationCount</name>
+                                <type>integer</type>
                                 <description>Number of identical events groupped into one.</description>
                             </param>
                             <param proprietary="true">
                                 <name>flags</name>
+                                <type>flags</type>
                                 <description>Combination (via "|") or the following flags:</description>
                                 <values>
                                     <value>
@@ -5910,7 +6067,9 @@ shown with this event.</description>
                     <method>GET</method>
                     <params/>
                     <result>
-                        <caption>JSON with an error code, error message and a list of strings in "reply" field.</caption>
+                        <caption>JSON with an error code, error message and a list of strings in "reply"
+field.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function proprietary="true">
@@ -5920,6 +6079,7 @@ shown with this event.</description>
                     <params/>
                     <result>
                         <caption>JSON with hardware information.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -5928,17 +6088,20 @@ shown with this event.</description>
                     <method>GET</method>
                     <params/>
                     <result>
-                        <caption>A JSON object with an error code, error message, and the list of JSON objects in
-"reply" field:</caption>
+                        <caption>A JSON object with an error code, error message, and the list of JSON
+objects in "reply" field:</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>realm</name>
+                                <type>string</type>
                                 <description>A string token used in authentication methods as "realm".</description>
                             </param>
                             <param>
                                 <name>nonce</name>
-                                <description>A session key for the current user. The current server time is used as a
-nonce value, and the nonce is valid for about 5 minutes.</description>
+                                <type>string</type>
+                                <description>A session key for the current user. The current server time is used
+as a nonce value, and the nonce is valid for about 5 minutes.</description>
                             </param>
                         </params>
                     </result>
@@ -5949,19 +6112,23 @@ nonce value, and the nonce is valid for about 5 minutes.</description>
                     <method>GET</method>
                     <params/>
                     <result>
-                        <caption>JSON object with an error code, error message, and the list of JSON objects in
-"reply" field:</caption>
+                        <caption>JSON object with an error code, error message, and the list of JSON objects
+in "reply" field:</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>comment</name>
+                                <type>string</type>
                                 <description>Time zone description in English.</description>
                             </param>
                             <param>
                                 <name>displayName</name>
+                                <type>string</type>
                                 <description>Time zone verbose name in English.</description>
                             </param>
                             <param>
                                 <name>hasDaylightTime</name>
+                                <type>boolean</type>
                                 <description>Whether the time zone has the DST feature.</description>
                                 <values>
                                     <value>
@@ -5976,10 +6143,12 @@ nonce value, and the nonce is valid for about 5 minutes.</description>
                             </param>
                             <param>
                                 <name>id</name>
+                                <type>string</type>
                                 <description>Time zone identifier, to be used for e.g. /api/setTime.</description>
                             </param>
                             <param>
                                 <name>isDaylightTime</name>
+                                <type>boolean</type>
                                 <description>Whether the time zone is on DST right now. To be reported
 properly, the server machine should have the correct current time set.</description>
                                 <values>
@@ -5995,6 +6164,7 @@ properly, the server machine should have the correct current time set.</descript
                             </param>
                             <param>
                                 <name>offsetFromUtc</name>
+                                <type>integer</type>
                                 <description>Time zone offset from UTC (in seconds).</description>
                             </param>
                         </params>
@@ -6008,6 +6178,7 @@ is added for convenience)</description>
                     <params/>
                     <result>
                         <caption>JSON data.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6023,32 +6194,38 @@ the result of GET /api/iflist function. </p>
                     <params>
                         <param>
                             <name>name</name>
+                            <type>string</type>
                             <description>Interface name.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>ipAddr</name>
+                            <type>string</type>
                             <description>IP address with dot-separated decimal components.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>netMask</name>
+                            <type>string</type>
                             <description>Network mask with dot-separated decimal components.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>mac</name>
+                            <type>string</type>
                             <description>MAC address with colon-separated upper-case hex components.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>gateway</name>
-                            <description>IP address of the gateway with dot-separated decimal components. Can be
-empty.</description>
+                            <type>string</type>
+                            <description>IP address of the gateway with dot-separated decimal components. Can
+be empty.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>dhcp</name>
+                            <type>boolean</type>
                             <description/>
                             <optional>false</optional>
                             <values>
@@ -6066,11 +6243,13 @@ fields can be empty.</description>
                         </param>
                         <param>
                             <name>extraParams</name>
+                            <type>object</type>
                             <description>JSON object with data in the internal format.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>dns_servers</name>
+                            <type>string</type>
                             <description>Space-separated list of IP addresses with dot-separated decimal
 components.</description>
                             <optional>false</optional>
@@ -6087,30 +6266,37 @@ include "SF_IfListCtrl" (server flags can be obtained via /ec2/getMediaServersEx
                     <params/>
                     <result>
                         <caption>List of objects with interface parameters.</caption>
+                        <type>object</type>
                         <params>
                             <param>
                                 <name>name</name>
+                                <type>string</type>
                                 <description>Interface name.</description>
                             </param>
                             <param>
                                 <name>ipAddr</name>
+                                <type>string</type>
                                 <description>IP address with dot-separated decimal components.</description>
                             </param>
                             <param>
                                 <name>netMask</name>
+                                <type>string</type>
                                 <description>Network mask with dot-separated decimal components.</description>
                             </param>
                             <param>
                                 <name>mac</name>
+                                <type>string</type>
                                 <description>MAC address with colon-separated upper-case hex components.</description>
                             </param>
                             <param>
                                 <name>gateway</name>
-                                <description>IP address of the gateway with dot-separated decimal components. Can be
-empty.</description>
+                                <type>string</type>
+                                <description>IP address of the gateway with dot-separated decimal components.
+Can be empty.</description>
                             </param>
                             <param>
                                 <name>dhcp</name>
+                                <type>boolean</type>
                                 <description/>
                                 <values>
                                     <value>
@@ -6127,12 +6313,14 @@ fields can be empty.</description>
                             </param>
                             <param>
                                 <name>extraParams</name>
+                                <type>object</type>
                                 <description>JSON object with data in the internal format.</description>
                             </param>
                             <param>
                                 <name>dns_servers</name>
-                                <description>Space-separated list of IP addresses with dot-separated decimal
-components.</description>
+                                <type>string</type>
+                                <description>Space-separated list of IP addresses with dot-separated
+decimal components.</description>
                             </param>
                         </params>
                     </result>
@@ -6150,6 +6338,7 @@ INVALID_FILE if the provided file cannot be opened as a ZIP archive;
 INCOMPATIBLE_SYSTEM if the update file is targeted for another system;
 EXTRACTION_ERROR if some extraction problems were found (e.g. not enough space);
 INSTALLATION_ERROR if the server could not execute installation script.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6159,6 +6348,7 @@ INSTALLATION_ERROR if the server could not execute installation script.</caption
                     <params>
                         <param>
                             <name>id</name>
+                            <type>integer</type>
                             <description>Log id</description>
                             <optional>true</optional>
                             <values>
@@ -6178,8 +6368,9 @@ INSTALLATION_ERROR if the server could not execute installation script.</caption
                         </param>
                         <param>
                             <name>value</name>
-                            <description>Target value for log level. More detailed level includes all less detailed
-levels.</description>
+                            <type>enum</type>
+                            <description>Target value for log level. More detailed level includes all less
+detailed levels.</description>
                             <optional>true</optional>
                             <values>
                                 <value>
@@ -6223,35 +6414,41 @@ must be defined several times with incrementing suffix "0", "1", etc.</descripti
                     <params>
                         <param>
                             <name>url0</name>
-                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the result of
-/api/manualCamera/status.</description>
+                            <type>string</type>
+                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the
+result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>uniqueId0</name>
-                            <description>Camera physical id, can be obtained from "reply.cameras[].uniqueId" field
-in the result of /api/manualCamera/status.</description>
+                            <type>string</type>
+                            <description>Camera physical id, can be obtained from "reply.cameras[].uniqueId"
+field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>manufacturer0</name>
+                            <type>string</type>
                             <description>Camera manufacturer, can be obtained from
 "reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>user</name>
+                            <type>string</type>
                             <description>Username for the cameras.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>Password for the cameras.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON object with error message and error code (0 means OK).</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6282,33 +6479,39 @@ content type "application/json". Example of such object:
                     <params>
                         <param>
                             <name>user</name>
+                            <type>string</type>
                             <description>Username for the cameras.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>Password for the cameras.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>cameras</name>
+                            <type>array</type>
                             <description>List of objects with fields defined below.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameras[].url</name>
-                            <description>Camera url, can be obtained from "reply.cameras[].url" field in the
-result of /api/manualCamera/status.</description>
+                            <type>string</type>
+                            <description>Camera url, can be obtained from "reply.cameras[].url"
+field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameras[].uniqueId</name>
+                            <type>string</type>
                             <description>Camera physical id, can be obtained from
 "reply.cameras[].uniqueId" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cameras[].manufacturer</name>
+                            <type>string</type>
                             <description>Camera manufacturer, can be obtained from
 "reply.cameras[].manufacturer" field in the result of /api/manualCamera/status.</description>
                             <optional>false</optional>
@@ -6316,6 +6519,7 @@ result of /api/manualCamera/status.</description>
                     </params>
                     <result>
                         <caption>JSON object with error message and error code (0 means OK).</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6325,35 +6529,41 @@ result of /api/manualCamera/status.</description>
                     <params>
                         <param>
                             <name>start_ip</name>
+                            <type>string</type>
                             <description>First IP address in the range to scan.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>end_ip</name>
+                            <type>string</type>
                             <description>Last IP address in the range to scan.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>port</name>
-                            <description>Camera(s) IP port to check. Port is auto-detected if this parameter is
-omitted.</description>
+                            <type>integer</type>
+                            <description>Camera(s) IP port to check. Port is auto-detected if this
+parameter is omitted.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>user</name>
+                            <type>string</type>
                             <description>Camera(s) username.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>Camera(s) password.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON object with the initial status of camera search process, including processUuid
-used for other /api/manualCamera calls, and the list of objects describing cameras found
-to the moment.</caption>
+                        <caption>JSON object with the initial status of camera search process, including
+processUuid used for other /api/manualCamera calls, and the list of objects describing
+cameras found to the moment.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6363,15 +6573,17 @@ to the moment.</caption>
                     <params>
                         <param>
                             <name>uuid</name>
-                            <description>Process unique id, can be obtained from "processUuid" field in the result of
-/api/manualCamera/search.</description>
+                            <type>uuid</type>
+                            <description>Process unique id, can be obtained from "processUuid" field in the result
+of /api/manualCamera/search.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON object with the initial status of camera search process, including processUuid
-used for other /api/manualCamera calls, and the list of objects describing cameras found
-to the moment.</caption>
+                        <caption>JSON object with the initial status of camera search process, including
+processUuid used for other /api/manualCamera calls, and the list of objects describing
+cameras found to the moment.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6381,13 +6593,15 @@ to the moment.</caption>
                     <params>
                         <param>
                             <name>uuid</name>
-                            <description>Process unique id, can be obtained from "processUuid" field in the result of
-/api/manualCamera/search.</description>
+                            <type>uuid</type>
+                            <description>Process unique id, can be obtained from "processUuid" field in the result
+of /api/manualCamera/search.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON object with error message and error code (0 means OK).</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6407,21 +6621,25 @@ needed. Digest authentication needs realm and nonce, both can be obtained with <
                     <params>
                         <param>
                             <name>url</name>
+                            <type>string</type>
                             <description>URL of one Server in the System to join.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>getKey</name>
+                            <type>string</type>
                             <description>Authentication hash of the target Server for GET requests.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>postKey</name>
+                            <type>string</type>
                             <description>Authentication hash of the target Server for POST requests.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>takeRemoteSettings</name>
+                            <type>boolean</type>
                             <description>Direction of the merge. Default value is false. If
 <b>mergeOneServer</b> is true, <b>takeRemoteSettings</b> parameter is ignored and
 treated as false.</description>
@@ -6441,8 +6659,9 @@ current system.</description>
                         </param>
                         <param>
                             <name>mergeOneServer</name>
-                            <description>Whether to merge with servers merged with the target server.
-Default value is false. If <b>mergeOneServer</b> is set to true,
+                            <type>boolean</type>
+                            <description>Whether to merge with servers merged with the target
+server. Default value is false. If <b>mergeOneServer</b> is set to true,
 <b>takeRemoteSettings</b> is ignored and treated as false.</description>
                             <optional>true</optional>
                             <values>
@@ -6460,6 +6679,7 @@ merged with the target server.</description>
                         </param>
                         <param>
                             <name>ignoreIncompatible</name>
+                            <type>boolean</type>
                             <description>Whether to ignore different version of merged server
 protocols. Default value is false.</description>
                             <optional>true</optional>
@@ -6477,11 +6697,12 @@ protocol version merge aborts.</description>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON with error code and error string. Error string could be empty in case of
-successful ping, "FAIL" if the specified system is unreachable or there is no system,
+                        <caption>JSON with error code and error string. Error string could be empty in case
+of successful ping, "FAIL" if the specified system is unreachable or there is no system,
 "UNAUTHORIZED" if the authentication credentials are invalid, "INCOMPATIBLE" if the
 found system has incompatible version or different customization, and "BACKUP_ERROR" if
 database backup could not been created.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6491,17 +6712,20 @@ database backup could not been created.</caption>
                     <params>
                         <param>
                             <name>allModules</name>
+                            <type>boolean</type>
                             <description>Set it to true to get all modules from the system.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>showAddresses</name>
+                            <type>boolean</type>
                             <description>Set it to true to show server addresses.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON object with module information.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6511,6 +6735,7 @@ database backup could not been created.</caption>
                     <params/>
                     <result>
                         <caption>JSON object with module information.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6519,7 +6744,9 @@ database backup could not been created.</caption>
                     <method>GET</method>
                     <params/>
                     <result>
-                        <caption>JSON with error code, error string and module unique id in case of successful ping.</caption>
+                        <caption>JSON with error code, error string and module unique id in case of
+successful ping.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6529,21 +6756,24 @@ database backup could not been created.</caption>
                     <params>
                         <param>
                             <name>url</name>
+                            <type>string</type>
                             <description>System URL to ping.</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>System administrator password.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON with error code, error string and module information in case of successful
-ping. Error string could be empty in case of successful ping, "FAIL" if the specified
-system is unreachable or there is no any system, "UNAUTHORIZED" if the authentication
-credentials are invalid, and "INCOMPATIBLE" if the found system has incompatible version
-or different customization.</caption>
+                        <caption>JSON with error code, error string and module information in case of
+successful ping. Error string could be empty in case of successful ping, "FAIL" if the
+specified system is unreachable or there is no any system, "UNAUTHORIZED" if the
+authentication credentials are invalid, and "INCOMPATIBLE" if the found system has
+incompatible version or different customization.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6553,12 +6783,14 @@ or different customization.</caption>
                     <params>
                         <param>
                             <name>cameraId</name>
+                            <type>string</type>
                             <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
 /ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>command</name>
+                            <type>enum</type>
                             <description>PTZ operation</description>
                             <optional>false</optional>
                             <values>
@@ -6629,6 +6861,7 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                     </params>
                     <result>
                         <caption>JSON object with an error code (0 means OK) and error message.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6638,6 +6871,7 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                     <params>
                         <param>
                             <name>action</name>
+                            <type>enum</type>
                             <description>What to do and what to report about the server archive rebuild.</description>
                             <optional>true</optional>
                             <values>
@@ -6650,19 +6884,21 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                                     <description>Stop rebuild.</description>
                                 </value>
                                 <value>
-                                    <name>any other value or no parameter</name>
+                                    <name>&lt;any_other_value_or_no_parameter&gt;</name>
                                     <description>Report server archive rebuild status</description>
                                 </value>
                             </values>
                         </param>
                         <param>
                             <name>mainPool</name>
+                            <type>integer</type>
                             <description>1 (for the main storage) or 0 (for the backup storage)</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>Rebuild progress status or an error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6673,6 +6909,7 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                     <params/>
                     <result>
                         <caption>JSON with error code.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function proprietary="true">
@@ -6683,12 +6920,14 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                     <params>
                         <param>
                             <name>oldPassword</name>
+                            <type>string</type>
                             <description>Current admin password</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON result with an error code and an error string.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6698,16 +6937,19 @@ preset name. Parameter speed defines move speed in range [0..1.0.]</description>
                     <params>
                         <param>
                             <name>cloudSystemId</name>
+                            <type>string</type>
                             <description/>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>cloudAuthenticationKey</name>
+                            <type>string</type>
                             <description/>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>reset</name>
+                            <type>string</type>
                             <description/>
                             <optional>true</optional>
                             <values>
@@ -6729,31 +6971,34 @@ cloud anymore</description>
                     <params/>
                     <result>
                         <caption>JSON object with string list.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
                     <name>setCameraParam</name>
-                    <description>Sets values of several camera parameters. This parameters are used
-                        on the Advanced tab in camera settings. For instance: brightness, contrast
-                        e.t.c.</description>
+                    <description>Sets values of several camera parameters. This parameters are used on the Advanced tab in
+camera settings. For instance: brightness, contrast e.t.c.</description>
                     <method>POST</method>
                     <params>
                         <param>
                             <name>cameraId</name>
-                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or /ec2/getCameras?extraFormatting) or
-                                MAC address (not supported for certain cameras).</description>
+                            <type>string</type>
+                            <description>Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
+/ec2/getCameras?extraFormatting) or MAC address (not supported for certain cameras).</description>
                             <optional>false</optional>
                         </param>
                         <param>
-                            <name>&lt;any name&gt;</name>
-                            <description>Parameter for camera to set. Request can contain one or
-                                more parameters to set.</description>
+                            <name>&lt;any_name&gt;</name>
+                            <type>string</type>
+                            <description>Parameter for camera to set. Request can contain one or more
+parameters to set.</description>
                             <optional>true</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>"OK" if all parameters have been set, otherwise return error 500
-                        (Internal server error) and the result of setting for every parameter.</caption>
+                        <caption>"OK" if all parameters have been set, otherwise return error 500 (Internal
+server error) and the result of setting for every parameter.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6779,13 +7024,15 @@ Can be called only if server flags include "SF_timeCtrl"
                     <params>
                         <param>
                             <name>timeZoneId</name>
+                            <type>string</type>
                             <description>Time zone identifier, can be obtained via /api/getTimeZones.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>dateTime</name>
-                            <description>Date and time (as string containing time in milliseconds since epoch, or a
-local time formatted like
+                            <type>string</type>
+                            <description>Date and time (as string containing time in milliseconds since
+epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
@@ -6803,13 +7050,15 @@ field).</description>
                     <params>
                         <param>
                             <name>timezone</name>
+                            <type>string</type>
                             <description>Time zone identifier, can be obtained via /api/getTimeZones.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>datetime</name>
-                            <description>System date and time (as a string containing time in milliseconds since
-epoch, or a local time formatted like
+                            <type>string</type>
+                            <description>System date and time (as a string containing time in milliseconds
+since epoch, or a local time formatted like
 <code>"<i>YYYY</i>-<i>MM</i>-<i>DD</i>T<i>HH</i>:<i>mm</i>:<i>ss</i>.<i>zzz</i>"</code>
 - the format is auto-detected).</description>
                             <optional>false</optional>
@@ -6827,22 +7076,26 @@ permissions.</description>
                     <params>
                         <param>
                             <name>systemName</name>
+                            <type>string</type>
                             <description>New system name</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cloudAuthKey</name>
+                            <type>string</type>
                             <description>could authentication key</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>cloudSystemID</name>
+                            <type>string</type>
                             <description>could system id</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON result with error code</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6855,17 +7108,20 @@ permissions.</description>
                     <params>
                         <param>
                             <name>password</name>
+                            <type>string</type>
                             <description>New password for admin user</description>
                             <optional>false</optional>
                         </param>
                         <param>
                             <name>systemName</name>
+                            <type>string</type>
                             <description>New system name</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
                         <caption>JSON result with error code</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6875,11 +7131,13 @@ permissions.</description>
                     <params>
                         <param>
                             <name>lines</name>
+                            <type>integer</type>
                             <description>Display last N log lines.</description>
                             <optional>true</optional>
                         </param>
                         <param>
                             <name>id</name>
+                            <type>integer</type>
                             <description>Id of log file. By default main log is returned</description>
                             <optional>true</optional>
                             <values>
@@ -6900,6 +7158,7 @@ permissions.</description>
                     </params>
                     <result>
                         <caption>Tail of the server log file in text format</caption>
+                        <type>text</type>
                     </result>
                 </function>
                 <function>
@@ -6909,6 +7168,7 @@ permissions.</description>
                     <params/>
                     <result>
                         <caption>JSON data with statistics.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6918,6 +7178,7 @@ permissions.</description>
                     <params/>
                     <result>
                         <caption>JSON data with server storages.</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
@@ -6927,27 +7188,32 @@ permissions.</description>
                     <params>
                         <param>
                             <name>path</name>
+                            <type>string</type>
                             <description>Folder to check.</description>
                             <optional>false</optional>
                         </param>
                     </params>
                     <result>
-                        <caption>JSON data. "OK" if specified folder may be used for writing on the server. Otherwise
-returns "FAIL"</caption>
+                        <caption>JSON data. "OK" if specified folder may be used for writing on the server.
+Otherwise returns "FAIL"</caption>
+                        <type>object</type>
                     </result>
                 </function>
                 <function>
                     <name>systemSettings</name>
-                    <description>Get or set global system settings. If called with no arguments, just returns list of all system settings with their values</description>
+                    <description>Get or set global system settings. If called with no arguments, just returns list of all
+system settings with their values</description>
                     <method>GET</method>
                     <params>
                         <param>
-                            <name>{param name}</name>
+                            <name>&lt;param_name&gt;</name>
+                            <type>string</type>
                             <description>name of system parameter. E.g., ec2AliveUpdateIntervalSec</description>
                             <optional>true</optional>
                         </param>
                         <param>
-                            <name>{param value}</name>
+                            <name>&lt;param_value&gt;</name>
+                            <type>string</type>
                             <description>New value for the specified parameter</description>
                             <optional>true</optional>
                         </param>

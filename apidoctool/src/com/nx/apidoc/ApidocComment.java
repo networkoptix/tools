@@ -61,12 +61,14 @@ public abstract class ApidocComment
     // S ::= (#x20)+
     // TextLine ::= S* "*" (S Char+)?
     // MethodName ::= ("/api/" | "/ec2/") [_A-Za-z0-9]+
-    // Header ::= S* "/**%apidoc" "[proprietary]"? S ("GET" | "POST") S MethodName
+    // Header ::= S* "/**"
+    // ApidocHeader ::= "%apidoc" "[proprietary]"? S ("GET" | "POST") S MethodName
+    // Label ::= [_A-Za-z0-9]+
     // TagName ::= "caption" | "permissions" | "param" | "value" | "return"
     // TagAttr ::= "proprietary" | "opt" | "default"
-    // Tag ::= S* "*" S+ "%" TagName ("[" TagAttr "]")? (S Char+ (NewLine TextLine)*)?
+    // Tag ::= S* "*" S+ "%" TagName (S* "[" TagAttr "]")? (S* ":" S* Label)? S* (S Char+ (NewLine TextLine)*)?
     // Footer ::= S* "*/"
-    // ApidocComment ::= Header (NewLine TextLine)* (NewLine Tag)* Footer
+    // ApidocComment ::= Header (ApidocHeader (NewLine TextLine)* (NewLine Tag)*)+ Footer
     //
     // - Semantics of attributes
     //
@@ -96,6 +98,8 @@ public abstract class ApidocComment
      * %return Return object in the requested format.
      *     %param ...
      *         %value ...
+     * %apidoc[proprietary] GET /ec2/someMethod/method
+     *  ...
      * %// Tag with comment, not intended to appear in generated XML. Can appear anywhere.
      */
 }

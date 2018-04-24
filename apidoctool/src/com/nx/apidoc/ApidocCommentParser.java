@@ -63,6 +63,7 @@ public final class ApidocCommentParser
         description.function.caption = "";
         description.function.result = new Apidoc.Result();
         description.function.result.caption = "";
+        description.function.result.type = Apidoc.Type.values()[0];
 
         parser.parseNextItem();
         while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
@@ -182,6 +183,16 @@ public final class ApidocCommentParser
             throwInvalidAttribute(parser, function.name);
         }
 
+        try
+        {
+            param.type = Apidoc.Type.fromString(parser.getItem().getLabel());
+        }
+        catch (Exception e)
+        {
+            throw new Error("Invalid param type \"" + parser.getItem().getLabel() + "\" found" +
+                " in function " + function.name + ".");
+        }
+
         parser.parseNextItem();
 
         parseParamValues(parser, function, param);
@@ -266,6 +277,15 @@ public final class ApidocCommentParser
         indentLevel++;
         checkNoAttribute(parser, function.name);
         function.result.caption = parser.getItem().getFullText(indentLevel);
+        try
+        {
+            function.result.type = Apidoc.Type.fromString(parser.getItem().getLabel());
+        }
+        catch (Exception e)
+        {
+            throw new Error("Invalid result type \"" + parser.getItem().getLabel() + "\" found" +
+                " in function " + function.name + ".");
+        }
 
         boolean deprecatedAttributeTagFound = false;
         parser.parseNextItem();
@@ -344,6 +364,16 @@ public final class ApidocCommentParser
 
         Apidoc.Param param = new Apidoc.Param();
         param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
+
+        try
+        {
+            param.type = Apidoc.Type.fromString(parser.getItem().getLabel());
+        }
+        catch (Exception e)
+        {
+            throw new Error("Invalid result param type \"" + parser.getItem().getLabel()
+                + "\" found in function " + function.name + ".");
+        }
 
         param.name = getInitialToken(parser, function.name);
         for (Apidoc.Param existingParam: function.result.params)

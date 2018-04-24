@@ -25,6 +25,9 @@ public abstract class Serializable
     public enum Emptiness { PROHIBIT, OMIT, ALLOW }
     public enum BooleanDefault { FALSE, TRUE, NONE }
 
+    /** For serialization, first enum value is considered a default value. */
+    public enum EnumDefault { PROHIBIT, OMIT, ALLOW }
+
     public interface Generator
     {
         void writeStringAttr(String name, String value, Emptiness emptiness);
@@ -33,6 +36,7 @@ public abstract class Serializable
         void writeBoolean(String name, boolean value, BooleanDefault booleanDefault);
         void writeInnerXml(String name, String xml, Emptiness emptiness);
         void writeObject(String name, Serializable object, Emptiness mode);
+        void writeEnum(String name, Enum value, Class enumClass, EnumDefault enumDefault);
         void writeObjectList(String listName, List<? extends Serializable> list, Emptiness mode);
     }
 
@@ -59,6 +63,11 @@ public abstract class Serializable
 
         <T extends Serializable>
         T readObject(String name, Class<T> objectClass, Presence presence) throws Error;
+
+        <E extends Enum<E>>
+        E readEnum(
+            String name, List<String> values, Class<E> enumClass, Serializable.Presence presence)
+            throws Error;
 
         <T extends Serializable>
         void readObjectList(

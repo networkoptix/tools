@@ -103,8 +103,18 @@ public class Main
         }
         catch (Throwable e)
         {
-            e.printStackTrace();
-            System.exit(2);
+            if (e instanceof Exception && !(e instanceof RuntimeException))
+            {
+                // Application-level exception.
+                System.err.println("ERROR: " + e.getMessage());
+                System.exit(1);
+            }
+            else
+            {
+                e.printStackTrace();
+                System.exit(2);
+            }
         }
+
     }
 }

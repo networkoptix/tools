@@ -22,12 +22,14 @@ public final class ApidocTagParser
     {
         private final String tag;
         private final String attribute;
+        private final String label;
         private final String initialTokenUntrimmed;
         private final List<String> textAfterInitialToken;
 
         protected Item(
             String tag,
             String attribute,
+            String label,
             String initialTokenUntrimmed,
             List<String> textAfterInitialToken)
         {
@@ -37,6 +39,9 @@ public final class ApidocTagParser
 
             assert(attribute != null);
             this.attribute = attribute;
+
+            assert(label != null);
+            this.label = label;
 
             assert(initialTokenUntrimmed != null);
             this.initialTokenUntrimmed = initialTokenUntrimmed;
@@ -51,6 +56,14 @@ public final class ApidocTagParser
         public String getTag()
         {
             return tag;
+        }
+
+        /**
+         * @return Label or "" if omitted.
+         */
+        public String getLabel()
+        {
+            return label;
         }
 
         /**
@@ -145,7 +158,7 @@ public final class ApidocTagParser
 
         ++line;
         final List<String> textAfterToken = new ArrayList<String>();
-        textAfterToken.add(values[3]);
+        textAfterToken.add(values[5]);
         while (line < lines.size())
         {
             final String[] continuation = Utils.matchRegex(
@@ -157,7 +170,7 @@ public final class ApidocTagParser
             ++line;
         }
 
-        item = new Item(values[0], values[1], values[2], textAfterToken);
+        item = new Item(values[0], values[1], values[3], values[4], textAfterToken);
     }
 
     public Item getItem()
@@ -165,7 +178,7 @@ public final class ApidocTagParser
         return item;
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private final String filename;
     private final boolean verbose;
@@ -175,15 +188,17 @@ public final class ApidocTagParser
     private int firstLineOfItem;
     private Item item;
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private static final Pattern emptyCommentLineRegex = Pattern.compile(
         "\\s*(?:/\\*)?\\*?\\s*");
       //     /*       *
 
     private static final Pattern itemStartRegex = Pattern.compile(
-        "\\s*(?:/\\*)?\\*?\\*?\\s*(%[^\\s\\[]+)\\s*(\\[\\w+\\])?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
-      //     /*       *           %tag             [attr]           Token                  ...
+        "\\s*(?:/\\*)?\\*?\\*?\\s*(%[^\\s\\[:]+)\\s*(\\[\\w+\\])?\\s*" +
+      //     /*       *           %tag              [attr]
+        "(:\\s*([_A-Za-z0-9]+))?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
+      // Label                      Token                  ...
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\* ([^%]*)");

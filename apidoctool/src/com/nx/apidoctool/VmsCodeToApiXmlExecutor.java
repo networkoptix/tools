@@ -26,17 +26,21 @@ public final class VmsCodeToApiXmlExecutor
         System.out.println("    Input: " + templateApiXmlFile);
         try
         {
-            apidoc = XmlSerializer.fromDocument(Apidoc.class, XmlUtils.parseXmlFile(templateApiXmlFile));
+            apidoc = XmlSerializer.fromDocument(
+                Apidoc.class, XmlUtils.parseXmlFile(templateApiXmlFile));
             ApidocUtils.checkNoFunctionDuplicates(apidoc);
         }
         catch (Exception e)
         {
-            throw new Exception("Error loading API xml file " + templateApiXmlFile + ": " + e.getMessage());
+            throw new Exception("Error loading API xml file " + templateApiXmlFile + ": "
+                + e.getMessage());
         }
 
         int processedFunctionsCount = 0;
-        processedFunctionsCount += processCppFile(params.templateRegistrationCpp(), new TemplateRegistrationMatcher());
-        processedFunctionsCount += processCppFile(params.handlerRegistrationCpp(), new HandlerRegistrationMatcher());
+        processedFunctionsCount += processCppFile(
+            params.templateRegistrationCpp(), new TemplateRegistrationMatcher());
+        processedFunctionsCount += processCppFile(
+            params.handlerRegistrationCpp(), new HandlerRegistrationMatcher());
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");

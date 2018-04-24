@@ -134,6 +134,25 @@ public final class JsonSerializer
             json.put(name, objJson);
         }
 
+        public void writeEnum(
+            String name, Enum value, Class enumClass, Serializable.EnumDefault enumDefault)
+        {
+            if (value == enumClass.getEnumConstants()[0])
+            {
+                switch (enumDefault)
+                {
+                    case PROHIBIT:
+                        throw new RuntimeException(
+                            "INTERNAL ERROR: Required enum value equals default: " +
+                                parentName + "." + name);
+                    case OMIT:
+                        return;
+                    default:
+                }
+            }
+            json.put(name, value.toString());
+        }
+
         public void writeObjectList(
             String listName, List<? extends Serializable> list, Serializable.Emptiness emptiness)
         {
@@ -322,6 +341,27 @@ public final class JsonSerializer
             fromJson(childObject, childJsonObject, fullName);
 
             return childObject;
+        }
+
+        public <E extends Enum<E>>
+        E readEnum(
+            String name, List<String> values, Class<E> enumClass, Serializable.Presence presence)
+            throws Error
+        {
+            final String stringValue = readStringField(name, presence, "enum");
+
+            if (stringValue.isEmpty())
+                return enumClass.getEnumConstants()[0];
+
+            try
+            {
+                return enumClass.getEnumConstants()[values.indexOf(stringValue)];
+            }
+            catch (Exception e)
+            {
+                throw new Error("Invalid enum value \"" + stringValue + "\" in "
+                    + parentName + "." + name);
+            }
         }
 
         public <T extends Serializable>
