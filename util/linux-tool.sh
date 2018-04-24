@@ -338,15 +338,6 @@ do_build()
 
     nx_cd "$VMS_DIR"
     time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
-
-    # TODO: Remove when build system is fixed.
-    if [ "$TARGET" == "linux" ]
-    then
-        "$VMS_DIR/build_utils/linux/copy_system_library.py" \
-            -c "$PACKAGES_DIR/linux-x64/gcc-7.3.0/bin/x86_64-pc-linux-gnu-gcc" \
-            -o "$CMAKE_BUILD_DIR/lib/" \
-            libstdc++.so.6 libatomic.so.1
-    fi
 }
 
 do_run_ut() # [all|TestName] "$@"
