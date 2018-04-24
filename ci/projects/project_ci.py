@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 DEFAULT_CLOUD_GROUP = 'test'
 DEFAULT_RELEASE = 'beta'
-DOWNSTREAM_FUNTEST_PROJECT = 'funtest'
 HG_BOOKMARK_FORMAT = '{branch}_stable'
 
 
@@ -119,16 +118,3 @@ class CiProject(BuildProject):
         if not build_info.has_failed_builds and build_info.has_failed_tests:
             return make_email_recipient_list(self.config.tests_watchers, build_info)
         return build_info.changeset_email_list
-
-    def make_postprocess_command_list(self, failed_build_platform_list):
-        # do we have any platform to test which is built?
-        if set(self.config.fun_tests.platforms) - set(failed_build_platform_list):
-            return [self._make_funtest_job_command()]
-        else:
-            return []
-    
-    def _make_funtest_job_command(self):
-        return BuildJobCommand(
-            job='{}/{}'.format(DOWNSTREAM_FUNTEST_PROJECT, self.nx_vms_branch_name),
-            wait_for_completion=False,
-            )
