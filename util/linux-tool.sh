@@ -5,6 +5,8 @@ source "$(dirname $0)/utils.sh"
 nx_load_config "${RC=".linux-toolrc"}"
 : ${TARGET=""} #< Target; "linux" for desktop Linux. If empty on Linux, VMS_DIR name is analyzed.
 : ${CONFIG="Debug"} #< Build configuration - either "Debug" or "Release".
+: ${DISTRIB=0} #< 0|1 - enable/disable building with distributions.
+: ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
@@ -32,7 +34,6 @@ then
 else
     : ${INI_FILES_DIR="$HOME/.config/nx_ini"}
 fi
-: ${CUSTOMIZATION=""}
 : ${NINJA_CLEAN_TOOL="$(dirname "$0")/../ninja_clean/ninja_clean.py"}
 
 #--------------------------------------------------------------------------------------------------
@@ -305,9 +306,13 @@ do_gen() # [cache] "$@"
     local CUSTOMIZATION_ARG=""
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
+    local DISTRIB_ARG=""
+    [[ $DISTRIB == 1 ]] && CUSTOMIZATION_ARG="-DwithDistributions=ON"
+
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
-        $CUSTOMIZATION_ARG ${GENERATOR_ARG:+"$GENERATOR_ARG"} $TARGET_ARG $CONFIG_ARG "$@"
+        ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
+        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG "$@"
     local RESULT=$?
 
     nx_popd
@@ -617,7 +622,12 @@ do_kit() # "$@"
 
 log_build_vars()
 {
-    echo "+ TARGET=$TARGET CONFIG=$CONFIG"
+    local MESSAGE="+"
+    [[ $TARGET != windows ]] && MESSAGE+=" TARGET=$TARGET"
+    MESSAGE+=" CONFIG=$CONFIG"
+    [[ $DISTRIB == 1 ]] && MESSAGE+=" DISTRIB=$DISTRIB"
+
+    echo "$MESSAGE"
 }
 
 do_cmake() # "$@"
