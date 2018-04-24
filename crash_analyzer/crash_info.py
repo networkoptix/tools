@@ -231,9 +231,9 @@ def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[s
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, Error):
-            logger.warning(result)
+            logger.warning(utils.format_error(result))
         elif isinstance(result, Exception):
-            logger.error(result)
+            logger.error(utils.format_error(result))
         else:
             processed.append((report, result))
 

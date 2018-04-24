@@ -18,10 +18,6 @@ import yaml
 logger = logging.getLogger(__name__)
 
 LOGGING_FORMAT = '%(asctime)s %(levelname)-8s %(name)s: %(message)s'
-POWER_SUFFIXES = dict(
-    k=1000, m=1000**2, g=1000**3, t=1000*4,
-    K=1024, M=1024**2, G=1024**3, T=1024*4,
-)
 
 
 class Error(Exception):
@@ -32,24 +28,30 @@ class KeyboardInterruptError(Error):
     pass
 
 
-def stream_log_handler(stream_name: str = 'stdout'):
-    streams = dict(stdout=sys.stdout, stderr=sys.stderr)
-    return logging.StreamHandler(streams[stream_name])
+def stream_log_handler(name: str = 'stdout', level: str = ''):
+    supported = dict(stdout=sys.stdout, stderr=sys.stderr)
+    stream = logging.StreamHandler(supported[name])
+    if level:
+        stream.setLevel(getattr(logging, level.upper(), None) or int(level))
+    return stream
 
 
-def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 1):
+def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 1, level: str = ''):
     File(base_name).directory().make()
-    return logging.handlers.RotatingFileHandler(
+    stream = logging.handlers.RotatingFileHandler(
         base_name, 'a', Size(max_size).bytes, backup_count)
+    if level:
+        stream.setLevel(getattr(logging, level.upper(), None) or int(level))
+    return stream
 
 
-def setup_logging(level: str = 'debug', title: str = '', stream: str = '', rotating_file: dict = {}):
+def setup_logging(level: str = 'debug', title: str = '', stream: dict = {}, rotating_file: dict = {}):
     """Sets up application log :level and :path.
     """
     handlers = []
     details = 'Level: {}'.format(level)
     if stream:
-        handlers.append(stream_log_handler(stream))
+        handlers.append(stream_log_handler(**stream))
         details += ', stream: {}'.format(stream)
     if rotating_file:
         handlers.append(rotating_log_handler(**rotating_file))
@@ -76,12 +78,14 @@ def is_ascii_printable(s: str):
         return all(c in string.printable for c in s)
 
 
-def parse_number(number: str):
-    for s in POWER_SUFFIXES:
-        if number.endswith(s):
-            return int(number[:-len(s)]) * POWER_SUFFIXES[s]
-
-    return int(s)
+def format_error(error: Exception, include_stack: bool = False):
+    cls = type(error)
+    exception = '{}.{}: {}'.format(cls.__module__, cls.__name__, str(error))
+    if include_stack:
+        stack = '\n'.join(traceback.format_exc().splitlines()[:-1])
+        return 'Exception: {}\n{}'.format(stack, exception)
+    else:
+        return exception
 
 
 def update_dict(dictionary: dict, request: str):
@@ -128,19 +132,19 @@ def _concurrent_main(task):
         raise KeyboardInterruptError
 
     except Exception as exception:
+        logging.debug(format_error(exception, include_stack=True))
         result = exception
-        logging.debug('Exception: {}'.format(traceback.format_exc()))
         if debug == 'raise':
             raise
 
     return {'result': result, 'logs': log_stream.lines()}
 
-	
-def _concurent_setup():
-	if not getattr(run_concurrent, 'debug', None):
-		sys.stdout = open(os.devnull, 'w')
-		sys.stderr = open(os.devnull, 'w')
-	
+
+def _concurrent_setup():
+    if not getattr(run_concurrent, 'debug', None):
+        sys.stdout = open(os.devnull, 'w')
+        sys.stderr = open(os.devnull, 'w')
+
 
 def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
     results = []
@@ -149,13 +153,18 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
     def save_result(result, logs):
         results.append(result)
         for line in logs:
-            logger.info(line)
+            try:
+                date, time, level, message = line.split(maxsplit=3)
+                resolved_level = getattr(logging, level)
+                logger.log(resolved_level, time + '    ' + message)
+            except (AttributeError, ValueError):
+                logger.log(resolved_level, line)   # < Not a beginning of the log line.
 
     def wrap_task(t):
         return {'action': action, 'argument': t, 'kwargs': kwargs, 'log_level': log_level}
 
     if not hasattr(run_concurrent, 'debug'):
-        with multiprocessing.Pool(thread_count, initializer=_concurent_setup) as pool:
+        with multiprocessing.Pool(thread_count, initializer=_concurrent_setup) as pool:
             for result in pool.map(_concurrent_main, (wrap_task(t) for t in tasks)):
                 save_result(**result)
     else:

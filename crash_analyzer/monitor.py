@@ -60,10 +60,37 @@ class Monitor:
                 logger.info('Service has stopped')
                 return
 
-            except Exception:
-                logger.critical(traceback.format_exc())
+            except Exception as error:
+                logger.critical(utils.format_error(error, include_stack=True))
                 time.sleep(self._options.stand_by_sleep_s)
                 # TODO: raise when amazon watch is configured.
+
+    def cleanup_jira_issues(self):
+        known_issues = set()
+        for _, record in self._records.items():
+            issue = record.get('issue')
+            if issue:
+                known_issues.add(issue)
+
+        logger.info('There are {} known JIRA issues'.format(len(known_issues)))
+        if not known_issues:
+            raise KeyError('No known issues')
+
+        options = self._upload.copy()
+        options.pop('thread_count')
+        jira = external_api.Jira(**options)
+        while True:
+            jira_issues = jira.all_issues()
+            logger.info('There are {} issues in JIRA total'.format(len(known_issues)))
+            deleted = 0
+            for issue in jira_issues:
+                if issue.key not in known_issues:
+                    logger.info('Remove unknown JIRA issue {}: {}'.format(issue.key, issue.fields.summary))
+                    issue.delete()
+                    deleted += 1
+
+            if not deleted:
+                return logger.info('No more JIRA issues to delete')
 
     def flush_records(self):
         if self._records:
@@ -133,14 +160,14 @@ class Monitor:
                 if data['issue'] or len(data['reports']) >= self._options.min_report_count:
                     crashes_to_push.append((data['issue'], data['reports']))
 
-        logger.info('Create or update {} issues with new reports'.format(len(crashes_to_push)))
+        logger.info('Create or update {} JIRA issues with new report(s)'.format(len(crashes_to_push)))
         for result in utils.run_concurrent(self._jira_sync, crashes_to_push,
                                            directory=self._options.reports_directory, **self._upload):
             if isinstance(result, Exception):
-                logger.error(result)
+                logger.error(utils.format_error(result))
             else:
                 issue, reports = result
-                logger.info('Issue {} updated with {} new reports'.format(issue, len(reports)))
+                logger.info('JIRA issue {} updated with {} new report(s)'.format(issue, len(reports)))
                 for r in reports:
                     self._records[r.name]['issue'] = issue
                     self._options.reports_directory.file(r.name).remove()
@@ -172,6 +199,8 @@ def main():
 
     parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
     parser.add_argument('config_file')
+    parser.add_argument('--cleanup-jira-issues', action='store_true',
+                        help='Just remove unknown JIRA issues')
     parser.add_argument('-o', '--override', action='append', default=[],
                         help='SECTION.KEY=VALUE to override config')
 
@@ -190,7 +219,10 @@ def main():
     debug(**config.pop('debug', {}))
 
     monitor = Monitor(**config)
-    monitor.run_service()
+    if arguments.cleanup_jira_issues:
+        monitor.cleanup_jira_issues()
+    else:
+        monitor.run_service()
 
 
 if __name__ == '__main__':

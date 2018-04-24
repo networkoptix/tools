@@ -2,7 +2,9 @@
 
 logging:
   level: debug
-  stream: stdout  #< Optional: remove if std stdout is not needed or use stderr.
+  stream:
+    name: stdout  #< Optional: remove if std stdout is not needed or use stderr.
+    level: info   #< Optional: override main log level for stream only.
   rotating_file:
     base_name: C:/develop/crash_analyzer/logs/log # Optional: remove if file is not needed.
     max_size: 10M  #< Maximum file size.
@@ -33,4 +35,4 @@ upload:
   password: kbnUk06boqBkwU
   file_limit: 20 #< Maximum attachments count.
   thread_count: 20 #< Communication connections count.
-  prefix: TEST-RUN #< Optional: for testing only.
+  prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.

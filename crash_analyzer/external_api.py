@@ -75,18 +75,18 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
 
         to_download.append(name)
 
-    logger.info('Found {} new reports on server to fetch'.format(len(to_download)))
+    logger.info('Found {} new report(s) on server to fetch'.format(len(to_download)))
     downloaded = []
     for name, result in zip(to_download, utils.run_concurrent(
             _fetch_crash, to_download, directory=directory, thread_count=thread_count, api=api, **options)):
         if isinstance(result, CrashServerError):
-            logger.debug(result)
+            logger.debug(utils.format_error(result))
         elif isinstance(result, Exception):
-            logger.error(result)
+            logger.error(utils.format_error(result))
         else:
             downloaded.append(name)
 
-    logger.info('Fetched {} new reports form server'.format(len(downloaded)))
+    logger.info('Fetched {} new report(s) form server'.format(len(downloaded)))
     return downloaded
 
 
@@ -164,6 +164,14 @@ class Jira:
 
         for r in reports:
             self._attach_files(key, directory.files(r.file_mask()))
+
+    def all_issues(self):
+        issues = []
+        for issue in self._jira.search_issues('summary ~ "has crashed on"', maxResults=1000):
+            summary = issue.fields.summary
+            if summary.startswith(self._prefix) and 'has crashed on' in summary:
+                issues.append(issue)
+        return issues
 
     def _attach_files(self, key: str, reports: List[utils.File]):
         """Attaches new :files to JIRA issue.

@@ -418,8 +418,10 @@ class DumpAnalyzer:
         if not urls:
             raise DistError('There are no distributive URLs available')
 
-        if not os.path.isdir(self.build_path):
+        try:
             os.makedirs(self.build_path)
+        except FileExistsError:
+            pass
 
         with FileLock(os.path.join(self.build_path, 'lock'), self.subprocess_timeout_s * len(urls)):
             if os.path.isdir(self.target_path):
