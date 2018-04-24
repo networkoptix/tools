@@ -19,15 +19,11 @@ set -xe
 [ -d "$BIN_DIR" ]  # expected to exist
 mkdir -p "$WORK_DIR"
 
-# TODO: restore after pipeline jobs deleted
-#VM_PORT_BASE=20000  # base for REST API ports forwarded from vm to host
-VM_PORT_BASE=30000  # base for REST API ports forwarded from vm to host
+VM_PORT_BASE=20000  # base for REST API ports forwarded from vm to host
 VM_PORT_RANGE=100  # how many forwarded ports one functional tests run may require, max
 
 VM_PORT=$(($VM_PORT_BASE + $SLOT * $VM_PORT_RANGE))
-# TODO: restore after pipeline jobs deleted
-#VM_NAME_PREFIX="funtest-$SLOT-"
-VM_NAME_PREFIX="funtest-X-$SLOT-"
+VM_NAME_PREFIX="funtest-$SLOT-"
 
 BUILD_PARAMETERS=(
     "project=$PROJECT"

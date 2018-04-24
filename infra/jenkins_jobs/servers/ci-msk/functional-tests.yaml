@@ -1,7 +1,7 @@
 - project:
     name: functional_tests
 
-    project-name: test
+    project-name: ci
 
     platform:
       - linux-x64
