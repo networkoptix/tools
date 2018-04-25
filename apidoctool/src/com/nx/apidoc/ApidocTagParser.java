@@ -95,7 +95,7 @@ public final class ApidocTagParser
                 indentString += ' ';
 
             StringBuilder b = new StringBuilder(textAfterInitialToken.get(0));
-            for (int line = 1; line < textAfterInitialToken.size(); line++)
+            for (int line = 1; line < textAfterInitialToken.size(); ++line)
             {
                 if (!b.toString().isEmpty()) //< skip empty lines
                     b.append("\n");
@@ -202,5 +202,5 @@ public final class ApidocTagParser
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\* ([^%]*)");
-      //    *' '  non-%...
+      //     *   non-%...
 }
