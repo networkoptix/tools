@@ -17,18 +17,18 @@ public final class Apidoc extends Serializable
         STRING,
         BOOLEAN,
         INTEGER,
+        ENUM,
         FLOAT,
         UUID,
-        OBJECT,
-        ARRAY,
-        ENUM,
-        OPTION,
-        FLAGS,
-        BINARY,
-        STRING_ARRAY,
-        OBJECT_JSON,
-        ARRAY_JSON,
-        TEXT;
+        OBJECT, //< Inner object.
+        ARRAY, //< List of objects.
+        OPTION, //< Parameter without value.
+        FLAGS, //< Combination of flags separated with "|".
+        STRING_ARRAY, //< List of string.
+        OBJECT_JSON, //< String with JSON object inside.
+        ARRAY_JSON, //< String with JSON array inside.
+        TEXT, //< Raw text in result.
+        BINARY; //< Raw binary data in result.
 
         public static Type fromString(String value)
         {
