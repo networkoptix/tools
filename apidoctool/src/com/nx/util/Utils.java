@@ -14,6 +14,26 @@ public final class Utils
 {
     private Utils() {}
 
+    public static String toCamelCase(String s)
+    {
+        final StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (String segment: s.split("_"))
+        {
+            if (first)
+            {
+                sb.append(segment.toLowerCase());
+                first = false;
+            }
+            else
+            {
+                sb.append(segment.charAt(0));
+                sb.append(segment.substring(1).toLowerCase());
+            }
+        }
+        return sb.toString();
+    }
+
     public static String stringOfSpaces(int numberOfSpaces)
     {
         char[] chars = new char[numberOfSpaces];

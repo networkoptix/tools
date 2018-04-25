@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nx.util.Serializable;
+import com.nx.util.Utils;
 
 /**
  * Object representation of apidoc XML elements. Empty Strings and ArrayLists
@@ -48,24 +49,7 @@ public final class Apidoc extends Serializable
         static
         {
             for (Type value: values())
-            {
-                final StringBuilder sb = new StringBuilder();
-                boolean first = true;
-                for (String segment: value.name().split("_"))
-                {
-                    if (first)
-                    {
-                        sb.append(segment.toLowerCase());
-                        first = false;
-                    }
-                    else
-                    {
-                        sb.append(segment.charAt(0));
-                        sb.append(segment.substring(1).toLowerCase());
-                    }
-                }
-                stringValues.add(sb.toString());
-            }
+                stringValues.add(Utils.toCamelCase(value.name()));
         }
     }
 
