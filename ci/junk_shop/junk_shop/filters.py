@@ -36,8 +36,6 @@ class JinjaFilters(object):
             s = dt.strftime('%b %d')
         else:
             s = dt.strftime('%Y %b %d')
-        if not precise and (dt.timetuple()[:2] < now.timetuple()[:2] or dt.day < datetime_utc_now().day - 10):
-            return Markup(s)
         if dt.timetuple()[:3] < now.timetuple()[:3]:
             s += ' ' + dt.strftime('%H:%M')
         else:
