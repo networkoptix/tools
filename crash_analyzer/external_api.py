@@ -65,17 +65,19 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     """Fetches :count new reports into :directory, which are not present in :known_reports and
     satisfy :min_version and :extension, returns created file names.
     """
-    to_download = []
+    to_download_groups = {}
     for name in api(**options).list_all(extension=extension):
-        if len(to_download) >= report_count:
-            break
-
-        if crash_info.Report(name).version < min_version or name in known_reports:
+        report = crash_info.Report(name)
+        if report.version < min_version or name in known_reports:
             continue
 
-        to_download.append(name)
+        # Download and process reports from different components equally often.
+        to_download_groups.setdefault(report.component, []).append(name)
 
-    logger.info('Found {} new report(s) on server to fetch'.format(len(to_download)))
+    for source, names in to_download_groups.items():
+        logger.info('Found {} new report(s) on server from {}'.format(len(names), source))
+
+    to_download = utils.mixed_merge(list(to_download_groups.values()), limit=report_count)
     downloaded = []
     for name, result in zip(to_download, utils.run_concurrent(
             _fetch_crash, to_download, directory=directory, thread_count=thread_count, api=api, **options)):

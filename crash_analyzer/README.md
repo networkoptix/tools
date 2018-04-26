@@ -6,9 +6,9 @@ Linux and Windows Crash Report Analyzer
 
 ### Ubuntu
 
-- Python 3 and it's PIP: `sudo apt install python3-pip`
-- Install required modules: `sudo python3 -m pip install -r requirements.txt`
-- NOTE: DMP analisys is not avaliable
+- Python 3 and it's PIP: `sudo apt install python3-pip`.
+- Install required modules: `sudo python3 -m pip install -r requirements.txt`.
+- NOTE: DMP analysis is not available.
 
 ### Windows
 

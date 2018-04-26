@@ -106,3 +106,21 @@
   customization: default
   extension: gdb-bt
   version: '4.0'
+? DW_Spectrum--2.3.2.9503-970fdce49492--2018-04-17_20-43-00_windows-x64-winxp_fb5a638635eecf67ab17d2c8a6a8fff8940d5c1a.dmp
+: beta: false
+  binary: DW_Spectrum
+  build: '9503'
+  changeset: 970fdce49492
+  component: Client
+  customization: unknown
+  extension: dmp
+  version: '2.3.2'
+? mediaserver--2.3.2.9503-970fdce49492--2018-04-24_21-31-37_windows-x64-winxp_1b9f0ddf3b751a85b6ca33e800bebaf9148aa6b3.dmp
+: beta: false
+  binary: mediaserver
+  build: '9503'
+  changeset: 970fdce49492
+  component: Server
+  customization: unknown
+  extension: dmp
+  version: '2.3.2'

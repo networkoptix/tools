@@ -101,6 +101,17 @@ def update_dict(dictionary: dict, request: str):
     dictionary[name] = yaml.load(value)
 
 
+def mixed_merge(list_of_lists: List[List[Any]], limit: int = None):
+    result = []
+    while list_of_lists and len(result) != limit:
+        current_list = list_of_lists.pop(0)
+        if current_list:
+            result.append(current_list.pop(0))
+            list_of_lists.append(current_list)
+
+    return result
+
+
 class BufferedStream:
     def __init__(self):
         self.buffers = []
@@ -114,8 +125,7 @@ class BufferedStream:
 
 def _concurrent_main(task):
     log_stream = BufferedStream()
-    debug = getattr(run_concurrent, 'debug', None)
-    if not debug:
+    if not getattr(run_concurrent, 'debug', None):
         logging.basicConfig(level=task['log_level'], stream=log_stream, format=LOGGING_FORMAT)
 
     action, argument, kwargs = task['action'], task['argument'], task['kwargs']
@@ -134,8 +144,6 @@ def _concurrent_main(task):
     except Exception as exception:
         logging.debug(format_error(exception, include_stack=True))
         result = exception
-        if debug == 'raise':
-            raise
 
     return {'result': result, 'logs': log_stream.lines()}
 
@@ -284,17 +292,6 @@ class File:
 
     def read_yaml(self, default=None):
         return self.read(lambda f: yaml.load(f), default)
-
-    def write_container(self, generator, brackets='{}'):
-        opener, closer = brackets
-        with open(self.path, 'w') as f:
-            f.write(opener)
-            try:
-                f.write('\n' + next(generator))
-                while True:
-                    f.write(',\n' + next(generator))
-            except StopIteration:
-                f.write('\n' + closer)
 
     def serialize(self, data):
         if self.extension == 'json':
