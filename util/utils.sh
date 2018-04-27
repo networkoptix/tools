@@ -14,6 +14,7 @@ Here <options> is a combination of the following options, in the listed order:
  -h, --help # Show this help. Also shown when called without arguments.
  -v, --verbose # Log execution of this script via "set -x".
  -gov, --go-verbose # Log commands to be executed remotely via nx_go() (ssh or telnet).
+ --mock-rsync # Do not call real rsync, just log its calling commands.
 EOF
 )"
 
@@ -349,12 +350,17 @@ nx_restore_cursor_pos()
     echo -en "$NX_RESTORE_CURSOR_POS"
 }
 
+nx_absolute_path() # path
+{
+    readlink -f "$1"
+}
+
 # Change directory verbously, but only if the current dir is not the desired one.
 nx_cd() # dir
 {
     nx_check_args 1 "$@"
     local -r DIR="$1"
-    if [ "$(readlink -f $(pwd))" != "$(readlink -f "$DIR")" ]
+    if [ "$(nx_absolute_path "$(pwd)")" != "$(nx_absolute_path "$DIR")" ]
     then
         nx_verbose cd "$DIR"
     fi
@@ -408,6 +414,16 @@ nx_path() # "$@"
 {
     if nx_is_cygwin; then
         cygpath -w "$@"
+    else
+        echo "$@"
+    fi
+}
+
+# If cygwin, convert windows or unix path to unix path; otherwise, return path as is.
+nx_unix_path() # "$@"
+{
+    if nx_is_cygwin; then
+        cygpath -u "$@"
     else
         echo "$@"
     fi

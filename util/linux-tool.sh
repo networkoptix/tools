@@ -12,7 +12,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
 : ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.6.1-1"}
 : ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.6.2-2"}
-: ${CMAKE_BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
+: ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 if nx_is_cygwin
 then
@@ -68,6 +68,7 @@ Here <command> can be one of the following:
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
 
  share target_dir [branch] # Do hg share, update and copy ".hg/hgrc". Default branch is target_dir.
+ cd # Change current dir: source dir <-> build dir.
  gen [cache] [cmake-args] # Perform cmake generation.
  build # Build via "cmake --build <dir>".
  cmake [gen-args] # Perform cmake generation, then build via "cmake --build".
@@ -75,7 +76,7 @@ Here <command> can be one of the following:
  test-distrib [checksum] [no-build] orig/archives/dir # Test if built matches orig.
 
  repos # List all hg repos in DEVELOP_DIR with their branches.
- print-dirs # Print VMS_DIR and CMAKE_BUILD_DIR for the target, on separate lines.
+ print-dirs # Print VMS_DIR and BUILD_DIR for the target, on separate lines.
  tunnel ip1 [ip2]... # Create two-way ssh tunnel to Burbank for the specified Burbank IP addresses.
  tunnel-s ip1 [port]... # Create ssh tunnel to Burbank for the specified port (default is 7001).
 EOF
@@ -141,10 +142,10 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
  # /C/develop/nx -> nx-win-build-linux
  # [in] VMS_DIR
  ##
-get_CMAKE_BUILD_DIR()
+get_BUILD_DIR()
 {
-    if [ ! -z "${CMAKE_BUILD_DIR:+x}" ]
-    then #< CMAKE_BUILD_DIR is defined and not empty.
+    if [ ! -z "${BUILD_DIR:+x}" ]
+    then #< BUILD_DIR is defined and not empty.
         return 0
     fi
 
@@ -155,16 +156,31 @@ get_CMAKE_BUILD_DIR()
 
     case "$VMS_DIR" in
         *"$TARGET_SUFFIX")
-            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
+            BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             ;;
         "$WIN_DEVELOP_DIR"/*)
             local -r VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
-            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX$TARGET_SUFFIX"
+            BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX$TARGET_SUFFIX"
             ;;
         *)
-            CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX$TARGET_SUFFIX"
+            BUILD_DIR="$VMS_DIR$BUILD_SUFFIX$TARGET_SUFFIX"
             ;;
     esac
+}
+
+# Convert VMS_DIR path to start with DEVELOP_DIR, if it's different due to symlinks.
+canonicalize_VMS_DIR()
+{
+    # NOTE: In Cygwin, path in CMakeCache.txt is like "C:/develop/...".
+    local -r VMS_DIR_ABSOLUTE=$(nx_absolute_path "$(nx_unix_path "$VMS_DIR")")
+    local -r DEVELOP_DIR_ABSOLUTE=$(nx_absolute_path "$DEVELOP_DIR")
+
+    if [[ $VMS_DIR_ABSOLUTE =~ ^$DEVELOP_DIR_ABSOLUTE ]]
+    then
+        VMS_DIR="$DEVELOP_DIR${VMS_DIR_ABSOLUTE#$DEVELOP_DIR_ABSOLUTE}"
+    else
+        VMS_DIR="$VMS_DIR_ABSOLUTE"
+    fi
 }
 
 # Extract the specified variable value from CMakeCache.txt. Print nothing if CMakeCache.txt does
@@ -172,10 +188,10 @@ get_CMAKE_BUILD_DIR()
 # return 0).
 printCmakeCacheValue() # cmake_build_dir cmake_var_name
 {
-    local -r BUILD_DIR="$1" && shift
+    local -r CMAKE_BUILD_DIR="$1" && shift
     local -r CMAKE_VAR_NAME="$1" && shift
 
-    local -r CMAKE_CACHE_TXT="$BUILD_DIR/CMakeCache.txt"
+    local -r CMAKE_CACHE_TXT="$CMAKE_BUILD_DIR/CMakeCache.txt"
     if [ ! -f "$CMAKE_CACHE_TXT" ]
     then
         return 2
@@ -191,24 +207,35 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 # [in][out] VMS_DIR
 # [in] DEVELOP_DIR
 # [out] TARGET
-# [out] CMAKE_BUILD_DIR
+# [out] BUILD_DIR
 setup_vars()
 {
     local -r HELP="Run this script from any dir inside a vms repo dir or its cmake build dir."
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" "$HELP"
-
     local -r CMAKE_CACHE_TXT="$VMS_DIR/CMakeCache.txt"
-    if [ -f "$CMAKE_CACHE_TXT" ]
-    then #< This is a cmake build dir: find respective repo dir.
-        CMAKE_BUILD_DIR="$VMS_DIR"
+    local -r CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
+
+    if [[ ! -f "$CMAKE_CACHE_TXT" && ! -f "$CMAKE_LISTS_TXT" && $VMS_DIR =~ $BUILD_SUFFIX$ ]]
+    then #< Assume a cmake build dir without CMakeCache.txt: guess VMS_DIR by removing the suffix.
+        BUILD_DIR="$VMS_DIR"
+        VMS_DIR=${VMS_DIR%$BUILD_SUFFIX}
+        local -r ACTUAL_CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
+        if [ ! -f "$ACTUAL_CMAKE_LISTS_TXT" ]
+        then
+            nx_fail "Cannot find $ACTUAL_CMAKE_LISTS_TXT" "$HELP"
+        fi
+        get_TARGET_and_CUSTOMIZATION_and_QT_DIR
+    elif [ -f "$CMAKE_CACHE_TXT" ]
+    then #< This is a cmake build dir: find respective repo dir via CMakeCache.txt.
+        BUILD_DIR="$VMS_DIR"
         VMS_DIR=$(printCmakeCacheValue "$VMS_DIR" CMAKE_HOME_DIRECTORY)
         if [ -z "VMS_DIR" ]
         then
             nx_fail "CMAKE_HOME_DIRECTORY not found in $CMAKE_CACHE_TXT" "$HELP"
         fi
+        canonicalize_VMS_DIR
         get_TARGET_and_CUSTOMIZATION_and_QT_DIR
     else #< This is not a cmake build dir: test it to be vms project repo dir.
-        local -r CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
         if [ ! -f "$CMAKE_LISTS_TXT" ]
         then
             nx_fail "Cannot find $CMAKE_LISTS_TXT" "$HELP"
@@ -220,7 +247,7 @@ setup_vars()
         fi
 
         get_TARGET_and_CUSTOMIZATION_and_QT_DIR
-        get_CMAKE_BUILD_DIR
+        get_BUILD_DIR
     fi
 
     case "$CONFIG" in
@@ -275,22 +302,22 @@ do_gen() # [cache] "$@"
     local -i CACHE_ARG=0
     [ "$1" = "cache" ] && { shift; CACHE_ARG=1; }
 
-    if [ -d "$CMAKE_BUILD_DIR" ]
+    if [ -d "$BUILD_DIR" ]
     then
-        nx_echo "WARNING: Dir $CMAKE_BUILD_DIR already exists."
+        nx_echo "WARNING: Dir $BUILD_DIR already exists."
         if [ $CACHE_ARG = 0 ]
         then
-            local -r CMAKE_CACHE="$CMAKE_BUILD_DIR/CMakeCache.txt"
+            local -r CMAKE_CACHE="$BUILD_DIR/CMakeCache.txt"
             if [ -f "$CMAKE_CACHE" ]
             then
                 nx_verbose rm "$CMAKE_CACHE"
             fi
         fi
     fi
-    mkdir -p "$CMAKE_BUILD_DIR"
+    mkdir -p "$BUILD_DIR"
 
-    nx_pushd "$CMAKE_BUILD_DIR"
-    nx_echo "+ cd \"$CMAKE_BUILD_DIR\"" #< Log "cd build-dir".
+    nx_pushd "$BUILD_DIR"
+    nx_echo "+ cd \"$BUILD_DIR\"" #< Log "cd build-dir".
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
@@ -321,9 +348,9 @@ do_gen() # [cache] "$@"
 
 do_build()
 {
-    if [ ! -d "$CMAKE_BUILD_DIR" ]
+    if [ ! -d "$BUILD_DIR" ]
     then
-        nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+        nx_fail "Dir $BUILD_DIR does not exist, run cmake generation first."
     fi
 
     if [ "$TARGET" == "windows" ]
@@ -337,12 +364,12 @@ do_build()
     fi
 
     nx_cd "$VMS_DIR"
-    time nx_verbose cmake --build "$(nx_path "$CMAKE_BUILD_DIR")" $CONFIG_ARG "$@"
+    time nx_verbose cmake --build "$(nx_path "$BUILD_DIR")" $CONFIG_ARG "$@"
 }
 
 do_run_ut() # [all|TestName] "$@"
 {
-    nx_verbose cd "$CMAKE_BUILD_DIR"
+    nx_verbose cd "$BUILD_DIR"
 
     local TEST_NAME="$1" && shift
 
@@ -434,8 +461,8 @@ do_apidoc() # dev|prod [action] "$@"
     local -a APIDOCTOOL_PARAMS
     find_APIDOCTOOL_PARAMS
 
-    local -r API_XML="$CMAKE_BUILD_DIR/mediaserver_core/api.xml"
-    local -r API_JSON="$CMAKE_BUILD_DIR/mediaserver_core/api.json"
+    local -r API_XML="$BUILD_DIR/mediaserver_core/api.xml"
+    local -r API_JSON="$BUILD_DIR/mediaserver_core/api.json"
 
     local -r API_TEMPLATE_XML="$VMS_DIR/mediaserver_core/api/api_template.xml"
     if [ ! -f "$API_TEMPLATE_XML" ]
@@ -490,9 +517,9 @@ do_apidoc() # dev|prod [action] "$@"
     fi
 
     copy_if_exists_and_different "$API_XML" \
-        "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.xml"
+        "$BUILD_DIR/mediaserver_core/resources/static/api.xml"
     copy_if_exists_and_different "$API_JSON" \
-        "$CMAKE_BUILD_DIR/mediaserver_core/resources/static/api.json"
+        "$BUILD_DIR/mediaserver_core/resources/static/api.json"
 
     return $RESULT
 }
@@ -627,7 +654,7 @@ do_cmake() # "$@"
 
     if ! nx_is_cygwin
     then
-        ( cd "$CMAKE_BUILD_DIR"
+        ( cd "$BUILD_DIR"
             nx_verbose "$NINJA_CLEAN_TOOL"
         ) || return $?
     fi
@@ -730,9 +757,9 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     local -i CHECKSUM=0; [ "$1" = "checksum" ] && { shift; CHECKSUM=1; }
     local -i NO_BUILD=0; [ "$1" = "no-build" ] && { shift; NO_BUILD=1; }
 
-    if [ ! -d "$CMAKE_BUILD_DIR" ]
+    if [ ! -d "$BUILD_DIR" ]
     then
-        nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+        nx_fail "Dir $BUILD_DIR does not exist, run cmake generation first."
     fi
 
     if [ $NO_BUILD = 0 ]
@@ -741,11 +768,11 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     fi
 
     local BUILT_TAR_GZ
-    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$CMAKE_BUILD_DIR" -name "$TAR_GZ_MASK" \
+    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$BUILD_DIR" -name "$TAR_GZ_MASK" \
         ! -name "*$DEBUG_TAR_GZ_SUFFIX"
 
     local BUILT_ZIP
-    nx_find_file BUILT_ZIP "installer .zip" "$CMAKE_BUILD_DIR" -name "$ZIP_MASK"
+    nx_find_file BUILT_ZIP "installer .zip" "$BUILD_DIR" -name "$ZIP_MASK"
 
     local -r ORIGINAL_DIR="$1"
     local -r ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
@@ -922,7 +949,8 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|start-s|start-c|run-ut|testcamera|share|gen|build|cmake|distrib|test-distrib| \
+        apidoc|kit|start-s|start-c|run-ut|testcamera| \
+        share|gen|cd|build|cmake|distrib|test-distrib| \
         print-dirs)
             setup_vars
             ;;
@@ -957,7 +985,7 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            nx_verbose cd "$CMAKE_BUILD_DIR"
+            nx_verbose cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
                     PATH="$QT_DIR/bin:$PATH"
@@ -994,11 +1022,11 @@ main()
 
             local VIDEO_FILE="$1" && shift
 
-            local -r TEST_CAMERA_BIN="$CMAKE_BUILD_DIR/bin/testcamera"
+            local -r TEST_CAMERA_BIN="$BUILD_DIR/bin/testcamera"
 
             if nx_is_cygwin
             then
-                PATH="$QT_DIR\bin:$CMAKE_BUILD_DIR/bin:$PATH"
+                PATH="$QT_DIR\bin:$BUILD_DIR/bin:$PATH"
             fi
 
             if [ $SHOW_HELP = 1 ]
@@ -1016,6 +1044,17 @@ main()
             do_share "$@"
             ;;
         #..........................................................................................
+        cd)
+            if [[ $(nx_absolute_path "$(pwd)")/ =~ ^$(nx_absolute_path "$VMS_DIR")/ ]]
+            then
+                echo "$BUILD_DIR"
+            elif [[ $(nx_absolute_path "$(pwd)") == $(nx_absolute_path "$BUILD_DIR") ]]
+            then
+                echo "$VMS_DIR"
+            else
+                nx_fail "Current dir is neither a cmake build dir nor a vms project dir."
+            fi
+            ;;
         gen)
             log_build_vars
             do_gen "$@"
@@ -1041,12 +1080,12 @@ main()
             printRepos
             ;;
         print-dirs)
-            if [ ! -d "$CMAKE_BUILD_DIR" ]
+            if [ ! -d "$BUILD_DIR" ]
             then
-                nx_fail "Dir $CMAKE_BUILD_DIR does not exist, run cmake generation first."
+                nx_fail "Dir $BUILD_DIR does not exist, run cmake generation first."
             fi
             echo "$VMS_DIR"
-            echo "$CMAKE_BUILD_DIR"
+            echo "$BUILD_DIR"
             ;;
         tunnel) # ip1 [ip2]...
             local SELF_IP
