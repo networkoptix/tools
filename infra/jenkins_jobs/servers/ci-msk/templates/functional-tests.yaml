@@ -101,6 +101,11 @@
                 filter: '{copyartifact_filter}'
                 target: dist
 
+      - init-venv-linux:
+          requirements-files: >-
+            devtools/ci/junk_shop/requirements.txt
+            nx_vms/func_tests/requirements.txt
+
       - parse-build-info:
           branch: '{branch}'
           customization: $CUSTOMIZATION
@@ -109,10 +114,6 @@
       - inject:
           properties-content: |
             JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@{junk-shop-host}
-      - init-venv-linux:
-          requirements-files: >-
-            devtools/ci/junk_shop/requirements.txt
-            nx_vms/func_tests/requirements.txt
       - extended-bash:
           headers: ''
           script: |

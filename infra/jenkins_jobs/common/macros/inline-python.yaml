@@ -31,6 +31,10 @@
           args: '{args}'
           script: '{script}'
       - batch: |
+          if not exist venv (
+            echo "Include init-venv-{{os}} macro first!" 1>&2
+            exit 1
+          )
           type __inline_python.py
           venv\\Scripts\\python.exe __inline_python.py
 
@@ -41,6 +45,10 @@
           args: '{args}'
           script: '{script}'
       - shell: |
+          if [ ! -d venv ]; then
+            echo "Include init-venv-{{os}} macro first!" 1>&2
+            exit 1
+          fi
           cat __inline_python.py
           venv/bin/python __inline_python.py
 
