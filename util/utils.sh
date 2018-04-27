@@ -404,7 +404,7 @@ nx_concat_ARGS() # "$@"
 nx_is_cygwin()
 {
     case "$(uname -s)" in
-        CYGWIN*) return 0;;
+        CYGWIN*|MINGW*) return 0;;
         *) return 1;;
     esac
 }

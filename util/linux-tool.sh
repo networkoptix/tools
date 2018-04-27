@@ -839,7 +839,7 @@ scanRepos_REPO_TO_BRANCH_and_EXTRAS()
 scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS() # "${REPOS[@]}"
 {
     local DIR
-    for DIR in *
+    for DIR in * */$BUILD_DIR
     do
         if [[ ! -d $DIR ]]
         then
