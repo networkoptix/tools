@@ -69,7 +69,7 @@ class TestRunner(object):
             time.sleep(1)
 
     def _abort_processes(self, run_duration):
-        error = 'Timed out after %s seconds; aborted' % timedelta_to_str(run_duration)
+        error = 'Timed out after %s; aborted' % timedelta_to_str(run_duration)
         log.warning(error)
         self._run_info.errors.append(error)
         for process in self._processes:
