@@ -217,7 +217,8 @@ class FileLock:
             except OSError:
                 if time.monotonic() - start > self.timeout_s:
                     self.handle.close()
-                    raise DistError('Unable to lock file: ' + self.path)
+                    raise DistError('Unable to lock file "{}" in {} seconds'
+                                    .format(self.path, self.timeout_s))
             else:
                 return self
 
@@ -484,7 +485,7 @@ def analyse_dump(generate: bool = True, *args, **kwargs) -> str:
     if generate:
         report_path = report_name(dump.dump_path)
         if os.path.isfile(report_path):
-            logger.warning('Already processed: ' + report_path)
+            logger.debug('Already processed: ' + report_path)
             with open(report_path, 'r') as f:
                 return f.read()
 

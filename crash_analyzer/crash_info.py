@@ -6,6 +6,7 @@ import os
 import re
 from typing import List, Tuple
 
+import dump_tool
 import utils
 
 logger = logging.getLogger(__name__)
@@ -238,7 +239,7 @@ def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[s
     """
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
-        if isinstance(result, Error):
+        if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError)):
             logger.warning(utils.format_error(result))
         elif isinstance(result, Exception):
             logger.error(utils.format_error(result))
@@ -258,8 +259,7 @@ def analyze_report(report: Report, directory: utils.Directory, **dump_tool_optio
         return analyze_windows_cdb_bt(report, report_file.read_string())
 
     if report.extension == 'dmp':
-        from dump_tool import analyse_dump
-        content = analyse_dump(dump_path=report_file.path, **dump_tool_options)
+        content = dump_tool.analyse_dump(dump_path=report_file.path, **dump_tool_options)
         return analyze_windows_cdb_bt(report, content)
 
     raise NotImplemented('Dump format is not supported: ' + report.name)

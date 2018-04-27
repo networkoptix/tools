@@ -2,3 +2,4 @@ jira>=1.0.14
 pyaml>=17.12.1
 pytest>=3.5.0
 requests>=2.18.4
+watchtower>=0.5.3

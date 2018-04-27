@@ -1,38 +1,40 @@
 # Crash Monitor Example Configuration
 
 logging:
-  level: debug
-  stream:
-    name: stdout  #< Optional: remove if std stdout is not needed or use stderr.
-    level: info   #< Optional: override main log level for stream only.
-  rotating_file:
-    base_name: C:/develop/crash_analyzer/logs/log # Optional: remove if file is not needed.
-    max_size: 10M  #< Maximum file size.
-    backup_count: 20  #< Maximum file count.
+    level: debug
+    stream:
+        name: stdout #< Optional: remove if std stdout is not needed or use stderr.
+        level: info #< Optional: override main log level for stream only.
+    rotating_file:
+        base_name: C:/develop/crash_analyzer/logs/log # Optional: remove if file is not needed.
+        max_size: 10M #< Maximum file size.
+        backup_count: 20 #< Maximum file count.
+    # cloud_watch:
+    #   level: debug #< For AWS Cloud Watch support
 
 options:
-  directory: C:/develop/crash_analyzer #< Local cache directory.
-  reports_size_limit: 100G #< Maximum cache size for reports.
-  dump_tool_size_limit: 100G #< Maximum cache size for dump_tool.
-  stand_by_sleep_s: 60 #< Sleep 1 minute on empty run or failure.
-  min_report_count: 2 #< Dump count to create new issue for crash.
+    directory: C:/develop/crash_analyzer #< Local cache directory.
+    reports_size_limit: 100G #< Maximum cache size for reports.
+    dump_tool_size_limit: 100G #< Maximum cache size for dump_tool.
+    stand_by_sleep_s: 60 #< Sleep 1 minute on empty run or failure.
+    min_report_count: 2 #< Dump count to create new issue for crash.
 
 fetch:
-  url: http://stats.networkoptix.com/crashserver/api/
-  login: statlord
-  password: razdvatri
-  min_version: "2.4" #< Minimal version to download.
-  report_count: 50 #< Do not download more at once.
-  thread_count: 20 #< Download connections count.
+    url: http://stats.networkoptix.com/crashserver/api/
+    login: statlord
+    password: razdvatri
+    min_version: "2.4" #< Minimal version to download.
+    report_count: 50 #< Do not download more at once.
+    thread_count: 20 #< Download connections count.
 
 analyze:
-  subprocess_timeout_s: 10 #< Newer wait for child processes longer.
-  thread_count: 10 #< Maximum CDB process count.
+    subprocess_timeout_s: 30 #< Newer wait for child processes longer.
+    thread_count: 5 #< Maximum CDB process count.
 
 upload:
-  url: https://networkoptix.atlassian.net/
-  login: service@networkoptix.com
-  password: kbnUk06boqBkwU
-  file_limit: 20 #< Maximum attachments count.
-  thread_count: 20 #< Communication connections count.
-  prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.
+    url: https://networkoptix.atlassian.net/
+    login: service@networkoptix.com
+    password: kbnUk06boqBkwU
+    file_limit: 20 #< Maximum attachments count.
+    thread_count: 10 #< Communication connections count.
+    prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.

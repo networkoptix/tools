@@ -28,34 +28,45 @@ class KeyboardInterruptError(Error):
     pass
 
 
-def stream_log_handler(name: str = 'stdout', level: str = ''):
+def stream_log_handler(name: str = 'stdout'):
     supported = dict(stdout=sys.stdout, stderr=sys.stderr)
-    stream = logging.StreamHandler(supported[name])
-    if level:
-        stream.setLevel(getattr(logging, level.upper(), None) or int(level))
-    return stream
+    return logging.StreamHandler(supported[name])
 
 
-def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 1, level: str = ''):
+def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 1):
     File(base_name).directory().make()
-    stream = logging.handlers.RotatingFileHandler(
+    return logging.handlers.RotatingFileHandler(
         base_name, 'a', Size(max_size).bytes, backup_count)
-    if level:
-        stream.setLevel(getattr(logging, level.upper(), None) or int(level))
-    return stream
 
 
-def setup_logging(level: str = 'debug', title: str = '', stream: dict = {}, rotating_file: dict = {}):
+def cloud_watch_log_handler():
+    import watchtower
+    return watchtower.CloudWatchLogHandler()
+
+
+def setup_logging(level: str = 'debug', title: str = '',
+                  stream: dict = {}, rotating_file: dict = {}, cloud_watch: dict = {}):
     """Sets up application log :level and :path.
     """
     handlers = []
-    details = 'Level: {}'.format(level)
+    details = ['level: {}'.format(level)]
+
+    def add_handler(handler_maker, level=None, **args):
+        handler = handler_maker(**args)
+        handlers.append(handler)
+        args['level'] = level
+        details.append('{}: {}'.format(
+            handler_maker.__name__,
+            ', '.join('{}="{}"'.format(*i) for i in args.items())))
+        if level:
+            handler.setLevel(getattr(logging, level.upper()))
+
     if stream:
-        handlers.append(stream_log_handler(**stream))
-        details += ', stream: {}'.format(stream)
+        add_handler(stream_log_handler, **stream)
     if rotating_file:
-        handlers.append(rotating_log_handler(**rotating_file))
-        details += ', ' + ', '.join('{}: {}'.format(*i) for i in rotating_file.items())
+        add_handler(rotating_log_handler, **rotating_file)
+    if cloud_watch:
+        add_handler(cloud_watch_log_handler, **cloud_watch)
 
     logging.basicConfig(
         level=getattr(logging, level.upper(), None) or int(level),
@@ -65,8 +76,8 @@ def setup_logging(level: str = 'debug', title: str = '', stream: dict = {}, rota
     if title:
         print(title)
         logging.info(title)
-
-    logging.info(details)
+    for detail in details:
+        logging.info(detail)
 
 
 def is_ascii_printable(s: str):
