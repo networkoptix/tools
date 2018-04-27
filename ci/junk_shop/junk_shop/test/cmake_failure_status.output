@@ -4,5 +4,5 @@ error	FAILED: cd /jenkins/workspace/ci-vms-linux-x64/build/debsetup/mediaserver-
 error	Creating distribution in deb (will be deleted on success).
 error	  See the log in /jenkins/workspace/ci-vms-linux-x64/build/build_logs/server-build-dist.log
 error	FAILURE (status 1); see the error message(s) above.
-error	ninja: build stopped: subcommand failed.
+none	ninja: build stopped: subcommand failed.
 none	

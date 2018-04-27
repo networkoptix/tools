@@ -26,23 +26,23 @@ error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode
 error	videonode_rgb.cpp:(.text+0x2ac): undefined reference to `glBindTexture'
 error	videonode_rgb.cpp:(.text+0x33c): undefined reference to `glDeleteTextures'
 error	videonode_rgb.cpp:(.text+0x348): undefined reference to `glGenTextures'
-error	videonode_rgb.cpp:(.text+0x388): undefined reference to `glGetIntegerv'
-error	videonode_rgb.cpp:(.text+0x394): undefined reference to `glPixelStorei'
-error	videonode_rgb.cpp:(.text+0x39c): undefined reference to `glActiveTexture'
-error	videonode_rgb.cpp:(.text+0x3a8): undefined reference to `glBindTexture'
-error	videonode_rgb.cpp:(.text+0x3f0): undefined reference to `glTexImage2D'
-error	videonode_rgb.cpp:(.text+0x3fc): undefined reference to `glPixelStorei'
-error	videonode_rgb.cpp:(.text+0x40c): undefined reference to `glTexParameteri'
-error	videonode_rgb.cpp:(.text+0x41c): undefined reference to `glTexParameteri'
-error	videonode_rgb.cpp:(.text+0x42c): undefined reference to `glTexParameteri'
-error	videonode_rgb.cpp:(.text+0x43c): undefined reference to `glTexParameteri'
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_texture.cpp.o: In function `QSGVideoMaterialShader_Texture::updateState(QSGMaterialShader::RenderState const&, QSGMaterial*, QSGMaterial*)':
-error	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_texture.cpp.o: In function `QSGVideoMaterialShader_Texture::updateState(QSGMaterialShader::RenderState const&, QSGMaterial*, QSGMaterial*)':
-error	videonode_texture.cpp:(.text+0x310): undefined reference to `glTexParameteri'
+skip	videonode_rgb.cpp:(.text+0x388): undefined reference to `glGetIntegerv'
+skip	videonode_rgb.cpp:(.text+0x394): undefined reference to `glPixelStorei'
+skip	videonode_rgb.cpp:(.text+0x39c): undefined reference to `glActiveTexture'
+skip	videonode_rgb.cpp:(.text+0x3a8): undefined reference to `glBindTexture'
+skip	videonode_rgb.cpp:(.text+0x3f0): undefined reference to `glTexImage2D'
+skip	videonode_rgb.cpp:(.text+0x3fc): undefined reference to `glPixelStorei'
+skip	videonode_rgb.cpp:(.text+0x40c): undefined reference to `glTexParameteri'
+skip	videonode_rgb.cpp:(.text+0x41c): undefined reference to `glTexParameteri'
+skip	videonode_rgb.cpp:(.text+0x42c): undefined reference to `glTexParameteri'
+skip	videonode_rgb.cpp:(.text+0x43c): undefined reference to `glTexParameteri'
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_rgb.cpp.o: In function `QSGVideoMaterial_RGB::~QSGVideoMaterial_RGB()':
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_texture.cpp.o: In function `QSGVideoMaterialShader_Texture::updateState(QSGMaterialShader::RenderState const&, QSGMaterial*, QSGMaterial*)':
+skip	client/nx_client_core/CMakeFiles/nx_client_core.dir/src/ui/video/videonode_texture.cpp.o: In function `QSGVideoMaterialShader_Texture::updateState(QSGMaterialShader::RenderState const&, QSGMaterial*, QSGMaterial*)':
+skip	videonode_texture.cpp:(.text+0x310): undefined reference to `glTexParameteri'
 error	videonode_texture.cpp:(.text+0x320): undefined reference to `glTexParameteri'
 error	videonode_texture.cpp:(.text+0x330): undefined reference to `glTexParameteri'
 error	videonode_texture.cpp:(.text+0x340): undefined reference to `glTexParameteri'

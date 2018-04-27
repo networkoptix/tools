@@ -36,9 +36,9 @@ def load_output_file_list(output_file_list):
 
 
 def pick_severity_lines(severity, output):
-    for s, rule_idx, line in parse_output_lines(output.splitlines()):
-        if s == severity:
-            yield line
+    for match in parse_output_lines(output.splitlines()):
+        if match.severity == severity:
+            yield match.line
 
 def get_severity_output(severity, output):
     return '\n'.join(pick_severity_lines(severity, output))
@@ -52,12 +52,12 @@ def store_output_and_error(repository, output, succeeded, error_message, parse_m
     test = repository.produce_test('build', is_leaf=True)
     run = repository.add_run('build', test=test)
     repository.add_artifact(run, 'output', 'build-output', repository.artifact_type.output, output)
-#    errors = get_severity_output('error', output)
-#    warnings = get_severity_output('warning', output)
-#    if errors:
-#        repository.add_artifact(run, 'build-errors', 'build-errors', repository.artifact_type.output, errors, is_error=True)
-#    if warnings:
-#        repository.add_artifact(run, 'build-warnings', 'build-warnings', repository.artifact_type.output, warnings)
+    errors = get_severity_output('error', output)
+    warnings = get_severity_output('warning', output)
+    if errors:
+        repository.add_artifact(run, 'build-errors', 'build-errors', repository.artifact_type.output, errors, is_error=True)
+    if warnings:
+        repository.add_artifact(run, 'build-warnings', 'build-warnings', repository.artifact_type.output, warnings)
     if parse_maven_outcome:
         outcome = parse_maven_output(output)
         if not outcome:

@@ -8,7 +8,7 @@ error	Call Stack (most recent call first):
 error	  cmake/dependencies.cmake:119 (nx_rdep_add_package)
 error	  cmake/dependencies.cmake:239 (nx_get_dependencies)
 error	  CMakeLists.txt:89 (include)
-error	
-error	
+ignore	
+ignore	
 error	-- Configuring incomplete, errors occurred!
 none	See also "/jenkins/workspace/ci-vms-edge1/build/CMakeFiles/CMakeOutput.log".

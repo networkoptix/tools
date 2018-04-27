@@ -1,0 +1,11 @@
+none	    virtual QString getUniqueId() const;
+none	                    ^
+none	/jenkins/workspace/ci-vms_3.2_dev-mac/nx_vms/common/src/core/resource/resource.h:63:21: note: overridden virtual function is here
+none	    virtual QString getUniqueId() const { return getId().toString(); };
+none	                    ^
+error	In file included from /jenkins/workspace/ci-vms_3.2_dev-mac/nx_vms/common/src/api/helpers/camera_id_helper.cpp:4:
+error	In file included from /jenkins/workspace/ci-vms_3.2_dev-mac/nx_vms/common/src/core/resource/security_cam_resource.h:24:
+error	/jenkins/workspace/ci-vms_3.2_dev-mac/nx_vms/common/src/core/resource/media_stream_capability.h:58:1: error: class template specialization of 'QMetaTypeId' must occur at global scope
+none	QN_FUSION_DECLARE_FUNCTIONS(CameraStreamCapabilityTrait, (json)(metatype));
+none	^
+none	/jenkins/workspace/ci-vms_3.2_dev-mac/nx_vms/common_libs/nx_fusion/src/nx/fusion/fusion/fusion_fwd.h:41:27: note: expanded from macro 'QN_FUSION_DECLARE_FUNCTIONS'

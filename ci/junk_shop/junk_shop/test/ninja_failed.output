@@ -5,6 +5,6 @@ none	[21/23] Building CXX object mediaserver_core/CMakeFiles/mediaserver_core.di
 none	[22/23] Linking CXX shared library lib/libmediaserver_core.so
 none	[23/23] Creating ARM installer archives
 error	FAILED: cd /jenkins/workspace/ci-vms_3.2-bananapi/build/edge_firmware && /jenkins/workspace/ci-vms_3.2-bananapi/nx_vms/edge_firmware/maven/bin-resources/create_arm_installer.sh
-error	Creating installer in /jenkins/workspace/ci-vms_3.2-bananapi/build/arm_installer (will be deleted on success).
-error	  See the log in /jenkins/workspace/ci-vms_3.2-bananapi/build/create_arm_installer.log
-error	ninja: build stopped: subcommand failed.
+none	Creating installer in /jenkins/workspace/ci-vms_3.2-bananapi/build/arm_installer (will be deleted on success).
+none	  See the log in /jenkins/workspace/ci-vms_3.2-bananapi/build/create_arm_installer.log
+none	ninja: build stopped: subcommand failed.
