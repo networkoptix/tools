@@ -14,7 +14,7 @@
 
 - job-template:
     name: '{project-name}-{branch}-{platform}-funtest'
-    node: funtest-test
+    node: funtest
     os: linux
 
     description: |
