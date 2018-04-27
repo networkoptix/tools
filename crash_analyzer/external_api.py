@@ -5,7 +5,7 @@ import jira.exceptions
 import json
 import logging
 import requests
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import crash_info
 import utils
@@ -60,7 +60,7 @@ class CrashServer:
 
 
 def fetch_new_crashes(directory: utils.Directory, report_count: int, known_reports: set = {},
-                      min_version: str = '', extension: str = '*',
+                      min_version: str = '', extension: str = '*', max_size: Union[int, str] = 0,
                       api: type = CrashServer, thread_count: int = 5, **options):
     """Fetches :count new reports into :directory, which are not present in :known_reports and
     satisfy :min_version and :extension, returns created file names.
@@ -80,7 +80,8 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     to_download = utils.mixed_merge(list(to_download_groups.values()), limit=report_count)
     downloaded = []
     for name, result in zip(to_download, utils.run_concurrent(
-            _fetch_crash, to_download, directory=directory, thread_count=thread_count, api=api, **options)):
+            _fetch_crash, to_download, directory=directory, thread_count=thread_count,
+            api=api, max_size=max_size, **options)):
         if isinstance(result, CrashServerError):
             logger.debug(utils.format_error(result))
         elif isinstance(result, Exception):
@@ -92,8 +93,13 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     return downloaded
 
 
-def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer, **options):
+def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
+                 max_size: Union[int, str] = 0, **options):
     content = api(**options).get(name)
+    size = utils.Size(len(content))
+    if size > utils.Size(max_size):
+        raise CrashServerError('Report of size {}B is too big: {}'.format(size, name))
+
     directory.file(name).write_bytes(content)
     return len(content)
 
@@ -121,47 +127,52 @@ class Jira:
             except KeyError:
                 raise ('Unsupported JIRA dump extension:' + extension)
 
-        issue = self._jira.create_issue(
-            project='VMS',
-            issuetype={'name': 'Bug'},
-            summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
-                r=reason, os=operation_system(report.extension)),
-            versions=[{'name': report.version}],
-            fixVersions=[{'name': report.version + '_hotfix'}],
-            components=[{'name': reason.component}],
-            customfield_10200={"value": team(reason.component)},
-            customfield_10009=CRASH_MONITOR_EPIC,
-            description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
+        try:
+            issue = self._jira.create_issue(
+                project='VMS',
+                issuetype={'name': 'Bug'},
+                summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
+                    r=reason, os=operation_system(report.extension)),
+                versions=[{'name': report.version}],
+                fixVersions=[{'name': report.version + '_hotfix'}],
+                components=[{'name': reason.component}],
+                customfield_10200={"value": team(reason.component)},
+                customfield_10009=CRASH_MONITOR_EPIC,
+                description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
+        except jira.exceptions.JIRAError as error:
+            logger.debug(utils.format_error(error))
+            raise JiraError('Unable to create issue for "{}": {}'.format(report.name, error.text))
 
-        logger.info("New JIRA case {}: {}".format(issue.key, issue.fields.summary))
+        logger.info("New JIRA issue {}: {}".format(issue.key, issue.fields.summary))
         return issue.key
 
     def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory) -> bool:
         """Update JIRA issue with new crash :reports.
         """
         if not reports:
-            raise JiraError('Unable to update JIRA case {} with no reports'.format(key))
+            raise JiraError('Unable to update issue {} with no reports'.format(key))
 
         try:
             issue = self._jira.issue(key)
-        except jira.exceptions.JIRAError:
-            raise JiraError('Unable to update JIRA case {} witch does not exist'.format(key))
+        except jira.exceptions.JIRAError as error:
+            logger.debug(utils.format_error(error))
+            raise JiraError('Unable to update issue {}: {}'.format(key, error.text))
 
         if issue.fields.status.name == 'Closed':
             min_fix = min(v.name for v in issue.fields.fixVersions)
             max_report = max(d.version for d in reports)
             if min_fix > max_report:
-                logger.debug('JIRA case {} is already fixed'.format(key))
+                logger.debug('JIRA issue {} is already fixed'.format(key))
                 return
             else:
                 self._transition(issue, 'Reopen')
-                logger.info('Reopen JIRA case {} for version {}'.format(key, max_report))
+                logger.info('Reopen JIRA issue {} for version {}'.format(key, max_report))
 
         issue_versions = set(v.name for v in issue.fields.versions)
         new_versions = issue_versions | set(d.version for d in reports)
         if issue_versions != new_versions:
             issue.update(fields={'versions': list({'name': v} for v in new_versions)})
-            logger.debug('JIRA case {} is updated for versions: {}'.format(
+            logger.debug('JIRA issue {} is updated for versions: {}'.format(
                 key, ', '.join(new_versions)))
 
         for r in reports:
@@ -179,15 +190,30 @@ class Jira:
         """Attaches new :files to JIRA issue.
         """
         for report in reports[-self._file_limit:]:
-            self._jira.add_attachment(key, attachment=report.path, filename=report.name)
-            logger.debug('JIRA case {} new attachment {}'.format(key, report.name))
+            try:
+                self._jira.add_attachment(key, attachment=report.path, filename=report.name)
 
-        reports = self._jira.issue(key).fields.attachment
-        reports.sort(key=lambda a: a.created)
-        while len(reports) > self._file_limit:
-            self._jira.delete_attachment(reports[0].id)
-            logger.debug('JIRA case {} replaced attachment {}'.format(key, reports[0].filename))
-            del reports[0]
+            except (jira.exceptions.JIRAError, requests.exceptions.ChunkedEncodingError) as error:
+                message = 'Unable to attach "{}" file to JIRA issue {}: {}'.format(
+                    report.name, key, error.text)
+                if isinstance(error, jira.exceptions.JIRAError) and error.status_code == 413:
+                    logging.warning(message)  #< HTTP: Payload Too Large.
+                else:
+                    raise JiraError(message)
+            else:
+                logger.debug('JIRA issue {} new attachment {}'.format(key, report.name))
+
+        try:
+            reports = self._jira.issue(key).fields.attachment
+            reports.sort(key=lambda a: a.created)
+            while len(reports) > self._file_limit:
+                first = reports.pop(0)
+                self._jira.delete_attachment(first.id)
+                logger.debug('JIRA issue {} removed attachment {}'.format(key, first.filename))
+
+        except jira.exceptions.JIRAError as error:
+            logger.debug(utils.format_error(error))
+            raise JiraError('Unable to cleanup attachments at issue {}: {}'.format(key, error.text))
 
     def _transition(self, issue: jira.Issue, *transition_names: List[str]):
         for name in transition_names:
@@ -195,9 +221,3 @@ class Jira:
                 if transition['name'].startswith(name):
                     self._jira.transition_issue(issue, transition['id'])
                     continue
-
-
-def example_jira():
-    config = utils.Resource('monitor_example_config.yaml').parse()['upload']
-    config.pop('thread_count')
-    return Jira(**config)._jira

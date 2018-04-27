@@ -24,6 +24,7 @@ fetch:
     login: statlord
     password: razdvatri
     min_version: "2.4" #< Minimal version to download.
+    max_size: 10M #< Maximal dump size to download.
     report_count: 50 #< Do not download more at once.
     thread_count: 20 #< Download connections count.
 

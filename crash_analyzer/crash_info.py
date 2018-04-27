@@ -262,4 +262,4 @@ def analyze_report(report: Report, directory: utils.Directory, **dump_tool_optio
         content = dump_tool.analyse_dump(dump_path=report_file.path, **dump_tool_options)
         return analyze_windows_cdb_bt(report, content)
 
-    raise NotImplemented('Dump format is not supported: ' + report.name)
+    raise NotImplementedError('Dump format is not supported: ' + report.name)

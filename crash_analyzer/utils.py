@@ -207,6 +207,8 @@ class Size:
             self.bytes = value
         elif isinstance(value, str):
             self.bytes = self.str_to_int(value)
+        elif isinstance(value, Size):
+            self.bytes = self.bytes
         else:
             raise TypeError('Unexpected type: ' + type(value).__name__)
 
@@ -309,14 +311,14 @@ class File:
             return self.write_json(data)
         if self.extension == 'yaml':
             return self.write_yaml(data)
-        raise NotImplemented('Unsupported format "{}" file: {}'.format(f, self.path))
+        raise NotImplementedError('Unsupported format "{}" file: {}'.format(f, self.path))
 
     def parse(self, *args, **kwargs):
         if self.extension == 'json':
             return self.read_json(*args, **kwargs)
         if self.extension == 'yaml':
             return self.read_yaml(*args, **kwargs)
-        raise NotImplemented('Unsupported format "{}" file: {}'.format(f, self.path))
+        raise NotImplementedError('Unsupported format "{}" file: {}'.format(f, self.path))
 
 
 class Directory:

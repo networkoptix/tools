@@ -424,7 +424,8 @@ class DumpAnalyzer:
         except FileExistsError:
             pass
 
-        with FileLock(os.path.join(self.build_path, 'lock'), self.subprocess_timeout_s * len(urls)):
+        with FileLock(os.path.join(self.build_path, 'lock'),
+                      self.subprocess_timeout_s * len(urls)) as lock:
             try:
                 logging.debug('Skip download of existing build: ' + self.module_dir())
                 return
@@ -442,9 +443,13 @@ class DumpAnalyzer:
 
             except Exception:
                 if not self.debug_mode:
+                    def on_error(call, path, error):
+                        if path != lock.path and path != os.path.dirname(lock.path):
+                            logger.error('{}("{}"): {}: {}'.format(
+                                call.__name__, path, error.__name__, str(error)))
+
+                    shutil.rmtree(self.build_path, onerror=on_error)
                     logger.debug('Clean up download dir: ' + self.build_path)
-                    shutil.rmtree(self.build_path, onerror=lambda f, p, ex: logger.error(
-                        "%s '%s': %s" % (f, p, repr(ex))))
                 raise
 
     def run_visual_studio(self):
