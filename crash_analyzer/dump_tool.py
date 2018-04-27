@@ -215,8 +215,8 @@ class FileLock:
             try:
                 msvcrt.locking(self.handle.fileno(), msvcrt.LK_RLCK, 1)
             except OSError:
-                self.handle.close()
                 if time.monotonic() - start > self.timeout_s:
+                    self.handle.close()
                     raise DistError('Unable to lock file: ' + self.path)
             else:
                 return self
@@ -424,17 +424,22 @@ class DumpAnalyzer:
             pass
 
         with FileLock(os.path.join(self.build_path, 'lock'), self.subprocess_timeout_s * len(urls)):
-            if os.path.isdir(self.target_path):
-                logging.debug('Skip download of existing build: ' + self.target_path)
+            try:
+                logging.debug('Skip download of existing build: ' + self.module_dir())
                 return
 
-            os.makedirs(self.target_path)
+            except DistError:
+                pass
+
+            if not os.path.isdir(self.target_path):
+                os.makedirs(self.target_path)
+
             try:
                 for url in urls:
                     path = self.download_url_data(url, self.build_path)
                     self.extract_dist(path)
 
-            except DistError:
+            except Exception:
                 if not self.debug_mode:
                     logger.debug('Clean up download dir: ' + self.build_path)
                     shutil.rmtree(self.build_path, onerror=lambda f, p, ex: logger.error(
