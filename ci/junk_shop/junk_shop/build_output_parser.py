@@ -160,11 +160,11 @@ PATTERN_LIST = [
     SingleLinePattern('error', r'internal compiler error:'),  # ..qmetatype.h:736:1: internal compiler error: Segmentation fault
     MultiLinePattern('error', r'FAILED:.+', last_line=r'collect2: error: .+'),
     # Windows
-    MultiLinePattern('error', r'.+ALL_BUILD.vcxproj.+->$',
+    MultiLinePattern('error', r'.+ALL_BUILD\.vcxproj.+->$',
                          other_lines=r'.+-> ?$', last_line=r'.+:\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
     SingleLinePattern('error', r'.+:\s+(fatal\s)?error\s[A-Z]+\d+\s*:'),
     SingleLinePattern('warning', r'.+:\s+warning\s[A-Z]+\d+\s*:'),
-    MultiLinePattern('error', r'ALL_BUILD\.vcxproj.+->', last_line=r'.*error.*:.+'),
+    MultiLinePattern('error', r'.+ALL_BUILD\.vcxproj.+->$', last_line=r'.*error.*:.+'),
     SingleLinePattern('error', r'\s*CUSTOMBUILD.*error.*:.+'),
     SingleLinePattern('error', r'\s+Error : .+'),
     # clang

@@ -1,8 +1,8 @@
 none	
 none	
-none	"J:\workspace\ci-vms-win-x64\build\ALL_BUILD.vcxproj" (default target) (1) ->
-none	"J:\workspace\ci-vms-win-x64\build\wixsetup\generate_server_update_package.vcxproj" (default target) (72) ->
-none	"J:\workspace\ci-vms-win-x64\build\wixsetup\wixsetup.vcxproj" (default target) (73) ->
+error	"J:\workspace\ci-vms-win-x64\build\ALL_BUILD.vcxproj" (default target) (1) ->
+error	"J:\workspace\ci-vms-win-x64\build\wixsetup\generate_server_update_package.vcxproj" (default target) (72) ->
+error	"J:\workspace\ci-vms-win-x64\build\wixsetup\wixsetup.vcxproj" (default target) (73) ->
 error	  Error : error information: "Error: Store::ImportCertObject() failed." (-2146893792/0x80090020) [J:\workspace\ci-vms-win-x64\build\wixsetup\wixsetup.vcxproj]
 error	  CUSTOMBUILD : SignTool error : An unexpected internal error has occurred. [J:\workspace\ci-vms-win-x64\build\wixsetup\wixsetup.vcxproj]
 none	
