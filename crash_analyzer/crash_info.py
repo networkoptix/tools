@@ -246,7 +246,7 @@ def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[s
         else:
             processed.append((report, result))
 
-    logger.info('Successfully analyzed {} reports'.format(len(processed)))
+    logger.info('Successfully analyzed {} of {} reports'.format(len(processed), len(reports)))
     return processed
 
 

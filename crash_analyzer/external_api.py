@@ -193,11 +193,11 @@ class Jira:
             try:
                 self._jira.add_attachment(key, attachment=report.path, filename=report.name)
 
-            except (jira.exceptions.JIRAError, requests.exceptions.ChunkedEncodingError) as error:
+            except jira.exceptions.JIRAError as error:
                 message = 'Unable to attach "{}" file to JIRA issue {}: {}'.format(
                     report.name, key, error.text)
-                if isinstance(error, jira.exceptions.JIRAError) and error.status_code == 413:
-                    logging.warning(message)  #< HTTP: Payload Too Large.
+                if error.status_code == 413: #< HTTP Code: Payload Too Large.
+                    logging.warning(message)
                 else:
                     raise JiraError(message)
             else:

@@ -255,7 +255,8 @@ class DumpAnalyzer:
         deduced = deduce_customization(dump_path)
         if not self.customization:
             if not deduced:
-                raise UserError('Customization is not selected and can not be deduced')
+                raise UserError('Customization is not selected and can not be deduced for: %s'
+                                % dump_path)
 
             logger.debug('Deduced customization [%s] selected for: %s' % (deduced, dump_path))
             self.customization = deduced
@@ -427,7 +428,7 @@ class DumpAnalyzer:
         with FileLock(os.path.join(self.build_path, 'lock'),
                       self.subprocess_timeout_s * len(urls)) as lock:
             try:
-                logging.debug('Skip download of existing build: ' + self.module_dir())
+                logger.debug('Skip download of existing build: ' + self.module_dir())
                 return
 
             except DistError:
@@ -448,8 +449,8 @@ class DumpAnalyzer:
                             logger.error('{}("{}"): {}: {}'.format(
                                 call.__name__, path, error.__name__, str(error)))
 
-                    shutil.rmtree(self.build_path, onerror=on_error)
                     logger.debug('Clean up download dir: ' + self.build_path)
+                    shutil.rmtree(self.build_path, onerror=on_error)
                 raise
 
     def run_visual_studio(self):

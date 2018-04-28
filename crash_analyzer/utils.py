@@ -17,7 +17,7 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-LOGGING_FORMAT = '%(asctime)s %(levelname)-8s %(name)s: %(message)s'
+LOGGING_FORMAT = '%(asctime)s %(levelname)-8s %(name)s:%(lineno)d: %(message)s'
 
 
 class Error(Exception):
