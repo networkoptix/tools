@@ -46,7 +46,7 @@ class JiraMock:
             'extension': report.extension,
             'versions': [report.version]}
 
-        logger.info('Case {} is created for {}'.format(key, reason))
+        logger.info('Issue {} is created for {}'.format(key, reason))
         return key
 
     def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory):
@@ -57,7 +57,7 @@ class JiraMock:
             issue['attachments'] = sorted(set(issue['attachments'] + [report.name]))
 
         self.issues[key] = issue
-        logger.info('Case {} is updated with {} reports'.format(key, len(reports)))
+        logger.info('Issue {} is updated with {} reports'.format(key, len(reports)))
         return True
 
 

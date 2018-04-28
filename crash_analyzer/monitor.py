@@ -3,7 +3,6 @@
 import argparse
 import logging
 import time
-import traceback
 from typing import Tuple, List
 
 import crash_info
@@ -39,7 +38,8 @@ class Options:
 
 
 class Monitor:
-    def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict):
+    def __init__(self, options: dict, fetch: dict, upload: dict, analyze: dict, debug: dict = {}):
+        self._debug = debug
         self._options = Options(**options)
         self._options.reports_directory.make()
         self._options.dump_tool_directory.make()
@@ -48,6 +48,15 @@ class Monitor:
         self._records = self._options.records_file.parse(dict())
 
     def run_service(self):
+        debug_concurrent = self._debug.get('run_concurrent', '').split(',')
+        if debug_concurrent:
+            logger.warning('Enable debug run_concurrent for ' + repr(debug_concurrent))
+            utils.run_concurrent.debug = debug_concurrent
+        
+        debug_exceptions = self._debug.get('exceptions', None)
+        if debug_exceptions:
+            logger.warning('Enable debug exceptions')
+        
         logger.info('Starting service...')
         while True:
             try:
@@ -63,7 +72,8 @@ class Monitor:
             except Exception as error:
                 logger.critical(utils.format_error(error, include_stack=True))
                 time.sleep(self._options.stand_by_sleep_s)
-                # TODO: raise when amazon watch is configured.
+                if debug_exceptions:
+                    raise
 
     def cleanup_jira_issues(self):
         known_issues = set()
@@ -74,14 +84,16 @@ class Monitor:
 
         logger.info('There are {} known JIRA issues'.format(len(known_issues)))
         if not known_issues:
-            raise KeyError('No known issues')
+            logger.warning('There are no known JIRA issues, clean up will start in {} seconds'
+                           .format(self._options.stand_by_sleep_s))
+            time.sleep(self._options.stand_by_sleep_s)
 
         options = self._upload.copy()
         options.pop('thread_count')
         jira = external_api.Jira(**options)
         while True:
             jira_issues = jira.all_issues()
-            logger.info('There are {} issues in JIRA total'.format(len(known_issues)))
+            logger.info('There are {} issues in JIRA total'.format(len(jira_issues)))
             deleted = 0
             for issue in jira_issues:
                 if issue.key not in known_issues:
@@ -212,11 +224,6 @@ def main():
     utils.setup_logging(
         **config.pop('logging'),
         title=(parser.prog + ', config: ' + arguments.config_file))
-
-    def debug(run_concurrent=None):
-        if run_concurrent:
-            utils.run_concurrent.debug = run_concurrent
-    debug(**config.pop('debug', {}))
 
     monitor = Monitor(**config)
     if arguments.cleanup_jira_issues:

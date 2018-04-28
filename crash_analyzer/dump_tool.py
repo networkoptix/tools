@@ -17,6 +17,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import msvcrt
+import traceback
 from typing import List, Callable
 
 logger = logging.getLogger(__name__)
@@ -276,12 +277,12 @@ class DumpAnalyzer:
             logger.debug("CDB reports version: " + self.version)
 
         self.dist = 'server' if self.module.find('server') != -1 else 'client'
-        logger.info('Dump information: %s (%s) %s %s ' % (
+        logger.debug('Dump information: %s (%s) %s %s ' % (
             self.module, self.dist, self.version, self.customization))
 
         self.build = self.build or self.version.split('.')[-1]
-        if self.build == '0':
-            raise UserError('Build 0 is not supported for: ' + self.dump_path)
+        if not self.build or self.build == '0':
+            raise UserError('Build number is not specified for: ' + self.dump_path)
 
     def fetch_url_data(self, url: str, regexps: List[str], sub_url: str = '') -> List[str]:
         """Fetches data from :url by :regexp (must contain single group!).
@@ -443,14 +444,18 @@ class DumpAnalyzer:
                     self.extract_dist(path)
 
             except Exception:
+                logger.debug('Unable to get build "{}": {}'.format(
+                    self.build_path, traceback.format_exc()))
                 if not self.debug_mode:
                     def on_error(call, path, error):
                         if path != lock.path and path != os.path.dirname(lock.path):
                             logger.error('{}("{}"): {}: {}'.format(
-                                call.__name__, path, error.__name__, str(error)))
-
-                    logger.debug('Clean up download dir: ' + self.build_path)
-                    shutil.rmtree(self.build_path, onerror=on_error)
+                                call, path, error.__name__, str(error)))
+                    try:
+                        logger.debug('Clean up download directory: ' + self.build_path)
+                        shutil.rmtree(self.build_path, onerror=on_error)
+                    except Exception:
+                        logger.error('Unable to cleanup: {}'.format(traceback.format_exc()))
                 raise
 
     def run_visual_studio(self):
@@ -478,7 +483,7 @@ class DumpAnalyzer:
             with open(report_path, 'w') as report_file:
                 report_file.write(report)
 
-        logger.info('Report is written to: ' + report_path)
+        logger.debug('Report is written to: ' + report_path)
         return report
 
 

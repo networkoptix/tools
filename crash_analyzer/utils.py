@@ -136,7 +136,7 @@ class BufferedStream:
 
 def _concurrent_main(task):
     log_stream = BufferedStream()
-    if not getattr(run_concurrent, 'debug', None):
+    if task['debug']:
         logging.basicConfig(level=task['log_level'], stream=log_stream, format=LOGGING_FORMAT)
 
     action, argument, kwargs = task['action'], task['argument'], task['kwargs']
@@ -153,8 +153,12 @@ def _concurrent_main(task):
         raise KeyboardInterruptError
 
     except Exception as exception:
-        logging.debug(format_error(exception, include_stack=True))
+        if type(exception).__name__ in task['debug']:
+            import pdb
+            pdb.set_trace()
+            
         result = exception
+        logging.debug(format_error(exception, include_stack=True))
 
     return {'result': result, 'logs': log_stream.lines()}
 
@@ -179,16 +183,19 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
             except (AttributeError, ValueError):
                 logger.log(resolved_level, line)   # < Not a beginning of the log line.
 
-    def wrap_task(t):
-        return {'action': action, 'argument': t, 'kwargs': kwargs, 'log_level': log_level}
+    def wrap_task(task, debug=''):
+        return {'action': action, 'argument': task, 'kwargs': kwargs, 
+                'log_level': log_level, 'debug': debug}
 
-    if not hasattr(run_concurrent, 'debug'):
+    debug = getattr(run_concurrent, 'debug', None)
+    if debug:
+        # Single thread implementation with break on exceptions.
+        for task in tasks:
+            save_result(**_concurrent_main(wrap_task(task, debug=debug)))
+    else:
         with multiprocessing.Pool(thread_count, initializer=_concurrent_setup) as pool:
             for result in pool.map(_concurrent_main, (wrap_task(t) for t in tasks)):
                 save_result(**result)
-    else:
-        for task in tasks:
-            save_result(**_concurrent_main(wrap_task(task)))
 
     return results
 

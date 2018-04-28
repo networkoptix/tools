@@ -67,15 +67,21 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     """
     to_download_groups = {}
     for name in api(**options).list_all(extension=extension):
-        report = crash_info.Report(name)
-        if report.version < min_version or name in known_reports:
+        try:
+            report = crash_info.Report(name)
+
+        except crash_info.ReportNameError as error:
+            logger.warning(str(error))
+            continue
+
+        if report.build == '0' or report.version < min_version or name in known_reports:
             continue
 
         # Download and process reports from different components equally often.
         to_download_groups.setdefault(report.component, []).append(name)
 
     for source, names in to_download_groups.items():
-        logger.info('Found {} new report(s) on server from {}'.format(len(names), source))
+        logger.info('Found {} new report(s) from {}'.format(len(names), source))
 
     to_download = utils.mixed_merge(list(to_download_groups.values()), limit=report_count)
     downloaded = []
