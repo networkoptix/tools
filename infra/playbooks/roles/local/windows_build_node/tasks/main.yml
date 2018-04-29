@@ -57,3 +57,5 @@
       It's possible that setting PATH env. var. will not take effect.
       Make sure that environment is correct or override it in Jenkins
       (url is http://<jenkins.url>/computer/<host.name>/configure ).
+
+# FIXME: Add missing "choco install cmake --version 3.10.2"

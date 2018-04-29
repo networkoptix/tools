@@ -1,0 +1,36 @@
+- job-template:
+    name: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+    project-type: multijob
+    node: runner
+
+
+    parameters:
+    - p_REQUESTED_BY
+    - p_CLEAN_CLONE
+    - p_NX_VMS_COMMIT:
+        default: '{branch}'
+
+    wrappers:
+    - pre-scm-repo-manipulations-1:
+        cached_hg_repository_base: '{cached_hg_repository_base}'
+
+    scm:
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '$NX_VMS_COMMIT'
+
+    builders:
+    # Clean repository files as we don't need them actually
+    # - folder-delete-operation:
+    #     folder-path: $WORKSPACE/nx_vms
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
+
+    publishers:
+    - archive:
+        artifacts: 'NX_VMS_COMMIT.envvar'
+        allow-empty: 'false'
+        fingerprint: true

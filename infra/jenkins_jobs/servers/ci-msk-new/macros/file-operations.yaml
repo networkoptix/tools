@@ -1,0 +1,58 @@
+# This is collection of wrappers forcross-platform plugin that's not oficially supported by jjb
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    name: folder-delete-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FolderDeleteOperation>
+                <folderPath>{folder-path}</folderPath>
+              </sp.sd.fileoperations.FolderDeleteOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>
+
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    name: folder-create-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FolderCreateOperation>
+                <folderPath>{folder-path}</folderPath>
+              </sp.sd.fileoperations.FolderCreateOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>
+
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    name: folder-copy-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FolderCopyOperation>
+                <sourceFolderPath>{source-folder-path}</sourceFolderPath>
+                <destinationFolderPath>{destination-folder-path}</destinationFolderPath>
+              </sp.sd.fileoperations.FolderCopyOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>
+
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    name: file-delete-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FileDeleteOperation>
+                <includes>{includes}</includes>
+                <excludes>{excludes}</excludes>
+              </sp.sd.fileoperations.FileDeleteOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>

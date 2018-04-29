@@ -1,0 +1,16 @@
+- view:
+    name: runners
+    view-type: list
+    description: 'List of all jobs related to build vms_3.2'
+    job-name:
+    - release.vms.vms.runner
+    - release.vms_3.2.vms.runner
+
+    # recurse: true
+    # status-filter: false
+
+- view:
+    name: build-vms_3.2
+    view-type: list
+    description: 'List of all entry points'
+    regex: release.vms_3.2.*build

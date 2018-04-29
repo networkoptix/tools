@@ -5,8 +5,10 @@ samba_gid: 1040
 samba_uid: 1040
 samba_home: '/home/infra'
 
-dir_mode: 0755
-file_mode: 0755
+# FIXME: only particular user should have rights to write
+# This is tmw w/a for jenkins user while testing publishing as std. build step
+dir_mode: 0775
+file_mode: 0775
 
 samba_share: "//192.168.13.2/infra"
 samba_mount_path: /mnt/infra

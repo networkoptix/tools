@@ -1,0 +1,56 @@
+
+# specific parameter for "registry-like" jobs
+# TODO: can we use some envvar that points to particular parent build ?
+- parameter:
+    name: p_REQUESTED_BY
+    parameters:
+    - string:
+        name: REQUESTED_BY
+        default: ''
+        description: |
+          Sticky label to mark individual build and query it's artifact in future
+
+# Common build parameters
+- parameter:
+    name: p_CLEAN_WORKSPACE
+    parameters:
+    - bool:
+        name: CLEAN_WORKSPACE
+        default: false
+        description: Remove entire workspace before build
+
+- parameter:
+    name: p_CLEAN_CLONE
+    parameters:
+    - bool:
+        name: CLEAN_CLONE
+        default: false
+        description: Remove stale repos before checkout
+
+- parameter:
+    name: p_CLEAN_BUILD
+    parameters:
+    - bool:
+        name: CLEAN_BUILD
+        default: false
+        description: >
+          Don't reuse build workspace from previous build
+          (if false, then will try to reuse)
+
+- parameter:
+    name: p_BUILD_IDENTITY
+    parameters:
+    - string:
+        name: BUILD_IDENTITY
+        default: ''
+        description: Build number in context of pipeline
+
+- parameter:
+    name: p_NX_VMS_COMMIT
+    parameters:
+    - string:
+        name: NX_VMS_COMMIT
+        default: '{default}'
+        description: >
+          Frozen nx_vms commit id or branch. commit sha is preferred as
+          all builds will be produced within the same repo state

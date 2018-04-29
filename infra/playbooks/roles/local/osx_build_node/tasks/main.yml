@@ -68,7 +68,6 @@
     state: present
   with_items:
   - ninja
-  - cmake
   - hg
   - wget
   - rsync
@@ -135,3 +134,20 @@
     owner: jenkins
     group: wheel
     mode: '755'
+
+- name: Check CMake version
+  become: yes
+  become_method: sudo
+  shell: cmake --version
+  register: check_cmake_version
+  changed_when: false
+  failed_when: false
+  check_mode: no
+
+- name: Install cmake
+  shell: curl -sSL https://cmake.org/files/v3.10/cmake-3.10.2-Linux-x86_64.tar.gz | sudo tar -xzC /usr/local/opt
+  when: check_cmake_version.rc != 0
+
+- name: Install cmake
+  shell: sudo ln -s -f /usr/local/opt/cmake-3.10.2-Linux-x86_64/bin/cmake /usr/local/bin/cmake
+  when: check_cmake_version.rc != 0

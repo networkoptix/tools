@@ -1,0 +1,91 @@
+- job-template:
+    name: '{pipeline}.{branch}.vms.webadmin.universal.build'
+    project-type: multijob
+
+    description: |
+      <h2> Build webadmin which is a part of nx_vms repository. </h2>
+
+      <p>
+        Technically it's linux project. But since it's cross-platform and
+        included into any distribution it's built solely.
+        And then it's consumed by installers.
+
+      <p>
+        This job consumes few groups of parameters.
+      <p>
+        Parameters related to workspace cleaning logic
+        CLEAN_WORKSPACE, CLEAN_CLONE and CLEAN_BUILD.
+      <p>
+        Parameters related to pointing artifacts in repository and development process
+        BUILD_IDENTITY (that determines release id or build_number used for releases) and
+        NX_VMS_COMMIT exact commit of sources taht produced this build.
+
+    node: '{webadmin-build-node}'
+
+    parameters:
+    - p_CLEAN_WORKSPACE
+    - p_CLEAN_CLONE
+    - p_CLEAN_BUILD
+    - p_BUILD_IDENTITY
+    - p_NX_VMS_COMMIT:
+        default: '{branch}'
+
+    wrappers:
+    - timestamps
+    - workspace-cleanup:
+        check-parameter: CLEAN_WORKSPACE
+    - pre-scm-repo-manipulations-2:
+        cached_hg_repository_base: '{cached_hg_repository_base}'
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+    - hg-la:
+        project-name: nx_vms
+        branch-name: $NX_VMS_COMMIT
+
+    builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+    - inject:
+        properties-content: |
+          REPOSITORY_PATH={artifact_repository_base}/$PIPELINE/$BUILD_IDENTITY/
+
+    - conditionally-clean-dir:
+        condition-varname: CLEAN_BUILD
+        dir: build
+
+    - file-delete-operation:
+        includes: webadmin-build.log
+        excludes: ''
+
+    - run-process:
+        workdir: $WORKSPACE
+        executable: nx_vms/webadmin/build.sh
+        executable-is-relpath: 'true'
+        arguments: ''
+        logfile: webadmin-build.log
+        inherit-environ: 'true'
+        environ: ''
+
+    publishers:
+    - archive:
+        artifacts: webadmin-build.log, static/version.txt
+        allow-empty: 'false'
+        fingerprint: true
+
+    - artifact-deployer:
+        entries:
+        - files: !join:
+            - ','
+            -
+              - server-external/**/*.*
+              - webadmin-build.log
+              - static/version.txt
+          basedir: '$WORKSPACE'
+          remote: '$REPOSITORY_PATH'
+          delete-remote: false
+          delete-remote-artifacts: false
+

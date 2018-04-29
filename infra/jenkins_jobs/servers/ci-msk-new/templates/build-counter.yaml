@@ -1,0 +1,67 @@
+# generate ID
+- job-template:
+    name: '{pipeline}.{counter_name}.generator'
+
+    node: runner
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+
+    description: |
+      Increment previous value of {counter_var_name} and save it as artifact
+
+    parameters:
+    - p_REQUESTED_BY
+    - string:
+        name: SET_{counter_var_name}
+        default: ''
+        description: Set build number instead of incrementing previous
+
+    builders:
+    # Note on conditional steps:
+    # The same logic may be achieved by unconditional fetch & inject but in this case
+    # artifact must be marked as optional. This may result in unexpected side effects
+    # and we'd like to avoid errors that are hard to debug.
+
+    # Normally just increment stored value
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{SET_{counter_var_name}}}'
+        condition-string2: ''
+        steps:
+        - copyartifact:
+            project: ${{JOB_NAME}}
+            filter: '{counter_var_name}.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo 'Following content will be injected as env variables'
+            cat '{counter_var_name}.envvar'
+        - inject:
+            properties-file: '{counter_var_name}.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            (( {counter_var_name} = {counter_var_name} +1 ))
+            echo "{counter_var_name}=${{{counter_var_name}}}" > '{counter_var_name}.envvar'
+    # alternatively, set new value
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '${{SET_{counter_var_name}}}'
+          condition-string2: ''
+        steps:
+        - shell: |
+            set -ex
+            echo "{counter_var_name}=${{SET_{counter_var_name}}}" > '{counter_var_name}.envvar'
+
+    publishers:
+    - archive:
+        artifacts: '{counter_var_name}.envvar'
+        allow-empty: 'false'
+        fingerprint: true

@@ -1,0 +1,77 @@
+# TODO: find-out if it's possible to split this into 2 manipulations
+
+- wrapper:
+    name: pre-scm-repo-manipulations-2
+    # This wrapperhelps with hg repo juggling
+    # We are experiencing significant problems with repo checkout
+    # since mercurial always pulls entire repo.
+
+    # in logic below we are keeping some cached hg repo and use it
+    # for clean checkout.
+    # this may save us up to 40min of pulling.
+
+    wrappers:
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - conditional-step:
+            condition-kind: boolean-expression
+            condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
+            steps:
+            # clean repository files
+            - folder-delete-operation:
+                folder-path: $WORKSPACE/devtools
+            - folder-delete-operation:
+                folder-path: $WORKSPACE/nx_vms
+        - conditional-step:
+            condition-kind: not
+            condition-operand:
+              condition-kind: file-exists
+              condition-filename: $WORKSPACE/devtools/.hg
+              condition-basedir: workspace
+            steps:
+            # populate with cached data
+            - folder-copy-operation:
+                source-folder-path: '{cached_hg_repository_base}/devtools/.hg'
+                destination-folder-path: $WORKSPACE/devtools/.hg
+        - conditional-step:
+            condition-kind: not
+            condition-operand:
+              condition-kind: file-exists
+              condition-filename: $WORKSPACE/nx_vms/.hg
+              condition-basedir: workspace
+            steps:
+            - folder-copy-operation:
+                source-folder-path: '{cached_hg_repository_base}/nx_vms/.hg'
+                destination-folder-path: $WORKSPACE/nx_vms/.hg
+
+- wrapper:
+    name: pre-scm-repo-manipulations-1
+    # This wrapperhelps with hg repo juggling
+    # We are experiencing significant problems with repo checkout
+    # since mercurial always pulls entire repo.
+
+    # in logic below we are keeping some cached hg repo and use it
+    # for clean checkout.
+    # this may save us up to 40min of pulling.
+
+    wrappers:
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - conditional-step:
+            condition-kind: boolean-expression
+            condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
+            steps:
+            - folder-delete-operation:
+                folder-path: $WORKSPACE/nx_vms
+        - conditional-step:
+            condition-kind: not
+            condition-operand:
+              condition-kind: file-exists
+              condition-filename: $WORKSPACE/nx_vms/.hg
+              condition-basedir: workspace
+            steps:
+            - folder-copy-operation:
+                source-folder-path: '{cached_hg_repository_base}/nx_vms/.hg'
+                destination-folder-path: $WORKSPACE/nx_vms/.hg

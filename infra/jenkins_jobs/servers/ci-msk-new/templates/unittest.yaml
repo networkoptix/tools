@@ -1,0 +1,7 @@
+- job-template:
+    name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest'
+
+    description: STUB
+
+
+    builders: []
