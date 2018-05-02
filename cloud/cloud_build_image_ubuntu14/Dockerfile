@@ -19,6 +19,6 @@ RUN cd /tmp/cmake-3.11.1 && ./bootstrap --prefix=/usr && make -j 10 && make inst
 RUN apt-get update && apt-get install -y rsync default-jre
 RUN apt-get update && apt-get install -y python-pip python3-pip
 RUN ln -sf /usr/bin/g++-7 /usr/bin/g++ && ln -sf /usr/bin/gcc-7 /usr/bin/gcc
-RUN apt-get install -y xsltproc libxml2-dev
-RUN apt-get install -y python-dev python3-dev
-RUN apt-get install -y libxml2-dev libxslt-dev python-dev lib32z1-dev npm libyaml-dev
+RUN apt-get install -y libxml2-dev libxslt-dev python-dev lib32z1-dev libyaml-dev mercurial python-dev python3-dev xsltproc libxml2-dev
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs

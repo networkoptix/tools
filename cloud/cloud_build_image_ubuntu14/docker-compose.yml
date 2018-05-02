@@ -3,12 +3,12 @@ services:
     cloud_build_image_ubuntu14:
         networks:
             default:
-            cloud_build_image_ubuntu14_net:
+            my_net:
         build: .
         volumes:
             - /home/ak:/root
 networks:
-    cloud_build_image_ubuntu14_net:
+    my_net:
         driver: bridge
         enable_ipv6: true
         ipam:
