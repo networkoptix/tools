@@ -22,3 +22,7 @@ RUN ln -sf /usr/bin/g++-7 /usr/bin/g++ && ln -sf /usr/bin/gcc-7 /usr/bin/gcc
 RUN apt-get install -y libxml2-dev libxslt-dev python-dev lib32z1-dev libyaml-dev mercurial python-dev python3-dev xsltproc libxml2-dev
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get install -y nodejs
+RUN pip3 install docker-compose
+RUN cd /tmp && wget https://download.docker.com/linux/static/stable/x86_64/docker-18.03.1-ce.tgz && tar xf docker-18.03.1-ce.tgz && cp /tmp/docker/docker /usr/local/bin/
+RUN pip install -U pip && pip3 install -U pip
+RUN pip install awscli

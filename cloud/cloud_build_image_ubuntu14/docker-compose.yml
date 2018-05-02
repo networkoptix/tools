@@ -1,17 +1,7 @@
 version: '2.1'
 services:
     cloud_build_image_ubuntu14:
-        networks:
-            default:
-            my_net:
         build: .
         volumes:
-            - /home/ak:/root
-networks:
-    my_net:
-        driver: bridge
-        enable_ipv6: true
-        ipam:
-            driver: default
-            config:
-                - subnet: fe80::/64
+            - ~:/root
+            - /var/run/docker.sock:/var/run/docker.sock
