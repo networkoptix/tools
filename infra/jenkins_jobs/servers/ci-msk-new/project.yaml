@@ -118,18 +118,15 @@
     # -- windows platform --
 
     - win-x64: &windows_config
-        installer-build-node:
-        artifact_repository_base:
-        cached_hg_repository_base:
+        installer-build-node: build-installer-windows
+        artifact_repository_base: '//192.168.13.2/infra/testing/repository/v1'
+        cached_hg_repository_base: '//192.168.13.2/infra/cached-hg'
         cmake_configure_args_platform: |
           CMAKE_EXECUTABLE=C:\Program files\CMake\bin\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017 Win64
           CMAKE_TOOL=host=x64
     - win-x86:
         <<: *windows_config
-        installer-build-node:
-        artifact_repository_base:
-        cached_hg_repository_base:
         cmake_configure_args_platform: |
           CMAKE_EXECUTABLE=C:\Program files\CMake\bin\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017
