@@ -162,6 +162,7 @@
               - build_info.txt
               - distrib/
               - bin/
+              - current_config.py
           basedir: '$WORKSPACE/build'
           remote: '{artifact_repository_base}/{pipeline}/$BUILD_IDENTITY/'
           delete-remote: false

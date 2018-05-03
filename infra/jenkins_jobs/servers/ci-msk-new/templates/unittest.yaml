@@ -1,7 +1,58 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest'
 
-    description: STUB
+    node: unittests-linux
 
+    junk_shop_host: '10.0.2.101'
 
-    builders: []
+    description: |
+      Run unit tests for {platform} for branch {branch}.
+
+    parameters:
+    - p_BUILD_IDENTITY
+
+    wrappers:
+    - timestamps
+    # - credentials-binding:
+    #   - username-password:
+    #       credential-id: junk_shop_db
+    #       variable: junk_shop_db_credentials
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+
+    builders:
+    - inject:
+        properties-content: |
+          REPOSITORY_PATH={artifact_repository_base}/{pipeline}/$BUILD_IDENTITY/
+          CUSTOMIZATION={customization}
+    - folder-copy-operation:
+        source-folder-path: $REPOSITORY_PATH
+        destination-folder-path: $WORKSPACE/build
+
+    # Inject junkshop variables relatd to publishing unittests results
+    - inject:
+        properties-content: |
+          DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
+          BUILD_PARAMETERS=project=testing,branch={branch},build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform={platform}
+
+    - init-venv-linux:
+        requirements-files: devtools/ci/junk_shop/requirements.txt
+    - shell: |
+          #!/bin/bash
+          set -ex
+
+          source venv/bin/activate
+          export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+          BIN_DIR="$WORKSPACE/build/bin"
+          CONFIG_PATH="$WORKSPACE/build/current_config.py"
+          TIMEOUT=30m
+          TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
+          mkdir -p unit_tests
+          cd unit_tests  # unit test runner and saver treat current directory as working one
+          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
+              --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
+          # $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
+          #     "$DB_CONFIG" "$BUILD_PARAMETERS"
