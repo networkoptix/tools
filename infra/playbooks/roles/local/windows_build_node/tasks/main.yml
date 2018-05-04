@@ -58,4 +58,37 @@
       Make sure that environment is correct or override it in Jenkins
       (url is http://<jenkins.url>/computer/<host.name>/configure ).
 
+# TODO:
+#  - Check a share is already exists
+#  - Use ansible variable instead explicit ip for cinas
+- name: Mount infra share
+  command: >-
+    net use I: \\\\192.168.13.2\\infra /persistent:yes /user:infra {{ samba_mount_pass }}
+
+# Install windows NFS client, if you run playbook on already existing node:
+#   Install-WindowsFeature -Name NFS-Client
+# To ensure nfs client installed:
+#   Get-WindowsFeature -Name NFS*
+- name: Mount beta-builds share
+  command: >-
+    powershell -Command
+    "New-PSDrive -Name T -PSProvider FileSystem -Root \\\\192.168.13.2\\share\\NFSv=4\\beta-builds -Persist"
+
+- name: Get Windows machine facts
+  setup:
+
+- name: Change Windows HostName
+  command: >-
+    powershell -Command
+    "Rename-Computer -NewName {{ libvirt_guest__hostname }} -Restart"
+  when: "libvirt_guest__hostname != ansible_hostname"
+  register: change_windows_hostname_result
+
+- name: Reboot the system when hostname is changed
+  shell: shutdown /r -t 1
+  when: change_windows_hostname_result.changed
+  async: 60
+  poll: 0
+
+
 # FIXME: Add missing "choco install cmake --version 3.10.2"

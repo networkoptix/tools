@@ -11,6 +11,7 @@
   vars_files:
   - ../secrets/windows_build.yml
   - ../secrets/autosign.yml
+  - ../secrets/infra_storage.yml
 
   roles:
   - role: libvirt_guest
@@ -20,6 +21,8 @@
     - libvirt_guest__state is defined
     - libvirt_guest__state == 'running'
     - libvirt_guest__type  == 'windows'
+    vars:
+      samba_mount_pass: "{{ cinas_infra_password }}"
   # - role: windows_sign_tool
   #   become: false
   #   when:
