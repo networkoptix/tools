@@ -11,8 +11,7 @@
         default: '{branch}'
 
     wrappers:
-    - pre-scm-repo-manipulations-1:
-        cached_hg_repository_base: '{cached_hg_repository_base}'
+    - pre-scm-repo-manipulations-1
 
     scm:
     - hg-la:

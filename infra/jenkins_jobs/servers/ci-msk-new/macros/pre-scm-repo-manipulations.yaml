@@ -30,10 +30,16 @@
               condition-filename: $WORKSPACE/devtools/.hg
               condition-basedir: workspace
             steps:
-            # populate with cached data
-            - folder-copy-operation:
-                source-folder-path: '{cached_hg_repository_base}/devtools/.hg'
-                destination-folder-path: $WORKSPACE/devtools/.hg
+            - trigger-builds:
+              - project: 'helper.sync-hg'
+                predefined-parameters: |
+                  SSH_USER=$USER
+                  LOCAL_PATH=$WORKSPACE
+                  REPO=devtools
+                  NODE_SSH_CONNECTION=$SSH_CONNECTION
+                block: true
+                block-thresholds:
+                  failure-threshold: FAILURE
         - conditional-step:
             condition-kind: not
             condition-operand:
@@ -41,9 +47,16 @@
               condition-filename: $WORKSPACE/nx_vms/.hg
               condition-basedir: workspace
             steps:
-            - folder-copy-operation:
-                source-folder-path: '{cached_hg_repository_base}/nx_vms/.hg'
-                destination-folder-path: $WORKSPACE/nx_vms/.hg
+            - trigger-builds:
+              - project: 'helper.sync-hg'
+                predefined-parameters: |
+                  SSH_USER=$USER
+                  LOCAL_PATH=$WORKSPACE
+                  REPO=nx_vms
+                  NODE_SSH_CONNECTION=$SSH_CONNECTION
+                block: true
+                block-thresholds:
+                  failure-threshold: FAILURE
 
 - wrapper:
     name: pre-scm-repo-manipulations-1
@@ -72,6 +85,13 @@
               condition-filename: $WORKSPACE/nx_vms/.hg
               condition-basedir: workspace
             steps:
-            - folder-copy-operation:
-                source-folder-path: '{cached_hg_repository_base}/nx_vms/.hg'
-                destination-folder-path: $WORKSPACE/nx_vms/.hg
+            - trigger-builds:
+              - project: 'helper.sync-hg'
+                predefined-parameters: |
+                  SSH_USER=$USER
+                  LOCAL_PATH=$WORKSPACE
+                  REPO=nx_vms
+                  NODE_SSH_CONNECTION=$SSH_CONNECTION
+                block: true
+                block-thresholds:
+                  failure-threshold: FAILURE

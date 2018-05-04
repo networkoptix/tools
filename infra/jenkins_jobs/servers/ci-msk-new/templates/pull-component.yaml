@@ -1,0 +1,55 @@
+- job-template:
+    name: 'helper.pull-component'
+
+    node: runner
+
+    wrappers:
+    - ssh-agent-credentials:
+        users:
+        - jenkins
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+
+    parameters:
+    - p_BUILD_IDENTITY
+    - string:
+        name: PLATFORM
+    - string:
+        name: CUSTOMIZATION
+    - string:
+        name: COMPONENT
+    - string:
+        name: LOCAL_PATH
+        default: ''
+    - string:
+        name: NODE_SSH_CONNECTION
+        default: ''
+        description: |
+          Original ssh connection from Jenkins SSH_CONNECTION envvar,
+          (<src host> <src port> <dst host> <dst port> NOTE, FOUR VARS in string),
+          example - 192.168.13.105 43896 192.168.13.116 22
+    - string:
+        name: SSH_USER
+
+    builders:
+    - inject:
+        properties-content: |
+          BASE_PATH={artifact_repository_base}
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        SSH_HOST="$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)"
+        SSH_PORT="$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)"
+        SSH_USER="${{SSH_USER}}"
+        RSYNC_SRC="${{BASE_PATH}}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/${{COMPONENT}}/"
+        RSYNC_DST="${{LOCAL_PATH}}/"
+
+        pushd "${{RSYNC_SRC}}"
+          rsync -avrzR -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{SSH_PORT}}" ./ "${{SSH_USER}}@${{SSH_HOST}}:${{RSYNC_DST}}"
+        popd

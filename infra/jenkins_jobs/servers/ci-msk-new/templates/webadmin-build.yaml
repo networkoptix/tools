@@ -34,8 +34,7 @@
     - timestamps
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
-    - pre-scm-repo-manipulations-2:
-        cached_hg_repository_base: '{cached_hg_repository_base}'
+    - pre-scm-repo-manipulations-2
 
     scm:
     - hg-la:
@@ -76,16 +75,30 @@
         allow-empty: 'false'
         fingerprint: true
 
-    - artifact-deployer:
-        entries:
-        - files: !join:
-            - ','
-            -
-              - server-external/**/*.*
-              - webadmin-build.log
-              - static/version.txt
-          basedir: '$WORKSPACE'
-          remote: '$REPOSITORY_PATH'
-          delete-remote: false
-          delete-remote-artifacts: false
+    - trigger-parameterized-builds:
+      - project:
+        - 'helper.push-component'
+        condition: UNSTABLE_OR_BETTER
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=universal
+          CUSTOMIZATION=default
+          LOCAL_PATH=$WORKSPACE/server-external/
+          COMPONENT=server-external
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          SSH_USER=$USER
+
+    # FIXME: add all artifacts from this old snip:
+    # - artifact-deployer:
+    #     entries:
+    #     - files: !join:
+    #         - ','
+    #         -
+    #           - server-external/**/*.*
+    #           - webadmin-build.log
+    #           - static/version.txt
+    #       basedir: '$WORKSPACE'
+    #       remote: '$REPOSITORY_PATH'
+    #       delete-remote: false
+    #       delete-remote-artifacts: false
 

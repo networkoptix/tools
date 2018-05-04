@@ -32,6 +32,7 @@ jenkins_plugins:
 # credentials
 - credentials
 - credentials-binding
+- ssh-agent
 # wrappers, conditions and parameters
 - job-restrictions
 - nodelabelparameter
