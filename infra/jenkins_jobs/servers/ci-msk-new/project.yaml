@@ -72,6 +72,7 @@
     # ============================================================
 
     platform:
+    # there is also edge1 platform, it's declared and commented in jobs section
     - linux-x64:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
@@ -99,11 +100,6 @@
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_targetDevice=rpi
-    - edge1:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=edge1
     - tx1:
         installer-build-node: *linux_node
         cmake_configure_args_platform: |
@@ -178,16 +174,45 @@
 
     # list of jobs to generate
     jobs:
+
+    # HELPERS - syncronize and publish different stuff
+
+    - helper.sync-hg
+    - helper.pull-component
+    - helper.push-component
+
+    # RUNNER - main entry point
+
     - '{pipeline}.{branch}.vms.runner':
         counter_name: build_number
         counter_var_name: BUILD_IDENTITY
+
+    # UTILITY - register commit, build identities and other
+
     - '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
     - '{pipeline}.{counter_name}.generator':
         counter_name: build_number
         counter_var_name: BUILD_IDENTITY
+
+    # BUILD AND TEST - main jobs
+
     - '{pipeline}.{branch}.vms.webadmin.universal.build'
     - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all'
     - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+    # Edge1 is a platform that's exclusive for digitalwatchdog.
+    # add extra jobs for edge1 with digitalwatchdog customization
+    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all': &extra-edge1-platform
+        platform:
+        - edge1:
+            installer-build-node: *linux_node
+            cmake_configure_args_platform: |
+              CMAKE_GENERATOR=Ninja
+              CMAKE_ARG_targetDevice=edge1
+        customization:
+        - 'digitalwatchdog'
+    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build':
+        <<: *extra-edge1-platform
+
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
     - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest':
@@ -195,7 +220,3 @@
         - linux-x64
         customization:
         - default
-    - helper.sync-hg
-    - helper.pull-component
-    - helper.push-component
-
