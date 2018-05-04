@@ -51,6 +51,11 @@
         includes: build/CMakeCache.txt
         excludes: ''
 
+    # Remove any logs located in build dir since build dir is shared across customizations
+    - file-delete-operation:
+        includes: 'build/*.log'
+        excludes: ''
+
     # Remove distrib folder
     - folder-delete-operation:
         folder-path: build/distrib
