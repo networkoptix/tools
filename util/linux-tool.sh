@@ -838,8 +838,15 @@ scanRepos_REPO_TO_BRANCH_and_EXTRAS()
 # [out] OTHER_DIRS: array<dir> Non-cmake-build-dirs which names start with some repo_dir name.
 scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS() # "${REPOS[@]}"
 {
+    if [[ -z $BUILD_DIR ]]
+    then
+        local -r MASK="*"
+    else
+        local -r MASK="* */$BUILD_DIR"
+    fi
+
     local DIR
-    for DIR in * */$BUILD_DIR
+    for DIR in $MASK
     do
         if [[ ! -d $DIR ]]
         then
