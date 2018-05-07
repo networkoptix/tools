@@ -178,9 +178,13 @@ nx_log_map() # ARRAY_NAME
         then
             local -r MAP_NAME="$1"
             # Copy a map with name $MAP_NAME to the local map MAP_VALUE.
-            eval $(typeset -A -p $MAP_NAME `# Print "declare -A $MAP_NAME=([key]="value"...)" #` \
-                |sed "s/$MAP_NAME=/MAP_VALUE=/" \
-                |sed 's/declare /local /')
+            local -r COMMAND=$( \
+                typeset -A -p $MAP_NAME `# Print "declare -A $MAP_NAME=([key]="value"...)" #` \
+                    |sed "s/$MAP_NAME=/MAP_VALUE=/" \
+                    |sed 's/declare /local /' \
+                    |sed "s/'//g" `# Workaround for a bash bug which adds apostrophes. #` \
+            )
+            eval "$COMMAND"
             echo "####### $MAP_NAME: map[${#MAP_VALUE[@]}]:"
             echo "####### {"
             local KEY
@@ -725,3 +729,14 @@ nx_run()
 
     main "$@"
 }
+
+#--------------------------------------------------------------------------------------------------
+# Conditional functions
+
+if nx_is_cygwin
+then
+    sudo() #< Command "sudo" is missing on cygwin.
+    {
+        "$@"
+    }
+fi
