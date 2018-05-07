@@ -58,21 +58,24 @@
       Make sure that environment is correct or override it in Jenkins
       (url is http://<jenkins.url>/computer/<host.name>/configure ).
 
-# TODO:
-#  - Check a share is already exists
-#  - Use ansible variable instead explicit ip for cinas
-- name: Mount infra share
-  command: >-
-    net use I: \\\\192.168.13.2\\infra /persistent:yes /user:infra {{ samba_mount_pass }}
+## There is an known issue with network shares under Cygwin:
+## https://cygwin.com/faq/faq.html#faq.using.shares
+## Also we have to:
+##  - check a share is already exists
+##  - use ansible variable instead explicit ip for cinas
 
-# Install windows NFS client, if you run playbook on already existing node:
-#   Install-WindowsFeature -Name NFS-Client
-# To ensure nfs client installed:
-#   Get-WindowsFeature -Name NFS*
-- name: Mount beta-builds share
-  command: >-
-    powershell -Command
-    "New-PSDrive -Name T -PSProvider FileSystem -Root \\\\192.168.13.2\\share\\NFSv=4\\beta-builds -Persist"
+#- name: Mount infra share
+#  command: >-
+#    net use I: \\\\192.168.13.2\\infra /persistent:yes /user:infra {{ samba_mount_pass }}
+#
+## Install windows NFS client, if you run playbook on already existing node:
+##   Install-WindowsFeature -Name NFS-Client
+## To ensure nfs client installed:
+##   Get-WindowsFeature -Name NFS*
+#- name: Mount beta-builds share
+#  command: >-
+#    powershell -Command
+#    "New-PSDrive -Name T -PSProvider FileSystem -Root \\\\192.168.13.2\\share\\NFSv=4\\beta-builds -Persist"
 
 - name: Get Windows machine facts
   setup:
