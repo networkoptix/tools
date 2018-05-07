@@ -806,8 +806,8 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.
 # [out] REPO_TO_BRANCH: map<repo_dir, branch> Names of current branches.
-# [out] EXTRAS: map<repo_dir, extra_info_if_any> Extra info to be printed to the user.
-scanRepos_REPO_TO_BRANCH_and_EXTRAS()
+# [out] REPO_TO_EXTRA: map<repo_dir, extra_info_if_any> Extra info to be printed to the user.
+scanRepos_REPO_TO_BRANCH_and_REPO_TO_EXTRA()
 {
     local REPO
     for REPO in $(find * -maxdepth 2 -path "*/.hg/branch" -printf '%H\n')
@@ -822,14 +822,14 @@ scanRepos_REPO_TO_BRANCH_and_EXTRAS()
             then
                 EXTRA=" $WIN_REPO"
             fi
-            EXTRAS["$REPO"]="win$EXTRA" #< Add key-value.
+            REPO_TO_EXTRA["$REPO"]="win$EXTRA" #< Add key-value.
         fi
 
         REPO_TO_BRANCH["$REPO"]=$(cat "$REPO/.hg/branch") #< Add key-value.
     done
 
     nx_log_map REPO_TO_BRANCH
-    nx_log_map EXTRAS
+    nx_log_map REPO_TO_EXTRA
 }
 
 # Scan current dir for immediate inner dirs which are cmake-build-dirs.
@@ -890,22 +890,44 @@ scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS() # "${REPOS
     nx_log_array OTHER_DIRS
 }
 
+# Check the specified dirs for .hg/sharedpath and add its contents to the map.
+# [out] REPO_TO_SHARED_BASE: map<repo_dir, hg_share_base_dir>.
+populate_REPO_TO_SHARED_BASE() # "${REPOS[@]}"
+{
+    local REPO
+    for REPO in "${REPOS[@]}"; do
+        local HG_SHAREDPATH_FILE="$REPO/.hg/sharedpath"
+        if [[ -f $HG_SHAREDPATH_FILE ]]
+        then #< This source folder was created using "hg share" from a base source folder.
+            local HG_SHAREDPATH=$(dirname "$(cat "$HG_SHAREDPATH_FILE")")
+            local SHAREDPATH=$(nx_unix_path "$HG_SHAREDPATH")
+            local SHAREDPATH_RELATIVE=${SHAREDPATH#$(nx_absolute_path "$(pwd)")/}
+            REPO_TO_SHARED_BASE["$REPO"]="$SHAREDPATH_RELATIVE" #< Add key-value.
+        fi
+    done
+
+    nx_log_map REPO_TO_SHARED_BASE
+}
+
 printRepos()
 {
     cd "$DEVELOP_DIR"
 
     local -A REPO_TO_BRANCH #< map<repo_dir, branch>
-    local -A EXTRAS #< map<repo_dir, extra_info_if_any>
-    scanRepos_REPO_TO_BRANCH_and_EXTRAS
+    local -A REPO_TO_EXTRA #< map<repo_dir, extra_info_if_any>
+    scanRepos_REPO_TO_BRANCH_and_REPO_TO_EXTRA
 
     # Set REPOS to sorted list of repos formed of REPO_TO_BRANCH keys.
     IFS=$'\n' eval 'local REPOS=( $(sort <<<"${!REPO_TO_BRANCH[*]}") )'
+    nx_log_array REPOS
 
-    # Fill BUILD_DIRS and OTHER_DIRS - non-cmake-build-dirs which names start with any repo name.
     local -A REPO_TO_BUILD_DIRS #< map<repo_dir, list<cmake_build_dir>>
     local -A BUILD_DIR_TO_CONFIG #< map<cmake_build_dir, build_configuration>.
-    local OTHER_DIRS=()
+    local OTHER_DIRS=() #< Mon-cmake-build-dirs which names start with any repo name.
     scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS "${REPOS[@]}"
+
+    local -A REPO_TO_SHARED_BASE #< map<repo_dir, hg_share_base_dir>
+    populate_REPO_TO_SHARED_BASE "${REPOS[@]}"
 
     # Print repo dirs.
     for REPO in "${REPOS[@]}"
@@ -932,12 +954,18 @@ printRepos()
         fi
 
         local EXTRA_STR=""
-        if [ ! -z "${EXTRAS[$REPO]}" ]
+        if [ ! -z "${REPO_TO_EXTRA[$REPO]}" ]
         then
-            EXTRA_STR=" $(nx_lgray)[${EXTRAS[$REPO]}]"
+            EXTRA_STR=" $(nx_lgray)[${REPO_TO_EXTRA["$REPO"]}]"
         fi
 
-        nx_echo "$(nx_white)$REPO$EXTRA_STR$BUILD_DIR_STR$(nx_dcyan):" \
+        local SHARED_BASE_STR=""
+        if [ ! -z "${REPO_TO_SHARED_BASE["$REPO"]}" ]
+        then
+            SHARED_BASE_STR="$(nx_dcyan)($(nx_lgray)${REPO_TO_SHARED_BASE["$REPO"]}$(nx_dcyan))"
+        fi
+
+        nx_echo "$(nx_white)$REPO$SHARED_BASE_STR$EXTRA_STR$BUILD_DIR_STR$(nx_dcyan):" \
             "$(nx_lyellow)${REPO_TO_BRANCH[$REPO]}$(nx_nocolor)"
     done
 
