@@ -595,7 +595,7 @@ find_INSTALLER() # mask [archive.file]
     then
         INSTALLER="$1"
     else
-        nx_find_file INSTALLER "Installer $MASK" "$CMAKE_DIR" -name "$MASK";;
+        nx_find_file INSTALLER "Installer $MASK" "$CMAKE_DIR" -name "$MASK"
     fi
 
     nx_echo "Installing $INSTALLER"
