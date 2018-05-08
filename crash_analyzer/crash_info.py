@@ -74,6 +74,10 @@ class Report:
     def __eq__(self, rhs):
         return self.name == rhs.name
 
+    @property
+    def full_version(self) -> str:
+        return '.'.join([self.version, self.build])
+
     def file_mask(self) -> str:
         return self.name[:-len(self.extension)] + '*'
 
@@ -237,10 +241,15 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
 def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[str, Reason]]:
     """Analyzes :reports in :directory, returns list of successful results.
     """
+    problem_versions = set()  # < TODO: Does it make sense to preserve it between runs?
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError)):
-            logger.warning(utils.format_error(result))
+            if report.full_version in problem_versions:
+                logger.debug(utils.format_error(result))
+            else:
+                logger.warning(utils.format_error(result))
+                problem_versions.add(report.full_version)
         elif isinstance(result, Exception):
             logger.error(utils.format_error(result))
         else:

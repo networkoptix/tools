@@ -23,6 +23,8 @@ from typing import List, Callable
 logger = logging.getLogger(__name__)
 
 
+CDB_CACHE_DIRECTORY = '''C:\ProgramData\dbg\sym'''
+
 DIST_URLS = [
     'http://beta.enk.me/beta-builds/daily/',
     'http://beta.networkoptix.com/beta-builds/daily/',

@@ -14,8 +14,9 @@ logging:
 
 options:
     directory: C:/develop/crash_analyzer #< Local cache directory.
-    reports_size_limit: 100G #< Maximum cache size for reports.
-    dump_tool_size_limit: 100G #< Maximum cache size for dump_tool.
+    reports_size_limit: 5M #< Maximum size reserved for local reports.
+    dump_tool_size_limit: 1G #< Maximum cache size for dump_tool.
+    cdb_cache_size_limit: 10G #< Maximum internal CDB cache size.
     stand_by_sleep_s: 60 #< Sleep 1 minute on empty run or failure.
     min_report_count: 2 #< Dump count to create new issue for crash.
 

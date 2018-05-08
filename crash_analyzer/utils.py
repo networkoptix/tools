@@ -318,20 +318,26 @@ class File:
             return self.write_json(data)
         if self.extension == 'yaml':
             return self.write_yaml(data)
-        raise NotImplementedError('Unsupported format "{}" file: {}'.format(f, self.path))
+        raise NotImplementedError('Unsupported format "{}" file: {}'.format(
+            self.extension, self.path))
 
     def parse(self, *args, **kwargs):
         if self.extension == 'json':
             return self.read_json(*args, **kwargs)
         if self.extension == 'yaml':
             return self.read_yaml(*args, **kwargs)
-        raise NotImplementedError('Unsupported format "{}" file: {}'.format(f, self.path))
+        raise NotImplementedError('Unsupported format "{}" file: {}'.format(
+            self.extension, self.path))
 
 
 class Directory:
     def __init__(self, *path):
         self.path = os.path.join(*path)
 
+    @property
+    def name(self) -> str:
+        return os.path.basename(self.path)
+        
     def file(self, name: str) -> File:
         return File(self.path, name)
 
@@ -343,13 +349,21 @@ class Directory:
 
     def directories(self, mask: str = '*') -> List['Directory']:
         return [Directory(d) for d in glob(os.path.join(self.path, mask))]
+        
+    def content(self, mask: str = '*'):
+        return [Directory(p) if os.path.isdir(p) else File(p) 
+                for p in glob(os.path.join(self.path, mask))]
 
     def make(self):
         if not os.path.isdir(self.path):
             os.makedirs(self.path)
 
     def size(self) -> Size:
-        return Size(os.stat(self.path).st_size)
+        total_size = 0
+        for path, _, filenames in os.walk(self.path):
+            for f in filenames:
+                total_size += os.path.getsize(os.path.join(path, f))
+        return Size(total_size)
 
     def remove(self):
         shutil.rmtree(self.path)

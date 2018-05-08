@@ -7,6 +7,7 @@ from typing import Tuple, List
 
 import crash_info
 import external_api
+import dump_tool
 import utils
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ class Options:
     def __init__(self, directory: str,
                  reports_size_limit: str = '10G',
                  dump_tool_size_limit: str = '10G',
+                 cdb_cache_size_limit: str = '10G',
                  **extra):
         self.directory = utils.Directory(directory)
         self.records_file = self.directory.file('records.json')
@@ -27,6 +29,7 @@ class Options:
         self.reports_size_limit = utils.Size(reports_size_limit)
         self.dump_tool_directory = self.directory.directory('dump_tool')
         self.dump_tool_size_limit = utils.Size(dump_tool_size_limit)
+        self.cdb_cache_size_limit = utils.Size(cdb_cache_size_limit)
         self.extension = '*'
         self.min_version = '3.2'
         self.min_report_count = 2
@@ -48,15 +51,15 @@ class Monitor:
         self._records = self._options.records_file.parse(dict())
 
     def run_service(self):
-        debug_concurrent = self._debug.get('run_concurrent', '').split(',')
+        debug_concurrent = self._debug.get('run_concurrent', '').split()
         if debug_concurrent:
             logger.warning('Enable debug run_concurrent for ' + repr(debug_concurrent))
             utils.run_concurrent.debug = debug_concurrent
-        
+
         debug_exceptions = self._debug.get('exceptions', None)
         if debug_exceptions:
             logger.warning('Enable debug exceptions')
-        
+
         logger.info('Starting service...')
         while True:
             try:
@@ -76,33 +79,38 @@ class Monitor:
                     raise
 
     def cleanup_jira_issues(self):
-        known_issues = set()
-        for _, record in self._records.items():
-            issue = record.get('issue')
-            if issue:
-                known_issues.add(issue)
+        try:
+            known_issues = set()
+            for _, record in self._records.items():
+                issue = record.get('issue')
+                if issue:
+                    known_issues.add(issue)
 
-        logger.info('There are {} known JIRA issues'.format(len(known_issues)))
-        if not known_issues:
-            logger.warning('There are no known JIRA issues, clean up will start in {} seconds'
-                           .format(self._options.stand_by_sleep_s))
-            time.sleep(self._options.stand_by_sleep_s)
+            logger.info('There are {} known JIRA issue(s)'.format(len(known_issues)))
+            if not known_issues:
+                logger.warning('There are no known JIRA issues, clean up will start in {} seconds'
+                               .format(self._options.stand_by_sleep_s))
+                time.sleep(self._options.stand_by_sleep_s)
 
-        options = self._upload.copy()
-        options.pop('thread_count')
-        jira = external_api.Jira(**options)
-        while True:
-            jira_issues = jira.all_issues()
-            logger.info('There are {} issues in JIRA total'.format(len(jira_issues)))
-            deleted = 0
-            for issue in jira_issues:
-                if issue.key not in known_issues:
-                    logger.info('Remove unknown JIRA issue {}: {}'.format(issue.key, issue.fields.summary))
-                    issue.delete()
-                    deleted += 1
+            options = self._upload.copy()
+            options.pop('thread_count')
+            jira = external_api.Jira(**options)
+            while True:
+                jira_issues = jira.all_issues()
+                logger.info('There are {} issues in JIRA total'.format(len(jira_issues)))
+                deleted = 0
+                for issue in jira_issues:
+                    if issue.key not in known_issues:
+                        logger.info('Remove unknown JIRA issue {}: {}'.format(
+                            issue.key, issue.fields.summary))
+                        issue.delete()
+                        deleted += 1
 
-            if not deleted:
-                return logger.info('No more JIRA issues to delete')
+                if not deleted:
+                    return logger.info('No more JIRA issues to delete')
+
+        except KeyboardInterrupt:
+            logger.info('Canceled by user')
 
     def flush_records(self):
         if self._records:
@@ -121,13 +129,10 @@ class Monitor:
             self._records[name] = dict()
 
         self.flush_records()
-        size = directory.size()
-        if size > self._options.reports_size_limit:
-            logger.info('Reports directory size is {}, remove failed dumps'.format(size))
-            for r in self._records:
-                if r.get('crash_id') == FAILED_CRASH_ID:
-                    directory.file(name).remove()
-                # TODO: Also remove crash directory if it is not enough.
+        self._cleanup_cache(
+            directory,
+            self._options.reports_size_limit,
+            lambda d: self._records.get(d.name, {}).get('crash_id') != FAILED_CRASH_ID)
 
         return len(new_reports)
 
@@ -135,7 +140,10 @@ class Monitor:
         to_analyze = [crash_info.Report(name)
                       for name, data in self._records.items() if not data.get('crash_id')]
 
-        logger.info('Analyze {} reports in local database'.format(len(to_analyze)))
+        logger.info('Analyze {} report(s) from local cache'.format(len(to_analyze)))
+        if not to_analyze:
+            return 0
+
         reasons = crash_info.analyze_reports_concurrent(
             to_analyze, directory=self._options.reports_directory, **self._analyze)
 
@@ -146,12 +154,15 @@ class Monitor:
             self._records[report.name]['crash_id'] = crash_id
 
         self.flush_records()
-        cache_size = self._options.dump_tool_directory.size()
-        if cache_size > self._options.dump_tool_size_limit:
-            logger.info('Dump tool cache has reached {}, clean up'.format(cache_size))
-            for d in self._options.dump_tool_directory.directories():
-                if not d.path.endswith('release'):
-                    d.remove()
+        self._cleanup_cache(
+            self._options.dump_tool_directory,
+            self._options.dump_tool_size_limit,
+            lambda d: d.name.endswith('release'))
+            
+        self._cleanup_cache(
+            utils.Directory(dump_tool.CDB_CACHE_DIRECTORY),
+            self._options.cdb_cache_size_limit,
+            lambda d: False)  # < TODO: Consider to keep system libraries.
 
         return len(analyzed)
 
@@ -172,14 +183,14 @@ class Monitor:
                 if data['issue'] or len(data['reports']) >= self._options.min_report_count:
                     crashes_to_push.append((data['issue'], data['reports']))
 
-        logger.info('Create or update {} JIRA issues with new report(s)'.format(len(crashes_to_push)))
+        logger.info('Create or update {} JIRA issue(s) with new report(s)'.format(len(crashes_to_push)))
         for result in utils.run_concurrent(self._jira_sync, crashes_to_push,
                                            directory=self._options.reports_directory, **self._upload):
             if isinstance(result, Exception):
                 logger.error(utils.format_error(result))
             else:
                 issue, reports = result
-                logger.info('JIRA issue {} updated with {} new report(s)'.format(issue, len(reports)))
+                logger.debug('JIRA issue {} updated with {} new report(s)'.format(issue, len(reports)))
                 for r in reports:
                     self._records[r.name]['issue'] = issue
                     self._options.reports_directory.file(r.name).remove()
@@ -200,6 +211,30 @@ class Monitor:
 
         jira.update_issue(issue, reports, directory=directory)
         return issue, reports
+        
+    @staticmethod
+    def _cleanup_cache(directory: utils.Directory, size_limit: utils.Size, is_impotant: callable):
+        def directory_message():
+            return 'directory size {} is {} limit {}: {}'.format(
+                size, 'within' if size < size_limit else 'over', size_limit, directory.path)
+
+        size = directory.size()
+        if size < size_limit:
+            return logger.debug('Cleanup is not required for ' + directory_message())
+
+        logger.info('Cleanup is started for ' + directory_message())
+        removed_count = 0
+        for d in directory.content():
+            if not is_impotant(d):
+                removed_count += 1
+                d.remove()
+
+        logger.info('Cleanup has removed {} items in: {}'.format(removed_count, directory.path))
+        size = directory.size()
+        if size < size_limit:
+            logger.error('Cleanup success for ' + directory_message())
+        else:
+            logger.error('Cleanup failed for ' + directory_message())
 
 
 def main():
@@ -212,7 +247,7 @@ def main():
     parser = argparse.ArgumentParser('{} version {}.{}'.format(NAME, VERSION, change_set))
     parser.add_argument('config_file')
     parser.add_argument('--cleanup-jira-issues', action='store_true',
-                        help='Just remove unknown JIRA issues')
+                        help='Just remove unknown JIRA issue(s)')
     parser.add_argument('-o', '--override', action='append', default=[],
                         help='SECTION.KEY=VALUE to override config')
 

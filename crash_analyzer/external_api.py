@@ -43,7 +43,7 @@ class CrashServer:
             if utils.is_ascii_printable(path):
                 dump_names.append(path.replace('/', '--'))
 
-        logger.info('Found {} reports by {}'.format(len(dump_names), response.url))
+        logger.debug('Found {} report(s) by {}'.format(len(dump_names), response.url))
         return dump_names
 
     def get(self, name: str) -> str:
@@ -81,7 +81,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
         to_download_groups.setdefault(report.component, []).append(name)
 
     for source, names in to_download_groups.items():
-        logger.info('Found {} new report(s) from {}'.format(len(names), source))
+        logger.debug('Found {} report(s) from VMS {}'.format(len(names), source))
 
     to_download = utils.mixed_merge(list(to_download_groups.values()), limit=report_count)
     downloaded = []
@@ -95,7 +95,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
         else:
             downloaded.append(name)
 
-    logger.info('Fetched {} new report(s) form server'.format(len(downloaded)))
+    logger.info('Fetched {} new report(s)'.format(len(downloaded)))
     return downloaded
 
 
