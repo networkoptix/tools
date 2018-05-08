@@ -17,34 +17,17 @@
 
     parameters:
     - string:
-        name: LOCAL_PATH
-        default: ''
-    - string:
         name: REPO
-    - string:
-        name: NODE_SSH_CONNECTION
-        default: ''
-        description: |
-          Original ssh connection from Jenkins SSH_CONNECTION envvar,
-          (<src host> <src port> <dst host> <dst port> NOTE, FOUR VARS in string),
-          example - 192.168.13.105 43896 192.168.13.116 22
-    - string:
-        name: SSH_USER
+        description: >
+          Which hg repo to sync, devtools or nx_vms
+    - p_LOCAL_PATH
+    - p_NODE_SSH_CONNECTION
+    - p_SSH_USER
 
     builders:
-    - inject:
-        properties-content: |
-          BASE_PATH={cached_hg_repository_base}
-    - shell: |
-        #!/bin/bash
-        set -ex
-
-        SSH_HOST="$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)"
-        SSH_PORT="$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)"
-        SSH_USER="${{SSH_USER}}"
-        RSYNC_SRC="${{BASE_PATH}}/${{REPO}}/.hg"
-        RSYNC_DST="${{LOCAL_PATH}}/${{REPO}}/.hg"
-
-        pushd "${{RSYNC_SRC}}"
-          rsync -avrzR -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{SSH_PORT}}" ./ "${{SSH_USER}}@${{SSH_HOST}}:${{RSYNC_DST}}"
-        popd
+    - rsync-upload:
+        host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
+        port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
+        user: '${{SSH_USER}}'
+        src_path: '{cached_hg_repository_base}/${{REPO}}/.hg/'
+        dst_path: '${{LOCAL_PATH}}/${{REPO}}/.hg/'

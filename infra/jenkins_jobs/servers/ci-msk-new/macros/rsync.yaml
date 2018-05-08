@@ -1,0 +1,72 @@
+- builder:
+    name: rsync-upload
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        RSYNC_HOST="{host}"
+        RSYNC_PORT="{port}"
+        RSYNC_USER="{user}"
+        RSYNC_SRC="{src_path}"
+        RSYNC_DST="{dst_path}"
+
+        # When working with windows Jenkins node Workspace is represented as windows path.
+        # Volume name ('C:') and back-slashes ('\') are error prone.
+        # One of the option is to replace them with cygwin paths.
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_DST="${{RSYNC_DST//\\//}}"
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+
+        # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
+
+        # FIXME: added -O  --no-perms - is a tmp solution hile testing on smb
+        rsync -vrzaO --no-perms \
+          -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
+          --rsync-path="mkdir -p ${{RSYNC_DST}} && rsync" \
+          "${{RSYNC_SRC}}" \
+          "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_DST}}"
+
+- builder:
+    name: rsync-download
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        RSYNC_HOST="{host}"
+        RSYNC_PORT="{port}"
+        RSYNC_USER="{user}"
+        RSYNC_SRC="{src_path}"
+        RSYNC_DST="{dst_path}"
+
+        # When working with windows Jenkins node Workspace is represented as windows path.
+        # Volume name ('C:') and back-slashes ('\') are error prone.
+        # One of the option is to replace them with cygwin paths.
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_DST="${{RSYNC_DST//\\//}}"
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+
+        # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
+
+        mkdir -p "${{RSYNC_DST}}"
+
+        # FIXME: added -O  --no-perms and removed -a - is a tmp solution hile testing on smb
+        rsync -vrzO --no-perms \
+          -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
+          "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_SRC}}" \
+          "${{RSYNC_DST}}"

@@ -10,7 +10,7 @@
         description: |
           Sticky label to mark individual build and query it's artifact in future
 
-# Common build parameters
+# Common build parameters and build process customizations
 - parameter:
     name: p_CLEAN_WORKSPACE
     parameters:
@@ -37,13 +37,7 @@
           Don't reuse build workspace from previous build
           (if false, then will try to reuse)
 
-- parameter:
-    name: p_BUILD_IDENTITY
-    parameters:
-    - string:
-        name: BUILD_IDENTITY
-        default: ''
-        description: Build number in context of pipeline
+# Parameters That fully define artifacts: what sources used and where to put what's built
 
 - parameter:
     name: p_NX_VMS_COMMIT
@@ -54,3 +48,73 @@
         description: >
           Frozen nx_vms commit id or branch. commit sha is preferred as
           all builds will be produced within the same repo state
+
+- parameter:
+    name: p_BUILD_IDENTITY
+    parameters:
+    - string:
+        name: BUILD_IDENTITY
+        default: ''
+        description: Build number in context of pipeline
+
+- parameter:
+    name: p_PLATFORM
+    parameters:
+    - string:
+        name: PLATFORM
+        default: ''
+        description: >
+          Target platform for installer (e.g. linux-x64, win-x86 and others,
+          note that universal is used for webadmin and other platform-independent components)
+
+
+- parameter:
+    name: p_CUSTOMIZATION
+    parameters:
+    - string:
+        name: CUSTOMIZATION
+        default: 'default'
+        description: >
+          Name of installer customization (e.g. default, hanwha and others)
+
+- parameter:
+    name: p_COMPONENT
+    parameters:
+    - string:
+        name: COMPONENT
+        default: ''
+        description: >
+          Name of component, mostly used in context of artifact repository as part of path
+          where artifact will be located (uploaded to or downloaded from)
+
+
+# Utility parameters used to describe connection details
+- parameter:
+    name: p_NODE_SSH_CONNECTION
+    parameters:
+    - string:
+        name: NODE_SSH_CONNECTION
+        default: ''
+        description: >
+          Original ssh connection from Jenkins SSH_CONNECTION envvar,
+          (<src host> <src port> <dst host> <dst port> NOTE, FOUR VARS in string),
+          example - 192.168.13.105 43896 192.168.13.116 22
+
+- parameter:
+    name: p_SSH_USER
+    - string:
+        name: SSH_USER
+        description: >
+          Name of ssh user used for ssh session (usually jenkins, but it may differ for
+          edge cases)
+
+# Specific parameters
+
+# Define paths to operate on
+- parameter:
+    name: p_LOCAL_PATH
+    - string:
+        name: LOCAL_PATH
+        default: ''
+        description: >
+          Local path on remote host
