@@ -48,6 +48,7 @@
   with_items:
   - add_default_keys.sh
   - setup_networks.ps1
+  - change_hostname.ps1
 
 - name: Copy init scripts w/o templating
   copy:

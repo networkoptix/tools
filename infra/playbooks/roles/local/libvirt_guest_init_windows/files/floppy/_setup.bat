@@ -1,6 +1,7 @@
 cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"
 C:\Windows\SysWOW64\cmd.exe /c powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force"
 
+powershell -File                a:\change_hostname.ps1
 powershell -File                a:\setup_networks.ps1
 powershell -File                a:\resize_partition.ps1
 timeout /t 10
