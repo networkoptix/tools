@@ -22,4 +22,5 @@ libvirt_guest__disks:
   target_bus: virtio
 
 libvirt_connection: "qemu:///system"
-libvirt_guest__graphics: true
+# useful for starting on local machine, use vnc for remote connections
+libvirt_guest__graphics_type: 'spice'

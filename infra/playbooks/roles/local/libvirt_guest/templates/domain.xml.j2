@@ -44,7 +44,7 @@
   <cpu mode='host-passthrough'>
     <model fallback='allow'/>
   </cpu>
-  
+
   <!--
   TODO: this is legacy config used before vbox-in-kvm
   It's kept as reference temporarily and should be removed after testing
@@ -71,12 +71,23 @@
 
   <devices>
     <emulator>/usr/bin/qemu-kvm</emulator>
-
-{% if libvirt_guest__graphics is defined and libvirt_guest__graphics == true %}
+{% if libvirt_guest__graphics_type is defined and libvirt_guest__graphics_type == 'spice' %}
     <graphics type='spice' autoport='yes'>
       <listen type='address'/>
     </graphics>
 {% endif %}
+  {# We also may add vnc on autoport for debug purposes #}
+{% if libvirt_guest__graphics_type is defined and libvirt_guest__graphics_type == 'vnc' %}
+    <graphics
+      type='vnc'
+      port='{{ libvirt_guest__graphics_port | default(5900) }}'
+      autoport='yes'
+      listen='127.0.0.1'
+      passwd='{{ libvirt_guest__graphics_passwd | default(1111) }}'>
+      <listen type='address' />
+    </graphics>
+{% endif %}
+
 
 {% for disk in libvirt_guest__disks_final %}
   {# Type of disk: file|block|dir|network|volume #}
