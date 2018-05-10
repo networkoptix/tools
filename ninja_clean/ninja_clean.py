@@ -33,7 +33,7 @@ def get_files_from_build_ninja(build_dir):
 
                             result.add(item)
                     break
-    except (FileNotFoundError, IOError):
+    except (OSError, IOError):
         sys.exit("Cannot open {}".format(os.path.join(build_dir, "build.ninja")))
 
     return result
@@ -55,7 +55,7 @@ def get_files_from_list_file(build_dir, list_file_name):
                 result.add(os.path.normpath(file_name))
 
             return result
-    except (FileNotFoundError, IOError):
+    except (OSError, IOError):
         sys.exit("Cannot open {}".format(list_file_name))
 
     return result
