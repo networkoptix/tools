@@ -55,8 +55,8 @@ def get_files_from_list_file(build_dir, list_file_name):
                 result.add(os.path.normpath(file_name))
 
             return result
-    except:
-        pass
+    except (FileNotFoundError, IOError):
+        sys.exit("Cannot open {}".format(list_file_name))
 
     return result
 
