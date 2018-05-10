@@ -652,7 +652,7 @@ do_cmake() # "$@"
 {
     do_gen "$@" || return $?
 
-    if ! nx_is_cygwin
+    if ! nx_is_cygwin && [[ -f $CMAKE_BUILD_DIR/known_files.txt ]]
     then
         ( cd "$BUILD_DIR"
             nx_verbose "$NINJA_CLEAN_TOOL"
