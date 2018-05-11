@@ -584,7 +584,7 @@ find_INSTALLER() # mask [archive.file]
     local -r MASK="$1"; shift
 
     get_CMAKE_BUILD_DIR
-    local -r CMAKE_DIR="$CMAKE_BUILD_DIR/edge_firmware"
+    local -r CMAKE_DIR="$CMAKE_BUILD_DIR/distrib"
 
     local INSTALLER
     if [ $# -ge 1 ]
