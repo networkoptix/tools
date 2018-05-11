@@ -210,10 +210,6 @@ get_CMAKE_BUILD_DIR()
         *-"$TARGET")
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX"
             ;;
-        "$WIN_DEVELOP_DIR"/*)
-            VMS_DIR_NAME=${VMS_DIR#$WIN_DEVELOP_DIR/} #< Removing the prefix.
-            CMAKE_BUILD_DIR="$DEVELOP_DIR/$VMS_DIR_NAME-win$BUILD_SUFFIX-$TARGET"
-            ;;
         *)
             CMAKE_BUILD_DIR="$VMS_DIR$BUILD_SUFFIX-$TARGET"
             ;;
