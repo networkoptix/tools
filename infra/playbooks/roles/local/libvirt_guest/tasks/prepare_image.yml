@@ -8,6 +8,21 @@
   delegate_to: "{{ libvirt_host }}"
   when: libvirt_guest__current_state == 'undefined'
 
+- name: Get stat for base image
+  become: true
+  become_method: sudo
+  stat:
+    path: "{{ libvirt_guest__storage_pool_path }}/{{ libvirt_guest__base_image }}"
+  delegate_to: "{{ libvirt_host }}"
+  register: stat_result
+
+- name: >-
+    Ensure base image is available (must be present in storage pool) {{
+    libvirt_guest__storage_pool_path }}/{{ libvirt_guest__base_image }}
+  assert:
+    that:
+    - stat_result.stat.exists == True
+
 - name: Copy guest disk image
   copy:
     src: "{{ libvirt_guest__storage_pool_path }}/{{ libvirt_guest__base_image }}"

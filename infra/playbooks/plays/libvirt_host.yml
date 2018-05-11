@@ -5,19 +5,33 @@
 
   vars_files:
   - ../secrets/infra_storage.yml
-  
+
   roles:
   - role: samba_share
     become: true
     become_method: sudo
-    when: 
+    when:
     - libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
     # temp. workaround for local deployments
     - attach_infra_share | default(True) == True
     vars:
       samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
-  - role: MichaelRigart.interfaces          
+  - role: MichaelRigart.interfaces
   - role: libvirt_host
-  # TODO we need to move base images to NAS and extract image creation project
-  - role: image_library
+    vars:
+      image_library_path: '/mnt/infra/images'
+      storage_pool_path: '/var/lib/libvirt/images'
+      base_images:
+      - name: win2016server-base-2018-05-10.qcow2
+      # TODO: Add linux (Ubuntu) base images
+      # This is not added yet because there are some problems with image vesioning in
+      # Ubuntu (there is no versioning at all) and we may have different cloud images that
+      # are already in use.
+      # there are 2 options:
+      # - check that all images are the same as we have in library and/or redeploy VMs w/
+      #   the same image
+      # - if there are too many different images used, then rename them and perform
+      #   crsp migrations on VMs
+      # Note: for a quite long time we didn't use "layered" qcow and just copied images
+      # for each VM before using them.
