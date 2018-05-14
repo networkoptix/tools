@@ -1,8 +1,5 @@
 11, Segmentation fault
 
-#0  0xb26a67b8 in QMutex::lock() () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#1  0xb26a8c8c in QThread::isRunning() const () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#2  0xb6453ef8 in QnRecordingManager::startOrStopRecording(QnSharedResourcePointer<QnResource> const&, QnSharedResourcePointer<QnVideoCamera> const&, QnServerStreamRecorder*, QnServerStreamRecorder*) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#3  0xadb733f0 in ?? ()
-#4  0xadb733f0 in ?? ()
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+QMutex::lock
+QThread::isRunning
+QnRecordingManager::startOrStopRecording

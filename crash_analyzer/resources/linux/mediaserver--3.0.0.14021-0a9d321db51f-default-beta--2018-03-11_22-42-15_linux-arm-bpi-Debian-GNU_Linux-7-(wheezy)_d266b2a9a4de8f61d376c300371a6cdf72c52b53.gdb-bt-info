@@ -1,16 +1,11 @@
 11, Segmentation fault
 
-#0  0xb4e41434 in nx::network::RetryTimer::retriesLeft() const () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#1  0xb4feabc8 in nx::network::cloud::tcp::IncomingReverseTunnelConnection::isExhausted() const () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#2  0xb4fefc40 in std::_Function_handler<void (int), nx::network::cloud::tcp::IncomingReverseTunnelConnection::spawnConnectorIfNeeded()::{lambda(int)#1}>::_M_invoke(std::_Any_data const&, int) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#3  0xb501041c in QtPrivate::QFunctorSlotObject<nx::network::cloud::tcp::ReverseConnector::connect(SocketAddress const&, std::function<void (int)>)::{lambda(nx_http::AsyncHttpClientPtr)#1}, 1, QtPrivate::List<nx_http::AsyncHttpClientPtr>, void>::impl(int, QtPrivate::QSlotObjectBase*, QObject*, void**, bool*) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#4  0xb2922a78 in QMetaObject::activate(QObject*, int, int, void**) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#5  0xb50286ac in nx_http::AsyncHttpClient::done(nx_http::AsyncHttpClientPtr) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#6  0xb4f3d644 in nx_http::AsyncHttpClient::onSomeBytesReadAsync(int, unsigned int) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#7  0xb4e73ab8 in nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<AbstractStreamSocket> >::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType)::{lambda(int, unsigned int)#4}::operator()(int, unsigned int) const () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#8  0xb4e75754 in nx::network::aio::AsyncSocketImplHelper<nx::network::CommunicatingSocket<AbstractStreamSocket> >::eventTriggered(nx::network::Pollable*, nx::network::aio::EventType) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#9  0xb4e8e9d0 in nx::network::aio::detail::AIOThreadImpl::processSocketEvents(long long) () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#10 0xb4e988f0 in nx::network::aio::AIOThread::run() () from /opt/networkoptix/mediaserver/bin/../lib/libnx_network.so
-#11 0xb2722384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#12 0xb2722384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+nx::network::RetryTimer::retriesLeft
+nx::network::cloud::tcp::IncomingReverseTunnelConnection::isExhausted
+...
+nx_http::AsyncHttpClient::done
+nx_http::AsyncHttpClient::onSomeBytesReadAsync
+nx::network::aio::AsyncSocketImplHelper::eventTriggered
+nx::network::aio::AsyncSocketImplHelper::eventTriggered
+nx::network::aio::detail::AIOThreadImpl::processSocketEvents
+nx::network::aio::AIOThread::run

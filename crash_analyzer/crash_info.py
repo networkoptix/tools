@@ -110,6 +110,35 @@ class Reason:
         return hashlib.sha256(description.encode('utf-8')).hexdigest()
 
 
+def remove_cxx_template_arguments(line):
+    while True:
+        start = line.find('<')
+        if start == -1:
+            return line
+
+        current = start + 1
+        opened = 1
+        while opened:
+            if current >= len(line):
+                return line[:start]
+            if line[current] == '<':
+                opened += 1
+            if line[current] == '>':
+                opened -= 1
+            current += 1
+
+        line = line[:start] + line[current:]
+
+
+def is_cxx_name_prefixed(line, *prefixes):
+    name = ' ' + line
+    for prefix in prefixes:
+        if ' ' + prefix in name:
+            return True
+
+    return False
+
+
 def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     """Extracts error code and call stack by rules in describer.
     """
@@ -136,27 +165,55 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     if not stack_content:
         raise AnalyzeError('Unable to get Call Stack from: ' + report.name)
 
-    stack = []
+    original_stack = []
     for line in stack_content.splitlines():
         line = line.strip()
         if line:
             if describer.is_new_line(line):
-                stack.append(line)
+                original_stack.append(line)
             else:
-                stack[-1] += ' ' + line
+                original_stack[-1] += ' ' + line
 
-    resolved_lines = 0
     transformed_stack = []
-    for line in stack:
-        line = describer.transform(line)
-        transformed_stack.append(line)
-        if describer.is_resolved(line):
-            resolved_lines += 1
+    for line in original_stack:
+        transformed = describer.transform(line)
+        if transformed:
+            transformed_stack.append(transformed)
 
-    if not resolved_lines:
-        raise AnalyzeError('Unresolved Call Stack in: ' + report.name)
+    if not transformed_stack:
+        raise AnalyzeError('No functions in Call Stack in: ' + report.name)
 
-    return Reason(report.component, code, transformed_stack)
+    is_useful = [describer.is_useful(x) for x in transformed_stack]
+    is_useful_count = is_useful.count(True)
+    if not is_useful_count:
+        if describer.allow_not_useful_stacks:
+            return Reason(report.component, code, transformed_stack)
+        raise AnalyzeError('Not useful Call Stack in: ' + report.name)
+
+    if is_useful_count < 3:
+        return Reason(report.component, code, transformed_stack)
+
+    useful_stack = []
+    is_skipped = False
+    for line, is_useful in zip(transformed_stack, is_useful):
+        if is_useful:
+            if is_skipped:
+                if useful_stack:
+                    useful_stack.append('...')
+                is_skipped = False
+            useful_stack.append(line)
+        else:
+            is_skipped = True
+
+    return Reason(report.component, code, useful_stack)
+
+
+_NX_OBJECT_NAME_PREFIXES = [
+    'nx::',
+    'nx_',
+    'Qn',
+    'CUDT',
+]
 
 
 def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
@@ -170,6 +227,8 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
         stack_begin = 'Thread 1 '
         stack_end = '\n(gdb)'
 
+        allow_not_useful_stacks = True
+
         @staticmethod
         def is_new_line(line):
             return any(line.startswith(p) for p in (
@@ -180,25 +239,40 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
 
         @staticmethod
         def transform(line):
-            begin = 0
-            while True:
-                # Remove all argument values so stacks with different ones
-                # are exactly the same.
-                begin = line.find('=', begin) + 1
-                if not begin:
-                    return line
+            transformed = remove_cxx_template_arguments(line)
 
-                end = line.find(',', begin)
-                if end == -1:
-                    end = line.find(')', begin)
+            # Remove arguments and other details.
+            call_position = transformed.find('(')
+            if call_position == -1:
+                return None
+            transformed = transformed[:call_position]
 
-                if end != -1:
-                    line = line[:begin] + line[end:]
+            # Remove frame number.
+            frame_position = transformed.find(' ')
+            if frame_position == -1 or not transformed.startswith('#'):
+                return None
+            transformed = transformed[frame_position:]
+
+            # Remove address if present.
+            in_position = transformed.find(' in ')
+            if in_position != -1:
+                transformed = transformed[in_position + 4:]
+            transformed = transformed.strip()
+
+            # Remove return type.
+            return_type_end = transformed.find(' ') + 1
+            if return_type_end:
+                transformed = transformed[return_type_end:]
+
+            # Remove optimized out trash.
+            if transformed == '??':
+                return None
+
+            return transformed
 
         @staticmethod
-        def is_resolved(line):
-            # Gdb replaces function names with ?? if they are not avaliable.
-            return line.startswith('#') and line.find('??') == -1
+        def is_useful(line):
+            return is_cxx_name_prefixed(line, *_NX_OBJECT_NAME_PREFIXES)
 
     return analyze_bt(report, content, GdbDescriber)
 
@@ -214,6 +288,8 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
         stack_begin = 'Call Site'
         stack_end = '\n\n'
 
+        allow_not_useful_stacks = False
+
         @staticmethod
         def is_new_line(line):
             # CDB newer uses the line wrap.
@@ -221,20 +297,30 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
 
         @staticmethod
         def transform(line):
-            if line.startswith(report.binary + '!'):
-                # Replace binary name with component so stacks from different
-                # customizations are exactly the same.
-                return report.component + line[len(report.binary):]
+            if line == '0x0':
+                return None
 
-            return line
+            # Replace lambdas from different builds with the same token.
+            line = re.sub('<lambda_[0-9a-f]+>', '{lambda}', line)
+
+            # Replace binary name with component so stacks from different
+            # customizations are exactly the same.
+            if line.startswith(report.binary + '!'):
+                line = report.component + line[len(report.binary):]
+
+            return remove_cxx_template_arguments(line)
 
         @staticmethod
-        def is_resolved(line):
+        def is_useful(line):
             module, *name = line.split('!')
-            if not any(module.startswith(x) for x in (report.component, 'nx_')):
-                return False  # < We expect some of our modules to be resolved.
+            if not name:
+                return False  # < Function name is not present.
 
-            return bool(name)  # < Function name is present.
+            if module == report.component or module.startswith('nx_') or \
+                    is_cxx_name_prefixed(name[0], *_NX_OBJECT_NAME_PREFIXES):
+                return True  # < NX Component.
+
+            return False
 
     return analyze_bt(report, content, CdbDescriber)
 

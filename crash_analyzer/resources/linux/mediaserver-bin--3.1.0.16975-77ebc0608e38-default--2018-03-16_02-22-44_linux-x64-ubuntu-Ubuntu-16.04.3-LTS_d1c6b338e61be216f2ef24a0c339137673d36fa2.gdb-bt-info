@@ -1,28 +1,8 @@
 SIGABRT, Aborted
 
-#0  0x00007fcd76f84428 in __GI_raise (sig=) at ../sysdeps/unix/sysv/linux/raise.c:54
-#1  0x00007fcd76f8602a in __GI_abort () at abort.c:89
-#2  0x00007fcd76fc67ea in __libc_message (do_abort=, fmt=) at ../sysdeps/posix/libc_fatal.c:175
-#3  0x00007fcd76fcfdfb in malloc_printerr (ar_ptr=, ptr=, str=, action=) at malloc.c:5006
-#4  _int_free (av=, p=, have_lock=) at malloc.c:4014
-#5  0x00007fcd76fd353c in __GI___libc_free (mem=) at malloc.c:2968
-#6  0x00007fcd75646eaf in ec2::QnBusinessEventManager<ec2::ServerQueryProcessorAccess>::broadcastBusinessAction(QSharedPointer<nx::vms::event::AbstractAction> const&, std::shared_ptr<ec2::impl::OneParamHandler<ec2::ErrorCode> >) () from /opt/networkoptix/mediaserver/bin/../lib/libappserver2.so
-#7  0x00007fcd7931290f in nx::mediaserver::event::RuleProcessor::broadcastAction(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#8  0x00007fcd79313835 in nx::mediaserver::event::RuleProcessor::executeActionInternal(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#9  0x00007fcd793093b3 in nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#10 0x00007fcd7931368f in nx::mediaserver::event::RuleProcessor::doExecuteAction(QSharedPointer<nx::vms::event::AbstractAction> const&, QnSharedResourcePointer<QnResource> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#11 0x00007fcd79313b72 in nx::mediaserver::event::RuleProcessor::executeAction(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#12 0x00007fcd793155a2 in nx::mediaserver::event::RuleProcessor::at_timer() () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#13 0x00007fcd778cf9e6 in QObject::event(QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#14 0x00007fcd778a3d4c in QCoreApplication::notify(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#15 0x00007fcd778a3c85 in QCoreApplication::notifyInternal2(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#16 0x00007fcd778a5aca in QCoreApplicationPrivate::sendPostedEvents(QObject*, int, QThreadData*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#17 0x00007fcd778f5ff3 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#18 0x00007fcd6f889197 in g_main_context_dispatch () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#19 0x00007fcd6f8893f0 in ?? () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#20 0x00007fcd6f88949c in g_main_context_iteration () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#21 0x00007fcd778f563c in QEventDispatcherGlib::processEvents(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#22 0x00007fcd778a1bdb in QEventLoop::exec(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#23 0x00007fcd776c34ba in QThread::exec() () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#24 0x00007fcd79286db4 in MediaServerProcess::run() () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-(More stack frames follow...)
+nx::mediaserver::event::RuleProcessor::broadcastAction
+nx::mediaserver::event::RuleProcessor::executeActionInternal
+nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal
+nx::mediaserver::event::RuleProcessor::doExecuteAction
+nx::mediaserver::event::RuleProcessor::executeAction
+nx::mediaserver::event::RuleProcessor::at_timer

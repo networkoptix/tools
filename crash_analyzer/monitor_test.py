@@ -41,11 +41,12 @@ class JiraMock:
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         key = reason.crash_id[:10]  # < Shorter key for easier debug.
         self.issues[key] = {
-            'attachments': [],
             'code': reason.code,
             'extension': report.extension,
-            'versions': [report.version]}
-
+            'versions': [report.version],
+            'stack': reason.stack,
+            'attachments': [],
+        }
         logger.info('Issue {} is created for {}'.format(key, reason))
         return key
 
@@ -116,4 +117,5 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     expected = {k: v for k, v in utils.Resource('expected_issues.yaml').parse().items()
                 if v['extension'].endswith(extension)}
 
+    utils.File('C:/develop/var/exp.yaml').serialize(actual)
     assert expected == actual

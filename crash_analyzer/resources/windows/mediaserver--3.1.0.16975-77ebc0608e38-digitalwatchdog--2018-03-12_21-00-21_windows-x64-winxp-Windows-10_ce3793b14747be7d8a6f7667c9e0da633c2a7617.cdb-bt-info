@@ -2,17 +2,13 @@ c0000005 (Access violation)
 
 Server!nx::vms::discovery::UdpMulticastFinder::sendModuleInformation
 Server!nx::vms::discovery::UdpMulticastFinder::updateInterfaces
-Server!nx::vms::discovery::Manager::start::__l2::<lambda_9a3e16c089adad12d571ddcf5af76669>::operator()
-Server!nx::utils::MoveOnlyFunc<void __cdecl(void)>::MoveOnlyFuncWrapper<<lambda_9a3e16c089adad12d571ddcf5af76669> >::operator()
+Server!nx::vms::discovery::Manager::start::__l2::{lambda}::operator()
+Server!nx::utils::MoveOnlyFunc::MoveOnlyFuncWrapper::operator()
 Server!std::_Invoker_functor::_Call
 Server!std::invoke
 Server!std::_Invoke_ret
-Server!std::_Func_impl<nx::utils::MoveOnlyFunc<void __cdecl(void)>::MoveOnlyFuncWrapper<<lambda_9a3e16c089adad12d571ddcf5af76669> >,std::allocator<int>,void>::_Do_call
-nx_network!std::_Func_class<void>::operator()
-nx_network!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()<>
+Server!std::_Func_impl::_Do_call
+nx_network!std::_Func_class::operator()
+nx_network!nx::utils::MoveOnlyFunc::operator()
 nx_network!nx::network::aio::detail::AioTaskQueue::processPostedCalls
 nx_network!nx::network::aio::AIOThread::run
-Qt5Core!QThread::start
-ucrtbase!thread_start<unsigned int (__cdecl*)(void * __ptr64)>
-kernel32!BaseThreadInitThunk
-ntdll!RtlUserThreadStart

@@ -2,12 +2,8 @@ c0000005 (Access violation)
 
 Server!nx::vms::discovery::UdpMulticastFinder::sendModuleInformation
 Server!nx::vms::discovery::UdpMulticastFinder::updateInterfaces
-nx_network!std::_Func_class<void>::operator()
-nx_network!nx::utils::MoveOnlyFunc<void __cdecl(void)>::operator()<>
+nx_network!std::_Func_class::operator()
+nx_network!nx::utils::MoveOnlyFunc::operator()
 nx_network!nx::network::aio::Timer::eventTriggered
 nx_network!nx::network::aio::detail::AioTaskQueue::processPeriodicTasks
 nx_network!nx::network::aio::AIOThread::run
-Qt5Core!QThread::start
-ucrtbase!wcstombs_s_l
-kernel32!BaseThreadInitThunk
-ntdll!RtlUserThreadStart

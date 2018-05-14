@@ -1,31 +1,25 @@
 80000003 (Break instruction exception)
 
-ntdll!NtDelayExecution
-KERNELBASE!SleepEx
 nx_utils!dumpCrtError
-VCRUNTIME140!_purecall
-Qt5Core!QObject::~QObject
-Qt5Core!QMetaObject::Connection::operator void * __ptr64 QMetaObject::Connection::* __ptr64
+...
 Client!QtSharedPointer::ExternalRefCountData::destroy
-Client!QSharedPointer<QnResourceDisplay>::deref
-Client!QSharedPointer<QnResourceDisplay>::deref
-Client!QSharedPointer<QnResourceDisplay>::{dtor}
-Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::deleteNode2
-Qt5Core!QHashData::free_helper
-Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::freeData
-Client!QHash<QSharedPointer<QnResourceDisplay>,bool>::{dtor}
+Client!QSharedPointer::deref
+Client!QSharedPointer::deref
+Client!QSharedPointer::{dtor}
+Client!QHash::deleteNode2
+...
+Client!QHash::freeData
+Client!QHash::{dtor}
 Client!QnWorkbenchNavigator::~QnWorkbenchNavigator
 Client!QnWorkbenchNavigator::`scalar deleting destructor'
-Client!QScopedPointerDeleter<QnWorkbenchNavigator>::cleanup
-Client!QScopedPointer<QnWorkbenchNavigator,QScopedPointerDeleter<QnWorkbenchNavigator> >::reset
+Client!QScopedPointerDeleter::cleanup
+Client!QScopedPointer::reset
 Client!QnWorkbenchContext::~QnWorkbenchContext
 Client!QnWorkbenchContext::`scalar deleting destructor'
-Client!QScopedPointerDeleter<QnWorkbenchContext>::cleanup
-Client!QScopedPointer<QnWorkbenchContext,QScopedPointerDeleter<QnWorkbenchContext> >::{dtor}
+Client!QScopedPointerDeleter::cleanup
+Client!QScopedPointer::{dtor}
 Client!nx::client::desktop::runApplication
 Client!main
 Client!WinMain
 Client!invoke_main
 Client!__scrt_common_main_seh
-kernel32!BaseThreadInitThunk
-ntdll!RtlUserThreadStart

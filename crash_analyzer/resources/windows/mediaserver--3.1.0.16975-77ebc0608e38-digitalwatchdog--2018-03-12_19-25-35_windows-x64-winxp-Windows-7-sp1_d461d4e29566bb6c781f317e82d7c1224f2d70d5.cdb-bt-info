@@ -1,22 +1,11 @@
 c0000005 (Access violation)
 
-VCRUNTIME140!MoveSmall
 Server!QnMediaCyclicBuffer::insert
 Server!QBufferedFile::writeData
-Qt5Core!QIODevice::write
-avformat_57!ffio_set_buf_size
-avformat_57!avio_flush
-avformat_57!avformat_get_mov_video_tags
-avformat_57!avformat_write_header
-avformat_57!avformat_write_header
-avformat_57!av_write_frame
+...
 Server!QnStreamRecorder::writeData
 Server!QnServerStreamRecorder::writeData
 Server!QnStreamRecorder::saveData
 Server!QnStreamRecorder::processData
 Server!QnServerStreamRecorder::processData
 Server!QnAbstractDataConsumer::run
-Qt5Core!QThread::start
-ucrtbase!crt_at_quick_exit
-kernel32!BaseThreadInitThunk
-ntdll!RtlUserThreadStart

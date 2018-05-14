@@ -1,11 +1,8 @@
 6, Aborted
 
-#0  __libc_do_syscall () at ../ports/sysdeps/unix/sysv/linux/arm/eabi/libc-do-syscall.S:44
-#1  0xb262bf8a in __GI_raise (sig=) at ../nptl/sysdeps/unix/sysv/linux/raise.c:67
-#2  0xb262e428 in __GI_abort () at abort.c:92
-#3  0xb262701e in __GI___assert_fail (assertion=, file=, line=, function=) at assert.c:81
-#4  0xb4f5a0f4 in AsyncSocketImplHelper<Pollable>::eventTriggered(Pollable*, aio::EventType) () from /opt/networkoptix/mediaserver//lib/libcommon.so.250
-#5  0xb4f6ddfc in aio::AIOThread<Pollable>::run() () from /opt/networkoptix/mediaserver//lib/libcommon.so.250
-#6  0xb28e20c0 in ?? () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
-#7  0xb28e20c0 in ?? () from /opt/networkoptix/mediaserver//lib/libQt5Core.so.5
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+__libc_do_syscall
+__GI_raise
+__GI_abort
+__GI___assert_fail
+AsyncSocketImplHelper::eventTriggered
+aio::AIOThread::run

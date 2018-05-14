@@ -6,11 +6,7 @@ Client!QnLongRunnable::stop
 Client!QnDesktopCameraConnectionProcessor::~QnDesktopCameraConnectionProcessor
 Client!QnDesktopCameraConnectionProcessor::`scalar deleting destructor'
 Client!std::_Ref_count_base::_Decref
-Client!std::_Ptr_base<QnDesktopCameraConnectionProcessor>::_Decref
-Client!std::shared_ptr<QnDesktopCameraConnectionProcessor>::{dtor}
-Client!std::shared_ptr<QnDesktopCameraConnectionProcessor>::reset
+Client!std::_Ptr_base::_Decref
+Client!std::shared_ptr::{dtor}
+Client!std::shared_ptr::reset
 Client!QnDesktopCameraConnection::run
-Qt5Core!QThread::start
-ucrtbase!crt_at_quick_exit
-kernel32!BaseThreadInitThunk
-ntdll!RtlUserThreadStart

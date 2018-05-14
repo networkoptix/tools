@@ -1,10 +1,5 @@
 11, Segmentation fault
 
-#0  0xb5f7db58 in _GLOBAL__sub_I_onvif_ptz_controller.cpp () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#1  0xb6137934 in QnPlOnvifResource::strictBitrate(int, Qn::ConnectionRole) const () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#2  0xb565ec80 in QnLiveStreamProvider::saveBitrateIfNeeded(std::shared_ptr<QnCompressedVideoData> const&, QnLiveStreamParams const&, bool) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
-#3  0xb565f030 in QnLiveStreamProvider::onGotVideoFrame(std::shared_ptr<QnCompressedVideoData> const&, QnLiveStreamParams const&, bool) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
-#4  0xb565a608 in CLServerPushStreamReader::run() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
-#5  0xb20f2384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#6  0xb20f2384 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+QnPlOnvifResource::strictBitrate
+QnLiveStreamProvider::saveBitrateIfNeeded
+QnLiveStreamProvider::onGotVideoFrame

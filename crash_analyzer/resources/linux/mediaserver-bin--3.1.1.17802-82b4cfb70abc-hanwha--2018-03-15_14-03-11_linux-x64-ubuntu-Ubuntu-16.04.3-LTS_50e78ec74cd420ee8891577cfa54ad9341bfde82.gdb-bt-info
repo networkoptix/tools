@@ -1,13 +1,11 @@
 SIGABRT, Aborted
 
-#0  0x00007f1c25f37428 in __GI_raise (sig=) at ../sysdeps/unix/sysv/linux/raise.c:54
-#1  0x00007f1c25f3902a in __GI_abort () at abort.c:89
-#2  0x00007f1c2632c535 in __gnu_cxx::__verbose_terminate_handler() () from /opt/hanwha/mediaserver/bin/../lib/libstdc++.so.6
-#3  0x00007f1c2632a6d6 in ?? () from /opt/hanwha/mediaserver/bin/../lib/libstdc++.so.6
-#4  0x00007f1c2632a703 in std::terminate() () from /opt/hanwha/mediaserver/bin/../lib/libstdc++.so.6
-#5  0x00007f1c2632b1bf in __cxa_pure_virtual () from /opt/hanwha/mediaserver/bin/../lib/libstdc++.so.6
-#6  0x00007f1c25310877 in QnAbstractStreamDataProvider::dataCanBeAccepted() const () from /opt/hanwha/mediaserver/bin/../lib/libcommon.so
-#7  0x00007f1c256896de in CLServerPushStreamReader::run() () from /opt/hanwha/mediaserver/bin/../lib/libcommon.so
-#8  0x00007f1c2667b163 in ?? () from /opt/hanwha/mediaserver/bin/../lib/libQt5Core.so.5
-#9  0x00007f1c204716ba in start_thread (arg=) at pthread_create.c:333
-#10 0x00007f1c2600941d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+__GI_raise
+__GI_abort
+__gnu_cxx::__verbose_terminate_handler
+std::terminate
+__cxa_pure_virtual
+QnAbstractStreamDataProvider::dataCanBeAccepted
+CLServerPushStreamReader::run
+start_thread
+clone

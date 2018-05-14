@@ -1,15 +1,11 @@
 SIGABRT, Aborted
 
-#0  0x00007f98517ed428 in __GI_raise (sig=) at ../sysdeps/unix/sysv/linux/raise.c:54
-#1  0x00007f98517ef02a in __GI_abort () at abort.c:89
-#2  0x00007f9851be2535 in __gnu_cxx::__verbose_terminate_handler() () from /opt/ioezio/mediaserver/bin/../lib/libstdc++.so.6
-#3  0x00007f9851be06d6 in ?? () from /opt/ioezio/mediaserver/bin/../lib/libstdc++.so.6
-#4  0x00007f9851be0703 in std::terminate() () from /opt/ioezio/mediaserver/bin/../lib/libstdc++.so.6
-#5  0x00007f9851be0357 in __gxx_personality_v0 () from /opt/ioezio/mediaserver/bin/../lib/libstdc++.so.6
-#6  0x00007f984babc059 in ?? () from /lib/x86_64-linux-gnu/libgcc_s.so.1
-#7  0x00007f984babc49d in _Unwind_Resume () from /lib/x86_64-linux-gnu/libgcc_s.so.1
-#8  0x00007f98539b5ba4 in ?? () from /opt/ioezio/mediaserver/bin/../lib/libmediaserver_core.so
-#9  0x00007f9853b0f830 in MediaServerProcess::run() () from /opt/ioezio/mediaserver/bin/../lib/libmediaserver_core.so
-#10 0x00007f9851f31163 in ?? () from /opt/ioezio/mediaserver/bin/../lib/libQt5Core.so.5
-#11 0x00007f984bfd26ba in start_thread (arg=) at pthread_create.c:333
-#12 0x00007f98518bf41d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+__GI_raise
+__GI_abort
+__gnu_cxx::__verbose_terminate_handler
+std::terminate
+__gxx_personality_v0
+_Unwind_Resume
+MediaServerProcess::run
+start_thread
+clone

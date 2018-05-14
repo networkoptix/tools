@@ -1,25 +1,9 @@
 SIGSEGV, Segmentation fault
 
-#0  0x00007f981e38f3a4 in QMapNode<QnUuid, nx::vms::event::InfoDetail>::copy(QMapData<QnUuid, nx::vms::event::InfoDetail>*) const () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#1  0x00007f981b55b0f3 in QMap<QnUuid, nx::vms::event::InfoDetail>::detach_helper() () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
-#2  0x00007f981b55a9b2 in nx::vms::event::AggregationInfo::append(nx::vms::event::EventParameters const&, nx::vms::event::AggregationInfo const&) () from /opt/networkoptix/mediaserver/bin/../lib/libcommon.so
-#3  0x00007f981e3858dd in nx::mediaserver::event::ExtendedRuleProcessor::sendMail(QSharedPointer<nx::vms::event::SendMailAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#4  0x00007f981e38a4e9 in nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#5  0x00007f981e3945af in nx::mediaserver::event::RuleProcessor::doExecuteAction(QSharedPointer<nx::vms::event::AbstractAction> const&, QnSharedResourcePointer<QnResource> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#6  0x00007f981e394a92 in nx::mediaserver::event::RuleProcessor::executeAction(QSharedPointer<nx::vms::event::AbstractAction> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#7  0x00007f981e397113 in nx::mediaserver::event::RuleProcessor::processEvent(QSharedPointer<nx::vms::event::AbstractEvent> const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#8  0x00007f981e39d843 in nx::mediaserver::event::EventConnector::at_networkIssue(QnSharedResourcePointer<QnResource> const&, long long, nx::vms::event::EventReason, QString const&) () from /opt/networkoptix/mediaserver/bin/../lib/libmediaserver_core.so
-#9  0x00007f981c94b9e6 in QObject::event(QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#10 0x00007f981c91fd4c in QCoreApplication::notify(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#11 0x00007f981c91fc85 in QCoreApplication::notifyInternal2(QObject*, QEvent*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#12 0x00007f981c921aca in QCoreApplicationPrivate::sendPostedEvents(QObject*, int, QThreadData*) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#13 0x00007f981c971ff3 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#14 0x00007f981490d197 in g_main_context_dispatch () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#15 0x00007f981490d3f0 in ?? () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#16 0x00007f981490d49c in g_main_context_iteration () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
-#17 0x00007f981c97163c in QEventDispatcherGlib::processEvents(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#18 0x00007f981c91dbdb in QEventLoop::exec(QFlags<QEventLoop::ProcessEventsFlag>) () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#19 0x00007f981c73f4ba in QThread::exec() () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#20 0x00007f981c744163 in ?? () from /opt/networkoptix/mediaserver/bin/../lib/libQt5Core.so.5
-#21 0x00007f98167ed6ba in start_thread (arg=) at pthread_create.c:333
-#22 0x00007f981c0d241d in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+nx::vms::event::AggregationInfo::append
+nx::mediaserver::event::ExtendedRuleProcessor::sendMail
+nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal
+nx::mediaserver::event::RuleProcessor::doExecuteAction
+nx::mediaserver::event::RuleProcessor::executeAction
+nx::mediaserver::event::RuleProcessor::processEvent
+nx::mediaserver::event::EventConnector::at_networkIssue

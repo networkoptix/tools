@@ -1,8 +1,5 @@
 SIGABRT, Aborted
 
-#0  0x73432776 in ?? () from /lib/libc.so.6
-#1  0x7344329e in raise () from /lib/libc.so.6
-#2  0x734464fe in abort () from /lib/libc.so.6
-#3  0x735f10d0 in __gnu_cxx::__verbose_terminate_handler() () from /usr/lib/libstdc++.so.6
-#4  0x735efb00 in ?? () from /usr/lib/libstdc++.so.6
-Backtrace stopped: previous frame identical to this frame (corrupt stack?)
+raise
+abort
+__gnu_cxx::__verbose_terminate_handler
