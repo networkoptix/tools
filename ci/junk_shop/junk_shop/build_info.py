@@ -239,7 +239,8 @@ class BuildInfoLoader(object):
                 run.test and
                 not exists(child for child in root_run.children if
                                child.path.startswith(run.path) and
-                               child is not run)).order_by(1):
+                               child is not run and
+                               child.outcome == 'failed')).order_by(1):
             if not self._is_run_wanted(root_run): continue
             stage = self._produce_stage(root_run, TestsStage)
             stage.add_run(run)
