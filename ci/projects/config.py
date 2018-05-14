@@ -658,6 +658,8 @@ class BranchConfig(object):
 
     @classmethod
     def from_dict(cls, data):
+        if data is None:
+            return cls.make_default()
         return cls(
             platforms={platform_name: PlatformBranchConfig.from_dict(platform_config)
                                for platform_name, platform_config in data.get('platforms', {}).items()},
