@@ -1,7 +1,7 @@
 C:\ProgramData\chocolatey\choco.exe install tortoisehg -y --version 4.1
 C:\ProgramData\chocolatey\choco.exe install python2 -y --version 2.7.14
 setx PATH "C:\Python27;C:\Python27\Scripts;%PATH%"
-C:\ProgramData\chocolatey\choco.exe install rsync -y --version 5.5.0.20160518
+C:\ProgramData\chocolatey\choco.exe install rsync -y --version 5.7.1.20180411
 C:\ProgramData\chocolatey\choco.exe install git -y --version 2.16.2
 setx PATH "%PATH%;C:\Program Files\Git\bin"
 
