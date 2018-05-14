@@ -398,18 +398,32 @@ class ChoiceProjectParameter(ProjectParameter):
             name=d['name'],
             description=d['description'],
             choices=d['choices'],
+            default_choice=d['default_choice'],
             )
 
-    def __init__(self, name, description, choices):
+    def __init__(self, name, description, choices, default_choice=None):
         assert is_list_inst(choices, basestring), repr(choices)
+        assert default_choice is None or isinstance(default_choice, basestring), repr(default_choice)
+        assert default_choice is None or default_choice in choices, repr(default_choice)
         ProjectParameter.__init__(self, name, description)
-        self.choices = choices
+        self.choices = self._reorder_choices(choices, default_choice)
+        self.default_choice = default_choice
 
     def to_dict(self):
         return dict(
             ProjectParameter.to_dict(self),
             choices=self.choices,
+            default_choice=self.default_choice,
             )
+
+    @staticmethod
+    def _reorder_choices(choices, default_choice):
+        if default_choice:
+            others = choices[:]
+            others.remove(default_choice)
+            return [default_choice] + others
+        else:
+            return choices
 
 
 class MultiChoiceProjectParameter(ProjectParameter):

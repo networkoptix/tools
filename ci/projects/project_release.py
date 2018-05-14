@@ -90,7 +90,8 @@ class ReleaseProject(BuildProject):
     def get_project_parameters(self):
         return BuildProject.get_project_parameters(self) + [
             ChoiceProjectParameter('release', 'Build beta or release', ['beta', 'release']),
-            ChoiceProjectParameter('cloud_group', 'Cloud group', CLOUD_GROUP_LIST),
+            ChoiceProjectParameter(
+                'cloud_group', 'Cloud group', CLOUD_GROUP_LIST, default_choice=self.branch_config.release.default_cloud_group),
             BooleanProjectParameter('hardware_signing',
                                         'Enable hardware signing, use hardware key to sign files', default_value=False),
             BooleanProjectParameter('trusted_timestamping',

@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 
 DEFAULT_CI_CUSTOMIZATION = 'hanwha'
+DEFAULT_CLOUD_GROUP = 'test'
 
 
 # configuration common for all branches, stored in devtools/ci/projects/config.yaml
@@ -615,6 +616,36 @@ class CiBranchConfig(object):
         log.info('\t\t' 'customization: %r', self.customization)
 
 
+class ReleaseBranchConfig(object):
+
+    @classmethod
+    def make_default(cls):
+        return cls(
+            default_cloud_group=DEFAULT_CLOUD_GROUP,
+            )
+
+    @classmethod
+    def from_dict(cls, data):
+        if data is None:
+            return cls.make_default()
+        return cls(
+            default_cloud_group=data.get('default_cloud_group'),
+            )
+
+    def __init__(self, default_cloud_group):
+        assert default_cloud_group is None or isinstance(default_cloud_group, basestring), repr(default_cloud_group)
+        self.default_cloud_group = default_cloud_group
+
+    def to_dict(self):
+        return dict(
+            default_cloud_group=self.default_cloud_group,
+            )
+
+    def report(self):
+        log.info('\t' 'release:')
+        log.info('\t\t' 'default_cloud_group: %r', self.default_cloud_group)
+
+
 class BranchConfig(object):
 
     @classmethod
@@ -622,27 +653,32 @@ class BranchConfig(object):
         return cls(
             platforms={},
             ci=CiBranchConfig.make_default(),
+            release=ReleaseBranchConfig.make_default(),
             )
 
     @classmethod
     def from_dict(cls, data):
         return cls(
             platforms={platform_name: PlatformBranchConfig.from_dict(platform_config)
-                               for platform_name, platform_config in data['platforms'].items()},
+                               for platform_name, platform_config in data.get('platforms', {}).items()},
             ci=CiBranchConfig.from_dict(data.get('ci')),
+            release=ReleaseBranchConfig.from_dict(data.get('release')),
             )
 
-    def __init__(self, platforms, ci):
+    def __init__(self, platforms, ci, release):
         assert is_dict_inst(platforms, basestring, PlatformBranchConfig), repr(platforms)
         assert isinstance(ci, CiBranchConfig), repr(ci)
+        assert isinstance(release, ReleaseBranchConfig), repr(release)
         self.platforms = platforms
         self.ci = ci
+        self.release = release
 
     def to_dict(self):
         return dict(
             platforms={platform_name: platform_config.to_dict()
                                for platform_name, platform_config in self.platforms.items()},
             ci=self.ci.to_dict(),
+            release=self.release.to_dict(),
             )
 
     def report(self):
@@ -652,6 +688,7 @@ class BranchConfig(object):
             log.info('\t\t' '%s:', platform_name)
             platform_info.report()
         self.ci.report()
+        self.release.report()
 
 
 def test_me():
