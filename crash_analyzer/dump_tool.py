@@ -16,6 +16,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import http.client
 import msvcrt
 import traceback
 from typing import List, Callable
@@ -41,15 +42,20 @@ PDB_SUFFIXES = [
 ]
 
 CUSTOMIZATIONS = (
+    'cox',
     'default',
     'default_cn',
     'default_zh_CN',
     'digitalwatchdog',
+    'digitalwatchdog_global',
+    'hanwha',
     'ionetworks',
     'ipera',
-    'hanwha',
+    'nutech',
+    'ras',
     'senturian',
     'systemk',
+    'ust',
     'vista',
     'vmsdemoblue',
     'vmsdemoorange',
@@ -63,8 +69,8 @@ CUSTOMIZATION_ALIASES = {
 
 
 def deduce_customization(dump_path):
-    for c in CUSTOMIZATIONS:
-        if c in dump_path:
+    for c in reversed(CUSTOMIZATIONS):
+        if '-{}'.format(c) in dump_path:
             return c
 
     return None
@@ -333,6 +339,9 @@ class DumpAnalyzer:
             build_url, (""">([a-zA-Z0-9-_\.]+%s)<""" % r for r in suffixes),
             os.path.join(dist_url, update_path))
 
+        if not out:
+            raise DistError('There are no distributive URLs available')
+            
         self.build_path = os.path.join(self.cache_directory, build_path)
         self.target_path = os.path.join(self.build_path, 'target')
         return list(os.path.join(*url) for url in out)
@@ -419,9 +428,10 @@ class DumpAnalyzer:
     def download_dists(self):
         """Downloads required distributions.
         """
-        urls = self.fetch_urls()
-        if not urls:
-            raise DistError('There are no distributive URLs available')
+        try:
+            urls = self.fetch_urls()
+        except http.client.HTTPException as e:
+            raise DistError(str(e))
 
         try:
             os.makedirs(self.build_path)
@@ -450,9 +460,9 @@ class DumpAnalyzer:
                     self.build_path, traceback.format_exc()))
                 if not self.debug_mode:
                     def on_error(call, path, error):
-                        if path != lock.path and path != os.path.dirname(lock.path):
+                        if not os.path.normpath(lock.path).startswith(os.path.normpath(path)):
                             logger.error('{}("{}"): {}: {}'.format(
-                                call, path, error.__name__, str(error)))
+                                call, path, type(error).__name__, str(error)))
                     try:
                         logger.debug('Clean up download directory: ' + self.build_path)
                         shutil.rmtree(self.build_path, onerror=on_error)

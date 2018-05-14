@@ -76,7 +76,8 @@ class Report:
 
     @property
     def full_version(self) -> str:
-        return '.'.join([self.version, self.build])
+        version_numbers = self.version.split('.') + ['0']
+        return '.'.join(version_numbers[:3] + [self.build])
 
     def file_mask(self) -> str:
         return self.name[:-len(self.extension)] + '*'
@@ -238,10 +239,11 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
     return analyze_bt(report, content, CdbDescriber)
 
 
-def analyze_reports_concurrent(reports: List[Report], **options) -> List[Tuple[str, Reason]]:
+def analyze_reports_concurrent(reports: List[Report], problem_versions: list = [], **options) \
+        -> List[Tuple[str, Reason]]:
     """Analyzes :reports in :directory, returns list of successful results.
     """
-    problem_versions = set()  # < TODO: Does it make sense to preserve it between runs?
+    problem_versions = set(problem_versions)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError)):
@@ -268,7 +270,8 @@ def analyze_report(report: Report, directory: utils.Directory, **dump_tool_optio
         return analyze_windows_cdb_bt(report, report_file.read_string())
 
     if report.extension == 'dmp':
-        content = dump_tool.analyse_dump(dump_path=report_file.path, **dump_tool_options)
+        content = dump_tool.analyse_dump(
+            dump_path=report_file.path, customization=report.customization, **dump_tool_options)
         return analyze_windows_cdb_bt(report, content)
 
     raise NotImplementedError('Dump format is not supported: ' + report.name)

@@ -131,12 +131,15 @@ class BufferedStream:
         self.buffers.append(data)
 
     def lines(self):
-        return ''.join(self.buffers).splitlines()
+        data = ''.join(self.buffers)
+        self.buffers = []
+        return data.splitlines()
 
 
 def _concurrent_main(task):
-    log_stream = BufferedStream()
-    if task['debug']:
+    log_stream = getattr(_concurrent_main, 'log_stream', BufferedStream())
+    _concurrent_main.log_stream = log_stream
+    if not task['debug']:
         logging.basicConfig(level=task['log_level'], stream=log_stream, format=LOGGING_FORMAT)
 
     action, argument, kwargs = task['action'], task['argument'], task['kwargs']
@@ -178,6 +181,7 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
         for line in logs:
             try:
                 date, time, level, message = line.split(maxsplit=3)
+                if level == 'INFO': level = 'DEBUG'
                 resolved_level = getattr(logging, level)
                 logger.log(resolved_level, time + '    ' + message)
             except (AttributeError, ValueError):

@@ -24,6 +24,7 @@ fetch:
     url: http://stats.networkoptix.com/crashserver/api/
     login: statlord
     password: razdvatri
+    extension: '*' #< Dumps format to fetch.
     min_version: "2.4" #< Minimal version to download.
     max_size: 10M #< Maximal dump size to download.
     report_count: 50 #< Do not download more at once.
@@ -32,6 +33,7 @@ fetch:
 analyze:
     subprocess_timeout_s: 30 #< Newer wait for child processes longer.
     thread_count: 5 #< Maximum CDB process count.
+    problem_versions: [] #< Ignore analyze problems on this builds.
 
 upload:
     url: https://networkoptix.atlassian.net/

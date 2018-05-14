@@ -232,7 +232,7 @@ class Monitor:
         logger.info('Cleanup has removed {} items in: {}'.format(removed_count, directory.path))
         size = directory.size()
         if size < size_limit:
-            logger.error('Cleanup success for ' + directory_message())
+            logger.info('Cleanup success for ' + directory_message())
         else:
             logger.error('Cleanup failed for ' + directory_message())
 

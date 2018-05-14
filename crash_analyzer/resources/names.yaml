@@ -6,6 +6,7 @@
   component: Client
   customization: digitalwatchdog
   extension: dmp
+  full_version: 2.6.0.13109
   version: '2.6'
 ? DW_Spectrum--3.0.0.15297-8aa83688cb28-digitalwatchdog--2018-03-08_16-26-04_windows-x64-winxp-Windows-7-sp1_8fac2dcc579aaed5e83c5f7b3ab5d49fe96c0c57.dmp
 : beta: false
@@ -15,6 +16,7 @@
   component: Client
   customization: digitalwatchdog
   extension: dmp
+  full_version: 3.0.0.15297
   version: '3.0'
 ? FlyView--3.1.0.16975-77ebc0608e38-ipera--2018-03-12_06-00-23_windows-x64-winxp-Windows-8.1_c7807d4b8981da47cb8d264a9f7de2bfe3754cc8.cdb-bt
 : beta: false
@@ -24,6 +26,7 @@
   component: Client
   customization: ipera
   extension: cdb-bt
+  full_version: 3.1.0.16975
   version: '3.1'
 ? HD_Witness--3.0.0.15297-9431fba23d64-default--2018-03-13_06-19-25_windows-x64-winxp-Windows-7-sp1_7801f3c95618829e76b2dfb0c3608f52162d24e7.cdb-bt
 : beta: false
@@ -33,6 +36,7 @@
   component: Client
   customization: default
   extension: cdb-bt
+  full_version: 3.0.0.15297
   version: '3.0'
 ? HD_Witness--4.0.0.0-348be6786652-default-beta--2018-03-13_14-46-31_windows-x64-winxp-Windows-7-sp1_0c17c3e43ec045e3835db37ae1d0c43bffe35ce5.dmp
 : beta: true
@@ -42,6 +46,7 @@
   component: Client
   customization: default
   extension: dmp
+  full_version: 4.0.0.0
   version: '4.0'
 ? mediaserver--2.6.0.13109-5fc41a691b0d-digitalwatchdog--2018-03-12_15-56-59_windows-x64-winxp-Windows-8_1b49c9a42623991028498c9075d57fd89ec64273.dmp
 : beta: false
@@ -51,6 +56,7 @@
   component: Server
   customization: digitalwatchdog
   extension: dmp
+  full_version: 2.6.0.13109
   version: '2.6'
 ? mediaserver--3.1.0.16975-77ebc0608e38-digitalwatchdog--2018-03-16_15-06-09_windows-x64-winxp-Windows-10_9ebbb6d590fe3ed9a97f4fbff757e79a23451f89.cdb-bt
 : beta: false
@@ -60,6 +66,7 @@
   component: Server
   customization: digitalwatchdog
   extension: cdb-bt
+  full_version: 3.1.0.16975
   version: '3.1'
 ? mediaserver-bin--2.6.0.13109-5fc41a691b0d-digitalwatchdog--2018-03-12_19-03-38_linux-x64-ubuntu-Ubuntu-14.04.4-LTS_28a5ec7314c681007e81023df85a4030f551ffb4.crash
 : beta: false
@@ -69,6 +76,7 @@
   component: Server
   customization: digitalwatchdog
   extension: crash
+  full_version: 2.6.0.13109
   version: '2.6'
 ? mediaserver-bin--3.0.0.15297-8aa83688cb28-digitalwatchdog--2018-03-12_21-10-30_linux-x64-ubuntu-Ubuntu-14.04.5-LTS_3ce76fe1dcb06e65a8346a4cfea49e9175f8167c.gdb-bt
 : beta: false
@@ -78,6 +86,7 @@
   component: Server
   customization: digitalwatchdog
   extension: gdb-bt
+  full_version: 3.0.0.15297
   version: '3.0'
 ? mediaserver-bin--3.1.0.16975-77ebc0608e38-digitalwatchdog--2018-03-08_16-41-09_linux-x64-ubuntu-Ubuntu-14.04.1-LTS_49f3c60f0d58ed3690b3f9d5e5b46890c85ab422.gdb-bt
 : beta: false
@@ -87,6 +96,7 @@
   component: Server
   customization: digitalwatchdog
   extension: gdb-bt
+  full_version: 3.1.0.16975
   version: '3.1'
 ? mediaserver-bin--3.1.1.17802-82b4cfb70abc-hanwha--2018-03-07_15-24-24_linux-x86-ubuntu-Ubuntu-14.04.5-LTS_7a140cd17f6f303107065f9bb83382614034cf8e.gdb-bt
 : beta: false
@@ -96,7 +106,8 @@
   component: Server
   customization: hanwha
   extension: gdb-bt
-  version: 3.1.1
+  full_version: 3.1.1.17802
+  version: '3.1.1'
 ? mediaserver-bin--4.0.0.53-61fbffc8dfa1-default-beta--2018-03-12_10-39-18_linux-x64-ubuntu-Ubuntu-16.04.2-LTS_2b7755ffafbaaf76c5648fd55ad0f0d7b8cb15b1.gdb-bt
 : beta: true
   binary: mediaserver-bin
@@ -105,6 +116,7 @@
   component: Server
   customization: default
   extension: gdb-bt
+  full_version: 4.0.0.53
   version: '4.0'
 ? DW_Spectrum--2.3.2.9503-970fdce49492--2018-04-17_20-43-00_windows-x64-winxp_fb5a638635eecf67ab17d2c8a6a8fff8940d5c1a.dmp
 : beta: false
@@ -114,6 +126,7 @@
   component: Client
   customization: unknown
   extension: dmp
+  full_version: 2.3.2.9503
   version: '2.3.2'
 ? mediaserver--2.3.2.9503-970fdce49492--2018-04-24_21-31-37_windows-x64-winxp_1b9f0ddf3b751a85b6ca33e800bebaf9148aa6b3.dmp
 : beta: false
@@ -123,4 +136,25 @@
   component: Server
   customization: unknown
   extension: dmp
+  full_version: 2.3.2.9503
   version: '2.3.2'
+? Sefica_ProBox--3.1.0.17499-99c5cc48ae01-ras--2018-05-06_11-14-32_windows-x64-winxp-Windows-10_e07e5f769674f3a703f09a16a19c26b45910a6f2.dmp
+: beta: false
+  binary: Sefica_ProBox
+  build: '17499'
+  changeset: 99c5cc48ae01
+  component: Client
+  customization: ras
+  extension: dmp
+  full_version: 3.1.0.17499
+  version: '3.1'
+? mediaserver--3.1.0.16975-77ebc0608e38-ras--2018-05-02_05-59-10_windows-x64-winxp-Windows-10_0329df051fa002a287375a2cd2fa6c6dce4a739d.dmp
+: beta: false
+  binary: mediaserver
+  build: '16975'
+  changeset: 77ebc0608e38
+  component: Server
+  customization: ras
+  extension: dmp
+  full_version: 3.1.0.16975
+  version: '3.1'
