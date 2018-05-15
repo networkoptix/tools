@@ -166,6 +166,19 @@
         function='{{  "%#0.1x" | format(address_function) }}'/>
     </interface>
   {% endif %}
+  {% if interface_type == 'internal' %}
+    <interface type='network'>
+      <source network='{{ network.source_network }}'/>
+      <model type='{{ model_type }}'/>
+      {# mask for vals: domain=0x0000 bus=0x00 slot=0x00 function=0x0 #}
+      <address
+        type='pci'
+        domain='{{    "%#0.4x" | format(address_domain)   }}'
+        bus='{{       "%#0.2x" | format(address_bus)      }}'
+        slot='{{      "%#0.2x" | format(address_slot)     }}'
+        function='{{  "%#0.1x" | format(address_function) }}'/>
+    </interface>
+  {% endif %}
   {# TODO: remove macvtap related stuff as we want to use bridges #}
   {% if interface_type == 'direct' %}
     <interface type='direct'>
