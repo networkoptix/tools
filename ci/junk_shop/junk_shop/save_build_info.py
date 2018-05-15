@@ -53,7 +53,7 @@ def load_change_sets(repository, src_dir, build, prev_revision):
             date=date,
             user=user,
             email=email,
-            desc=desc,
+            desc=desc.decode('utf-8'),
             )
 
 @db_session
