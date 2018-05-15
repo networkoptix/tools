@@ -1,14 +1,9 @@
 package com.nx.apidoctool;
 
-import com.nx.apidoc.Apidoc;
-import com.nx.apidoc.ApidocCommentParser;
-import com.nx.apidoc.ApidocTagParser;
-import com.nx.apidoc.ApidocUtils;
+import com.nx.apidoc.*;
 import com.nx.util.SourceCode;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Parses SourceCode to generate Apidoc structure using ApidocCommentParser and ApidocUtils.
@@ -37,16 +32,17 @@ public final class SourceCodeParser
         this.sourceCode = sourceCode;
     }
 
-    public SourceCode getSourceCode()
-    {
-        return sourceCode;
-    }
-
     /**
      * @return Number of API functions processed.
      */
-    public int parseApidocComments(Apidoc apidoc, RegistrationMatcher matcher)
-        throws Error, ApidocUtils.Error, SourceCode.Error
+    public int parseApidocComments(
+        Apidoc apidoc, RegistrationMatcher matcher, TypeMananger typeManager)
+        throws Error,
+        ApidocUtils.Error,
+        SourceCode.Error,
+        ApidocTagParser.Error,
+        ApidocCommentParser.Error,
+        TypeMananger.Error
     {
         if (verbose)
             System.out.println("        Processed API functions:");
@@ -76,6 +72,11 @@ public final class SourceCodeParser
                             System.out.println("            " + description.function.name);
 
                         checkFunctionProperties(match, description.function);
+                        if (typeManager != null)
+                        {
+                            typeManager.mergeDescription(
+                                match.inputDataType, match.outputDataType, description.function);
+                        }
 
                         if (!ApidocUtils.checkFunctionDuplicate(group, description.function))
                         {
@@ -97,49 +98,27 @@ public final class SourceCodeParser
         return processedFunctionCount;
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     /**
      * @return Null if the comment should not convert to an XML function.
      */
     private List<ApidocCommentParser.FunctionDescription> createFunctionsFromComment()
-        throws Error
+        throws ApidocCommentParser.Error, ApidocTagParser.Error
     {
-        // Look for an Apidoc Comment end "*/" directly above the main line.
-        int line = mainLine - 1;
-        if (line == 0 || !sourceCode.lineMatches(line, commentEndRegex))
+        final List<String> commentLines =
+            ApidocTagParser.getPrecedingComment(sourceCode, mainLine - 1);
+
+        if (commentLines == null)
             return null;
-
-        --line;
-        // Now line points to the line preceding the comment-end line "*/".
-
-        while (line > 0 && !sourceCode.lineMatches(line, commentStartRegex))
-            --line;
-        if (line == 0) //< Did not find comment start.
-            return null;
-
-        // Now line points to a comment start: "/*...".
-
-        // Check that the found comment starts with "/**".
-        if (!sourceCode.lineMatches(line, apidocCommentStartRegex))
-            return null;
-
-        List<String> commentLines = new ArrayList<String>(mainLine - line);
-        for (int i = line; i < mainLine - 1; ++i)
-            commentLines.add(sourceCode.getLine(i));
 
         final List<ApidocCommentParser.FunctionDescription> functions;
-        try
-        {
-            final ApidocCommentParser parser = new ApidocCommentParser();
-            final ApidocTagParser tagParser = new ApidocTagParser(
-                commentLines, sourceCode.getFilename(), line, verbose);
-            functions = parser.createFunctionsFromCommentLines(tagParser);
-        }
-        catch (ApidocCommentParser.Error e)
-        {
-            throw new Error(e.getMessage());
-        }
+        final int commentStartLine = mainLine - commentLines.size();
+        final ApidocCommentParser parser = new ApidocCommentParser();
+        functions = parser.createFunctionsFromTags(
+            ApidocTagParser.getItems(
+                commentLines, sourceCode.getFilename(), commentStartLine, verbose));
+
         return functions;
     }
 
@@ -164,19 +143,10 @@ public final class SourceCodeParser
         }
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private final boolean verbose;
     private final SourceCode sourceCode;
 
-    //--------------------------------------------------------------------------
-
-    private static final Pattern commentEndRegex = Pattern.compile(
-        "\\s*\\*/\\s*");
-
-    private static final Pattern commentStartRegex = Pattern.compile(
-        "\\s*/\\*.*");
-
-    private static final Pattern apidocCommentStartRegex = Pattern.compile(
-        "\\s*/\\*\\*.*");
+    //---------------------------------------------------------------------------------------------
 }

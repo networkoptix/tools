@@ -13,3 +13,63 @@
  *     %param[proprietary] proprietaryParam proprietary result param
  */
 regUpdate<ApiDummyData>(dummy, ApiCommand::testFunction1);
+
+/**%apidoc Enum description*/
+enum class Enum
+{
+    value1, /**<%apidoc value1 description*/
+    /**%apidoc value2 description*/
+    value2,
+};
+
+Q_DECLARE_FLAGS(Enums, Enum)
+
+/**%apidoc inner object description*/
+struct InnerStruct
+{
+    QString innerParam;
+    Enum innerEnumParam;
+};
+
+namespace N1 {
+namespace N2 {
+
+struct BaseStruct
+{
+    /**%apidoc base value description
+     */
+    int baseValue;
+};
+
+}
+
+}
+
+/**%apidoc Input struct description
+ * multiline
+ */
+struct NX_DEF InputStruct
+    : N1::N2::BaseStruct
+{
+    int param1; /**<%apidoc[opt] int param description*/
+    InnerStruct innerObject;
+};
+
+/**%apidoc Output description*/
+struct OutputStruct
+{
+    /**%apidoc outputParam description
+     * %value 1 one
+     * %value 2 two
+     */
+    int outputParam;
+    Enum enumParam;
+    Enums flagsParam;
+};
+
+
+/**%apidoc:arrayParams GET /urlPrefix/getStorages
+ * Read the list of current storages.
+ * %param innerObject.innerParam override description from function comment
+ */
+regGet<InputStruct, OutputStructList>(p, ApiCommand::getStorages);

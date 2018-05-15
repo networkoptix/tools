@@ -1,6 +1,9 @@
 package com.nx.util;
 
+import com.nx.apidoc.ApidocTagParser;
+
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -126,6 +129,28 @@ public class SourceCode
         return lines.get(line - 1);
     }
 
+    public final List<String> getPreviousLines(int startLine, Pattern startRegex, Pattern endRegex)
+    {
+        int line = startLine;
+
+        // Look for an end pattern directly above the line.
+        if (line == 0 || !lineMatches(line, endRegex))
+            return null;
+
+        // Now line points to the line preceding the end line.
+        while (line > 0 && !lineMatches(line, startRegex))
+            --line;
+
+        if (line == 0) //< Did not find start.
+            return null;
+
+        final List<String> matchingLines = new ArrayList<String>(startLine - line + 1);
+        for (int i = line; i <= startLine; ++i)
+            matchingLines.add(getLine(i));
+
+        return matchingLines;
+    }
+
     public int getLineCount()
     {
         return lines.size();
@@ -141,4 +166,6 @@ public class SourceCode
     protected final File file;
     protected final List<String> lines;
     protected final String lineBreak;
+
+
 }

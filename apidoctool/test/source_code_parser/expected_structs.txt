@@ -1,0 +1,48 @@
+-----------------------------------------------------------------------
+- Enums
+
+Name: Enum
+Description: Enum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
+Name: IndentedEnum
+Description: Enum description
+    Value: value1
+    Description: value1 description
+    Value: value2
+    Description: value2 description
+
+-----------------------------------------------------------------------
+- Structs
+
+Name: BaseStruct
+Parents: null
+    Field:integer baseValue
+    Apidoc item: "base value description"
+
+Name: InnerStruct
+Parents: null
+Apidoc item: "inner object description"
+    Field:string innerParam
+    Field:unknown(Enum) innerEnumParam
+
+Name: InputStruct
+Parents: [BaseStruct]
+Apidoc item: "Input struct description
+multiline"
+    Field:integer param1
+    Apidoc item: "int param description"
+    Field:unknown(InnerStruct) innerObject
+
+Name: OutputStruct
+Parents: null
+Apidoc item: "Output description"
+    Field:integer outputParam
+    Apidoc item: "outputParam description"
+    Apidoc item: "1 one"
+    Apidoc item: "2 two"
+    Field:unknown(Enum) enumParam
+

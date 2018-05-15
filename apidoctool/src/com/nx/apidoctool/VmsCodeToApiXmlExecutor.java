@@ -2,6 +2,7 @@ package com.nx.apidoctool;
 
 import com.nx.apidoc.Apidoc;
 import com.nx.apidoc.ApidocUtils;
+import com.nx.apidoc.TypeMananger;
 import com.nx.util.*;
 
 import java.io.File;
@@ -36,11 +37,23 @@ public final class VmsCodeToApiXmlExecutor
                 + e.getMessage());
         }
 
+        TypeMananger typeMananger = null;
+        if (!params.typeHeaderPaths().isEmpty())
+        {
+            List<File> typeHeaders = Utils.getHeaderFileList(vmsPath, params.typeHeaderPaths());
+            typeMananger = new TypeMananger(verbose);
+            typeMananger.processFiles(typeHeaders);
+        }
+
         int processedFunctionsCount = 0;
         processedFunctionsCount += processCppFile(
-            params.templateRegistrationCpp(), new TemplateRegistrationMatcher());
+            params.templateRegistrationCpp(),
+            new TemplateRegistrationMatcher(),
+            typeMananger);
         processedFunctionsCount += processCppFile(
-            params.handlerRegistrationCpp(), new HandlerRegistrationMatcher());
+            params.handlerRegistrationCpp(),
+            new HandlerRegistrationMatcher(),
+            /*typeManager*/ null);
 
         if (processedFunctionsCount == 0)
             System.out.println("    WARNING: No functions were processed.");
@@ -65,16 +78,15 @@ public final class VmsCodeToApiXmlExecutor
         return processedFunctionsCount;
     }
 
-    protected int processCppFile(String sourceCppFilename, RegistrationMatcher matcher)
+    private int processCppFile(
+        String sourceCppFilename, RegistrationMatcher matcher, TypeMananger typeManager)
         throws Exception
     {
-        final File sourceCppFile = new File(vmsPath + sourceCppFilename);
+        final File sourceCppFile = new File(vmsPath, sourceCppFilename);
         System.out.println("    Input: " + sourceCppFile);
 
         SourceCode reader = new SourceCode(sourceCppFile);
         SourceCodeParser parser = new SourceCodeParser(verbose, reader);
-        final int processedFunctionsCount = parser.parseApidocComments(apidoc, matcher);
-
-        return processedFunctionsCount;
+        return parser.parseApidocComments(apidoc, matcher, typeManager);
     }
 }

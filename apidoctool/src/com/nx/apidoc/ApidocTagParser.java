@@ -1,5 +1,6 @@
 package com.nx.apidoc;
 
+import com.nx.util.SourceCode;
 import com.nx.util.Utils;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.regex.Pattern;
  * Parses a multiline comment into items started by %-tags. Format of each
  * comment item is as follows:
  * <pre>
- * * %tag [attribute] initialToken Possibly-multiline-text
+ * * %tag:label [attribute] initialToken Possibly-multiline-text
  * </pre>
  * Each of the components, including initial "*", but except the tag, is
  * optional. Note that "%" char is prohibited in a continuation line (because it
@@ -18,7 +19,16 @@ import java.util.regex.Pattern;
  */
 public final class ApidocTagParser
 {
-    public final class Item
+    public static class Error
+        extends Exception
+    {
+        public Error(String filename, int line, String message)
+        {
+            super(filename + ":" + line + ": " + message);
+        }
+    }
+
+    public final static class Item
     {
         private final String tag;
         private final String attribute;
@@ -26,12 +36,19 @@ public final class ApidocTagParser
         private final String initialTokenUntrimmed;
         private final List<String> textAfterInitialToken;
 
+        private final boolean verbose;
+        private final String filename;
+        private final int firstLineOfItem;
+
         protected Item(
             String tag,
             String attribute,
             String label,
             String initialTokenUntrimmed,
-            List<String> textAfterInitialToken)
+            List<String> textAfterInitialToken,
+            String filename,
+            int firstLineOfItem,
+            boolean verbose)
         {
             assert tag != null;
             assert !tag.isEmpty();
@@ -48,6 +65,10 @@ public final class ApidocTagParser
 
             assert textAfterInitialToken != null;
             this.textAfterInitialToken = textAfterInitialToken;
+
+            this.verbose = verbose;
+            this.filename = filename;
+            this.firstLineOfItem = firstLineOfItem;
         }
 
         /**
@@ -121,23 +142,86 @@ public final class ApidocTagParser
         {
             return initialTokenUntrimmed + getTextAfterInitialToken(indentLevel);
         }
+
+        public  String getErrorPrefix()
+        {
+            return filename + ":" + firstLineOfItem + ": ";
+        }
     }
 
-    public ApidocTagParser(List<String> lines, String filename, int firstLine, boolean verbose)
+    public static List<Item> getItems(
+        List<String> lines, String filename, int firstLine, boolean verbose)
+        throws Error
+    {
+        List<Item> items = new ArrayList<Item>();
+        ApidocTagParser parser = new ApidocTagParser(lines, filename, firstLine, verbose);
+        Item item = parser.parseNextItem();
+        while (item != null)
+        {
+            items.add(item);
+            item = parser.parseNextItem();
+        }
+        return items;
+    }
+
+    public static List<Item> getApidocTags(SourceCode sourceCode, int line, boolean verbose)
+        throws Error
+    {
+        List<String> commentLines;
+        int firstCommentLine = line;
+        boolean trailingComment = false;
+        final String comment = getTrailingComment(sourceCode, line);
+        if (comment != null)
+        {
+            commentLines = new ArrayList<String>();
+            commentLines.add(comment);
+            trailingComment = true;
+        }
+        else
+        {
+            commentLines = getPrecedingComment(sourceCode, line - 1);
+            if (commentLines != null)
+                firstCommentLine = line - commentLines.size() - 1;
+        }
+        if (commentLines == null || commentLines.isEmpty())
+            return null;
+
+        final String[] values = Utils.matchRegex(itemStartRegex, commentLines.get(0));
+        if (values == null)
+            return null;
+
+        if (trailingComment && "".equals(values[0]))
+        {
+            throw new Error(
+                sourceCode.getFilename(),
+                firstCommentLine,
+                "Trailing comment should start from \"/**<\"");
+        }
+        if (!trailingComment && "<".equals(values[0]))
+        {
+            throw new Error(
+                sourceCode.getFilename(),
+                firstCommentLine,
+                "Preceding comment start from \"/**<\"");
+        }
+
+
+        return getItems(
+            commentLines, sourceCode.getFilename(), firstCommentLine, verbose);
+    }
+
+    private ApidocTagParser(List<String> lines, String filename, int firstLine, boolean verbose)
     {
         this.filename = filename;
         this.firstLine = firstLine;
         this.verbose = verbose;
         this.lines = lines;
         line = 0;
-        item = null;
     }
 
-    public void parseNextItem()
-        throws ApidocCommentParser.Error
+    private Item parseNextItem()
+        throws Error
     {
-        item = null;
-
         // Skip empty comment lines: those containing only "/**" or "*".
         while (line < lines.size() &&
             Utils.matchRegex(emptyCommentLineRegex, lines.get(line)) != null)
@@ -146,19 +230,20 @@ public final class ApidocTagParser
         }
 
         if (line >= lines.size())
-            return;
+            return null;
 
-        firstLineOfItem = firstLine + line;
-        final String[] values = Utils.matchRegex(itemStartRegex, lines.get(line));
+        int firstLineOfItem = firstLine + line;
+        String sourceLine = lines.get(line);
+        if (sourceLine.endsWith("*/")) //< single line case
+            sourceLine = sourceLine.substring(0, sourceLine.length() - 2);
+
+        final String[] values = Utils.matchRegex(itemStartRegex, sourceLine);
         if (values == null)
-        {
-            throw new ApidocCommentParser.Error(
-                "Invalid tag line in Apidoc comment: " + lines.get(line));
-        }
+            throw new Error(filename, firstLine + line, "Invalid tag line in Apidoc comment");
 
         ++line;
         final List<String> textAfterToken = new ArrayList<String>();
-        textAfterToken.add(values[5]);
+        textAfterToken.add(values[6]);
         while (line < lines.size())
         {
             final String[] continuation = Utils.matchRegex(
@@ -170,12 +255,31 @@ public final class ApidocTagParser
             ++line;
         }
 
-        item = new Item(values[0], values[1], values[3], values[4], textAfterToken);
+        return new Item(
+            values[1],
+            values[2],
+            values[4],
+            values[5],
+            textAfterToken,
+            filename,
+            firstLineOfItem,
+            verbose);
     }
 
-    public Item getItem()
+    private static String getTrailingComment(SourceCode sourceCode, int startLine)
     {
-        return item;
+        String[] match = sourceCode.matchLine(startLine, trailingCommentRegex);
+        if (match != null)
+            return match[0];
+
+        return null;
+    }
+
+
+    public static List<String> getPrecedingComment(SourceCode sourceCode, int startLine)
+    {
+        return sourceCode.getPreviousLines(
+            startLine, commentStartRegex, commentEndRegex);
     }
 
     //---------------------------------------------------------------------------------------------
@@ -185,22 +289,30 @@ public final class ApidocTagParser
     private final int firstLine;
     private final List<String> lines;
     private int line;
-    private int firstLineOfItem;
-    private Item item;
 
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern emptyCommentLineRegex = Pattern.compile(
-        "\\s*(?:/\\*)?\\*?\\s*");
-      //     /*       *
+        "\\s*(?:/\\*)?\\*?/?\\s*");
+      //     /*       *   /
 
     private static final Pattern itemStartRegex = Pattern.compile(
-        "\\s*(?:/\\*)?\\*?\\*?\\s*(%[^\\s\\[:]+)\\s*(\\[\\w+\\])?\\s*" +
-      //     /*       *           %tag              [attr]
+        "\\s*(?:/\\*)?\\*?\\*?(<)?\\s*(%[^\\s\\[:]+)\\s*(\\[\\w+\\])?\\s*" +
+      //     /*       *               %tag              [attr]
         "(:\\s*([_A-Za-z0-9]+))?\\s*([^\\[\\s][^\\s]*\\s*)?(.*)");
       // Label                      Token                  ...
 
     private static final Pattern itemContinuationRegex = Pattern.compile(
         "\\s*\\* ([^%]*)");
       //     *   non-%...
+
+    public static final Pattern trailingCommentRegex = Pattern.compile(
+        ".*(\\/\\*.*\\*\\/)");
+
+    public static final Pattern commentEndRegex = Pattern.compile(
+        "\\s*(/\\*\\*.*)?\\*/\\s*");
+
+    public static final Pattern commentStartRegex = Pattern.compile(
+        "\\s*/\\*\\*.*");
+
 }

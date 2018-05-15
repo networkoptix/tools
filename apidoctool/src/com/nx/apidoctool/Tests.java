@@ -1,6 +1,6 @@
 package com.nx.apidoctool;
 
-import com.nx.apidoc.Apidoc;
+import com.nx.apidoc.*;
 import com.nx.util.*;
 import org.w3c.dom.Document;
 
@@ -172,14 +172,19 @@ public final class Tests extends TestBase
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
 
+        TypeMananger typeMananger = new TypeMananger(/*verbose*/ true);
+        List<File> files = new ArrayList<File>();
+        files.add(templateFunctionsCppFile);
+        typeMananger.processFiles(files);
+
         System.out.println("test: parsing apidoc in \"template\" functions C++");
         System.out.println("    Sample: " + expectedTemplateFunctionsXmlFile);
         System.out.println("    Input: " + templateFunctionsCppFile);
 
         final SourceCode reader = new SourceCode(templateFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
-        final int processedFunctionsCount =
-            sourceCodeParser.parseApidocComments(apidoc, new TemplateRegistrationMatcher());
+        final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
+            apidoc, new TemplateRegistrationMatcher(), typeMananger);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
@@ -206,14 +211,69 @@ public final class Tests extends TestBase
         System.out.println("    Input: " + handlerFunctionsCppFile);
         final SourceCode reader = new SourceCode(handlerFunctionsCppFile);
         final SourceCodeParser sourceCodeParser = new SourceCodeParser(verbose, reader);
-        final int processedFunctionsCount =
-            sourceCodeParser.parseApidocComments(apidoc, new HandlerRegistrationMatcher());
+        final int processedFunctionsCount = sourceCodeParser.parseApidocComments(
+                apidoc, new HandlerRegistrationMatcher(), null);
         System.out.println("    API functions processed: " + processedFunctionsCount);
 
         XmlUtils.writeXmlFile(outputApidocXmlFile, XmlSerializer.toDocument(apidoc));
         System.out.println("    Output: " + outputApidocXmlFile);
 
         assertFileContentsEqual(outputApidocXmlFile, expectedHandlerFunctionsXmlFile);
+    }
+
+    private void testTypeParsers()
+        throws Exception
+    {
+        final File structHeaderFile = new File(
+            sourceCodeParserTestPath + "/structs.h");
+        final File expectedStructDescriptionFile = new File(
+            sourceCodeParserTestPath + "/expected_structs.txt");
+        final File outputStructDescriptionFile = new File(
+            sourceCodeParserOutputTestPath + "/structs.txt");
+
+        System.out.println("test: parsing apidoc structs and enums in C++");
+        System.out.println("    Input: " + structHeaderFile);
+        System.out.println("    Output: " + outputStructDescriptionFile);
+        final SourceCode reader = new SourceCode(structHeaderFile);
+
+        final EnumParser enumParser = new EnumParser(reader, true);
+        final Map<String, EnumParser.EnumInfo> enums = enumParser.parseEnums();
+
+        List<EnumParser.EnumInfo> enumList =
+            new ArrayList<EnumParser.EnumInfo>(enums.values());
+        Collections.sort(enumList, new Comparator<EnumParser.EnumInfo>()
+        {
+            public int compare(EnumParser.EnumInfo e1, EnumParser.EnumInfo e2)
+            {
+                return e1.name.compareTo(e2.name);
+            }
+        });
+
+        String description = "";
+        description += "-----------------------------------------------------------------------\n";
+        description += "- Enums\n\n";
+        for (EnumParser.EnumInfo enumInfo: enumList)
+            description += enumInfo.toString() + "\n";
+
+        description += "-----------------------------------------------------------------------\n";
+        description += "- Structs\n\n";
+        final StructParser structParser = new StructParser(reader, true);
+        final Map<String, StructParser.StructInfo> structs = structParser.parseStructs();
+        List<StructParser.StructInfo> structList =
+            new ArrayList<StructParser.StructInfo>(structs.values());
+        Collections.sort(structList, new Comparator<StructParser.StructInfo>()
+            {
+                public int compare(StructParser.StructInfo s1, StructParser.StructInfo s2)
+                {
+                    return s1.name.compareTo(s2.name);
+                }
+            });
+        for (StructParser.StructInfo structInfo: structList)
+            description += structInfo.toString() + "\n";
+
+        Utils.writeStringToFile(outputStructDescriptionFile, description);
+
+        assertFileContentsEqual(expectedStructDescriptionFile, outputStructDescriptionFile);
     }
 
     private void VmsCodeToApiXmlExecutor()
@@ -266,7 +326,8 @@ public final class Tests extends TestBase
         this.testPath = testPath;
         this.outputTestPath = outputTestPath;
         this.sourceCodeParserTestPath = new File(testPath + "/source_code_parser");
-        this.sourceCodeParserApiTemplateXmlFile = new File(sourceCodeParserTestPath + "/api_template.xml");
+        this.sourceCodeParserApiTemplateXmlFile = new File(
+            sourceCodeParserTestPath + "/api_template.xml");
         this.sourceCodeParserOutputTestPath = new File(outputTestPath + "/source_code_parser");
         this.testPropertiesFile = new File(testPath + "/test.properties");
         this.vmsPath = new File(testPath + "/nx_vms");
@@ -286,13 +347,14 @@ public final class Tests extends TestBase
         run("SourceCodeEditor", new Run() { public void run() throws Exception {
             testSourceCodeEditor(); } });
 
+        run("TypeParsers", new Run() { public void run() throws Exception {
+            testTypeParsers(); } });
+
         run("SourceCodeParserTemplate", new Run() { public void run() throws Exception {
             testSourceCodeParserTemplate(); } });
 
         run("SourceCodeParserHanlder", new Run() { public void run() throws Exception {
-            testSourceCodeParserHandler
-                    (); } });
-
+            testSourceCodeParserHandler(); } });
 
         run("VmsCodeToApiXmlExecutor", new Run() { public void run() throws Exception {
             VmsCodeToApiXmlExecutor(); } });

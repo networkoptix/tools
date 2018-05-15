@@ -12,6 +12,19 @@ public final class ApidocCommentParser
     extends ApidocComment
 {
     private int indentLevel = 0;
+    private String currentFunctionName;
+
+    public enum ParamDirection
+    {
+        Input,
+        Output
+    }
+
+    public enum ParamMode
+    {
+        WithToken,
+        WithoutToken
+    }
 
     public static class FunctionDescription 
     {
@@ -22,40 +35,59 @@ public final class ApidocCommentParser
     public static final class Error
         extends Exception
     {
-        public Error(String message, Throwable cause)
-        {
-            super(message, cause);
-        }
+        public Error(String message) { super(message); }
+    }
 
-        public Error(String message)
+    public static Apidoc.Param parseParam(
+        List<ApidocTagParser.Item> tags, ParamDirection paramDirection, ParamMode paramMode)
+        throws Error
+    {
+        if (tags == null)
+            return null;
+
+        ApidocCommentParser parser = new ApidocCommentParser();
+        ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
+        if (tagIterator.hasNext())
         {
-            super(message);
+            ApidocTagParser.Item tag = tagIterator.next();
+            return parser.parseParam(tag, tagIterator, paramDirection, paramMode);
         }
+        return null;
     }
 
     /**
      * @return Empty list if the comment should not convert to an XML function.
      */
-    public List<FunctionDescription> createFunctionsFromCommentLines(ApidocTagParser parser)
+    public List<FunctionDescription> createFunctionsFromTags(
+        List<ApidocTagParser.Item> tags)
         throws Error
     {
-        parser.parseNextItem();
-
         final List<FunctionDescription> functions = new ArrayList<FunctionDescription>();
-        if (parser.getItem() == null || !TAG_APIDOC.equals(parser.getItem().getTag()))
-            throw new Error("Comment should start with " + TAG_APIDOC + " tag.");
 
-        while (parser.getItem() != null)
-            functions.add(createFunctionFromCommentLines(parser));
+        ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
+        while (tagIterator.hasNext())
+            functions.add(createFunctionFromTags(tagIterator));
 
         return functions;
     }
+
+    //---------------------------------------------------------------------------------------------
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private FunctionDescription createFunctionFromCommentLines(ApidocTagParser parser) throws Error
+    private FunctionDescription createFunctionFromTags(
+        ListIterator<ApidocTagParser.Item> tagIterator)
+        throws Error
     {
-        FunctionDescription description = createFunctionFromApidocItem(parser);
+        ApidocTagParser.Item item = tagIterator.next();
+
+        if (!TAG_APIDOC.equals(item.getTag()))
+        {
+            throw new Error(item.getErrorPrefix() +
+                "Comment should start with " + TAG_APIDOC + " tag.");
+        }
+
+        FunctionDescription description = createFunctionFromApidocItem(item);
 
         boolean captionParsed = false;
         boolean permissionsParsed = false;
@@ -65,58 +97,60 @@ public final class ApidocCommentParser
         description.function.result.caption = "";
         description.function.result.type = Apidoc.Type.values()[0];
 
-        parser.parseNextItem();
-        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
+        while (tagIterator.hasNext())
         {
-            if (TAG_CAPTION.equals(parser.getItem().getTag()))
+            item = tagIterator.next();
+            if (TAG_APIDOC.equals(item.getTag()))
             {
-                captionParsed = checkTagOnce(
-                    captionParsed, description.function.name, TAG_CAPTION);
-                checkNoAttribute(parser, description.function.name);
-                description.function.caption = parser.getItem().getFullText(indentLevel);
-                parser.parseNextItem();
+                tagIterator.previous(); //< Return previous tag for future parsing.
+                break;
             }
-            else if (TAG_PERMISSIONS.equals(parser.getItem().getTag()))
+            else if (TAG_CAPTION.equals(item.getTag()))
             {
-                permissionsParsed = checkTagOnce(
-                    permissionsParsed, description.function.name, TAG_PERMISSIONS);
-                description.function.permissions = parser.getItem().getFullText(indentLevel + 1);
-                parser.parseNextItem();
+                captionParsed = checkTagOnce(item, captionParsed, TAG_CAPTION);
+                checkNoAttribute(item);
+                description.function.caption = item.getFullText(indentLevel);
             }
-            else if (TAG_PARAM.equals(parser.getItem().getTag()))
+            else if (TAG_PERMISSIONS.equals(item.getTag()))
             {
-                parseFunctionParam(parser, description.function);
+                permissionsParsed = checkTagOnce(item, permissionsParsed, TAG_PERMISSIONS);
+                description.function.permissions = item.getFullText(indentLevel + 1);
             }
-            else if (TAG_RETURN.equals(parser.getItem().getTag()))
+            else if (TAG_PARAM.equals(item.getTag()))
             {
-                returnParsed = checkTagOnce(returnParsed, description.function.name, TAG_RETURN);
-                parseFunctionResult(parser, description.function);
+                Apidoc.Param param = parseParam(
+                    item, tagIterator, ParamDirection.Input, ParamMode.WithToken);
+
+                checkDuplicateParam(item, description.function.params, param.name);
+                if (param.unused)
+                    description.function.unusedParams.add(param);
+                else
+                    description.function.params.add(param);
             }
-            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
+            else if (TAG_RETURN.equals(item.getTag()))
             {
-                // Ignore: this comment part is not intended for XML.
-                parser.parseNextItem();
+                returnParsed = checkTagOnce(item, returnParsed, TAG_RETURN);
+                description.function.result = parseFunctionResult(item, tagIterator);
             }
-            else
+            else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
-                throwUnknownTag(parser, description.function.name);
+                throwUnknownTag(item);
             }
         }
 
         return description;
     }
 
-    //---------------------------------------------------------------------------------------------
-
     /**
      * @return Null if the comment should not convert to an XML function.
      */
-    private FunctionDescription createFunctionFromApidocItem(ApidocTagParser parser) throws Error
+    private FunctionDescription createFunctionFromApidocItem(ApidocTagParser.Item item)
+        throws Error
     {
         String[] values = Utils.matchRegex(
-            functionHeaderRegex, parser.getItem().getFullText(indentLevel));
+            functionHeaderRegex, item.getFullText(indentLevel));
         if (values == null)
-            throw new Error("Wrong " + TAG_APIDOC + " function header.");
+            throw new Error(item.getErrorPrefix() + "Wrong " + TAG_APIDOC + " function header.");
 
         FunctionDescription result = new FunctionDescription();
         result.urlPrefix = values[1];
@@ -125,126 +159,136 @@ public final class ApidocCommentParser
         result.function.name = values[2];
         result.function.method = values[0].trim();
         result.function.description = values[3].trim();
+        if (LABEL_ARRAY_PARAMS.equals(item.getLabel()))
+            result.function.arrayParams = true;
+        else if (!"".equals(item.getLabel()))
+            throw new Error(item.getErrorPrefix() + "Invalid label: \"" + item.getLabel() + "\"");
 
-        if ("".equals(parser.getItem().getAttribute()))
+        currentFunctionName = result.function.name;
+
+        if ("".equals(item.getAttribute()))
             result.function.proprietary = false;
-        else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
+        else if (ATTR_PROPRIETARY.equals(item.getAttribute()))
             result.function.proprietary = true;
         else
-            throwInvalidAttribute(parser, result.function.name);
+            throwInvalidAttribute(item);
 
         return result;
     }
 
-    private void parseFunctionParam(
-        ApidocTagParser parser, Apidoc.Function function)
+    public Apidoc.Param parseParam(
+        ApidocTagParser.Item item,
+        ListIterator<ApidocTagParser.Item> tagIterator,
+        ParamDirection paramDirection,
+        ParamMode paramMode)
         throws Error
     {
-        assert TAG_PARAM.equals(parser.getItem().getTag());
-
-        String paramName = parser.getItem().getInitialToken();
-        int paramIndentLevel = paramName.length() - paramName.replace(".", "").length() + 1;
-
-        indentLevel += paramIndentLevel;
-        Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
-
-        param.name = getInitialToken(parser, function.name);
-        for (Apidoc.Param existingParam: function.params)
+        int paramIndentLevel = 0;
+        if (paramMode == ParamMode.WithToken)
         {
-            if (existingParam.name.equals(param.name))
-            {
-                throw new Error("Duplicate param \"" + param.name + "\" found" +
-                    " in function " + function.name + ".");
-            }
+            final String paramName = item.getInitialToken();
+            paramIndentLevel = Utils.substringCount(paramName, ".") + 1;
         }
+        indentLevel += paramIndentLevel;
 
-        if ("".equals(parser.getItem().getAttribute()))
+        Apidoc.Param param = new Apidoc.Param();
+        if (paramMode == ParamMode.WithToken)
+            param.description = item.getTextAfterInitialToken(indentLevel);
+        else
+            param.description = item.getFullText(indentLevel);
+        param.name = getInitialToken(item, paramMode);
+        try
+        {
+            param.type = Apidoc.Type.fromString(item.getLabel());
+        }
+        catch (Exception e)
+        {
+            throw new Error(item.getErrorPrefix() + "Invalid param type \"" + item.getLabel()
+                + "\" found" + " in function " + currentFunctionName + ".");
+        }
+        param.values.addAll(parseParamValues(tagIterator));
+
+        if (paramDirection == ParamDirection.Output)
+            parseFunctionResultParamAttr(item, param);
+        else
+            parseFunctionParamAttr(item, param);
+
+        indentLevel -= paramIndentLevel;
+        return param;
+    }
+
+    private void parseFunctionParamAttr(ApidocTagParser.Item item, Apidoc.Param param)
+        throws Error
+    {
+        if ("".equals(item.getAttribute()))
         {
             param.proprietary = false;
             param.optional = false;
         }
-        else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
+        else if (ATTR_PROPRIETARY.equals(item.getAttribute()))
         {
             param.proprietary = true;
             param.optional = true;
         }
-        else if (ATTR_OPT.equals(parser.getItem().getAttribute()))
+        else if (ATTR_OPT.equals(item.getAttribute()))
         {
             param.proprietary = false;
             param.optional = true;
         }
-        else if (ATTR_DEFAULT.equals(parser.getItem().getAttribute()))
+        else if (ATTR_DEFAULT.equals(item.getAttribute()))
         {
-            fillDefaultFormatParam(param, function.name);
+            fillDefaultFormatParam(item, param);
+            param.hasDefaultDescription = true;
+        }
+        else if (ATTR_UNUSED.equals(item.getAttribute()))
+        {
+            param.unused = true;
         }
         else
         {
-            throwInvalidAttribute(parser, function.name);
+            throwInvalidAttribute(item);
         }
-
-        try
-        {
-            param.type = Apidoc.Type.fromString(parser.getItem().getLabel());
-        }
-        catch (Exception e)
-        {
-            throw new Error("Invalid param type \"" + parser.getItem().getLabel() + "\" found" +
-                " in function " + function.name + ".");
-        }
-
-        parser.parseNextItem();
-
-        parseParamValues(parser, function, param);
-
-        function.params.add(param);
-        indentLevel -= paramIndentLevel;
     }
 
-    private void parseParamValues(
-        ApidocTagParser parser, Apidoc.Function function, Apidoc.Param param)
+    private List<Apidoc.Value> parseParamValues(
+        ListIterator<ApidocTagParser.Item> tagIterator)
         throws Error
     {
         indentLevel++;
-        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
+        List<Apidoc.Value> values = new ArrayList<Apidoc.Value>();
+        while (tagIterator.hasNext())
         {
-            if (TAG_VALUE.equals(parser.getItem().getTag()))
+            final ApidocTagParser.Item tag = tagIterator.next();
+            if (TAG_VALUE.equals(tag.getTag()))
             {
                 // ATTENTION: Currently, [proprietary] params are ignored, until supported in XML.
-                if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
-                {
-                    parser.parseNextItem();
+                if (ATTR_PROPRIETARY.equals(tag.getAttribute()))
                     continue;
-                }
-                checkNoAttribute(parser, function.name);
+
+                checkNoAttribute(tag);
                 Apidoc.Value value = new Apidoc.Value();
-                value.name = getInitialToken(parser, function.name);
-                value.description = parser.getItem().getTextAfterInitialToken(indentLevel);
-                param.values.add(value);
-                parser.parseNextItem();
+                value.name = getInitialToken(tag, ParamMode.WithToken);
+                value.description = tag.getTextAfterInitialToken(indentLevel);
+                values.add(value);
             }
-            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
+            else if (!tag.getTag().startsWith(TAG_COMMENTED_OUT))
             {
-                // Ignore: this comment part is not intended for XML.
-                parser.parseNextItem();
-            }
-            else
-            {
+                tagIterator.previous(); //< Return previous tag for future parsing.
                 break;
             }
         }
         indentLevel--;
+        return values;
     }
 
-    private void fillDefaultFormatParam(
-        Apidoc.Param param, String functionName)
+    private void fillDefaultFormatParam(ApidocTagParser.Item item, Apidoc.Param param)
         throws Error
     {
         if (!param.name.equals(PARAM_FORMAT))
         {
-            throw new Error(ATTR_DEFAULT + " found for param \"" + param.name +
-                "\", but supported only for param \"format\"," +
-                " in function " + functionName + ".");
+            throw new Error(item.getErrorPrefix() + ATTR_DEFAULT + " found for param \""
+                + param.name + "\", but supported only for param \"format\","
+                + " in function " + currentFunctionName + ".");
         }
 
         // TODO: Consider defining default "format" in the C++ source code.
@@ -269,46 +313,50 @@ public final class ApidocCommentParser
         return value;
     }
 
-    private void parseFunctionResult(
-        ApidocTagParser parser, Apidoc.Function function)
+    private Apidoc.Result parseFunctionResult(
+        ApidocTagParser.Item item, ListIterator<ApidocTagParser.Item> tagIterator)
         throws Error
     {
-        assert TAG_RETURN.equals(parser.getItem().getTag());
+        assert TAG_RETURN.equals(item.getTag());
         indentLevel++;
-        checkNoAttribute(parser, function.name);
-        function.result.caption = parser.getItem().getFullText(indentLevel);
+        checkNoAttribute(item);
+        Apidoc.Result result = new Apidoc.Result();
+        result.caption = item.getFullText(indentLevel);
         try
         {
-            function.result.type = Apidoc.Type.fromString(parser.getItem().getLabel());
+            result.type = Apidoc.Type.fromString(item.getLabel());
         }
         catch (Exception e)
         {
-            throw new Error("Invalid result type \"" + parser.getItem().getLabel() + "\" found" +
-                " in function " + function.name + ".");
+            throw new Error(item.getErrorPrefix() + "Invalid result type \"" + item.getLabel()
+                + "\" found" + " in function " + currentFunctionName + ".");
         }
 
         boolean deprecatedAttributeTagFound = false;
-        parser.parseNextItem();
-        while (parser.getItem() != null && !TAG_APIDOC.equals(parser.getItem().getTag()))
+        while (tagIterator.hasNext())
         {
-            if (TAG_PARAM.equals(parser.getItem().getTag()))
+            item = tagIterator.next();
+            if (TAG_PARAM.equals(item.getTag()))
             {
-                parseFunctionResultParam(parser, function);
+                Apidoc.Param param = parseParam(
+                    item, tagIterator, ParamDirection.Output, ParamMode.WithToken);
+
+                checkDuplicateParam(item, result.params, param.name);
+                if (param.unused)
+                    result.unusedParams.add(param);
+                else
+                    result.params.add(param);
             }
-            else if ("%attribute".equals(parser.getItem().getTag()))
+            else if ("%attribute".equals(item.getTag()))
             {
                 // Support for old deprecated Apidoc Comment format which has
                 // "%attribute" tags following "%result" instead of "%param".
                 deprecatedAttributeTagFound = true;
-                parseFunctionResultAttributeDeprecated(parser, function);
+                parseFunctionResultAttributeDeprecated(item, result);
             }
-            else if (parser.getItem().getTag().startsWith(TAG_COMMENTED_OUT))
+            else if (!item.getTag().startsWith(TAG_COMMENTED_OUT))
             {
-                // Ignore: this comment part is not intended for XML.
-                parser.parseNextItem();
-            }
-            else
-            {
+                tagIterator.previous(); //< Return previous tag for future parsing.
                 break;
             }
         }
@@ -318,140 +366,114 @@ public final class ApidocCommentParser
             System.out.println(
                 "    WARNING: Deprecated Apidoc tag \"%attribute\" found" +
                     " instead of \"" + TAG_PARAM + "\"" +
-                    " in function " + function.name + ".");
+                    " in function " + currentFunctionName + ".");
         }
         indentLevel--;
+        return result;
     }
 
     private void parseFunctionResultAttributeDeprecated(
-        ApidocTagParser parser, Apidoc.Function function)
+        ApidocTagParser.Item item, Apidoc.Result result)
         throws Error
     {
-        assert "%attribute".equals(parser.getItem().getTag());
+        assert "%attribute".equals(item.getTag());
 
         Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
+        param.description = item.getTextAfterInitialToken(indentLevel);
 
-        param.name = getInitialToken(parser, function.name);
-        for (Apidoc.Param existingParam: function.result.params)
+        param.name = getInitialToken(item, ParamMode.WithToken);
+        for (Apidoc.Param existingParam: result.params)
         {
             if (existingParam.name.equals(param.name))
             {
-                throw new Error("Duplicate result attribute \"" + param.name + "\" found" +
-                    " in function " + function.name + ".");
+                throw new Error(item.getErrorPrefix() + "Duplicate result attribute \"" + param.name
+                    + "\" found" + " in function " + currentFunctionName + ".");
             }
         }
 
-        checkNoAttribute(parser, function.name);
+        checkNoAttribute(item);
         param.proprietary = false;
         param.optional = false;
-
-        parser.parseNextItem();
-
-        function.result.params.add(param);
+        result.params.add(param);
     }
 
-    private void parseFunctionResultParam(
-        ApidocTagParser parser, Apidoc.Function function)
+    private void parseFunctionResultParamAttr(ApidocTagParser.Item tag, Apidoc.Param param)
         throws Error
     {
-        assert TAG_PARAM.equals(parser.getItem().getTag());
-
-        String paramName = parser.getItem().getInitialToken();
-        int paramIndentLevel = paramName.length() - paramName.replace(".", "").length() + 1;
-
-        indentLevel += paramIndentLevel;
-
-        Apidoc.Param param = new Apidoc.Param();
-        param.description = parser.getItem().getTextAfterInitialToken(indentLevel);
-
-        try
-        {
-            param.type = Apidoc.Type.fromString(parser.getItem().getLabel());
-        }
-        catch (Exception e)
-        {
-            throw new Error("Invalid result param type \"" + parser.getItem().getLabel()
-                + "\" found in function " + function.name + ".");
-        }
-
-        param.name = getInitialToken(parser, function.name);
-        for (Apidoc.Param existingParam: function.result.params)
-        {
-            if (existingParam.name.equals(param.name))
-            {
-                throw new Error("Duplicate result param \"" + param.name + "\" found" +
-                    " in function " + function.name + ".");
-            }
-        }
-
         param.optional = false;
-        if ("".equals(parser.getItem().getAttribute()))
+        if ("".equals(tag.getAttribute()))
             param.proprietary = false;
-        else if (ATTR_PROPRIETARY.equals(parser.getItem().getAttribute()))
+        else if (ATTR_PROPRIETARY.equals(tag.getAttribute()))
             param.proprietary = true;
+        else if (ATTR_UNUSED.equals(tag.getAttribute()))
+            param.unused = true;
         else
-            throwInvalidAttribute(parser, function.name);
-
-        parser.parseNextItem();
-
-        parseParamValues(parser, function, param);
-
-        function.result.params.add(param);
-        indentLevel -= paramIndentLevel;
+            throwInvalidAttribute(tag);
     }
 
     /**
      * @return New value for the tagParsed flag.
      */
-    private static boolean checkTagOnce(
-        boolean tagParsed, String functionName, String tag)
+    private boolean checkTagOnce(ApidocTagParser.Item item, boolean tagParsed, String tag)
         throws Error
     {
         if (tagParsed)
         {
-            throw new Error("More than one " + tag + " found" +
-                " in function " + functionName + ".");
+            throw new Error(item.getErrorPrefix() + "More than one " + tag + " found" +
+                " in function " + currentFunctionName + ".");
         }
         return true;
     }
 
-    private static void throwUnknownTag(
-        ApidocTagParser parser, String functionName)
+    private void throwUnknownTag(ApidocTagParser.Item item)
         throws Error
     {
-        throw new Error("Unknown tag " + parser.getItem().getTag() + " found" +
-            " in function " + functionName + ".");
+        throw new Error(item.getErrorPrefix() + "Unknown tag " + item.getTag() + " found" +
+            " in function " + currentFunctionName + ".");
     }
 
-    private static void throwInvalidAttribute(
-        ApidocTagParser parser, String functionName)
+    private void throwInvalidAttribute(ApidocTagParser.Item item)
         throws Error
     {
-        throw new Error("The attribute " + parser.getItem().getAttribute() +
-            " is not allowed after the tag " + parser.getItem().getTag() +
-            " in function " + functionName + ".");
+        throw new Error(item.getErrorPrefix() + "The attribute " + item.getAttribute() +
+            " is not allowed after the tag " + item.getTag() +
+            " in function " + currentFunctionName + ".");
     }
 
-    private static void checkNoAttribute(
-        ApidocTagParser parser, String functionName)
+    private void checkNoAttribute(ApidocTagParser.Item item)
         throws Error
     {
-        if (!parser.getItem().getAttribute().isEmpty())
-            throwInvalidAttribute(parser, functionName);
+        if (!item.getAttribute().isEmpty())
+            throwInvalidAttribute(item);
     }
 
-    private static String getInitialToken(
-        ApidocTagParser parser, String functionName)
+    private void checkDuplicateParam(
+        ApidocTagParser.Item item, List<Apidoc.Param> params, String paramName)
         throws Error
     {
-        final String initialToken = parser.getItem().getInitialToken();
+        for (Apidoc.Param existingParam: params)
+        {
+            if (existingParam.name.equals(paramName))
+            {
+                throw new Error(item.getErrorPrefix() + "Duplicate param \"" + paramName
+                    + "\" found" + " in function " + currentFunctionName + ".");
+            }
+        }
+    }
+
+    private String getInitialToken(ApidocTagParser.Item item, ParamMode paramMode)
+        throws Error
+    {
+        if (paramMode == ParamMode.WithoutToken)
+            return "";
+
+        final String initialToken = item.getInitialToken();
 
         if (initialToken.isEmpty())
         {
-            throw new Error(
-                "A token should follow the tag " + parser.getItem().getTag() +
-                " in function " + functionName + ".");
+            throw new Error(item.getErrorPrefix()
+                + "A token should follow the tag " + item.getTag()
+                + " in function " + currentFunctionName + ".");
         }
 
         return initialToken;
@@ -460,7 +482,7 @@ public final class ApidocCommentParser
     //---------------------------------------------------------------------------------------------
 
     private static final Pattern functionHeaderRegex = Pattern.compile(
-        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?([\\w\\/]+)(.*)", Pattern.DOTALL);
+        "\\s*([A-Z]+ )?\\s*(?:(/\\w+)/)?([\\w/]+)(.*)", Pattern.DOTALL);
       //     0HttpMthd        1UrlPre   2FnNm      3Txt
       //       GET             /ec2     getRe      \nRe
 }

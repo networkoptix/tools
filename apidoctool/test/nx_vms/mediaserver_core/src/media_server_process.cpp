@@ -1934,7 +1934,6 @@ void MediaServerProcess::registerRestHandlers(
 
     reg("api/wearableCamera", new QnWearableCameraRestHandler());
 
-    // TODO: lbusygin: params xSpeed xPos and etc ??
     /**%apidoc GET /api/ptz
      * Perform reading or writing PTZ operation
      * %param:string cameraId Camera id (can be obtained from "id" field via /ec2/getCamerasEx or
@@ -3272,7 +3271,10 @@ void MediaServerProcess::updateGuidIfNeeded()
 }
 
 nx::utils::log::Settings MediaServerProcess::makeLogSettings(
-    const QString& argValue, const QString& settingsKey, const QString& defaultValue)
+    const QString& argValue,
+    const QString& settingsKey,
+    const QString& defaultValue,
+    const QString& logBaseName)
 {
     const auto settings = qnServerModule->roSettings();
 
@@ -3281,6 +3283,7 @@ nx::utils::log::Settings MediaServerProcess::makeLogSettings(
     s.directory = settings->value("logDir").toString();
     s.maxFileSize = settings->value("maxLogFileSize", DEFAULT_MAX_LOG_FILE_SIZE).toUInt();
     s.updateDirectoryIfEmpty(getDataDirectory());
+    s.logBaseName = logBaseName;
 
     const auto makeLevel =
         [&]()
@@ -3312,7 +3315,7 @@ void MediaServerProcess::initializeLogging()
 {
     const auto binaryPath = QFile::decodeName(m_argv[0]);
     nx::utils::log::initialize(
-        makeLogSettings(cmdLineArguments().logLevel, "logLevel", ""),
+        makeLogSettings(cmdLineArguments().logLevel, "logLevel", "", "log_file"),
         qApp->applicationName(), binaryPath);
 
     if (auto path = nx::utils::log::mainLogger()->filePath())
@@ -3323,28 +3326,28 @@ void MediaServerProcess::initializeLogging()
     nx::utils::log::Settings logSettings;
 
     logSettings = makeLogSettings(cmdLineArguments().httpLogLevel,
-        "http-log-level", toString(nx::utils::log::Level::none));
+        "http-log-level", toString(nx::utils::log::Level::none), "http_log");
     nx::utils::log::initialize(
         logSettings, qApp->applicationName(), binaryPath,
-        QLatin1String("http_log"), nx::utils::log::addLogger({QnLog::HTTP_LOG_INDEX}));
+        nx::utils::log::addLogger({QnLog::HTTP_LOG_INDEX}));
 
     logSettings = makeLogSettings(cmdLineArguments().hwLogLevel,
-        "hwLoglevel", toString(nx::utils::log::Level::info));
+        "hwLoglevel", toString(nx::utils::log::Level::info), "hw_log");
     nx::utils::log::initialize(
         logSettings, qApp->applicationName(), binaryPath,
-        QLatin1String("hw_log"), nx::utils::log::addLogger({QnLog::HWID_LOG}));
+        nx::utils::log::addLogger({QnLog::HWID_LOG}));
 
     logSettings = makeLogSettings(cmdLineArguments().ec2TranLogLevel,
-        "tranLogLevel", toString(nx::utils::log::Level::none));
+        "tranLogLevel", toString(nx::utils::log::Level::none), "ec2_tran");
     nx::utils::log::initialize(
         logSettings, qApp->applicationName(), binaryPath,
-        QLatin1String("ec2_tran"), nx::utils::log::addLogger({QnLog::EC2_TRAN_LOG}));
+        nx::utils::log::addLogger({QnLog::EC2_TRAN_LOG}));
 
     logSettings = makeLogSettings(cmdLineArguments().permissionsLogLevel,
-        "permissionsLogLevel", toString(nx::utils::log::Level::none));
+        "permissionsLogLevel", toString(nx::utils::log::Level::none), "permissions");
     nx::utils::log::initialize(
         logSettings, qApp->applicationName(), binaryPath,
-        QLatin1String("permissions"), nx::utils::log::addLogger({QnLog::PERMISSIONS_LOG}));
+        nx::utils::log::addLogger({QnLog::PERMISSIONS_LOG}));
 
     defaultMsgHandler = qInstallMessageHandler(myMsgHandler);
 }
@@ -3353,10 +3356,12 @@ void MediaServerProcess::initializeHardwareId()
 {
     const auto binaryPath = QFile::decodeName(m_argv[0]);
 
-    auto logSettings = makeLogSettings(cmdLineArguments().hwLogLevel, "hwLoglevel", "info");
+    // Double log initialization is intended here because this log is written under root.
+    const auto logSettings = makeLogSettings(cmdLineArguments().hwLogLevel,
+        "hwLoglevel", toString(nx::utils::log::Level::info), "hw_log");
     nx::utils::log::initialize(
         logSettings, qApp->applicationName(), binaryPath,
-        QLatin1String("hw_log"), nx::utils::log::addLogger({QnLog::HWID_LOG}));
+        nx::utils::log::addLogger({QnLog::HWID_LOG}));
 
     LLUtil::initHardwareId(qnServerModule->roSettings());
     updateGuidIfNeeded();
@@ -4460,8 +4465,35 @@ void SIGUSR1_handler(int)
 }
 #endif
 
+static void redirectOutput(FILE* stream, const char* streamName, const std::string& filename)
+{
+    if (freopen(filename.c_str(), "w", stream))
+        fprintf(stream, "%s of mediaserver is redirected to this file\n", streamName);
+    // Ignore possible errors because it is not clear where to print an error message.
+}
+
+static bool fileExists(const std::string& filename)
+{
+    return static_cast<bool>(std::ifstream(filename.c_str()));
+}
+
+static void redirectStdoutAndStderrIfNeeded(int argc, char* argv[])
+{
+    static const std::string kFilePrefix = nx::kit::IniConfig::iniFilesDir();
+    static const std::string kStdoutFilename = "mediaserver_stdout.log";
+    static const std::string kStderrFilename = "mediaserver_stderr.log";
+
+    if (fileExists(kFilePrefix + kStdoutFilename))
+        redirectOutput(stdout, "stdout", kFilePrefix + kStdoutFilename);
+
+    if (fileExists(kFilePrefix + kStderrFilename))
+        redirectOutput(stderr, "stderr", kFilePrefix + kStderrFilename);
+}
+
 int MediaServerProcess::main(int argc, char* argv[])
 {
+    redirectStdoutAndStderrIfNeeded(argc, argv);
+
 #if 0
 #if defined(__GNUC__)
 # if defined(__i386__)

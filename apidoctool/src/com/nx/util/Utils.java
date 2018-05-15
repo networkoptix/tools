@@ -34,6 +34,44 @@ public final class Utils
         return sb.toString();
     }
 
+    public static List<File> getHeaderFileList(File rootPath, String fileList)
+        throws Exception
+    {
+        final List<File> headers = new ArrayList<File>();
+        String[] tokens = fileList.split(",");
+        for (String token: tokens)
+        {
+            File file = new File(rootPath, token.trim());
+            if (!file.exists())
+            {
+                throw new Exception("File not exists: " + file);
+            }
+            if (file.isDirectory())
+            {
+                File[] directoryListing = file.listFiles();
+                for (File entry: directoryListing)
+                {
+                    if (entry.isFile() && entry.getName().endsWith(".h"))
+                        headers.add(entry);
+                }
+            }
+            if (file.isFile() && file.getName().endsWith(".h"))
+                headers.add(file);
+        }
+        return headers;
+    }
+
+    public static int substringCount(String str, String substring)
+    {
+        return str.length() - str.replace(substring, "").length();
+    }
+
+    public static String removeCppNamespaces(String str)
+    {
+        String[] namespaces = str.split("::");
+        return  namespaces[namespaces.length - 1];
+    }
+
     public static String stringOfSpaces(int numberOfSpaces)
     {
         char[] chars = new char[numberOfSpaces];

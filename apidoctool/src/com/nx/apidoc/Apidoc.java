@@ -25,7 +25,8 @@ public final class Apidoc extends Serializable
         ARRAY, //< List of objects.
         OPTION, //< Parameter without value.
         FLAGS, //< Combination of flags separated with "|".
-        STRING_ARRAY, //< List of string.
+        STRING_ARRAY, //< List of strings.
+        UUID_ARRAY, //< List of uuids.
         OBJECT_JSON, //< String with JSON object inside.
         ARRAY_JSON, //< String with JSON array inside.
         TEXT, //< Raw text in result.
@@ -75,6 +76,9 @@ public final class Apidoc extends Serializable
     {
         protected boolean omitOptionalFieldIfFalse = false; ///< Used for serializing.
 
+        public boolean unused = false; ///< Internal field, omit param from apidoc.
+        public boolean hasDefaultDescription = false; ///< Internal field
+
         public boolean proprietary; ///< attribute; optional(default=false)
         public String name;
         public Type type;
@@ -111,6 +115,8 @@ public final class Apidoc extends Serializable
 
     public static final class Result extends Serializable
     {
+        public List<Param> unusedParams; ///< Internal field.
+
         public String caption; ///< optional
         public Type type;
         public List<Param> params; ///< optional
@@ -118,6 +124,7 @@ public final class Apidoc extends Serializable
         public Result()
         {
             params = new ArrayList<Param>();
+            unusedParams = new ArrayList<Param>();
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
@@ -140,7 +147,9 @@ public final class Apidoc extends Serializable
     public static final class Function extends Serializable
     {
         public Group parentGroup;
+        public List<Param> unusedParams; ///< Internal field.
 
+        public boolean arrayParams; ///< optional(false)
         public boolean proprietary; ///< attribute; optional(false)
         public String name;
         public String caption; ///< optional
@@ -153,11 +162,13 @@ public final class Apidoc extends Serializable
         public Function()
         {
             params = new ArrayList<Param>();
+            unusedParams = new ArrayList<Param>();
         }
 
         protected void readFromParser(Parser p) throws Parser.Error
         {
             proprietary = p.readBooleanAttr("proprietary", BooleanDefault.FALSE);
+            arrayParams = p.readBoolean("arrayParams", BooleanDefault.FALSE);
             name = p.readString("name", Presence.REQUIRED);
             caption = p.readString("caption", Presence.OPTIONAL);
             description = p.readInnerXml("description", Presence.OPTIONAL);
@@ -170,6 +181,7 @@ public final class Apidoc extends Serializable
         protected void writeToGenerator(Generator g)
         {
             g.writeBooleanAttr("proprietary", proprietary, BooleanDefault.FALSE);
+            g.writeBoolean("arrayParams", arrayParams, BooleanDefault.FALSE);
             g.writeString("name", name, Emptiness.PROHIBIT);
             g.writeString("caption", caption, Emptiness.OMIT);
             g.writeInnerXml("description", description, Emptiness.ALLOW);

@@ -37,6 +37,104 @@
                         </params>
                     </result>
                 </function>
+                <function>
+                    <arrayParams>true</arrayParams>
+                    <name>getStorages</name>
+                    <description>Read the list of current storages.</description>
+                    <method>GET</method>
+                    <params>
+                        <param>
+                            <name>baseValue</name>
+                            <type>integer</type>
+                            <description>base value description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>param1</name>
+                            <type>integer</type>
+                            <description>int param description</description>
+                            <optional>true</optional>
+                        </param>
+                        <param>
+                            <name>innerObject</name>
+                            <type>object</type>
+                            <description>inner object description</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>innerObject.innerParam</name>
+                            <type>string</type>
+                            <description>override description from function comment</description>
+                            <optional>false</optional>
+                        </param>
+                        <param>
+                            <name>innerObject.innerEnumParam</name>
+                            <type>enum</type>
+                            <description>Enum description</description>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>value1</name>
+                                    <description>value1 description</description>
+                                </value>
+                                <value>
+                                    <name>value2</name>
+                                    <description>value2 description</description>
+                                </value>
+                            </values>
+                        </param>
+                    </params>
+                    <result>
+                        <type>array</type>
+                        <params>
+                            <param>
+                                <name>outputParam</name>
+                                <type>integer</type>
+                                <description>outputParam description</description>
+                                <values>
+                                    <value>
+                                        <name>1</name>
+                                        <description>one</description>
+                                    </value>
+                                    <value>
+                                        <name>2</name>
+                                        <description>two</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>enumParam</name>
+                                <type>enum</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                            <param>
+                                <name>flagsParam</name>
+                                <type>flags</type>
+                                <description>Enum description</description>
+                                <values>
+                                    <value>
+                                        <name>value1</name>
+                                        <description>value1 description</description>
+                                    </value>
+                                    <value>
+                                        <name>value2</name>
+                                        <description>value2 description</description>
+                                    </value>
+                                </values>
+                            </param>
+                        </params>
+                    </result>
+                </function>
             </functions>
         </group>
     </groups>

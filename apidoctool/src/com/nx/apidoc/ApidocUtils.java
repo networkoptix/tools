@@ -1,9 +1,8 @@
 package com.nx.apidoc;
 
-import com.nx.util.Utils;
+import com.nx.util.SourceCode;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Helper functions for handling Apidoc structure elements.
@@ -121,7 +120,8 @@ public final class ApidocUtils
     {
         for (Apidoc.Function function: group.functions)
         {
-            if (function.name.equals(functionToCheck.name) && function.method.equals(functionToCheck.method))
+            if (function.name.equals(functionToCheck.name)
+                && function.method.equals(functionToCheck.method))
                 return false;
         }
         return true;
@@ -130,7 +130,7 @@ public final class ApidocUtils
     /**
      * @return false if duplicate function found in entire group.
      */
-    public static void checkNoFunctionDuplicates(Apidoc apidoc) throws Exception
+    public static void checkNoFunctionDuplicates(Apidoc apidoc) throws Error
     {
         for (Apidoc.Group group: apidoc.groups)
         {
@@ -138,7 +138,7 @@ public final class ApidocUtils
             for (Apidoc.Function function: group.functions)
             {
                 if (!uniques.add(function.name + function.method))
-                    throw new Exception("Duplicate function found: [" + function.name + "]");
+                    throw new Error("Duplicate function found: [" + function.name + "]");
             }
         }
     }

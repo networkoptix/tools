@@ -5,34 +5,38 @@ import com.nx.util.SourceCode;
 import java.util.regex.Pattern;
 
 /**
- * Parses registration for "template" functions - API functions which are registered in C++ code using a C++ template
- * function with input and output data types as template parameters.
+ * Parses registration for "template" functions - API functions which are registered in C++ code
+ * using a C++ template function with input and output data types as template parameters.
  */
 public final class TemplateRegistrationMatcher implements RegistrationMatcher
 {
     /**
      * @return Null if the line is not a registration line.
      */
-    public RegistrationMatch createRegistrationMatch(SourceCode sourceCode, int line) throws SourceCode.Error
+    public RegistrationMatch createRegistrationMatch(SourceCode sourceCode, int line)
+        throws SourceCode.Error
     {
         String[] params;
 
-        params = sourceCode.matchMultiline(line, firstLineRegexForGetFunc, groupRegexForGetFunc, lastLineRegex);
+        params = sourceCode.matchMultiline(
+            line, firstLineRegexForGetFunc, groupRegexForGetFunc, lastLineRegex);
         if (params != null)
             return createMatchRegister(params[2], params[0], params[1], "GET");
 
-        params = sourceCode.matchMultiline(line, firstLineRegexForUpdateFunc, groupRegexForUpdateFunc, lastLineRegex);
+        params = sourceCode.matchMultiline(
+            line, firstLineRegexForUpdateFunc, groupRegexForUpdateFunc, lastLineRegex);
         if (params != null)
             return createMatchRegister(params[1], params[0], "", "POST");
 
-        params = sourceCode.matchMultiline(line, firstLineRegexForFunctor, groupRegexForFunctor, lastLineRegex);
+        params = sourceCode.matchMultiline(
+            line, firstLineRegexForFunctor, groupRegexForFunctor, lastLineRegex);
         if (params != null)
             return createMatchRegister(params[2], params[0], params[1], "GET");
 
         return null;
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private static RegistrationMatch createMatchRegister(
         String functionName,
@@ -53,7 +57,7 @@ public final class TemplateRegistrationMatcher implements RegistrationMatcher
         return new RegistrationMatch(functionName, inputDataType, outputDataType, method);
     }
 
-    //--------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     private static final Pattern lastLineRegex = Pattern.compile(
         ".*[;\\[].*");
