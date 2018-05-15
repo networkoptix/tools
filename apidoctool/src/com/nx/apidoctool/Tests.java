@@ -241,13 +241,14 @@ public final class Tests extends TestBase
 
         List<EnumParser.EnumInfo> enumList =
             new ArrayList<EnumParser.EnumInfo>(enums.values());
-        Collections.sort(enumList, new Comparator<EnumParser.EnumInfo>()
-        {
-            public int compare(EnumParser.EnumInfo e1, EnumParser.EnumInfo e2)
+        Collections.sort(enumList,
+            new Comparator<EnumParser.EnumInfo>()
             {
-                return e1.name.compareTo(e2.name);
-            }
-        });
+                public int compare(EnumParser.EnumInfo e1, EnumParser.EnumInfo e2)
+                {
+                    return e1.name.compareTo(e2.name);
+                }
+            });
 
         String description = "";
         description += "-----------------------------------------------------------------------\n";
@@ -261,7 +262,8 @@ public final class Tests extends TestBase
         final Map<String, StructParser.StructInfo> structs = structParser.parseStructs();
         List<StructParser.StructInfo> structList =
             new ArrayList<StructParser.StructInfo>(structs.values());
-        Collections.sort(structList, new Comparator<StructParser.StructInfo>()
+        Collections.sort(structList,
+            new Comparator<StructParser.StructInfo>()
             {
                 public int compare(StructParser.StructInfo s1, StructParser.StructInfo s2)
                 {

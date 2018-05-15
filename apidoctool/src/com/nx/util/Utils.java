@@ -38,17 +38,16 @@ public final class Utils
         throws Exception
     {
         final List<File> headers = new ArrayList<File>();
-        String[] tokens = fileList.split(",");
+        final String[] tokens = fileList.split(",");
         for (String token: tokens)
         {
-            File file = new File(rootPath, token.trim());
+            final File file = new File(rootPath, token.trim());
             if (!file.exists())
-            {
                 throw new Exception("File not exists: " + file);
-            }
+
             if (file.isDirectory())
             {
-                File[] directoryListing = file.listFiles();
+                final File[] directoryListing = file.listFiles();
                 for (File entry: directoryListing)
                 {
                     if (entry.isFile() && entry.getName().endsWith(".h"))
