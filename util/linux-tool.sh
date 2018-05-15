@@ -418,21 +418,7 @@ find_APIDOCTOOL_JAR()
 
 find_APIDOCTOOL_PARAMS()
 {
-    local -r LIST=( $(sed -n '/set(apidoctool_params/,/)/p' \
-        "$VMS_DIR/mediaserver_core/CMakeLists.txt") )
-    nx_log_array LIST
-
-    if (( ${#LIST[@]} == 0 ))
-    then
-        APIDOCTOOL_PARAMS=()
-    else
-        local -i i=1 #< Start from item #1, because #0 is the header line.
-        while (( i != ${#LIST[@]} - 1 )) #< Ignore the last item which is ")".
-        do
-            APIDOCTOOL_PARAMS+=( "$(echo "${LIST[$i]}" |sed 's/"//g')" )
-            (( ++i ))
-        done
-    fi
+    APIDOCTOOL_PARAMS=( -config "$VMS_DIR/mediaserver_core/api/apidoctool.properties" )
     nx_log_array APIDOCTOOL_PARAMS
 }
 
