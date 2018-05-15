@@ -418,7 +418,7 @@ find_APIDOCTOOL_JAR()
 
 find_APIDOCTOOL_PARAMS()
 {
-    APIDOCTOOL_PARAMS=( -config "$VMS_DIR/mediaserver_core/api/apidoctool.properties" )
+    APIDOCTOOL_PARAMS=( -config "$(nx_path "$VMS_DIR/mediaserver_core/api/apidoctool.properties")" )
     nx_log_array APIDOCTOOL_PARAMS
 }
 
@@ -463,6 +463,7 @@ do_apidoc() # dev|prod [action] "$@"
     else #< Run apidoctool with appropriate args for the action, adding the remaining args, if any.
         local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
         local -i OUTPUT_DIR_NEEDED=0
+        local -r TEST_DIR="$DEVELOP_DIR/devtools/apidoctool/test"
         case "$ACTION" in
             code-to-xml)
                 local -r ARGS=(
@@ -476,8 +477,9 @@ do_apidoc() # dev|prod [action] "$@"
             test)
                 OUTPUT_DIR_NEEDED=1
                 local -r ARGS=(
-                    -test-path "$(nx_path "$DEVELOP_DIR/devtools/apidoctool/test")"
+                    -test-path "$(nx_path "$TEST_DIR")"
                     -output-test-path "$(nx_path "$OUTPUT_DIR")"
+                    -config "$(nx_path "$TEST_DIR/apidoctool.properties")"
                 )
                 ;;
             sort-xml)
@@ -517,6 +519,7 @@ do_apidoc_rdep() # "$@"
     local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool"
     local -r JAR_PROD="$PACKAGE_DIR/apidoctool.jar"
     local -r TEST_DIR="$DEV_DIR/test"
+    local -r APIDOC_PROPERTIES="$TEST_DIR/apidoctool.properties"
 
     local -r OUTPUT_DIR="$TEMP_DIR/apidoctool"
     rm -rf "$OUTPUT_DIR"
@@ -526,6 +529,7 @@ do_apidoc_rdep() # "$@"
         -verbose test \
         -test-path "$(nx_path "$TEST_DIR")" \
         -output-test-path "$(nx_path "$OUTPUT_DIR")" \
+        -config "$(nx_path "$APIDOC_PROPERTIES")" \
         || exit $?
 
     nx_echo

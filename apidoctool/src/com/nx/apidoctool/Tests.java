@@ -128,7 +128,7 @@ public final class Tests extends TestBase
             "stringParam=Value with 2 spaces,\\\\backslash,\\ttab,\\nnewline",
             "# End of file");
 
-        final File testFile = new File(outputTestPath + "/params.properties");
+        final File testFile = new File(outputTestPath, "params.properties");
         Utils.writeStringListToFile(testFile, testFileText, /*lineBreak*/ "\n");
         testParams.parse(testFile, Collections.<String>emptyList(), /*verbose*/ false);
 
@@ -138,8 +138,8 @@ public final class Tests extends TestBase
     private void testApidocSerialization()
         throws Exception
     {
-        final File outputExpectedApiXmlFile = new File(outputTestPath + "/expected_api.xml");
-        final File outputExpectedApiJsonFile = new File(outputTestPath + "/expected_api.json");
+        final File outputExpectedApiXmlFile = new File(outputTestPath, "expected_api.xml");
+        final File outputExpectedApiJsonFile = new File(outputTestPath, "expected_api.json");
 
         apiXmlToXml(expectedApiXmlFile, outputExpectedApiXmlFile, outputExpectedApiJsonFile);
 
@@ -150,8 +150,8 @@ public final class Tests extends TestBase
     private void testSourceCodeEditor()
         throws Exception
     {
-        final File outputCppFile = new File(outputVmsPath + params.templateRegistrationCpp());
-        final File cppFile = new File(vmsPath + params.templateRegistrationCpp());
+        final File outputCppFile = new File(outputVmsPath, params.templateRegistrationCpp());
+        final File cppFile = new File(vmsPath, params.templateRegistrationCpp());
 
         final SourceCodeEditor sourceCodeEditor = new SourceCodeEditor(cppFile);
         sourceCodeEditor.saveToFile(outputCppFile);
@@ -163,11 +163,11 @@ public final class Tests extends TestBase
         throws Exception
     {
         final File templateFunctionsCppFile = new File(
-            sourceCodeParserTestPath + "/template_functions.cpp");
+            sourceCodeParserTestPath, "template_functions.cpp");
         final File expectedTemplateFunctionsXmlFile = new File(
-            sourceCodeParserTestPath + "/expected_template_functions.xml");
+            sourceCodeParserTestPath, "expected_template_functions.xml");
         final File outputApidocXmlFile = new File(
-            sourceCodeParserOutputTestPath + "/template_functions.xml");
+            sourceCodeParserOutputTestPath, "template_functions.xml");
 
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
             XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
@@ -197,11 +197,11 @@ public final class Tests extends TestBase
         throws Exception
     {
         final File handlerFunctionsCppFile = new File(
-            sourceCodeParserTestPath + "/handler_functions.cpp");
+            sourceCodeParserTestPath, "handler_functions.cpp");
         final File expectedHandlerFunctionsXmlFile = new File(
-            sourceCodeParserTestPath + "/expected_handler_functions.xml");
+            sourceCodeParserTestPath, "expected_handler_functions.xml");
         final File outputApidocXmlFile = new File(
-            sourceCodeParserOutputTestPath + "/handler_functions.xml");
+            sourceCodeParserOutputTestPath, "handler_functions.xml");
 
         final Apidoc apidoc = XmlSerializer.fromDocument(Apidoc.class,
                 XmlUtils.parseXmlFile(sourceCodeParserApiTemplateXmlFile));
@@ -225,11 +225,11 @@ public final class Tests extends TestBase
         throws Exception
     {
         final File structHeaderFile = new File(
-            sourceCodeParserTestPath + "/structs.h");
+            sourceCodeParserTestPath, "structs.h");
         final File expectedStructDescriptionFile = new File(
-            sourceCodeParserTestPath + "/expected_structs.txt");
+            sourceCodeParserTestPath, "expected_structs.txt");
         final File outputStructDescriptionFile = new File(
-            sourceCodeParserOutputTestPath + "/structs.txt");
+            sourceCodeParserOutputTestPath, "structs.txt");
 
         System.out.println("test: parsing apidoc structs and enums in C++");
         System.out.println("    Input: " + structHeaderFile);
@@ -281,9 +281,9 @@ public final class Tests extends TestBase
     private void VmsCodeToApiXmlExecutor()
         throws Exception
     {
-        final File apiTemplateXmlFile = new File(testPath + "/api_template.xml");
-        final File generatedApiXmlFile = new File(outputTestPath, "/api.FROM_CPP.xml");
-        final File generatedApiJsonFile = new File(outputTestPath + "/api.FROM_CPP.json");
+        final File apiTemplateXmlFile = new File(testPath, "api_template.xml");
+        final File generatedApiXmlFile = new File(outputTestPath, "api.FROM_CPP.xml");
+        final File generatedApiJsonFile = new File(outputTestPath, "api.FROM_CPP.json");
 
         final VmsCodeToApiXmlExecutor executor = new VmsCodeToApiXmlExecutor();
         executor.verbose = verbose;
@@ -327,14 +327,14 @@ public final class Tests extends TestBase
         this.params = params;
         this.testPath = testPath;
         this.outputTestPath = outputTestPath;
-        this.sourceCodeParserTestPath = new File(testPath + "/source_code_parser");
+        this.sourceCodeParserTestPath = new File(testPath, "source_code_parser");
         this.sourceCodeParserApiTemplateXmlFile = new File(
-            sourceCodeParserTestPath + "/api_template.xml");
-        this.sourceCodeParserOutputTestPath = new File(outputTestPath + "/source_code_parser");
-        this.testPropertiesFile = new File(testPath + "/test.properties");
-        this.vmsPath = new File(testPath + "/nx_vms");
-        this.outputVmsPath = new File(outputTestPath + "/nx_vms");
-        this.expectedApiXmlFile = new File(testPath + "/expected_api.xml");
+            sourceCodeParserTestPath, "api_template.xml");
+        this.sourceCodeParserOutputTestPath = new File(outputTestPath, "source_code_parser");
+        this.testPropertiesFile = new File(testPath, "test.properties");
+        this.vmsPath = new File(testPath, "nx_vms");
+        this.outputVmsPath = new File(outputTestPath, "nx_vms");
+        this.expectedApiXmlFile = new File(testPath, "expected_api.xml");
         sourceCodeParserOutputTestPath.mkdirs();
         sourceCodeParserOutputTestPath.mkdir();
 

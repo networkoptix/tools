@@ -2,7 +2,7 @@
   <configuration default="false" name="Run test" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.nx.apidoctool.Main" />
     <module name="apidoctool" />
-    <option name="PROGRAM_PARAMETERS" value="-verbose test -test-path test -output-test-path out_test -DtemplateRegistrationCpp=/mediaserver_db/src/local_connection_factory.cpp -DtypeHeaderPaths=common/src/nx_ec/data,common/src/nx/vms/event/event_fwd.h,common/src/network/module_information.h,common/src/common/common_globals.h" />
+    <option name="PROGRAM_PARAMETERS" value="-verbose test -test-path test -output-test-path out_test -config test/apidoctool.properties" />
     <option name="VM_PARAMETERS" value="-ea" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <method />
