@@ -147,9 +147,12 @@
         properties-content: |
           WORKDIR=$WORKSPACE/build
           EXECUTABLE=cmake
+          CMAKE_BUILD_THREADS=20
           LOGFILE=build/cmake-build-{customization}.log
+          CMAKE_ENV_NINJA_STATUS=[%s/%t] %es
+          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+          CMAKE_ENV_environment=$WORKSPACE
           INHERIT_ENVIRON=true
-          ENVIRON=NINJA_STATUS=[%s/%t] %es ,_MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER,environment=$WORKSPACE
     - groovy:
         version: '{groovy-version}'
         command: !include-raw-escape: ../builders/cmake_build_wrapper.groovy

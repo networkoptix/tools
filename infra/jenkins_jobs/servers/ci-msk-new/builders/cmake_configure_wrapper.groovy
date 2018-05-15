@@ -31,8 +31,6 @@ if (_tool != "") {
 
 ARGUMENTS.addAll([ env.get("CMAKE_SOURCEDIR")  ])
 
-
-
 // Build environ
 def INHERIT_ENVIRON = (env.get("INHERIT_ENVIRON") ?: "false").toBoolean()
 if (INHERIT_ENVIRON) {
@@ -46,7 +44,6 @@ env.each { key, val ->
         // drop quotes
         def value = val.replaceAll('^"|"$', "")
         ENVIRON.put(keyname, value)
-        // ARGUMENTS.addAll([ "-D" + keyname + "=" + val])
     }
 }
 

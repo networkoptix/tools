@@ -10,7 +10,8 @@ def EXECUTABLE = new File(env.get("CMAKE_EXECUTABLE")).toString()
 def ARGUMENTS = []
 def ENVIRON = [:]
 
-ARGUMENTS.addAll(["--build", ".", "--", "-j", "20"])
+def CMAKE_BUILD_THREADS = (env.get("CMAKE_BUILD_THREADS") ?: "20")
+ARGUMENTS.addAll(["--build", ".", "--", "-j", CMAKE_BUILD_THREADS])
 
 // Build environ
 def INHERIT_ENVIRON = (env.get("INHERIT_ENVIRON") ?: "false").toBoolean()
@@ -18,12 +19,13 @@ if (INHERIT_ENVIRON) {
     ENVIRON.putAll(env)
 }
 
-def CMAKE_ENV_PREFIX = "CMENV_"
+def CMAKE_ENV_PREFIX = "CMAKE_ENV_"
 env.each { key, val ->
     if (key.startsWith(CMAKE_ENV_PREFIX)  && val.trim() != "") {
         def keyname = key.substring(CMAKE_ENV_PREFIX.length())
-        ENVIRON.put(keyname, val)
-        ARGUMENTS.addAll([ "-D" + keyname + "=" + val])
+        // drop quotes
+        def value = val.replaceAll('^"|"$', "")
+        ENVIRON.put(keyname, value)
     }
 }
 
