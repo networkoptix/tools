@@ -83,6 +83,42 @@
                                 </value>
                             </values>
                         </param>
+                        <param>
+                            <name>innerObject.status</name>
+                            <type>enum</type>
+                            <description/>
+                            <optional>false</optional>
+                            <values>
+                                <value>
+                                    <name>Offline</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>Unauthorized</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>Online</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>Recording</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>NotDefined</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>Incompatible</name>
+                                    <description/>
+                                </value>
+                                <value>
+                                    <name>AnyStatus</name>
+                                    <description/>
+                                </value>
+                            </values>
+                        </param>
                     </params>
                     <result>
                         <type>array</type>

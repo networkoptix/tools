@@ -42,7 +42,7 @@ public final class FlagParser
         }
     }
 
-    public final Map<String, FlagInfo> parseFlags() throws Error
+    public final Map<String, FlagInfo> parseFlags() throws Error, ApidocTagParser.Error
     {
         final Map<String, FlagInfo> flags = new HashMap<String, FlagInfo>();
         line = 1;
@@ -62,21 +62,15 @@ public final class FlagParser
         return flags;
     }
 
-    private String parseDescription() throws Error
+    private String parseDescription() throws Error, ApidocTagParser.Error
     {
         List<ApidocTagParser.Item> items;
-        try
-        {
-            items = ApidocTagParser.getApidocTags(sourceCode, line, verbose);
-        }
-        catch(ApidocTagParser.Error e)
-        {
-            throw new Error(e.getMessage());
-        }
+        items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
+
         if (items != null && items.size() > 0)
         {
-            if (items.size() > 1 || !ApidocComment.TAG_APIDOC.equals(items.get(0).getTag()))
-                throw new Error(items.get(0).getErrorPrefix() + "Invalid flag apidoc comment");
+            if (items.size() > 1)
+                throw new Error("Unexpected tag " + items.get(1).getTag() + " found.");
 
             return items.get(0).getFullText(0);
         }

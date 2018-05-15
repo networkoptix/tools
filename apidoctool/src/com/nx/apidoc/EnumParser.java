@@ -53,7 +53,8 @@ public final class EnumParser
         }
     }
     
-    public final Map<String, EnumInfo> parseEnums() throws Error, SourceCode.Error
+    public final Map<String, EnumInfo> parseEnums()
+        throws Error, SourceCode.Error, ApidocTagParser.Error
     {
         final Map<String, EnumInfo> enums = new HashMap<String, EnumInfo>();
         line = 1;
@@ -74,7 +75,7 @@ public final class EnumParser
         return enums;
     }
 
-    private List<EnumInfo.Value> parseEnumValues() throws Error
+    private List<EnumInfo.Value> parseEnumValues() throws Error, ApidocTagParser.Error
     {
         final List<EnumInfo.Value> values = new ArrayList<EnumInfo.Value>();
         ++line;
@@ -96,21 +97,14 @@ public final class EnumParser
         return values;
     }
 
-    private String parseDescription() throws Error
+    private String parseDescription() throws Error, ApidocTagParser.Error
     {
-        List<ApidocTagParser.Item> items;
-        try
-        {
-            items = ApidocTagParser.getApidocTags(sourceCode, line, verbose);
-        }
-        catch(ApidocTagParser.Error e)
-        {
-            throw new Error(e.getMessage());
-        }
+        final List<ApidocTagParser.Item> items =
+            ApidocTagParser.getItemsForType(sourceCode, line, verbose);
         if (items != null && items.size() > 0)
         {
-            if (items.size() > 1 || !ApidocComment.TAG_APIDOC.equals(items.get(0).getTag()))
-                throw new Error(items.get(0).getErrorPrefix() + "Invalid enum apidoc comment");
+            if (items.size() > 1)
+                throw new Error("Unexpected tag " + items.get(1).getTag() + " found.");
 
             return items.get(0).getFullText(0);
         }

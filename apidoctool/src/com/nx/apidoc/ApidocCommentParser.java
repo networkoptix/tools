@@ -12,7 +12,6 @@ public final class ApidocCommentParser
     extends ApidocComment
 {
     private int indentLevel = 0;
-    private String currentFunctionName;
 
     public enum ParamDirection
     {
@@ -49,8 +48,16 @@ public final class ApidocCommentParser
         ListIterator<ApidocTagParser.Item> tagIterator = tags.listIterator();
         if (tagIterator.hasNext())
         {
-            ApidocTagParser.Item tag = tagIterator.next();
-            return parser.parseParam(tag, tagIterator, paramDirection, paramMode);
+            final ApidocTagParser.Item item = tagIterator.next();
+            final Apidoc.Param result =
+                parser.parseParam(item, tagIterator, paramDirection, paramMode);
+            if (tagIterator.hasNext())
+            {
+                final ApidocTagParser.Item unexpectedItem = tagIterator.next();
+                throw new Error(unexpectedItem.getErrorPrefix() +
+                    "Unexpected tag " + unexpectedItem.getTag() + " found.");
+            }
+            return result;
         }
         return null;
     }
@@ -164,8 +171,6 @@ public final class ApidocCommentParser
         else if (!"".equals(item.getLabel()))
             throw new Error(item.getErrorPrefix() + "Invalid label: \"" + item.getLabel() + "\"");
 
-        currentFunctionName = result.function.name;
-
         if ("".equals(item.getAttribute()))
             result.function.proprietary = false;
         else if (ATTR_PROPRIETARY.equals(item.getAttribute()))
@@ -204,7 +209,7 @@ public final class ApidocCommentParser
         catch (Exception e)
         {
             throw new Error(item.getErrorPrefix() + "Invalid param type \"" + item.getLabel()
-                + "\" found" + " in function " + currentFunctionName + ".");
+                + "\" found.");
         }
         param.values.addAll(parseParamValues(tagIterator));
 
@@ -287,8 +292,7 @@ public final class ApidocCommentParser
         if (!param.name.equals(PARAM_FORMAT))
         {
             throw new Error(item.getErrorPrefix() + ATTR_DEFAULT + " found for param \""
-                + param.name + "\", but supported only for param \"format\","
-                + " in function " + currentFunctionName + ".");
+                + param.name + "\", but supported only for param \"format\".");
         }
 
         // TODO: Consider defining default "format" in the C++ source code.
@@ -329,7 +333,7 @@ public final class ApidocCommentParser
         catch (Exception e)
         {
             throw new Error(item.getErrorPrefix() + "Invalid result type \"" + item.getLabel()
-                + "\" found" + " in function " + currentFunctionName + ".");
+                + "\" found.");
         }
 
         boolean deprecatedAttributeTagFound = false;
@@ -365,8 +369,7 @@ public final class ApidocCommentParser
         {
             System.out.println(
                 "    WARNING: Deprecated Apidoc tag \"%attribute\" found" +
-                    " instead of \"" + TAG_PARAM + "\"" +
-                    " in function " + currentFunctionName + ".");
+                    " instead of \"" + TAG_PARAM + "\".");
         }
         indentLevel--;
         return result;
@@ -387,7 +390,7 @@ public final class ApidocCommentParser
             if (existingParam.name.equals(param.name))
             {
                 throw new Error(item.getErrorPrefix() + "Duplicate result attribute \"" + param.name
-                    + "\" found" + " in function " + currentFunctionName + ".");
+                    + "\" found.");
             }
         }
 
@@ -418,26 +421,22 @@ public final class ApidocCommentParser
         throws Error
     {
         if (tagParsed)
-        {
-            throw new Error(item.getErrorPrefix() + "More than one " + tag + " found" +
-                " in function " + currentFunctionName + ".");
-        }
+            throw new Error(item.getErrorPrefix() + "More than one " + tag + " found.");
+
         return true;
     }
 
     private void throwUnknownTag(ApidocTagParser.Item item)
         throws Error
     {
-        throw new Error(item.getErrorPrefix() + "Unknown tag " + item.getTag() + " found" +
-            " in function " + currentFunctionName + ".");
+        throw new Error(item.getErrorPrefix() + "Unknown tag " + item.getTag() + " found.");
     }
 
     private void throwInvalidAttribute(ApidocTagParser.Item item)
         throws Error
     {
         throw new Error(item.getErrorPrefix() + "The attribute " + item.getAttribute() +
-            " is not allowed after the tag " + item.getTag() +
-            " in function " + currentFunctionName + ".");
+            " is not allowed after the tag " + item.getTag() + ".");
     }
 
     private void checkNoAttribute(ApidocTagParser.Item item)
@@ -456,7 +455,7 @@ public final class ApidocCommentParser
             if (existingParam.name.equals(paramName))
             {
                 throw new Error(item.getErrorPrefix() + "Duplicate param \"" + paramName
-                    + "\" found" + " in function " + currentFunctionName + ".");
+                    + "\" found.");
             }
         }
     }
@@ -472,8 +471,7 @@ public final class ApidocCommentParser
         if (initialToken.isEmpty())
         {
             throw new Error(item.getErrorPrefix()
-                + "A token should follow the tag " + item.getTag()
-                + " in function " + currentFunctionName + ".");
+                + "A token should follow the tag " + item.getTag() + ".");
         }
 
         return initialToken;

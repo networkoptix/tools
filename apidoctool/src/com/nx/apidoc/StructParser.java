@@ -113,7 +113,7 @@ public final class StructParser
 
         final String[] nameTokens = items[0].split("\\s");
         struct.name = nameTokens[nameTokens.length - 1]; //< ignore all preceding tokens
-        struct.items = ApidocTagParser.getApidocTags(sourceCode, line, verbose);
+        struct.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);
 
         return struct;
     }
@@ -185,7 +185,7 @@ public final class StructParser
         if (field.typeName != null)
             field.typeName = Utils.removeCppNamespaces(field.typeName);
 
-        field.items = ApidocTagParser.getApidocTags(sourceCode, line, verbose);;
+        field.items = ApidocTagParser.getItemsForType(sourceCode, line, verbose);;
         return field;
     }
 

@@ -14,6 +14,25 @@
  */
 regUpdate<ApiDummyData>(dummy, ApiCommand::testFunction1);
 
+enum ResourceStatus
+{
+    Offline,
+    Unauthorized,
+    Online,
+    Recording,
+    NotDefined,
+    /*! Applies only to a server resource. A server is incompatible only when it has system
+     * name different
+     * from the current or it has incompatible protocol version.
+     * \note Incompatible server is not the same as fake server which is create in the client by
+     * QnIncompatibleServerWatcher. Fake servers can also have Unauthorized status.
+     * So if you want to check if the server is fake use QnMediaServerResource::isFakeServer().
+     */
+    Incompatible,
+
+    AnyStatus
+};
+
 /**%apidoc Enum description*/
 enum class Enum
 {
@@ -29,6 +48,7 @@ struct InnerStruct
 {
     QString innerParam;
     Enum innerEnumParam;
+    ResourceStatus status;
 };
 
 namespace N1 {
@@ -36,9 +56,9 @@ namespace N2 {
 
 struct BaseStruct
 {
-    /**%apidoc base value description
+    /**apidoc base value description
      */
-    int baseValue;
+    int baseValue;/**<%apidoc base value description*/
 };
 
 }

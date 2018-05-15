@@ -3,6 +3,7 @@ package com.nx.apidoc;
 import com.nx.util.SourceCode;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public final class TypeMananger
@@ -19,31 +20,25 @@ public final class TypeMananger
     }
 
     public final void processFiles(List<File> files)
-        throws Error
+        throws Error, IOException, EnumParser.Error, SourceCode.Error, ApidocTagParser.Error,
+            FlagParser.Error, StructParser.Error
     {
-        try
+        for (File file: files)
         {
-            for (File file: files)
-            {
-                final SourceCode sourceCode = new SourceCode(file);
+            final SourceCode sourceCode = new SourceCode(file);
 
-                final EnumParser enumParser = new EnumParser(sourceCode, verbose);
-                enums.putAll(enumParser.parseEnums());
+            final EnumParser enumParser = new EnumParser(sourceCode, verbose);
+            enums.putAll(enumParser.parseEnums());
 
-                final FlagParser flagParser = new FlagParser(sourceCode, verbose);
-                flags.putAll(flagParser.parseFlags());
+            final FlagParser flagParser = new FlagParser(sourceCode, verbose);
+            flags.putAll(flagParser.parseFlags());
 
-                final StructParser structParser = new StructParser(sourceCode, verbose);
-                structs.putAll(structParser.parseStructs());
+            final StructParser structParser = new StructParser(sourceCode, verbose);
+            structs.putAll(structParser.parseStructs());
 
-            }
-            makeStructsFlat();
-            fillUnknownTypes();
         }
-        catch (Exception e)
-        {
-            throw new Error(e.getMessage());
-        }
+        makeStructsFlat();
+        fillUnknownTypes();
     }
 
     public final void mergeDescription(

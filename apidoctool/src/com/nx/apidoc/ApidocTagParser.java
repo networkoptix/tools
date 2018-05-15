@@ -153,8 +153,8 @@ public final class ApidocTagParser
         List<String> lines, String filename, int firstLine, boolean verbose)
         throws Error
     {
-        List<Item> items = new ArrayList<Item>();
-        ApidocTagParser parser = new ApidocTagParser(lines, filename, firstLine, verbose);
+        final List<Item> items = new ArrayList<Item>();
+        final ApidocTagParser parser = new ApidocTagParser(lines, filename, firstLine, verbose);
         Item item = parser.parseNextItem();
         while (item != null)
         {
@@ -164,47 +164,40 @@ public final class ApidocTagParser
         return items;
     }
 
-    public static List<Item> getApidocTags(SourceCode sourceCode, int line, boolean verbose)
+    /**
+     * @return Null in case no apidoc comment found.
+     */
+    public static List<Item> getItemsForType(SourceCode sourceCode, int line, boolean verbose)
         throws Error
     {
-        List<String> commentLines;
-        int firstCommentLine = line;
-        boolean trailingComment = false;
-        final String comment = getTrailingComment(sourceCode, line);
-        if (comment != null)
+        final List<String> commentLines;
+        final String trailingComment = getTrailingComment(sourceCode, line);
+        final List<String> precedingCommentLines = getPrecedingComment(sourceCode, line - 1);
+
+        if (trailingComment == null && precedingCommentLines == null)
+            return null;
+
+        if (trailingComment != null && precedingCommentLines != null)
         {
+            throw new Error(sourceCode.getFilename(), line,
+                "Both trailing and preceding apidoc comments found.");
+        }
+
+        final int firstCommentLine;
+        if (trailingComment != null)
+        {
+            firstCommentLine = line;
             commentLines = new ArrayList<String>();
-            commentLines.add(comment);
-            trailingComment = true;
+            commentLines.add(trailingComment);
         }
         else
         {
-            commentLines = getPrecedingComment(sourceCode, line - 1);
-            if (commentLines != null)
-                firstCommentLine = line - commentLines.size() - 1;
+            firstCommentLine = line - precedingCommentLines.size() - 1;
+            commentLines = precedingCommentLines;
         }
-        if (commentLines == null || commentLines.isEmpty())
+
+        if (commentLines.isEmpty())
             return null;
-
-        final String[] values = Utils.matchRegex(itemStartRegex, commentLines.get(0));
-        if (values == null)
-            return null;
-
-        if (trailingComment && "".equals(values[0]))
-        {
-            throw new Error(
-                sourceCode.getFilename(),
-                firstCommentLine,
-                "Trailing comment should start from \"/**<\"");
-        }
-        if (!trailingComment && "<".equals(values[0]))
-        {
-            throw new Error(
-                sourceCode.getFilename(),
-                firstCommentLine,
-                "Preceding comment start from \"/**<\"");
-        }
-
 
         return getItems(
             commentLines, sourceCode.getFilename(), firstCommentLine, verbose);
@@ -266,20 +259,44 @@ public final class ApidocTagParser
             verbose);
     }
 
-    private static String getTrailingComment(SourceCode sourceCode, int startLine)
+    private static String getTrailingComment(SourceCode sourceCode, int startLine) throws Error
     {
-        String[] match = sourceCode.matchLine(startLine, trailingCommentRegex);
-        if (match != null)
-            return match[0];
+        String[] values = sourceCode.matchLine(startLine, trailingCommentRegex);
+        if (values == null)
+            return null;
 
-        return null;
+        if (!"<".equals(values[1]))
+        {
+            throw new Error(
+                sourceCode.getFilename(),
+                startLine,
+                "Trailing comment should start with \"/**<\".");
+        }
+        return values[0];
     }
 
 
     public static List<String> getPrecedingComment(SourceCode sourceCode, int startLine)
+        throws Error
     {
-        return sourceCode.getPreviousLines(
+        final List<String> lines = sourceCode.getPreviousLines(
             startLine, commentStartRegex, commentEndRegex);
+
+        if (lines == null)
+            return null;
+
+        String[] values = Utils.matchRegex(apidpocCommentStartRegex, lines.get(0));
+        if (values == null)
+            return null;
+
+        if ("<".equals(values[0]))
+        {
+            throw new Error(
+                sourceCode.getFilename(),
+                startLine,
+                "Preceding comment should not start with \"/**<\"");
+        }
+        return lines;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -307,12 +324,14 @@ public final class ApidocTagParser
       //     *   non-%...
 
     public static final Pattern trailingCommentRegex = Pattern.compile(
-        ".*(\\/\\*.*\\*\\/)");
+        ".+(\\/\\*\\*(<)?\\s*%apidoc.*\\*/)");
 
     public static final Pattern commentEndRegex = Pattern.compile(
         "\\s*(/\\*\\*.*)?\\*/\\s*");
 
     public static final Pattern commentStartRegex = Pattern.compile(
-        "\\s*/\\*\\*.*");
+        "\\s*/\\*.*");
 
+    public static final Pattern apidpocCommentStartRegex = Pattern.compile(
+        "\\s*/\\*\\*(<)?\\s*%apidoc.*");
 }
