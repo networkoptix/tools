@@ -516,7 +516,7 @@ do_apidoc_rdep() # "$@"
 {
     local -r DEV_DIR="$DEVELOP_DIR/devtools/apidoctool"
     local -r JAR_DEV="$DEV_DIR/out/apidoctool.jar"
-    local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool"
+    local -r PACKAGE_DIR="$PACKAGES_DIR/any/apidoctool-2.0"
     local -r JAR_PROD="$PACKAGE_DIR/apidoctool.jar"
     local -r TEST_DIR="$DEV_DIR/test"
     local -r APIDOC_PROPERTIES="$TEST_DIR/apidoctool.properties"
