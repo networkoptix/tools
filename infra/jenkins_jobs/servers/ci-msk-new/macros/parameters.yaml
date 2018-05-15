@@ -102,6 +102,7 @@
 
 - parameter:
     name: p_SSH_USER
+    parameters:
     - string:
         name: SSH_USER
         description: >
@@ -113,6 +114,7 @@
 # Define paths to operate on
 - parameter:
     name: p_LOCAL_PATH
+    parameters:
     - string:
         name: LOCAL_PATH
         default: ''
