@@ -54,3 +54,4 @@
   with_items: '{{ administrators }}'
   loop_control:
     loop_var: admin
+  when: "add_administrators == True"
