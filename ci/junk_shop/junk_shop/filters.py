@@ -56,7 +56,7 @@ class JinjaFilters(object):
         jira_url = self._config.jira_url
         if not jira_url:
             return message
-        message = str(escape(message))
+        message = unicode(escape(message))
         ref_list = [group[0] for group in re.findall(JIRA_REF_REGEX, message)]
         for ref in ref_list:
             message = message.replace(ref, self._make_jira_ref(jira_url, ref))
