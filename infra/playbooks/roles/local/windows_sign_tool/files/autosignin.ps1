@@ -4,9 +4,8 @@ set PATH "C:\tools\cygwin\usr\local\bin;C:\tools\cygwin\bin;C:\tools\cygwin\bin;
 SET PATH "%PATH%;%ALLUSERSPROFILE%\chocolatey\bin;C:\ProgramData\chocolatey\helpers\functions"
 $packageName= 'GlobalSign'
 $toolsDir   = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
-# does not exists
-$url        = 'https://www.globalsign.com/support/adobe/GlobalSign_SAC_9.0.msi'
-$url64      = 'https://www.globalsign.com/support/adobe/GlobalSign_SAC_9.0-x64.msi'
+$url        = 'https://www.globalsign.com/en/safenet-drivers/USB/10.3/GlobalSign_SAC-x32-10.3.msi'
+$url64      = 'https://www.globalsign.com/en/safenet-drivers/USB/10.3/GlobalSign_SAC-x64-10.3.msi'
 
 $packageArgs = @{
   packageName   = $packageName
