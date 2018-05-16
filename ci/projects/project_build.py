@@ -179,6 +179,10 @@ class BuildProject(NxVmsProject):
     def must_skip_this_build(self):
         return False
 
+    @property
+    def should_build_unit_tests(self):
+        return True
+
     @abc.abstractproperty
     def is_signing_enabled(self):
         pass
@@ -363,8 +367,8 @@ class BuildProject(NxVmsProject):
 
     def _run_build_job(self, platform, customization, clean_build):
         platform_config = self.config.platforms[platform]
-        build_tests = True  # always build - we need appserver2_ut for functional tess
         run_unit_tests = self.params.run_unit_tests and platform_config.should_run_unit_tests
+        build_tests = self.should_build_unit_tests or run_unit_tests
         build_parameters = self._make_build_parameters(customization, platform)
         job = BuildNodeJob(
             cmake_version=self.config.build.cmake_version,

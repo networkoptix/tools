@@ -81,7 +81,10 @@ class ReleaseProject(BuildProject):
 
     @property
     def custom_cmake_args(self):
-        return self.params.custom_cmake_args
+        args = '-DwithClouds=OFF -DwithPluginStubs=OFF'
+        if self.params.custom_cmake_args:
+            args = args + ' ' + self.params.custom_cmake_args
+        return args
 
     @property
     def run_unit_tests_by_default(self):
@@ -103,6 +106,10 @@ class ReleaseProject(BuildProject):
             MultiChoiceProjectParameter('customization_list', 'Customizations to build',
                                             choices=self.config.customization_list, selected_choices=['default']),
             ]
+
+    @property
+    def should_build_unit_tests(self):
+        return False
 
     @property
     def is_signing_enabled(self):
