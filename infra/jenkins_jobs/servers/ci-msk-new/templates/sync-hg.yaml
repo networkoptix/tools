@@ -1,7 +1,7 @@
 - job-template:
     name: 'helper.sync-hg'
 
-    node: runner
+    node: hg-sync
 
     wrappers:
     - ssh-agent-credentials:

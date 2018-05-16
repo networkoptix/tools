@@ -13,11 +13,11 @@
     # ============================================================
 
     # location of repository whre to publish builds
-    artifact_repository_base: '/mnt/infra/testing/repository/v1'
+    artifact_repository_base: '/mnt-stub/beta-builds/repository/v1'  # TODO: switch to /mnt/beta-builds
     # location of folder where mercurial repos are precached
     # this cache is required due to the fact that mercurial can't
-    # fetch part of repo and always pulls everything (~3GB ove atlantic)
-    cached_hg_repository_base: '/mnt/infra/cached-hg'
+    # fetch part of repo and always pulls everything (~3GB over atlantic)
+    cached_hg_repository_base: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
 
     webadmin-build-node: webadmin-build
 
@@ -90,21 +90,23 @@
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_targetDevice=bananapi
-    - bpi:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=bpi
-    - rpi:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=rpi
-    - tx1:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=tx1
+    # TODO: Enable later when we'll be ready to test it.
+    #
+    # - bpi:
+    #     installer-build-node: *linux_node
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    #       CMAKE_ARG_targetDevice=bpi
+    # - rpi:
+    #     installer-build-node: *linux_node
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    #       CMAKE_ARG_targetDevice=rpi
+    # - tx1:
+    #     installer-build-node: *linux_node
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    #       CMAKE_ARG_targetDevice=tx1
     - android-arm:
         installer-build-node: *linux_node
         cmake_configure_args_platform: |
@@ -130,16 +132,18 @@
 
     # -- apple platform --
 
-    - mac: &osx_config
-        installer-build-node: build-installer-mac
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-    - ios:
-        <<: *osx_config
-        installer-build-node:
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Xcode
-          CMAKE_ARG_targetDevice=ios
+    # TODO: Enable later when we'll be ready to test it.
+    #
+    # - mac: &osx_config
+    #     installer-build-node: build-installer-mac
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    # - ios:
+    #     <<: *osx_config
+    #     installer-build-node:
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Xcode
+    #       CMAKE_ARG_targetDevice=ios
 
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================
@@ -153,24 +157,27 @@
       CMAKE_ARG_customization=$CUSTOMIZATION
 
     customization:
+
+    # TODO: Enable later when we'll be ready to test it.
+
     - default
-    - default_cn
-    - default_zh_CN
-    - cox
-    - digitalwatchdog
-    - digitalwatchdog_global
+    # - default_cn
+    # - default_zh_CN
+    # - cox
+    # - digitalwatchdog
+    # - digitalwatchdog_global
     - hanwha
-    - ipera
-    - ionetworks
-    - nutech
-    - ras
-    - senturian
-    - systemk
-    - tricom
-    - ust
+    # - ipera
+    # - ionetworks
+    # - nutech
+    # - ras
+    # - senturian
+    # - systemk
+    # - tricom
+    # - ust
     - vista
-    - vmsdemoblue
-    - vmsdemoorange
+    # - vmsdemoblue
+    # - vmsdemoorange
 
     # list of jobs to generate
     jobs:

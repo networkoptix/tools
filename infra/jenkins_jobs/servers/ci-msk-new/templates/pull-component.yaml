@@ -1,7 +1,7 @@
 - job-template:
     name: 'helper.pull-component'
 
-    node: runner
+    node: repository-ops
 
     wrappers:
     - ssh-agent-credentials:
