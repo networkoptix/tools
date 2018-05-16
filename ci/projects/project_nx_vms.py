@@ -51,6 +51,6 @@ class NxVmsProject(JenkinsProject):
                 UnstashCommand('nx_vms_ci'),
                 ]
         elif revision:
-            CheckoutCommand('nx_vms', revision),
+            return [CheckoutCommand('nx_vms', revision)]
         else:
             return [CheckoutScmCommand('nx_vms')]
