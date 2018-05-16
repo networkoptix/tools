@@ -10,9 +10,8 @@
     logrotate:
       daysToKeep: 30
 
-#    todo: uncomment when deployed:
-#    triggers:
-#      - timed: 'H/30 * * * *'
+    triggers:
+      - timed: 'H/10 * * * *'
 
     wrappers:
       - timestamps
