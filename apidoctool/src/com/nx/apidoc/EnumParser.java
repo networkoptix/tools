@@ -116,7 +116,7 @@ public final class EnumParser
     private int line;
 
     private static final Pattern enumFirstLineRegex = Pattern.compile(
-        " {0,4}enum .*");
+        " {0,4}enum [^;]*");
 
     private static final Pattern enumHeaderRegex = Pattern.compile(
         " {0,4}enum\\s+(class\\s+)?([_A-Za-z0-9]+)\\s*\\{");

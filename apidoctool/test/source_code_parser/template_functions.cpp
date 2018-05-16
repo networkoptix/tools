@@ -14,6 +14,8 @@
  */
 regUpdate<ApiDummyData>(dummy, ApiCommand::testFunction1);
 
+enum class Status;
+
 enum ResourceStatus
 {
     Offline,
