@@ -53,6 +53,10 @@ The location at which the `jenkins-cli.jar` jarfile will be kept. This is used f
 
 Jenkins plugins to be installed automatically during provisioning.
 
+    jenkins_plugins_install_dependencies: yes
+
+Whether Jenkins plugins to be installed should also install any plugin dependencies.
+
     jenkins_plugins_state: present
 
 Use `latest` to ensure all plugins are running the most up-to-date version.

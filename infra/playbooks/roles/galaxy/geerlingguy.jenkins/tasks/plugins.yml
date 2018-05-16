@@ -24,9 +24,9 @@
     jenkins_admin_token: "{{ admintokenfile['stdout'] | default(jenkins_admin_token) }}"
   no_log: True
 
-# Update Jenkins so that plugin updates don't fail
+# Update Jenkins so that plugin updates don't fail.
 - name: Create update directory
-  file: 
+  file:
     path: "{{ jenkins_home }}/updates"
     state: directory
     owner: jenkins
@@ -41,7 +41,7 @@
     mode: 0440
 
 - name: Remove first and last line from json file
-  replace: 
+  replace:
     path: "{{ jenkins_home }}/updates/default.json"
     regexp: "1d;$d"
 
@@ -49,13 +49,13 @@
   jenkins_plugin:
     name: "{{ item }}"
     jenkins_home: "{{ jenkins_home }}"
-    params:
-      url_username: "{{ jenkins_admin_username }}"
+    url_username: "{{ jenkins_admin_username }}"
     url_password: "{{ jenkins_admin_password }}"
     state: "{{ jenkins_plugins_state }}"
     timeout: "{{ jenkins_plugin_timeout }}"
     updates_expiration: "{{ jenkins_plugin_updates_expiration }}"
     url: "http://{{ jenkins_hostname }}:{{ jenkins_http_port }}{{ jenkins_url_prefix }}"
+    with_dependencies: "{{ jenkins_plugins_install_dependencies }}"
   with_items: "{{ jenkins_plugins }}"
   when: jenkins_admin_password != ""
   notify: restart jenkins
@@ -63,10 +63,10 @@
 - name: Install Jenkins plugins using token.
   jenkins_plugin:
     name: "{{ item }}"
-    params:
-      url_token: "{{ jenkins_admin_token }}"
+    url_token: "{{ jenkins_admin_token }}"
     updates_expiration: "{{ jenkins_plugin_updates_expiration }}"
     url: "http://{{ jenkins_hostname }}:{{ jenkins_http_port }}{{ jenkins_url_prefix }}"
+    with_dependencies: "{{ jenkins_plugins_install_dependencies }}"
   with_items: "{{ jenkins_plugins }}"
   when: jenkins_admin_token != ""
   notify: restart jenkins
