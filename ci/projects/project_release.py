@@ -2,6 +2,7 @@
 
 import logging
 
+from build import bool_to_cmake_param
 from project_build import VERSION_FILE, BuildProject
 from command import (
     StringProjectParameter,
@@ -81,7 +82,9 @@ class ReleaseProject(BuildProject):
 
     @property
     def custom_cmake_args(self):
-        args = '-DwithClouds=OFF -DwithPluginStubs=OFF'
+        args = (('-DwithClouds=%s' % bool_to_cmake_param(self.params.withClouds))
+              + ' '
+              + ('-DwithPluginStubs=%s' % bool_to_cmake_param(self.params.withPluginStubs)))
         if self.params.custom_cmake_args:
             args = args + ' ' + self.params.custom_cmake_args
         return args
@@ -99,6 +102,8 @@ class ReleaseProject(BuildProject):
                                         'Enable hardware signing, use hardware key to sign files', default_value=False),
             BooleanProjectParameter('trusted_timestamping',
                                         'Use trusted timestamping.', default_value=False),
+            BooleanProjectParameter('withPluginStubs', 'Build plugin stubs.', default_value=False),
+            BooleanProjectParameter('withClouds', '-DwithClouds cmake argument value.', default_value=False),
             StringProjectParameter('revision', 'Specific revision to checkout (optional)', default_value=''),
             StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
             MultiChoiceProjectParameter('platform_list', 'Platforms to build',

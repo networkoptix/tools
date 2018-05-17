@@ -87,9 +87,9 @@ class CMakeResults(object):
 def bool_to_cmake_param(value):
     assert isinstance(value, bool), repr(value)
     if value:
-        return 'TRUE'
+        return 'ON'
     else:
-        return 'FALSE'
+        return 'OFF'
 
 
 class CMakeBuilder(object):
