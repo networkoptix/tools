@@ -82,9 +82,9 @@ class ReleaseProject(BuildProject):
 
     @property
     def custom_cmake_args(self):
-        args = (('-DwithClouds=%s' % bool_to_cmake_param(self.params.withClouds))
+        args = (('-DwithClouds=%s' % bool_to_cmake_param(self.params.withClouds or False))
               + ' '
-              + ('-DwithPluginStubs=%s' % bool_to_cmake_param(self.params.withPluginStubs)))
+              + ('-DwithPluginStubs=%s' % bool_to_cmake_param(self.params.withPluginStubs or False)))
         if self.params.custom_cmake_args:
             args = args + ' ' + self.params.custom_cmake_args
         return args
