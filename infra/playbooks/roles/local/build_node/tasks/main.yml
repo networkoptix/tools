@@ -52,7 +52,6 @@
   - libpq-dev
   - gdb
   # Build System common
-  - rsync
   - ninja-build
   # Build packages start #??
   # zlib

@@ -18,6 +18,7 @@
     state: present
   with_items:
   - python-lxml
+  - rsync
   when:
   - ansible_os_family is defined
   - ansible_os_family == 'Debian'
