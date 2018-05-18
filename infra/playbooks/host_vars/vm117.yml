@@ -4,7 +4,7 @@ libvirt_guest__state: running
 libvirt_guest__type: windows
 libvirt_guest__copy_on_write: true
 libvirt_guest__extra_system_image_size_gb: "600"
-libvirt_guest__memory: "{{ 60 * 1024 * 1024 }}"  # 1 GiB
+libvirt_guest__memory: "{{ 60 * 1024 * 1024 }}"  # 60 GiB
 libvirt_guest__cpus: 30
 
 libvirt_guest__base_image: win2016server-base.qcow2
