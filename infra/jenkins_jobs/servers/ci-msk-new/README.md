@@ -63,3 +63,35 @@ In revealed matrix
 Now it's safe to save.
 
 Other users may be added to auth matrix if needed.
+
+# Emulating NAS
+
+On publish node:
+
+1.  Create beta-builds fake mount with sticky group bit
+2.  Change ownership on repository, grant only jenkins write access
+3.  Add infra/cached-hg repo with rules similar to b-b (we don't wont)
+
+```
+sudo mkdir -p /mnt-stub/beta-builds/repository
+sudo chown -R beta-builds:beta-builds /mnt-stub/beta-builds
+sudo chmod 2775 /mnt-stub/beta-builds
+
+sudo chown jenkins:jenkins /mnt-stub/beta-builds/repository
+sudo chmod a-w /mnt-stub/beta-builds/repository
+sudo chmod u+w /mnt-stub/beta-builds/repository
+sudo chmod g-w /mnt-stub/beta-builds/repository
+
+sudo mkdir -p /mnt-stub/infra/cached-hg
+sudo chown -R infra:infra /mnt-stub/infra
+sudo chmod 2775 /mnt-stub/infra/
+
+sudo chmod -R g+w /mnt-stub/infra/
+sudo usermod -a -G infra YOUR_USER_NAME
+```
+
+from real prod server (for example, alpha)
+
+```
+rsync -av /mnt/infra/cached-hg/ iremizov@10.0.0.158:/mnt-stub/infra/cached-hg/
+```
