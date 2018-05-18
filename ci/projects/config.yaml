@@ -122,7 +122,6 @@ platforms:
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:
-      - '*-servertool-*.msi'
       - '*.exe'
     update_mask_list:
       - '*_update-*.zip'
@@ -134,7 +133,6 @@ platforms:
     should_run_unit_tests: yes
     publish_dir: windows
     distributive_mask_list:
-      - '*-servertool-*.msi'
       - '*.exe'
     update_mask_list:
       - '*_update-*.zip'
