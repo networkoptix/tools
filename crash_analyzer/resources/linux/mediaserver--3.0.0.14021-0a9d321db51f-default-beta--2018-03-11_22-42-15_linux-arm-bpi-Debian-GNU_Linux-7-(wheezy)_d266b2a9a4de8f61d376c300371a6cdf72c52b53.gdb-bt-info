@@ -1,11 +1,13 @@
 11, Segmentation fault
 
-nx::network::RetryTimer::retriesLeft
-nx::network::cloud::tcp::IncomingReverseTunnelConnection::isExhausted
+nx_network!nx::network::RetryTimer::retriesLeft
+nx_network!nx::network::cloud::tcp::IncomingReverseTunnelConnection::isExhausted
+nx_network!std::_Function_handler::_M_invoke
+nx_network!QtPrivate::QFunctorSlotObject::impl
 ...
-nx_http::AsyncHttpClient::done
-nx_http::AsyncHttpClient::onSomeBytesReadAsync
-nx::network::aio::AsyncSocketImplHelper::eventTriggered
-nx::network::aio::AsyncSocketImplHelper::eventTriggered
-nx::network::aio::detail::AIOThreadImpl::processSocketEvents
-nx::network::aio::AIOThread::run
+nx_network!nx_http::AsyncHttpClient::done
+nx_network!nx_http::AsyncHttpClient::onSomeBytesReadAsync
+nx_network!nx::network::aio::AsyncSocketImplHelper::eventTriggered
+nx_network!nx::network::aio::AsyncSocketImplHelper::eventTriggered
+nx_network!nx::network::aio::detail::AIOThreadImpl::processSocketEvents
+nx_network!nx::network::aio::AIOThread::run

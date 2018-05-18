@@ -2,10 +2,10 @@ SIGABRT, Aborted
 
 __GI_raise
 __GI_abort
-__gnu_cxx::__verbose_terminate_handler
-std::terminate
-__gxx_personality_v0
-_Unwind_Resume
-MediaServerProcess::run
+stdc++!__gnu_cxx::__verbose_terminate_handler
+stdc++!std::terminate
+stdc++!__gxx_personality_v0
+gcc_s!_Unwind_Resume
+mediaserver_core!MediaServerProcess::run
 start_thread
 clone

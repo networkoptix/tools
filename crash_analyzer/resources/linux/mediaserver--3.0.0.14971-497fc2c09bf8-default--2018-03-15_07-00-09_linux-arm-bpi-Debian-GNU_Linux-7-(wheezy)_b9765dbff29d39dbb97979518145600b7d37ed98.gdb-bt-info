@@ -1,9 +1,10 @@
 11, Segmentation fault
 
-CUDT::recv
-CUDT::recv
-nx::network::UdtStreamSocket::recv
-nx::network::aio::AsyncSocketImplHelper::processRecvEvent
-nx::network::aio::AsyncSocketImplHelper::eventTriggered
-nx::network::aio::detail::AioTaskQueue::processSocketEvents
-nx::network::aio::AIOThread::run
+udt!CRcvBuffer::getRcvDataSize
+udt!CUDT::recv
+udt!CUDT::recv
+nx_network!nx::network::UdtStreamSocket::recv
+nx_network!nx::network::aio::AsyncSocketImplHelper::processRecvEvent
+nx_network!nx::network::aio::AsyncSocketImplHelper::eventTriggered
+nx_network!nx::network::aio::detail::AioTaskQueue::processSocketEvents
+nx_network!nx::network::aio::AIOThread::run

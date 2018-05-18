@@ -1,7 +1,7 @@
 SIGSEGV, Segmentation fault
 
-FrameTypeExtractor::getFrameType
-QnArchiveStreamReader::getNextData
-QnAbstractArchiveStreamReader::run
+common!FrameTypeExtractor::getFrameType
+nx_streaming!QnArchiveStreamReader::getNextData
+nx_streaming!QnAbstractArchiveStreamReader::run
 start_thread
 clone

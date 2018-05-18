@@ -1,0 +1,6 @@
+c0000005 (Access violation)
+
+udt!CHash::remove
+udt!CRcvQueue::worker
+kernel32!BaseThreadInitThunk
+ntdll!RtlUserThreadStart

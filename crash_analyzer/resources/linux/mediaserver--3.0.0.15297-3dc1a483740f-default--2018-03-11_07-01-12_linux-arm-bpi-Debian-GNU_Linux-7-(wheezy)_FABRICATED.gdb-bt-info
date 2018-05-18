@@ -4,5 +4,5 @@ __libc_do_syscall
 __GI_raise
 __GI_abort
 __GI___assert_fail
-AsyncSocketImplHelper::eventTriggered
-aio::AIOThread::run
+common!AsyncSocketImplHelper::eventTriggered
+common!aio::AIOThread::run

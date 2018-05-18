@@ -1,13 +1,13 @@
-4f65ca575d:
+2f4fd92489:
   attachments:
   - mediaserver-bin--3.0.0.15297-8aa83688cb28-digitalwatchdog--2018-03-11_21-25-38_linux-x64-ubuntu-Ubuntu-14.04.3-LTS_201f7427852d76efe33cf4b61500f33c033679ad.gdb-bt
   - mediaserver-bin--3.0.0.15297-8aa83688cb28-vista--2018-03-11_17-28-08_linux-x64-ubuntu-Ubuntu-16.04.3-LTS_1132c2760f01a051bcdee738a37a72024f113a69.gdb-bt
   code: SIGSEGV, Segmentation fault
   extension: gdb-bt
   stack:
-  - FrameTypeExtractor::getFrameType
-  - QnArchiveStreamReader::getNextData
-  - QnAbstractArchiveStreamReader::run
+  - common!FrameTypeExtractor::getFrameType
+  - nx_streaming!QnArchiveStreamReader::getNextData
+  - nx_streaming!QnAbstractArchiveStreamReader::run
   - start_thread
   - clone
   versions:
@@ -33,6 +33,23 @@
   - Client!__scrt_common_main_seh
   versions:
   - '3.1'
+98d306839b:
+  attachments:
+  - mediaserver--2.5.0.12353-d7550058c6eb-default--2018-03-11_06-30-50_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_2eecae5a4e5c9f2a9a6d6a0db0229d9a2a078742.gdb-bt
+  - mediaserver--2.5.0.12353-d7550058c6eb-default--2018-03-11_22-05-43_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_2eecae5a4e5c9f2a9a6d6a0db0229d9a2a078742.gdb-bt
+  - mediaserver--3.0.0.15297-3dc1a483740f-default--2018-03-11_07-01-12_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_FABRICATED.gdb-bt
+  code: 6, Aborted
+  extension: gdb-bt
+  stack:
+  - __libc_do_syscall
+  - __GI_raise
+  - __GI_abort
+  - __GI___assert_fail
+  - common!AsyncSocketImplHelper::eventTriggered
+  - common!aio::AIOThread::run
+  versions:
+  - '2.5'
+  - '3.0'
 994707a49a:
   attachments:
   - mediaserver--3.0.0.15888-983625ccc6ff-digitalwatchdog--2018-03-17_04-15-26_windows-x64-winxp-Windows-7-sp1_d88a4cd8ccba4a6009df3ec6362bbbbef1742bdc.cdb-bt
@@ -52,24 +69,6 @@
   versions:
   - '3.0'
   - '3.1'
-c01695c7ce:
-  attachments:
-  - mediaserver-bin--3.1.0.16975-77ebc0608e38-digitalwatchdog--2018-03-14_04-48-49_linux-x64-ubuntu-Ubuntu-16.04.4-LTS_FABRICATED.gdb-bt
-  - mediaserver-bin--3.2.0.260-5167f3722ad7-default-beta--2018-03-12_15-50-34_linux-x64-ubuntu-Ubuntu-16.04.3-LTS_cc4b6c661d67df4b1b1f2b94400fd9a440cf1030.gdb-bt
-  - mediaserver-bin--4.0.0.53-61fbffc8dfa1-default-beta--2018-03-12_10-39-18_linux-x64-ubuntu-Ubuntu-16.04.2-LTS_FABRICATED.gdb-bt
-  code: SIGSEGV, Segmentation fault
-  extension: gdb-bt
-  stack:
-  - nx::axis::CameraController::readSupportedEvents
-  - nx::mediaserver_plugins::metadata::axis::Plugin::fetchSupportedEvents
-  - nx::mediaserver_plugins::metadata::axis::Plugin::obtainCameraManager
-  - nx::mediaserver::metadata::ManagerPool::createMetadataManager
-  - nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
-  - nx::mediaserver::metadata::ManagerPool::handleResourceChanges
-  versions:
-  - '3.1'
-  - '3.2'
-  - '4.0'
 c8ad64344f:
   attachments:
   - mediaserver--3.1.0.16975-77ebc0608e38-digitalwatchdog--2018-03-12_21-00-21_windows-x64-winxp-Windows-10_ce3793b14747be7d8a6f7667c9e0da633c2a7617.cdb-bt
@@ -92,23 +91,6 @@ c8ad64344f:
   - nx_network!nx::network::aio::AIOThread::run
   versions:
   - '3.1'
-d801dfe3c8:
-  attachments:
-  - mediaserver--2.5.0.12353-d7550058c6eb-default--2018-03-11_06-30-50_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_2eecae5a4e5c9f2a9a6d6a0db0229d9a2a078742.gdb-bt
-  - mediaserver--2.5.0.12353-d7550058c6eb-default--2018-03-11_22-05-43_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_2eecae5a4e5c9f2a9a6d6a0db0229d9a2a078742.gdb-bt
-  - mediaserver--3.0.0.15297-3dc1a483740f-default--2018-03-11_07-01-12_linux-arm-bpi-Debian-GNU_Linux-7-(wheezy)_FABRICATED.gdb-bt
-  code: 6, Aborted
-  extension: gdb-bt
-  stack:
-  - __libc_do_syscall
-  - __GI_raise
-  - __GI_abort
-  - __GI___assert_fail
-  - AsyncSocketImplHelper::eventTriggered
-  - aio::AIOThread::run
-  versions:
-  - '2.5'
-  - '3.0'
 fd2a12d2b7:
   attachments:
   - DW_Spectrum--3.0.0.15888-983625ccc6ff-digitalwatchdog--2018-03-12_12-23-49_windows-x64-winxp-Windows-10_dcd50bc70f2ba2aef918b541c629f4004a6ee0ed.cdb-bt
@@ -131,3 +113,21 @@ fd2a12d2b7:
   - Client!__scrt_common_main_seh
   versions:
   - '3.0'
+fda116b4f1:
+  attachments:
+  - mediaserver-bin--3.1.0.16975-77ebc0608e38-digitalwatchdog--2018-03-14_04-48-49_linux-x64-ubuntu-Ubuntu-16.04.4-LTS_FABRICATED.gdb-bt
+  - mediaserver-bin--3.2.0.260-5167f3722ad7-default-beta--2018-03-12_15-50-34_linux-x64-ubuntu-Ubuntu-16.04.3-LTS_cc4b6c661d67df4b1b1f2b94400fd9a440cf1030.gdb-bt
+  - mediaserver-bin--4.0.0.53-61fbffc8dfa1-default-beta--2018-03-12_10-39-18_linux-x64-ubuntu-Ubuntu-16.04.2-LTS_FABRICATED.gdb-bt
+  code: SIGSEGV, Segmentation fault
+  extension: gdb-bt
+  stack:
+  - axis_metadata_plugin!nx::axis::CameraController::readSupportedEvents
+  - axis_metadata_plugin!nx::mediaserver_plugins::metadata::axis::Plugin::fetchSupportedEvents
+  - axis_metadata_plugin!nx::mediaserver_plugins::metadata::axis::Plugin::obtainCameraManager
+  - mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataManager
+  - mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
+  - mediaserver_core!nx::mediaserver::metadata::ManagerPool::handleResourceChanges
+  versions:
+  - '3.1'
+  - '3.2'
+  - '4.0'

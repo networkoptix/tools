@@ -1,7 +1,7 @@
 SIGSEGV, Segmentation fault
 
-CUDT::~CUDT
-CUDTSocket::~CUDTSocket
-CUDTUnited::removeSocket
-CUDTUnited::checkBrokenSockets
-CUDTUnited::garbageCollect
+udt!CUDT::~CUDT
+udt!CUDTSocket::~CUDTSocket
+udt!CUDTUnited::removeSocket
+udt!CUDTUnited::checkBrokenSockets
+udt!CUDTUnited::garbageCollect

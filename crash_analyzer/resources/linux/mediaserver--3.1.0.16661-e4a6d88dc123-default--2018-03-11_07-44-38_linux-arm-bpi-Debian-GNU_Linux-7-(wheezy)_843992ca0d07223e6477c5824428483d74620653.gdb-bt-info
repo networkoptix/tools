@@ -1,4 +1,4 @@
 4, Illegal instruction
 
-QnRtspDataConsumer::processData
-QnAbstractDataConsumer::run
+mediaserver_core!QnRtspDataConsumer::processData
+common!QnAbstractDataConsumer::run

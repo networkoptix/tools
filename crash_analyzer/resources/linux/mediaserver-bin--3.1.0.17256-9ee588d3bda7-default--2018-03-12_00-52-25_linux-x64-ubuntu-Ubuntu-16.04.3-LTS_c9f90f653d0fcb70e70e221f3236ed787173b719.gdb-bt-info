@@ -1,9 +1,9 @@
 SIGABRT, Aborted
 
-nx::vms::event::InfoDetail::~InfoDetail
+common!nx::vms::event::InfoDetail::~InfoDetail
 ...
-nx::vms::event::AggregationInfo::append
-nx::mediaserver::event::ExtendedRuleProcessor::sendMail
-nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal
-nx::mediaserver::event::RuleProcessor::doExecuteAction
-nx::mediaserver::event::RuleProcessor::executeAction
+common!nx::vms::event::AggregationInfo::append
+mediaserver_core!nx::mediaserver::event::ExtendedRuleProcessor::sendMail
+mediaserver_core!nx::mediaserver::event::ExtendedRuleProcessor::executeActionInternal
+mediaserver_core!nx::mediaserver::event::RuleProcessor::doExecuteAction
+mediaserver_core!nx::mediaserver::event::RuleProcessor::executeAction

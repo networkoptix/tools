@@ -1,5 +1,5 @@
 SIGFPE, Arithmetic exception
 
-QnMotionEstimation::scaleFrame
-QnMotionEstimation::analizeFrame
-QnLiveStreamProvider::onGotVideoFrame
+common!QnMotionEstimation::scaleFrame
+common!QnMotionEstimation::analizeFrame
+common!QnLiveStreamProvider::onGotVideoFrame

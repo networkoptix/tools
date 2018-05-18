@@ -11,7 +11,7 @@ import utils
 
 logger = logging.getLogger(__name__)
 
-# Avoid crazy amount of logs from this module.
+# Suppress crazy amount of logs from network modules.
 logging.getLogger('chardet.charsetprober').setLevel(logging.INFO)
 
 REPORT_NAME_REGEXP = re.compile('''
@@ -23,6 +23,22 @@ REPORT_NAME_REGEXP = re.compile('''
     .+ \. (?P<extension> [^\.]+)
 ''', re.VERBOSE)
 
+CXX_MODULE_SEPARATOR = '!'
+CXX_LINUX_MODULE_RE = re.compile('.+lib(?P<name>[^\.\ ]+)\.so.*')
+
+# Such hardcode looks awful and vary wrong, however these are essential rules for the stack
+# extraction and it is not supposed to be changed ever!
+# Also this crash monitor in bound to NX infrastructure in every way, so this make just one
+# more binding point.
+CXX_ONW_MODULES_MIN_COUNT = 3
+CXX_OWN_MODULE_PREFIXES = [
+    'nx_', 'nx::',  # < Modern module conventions.
+    'Qn',  # < Legacy conventions.
+    'udt',  # < Absorbed external code.
+    'axiscamplugin', 'evidence_plugin', 'generic_multicast_plugin', 'generic_multicast_plugin',
+    'image_library_plugin', 'it930x_plugin', 'mjpg_link', 'NxControl', 'quicksyncdecoder', 'rpi_cam',
+    'xvbadecoder',  # < Legacy VMS server plugins.
+]
 
 class Error(Exception):
     pass
@@ -131,9 +147,8 @@ def remove_cxx_template_arguments(line):
 
 
 def is_cxx_name_prefixed(line, *prefixes):
-    name = ' ' + line
     for prefix in prefixes:
-        if ' ' + prefix in name:
+        if line.startswith(prefix) or (CXX_MODULE_SEPARATOR + prefix) in line:
             return True
 
     return False
@@ -183,20 +198,19 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     if not transformed_stack:
         raise AnalyzeError('No functions in Call Stack in: ' + report.name)
 
-    is_useful = [describer.is_useful(x) for x in transformed_stack]
-    is_useful_count = is_useful.count(True)
-    if not is_useful_count:
-        if describer.allow_not_useful_stacks:
-            return Reason(report.component, code, transformed_stack)
-        raise AnalyzeError('Not useful Call Stack in: ' + report.name)
+    is_own_values = [is_cxx_name_prefixed(x, report.component, *CXX_OWN_MODULE_PREFIXES)
+                     for x in transformed_stack]
 
-    if is_useful_count < 3:
+    if not any(is_own_values) and not describer.allow_not_own_stacks:
+        raise AnalyzeError('Entirely external stack in: ' + report.name)
+
+    if is_own_values.count(True) < CXX_ONW_MODULES_MIN_COUNT:
         return Reason(report.component, code, transformed_stack)
 
     useful_stack = []
     is_skipped = False
-    for line, is_useful in zip(transformed_stack, is_useful):
-        if is_useful:
+    for line, is_own in zip(transformed_stack, is_own_values):
+        if is_own:
             if is_skipped:
                 if useful_stack:
                     useful_stack.append('...')
@@ -208,15 +222,7 @@ def analyze_bt(report: Report, content: str, describer: object) -> Reason:
     return Reason(report.component, code, useful_stack)
 
 
-_NX_OBJECT_NAME_PREFIXES = [
-    'nx::',
-    'nx_',
-    'Qn',
-    'CUDT',
-]
-
-
-def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
+def analyze_linux_gdb_bt(report: Report, content: str, **options) -> Reason:
     """Extracts error code and call stack by rules from linux gdb bt output.
     """
 
@@ -227,7 +233,8 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
         stack_begin = 'Thread 1 '
         stack_end = '\n(gdb)'
 
-        allow_not_useful_stacks = True
+        # On some platforms only short function names are available, so we can not understand if function is own.
+        allow_not_own_stacks = True
 
         @staticmethod
         def is_new_line(line):
@@ -240,6 +247,8 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
         @staticmethod
         def transform(line):
             transformed = remove_cxx_template_arguments(line)
+            module_match = CXX_LINUX_MODULE_RE.match(line)
+            module_prefix = module_match.group('name') + CXX_MODULE_SEPARATOR if module_match else ''
 
             # Remove arguments and other details.
             call_position = transformed.find('(')
@@ -268,16 +277,12 @@ def analyze_linux_gdb_bt(report: Report, content: str) -> Reason:
             if transformed == '??':
                 return None
 
-            return transformed
-
-        @staticmethod
-        def is_useful(line):
-            return is_cxx_name_prefixed(line, *_NX_OBJECT_NAME_PREFIXES)
+            return module_prefix + transformed
 
     return analyze_bt(report, content, GdbDescriber)
 
 
-def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
+def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
     """Extracts error code and call stack by rules from windows cdb bt output.
     """
 
@@ -288,7 +293,8 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
         stack_begin = 'Call Site'
         stack_end = '\n\n'
 
-        allow_not_useful_stacks = False
+        # If there are no our modules there is a good chance they are not able to be resolved.
+        allow_not_own_stacks = False
 
         @staticmethod
         def is_new_line(line):
@@ -297,32 +303,22 @@ def analyze_windows_cdb_bt(report: Report, content: str) -> Reason:
 
         @staticmethod
         def transform(line):
-            if line == '0x0':
+            # Keep only resolved symbols.
+            module, *name = line.split(CXX_MODULE_SEPARATOR, 1)
+            if not name:
                 return None
 
             # Replace lambdas from different builds with the same token.
-            line = re.sub('<lambda_[0-9a-f]+>', '{lambda}', line)
+            name = re.sub('<lambda_[0-9a-f]+>', '{lambda}', name[0])
 
             # Replace binary name with component so stacks from different
             # customizations are exactly the same.
-            if line.startswith(report.binary + '!'):
-                line = report.component + line[len(report.binary):]
+            if module == report.binary:
+                module = report.component
 
-            return remove_cxx_template_arguments(line)
+            return CXX_MODULE_SEPARATOR.join([module, remove_cxx_template_arguments(name)])
 
-        @staticmethod
-        def is_useful(line):
-            module, *name = line.split('!')
-            if not name:
-                return False  # < Function name is not present.
-
-            if module == report.component or module.startswith('nx_') or \
-                    is_cxx_name_prefixed(name[0], *_NX_OBJECT_NAME_PREFIXES):
-                return True  # < NX Component.
-
-            return False
-
-    return analyze_bt(report, content, CdbDescriber)
+    return analyze_bt(report, content, CdbDescriber, **options)
 
 
 def analyze_reports_concurrent(reports: List[Report], problem_versions: list = [], **options) \

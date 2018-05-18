@@ -1,6 +1,6 @@
 SIGSEGV, Segmentation fault
 
-nx::mediaserver::metadata::EventHandler::EventHandler
-nx::mediaserver::metadata::ManagerPool::createMetadataHandler
-nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
-nx::mediaserver::metadata::ManagerPool::handleResourceChanges
+mediaserver_core!nx::mediaserver::metadata::EventHandler::EventHandler
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataHandler
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::handleResourceChanges

@@ -1,5 +1,5 @@
 11, Segmentation fault
 
-QMutex::lock
-QThread::isRunning
-QnRecordingManager::startOrStopRecording
+Qt5Core!QMutex::lock
+Qt5Core!QThread::isRunning
+mediaserver_core!QnRecordingManager::startOrStopRecording

@@ -1,6 +1,6 @@
 SIGSEGV, Segmentation fault
 
-QnTCPConnectionProcessor::sendData
-QnTCPConnectionProcessor::sendBuffer
-QnRtspDataConsumer::processData
-QnAbstractDataConsumer::run
+common!QnTCPConnectionProcessor::sendData
+common!QnTCPConnectionProcessor::sendBuffer
+mediaserver_core!QnRtspDataConsumer::processData
+nx_streaming!QnAbstractDataConsumer::run

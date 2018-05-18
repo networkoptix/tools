@@ -1,9 +1,9 @@
 SIGSEGV, Segmentation fault
 
-nx::utils::assertCrash
-nx::network::CommunicatingSocket::~CommunicatingSocket
-nx::network::TCPSocket::~TCPSocket
-nx::network::deprecated::SslSocket::~SslSocket
-nx::network::deprecated::MixedSslSocket::~MixedSslSocket
-QnUniversalRequestProcessor::processRequest
-QnUniversalRequestProcessor::run
+nx_network!nx::utils::assertCrash
+nx_network!nx::network::CommunicatingSocket::~CommunicatingSocket
+nx_network!nx::network::TCPSocket::~TCPSocket
+nx_network!nx::network::deprecated::SslSocket::~SslSocket
+nx_network!nx::network::deprecated::MixedSslSocket::~MixedSslSocket
+mediaserver_core!QnUniversalRequestProcessor::processRequest
+mediaserver_core!QnUniversalRequestProcessor::run

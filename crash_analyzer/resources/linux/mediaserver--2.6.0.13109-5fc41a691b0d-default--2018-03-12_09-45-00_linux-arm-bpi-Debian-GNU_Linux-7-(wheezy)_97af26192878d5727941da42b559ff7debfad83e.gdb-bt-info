@@ -1,6 +1,6 @@
 11, Segmentation fault
 
-QMutex::lock
-QMutex::lock
-QMetaObject::activate
-QMetaObject::activate
+Qt5Core!QMutex::lock
+Qt5Core!QMutex::lock
+Qt5Core!QMetaObject::activate
+Qt5Core!QMetaObject::activate

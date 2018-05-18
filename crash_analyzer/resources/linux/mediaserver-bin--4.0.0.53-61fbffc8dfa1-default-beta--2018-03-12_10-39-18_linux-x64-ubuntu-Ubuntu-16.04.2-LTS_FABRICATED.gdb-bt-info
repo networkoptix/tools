@@ -1,8 +1,8 @@
 SIGSEGV, Segmentation fault
 
-nx::axis::CameraController::readSupportedEvents
-nx::mediaserver_plugins::metadata::axis::Plugin::fetchSupportedEvents
-nx::mediaserver_plugins::metadata::axis::Plugin::obtainCameraManager
-nx::mediaserver::metadata::ManagerPool::createMetadataManager
-nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
-nx::mediaserver::metadata::ManagerPool::handleResourceChanges
+axis_metadata_plugin!nx::axis::CameraController::readSupportedEvents
+axis_metadata_plugin!nx::mediaserver_plugins::metadata::axis::Plugin::fetchSupportedEvents
+axis_metadata_plugin!nx::mediaserver_plugins::metadata::axis::Plugin::obtainCameraManager
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataManager
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::createMetadataManagersForResource
+mediaserver_core!nx::mediaserver::metadata::ManagerPool::handleResourceChanges

@@ -2,10 +2,10 @@ SIGABRT, Aborted
 
 __GI_raise
 __GI_abort
-__gnu_cxx::__verbose_terminate_handler
-std::terminate
-__cxa_pure_virtual
-QnAbstractStreamDataProvider::dataCanBeAccepted
-CLServerPushStreamReader::run
+stdc++!__gnu_cxx::__verbose_terminate_handler
+stdc++!std::terminate
+stdc++!__cxa_pure_virtual
+common!QnAbstractStreamDataProvider::dataCanBeAccepted
+common!CLServerPushStreamReader::run
 start_thread
 clone

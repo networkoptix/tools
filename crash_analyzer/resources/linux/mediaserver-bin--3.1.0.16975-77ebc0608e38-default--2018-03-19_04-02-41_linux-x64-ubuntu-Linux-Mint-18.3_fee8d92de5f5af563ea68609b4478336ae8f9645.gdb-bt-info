@@ -1,8 +1,8 @@
 SIGSEGV, Segmentation fault
 
-QnServerArchiveDelegate::switchToChunk
-QnServerArchiveDelegate::seekInternal
-QnServerArchiveDelegate::seek
-QnThumbnailsArchiveDelegate::getNextData
-QnThumbnailsStreamReader::getNextData
-QnThumbnailsStreamReader::run
+mediaserver_core!QnServerArchiveDelegate::switchToChunk
+mediaserver_core!QnServerArchiveDelegate::seekInternal
+mediaserver_core!QnServerArchiveDelegate::seek
+common!QnThumbnailsArchiveDelegate::getNextData
+common!QnThumbnailsStreamReader::getNextData
+common!QnThumbnailsStreamReader::run

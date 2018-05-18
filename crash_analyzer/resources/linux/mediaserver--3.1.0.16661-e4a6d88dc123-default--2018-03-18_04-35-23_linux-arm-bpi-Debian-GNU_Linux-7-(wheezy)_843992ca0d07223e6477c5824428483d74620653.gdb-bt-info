@@ -1,5 +1,5 @@
 11, Segmentation fault
 
-QnPlOnvifResource::strictBitrate
-QnLiveStreamProvider::saveBitrateIfNeeded
-QnLiveStreamProvider::onGotVideoFrame
+mediaserver_core!QnPlOnvifResource::strictBitrate
+common!QnLiveStreamProvider::saveBitrateIfNeeded
+common!QnLiveStreamProvider::onGotVideoFrame
