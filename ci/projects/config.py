@@ -9,7 +9,7 @@ from utils import setup_logging, is_list_inst, is_dict_inst, str_to_timedelta, t
 log = logging.getLogger(__name__)
 
 
-DEFAULT_CI_CUSTOMIZATION = 'hanwha'
+DEFAULT_CI_CUSTOMIZATION = 'default'
 DEFAULT_CLOUD_GROUP = 'test'
 
 
