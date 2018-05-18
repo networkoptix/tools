@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 NAME = 'Crash Monitor and Analyzer'
 VERSION = '2.0'
+RETRY_CRASH_ID = 'RETRY'
 FAILED_CRASH_ID = 'FAILED'
 
 
@@ -137,8 +138,11 @@ class Monitor:
         return len(new_reports)
 
     def analyze(self) -> int:
-        to_analyze = [crash_info.Report(name)
-                      for name, data in self._records.items() if not data.get('crash_id')]
+        to_analyze = []
+        for name, data in self._records.items():
+            crash_id = data.get('crash_id')
+            if not crash_id or crash_id == RETRY_CRASH_ID:
+                to_analyze.append(crash_info.Report(name))
 
         logger.info('Analyze {} report(s) from local cache'.format(len(to_analyze)))
         if not to_analyze:
@@ -150,8 +154,9 @@ class Monitor:
         analyzed = {report.name: reason for report, reason in reasons}
         for report in to_analyze:
             reason = analyzed.get(report.name)
-            crash_id = reason.crash_id if reason else FAILED_CRASH_ID
-            self._records[report.name]['crash_id'] = crash_id
+            record = self._records[report.name]
+            record['crash_id'] = reason.crash_id if reason else (
+                FAILED_CRASH_ID if record.get('crash_id') else RETRY_CRASH_ID)
 
         self.flush_records()
         self._cleanup_cache(
@@ -162,7 +167,7 @@ class Monitor:
         self._cleanup_cache(
             utils.Directory(dump_tool.CDB_CACHE_DIRECTORY),
             self._options.cdb_cache_size_limit,
-            lambda d: False)  # < TODO: Consider to keep system libraries.
+            lambda d: d.size() < self._options.cdb_cache_size_limit / 1000)
 
         return len(analyzed)
 
@@ -170,7 +175,7 @@ class Monitor:
         crashes_by_id = {}
         for name, record in self._records.items():
             crash_id, issue = record.get('crash_id'), record.get('issue')
-            if crash_id and crash_id != FAILED_CRASH_ID:
+            if crash_id and crash_id != FAILED_CRASH_ID and crash_id != RETRY_CRASH_ID:
                 crash_data = crashes_by_id.setdefault(crash_id, {'issue': None, 'reports': []})
                 if issue:
                     crash_data['issue'] = issue

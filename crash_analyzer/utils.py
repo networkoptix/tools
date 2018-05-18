@@ -182,9 +182,9 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
             try:
                 date, time, level, message = line.split(maxsplit=3)
                 if level == 'INFO': level = 'DEBUG'
-                resolved_level = getattr(logging, level)
+                resolved_level = int(getattr(logging, level))
                 logger.log(resolved_level, time + '    ' + message)
-            except (AttributeError, ValueError):
+            except (AttributeError, TypeError, ValueError):
                 logger.log(resolved_level, line)   # < Not a beginning of the log line.
 
     def wrap_task(task, debug=''):

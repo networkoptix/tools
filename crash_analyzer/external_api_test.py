@@ -96,7 +96,7 @@ def _test_jira():
         jira.create_issue('server--3.1.0.1234-abcd-default--1234.gdb-bt')
         jira.update_issue(['server--3.1.0.1234-abcd-default--1234.gdb-bt'])
         assert jira.issue.key.startswith('VMS-')
-        assert 'Open', jira.issue.fields.status.name
+        assert 'Open' == jira.issue.fields.status.name
         assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
         assert 'Call Stack:\n{code}\nf1\nf2\n{code}' == jira.issue.fields.description
         assert 'Server' == jira.issue.fields.customfield_10200.value
@@ -106,7 +106,7 @@ def _test_jira():
         assert {'1234'} == jira.attachments()
 
         logger.debug('Suppose case is closed by developer')
-        jira.api._transition(jira.issue.key, 'Feedback', 'QA Passed')
+        jira.api._transition(jira.issue.key, 'Reject')
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('No reopen should happen for dump from the same version')

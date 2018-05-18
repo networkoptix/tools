@@ -26,6 +26,11 @@ logger = logging.getLogger(__name__)
 
 CDB_CACHE_DIRECTORY = '''C:\ProgramData\dbg\sym'''
 
+CDB_KNOWN_ERRORS = [
+    'Minidump does not have system info',
+    'invalid file format',
+]
+
 DIST_URLS = [
     'http://beta.enk.me/beta-builds/daily/',
     'http://beta.networkoptix.com/beta-builds/daily/',
@@ -165,6 +170,7 @@ class CdbSession:
         """Executes cdb :command and returns collected output.
         """
         if command:
+            logger.debug('Cdb execute: ' + command.strip())
             self.cdb.stdin.write(command.encode() + b'\n')
             self.cdb.stdin.flush()
 
@@ -173,10 +179,12 @@ class CdbSession:
             # TODO: Implement read timeout, so we are sure it newer blocks forever.
             c = self.cdb.stdout.read(1)
             if not c:
-                raise CdbError('\n'.join((
-                    '%s ->' % shell_line(self.shell),
-                    'Cdb command: %s' % command,
-                    'Unexpected eof: %s' % out)))
+                logger.debug('Cdb command: %s' % command)
+                logger.debug('Unexpected EOF: %s' % out)
+                for error in CDB_KNOWN_ERRORS:
+                    if error in out:
+                        raise CdbError('{} -> {}'.format(shell_line(self.shell), error))
+                raise CdbError('{} ->\n{}'.format(shell_line(self.shell), out))
 
             out += c.decode()
 
@@ -319,12 +327,15 @@ class DumpAnalyzer:
         """
         dist_url, out = None, None
         for url in DIST_URLS:
-            out = self.fetch_url_data(
-                url, [""">(%s\-%s[^<]*)<""" % (self.build, re.escape(self.branch))])
-
-            if len(out) > 0:
-                dist_url = url
-                break
+            logger.debug('Search for dist on {}'.format(url))
+            try:
+                out = self.fetch_url_data(
+                    url, [""">(%s\-%s[^<]*)<""" % (self.build, re.escape(self.branch))])
+                if len(out) > 0:
+                    dist_url = url
+                    break
+            except http.client.IncompleteRead as e:
+                logger.debug(e)
 
         if not dist_url:
             raise DistError("No distributive found for build %s, analysis is impossible" % self.build)
@@ -343,7 +354,6 @@ class DumpAnalyzer:
             raise DistError('There are no distributive URLs available')
             
         self.build_path = os.path.join(self.cache_directory, build_path)
-        self.target_path = os.path.join(self.build_path, 'target')
         return list(os.path.join(*url) for url in out)
 
     @staticmethod
@@ -438,12 +448,13 @@ class DumpAnalyzer:
         except FileExistsError:
             pass
 
-        with FileLock(os.path.join(self.build_path, 'lock'),
-                      self.subprocess_timeout_s * len(urls)) as lock:
+        lock_path = os.path.join(self.build_path, self.dist + '-lock')
+        self.build_path = os.path.join(self.build_path, self.dist)
+        self.target_path = os.path.join(self.build_path, 'target')
+        with FileLock(lock_path, self.subprocess_timeout_s * len(urls)) as lock:
             try:
                 logger.debug('Skip download of existing build: ' + self.module_dir())
                 return
-
             except DistError:
                 pass
 
@@ -459,13 +470,9 @@ class DumpAnalyzer:
                 logger.debug('Unable to get build "{}": {}'.format(
                     self.build_path, traceback.format_exc()))
                 if not self.debug_mode:
-                    def on_error(call, path, error):
-                        if not os.path.normpath(lock.path).startswith(os.path.normpath(path)):
-                            logger.error('{}("{}"): {}: {}'.format(
-                                call, path, type(error).__name__, str(error)))
                     try:
                         logger.debug('Clean up download directory: ' + self.build_path)
-                        shutil.rmtree(self.build_path, onerror=on_error)
+                        shutil.rmtree(self.build_path)
                     except Exception:
                         logger.error('Unable to cleanup: {}'.format(traceback.format_exc()))
                 raise

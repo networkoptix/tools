@@ -343,7 +343,7 @@ def analyze_reports_concurrent(reports: List[Report], problem_versions: list = [
         else:
             processed.append((report, result))
 
-    logger.info('Successfully analyzed {} of {} reports'.format(len(processed), len(reports)))
+    logger.info('Successfully analyzed {} of {} report(s)'.format(len(processed), len(reports)))
     return processed
 
 

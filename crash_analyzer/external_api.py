@@ -65,6 +65,12 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     """Fetches :count new reports into :directory, which are not present in :known_reports and
     satisfy :min_version and :extension, returns created file names.
     """
+    try:
+        full_list = api(**options).list_all(extension=extension)
+    except (CrashServerError, json.decoder.JSONDecodeError) as error:
+        logger.warning(utils.format_error(error))
+        return []
+    
     to_download_groups = {}
     for name in api(**options).list_all(extension=extension):
         try:
@@ -136,7 +142,7 @@ class Jira:
         try:
             issue = self._jira.create_issue(
                 project='VMS',
-                issuetype={'name': 'Bug'},
+                issuetype={'name': 'Crash'},
                 summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
                     r=reason, os=operation_system(report.extension)),
                 versions=[{'name': report.version}],
