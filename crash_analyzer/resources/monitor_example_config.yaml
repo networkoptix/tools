@@ -31,8 +31,8 @@ fetch:
     thread_count: 20 #< Download connections count.
 
 analyze:
-    subprocess_timeout_s: 30 #< Newer wait for child processes longer.
     thread_count: 5 #< Maximum CDB process count.
+    subprocess_timeout_s: 30 #< Newer wait for child processes longer.
     problem_versions: [] #< Ignore analyze problems on this builds.
 
 upload:
@@ -41,4 +41,5 @@ upload:
     password: kbnUk06boqBkwU
     file_limit: 20 #< Maximum attachments count.
     thread_count: 10 #< Communication connections count.
+    epic_link: VMS-2022 #< Epic name to link newly created issues.
     prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.

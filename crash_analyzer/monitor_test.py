@@ -34,9 +34,9 @@ class CrashServerMock:
 
 class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str,
-                 file_limit: int, prefix: str = ''):
+                 file_limit: int, epic_link: str, prefix: str = ''):
         self.issues = issues
-        self.server = '{}:{} @ {} / {} {}'.format(login, password, url, file_limit, prefix)
+        self.server = '{}:{} @ {} / {} {} {}'.format(login, password, url, file_limit, epic_link, prefix)
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         key = reason.crash_id[:10]  # < Shorter key for easier debug.
@@ -89,13 +89,13 @@ def monitor_fixture():
 
 
 @pytest.mark.parametrize(
-    "extension", ['gdb-bt', 'cdb-bt', '-bt']
+    "extension", ['-bt', 'gdb-bt', 'cdb-bt']
 )
 @pytest.mark.parametrize(
     "restart_after_each_stage", [True, False]
 )
 @pytest.mark.parametrize(
-    "reports_each_run", [1000, 10]
+    "reports_each_run", [10, 1000]
 )
 def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool, reports_each_run: int):
     monitor_fixture.options['fetch'].update(extension=extension, report_count=reports_each_run)
@@ -117,5 +117,4 @@ def test_monitor(monitor_fixture, extension: str, restart_after_each_stage: bool
     expected = {k: v for k, v in utils.Resource('expected_issues.yaml').parse().items()
                 if v['extension'].endswith(extension)}
 
-    utils.File('C:/develop/var/exp.yaml').serialize(actual)
     assert expected == actual

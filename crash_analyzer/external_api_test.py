@@ -12,9 +12,8 @@ import utils
 logger = logging.getLogger(__name__)
 
 CONFIG = utils.Resource('monitor_example_config.yaml').parse()
-SERVER_FIELDS = ('url', 'login', 'password')
-SERVER_CONFIG = {k: v for k, v in CONFIG['fetch'].items() if k in SERVER_FIELDS}
-JIRA_CONFIG = {k: v for k, v in CONFIG['upload'].items() if k in SERVER_FIELDS}
+SERVER_CONFIG = {k: v for k, v in CONFIG['fetch'].items() if k in ('url', 'login', 'password')}
+JIRA_CONFIG = {k: v for k, v in CONFIG['upload'].items() if k in ('url', 'login', 'password', 'epic_link')}
 JIRA_PREFIX = 'TEST-RUN'
 JIRA_REASON = crash_info.Reason('Server', 'SEGFAULT', ['f1', 'f2'])
 
@@ -100,6 +99,7 @@ def _test_jira():
         assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
         assert 'Call Stack:\n{code}\nf1\nf2\n{code}' == jira.issue.fields.description
         assert 'Server' == jira.issue.fields.customfield_10200.value
+        assert 'VMS-2022' == jira.issue.fields.customfield_10009
         assert {'Server'} == {c.name for c in jira.issue.fields.components}
         assert {'3.1'} == {v.name for v in jira.issue.fields.versions}
         assert {'3.1_hotfix'} == {v.name for v in jira.issue.fields.fixVersions}

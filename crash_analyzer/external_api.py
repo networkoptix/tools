@@ -11,7 +11,6 @@ import crash_info
 import utils
 
 logger = logging.getLogger(__name__)
-CRASH_MONITOR_EPIC = "VMS-2022"
 
 
 class Error(Exception):
@@ -72,7 +71,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
         return []
     
     to_download_groups = {}
-    for name in api(**options).list_all(extension=extension):
+    for name in full_list:
         try:
             report = crash_info.Report(name)
 
@@ -83,8 +82,9 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
         if report.build == '0' or report.version < min_version or name in known_reports:
             continue
 
-        # Download and process reports from different components equally often.
-        to_download_groups.setdefault(report.component, []).append(name)
+        # Download and process reports from different components on different platforms equally often.
+        key = '{} ({})'.format(report.component, report.extension)
+        to_download_groups.setdefault(key, []).append(name)
 
     for source, names in to_download_groups.items():
         logger.debug('Found {} report(s) from VMS {}'.format(len(names), source))
@@ -117,9 +117,10 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 
 class Jira:
-    def __init__(self, url: str, login: str, password: str, file_limit: int, prefix: str = ''):
+    def __init__(self, url: str, login: str, password: str, file_limit: int, epic_link: str, prefix: str = ''):
         self._jira = jira.JIRA(server=url, basic_auth=(login, password))
         self._file_limit = file_limit
+        self.epic_link = epic_link
         self._prefix = prefix + ' ' if prefix else ''
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
@@ -149,7 +150,7 @@ class Jira:
                 fixVersions=[{'name': report.version + '_hotfix'}],
                 components=[{'name': reason.component}],
                 customfield_10200={"value": team(reason.component)},
-                customfield_10009=CRASH_MONITOR_EPIC,
+                customfield_10009=self.epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
         except jira.exceptions.JIRAError as error:
             logger.debug(utils.format_error(error))
