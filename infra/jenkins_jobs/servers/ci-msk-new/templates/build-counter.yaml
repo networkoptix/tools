@@ -4,6 +4,8 @@
 
     node: runner
 
+    concurrent: false  # important
+
     properties:
     - heavy-job:
         weight: 1

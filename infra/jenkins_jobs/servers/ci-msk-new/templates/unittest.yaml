@@ -3,6 +3,8 @@
 
     node: unittests-linux
 
+    concurrent: true
+
     junk_shop_host: '10.0.2.101'
 
     description: |
@@ -28,9 +30,65 @@
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base}/{pipeline}/$BUILD_IDENTITY/
           CUSTOMIZATION={customization}
-    - folder-copy-operation:
-        source-folder-path: $REPOSITORY_PATH
-        destination-folder-path: $WORKSPACE/build
+    # - folder-copy-operation:
+    #     source-folder-path: $REPOSITORY_PATH
+    #     destination-folder-path: $WORKSPACE/build
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/distrib/
+          PLATFORM={platform}
+          CUSTOMIZATION={customization}
+          COMPONENT=distrib/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/bin/
+          PLATFORM={platform}
+          CUSTOMIZATION={customization}
+          COMPONENT=bin/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/lib/
+          PLATFORM={platform}
+          CUSTOMIZATION={customization}
+          COMPONENT=lib/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/current_config.py
+          PLATFORM={platform}
+          CUSTOMIZATION={customization}
+          COMPONENT=current_config.py
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
 
     # Inject junkshop variables relatd to publishing unittests results
     - inject:
@@ -48,7 +106,7 @@
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
           BIN_DIR="$WORKSPACE/build/bin"
           CONFIG_PATH="$WORKSPACE/build/current_config.py"
-          TIMEOUT=30m
+          TIMEOUT=3m
           TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
           mkdir -p unit_tests
           cd unit_tests  # unit test runner and saver treat current directory as working one

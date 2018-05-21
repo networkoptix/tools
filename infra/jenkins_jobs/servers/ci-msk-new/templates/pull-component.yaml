@@ -3,6 +3,8 @@
 
     node: repository-ops
 
+    concurrent: true
+
     wrappers:
     - ssh-agent-credentials:
         users:
@@ -34,5 +36,5 @@
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '{artifact_repository_base}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/${{COMPONENT}}/'
-        dst_path: '${{LOCAL_PATH}}/'
+        src_path: '{artifact_repository_base}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/${{COMPONENT}}'
+        dst_path: '${{LOCAL_PATH}}'

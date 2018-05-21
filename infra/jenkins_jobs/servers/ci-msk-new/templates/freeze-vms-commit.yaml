@@ -3,6 +3,7 @@
     project-type: multijob
     node: runner
 
+    concurrent: false  # important
 
     parameters:
     - p_REQUESTED_BY

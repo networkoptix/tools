@@ -3,6 +3,8 @@
 
     node: hg-sync
 
+    concurrent: true
+
     wrappers:
     - ssh-agent-credentials:
         users:

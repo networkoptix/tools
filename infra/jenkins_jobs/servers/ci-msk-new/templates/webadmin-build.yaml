@@ -22,6 +22,8 @@
 
     node: '{webadmin-build-node}'
 
+    concurrent: true
+
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE

@@ -4,6 +4,8 @@
     node: '{installer-build-node}'
     workspace: '{workspace}'
 
+    concurrent: true
+
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE
@@ -112,6 +114,7 @@
         properties-content: |
           PIPELINE={pipeline}
           CUSTOMIZATION={customization}
+          PLATFORM={platform}
           {cmake_configure_args_global}
     - inject:
         properties-content: |
@@ -127,7 +130,6 @@
           CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/server-external
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
           CMAKE_SOURCEDIR=../nx_vms
-          CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_ENV_environment=$WORKSPACE
           environment=$WORKSPACE
@@ -149,7 +151,7 @@
           EXECUTABLE=cmake
           CMAKE_BUILD_THREADS=20
           LOGFILE=build/cmake-build-{customization}.log
-          CMAKE_ENV_NINJA_STATUS=[%s/%t] %es
+          CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_ENV_environment=$WORKSPACE
           INHERIT_ENVIRON=true
@@ -187,6 +189,28 @@
           CUSTOMIZATION=$CUSTOMIZATION
           LOCAL_PATH=$WORKSPACE/build/bin/
           COMPONENT=bin/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          SSH_USER=$USER
+      - project:
+        - 'helper.push-component'
+        condition: UNSTABLE_OR_BETTER
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          LOCAL_PATH=$WORKSPACE/build/lib/
+          COMPONENT=lib/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          SSH_USER=$USER
+      - project:
+        - 'helper.push-component'
+        condition: UNSTABLE_OR_BETTER
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          LOCAL_PATH=$WORKSPACE/build/current_config.py
+          COMPONENT=current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           SSH_USER=$USER
     # FIXME: add build_info.txt and current_config.py from this old snip

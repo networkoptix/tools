@@ -6,6 +6,8 @@
     description: |
       Entry point
 
+    concurrent: true
+
     parameters:
     # FIXME: Figure out why extended choice created from JJB is not visible..
     - string:
