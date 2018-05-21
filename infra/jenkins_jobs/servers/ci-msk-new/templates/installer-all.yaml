@@ -7,8 +7,11 @@
     concurrent: true
 
     wrppers:
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
     - build-name:
         name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+
 
     parameters:
     - p_CLEAN_WORKSPACE

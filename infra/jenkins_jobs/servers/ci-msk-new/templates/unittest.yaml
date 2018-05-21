@@ -15,6 +15,10 @@
 
     wrappers:
     - timestamps
+    - timeout:
+        timeout: 20 # min
+        fail: true
+        type: absolute
     - build-name:
         name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     # - credentials-binding:

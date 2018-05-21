@@ -6,6 +6,14 @@
 
     concurrent: false  # important
 
+    wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 1-2 min
+        timeout: 10 # min
+        fail: true
+        type: absolute
+
     properties:
     - heavy-job:
         weight: 1

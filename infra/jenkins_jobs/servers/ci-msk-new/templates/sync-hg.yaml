@@ -6,6 +6,12 @@
     concurrent: true
 
     wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 2-10 min
+        timeout: 20 # min
+        fail: true
+        type: absolute
     - ssh-agent-credentials:
         users:
         - jenkins

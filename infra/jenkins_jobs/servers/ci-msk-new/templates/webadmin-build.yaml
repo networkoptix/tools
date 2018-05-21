@@ -34,6 +34,11 @@
 
     wrappers:
     - timestamps
+    - timeout:
+        # normally, should complete in 7-15 min
+        timeout: 30 # min
+        fail: true
+        type: absolute
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
     - build-name:
