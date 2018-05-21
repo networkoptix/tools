@@ -54,6 +54,10 @@
     - inject:
         properties-file: '{counter_var_name}.envvar'
 
+    - build-name-setter:
+        template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+        macro: true
+
     - multijob:
         name: Build web admin
         projects:

@@ -62,6 +62,10 @@
             set -ex
             echo "{counter_var_name}=${{SET_{counter_var_name}}}" > '{counter_var_name}.envvar'
 
+    - build-name-setter:
+        template: '[${{BUILD_ID}}] ${{BUILD_IDENTITY}}'
+        macro: true
+
     publishers:
     - archive:
         artifacts: '{counter_var_name}.envvar'

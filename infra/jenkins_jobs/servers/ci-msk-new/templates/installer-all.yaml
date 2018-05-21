@@ -6,6 +6,10 @@
 
     concurrent: true
 
+    wrppers:
+    - build-name:
+        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE

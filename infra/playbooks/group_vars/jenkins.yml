@@ -24,6 +24,7 @@ jenkins_plugins:
 - view-job-filters
 - ssh-slaves
 # job types
+- build-name-setter
 - jenkins-multijob-plugin
 # scm
 - git
