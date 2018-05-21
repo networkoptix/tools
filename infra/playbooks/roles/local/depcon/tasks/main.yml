@@ -71,27 +71,6 @@
     dest: "{{ depcon_home }}/src"
     revision: "{{ depcon_rev }}"
 
-- name: Install nfs client
-  apt:
-    pkg: nfs-common
-    state: present
-
-- name: Create mount dir
-  file:
-    path: "/vol/ftp/beta-builds"
-    owner: "{{ depcon_user }}"
-    group: "{{ depcon_group }}"
-    recurse: true
-    state: directory
-
-- name: Mount nfs directory
-  mount:
-    path: "/vol/ftp/beta-builds"
-    src: "{{ nfsserver }}:/share/NFSv=4/beta-builds"
-    boot: yes
-    state: mounted
-    fstype: nfs
-
 - name: Install awscli requirements
   apt:
     name: "{{ item }}"
