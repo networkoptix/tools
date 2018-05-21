@@ -33,6 +33,8 @@
         default: '{branch}'
 
     wrappers:
+    - build-name:
+        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     - timestamps
     - timeout:
         # normally, should complete in 7-15 min
@@ -41,8 +43,6 @@
         type: absolute
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     - pre-scm-repo-manipulations-2
 
     scm:

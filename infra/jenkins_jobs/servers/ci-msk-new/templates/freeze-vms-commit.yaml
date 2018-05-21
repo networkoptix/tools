@@ -12,14 +12,14 @@
         default: '{branch}'
 
     wrappers:
+    - build-name:
+        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     - timestamps
     - timeout:
         # normally should complete in 2-5 min
         timeout: 20 # min
         fail: true
         type: absolute
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     - pre-scm-repo-manipulations-1
 
     scm:
