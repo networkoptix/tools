@@ -11,7 +11,7 @@
 
     upstream-project: ci
     junk-shop-host: '10.0.0.113'
-    customization: hanwha
+    customization: default
     cloud-group: test
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     test-timeout-hours: 3
