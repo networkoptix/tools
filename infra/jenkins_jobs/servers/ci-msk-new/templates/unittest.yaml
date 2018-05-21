@@ -30,61 +30,16 @@
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base}/{pipeline}/$BUILD_IDENTITY/
           CUSTOMIZATION={customization}
-    # - folder-copy-operation:
-    #     source-folder-path: $REPOSITORY_PATH
-    #     destination-folder-path: $WORKSPACE/build
 
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
           BUILD_IDENTITY=$BUILD_IDENTITY
           SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/build/distrib/
+          LOCAL_PATH=$WORKSPACE/build/
           PLATFORM={platform}
           CUSTOMIZATION={customization}
-          COMPONENT=distrib/
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-
-    - trigger-builds:
-      - project: 'helper.pull-component'
-        predefined-parameters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/build/bin/
-          PLATFORM={platform}
-          CUSTOMIZATION={customization}
-          COMPONENT=bin/
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-
-    - trigger-builds:
-      - project: 'helper.pull-component'
-        predefined-parameters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/build/lib/
-          PLATFORM={platform}
-          CUSTOMIZATION={customization}
-          COMPONENT=lib/
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-
-    - trigger-builds:
-      - project: 'helper.pull-component'
-        predefined-parameters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/build/current_config.py
-          PLATFORM={platform}
-          CUSTOMIZATION={customization}
-          COMPONENT=current_config.py
+          COMPONENT=distrib/,bin/,lib/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:

@@ -20,6 +20,7 @@
     cached_hg_repository_base: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
 
     webadmin-build-node: webadmin-build
+    commit-freeze-node: webadmin-build
 
     # We use some trick to reuse precompiled obj files.
     # Dirty builds run faster than clean and we are trying to optimize build speed.

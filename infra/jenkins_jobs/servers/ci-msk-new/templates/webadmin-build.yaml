@@ -85,22 +85,8 @@
           BUILD_IDENTITY=$BUILD_IDENTITY
           PLATFORM=universal
           CUSTOMIZATION=default
-          LOCAL_PATH=$WORKSPACE/server-external/
-          COMPONENT=server-external
+          LOCAL_PATH=$WORKSPACE/
+          COMPONENTS=server-external/,webadmin-build.log,static/version.txt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           SSH_USER=$USER
-
-    # FIXME: add all artifacts from this old snip:
-    # - artifact-deployer:
-    #     entries:
-    #     - files: !join:
-    #         - ','
-    #         -
-    #           - server-external/**/*.*
-    #           - webadmin-build.log
-    #           - static/version.txt
-    #       basedir: '$WORKSPACE'
-    #       remote: '$REPOSITORY_PATH'
-    #       delete-remote: false
-    #       delete-remote-artifacts: false
 

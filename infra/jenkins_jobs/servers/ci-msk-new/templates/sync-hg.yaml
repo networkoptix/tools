@@ -31,5 +31,6 @@
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '{cached_hg_repository_base}/${{REPO}}/.hg/'
-        dst_path: '${{LOCAL_PATH}}/${{REPO}}/.hg/'
+        src_path: '{cached_hg_repository_base}/${{REPO}}/'
+        dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
+        components: '.hg/'

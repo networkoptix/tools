@@ -23,7 +23,7 @@
     - p_BUILD_IDENTITY
     - p_PLATFORM
     - p_CUSTOMIZATION
-    - p_COMPONENT
+    - p_COMPONENTS
     # Parameter that defines path to operate it's actually remote path
     - p_LOCAL_PATH
     # Utility parameters used to describe connection details
@@ -36,5 +36,6 @@
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '{artifact_repository_base}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/${{COMPONENT}}'
+        src_path: '{artifact_repository_base}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/'
         dst_path: '${{LOCAL_PATH}}'
+        components: '${{COMPONENTS}}'

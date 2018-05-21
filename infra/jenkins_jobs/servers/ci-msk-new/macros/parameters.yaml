@@ -78,15 +78,15 @@
           Name of installer customization (e.g. default, hanwha and others)
 
 - parameter:
-    name: p_COMPONENT
+    name: p_COMPONENTS
     parameters:
     - string:
-        name: COMPONENT
+        name: COMPONENTS
         default: ''
         description: >
-          Name of component, mostly used in context of artifact repository as part of path
-          where artifact will be located (uploaded to or downloaded from)
-
+          Name of components, mostly used in context of artifact repository as part of path
+          where artifact will be located (uploaded to or downloaded from) — comma-separated list.
+          Note that trailing slash matters.
 
 # Utility parameters used to describe connection details
 - parameter:
