@@ -170,16 +170,13 @@
     # STAGE: PUBLISH
     # ========================================
 
-    publishers:
-    - archive:
-        artifacts: 'build/*.log'
-        allow-empty: 'false'
-        fingerprint: true
-
-    - trigger-parameterized-builds:
-      - project:
-        - 'helper.push-component'
-        condition: UNSTABLE_OR_BETTER
+    # If we put this trigger into publish step, other builds of this pipeline may start
+    # before components published and will fail.
+    # There are 2 options:
+    # - add small pause between steps in pipeline and hope that arts. will be in time
+    # - block build until "fat" artifact is published.
+    - trigger-builds:
+      - project: 'helper.push-component'
         predefined-parameters: |
           BUILD_IDENTITY=$BUILD_IDENTITY
           PLATFORM=$PLATFORM
@@ -188,3 +185,12 @@
           COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           SSH_USER=$USER
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    publishers:
+    - archive:
+        artifacts: 'build/*.log'
+        allow-empty: 'false'
+        fingerprint: true
