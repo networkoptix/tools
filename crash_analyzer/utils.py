@@ -228,7 +228,19 @@ class Size:
 
     def __lt__(self, other):
         return self.bytes < other.bytes
+        
+    def __add__(self, other):
+        return Size(self.bytes + other.bytes)
 
+    def __sub__(self, other):
+        return Size(self.bytes - other.bytes)
+
+    def __mul__(self, scalar):
+        return Size(int(self.bytes * scalar))
+        
+    def __truediv__ (self, scalar):
+        return Size(int(self.bytes / scalar))
+        
     def __str__(self):
         return self.int_to_str(self.bytes)
 
@@ -275,6 +287,9 @@ class File:
     def extension(self) -> str:
         return self.path.split('.')[-1]
 
+    def size(self) -> Size:
+        return Size(os.path.getsize(self.path))
+        
     def write(self, action, mode=''):
         """Executes an :action on a file, opened for writing.
         """

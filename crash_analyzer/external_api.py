@@ -69,7 +69,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
     except (CrashServerError, json.decoder.JSONDecodeError) as error:
         logger.warning(utils.format_error(error))
         return []
-    
+
     to_download_groups = {}
     for name in full_list:
         try:
@@ -117,7 +117,7 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 
 class Jira:
-    def __init__(self, url: str, login: str, password: str, file_limit: int, epic_link: str, prefix: str = ''):
+    def __init__(self, url: str, login: str, password: str, file_limit: int, epic_link: str = '', prefix: str = ''):
         self._jira = jira.JIRA(server=url, basic_auth=(login, password))
         self._file_limit = file_limit
         self.epic_link = epic_link
