@@ -1,5 +1,4 @@
 import logging
-import sys
 import argparse
 from collections import namedtuple
 
@@ -56,5 +55,3 @@ def main():
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
     setup_logging()
     is_passed = parse_and_save_results_to_db(work_dir, repository)
-    if not is_passed:
-        sys.exit(1)
