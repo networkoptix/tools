@@ -37,6 +37,9 @@
   - role: beta_builds_share
     become: true
     become_method: sudo
+    when:
+    # local deployments support
+    - attach_beta_builds_share | default(True) == True
   - role: ANXS.generic-users
     become: true
     become_method: sudo
