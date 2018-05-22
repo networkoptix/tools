@@ -43,7 +43,9 @@
         type: absolute
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
-    - pre-scm-repo-manipulations-2
+    - copy-hg-repo(2):
+        name_1: nx_vms
+        name_2: devtools
 
     scm:
     - hg-la:
@@ -56,7 +58,10 @@
     builders:
     - inject:
         properties-content: |
+          BRANCH={branch}
           PIPELINE={pipeline}
+          PLATFORM=universal
+          CUSTOMIZATION=default
     - inject:
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base}/$PIPELINE/$BUILD_IDENTITY/
@@ -87,8 +92,8 @@
       - project: 'helper.push-component'
         predefined-parameters: |
           BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=universal
-          CUSTOMIZATION=default
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
           LOCAL_PATH=$WORKSPACE/
           COMPONENTS=server-external/,webadmin-build.log,static/version.txt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -103,3 +108,25 @@
         allow-empty: 'false'
         fingerprint: true
 
+    - trigger-parameterized-builds:
+      - project: '{pipeline}.build-reporter'
+        condition: SUCCESS
+        predefined-parameters: |
+          BRANCH=$BRANCH
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          BUILD_STATUS=passed
+          LOGFILE=webadmin-build.log
+    - trigger-parameterized-builds:
+      - project: '{pipeline}.build-reporter'
+        condition: FAILED
+        predefined-parameters: |
+          BRANCH=$BRANCH
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          BUILD_STATUS=failed
+          LOGFILE=webadmin-build.log

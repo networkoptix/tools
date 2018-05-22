@@ -40,6 +40,14 @@
 # Parameters That fully define artifacts: what sources used and where to put what's built
 
 - parameter:
+    name: p_BRANCH
+    parameters:
+    - string:
+        name: BRANCH
+        description: >
+          Branch of nx_vms for setting up proper build context.
+
+- parameter:
     name: p_NX_VMS_COMMIT
     parameters:
     - string:

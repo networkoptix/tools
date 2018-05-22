@@ -228,3 +228,7 @@
         - linux-x64
         customization:
         - default
+
+    # utility job for reporting unittests reslts to junkshop
+    - '{pipeline}.unittests-reporter'
+    - '{pipeline}.build-reporter'

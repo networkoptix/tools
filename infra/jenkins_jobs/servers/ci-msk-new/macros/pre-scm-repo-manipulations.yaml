@@ -1,7 +1,5 @@
-# TODO: find-out if it's possible to split this into 2 manipulations
-
 - wrapper:
-    name: pre-scm-repo-manipulations-2
+    name: copy-hg-repo(2)
     # This wrapperhelps with hg repo juggling
     # We are experiencing significant problems with repo checkout
     # since mercurial always pulls entire repo.
@@ -20,14 +18,14 @@
             steps:
             # clean repository files
             - folder-delete-operation:
-                folder-path: $WORKSPACE/devtools
+                folder-path: '$WORKSPACE/{name_1}'
             - folder-delete-operation:
-                folder-path: $WORKSPACE/nx_vms
+                folder-path: '$WORKSPACE/{name_2}'
         - conditional-step:
             condition-kind: not
             condition-operand:
               condition-kind: file-exists
-              condition-filename: $WORKSPACE/devtools/.hg
+              condition-filename: '$WORKSPACE/{name_1}/.hg'
               condition-basedir: workspace
             steps:
             - trigger-builds:
@@ -35,7 +33,7 @@
                 predefined-parameters: |
                   SSH_USER=$USER
                   LOCAL_PATH=$WORKSPACE
-                  REPO=devtools
+                  REPO={name_1}
                   NODE_SSH_CONNECTION=$SSH_CONNECTION
                 block: true
                 block-thresholds:
@@ -44,7 +42,7 @@
             condition-kind: not
             condition-operand:
               condition-kind: file-exists
-              condition-filename: $WORKSPACE/nx_vms/.hg
+              condition-filename: '$WORKSPACE/{name_2}/.hg'
               condition-basedir: workspace
             steps:
             - trigger-builds:
@@ -52,14 +50,14 @@
                 predefined-parameters: |
                   SSH_USER=$USER
                   LOCAL_PATH=$WORKSPACE
-                  REPO=nx_vms
+                  REPO={name_2}
                   NODE_SSH_CONNECTION=$SSH_CONNECTION
                 block: true
                 block-thresholds:
                   failure-threshold: FAILURE
 
 - wrapper:
-    name: pre-scm-repo-manipulations-1
+    name: copy-hg-repo(1)
     # This wrapperhelps with hg repo juggling
     # We are experiencing significant problems with repo checkout
     # since mercurial always pulls entire repo.
@@ -77,12 +75,12 @@
             condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
             steps:
             - folder-delete-operation:
-                folder-path: $WORKSPACE/nx_vms
+                folder-path: '$WORKSPACE/{name}'
         - conditional-step:
             condition-kind: not
             condition-operand:
               condition-kind: file-exists
-              condition-filename: $WORKSPACE/nx_vms/.hg
+              condition-filename: '$WORKSPACE/{name}/.hg'
               condition-basedir: workspace
             steps:
             - trigger-builds:
@@ -90,7 +88,7 @@
                 predefined-parameters: |
                   SSH_USER=$USER
                   LOCAL_PATH=$WORKSPACE
-                  REPO=nx_vms
+                  REPO={name}
                   NODE_SSH_CONNECTION=$SSH_CONNECTION
                 block: true
                 block-thresholds:

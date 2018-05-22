@@ -20,7 +20,8 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    - pre-scm-repo-manipulations-1
+    - copy-hg-repo(1):
+        name: nx_vms
 
     scm:
     - hg-la:

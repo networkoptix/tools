@@ -5,13 +5,13 @@
 
     concurrent: true
 
-    junk_shop_host: '10.0.2.101'
-
     description: |
       Run unit tests for {platform} for branch {branch}.
 
     parameters:
+    - p_CLEAN_CLONE
     - p_BUILD_IDENTITY
+    - p_NX_VMS_COMMIT
 
     wrappers:
     - build-name:
@@ -21,10 +21,9 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    # - credentials-binding:
-    #   - username-password:
-    #       credential-id: junk_shop_db
-    #       variable: junk_shop_db_credentials
+    - workspace-cleanup
+    - copy-hg-repo(1):
+        name: devtools
 
     scm:
     - hg-la:
@@ -32,9 +31,12 @@
         branch-name: default
 
     builders:
+
     - inject:
         properties-content: |
-          REPOSITORY_PATH={artifact_repository_base}/{pipeline}/$BUILD_IDENTITY/
+          PIPELINE={pipeline}
+          BRANCH={branch}
+          PLATFORM={platform}
           CUSTOMIZATION={customization}
 
     - trigger-builds:
@@ -43,35 +45,64 @@
           BUILD_IDENTITY=$BUILD_IDENTITY
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          PLATFORM={platform}
-          CUSTOMIZATION={customization}
-          COMPONENT=distrib/,bin/,lib/,current_config.py
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          COMPONENTS=distrib/,bin/,lib/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
           failure-threshold: FAILURE
 
-    # Inject junkshop variables relatd to publishing unittests results
-    - inject:
-        properties-content: |
-          DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
-          BUILD_PARAMETERS=project=testing,branch={branch},build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform={platform}
-
     - init-venv-linux:
         requirements-files: devtools/ci/junk_shop/requirements.txt
     - shell: |
-          #!/bin/bash
-          set -ex
+        #!/bin/bash
+        set -ex
 
-          source venv/bin/activate
+        source venv/bin/activate
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
           BIN_DIR="$WORKSPACE/build/bin"
           CONFIG_PATH="$WORKSPACE/build/current_config.py"
           TIMEOUT=3m
           TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
           mkdir -p unit_tests
-          cd unit_tests  # unit test runner and saver treat current directory as working one
-          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
-              --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
-          # $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
-          #     "$DB_CONFIG" "$BUILD_PARAMETERS"
+          cd unit_tests
+          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
+
+    # If we put this trigger into publish step, other builds of this pipeline may start
+    # before components published and will fail.
+    # There are 2 options:
+    # - add small pause between steps in pipeline and hope that arts. will be in time
+    # - block build until "fat" artifact is published.
+    - trigger-builds:
+      - project: 'helper.push-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          LOCAL_PATH=$WORKSPACE/
+          COMPONENTS=unit_tests/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          SSH_USER=$USER
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    # finally count unittests that did not show exit_code == 0
+    # if there are no such tests, exit 0 otherwise fail build
+    - shell: |
+        #!/bin/bash
+        set -ex
+        failed_tests="$(cat $WORKSPACE/unit_tests/*_ut.yaml | grep exit_code | grep -v '^exit_code.* 0$' | wc -l)"
+        exit $failed_tests
+
+    publishers:
+    - trigger-parameterized-builds:
+      - project: '{pipeline}.unittests-reporter'
+        condition: ALWAYS
+        predefined-parameters: |
+          BRANCH=$BRANCH
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION

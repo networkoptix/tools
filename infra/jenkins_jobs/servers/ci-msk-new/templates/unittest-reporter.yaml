@@ -1,0 +1,68 @@
+- job-template:
+    name: '{pipeline}.unittests-reporter'
+
+    node: unittests-reporter
+
+    concurrent: true
+
+    junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101' or parameterize
+
+    parameters:
+    - p_CLEAN_CLONE
+    - p_BRANCH
+    - p_NX_VMS_COMMIT
+    - p_BUILD_IDENTITY
+    - p_CUSTOMIZATION
+    - p_PLATFORM
+
+    wrappers:
+    - build-name:
+        name: '[${{BUILD_ID}}] ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - timestamps
+    - timeout:
+        timeout: 20 # min
+        fail: true
+        type: absolute
+    - workspace-cleanup
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: junk_shop_db_credentials
+    - copy-hg-repo(1):
+        name: devtools
+
+    scm:
+    - hg-la:
+        project-name: devtools
+        branch-name: default
+
+    builders:
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          COMPONENTS=unit_tests/
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - init-venv-linux:
+        requirements-files: devtools/ci/junk_shop/requirements.txt
+    - shell: |
+          #!/bin/bash
+          set -ex
+
+          source venv/bin/activate
+            export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+
+            DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
+            BUILD_PARAMETERS=project=testing,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$PLATFORM
+
+            cd unit_tests
+            $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS"

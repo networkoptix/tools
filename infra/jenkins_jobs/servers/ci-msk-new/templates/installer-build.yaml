@@ -1,4 +1,3 @@
-
 - job-template:
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
     node: '{installer-build-node}'
@@ -26,11 +25,12 @@
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
 
-
     # STAGE: PRE-SCM
     # ========================================
 
-    - pre-scm-repo-manipulations-2
+    - copy-hg-repo(2):
+        name_1: nx_vms
+        name_2: devtools
 
     # STAGE: SCM
     # ========================================
@@ -123,6 +123,7 @@
           PIPELINE={pipeline}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
+          BRANCH={branch}
           {cmake_configure_args_global}
     - inject:
         properties-content: |
@@ -182,7 +183,7 @@
           PLATFORM=$PLATFORM
           CUSTOMIZATION=$CUSTOMIZATION
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt
+          COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build-{customization}.log,cmake-configure-{customization}.log
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           SSH_USER=$USER
         block: true
@@ -194,3 +195,26 @@
         artifacts: 'build/*.log'
         allow-empty: 'false'
         fingerprint: true
+
+    - trigger-parameterized-builds:
+      - project: '{pipeline}.build-reporter'
+        condition: SUCCESS
+        predefined-parameters: |
+          BRANCH=$BRANCH
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          BUILD_STATUS=passed
+          LOGFILE=cmake-build-{customization}.log
+    - trigger-parameterized-builds:
+      - project: '{pipeline}.build-reporter'
+        condition: FAILED
+        predefined-parameters: |
+          BRANCH=$BRANCH
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          PLATFORM=$PLATFORM
+          CUSTOMIZATION=$CUSTOMIZATION
+          BUILD_STATUS=failed
+          LOGFILE=cmake-build-{customization}.log
