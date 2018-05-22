@@ -11,7 +11,7 @@ set -xe
 : ${CLOUD_GROUP:?}
 : ${WORK_DIR:?}
 : ${BIN_DIR:?}
-: ${MEDIASERVER_DIST_PATH:?}
+: ${MEDIASERVER_DIST_DIR:?}
 : ${TEST_LIST?}  # space-delimited; empty means run all tests
 : ${TIMEOUT_SEC:?}
 : ${SLOT:?}  # aka executor number, 0..
@@ -36,7 +36,8 @@ BUILD_PARAMETERS=(
 OPTIONS=(
     "--work-dir=$WORK_DIR"
     "--bin-dir=$BIN_DIR"
-    "--mediaserver-dist-path=$MEDIASERVER_DIST_PATH"
+    "--mediaserver-installers-dir=$MEDIASERVER_DIST_DIR"
+    "--mediaserver-dist-path=$MEDIASERVER_DIST_DIR/*-server-*.deb"
     "--customization=$CUSTOMIZATION"
     "--cloud-group=$CLOUD_GROUP"
     "--timeout=$TIMEOUT_SEC"
