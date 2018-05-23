@@ -7,20 +7,13 @@
   failed_when: false
   check_mode: no
 
-- name: Get Vagrant from hashicorp site
-  get_url:
-    url: >-
-      https://releases.hashicorp.com/vagrant/{{ vagrant_version
-      }}/vagrant_{{ vagrant_version }}_x86_64.deb
-    dest: /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
-  when: >-
-    check_vagrant_version.rc != 0 or
-    vagrant_version not in check_vagrant_version.stdout
-
 - name: Install vagrant
   become: yes
   become_method: sudo
-  command: dpkg -i /tmp/vagrant_{{ vagrant_version }}_x86_64.deb
+  apt:
+    deb: >-
+      https://releases.hashicorp.com/vagrant/{{ vagrant_version
+      }}/vagrant_{{ vagrant_version }}_x86_64.deb
   when: >-
     check_vagrant_version.rc != 0 or
     vagrant_version not in check_vagrant_version.stdout
