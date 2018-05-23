@@ -1,0 +1,51 @@
+- job-template:
+    name: '{pipeline}.{branch}.vms.trigger.{preset}'
+    project-type: multijob
+    node: runner
+
+    concurrent: true
+
+    timer: ''  # no timed trigger by default
+
+    wrappers:
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
+
+    triggers:
+    - timed: "{timer}"
+
+    parameters:
+    # FIXME: Figure out why extended choice created from JJB is not visible..
+    - p_PLATFORMS:
+        default: '{platforms}'
+    - p_CUSTOMIZATIONS:
+        default: '{customizations}'
+    - string:
+        name: _NX_VMS_COMMIT
+        default: '{branch}'
+    - p_CLEAN_BUILD
+
+    builders:
+    - inject:
+        properties-content: |
+          BRANCH={branch}
+          PIPELINE={pipeline}
+
+    # We don't use multijob to hide dependency graph from trigger because graph
+    # is too big and takes a while to be loaded
+    # Anyway this graph is available in runner
+    - trigger-builds:
+      - project: '{pipeline}.{branch}.vms.runner'
+        predefined-parameters: |
+          PLATFORM=$PLATFORM
+          CUSTOMIZATIONS=$CUSTOMIZATIONS
+          _NX_VMS_COMMIT=$_NX_VMS_COMMIT
+          CLEAN_BUILD=$CLEAN_BUILD
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    publishers:
+    - completed-email
+    - failure-email:
+        email-recipients: ''

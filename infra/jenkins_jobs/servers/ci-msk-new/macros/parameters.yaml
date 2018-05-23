@@ -64,6 +64,15 @@
         name: BUILD_IDENTITY
         default: ''
         description: Build number in context of pipeline
+- parameter:
+    name: p_PLATFORMS
+    parameters:
+    - string:
+        name: PLATFORMS
+        default: '{default}'
+        description: >
+          Target platforms comma-separated list for installer (e.g. linux-x64, win-x86 and others,
+          note that universal is used for webadmin and other platform-independent components)
 
 - parameter:
     name: p_PLATFORM
@@ -75,7 +84,14 @@
           Target platform for installer (e.g. linux-x64, win-x86 and others,
           note that universal is used for webadmin and other platform-independent components)
 
-
+- parameter:
+    name: p_CUSTOMIZATIONS
+    parameters:
+    - string:
+        name: CUSTOMIZATIONS
+        default: '{default}'
+        description: >
+          Comma-separated list names of installers customizations (e.g. default, hanwha and others)
 - parameter:
     name: p_CUSTOMIZATION
     parameters:

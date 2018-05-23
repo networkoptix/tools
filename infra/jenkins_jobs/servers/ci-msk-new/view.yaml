@@ -1,16 +1,16 @@
 - view:
+    name: triggers
+    view-type: list
+    description: 'List of all release triggers'
+    regex: release.*.trigger.*
+- view:
     name: runners
     view-type: list
-    description: 'List of all jobs related to build vms_3.2'
-    job-name:
-    - release.vms.vms.runner
-    - release.vms_3.2.vms.runner
-
-    # recurse: true
-    # status-filter: false
+    description: 'List of all release runners'
+    regex: release.*.runner
 
 - view:
     name: build-vms_3.2
     view-type: list
-    description: 'List of all entry points'
+    description: 'List of all release jobs related to vms_3.2'
     regex: release.vms_3.2.*build

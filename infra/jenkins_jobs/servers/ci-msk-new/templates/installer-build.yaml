@@ -218,3 +218,8 @@
           CUSTOMIZATION=$CUSTOMIZATION
           BUILD_STATUS=failed
           LOGFILE=cmake-build-{customization}.log
+
+    - failure-email:
+        email-recipients: iremizov@networkoptix.com
+    - fixed-email:
+        email-recipients: iremizov@networkoptix.com

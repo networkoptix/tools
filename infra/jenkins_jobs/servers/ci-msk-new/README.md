@@ -95,3 +95,12 @@ from real prod server (for example, alpha)
 ```
 rsync -av /mnt/infra/cached-hg/ iremizov@10.0.0.158:/mnt-stub/infra/cached-hg/
 ```
+
+# Configuring email notifications
+
+Go to http://10.0.0.112:8080/configure
+
+In section "Extended E-mail Notification"
+
+Configure smtp connection and credentials for service@networkoptix.user
+Exact config is not provided due to security reasons.
