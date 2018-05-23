@@ -37,7 +37,7 @@
     - trigger-builds:
       - project: '{pipeline}.{branch}.vms.runner'
         predefined-parameters: |
-          PLATFORM=$PLATFORM
+          PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$_NX_VMS_COMMIT
           CLEAN_BUILD=$CLEAN_BUILD
