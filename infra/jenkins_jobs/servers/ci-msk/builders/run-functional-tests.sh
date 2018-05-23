@@ -25,6 +25,8 @@ VM_PORT_RANGE=100  # how many forwarded ports one functional tests run may requi
 VM_PORT=$(($VM_PORT_BASE + $SLOT * $VM_PORT_RANGE))
 VM_NAME_PREFIX="funtest-$SLOT-"
 
+MEDIASERVER_DIST_PATH="$(echo $MEDIASERVER_DIST_DIR/*-server-*.deb)"
+
 BUILD_PARAMETERS=(
     "project=$PROJECT"
     "branch=$BRANCH"
@@ -37,7 +39,7 @@ OPTIONS=(
     "--work-dir=$WORK_DIR"
     "--bin-dir=$BIN_DIR"
     "--mediaserver-installers-dir=$MEDIASERVER_DIST_DIR"
-    "--mediaserver-dist-path=$MEDIASERVER_DIST_DIR/*-server-*.deb"
+    "--mediaserver-dist-path=$MEDIASERVER_DIST_PATH"
     "--customization=$CUSTOMIZATION"
     "--cloud-group=$CLOUD_GROUP"
     "--timeout=$TIMEOUT_SEC"
