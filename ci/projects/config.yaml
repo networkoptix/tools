@@ -97,6 +97,8 @@ customization_list:
   - vista
   - vmsdemoblue
   - vmsdemoorange
+  - xcello
+  - metavms
 
 platforms:
   linux-x64:
