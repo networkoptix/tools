@@ -8,13 +8,6 @@
   delegate_to: "{{ libvirt_host }}"
   check_mode: no
 
-- name: Get autostart domain list
-  command: "virsh list --autostart --name"
-  register: libvirt_autostart_vms
-  changed_when: false
-  delegate_to: "{{ libvirt_host }}"
-  check_mode: no
-
 - name: "Set fact libvirt_guest__current_state for {{ libvirt_guest__hostname }}"
   set_fact:
     libvirt_guest__current_state: '{{ domstate.status | default("undefined") }}'

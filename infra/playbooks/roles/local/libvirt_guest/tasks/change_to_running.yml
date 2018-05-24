@@ -14,19 +14,26 @@
     libvirt_guest__current_state == 'shutdown' or
     libvirt_guest__current_state == 'paused'
 
+- name: Get autostart domain list
+  command: "virsh list --autostart --name"
+  register: autostart_list
+  changed_when: false
+  delegate_to: "{{ libvirt_host }}"
+  check_mode: no
+
 - name: Disable VM autostart if it's enabled
   command: "virsh autostart {{ libvirt_guest__hostname }} --disable"
   delegate_to: "{{ libvirt_host }}"
   when: >-
     libvirt_guest__autostart == False and
-    libvirt_guest__hostname in libvirt_autostart_vms.stdout_lines
+    libvirt_guest__hostname in autostart_list.stdout_lines
 
 - name: Enable VM autostart if it's disabled
   command: "virsh autostart {{ libvirt_guest__hostname }}"
   delegate_to: "{{ libvirt_host }}"
   when: >-
     libvirt_guest__autostart == True and
-    libvirt_guest__hostname not in libvirt_autostart_vms.stdout_lines
+    libvirt_guest__hostname not in autostart_list.stdout_lines
 
 - name: Pause before gathering facts
   pause:
