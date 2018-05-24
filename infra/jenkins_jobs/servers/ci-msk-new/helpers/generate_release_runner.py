@@ -112,3 +112,12 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 '''
+print '''
+    # At this moment all builds are completed and we may publish links
+    - inject:
+        # todo: testing -> $PIPELINE
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY
+          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+    - set-build-description
+'''

@@ -1,0 +1,9 @@
+- builder:
+    name: set-build-description
+    builders:
+    # Description is limited because it's included into left panel (with latest builds).
+    # We don't want to make that panel too huge
+    - description-setter:
+        description: >-
+          <a href='$REPOSITORY_URL'> Artifacts </a>
+          <a href='$JUNKSHOP_URL'> Junkshop </a>

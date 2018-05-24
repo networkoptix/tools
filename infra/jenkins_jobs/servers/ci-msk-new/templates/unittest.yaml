@@ -95,7 +95,12 @@
         set -ex
         failed_tests="$(cat $WORKSPACE/unit_tests/*_ut.yaml | grep exit_code | grep -v '^exit_code.* 0$' | wc -l)"
         exit $failed_tests
-
+    - inject:
+        # todo: testing -> $PIPELINE
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY/$PLATFORM/$CUSTOMIZATION
+          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+    - set-build-description
     publishers:
     - trigger-parameterized-builds:
       - project: '{pipeline}.unittests-reporter'

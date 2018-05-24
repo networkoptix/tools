@@ -2274,3 +2274,11 @@
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
+
+    - inject:
+        # todo: testing -> $PIPELINE
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY
+          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+    - set-build-description
+

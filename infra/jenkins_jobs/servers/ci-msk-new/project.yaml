@@ -19,6 +19,9 @@
     # fetch part of repo and always pulls everything (~3GB over atlantic)
     cached_hg_repository_base: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
 
+    artifact_repository_url: 'http://10.0.0.158/repository/v1/'
+    junkshop_url: 'http://10.0.0.160'
+
     webadmin-build-node: webadmin-build
     commit-freeze-node: webadmin-build
 

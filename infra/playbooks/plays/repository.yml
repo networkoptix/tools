@@ -1,0 +1,20 @@
+- hosts: repository
+  become: true
+  become_method: sudo
+
+  roles:
+  - role: jdauphant.nginx
+    vars:
+      nginx_user: "www-data"
+      nginx_events_params:
+      - worker_connections 512
+      - debug_connection 127.0.0.1
+      - use epoll
+      - multi_accept on
+      nginx_sites:
+        default:
+        - listen 80
+        - server_name _
+        - location / { try_files $uri $uri/ /index.html; }
+        - root "/mnt-stub/beta-builds/"
+        - autoindex on

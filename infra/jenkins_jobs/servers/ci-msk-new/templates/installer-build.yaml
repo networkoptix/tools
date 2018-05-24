@@ -189,6 +189,12 @@
         block: true
         block-thresholds:
           failure-threshold: FAILURE
+    - inject:
+        # todo: testing -> $PIPELINE
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY/$PLATFORM/$CUSTOMIZATION
+          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+    - set-build-description
 
     publishers:
     - archive:

@@ -63,8 +63,10 @@
           PLATFORM=universal
           CUSTOMIZATION=default
     - inject:
+        # todo: testing -> $PIPELINE
         properties-content: |
-          REPOSITORY_PATH={artifact_repository_base}/$PIPELINE/$BUILD_IDENTITY/
+          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY/$PLATFORM/$CUSTOMIZATION
+          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
 
     - conditionally-clean-dir:
         condition-varname: CLEAN_BUILD
@@ -101,6 +103,7 @@
         block: true
         block-thresholds:
           failure-threshold: FAILURE
+    - set-build-description
 
     publishers:
     - archive:
