@@ -42,5 +42,5 @@
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
         src_path: '${{LOCAL_PATH}}'
-        dst_path: '{artifact_repository_base}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}/'
+        dst_path: '{artifact_repository_base_path}/{{artifact_location_full_pattern}}'
         components: '${{COMPONENTS}}'

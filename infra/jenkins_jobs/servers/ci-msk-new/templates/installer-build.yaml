@@ -192,8 +192,8 @@
     - inject:
         # todo: testing -> $PIPELINE
         properties-content: |
-          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY/$PLATFORM/$CUSTOMIZATION
-          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - set-build-description
 
     publishers:

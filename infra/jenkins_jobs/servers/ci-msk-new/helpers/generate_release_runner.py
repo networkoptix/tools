@@ -115,9 +115,8 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
 print '''
     # At this moment all builds are completed and we may publish links
     - inject:
-        # todo: testing -> $PIPELINE
         properties-content: |
-          REPOSITORY_URL={artifact_repository_url}/$BUILD_IDENTITY
-          JUNKSHOP_URL={junkshop_url}/project/testing/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - set-build-description
 '''

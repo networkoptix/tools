@@ -12,15 +12,24 @@
     # SECTION. GLOBAL CONFIG
     # ============================================================
 
-    # location of repository whre to publish builds
-    artifact_repository_base: '/mnt-stub/beta-builds/repository/v1'  # TODO: switch to /mnt/beta-builds
-    # location of folder where mercurial repos are precached
+    # artifact repository location on publish-node filesystem
+    artifact_repository_base_path: '/mnt-stub/beta-builds/repository/v1'  # TODO: switch to /mnt/beta-builds
+    # location of cache folder publish-node where mercurial repos are precached
     # this cache is required due to the fact that mercurial can't
     # fetch part of repo and always pulls everything (~3GB over atlantic)
-    cached_hg_repository_base: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
+    cached_hg_repository_base_path: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
 
-    artifact_repository_url: 'http://10.0.0.158/repository/v1/'
-    junkshop_url: 'http://10.0.0.160'
+    artifact_repository_base_url: 'http://10.0.0.158/repository/v1/'
+    junkshop_base_url: 'http://10.0.0.160'
+
+    # TODO: insert $PIPELINE
+    artifact_location_root_pattern: '${{BUILD_IDENTITY}}'
+    artifact_location_full_pattern: '${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}'
+
+    # TODO: testing -> $PIPELINE
+    junkshop_location_root_pattern: 'project/testing/$BRANCH/$BUILD_IDENTITY'
+    junkshop_location_full_pattern:
+
 
     webadmin-build-node: webadmin-build
     commit-freeze-node: webadmin-build
