@@ -14,7 +14,11 @@ def prettify(infile, outfile):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
+    parser.add_argument(
+        'infile',
+        nargs='?',
+        type=argparse.FileType('r', encoding='utf-8'),
+        default=sys.stdin)
     parser.add_argument(
         'outfile',
         nargs='?',
