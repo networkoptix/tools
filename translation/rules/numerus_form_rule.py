@@ -3,6 +3,7 @@ from validation_rule import ValidationRule, Levels
 exceptions = [
     'nx::vms::event::StringsHelper',
     'QnTimeStrings',
+    'HumanReadable',
     'LocalFiles',
     'QnAuditLogDialog',
     'QnCameraAudioTransmitPolicy',
