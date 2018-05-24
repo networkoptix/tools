@@ -6,6 +6,18 @@
 
     junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101' or parameterize
 
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 10
+        option: project
+    - build-discarder:
+        days-to-keep: 10
+        num-to-keep: 25
+        artifact-days-to-keep: 10
+        artifact-num-to-keep: 25
+
     parameters:
     - p_CLEAN_CLONE
     - p_BRANCH

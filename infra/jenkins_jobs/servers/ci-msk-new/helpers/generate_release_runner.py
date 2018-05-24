@@ -13,6 +13,18 @@ print '''#
     node: runner
     concurrent: true
 
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 5
+        option: project
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 100
+
     parameters:
     # FIXME: Figure out why extended choice created from JJB is not visible..
     - p_PLATFORMS:

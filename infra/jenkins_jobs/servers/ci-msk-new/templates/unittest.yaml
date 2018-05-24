@@ -6,6 +6,20 @@
     node: unittests-linux
     concurrent: true
 
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: category
+        categories:
+        - unittests-linux
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 100
+
     parameters:
     - p_CLEAN_CLONE
     - p_BUILD_IDENTITY

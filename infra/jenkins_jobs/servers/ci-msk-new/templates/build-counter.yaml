@@ -13,6 +13,11 @@
     - throttle:
         max-total: 1
         option: project
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 100
 
     parameters:
     - p_REQUESTED_BY

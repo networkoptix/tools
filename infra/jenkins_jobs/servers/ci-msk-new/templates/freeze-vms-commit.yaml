@@ -5,6 +5,18 @@
     node: '{commit-freeze-node}'
     concurrent: false  # important
 
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 10
+        option: project
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 100
+
     parameters:
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
