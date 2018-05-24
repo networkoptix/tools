@@ -55,17 +55,17 @@
     - multijob:
         name: Request new release build id
         projects:
-        - name: '{pipeline}.{counter_name}.generator'
+        - name: '{pipeline}.build_number.generator'
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - copyartifact:
-        project: '{pipeline}.{counter_name}.generator'
-        filter: '{counter_var_name}.envvar'
+        project: '{pipeline}.build_number.generator'
+        filter: 'BUILD_IDENTITY.envvar'
         which-build: last-successful
         parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - inject:
-        properties-file: '{counter_var_name}.envvar'
+        properties-file: 'BUILD_IDENTITY.envvar'
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT, so build-name may be set.
     - build-name-setter:
@@ -78,7 +78,7 @@
         - name: '{pipeline}.{branch}.vms.webadmin.universal.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -92,7 +92,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -103,7 +103,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -114,7 +114,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -125,7 +125,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -136,7 +136,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -147,7 +147,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -158,7 +158,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -169,7 +169,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -180,7 +180,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -191,7 +191,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -202,7 +202,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -213,7 +213,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -224,7 +224,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -235,7 +235,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -246,7 +246,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -257,7 +257,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -268,7 +268,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -279,7 +279,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -290,7 +290,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -301,7 +301,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -312,7 +312,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -323,7 +323,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -334,7 +334,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -345,7 +345,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -356,7 +356,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -367,7 +367,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -378,7 +378,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -389,7 +389,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -400,7 +400,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -411,7 +411,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -422,7 +422,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -433,7 +433,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -444,7 +444,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -455,7 +455,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -466,7 +466,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -477,7 +477,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -488,7 +488,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -499,7 +499,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -510,7 +510,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -521,7 +521,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -532,7 +532,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -543,7 +543,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -554,7 +554,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -565,7 +565,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -576,7 +576,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -587,7 +587,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -598,7 +598,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -609,7 +609,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -620,7 +620,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -631,7 +631,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -642,7 +642,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -653,7 +653,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -664,7 +664,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -675,7 +675,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -686,7 +686,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -697,7 +697,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -708,7 +708,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -719,7 +719,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -730,7 +730,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -741,7 +741,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -752,7 +752,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -763,7 +763,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -774,7 +774,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -785,7 +785,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -796,7 +796,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -807,7 +807,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -818,7 +818,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -829,7 +829,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -840,7 +840,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -851,7 +851,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -862,7 +862,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -873,7 +873,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -884,7 +884,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -895,7 +895,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -906,7 +906,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -917,7 +917,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -928,7 +928,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -939,7 +939,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -950,7 +950,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -961,7 +961,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -972,7 +972,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -983,7 +983,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -994,7 +994,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1005,7 +1005,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1016,7 +1016,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1027,7 +1027,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1038,7 +1038,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1049,7 +1049,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1060,7 +1060,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1071,7 +1071,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1082,7 +1082,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("edge1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1093,7 +1093,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1104,7 +1104,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1115,7 +1115,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1126,7 +1126,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1137,7 +1137,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1148,7 +1148,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1159,7 +1159,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1170,7 +1170,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1181,7 +1181,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1192,7 +1192,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1203,7 +1203,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1214,7 +1214,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1225,7 +1225,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1236,7 +1236,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1247,7 +1247,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1258,7 +1258,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1269,7 +1269,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1280,7 +1280,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1291,7 +1291,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1302,7 +1302,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1313,7 +1313,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1324,7 +1324,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1335,7 +1335,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1346,7 +1346,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1357,7 +1357,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1368,7 +1368,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1379,7 +1379,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1390,7 +1390,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1401,7 +1401,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1412,7 +1412,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1423,7 +1423,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1434,7 +1434,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1445,7 +1445,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1456,7 +1456,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1467,7 +1467,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1478,7 +1478,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1489,7 +1489,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1500,7 +1500,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1511,7 +1511,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1522,7 +1522,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1533,7 +1533,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1544,7 +1544,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1555,7 +1555,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1566,7 +1566,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1577,7 +1577,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1588,7 +1588,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1599,7 +1599,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1610,7 +1610,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1621,7 +1621,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1632,7 +1632,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1643,7 +1643,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1654,7 +1654,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1665,7 +1665,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1676,7 +1676,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x64") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1687,7 +1687,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1698,7 +1698,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1709,7 +1709,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1720,7 +1720,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1731,7 +1731,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1742,7 +1742,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1753,7 +1753,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1764,7 +1764,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1775,7 +1775,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1786,7 +1786,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1797,7 +1797,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1808,7 +1808,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1819,7 +1819,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1830,7 +1830,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1841,7 +1841,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1852,7 +1852,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1863,7 +1863,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1874,7 +1874,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1885,7 +1885,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1896,7 +1896,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1907,7 +1907,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1918,7 +1918,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1929,7 +1929,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1940,7 +1940,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1951,7 +1951,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1962,7 +1962,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1973,7 +1973,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1984,7 +1984,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -1995,7 +1995,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2006,7 +2006,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2017,7 +2017,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2028,7 +2028,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2039,7 +2039,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2050,7 +2050,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2061,7 +2061,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2072,7 +2072,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2083,7 +2083,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2094,7 +2094,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2105,7 +2105,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2116,7 +2116,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2127,7 +2127,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2138,7 +2138,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2149,7 +2149,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2160,7 +2160,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2171,7 +2171,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2182,7 +2182,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2193,7 +2193,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2204,7 +2204,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2215,7 +2215,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2226,7 +2226,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2237,7 +2237,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2248,7 +2248,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2259,7 +2259,7 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -2270,11 +2270,12 @@
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
 
+    # At this moment all builds are completed and we may publish links
     - inject:
         # todo: testing -> $PIPELINE
         properties-content: |

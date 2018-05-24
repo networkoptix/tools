@@ -57,17 +57,17 @@ print '''#
     - multijob:
         name: Request new release build id
         projects:
-        - name: '{pipeline}.{counter_name}.generator'
+        - name: '{pipeline}.build_number.generator'
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - copyartifact:
-        project: '{pipeline}.{counter_name}.generator'
-        filter: '{counter_var_name}.envvar'
+        project: '{pipeline}.build_number.generator'
+        filter: 'BUILD_IDENTITY.envvar'
         which-build: last-successful
         parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - inject:
-        properties-file: '{counter_var_name}.envvar'
+        properties-file: 'BUILD_IDENTITY.envvar'
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT, so build-name may be set.
     - build-name-setter:
@@ -80,7 +80,7 @@ print '''#
         - name: '{pipeline}.{branch}.vms.webadmin.universal.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 
@@ -108,7 +108,7 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
             ("$PLATFORMS     ").trim().split(",").contains("'''+platform+'''") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''")
           predefined-parameters: |
-            BUILD_IDENTITY=${counter_var_name}
+            BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
 '''

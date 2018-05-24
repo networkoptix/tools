@@ -199,9 +199,7 @@
     - helper.push-component
 
     # RUNNER - main entry point
-    - '{pipeline}.{branch}.vms.runner':
-        counter_name: build_number
-        counter_var_name: BUILD_IDENTITY
+    - '{pipeline}.{branch}.vms.runner'
 
     # UTILITY - register commit, build identities and other
 
