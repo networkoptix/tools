@@ -198,7 +198,17 @@
     - helper.pull-component
     - helper.push-component
 
-    # RUNNER - main entry point
+    # TRIGGERS - main entry point
+
+    - '{pipeline}.{branch}.vms.trigger.{preset}':
+        preset:
+        - example:
+            platforms: linux-x64,linux-x86
+            customizations: default,hanwha
+            timer: '0 3 * * *'
+
+    # RUNNER - root launcher of all builds
+
     - '{pipeline}.{branch}.vms.runner'
 
     # UTILITY - register commit, build identities and other
@@ -235,13 +245,8 @@
         customization:
         - default
 
+    # REPORTERS - parse & upload logs, build and test information to outer services
+
     # utility job for reporting unittests reslts to junkshop
     - '{pipeline}.unittests-reporter'
     - '{pipeline}.build-reporter'
-
-    - '{pipeline}.{branch}.vms.trigger.{preset}':
-        preset:
-        - example:
-            platforms: linux-x64,linux-x86
-            customizations: default,hanwha
-            timer: '0 3 * * *'
