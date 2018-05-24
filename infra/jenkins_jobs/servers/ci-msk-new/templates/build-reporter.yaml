@@ -2,7 +2,6 @@
     name: '{pipeline}.build-reporter'
 
     node: unittests-reporter
-
     concurrent: true
 
     junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101' or parameterize

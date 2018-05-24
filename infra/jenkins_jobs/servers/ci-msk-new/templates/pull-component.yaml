@@ -2,8 +2,26 @@
     name: 'helper.pull-component'
 
     node: repository-ops
-
     concurrent: true
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+
+    parameters:
+    # Parameters related to artifact location in repository
+    - p_BUILD_IDENTITY
+    - p_PLATFORM
+    - p_CUSTOMIZATION
+    - p_COMPONENTS
+    # Parameter that defines path to operate it's actually remote path
+    - p_LOCAL_PATH
+    # Utility parameters used to describe connection details
+    - p_NODE_SSH_CONNECTION
+    - p_SSH_USER
 
     wrappers:
     - timestamps
@@ -15,26 +33,6 @@
     - ssh-agent-credentials:
         users:
         - jenkins
-
-    properties:
-    - heavy-job:
-        weight: 1
-    - throttle:
-        max-total: 1
-        option: project
-
-    parameters:
-
-    # Parameters related to artifact location in repository
-    - p_BUILD_IDENTITY
-    - p_PLATFORM
-    - p_CUSTOMIZATION
-    - p_COMPONENTS
-    # Parameter that defines path to operate it's actually remote path
-    - p_LOCAL_PATH
-    # Utility parameters used to describe connection details
-    - p_NODE_SSH_CONNECTION
-    - p_SSH_USER
 
     builders:
 

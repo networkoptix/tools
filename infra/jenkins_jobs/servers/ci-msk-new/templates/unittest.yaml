@@ -1,12 +1,10 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest'
-
-    node: unittests-linux
-
-    concurrent: true
-
     description: |
       Run unit tests for {platform} for branch {branch}.
+
+    node: unittests-linux
+    concurrent: true
 
     parameters:
     - p_CLEAN_CLONE
@@ -100,6 +98,7 @@
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - set-build-description
+
     publishers:
     - trigger-parameterized-builds:
       - project: '{pipeline}.unittests-reporter'

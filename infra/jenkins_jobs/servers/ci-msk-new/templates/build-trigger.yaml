@@ -1,18 +1,11 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.trigger.{preset}'
     project-type: multijob
-    node: runner
 
+    node: runner
     concurrent: true
 
     timer: ''  # no timed trigger by default
-
-    wrappers:
-    - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
-
-    triggers:
-    - timed: "{timer}"
 
     parameters:
     # FIXME: Figure out why extended choice created from JJB is not visible..
@@ -24,6 +17,13 @@
         name: _NX_VMS_COMMIT
         default: '{branch}'
     - p_CLEAN_BUILD
+
+    triggers:
+    - timed: "{timer}"
+
+    wrappers:
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
     - inject:

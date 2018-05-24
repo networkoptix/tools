@@ -1,17 +1,10 @@
 
 - job-template:
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all'
-    node: runner
     project-type: multijob
 
+    node: runner
     concurrent: true
-
-    wrppers:
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
-    - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
-
 
     parameters:
     - p_CLEAN_WORKSPACE
@@ -20,6 +13,12 @@
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
+
+    wrppers:
+    - build-name:
+        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
     - multijob:

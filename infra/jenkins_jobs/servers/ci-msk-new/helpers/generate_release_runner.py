@@ -7,16 +7,11 @@ print '''#
 - job-template:
     name: '{pipeline}.{branch}.vms.runner'
     project-type: multijob
-    node: runner
-
     description: |
       Entry point
 
+    node: runner
     concurrent: true
-
-    wrappers:
-    - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     parameters:
     # FIXME: Figure out why extended choice created from JJB is not visible..
@@ -28,6 +23,10 @@ print '''#
         name: _NX_VMS_COMMIT
         default: '{branch}'
     - p_CLEAN_BUILD
+
+    wrappers:
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
 

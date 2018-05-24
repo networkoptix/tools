@@ -1,8 +1,8 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
     project-type: multijob
-    node: '{commit-freeze-node}'
 
+    node: '{commit-freeze-node}'
     concurrent: false  # important
 
     parameters:

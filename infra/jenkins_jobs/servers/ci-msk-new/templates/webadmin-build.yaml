@@ -1,7 +1,6 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.webadmin.universal.build'
     project-type: multijob
-
     description: |
       <h2> Build webadmin which is a part of nx_vms repository. </h2>
 
@@ -21,7 +20,6 @@
         NX_VMS_COMMIT exact commit of sources taht produced this build.
 
     node: '{webadmin-build-node}'
-
     concurrent: true
 
     parameters:

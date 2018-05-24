@@ -2,19 +2,7 @@
     name: 'helper.sync-hg'
 
     node: hg-sync
-
     concurrent: true
-
-    wrappers:
-    - timestamps
-    - timeout:
-        # normally, should complete in 2-10 min
-        timeout: 20 # min
-        fail: true
-        type: absolute
-    - ssh-agent-credentials:
-        users:
-        - jenkins
 
     properties:
     - heavy-job:
@@ -31,6 +19,17 @@
     - p_LOCAL_PATH
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
+
+    wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 2-10 min
+        timeout: 20 # min
+        fail: true
+        type: absolute
+    - ssh-agent-credentials:
+        users:
+        - jenkins
 
     builders:
     - rsync-upload:

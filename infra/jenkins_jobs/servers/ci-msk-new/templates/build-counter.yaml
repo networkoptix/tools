@@ -1,18 +1,11 @@
 # generate ID
 - job-template:
     name: '{pipeline}.{counter_name}.generator'
+    description: |
+      Increment previous value of {counter_var_name} and save it as artifact
 
     node: runner
-
     concurrent: false  # important
-
-    wrappers:
-    - timestamps
-    - timeout:
-        # normally, should complete in 1-2 min
-        timeout: 10 # min
-        fail: true
-        type: absolute
 
     properties:
     - heavy-job:
@@ -21,15 +14,20 @@
         max-total: 1
         option: project
 
-    description: |
-      Increment previous value of {counter_var_name} and save it as artifact
-
     parameters:
     - p_REQUESTED_BY
     - string:
         name: SET_{counter_var_name}
         default: ''
         description: Set build number instead of incrementing previous
+
+    wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 1-2 min
+        timeout: 10 # min
+        fail: true
+        type: absolute
 
     builders:
     # Note on conditional steps:
