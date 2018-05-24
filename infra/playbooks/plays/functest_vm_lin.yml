@@ -16,7 +16,7 @@
   - role: samba_share
     become: true
     become_method: sudo
-    when: 
+    when:
     - libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
     # temp. workaround for local deployments
     - attach_infra_share | default(True) == True
@@ -27,4 +27,6 @@
   - role: jenkins_slave
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: functest_node
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: cloudalchemy.node-exporter
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

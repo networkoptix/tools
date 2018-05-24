@@ -1,0 +1,37 @@
+---
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_os_family | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+  tags:
+    - always
+
+- include: preflight.yml
+
+- include: install.yml
+
+- include: configure.yml
+
+- include: plugins.yml
+  when: grafana_plugins != []
+
+- name: Restart grafana before configuring datasources and dashboards
+  meta: flush_handlers
+
+- name: Wait for grafana to start
+  wait_for:
+    host: "{{ grafana_address }}"
+    port: "{{ grafana_port }}"
+
+- include: api_keys.yml
+  when: grafana_api_keys | length > 0
+
+- include: datasources.yml
+  when: grafana_datasources != []
+
+- include: dashboards.yml
+  when: grafana_dashboards | length > 0

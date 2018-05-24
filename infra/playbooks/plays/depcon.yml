@@ -27,3 +27,5 @@
   - role: depcon
     become: true
     become_method: sudo
+  - role: cloudalchemy.node-exporter
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

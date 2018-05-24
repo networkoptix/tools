@@ -31,3 +31,5 @@
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: jenkins_slave
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: cloudalchemy.node-exporter
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

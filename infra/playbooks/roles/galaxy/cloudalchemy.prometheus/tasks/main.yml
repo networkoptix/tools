@@ -1,0 +1,31 @@
+---
+
+- name: Gather facts
+  setup:
+
+- name: Display variables
+  debug:
+    var: ansible_host
+
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+  tags:
+    - always
+
+- include: preflight.yml
+
+- include: install.yml
+  become: true
+
+- include: configure.yml
+  become: true
+
+- name: ensure prometheus service is started and enabled
+  become: true
+  systemd:
+    name: prometheus
+    state: started
+    enabled: true

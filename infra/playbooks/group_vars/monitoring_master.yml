@@ -1,0 +1,54 @@
+prometheus_web_external_url: "http://{{ ansible_ssh_host }}:9090"
+
+prometheus_targets:
+  node:
+    - targets:
+        "{{ groups['all'] | map('extract', hostvars, ['ansible_ssh_host']) | map('regex_replace', '$', ':9100') | list }}"
+      labels:
+        env: monitoring
+  grafana:
+    - targets:
+      - "{{ ansible_ssh_host }}:3000"
+      labels:
+        env: monitoring
+
+prometheus_scrape_configs:
+- job_name: "prometheus"
+  metrics_path: "/metrics"
+  static_configs:
+  - targets:
+    - "{{ ansible_ssh_host }}:9090"
+- job_name: "node"
+  file_sd_configs:
+  - files:
+    - "/etc/prometheus/file_sd/node.yml"
+- job_name: "grafana"
+  file_sd_configs:
+  - files:
+    - "/etc/prometheus/file_sd/grafana.yml"
+
+grafana_security:
+  admin_user: admin
+  admin_password: "{{ grafana_database_password }}"
+
+grafana_auth:
+  anonymous:
+    org_name: "Main Org."
+    org_role: Viewer
+
+grafana_datasources:
+  - name: "Prometheus"
+    type: "prometheus"
+    access: "proxy"
+    url: "http://{{ ansible_ssh_host }}:9090"
+    isDefault: true
+grafana_dashboards:
+  - dashboard_id: '1860'
+    revision_id: '8'
+    datasource: '{{ grafana_datasources.0.name }}'
+  - dashboard_id: '3662'
+    revision_id: '2'
+    datasource: '{{ grafana_datasources.0.name }}'
+  - dashboard_id: '4271'
+    revision_id: '3'
+    datasource: '{{ grafana_datasources.0.name }}'
