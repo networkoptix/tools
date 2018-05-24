@@ -39,11 +39,13 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
     return run
 
 @db_session
-def save_test_results(repository, test_record_list):
+def save_test_results(repository, run_info, test_record_list):
     root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
     pony.orm.flush()  # acquire root_run.id
     print 'Root run: id=%r' % root_run.id
     passed = True
+    add_output_artifact(repository, root_run, 'errors', '\n'.join(run_info.errors), is_error=True)
+    root_run.duration = run_info.duration
     for test_record in test_record_list:
         run = produce_test_run(repository, root_run, ['unit'], test_record.test_name, test_record.test_results)
         run.started_at = test_record.test_info.started_at

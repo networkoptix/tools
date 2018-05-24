@@ -22,7 +22,7 @@ def parse_and_save_results_to_db(work_dir, repository):
     print 'Parsing unit test results from %s:' % work_dir
     test_record_list = [produce_test_record(work_dir, test_name) for test_name in run_info.test_list]
     print 'Saving unit test results:'
-    passed = save_test_results(repository, test_record_list)
+    passed = save_test_results(repository, run_info, test_record_list)
     print 'Done.'
     return passed
 

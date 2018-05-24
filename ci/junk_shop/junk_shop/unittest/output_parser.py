@@ -39,6 +39,7 @@ class TestResults(object):
         self.output_lines = self._make_lines_artifact('output')
         self.gtest_errors = self._make_lines_artifact('gtest errors', is_error=True)
         self.parse_errors = self._make_lines_artifact('parse errors', is_error=True)
+        self.errors = self._make_lines_artifact('errors', is_error=True)  # misc errors
         self.children = []
 
     def _make_lines_artifact(self, name, is_error=False):
@@ -93,8 +94,11 @@ class GTestOutputParser(GoogleTestEventHandler):
     def on_test_start(self, test_name):
         self._add_level(test_name, is_leaf=True)
 
-    def on_test_stop(self, status, duration_ms):
+    def on_test_stop(self, status, duration_ms, is_aborted=False):
         assert len(self._levels) == 3, len(self._levels)
+        if is_aborted:
+            status = 'FAILED'
+            self._levels[-1].errors.add('aborted')
         self._drop_level(duration_ms, status)
 
     def _add_level(self, test_name, is_leaf):

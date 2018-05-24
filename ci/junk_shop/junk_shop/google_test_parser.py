@@ -62,7 +62,7 @@ class GoogleTestParser(object):
         if self.current_test:
             if not is_aborted:
                 self._parse_error('test closing tag is missing')
-            self._handler.on_test_stop(None, None)
+            self._handler.on_test_stop(None, None, is_aborted=True)
             self.current_test = None
         if self.current_suite:
             if not is_aborted:
@@ -174,8 +174,8 @@ class TestEventHandler(GoogleTestEventHandler):
     def on_test_start(self, test_name):
         print 'Test: %s' % test_name
 
-    def on_test_stop(self, status, duration_ms):
-        print 'Test finished: %s %s' % (status, duration_ms)
+    def on_test_stop(self, status, duration_ms, is_aborted=False):
+        print 'Test finished: %s %s, is_abourted=%r' % (status, duration_ms, is_aborted)
 
 
 def test_output():
