@@ -2,15 +2,15 @@ prometheus_web_external_url: "http://{{ ansible_ssh_host }}:9090"
 
 prometheus_targets:
   node:
-    - targets:
-        "{{ groups['all'] | map('extract', hostvars, ['ansible_ssh_host']) | map('regex_replace', '$', ':9100') | list }}"
-      labels:
-        env: monitoring
+  - targets:
+      "{{ groups['all'] | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9100') | list }}"
+    labels:
+      env: monitoring
   grafana:
-    - targets:
-      - "{{ ansible_ssh_host }}:3000"
-      labels:
-        env: monitoring
+  - targets:
+    - "{{ ansible_ssh_host }}:3000"
+    labels:
+      env: monitoring
 
 prometheus_scrape_configs:
 - job_name: "prometheus"
@@ -33,22 +33,24 @@ grafana_security:
 
 grafana_auth:
   anonymous:
-    org_name: "Main Org."
+    org_name: "NetworkOptix"
     org_role: Viewer
 
+prometheus_grafana_datasource: "NetworkOptix, Moscow"
+
 grafana_datasources:
-  - name: "Prometheus"
+  - name: "{{ prometheus_grafana_datasource }}"
     type: "prometheus"
     access: "proxy"
     url: "http://{{ ansible_ssh_host }}:9090"
     isDefault: true
+
 grafana_dashboards:
+  # Node Exporter Full dashboard
   - dashboard_id: '1860'
-    revision_id: '8'
-    datasource: '{{ grafana_datasources.0.name }}'
+    revision_id: '11'     # last revision
+    datasource: '{{ prometheus_grafana_datasource }}'
+  # Overview of metrics from Prometheus 2.0
   - dashboard_id: '3662'
-    revision_id: '2'
-    datasource: '{{ grafana_datasources.0.name }}'
-  - dashboard_id: '4271'
-    revision_id: '3'
-    datasource: '{{ grafana_datasources.0.name }}'
+    revision_id: '2'      # last revision
+    datasource: '{{ prometheus_grafana_datasource }}'

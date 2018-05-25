@@ -13,6 +13,9 @@
 
   roles:
   - role: libvirt_guest
+  - role: alphabet_common
+    become: true
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: cloudalchemy.node-exporter
     become: true
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

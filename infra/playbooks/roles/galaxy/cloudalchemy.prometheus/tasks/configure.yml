@@ -38,8 +38,6 @@
   notify:
     - reload prometheus
 
-- name: Display prometheus te
-
 - name: configure prometheus static targets
   copy:
     content: |
