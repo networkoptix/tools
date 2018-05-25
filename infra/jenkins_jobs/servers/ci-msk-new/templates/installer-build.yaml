@@ -110,6 +110,9 @@
         - folder-create-operation:
             folder-path: 'build'
 
+    - folder-delete-operation:
+        folder-path: '$WORKSPACE/server-external'
+
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
@@ -118,7 +121,7 @@
           LOCAL_PATH=$WORKSPACE/
           PLATFORM=universal
           CUSTOMIZATION=default
-          COMPONENTS=server-external
+          COMPONENTS=server-external/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -133,6 +136,13 @@
           CUSTOMIZATION={customization}
           PLATFORM={platform}
           BRANCH={branch}
+    - inject:
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+
+    - inject:
+        properties-content: |
           {cmake_configure_args_global}
     - inject:
         properties-content: |
@@ -180,59 +190,75 @@
     # STAGE: PUBLISH
     # ========================================
 
-    # If we put this trigger into publish step, other builds of this pipeline may start
-    # before components published and will fail.
-    # There are 2 options:
-    # - add small pause between steps in pipeline and hope that arts. will be in time
-    # - block build until "fat" artifact is published.
-    - trigger-builds:
-      - project: 'helper.push-component'
-        predefined-parameters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
-          LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build-{customization}.log,cmake-configure-{customization}.log
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-          SSH_USER=$USER
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-    - inject:
-        # todo: testing -> $PIPELINE
-        properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    - set-build-description
-
     publishers:
     - archive:
         artifacts: 'build/*.log'
         allow-empty: 'false'
         fingerprint: true
 
-    - trigger-parameterized-builds:
-      - project: '{pipeline}.build-reporter'
-        condition: SUCCESS
-        predefined-parameters: |
-          BRANCH=$BRANCH
-          NX_VMS_COMMIT=$NX_VMS_COMMIT
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
-          BUILD_STATUS=passed
-          LOGFILE=cmake-build-{customization}.log
-    - trigger-parameterized-builds:
-      - project: '{pipeline}.build-reporter'
-        condition: FAILED
-        predefined-parameters: |
-          BRANCH=$BRANCH
-          NX_VMS_COMMIT=$NX_VMS_COMMIT
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
-          BUILD_STATUS=failed
-          LOGFILE=cmake-build-{customization}.log
+    # TODO: publish into other repo than default when build is failed
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - UNSTABLE
+          - FAILURE
+          - NOT_BUILT
+          - ABORTED
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              predefined-parameters: |
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PLATFORM=$PLATFORM
+                CUSTOMIZATION=$CUSTOMIZATION
+                LOCAL_PATH=$WORKSPACE/build/
+                COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build-{customization}.log,cmake-configure-{customization}.log
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
+          - set-build-description
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          build-steps:
+          - trigger-builds:
+            - project: '{pipeline}.build-reporter'
+              block: true
+              predefined-parameters: |
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PLATFORM=$PLATFORM
+                CUSTOMIZATION=$CUSTOMIZATION
+                BUILD_STATUS=passed
+                LOGFILE=cmake-build-{customization}.log
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          build-steps:
+          - trigger-builds:
+            - project: '{pipeline}.build-reporter'
+              block: true
+              predefined-parameters: |
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PLATFORM=$PLATFORM
+                CUSTOMIZATION=$CUSTOMIZATION
+                BUILD_STATUS=failed
+                LOGFILE=cmake-build-{customization}.log
 
     - failure-email:
         email-recipients: iremizov@networkoptix.com

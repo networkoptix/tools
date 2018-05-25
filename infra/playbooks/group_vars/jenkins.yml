@@ -68,3 +68,5 @@ jenkins_plugins:
 - ansicolor
 - console-badge
 - timestamper
+- display-upstream-changes
+- postbuildscript

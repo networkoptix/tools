@@ -10,7 +10,7 @@
     - heavy-job:
         weight: 1
     - throttle:
-        max-total: 1
+        max-total: 5
         option: category
         categories:
         - unittests-linux
@@ -50,6 +50,10 @@
           BRANCH={branch}
           PLATFORM={platform}
           CUSTOMIZATION={customization}
+    - inject:
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
 
     - trigger-builds:
       - project: 'helper.pull-component'
@@ -75,30 +79,11 @@
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
           BIN_DIR="$WORKSPACE/build/bin"
           CONFIG_PATH="$WORKSPACE/build/current_config.py"
-          TIMEOUT=3m
+          TIMEOUT=1m
           TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
           mkdir -p unit_tests
           cd unit_tests
           $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
-
-    # If we put this trigger into publish step, other builds of this pipeline may start
-    # before components published and will fail.
-    # There are 2 options:
-    # - add small pause between steps in pipeline and hope that arts. will be in time
-    # - block build until "fat" artifact is published.
-    - trigger-builds:
-      - project: 'helper.push-component'
-        predefined-parameters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
-          LOCAL_PATH=$WORKSPACE/
-          COMPONENTS=unit_tests/
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-          SSH_USER=$USER
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
 
     # finally count unittests that did not show exit_code == 0
     # if there are no such tests, exit 0 otherwise fail build
@@ -107,19 +92,35 @@
         set -ex
         failed_tests="$(cat $WORKSPACE/unit_tests/*_ut.yaml | grep exit_code | grep -v '^exit_code.* 0$' | wc -l)"
         exit $failed_tests
-    - inject:
-        properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    - set-build-description
 
     publishers:
-    - trigger-parameterized-builds:
-      - project: '{pipeline}.unittests-reporter'
-        condition: ALWAYS
-        predefined-parameters: |
-          BRANCH=$BRANCH
-          NX_VMS_COMMIT=$NX_VMS_COMMIT
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
+    # TODO: publish into other repo than default when build is failed
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          - SUCCESS
+          - UNSTABLE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              block: true
+              predefined-parameters: |
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PLATFORM=$PLATFORM
+                CUSTOMIZATION=$CUSTOMIZATION
+                LOCAL_PATH=$WORKSPACE/
+                COMPONENTS=unit_tests/
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+            - project: '{pipeline}.unittests-reporter'
+              block: false
+              predefined-parameters: |
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PLATFORM=$PLATFORM
+                CUSTOMIZATION=$CUSTOMIZATION
+          - set-build-description
