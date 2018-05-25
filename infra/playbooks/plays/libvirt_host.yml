@@ -35,3 +35,4 @@
       #   crsp migrations on VMs
       # Note: for a quite long time we didn't use "layered" qcow and just copied images
       # for each VM before using them.
+  - role: cloudalchemy.node-exporter

@@ -36,7 +36,7 @@ grafana_auth:
     org_name: "NetworkOptix"
     org_role: Viewer
 
-prometheus_grafana_datasource: "NetworkOptix, Moscow"
+prometheus_grafana_datasource: "Prometheus"
 
 grafana_datasources:
   - name: "{{ prometheus_grafana_datasource }}"

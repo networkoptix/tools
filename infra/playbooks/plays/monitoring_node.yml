@@ -1,0 +1,7 @@
+- name: Setup monitoring node
+  hosts: all
+  become: true
+  become_method: sudo
+
+  roles:
+  - role: cloudalchemy.node-exporter
