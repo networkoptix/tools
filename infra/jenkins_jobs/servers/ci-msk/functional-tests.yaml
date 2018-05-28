@@ -19,3 +19,6 @@
 
     jobs:
       - '{project-name}-{branch}-{platform}-funtest'
+      - '{project-name}-{branch}-{platform}-funtest-debug':
+          branch:
+            - vms

@@ -1,4 +1,6 @@
-# run functional tests
+# run functional tests manually - for debugging specific functional tests
+# copy-paste from functional-tests.yaml, without trigger, with concurrent
+#  and another default for upstream build number.
 
 # Required template variables:
 #   project-name
@@ -13,12 +15,13 @@
 #   test-timeout-hours
 
 - job-template:
-    name: '{project-name}-{branch}-{platform}-funtest'
+    name: '{project-name}-{branch}-{platform}-funtest-debug'
     node: funtest
     os: linux
+    concurrent: true
 
     description: |
-      Run functional tests for branch {branch} project {upstream-project}.
+      Manually run functional tests for branch {branch} project {upstream-project}.
 
     copyartifact_filter: 'build_info.yaml, *-server-*-linux64*.deb, *-server-*-win64*.exe, unit_tests/**/appserver2_ut'
 
@@ -33,7 +36,7 @@
           description: name of upstream project to take artifacts to test from.
       - string:
           name: UPSTREAM_BUILD_NUMBER
-          description: BUILD_NUMBER of upstream project to take artifacts to test from. Default is upstream build.
+          description: BUILD_NUMBER of upstream project to take artifacts to test from. By default use last unstable.
       - string:
           name: CUSTOMIZATION
           default: '{customization}'
@@ -42,11 +45,6 @@
           name: TEST_LIST
           default: ''
           description: Tests to run, space-delimited list. Empty means run all tests.
-
-    triggers:
-      - reverse:
-          jobs: '{upstream-project}/{branch}'
-          result: failure
 
     wrappers:
     - timestamps
@@ -97,7 +95,8 @@
           steps:
             - copyartifact:
                 project: $UPSTREAM_PROJECT
-                which-build: upstream-build
+                which-build: last-successful
+                stable: false  # it's ok if unit tests are failed
                 filter: '{copyartifact_filter}'
                 target: dist
 
