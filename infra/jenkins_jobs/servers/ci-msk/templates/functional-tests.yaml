@@ -44,9 +44,10 @@
           description: Tests to run, space-delimited list. Empty means run all tests.
 
     triggers:
-      - reverse:
-          jobs: '{upstream-project}/{branch}'
-          result: failure
+      - timed: 'H 0 * * *'
+#      - reverse:
+#          jobs: '{upstream-project}/{branch}'
+#          result: failure
 
     wrappers:
     - timestamps
