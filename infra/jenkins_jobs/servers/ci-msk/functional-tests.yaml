@@ -14,8 +14,8 @@
     customization: default
     cloud-group: test
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
-    test-timeout-hours: 3
-    job-timeout-minutes: 300
+    test-timeout-hours: 6
+    job-timeout-minutes: 420  # 7 hours
 
     jobs:
       - '{project-name}-{branch}-{platform}-funtest'
