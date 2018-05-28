@@ -13,7 +13,7 @@
     #   bin-dir
     #   work-dir
     #   mediaserver-dist-dir
-    #   clean ('true' or 'false')
+    #   clean ('true'/'True' or 'false'/'False')
     #   test-list (space-delimited; empty means run all tests)
     #   test-timeout-hours
     #

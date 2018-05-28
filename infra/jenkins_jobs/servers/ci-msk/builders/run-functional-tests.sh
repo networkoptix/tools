@@ -12,7 +12,7 @@ set -xe
 : ${WORK_DIR:?}
 : ${BIN_DIR:?}
 : ${MEDIASERVER_DIST_DIR:?}
-: ${CLEAN:?}  # 'true' or 'false'
+: ${CLEAN:?}  # 'true'/'True' or 'false'/'False'
 : ${TEST_LIST?}  # space-delimited; empty means run all tests
 : ${TIMEOUT_SEC:?}
 : ${SLOT:?}  # aka executor number, 0..
