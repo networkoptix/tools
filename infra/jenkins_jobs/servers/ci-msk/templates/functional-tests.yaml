@@ -156,5 +156,6 @@
           bin-dir: $BIN_DIR
           work-dir: $WORK_DIR
           mediaserver-dist-dir: "$WORKSPACE/dist"
+          clean: true
           test-list: "$TEST_LIST"
           test-timeout-hours: '{test-timeout-hours}'

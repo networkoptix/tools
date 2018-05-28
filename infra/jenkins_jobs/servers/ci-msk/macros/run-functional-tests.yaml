@@ -13,6 +13,7 @@
     #   bin-dir
     #   work-dir
     #   mediaserver-dist-dir
+    #   clean ('true' or 'false')
     #   test-list (space-delimited; empty means run all tests)
     #   test-timeout-hours
     #
@@ -39,6 +40,7 @@
           export BIN_DIR="{bin-dir}"
           export WORK_DIR="{work-dir}"
           export MEDIASERVER_DIST_DIR="{mediaserver-dist-dir}"
+          export CLEAN="{clean}"
           export TEST_LIST="{test-list}"
           export TIMEOUT_SEC="$(({test-timeout-hours} * 60*60))"
           export SLOT="$EXECUTOR_NUMBER"

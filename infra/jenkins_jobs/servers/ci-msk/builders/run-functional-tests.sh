@@ -12,6 +12,7 @@ set -xe
 : ${WORK_DIR:?}
 : ${BIN_DIR:?}
 : ${MEDIASERVER_DIST_DIR:?}
+: ${CLEAN:?}  # 'true' or 'false'
 : ${TEST_LIST?}  # space-delimited; empty means run all tests
 : ${TIMEOUT_SEC:?}
 : ${SLOT:?}  # aka executor number, 0..
@@ -47,8 +48,15 @@ OPTIONS=(
     "--build-parameters=$(join_by ',' ${BUILD_PARAMETERS[@]})"
     "--vm-port-base=$VM_PORT"
     "--vm-name-prefix=$VM_NAME_PREFIX"
-    "--reinstall"
-    )
+)
+
+if [[ "$CLEAN" == "true" || "$CLEAN" == "True" ]]; then
+	OPTIONS=(
+		"${OPTIONS[@]}"
+		"--reinstall"
+	)
+fi
+
 
 source venv/bin/activate
 
