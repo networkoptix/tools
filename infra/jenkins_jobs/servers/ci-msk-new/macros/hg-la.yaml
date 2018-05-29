@@ -8,4 +8,13 @@
         clean: true
         subdir: '{project-name}'
         disable-changelog: false
-        installation: default
+
+- scm:
+    name: hg-la-anon
+    scm:
+    - hg:
+        revision: '{branch-name}'
+        url: 'ssh://hg@hdw.mx/{project-name}'
+        clean: true
+        subdir: '{project-name}'
+        disable-changelog: false

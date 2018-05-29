@@ -36,7 +36,7 @@
         name: nx_vms
 
     scm:
-    - hg-la:
+    - hg-la-anon:
         project-name: nx_vms
         branch-name: '$NX_VMS_COMMIT'
 

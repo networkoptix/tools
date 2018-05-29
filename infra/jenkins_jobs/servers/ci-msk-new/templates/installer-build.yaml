@@ -45,10 +45,10 @@
     # ========================================
 
     scm:
-    - hg-la:
+    - hg-la-anon:
         project-name: devtools
         branch-name: default
-    - hg-la:
+    - hg-la-anon:
         project-name: nx_vms
         branch-name: $NX_VMS_COMMIT
 

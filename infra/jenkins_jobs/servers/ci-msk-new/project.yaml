@@ -136,13 +136,13 @@
     - win-x64: &windows_config
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: |
-          CMAKE_EXECUTABLE=C:\Program files\CMake\bin\cmake.exe
+          CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017 Win64
           CMAKE_TOOL=host=x64
     - win-x86:
         <<: *windows_config
         cmake_configure_args_platform: |
-          CMAKE_EXECUTABLE=C:\Program files\CMake\bin\cmake.exe
+          CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017
           CMAKE_TOOL=host=x64
 

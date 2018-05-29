@@ -38,7 +38,7 @@
         name: devtools
 
     scm:
-    - hg-la:
+    - hg-la-anon:
         project-name: devtools
         branch-name: default
 
