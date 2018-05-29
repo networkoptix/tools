@@ -44,7 +44,7 @@
           description: Tests to run, space-delimited list. Empty means run all tests.
 
     triggers:
-      - timed: 'H 0 * * *'
+      - timed: 'H 21 * * *'
 #      - reverse:
 #          jobs: '{upstream-project}/{branch}'
 #          result: failure
@@ -98,9 +98,15 @@
           steps:
             - copyartifact:
                 project: $UPSTREAM_PROJECT
-                which-build: upstream-build
+                which-build: last-successful
+                stable: false  # it's ok if unit tests are failed
                 filter: '{copyartifact_filter}'
                 target: dist
+#            - copyartifact:
+#                project: $UPSTREAM_PROJECT
+#                which-build: upstream-build
+#                filter: '{copyartifact_filter}'
+#                target: dist
 
       - init-venv-linux:
           requirements-files: >-
