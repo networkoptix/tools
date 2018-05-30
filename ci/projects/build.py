@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 GENERATE_TIMEOUT = datetime.timedelta(hours=2)
 BUILD_TIMEOUT = datetime.timedelta(hours=4)
-BUILD_SAVE_TIMEOUT = datetime.timedelta(hours=1)  # kill job if saving to junk-shop db timed out
+BUILD_SAVE_TIMEOUT = datetime.timedelta(minutes=20)  # kill job if saving to junk-shop db timed out
 DEFAULT_GENERATOR = 'Ninja'
 LOGS_DIR = 'build_logs'
 PARALLEL_JOB_COUNT = 20

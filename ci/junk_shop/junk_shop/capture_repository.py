@@ -1,10 +1,15 @@
 from argparse import ArgumentTypeError
 import re
 import bz2
+import logging
 import threading
+
 from pony.orm import db_session, commit, flush, select, desc, raw_sql
+
 from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
 from . import models
+
+log = logging.getLogger(__name__)
 
 
 VERSION_REGEX = r'^\d+(\.\d+)+$'
@@ -282,7 +287,9 @@ class DbCaptureRepository(object):
             return value
         if not value:
             return None
+        log.info('Retrieving %r record for parameter name=%r value=%r...', model, name, value)
         rec = model.get(name=value)
+        log.info('Retrieving %r record for parameter name=%r value=%r: done: %r', model, name, value, rec)
         if not rec:
             rec = model(name=value)
         return rec
