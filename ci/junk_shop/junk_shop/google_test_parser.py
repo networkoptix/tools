@@ -5,9 +5,19 @@
 import abc
 import re
 import argparse
+from collections import namedtuple
+
+
+GTestPattern = namedtuple('GTestPattern', 'pattern extra_line_count')
 
 
 LOG_PATTERN = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} +\w+ +[A-Z]+ .+'
+
+GTEST_PATTERN_LIST = [
+    GTestPattern(r'^.+:\d+: Failure$', 3),  # linux, mac
+    GTestPattern(r'^unknown file: Failure$', 1),  # linux?, mac
+    GTestPattern(r'^.+\(\d+\): error: .+$', 2),  # windows
+    ]
 
 
 class GoogleTestEventHandler(object):
@@ -50,6 +60,7 @@ class GoogleTestParser(object):
         self.current_suite = None
         self.current_test = None
         self._last_output_line = None
+        self._gtest_lines_left = None
 
     def process_line(self, line):
         line = line.rstrip('\r\n')
@@ -139,8 +150,17 @@ class GoogleTestParser(object):
 
     def _handle_output_line(self, line):
         self._handler.on_output_line(line)
-        if not re.match(LOG_PATTERN, line) and line.strip() and self.current_test:
+        if not self.current_test:
+            return
+        if self._gtest_lines_left:
             self._handler.on_gtest_error(line)
+            self._gtest_lines_left -= 1
+            return
+        for pattern in GTEST_PATTERN_LIST:
+            if re.match(pattern.pattern, line):
+                self._handler.on_gtest_error(line)
+                self._gtest_lines_left = pattern.extra_line_count
+                break
 
     def _parse_error(self, desc, line=None, parsed_suite=None, parsed_test=None):
         error = ('%s: current suite: %s, current test: %s, parsed suite: %s, parsed test: %s, line: %r'
