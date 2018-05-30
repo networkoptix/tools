@@ -23,6 +23,12 @@
     - libvirt_guest__type  == 'windows'
     vars:
       samba_mount_pass: "{{ cinas_infra_password }}"
+  - role: wmi_exporter
+    become: false
+    when:
+    - libvirt_guest__state is defined
+    - libvirt_guest__state == 'running'
+    - libvirt_guest__type  == 'windows'
   # - role: windows_sign_tool
   #   become: false
   #   when:

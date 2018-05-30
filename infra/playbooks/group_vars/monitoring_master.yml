@@ -13,6 +13,11 @@ prometheus_targets:
       env: monitoring
 
 prometheus_scrape_configs:
+- job_name: "windows"
+  metrics_path: "/metrics"
+  static_configs:
+  - targets:
+      "{{ groups['build_vm_win'] | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9182') | list }}"
 - job_name: "prometheus"
   metrics_path: "/metrics"
   static_configs:
@@ -45,12 +50,21 @@ grafana_datasources:
     url: "http://{{ ansible_ssh_host }}:9090"
     isDefault: true
 
+#  Grafana role uses dashbordId to download a dashbord by request
+# https://grafana.com/api/dashboards/{{ dashboard_id }}/revisions/{{ revision_id }}/download"
+#
+# You can find information about dashboards and its revisions
+# on https://grafana.com/dashboards page,
 grafana_dashboards:
   # Node Exporter Full dashboard
   - dashboard_id: '1860'
-    revision_id: '11'     # last revision
+    revision_id: '11'     # node exporter dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'
   # Overview of metrics from Prometheus 2.0
   - dashboard_id: '3662'
-    revision_id: '2'      # last revision
+    revision_id: '2'      # Prometheus metrics dashboard last revision
+    datasource: '{{ prometheus_grafana_datasource }}'
+  # Windows Node dashboard
+  - dashboard_id: '2129'
+    revision_id:  '3'     # windows node dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'

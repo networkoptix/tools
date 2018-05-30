@@ -1,0 +1,47 @@
+- name: Download prometheus WMI exporter
+  get_url:
+    url: "https://github.com/martinlindhe/wmi_exporter/releases/download/v0.3.3/wmi_exporter-0.3.3-386.msi"
+    dest: "{{ wmi_exporter_work_dir }}/wmi_exporter-0.3.3-386.msi"
+  register: wmi_exporter_download
+
+- name: Copy prometheus WMI exporter uninstall script
+  copy:
+    src: files/uninstall_wmi_exporter.ps1
+    dest: "{{ wmi_exporter_work_dir }}/uninstall_wmi_exporter.ps1"
+
+- name: Check prometheus WMI already installed
+  command: >-
+    powershell -command "Get-WmiObject -Class Win32_Product -Filter \"Name = 'WMI Exporter'\" | ft IdentifyingNumber"
+  register: wmi_exporter_installation_check
+  changed_when: false
+  check_mode: no
+
+- name: Get windows path of uninstall script
+  command: >-
+    cygpath -w {{ wmi_exporter_work_dir}}/uninstall_wmi_exporter.ps1
+  register: wmi_exporter_uninstall_ps1_path
+  changed_when: false
+  check_mode: no
+
+- name: Uninstall prometheus WMI exporter
+  command: >-
+    powershell -File "{{ wmi_exporter_uninstall_ps1_path.stdout }}"
+  when: >-
+    wmi_exporter_installation_check.stdout != "" and
+    ( wmi_exporter_reinstall or wmi_exporter_download.changed )
+  register: unistall_status
+
+- name: Get windows path of installer
+  command: >-
+    cygpath -w {{ wmi_exporter_work_dir }}/wmi_exporter-0.3.3-386.msi
+  register: wmi_exporter_installer_path
+  changed_when: false
+  check_mode: no
+
+- name: Install prometheus WMI exporter
+  command: >-
+     msiexec /i "{{ wmi_exporter_installer_path.stdout }}"
+     ENABLED_COLLECTORS=os,cpu,cs,process,service,net,system,tcp,ad,logical_disk
+     LISTEN_PORT=9182
+  when: >-
+    wmi_exporter_installation_check.stdout == "" or unistall_status.changed

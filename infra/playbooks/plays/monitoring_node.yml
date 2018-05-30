@@ -1,3 +1,4 @@
+# it's just a helper to setup only node exporter to destination hosts
 - name: Setup monitoring node
   hosts: all
   become: true
