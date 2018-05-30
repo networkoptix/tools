@@ -67,7 +67,7 @@ export PYTEST_PLUGINS=junk_shop.pytest_plugin
 cd nx_vms/func_tests
 
 if [[ "$TEST_LIST" == "" ]]; then
-	pytest $(join_by ' ' ${OPTIONS[@]}) -k 'not window' -k 'not smb'
+	pytest $(join_by ' ' ${OPTIONS[@]}) -k 'not windows' -k 'not smb'
 else
 	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST
 fi
