@@ -117,12 +117,14 @@ def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
 
 
 class Jira:
-    def __init__(self, url: str, login: str, password: str, file_limit: int, epic_link: str = '', prefix: str = ''):
+    def __init__(self, url: str, login: str, password: str, file_limit: int, fix_versions: list, 
+                 epic_link: str = '', prefix: str = ''):
         self._jira = jira.JIRA(server=url, basic_auth=(login, password))
         self._file_limit = file_limit
-        self.epic_link = epic_link
+        self._fix_versions = fix_versions
+        self._epic_link = epic_link
         self._prefix = prefix + ' ' if prefix else ''
-
+        
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         """Creates JIRA issue by crash :report.
         Return issue key of created issue.
@@ -147,10 +149,10 @@ class Jira:
                 summary=self._prefix + '{r.component} has crashed on {os}: {r.code}'.format(
                     r=reason, os=operation_system(report.extension)),
                 versions=[{'name': report.version}],
-                fixVersions=[{'name': report.version + '_hotfix'}],
+                fixVersions=[{'name': v} for v in self._fix_versions_for(report.version)],
                 components=[{'name': reason.component}],
                 customfield_10200={"value": team(reason.component)},
-                customfield_10009=self.epic_link,
+                customfield_10009=self._epic_link,
                 description='\n'.join(['Call Stack:', '{code}'] + reason.stack + ['{code}']))
         except jira.exceptions.JIRAError as error:
             logger.debug(utils.format_error(error))
@@ -180,16 +182,16 @@ class Jira:
             else:
                 self._transition(issue, 'Reopen')
                 logger.info('Reopen JIRA issue {} for version {}'.format(key, max_report))
-
-        issue_versions = set(v.name for v in issue.fields.versions)
-        new_versions = issue_versions | set(d.version for d in reports)
-        if issue_versions != new_versions:
-            issue.update(fields={'versions': list({'name': v} for v in new_versions)})
-            logger.debug('JIRA issue {} is updated for versions: {}'.format(
-                key, ', '.join(new_versions)))
-
+                
+        versions = set()
+        fix_versions = set()
         for r in reports:
+            versions.add(r.version)
+            fix_versions.update(self._fix_versions_for(r.version))
             self._attach_files(key, directory.files(r.file_mask()))
+            
+        self._update_field_names(issue, 'versions', versions)
+        self._update_field_names(issue, 'fixVersions', fix_versions)
 
     def all_issues(self):
         issues = []
@@ -198,7 +200,19 @@ class Jira:
             if summary.startswith(self._prefix) and 'has crashed on' in summary:
                 issues.append(issue)
         return issues
-
+    
+    def _fix_versions_for(self, version):
+        return set(v for v in self._fix_versions if v >= version)
+        
+    @staticmethod
+    def _update_field_names(issue: jira.Issue, name: str, values: list):
+        current_values = set(v.name for v in getattr(issue.fields, name))
+        new_values = current_values | set(values)
+        if current_values != new_values:
+            issue.update(fields={name: [{'name': v} for v in new_values]})
+            logger.debug('JIRA issue {} is updated for {}: {}'.format(
+                issue.key, name, ', '.join(new_values)))
+    
     def _attach_files(self, key: str, reports: List[utils.File]):
         """Attaches new :files to JIRA issue.
         """

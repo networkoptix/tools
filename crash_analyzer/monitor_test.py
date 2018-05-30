@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class CrashServerMock:
     def __init__(self, url: str, login: str, password: str):
-        self.server = '{}:{} @ {}'.format(login, password, url)
+        self.args = [url, login, password]
 
     @staticmethod
     def list_all(extension: str) -> List[str]:
@@ -34,9 +34,9 @@ class CrashServerMock:
 
 class JiraMock:
     def __init__(self, issues, url: str, login: str, password: str,
-                 file_limit: int, epic_link: str, prefix: str = ''):
+                 file_limit: int, fix_versions: list, epic_link: str, prefix: str = ''):
         self.issues = issues
-        self.server = '{}:{} @ {} / {} {} {}'.format(login, password, url, file_limit, epic_link, prefix)
+        self.args = [url, login, password, file_limit, fix_versions, epic_link, prefix]
 
     def create_issue(self, report: crash_info.Report, reason: crash_info.Reason) -> str:
         key = reason.crash_id[:10]  # < Shorter key for easier debug.

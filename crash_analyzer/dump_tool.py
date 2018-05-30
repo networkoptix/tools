@@ -440,7 +440,7 @@ class DumpAnalyzer:
         """
         try:
             urls = self.fetch_urls()
-        except http.client.HTTPException as e:
+        except (http.client.HTTPException, urllib.error.URLError) as e:
             raise DistError(str(e))
 
         try:

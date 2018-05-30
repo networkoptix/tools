@@ -42,4 +42,5 @@ upload:
     file_limit: 20 #< Maximum attachments count.
     thread_count: 10 #< Communication connections count.
     epic_link: VMS-2022 #< Epic name to link newly created issues.
+    fix_versions: ['3.0_hotfix', '3.1_hotfix', '3.2'] # Fix versions for cases.
     prefix: TEST-RUN #< Optional: issue summary prefix, for testing only.
