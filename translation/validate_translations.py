@@ -12,7 +12,7 @@ sys.path.pop(0)
 
 rulesDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rules')
 sys.path.insert(0, rulesDir)
-from validation_rule import Levels
+from validation_rule import Levels, ValidationRule
 from rules_list import get_validation_rules
 sys.path.pop(0)
 
@@ -22,13 +22,13 @@ if os.path.isfile('current_config.py'):
     os.chdir(PROJECT_SOURCE_DIR)
     sys.path.pop(0)
 
-projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+projectDir = os.path.join(os.getcwd(), 'build_utils/validation')
 sys.path.insert(0, projectDir)
-from vms_projects import getTranslatableProjects
+from translatable_projects import get_translatable_projects
 sys.path.pop(0)
 
 
-def printLeveled(text, level):
+def print_leveled(text, level):
     if level == Levels.CRITICAL:
         err(text)
     elif level == Levels.WARNING:
@@ -37,7 +37,7 @@ def printLeveled(text, level):
         info(text)
 
 
-def validateXml(root, filename, errorsOnly):
+def validate_xml(root, filename, lowest_level):
     applied_rules = list(get_validation_rules(filename))
 
     diagnostics = []
@@ -46,31 +46,30 @@ def validateXml(root, filename, errorsOnly):
         contextName = context.find('name').text
         for message in context.iter('message'):
             for rule in applied_rules:
-                if errorsOnly and rule.level() != Levels.CRITICAL:
+                if rule.level() < lowest_level:
                     continue
                 if not rule.valid_message(contextName, message):
-                    diagnostics.append((contextName, rule.last_error_text(), rule.level()))
+                    source = ValidationRule.translation_source(message)
+                    diagnostics.append((contextName, source, rule.last_error_text(), rule.level()))
 
     if diagnostics:
-        max_level = max(diagnostics, key=lambda x: x[2])
-        printLeveled(u"\nValidating {}...".format(filename), max_level[2])
-        for context, text, level in diagnostics:
-            message = u'*** Context: {0} ***\n{1}'.format(context, text)
-            printLeveled(message, level)
+        max_level = max(diagnostics, key=lambda x: x[3])
+        print_leveled(u"\nValidating {}...".format(filename), max_level[3])
+        for context, source, text, level in diagnostics:
+            message = u'*** Context: {0} ***\n*** Source: {1}\n{2}'.format(context, source, text)
+            print_leveled(message, level)
 
 
-def validateFile(path, errorsOnly):
+def validate_file(path, lowest_level):
     name = os.path.basename(path)
     tree = ET.parse(path)
     root = tree.getroot()
-    validateXml(root, name, errorsOnly)
+    validate_xml(root, name, lowest_level)
 
 
-def validateProject(project, translationDir, language, errorsOnly):
-    entries = []
-
-    for entry in os.listdir(translationDir):
-        path = os.path.join(translationDir, entry)
+def calculate_files(project, translations_dir, language):
+    for entry in os.listdir(translations_dir):
+        path = os.path.join(translations_dir, entry)
 
         if (os.path.isdir(path)):
             continue
@@ -85,17 +84,17 @@ def validateProject(project, translationDir, language, errorsOnly):
         if (not entry.startswith(project)):
             continue
 
-        entries.append(path)
-
-    for path in entries:
-        validateFile(path, errorsOnly)
+        yield path
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--color', action='store_true', help="colorized output")
-    parser.add_argument('-e', '--errors-only', action='store_true', help="do not show warnings")
-    parser.add_argument('-l', '--language', help="check only selected language")
+    parser.add_argument('-c', '--color', action='store_true', help="Colorized output")
+    parser.add_argument('-e', '--errors-only', action='store_true', help="Show only errors")
+    parser.add_argument('-w', '--warnings', action='store_true', help="Show warnings and errors")
+    parser.add_argument('-l', '--language', help="Check only selected language")
+    parser.add_argument(
+        '-p', '--project', help="Check only selected project. Allowed values: mobile, vms.")
     args = parser.parse_args()
 
     if args.color:
@@ -103,11 +102,22 @@ def main():
 
     rootDir = os.getcwd()
 
-    projects = getTranslatableProjects()
+    files = []
+    projects = get_translatable_projects(args.project)
     for project in projects:
         projectDir = os.path.join(rootDir, project.path)
-        translationDir = os.path.join(projectDir, 'translations')
-        validateProject(project.name, translationDir, args.language, args.errors_only)
+        translations_dir = os.path.join(projectDir, 'translations')
+        files += list(calculate_files(project.name, translations_dir, args.language))
+
+    lowest_level = Levels.INFO
+    if args.warnings:
+        lowest_level = Levels.WARNING
+    if args.errors_only:
+        lowest_level = Levels.CRITICAL
+
+    files.sort(key=lambda filename: filename[-8:-3])
+    for file in files:
+        validate_file(file, lowest_level)
 
     info("Validation finished.")
 
