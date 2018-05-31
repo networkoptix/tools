@@ -2,9 +2,9 @@ import re
 
 
 class Levels:
-    CRITICAL = "critical"
-    WARNING = "warning"
-    INFO = "info"
+    INFO = 0
+    WARNING = 1
+    CRITICAL = 2
 
 
 class ValidationRule:
