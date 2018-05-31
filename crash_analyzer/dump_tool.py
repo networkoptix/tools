@@ -551,7 +551,7 @@ if __name__ == '__main__':
 
     del arguments.verbose
     try:
-        analyse_dump(**vars(arguments))
+        analyse_dump(**vars(arguments), subprocess_timeout_s=60)
 
     except Error as e:
         if arguments.debug_mode:
