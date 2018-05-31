@@ -67,6 +67,8 @@ Here <command> can be one of the following:
  run-ut [all|test_name] [args] # Run all or the specified unit test via ctest.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
 
+ dmp file.dmp [args] # Cygwin-only: Analyze .dmp with crash_analyzer. Requires win-python3.
+
  share target_dir [branch] # Do hg share, update and copy ".hg/hgrc". Default branch is target_dir.
  cd # Change current dir: source dir <-> build dir.
  gen [cache] [cmake-args] # Perform cmake generation.
@@ -334,7 +336,7 @@ do_gen() # [cache] "$@"
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
     local DISTRIB_ARG=""
-    [[ $DISTRIB == 1 ]] && CUSTOMIZATION_ARG="-DwithDistributions=ON"
+    [[ $DISTRIB == 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
 
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
@@ -615,17 +617,19 @@ do_kit() # "$@"
     if [[ $KEEP_BUILD_DIR == 0 ]]
     then
         rm -rf "$KIT_BUILD_DIR"
+        nx_echo "Built successfully."
     else
         nx_echo
         nx_echo "ATTENTION: Built at $KIT_BUILD_DIR"
-        nx_echo
+        #nx_echo
     fi
 
-    nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || return $?
-    nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || return $?
-    nx_echo
-    nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
+    # Deploying to artifacts commented out - starting with vms_3.2, this artifact is not used.
+    #nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
+    #nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || return $?
+    #nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || return $?
+    #nx_echo
+    #nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 }
 
 log_build_vars()
@@ -654,7 +658,7 @@ do_cmake() # "$@"
 
 build_distrib() # "$@"
 {
-    do_cmake "$@" -DwithDistributions=ON
+    do_cmake -DwithDistributions=ON "$@"
 }
 
 list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
@@ -1063,6 +1067,21 @@ main()
                 nx_verbose "$TEST_CAMERA_BIN" --local-interface="$SELF_IP" "$@" \
                     "files=\"$(nx_path "$VIDEO_FILE")\";count=1"
             fi
+            ;;
+        #..........................................................................................
+        dmp)
+            if ! nx_is_cygwin
+            then
+                nx_fail "This command supported only on cygwin."
+            fi
+            if [ $# -lt 1 ]
+            then
+                nx_fail "Missing first arg: .dmp file."
+            fi
+            local -r DMP_FILE="$1"; shift
+
+            nx_verbose win-python3 "$DEVELOP_DIR/devtools/crash_analyzer/dump_tool.py" \
+                "$(nx_path "$DMP_FILE")" "$@"
             ;;
         #..........................................................................................
         share)
