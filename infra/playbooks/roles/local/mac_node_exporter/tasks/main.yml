@@ -1,0 +1,45 @@
+- include: preflight.yml
+
+- name: Download Node exporter binary to local folder
+  become: no
+  unarchive:
+    src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.darwin-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+    creates: "/tmp/node_exporter-{{ node_exporter_version }}.darwin-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/node_exporter"
+  register: _download_binary
+  until: _download_binary is succeeded
+  retries: 5
+  delay: 2
+  delegate_to: localhost
+
+- name: Propagate Node Exporter binaries
+  copy:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.darwin-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}/node_exporter"
+    dest: "/usr/local/bin/node_exporter"
+    mode:
+  notify:
+    - restart node exporter
+  when: not ansible_check_mode
+
+- name: Creates needful directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  with_items:
+    - "{{ ansible_env.HOME }}/Library/LaunchAgents"
+    - "{{ ansible_env.HOME }}/{{ node_exporter_service_name }}/log"
+
+- name: Copy the Node Exporter lauchctl service file
+  template:
+    src: prometheus.node_exporter.plist.j2
+    dest: "{{ ansible_env.HOME }}/Library/LaunchAgents/{{ node_exporter_service_name }}.plist"
+    mode: 0644
+  notify:
+    - restart node exporter
+  register: node_exporter_launch_config
+
+
+
+

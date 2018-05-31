@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>{{ node_exporter_service_name }}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node_exporter</string>
+    <string>--web.listen-address</string>
+    <string>{{ node_exporter_web_listen_address }}</string>
+    {% for c in node_exporter_enabled_collectors -%}
+    {%   if not c is mapping -%}
+    <string>--collector.{{ c }}</string>
+    {%   else -%}
+    {%     set name,opt = (c.items() | list)[0] -%}
+    {%     for k,v in opt.items() -%}
+    <string>--collector.{{ name }}.{{ k }}={{ v }}</string>
+    {%     endfor -%}
+    {%   endif -%}
+    {% endfor -%}
+    {% for c in node_exporter_disabled_collectors -%}
+    <string>--no-collector.{{ c }}</string>
+    {% endfor %}
+  </array>
+  <key>WorkingDirectory</key>
+  <string>{{ ansible_env.HOME }}/{{ node_exporter_service_name }}</string>
+  <key>StandardOutPath</key>
+  <string>{{ ansible_env.HOME }}/{{ node_exporter_service_name }}/log/rackup.log</string>
+  <key>StandardErrorPath</key>
+  <string>{{ ansible_env.HOME }}/{{ node_exporter_service_name }}/log/rackup.err</string>
+  <key>KeepAlive</key>
+  <true/>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

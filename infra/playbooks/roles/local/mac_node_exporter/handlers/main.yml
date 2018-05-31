@@ -1,0 +1,19 @@
+- name: Get service list
+  command: launchctl list
+  register: service_list
+  changed_when: false
+  check_mode: no
+  listen: restart node exporter
+
+- name: Unload Node exporter service
+  command: >-
+    launchctl unload {{ ansible_env.HOME }}/Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+  listen: restart node exporter
+  when: >-
+    node_exporter_service_name in service_list.stdout
+
+- name: Load Node Exporter service
+  command: >-
+     launchctl load {{ ansible_env.HOME }}/Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+  listen: restart node exporter
+
