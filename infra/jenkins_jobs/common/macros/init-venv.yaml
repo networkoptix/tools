@@ -17,6 +17,8 @@
           if not exist venv (
             virtualenv --system-site-packages venv
           )
+          rem won't work if put into requirements.txt:
+          venv\\Scripts\\PIP.exe install setuptools==39.2.0
           for %%V IN ({requirements-files}) do (
             venv\\Scripts\\PIP.exe install -r %%V
           )
@@ -33,6 +35,8 @@
           fi
 
           source venv/bin/activate
+            # won't work if put into requirements.txt:
+            pip install --upgrade setuptools==39.2.0
             for path in {requirements-files}; do
               pip install -r "$path"
             done
