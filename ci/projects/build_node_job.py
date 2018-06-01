@@ -12,7 +12,7 @@ from pony.orm import db_session
 from pyvalid import accepts, returns
 
 from junk_shop import models, DbCaptureRepository
-from junk_shop.unittest import run_unit_tests, parse_and_save_results_to_db
+from junk_shop.unittest import run_unit_tests, make_backtraces, parse_and_save_results_to_db
 
 from utils import prepare_empty_dir, list_inst, dict_inst
 from command import (
@@ -207,18 +207,21 @@ class BuildNodeJob(object):
         if not test_binary_list:
             self._add_error('No unit tests were produced matching masks: {}'.format(unit_test_mask_list))
             return
-        unit_tests_dir = os.path.join(self._workspace_dir, 'unit_tests')
+        unit_tests_dir = Path(self._workspace_dir) / 'unit_tests'
         bin_dir = os.path.abspath(build_info.unit_tests_bin_dir)
-        prepare_empty_dir(unit_tests_dir)
+        prepare_empty_dir(str(unit_tests_dir))
         log.info('Running unit tests in %r: %s', unit_tests_dir, ', '.join(test_binary_list))
         run_unit_tests(
             config_path=Path(build_info.current_config_path),
-            work_dir=Path(unit_tests_dir),
+            work_dir=unit_tests_dir,
             bin_dir=Path(bin_dir),
             test_binary_list=test_binary_list,
             timeout=timeout,
             )
-        is_passed = parse_and_save_results_to_db(Path(unit_tests_dir), self._repository)
+        log.info('Parsing core files:')
+        make_backtraces(unit_tests_dir)
+        log.info('Saving results to junk-shop:')
+        is_passed = parse_and_save_results_to_db(unit_tests_dir, self._repository)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')
 
     def _make_stash_command_list(self, platform_build_info):

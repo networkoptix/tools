@@ -66,14 +66,6 @@ def save_test_results(repository, run_info, test_record_list):
             name = backtrace_path.name
             repository.add_artifact(run, name, name, repository.artifact_type.traceback, backtrace_path.read_bytes(), is_error=True)
             fail_it = True
-        for core_file_path in test_record.core_file_list:
-            size = core_file_path.stat().st_size
-            if size <= CORE_FILE_SIZE_LIMIT:
-                name = core_file_path.name
-                repository.add_artifact(run, name, name, repository.artifact_type.core, core_file_path.read_bytes(), is_error=True)
-            else:
-                log.info('Core file "%s" is too large (%rB); will not store', core_file_path, size)
-            fail_it = True
         # outcome
         if fail_it:
             run.outcome = status2outcome(False)

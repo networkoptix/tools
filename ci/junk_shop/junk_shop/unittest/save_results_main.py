@@ -8,13 +8,13 @@ from junk_shop.utils import DbConfig
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from .test_info import RunInfo, TestInfo
 from .output_parser import GTestOutputParser
-from .core_file import collect_core_file_list, produce_core_traceback
+from .core_file import collect_backtrace_file_list
 from .save_results import save_test_results
 
 log = logging.getLogger(__name__)
 
 
-TestRecord = namedtuple('TestRecord', 'test_name test_info output_file_path test_results core_file_list backtrace_file_list')
+TestRecord = namedtuple('TestRecord', 'test_name test_info output_file_path test_results backtrace_file_list')
 
 
 def parse_and_save_results_to_db(work_dir, repository):
@@ -33,10 +33,8 @@ def produce_test_record(work_dir, test_name):
     killed_by_signal = test_info.exit_code < 0
     is_aborted = test_info.timed_out or killed_by_signal
     test_results = GTestOutputParser.run(test_name, output_file_path, is_aborted)
-    core_file_list = list(collect_core_file_list(test_name, test_dir_base))
-    backtrace_file_list = [produce_core_traceback(test_info.binary_path, core_file_path)
-                               for core_file_path in core_file_list]
-    return TestRecord(test_name, test_info, output_file_path, test_results, core_file_list, backtrace_file_list)
+    backtrace_file_list = list(collect_backtrace_file_list(test_name, test_dir_base))
+    return TestRecord(test_name, test_info, output_file_path, test_results, backtrace_file_list)
 
 
 def setup_logging(level=None):
