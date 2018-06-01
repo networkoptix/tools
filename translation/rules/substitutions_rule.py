@@ -35,8 +35,8 @@ class SubstitutionsRule(ValidationRule):
             for text in ValidationRule.translation_texts(message):
                 if not text.count(symbol) == occurences:
                     self.lastErrorText = (
-                        u'''Invalid substitution count found in:\n\"{0}\"\nSource is:\n\"{1}\"'''
-                        .format(text, source))
+                        u'''Invalid substitution count found in:\n\"{0}\"'''
+                        .format(text))
                     return False
 
         return True

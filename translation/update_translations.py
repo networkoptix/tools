@@ -3,7 +3,6 @@
 import sys
 import os
 import argparse
-from multiprocessing import Process
 import threading
 import subprocess
 
@@ -13,35 +12,43 @@ from common_module import init_color,info,green,warn,err,separator
 sys.path.pop(0)
 
 ignored = [
-            # QT files
-            '/qstringbuilder.h', '/qstring.h', '/qmatrix.h', '/qaction.h', '/qnetworkcookiejar.h', '/qboxlayout.h', '/qgridlayout.h',
+    # QT files
+    '/qstringbuilder.h',
+    '/qstring.h',
+    '/qmatrix.h',
+    '/qaction.h',
+    '/qnetworkcookiejar.h',
+    '/qboxlayout.h',
+    '/qgridlayout.h',
 
-            # 3rd-party libraries
-            '/boost', '/libavutil', '/openssl', '/directx', '/festival',
+    # 3rd-party libraries
+    '/boost', '/libavutil', '/openssl', '/directx', '/festival',
 
-            # Project files
-            '.prf', '.pro(1)', 'Project MESSAGE:'
-          ]
+    # Project files
+    '.prf', '.pro(1)', 'Project MESSAGE:'
+]
 
 errors = [
-            # Module lacks Q_OBJECT macro
-            'lacks'
-         ]
+    # Module lacks Q_OBJECT macro
+    'lacks'
+]
 
 warnings = [
-            # Discarding unconsumed metadata, usually warned on sequences like /*=
-            'Discarding',
+    # Discarding unconsumed metadata, usually warned on sequences like /*=
+    'Discarding',
 
-            # Circular inclusions
-            'circular'
-           ]
+    # Circular inclusions
+    'circular'
+]
 
 verbose = False
 results = dict()
 lupdate = None
 
+
 def isBinary(binary):
     return any(os.access(os.path.join(path, binary), os.X_OK) for path in os.environ["PATH"].split(os.pathsep))
+
 
 def detectLUpdate():
     global lupdate
@@ -52,7 +59,7 @@ def detectLUpdate():
     elif os.path.isfile('current_config.py'):
         sys.path.insert(0, os.getcwd())
         from current_config import QT_DIR, PROJECT_SOURCE_DIR
-        lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')   
+        lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
         os.chdir(PROJECT_SOURCE_DIR)
         sys.path.pop(0)
     else:
@@ -62,6 +69,7 @@ def detectLUpdate():
             from current_config import QT_DIR
             lupdate = os.path.join(QT_DIR, 'bin', 'lupdate.exe')
         sys.path.pop(0)
+
 
 def calculateEntries(prefix, dir, language):
     entries = []
@@ -82,17 +90,18 @@ def calculateEntries(prefix, dir, language):
         entries.append(path)
     return entries
 
+
 def update(project, language):
     rootDir = os.getcwd()
     projectDir = os.path.join(rootDir, project.path)
     translationDir = os.path.join(projectDir, 'translations')
     sourcesDir = os.path.join(projectDir, project.sources)
     filename = project.name
-    
+
     entries = calculateEntries(filename, translationDir, language)
-    
+
     command = [lupdate, '-no-obsolete', '-no-ui-lines']
-  
+
     command.append('-locations')
     command.append(project.locations)
     command.append('-extensions')
@@ -101,16 +110,17 @@ def update(project, language):
     command.append('-ts')
     for path in entries:
         command.append(path)
-    
+
     log = ''
     global verbose
     if verbose:
         log += ' '.join(command)
         log += '\n'
-    
+
     log += subprocess.check_output(command, stderr=subprocess.STDOUT)
     global results
     results[project] = log
+
 
 def handleOutput(log):
     for line in log.split('\n'):
@@ -131,10 +141,12 @@ def handleOutput(log):
         if verbose:
             info(line)
 
+
 def updateThreaded(project, language, callback):
-    thread = threading.Thread(None, callback, args=(project,language))
+    thread = threading.Thread(None, callback, args=(project, language))
     thread.start()
     return thread
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -153,19 +165,21 @@ def main():
         err('lupdate is not found in PATH')
         return 1
     info('Using {0}'.format(lupdate))
-        
-    projectDir = os.path.join(os.getcwd(), 'build_utils/python')
+
+    projectDir = os.path.join(os.getcwd(), 'build_utils/validation')
     sys.path.insert(0, projectDir)
-    from vms_projects import getTranslatableProjects
+    from translatable_projects import get_translatable_projects
     sys.path.pop(0)
-        
-    projects = getTranslatableProjects()   
+
+    projects = get_translatable_projects()
+    if not projects:
+        err("Projects list could not be read")
     threads = []
     for project in projects:
         if verbose:
-            info("Updating project " + str(project))           
+            info("Updating project " + str(project))
         threads.append(updateThreaded(project, args.language, update))
-            
+
     for thread in threads:
         thread.join()
 
