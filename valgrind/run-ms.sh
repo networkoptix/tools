@@ -13,12 +13,17 @@ ARGS=$($SCRIPT_PATH/args.sh $TOOL $LOG_FILE)
 
 export LD_LIBRARY_PATH=$MS_PATH/lib
 if [[ "$(uname -p)" == x86* ]]; then
-    MS_BIN=$MS_PATH/bin/mediaserver-bin
+    MS_BIN_ORIGINAL=$MS_PATH/bin/mediaserver-bin
 else
-    MS_BIN=$MS_PATH/bin/mediaserver
+    MS_BIN_ORIGINAL=$MS_PATH/bin/mediaserver
 fi
+
+# Get rid of capabilities.
+MS_BIN_VALGRIND=$MS_PATH/bin/mediaserver-valgrind
+cat $MS_BIN_ORIGINAL > $MS_BIN_VALGRIND
+chmod 755 $MS_BIN_VALGRIND
 
 echo Output redirect: $LOG_FILE.out
 set -x
-valgrind $ARGS $MS_BIN -e >$LOG_FILE.out 2>&1
+valgrind $ARGS $MS_BIN_VALGRIND -e >$LOG_FILE.out 2>&1
 
