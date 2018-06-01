@@ -66,8 +66,9 @@ export PYTEST_PLUGINS=junk_shop.pytest_plugin
 
 cd nx_vms/func_tests
 
-if [[ "$TEST_LIST" == "" ]]; then
-	pytest $(join_by ' ' ${OPTIONS[@]}) -k 'not windows' -k 'not smb'
-else
+if [[ "$TEST_LIST" =~ .*::.* ]]; then
+	# only include windows VMs if specific tests in module are requested
 	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST
+else
+	pytest $(join_by ' ' ${OPTIONS[@]}) -k 'not windows and not smb' $TEST_LIST
 fi
