@@ -1,6 +1,7 @@
 import logging
 import argparse
 from collections import namedtuple
+import time
 
 from pathlib2 import Path
 
@@ -22,8 +23,9 @@ def parse_and_save_results_to_db(work_dir, repository):
     print 'Parsing unit test results from %s:' % work_dir
     test_record_list = [produce_test_record(work_dir, test_name) for test_name in run_info.test_list]
     print 'Saving unit test results:'
+    t = time.time()
     passed = save_test_results(repository, run_info, test_record_list)
-    print 'Done.'
+    print 'Done in %r seconds.' % (time.time() - t)
     return passed
 
 def produce_test_record(work_dir, test_name):
