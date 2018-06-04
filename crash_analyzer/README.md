@@ -14,12 +14,12 @@ Linux and Windows Crash Report Analyzer
 
 - Download and install Python 3: <https://www.python.org>
 - Install required modules: `python -m pip install -r requirements.txt`
-- Install dump tool requirements:
-    - *7z* - Free ZIP extractor, download: <https://www.7-zip.org>
-    - *dark* - Wix extractor, part of Wix Toolset: <http://wixtoolset.org/releases>
-    - *cdb* - Windows Debugger (for report generation), part of Windows SDK:
+- Install dump tool requirements (executables should be on _PATH_):
+    - **7z** - Free ZIP extractor, download: <https://www.7-zip.org>
+    - **dark** - Wix extractor, part of Wix Toolset: <http://wixtoolset.org/releases>
+    - **cdb** - Windows Debugger (for report generation), part of Windows SDK:
       <https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk>
-    - *devenv* - Visual Studio (for developers only): <https://www.visualstudio.com>
+    - **devenv** - Visual Studio (for developers only): <https://www.visualstudio.com>
 - Make sure all of them available in environment variable `PATH`:
     - `C:\Program Files\7-Zip`
     - `C:\Program Files (x86)\WiX Toolset v3.11\bin`
