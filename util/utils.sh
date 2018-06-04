@@ -356,7 +356,14 @@ nx_restore_cursor_pos()
 
 nx_absolute_path() # path
 {
-    readlink -f "$1"
+    readlink -f -- "$1"
+}
+
+# Print file extension(s) without the trailing period, or nothing if there is no extension.
+nx_file_ext() # any-filename
+{
+    local -r FILENAME=$(basename -- "$1")
+    echo "${FILENAME##*.}" #< Remove prefix up to and including the last period.
 }
 
 # Change directory verbously, but only if the current dir is not the desired one.
@@ -440,6 +447,81 @@ nx_unix_path() # "$@"
 nx_fail_on_invalid_arguments()
 {
     nx_fail "Invalid arguments. Run with -h for help."
+}
+
+# Call diff having args logged. Better than `nx_verbose diff` because nx_echo trims paths with `~`.
+# Also checks that the last 2 arguments (if exist) do not refer to the same file.
+nx_diff()
+{
+    nx_echo "+ diff" "$@"
+
+    # Check that the last two args (if exist) do not refer to the same file.
+    if [[ $# -ge 2 ]]
+    then
+        local -r FILE1=$(nx_absolute_path "${@:$#-1}")
+        local -r FILE2=$(nx_absolute_path "${@:$#-0}")
+        if [[ ! -z $FILE1 && $FILE1 == $FILE2 ]]
+        then
+            nx_fail "INTERNAL ERROR: Attempt to diff a file with itself: [$FILE1]"
+        fi
+    fi
+
+    diff "$@"
+}
+
+# Silently unpack archive of auto-detected type. If directory is not specified, it will be
+# (re)created with the same name as the archive but without extension.
+# [out] DIR Directory to which the archive was unpacked.
+nx_unpack_archive_DIR() # archive-filename [directory]
+{
+    local -r ARCHIVE=$(nx_absolute_path "$1")
+    local -r EXT=$(nx_file_ext "$ARCHIVE")
+
+    if [[ $# -ge 2 ]]
+    then
+        DIR="$2"
+    else
+        DIR="${ARCHIVE%.$EXT}"
+        DIR="${DIR%.tar}" #< Remove the preceding ".tar" (if any).
+    fi
+
+    rm -rf "$DIR" || return $?
+    mkdir -p "$DIR" || return $?
+
+    local -i SUCCESS=1
+    nx_pushd "$DIR"
+
+    case "$EXT" in
+        zip)
+            unzip -q "$ARCHIVE" >/dev/null || SUCCESS=0
+            ;;
+        xz|gz|tgz)
+            tar xf "$ARCHIVE" >/dev/null || SUCCESS=0
+            ;;
+        deb)
+            (ar x "$ARCHIVE" \
+                && nx_unpack_archive_and_delete control.tar.gz \
+                && nx_unpack_archive_and_delete data.tar.xz \
+            ) || SUCCESS=0
+            ;;
+        *)
+            nx_fail "Unsupported archive extension: .$EXT."
+            ;;
+    esac
+
+    nx_popd
+    if [[ $SUCCESS = 0 ]]
+    then
+        nx_fail "Unpacking .$EXT failed, see above."
+    fi
+}
+
+nx_unpack_archive_and_delete() # archive-filename
+{
+    local -r ARCHIVE="$1"; shift
+
+    local DIR
+    nx_unpack_archive_DIR "$ARCHIVE" && rm -rf "$ARCHIVE"
 }
 
 nx_telnet() # user password host port terminal_title background_rrggbb [command [args...]]
@@ -601,7 +683,7 @@ nx_find_files() # FILES_ARRAY_VAR find_args...
 }
 
 # Search for the file inside the given dir via 'find'. If more than one file is found, fail with
-# the message including the file list.
+# the message including the file list. If the file is not found, fail with a message.
 nx_find_file() # FILE_VAR file_description_for_error_message dir find_args...
 {
     local FILE_VAR="$1"; shift
@@ -621,6 +703,30 @@ nx_find_file() # FILE_VAR file_description_for_error_message dir find_args...
     fi
 
     eval "$FILE_VAR=\${FILES[0]}"
+}
+
+# Search for the file inside the given dir via 'find'. If more than one file is found, fail with
+# the message including the file list. If the file is not found, return 1.
+nx_find_file_optional() # FILE_VAR file_description_for_error_message dir find_args...
+{
+    local FILE_VAR="$1"; shift
+    local FILE_DESCRIPTION="$1"; shift
+    local FILE_LOCATION="$1"; shift
+
+    local FILES=()
+    nx_find_files FILES "$FILE_LOCATION" "$@"
+
+    # Make sure "find" returned exactly one file.
+    if [ ${#FILES[*]} = 0 ]; then
+        return 1
+    fi
+    if [ ${#FILES[*]} -gt 1 ]; then
+        nx_fail "Found ${#FILES[*]} files for $FILE_DESCRIPTION matching [$@] in $FILE_LOCATION:" \
+            "${FILES[@]}"
+    fi
+
+    eval "$FILE_VAR=\${FILES[0]}"
+    return 0
 }
 
 # If the specified variable is not set, scan from the current dir upwards up to but not including
@@ -717,7 +823,7 @@ nx_detail_on_exit()
     return $RESULT
 }
 
-# Call after sourcing this script.
+# To be called after sourcing this script.
 nx_run()
 {
     trap nx_detail_on_exit EXIT
