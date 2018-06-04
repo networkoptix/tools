@@ -17,8 +17,7 @@
     job-timeout-minutes: 420  # 7 hours
     # junk-shop-host: '10.0.0.113'
 
-    # Currently run on remote (burbank) host.
-    # Junk-shop db host is mapped using 'ssh -R 5432:megatron:5432' by agent launch script.
+    # See extra/burbank-node-readme.txt for explanation
     junk-shop-host: localhost
 
     jobs:
