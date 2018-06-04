@@ -3,8 +3,10 @@ node_exporter_version: 0.15.2
 node_exporter_web_listen_address: "0.0.0.0:9100"
 
 node_exporter_enabled_collectors:
+  - diskstats:
+      ignored-devices: "^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+$"
   - filesystem:
-      ignored-mount-points: "^/(sys|proc|dev)($|/)"
+      ignored-mount-points: "^/(sys|proc|dev|mnt|var/lib/packer/drivers)($|/)"
       ignored-fs-types: "^(sys|proc|auto)fs$"
   - systemd
   - diskstats
