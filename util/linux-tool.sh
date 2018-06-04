@@ -305,7 +305,11 @@ do_gen() # [cache] "$@"
     esac
 
     local -i CACHE_ARG=0
-    [ "$1" = "cache" ] && { shift; CACHE_ARG=1; }
+    if [[ $# -ge 1 && $1 = "cache" ]]
+    then
+        shift
+        CACHE_ARG=1
+    fi
 
     if [ -d "$BUILD_DIR" ]
     then
@@ -1086,27 +1090,27 @@ printRepos()
 {
     cd "$DEVELOP_DIR"
 
-    local -A REPO_TO_BRANCH #< map<repo_dir, branch>
-    local -A REPO_TO_EXTRA #< map<repo_dir, extra_info_if_any>
+    local -A REPO_TO_BRANCH=() #< map<repo_dir, branch>
+    local -A REPO_TO_EXTRA=() #< map<repo_dir, extra_info_if_any>
     scanRepos_REPO_TO_BRANCH_and_REPO_TO_EXTRA
 
     # Set REPOS to sorted list of repos formed of REPO_TO_BRANCH keys.
     IFS=$'\n' eval 'local REPOS=( $(sort <<<"${!REPO_TO_BRANCH[*]}") )'
     nx_log_array REPOS
 
-    local -A REPO_TO_BUILD_DIRS #< map<repo_dir, list<cmake_build_dir>>
-    local -A BUILD_DIR_TO_CONFIG #< map<cmake_build_dir, build_configuration>.
+    local -A REPO_TO_BUILD_DIRS=() #< map<repo_dir, list<cmake_build_dir>>
+    local -A BUILD_DIR_TO_CONFIG=() #< map<cmake_build_dir, build_configuration>.
     local OTHER_DIRS=() #< Mon-cmake-build-dirs which names start with any repo name.
     scanRepos_REPO_TO_BUILD_DIRS_and_BUILD_DIR_TO_CONFIG_and_OTHER_DIRS "${REPOS[@]}"
 
-    local -A REPO_TO_SHARED_BASE #< map<repo_dir, hg_share_base_dir>
+    local -A REPO_TO_SHARED_BASE=() #< map<repo_dir, hg_share_base_dir>
     populate_REPO_TO_SHARED_BASE "${REPOS[@]}"
 
     # Print repo dirs.
     for REPO in "${REPOS[@]}"
     do
         local BUILD_DIR_STR=""
-        if [ ! -z "${REPO_TO_BUILD_DIRS[$REPO]}" ]
+        if [ "${REPO_TO_BUILD_DIRS[$REPO]+is_set}" ]
         then
             local DIRS=( ${REPO_TO_BUILD_DIRS[$REPO]} ) #< Split by spaces into array.
             local DIR
@@ -1127,13 +1131,13 @@ printRepos()
         fi
 
         local EXTRA_STR=""
-        if [ ! -z "${REPO_TO_EXTRA[$REPO]}" ]
+        if [ "${REPO_TO_EXTRA[$REPO]+is_set}" ]
         then
             EXTRA_STR=" $(nx_lgray)[${REPO_TO_EXTRA["$REPO"]}]"
         fi
 
         local SHARED_BASE_STR=""
-        if [ ! -z "${REPO_TO_SHARED_BASE["$REPO"]}" ]
+        if [ "${REPO_TO_SHARED_BASE["$REPO"]+is_set}" ]
         then
             SHARED_BASE_STR="$(nx_dcyan)($(nx_lgray)${REPO_TO_SHARED_BASE["$REPO"]}$(nx_dcyan))"
         fi
