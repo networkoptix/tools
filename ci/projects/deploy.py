@@ -53,7 +53,7 @@ class Deployer(object):
         self._deploy_distributives(platform_config, customization, platform_build_info, src_dir, target_dir)
         self._deploy_updates(platform_config, customization, platform_build_info, src_dir, target_dir)
         self._deploy_unit_tests(platform_config, customization, platform, platform_build_info, src_root_dir, target_dir)
-        self._deploy_qtpdb(platform_config, customization, platform, platform_build_info, src_dir, target_dir)
+        self._deploy_qtpdb(platform_config, customization, platform, platform_build_info, src_root_dir, target_dir)
         self._deploy_misc(platform_config, customization, platform, platform_build_info, src_root_dir, target_dir)
 
     def _deploy_distributives(self, platform_config, customization, platform_build_info, src_dir, target_root_dir):
@@ -68,8 +68,9 @@ class Deployer(object):
         for name in platform_build_info.typed_artifact_list.get('update', []):
             self._put_file(src_dir, target_dir, name)
 
-    def _deploy_qtpdb(self, platform_config, customization, platform, platform_build_info, src_dir, target_root_dir):
+    def _deploy_qtpdb(self, platform_config, customization, platform, platform_build_info, src_root_dir, target_root_dir):
         # to <build-num>-<branch>/dev/qtpdb/<platform>
+        src_dir = os.path.join(src_root_dir, 'qtpdb', customization, platform)
         target_dir = os.path.join(target_root_dir, 'dev', 'qtpdb', platform)
         for name in platform_build_info.typed_artifact_list.get('qtpdb', []):
             self._put_file(src_dir, target_dir, name)

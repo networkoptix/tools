@@ -310,7 +310,7 @@ class BuildProject(NxVmsProject):
                     yield UnstashCommand(name, dir, ignore_missing=True)
 
     def _make_artifact_subdir(self, t, customization, platform):
-        if t in ['unit_tests', 'misc']:
+        if t in ['qtpdb', 'unit_tests', 'misc']:
             return os.path.join(t, customization, platform)
         if self.must_store_artifacts_in_different_customization_dirs:
             return customization
