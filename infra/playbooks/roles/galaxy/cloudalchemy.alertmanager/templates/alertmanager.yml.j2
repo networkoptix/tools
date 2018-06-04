@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+
+global:
+  resolve_timeout: {{ alertmanager_resolve_timeout }}
+{% for key, value in alertmanager_smtp.items() %}
+  smtp_{{ key }}: {{ value }}
+{% endfor %}
+{% if alertmanager_slack_api_url != '' %}
+  slack_api_url: {{ alertmanager_slack_api_url }}
+{% endif %}
+{% if alertmanager_pagerduty_url != '' %}
+  pagerduty_url: {{ alertmanager_pagerduty_url }}
+{% endif %}
+{% if alertmanager_opsgenie_api_host != '' %}
+  opsgenie_api_host: {{ alertmanager_opsgenie_api_host }}
+{% endif %}
+{% if alertmanager_hipchat_url != '' %}
+  hipchat_url: {{ alertmanager_hipchat_url }}
+{% endif %}
+{% if alertmanager_hipchat_auth_token != '' %}
+  hipchat_auth_token: {{ alertmanager_hipchat_auth_token }}
+{% endif %}
+templates:
+- '/etc/alertmanager/templates/*.tmpl'
+{% if alertmanager_receivers != [] %}
+receivers:
+{{ alertmanager_receivers | to_nice_yaml(indent=2) }}
+{% endif %}
+{% if alertmanager_inhibit_rules != [] %}
+inhibit_rules:
+{{ alertmanager_inhibit_rules | to_nice_yaml(indent=2) }}
+{% endif %}
+route:
+  {{ alertmanager_route | to_nice_yaml(indent=2) | indent(2, False) }}
+{% if alertmanager_child_routes != [] %}
+  routes:
+  {{ alertmanager_child_routes | to_nice_yaml(indent=2) | indent(2, False) }}
+{% endif %}

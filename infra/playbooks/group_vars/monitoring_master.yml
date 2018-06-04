@@ -1,9 +1,20 @@
 prometheus_web_external_url: "http://{{ ansible_ssh_host }}:9090"
 
+prometheus_alertmanager_config:
+  - scheme: http
+    static_configs:
+      - targets:
+        - "{{ ansible_ssh_host }}:9093"
+
 prometheus_targets:
   node:
   - targets:
-      "{{ groups['all'] | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9100') | list }}"
+      "{{ groups['all'] | difference(groups['build_vm_win']) | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9100') | list }}"
+    labels:
+      env: monitoring
+  alertmanager:
+  - targets:
+    - "{{ ansible_ssh_host }}:9093"
     labels:
       env: monitoring
   grafana:
@@ -18,6 +29,11 @@ prometheus_scrape_configs:
   static_configs:
   - targets:
       "{{ groups['build_vm_win'] | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9182') | list }}"
+- job_name: "libvirt_nodes"
+  metrics_path: "/metrics"
+  static_configs:
+  - targets:
+      "{{ groups['libvirt_host'] | map('extract', hostvars, ['node_exporter_address']) | map('regex_replace', '$', ':9177') | list }}"
 - job_name: "prometheus"
   metrics_path: "/metrics"
   static_configs:
@@ -31,6 +47,51 @@ prometheus_scrape_configs:
   file_sd_configs:
   - files:
     - "/etc/prometheus/file_sd/grafana.yml"
+- job_name: "alertmanager"
+  file_sd_configs:
+  - files:
+    - "/etc/prometheus/file_sd/alertmanager.yml"
+
+prometheus_alert_rules:
+  - alert: InstanceDown
+    expr: "up == 0"
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} down{% endraw %}"
+  - alert: CriticalCPULoad
+    expr: '(100 * (1 - avg(irate(node_cpu{job="node",mode="idle"}[5m])) BY (instance))) > 96'
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has Critical CPU load for more than 2 minutes.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} - Critical CPU load{% endraw %}"
+  - alert: CriticalRAMUsage
+    expr: '(1 - ((node_memory_MemFree + node_memory_Buffers + node_memory_Cached) / node_memory_MemTotal)) * 100 > 98'
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} has Critical Memory Usage more than 5 minutes.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} has Critical Memory Usage{% endraw %}"
+  - alert: CriticalDiskSpace
+    expr: 'node_filesystem_free{job="node",filesystem!~"^/run(/|$)"} / node_filesystem_size{job="node"} < 0.1'
+    for: 4m
+    labels:
+      severity: critical
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} - Critical disk space usage{% endraw %}"
+  - alert: RebootRequired
+    expr: "node_reboot_required > 0"
+    labels:
+      severity: warning
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} requires a reboot.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} - reboot required{% endraw %}"
 
 grafana_security:
   admin_user: admin
@@ -56,15 +117,58 @@ grafana_datasources:
 # You can find information about dashboards and its revisions
 # on https://grafana.com/dashboards page,
 grafana_dashboards:
-  # Node Exporter Full dashboard
-  - dashboard_id: '1860'
-    revision_id: '11'     # node exporter dashboard last revision
+  # Node ExporterFull
+  - dashboard_id: '1860'  # dashboardId
+    revision_id: '11'     # node exporter full dashboard last revision
+    datasource: '{{ prometheus_grafana_datasource }}'
+  # Node Exporter Server Metrics
+  - dashboard_id: '405'  # dashboardId
+    revision_id: '6'     # Node Exporter Server Metrics dashboard last revision
+    datasource: '{{ prometheus_grafana_datasource }}'
+  # Node Exporter (pre 0.16.0)
+  - dashboard_id: '718'  # dashboardId
+    revision_id: '1'     # node exporter (0.16.0) dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'
   # Overview of metrics from Prometheus 2.0
-  - dashboard_id: '3662'
+  - dashboard_id: '3662'  # dashboardId
     revision_id: '2'      # Prometheus metrics dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'
   # Windows Node dashboard
-  - dashboard_id: '2129'
-    revision_id:  '3'     # windows node dashboard last revision
+  - dashboard_id: '2129'  # dashboardId
+    revision_id:  '3'     # Windows node dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'
+#  # Libvirt
+#  - dashboard_id: '3928'  # dashboardId
+#    revision_id:  '1'     # Libvirt dashboard last revision
+#    datasource: '{{ prometheus_grafana_datasource }}'
+
+# Prometheus alertmanager configuration
+alertmanager_external_url: "http://{{ ansible_ssh_host }}:9093"
+
+alertmanager_smtp:
+   # The default SMTP From header field.
+  from: 'alertmanager@networkoptix.com'
+  # The default SMTP smarthost used for sending emails, including port number.
+  # Port number usually is 25, or 587 for SMTP over TLS (sometimes referred to as STARTTLS).
+  # Example: smtp.example.org:587
+  smarthost: '{{ prometheus_alertmanager_smtp_smarthost }}'
+  # The default hostname to identify to the SMTP server.
+  auth_username: '{{ prometheus_alertmanager_smtp_auth_username }}'
+  # SMTP Auth using LOGIN and PLAIN.
+  auth_password: '{{ prometheus_alertmanager_smtp_auth_password }}'
+  # The default hostname to identify to the SMTP server.
+  hello: "{{ ansible_ssh_host }}"
+
+
+alertmanager_receivers:
+  - name: email
+    email_configs:
+    - to: 'anikitin@networkoptix.com'
+    - to: 'iremizov@networkoptix.com'
+
+alertmanager_route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: email

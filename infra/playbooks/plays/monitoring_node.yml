@@ -6,3 +6,5 @@
 
   roles:
   - role: cloudalchemy.node-exporter
+  - role: libvirt_exporter
+    when:  groups['libvirt_host']

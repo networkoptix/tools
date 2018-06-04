@@ -10,6 +10,7 @@
 
   vars_files:
   - ../secrets/grafana.yml
+  - ../secrets/prometheus_alertmanager.yml
 
   roles:
   - role: libvirt_guest
@@ -23,5 +24,8 @@
     become: true
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: cloudalchemy.grafana
+    become: true
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: cloudalchemy.alertmanager
     become: true
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
