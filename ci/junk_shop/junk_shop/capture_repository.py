@@ -3,7 +3,9 @@ import re
 import bz2
 import logging
 import threading
+from collections import namedtuple
 
+from cached_property import cached_property
 from pony.orm import db_session, commit, flush, select, desc, raw_sql
 
 from .utils import SimpleNamespace, datetime_utc_now, param_to_bool
@@ -334,23 +336,43 @@ class DbCaptureRepository(object):
             is_leaf = i == len(path_list) - 1
             yield (path, name, is_leaf)
 
+    @cached_property
+    @db_session
+    def _prev_tests_outcomes(self):
+        build_count_limit = 10
+        project = models.Project.get(name=self.build_parameters.project)
+        branch = models.Branch.get(name=self.build_parameters.branch)
+        build_set = set(select(
+            build for build in models.Build
+            if build.build_num < self.build_parameters.build_num
+            and build.project==project
+            and build.branch==branch)
+                            .order_by(desc(models.Build.build_num))[:build_count_limit])
+        outcome_dict = {}  # (platform_name, test_path) -> (build_num, outcome)
+        for build_num, platform_name, test_path, outcome in select(
+                (build.build_num, run.root_run.platform.name, run.test.path, run.outcome) for
+                build in models.Build
+                for run in models.Run
+                if
+                build in build_set and
+                run.root_run.build is build):
+            key = (platform_name, test_path)
+            value = outcome_dict.get(key)
+            if value:
+                num, _ = value
+                if num > build_num:
+                    continue  # keep most recent build
+            outcome_dict[key] = (build_num, outcome)
+        return outcome_dict
+
     def _pick_prev_outcome(self, this_run):
         if not this_run.root_run or not this_run.root_run.build:
             return None
-        prev_run = select(prev_run
-                          for prev_run in models.Run
-                          for this_build in models.Build
-                          for prev_build in models.Build if
-                          this_run.root_run.build is this_build and
-                          prev_run.root_run.build is prev_build and
-                          prev_build.project is this_build.project and
-                          prev_build.branch is this_build.branch and
-                          prev_build.build_num < this_build.build_num and
-                          prev_run.root_run.platform is this_run.root_run.platform and
-                          prev_run.test is this_run.test).order_by(desc(1)).first()
-        if not prev_run:
+        value = self._prev_tests_outcomes.get((this_run.root_run.platform.name, this_run.test.path))
+        if not value:
             return None
-        return prev_run.outcome
+        build_num, outcome = value
+        return outcome
 
     def add_artifact(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
         assert run
