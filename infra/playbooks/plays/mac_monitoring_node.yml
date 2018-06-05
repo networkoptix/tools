@@ -1,4 +1,4 @@
-# it's just a helper to setup only node exporter to MacOS hosts
+# It's just a helper to setup only node exporter to macOS hosts
 - name: Setup macOS monitoring node
   hosts: build_mac
   gather_facts: yes

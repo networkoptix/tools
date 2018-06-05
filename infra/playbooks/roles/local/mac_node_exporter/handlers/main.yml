@@ -3,17 +3,23 @@
   register: service_list
   changed_when: false
   check_mode: no
+  become: True
+  become_user: root
   listen: restart node exporter
 
 - name: Unload Node exporter service
   command: >-
-    launchctl unload {{ ansible_env.HOME }}/Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+    launchctl unload /Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+  become: True
+  become_user: root
   listen: restart node exporter
   when: >-
     node_exporter_service_name in service_list.stdout
 
 - name: Load Node Exporter service
   command: >-
-     launchctl load {{ ansible_env.HOME }}/Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+     launchctl load /Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+  become: True
+  become_user: root
   listen: restart node exporter
 

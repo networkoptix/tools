@@ -4,3 +4,5 @@ go_arch_map:
   aarch64: arm64
   armv7l: armv7
   armv6l: armv6
+
+node_exporter_archive_name: "node_exporter-{{ node_exporter_version }}.darwin-{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}"
