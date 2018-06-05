@@ -23,6 +23,8 @@ prometheus_targets:
     labels:
       env: monitoring
 
+# Prometheus alerting rules
+# https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
 prometheus_scrape_configs:
 - job_name: "windows"
   metrics_path: "/metrics"
@@ -137,13 +139,10 @@ grafana_dashboards:
   - dashboard_id: '2129'  # dashboardId
     revision_id:  '3'     # Windows node dashboard last revision
     datasource: '{{ prometheus_grafana_datasource }}'
-#  # Libvirt
-#  - dashboard_id: '3928'  # dashboardId
-#    revision_id:  '1'     # Libvirt dashboard last revision
-#    datasource: '{{ prometheus_grafana_datasource }}'
 
 # Prometheus alertmanager configuration
-alertmanager_external_url: "http://{{ ansible_ssh_host }}:9093"
+# https://prometheus.io/docs/alerting/configuration/
+alertmanager_external_url: "http://{{ ansible_ssh_host }}:9093" # Alertmanager UI
 
 alertmanager_smtp:
    # The default SMTP From header field.
@@ -156,19 +155,27 @@ alertmanager_smtp:
   auth_username: '{{ prometheus_alertmanager_smtp_auth_username }}'
   # SMTP Auth using LOGIN and PLAIN.
   auth_password: '{{ prometheus_alertmanager_smtp_auth_password }}'
-  # The default hostname to identify to the SMTP server.
-  hello: "{{ ansible_ssh_host }}"
 
 
 alertmanager_receivers:
-  - name: email
+  - name: email  # The unique name of the receiver.
+    # Configurations for several notification integrations.
     email_configs:
     - to: 'anikitin@networkoptix.com'
     - to: 'iremizov@networkoptix.com'
 
+# The root node of the routing tree.
 alertmanager_route:
-  group_by: ['alertname', 'cluster', 'service']
+  group_by: ['alertname', 'cluster']
+  # How long to initially wait to send a notification for a group
+  # of alerts. Allows to wait for an inhibiting alert to arrive or collect
+  # more initial alerts for the same group. (Usually ~0s to few minutes.)
   group_wait: 30s
+  # How long to wait before sending a notification about new alerts that
+  # are added to a group of alerts for which an initial notification has
+  # already been sent. (Usually ~5m or more.)
   group_interval: 5m
+  # How long to wait before sending a notification again if it has already
+  # been sent successfully for an alert. (Usually ~3h or more).
   repeat_interval: 4h
   receiver: email
