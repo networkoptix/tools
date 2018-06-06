@@ -16,6 +16,7 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.6.2-2"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
+: ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
 if nx_is_cygwin
 then
     : ${CMAKE_GEN=""}
@@ -344,10 +345,13 @@ do_gen() # [cache] "$@"
     local DISTRIB_ARG=""
     [[ $DISTRIB == 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
 
+    local DEV_ARG=""
+    [[ $DEV == 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
+
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
-        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG "$@"
+        $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG $DEV_ARG "$@"
     local RESULT=$?
 
     nx_popd
