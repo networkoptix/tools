@@ -66,7 +66,7 @@ process_file()
 
 #---------------------------------------------------------------------------------------------------
 
-help()
+help_callback()
 {
     cat <<EOF
 Utility to patch a binary file to replace the hard-coded Cloud Host.
