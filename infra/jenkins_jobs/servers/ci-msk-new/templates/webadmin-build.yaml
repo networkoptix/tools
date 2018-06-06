@@ -37,14 +37,19 @@
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE
-    - p_CLEAN_BUILD
+    - p_CLEAN_BUILD:
+        default: false
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
 
     wrappers:
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - inject:
+        properties-content: |
+          BRANCH={branch}
+          PIPELINE={pipeline}
+          PLATFORM=universal
+          CUSTOMIZATION=default
     - timestamps
     - timeout:
         # normally, should complete in 7-15 min
@@ -53,25 +58,28 @@
         type: absolute
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
-    - copy-hg-repo(2):
-        name_1: nx_vms
-        name_2: devtools
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        # 'build-name' wrapper wil set build name after all wrappers applied,
+        # this approach will set build name earlier
+        - build-name-setter:
+            template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+            macro: true
+        - copy-hg-repo:
+            name: nx_vms
+        - copy-hg-repo:
+            name: devtools
 
     scm:
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: devtools
         branch-name: default
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: nx_vms
         branch-name: $NX_VMS_COMMIT
 
     builders:
-    - inject:
-        properties-content: |
-          BRANCH={branch}
-          PIPELINE={pipeline}
-          PLATFORM=universal
-          CUSTOMIZATION=default
     - inject:
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}

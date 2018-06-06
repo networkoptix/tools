@@ -34,11 +34,14 @@
         fail: true
         type: absolute
     - workspace-cleanup
-    - copy-hg-repo(1):
-        name: devtools
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - copy-hg-repo:
+            name: devtools
 
     scm:
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: devtools
         branch-name: default
 

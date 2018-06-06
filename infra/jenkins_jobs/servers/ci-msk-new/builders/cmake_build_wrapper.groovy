@@ -11,7 +11,17 @@ def ARGUMENTS = []
 def ENVIRON = [:]
 
 def CMAKE_BUILD_THREADS = (env.get("CMAKE_BUILD_THREADS") ?: "20")
-ARGUMENTS.addAll(["--build", ".", "--", "-j", CMAKE_BUILD_THREADS])
+def GENERATOR = (env.get("CMAKE_GENERATOR") ?: "")
+// FIXME: This binding is probably incorrect, but it looks like we pick correct value here
+def CMAKE_BUILD_TYPE = (env.get("CMAKE_ARG_CMAKE_BUILD_TYPE") ?: "Release")
+
+ARGUMENTS.addAll(["--build", ".", "--config", CMAKE_BUILD_TYPE.capitalize()])
+
+if (GENERATOR == "Ninja") {
+    ARGUMENTS.addAll( ["--", "-j", CMAKE_BUILD_THREADS])
+} else {
+    ARGUMENTS.addAll([])
+}
 
 // Build environ
 def INHERIT_ENVIRON = (env.get("INHERIT_ENVIRON") ?: "false").toBoolean()

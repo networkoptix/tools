@@ -17,14 +17,21 @@
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE
-    - p_CLEAN_BUILD
+    - p_CLEAN_BUILD:
+        default: false
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
 
     wrappers:
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    # - build-name:
+    #     name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          CUSTOMIZATION={customization}
+          PLATFORM={platform}
+          BRANCH={branch}
     - timestamps
     - timeout:
         # normally, should complete in 7-30 min
@@ -37,18 +44,27 @@
     # STAGE: PRE-SCM
     # ========================================
 
-    - copy-hg-repo(2):
-        name_1: nx_vms
-        name_2: devtools
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        # 'build-name' wrapper wil set build name after all wrappers applied,
+        # this approach will set build name earlier
+        - build-name-setter:
+            template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+            macro: true
+        - copy-hg-repo:
+            name: nx_vms
+        - copy-hg-repo:
+            name: devtools
 
     # STAGE: SCM
     # ========================================
 
     scm:
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: devtools
         branch-name: default
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: nx_vms
         branch-name: $NX_VMS_COMMIT
 
@@ -130,12 +146,12 @@
     # STAGE: BUILD
     # ========================================
 
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={customization}
-          PLATFORM={platform}
-          BRANCH={branch}
+    # - inject:
+    #     properties-content: |
+    #       PIPELINE={pipeline}
+    #       CUSTOMIZATION={customization}
+    #       PLATFORM={platform}
+    #       BRANCH={branch}
     - inject:
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
@@ -157,17 +173,15 @@
         properties-content: |
           CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/server-external
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
-          CMAKE_SOURCEDIR=../nx_vms
-          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+          CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
           CMAKE_ENV_environment=$WORKSPACE
-          environment=$WORKSPACE
     - inject:
         properties-content: |
           WORKDIR=$WORKSPACE/build
           EXECUTABLE=cmake
           EXECUTABLE_IS_RELPATH=false
           LOGFILE=build/cmake-configure-{customization}.log
-          INHERIT_ENVIRON=true
+          CMAKE_ENV_PATH=$PATH
     - groovy:
         version: '{groovy-version}'
         command: !include-raw-escape: ../builders/cmake_configure_wrapper.groovy
@@ -182,7 +196,7 @@
           CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_ENV_environment=$WORKSPACE
-          INHERIT_ENVIRON=true
+          CMAKE_ENV_PATH=$PATH
     - groovy:
         version: '{groovy-version}'
         command: !include-raw-escape: ../builders/cmake_build_wrapper.groovy

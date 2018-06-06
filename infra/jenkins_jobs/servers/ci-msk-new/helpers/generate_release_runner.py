@@ -85,6 +85,8 @@ print '''#
         template: '[${{BUILD_ID}}] ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
         macro: true
 
+    # TODO: we don't need to build w/a for macOS. But it's not enough to disable it here
+    # because w/a artifact is mandatory in build installers..
     - multijob:
         name: Build web admin
         projects:
@@ -111,6 +113,9 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
 
         if platform == "edge1" and customization != "digitalwatchdog":
             continue
+        # TODO: ios and android have own release cycles and branches, need to extract in other project
+        if platform in ['ios', 'android-arm']:
+            continue
 
         print '''
         - name: '{pipeline}.{branch}.vms.installer.'''+platform+'''.'''+customization+'''.all'
@@ -130,4 +135,10 @@ print '''
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - set-build-description
+
+    publishers:
+    - archive:
+        artifacts: '*.envvar'
+        allow-empty: 'false'
+        fingerprint: true
 '''

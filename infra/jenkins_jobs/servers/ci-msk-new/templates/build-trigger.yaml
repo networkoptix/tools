@@ -6,6 +6,7 @@
     concurrent: true
 
     timer: ''  # no timed trigger by default
+    clean-build: '' # false by default
 
     properties:
     - heavy-job:
@@ -28,12 +29,19 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - p_CLEAN_BUILD
+    - p_CLEAN_BUILD:
+        default: '{clean-build}'
+    - bool:
+        name: FREEZE_COMMIT_NOW
+        default: false
+        description: Freeze nx_vms commit right now, don't wait for starting builds
 
     triggers:
     - timed: "{timer}"
 
     wrappers:
+    # - build-name:
+    #     name: '[${{BUILD_ID}}] ?????'  # TODO: what to put here?
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
@@ -43,6 +51,40 @@
           BRANCH={branch}
           PIPELINE={pipeline}
 
+    # Runner itself may freeze commits (when runner is triggereddirectly)
+    # But we want to allow users to freeze commit by the time this job is triggered
+
+    # inject given ref at first
+    - inject:
+        properties-content: |
+          NX_VMS_COMMIT=$_NX_VMS_COMMIT
+
+    # freeze if needed and overwrite
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
+        steps:
+        - trigger-builds:
+          - project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+            block: true
+            predefined-parameters: |
+              REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+              NX_VMS_COMMIT=$NX_VMS_COMMIT
+        - copyartifact:
+            project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+            filter: 'NX_VMS_COMMIT.envvar'
+            which-build: last-successful
+            parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+        - inject:
+            properties-file: 'NX_VMS_COMMIT.envvar'
+
+
+    - build-name-setter:
+        template: '[${{BUILD_ID}}] {branch}@${{NX_VMS_COMMIT}}'
+        macro: true
+    - description-setter:
+        description: $PLATFORMS $CUSTOMIZATIONS for $_NX_VMS_COMMIT
+
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
     # Anyway this graph is available in runner
@@ -51,11 +93,26 @@
         predefined-parameters: |
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
-          _NX_VMS_COMMIT=$_NX_VMS_COMMIT
+          _NX_VMS_COMMIT=$NX_VMS_COMMIT
           CLEAN_BUILD=$CLEAN_BUILD
         block: true
         block-thresholds:
           failure-threshold: FAILURE
+
+    - copyartifact:
+        project: '{pipeline}.{branch}.vms.runner'
+        filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
+        which-build: downstream-build
+        upstream-project-name: '$JOB_NAME'
+        upstream-build-number: '$BUILD_ID'
+
+    - inject:
+        properties-file: 'NX_VMS_COMMIT.envvar'
+    - inject:
+        properties-file: 'BUILD_IDENTITY.envvar'
+    - build-name-setter:
+        template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+        macro: true
 
     publishers:
     - completed-email

@@ -32,7 +32,7 @@
     parameters:
     - bool:
         name: CLEAN_BUILD
-        default: false
+        default: '{default}'
         description: >
           Don't reuse build workspace from previous build
           (if false, then will try to reuse)

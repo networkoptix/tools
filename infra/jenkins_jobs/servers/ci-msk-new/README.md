@@ -57,8 +57,8 @@ This strategy allow to restrict user actions even for triggering particular buil
 
 In revealed matrix
 
-* allow "Authenticated Users" to do everything.
-* allow "admin" to do everything (just in case..)
+- allow "Authenticated Users" to do everything.
+- allow "admin" to do everything (just in case..)
 
 Now it's safe to save.
 
@@ -87,13 +87,13 @@ sudo chown -R infra:infra /mnt-stub/infra
 sudo chmod 2775 /mnt-stub/infra/
 
 sudo chmod -R g+w /mnt-stub/infra/
-sudo usermod -a -G infra YOUR_USER_NAME
+sudo usermod -a -G infra $YOUR_USER_NAME
 ```
 
 from real prod server (for example, alpha)
 
 ```
-rsync -av /mnt/infra/cached-hg/ iremizov@10.0.0.158:/mnt-stub/infra/cached-hg/
+rsync -av /mnt/infra/cached-hg/ $YOUR_USER_NAME@10.0.0.158:/mnt-stub/infra/cached-hg/
 ```
 
 # Configuring email notifications

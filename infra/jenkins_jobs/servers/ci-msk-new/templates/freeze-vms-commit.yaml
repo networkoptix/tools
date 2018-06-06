@@ -32,11 +32,14 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    - copy-hg-repo(1):
-        name: nx_vms
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - copy-hg-repo:
+            name: nx_vms
 
     scm:
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: nx_vms
         branch-name: '$NX_VMS_COMMIT'
 

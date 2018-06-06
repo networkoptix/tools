@@ -47,15 +47,19 @@
       - username-password:
           credential-id: junk_shop_db
           variable: junk_shop_db_credentials
-    - copy-hg-repo(2):
-        name_1: nx_vms
-        name_2: devtools
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - copy-hg-repo:
+            name: nx_vms
+        - copy-hg-repo:
+            name: devtools
 
     scm:
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: devtools
         branch-name: default
-    - hg-la-anon:
+    - '{hg-pull-macro}':
         project-name: nx_vms
         branch-name: $NX_VMS_COMMIT
 

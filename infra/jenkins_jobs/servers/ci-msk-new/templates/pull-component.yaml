@@ -33,6 +33,8 @@
     - p_SSH_USER
 
     wrappers:
+    - build-name:
+        name: '[${{BUILD_ID}}] ${{BUILD_IDENTITY}} ${{PLATFORM}} ${{CUSTOMIZATION}}'
     - timestamps
     - timeout:
         # normally, should complete in 5-10 min

@@ -27,6 +27,8 @@
         description: Set build number instead of incrementing previous
 
     wrappers:
+    - build-name:
+        name: '[${{BUILD_ID}}]'  # will be filled later
     - timestamps
     - timeout:
         # normally, should complete in 1-2 min

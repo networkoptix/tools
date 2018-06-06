@@ -40,7 +40,7 @@
         recipients: '{email-recipients}'
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         body: |
-          $BRANCH $PLATFORM $CUSTOMIZATION fixed witj commit $NX_VMS_COMMIT
+          $BRANCH $PLATFORM $CUSTOMIZATION fixed with commit $NX_VMS_COMMIT
           Thanks, everyone.
         # ---- email contents ----
 

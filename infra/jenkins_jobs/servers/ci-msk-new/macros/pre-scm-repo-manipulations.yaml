@@ -1,95 +1,33 @@
-- wrapper:
-    name: copy-hg-repo(2)
-    # This wrapperhelps with hg repo juggling
-    # We are experiencing significant problems with repo checkout
-    # since mercurial always pulls entire repo.
-
-    # in logic below we are keeping some cached hg repo and use it
-    # for clean checkout.
-    # this may save us up to 40min of pulling.
-
-    wrappers:
-    - pre-scm-buildstep:
-        failOnError: true
-        buildsteps:
-        - conditional-step:
-            condition-kind: boolean-expression
-            condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
-            steps:
-            # clean repository files
-            - folder-delete-operation:
-                folder-path: '$WORKSPACE/{name_1}'
-            - folder-delete-operation:
-                folder-path: '$WORKSPACE/{name_2}'
-        - conditional-step:
-            condition-kind: not
-            condition-operand:
-              condition-kind: file-exists
-              condition-filename: '$WORKSPACE/{name_1}/.hg'
-              condition-basedir: workspace
-            steps:
-            - trigger-builds:
-              - project: 'helper.sync-hg'
-                predefined-parameters: |
-                  SSH_USER=$USER
-                  LOCAL_PATH=$WORKSPACE
-                  REPO={name_1}
-                  NODE_SSH_CONNECTION=$SSH_CONNECTION
-                block: true
-                block-thresholds:
-                  failure-threshold: FAILURE
-        - conditional-step:
-            condition-kind: not
-            condition-operand:
-              condition-kind: file-exists
-              condition-filename: '$WORKSPACE/{name_2}/.hg'
-              condition-basedir: workspace
-            steps:
-            - trigger-builds:
-              - project: 'helper.sync-hg'
-                predefined-parameters: |
-                  SSH_USER=$USER
-                  LOCAL_PATH=$WORKSPACE
-                  REPO={name_2}
-                  NODE_SSH_CONNECTION=$SSH_CONNECTION
-                block: true
-                block-thresholds:
-                  failure-threshold: FAILURE
-
-- wrapper:
-    name: copy-hg-repo(1)
-    # This wrapperhelps with hg repo juggling
-    # We are experiencing significant problems with repo checkout
-    # since mercurial always pulls entire repo.
-
-    # in logic below we are keeping some cached hg repo and use it
-    # for clean checkout.
-    # this may save us up to 40min of pulling.
-
-    wrappers:
-    - pre-scm-buildstep:
-        failOnError: true
-        buildsteps:
-        - conditional-step:
-            condition-kind: boolean-expression
-            condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
-            steps:
-            - folder-delete-operation:
-                folder-path: '$WORKSPACE/{name}'
-        - conditional-step:
-            condition-kind: not
-            condition-operand:
-              condition-kind: file-exists
-              condition-filename: '$WORKSPACE/{name}/.hg'
-              condition-basedir: workspace
-            steps:
-            - trigger-builds:
-              - project: 'helper.sync-hg'
-                predefined-parameters: |
-                  SSH_USER=$USER
-                  LOCAL_PATH=$WORKSPACE
-                  REPO={name}
-                  NODE_SSH_CONNECTION=$SSH_CONNECTION
-                block: true
-                block-thresholds:
-                  failure-threshold: FAILURE
+# This builder should be used in pre-scm step
+# We are experiencing significant problems with repo checkout
+# since mercurial always pulls entire repo.
+#
+# In logic below we are keeping some cached hg repo and use it
+# for clean checkout.
+# this may save us up to 40min of pulling.
+- builder:
+    name: copy-hg-repo
+    builders:
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="CLEAN_CLONE"}}'
+        steps:
+        - folder-delete-operation:
+            folder-path: '$WORKSPACE/{name}'
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: file-exists
+          condition-filename: '$WORKSPACE/{name}/.hg'
+          condition-basedir: workspace
+        steps:
+        - trigger-builds:
+          - project: 'helper.sync-hg'
+            predefined-parameters: |
+              SSH_USER=$USER
+              LOCAL_PATH=$WORKSPACE
+              REPO={name}
+              NODE_SSH_CONNECTION=$SSH_CONNECTION
+            block: true
+            block-thresholds:
+              failure-threshold: FAILURE

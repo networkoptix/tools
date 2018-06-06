@@ -28,7 +28,7 @@
 
     # TODO: testing -> $PIPELINE
     junkshop_location_root_pattern: 'project/testing/$BRANCH/$BUILD_IDENTITY'
-    junkshop_location_full_pattern:
+    junkshop_location_full_pattern: 'project/testing/$BRANCH/$BUILD_IDENTITY'
 
 
     webadmin-build-node: webadmin-build
@@ -57,20 +57,24 @@
     # According to prev. facts,
     # - all platform x branch variables are frozen in job
     # - all customization-related stuff is passed as arguments
-    workspace: nx_build_thr${{EXECUTOR_NUMBER}}_{pipeline}_{platform}/
+
+    # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
+    # '_{platform}' combination is unallowed
+    workspace: nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}/
 
     # in some cases there is a "cleaner" script that does some actions inbetween dirty builds.
     # this path is optional but if it exists, cleaner will be invoked
     custom_cleaner_path: $WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py
 
     # Some cmake args are applicable for any builds they are applied at first
+    # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
     cmake_configure_args_global: |
       CMAKE_EXECUTABLE=cmake
       CMAKE_ARG_beta=TRUE
       CMAKE_ARG_developerBuild=OFF
       CMAKE_ARG_cloudGroup=test
-      CMAKE_ARG_withTests=TRUE
-      CMAKE_ARG_addQtPdb=TRUE
+      CMAKE_ARG_rdepSync=ON
+      # CMAKE_ARG_withTests=TRUE
 
     # SECTION. PIPELINE CONFIG
     # ============================================================
@@ -80,6 +84,8 @@
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline:
           CMAKE_ARG_CMAKE_BUILD_TYPE=Release
+
+    hg-pull-macro: hg-la
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -106,6 +112,7 @@
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_targetDevice=bananapi
+          CMAKE_ARG_withTests=OFF
     # TODO: Enable later when we'll be ready to test it.
     #
     # - bpi:
@@ -123,11 +130,14 @@
     #     cmake_configure_args_platform: |
     #       CMAKE_GENERATOR=Ninja
     #       CMAKE_ARG_targetDevice=tx1
-    - android-arm:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=android-arm
+    # + edge1
+
+    # TODO: ios and android have own release cycles and branches, need to extract in other project
+    # - android-arm:
+    #     installer-build-node: *linux_node
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    #       CMAKE_ARG_targetDevice=android-arm
 
     # -- windows platform --
     # FIXME: HOME,PATH and other vars are represented as win env.
@@ -135,29 +145,47 @@
     # Rsync goes mad ain result and nothing works.
     - win-x64: &windows_config
         installer-build-node: build-installer-windows
+        hg-pull-macro: hg-la-anon
         cmake_configure_args_platform: |
+          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017 Win64
+          CMAKE_ARG_beta=ON
+          CMAKE_ARG_addQtPdb=ON
+          CMAKE_ARG_trustedTimestamping=OFF
+          CMAKE_ARG_withClouds=OFF
+          CMAKE_ARG_withPluginStubs=OFF
+          CMAKE_ARG_withTests=OFF
           CMAKE_TOOL=host=x64
+
     - win-x86:
         <<: *windows_config
         cmake_configure_args_platform: |
+          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017
-          CMAKE_TOOL=host=x64
+          CMAKE_ARG_addQtPdb=ON
+          CMAKE_ARG_trustedTimestamping=OFF
+          CMAKE_ARG_withClouds=OFF
+          CMAKE_ARG_withPluginStubs=OFF
+          CMAKE_ARG_withTests=OFF
+
 
     # -- apple platform --
 
-    # TODO: Enable later when we'll be ready to test it.
-    #
-    # - mac: &osx_config
-    #     installer-build-node: build-installer-mac
-    #     cmake_configure_args_platform: |
-    #       CMAKE_GENERATOR=Ninja
+    - mac: &osx_config
+        hg-pull-macro: hg-la-anon
+        installer-build-node: build-installer-mac
+        cmake_configure_args_platform: |
+          CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
+          CMAKE_GENERATOR=Ninja
+          CMAKE_ARG_beta=ON
+          CMAKE_ARG_codeSigning=OFF
+    # TODO: ios and android have own release cycles and branches, need to extract in other project
     # - ios:
     #     <<: *osx_config
-    #     installer-build-node:
     #     cmake_configure_args_platform: |
+    #       CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
     #       CMAKE_GENERATOR=Xcode
     #       CMAKE_ARG_targetDevice=ios
 
@@ -197,6 +225,7 @@
     - vista
     # - vmsdemoblue
     # - vmsdemoorange
+    # + digitalwatchdog
 
     # list of jobs to generate
     jobs:
@@ -207,14 +236,18 @@
     - helper.pull-component
     - helper.push-component
 
-    # TRIGGERS - main entry point
+    # TRIGGERS - main entry points
 
     - '{pipeline}.{branch}.vms.trigger.{preset}':
         preset:
         - example:
             platforms: linux-x64,linux-x86
             customizations: default,hanwha
-            timer: '0 3 * * *'
+        - nightly:
+            platforms: linux-x64,linux-x86,bananapi,win-x86,win-64,mac,edge1
+            customizations: default,hanwha,vista,digitalwatchdog
+            clean-build: true
+            timer: '0 0 * * *'
 
     # RUNNER - root launcher of all builds
 

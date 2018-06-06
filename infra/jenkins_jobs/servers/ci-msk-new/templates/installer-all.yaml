@@ -24,7 +24,8 @@
     parameters:
     - p_CLEAN_WORKSPACE
     - p_CLEAN_CLONE
-    - p_CLEAN_BUILD
+    - p_CLEAN_BUILD:
+        default: false
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
