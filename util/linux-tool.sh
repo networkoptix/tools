@@ -1,5 +1,4 @@
 #!/bin/bash
-set -u #< Require variable definitions.
 set -o pipefail
 
 source "$(dirname $0)/utils.sh"
