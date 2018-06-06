@@ -14,6 +14,7 @@
     #   work-dir
     #   mediaserver-dist-dir
     #   clean ('true'/'True' or 'false'/'False')
+    #   test-select-expr (argument for -k, if not empty)
     #   test-list (space-delimited; empty means run all tests)
     #   test-timeout-hours
     #
@@ -41,6 +42,7 @@
           export WORK_DIR="{work-dir}"
           export MEDIASERVER_DIST_DIR="{mediaserver-dist-dir}"
           export CLEAN="{clean}"
+          export TEST_SELECT_EXPR="{test-select-expr}"
           export TEST_LIST="{test-list}"
           export TIMEOUT_SEC="$(({test-timeout-hours} * 60*60))"
           export SLOT="$EXECUTOR_NUMBER"

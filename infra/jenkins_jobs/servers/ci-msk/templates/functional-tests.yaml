@@ -39,6 +39,13 @@
           default: '{customization}'
           description: Customization to test.
       - string:
+          name: TEST_SELECT_EXPR
+          default: 'not windows and not smb'
+          description: >
+            Test selection expression, parameter for pytest '-k' option.
+            Empty means run all tests specified in TEST_LIST parameter below.
+            Example: 'not windows and not smb' to exclude all windows and samba tests.
+      - string:
           name: TEST_LIST
           default: ''
           description: Tests to run, space-delimited list. Empty means run all tests.
@@ -164,5 +171,6 @@
           work-dir: $WORK_DIR
           mediaserver-dist-dir: "$WORKSPACE/dist"
           clean: true
+          test-select-expr: "$TEST_SELECT_EXPR"
           test-list: "$TEST_LIST"
           test-timeout-hours: '{test-timeout-hours}'

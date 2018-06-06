@@ -13,6 +13,7 @@ set -xe
 : ${BIN_DIR:?}
 : ${MEDIASERVER_DIST_DIR:?}
 : ${CLEAN:?}  # 'true'/'True' or 'false'/'False'
+: ${TEST_SELECT_EXPR?}
 : ${TEST_LIST?}  # space-delimited; empty means run all tests
 : ${TIMEOUT_SEC:?}
 : ${SLOT:?}  # aka executor number, 0..
@@ -66,9 +67,8 @@ export PYTEST_PLUGINS=junk_shop.pytest_plugin
 
 cd nx_vms/func_tests
 
-if [[ "$TEST_LIST" =~ .*::.* ]]; then
-	# only include windows VMs if specific tests in module are requested
-	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST
+if [[ "$TEST_SELECT_EXPR" != "" ]]; then
+	pytest $(join_by ' ' ${OPTIONS[@]}) -k "$TEST_SELECT_EXPR" $TEST_LIST
 else
-	pytest $(join_by ' ' ${OPTIONS[@]}) -k 'not windows and not smb' $TEST_LIST
+	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST
 fi
