@@ -1268,7 +1268,8 @@ main()
             fi
             local -r DMP_FILE="$1" && shift
 
-            nx_verbose win-python3 "$DEVELOP_DIR/devtools/crash_analyzer/dump_tool.py" \
+            nx_verbose win-python3 \
+		"$(nx_path "$DEVELOP_DIR/devtools/crash_analyzer/dump_tool.py")" \
                 "$(nx_path "$DMP_FILE")" "$@"
             ;;
         #..........................................................................................
