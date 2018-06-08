@@ -82,9 +82,7 @@ class ReleaseProject(BuildProject):
 
     @property
     def custom_cmake_args(self):
-        args = (('-DwithClouds=%s' % bool_to_cmake_param(self.params.withClouds or False))
-              + ' '
-              + ('-DwithPluginStubs=%s' % bool_to_cmake_param(self.params.withPluginStubs or False)))
+        args = '-DwithClouds=%s' % bool_to_cmake_param(self.params.withClouds or False)
         if self.params.custom_cmake_args:
             args = args + ' ' + self.params.custom_cmake_args
         return args
@@ -102,7 +100,6 @@ class ReleaseProject(BuildProject):
                                         'Enable hardware signing, use hardware key to sign files', default_value=False),
             BooleanProjectParameter('trusted_timestamping',
                                         'Use trusted timestamping.', default_value=False),
-            BooleanProjectParameter('withPluginStubs', 'Build plugin stubs.', default_value=False),
             BooleanProjectParameter('withClouds', '-DwithClouds cmake argument value.', default_value=False),
             StringProjectParameter('revision', 'Specific revision to checkout (optional)', default_value=''),
             StringProjectParameter('custom_cmake_args', 'Additional arguments to cmake', default_value=''),
