@@ -48,13 +48,8 @@ ci:
   platforms:
     - win-x64
     - linux-x64
-    - linux-x86
     - mac
-    - bananapi
     - bpi
-    - rpi
-    - edge1
-    - tx1
   # cron schedule to do clean build at night:
   nightly_schedule: 'H 0 * * *'
   enable_concurrent_builds: False
