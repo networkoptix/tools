@@ -133,7 +133,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
             nx_fail "On Windows, only \"windows\" target is supported, but \"$TARGET\" detected."
         fi
     else
-        if [ "$TARGET" == "windows" ]
+        if [ "$TARGET" = "windows" ]
         then
             nx_fail "On Linux, \"windows\" target is not supported."
         fi
@@ -343,10 +343,10 @@ do_gen() # [cache] "$@"
     [ ! -z "$CUSTOMIZATION" ] && CUSTOMIZATION_ARG="-Dcustomization=$CUSTOMIZATION"
 
     local DISTRIB_ARG=""
-    [[ $DISTRIB == 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
+    [[ $DISTRIB = 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
 
     local DEV_ARG=""
-    [[ $DEV == 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
+    [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
 
     nx_verbose cmake "$(nx_path "$VMS_DIR")" \
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
@@ -365,7 +365,7 @@ do_build()
         nx_fail "Dir $BUILD_DIR does not exist, run cmake generation first."
     fi
 
-    if [ "$TARGET" == "windows" ]
+    if [ "$TARGET" = "windows" ]
     then
         case "$CONFIG" in
             Release) local -r CONFIG_ARG="--config $CONFIG";;
@@ -392,7 +392,7 @@ do_run_ut() # [all|TestName] "$@"
         *) TEST_ARG="-R $TEST_NAME";;
     esac
 
-    if [ "$TARGET" == "windows" ]
+    if [ "$TARGET" = "windows" ]
     then
         local -r CONFIG_ARG="-C $CONFIG"
     else
@@ -624,7 +624,7 @@ do_kit() # "$@"
     build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
 
     nx_popd
-    if [[ $KEEP_BUILD_DIR == 0 ]]
+    if [[ $KEEP_BUILD_DIR = 0 ]]
     then
         rm -rf "$KIT_BUILD_DIR"
         nx_echo "Built successfully."
@@ -647,7 +647,7 @@ log_build_vars()
     local MESSAGE="+"
     [[ $TARGET != windows ]] && MESSAGE+=" TARGET=$TARGET"
     MESSAGE+=" CONFIG=$CONFIG"
-    [[ $DISTRIB == 1 ]] && MESSAGE+=" DISTRIB=$DISTRIB"
+    [[ $DISTRIB = 1 ]] && MESSAGE+=" DISTRIB=$DISTRIB"
 
     echo "$MESSAGE"
 }
@@ -877,11 +877,11 @@ find_distrib_FILE() # original|built client|server .ext
     local MODULE="$1" && shift
     local EXT="$1" && shift
 
-    if [[ $EXT == ".zip" ]]
+    if [[ $EXT = ".zip" ]]
     then
         local -r DESCRIPTION="update .zip"
         local -r MASK="*-${MODULE}_update-*.zip"
-    elif [[ $EXT == ".deb" ]]
+    elif [[ $EXT = ".deb" ]]
     then
         local -r DESCRIPTION=".deb"
         local -r MASK="*-${MODULE}-*.deb"
@@ -889,10 +889,10 @@ find_distrib_FILE() # original|built client|server .ext
         nx_fail "find_distrib_file(): Unsupported extension: $EXT"
     fi
 
-    if [[ $LOCATION == original ]]
+    if [[ $LOCATION = original ]]
     then
         local -r DIR="$ORIGINAL_DIR"
-    elif [[ $LOCATION == built ]]
+    elif [[ $LOCATION = built ]]
     then
         local -r DIR="$BUILD_DIR"
     else
@@ -1203,7 +1203,9 @@ main()
             nx_verbose cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
-                    PATH="$QT_DIR/bin:$PATH"
+                    local -r QT_PATH="$QT_DIR/bin"
+                    nx_echo "+ PATH=\"$QT_PATH:\$PATH\""
+                    PATH="$QT_PATH:$PATH"
                     nx_verbose bin/mediaserver -e "$@"
                     ;;
                 linux)
@@ -1215,7 +1217,7 @@ main()
             ;;
         stop-s)
             # TODO: Decide on better impl.
-            sudo killall -9 mediaserver
+            sudo pkill -9 mediaserver
             ;;
         start-c)
             # TODO: IMPLEMENT
@@ -1223,7 +1225,7 @@ main()
             ;;
         stop-c)
             # TODO: Decide on better impl.
-            sudo killall -9 desktop_client
+            sudo pkill -9 desktop_client
             ;;
         run-ut)
             do_run_ut "$@"
@@ -1278,7 +1280,7 @@ main()
             if [[ $(nx_absolute_path "$(pwd)")/ =~ ^$(nx_absolute_path "$VMS_DIR")/ ]]
             then
                 echo "$BUILD_DIR"
-            elif [[ $(nx_absolute_path "$(pwd)") == $(nx_absolute_path "$BUILD_DIR") ]]
+            elif [[ $(nx_absolute_path "$(pwd)") = $(nx_absolute_path "$BUILD_DIR") ]]
             then
                 echo "$VMS_DIR"
             else
