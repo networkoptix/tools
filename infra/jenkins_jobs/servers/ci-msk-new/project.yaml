@@ -155,7 +155,7 @@
           CMAKE_ARG_trustedTimestamping=OFF
           CMAKE_ARG_withClouds=OFF
           CMAKE_ARG_withPluginStubs=OFF
-          CMAKE_ARG_withTests=OFF
+          CMAKE_ARG_withTests=ON
           CMAKE_TOOL=host=x64
 
     - win-x86:
@@ -168,7 +168,7 @@
           CMAKE_ARG_trustedTimestamping=OFF
           CMAKE_ARG_withClouds=OFF
           CMAKE_ARG_withPluginStubs=OFF
-          CMAKE_ARG_withTests=OFF
+          CMAKE_ARG_withTests=ON
 
 
     # -- apple platform --
@@ -241,10 +241,15 @@
     - '{pipeline}.{branch}.vms.trigger.{preset}':
         preset:
         - example:
+            default-build-description: >-
+              Manually triggered build
             platforms: linux-x64,linux-x86
             customizations: default,hanwha
         - nightly:
-            platforms: linux-x64,linux-x86,bananapi,win-x86,win-64,mac,edge1
+            default-build-description: >-
+              Nightly clean build for all platforms and customizations
+              triggered automatically by timer
+            platforms: linux-x64,linux-x86,bananapi,win-x86,win-x64,mac,edge1
             customizations: default,hanwha,vista,digitalwatchdog
             clean-build: true
             timer: '0 0 * * *'
@@ -281,12 +286,23 @@
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest':
+    - 'installer-unittests-default':
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
-        - linux-x64
+        - linux-x86:
+            unittest-node: unittests-linux
+        - linux-x64:
+            unittest-node: unittests-linux
         customization:
         - default
-
+    - installer-unittests-windows:
+        platform:
+        - win-x64:
+            unittest-node: unittests-windows
+        - win-x86:
+            unittest-node: unittests-windows
+        customization:
+        - default
     # REPORTERS - parse & upload logs, build and test information to outer services
 
     # utility job for reporting unittests reslts to junkshop

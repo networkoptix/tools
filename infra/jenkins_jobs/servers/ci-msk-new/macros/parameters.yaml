@@ -9,6 +9,16 @@
         default: ''
         description: |
           Sticky label to mark individual build and query it's artifact in future
+- parameter:
+    name: p_BUILD_DESCRIPTION
+    parameters:
+    - string:
+        name: BUILD_DESCRIPTION
+        default: '{default}'
+        description: >-
+          Free-style field to add some description for this build.
+          This description will be posted on build page and also used in email notification.
+          Use it to distinct one build from another.
 
 # Common build parameters and build process customizations
 - parameter:

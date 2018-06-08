@@ -40,6 +40,7 @@
         recipients: '{email-recipients}'
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         body: |
+          $BUILD_DESCRIPTION
           $BRANCH $PLATFORM $CUSTOMIZATION fixed with commit $NX_VMS_COMMIT
           Thanks, everyone.
         # ---- email contents ----
@@ -58,6 +59,7 @@
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         # TODO: Generate repository url
         body: |
-          Completed build $BRANCH $PLATFORM $CUSTOMIZATION $NX_VMS_COMMIT
+          $BUILD_DESCRIPTION
+          Completed $BRANCH $PLATFORM $CUSTOMIZATION $NX_VMS_COMMIT
           Artifacts are available at $REPOSITORY_URL
         # ---- email contents ----

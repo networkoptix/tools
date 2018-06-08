@@ -7,6 +7,7 @@
 
     timer: ''  # no timed trigger by default
     clean-build: '' # false by default
+    default-build-description: ''
 
     properties:
     - heavy-job:
@@ -35,6 +36,8 @@
         name: FREEZE_COMMIT_NOW
         default: false
         description: Freeze nx_vms commit right now, don't wait for starting builds
+    - p_BUILD_DESCRIPTION:
+        default: '{default-build-description}'
 
     triggers:
     - timed: "{timer}"
@@ -99,22 +102,33 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - copyartifact:
-        project: '{pipeline}.{branch}.vms.runner'
-        filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-        which-build: downstream-build
-        upstream-project-name: '$JOB_NAME'
-        upstream-build-number: '$BUILD_ID'
-
-    - inject:
-        properties-file: 'NX_VMS_COMMIT.envvar'
-    - inject:
-        properties-file: 'BUILD_IDENTITY.envvar'
-    - build-name-setter:
-        template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
-        macro: true
-
     publishers:
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - UNSTABLE
+          - FAILURE
+          - NOT_BUILT
+          - ABORTED
+          build-steps:
+          - copyartifact:
+              project: '{pipeline}.{branch}.vms.runner'
+              filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
+              which-build: downstream-build
+              upstream-project-name: '$JOB_NAME'
+              upstream-build-number: '$BUILD_ID'
+
+          - inject:
+              properties-file: 'NX_VMS_COMMIT.envvar'
+          - inject:
+              properties-file: 'BUILD_IDENTITY.envvar'
+          - build-name-setter:
+              template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+              macro: true
+
     - completed-email
     - failure-email:
         email-recipients: ''

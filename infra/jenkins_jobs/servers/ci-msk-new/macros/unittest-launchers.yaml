@@ -1,0 +1,99 @@
+- builder:
+    name: unittest-launcher-windows
+    builders:
+    - init-venv-windows:
+        requirements-files: devtools/ci/junk_shop/requirements.txt
+    - file-delete-operation:
+        includes: TEST_BINARY_LIST.envvar
+        excludes: ''
+    - groovy:
+        version: 'groovy'
+        command: |
+          import groovy.io.FileType
+
+          def list = []
+          def dir = new File("build/bin")
+          println "Will search unittests in build/bin - all files that ends with _ut.exe"
+          dir.eachFile (FileType.FILES) { file ->
+            if (file.toString().endsWith("_ut.exe") ){
+              println "[PICK] " + file.toString() + " - file appears to be unittest"
+              list << file.getName()
+            } else {
+              println "[SKIP] " + file.toString() + " - file appears NOT to be unittest"
+            }
+          }
+
+          println "\nFound unittests\n================\n" + list.join("\n");
+
+          def envvar_file = new File("TEST_BINARY_LIST.envvar");
+          def content = ("TEST_BINARY_LIST=" + list.join(",")).replace('\\', '/');
+          envvar_file << content;
+    - inject:
+        properties-file: TEST_BINARY_LIST.envvar
+    - inject:
+        properties-content: |
+          TIMEOUT=1m
+          CONFIG_PATH=$WORKSPACE/build/current_config.py
+          BIN_DIR=$WORKSPACE/build/bin
+    - folder-create-operation:
+        folder-path: $WORKSPACE/unit_tests
+
+    - run-process:
+        workdir: $WORKSPACE/unit_tests
+        # executable: $WORKSPACE/venv/bin/python
+        executable: $WORKSPACE/venv/Scripts/python.exe
+        executable-is-relpath: 'false'
+        arguments: '$WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py,--timeout=$TIMEOUT,$CONFIG_PATH,$BIN_DIR,$TEST_BINARY_LIST'
+        logfile: testing.log
+        inherit-environ: 'false'
+        environ: 'PATH=$PATH,PYTHONPATH=$WORKSPACE/venv/Lib/site-packages;$WORKSPACE/devtools/ci/junk_shop'
+
+
+- builder:
+    name: unittest-launcher-default
+
+    builders:
+    - init-venv-linux:
+        requirements-files: devtools/ci/junk_shop/requirements.txt
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        source venv/bin/activate
+          export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
+          BIN_DIR="$WORKSPACE/build/bin"
+          CONFIG_PATH="$WORKSPACE/build/current_config.py"
+          TIMEOUT=1m
+          TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
+          mkdir -p unit_tests
+          cd unit_tests
+          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
+
+- builder:
+    name: count-fails
+    builders:
+
+    # finally count unittests that did not show exit_code == 0
+    # if there are no such tests, exit 0 otherwise fail build
+    - groovy:
+        version: 'groovy'
+        command: |
+          import groovy.io.FileType
+          def list = []
+          def dir = new File("unit_tests")
+          def fails = 0;
+          dir.eachFile (FileType.FILES) { file ->
+            if (file.toString().endsWith("_ut.yaml") ){
+              println "Found tests result file " + file.toString()
+              file.eachLine { line ->
+                if (line.startsWith('exit_code')) {
+                  println "Found exit code, " + line
+                  if (! line.endsWith(' 0')) {
+                    fails = fails + 1
+                  }
+                }
+              }
+            }
+          }
+          println fails.toString() + " Fails"
+          System.exit (fails);

@@ -21,10 +21,13 @@
 
     parameters:
     - p_REQUESTED_BY
+    - p_BUILD_DESCRIPTION:
+        default: ''
     - string:
         name: SET_{counter_var_name}
         default: ''
         description: Set build number instead of incrementing previous
+
 
     wrappers:
     - build-name:
@@ -75,8 +78,11 @@
             set -ex
             echo "{counter_var_name}=${{SET_{counter_var_name}}}" > '{counter_var_name}.envvar'
 
+    - inject:
+        properties-file: '{counter_var_name}.envvar'
+
     - build-name-setter:
-        template: '[${{BUILD_ID}}] ${{BUILD_IDENTITY}}'
+        template: '[${{BUILD_ID}}] ${{{counter_var_name}}}'
         macro: true
 
     publishers:

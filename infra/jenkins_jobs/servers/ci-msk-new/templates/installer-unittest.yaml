@@ -1,10 +1,19 @@
-- job-template:
+#
+# IMPORTANT NOTE
+#
+# There are 2 job-templates defined in this file
+#
+- job-template: &installer_unittests_default
+    id: installer-unittests-default
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest'
     description: |
       Run unit tests for {platform} for branch {branch}.
 
-    node: unittests-linux
+    node: '{unittest-node}'
     concurrent: true
+
+    unittest-launcher: unittest-launcher-default
+    init-venv-method: init-venv-linux
 
     properties:
     - heavy-job:
@@ -13,7 +22,7 @@
         max-total: 5
         option: category
         categories:
-        - unittests-linux
+        - '{unittest-node}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
@@ -21,6 +30,8 @@
         artifact-num-to-keep: 100
 
     parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
     - p_CLEAN_CLONE
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT
@@ -33,7 +44,7 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    - workspace-cleanup
+    # - workspace-cleanup # always
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
@@ -72,31 +83,13 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - init-venv-linux:
-        requirements-files: devtools/ci/junk_shop/requirements.txt
-    - shell: |
-        #!/bin/bash
-        set -ex
-
-        source venv/bin/activate
-          export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
-          BIN_DIR="$WORKSPACE/build/bin"
-          CONFIG_PATH="$WORKSPACE/build/current_config.py"
-          TIMEOUT=1m
-          TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
-          mkdir -p unit_tests
-          cd unit_tests
-          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
-
-    # finally count unittests that did not show exit_code == 0
-    # if there are no such tests, exit 0 otherwise fail build
-    - shell: |
-        #!/bin/bash
-        set -ex
-        failed_tests="$(cat $WORKSPACE/unit_tests/*_ut.yaml | grep exit_code | grep -v '^exit_code.* 0$' | wc -l)"
-        exit $failed_tests
-
+    - '{unittest-launcher}'
+    - count-fails
     publishers:
+    - archive:
+        artifacts: '*.envvar'
+        allow-empty: 'false'
+        fingerprint: true
     # TODO: publish into other repo than default when build is failed
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -127,3 +120,12 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
           - set-build-description
+
+
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-windows
+    unittest-launcher: unittest-launcher-windows
+    hg-pull-macro: hg-la-anon
+    init-venv-method: init-venv-windows

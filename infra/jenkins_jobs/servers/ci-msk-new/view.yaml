@@ -1,3 +1,5 @@
+# General sections
+
 - view:
     name: triggers
     view-type: list
@@ -9,8 +11,16 @@
     description: 'List of all release runners'
     regex: release.*.runner
 
+# Per-release sections
+
+# vms-3.2
 - view:
-    name: build-vms_3.2
+    name: vms_3.2.build
     view-type: list
     description: 'List of all release jobs related to vms_3.2'
     regex: release.vms_3.2.*build
+- view:
+    name: vms_3.2.test
+    view-type: list
+    description: 'List of all release jobs related to vms_3.2'
+    regex: release.vms_3.2.*unittest

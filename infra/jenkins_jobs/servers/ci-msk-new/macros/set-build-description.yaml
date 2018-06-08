@@ -5,5 +5,6 @@
     # We don't want to make that panel too huge
     - description-setter:
         description: >-
-          <a href='$REPOSITORY_URL'> Artifacts </a>
+          $BUILD_DESCRIPTION
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>

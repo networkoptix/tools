@@ -21,6 +21,8 @@
         option: project
 
     parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
     # Parameters related to artifact location in repository
     - p_BUILD_IDENTITY
     - p_PLATFORM

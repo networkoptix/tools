@@ -27,6 +27,8 @@ print '''#
 
     parameters:
     # FIXME: Figure out why extended choice created from JJB is not visible..
+    - p_BUILD_DESCRIPTION:
+        default: ''
     - p_PLATFORMS:
         default: 'linux-x64,linux-x86,win-x86'
     - p_CUSTOMIZATIONS:
@@ -57,6 +59,7 @@ print '''#
           predefined-parameters: |
             REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
         filter: 'NX_VMS_COMMIT.envvar'
@@ -72,6 +75,7 @@ print '''#
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: '{pipeline}.build_number.generator'
         filter: 'BUILD_IDENTITY.envvar'
@@ -93,6 +97,7 @@ print '''#
         - name: '{pipeline}.{branch}.vms.webadmin.universal.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
@@ -124,6 +129,7 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
             ("$PLATFORMS     ").trim().split(",").contains("'''+platform+'''") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''")
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CLEAN_BUILD=$CLEAN_BUILD
