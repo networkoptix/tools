@@ -67,6 +67,7 @@ def save_root_test_info(repository, run, test_record):
     # outcome
     if fail_it:
         run.outcome = status2outcome(False)
+    return outcome2status(run.outcome)
 
 def save_test_results(repository, run_info, test_record_list):
     root_run = make_root_run(repository, run_info)
@@ -74,8 +75,8 @@ def save_test_results(repository, run_info, test_record_list):
     passed = True
     for test_record in test_record_list:
         run = produce_test_run(repository, root_run, ['unit'], test_record.test_name, test_record.test_results)
-        save_root_test_info(repository, run, test_record)
-        if not outcome2status(run.outcome):
+        test_passed = save_root_test_info(repository, run, test_record)
+        if not test_passed:
             passed = False
     with db_session:
         root_run = models.Run[root_run.id]
