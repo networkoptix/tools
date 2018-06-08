@@ -10,7 +10,10 @@ logging:
         max_size: 10M #< Maximum file size.
         backup_count: 20 #< Maximum file count.
     # cloud_watch:
-    #   level: debug #< For AWS Cloud Watch support
+    #   level: debug #< For AWS Cloud Watch support.
+    #   log_group: crash_analyzer
+    #   stream_name: crash_analyzer_moscow
+    #   create_log_group: False
 
 options:
     directory: C:/crash_analyzer/cache #< Local cache directory.

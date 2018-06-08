@@ -39,21 +39,22 @@ def rotating_log_handler(base_name: str, max_size: int = 1, backup_count: str = 
         base_name, 'a', Size(max_size).bytes, backup_count)
 
 
-def cloud_watch_log_handler():
+def cloud_watch_log_handler(**kwargs):
     import watchtower
-    return watchtower.CloudWatchLogHandler()
+    return watchtower.CloudWatchLogHandler(**kwargs)
 
 
 def setup_logging(level: str = 'debug', title: str = '',
                   stream: dict = {}, rotating_file: dict = {}, cloud_watch: dict = {}):
     """Sets up application log :level and :path.
     """
-    handlers = []
+    main_handlers = []
+    extra_handlers = []
     details = ['level: {}'.format(level)]
 
-    def add_handler(handler_maker, level=None, **args):
+    def add_handler(container, handler_maker, level=None, **args):
         handler = handler_maker(**args)
-        handlers.append(handler)
+        container.append(handler)
         args['level'] = level
         details.append('{}: {}'.format(
             handler_maker.__name__,
@@ -62,16 +63,21 @@ def setup_logging(level: str = 'debug', title: str = '',
             handler.setLevel(getattr(logging, level.upper()))
 
     if stream:
-        add_handler(stream_log_handler, **stream)
+        add_handler(main_handlers, stream_log_handler, **stream)
     if rotating_file:
-        add_handler(rotating_log_handler, **rotating_file)
+        add_handler(main_handlers, rotating_log_handler, **rotating_file)
     if cloud_watch:
-        add_handler(cloud_watch_log_handler, **cloud_watch)
+        add_handler(extra_handlers, cloud_watch_log_handler, **cloud_watch)
 
     logging.basicConfig(
         level=getattr(logging, level.upper(), None) or int(level),
-        format=LOGGING_FORMAT, handlers=handlers)
+        format=LOGGING_FORMAT, handlers=(main_handlers + extra_handlers))
 
+    # Avoid infinit recursion: botocore -> logger -> CloudWatchLogHandler -> botocore
+    botocore_logger = logging.getLogger('botocore')
+    botocore_logger.handlers = main_handlers
+    botocore_logger.propagate = False
+        
     logging.info('=' * 80)
     if title:
         print(title)
@@ -159,7 +165,7 @@ def _concurrent_main(task):
         if type(exception).__name__ in task['debug']:
             import pdb
             pdb.set_trace()
-            
+
         result = exception
         logging.debug(format_error(exception, include_stack=True))
 
@@ -188,7 +194,7 @@ def run_concurrent(action: Callable, tasks: list, thread_count: int, **kwargs):
                 logger.log(resolved_level, line)   # < Not a beginning of the log line.
 
     def wrap_task(task, debug=''):
-        return {'action': action, 'argument': task, 'kwargs': kwargs, 
+        return {'action': action, 'argument': task, 'kwargs': kwargs,
                 'log_level': log_level, 'debug': debug}
 
     debug = getattr(run_concurrent, 'debug', None)
@@ -228,7 +234,7 @@ class Size:
 
     def __lt__(self, other):
         return self.bytes < other.bytes
-        
+
     def __add__(self, other):
         return Size(self.bytes + other.bytes)
 
@@ -237,10 +243,10 @@ class Size:
 
     def __mul__(self, scalar):
         return Size(int(self.bytes * scalar))
-        
+
     def __truediv__ (self, scalar):
         return Size(int(self.bytes / scalar))
-        
+
     def __str__(self):
         return self.int_to_str(self.bytes)
 
@@ -289,7 +295,7 @@ class File:
 
     def size(self) -> Size:
         return Size(os.path.getsize(self.path))
-        
+
     def write(self, action, mode=''):
         """Executes an :action on a file, opened for writing.
         """
@@ -356,7 +362,7 @@ class Directory:
     @property
     def name(self) -> str:
         return os.path.basename(self.path)
-        
+
     def file(self, name: str) -> File:
         return File(self.path, name)
 
@@ -368,9 +374,9 @@ class Directory:
 
     def directories(self, mask: str = '*') -> List['Directory']:
         return [Directory(d) for d in glob(os.path.join(self.path, mask))]
-        
+
     def content(self, mask: str = '*'):
-        return [Directory(p) if os.path.isdir(p) else File(p) 
+        return [Directory(p) if os.path.isdir(p) else File(p)
                 for p in glob(os.path.join(self.path, mask))]
 
     def make(self):
