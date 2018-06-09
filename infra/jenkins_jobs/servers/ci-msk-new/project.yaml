@@ -12,6 +12,9 @@
     # SECTION. GLOBAL CONFIG
     # ============================================================
 
+    # comma-separated list of emails to whom send notifications related to builds
+    build-watchers: iremizov@networkoptix.com
+
     # artifact repository location on publish-node filesystem
     artifact_repository_base_path: '/mnt-stub/beta-builds/repository/v1'  # TODO: switch to /mnt/beta-builds
     # location of cache folder publish-node where mercurial repos are precached

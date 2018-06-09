@@ -156,4 +156,5 @@ print '''
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
+    - completed-email
 '''

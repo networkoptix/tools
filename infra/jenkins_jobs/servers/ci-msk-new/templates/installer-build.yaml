@@ -273,6 +273,6 @@
                 LOGFILE=cmake-build-{customization}.log
 
     - failure-email:
-        email-recipients: iremizov@networkoptix.com
+        email-recipients: '{build-watchers}'
     - fixed-email:
-        email-recipients: iremizov@networkoptix.com
+        email-recipients: '{build-watchers}'

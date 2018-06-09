@@ -133,5 +133,3 @@
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
 
     - completed-email
-    - failure-email:
-        email-recipients: ''
