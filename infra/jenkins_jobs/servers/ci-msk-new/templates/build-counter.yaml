@@ -78,10 +78,6 @@
     - inject:
         properties-file: '{counter_var_name}.envvar'
 
-    - build-name-setter:
-        template: '#${{BUILD_ID}} ${{{counter_var_name}}}'
-        macro: true
-
     publishers:
     - publisher-set-build-name:
         name: '#$BUILD_ID ${counter_var_name}'
