@@ -40,18 +40,14 @@ print '''#
     - p_CLEAN_BUILD
 
     wrappers:
-    - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
-
-    builders:
-
     - inject:
         properties-content: |
           BRANCH={branch}
           PIPELINE={pipeline}
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
-    # FIXME: run conditionally when commit is not set
-
+    builders:
     - multijob:
         name: Freeze nx commit
         projects:
@@ -86,6 +82,11 @@ print '''#
         properties-file: 'BUILD_IDENTITY.envvar'
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
+
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+
     - description-setter:
         description: |
           $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
