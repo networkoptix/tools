@@ -22,6 +22,8 @@
     node: '{webadmin-build-node}'
     concurrent: true
 
+    synchronous-reporting: '' # false
+
     properties:
     - heavy-job:
         weight: 1
@@ -150,7 +152,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.build-reporter'
-              # block: true
+              block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -169,7 +171,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.build-reporter'
-              # block: true
+              block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
