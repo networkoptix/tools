@@ -24,6 +24,12 @@
         artifact-num-to-keep: 100
 
     parameters:
+    - p_BUILD_DESCRIPTION:
+        default: '{default-build-description}'
+    - simple-separator:
+        header: Build parameters
+    - p_CLEAN_BUILD:
+        default: '{clean-build}'
     # FIXME: Figure out why extended choice created from JJB is not visible..
     - p_PLATFORMS:
         default: '{platforms}'
@@ -32,14 +38,11 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - p_CLEAN_BUILD:
-        default: '{clean-build}'
     - bool:
         name: FREEZE_COMMIT_NOW
         default: false
         description: Freeze nx_vms commit right now, don't wait for starting builds
-    - p_BUILD_DESCRIPTION:
-        default: '{default-build-description}'
+
 
     triggers:
     - timed: "{timer}"
