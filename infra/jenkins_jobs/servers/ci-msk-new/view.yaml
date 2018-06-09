@@ -24,3 +24,11 @@
     view-type: list
     description: 'List of all release jobs related to vms_3.2'
     regex: release.vms_3.2.*unittest
+
+# Helpers and utilities
+
+- view:
+    name: system
+    view-type: list
+    description: 'List of helper jobs'
+    regex: '.*(helper|reporter).*'
