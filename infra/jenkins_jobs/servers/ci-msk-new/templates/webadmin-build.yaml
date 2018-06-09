@@ -63,11 +63,6 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        # 'build-name' wrapper wil set build name after all wrappers applied,
-        # this approach will set build name earlier
-        - build-name-setter:
-            template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
-            macro: true
         - copy-hg-repo:
             name: nx_vms
         - copy-hg-repo:
@@ -86,6 +81,10 @@
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+    - description-setter:
+        description: >-
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - conditionally-clean-dir:
         condition-varname: CLEAN_BUILD
@@ -105,6 +104,8 @@
         environ: ''
 
     publishers:
+    - publisher-set-build-name:
+        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - archive:
         artifacts: webadmin-build.log, static/version.txt
         allow-empty: 'false'
@@ -124,6 +125,9 @@
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
               predefined-parameters: |
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 PLATFORM=$PLATFORM
@@ -132,11 +136,6 @@
                 COMPONENTS=server-external/,webadmin-build.log,static/version.txt
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
-              block: true
-              block-thresholds:
-                failure-threshold: FAILURE
-          - set-build-description
-
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -146,7 +145,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.build-reporter'
-              block: true
+              # block: true
               predefined-parameters: |
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -165,7 +164,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.build-reporter'
-              block: true
+              # block: true
               predefined-parameters: |
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT

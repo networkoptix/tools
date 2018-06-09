@@ -29,8 +29,11 @@
     - p_PLATFORM
 
     wrappers:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
     - build-name:
-        name: '[${{BUILD_ID}}] ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
     - timeout:
         timeout: 20 # min

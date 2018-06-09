@@ -32,19 +32,30 @@
     - p_NX_VMS_COMMIT:
         default: '{branch}'
 
-    wrppers:
+    wrappers:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+          PLATFORM={platform}
+          CUSTOMIZATION={customization}
     - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
+
     - multijob:
         name: "Build installer for {platform} with {customization}"
         projects:
         - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
@@ -57,6 +68,7 @@
         - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
@@ -66,6 +78,7 @@
         - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
@@ -75,6 +88,7 @@
         - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.functest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD

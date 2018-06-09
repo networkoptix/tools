@@ -37,8 +37,9 @@
           Build status to report, note that THIS ENUM DOES NOT CONFORM with JENKINS ENUMs, valid options are "passed" and "failed"
 
     wrappers:
-    - build-name:
-        name: '[${{BUILD_ID}}] ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
     - timestamps
     - timeout:
         timeout: 20 # min
@@ -52,6 +53,9 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
+        - build-name-setter:
+            template: '#${{BUILD_ID}} ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+            macro: true
         - copy-hg-repo:
             name: nx_vms
         - copy-hg-repo:

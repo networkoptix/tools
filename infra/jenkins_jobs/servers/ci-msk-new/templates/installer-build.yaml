@@ -26,8 +26,6 @@
         default: '{branch}'
 
     wrappers:
-    # - build-name:
-    #     name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
     - inject:
         properties-content: |
           PIPELINE={pipeline}
@@ -52,7 +50,7 @@
         # 'build-name' wrapper wil set build name after all wrappers applied,
         # this approach will set build name earlier
         - build-name-setter:
-            template: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+            template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
             macro: true
         - copy-hg-repo:
             name: nx_vms
@@ -148,17 +146,10 @@
     # STAGE: BUILD
     # ========================================
 
-    # - inject:
-    #     properties-content: |
-    #       PIPELINE={pipeline}
-    #       CUSTOMIZATION={customization}
-    #       PLATFORM={platform}
-    #       BRANCH={branch}
     - inject:
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-
     - inject:
         properties-content: |
           {cmake_configure_args_global}
@@ -237,7 +228,12 @@
               block: true
               block-thresholds:
                 failure-threshold: FAILURE
-          - set-build-description
+          # TODO: descriptions should differ for failed and successful builds
+          - description-setter:
+              description: >-
+                $BUILD_DESCRIPTION
+                <a href='$REPOSITORY_URL'> Artifacts </a>,
+                <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - postbuildscript:
         mark-unstable-if-failed: true

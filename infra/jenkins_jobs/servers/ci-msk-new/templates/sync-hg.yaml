@@ -17,6 +17,8 @@
         artifact-num-to-keep: 25
 
     parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
     - string:
         name: REPO
         description: >
@@ -27,7 +29,7 @@
 
     wrappers:
     - build-name:
-        name: '[${{BUILD_ID}}]'
+        name: '#${{BUILD_ID}}'
     - timestamps
     - timeout:
         # normally, should complete in 2-10 min
@@ -39,6 +41,10 @@
         - jenkins
 
     builders:
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
+
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'

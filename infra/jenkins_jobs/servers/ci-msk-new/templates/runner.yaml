@@ -24,6 +24,7 @@
         artifact-num-to-keep: 100
 
     parameters:
+    - p_REQUESTED_BY
     # FIXME: Figure out why extended choice created from JJB is not visible..
     - p_BUILD_DESCRIPTION:
         default: ''
@@ -61,7 +62,7 @@
     - copyartifact:
         project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
         filter: 'NX_VMS_COMMIT.envvar'
-        which-build: last-successful
+        which-build: last-completed
         parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - inject:
         properties-file: 'NX_VMS_COMMIT.envvar'
@@ -77,15 +78,18 @@
     - copyartifact:
         project: '{pipeline}.build_number.generator'
         filter: 'BUILD_IDENTITY.envvar'
-        which-build: last-successful
+        which-build: last-completed
         parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
     - inject:
         properties-file: 'BUILD_IDENTITY.envvar'
 
-    # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT, so build-name may be set.
-    - build-name-setter:
-        template: '[${{BUILD_ID}}] ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
-        macro: true
+    # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
+    - description-setter:
+        description: |
+          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
 
     # TODO: we don't need to build w/a for macOS. But it's not enough to disable it here
     # because w/a artifact is mandatory in build installers..
@@ -2065,7 +2069,13 @@
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    - set-build-description
+    # TODO: Move to publishers
+    # TODO: set paths based on publisher?
+    - description-setter:
+        description: >-
+          $BUILD_DESCRIPTION
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     publishers:
     - archive:

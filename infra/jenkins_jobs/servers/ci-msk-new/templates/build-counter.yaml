@@ -28,10 +28,7 @@
         default: ''
         description: Set build number instead of incrementing previous
 
-
     wrappers:
-    - build-name:
-        name: '[${{BUILD_ID}}]'  # will be filled later
     - timestamps
     - timeout:
         # normally, should complete in 1-2 min
@@ -82,10 +79,12 @@
         properties-file: '{counter_var_name}.envvar'
 
     - build-name-setter:
-        template: '[${{BUILD_ID}}] ${{{counter_var_name}}}'
+        template: '#${{BUILD_ID}} ${{{counter_var_name}}}'
         macro: true
 
     publishers:
+    - publisher-set-build-name:
+        name: '#$BUILD_ID ${counter_var_name}'
     - archive:
         artifacts: '{counter_var_name}.envvar'
         allow-empty: 'false'

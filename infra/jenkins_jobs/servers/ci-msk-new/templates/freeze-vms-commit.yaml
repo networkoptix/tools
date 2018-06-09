@@ -24,8 +24,10 @@
         default: '{branch}'
 
     wrappers:
-    - build-name:
-        name: '[${{BUILD_ID}}] {branch}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
     - timestamps
     - timeout:
         # normally should complete in 2-5 min
@@ -52,8 +54,12 @@
         #!/bin/bash
         set -ex
         echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
+    - inject:
+        properties-file: NX_VMS_COMMIT.envvar
 
     publishers:
+    - publisher-set-build-name:
+        name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
         artifacts: 'NX_VMS_COMMIT.envvar'
         allow-empty: 'false'
