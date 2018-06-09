@@ -13,6 +13,9 @@ print '''#
     node: runner
     concurrent: true
 
+    # vars
+    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
+
     properties:
     - heavy-job:
         weight: 1
@@ -54,14 +57,14 @@ print '''#
         - name: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
           kill-phase-on: FAILURE
           predefined-parameters: |
-            REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+            REQUESTED_BY={tag_requested_by}
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
         filter: 'NX_VMS_COMMIT.envvar'
         which-build: last-completed
-        parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+        parameter-filters: REQUESTED_BY={tag_requested_by}
     - inject:
         properties-file: 'NX_VMS_COMMIT.envvar'
 
@@ -71,13 +74,13 @@ print '''#
         - name: '{pipeline}.build_number.generator'
           kill-phase-on: FAILURE
           predefined-parameters: |
-            REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: '{pipeline}.build_number.generator'
         filter: 'BUILD_IDENTITY.envvar'
         which-build: last-completed
-        parameter-filters: REQUESTED_BY=${{JOB_NAME}}-${{BUILD_NUMBER}}
+        parameter-filters: REQUESTED_BY={tag_requested_by}
     - inject:
         properties-file: 'BUILD_IDENTITY.envvar'
 
