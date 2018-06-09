@@ -148,7 +148,6 @@ print '''
     # TODO: set paths based on publisher?
     - description-setter:
         description: >-
-          $BUILD_DESCRIPTION
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
 
