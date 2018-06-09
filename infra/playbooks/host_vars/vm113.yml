@@ -4,7 +4,22 @@ libvirt_guest__state: running
 libvirt_guest__type: linux
 libvirt_guest__extra_system_image_size_gb: "120"
 libvirt_guest__memory: "{{ 10 * 1024 * 1024 }}"
-libvirt_guest__cpus: 2
+libvirt_guest__cpus: 8
+
+node_exporter_enabled_collectors:
+  - diskstats:
+      ignored-devices: "^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+$"
+  - filesystem:
+      ignored-mount-points: "^/(sys|proc|dev|mnt|run|var/lib/docker|var/lib/lxcfs)($|/)"
+      ignored-fs-types: "^(sys|proc|auto)fs$"
+  - systemd
+  - diskstats
+  - hwmon
+  - loadavg
+  - meminfo
+  - netdev
+  - netstat
+  - stat
 
 networks:
 - interface_type: bridge
