@@ -77,6 +77,10 @@
         branch-name: $NX_VMS_COMMIT
 
     builders:
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
@@ -107,8 +111,6 @@
         environ: ''
 
     publishers:
-    - publisher-set-build-name:
-        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - archive:
         artifacts: webadmin-build.log, static/version.txt
         allow-empty: 'false'

@@ -53,9 +53,6 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - build-name-setter:
-            template: '#${{BUILD_ID}} ${{BRANCH}}-${{BUILD_IDENTITY}}@${{NX_VMS_COMMIT}}'
-            macro: true
         - copy-hg-repo:
             name: nx_vms
         - copy-hg-repo:
@@ -70,7 +67,9 @@
         branch-name: $NX_VMS_COMMIT
 
     builders:
-
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
