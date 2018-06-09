@@ -54,28 +54,24 @@ prometheus_scrape_configs:
   - files:
     - "/etc/prometheus/file_sd/alertmanager.yml"
 
+prometheus_environment_label: "Moscow"
+
 prometheus_alert_rules:
   - alert: InstanceDown
     expr: "up == 0"
     for: 5m
     labels:
       severity: critical
+      environment: "{{ prometheus_environment_label }}"
     annotations:
       description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} down{% endraw %}"
-  - alert: CriticalCPULoad
-    expr: '(100 * (1 - avg(irate(node_cpu{job="node",mode="idle"}[5m])) BY (instance))) > 96'
-    for: 2m
-    labels:
-      severity: warning
-    annotations:
-      description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has Critical CPU load for more than 2 minutes.{% endraw %}"
-      summary: "{% raw %}Instance {{ $labels.instance }} - Critical CPU load{% endraw %}"
   - alert: CriticalRAMUsage
     expr: '(1 - ((node_memory_MemFree + node_memory_Buffers + node_memory_Cached) / node_memory_MemTotal)) * 100 > 98'
     for: 5m
     labels:
       severity: critical
+      environment: "{{ prometheus_environment_label }}"
     annotations:
       description: "{% raw %}{{ $labels.instance }} has Critical Memory Usage more than 5 minutes.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} has Critical Memory Usage{% endraw %}"
@@ -84,6 +80,7 @@ prometheus_alert_rules:
     for: 4m
     labels:
       severity: critical
+      environment: "{{ prometheus_environment_label }}"
     annotations:
       description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} - Critical disk space usage{% endraw %}"
@@ -91,6 +88,7 @@ prometheus_alert_rules:
     expr: "node_reboot_required > 0"
     labels:
       severity: warning
+      environment: "{{ prometheus_environment_label }}"
     annotations:
       description: "{% raw %}{{ $labels.instance }} requires a reboot.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} - reboot required{% endraw %}"
@@ -163,6 +161,7 @@ alertmanager_receivers:
     email_configs:
     - to: 'anikitin@networkoptix.com'
     - to: 'iremizov@networkoptix.com'
+    - to: 'vfedorov@networkoptix.com'
 
 # The root node of the routing tree.
 alertmanager_route:
