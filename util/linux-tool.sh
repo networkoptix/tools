@@ -344,6 +344,7 @@ do_gen() # [cache] "$@"
 
     local DISTRIB_ARG=""
     [[ $DISTRIB = 1 ]] && DISTRIB_ARG="-DwithDistributions=ON"
+    [[ $TARGET = windows ]] && DISTRIB_ARG+=" -DwithMiniLauncher=ON"
 
     local DEV_ARG=""
     [[ $DEV = 0 ]] && DEV_ARG="-DdeveloperBuild=OFF"
@@ -668,7 +669,7 @@ do_cmake() # "$@"
 
 build_distrib() # "$@"
 {
-    do_cmake -DwithDistributions=ON "$@"
+    DISTRIB=1 do_cmake "$@"
 }
 
 list_tar_gz() # CHECKSUM archive.tar.gz listing.txt
