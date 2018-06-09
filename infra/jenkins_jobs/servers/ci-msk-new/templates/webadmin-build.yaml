@@ -77,6 +77,9 @@
         branch-name: $NX_VMS_COMMIT
 
     builders:
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
     - inject:
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
