@@ -47,12 +47,14 @@ print '''#
         properties-content: |
           BRANCH={branch}
           PIPELINE={pipeline}
-          BUILD_IDENTITY=undef
-          NX_VMS_COMMIT=undef
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - inject:
+        properties-content: |
+          BUILD_IDENTITY=undef
+          NX_VMS_COMMIT=undef
     - multijob:
         name: Freeze nx commit
         projects:

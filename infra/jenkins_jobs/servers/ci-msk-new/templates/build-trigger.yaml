@@ -52,12 +52,15 @@
         properties-content: |
           BRANCH={branch}
           PIPELINE={pipeline}
-          BUILD_IDENTITY=undef
-          NX_VMS_COMMIT=undef
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+
+    - inject:
+        properties-content: |
+          BUILD_IDENTITY=undef
+          NX_VMS_COMMIT=undef
 
     # Runner itself may freeze commits (when runner is triggereddirectly)
     # But we want to allow users to freeze commit by the time this job is triggered
