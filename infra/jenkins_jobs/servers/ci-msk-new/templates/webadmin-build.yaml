@@ -1,28 +1,53 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.webadmin.universal.build'
     project-type: multijob
+    job-maintainers: 'iremizov@networkoptix.com'
     description: |
-      <h2> Build webadmin which is a part of nx_vms repository. </h2>
+      <pre>
+      ================================================================================
+      Build Web Admin
+      ================================================================================
 
-      <p>
-        Technically it's linux project. But since it's cross-platform and
-        included into any distribution it's built solely.
-        And then it's consumed by installers.
+      JOB MAINTAINERS
+        {job-maintainers}
+        (NOT notified by email on build failures)
+      BUILD WATCHERS
+        {build-watchers}
+        (notified by email on build failures)
 
-      <p>
-        This job consumes few groups of parameters.
-      <p>
-        Parameters related to workspace cleaning logic
-        CLEAN_WORKSPACE, CLEAN_CLONE and CLEAN_BUILD.
-      <p>
-        Parameters related to pointing artifacts in repository and development process
-        BUILD_IDENTITY (that determines release id or build_number used for releases) and
-        NX_VMS_COMMIT exact commit of sources taht produced this build.
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/webadmin-build.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job builds webadmin that's not consumed independently but will be
+      included in installer for all platforms.
+      Despite the fact that this is linux project it's assigned to have
+      "universal" platform with "default" customization in order to be put into
+      repository with logically correct path.
+
+      --------------------------------------------------------------------------------
+
+      This job consumes few groups of parameters.
+
+      Parameters related to workspace cleaning logic
+      * CLEAN_WORKSPACE
+      * CLEAN_CLONE
+      * CLEAN_BUILD
+
+
+      Parameters related to pointing artifacts in repository and development process
+      * BUILD_IDENTITY (that determines release id or build_number used for releases)
+      * NX_VMS_COMMIT exact commit of sources taht produced this build.
+
+      --------------------------------------------------------------------------------
+      </pre>
 
     node: '{webadmin-build-node}'
     concurrent: true
 
     synchronous-reporting: '' # false
+    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
 
     webadmin-platform: universal
     webadmin-customization: default
@@ -58,8 +83,10 @@
         default: '{branch}'
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
           BRANCH={branch}
           PIPELINE={pipeline}
           PLATFORM={webadmin-platform}
@@ -164,6 +191,7 @@
             - project: '{pipeline}.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY

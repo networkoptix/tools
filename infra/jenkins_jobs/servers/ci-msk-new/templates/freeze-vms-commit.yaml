@@ -1,7 +1,44 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
-    project-type: multijob
+    job-maintainers: 'iremizov@networkoptix.com'
+    description: |
+      <pre>
+      ================================================================================
+      Freeze nx_vms commit
+      ================================================================================
 
+      JOB MAINTAINERS
+        {job-maintainers}
+        (notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/freeze-vms-commit.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job serves as for freezing particular commit based on abstract hg ref.
+
+      This solves 2 problems
+
+      * After some waiting time in queue builds may build not the commit they supposed
+        to build, but commit that is assigned to ref by the time build really starts
+      * Not all builds are started in the same time, so by the time different builds
+        started there are different commits pointed by ref and this is not acceptable
+
+      Frozen commit value (sha) is available in NX_VMS_COMMIT.envvar file represented
+      in Jenkins envvar format (Var name, equals and var value not enclosed in quotes).
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
     node: '{commit-freeze-node}'
     concurrent: false  # important
 
@@ -25,8 +62,10 @@
         default: '{branch}'
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
           BRANCH={branch}
     - timestamps
@@ -67,3 +106,4 @@
         artifacts: 'NX_VMS_COMMIT.envvar'
         allow-empty: 'false'
         fingerprint: true
+    - failure-email(maintainers)

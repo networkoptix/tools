@@ -27,7 +27,9 @@
     - bool:
         name: CLEAN_WORKSPACE
         default: false
-        description: Remove entire workspace before build
+        description: >-
+          BUild strategy, don't even try to reuse existing workspace.
+          Clean EVERYTHING (HG repos, build, distrib and other folders).
 
 - parameter:
     name: p_CLEAN_CLONE
@@ -35,7 +37,9 @@
     - bool:
         name: CLEAN_CLONE
         default: false
-        description: Remove stale repos before checkout
+        description: >-
+          Build strategy, don't try to reuse currently cloned repositories.
+          Clean repositories folders and reclone HG repos.
 
 - parameter:
     name: p_CLEAN_BUILD
@@ -43,9 +47,10 @@
     - bool:
         name: CLEAN_BUILD
         default: '{default}'
-        description: >
-          Don't reuse build workspace from previous build
-          (if false, then will try to reuse)
+        description: >-
+          Build strategy, don't try to reuse build folder from previous build in this workspace.
+          This is very useful if you suspect that system incorrectly tries to perform incremental
+          build that's not possible under current circumstances.
 
 # Parameters That fully define artifacts: what sources used and where to put what's built
 
@@ -54,8 +59,8 @@
     parameters:
     - string:
         name: BRANCH
-        description: >
-          Branch of nx_vms for setting up proper build context.
+        description: >-
+          Branch of nx_vms from which product is built.
 
 - parameter:
     name: p_NX_VMS_COMMIT
@@ -63,7 +68,7 @@
     - string:
         name: NX_VMS_COMMIT
         default: '{default}'
-        description: >
+        description: >-
           Frozen nx_vms commit id or branch. commit sha is preferred as
           all builds will be produced within the same repo state
 
@@ -73,14 +78,15 @@
     - string:
         name: BUILD_IDENTITY
         default: ''
-        description: Build number in context of pipeline
+        description: >-
+          Build number in context of this pipeline.
 - parameter:
     name: p_PLATFORMS
     parameters:
     - string:
         name: PLATFORMS
         default: '{default}'
-        description: >
+        description: >-
           Target platforms comma-separated list for installer (e.g. linux-x64, win-x86 and others,
           note that universal is used for webadmin and other platform-independent components)
 

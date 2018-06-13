@@ -1,10 +1,43 @@
 - job-template:
     name: '{pipeline}.build-reporter'
+    job-maintainers: 'iremizov@networkoptix.com'
+    description: |
+      <pre>
+      ================================================================================
+      Build reporter
+      ================================================================================
 
+      JOB MAINTAINERS
+        {job-maintainers}
+        (notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/build-reporter.yaml
+
+      ONLY FAILED BUILDS MAY BE RETRIGGERED/RETRIED
+
+      If build failed by infrastracture reasons anyone may try to retrigger uploading
+      process.
+
+      --------------------------------------------------------------------------------
+
+      This job serves for parsing and uploading build results into JunkShop service.
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
     node: unittests-reporter
     concurrent: true
 
-    junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101' or parameterize
+    # junk_shop_host: required!
 
     properties:
     - heavy-job:
@@ -19,6 +52,7 @@
         artifact-num-to-keep: 25
 
     parameters:
+    - p_REQUESTED_BY
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_CLONE
@@ -33,12 +67,15 @@
           Logfile that contains information about build
     - string:
         name: BUILD_STATUS
-        description: |
-          Build status to report, note that THIS ENUM DOES NOT CONFORM with JENKINS ENUMs, valid options are "passed" and "failed"
+        description: >-
+          Build status to report, note that THIS ENUM DOES NOT CONFORM
+          with JENKINS ENUMs, valid options are "passed" and "failed"
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
     - timestamps
     - timeout:
@@ -103,3 +140,6 @@
           # upload build results
           BUILD_PARAMETERS="project=testing,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$PLATFORM"
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" "$LOGFILE" "--outcome=$BUILD_STATUS"
+
+    publishers:
+    - failure-email(maintainers)

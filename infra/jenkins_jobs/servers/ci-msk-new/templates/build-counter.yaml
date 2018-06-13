@@ -1,8 +1,83 @@
 # generate ID
 - job-template:
     name: '{pipeline}.{counter_name}.generator'
+    job-maintainers: 'iremizov@networkoptix.com'
     description: |
-      Increment previous value of {counter_var_name} and save it as artifact
+      <pre>
+      ================================================================================
+      {counter_var_name} generator
+      ================================================================================
+
+      JOB MAINTAINERS
+        {job-maintainers}
+        (notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/build-counter.yaml
+
+      BUILDS MUST NOT BE TRIGGERED MANUALLY
+
+      The only exclusion is setting or changing current value of this counter.
+      This may be done via "SET_{counter_var_name}" parameter.
+
+      --------------------------------------------------------------------------------
+
+      This job serves as registry and autoincrement for "{counter_var_name}".
+      Value is available in {counter_var_name}.envvar file represented in Jenkins
+      envvar format (Var name, equals and var value not enclosed in quotes).
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
+
+    # Examples
+    # ========
+    # multijob projects
+    # ```
+    # tag_requested_by: $JOB_NAME-$BUILD_NUMBER
+    # builders:
+    # - multijob:
+    #     name: Request new {counter_var_name}
+    #     projects:
+    #     - name: '{pipeline}.{counter_name}.generator'
+    #       kill-phase-on: FAILURE
+    #       predefined-parameters: |
+    #         REQUESTED_BY={tag_requested_by}
+    #         BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    # - copyartifact:
+    #     project: '{pipeline}.{counter_name}.generator'
+    #     filter: '{counter_var_name}.envvar'
+    #     which-build: last-completed
+    #     parameter-filters: REQUESTED_BY={tag_requested_by}
+    # - inject:
+    #     properties-file: '{counter_var_name}.envvar'
+    # ```
+    # freestyle projects
+    # ```
+    # tag_requested_by: $JOB_NAME-$BUILD_NUMBER
+    # builders:
+    # - trigger-builds:
+    #   - project: '{pipeline}.{counter_name}.generator'
+    #     block: true
+    #     predefined-parameters: |
+    #       REQUESTED_BY={tag_requested_by}
+    #       BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    # - copyartifact:
+    #     project: '{pipeline}.{counter_name}.generator'
+    #     filter: '{counter_var_name}.envvar'
+    #     which-build: last-completed
+    #     parameter-filters: REQUESTED_BY={{ag_requested_by}
+    # - inject:
+    #     properties-file: '{counter_var_name}.envvar'
+    # ```
 
     node: runner
     concurrent: false  # important
@@ -20,15 +95,27 @@
         artifact-num-to-keep: 100
 
     parameters:
+
+    # general parameters
+    - simple-separator:
+        header: "General parameters"
     - p_REQUESTED_BY
     - p_BUILD_DESCRIPTION:
         default: ''
+
+    # administrative parameters
+    - simple-separator:
+        header: "Special section for administrative/maintenance purposes.. DON'T MODIFY if you are not administrator"
     - string:
         name: SET_{counter_var_name}
         default: ''
         description: Set build number instead of incrementing previous
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
+    - inject:
+        properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
     - timestamps
     - timeout:
         # normally, should complete in 1-2 min
@@ -63,6 +150,7 @@
             set -ex
             (( {counter_var_name} = {counter_var_name} +1 ))
             echo "{counter_var_name}=${{{counter_var_name}}}" > '{counter_var_name}.envvar'
+
     # alternatively, set new value
     - conditional-step:
         condition-kind: not
@@ -85,3 +173,4 @@
         artifacts: '{counter_var_name}.envvar'
         allow-empty: 'false'
         fingerprint: true
+    - failure-email(maintainers)

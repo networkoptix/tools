@@ -1,23 +1,62 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+    job-maintainers: 'iremizov@networkoptix.com'
+    description: |
+      <pre>
+      ================================================================================
+      Build Installer for {platform} with {customization} customization
+      ================================================================================
 
+      JOB MAINTAINERS
+        {job-maintainers}
+        (NOT notified by email on build failures)
+      BUILD WATCHERS
+        {build-watchers}
+        (notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/webadmin-build.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job builds installer that also includes webadmin binaries with small
+      exception for few platforms where there is no webserver included into installer
+      (this case is not handled yet by this job)
+
+      --------------------------------------------------------------------------------
+
+      This job consumes few groups of parameters.
+
+      Parameters related to workspace cleaning logic
+      * CLEAN_WORKSPACE
+      * CLEAN_CLONE
+      * CLEAN_BUILD
+
+      Parameters related to pointing artifacts in repository and development process
+      * BUILD_IDENTITY (that determines release id or build_number used for releases)
+      * NX_VMS_COMMIT exact commit of sources taht produced this build.
+
+      --------------------------------------------------------------------------------
+      </pre>
     node: '{installer-build-node}'
     workspace: '{workspace}'
     concurrent: true
 
     synchronous-reporting: '' # false
+    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
     webadmin-component-name: 'server-external'
     webadmin-platform: universal
     webadmin-customization: default
 
     cmake-executable: cmake
-    custom-cleaner-log: '{build-dir}/cleaner.log'
-    cmake-configure-log: 'cmake-configure-{customization}.log'
-    cmake-build-log: 'cmake-build-{customization}.log'
+    custom-cleaner-log: 'build/cleaner.log'
+    cmake-configure-log: 'cmake-configure.log'
+    cmake-build-log: 'cmake-build.log'
     build-dir: build
 
-    build-artifacts: 'distrib/,bin/,lib/,current_config.py,build_info.txt,{cmake-build-log},{cmake-configure-log}'
-    build-artifacts-min: '{build-dir}/*.log'
+    build-artifacts: 'distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
+    build-artifacts-min: 'build/*.log'
+
     properties:
     - heavy-job:
         weight: 1
@@ -39,8 +78,10 @@
         default: '{branch}'
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
@@ -275,6 +316,7 @@
             - project: '{pipeline}.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY

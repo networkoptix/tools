@@ -26,6 +26,24 @@
         # ---- email contents ----
 
 - publisher:
+    name: failure-email(maintainers)
+
+    publishers:
+    - email-ext:
+        <<: *failure_email
+        send-to:
+        - recipients
+        recipients: '$JOB_MAINTAINERS'
+        subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
+        body: |
+          $BUILD_DESCRIPTION
+
+          $BUILD_URL
+
+          $BUILD_LOG
+        # ---- email contents ----
+
+- publisher:
     name: failure-email(group)
 
     publishers:

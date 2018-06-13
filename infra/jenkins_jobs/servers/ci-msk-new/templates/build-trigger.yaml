@@ -1,12 +1,44 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.trigger.{preset}'
+    job-maintainers: 'iremizov@networkoptix.com'
+    description: |
+      <pre>
+      ================================================================================
+      Build Trigger
+      ================================================================================
 
+      JOB MAINTAINERS
+        {job-maintainers}
+        (NOT notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/build-trigger.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job serves for starting bunch of builds associated with particular commit
+      in nx_vms repository and also assigned build identity.
+
+      By default (e.g. triggered automatically) it will build following installers
+      {platforms}
+      {customizations}
+
+      There are some different triggers available.
+      See all triggers on {jenkins_host}/view/triggers/
+
+      {detailed-job-description}
+
+      See more details on build procedure in corresponding downstream "*.runner" job
+
+      --------------------------------------------------------------------------------
+      </pre>
     node: runner
     concurrent: true
 
     timer: ''  # no timed trigger by default
     clean-build: '' # false by default
     default-build-description: ''
+    # detailed-job-description required!
 
     # vars
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER
@@ -48,8 +80,10 @@
     - timed: "{timer}"
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
+          JOB_MAINTAINERS={job-maintainers}
           BRANCH={branch}
           PIPELINE={pipeline}
     - timestamps
@@ -62,7 +96,7 @@
           BUILD_IDENTITY=undef
           NX_VMS_COMMIT=undef
 
-    # Runner itself may freeze commits (when runner is triggereddirectly)
+    # Runner itself may freeze commits (when runner is triggered directly)
     # But we want to allow users to freeze commit by the time this job is triggered
 
     # inject given ref at first
@@ -138,3 +172,5 @@
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
 
     - completed-email(group)
+    # TODO: decide if we want to receive errors on each build...
+    # - failure-email(maintainers) # TODO:

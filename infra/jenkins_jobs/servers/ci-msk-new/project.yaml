@@ -5,7 +5,8 @@
     # We may probably replace that groovy incl groovy w/ python.
     groovy-version: groovy
     project: vms
-
+    junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
+    jenkins_host: http://10.0.0.112:8080 # TODO: switch after prod
     branch:
     - vms_3.2
 
@@ -247,11 +248,19 @@
     - '{pipeline}.{branch}.vms.trigger.{preset}':
         preset:
         - example:
+            detailed-job-description: |-
+              This trigger serves for demo purposes and will be removed in future
             default-build-description: >-
               Manually triggered build
             platforms: linux-x64,linux-x86
             customizations: default,hanwha
         - nightly:
+            detailed-job-description: |-
+              This trigger serves for nigtly clean builds to verify the state of product
+              It builds with corresponding schedule "{timer}".
+
+              It should not be triggered manually excluding debugging of infra problems
+              associated with only this trigger type.
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
