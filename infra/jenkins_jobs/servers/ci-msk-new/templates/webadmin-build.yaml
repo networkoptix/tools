@@ -24,6 +24,16 @@
 
     synchronous-reporting: '' # false
 
+    webadmin-platform: universal
+    webadmin-customization: default
+
+    # artifact used in reporting
+    webadmin-build-log: 'webadmin-build.log'
+    # artifacts to save in repository
+    webadmin-build-artifacts: 'server-external/,webadmin-build.log,static/version.txt'
+    # artifacts to save in jenkins
+    webadmin-build-artifacts-min: 'webadmin-build.log,static/version.txt'
+
     properties:
     - heavy-job:
         weight: 1
@@ -52,8 +62,8 @@
         properties-content: |
           BRANCH={branch}
           PIPELINE={pipeline}
-          PLATFORM=universal
-          CUSTOMIZATION=default
+          PLATFORM={webadmin-platform}
+          CUSTOMIZATION={webadmin-customization}
     - timestamps
     - timeout:
         # normally, should complete in 7-15 min
@@ -100,7 +110,7 @@
         dir: build
 
     - file-delete-operation:
-        includes: webadmin-build.log
+        includes: '{webadmin-build-log}'
         excludes: ''
 
     - run-process:
@@ -108,13 +118,13 @@
         executable: nx_vms/webadmin/build.sh
         executable-is-relpath: 'true'
         arguments: ''
-        logfile: webadmin-build.log
+        logfile: '{webadmin-build-log}'
         inherit-environ: 'true'
         environ: ''
 
     publishers:
     - archive:
-        artifacts: webadmin-build.log, static/version.txt
+        artifacts: '{webadmin-build-artifacts-min}'
         allow-empty: 'false'
         fingerprint: true
 
@@ -140,7 +150,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 LOCAL_PATH=$WORKSPACE/
-                COMPONENTS=server-external/,webadmin-build.log,static/version.txt
+                COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
     - postbuildscript:
@@ -160,7 +170,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=passed
-                LOGFILE=webadmin-build.log
+                LOGFILE='{webadmin-build-log}'
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -179,7 +189,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=failed
-                LOGFILE=webadmin-build.log
+                LOGFILE='{webadmin-build-log}'
 
     - failure-email:
         email-recipients: '{build-watchers}'

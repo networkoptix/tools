@@ -6,7 +6,18 @@
     concurrent: true
 
     synchronous-reporting: '' # false
+    webadmin-component-name: 'server-external'
+    webadmin-platform: universal
+    webadmin-customization: default
 
+    cmake-executable: cmake
+    custom-cleaner-log: '{build-dir}/cleaner.log'
+    cmake-configure-log: 'cmake-configure-{customization}.log'
+    cmake-build-log: 'cmake-build-{customization}.log'
+    build-dir: build
+
+    build-artifacts: 'distrib/,bin/,lib/,current_config.py,build_info.txt,{cmake-build-log},{cmake-configure-log}'
+    build-artifacts-min: '{build-dir}/*.log'
     properties:
     - heavy-job:
         weight: 1
@@ -88,12 +99,12 @@
 
     # Remove any logs located in build dir since build dir is shared across customizations
     - file-delete-operation:
-        includes: 'build/*.log'
+        includes: '{build-artifacts-min}'
         excludes: ''
 
     # Remove distrib folder
     - folder-delete-operation:
-        folder-path: build/distrib
+        folder-path: '{build-dir}/distrib'
 
     # Run custom cleaner provided by development team
     # TODO: display content of file
@@ -103,11 +114,11 @@
         condition-basedir: workspace
         steps:
         - run-process:
-            workdir: $WORKSPACE/build
+            workdir: '$WORKSPACE/{build-dir}'
             executable: python
             executable-is-relpath: 'false'
-            arguments: '{custom_cleaner_path},--build-dir,$WORKSPACE/build'
-            logfile: build/cleaner.log
+            arguments: '{custom_cleaner_path},--build-dir,$WORKSPACE/{build-dir}'
+            logfile: '{custom-cleaner-log}'
             inherit-environ: 'true'
             environ: ''
 
@@ -120,14 +131,14 @@
         condition-kind: not
         condition-operand:
           condition-kind: file-exists
-          condition-filename: build
+          condition-filename: '{build-dir}'
           condition-basedir: workspace
         steps:
         - folder-create-operation:
-            folder-path: 'build'
+            folder-path: '{build-dir}'
 
     - folder-delete-operation:
-        folder-path: '$WORKSPACE/server-external'
+        folder-path: '$WORKSPACE/{webadmin-component-name}'
 
     - trigger-builds:
       - project: 'helper.pull-component'
@@ -135,9 +146,9 @@
           BUILD_IDENTITY=$BUILD_IDENTITY
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/
-          PLATFORM=universal
-          CUSTOMIZATION=default
-          COMPONENTS=server-external/
+          PLATFORM={webadmin-platform}
+          CUSTOMIZATION={webadmin-customization}
+          COMPONENTS={webadmin-component-name}/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -164,16 +175,16 @@
           {cmake_configure_args_customization}
     - inject:
         properties-content: |
-          CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/server-external
+          CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/{webadmin-component-name}
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
           CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
           CMAKE_ENV_environment=$WORKSPACE
     - inject:
         properties-content: |
-          WORKDIR=$WORKSPACE/build
-          EXECUTABLE=cmake
+          WORKDIR=$WORKSPACE/{build-dir}
+          EXECUTABLE={cmake-executable}
           EXECUTABLE_IS_RELPATH=false
-          LOGFILE=build/cmake-configure-{customization}.log
+          LOGFILE=build/{cmake-configure-log}
           CMAKE_ENV_PATH=$PATH
     - groovy:
         version: '{groovy-version}'
@@ -182,10 +193,10 @@
     # Build
     - inject:
         properties-content: |
-          WORKDIR=$WORKSPACE/build
-          EXECUTABLE=cmake
+          WORKDIR=$WORKSPACE/{build-dir}
+          EXECUTABLE={cmake-executable}
           CMAKE_BUILD_THREADS=20
-          LOGFILE=build/cmake-build-{customization}.log
+          LOGFILE=build/{cmake-build-log}
           CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_ENV_environment=$WORKSPACE
@@ -199,7 +210,7 @@
 
     publishers:
     - archive:
-        artifacts: 'build/*.log'
+        artifacts: '{build-artifacts-min}'
         allow-empty: 'false'
         fingerprint: true
 
@@ -221,8 +232,8 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
-                LOCAL_PATH=$WORKSPACE/build/
-                COMPONENTS=distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build-{customization}.log,cmake-configure-{customization}.log
+                LOCAL_PATH=$WORKSPACE/{build-dir}/
+                COMPONENTS={build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
               block: true
@@ -252,7 +263,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=passed
-                LOGFILE=cmake-build-{customization}.log
+                LOGFILE={cmake-build-log}
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -270,7 +281,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=failed
-                LOGFILE=cmake-build-{customization}.log
+                LOGFILE={cmake-build-log}
 
     - failure-email:
         email-recipients: '{build-watchers}'
