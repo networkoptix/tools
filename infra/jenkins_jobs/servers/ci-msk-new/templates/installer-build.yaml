@@ -169,9 +169,26 @@
         steps:
         - inject:
             properties-file: CMAKELISTS_SHA_OLD.envvar
-        - conditionally-clean-dir-expr:
-            expression: ${{env,CMAKELISTS_SHA}} != ${{env,CMAKELISTS_SHA_OLD}}
-            dir: build
+        - conditional-step:
+            condition-kind: not
+            condition-operand:
+              condition-kind: strings-match
+              condition-string1: "${{CMAKELISTS_SHA}}"
+              condition-string2: "${{CMAKELISTS_SHA_OLD}}"
+            steps:
+            - folder-delete-operation:
+                folder-path: 'build'
+
+    # create build dir if not exists or removed
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: file-exists
+          condition-filename: 'build'
+          condition-basedir: workspace
+        steps:
+        - folder-create-operation:
+            folder-path: 'build'
 
     # Once we completed checks related to CMakeLists.txt, store new value
     - file-create-operation:
