@@ -228,8 +228,7 @@ class Rdep:
         dst_config_file = os.path.join(dst, PackageConfig.FILE_NAME)
         self._verbose_message("Moving {0} to {1}".format(
                 config_file, dst_config_file))
-        shutil.copy(config_file, dst_config_file)
-        os.remove(config_file)
+        shutil.move(config_file, dst_config_file)
 
         return self.SYNC_SUCCESS
 
@@ -314,7 +313,6 @@ class Rdep:
         remote = posixpath.join(url, target, package)
 
         config = PackageConfig(local)
-        config.update_timestamp()
         config.set_uploader(uploader_name)
 
         command = self._get_rsync_command(
@@ -332,9 +330,13 @@ class Rdep:
             print >> sys.stderr, "Could not upload {0}".format(package)
             return False
 
+        local_config = os.path.join(local, PackageConfig.FILE_NAME)
+        shutil.copy(local_config, config_file)
+        PackageConfig(config_file).update_timestamp()
+
         command = self._get_rsync_command(
-            _cygwin_path(os.path.join(local, PackageConfig.FILE_NAME)),
-            remote,
+            _cygwin_path(config_file),
+            posixpath.join(remote, PackageConfig.FILE_NAME),
             show_progress=False,
             additional_args=ADDITIONAL_UPLOAD_ARGS
         )
@@ -342,8 +344,11 @@ class Rdep:
         self._verbose_rsync(command)
 
         if subprocess.call(command) != 0:
+            os.remove(config_file)
             print "Could not upload {0}".format(package)
             return False
+
+        shutil.move(config_file, local_config)
 
         print "Done {0}".format(package)
         return True
