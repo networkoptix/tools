@@ -288,7 +288,7 @@ class Rdep:
 
         print "Uploading {0}...".format(package)
 
-        url = self._repo_config.get_url()
+        url = self._repo_config.get_push_url() or self._repo_config.get_url()
         remote = posixpath.join(url, target, package)
         local = os.path.join(self.root, target, package)
 
@@ -311,7 +311,6 @@ class Rdep:
                         print >> sys.stderr, "Please make sure you are updating the latest version of the package."
                         return False
 
-        url = self._repo_config.get_push_url(url)
         remote = posixpath.join(url, target, package)
 
         config = PackageConfig(local)
