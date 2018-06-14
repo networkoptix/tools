@@ -86,7 +86,7 @@
           LOCAL_PATH=$WORKSPACE/build/
           PLATFORM=$PLATFORM
           CUSTOMIZATION=$CUSTOMIZATION
-          COMPONENTS=distrib/,bin/,lib/,current_config.py
+          COMPONENTS=distrib/,bin/,lib/,packages/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:

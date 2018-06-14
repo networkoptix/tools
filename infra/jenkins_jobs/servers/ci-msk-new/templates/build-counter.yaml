@@ -103,9 +103,7 @@
     - p_BUILD_DESCRIPTION:
         default: ''
 
-    # administrative parameters
-    - simple-separator:
-        header: "Special section for administrative/maintenance purposes.. DON'T MODIFY if you are not administrator"
+    - administrative-section-separator
     - string:
         name: SET_{counter_var_name}
         default: ''

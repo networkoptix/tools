@@ -271,7 +271,9 @@
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.vms.runner'
+    - '{pipeline}.{branch}.vms.runner':
+        default-platforms: linux-x64,linux-x86,win-x86
+        default-customizations: default,hanwha
 
     # UTILITY - register commit, build identities and other
 

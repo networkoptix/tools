@@ -53,6 +53,49 @@
         RSYNC_PORT="{port}"
         RSYNC_USER="{user}"
 
+        #TODO: Should we move files somewhere instead of deleting?
+        if [ '{force}' == 'true' ] ; then
+          echo "\nFORCE MODE\nWILL OVERRIDE ALL ARTIFACTS\n"
+          echo "Clean dir first.."
+          RSYNC_DST="{dst_path}"
+            # replace 'C:\' with '/cygdrive/c/'
+          RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+          RSYNC_DST="${{RSYNC_DST//\\//}}"
+          rm -rf "${{RSYNC_DST}}"
+          echo "Done"
+        else
+          echo "Ensure that components will not be overwritten..."
+          if [ -e "{dst_path}" ] ; then
+            echo "Here is a list of components currently located at the root of target directory."
+            echo "Note, that '..' are also allowed as part paths."
+            ls -la "{dst_path}"
+          else
+            echo "{dst_path} does not exist yet"
+          fi
+
+          echo "The components array is {components}"
+          IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
+          for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
+          do
+            RSYNC_DST="{dst_path}/${{COMPONENT}}"
+            # When working with windows Jenkins node Workspace is represented as windows path.
+            # Volume name ('C:') and back-slashes ('\') are error prone.
+            # One of the option is to replace them with cygwin paths.
+
+            # replace 'C:\' with '/cygdrive/c/'
+            RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+            # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+            RSYNC_DST="${{RSYNC_DST//\\//}}"
+
+            echo "Checking path \"${{RSYNC_DST}}\""
+            if [ -e ${{RSYNC_DST}} ] ; then
+              echo "Path exists. FAIL."
+              exit 1
+            fi
+          done
+        fi
+
         # components ~> "dir1/,dir2/,file1,file2"
         echo "Will rsync {components} components"
 

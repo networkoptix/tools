@@ -32,13 +32,16 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_PLATFORMS:
-        default: 'linux-x64,linux-x86,win-x86'
+        default: '{default-platforms}'
     - p_CUSTOMIZATIONS:
-        default: 'default,hanwha'
+        default: '{default-customizations}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - p_CLEAN_BUILD
+    - p_CLEAN_WORKSPACE
+    - p_CLEAN_BUILD:
+        default: false
+    - p_CLEAN_CLONE
 
     wrappers:
     - inject:
@@ -110,7 +113,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -125,7 +130,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.default_cn.all'
@@ -137,7 +144,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.default_zh_CN.all'
@@ -149,7 +158,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.cox.all'
@@ -161,7 +172,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.digitalwatchdog.all'
@@ -173,7 +186,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.digitalwatchdog_global.all'
@@ -185,7 +200,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.hanwha.all'
@@ -197,7 +214,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.ipera.all'
@@ -209,7 +228,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.ionetworks.all'
@@ -221,7 +242,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.nutech.all'
@@ -233,7 +256,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.ras.all'
@@ -245,7 +270,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.senturian.all'
@@ -257,7 +284,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.systemk.all'
@@ -269,7 +298,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.tricom.all'
@@ -281,7 +312,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.ust.all'
@@ -293,7 +326,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.vista.all'
@@ -305,7 +340,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.vmsdemoblue.all'
@@ -317,7 +354,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x64.vmsdemoorange.all'
@@ -329,7 +368,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.default.all'
@@ -341,7 +382,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.default_cn.all'
@@ -353,7 +396,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.default_zh_CN.all'
@@ -365,7 +410,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.cox.all'
@@ -377,7 +424,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.digitalwatchdog.all'
@@ -389,7 +438,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.digitalwatchdog_global.all'
@@ -401,7 +452,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.hanwha.all'
@@ -413,7 +466,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.ipera.all'
@@ -425,7 +480,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.ionetworks.all'
@@ -437,7 +494,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.nutech.all'
@@ -449,7 +508,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.ras.all'
@@ -461,7 +522,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.senturian.all'
@@ -473,7 +536,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.systemk.all'
@@ -485,7 +550,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.tricom.all'
@@ -497,7 +564,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.ust.all'
@@ -509,7 +578,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.vista.all'
@@ -521,7 +592,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.vmsdemoblue.all'
@@ -533,7 +606,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.linux-x86.vmsdemoorange.all'
@@ -545,7 +620,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.default.all'
@@ -557,7 +634,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.default_cn.all'
@@ -569,7 +648,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.default_zh_CN.all'
@@ -581,7 +662,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.cox.all'
@@ -593,7 +676,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.digitalwatchdog.all'
@@ -605,7 +690,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.digitalwatchdog_global.all'
@@ -617,7 +704,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.hanwha.all'
@@ -629,7 +718,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.ipera.all'
@@ -641,7 +732,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.ionetworks.all'
@@ -653,7 +746,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.nutech.all'
@@ -665,7 +760,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.ras.all'
@@ -677,7 +774,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.senturian.all'
@@ -689,7 +788,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.systemk.all'
@@ -701,7 +802,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.tricom.all'
@@ -713,7 +816,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.ust.all'
@@ -725,7 +830,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.vista.all'
@@ -737,7 +844,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.vmsdemoblue.all'
@@ -749,7 +858,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bananapi.vmsdemoorange.all'
@@ -761,7 +872,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.default.all'
@@ -773,7 +886,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.default_cn.all'
@@ -785,7 +900,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.default_zh_CN.all'
@@ -797,7 +914,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.cox.all'
@@ -809,7 +928,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.digitalwatchdog.all'
@@ -821,7 +942,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.digitalwatchdog_global.all'
@@ -833,7 +956,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.hanwha.all'
@@ -845,7 +970,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.ipera.all'
@@ -857,7 +984,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.ionetworks.all'
@@ -869,7 +998,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.nutech.all'
@@ -881,7 +1012,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.ras.all'
@@ -893,7 +1026,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.senturian.all'
@@ -905,7 +1040,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.systemk.all'
@@ -917,7 +1054,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.tricom.all'
@@ -929,7 +1068,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.ust.all'
@@ -941,7 +1082,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.vista.all'
@@ -953,7 +1096,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.vmsdemoblue.all'
@@ -965,7 +1110,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.bpi.vmsdemoorange.all'
@@ -977,7 +1124,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.default.all'
@@ -989,7 +1138,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.default_cn.all'
@@ -1001,7 +1152,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.default_zh_CN.all'
@@ -1013,7 +1166,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.cox.all'
@@ -1025,7 +1180,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.digitalwatchdog.all'
@@ -1037,7 +1194,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.digitalwatchdog_global.all'
@@ -1049,7 +1208,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.hanwha.all'
@@ -1061,7 +1222,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.ipera.all'
@@ -1073,7 +1236,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.ionetworks.all'
@@ -1085,7 +1250,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.nutech.all'
@@ -1097,7 +1264,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.ras.all'
@@ -1109,7 +1278,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.senturian.all'
@@ -1121,7 +1292,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.systemk.all'
@@ -1133,7 +1306,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.tricom.all'
@@ -1145,7 +1320,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.ust.all'
@@ -1157,7 +1334,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.vista.all'
@@ -1169,7 +1348,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.vmsdemoblue.all'
@@ -1181,7 +1362,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.rpi.vmsdemoorange.all'
@@ -1193,7 +1376,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.edge1.digitalwatchdog.all'
@@ -1205,7 +1390,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.default.all'
@@ -1217,7 +1404,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.default_cn.all'
@@ -1229,7 +1418,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.default_zh_CN.all'
@@ -1241,7 +1432,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.cox.all'
@@ -1253,7 +1446,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.digitalwatchdog.all'
@@ -1265,7 +1460,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.digitalwatchdog_global.all'
@@ -1277,7 +1474,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.hanwha.all'
@@ -1289,7 +1488,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.ipera.all'
@@ -1301,7 +1502,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.ionetworks.all'
@@ -1313,7 +1516,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.nutech.all'
@@ -1325,7 +1530,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.ras.all'
@@ -1337,7 +1544,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.senturian.all'
@@ -1349,7 +1558,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.systemk.all'
@@ -1361,7 +1572,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.tricom.all'
@@ -1373,7 +1586,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.ust.all'
@@ -1385,7 +1600,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.vista.all'
@@ -1397,7 +1614,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.vmsdemoblue.all'
@@ -1409,7 +1628,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.tx1.vmsdemoorange.all'
@@ -1421,7 +1642,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.default.all'
@@ -1433,7 +1656,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.default_cn.all'
@@ -1445,7 +1670,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.default_zh_CN.all'
@@ -1457,7 +1684,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.cox.all'
@@ -1469,7 +1698,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.digitalwatchdog.all'
@@ -1481,7 +1712,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.digitalwatchdog_global.all'
@@ -1493,7 +1726,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.hanwha.all'
@@ -1505,7 +1740,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.ipera.all'
@@ -1517,7 +1754,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.ionetworks.all'
@@ -1529,7 +1768,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.nutech.all'
@@ -1541,7 +1782,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.ras.all'
@@ -1553,7 +1796,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.senturian.all'
@@ -1565,7 +1810,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.systemk.all'
@@ -1577,7 +1824,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.tricom.all'
@@ -1589,7 +1838,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.ust.all'
@@ -1601,7 +1852,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.vista.all'
@@ -1613,7 +1866,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.vmsdemoblue.all'
@@ -1625,7 +1880,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x64.vmsdemoorange.all'
@@ -1637,7 +1894,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.default.all'
@@ -1649,7 +1908,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.default_cn.all'
@@ -1661,7 +1922,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.default_zh_CN.all'
@@ -1673,7 +1936,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.cox.all'
@@ -1685,7 +1950,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.digitalwatchdog.all'
@@ -1697,7 +1964,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.digitalwatchdog_global.all'
@@ -1709,7 +1978,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.hanwha.all'
@@ -1721,7 +1992,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.ipera.all'
@@ -1733,7 +2006,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.ionetworks.all'
@@ -1745,7 +2020,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.nutech.all'
@@ -1757,7 +2034,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.ras.all'
@@ -1769,7 +2048,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.senturian.all'
@@ -1781,7 +2062,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.systemk.all'
@@ -1793,7 +2076,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.tricom.all'
@@ -1805,7 +2090,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.ust.all'
@@ -1817,7 +2104,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.vista.all'
@@ -1829,7 +2118,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.vmsdemoblue.all'
@@ -1841,7 +2132,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.win-x86.vmsdemoorange.all'
@@ -1853,7 +2146,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.default.all'
@@ -1865,7 +2160,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.default_cn.all'
@@ -1877,7 +2174,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.default_zh_CN.all'
@@ -1889,7 +2188,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.cox.all'
@@ -1901,7 +2202,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.digitalwatchdog.all'
@@ -1913,7 +2216,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.digitalwatchdog_global.all'
@@ -1925,7 +2230,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.hanwha.all'
@@ -1937,7 +2244,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.ipera.all'
@@ -1949,7 +2258,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.ionetworks.all'
@@ -1961,7 +2272,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.nutech.all'
@@ -1973,7 +2286,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.ras.all'
@@ -1985,7 +2300,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.senturian.all'
@@ -1997,7 +2314,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.systemk.all'
@@ -2009,7 +2328,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.tricom.all'
@@ -2021,7 +2342,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.ust.all'
@@ -2033,7 +2356,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.vista.all'
@@ -2045,7 +2370,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.vmsdemoblue.all'
@@ -2057,7 +2384,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
         - name: '{pipeline}.{branch}.vms.installer.mac.vmsdemoorange.all'
@@ -2069,7 +2398,9 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
 
     # At this moment all builds are completed and we may publish links

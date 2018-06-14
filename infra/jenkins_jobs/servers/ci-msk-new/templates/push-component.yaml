@@ -30,6 +30,12 @@
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
 
+    - administrative-section-separator
+    - string:
+        name: FORCE_PUSH
+        default: 'false'
+        description: "Delete existing artifacts before pushing."
+
     wrappers:
     - build-name:
         name: '#$BUILD_ID $BUILD_IDENTITY $PLATFORM $CUSTOMIZATION'
@@ -52,3 +58,4 @@
         src_path: '${{LOCAL_PATH}}'
         dst_path: '{artifact_repository_base_path}/{artifact_location_full_pattern}'
         components: '${{COMPONENTS}}'
+        force: '$FORCE_PUSH'

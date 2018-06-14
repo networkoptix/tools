@@ -56,3 +56,18 @@
               </sp.sd.fileoperations.FileDeleteOperation>
             </fileOperations>
           </sp.sd.fileoperations.FileOperationsBuilder>
+
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    name: file-create-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FileCreateOperation>
+                <fileName>{file-name}</fileName>
+                <fileContent>{file-content}</fileContent>
+              </sp.sd.fileoperations.FileCreateOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>

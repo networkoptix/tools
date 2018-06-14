@@ -37,6 +37,27 @@
       Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
       latest artifact that has REQUESTED_BY equal to marker.
 
+      This job also provides shasum for build configuration files.
+      In build workspace one may compare "old" shasum calculated for sources of prev.
+      build located in build workspace with "new" shasum calculated for sources for
+      requested build.
+      If shasums don't differ then incremental build is possible. otherwise all files
+      from build dir should be removed.
+
+      Example
+
+      commit_hash_1 -> shasum_A -> build_1
+      commit_hash_2 -> shasum_A -> build_2
+      commit_hash_3 -> shasum_B -> build_3
+
+      If in current build dir we have any build that have shasum_A and we want to
+      build commit_hash_2 incrementally, then it's possible because it's hash is
+      shasum_A. But it's impossible to build incrementally commit_hash_3 because it
+      produces shasum_B that differs from shasum_A
+
+      Shasum of build files is available in CMAKELISTS_SHA.envvar file represented
+      in Jenkins envvar format (Var name, equals and var value not enclosed in quotes).
+
       --------------------------------------------------------------------------------
       </pre>
     node: '{commit-freeze-node}'
@@ -95,6 +116,15 @@
     - shell: |
         #!/bin/bash
         set -ex
+        echo "CMAKELISTS_SHA=$(find "${{WORKSPACE}}/nx_vms" -name CMakeLists.txt | xargs cat | shasum -a 256 | cut -f 1 -d " ")" > 'CMAKELISTS_SHA.envvar'
+    - inject:
+        properties-file: CMAKELISTS_SHA.envvar
+    - description-setter:
+        description: |
+          CMakeLists.txt sha is $CMAKELISTS_SHA
+    - shell: |
+        #!/bin/bash
+        set -ex
         echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
     - inject:
         properties-file: NX_VMS_COMMIT.envvar
@@ -103,7 +133,7 @@
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
-        artifacts: 'NX_VMS_COMMIT.envvar'
+        artifacts: 'NX_VMS_COMMIT.envvar,CMAKELISTS_SHA.envvar'
         allow-empty: 'false'
         fingerprint: true
     - failure-email(maintainers)

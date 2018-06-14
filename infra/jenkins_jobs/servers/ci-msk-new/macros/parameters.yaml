@@ -28,7 +28,7 @@
         name: CLEAN_WORKSPACE
         default: false
         description: >-
-          BUild strategy, don't even try to reuse existing workspace.
+          Build strategy, don't even try to reuse existing workspace.
           Clean EVERYTHING (HG repos, build, distrib and other folders).
 
 - parameter:
@@ -160,3 +160,12 @@
         default: ''
         description: >
           Local path on remote host
+
+# Advanced usage
+- parameter:
+    name: administrative-section-separator
+    parameters:
+    - simple-separator:
+        header: >-
+          Special section for administrative/maintenance purposes..
+          DON'T MODIFY anything if you are not administrator

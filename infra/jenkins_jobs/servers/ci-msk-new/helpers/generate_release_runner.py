@@ -34,13 +34,16 @@ print '''#
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_PLATFORMS:
-        default: 'linux-x64,linux-x86,win-x86'
+        default: '{default-platforms}'
     - p_CUSTOMIZATIONS:
-        default: 'default,hanwha'
+        default: '{default-customizations}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - p_CLEAN_BUILD
+    - p_CLEAN_WORKSPACE
+    - p_CLEAN_BUILD:
+        default: false
+    - p_CLEAN_CLONE
 
     wrappers:
     - inject:
@@ -112,7 +115,9 @@ print '''#
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -144,7 +149,9 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
 '''
 print '''
     # At this moment all builds are completed and we may publish links

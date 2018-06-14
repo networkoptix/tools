@@ -54,8 +54,8 @@
     cmake-build-log: 'cmake-build.log'
     build-dir: build
 
-    build-artifacts: 'distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
-    build-artifacts-min: 'build/*.log'
+    build-artifacts: 'distrib/,bin/,lib/,packages/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
+    build-artifacts-min: 'build/**/*.log'
 
     properties:
     - heavy-job:
@@ -122,13 +122,61 @@
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
 
+    # At first, calculate sha for CMakeLists.txt
+    # since this job is crossplatform it's safier to just trigger freeze commit
+    # with linux executor than try to inplement cross-platform stuff
+    - trigger-builds:
+      - project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+        block: true
+        predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+    # Inject commit sha
+    - copyartifact:
+        project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+        filter: 'CMAKELISTS_SHA.envvar'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY={tag_requested_by}
+    - inject:
+        properties-file: 'CMAKELISTS_SHA.envvar'
+
     # STAGE: CLEANUP
     # ========================================
 
-    # Optionally remove entire build directory
+    # When there is no information related to prev CMakeLists.txt
+    # We will force to clean build dir
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: file-exists
+          condition-filename: 'CMAKELISTS_SHA_OLD.envvar'
+          condition-basedir: workspace
+        steps:
+        - folder-delete-operation:
+            folder-path: 'build'
+
+    # Optionally when special flag is set, we also remove build directory
     - conditionally-clean-dir:
         condition-varname: CLEAN_BUILD
         dir: build
+
+    # Once we have some info regarding old CMakeLists.txt, we'll check that
+    # incremental build is applicable, if not, again remove build folder
+    - conditional-step:
+        condition-kind: file-exists
+        condition-filename: 'CMAKELISTS_SHA_OLD.envvar'
+        condition-basedir: workspace
+        steps:
+        - inject:
+            properties-file: CMAKELISTS_SHA_OLD.envvar
+        - conditionally-clean-dir-expr:
+            expression: ${{env,CMAKELISTS_SHA}} != ${{env,CMAKELISTS_SHA_OLD}}
+            dir: build
+
+    # Once we completed checks related to CMakeLists.txt, store new value
+    - file-create-operation:
+        file-name: CMAKELISTS_SHA_OLD.envvar
+        file-content: CMAKELISTS_SHA_OLD=${{CMAKELISTS_SHA}}
 
     # Unconditionally ensure that all artifacts that may be left in workspace after
     # any previous build process are removed
@@ -219,7 +267,7 @@
           CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/{webadmin-component-name}
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
           CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
-          CMAKE_ENV_environment=$WORKSPACE
+          CMAKE_ENV_environment=$WORKSPACE/build
     - inject:
         properties-content: |
           WORKDIR=$WORKSPACE/{build-dir}
@@ -240,7 +288,6 @@
           LOGFILE=build/{cmake-build-log}
           CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_ENV_environment=$WORKSPACE
           CMAKE_ENV_PATH=$PATH
     - groovy:
         version: '{groovy-version}'
