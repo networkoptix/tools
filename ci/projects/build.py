@@ -265,8 +265,8 @@ class CMakeBuilder(object):
         if self._platform_config.toolset:
             generate_args += ['-T', self._platform_config.toolset]
         generate_args += [src_full_path]
-        if build_params.target_device:
-            generate_args.append('-DtargetDevice=%s' % build_params.target_device)
+        # if build_params.target_device:
+        #     generate_args.append('-DtargetDevice=%s' % build_params.target_device)
         log.info('Generating with cmake: %s', self._host.args2cmdline(generate_args))
         return self._run_and_decorate_cmake(
             'Generation', generate_args, env=self._env, cwd=build_dir, check_retcode=False, timeout=GENERATE_TIMEOUT)
