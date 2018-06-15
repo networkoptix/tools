@@ -131,6 +131,7 @@
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     # Inject commit sha
     - copyartifact:
         project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'

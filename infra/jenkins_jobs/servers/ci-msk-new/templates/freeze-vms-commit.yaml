@@ -76,7 +76,8 @@
         artifact-num-to-keep: 100
 
     parameters:
-    - p_BUILD_DESCRIPTION
+    - p_BUILD_DESCRIPTION:
+        default: ''
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
