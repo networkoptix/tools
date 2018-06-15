@@ -59,14 +59,16 @@
     - multijob:
         name: Freeze nx commit
         projects:
-        - name: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+        - name: 'helper.freeze-nx-vms-commit'
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
+            BRANCH=$BRANCH
+            PIPELINE=$PIPELINE
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
-        project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+        project: 'helper.freeze-nx-vms-commit'
         filter: 'NX_VMS_COMMIT.envvar'
         which-build: last-completed
         parameter-filters: REQUESTED_BY={tag_requested_by}

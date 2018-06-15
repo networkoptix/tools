@@ -110,13 +110,16 @@
         condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
         steps:
         - trigger-builds:
-          - project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+          - project: 'helper.freeze-nx-vms-commit'
             block: true
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
-              NX_VMS_COMMIT=$NX_VMS_COMMIT
+              BRANCH=$BRANCH
+              PIPELINE=$PIPELINE
+              NX_VMS_COMMIT=$_NX_VMS_COMMIT
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
         - copyartifact:
-            project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+            project: 'helper.freeze-nx-vms-commit'
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-completed
             parameter-filters: REQUESTED_BY={tag_requested_by}

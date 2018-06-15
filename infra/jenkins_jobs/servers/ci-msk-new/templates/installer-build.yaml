@@ -122,35 +122,37 @@
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
 
-    # At first, calculate sha for CMakeLists.txt
+    # At first, calculate sha for build config files
     # since this job is crossplatform it's safier to just trigger freeze commit
     # with linux executor than try to inplement cross-platform stuff
     - trigger-builds:
-      - project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
+      - project: 'helper.freeze-build-config'
         block: true
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
+          BRANCH=$BRANCH
+          PIPELINE=$PIPELINE
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     # Inject commit sha
     - copyartifact:
-        project: '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
-        filter: 'CMAKELISTS_SHA.envvar'
+        project: 'helper.freeze-build-config'
+        filter: 'BUILD_CONFIG_SHA.envvar'
         which-build: last-completed
         parameter-filters: REQUESTED_BY={tag_requested_by}
     - inject:
-        properties-file: 'CMAKELISTS_SHA.envvar'
+        properties-file: 'BUILD_CONFIG_SHA.envvar'
 
     # STAGE: CLEANUP
     # ========================================
 
-    # When there is no information related to prev CMakeLists.txt
+    # When there is no information related to prev build config
     # We will force to clean build dir
     - conditional-step:
         condition-kind: not
         condition-operand:
           condition-kind: file-exists
-          condition-filename: 'CMAKELISTS_SHA_OLD.envvar'
+          condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
           condition-basedir: workspace
         steps:
         - folder-delete-operation:
@@ -161,21 +163,21 @@
         condition-varname: CLEAN_BUILD
         dir: build
 
-    # Once we have some info regarding old CMakeLists.txt, we'll check that
+    # Once we have some info regarding oldbuild config, we'll check that
     # incremental build is applicable, if not, again remove build folder
     - conditional-step:
         condition-kind: file-exists
-        condition-filename: 'CMAKELISTS_SHA_OLD.envvar'
+        condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
         condition-basedir: workspace
         steps:
         - inject:
-            properties-file: CMAKELISTS_SHA_OLD.envvar
+            properties-file: BUILD_CONFIG_SHA_OLD.envvar
         - conditional-step:
             condition-kind: not
             condition-operand:
               condition-kind: strings-match
-              condition-string1: "${{CMAKELISTS_SHA}}"
-              condition-string2: "${{CMAKELISTS_SHA_OLD}}"
+              condition-string1: "${{BUILD_CONFIG_SHA}}"
+              condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
             steps:
             - folder-delete-operation:
                 folder-path: 'build'
@@ -193,8 +195,8 @@
 
     # Once we completed checks related to CMakeLists.txt, store new value
     - file-create-operation:
-        file-name: CMAKELISTS_SHA_OLD.envvar
-        file-content: CMAKELISTS_SHA_OLD=${{CMAKELISTS_SHA}}
+        file-name: BUILD_CONFIG_SHA_OLD.envvar
+        file-content: BUILD_CONFIG_SHA_OLD=${{BUILD_CONFIG_SHA}}
 
     # Unconditionally ensure that all artifacts that may be left in workspace after
     # any previous build process are removed

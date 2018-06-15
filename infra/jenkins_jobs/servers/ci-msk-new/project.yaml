@@ -242,6 +242,8 @@
     - helper.sync-hg
     - helper.pull-component
     - helper.push-component
+    - helper.freeze-nx-vms-commit
+    - helper.freeze-build-config
 
     # TRIGGERS - main entry points
 
@@ -277,7 +279,6 @@
 
     # UTILITY - register commit, build identities and other
 
-    - '{pipeline}.{branch}.vms.freeze_nx_vms_commit'
     - '{pipeline}.{counter_name}.generator':
         counter_name: build_number
         counter_var_name: BUILD_IDENTITY

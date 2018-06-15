@@ -53,6 +53,13 @@
           build that's not possible under current circumstances.
 
 # Parameters That fully define artifacts: what sources used and where to put what's built
+- parameter:
+    name: p_PIPELINE
+    parameters:
+    - string:
+        name: PIPELINE
+        description: >-
+          Build pipeline pipeline (e.g. custom, release and others)
 
 - parameter:
     name: p_BRANCH

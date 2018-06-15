@@ -1,10 +1,10 @@
 - job-template:
-    name: 'helper.freeze-nx-vms-commit'
+    name: 'helper.freeze-build-config'
     job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================
-      Freeze nx_vms commit
+      Freeze build configuration identity
       ================================================================================
 
       JOB MAINTAINERS
@@ -12,25 +12,30 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/freeze-vms-commit.yaml
+        devtools/infra/jenkins_jobs/servers/templates/freeze-build-config.yaml
 
       --------------------------------------------------------------------------------
 
-      This job serves as for freezing particular commit based on abstract hg ref.
+      This job provides shasum for build configuration files.
+      In build workspace one may compare "old" shasum calculated for sources of prev.
+      build located in build workspace with "new" shasum calculated for sources for
+      requested build.
+      If shasums don't differ then incremental build is possible. otherwise all files
+      from build dir should be removed.
 
-      This solves 2 problems
+      Example
 
-      * After some waiting time in queue builds may build not the commit they supposed
-        to build, but commit that is assigned to ref by the time build really starts
-      * Not all builds are started in the same time, so by the time different builds
-        started there are different commits pointed by ref and this is not acceptable
+      commit_hash_1 -> shasum_A -> build_1
+      commit_hash_2 -> shasum_A -> build_2
+      commit_hash_3 -> shasum_B -> build_3
 
-      Frozen commit value (sha) is available in NX_VMS_COMMIT.envvar file represented
+      If in current build dir we have any build that have shasum_A and we want to
+      build commit_hash_2 incrementally, then it's possible because it's hash is
+      shasum_A. But it's impossible to build incrementally commit_hash_3 because it
+      produces shasum_B that differs from shasum_A
+
+      Shasum of build files is available in BUILD_CONFIG_SHA.envvar file represented
       in Jenkins envvar format (Var name, equals and var value not enclosed in quotes).
-
-      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
-      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
-      of build description.
 
       Every build is connected with upstream builds by Jenkins internals, but due to
       some internal limitations it's recommended to use REQUESTED_BY argument.
@@ -107,18 +112,12 @@
     - description-setter:
         description: |
           CMakeLists.txt sha is $BUILD_CONFIG_SHA
-    - shell: |
-        #!/bin/bash
-        set -ex
-        echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
-    - inject:
-        properties-file: NX_VMS_COMMIT.envvar
 
     publishers:
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
-        artifacts: 'NX_VMS_COMMIT.envvar,BUILD_CONFIG_SHA.envvar'
+        artifacts: 'BUILD_CONFIG_SHA.envvar'
         allow-empty: 'false'
         fingerprint: true
     - failure-email(maintainers)
