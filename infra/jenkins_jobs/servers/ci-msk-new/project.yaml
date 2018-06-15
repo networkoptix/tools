@@ -29,13 +29,11 @@
     artifact_repository_base_url: 'http://10.0.0.158/repository/v1/'
     junkshop_base_url: 'http://10.0.0.160'
 
-    # TODO: insert $PIPELINE
-    artifact_location_root_pattern: '${{BUILD_IDENTITY}}'
-    artifact_location_full_pattern: '${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}'
+    artifact_location_root_pattern: '${{PIPELINE}}/${{BUILD_IDENTITY}}'
+    artifact_location_full_pattern: '${{PIPELINE}}/${{BUILD_IDENTITY}}/${{PLATFORM}}/${{CUSTOMIZATION}}'
 
-    # TODO: testing -> $PIPELINE
-    junkshop_location_root_pattern: 'project/testing/$BRANCH/$BUILD_IDENTITY'
-    junkshop_location_full_pattern: 'project/testing/$BRANCH/$BUILD_IDENTITY'
+    junkshop_location_root_pattern: 'project/$PIPELINE/$BRANCH/$BUILD_IDENTITY'
+    junkshop_location_full_pattern: 'project/$PIPELINE/$BRANCH/$BUILD_IDENTITY'
 
 
     webadmin-build-node: webadmin-build

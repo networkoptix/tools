@@ -1,6 +1,5 @@
 
 # specific parameter for "registry-like" jobs
-# TODO: can we use some envvar that points to particular parent build ?
 - parameter:
     name: p_REQUESTED_BY
     parameters:

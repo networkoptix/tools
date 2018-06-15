@@ -106,8 +106,8 @@ print '''#
         description: |
           $BUILD_DESCRIPTION
 
-    # TODO: we don't need to build w/a for macOS. But it's not enough to disable it here
-    # because w/a artifact is mandatory in build installers..
+    # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
+    # because artifact is mandatory in build installers.
     - multijob:
         name: Build web admin
         projects:
