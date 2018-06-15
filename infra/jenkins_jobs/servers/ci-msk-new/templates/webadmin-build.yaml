@@ -145,17 +145,7 @@
         artifacts: '{webadmin-build-artifacts-min}'
         allow-empty: 'false'
         fingerprint: true
-    # - postbuildscript:
-    #     mark-unstable-if-failed: true
-    #     builders:
-    #     - role: SLAVE
-    #       build-on:
-    #       - SUCCESS
-    #       - UNSTABLE
-    #       build-steps:
 
-
-    # TODO: publish into other repo than default when build is failed
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:

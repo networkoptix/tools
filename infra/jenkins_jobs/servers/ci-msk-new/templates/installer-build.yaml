@@ -362,7 +362,7 @@
                 <a href='$REPOSITORY_URL'> Artifacts </a>,
                 <a href='$JUNKSHOP_URL'> Junkshop </a>
 
-    # TODO: publish into other repo than default when build is failed
+
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:

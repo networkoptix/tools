@@ -100,7 +100,7 @@
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
-    # TODO: publish into other repo than default when build is failed
+
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
