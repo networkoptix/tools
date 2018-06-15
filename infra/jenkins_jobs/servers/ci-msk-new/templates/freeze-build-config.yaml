@@ -111,7 +111,7 @@
         properties-file: BUILD_CONFIG_SHA.envvar
     - description-setter:
         description: |
-          CMakeLists.txt sha is $BUILD_CONFIG_SHA
+          $BUILD_CONFIG_SHA
 
     publishers:
     - publisher-set-build-name:

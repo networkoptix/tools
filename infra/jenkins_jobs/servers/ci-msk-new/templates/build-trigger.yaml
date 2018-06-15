@@ -128,10 +128,10 @@
 
     - description-setter:
         description: |
-          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
+          $BUILD_DESCRIPTION
     - description-setter:
         description: |
-          $BUILD_DESCRIPTION
+          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
 
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
