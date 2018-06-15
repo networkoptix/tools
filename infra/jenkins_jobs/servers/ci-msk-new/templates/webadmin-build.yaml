@@ -198,7 +198,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=passed
-                LOGFILE='{webadmin-build-log}'
+                LOGFILE={webadmin-build-log}
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -217,7 +217,7 @@
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
                 BUILD_STATUS=failed
-                LOGFILE='{webadmin-build-log}'
+                LOGFILE={webadmin-build-log}
 
     - failure-email:
         email-recipients: '{build-watchers}'
