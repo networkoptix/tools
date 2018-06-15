@@ -46,7 +46,7 @@ unit_tests:
 ci:
   # default platforms to build by CI project
   platforms:
-    - win-x64
+    - windows-x64
     - linux-x64
     - mac
     - bpi
@@ -60,16 +60,16 @@ release:
   days_to_keep_old_builds: 5
   hardware_signing:
     - customization: vista
-      platform: win-x64
+      platform: windows-x64
       node: windows-vista-key  # node is ignored for now
     - customization: vista
-      platform: win-x86
+      platform: windows-x86
       node: windows-vista-key  # node is ignored for now
 
 fun_tests:
   platforms:
     - linux-x64
-  #  - win-x64
+  #  - windows-x64
   node: funtest
   timeout: 4h
   port_base: 20000  # base for REST API ports forwarded from vm to host
@@ -117,7 +117,7 @@ platforms:
       - '*.deb'
     update_mask_list:
       - '*_update-*.zip'
-  win-x64:
+  windows-x64:
     build_node: windows
     generator: Visual Studio 15 2017 Win64
     toolset: host=x64
@@ -128,7 +128,7 @@ platforms:
     update_mask_list:
       - '*_update-*.zip'
       - '*_debug-*.zip'  # strange, but pdbs go to updates dir
-  win-x86:
+  windows-x86:
     build_node: windows
     generator: Visual Studio 15 2017
     toolset: host=x64
