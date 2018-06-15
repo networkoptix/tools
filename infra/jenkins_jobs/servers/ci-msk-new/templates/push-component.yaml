@@ -17,9 +17,18 @@
         artifact-num-to-keep: 25
 
     parameters:
+    - p_REQUESTED_BY
+    - bool:
+        name: IS_SUCCESSFUL
+        default: true
+        description: >-
+          Special flag to mark partial and/or faild builds, they should
+          go to other repository than final one with good artifacts.
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
+    - p_PIPELINE
+    - p_BRANCH
     - p_BUILD_IDENTITY
     - p_PLATFORM
     - p_CUSTOMIZATION
@@ -50,12 +59,50 @@
         - jenkins
 
     builders:
+    - inject:
+        properties-content: |
+          RUNNING_NUM=$BUILD_ID
+    - shell: |
+        #!/bin/bash
+        : ${{REQUESTED_BY:?}}
+        : ${{BUILD_IDENTITY:?}}
+        : ${{CUSTOMIZATION:?}}
+        : ${{PLATFORM:?}}
+    - shell: |
+        #!/bin/bash
+        if [ "${{IS_SUCCESSFUL}}" == 'true' ] ; then
+          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
+          REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
+        else
+          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern_failed}"
+          REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern_failed}"
+        fi
+        echo "REPOSITORY_PATH=${{REPOSITORY_PATH}}" > REPOSITORY_PATH.envvar
+        echo "REPOSITORY_URL=${{REPOSITORY_URL}}" > REPOSITORY_URL.envvar
+    - inject:
+        properties-file: REPOSITORY_PATH.envvar
+    - inject:
+        properties-file: REPOSITORY_URL.envvar
+
+    - description-setter:
+        description: |
+          $REPOSITORY_URL
 
     - rsync-download:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
         src_path: '${{LOCAL_PATH}}'
-        dst_path: '{artifact_repository_base_path}/{artifact_location_full_pattern}'
+        dst_path: '${{REPOSITORY_PATH}}'
         components: '${{COMPONENTS}}'
         force: '$FORCE_PUSH'
+
+    publishers:
+    - archive:
+        artifacts: 'REPOSITORY_PATH.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - archive:
+        artifacts: 'REPOSITORY_URL.envvar'
+        allow-empty: 'false'
+        fingerprint: true

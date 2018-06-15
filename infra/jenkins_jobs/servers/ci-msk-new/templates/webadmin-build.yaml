@@ -123,15 +123,6 @@
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
-    - inject:
-        properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    - description-setter:
-        description: >-
-          <a href='$REPOSITORY_URL'> Artifacts </a>,
-          <a href='$JUNKSHOP_URL'> Junkshop </a>
-
     - conditionally-clean-dir:
         condition-varname: CLEAN_BUILD
         dir: build
@@ -154,6 +145,15 @@
         artifacts: '{webadmin-build-artifacts-min}'
         allow-empty: 'false'
         fingerprint: true
+    # - postbuildscript:
+    #     mark-unstable-if-failed: true
+    #     builders:
+    #     - role: SLAVE
+    #       build-on:
+    #       - SUCCESS
+    #       - UNSTABLE
+    #       build-steps:
+
 
     # TODO: publish into other repo than default when build is failed
     - postbuildscript:
@@ -163,9 +163,6 @@
           build-on:
           - SUCCESS
           - UNSTABLE
-          - FAILURE
-          - NOT_BUILT
-          - ABORTED
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
@@ -173,19 +170,78 @@
               block-thresholds:
                 failure-threshold: FAILURE
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                IS_SUCCESSFULL=true
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
+          - copyartifact:
+              project: 'helper.push-component'
+              filter: 'REPOSITORY_URL.envvar'
+              which-build: last-completed
+              parameter-filters: REQUESTED_BY={tag_requested_by}
+          - inject:
+              properties-file: REPOSITORY_URL.envvar
+          - inject:
+              properties-content: |
+                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+          - description-setter:
+              description: >-
+                <a href='$REPOSITORY_URL'> Artifacts </a>,
+                <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                IS_SUCCESSFULL=false
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                LOCAL_PATH=$WORKSPACE/
+                COMPONENTS={webadmin-build-artifacts}
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+          - copyartifact:
+              project: 'helper.push-component'
+              filter: 'REPOSITORY_URL.envvar'
+              which-build: last-completed
+              parameter-filters: REQUESTED_BY={tag_requested_by}
+          - inject:
+              properties-file: REPOSITORY_URL.envvar
+          - inject:
+              properties-content: |
+                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+          - description-setter:
+              description: >-
+                <a href='$REPOSITORY_URL'> Artifacts </a>,
+                <a href='$JUNKSHOP_URL'> Junkshop </a>
+
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
           build-on:
           - SUCCESS
+          - UNSTABLE
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.build-reporter'

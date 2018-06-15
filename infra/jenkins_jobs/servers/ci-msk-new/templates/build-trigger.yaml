@@ -90,7 +90,11 @@
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
-
+    - inject:
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          REPOSITORY_URL_FAILED={artifact_repository_base_url}/{artifact_location_root_pattern_failed}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - inject:
         properties-content: |
           BUILD_IDENTITY=undef
@@ -170,6 +174,11 @@
               properties-file: 'NX_VMS_COMMIT.envvar'
           - inject:
               properties-file: 'BUILD_IDENTITY.envvar'
+          - description-setter:
+              description: >-
+                <a href='$REPOSITORY_URL'> Artifacts </a>,
+                <a href='$REPOSITORY_URL_FAILED'> Fails </a>,
+                <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'

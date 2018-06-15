@@ -24,9 +24,11 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
+    - p_BRANCH
+    - p_PIPELINE
     - p_BUILD_IDENTITY
-    - p_PLATFORM
     - p_CUSTOMIZATION
+    - p_PLATFORM
     - p_COMPONENTS
     # Parameter that defines path to operate it's actually remote path
     - p_LOCAL_PATH

@@ -114,11 +114,13 @@
             - project: 'helper.push-component'
               block: true
               predefined-parameters: |
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
-                LOCAL_PATH=$WORKSPACE/
+                PLATFORM=$PLATFORM
                 COMPONENTS=unit_tests/
+                LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
             - project: '{pipeline}.unittests-reporter'

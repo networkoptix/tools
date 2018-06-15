@@ -253,12 +253,14 @@
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
+          BRANCH=$BRANCH
+          PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOMIZATION={webadmin-customization}
+          PLATFORM={webadmin-platform}
+          COMPONENTS={webadmin-component-name}/
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/
-          PLATFORM={webadmin-platform}
-          CUSTOMIZATION={webadmin-customization}
-          COMPONENTS={webadmin-component-name}/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -267,10 +269,6 @@
     # STAGE: BUILD
     # ========================================
 
-    - inject:
-        properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - inject:
         properties-content: |
           {cmake_configure_args_global}
@@ -323,7 +321,6 @@
         allow-empty: 'false'
         fingerprint: true
 
-    # TODO: publish into other repo than default when build is failed
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -331,16 +328,17 @@
           build-on:
           - SUCCESS
           - UNSTABLE
-          - FAILURE
-          - NOT_BUILT
-          - ABORTED
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                IS_SUCCESSFULL=true
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
                 LOCAL_PATH=$WORKSPACE/{build-dir}/
                 COMPONENTS={build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -348,10 +346,59 @@
               block: true
               block-thresholds:
                 failure-threshold: FAILURE
-          # TODO: descriptions should differ for failed and successful builds
+
+          - copyartifact:
+              project: 'helper.push-component'
+              filter: 'REPOSITORY_URL.envvar'
+              which-build: last-completed
+              parameter-filters: REQUESTED_BY={tag_requested_by}
+          - inject:
+              properties-file: REPOSITORY_URL.envvar
+          - inject:
+              properties-content: |
+                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
           - description-setter:
               description: >-
-                $BUILD_DESCRIPTION
+                <a href='$REPOSITORY_URL'> Artifacts </a>,
+                <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    # TODO: publish into other repo than default when build is failed
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                IS_SUCCESSFULL=false
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                LOCAL_PATH=$WORKSPACE/{build-dir}/
+                COMPONENTS={build-artifacts}
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
+          - copyartifact:
+              project: 'helper.push-component'
+              filter: 'REPOSITORY_URL.envvar'
+              which-build: last-completed
+              parameter-filters: REQUESTED_BY={tag_requested_by}
+          - inject:
+              properties-file: REPOSITORY_URL.envvar
+          - inject:
+              properties-content: |
+                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+          - description-setter:
+              description: >-
                 <a href='$REPOSITORY_URL'> Artifacts </a>,
                 <a href='$JUNKSHOP_URL'> Junkshop </a>
 
