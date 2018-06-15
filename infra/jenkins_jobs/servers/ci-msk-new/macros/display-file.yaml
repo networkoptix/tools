@@ -1,0 +1,11 @@
+- builder:
+    name: display-file
+    builders:
+    - groovy:
+        version: 'groovy'
+        command: |
+          import groovy.io.FileType
+          def file = new File({file})
+          file.eachLine {{ line ->
+            println line
+          }}

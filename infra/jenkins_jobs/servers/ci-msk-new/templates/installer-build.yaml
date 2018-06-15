@@ -216,12 +216,13 @@
         folder-path: '{build-dir}/distrib'
 
     # Run custom cleaner provided by development team
-    # TODO: display content of file
     - conditional-step:
         condition-kind: file-exists
         condition-filename: '{custom_cleaner_path}'
         condition-basedir: workspace
         steps:
+        - display-file:
+            file: '{custom_cleaner_path}'
         - run-process:
             workdir: '$WORKSPACE/{build-dir}'
             executable: python
