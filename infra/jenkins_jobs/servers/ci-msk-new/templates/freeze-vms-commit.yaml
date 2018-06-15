@@ -117,7 +117,12 @@
     - shell: |
         #!/bin/bash
         set -ex
-        echo "CMAKELISTS_SHA=$(find "${{WORKSPACE}}/nx_vms" -name CMakeLists.txt | xargs cat | shasum -a 256 | cut -f 1 -d " ")" > 'CMAKELISTS_SHA.envvar'
+        function find_all_files() {{
+          find "nx_vms" -type f -and \( -name 'CMakeLists.txt' -or -name '*.vcxproj' -or -name '*.cmake' -or -wholename '**/build_utils/**' \)
+        }}
+        echo "CMAKELISTS_SHA will be based on files"
+        find_all_files
+        echo "CMAKELISTS_SHA=$( find_all_files | xargs cat | shasum -a 256 | cut -f 1 -d " ")" > 'CMAKELISTS_SHA.envvar'
     - inject:
         properties-file: CMAKELISTS_SHA.envvar
     - description-setter:
