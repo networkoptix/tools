@@ -81,11 +81,13 @@
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
+          BRANCH=$BRANCH
+          PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOMIZATION=$CUSTOMIZATION
+          PLATFORM=$PLATFORM
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
           COMPONENTS=distrib/,bin/,lib/,packages/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
