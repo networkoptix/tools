@@ -58,11 +58,6 @@ print '''#
         properties-content: |
           BUILD_IDENTITY=undef
           NX_VMS_COMMIT=undef
-    # TODO: Should we fetch all links from publisher or something like that?
-    - inject:
-        properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - multijob:
         name: Freeze nx commit
         projects:
@@ -99,7 +94,11 @@ print '''#
         properties-file: 'BUILD_IDENTITY.envvar'
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
-
+    # TODO: Should we fetch all links from publisher or something like that?
+    - inject:
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
