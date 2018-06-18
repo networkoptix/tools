@@ -68,6 +68,17 @@
         : ${{BUILD_IDENTITY:?}}
         : ${{CUSTOMIZATION:?}}
         : ${{PLATFORM:?}}
+    # in rare case when build failed somewhere in checkout state some vars are undefined and passed as is
+    # anyways build will try to upload artifacts.
+    - shell: |
+        #!/bin/bash
+        set -ex
+        test "$BRANCH" != '$BRANCH'
+        test "$PIPELINE" != '$PIPELINE'
+        test "$BUILD_IDENTITY" != '$BUILD_IDENTITY'
+        test "$CUSTOMIZATION" != '$CUSTOMIZATION'
+        test "$COMPONENTS" != '$COMPONENTS'
+
     - shell: |
         #!/bin/bash
         if [ "${{IS_SUCCESSFUL}}" == 'true' ] ; then
