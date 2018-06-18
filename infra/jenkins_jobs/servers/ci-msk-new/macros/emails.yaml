@@ -20,7 +20,8 @@
           $BUILD_DESCRIPTION
           $BRANCH $PLATFORM $CUSTOMIZATION failed on commit $NX_VMS_COMMIT
 
-          $BUILD_URL
+          Build url - $BUILD_URL
+          Junkshop url - $JUNKSHOP_URL
 
           $BUILD_LOG
         # ---- email contents ----
@@ -37,8 +38,11 @@
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         body: |
           $BUILD_DESCRIPTION
+          $BRANCH $PLATFORM $CUSTOMIZATION failed on commit $NX_VMS_COMMIT
 
-          $BUILD_URL
+          Build url - $BUILD_URL
+          Artifacts - $REPOSITORY_URL
+          Junkshop url - $JUNKSHOP_URL
 
           $BUILD_LOG
         # ---- email contents ----
@@ -53,7 +57,9 @@
           $BUILD_DESCRIPTION
           $BRANCH $PLATFORMS $CUSTOMIZATIONS failed on commit $NX_VMS_COMMIT
 
-          $BUILD_URL
+          Build url - $BUILD_URL
+          Artifacts - $REPOSITORY_URL
+          Junkshop url - $JUNKSHOP_URL
 
           $BUILD_LOG
         # ---- email contents ----
@@ -76,6 +82,7 @@
         body: |
           $BUILD_DESCRIPTION
           $BRANCH $PLATFORM $CUSTOMIZATION fixed with commit $NX_VMS_COMMIT
+
           Thanks, everyone.
         # ---- email contents ----
 
@@ -95,7 +102,10 @@
         body: |
           $BUILD_DESCRIPTION
           Completed $BRANCH $PLATFORM $CUSTOMIZATION $NX_VMS_COMMIT
-          Artifacts are available at $REPOSITORY_URL
+
+          Build url - $BUILD_URL
+          Artifacts - $REPOSITORY_URL
+          Junkshop url - $JUNKSHOP_URL
         # ---- email contents ----
 
 - publisher:
@@ -107,6 +117,8 @@
         body: |
           $BUILD_DESCRIPTION
           Completed $BRANCH $PLATFORMS $CUSTOMIZATIONS $NX_VMS_COMMIT
-          Artifacts from successful builds - $REPOSITORY_URL
-          Artifacts from failed builds - REPOSITORY_URL_FAILED
+
+          Build url - $BUILD_URL
+          Artifacts - $REPOSITORY_URL
+          Junkshop url - $JUNKSHOP_URL
         # ---- email contents ----

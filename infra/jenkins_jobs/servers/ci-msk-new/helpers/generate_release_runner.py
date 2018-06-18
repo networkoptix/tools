@@ -58,6 +58,11 @@ print '''#
         properties-content: |
           BUILD_IDENTITY=undef
           NX_VMS_COMMIT=undef
+    # TODO: Should we fetch all links from publisher or something like that?
+    - inject:
+        properties-content: |
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - multijob:
         name: Freeze nx commit
         projects:
@@ -169,20 +174,15 @@ print '''
           build-on:
           - SUCCESS
           - UNSTABLE
+          - FAILED
           build-steps:
           # At this moment all builds are completed and we may publish links
-          # TODO: Should we fetch all links?
-          - inject:
-              properties-content: |
-                REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-                REPOSITORY_URL_FAILED={artifact_repository_base_url}/{artifact_location_root_pattern_failed}
-                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+
           # TODO: Move to publishers
           # TODO: set paths based on publisher?
           - description-setter:
               description: >-
                 <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$REPOSITORY_URL_FAILED'> Fails </a>,
                 <a href='$JUNKSHOP_URL'> Junkshop </a>
     - completed-email(group)
 '''
