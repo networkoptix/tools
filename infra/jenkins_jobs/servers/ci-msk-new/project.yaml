@@ -20,13 +20,13 @@
     synchronous-reporting: '' # false
 
     # artifact repository location on publish-node filesystem
-    artifact_repository_base_path: '/mnt-stub/beta-builds/repository/v1'  # TODO: switch to /mnt/beta-builds
+    artifact_repository_base_path: '/mnt/beta-builds/repository/v1'
     # location of cache folder publish-node where mercurial repos are precached
     # this cache is required due to the fact that mercurial can't
     # fetch part of repo and always pulls everything (~3GB over atlantic)
-    cached_hg_repository_base_path: '/mnt-stub/infra/cached-hg'  # TODO: switch to /mnt/infra
+    cached_hg_repository_base_path: '/mnt/infra/cached-hg'
 
-    artifact_repository_base_url: 'http://10.0.0.158/repository/v1/'
+    artifact_repository_base_url: 'http://10.0.0.120/'
     junkshop_base_url: 'http://10.0.0.160'
 
     artifact_location_root_pattern: '${{BRANCH}}/${{PIPELINE}}/${{BUILD_IDENTITY}}'

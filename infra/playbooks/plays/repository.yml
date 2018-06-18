@@ -1,8 +1,30 @@
 - hosts: repository
   become: true
   become_method: sudo
+  # We don't know status of guest, so if we try to gather facts (=connect),
+  # but this guest is not created yet, we'll fail entire section.
+  # That's why don't collect facts here.
+  # All facts will be collected in libvirt_guest.
+  gather_facts: no
+
+  vars_files:
+  - ../secrets/infra_storage.yml
 
   roles:
+  - role: libvirt_guest
+  - role: alphabet_common
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: jenkins_slave
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: samba_share
+    when:
+    - libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+    # temp. workaround for local deployments
+    - attach_infra_share | default(True) == True
+    vars:
+      samba_mount_pass: "{{ cinas_infra_password }}"
+  - role: beta_builds_share
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
   - role: jdauphant.nginx
     vars:
       nginx_user: "www-data"
@@ -16,5 +38,7 @@
         - listen 80
         - server_name _
         - location / { try_files $uri $uri/ /index.html; }
-        - root "/mnt-stub/beta-builds/"
+        - root "/mnt/beta-builds/repository/v1/"
         - autoindex on
+  - role: cloudalchemy.node-exporter
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
