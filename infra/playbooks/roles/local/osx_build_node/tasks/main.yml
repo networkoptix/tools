@@ -2,8 +2,8 @@
 # TODO: add authorized keys
 # TODO: install xcode (or at least check installed)
 # TODO: install updates?
-# TODO: add users
-
+# TODO: add users - jenkins!
+# TODO: add '%admin          ALL = (ALL) NOPASSWD: ALL' in /etc/sudoers
 
 # this and next tasks are useless for remote setup, but may be used for local
 - name: Check remote login
@@ -53,6 +53,7 @@
   check_mode: no
 
 # not tested: all macs have brew
+# Requires sudo w/o password !
 - name: Install homebrew
   shell: /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   when: brew_version.rc != 0
@@ -125,7 +126,8 @@
   changed_when: >-
     "kern.corefile: %N.core.%P -> %N.core.%P" not in result.stdout
 
-- name: create jenkins working directory
+# Jenkins user must be existing at this point
+- name: Create jenkins working directory
   become: true
   become_method: sudo
   file:
