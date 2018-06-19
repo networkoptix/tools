@@ -21,10 +21,12 @@
     - restart node exporter
   when: not ansible_check_mode
 
+# We add plist file to /Library/LaunchDaemons/ to make exporter 'Run at Boot'
+# http://www.grivet-tools.com/blog/2014/launchdaemons-vs-launchagents/
 - name: Copy the Node Exporter lauchctl service file
   template:
     src: prometheus.node_exporter.plist.j2
-    dest: "/Library/LaunchAgents/{{ node_exporter_service_name }}.plist"
+    dest: "/Library/LaunchDaemons/{{ node_exporter_service_name }}.plist"
     mode: 0644
   become: True
   become_user: root

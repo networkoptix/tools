@@ -9,7 +9,7 @@
 
 - name: Unload Node exporter service
   command: >-
-    launchctl unload /Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+    launchctl unload /Library/LaunchDaemons/{{ node_exporter_service_name }}.plist
   become: True
   become_user: root
   listen: restart node exporter
@@ -18,7 +18,7 @@
 
 - name: Load Node Exporter service
   command: >-
-     launchctl load /Library/LaunchAgents/{{ node_exporter_service_name }}.plist
+     launchctl load /Library/LaunchDaemons/{{ node_exporter_service_name }}.plist
   become: True
   become_user: root
   listen: restart node exporter
