@@ -38,6 +38,7 @@
     timer: ''  # no timed trigger by default
     clean-build: '' # false by default
     default-build-description: ''
+    build_webadmin: true
     # detailed-job-description required!
 
     # vars
@@ -67,6 +68,8 @@
         default: '{platforms}'
     - p_CUSTOMIZATIONS:
         default: '{customizations}'
+    - p_BUILD_WEBADMIN:
+        default: '{build_webadmin}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'

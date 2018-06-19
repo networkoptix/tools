@@ -51,6 +51,18 @@
           This is very useful if you suspect that system incorrectly tries to perform incremental
           build that's not possible under current circumstances.
 
+- parameter:
+    name: p_BUILD_WEBADMIN
+    parameters:
+    - bool:
+        name: BUILD_WEBADMIN
+        default: '{default}'
+        description: >-
+          Normally you need to build webadmin, but there are few cases when you don't.
+          For example, if build is related to only platform w/o servers included or when webadmin
+          is already built and published under the same build identity.
+
+
 # Parameters That fully define artifacts: what sources used and where to put what's built
 - parameter:
     name: p_PIPELINE

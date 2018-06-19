@@ -37,6 +37,8 @@ print '''#
         default: '{default-platforms}'
     - p_CUSTOMIZATIONS:
         default: '{default-customizations}'
+    - p_BUILD_WEBADMIN:
+        default: true
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
@@ -116,6 +118,8 @@ print '''#
         name: Build web admin
         projects:
         - name: '{pipeline}.{branch}.vms.webadmin.universal.build'
+          enable-condition: >-
+            ("$BUILD_WEBADMIN").toBoolean()
           kill-phase-on: FAILURE
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
