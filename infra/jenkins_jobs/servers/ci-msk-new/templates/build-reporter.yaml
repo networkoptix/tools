@@ -144,4 +144,4 @@
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" "$LOGFILE" "--outcome=$BUILD_STATUS"
 
     publishers:
-    - failure-email(maintainers)
+    - failure-email-helpers(maintainers)

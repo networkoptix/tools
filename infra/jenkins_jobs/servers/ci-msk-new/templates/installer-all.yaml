@@ -94,8 +94,3 @@
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
-    publishers:
-    - failure-email:
-        email-recipients: '{build-watchers}'
-    - fixed-email:
-        email-recipients: '{build-watchers}'

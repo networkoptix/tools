@@ -58,3 +58,6 @@
         src_path: '{artifact_repository_base_path}/{artifact_location_full_pattern}'
         dst_path: '${{LOCAL_PATH}}'
         components: '${{COMPONENTS}}'
+
+    publishers:
+    - failure-email-helpers(maintainers)

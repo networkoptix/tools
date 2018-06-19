@@ -52,3 +52,6 @@
         src_path: '{cached_hg_repository_base_path}/${{REPO}}/'
         dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
         components: '.hg/'
+
+    publishers:
+    - failure-email-helpers(maintainers)

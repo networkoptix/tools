@@ -120,4 +120,4 @@
         artifacts: 'BUILD_CONFIG_SHA.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - failure-email(maintainers)
+    - failure-email-helpers(maintainers)

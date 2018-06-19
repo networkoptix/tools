@@ -89,7 +89,7 @@
     - timestamps
     - timeout:
         # normally, should complete in 7-30 min
-        timeout: 60 # min
+        timeout: 90 # min
         fail: true
         type: absolute
     - workspace-cleanup:

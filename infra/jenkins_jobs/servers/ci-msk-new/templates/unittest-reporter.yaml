@@ -87,3 +87,6 @@
 
             cd unit_tests
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS"
+
+    publishers:
+    - failure-email-helpers(maintainers)

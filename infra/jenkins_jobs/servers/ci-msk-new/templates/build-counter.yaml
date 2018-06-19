@@ -171,4 +171,4 @@
         artifacts: '{counter_var_name}.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - failure-email(maintainers)
+    - failure-email-helpers(maintainers)

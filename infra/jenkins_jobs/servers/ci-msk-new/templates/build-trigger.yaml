@@ -183,4 +183,4 @@
 
     - completed-email(group)
     # TODO: decide if we want to receive errors on each build...
-    # - failure-email(maintainers) # TODO:
+    # - failure-email-helpers(maintainers)

@@ -117,3 +117,5 @@
         artifacts: 'REPOSITORY_URL.envvar'
         allow-empty: 'false'
         fingerprint: true
+
+    - failure-email-helpers(maintainers)
