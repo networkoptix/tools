@@ -147,6 +147,7 @@
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          BUILD_WEBADMIN=$BUILD_WEBADMIN
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$NX_VMS_COMMIT
