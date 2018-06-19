@@ -54,8 +54,8 @@
         RSYNC_USER="{user}"
 
         #TODO: Should we move files somewhere instead of deleting?
-        if [ '{force}' == 'true' ] ; then
-          echo "\nFORCE MODE\nWILL OVERRIDE ALL ARTIFACTS\n"
+        if [ "{force}" == 'true' ] ; then
+          echo "== FORCE MODE - WILL OVERRIDE ALL ARTIFACTS =="
           echo "Clean dir first.."
           RSYNC_DST="{dst_path}"
             # replace 'C:\' with '/cygdrive/c/'
