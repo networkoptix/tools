@@ -12,15 +12,13 @@
     state: present
     update_cache: yes
   with_items:
-  - virtualbox
-  - virtualbox-dkms
+  - virtualbox-5.1
   - python
   - virtualenv
   - python-demjson
   - python-opencv
   - python-dev
   - ffmpeg
-
   - libpq-dev
   - gdb
 
