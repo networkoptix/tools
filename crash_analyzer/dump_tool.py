@@ -352,7 +352,7 @@ class DumpAnalyzer:
 
         if not out:
             raise DistError('There are no distributive URLs available')
-            
+
         self.build_path = os.path.join(self.cache_directory, build_path)
         return list(os.path.join(*url) for url in out)
 
@@ -502,7 +502,7 @@ class DumpAnalyzer:
             with open(report_path, 'w') as report_file:
                 report_file.write(report)
 
-        logger.debug('Report is written to: ' + report_path)
+        logger.info('Report is written to: ' + report_path)
         return report
 
 
@@ -515,7 +515,7 @@ def analyse_dump(generate: bool = True, *args, **kwargs) -> str:
     if generate:
         report_path = report_name(dump.dump_path)
         if os.path.isfile(report_path):
-            logger.debug('Already processed: ' + report_path)
+            logger.info('Already processed: ' + report_path)
             with open(report_path, 'r') as f:
                 return f.read()
 
