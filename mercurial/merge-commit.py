@@ -39,7 +39,7 @@ def merge_commit(ui, repo, *pats, **opts):
 
     message = "Merge: {0} -> {1}\n".format(other.branch(), branch)
     message_checker = CommitMessageChecker()
-    match = revset.match(ui, "(::{0} - ::{1})".format(other.branch(), branch), repo)
+    match = revset.match(ui, "(::{0} - ::{1})".format(other.branch(), branch))
     for rev in match(repo, set(range(len(repo)))):
         description = repo[rev].description()
         if description:
