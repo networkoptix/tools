@@ -1147,7 +1147,7 @@ printRepos()
         fi
 
         nx_echo "$(nx_white)$REPO$SHARED_BASE_STR$EXTRA_STR$BUILD_DIR_STR$(nx_dcyan):" \
-            "$(nx_lyellow)${REPO_TO_BRANCH[$REPO]}$(nx_nocolor)"
+            "$(nx_lyellow)[${REPO_TO_BRANCH[$REPO]}]$(nx_nocolor)"
     done
 
     # Print other dirs.
