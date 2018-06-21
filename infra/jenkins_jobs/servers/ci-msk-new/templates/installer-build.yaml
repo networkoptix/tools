@@ -15,7 +15,7 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/webadmin-build.yaml
+        devtools/infra/jenkins_jobs/servers/templates/installer-build.yaml
 
       --------------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@
     node: '{installer-build-node}'
     # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
     # '_{platform}' combination is unallowed
-    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}/'
+    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}-{branch}/'
     concurrent: true
 
     synchronous-reporting: '' # false
@@ -58,6 +58,13 @@
 
     build-artifacts: 'distrib/,bin/,lib/,packages/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
     build-artifacts-min: 'build/**/*.log'
+
+    # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
+    # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one custmizations
+    # must not be present while we are building other customization.
+    # To simplify things we execute this file when it's present in workspace (see below)
+    # anyways it's possible to override this file for other use cases.
+    custom_cleaner_path: '$WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py'
 
     properties:
     - heavy-job:
@@ -120,7 +127,9 @@
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
-
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
     # At first, calculate sha for build config files
     # since this job is crossplatform it's safier to just trigger freeze commit
     # with linux executor than try to inplement cross-platform stuff
@@ -223,10 +232,10 @@
         - display-file:
             file: '{custom_cleaner_path}'
         - run-process:
-            workdir: '$WORKSPACE/{build-dir}'
+            workdir: '${{WORKSPACE}}/{build-dir}'
             executable: python
             executable-is-relpath: 'false'
-            arguments: '{custom_cleaner_path},--build-dir,$WORKSPACE/{build-dir}'
+            arguments: '{custom_cleaner_path},--build-dir,${{WORKSPACE}}/{build-dir}'
             logfile: '{custom-cleaner-log}'
             inherit-environ: 'true'
             environ: ''

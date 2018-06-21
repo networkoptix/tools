@@ -18,6 +18,9 @@ import groovy.time.TimeDuration
 
 def env = System.getenv();
 
+// Make $WORKSPACE resolved in string templates as it's commonly used var
+def WORKSPACE = env.get("WORKSPACE")
+
 def EXECUTABLE_IS_RELPATH = (env.get("EXECUTABLE_IS_RELPATH") ?: "false").toBoolean()
 
 def EXECUTABLE = new File(env.get("EXECUTABLE")).toString()
@@ -101,5 +104,3 @@ if (SUPPRESS_FAIL) {
 } else {
     System.exit(excode);
 }
-
-

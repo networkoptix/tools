@@ -101,7 +101,7 @@
             basedir: $WORKSPACE
 
     scm:
-    - hg-local:
+    - hg-local-no-changelog:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
     - hg-local:

@@ -12,12 +12,8 @@
         num-to-keep: 100
         artifact-days-to-keep: 30
         artifact-num-to-keep: 100
-
-    properties:
-    - heavy-job:
-        weight: 1
     - throttle:
-        max-total: 1
+        max-total: 3
         option: project
 
     parameters:
@@ -38,7 +34,7 @@
 
     wrappers:
     - build-name:
-        name: '#$BUILD_ID $BUILD_IDENTITY $PLATFORM $CUSTOMIZATION'
+        name: '#$BUILD_ID $BUILD_IDENTITY $BRANCH $PLATFORM $CUSTOMIZATION'
     - timestamps
     - timeout:
         # normally, should complete in 5-10 min

@@ -1,0 +1,179 @@
+- project:
+    name: develop-pipeline-4.0
+
+    project: vms
+
+    branch: vms
+
+    # SECTION. GLOBAL PIPELINE CONFIG
+    # ============================================================
+
+    # comma-separated list of emails to whom send notifications related to builds
+    build-watchers: iremizov@networkoptix.com
+
+    # block builds and wait for reporting job to report results
+    synchronous-reporting: '' # false
+
+    webadmin-build-node: webadmin-build
+
+
+    # Some cmake args are applicable for any builds they are applied at first
+    # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
+    cmake_configure_args_global: |
+      CMAKE_EXECUTABLE=cmake
+      CMAKE_ARG_beta=TRUE
+      CMAKE_ARG_developerBuild=OFF
+      CMAKE_ARG_cloudGroup=test
+      CMAKE_ARG_rdepSync=ON
+      # CMAKE_ARG_withTests=TRUE
+
+    # SECTION. PIPELINE CONFIG
+    # ============================================================
+
+    pipeline:
+    - develop:
+        # Pipeline-specific cmake arguments
+        cmake_configure_args_pipeline:
+          CMAKE_ARG_CMAKE_BUILD_TYPE=Release
+
+    # SECTION. PLATFORM CONFIG
+    # ============================================================
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    platform:
+    # there is also edge1 platform, it's declared and commented in jobs section
+    - linux-x64:
+        # most of builds are linux cross-builds that built on "build-installer-linux"
+        # here we make an anchor to avoid typos and other kind of missconfiguration in future
+        installer-build-node: &linux_node build-installer-linux
+        # There are some CMake args that aplicable only for particular platform
+        cmake_configure_args_platform: |
+          CMAKE_GENERATOR=Ninja
+    - bpi:
+        installer-build-node: *linux_node
+        cmake_configure_args_platform: |
+          CMAKE_GENERATOR=Ninja
+          CMAKE_ARG_targetDevice=bpi
+
+    # -- windows platform --
+    # FIXME: HOME,PATH and other vars are represented as win env.
+    # But some other vars are linux-like.
+    # Rsync goes mad ain result and nothing works.
+    - win-x64: &windows_config
+        installer-build-node: build-installer-windows
+        cmake_configure_args_platform: |
+          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+          CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
+          CMAKE_GENERATOR=Visual Studio 15 2017 Win64
+          CMAKE_ARG_beta=ON
+          CMAKE_ARG_addQtPdb=ON
+          CMAKE_ARG_trustedTimestamping=OFF
+          CMAKE_ARG_withClouds=OFF
+          CMAKE_ARG_withPluginStubs=OFF
+          CMAKE_ARG_withTests=ON
+          CMAKE_TOOL=host=x64
+
+
+    # # -- apple platform --
+
+    - mac: &osx_config
+        installer-build-node: build-installer-mac
+        cmake_configure_args_platform: |
+          CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
+          CMAKE_GENERATOR=Ninja
+          CMAKE_ARG_beta=ON
+          CMAKE_ARG_codeSigning=OFF
+
+    # SECTION. CUSTOMIZATION CONFIG
+    # ============================================================
+
+    # TODO: There are some customization that may be build only on specific platform
+    # there is no need to generate extra set of jobs that never gonna be triggered.
+    # it looks like there are too few customization spec. cmake args and we may move such
+    # rare customizations to platform enum.
+
+    cmake_configure_args_customization: |
+      CMAKE_ARG_customization=$CUSTOMIZATION
+
+    customization:
+
+    # TODO: Enable later when we'll be ready to test it.
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    - default
+
+    # list of jobs to generate
+    jobs:
+
+    # TRIGGERS - main entry points
+
+    - '{pipeline}.{branch}.vms.trigger.{preset}':
+        preset:
+        - on-push:
+            detailed-job-description: |-
+              This trigger serves for automatic builds on every push to remote repository
+            default-build-description: >-
+              Triggered on push event
+            platforms: linux-x64,win-x64,mac,bpi
+            customizations: default
+            poll-scm-timer: '* * * * *'
+            freeze-commit-now: true
+
+        - nightly:
+            detailed-job-description: |-
+              This trigger serves for nigtly clean builds to verify the state of product
+              It builds with corresponding schedule "{timer}".
+
+              It should not be triggered manually excluding debugging of infra problems
+              associated with only this trigger type.
+            default-build-description: >-
+              Nightly clean build for all platforms and customizations
+              triggered automatically by timer
+            platforms: linux-x64,windows-x64,mac,bpi
+            customizations: default
+            freeze-commit-now: true
+            clean-build: true
+            timer: '4 0 * * *'
+
+    # RUNNER - root launcher of all builds
+
+    - '{pipeline}.{branch}.vms.runner':
+        default-platforms: linux-x64,linux-x86,win-x86
+        default-customizations: default,hanwha
+
+    # UTILITY - register commit, build identities and other
+
+    - '{pipeline}.{counter_name}.generator':
+        counter_name: build_number
+        counter_var_name: BUILD_IDENTITY
+
+    # BUILD AND TEST - main jobs
+
+    - '{pipeline}.{branch}.vms.webadmin.universal.build'
+    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all'
+    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+
+    # Our tests work per-customization per-platform and not yet implemented
+    # for all platforms, so list of jobs is reduced
+    - 'installer-unittests-default':
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
+        platform:
+        - linux-x64:
+            unittest-node: unittests-linux
+        customization:
+        - default
+    # - installer-unittests-windows:
+    #     platform:
+    #     - win-x64:
+    #         unittest-node: unittests-windows
+    #     customization:
+    #     - default
+    # REPORTERS - parse & upload logs, build and test information to outer services
+
+    # utility job for reporting unittests reslts to junkshop
+    - '{pipeline}.unittests-reporter'
+    - '{pipeline}.build-reporter'

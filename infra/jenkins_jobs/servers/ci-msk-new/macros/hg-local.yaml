@@ -10,3 +10,16 @@
         clean: true
         subdir: '{name}'
         disable-changelog: false
+
+- scm:
+    name: hg-local-no-changelog
+    scm:
+    - hg:
+        revision: '{revision}'
+        # original string is simplified to avoid duplication everywhere, for easier finding, here it is
+        # ssh://jenkins@{hg-local-cache-node-ip-addr}//home/jenkins{hg-local-cache-node-workspace}/{name}
+        url: ssh://jenkins@192.168.13.116//home/jenkins/repo/{name}
+        credentials-id: jenkins
+        clean: true
+        subdir: '{name}'
+        disable-changelog: true

@@ -45,7 +45,7 @@
 
     node: '{webadmin-build-node}'
     concurrent: true
-    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin/'
+    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{branch}/'
 
     synchronous-reporting: '' # false
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER

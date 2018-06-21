@@ -48,7 +48,7 @@
         - jenkins
 
     scm:
-    - hg-local:
+    - hg-local-no-changelog:
         name: '$REPO'
         revision: '$BRANCH'
 

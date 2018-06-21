@@ -52,7 +52,7 @@
             basedir: $WORKSPACE
 
     scm:
-    - hg-local:
+    - hg-local-no-changelog:
         name: devtools
         revision: 'default'
 

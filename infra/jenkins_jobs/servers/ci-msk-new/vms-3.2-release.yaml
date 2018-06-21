@@ -3,8 +3,7 @@
 
     project: vms
 
-    branch:
-    - vms_3.2
+    branch: vms_3.2
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -16,10 +15,6 @@
     synchronous-reporting: '' # false
 
     webadmin-build-node: webadmin-build
-
-    # in some cases there is a "cleaner" script that does some actions inbetween dirty builds.
-    # this path is optional but if it exists, cleaner will be invoked
-    custom_cleaner_path: $WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options

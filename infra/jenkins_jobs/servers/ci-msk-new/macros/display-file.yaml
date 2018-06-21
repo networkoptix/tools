@@ -5,7 +5,12 @@
         version: 'groovy'
         command: |
           import groovy.io.FileType
-          def file = new File({file})
+          def env = System.getenv();
+
+          // Make $WORKSPACE resolved in string templates as it's commonly used var
+          def WORKSPACE = env.get("WORKSPACE")
+
+          def file = new File("{file}")
           file.eachLine {{ line ->
             println line
           }}

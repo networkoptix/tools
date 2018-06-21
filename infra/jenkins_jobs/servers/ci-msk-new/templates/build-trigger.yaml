@@ -42,6 +42,8 @@
     concurrent: false
 
     timer: ''  # no timed trigger by default
+    poll-scm-timer: '' # no scm polling by default
+    freeze-commit-now: true # default true
     clean-build: '' # false by default
     default-build-description: ''
     build_webadmin: true
@@ -83,11 +85,14 @@
         default: '{branch}'
     - bool:
         name: FREEZE_COMMIT_NOW
-        default: false
+        default: '{freeze-commit-now}'
         description: Freeze nx_vms commit right now, don't wait for starting builds
 
     triggers:
     - timed: "{timer}"
+    - pollscm:
+        cron: "{poll-scm-timer}"
+        ignore-post-commit-hooks: True
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -105,7 +110,7 @@
     scm:
     - hg-la:
         project-name: nx_vms
-        branch-name: '{branch}'
+        branch-name: '$_NX_VMS_COMMIT'
     - hg-la:
         project-name: devtools
         branch-name: default

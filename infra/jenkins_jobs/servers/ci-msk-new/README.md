@@ -27,10 +27,6 @@ According to prev. facts,
 - all platform x branch variables are frozen in job
 - all customization-related stuff is passed as arguments
 
-in some cases there is a "cleaner" script that does some actions inbetween dirty builds.
-this path is optional but if it exists, cleaner will be invoked
-custom_cleaner_path: $WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py
-
 # Manual configuration steps used for "staging":
 
 ## Configure groovy

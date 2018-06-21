@@ -84,7 +84,7 @@
         type: absolute
 
     scm:
-    - hg-la:
+    - hg-la-no-changelog:
         project-name: nx_vms
         branch-name: '$NX_VMS_COMMIT'
 
