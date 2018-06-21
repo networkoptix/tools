@@ -34,8 +34,8 @@
 
           # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
 
-          # FIXME: added -O  --no-perms - is a tmp solution hile testing on smb
-          rsync -vrzaO --no-perms \
+          # -a ~ -rlptgoD
+          rsync -vrza --links --delete \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
             --rsync-path="mkdir -p ${{RSYNC_DST%/*}} && rsync" \
             "${{RSYNC_SRC}}" \
@@ -124,7 +124,7 @@
           mkdir -p "${{RSYNC_DST%/*}}"
 
           # FIXME: added -O  --no-perms and removed -a - is a tmp solution hile testing on smb
-          rsync -vrzO --no-perms \
+          rsync -vrzO --no-perms --links \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
             "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_SRC}}" \
             "${{RSYNC_DST}}"

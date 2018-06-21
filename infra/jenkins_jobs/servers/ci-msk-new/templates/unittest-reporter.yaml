@@ -2,6 +2,7 @@
     name: '{pipeline}.unittests-reporter'
 
     node: unittests-reporter
+    workspace: 'nx_report_thr${{EXECUTOR_NUMBER}}/'
     concurrent: true
 
     properties:
@@ -45,13 +46,15 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - copy-hg-repo:
+        - import-hg-repo(if-missing):
             name: devtools
+            branch: default
+            basedir: $WORKSPACE
 
     scm:
-    - '{hg-pull-macro}':
-        project-name: devtools
-        branch-name: default
+    - hg-local:
+        name: devtools
+        revision: 'default'
 
     builders:
 

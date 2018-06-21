@@ -1,14 +1,17 @@
+# TODO: this is not needed on new jenkins
 - name: Configure private key
   copy:
     content: "{{ mercurial_ppk }}"
     dest: /home/Users/jenkins/mercurial.ppk
 
+# TODO: this is not needed on new jenkins
 - name: "Download hg long filenames extension"
   # see https://www.mercurial-scm.org/wiki/Win32LongFileNamesExtension
   get_url:
     url: "https://bitbucket.org/remleduff/win32lfn/raw/397c0cfe3615787acb344b5a2d44e3160b5833bc/src/win32lfn.py"
     dest: "/home/Users/jenkins/win32lfn.py"
 
+# FIXME: This must not be applied on new jenkins - it will break cloning and pulling
 - name:
   copy:
     content: |-
@@ -19,6 +22,7 @@
       win32lfn = C:\Users\jenkins\win32lfn.py
     dest: /home/Users/jenkins/.hgrc
 
+# TODO: this is not needed on new jenkins -> add repo node in ~/.ssh/known_hosts
 - name: add hdw.mx to known hosts
   command: >-
     REG ADD "HKEY_CURRENT_USER\SOFTWARE\SimonTatham\PuTTY\SshHostKeys"
@@ -31,6 +35,8 @@
   command: >-
     /cygdrive/c/Python27/Scripts/pip.exe install virtualenv
 
+# TODO: this is not needed on new jenkins
+# Note: ensure that TortoiseHg is not on systym path or at sytem path but after cygwin hg
 - name: Set CMD PATH variable (1)
   command: >-
     REG ADD "HKEY_CURRENT_USER\Environment"
@@ -39,6 +45,7 @@
     /d "C:\Python27;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64;C:\Program Files (x86)\Windows Kits\10\bin\x64"
     /f
 
+# TODO: this is not needed on new jenkins
 - name: Set CMD PATH variable (2)
   command: >-
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
@@ -47,10 +54,12 @@
     /d "C:\Python27;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64;C:\Program Files (x86)\Windows Kits\10\bin\x64"
     /f
 
+# TODO: this is not needed on new jenkins
 - name: Set CMD PATH variable (3)
   command: >-
     SETX PATH "C:\Python27;C:\Python27\Scripts;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\TortoiseHg;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files (x86)\Xoreax\IncrediBuild;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64;C:\Program Files (x86)\Windows Kits\10\bin\x64"
 
+# TODO: this is not needed on new jenkins
 - name: Info
   debug:
     msg: >-

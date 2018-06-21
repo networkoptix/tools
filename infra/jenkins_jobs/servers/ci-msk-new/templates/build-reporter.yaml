@@ -36,6 +36,7 @@
       </pre>
     node: unittests-reporter
     concurrent: true
+    workspace: 'nx_report_thr${{EXECUTOR_NUMBER}}/'
 
     # junk_shop_host: required!
 
@@ -90,18 +91,22 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - copy-hg-repo:
+        - import-hg-repo(if-missing):
             name: nx_vms
-        - copy-hg-repo:
+            branch: $BRANCH
+            basedir: $WORKSPACE
+        - import-hg-repo(if-missing):
             name: devtools
+            branch: default
+            basedir: $WORKSPACE
 
     scm:
-    - '{hg-pull-macro}':
-        project-name: devtools
-        branch-name: default
-    - '{hg-pull-macro}':
-        project-name: nx_vms
-        branch-name: $NX_VMS_COMMIT
+    - hg-local:
+        name: nx_vms
+        revision: '$NX_VMS_COMMIT'
+    - hg-local:
+        name: devtools
+        revision: 'default'
 
     builders:
     - build-name-setter:

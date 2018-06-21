@@ -1,0 +1,71 @@
+- job-template:
+    name: 'helper.{pipeline}.{branch}.repo-dedupe'
+    job-maintainers: 'iremizov@networkoptix.com'
+
+    num-rand-choice: 5
+
+    node: repository-ops
+    concurrent: false
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+    - build-discarder:
+        days-to-keep: 10
+        num-to-keep: 25
+        artifact-days-to-keep: 10
+        artifact-num-to-keep: 25
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 360 # 6hr
+        fail: true
+        type: absolute
+
+    parameters:
+    - string:
+        name: DEDUPE_FOLDERS
+        default: ''
+        description: >
+          List of build identities where to search for common dupes, keep empty to
+          pick random folders
+    - bool:
+        name: DRY_RUN
+        default: false
+        description: >
+          Don't dedupe, just check possible outcome
+    - string:
+        name: NUM_RAND_CHOICE
+        default: '{num-rand-choice}'
+        description:
+          How many random folders to take if List of folders is not provided
+
+
+    builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          JOB_MAINTAINERS={job-maintainers}
+          BRANCH={branch}
+    # FIXME: this job relies on hardlink utility which is not installed with ansible yet
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        cd "/mnt/beta-builds/repository/v1/${{BRANCH}}/${{PIPELINE}}"
+        if [ -z "$DEDUPE_FOLDERS" ] ; then
+          DEDUPE_FOLDERS="$(ls | shuf -n "${{NUM_RAND_CHOICE}}")"
+        fi
+
+        if [ "${{DRY_RUN}}" == 'true' ] ; then
+          hardlink --dry-run -v -t ${{DEDUPE_FOLDERS}}
+        else
+          hardlink -v -t ${{DEDUPE_FOLDERS}}
+        fi
+
+    publishers:
+    - failure-email-helpers(maintainers)

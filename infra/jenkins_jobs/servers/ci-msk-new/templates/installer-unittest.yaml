@@ -50,16 +50,19 @@
         fail: true
         type: absolute
     # - workspace-cleanup # always
+
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - copy-hg-repo:
+        - import-hg-repo(if-missing):
             name: devtools
+            branch: default
+            basedir: $WORKSPACE
 
     scm:
-    - '{hg-pull-macro}':
-        project-name: devtools
-        branch-name: default
+    - hg-local:
+        name: devtools
+        revision: 'default'
 
     builders:
     - build-name-setter:
@@ -144,5 +147,4 @@
     # all the same, but not id, node and build steps..
     id: installer-unittests-windows
     unittest-launcher: unittest-launcher-windows
-    hg-pull-macro: hg-la-anon
     init-venv-method: init-venv-windows

@@ -37,8 +37,13 @@
     junkshop_location_root_pattern: 'project/$PIPELINE/$BRANCH/$BUILD_IDENTITY'
     junkshop_location_full_pattern: 'project/$PIPELINE/$BRANCH/$BUILD_IDENTITY'
 
+    # utility variables for jobs family which operate on the same workspace
+    hg-local-cache-node: repo
+    hg-local-cache-node-workspace: repo
+    hg-local-cache-node-throttle-category: repo
+    hg-local-cache-node-ip-addr: '192.168.13.116'
+
     webadmin-build-node: webadmin-build
-    commit-freeze-node: webadmin-build
 
     # We use some trick to reuse precompiled obj files.
     # Dirty builds run faster than clean and we are trying to optimize build speed.
@@ -64,10 +69,6 @@
     # - all platform x branch variables are frozen in job
     # - all customization-related stuff is passed as arguments
 
-    # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
-    # '_{platform}' combination is unallowed
-    workspace: nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}/
-
     # in some cases there is a "cleaner" script that does some actions inbetween dirty builds.
     # this path is optional but if it exists, cleaner will be invoked
     custom_cleaner_path: $WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py
@@ -90,8 +91,6 @@
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline:
           CMAKE_ARG_CMAKE_BUILD_TYPE=Release
-
-    hg-pull-macro: hg-la
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -151,7 +150,6 @@
     # Rsync goes mad ain result and nothing works.
     - win-x64: &windows_config
         installer-build-node: build-installer-windows
-        hg-pull-macro: hg-la-anon
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
           CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
@@ -176,11 +174,9 @@
           CMAKE_ARG_withPluginStubs=OFF
           CMAKE_ARG_withTests=ON
 
-
     # -- apple platform --
 
     - mac: &osx_config
-        hg-pull-macro: hg-la-anon
         installer-build-node: build-installer-mac
         cmake_configure_args_platform: |
           CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
@@ -243,6 +239,7 @@
     - helper.push-component
     - helper.freeze-nx-vms-commit
     - helper.freeze-build-config
+    - helper.{pipeline}.{branch}.repo-dedupe
 
     # TRIGGERS - main entry points
 

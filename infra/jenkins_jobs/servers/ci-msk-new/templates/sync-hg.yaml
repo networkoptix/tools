@@ -1,7 +1,9 @@
 - job-template:
     name: 'helper.sync-hg'
 
-    node: hg-sync
+    # all build triggers will work under the same workspace as well as
+    node: repo
+    workspace: 'repo-sync-${{EXECUTOR_NUMBER}}'
     concurrent: true
 
     properties:
@@ -19,13 +21,18 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
+    - p_BRANCH:
+        default: 'default'
     - string:
         name: REPO
+        default: nx_vms
         description: >
           Which hg repo to sync, devtools or nx_vms
     - p_LOCAL_PATH
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
+    - p_NX_VMS_COMMIT:
+        default: default
 
     wrappers:
     - build-name:
@@ -40,18 +47,31 @@
         users:
         - jenkins
 
+    scm:
+    - hg-local:
+        name: '$REPO'
+        revision: '$BRANCH'
+
     builders:
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
 
+    - shell: |
+        #!/bin/bash
+        # ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{SSH_USER}}@$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3):$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '{cached_hg_repository_base_path}/${{REPO}}/'
+        src_path: '${{WORKSPACE}}/${{REPO}}/'
         dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
         components: '.hg/'
+    # - shell: |
+    #     #!/bin/bash
+    #     set -x
+    #     cd $REPO
+    #       hg push --insecure ssh://${{SSH_USER}}@$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3):$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)//${{LOCAL_PATH}}/${{REPO}}/
 
     publishers:
     - failure-email-helpers(maintainers)

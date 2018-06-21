@@ -12,9 +12,9 @@
         option: project
     - build-discarder:
         days-to-keep: 10
-        num-to-keep: 25
+        num-to-keep: 50
         artifact-days-to-keep: 10
-        artifact-num-to-keep: 25
+        artifact-num-to-keep: 50
 
     parameters:
     - p_REQUESTED_BY

@@ -1,3 +1,5 @@
+
+
 - job-template:
     name: 'helper.freeze-nx-vms-commit'
     job-maintainers: 'iremizov@networkoptix.com'
@@ -39,15 +41,20 @@
 
       --------------------------------------------------------------------------------
       </pre>
-    node: '{commit-freeze-node}'
-    concurrent: false  # important
+
+    # all build triggers will work under the same workspace as well as
+    node: '{hg-local-cache-node}'
+    workspace: '{hg-local-cache-node-workspace}'
+    concurrent: false
 
     properties:
     - heavy-job:
         weight: 1
     - throttle:
-        max-total: 10
-        option: project
+        option: category
+        max-total: 1
+        categories:
+        - '{hg-local-cache-node-throttle-category}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
@@ -75,14 +82,9 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    - pre-scm-buildstep:
-        failOnError: true
-        buildsteps:
-        - copy-hg-repo:
-            name: nx_vms
 
     scm:
-    - '{hg-pull-macro}':
+    - hg-la:
         project-name: nx_vms
         branch-name: '$NX_VMS_COMMIT'
 
@@ -93,20 +95,7 @@
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
-    - shell: |
-        #!/bin/bash
-        set -ex
-        function find_all_files() {{
-          find "nx_vms" -type f -and \( -name 'CMakeLists.txt' -or -name '*.vcxproj' -or -name '*.cmake' -or -wholename '**/build_utils/**' \)
-        }}
-        echo "BUILD_CONFIG_SHA will be based on files"
-        find_all_files
-        echo "BUILD_CONFIG_SHA=$( find_all_files | xargs cat | shasum -a 256 | cut -f 1 -d " ")" > 'BUILD_CONFIG_SHA.envvar'
-    - inject:
-        properties-file: BUILD_CONFIG_SHA.envvar
-    - description-setter:
-        description: |
-          CMakeLists.txt sha is $BUILD_CONFIG_SHA
+
     - shell: |
         #!/bin/bash
         set -ex
@@ -118,7 +107,7 @@
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
-        artifacts: 'NX_VMS_COMMIT.envvar,BUILD_CONFIG_SHA.envvar'
+        artifacts: 'NX_VMS_COMMIT.envvar'
         allow-empty: 'false'
         fingerprint: true
     - failure-email-helpers(maintainers)

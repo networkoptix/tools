@@ -5,8 +5,9 @@
 # In logic below we are keeping some cached hg repo and use it
 # for clean checkout.
 # this may save us up to 40min of pulling.
+
 - builder:
-    name: copy-hg-repo
+    name: import-hg-repo(if-missing)
     builders:
     - conditional-step:
         condition-kind: boolean-expression
@@ -14,6 +15,7 @@
         steps:
         - folder-delete-operation:
             folder-path: '$WORKSPACE/{name}'
+
     - conditional-step:
         condition-kind: not
         condition-operand:
@@ -23,10 +25,12 @@
         steps:
         - trigger-builds:
           - project: 'helper.sync-hg'
+            # LOCAL_PATH= $WORKSPACE -> {dest-workspace}
             predefined-parameters: |
               SSH_USER=$USER
-              LOCAL_PATH=$WORKSPACE
+              LOCAL_PATH={basedir}
               REPO={name}
+              BRANCH={branch}
               NODE_SSH_CONNECTION=$SSH_CONNECTION
             block: true
             block-thresholds:

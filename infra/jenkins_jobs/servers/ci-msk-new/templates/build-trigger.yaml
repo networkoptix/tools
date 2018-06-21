@@ -1,6 +1,7 @@
 - job-template:
     name: '{pipeline}.{branch}.vms.trigger.{preset}'
     job-maintainers: 'iremizov@networkoptix.com'
+
     description: |
       <pre>
       ================================================================================
@@ -30,10 +31,15 @@
 
       See more details on build procedure in corresponding downstream "*.runner" job
 
+      Note, that this job doesn't wait for downstream build completion.
+      Find your build in crsp build queue
+
       --------------------------------------------------------------------------------
       </pre>
-    node: runner
-    concurrent: true
+    # all build triggers will work under the same workspace as well as
+    node: '{hg-local-cache-node}'
+    workspace: '{hg-local-cache-node-workspace}'
+    concurrent: false
 
     timer: ''  # no timed trigger by default
     clean-build: '' # false by default
@@ -48,13 +54,15 @@
     - heavy-job:
         weight: 1
     - throttle:
-        max-total: 10
-        option: project
+        option: category
+        max-total: 1
+        categories:
+        - '{hg-local-cache-node-throttle-category}'
     - build-discarder:
-        days-to-keep: 30
-        num-to-keep: 100
-        artifact-days-to-keep: 30
-        artifact-num-to-keep: 100
+        days-to-keep: 10
+        num-to-keep: 50
+        artifact-days-to-keep: 10
+        artifact-num-to-keep: 50
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -78,7 +86,6 @@
         default: false
         description: Freeze nx_vms commit right now, don't wait for starting builds
 
-
     triggers:
     - timed: "{timer}"
 
@@ -87,57 +94,47 @@
     - inject:
         properties-content: |
           JOB_MAINTAINERS={job-maintainers}
-          BRANCH={branch}
-          PIPELINE={pipeline}
     - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
+    - timeout:
+        # normally should complete in <1 min, but in case of clean clone this may not work
+        # if there is no repo cloned yet, copy/clone it manually or change timeout
+        timeout: 5 # min
+        fail: true
+        type: absolute
+
+    scm:
+    - hg-la:
+        project-name: nx_vms
+        branch-name: '{branch}'
+    - hg-la:
+        project-name: devtools
+        branch-name: default
 
     builders:
     - inject:
         properties-content: |
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    - inject:
-        properties-content: |
-          BUILD_IDENTITY=undef
-          NX_VMS_COMMIT=undef
-
-    # Runner itself may freeze commits (when runner is triggered directly)
-    # But we want to allow users to freeze commit by the time this job is triggered
+          BRANCH={branch}
+          PIPELINE={pipeline}
 
     # inject given ref at first
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "NX_VMS_COMMIT=${{_NX_VMS_COMMIT}}" > 'NX_VMS_COMMIT.envvar'
     - inject:
-        properties-content: |
-          NX_VMS_COMMIT=$_NX_VMS_COMMIT
+        properties-file: NX_VMS_COMMIT.envvar
 
     # freeze if needed and overwrite
     - conditional-step:
         condition-kind: boolean-expression
         condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
         steps:
-        - trigger-builds:
-          - project: 'helper.freeze-nx-vms-commit'
-            block: true
-            predefined-parameters: |
-              REQUESTED_BY={tag_requested_by}
-              BRANCH=$BRANCH
-              PIPELINE=$PIPELINE
-              NX_VMS_COMMIT=$_NX_VMS_COMMIT
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-        - copyartifact:
-            project: 'helper.freeze-nx-vms-commit'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
         - inject:
-            properties-file: 'NX_VMS_COMMIT.envvar'
-
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
-    - description-setter:
-        description: |
-          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
+            properties-file: NX_VMS_COMMIT.envvar
 
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
@@ -152,39 +149,15 @@
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$NX_VMS_COMMIT
           CLEAN_BUILD=$CLEAN_BUILD
-        block: true
+        block: false # !! don't wait
         block-thresholds:
           failure-threshold: FAILURE
 
     publishers:
-    - postbuildscript:
-        mark-unstable-if-failed: true
-        builders:
-        - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
-          - NOT_BUILT
-          - ABORTED
-          build-steps:
-          - copyartifact:
-              project: '{pipeline}.{branch}.vms.runner'
-              filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: 'NX_VMS_COMMIT.envvar'
-          - inject:
-              properties-file: 'BUILD_IDENTITY.envvar'
-          - description-setter:
-              description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
-
     - publisher-set-build-name:
-        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
-
-    - completed-email(group)
-    # TODO: decide if we want to receive errors on each build...
-    # - failure-email-helpers(maintainers)
+        name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
+    - archive:
+        artifacts: 'NX_VMS_COMMIT.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - failure-email-helpers(maintainers)

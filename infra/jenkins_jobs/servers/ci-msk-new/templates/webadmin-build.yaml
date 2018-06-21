@@ -45,6 +45,7 @@
 
     node: '{webadmin-build-node}'
     concurrent: true
+    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin/'
 
     synchronous-reporting: '' # false
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER
@@ -102,18 +103,15 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - copy-hg-repo:
+        - import-hg-repo(if-missing):
             name: nx_vms
-        - copy-hg-repo:
-            name: devtools
+            branch: '{branch}'
+            basedir: $WORKSPACE
 
     scm:
-    - '{hg-pull-macro}':
-        project-name: devtools
-        branch-name: default
-    - '{hg-pull-macro}':
-        project-name: nx_vms
-        branch-name: $NX_VMS_COMMIT
+    - hg-local:
+        name: nx_vms
+        revision: '$NX_VMS_COMMIT'
 
     builders:
     - build-name-setter:
