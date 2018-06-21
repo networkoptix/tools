@@ -1,0 +1,15 @@
+- project:
+    name: helpers
+
+    # comma-separated list of emails to whom send notifications related to builds
+    build-watchers: iremizov@networkoptix.com
+
+    jobs:
+
+    # HELPERS - syncronize and publish different stuff
+
+    - helper.sync-hg
+    - helper.pull-component
+    - helper.push-component
+    - helper.freeze-nx-vms-commit
+    - helper.freeze-build-config

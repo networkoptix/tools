@@ -1,3 +1,36 @@
+# General notes
+
+We use some trick to reuse precompiled obj files.
+Dirty builds run faster than clean and we are trying to optimize build speed.
+
+Given axes:
+platform linux-64, linux-86, windows-86, ..
+branch default, vms, vms_3.2, ..
+customization default, hanwha, ..
+
+Optimization rules:
+changing platform -> full rebuild
+changing branch -> full rebuild (looks like)
+changing customization -> partial rebuild
+
+The solution is:
+
+1.  Keep platform x branch in separate workspaces
+2.  Allow to build different customization in the same place
+3.  Mess-up auto, release and custom pipelines into the same workspace (this may result in
+    full rebuild in future, but anyways we may control build time and see this problem)
+
+Job specific:
+
+According to prev. facts,
+
+- all platform x branch variables are frozen in job
+- all customization-related stuff is passed as arguments
+
+in some cases there is a "cleaner" script that does some actions inbetween dirty builds.
+this path is optional but if it exists, cleaner will be invoked
+custom_cleaner_path: $WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py
+
 # Manual configuration steps used for "staging":
 
 ## Configure groovy
