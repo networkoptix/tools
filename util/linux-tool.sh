@@ -1221,8 +1221,19 @@ main()
             sudo pkill -9 mediaserver
             ;;
         start-c)
-            # TODO: IMPLEMENT
-            nx_fail "Command not implemented yet."
+            nx_verbose cd "$BUILD_DIR"
+            case "$TARGET" in
+                windows)
+                    local -r QT_PATH="$QT_DIR/bin"
+                    nx_echo "+ PATH=\"$QT_PATH:\$PATH\""
+                    PATH="$QT_PATH:$PATH"
+                    nx_verbose "bin/HD Witness.exe" "$@"
+                    ;;
+                linux)
+                    nx_verbose bin/desktop_client "$@"
+                    ;;
+                *) nx_fail "Target [$TARGET] not supported yet.";;
+            esac
             ;;
         stop-c)
             # TODO: Decide on better impl.
