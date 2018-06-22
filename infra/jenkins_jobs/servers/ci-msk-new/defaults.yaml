@@ -18,7 +18,7 @@
     junkshop_base_url: 'http://10.0.0.160'
 
     artifact_location_root_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}'
-    artifact_location_full_pattern: '$${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}/${{CUSTOMIZATION}}/${{PLATFORM}}'
+    artifact_location_full_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}/${{CUSTOMIZATION}}/${{PLATFORM}}'
     artifact_location_root_pattern_failed: '${{PIPELINE}}-FAILED/${{BRANCH}}/${{BUILD_IDENTITY}}-${{RUNNING_NUM}}'
     artifact_location_full_pattern_failed: '${{PIPELINE}}-FAILED/${{BRANCH}}/${{BUILD_IDENTITY}}-${{RUNNING_NUM}}/${{CUSTOMIZATION}}/${{PLATFORM}}'
 
