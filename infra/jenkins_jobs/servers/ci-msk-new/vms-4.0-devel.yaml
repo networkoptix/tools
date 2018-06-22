@@ -133,7 +133,7 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,windows-x64,mac,bpi
+            platforms: linux-x64,win-x64,mac,bpi
             customizations: default
             freeze-commit-now: true
             clean-build: true
