@@ -163,13 +163,22 @@
           condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
           condition-basedir: workspace
         steps:
+        - description-setter:
+            description: |
+              Clean build is forced by missing BUILD_CONFIG_SHA_OLD.envvar
         - folder-delete-operation:
             folder-path: 'build'
 
     # Optionally when special flag is set, we also remove build directory
-    - conditionally-clean-dir:
-        condition-varname: CLEAN_BUILD
-        dir: build
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="CLEAN_BUILD"}}'
+        steps:
+        - description-setter:
+            description: |
+              Clean build is forced by CLEAN_BUILD var ( $CLEAN_BUILD )
+        - folder-delete-operation:
+            folder-path: 'build'
 
     # Once we have some info regarding oldbuild config, we'll check that
     # incremental build is applicable, if not, again remove build folder
@@ -187,6 +196,9 @@
               condition-string1: "${{BUILD_CONFIG_SHA}}"
               condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
             steps:
+            - description-setter:
+                description: |
+                  Clean build is forced by changed BUILD_CONFIG_SHA, $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
             - folder-delete-operation:
                 folder-path: 'build'
 

@@ -95,7 +95,6 @@
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017 Win64
           CMAKE_ARG_beta=ON
           CMAKE_ARG_addQtPdb=ON
@@ -109,7 +108,6 @@
         <<: *windows_config
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_EXECUTABLE=C:\\Program files\\CMake\\bin\\cmake.exe
           CMAKE_GENERATOR=Visual Studio 15 2017
           CMAKE_ARG_addQtPdb=ON
           CMAKE_ARG_trustedTimestamping=OFF
@@ -122,7 +120,6 @@
     - mac: &osx_config
         installer-build-node: build-installer-mac
         cmake_configure_args_platform: |
-          CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_beta=ON
           CMAKE_ARG_codeSigning=OFF
@@ -130,7 +127,6 @@
     # - ios:
     #     <<: *osx_config
     #     cmake_configure_args_platform: |
-    #       CMAKE_EXECUTABLE=/usr/local/opt/cmake-3.10.2-Darwin-x86_64/CMake.app/Contents/bin/cmake
     #       CMAKE_GENERATOR=Xcode
     #       CMAKE_ARG_targetDevice=ios
 
