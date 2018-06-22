@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.vms.webadmin.universal.build'
+    name: '{pipeline}.{branch}.{project}.webadmin.universal.build'
     project-type: multijob
     job-maintainers: 'iremizov@networkoptix.com'
     description: |
@@ -49,7 +49,7 @@
 
     synchronous-reporting: '' # false
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER
-
+    webadmin-build-node: webadmin-build
     webadmin-platform: universal
     webadmin-customization: default
 

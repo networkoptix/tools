@@ -30,3 +30,5 @@
     hg-local-cache-node-workspace: repo
     hg-local-cache-node-throttle-category: repo
     hg-local-cache-node-ip-addr: '192.168.13.116'
+
+    webadmin-build-node: webadmin-build

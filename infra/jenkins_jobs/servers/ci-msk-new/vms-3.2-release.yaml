@@ -14,8 +14,6 @@
     # block builds and wait for reporting job to report results
     synchronous-reporting: '' # false
 
-    webadmin-build-node: webadmin-build
-
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
     cmake_configure_args_global: |
@@ -24,6 +22,7 @@
       CMAKE_ARG_developerBuild=OFF
       CMAKE_ARG_cloudGroup=test
       CMAKE_ARG_rdepSync=ON
+      CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/$WEBADMIN_COMPONENT_NAME
       # CMAKE_ARG_withTests=TRUE
 
     # SECTION. PIPELINE CONFIG
@@ -119,6 +118,7 @@
 
     - mac: &osx_config
         installer-build-node: build-installer-mac
+        use-webadmin: false
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_beta=ON
@@ -173,7 +173,7 @@
 
     # TRIGGERS - main entry points
 
-    - '{pipeline}.{branch}.vms.trigger.{preset}':
+    - '{pipeline}.{branch}.{project}.trigger.{preset}':
         preset:
         - example:
             detailed-job-description: |-
@@ -199,7 +199,7 @@
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.vms.runner':
+    - '{pipeline}.{branch}.{project}.runner':
         default-platforms: linux-x64,linux-x86,win-x86
         default-customizations: default,hanwha
 
@@ -211,12 +211,12 @@
 
     # BUILD AND TEST - main jobs
 
-    - '{pipeline}.{branch}.vms.webadmin.universal.build'
-    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
+    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
+    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
     # Edge1 is a platform that's exclusive for digitalwatchdog.
     # add extra jobs for edge1 with digitalwatchdog customization
-    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all': &extra-edge1-platform
+    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all': &extra-edge1-platform
         platform:
         - edge1:
             installer-build-node: *linux_node
@@ -225,7 +225,7 @@
               CMAKE_ARG_targetDevice=edge1
         customization:
         - 'digitalwatchdog'
-    - '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build':
+    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build':
         <<: *extra-edge1-platform
 
     # Our tests work per-customization per-platform and not yet implemented

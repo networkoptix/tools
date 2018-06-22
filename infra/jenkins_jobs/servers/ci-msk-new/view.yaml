@@ -37,6 +37,13 @@
     description: 'List of all release jobs related to vms'
     regex: develop.vms.*unittest
 
+# mobile-18.2
+- view:
+    name: mob 18.2 build
+    view-type: list
+    description: 'List of all release jobs related to mobile next'
+    regex: develop.mobile.*build
+
 # Helpers and utilities
 
 - view:

@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+    name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
     job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
@@ -46,6 +46,7 @@
 
     synchronous-reporting: '' # false
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER
+    use-webadmin: 'true' # defaults to build installer that requires webadmin
     webadmin-component-name: 'server-external'
     webadmin-platform: universal
     webadmin-customization: default
@@ -95,6 +96,8 @@
           BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
+          USE_WEBADMIN={use-webadmin}
+          WEBADMIN_COMPONENT_NAME={webadmin-component-name}
 
     - timestamps
     - timeout:
@@ -269,23 +272,27 @@
             folder-path: '{build-dir}'
 
     - folder-delete-operation:
-        folder-path: '$WORKSPACE/{webadmin-component-name}'
-
-    - trigger-builds:
-      - project: 'helper.pull-component'
-        predefined-parameters: |
-          PIPELINE=$PIPELINE
-          BRANCH=$BRANCH
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          CUSTOMIZATION={webadmin-customization}
-          PLATFORM={webadmin-platform}
-          COMPONENTS={webadmin-component-name}/
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
+        folder-path: '$WORKSPACE/$WEBADMIN_COMPONENT_NAME'
+    - conditional-step:
+        condition-kind: boolean-expression
+        # pull webadmin only when needed
+        condition-expression: '${{ENV,var="USE_WEBADMIN"}}'
+        steps:
+        - trigger-builds:
+          - project: 'helper.pull-component'
+            predefined-parameters: |
+              PIPELINE=$PIPELINE
+              BRANCH=$BRANCH
+              BUILD_IDENTITY=$BUILD_IDENTITY
+              CUSTOMIZATION={webadmin-customization}
+              PLATFORM={webadmin-platform}
+              COMPONENTS=$WEBADMIN_COMPONENT_NAME/
+              SSH_USER=$USER
+              LOCAL_PATH=$WORKSPACE/
+              NODE_SSH_CONNECTION=$SSH_CONNECTION
+            block: true
+            block-thresholds:
+              failure-threshold: FAILURE
 
     # STAGE: BUILD
     # ========================================
@@ -304,7 +311,6 @@
           {cmake_configure_args_customization}
     - inject:
         properties-content: |
-          CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/{webadmin-component-name}
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
           CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
           CMAKE_ENV_environment=$WORKSPACE/build

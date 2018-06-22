@@ -1,6 +1,6 @@
 
 - job-template:
-    name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.all'
+    name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
     project-type: multijob
 
     node: runner
@@ -52,7 +52,7 @@
     - multijob:
         name: "Build installer for {platform} with {customization}"
         projects:
-        - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.build'
+        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -65,7 +65,7 @@
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)
         projects:
-        - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.unittest' # TODO:
+        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -75,7 +75,7 @@
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
 
-        - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.perftest' # TODO:
+        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -85,7 +85,7 @@
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
 
-        - name: '{pipeline}.{branch}.vms.installer.{platform}.{customization}.functest' # TODO:
+        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.functest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION

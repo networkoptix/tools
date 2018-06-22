@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.vms.trigger.{preset}'
+    name: '{pipeline}.{branch}.{project}.trigger.{preset}'
     job-maintainers: 'iremizov@networkoptix.com'
 
     description: |
@@ -46,7 +46,7 @@
     freeze-commit-now: true # default true
     clean-build: '' # false by default
     default-build-description: ''
-    build_webadmin: true
+    build-webadmin: true
     # detailed-job-description required!
 
     # vars
@@ -79,7 +79,7 @@
     - p_CUSTOMIZATIONS:
         default: '{customizations}'
     - p_BUILD_WEBADMIN:
-        default: '{build_webadmin}'
+        default: '{build-webadmin}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
@@ -146,7 +146,7 @@
     # is too big and takes a while to be loaded
     # Anyway this graph is available in runner
     - trigger-builds:
-      - project: '{pipeline}.{branch}.vms.runner'
+      - project: '{pipeline}.{branch}.{project}.runner'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
