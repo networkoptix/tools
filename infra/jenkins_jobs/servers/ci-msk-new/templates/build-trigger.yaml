@@ -118,6 +118,10 @@
           BRANCH={branch}
           PIPELINE={pipeline}
 
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
+
     # inject given ref at first
     - shell: |
         #!/bin/bash
