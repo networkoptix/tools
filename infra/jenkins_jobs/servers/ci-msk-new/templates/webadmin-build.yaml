@@ -159,7 +159,7 @@
                 failure-threshold: FAILURE
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFULL=true
+                IS_SUCCESSFUL=true
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -198,7 +198,7 @@
                 failure-threshold: FAILURE
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFULL=false
+                IS_SUCCESSFUL=false
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
