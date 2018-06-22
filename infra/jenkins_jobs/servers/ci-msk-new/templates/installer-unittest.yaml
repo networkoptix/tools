@@ -136,7 +136,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
-    publishers:
+
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:
