@@ -49,9 +49,6 @@
     build-webadmin: true
     # detailed-job-description required!
 
-    # vars
-    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
-
     properties:
     - heavy-job:
         weight: 1

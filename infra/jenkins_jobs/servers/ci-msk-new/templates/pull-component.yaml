@@ -31,6 +31,8 @@
     # Utility parameters used to describe connection details
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
+    - p_BUILD_STATUS
+    - p_RUNNING_NUM
 
     wrappers:
     - build-name:
@@ -46,12 +48,22 @@
         - jenkins
 
     builders:
+    - shell: |
+        #!/bin/bash
+        if [ "${{BUILD_STATUS}}" == 'passed' ] ; then
+          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
+        else
+          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern_failed}"
+        fi
+        echo "REPOSITORY_PATH=${{REPOSITORY_PATH}}" > REPOSITORY_PATH.envvar
+    - inject:
+        properties-file: REPOSITORY_PATH.envvar
 
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '{artifact_repository_base_path}/{artifact_location_full_pattern}'
+        src_path: '${{REPOSITORY_PATH}}'
         dst_path: '${{LOCAL_PATH}}'
         components: '${{COMPONENTS}}'
 

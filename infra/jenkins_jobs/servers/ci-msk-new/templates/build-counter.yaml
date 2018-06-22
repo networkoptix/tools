@@ -42,7 +42,6 @@
     # ========
     # multijob projects
     # ```
-    # tag_requested_by: $JOB_NAME-$BUILD_NUMBER
     # builders:
     # - multijob:
     #     name: Request new {counter_var_name}
@@ -62,7 +61,6 @@
     # ```
     # freestyle projects
     # ```
-    # tag_requested_by: $JOB_NAME-$BUILD_NUMBER
     # builders:
     # - trigger-builds:
     #   - project: '{pipeline}.{counter_name}.generator'

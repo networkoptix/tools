@@ -18,12 +18,7 @@
 
     parameters:
     - p_REQUESTED_BY
-    - bool:
-        name: IS_SUCCESSFUL
-        default: true
-        description: >-
-          Special flag to mark partial and/or faild builds, they should
-          go to other repository than final one with good artifacts.
+    - p_BUILD_STATUS
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
@@ -63,6 +58,8 @@
         properties-content: |
           RUNNING_NUM=$BUILD_ID
     - shell: |
+          echo "RUNNING_NUM=${{RUNNING_NUM}}" > RUNNING_NUM.envvar
+    - shell: |
         #!/bin/bash
         : ${{REQUESTED_BY:?}}
         : ${{BUILD_IDENTITY:?}}
@@ -81,7 +78,7 @@
 
     - shell: |
         #!/bin/bash
-        if [ "${{IS_SUCCESSFUL}}" == 'true' ] ; then
+        if [ "${{BUILD_STATUS}}" == 'passed' ] ; then
           REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
           REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
         else
@@ -115,6 +112,10 @@
         fingerprint: true
     - archive:
         artifacts: 'REPOSITORY_URL.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - archive:
+        artifacts: 'RUNNING_NUM.envvar'
         allow-empty: 'false'
         fingerprint: true
 

@@ -111,19 +111,19 @@
         builders:
         - role: SLAVE
           build-on:
-          - FAILURE
           - SUCCESS
-          - UNSTABLE
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
               block: true
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BUILD_STATUS=passed
                 COMPONENTS=unit_tests/
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -136,7 +136,36 @@
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
-
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              block: true
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BUILD_STATUS=failed
+                COMPONENTS=unit_tests/
+                LOCAL_PATH=$WORKSPACE/
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+            - project: '{pipeline}.unittests-reporter'
+              block: '{synchronous-reporting}'
+              predefined-parameters: |
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:

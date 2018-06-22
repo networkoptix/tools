@@ -48,7 +48,6 @@
     workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{branch}/'
 
     synchronous-reporting: '' # false
-    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
     webadmin-build-node: webadmin-build
     webadmin-platform: universal
     webadmin-customization: default
@@ -165,7 +164,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
-                IS_SUCCESSFUL=true
+                BUILD_STATUS=passed
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -204,7 +203,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
-                IS_SUCCESSFUL=false
+                BUILD_STATUS=failed
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION

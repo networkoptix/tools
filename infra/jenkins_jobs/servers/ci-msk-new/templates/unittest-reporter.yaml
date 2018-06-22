@@ -26,6 +26,8 @@
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
     - p_PLATFORM
+    - p_RUNNING_NUM
+    - p_BUILD_STATUS
 
     wrappers:
     - inject:
@@ -72,6 +74,8 @@
           CUSTOMIZATION=$CUSTOMIZATION
           COMPONENTS=unit_tests/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
+          BUILD_STATUS=$BUILD_STATUS
+          RUNNING_NUM=$RUNNING_NUM
         block: true
         block-thresholds:
           failure-threshold: FAILURE

@@ -13,8 +13,6 @@ print '''#
     node: runner
     concurrent: true
 
-    # vars
-    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
 
     properties:
     - heavy-job:

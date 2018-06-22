@@ -45,7 +45,7 @@
     concurrent: true
 
     synchronous-reporting: '' # false
-    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
+
     use-webadmin: 'true' # defaults to build installer that requires webadmin
     webadmin-component-name: 'server-external'
     webadmin-platform: universal
@@ -360,7 +360,7 @@
             - project: 'helper.push-component'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFUL=true
+                BUILD_STATUS=passed
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -401,7 +401,7 @@
             - project: 'helper.push-component'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFUL=false
+                BUILD_STATUS=failed
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -421,6 +421,15 @@
               parameter-filters: REQUESTED_BY={tag_requested_by}
           - inject:
               properties-file: REPOSITORY_URL.envvar
+
+          - copyartifact:
+              project: 'helper.push-component'
+              filter: 'RUNNING_NUM.envvar'
+              which-build: last-completed
+              parameter-filters: REQUESTED_BY={tag_requested_by}
+          - inject:
+              properties-file: RUNNING_NUM.envvar
+
           - inject:
               properties-content: |
                 JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
@@ -466,6 +475,7 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
+                RUNNING_NUM=$RUNNING_NUM
                 LOGFILE={cmake-build-log}
 
     - failure-email:

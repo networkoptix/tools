@@ -62,15 +62,12 @@
     - p_CUSTOMIZATION
     - p_PLATFORM
     - p_NX_VMS_COMMIT
+    - p_RUNNING_NUM
     - string:
         name: LOGFILE
         description: |
           Logfile that contains information about build
-    - string:
-        name: BUILD_STATUS
-        description: >-
-          Build status to report, note that THIS ENUM DOES NOT CONFORM
-          with JENKINS ENUMs, valid options are "passed" and "failed"
+    - p_BUILD_STATUS
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -124,6 +121,8 @@
           LOCAL_PATH=$WORKSPACE/
           COMPONENTS=$LOGFILE
           NODE_SSH_CONNECTION=$SSH_CONNECTION
+          BUILD_STATUS=$BUILD_STATUS
+          RUNNING_NUM=$RUNNING_NUM
         block: true
         block-thresholds:
           failure-threshold: FAILURE

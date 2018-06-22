@@ -187,3 +187,23 @@
         header: >-
           Special section for administrative/maintenance purposes..
           DON'T MODIFY anything if you are not administrator
+
+- parameter:
+    name: p_BUILD_STATUS
+    parameters:
+    - string:
+        name: BUILD_STATUS
+        default: passed
+        description: >-
+          Build status to report, note that THIS ENUM DOES NOT CONFORM
+          with JENKINS ENUMs, valid options are "passed" and "failed"
+
+- parameter:
+    name: p_RUNNING_NUM
+    parameters:
+    - string:
+        name: RUNNING_NUM
+        default: ''
+        description: >-
+          Utility, special autoincremental number for failed builds
+          (this num is appended for each folder where faile build lands)
