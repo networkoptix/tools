@@ -21,8 +21,7 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
-    - p_BRANCH:
-        default: 'default'
+    - p_BRANCH
     - string:
         name: REPO
         default: nx_vms

@@ -42,8 +42,8 @@
         properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
-          PLATFORM={platform}
           CUSTOMIZATION={customization}
+          PLATFORM={platform}
     - timestamps
     - timeout:
         timeout: 20 # min
@@ -84,8 +84,8 @@
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
-          BRANCH=$BRANCH
           PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM
@@ -132,10 +132,10 @@
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
 
     - failure-email:
         email-recipients: '{build-watchers}'

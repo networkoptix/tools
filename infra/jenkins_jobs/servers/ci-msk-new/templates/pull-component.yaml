@@ -20,8 +20,8 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
-    - p_BRANCH
     - p_PIPELINE
+    - p_BRANCH
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
     - p_PLATFORM

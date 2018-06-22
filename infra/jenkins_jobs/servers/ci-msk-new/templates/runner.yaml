@@ -48,8 +48,9 @@
     wrappers:
     - inject:
         properties-content: |
-          BRANCH={branch}
           PIPELINE={pipeline}
+          BRANCH={branch}
+
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
@@ -65,8 +66,8 @@
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
-            BRANCH=$BRANCH
             PIPELINE=$PIPELINE
+            BRANCH=$BRANCH
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:

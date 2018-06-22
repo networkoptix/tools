@@ -67,8 +67,8 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
-    - p_BRANCH
     - p_PIPELINE
+    - p_BRANCH
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:

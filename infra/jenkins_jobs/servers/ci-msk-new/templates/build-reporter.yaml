@@ -58,10 +58,10 @@
         default: ''
     - p_CLEAN_CLONE
     - p_BRANCH
-    - p_NX_VMS_COMMIT
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
     - p_PLATFORM
+    - p_NX_VMS_COMMIT
     - string:
         name: LOGFILE
         description: |

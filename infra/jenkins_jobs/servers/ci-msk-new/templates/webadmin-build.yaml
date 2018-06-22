@@ -88,10 +88,11 @@
     - inject:
         properties-content: |
           JOB_MAINTAINERS={job-maintainers}
-          BRANCH={branch}
           PIPELINE={pipeline}
-          PLATFORM={webadmin-platform}
+          BRANCH={branch}
           CUSTOMIZATION={webadmin-customization}
+          PLATFORM={webadmin-platform}
+
     - timestamps
     - timeout:
         # normally, should complete in 7-15 min
@@ -159,12 +160,12 @@
                 failure-threshold: FAILURE
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFUL=true
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                IS_SUCCESSFUL=true
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -198,12 +199,12 @@
                 failure-threshold: FAILURE
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
-                IS_SUCCESSFUL=false
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                IS_SUCCESSFUL=false
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
@@ -237,10 +238,10 @@
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BRANCH=$BRANCH
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 LOGFILE={webadmin-build-log}
 
@@ -256,10 +257,10 @@
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 LOGFILE={webadmin-build-log}
 

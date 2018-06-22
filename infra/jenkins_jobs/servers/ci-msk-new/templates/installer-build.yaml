@@ -92,9 +92,10 @@
         properties-content: |
           JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
+          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
-          BRANCH={branch}
+
     - timestamps
     - timeout:
         # normally, should complete in 7-30 min
@@ -138,8 +139,8 @@
         block: true
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
-          BRANCH=$BRANCH
           PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     # Inject commit sha
@@ -273,8 +274,8 @@
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
-          BRANCH=$BRANCH
           PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION={webadmin-customization}
           PLATFORM={webadmin-platform}
@@ -433,11 +434,12 @@
             - project: '{pipeline}.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 BRANCH=$BRANCH
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 LOGFILE={cmake-build-log}
     - postbuildscript:
@@ -453,10 +455,10 @@
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BRANCH=$BRANCH
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_IDENTITY=$BUILD_IDENTITY
-                PLATFORM=$PLATFORM
                 CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 LOGFILE={cmake-build-log}
 

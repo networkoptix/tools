@@ -37,8 +37,8 @@
         properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
-          PLATFORM={platform}
           CUSTOMIZATION={customization}
+          PLATFORM={platform}
     - build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps

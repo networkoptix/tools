@@ -44,19 +44,18 @@
         description:
           How many random folders to take if List of folders is not provided
 
-
     builders:
     - inject:
         properties-content: |
-          PIPELINE={pipeline}
           JOB_MAINTAINERS={job-maintainers}
+          PIPELINE={pipeline}
           BRANCH={branch}
     # FIXME: this job relies on hardlink utility which is not installed with ansible yet
     - shell: |
         #!/bin/bash
         set -ex
 
-        cd "/mnt/beta-builds/repository/v1/${{BRANCH}}/${{PIPELINE}}"
+        cd "/mnt/beta-builds/repository/v1/${{PIPELINE}}/${{BRANCH}}"
         if [ -z "$DEDUPE_FOLDERS" ] ; then
           DEDUPE_FOLDERS="$(ls | shuf -n "${{NUM_RAND_CHOICE}}")"
         fi

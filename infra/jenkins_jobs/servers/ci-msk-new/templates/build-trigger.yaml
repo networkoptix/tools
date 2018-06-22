@@ -115,8 +115,8 @@
     builders:
     - inject:
         properties-content: |
-          BRANCH={branch}
           PIPELINE={pipeline}
+          BRANCH={branch}
 
     - description-setter:
         description: |
