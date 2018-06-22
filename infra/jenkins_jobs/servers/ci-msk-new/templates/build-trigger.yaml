@@ -111,9 +111,6 @@
     - hg-la:
         project-name: nx_vms
         branch-name: '$_NX_VMS_COMMIT'
-    - hg-la:
-        project-name: devtools
-        branch-name: default
 
     builders:
     - inject:
