@@ -15,10 +15,10 @@
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     test-timeout-hours: 6
     job-timeout-minutes: 420  # 7 hours
-    # junk-shop-host: '10.0.0.113'
+    junk-shop-host: '10.0.0.113'
 
     # See extra/burbank-node-readme.txt for explanation
-    junk-shop-host: localhost
+    # junk-shop-host: localhost
 
     jobs:
       - '{project-name}-{branch}-{platform}-funtest'
