@@ -56,7 +56,7 @@
     cmake-build-log: 'cmake-build.log'
     build-dir: build
 
-    build-artifacts: 'distrib/,bin/,lib/,packages/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
+    build-artifacts: 'distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
     build-artifacts-min: 'build/**/*.log'
 
     # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
