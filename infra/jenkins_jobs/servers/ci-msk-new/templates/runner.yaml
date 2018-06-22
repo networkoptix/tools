@@ -2918,6 +2918,7 @@
 
 
     publishers:
+    - display-upstream-changes
     - archive:
         artifacts: '*.envvar'
         allow-empty: 'false'

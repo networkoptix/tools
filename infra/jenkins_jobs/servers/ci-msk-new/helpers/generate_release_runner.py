@@ -165,6 +165,7 @@ for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
 '''
 print '''
     publishers:
+    - display-upstream-changes
     - archive:
         artifacts: '*.envvar'
         allow-empty: 'false'
