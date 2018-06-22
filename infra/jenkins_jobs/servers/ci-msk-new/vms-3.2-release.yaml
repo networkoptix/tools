@@ -70,11 +70,11 @@
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_targetDevice=rpi
-    - tx1:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=tx1
+    # - tx1:
+    #     installer-build-node: *linux_node
+    #     cmake_configure_args_platform: |
+    #       CMAKE_GENERATOR=Ninja
+    #       CMAKE_ARG_targetDevice=tx1
     # + edge1
 
     # -- windows platform --
