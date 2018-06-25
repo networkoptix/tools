@@ -15,6 +15,7 @@
     unittest-launcher: unittest-launcher-default
     init-venv-method: init-venv-linux
     synchronous-reporting: '' # false
+    workspace: 'nx_ut_thr${{EXECUTOR_NUMBER}}/'
 
     properties:
     - heavy-job:
@@ -65,6 +66,8 @@
         revision: 'default'
 
     builders:
+    - folder-delete-operation:
+        folder-path: 'build'
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
