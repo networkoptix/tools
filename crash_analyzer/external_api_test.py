@@ -99,8 +99,8 @@ def test_jira_concurrent(thread_count):
 
 def _test_jira():
     with JiraFixture() as jira:
-        jira.create_issue('server--3.1.0.1234-abcd-default--1234.gdb-bt')
-        jira.update_issue(['server--3.1.0.1234-abcd-default--1234.gdb-bt'])
+        jira.create_issue('server--3.1.0.311-abc-default--a.gdb-bt')
+        jira.update_issue(['server--3.1.0.311-abc-default--a.gdb-bt'])
         assert jira.issue.key.startswith('VMS-')
         assert 'Open' == jira.issue.fields.status.name
         assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
@@ -110,36 +110,46 @@ def _test_jira():
         assert {'Server'} == jira.field_set('components')
         assert {'3.1'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
-        assert {'1234'} == jira.attachments()
+        assert {'a'} == jira.attachments()
         
         logger.debug('Suppose case is closed by developer')
         jira.api._transition(jira.issue.key, 'Reject')
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
-        logger.debug('No reopen should happen for dump from the same version')
-        jira.update_issue(['server--3.1.0.5678-xyzu-default--5678.gdb-bt'])
+        logger.debug('No reopen for the same version')
+        jira.update_issue(['server--3.1.0.312-abc-default--b.gdb-bt'])
         assert 'Closed' == jira.issue.fields.status.name
-        assert {'1234'} == jira.attachments()
+        assert {'a'} == jira.attachments()
 
-        logger.debug('Reopen is expected for dumps from new version')
-        jira.update_issue([
-            'server--3.2.0.2344-asdf-default--3451.gdb-bt',
-            'server--3.2.0.3452-dfga-default--7634.gdb-bt',
-        ])
+        logger.debug('Reopen is for new version')
+        jira.update_issue(['server--3.2.0.321-tricom-default--c.gdb-bt'])
         assert 'Open' == jira.issue.fields.status.name
         assert {'3.1', '3.2'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
-        assert {'1234', '3451', '7634'} == jira.attachments()
+        assert {'a', 'c'} == jira.attachments()
 
-        logging.debug('First dump should be replaced by the last one')
-        jira.update_issue(['server--4.0.0.1111-abcd-default--1111.gdb-bt'])
+        logger.debug('Suppose case is closed by developer with fix version')
+        jira.api._transition(jira.issue.key, 'Reject')
+        jira.issue.update(fields=dict(customfield_11120=323))
+        assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
+
+        logger.debug('No reopen should happen for report on changeset before fix')
+        jira.update_issue(['server--3.2.0.322-tricom-default--d.gdb-bt'])
+        assert 'Closed' == jira.issue.fields.status.name
+        assert {'a', 'c'} == jira.attachments()
+
+        logger.debug('Reopen is for new changeset')
+        jira.update_issue(['server--3.2.0.323-xyz-default--e.gdb-bt'])
+        assert 'Open' == jira.issue.fields.status.name
+        assert {'3.1', '3.2'} == jira.field_set('versions')
+        assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
+        assert {'a', 'c', 'e'} == jira.attachments()
+
+        logging.debug('Attachments rotation')
+        jira.update_issue([
+            'server--3.2.0.324-xyz-default--f.gdb-bt',
+            'server--4.0.0.412-abc-default--g.gdb-bt',
+        ])
         assert {'3.1', '3.2', '4.0'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
-        assert {'3451', '7634', '1111'} == jira.attachments()
-        
-        logger.debug('Fix version should be updated after by older report.')
-        jira.update_issue(['server--3.0.0.123-tricom-default--123.gdb-bt'])
-        assert {'3.0', '3.1', '3.2', '4.0'} == jira.field_set('versions')
-        assert {'3.0_hotfix', '3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
-        assert {'7634', '1111', '123'} == jira.attachments()
-        
+        assert {'e', 'f', 'g'} == jira.attachments()

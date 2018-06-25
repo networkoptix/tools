@@ -173,15 +173,23 @@ class Jira:
             logger.debug(utils.format_error(error))
             raise JiraError('Unable to update issue {}: {}'.format(key, error.text))
 
+        fix_build = issue.fields.customfield_11120
+        if fix_build:
+            reports = list(filter(lambda r: int(r.build) >= fix_build, reports))
+            if not reports:
+                return logger.debug('JIRA issue {} ignores new reports by fix build {}'.format(
+                    key, fix_build))
+
         if issue.fields.status.name == 'Closed':
-            min_fix = min(v.name for v in issue.fields.fixVersions)
-            max_report = max(d.version for d in reports)
-            if min_fix > max_report:
-                logger.debug('JIRA issue {} is already fixed'.format(key))
-                return
-            else:
-                self._transition(issue, 'Reopen')
-                logger.info('Reopen JIRA issue {} for version {}'.format(key, max_report))
+            if not fix_build:
+                min_fix_version = min(v.name for v in issue.fields.fixVersions)
+                max_report_version = max(r.version for r in reports)
+                if min_fix_version >= max_report_version:
+                    return logger.debug('JIRA issue {} is already fixed'.format(key))
+
+            self._transition(issue, 'Reopen')
+            logger.info('Reopen JIRA issue {} for reports from {}'.format(
+                key, ', '.join(r.full_version for r in reports)))
                 
         versions = set()
         fix_versions = set()
