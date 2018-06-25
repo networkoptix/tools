@@ -188,6 +188,7 @@ PATTERN_LIST = [
     MultiLinePattern('error', r'rsync: .+', second_line=r'rsync error: .+', last_line=r'>> \[.+\]: FAILED'),
     MultiLinePattern('error', r'FAILED:.+', last_line=r'FAILURE \(status 1\); see the error message\(s\) above.'),  # ninja
     SingleLinePattern('error', r'FAILED:.+'),  # ninja
+    SingleLinePattern('error', r'/bin/sh: 1: .+: .+'),  # /bin/sh: 1: /.../build_distribution.sh: Permission denied
     ]
 
 
