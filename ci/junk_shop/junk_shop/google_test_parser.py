@@ -14,7 +14,7 @@ GTestPattern = namedtuple('GTestPattern', 'pattern extra_line_count')
 LOG_PATTERN = r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} +\w+ +[A-Z]+ .+'
 
 GTEST_PATTERN_LIST = [
-    GTestPattern(r'^.+:\d+: Failure$', 3),  # linux, mac
+    GTestPattern(r'^.+:\d+: Failure$', 5),  # linux, mac
     GTestPattern(r'^unknown file: Failure$', 1),  # linux?, mac
     GTestPattern(r'^.+\(\d+\): error: .+$', 2),  # windows
     ]
