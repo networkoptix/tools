@@ -12,7 +12,7 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/freeze-build-config.yaml
+        devtools/infra/jenkins_jobs/servers/templates/helpers/freeze-build-config.yaml
 
       --------------------------------------------------------------------------------
 

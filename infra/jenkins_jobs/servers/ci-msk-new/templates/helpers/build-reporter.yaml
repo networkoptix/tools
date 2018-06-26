@@ -12,7 +12,7 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/build-reporter.yaml
+        devtools/infra/jenkins_jobs/servers/templates/helpers/build-reporter.yaml
 
       ONLY FAILED BUILDS MAY BE RETRIGGERED/RETRIED
 

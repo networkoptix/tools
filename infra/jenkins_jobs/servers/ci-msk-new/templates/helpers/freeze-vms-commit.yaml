@@ -14,7 +14,7 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/freeze-vms-commit.yaml
+        devtools/infra/jenkins_jobs/servers/templates/helpers/freeze-vms-commit.yaml
 
       --------------------------------------------------------------------------------
 
