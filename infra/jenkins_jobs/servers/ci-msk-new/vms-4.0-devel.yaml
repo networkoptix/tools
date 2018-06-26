@@ -160,14 +160,16 @@
         platform:
         - linux-x64:
             unittest-node: unittests-linux
+        - mac:
+            unittest-node: unittests-mac
         customization:
         - default
-    # - installer-unittests-windows:
-    #     platform:
-    #     - win-x64:
-    #         unittest-node: unittests-windows
-    #     customization:
-    #     - default
+    - installer-unittests-windows:
+        platform:
+        - win-x64:
+            unittest-node: unittests-windows
+        customization:
+        - default
     # REPORTERS - parse & upload logs, build and test information to outer services
 
     # utility job for reporting unittests reslts to junkshop
