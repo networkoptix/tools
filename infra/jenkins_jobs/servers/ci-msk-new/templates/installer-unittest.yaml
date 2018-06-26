@@ -51,19 +51,16 @@
         fail: true
         type: absolute
     # - workspace-cleanup # always
-
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
+        - folder-delete-operation:
+            folder-path: 'devtools'
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
             basedir: $WORKSPACE
 
-    scm:
-    - hg-local:
-        name: devtools
-        revision: 'default'
 
     builders:
     - folder-delete-operation:

@@ -118,6 +118,9 @@
             name: nx_vms
             branch: '{branch}'
             basedir: $WORKSPACE
+        # this is an ugly huck to finally close the problem with long filenames in devtools
+        - folder-delete-operation:
+            folder-path: 'devtools'
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
@@ -130,10 +133,6 @@
     - hg-local:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
-    # FIXME: Path too long
-    # - hg-local:
-    #     name: devtools
-    #     revision: default
 
     builders:
     - build-name-setter:
