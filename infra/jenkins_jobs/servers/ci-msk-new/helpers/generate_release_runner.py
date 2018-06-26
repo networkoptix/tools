@@ -46,6 +46,7 @@ print '''#
     - p_CLEAN_CLONE
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
           BRANCH={branch}
