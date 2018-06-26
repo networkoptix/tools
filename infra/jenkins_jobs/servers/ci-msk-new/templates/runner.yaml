@@ -2160,10 +2160,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.default.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2174,10 +2174,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2188,10 +2188,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2202,10 +2202,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.cox.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2216,10 +2216,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2230,10 +2230,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2244,10 +2244,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2258,10 +2258,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2272,10 +2272,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2286,10 +2286,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2300,10 +2300,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.ras.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2314,10 +2314,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2328,10 +2328,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2342,10 +2342,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2356,10 +2356,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.ust.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2370,10 +2370,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.vista.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2384,10 +2384,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -2398,10 +2398,10 @@
             CLEAN_CLONE=$CLEAN_CLONE
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.win-x86.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$PLATFORMS     ").trim().split(",").contains("win-x86") &&
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange")
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION

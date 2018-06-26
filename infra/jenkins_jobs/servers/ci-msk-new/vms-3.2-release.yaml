@@ -94,7 +94,7 @@
           CMAKE_ARG_withTests=ON
           CMAKE_TOOL=host=x64
 
-    - win-x86:
+    - windows-x86:
         <<: *windows_config
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
@@ -177,7 +177,7 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,linux-x86,bananapi,win-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
+            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
             customizations: default,hanwha,vista,digitalwatchdog
             clean-build: true
             timer: '0 0 * * *'
@@ -185,7 +185,7 @@
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,win-x86
+        default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
     # BUILD AND TEST - main jobs
@@ -222,7 +222,7 @@
     #     platform:
     #     - windows-x64:
     #         unittest-node: unittests-windows
-    #     - win-x86:
+    #     - windows-x86:
     #         unittest-node: unittests-windows
     #     customization:
     #     - default

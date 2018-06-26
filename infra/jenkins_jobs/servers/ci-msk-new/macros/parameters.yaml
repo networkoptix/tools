@@ -105,7 +105,7 @@
         name: PLATFORMS
         default: '{default}'
         description: >-
-          Target platforms comma-separated list for installer (e.g. linux-x64, win-x86 and others,
+          Target platforms comma-separated list for installer (e.g. linux-x64, windows-x86 and others,
           note that universal is used for webadmin and other platform-independent components)
 
 - parameter:
@@ -115,7 +115,7 @@
         name: PLATFORM
         default: ''
         description: >
-          Target platform for installer (e.g. linux-x64, win-x86 and others,
+          Target platform for installer (e.g. linux-x64, windows-x86 and others,
           note that universal is used for webadmin and other platform-independent components)
 
 - parameter:

@@ -138,7 +138,7 @@
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,win-x86
+        default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
     # BUILD AND TEST - main jobs
