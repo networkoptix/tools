@@ -144,8 +144,11 @@
           REQUESTED_BY={tag_requested_by}
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
+          CUSTOMIZATION=$CUSTOMIZATION
+          PLATFORM=$PLATFORM
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+
     # Inject commit sha
     - copyartifact:
         project: 'helper.freeze-build-config'

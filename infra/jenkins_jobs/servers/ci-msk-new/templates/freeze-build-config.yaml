@@ -69,6 +69,8 @@
         default: ''
     - p_PIPELINE
     - p_BRANCH
+    - p_CUSTOMIZATION
+    - p_PLATFORM
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
@@ -105,11 +107,26 @@
     - shell: |
         #!/bin/bash
         set -ex
-        function find_all_files() {{
-          find "nx_vms" -type f -and \( -name 'CMakeLists.txt' -or -name '*.vcxproj' -or -name '*.cmake' -or -wholename '**/build_utils/**' \)
-        }}
+
+        case $PLATFORM in
+          linux-x64|linux-x86|rpi|bpi|bananapi|mac|ios)
+            function find_all_files() {{
+              echo "Will ignore changes in vcxproj as it's used only for windows and not for ${{PLATFORM}}"
+
+              find "nx_vms" -type f -and \( -name 'CMakeLists.txt' -or -name '*.cmake' -or -wholename '**/build_utils/**' \)
+            }}
+            ;;
+          *)
+            function find_all_files() {{
+              echo "Will include changes in vcxproj (used for windows), current ${{PLATFORM}} is not exceptional"
+              find "nx_vms" -type f -and \( -name 'CMakeLists.txt' -or -name '*.vcxproj' -or -name '*.cmake' -or -wholename '**/build_utils/**' \)
+            }}
+            ;;
+        esac
+
         echo "BUILD_CONFIG_SHA will be based on files"
         find_all_files
+
         echo "BUILD_CONFIG_SHA=$( find_all_files | xargs cat | shasum -a 256 | cut -f 1 -d " ")" > 'BUILD_CONFIG_SHA.envvar'
     - inject:
         properties-file: BUILD_CONFIG_SHA.envvar
