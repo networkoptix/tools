@@ -106,7 +106,7 @@
             customizations: default
             freeze-commit-now: true
             clean-build: true
-            timer: '* 6 * * *'
+            timer: 'H 6 * * *'
 
     # RUNNER - root launcher of all builds
 
