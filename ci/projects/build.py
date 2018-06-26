@@ -259,9 +259,10 @@ class CMakeBuilder(object):
             generate_args += ['-DtrustedTimestamping=%s' % bool_to_cmake_param(use_trusted_timestamping)]
         else:
             generate_args += ['-DcodeSigning=OFF']
+        generate_args += platform_args
         if custom_cmake_args:
             generate_args += custom_cmake_args.split(' ')
-        generate_args += platform_args + ['-G', self._generator]
+        generate_args += ['-G', self._generator]
         if self._platform_config.toolset:
             generate_args += ['-T', self._platform_config.toolset]
         generate_args += [src_full_path]
