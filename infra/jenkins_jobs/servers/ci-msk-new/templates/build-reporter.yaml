@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.build-reporter'
+    name: 'helper.build-reporter'
     job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
@@ -57,6 +57,7 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_CLONE
+    - p_PIPELINE
     - p_BRANCH
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
@@ -74,7 +75,6 @@
     - inject:
         properties-content: |
           JOB_MAINTAINERS={job-maintainers}
-          PIPELINE={pipeline}
     - timestamps
     - timeout:
         timeout: 20 # min

@@ -141,12 +141,6 @@
         default-platforms: linux-x64,linux-x86,win-x86
         default-customizations: default,hanwha
 
-    # UTILITY - register commit, build identities and other
-
-    - '{pipeline}.{counter_name}.generator':
-        counter_name: build_number
-        counter_var_name: BUILD_IDENTITY
-
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
@@ -170,8 +164,3 @@
             unittest-node: unittests-windows
         customization:
         - default
-    # REPORTERS - parse & upload logs, build and test information to outer services
-
-    # utility job for reporting unittests reslts to junkshop
-    - '{pipeline}.unittests-reporter'
-    - '{pipeline}.build-reporter'

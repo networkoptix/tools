@@ -446,7 +446,7 @@
           - SUCCESS
           build-steps:
           - trigger-builds:
-            - project: '{pipeline}.build-reporter'
+            - project: 'helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
@@ -465,7 +465,7 @@
           - FAILURE
           build-steps:
           - trigger-builds:
-            - project: '{pipeline}.build-reporter'
+            - project: 'helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}

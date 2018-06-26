@@ -131,7 +131,7 @@
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
-            - project: '{pipeline}.unittests-reporter'
+            - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH
@@ -161,7 +161,7 @@
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
-            - project: '{pipeline}.unittests-reporter'
+            - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 BRANCH=$BRANCH

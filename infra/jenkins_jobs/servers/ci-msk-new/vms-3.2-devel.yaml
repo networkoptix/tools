@@ -1,9 +1,11 @@
 - project:
-    name: release-pipeline-3.2
+    name: develop-pipeline-3.2
 
     project: vms
 
-    branch: vms_3.2
+    branch:
+    - vms_3.2
+    - vms_3.2_release
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -29,7 +31,7 @@
     # ============================================================
 
     pipeline:
-    - release:
+    - develop:
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline:
           CMAKE_ARG_CMAKE_BUILD_TYPE=Release
@@ -49,33 +51,11 @@
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
-    - linux-x86:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=linux-x86
-    - bananapi:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=bananapi
-          CMAKE_ARG_withTests=OFF
     - bpi:
         installer-build-node: *linux_node
         cmake_configure_args_platform: |
           CMAKE_GENERATOR=Ninja
           CMAKE_ARG_targetDevice=bpi
-    - rpi:
-        installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=rpi
-    # - tx1:
-    #     installer-build-node: *linux_node
-    #     cmake_configure_args_platform: |
-    #       CMAKE_GENERATOR=Ninja
-    #       CMAKE_ARG_targetDevice=tx1
-    # + edge1
 
     # -- windows platform --
     # FIXME: HOME,PATH and other vars are represented as win env.
@@ -93,17 +73,6 @@
           CMAKE_ARG_withPluginStubs=OFF
           CMAKE_ARG_withTests=ON
           CMAKE_TOOL=host=x64
-
-    - win-x86:
-        <<: *windows_config
-        cmake_configure_args_platform: |
-          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_GENERATOR=Visual Studio 15 2017
-          CMAKE_ARG_addQtPdb=ON
-          CMAKE_ARG_trustedTimestamping=OFF
-          CMAKE_ARG_withClouds=OFF
-          CMAKE_ARG_withPluginStubs=OFF
-          CMAKE_ARG_withTests=ON
 
     # -- apple platform --
 
@@ -134,24 +103,6 @@
     # extra items are added or removed, so don't forget to change runner
     # template according to changes made here
     - default
-    # - default_cn
-    # - default_zh_CN
-    # - cox
-    # - digitalwatchdog
-    # - digitalwatchdog_global
-    - hanwha
-    # - ipera
-    # - ionetworks
-    # - nutech
-    # - ras
-    # - senturian
-    # - systemk
-    # - tricom
-    # - ust
-    - vista
-    # - vmsdemoblue
-    # - vmsdemoorange
-    # + digitalwatchdog
 
     # list of jobs to generate
     jobs:
@@ -160,13 +111,16 @@
 
     - '{pipeline}.{branch}.{project}.trigger.{preset}':
         preset:
-        - example:
+        - on-push:
             detailed-job-description: |-
-              This trigger serves for demo purposes and will be removed in future
+              This trigger serves for automatic builds on every push to remote repository
             default-build-description: >-
-              Manually triggered build
-            platforms: linux-x64,linux-x86
-            customizations: default,hanwha
+              Triggered on push event
+            platforms: linux-x64,win-x64,mac,bpi
+            customizations: default
+            poll-scm-timer: '* * * * *'
+            freeze-commit-now: true
+
         - nightly:
             detailed-job-description: |-
               This trigger serves for nigtly clean builds to verify the state of product
@@ -177,10 +131,11 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,linux-x86,bananapi,win-x86,win-x64,mac,edge1,bpi,rpi,tx1,edge1
-            customizations: default,hanwha,vista,digitalwatchdog
+            platforms: linux-x64,win-x64,mac,bpi
+            customizations: default
+            freeze-commit-now: true
             clean-build: true
-            timer: '0 0 * * *'
+            timer: 'H 1 * * *'
 
     # RUNNER - root launcher of all builds
 
@@ -193,37 +148,21 @@
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
-    # Edge1 is a platform that's exclusive for digitalwatchdog.
-    # add extra jobs for edge1 with digitalwatchdog customization
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all': &extra-edge1-platform
-        platform:
-        - edge1:
-            installer-build-node: *linux_node
-            cmake_configure_args_platform: |
-              CMAKE_GENERATOR=Ninja
-              CMAKE_ARG_targetDevice=edge1
-        customization:
-        - 'digitalwatchdog'
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build':
-        <<: *extra-edge1-platform
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    # - 'installer-unittests-default':
-    #     # TODO: Rework a bit this parameterization as well as probably build node parameterization
-    #     platform:
-    #     - linux-x86:
-    #         unittest-node: unittests-linux
-    #     - linux-x64:
-    #         unittest-node: unittests-linux
-    #     customization:
-    #     - default
-    # - installer-unittests-windows:
-    #     platform:
-    #     - win-x64:
-    #         unittest-node: unittests-windows
-    #     - win-x86:
-    #         unittest-node: unittests-windows
-    #     customization:
-    #     - default
-
+    - 'installer-unittests-default':
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
+        platform:
+        - linux-x64:
+            unittest-node: unittests-linux
+        - mac:
+            unittest-node: unittests-mac
+        customization:
+        - default
+    - installer-unittests-windows:
+        platform:
+        - win-x64:
+            unittest-node: unittests-windows
+        customization:
+        - default

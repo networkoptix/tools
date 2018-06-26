@@ -114,19 +114,8 @@
         default-platforms: android-arm,ios
         default-customizations: default
 
-    # UTILITY - register commit, build identities and other
-    # FIXME: use own numerator
-    # - '{pipeline}.{counter_name}.generator':
-    #     counter_name: build_number
-    #     counter_var_name: BUILD_IDENTITY
-
     # BUILD AND TEST - main jobs
 
     # - '{pipeline}.{branch}.{project}.webadmin.universal.build'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
-
-    # utility job for reporting unittests reslts to junkshop
-    # FIXME: extract develop jobs, currently used reporter from vms-4.0 definition
-    # - '{pipeline}.unittests-reporter'
-    # - '{pipeline}.build-reporter'

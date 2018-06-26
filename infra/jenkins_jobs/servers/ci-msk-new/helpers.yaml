@@ -13,3 +13,20 @@
     - helper.push-component
     - helper.freeze-nx-vms-commit
     - helper.freeze-build-config
+
+    # REPORTERS - parse & upload logs, build and test information to outer services
+
+    - helper.unittests-reporter
+    - helper.build-reporter
+
+    # UTILITY - register commit, build identities and other
+
+    # TODO: split different generators across different jobs
+    # e.g. 3.2 has own gen with own range, 4.0 has own range, mobile - own
+    - '{pipeline}.{counter_name}.generator':
+        counter_name: build_number
+        counter_var_name: BUILD_IDENTITY
+        pipeline:
+        - release
+        - develop
+

@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.unittests-reporter'
+    name: 'helper.unittests-reporter'
 
     node: unittests-reporter
     workspace: 'nx_report_thr${{EXECUTOR_NUMBER}}/'
@@ -21,6 +21,7 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_CLONE
+    - p_PIPELINE
     - p_BRANCH
     - p_NX_VMS_COMMIT
     - p_BUILD_IDENTITY
@@ -30,9 +31,6 @@
     - p_BUILD_STATUS
 
     wrappers:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps

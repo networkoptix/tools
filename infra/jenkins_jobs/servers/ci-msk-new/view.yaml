@@ -15,33 +15,38 @@
 
 # vms-3.2
 - view:
-    name: vms_3.2.build
+    name: VMS-3.2-rb
     view-type: list
-    description: 'List of all release jobs related to vms_3.2'
+    description: >-
+      List of all release builds related to VMS 3.2
     regex: release.vms_3.2.*build
 - view:
-    name: vms_3.2.test
+    name: VMS-3.2-rt
     view-type: list
-    description: 'List of all release jobs related to vms_3.2'
-    regex: release.vms_3.2.*unittest
+    description: >-
+      List of all release tests related to VMS 3.2
+    regex: release.vms_3.2.*test
 
 # vms-4.0
 - view:
-    name: vms_4.0.build
+    name: VMS-next-rb
     view-type: list
-    description: 'List of all release jobs related to vms'
-    regex: develop.vms.*build
+    description: >-
+      List of all release builds related to next VMS releases
+    regex: release.vms.*build
 - view:
-    name: vms_4.0.test
+    name: VMS-next-rt
     view-type: list
-    description: 'List of all release jobs related to vms'
-    regex: develop.vms.*unittest
+    description: >-
+      List of all release tests related to next VMS releases
+    regex: release.vms.*test
 
-# mobile-18.2
+# Mobile 18.2
 - view:
-    name: mob 18.2 build
+    name: MOB-next-db
     view-type: list
-    description: 'List of all release jobs related to mobile next'
+    description: >-
+      List of all CI jobs related to mobile next releases
     regex: develop.mobile.*build
 
 # Helpers and utilities
