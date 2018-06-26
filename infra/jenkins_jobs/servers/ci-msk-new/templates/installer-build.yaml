@@ -130,9 +130,10 @@
     - hg-local:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
-    - hg-local:
-        name: devtools
-        revision: default
+    # FIXME: Path too long
+    # - hg-local:
+    #     name: devtools
+    #     revision: default
 
     builders:
     - build-name-setter:
