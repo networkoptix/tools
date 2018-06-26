@@ -118,6 +118,10 @@
             name: nx_vms
             branch: '{branch}'
             basedir: $WORKSPACE
+        - import-hg-repo(if-missing):
+            name: devtools
+            branch: default
+            basedir: $WORKSPACE
 
     # STAGE: SCM
     # ========================================
@@ -126,6 +130,9 @@
     - hg-local:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
+    - hg-local:
+        name: devtools
+        revision: default
 
     builders:
     - build-name-setter:
@@ -137,44 +144,73 @@
     # At first, calculate sha for build config files
     # since this job is crossplatform it's safier to just trigger freeze commit
     # with linux executor than try to inplement cross-platform stuff
-    - trigger-builds:
-      - project: 'helper.freeze-build-config'
-        block: true
-        predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
-          PIPELINE=$PIPELINE
-          BRANCH=$BRANCH
-          CUSTOMIZATION=$CUSTOMIZATION
-          PLATFORM=$PLATFORM
-          NX_VMS_COMMIT=$NX_VMS_COMMIT
-          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-
-    # Inject commit sha
-    - copyartifact:
-        project: 'helper.freeze-build-config'
-        filter: 'BUILD_CONFIG_SHA.envvar'
-        which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
-    - inject:
-        properties-file: 'BUILD_CONFIG_SHA.envvar'
 
     # STAGE: CLEANUP
     # ========================================
 
-    # When there is no information related to prev build config
-    # We will force to clean build dir
     - conditional-step:
-        condition-kind: not
-        condition-operand:
-          condition-kind: file-exists
-          condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
-          condition-basedir: workspace
+        condition-kind: strings-match
+        condition-string1: '{force-clean-build-based-on-build-configs-sha}'
+        condition-string2: 'YES'
         steps:
-        - description-setter:
-            description: |
-              Clean build is forced by missing BUILD_CONFIG_SHA_OLD.envvar
-        - folder-delete-operation:
-            folder-path: 'build'
+        - trigger-builds:
+          - project: 'helper.freeze-build-config'
+            block: true
+            predefined-parameters: |
+              REQUESTED_BY={tag_requested_by}
+              PIPELINE=$PIPELINE
+              BRANCH=$BRANCH
+              CUSTOMIZATION=$CUSTOMIZATION
+              PLATFORM=$PLATFORM
+              NX_VMS_COMMIT=$NX_VMS_COMMIT
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+
+        # Inject commit sha
+        - copyartifact:
+            project: 'helper.freeze-build-config'
+            filter: 'BUILD_CONFIG_SHA.envvar'
+            which-build: last-completed
+            parameter-filters: REQUESTED_BY={tag_requested_by}
+        - inject:
+            properties-file: 'BUILD_CONFIG_SHA.envvar'
+
+        # When there is no information related to prev build config
+        # We will force to clean build dir
+        - conditional-step:
+            condition-kind: not
+            condition-operand:
+              condition-kind: file-exists
+              condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
+              condition-basedir: workspace
+            steps:
+            - description-setter:
+                description: |
+                  Clean build is forced by missing BUILD_CONFIG_SHA_OLD.envvar
+            - folder-delete-operation:
+                folder-path: 'build'
+
+            # Once we have some info regarding oldbuild config, we'll check that
+            # incremental build is applicable, if not, again remove build folder
+            - conditional-step:
+                condition-kind: file-exists
+                condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
+                condition-basedir: workspace
+                steps:
+                - inject:
+                    properties-file: BUILD_CONFIG_SHA_OLD.envvar
+                - conditional-step:
+                    condition-kind: not
+                    condition-operand:
+                      condition-kind: strings-match
+                      condition-string1: "${{BUILD_CONFIG_SHA}}"
+                      condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
+                    steps:
+                    - description-setter:
+                        description: >-
+                          Clean build is forced by changed BUILD_CONFIG_SHA,
+                          $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
+                    - folder-delete-operation:
+                        folder-path: 'build'
 
     # Optionally when special flag is set, we also remove build directory
     - conditional-step:
@@ -186,28 +222,6 @@
               Clean build is forced by CLEAN_BUILD var ( $CLEAN_BUILD )
         - folder-delete-operation:
             folder-path: 'build'
-
-    # Once we have some info regarding oldbuild config, we'll check that
-    # incremental build is applicable, if not, again remove build folder
-    - conditional-step:
-        condition-kind: file-exists
-        condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
-        condition-basedir: workspace
-        steps:
-        - inject:
-            properties-file: BUILD_CONFIG_SHA_OLD.envvar
-        - conditional-step:
-            condition-kind: not
-            condition-operand:
-              condition-kind: strings-match
-              condition-string1: "${{BUILD_CONFIG_SHA}}"
-              condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
-            steps:
-            - description-setter:
-                description: |
-                  Clean build is forced by changed BUILD_CONFIG_SHA, $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
-            - folder-delete-operation:
-                folder-path: 'build'
 
     # create build dir if not exists or removed
     - conditional-step:
@@ -327,6 +341,20 @@
     - groovy:
         version: '{groovy-version}'
         command: !include-raw-escape: ../builders/cmake_configure_wrapper.groovy
+    # Normally just increment stored value
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '{use-ninja-clean-file}'
+        condition-string2: 'YES'
+        steps:
+        - run-process:
+            workdir: '${{WORKSPACE}}/{build-dir}'
+            executable: python
+            executable-is-relpath: 'false'
+            arguments: '${{WORKSPACE}}/devtools/ninja_clean/ninja_clean.py,--build-dir,${{WORKSPACE}}/{build-dir}'
+            logfile: 'ninja_clean.log'
+            inherit-environ: 'true'
+            environ: ''
 
     # Build
     - inject:
