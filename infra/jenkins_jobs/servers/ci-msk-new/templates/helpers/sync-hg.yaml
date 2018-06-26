@@ -56,9 +56,6 @@
         description: |
           $BUILD_DESCRIPTION
 
-    - shell: |
-        #!/bin/bash
-        # ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{SSH_USER}}@$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3):$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
@@ -66,11 +63,6 @@
         src_path: '${{WORKSPACE}}/${{REPO}}/'
         dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
         components: '/'
-    # - shell: |
-    #     #!/bin/bash
-    #     set -x
-    #     cd $REPO
-    #       hg push --insecure ssh://${{SSH_USER}}@$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3):$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)//${{LOCAL_PATH}}/${{REPO}}/
 
     publishers:
     - failure-email-helpers(maintainers)

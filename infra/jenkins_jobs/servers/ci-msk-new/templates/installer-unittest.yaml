@@ -39,6 +39,7 @@
     - p_NX_VMS_COMMIT
 
     wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
           PIPELINE={pipeline}
@@ -60,7 +61,6 @@
             name: devtools
             branch: default
             basedir: $WORKSPACE
-
 
     builders:
     - folder-delete-operation:

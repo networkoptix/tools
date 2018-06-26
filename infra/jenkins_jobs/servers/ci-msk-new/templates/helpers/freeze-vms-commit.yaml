@@ -92,9 +92,7 @@
         branch-name: default
 
     builders:
-    # Clean repository files as we don't need them actually
-    # - folder-delete-operation:
-    #     folder-path: $WORKSPACE/nx_vms
+
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
