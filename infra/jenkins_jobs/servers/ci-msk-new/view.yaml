@@ -14,6 +14,7 @@
 # Per-release sections
 
 # vms-3.2
+# release jobs
 - view:
     name: VMS-3.2-rb
     view-type: list
@@ -27,7 +28,22 @@
       List of all release tests related to VMS 3.2
     regex: release.vms_3.2.*test
 
+# CI jobs
+- view:
+    name: VMS-3.2-db
+    view-type: list
+    description: >-
+      List of all release builds related to VMS 3.2
+    regex: develop.vms_3.2.*build
+- view:
+    name: VMS-3.2-dt
+    view-type: list
+    description: >-
+      List of all release tests related to VMS 3.2
+    regex: develop.vms_3.2.*test
+
 # vms-4.0
+# release jobs
 - view:
     name: VMS-next-rb
     view-type: list
@@ -40,6 +56,19 @@
     description: >-
       List of all release tests related to next VMS releases
     regex: release.vms.*test
+# CI jobs
+- view:
+    name: VMS-next-db
+    view-type: list
+    description: >-
+      List of all release builds related to next VMS releases
+    regex: develop.vms.*build
+- view:
+    name: VMS-next-dt
+    view-type: list
+    description: >-
+      List of all release tests related to next VMS releases
+    regex: develop.vms.*test
 
 # Mobile 18.2
 - view:
