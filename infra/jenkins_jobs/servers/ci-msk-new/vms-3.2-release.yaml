@@ -81,7 +81,7 @@
     # FIXME: HOME,PATH and other vars are represented as win env.
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
-    - win-x64: &windows_config
+    - windows-x64: &windows_config
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
@@ -177,7 +177,7 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,linux-x86,bananapi,win-x86,win-x64,mac,edge1,bpi,rpi,tx1,edge1
+            platforms: linux-x64,linux-x86,bananapi,win-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
             customizations: default,hanwha,vista,digitalwatchdog
             clean-build: true
             timer: '0 0 * * *'
@@ -220,7 +220,7 @@
     #     - default
     # - installer-unittests-windows:
     #     platform:
-    #     - win-x64:
+    #     - windows-x64:
     #         unittest-node: unittests-windows
     #     - win-x86:
     #         unittest-node: unittests-windows

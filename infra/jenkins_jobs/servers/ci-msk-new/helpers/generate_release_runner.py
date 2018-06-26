@@ -132,7 +132,7 @@ print '''#
         projects:'''
 
 for platform in ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
-                 "tx1 android-arm win-x64 win-x86 mac ios").split():
+                 "tx1 android-arm windows-x64 win-x86 mac ios").split():
     for customization in ("default default_cn default_zh_CN cox "
                           "digitalwatchdog digitalwatchdog_global hanwha "
                           "ipera ionetworks nutech ras senturian systemk "

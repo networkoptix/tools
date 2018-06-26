@@ -61,7 +61,7 @@
     # FIXME: HOME,PATH and other vars are represented as win env.
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
-    - win-x64: &windows_config
+    - windows-x64: &windows_config
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: |
           CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
@@ -116,7 +116,7 @@
               This trigger serves for automatic builds on every push to remote repository
             default-build-description: >-
               Triggered on push event
-            platforms: linux-x64,win-x64,mac,bpi
+            platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             poll-scm-timer: '* * * * *'
             freeze-commit-now: true
@@ -131,7 +131,7 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,win-x64,mac,bpi
+            platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             freeze-commit-now: true
             clean-build: true
@@ -162,7 +162,7 @@
         - default
     - installer-unittests-windows:
         platform:
-        - win-x64:
+        - windows-x64:
             unittest-node: unittests-windows
         customization:
         - default
