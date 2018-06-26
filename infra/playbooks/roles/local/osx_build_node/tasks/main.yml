@@ -4,6 +4,7 @@
 # TODO: install updates?
 # TODO: add users - jenkins!
 # TODO: add '%admin          ALL = (ALL) NOPASSWD: ALL' in /etc/sudoers
+# TODO: run sudo xcode-select -s /Applications/Xcode.app/Contents/Developer to enable iOS builds
 
 # this and next tasks are useless for remote setup, but may be used for local
 - name: Check remote login
