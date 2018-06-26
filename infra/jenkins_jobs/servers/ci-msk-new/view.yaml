@@ -43,32 +43,19 @@
     regex: develop.vms_3.2.*test
 
 # vms-4.0
-# release jobs
-- view:
-    name: VMS-next-rb
-    view-type: list
-    description: >-
-      List of all release builds related to next VMS releases
-    regex: release.vms.*build
-- view:
-    name: VMS-next-rt
-    view-type: list
-    description: >-
-      List of all release tests related to next VMS releases
-    regex: release.vms.*test
 # CI jobs
 - view:
     name: VMS-next-db
     view-type: list
     description: >-
       List of all release builds related to next VMS releases
-    regex: develop.vms.*build
+    regex: develop.vms\..*build
 - view:
     name: VMS-next-dt
     view-type: list
     description: >-
       List of all release tests related to next VMS releases
-    regex: develop.vms.*test
+    regex: develop.vms\..*test
 
 # Mobile 18.2
 - view:
@@ -76,7 +63,7 @@
     view-type: list
     description: >-
       List of all CI jobs related to mobile next releases
-    regex: develop.mobile.*build
+    regex: develop.mobile\..*build
 
 # Helpers and utilities
 
