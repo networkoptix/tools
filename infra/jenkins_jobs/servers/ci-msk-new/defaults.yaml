@@ -33,3 +33,4 @@
     hg-local-cache-node-ip-addr: '192.168.13.116'
 
     webadmin-build-node: webadmin-build
+    functest-node: functests

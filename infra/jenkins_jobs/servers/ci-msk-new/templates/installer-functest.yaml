@@ -1,0 +1,188 @@
+#
+- job-template:
+    name: '{pipeline}.{branch}.{project}.installer.{customization}.functest'
+    description: |
+      Run functional tests for {customization} for branch {branch}.
+    node: '{functest-node}'
+    concurrent: true
+
+    init-venv-method: init-venv-linux
+    binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
+    synchronous-reporting: '' # false
+    workspace: 'nx_ft_thr${{EXECUTOR_NUMBER}}/'
+
+    test-select-expr: not windows and not smb
+    test-list: ''
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+    - build-discarder:
+        days-to-keep: 10
+        num-to-keep: 50
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 50
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_CLEAN_CLONE
+    - p_BUILD_IDENTITY
+    - p_NX_VMS_COMMIT
+
+    - string:
+        name: TEST_SELECT_EXPR
+        default: '{test-select-expr}'
+        description: >
+          Test selection expression, parameter for pytest '-k' option.
+          Empty means run all tests specified in TEST_LIST parameter below.
+          Example: 'not windows and not smb' to exclude all windows and samba tests.
+          Value is passed as single argument enclosed with quotes. E.g. 'linux and ssh' would end up as '-k "linux and ssh"'.
+          See: https://docs.pytest.org/en/latest/example/markers.html#using-k-expr-to-select-tests-based-on-their-name
+    - string:
+        name: TEST_LIST
+        default: '{test-list}'
+        description: Tests to run, space-delimited list. Empty means run all tests.
+
+    wrappers:
+    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+          CUSTOMIZATION={customization}
+    - timestamps
+    - timeout:
+        timeout: 20 # min
+        fail: true
+        type: absolute
+    - workspace-cleanup:
+        check-parameter: CLEAN
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: JUNK_SHOP_DB_CREDENTIALS
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - folder-delete-operation:
+            folder-path: 'devtools'
+        - import-hg-repo(if-missing):
+            name: devtools
+            branch: default
+            basedir: $WORKSPACE
+        - import-hg-repo(if-missing):
+            name: nx_vms
+            branch: '{branch}'
+            basedir: $WORKSPACE
+    scm:
+    - hg-local:
+        name: nx_vms
+        revision: '$NX_VMS_COMMIT'
+
+    builders:
+    - folder-delete-operation:
+        folder-path: 'build'
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
+    # TODO: We don't have any platform here, so urls will appear to be broken
+    # - inject:
+    #     properties-content: |
+    #       REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+    #       JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+    # - description-setter:
+    #     description: >-
+    #       <a href='$REPOSITORY_URL'> Artifacts </a>,
+    #       <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOMIZATION=$CUSTOMIZATION
+          PLATFORM=windows-x64
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/
+          COMPONENTS=distrib/,build_info.yaml,lib/,build/bin/appserver2_ut
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          ALLOW_MISSING=YES
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOMIZATION=$CUSTOMIZATION
+          PLATFORM=linux-x64
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/
+          COMPONENTS=distrib/,build_info.yaml,lib/,build/bin/appserver2_ut
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+          ALLOW_MISSING=YES
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - file-copy-operation:
+        includes: 'build/distrib/*-server-*-linux64*.deb, build/distrib/*-server-*-win64*.exe'
+        excludes: ''
+        target-location: '$WORKSPACE'
+        flatten-files: 'true'
+
+    - init-venv-linux:
+        requirements-files: >-
+          devtools/ci/junk_shop/requirements.txt
+          nx_vms/func_tests/requirements.txt
+    # TODO: What means platform?? we are running tests against all possible platforms
+    # - parse-build-info:
+    #     branch: '{branch}'
+    #     customization: $CUSTOMIZATION
+    #     platform: '{platform}'
+
+    - inject:
+        properties-content: |
+          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@{junk_shop_host}
+          BIN_DIR=$WORKSPACE/funtest/bin
+          WORK_DIR=$WORKSPACE/funtest/work
+    - shell: |
+        #!/bin/bash
+        set -ex
+        mkdir -p "$BIN_DIR"
+        rsync -av --delete {binaries_url} "$BIN_DIR/"
+
+        # if [ -f "dist/$APPSERVER2_UT_PATH" ]; then
+        #   cp "dist/$APPSERVER2_UT_PATH" "$BIN_DIR/"
+        # else
+        #   echo "Warning: $APPSERVER2_UT_PATH is missing"
+        # fi
+
+    # TODO:
+    # - run-functional-tests:
+    #     project: '{project-name}'
+    #     branch: '{branch}'
+    #     build-num: $BUILD_NUM
+    #     customization: $CUSTOMIZATION
+    #     platform: '{platform}'
+    #     cloud-group: '{cloud-group}'
+    #     bin-dir: $BIN_DIR
+    #     work-dir: $WORK_DIR
+    #     mediaserver-dist-dir: "$WORKSPACE/dist"
+    #     clean: true
+    #     test-select-expr: "$TEST_SELECT_EXPR"
+    #     test-list: "$TEST_LIST"
+    #     test-timeout-hours: '{test-timeout-hours}'
+
+    # TODO: reporting

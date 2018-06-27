@@ -33,6 +33,11 @@
     - p_SSH_USER
     - p_BUILD_STATUS
     - p_RUNNING_NUM
+    - string:
+        name: ALLOW_MISSING
+        default: 'NO'
+        description: >-
+          SHould build suppress fail and don't stop when some components are not found and may not be imported?
 
     wrappers:
     - build-name:
@@ -66,6 +71,7 @@
         src_path: '${{REPOSITORY_PATH}}'
         dst_path: '${{LOCAL_PATH}}'
         components: '${{COMPONENTS}}'
+        allow_missing: '${{ALLOW_MISSING}}'
 
     publishers:
     - failure-email-helpers(maintainers)

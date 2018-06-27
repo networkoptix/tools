@@ -63,6 +63,7 @@
         src_path: '${{WORKSPACE}}/${{REPO}}/'
         dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
         components: '/'
+        allow_missing: 'NO'
 
     publishers:
     - failure-email-helpers(maintainers)

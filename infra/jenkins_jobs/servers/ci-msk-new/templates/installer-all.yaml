@@ -31,6 +31,8 @@
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
+    - p_RUN_UNITTESTS:
+        default: true
 
     wrappers:
     - inject:
@@ -67,6 +69,8 @@
         projects:
         - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
+          enable-condition: >-
+            ("$RUN_UNITTESTS").toBoolean()
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
@@ -76,16 +80,6 @@
             NX_VMS_COMMIT=$NX_VMS_COMMIT
 
         - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.perftest' # TODO:
-          kill-phase-on: NEVER
-          predefined-parameters: |
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
-            CLEAN_CLONE=$CLEAN_CLONE
-            CLEAN_BUILD=$CLEAN_BUILD
-            BUILD_IDENTITY=$BUILD_IDENTITY
-            NX_VMS_COMMIT=$NX_VMS_COMMIT
-
-        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.functest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION

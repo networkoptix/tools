@@ -11,6 +11,11 @@
 
         # components ~> "dir1/,dir2/,file1,file2"
         echo "Will rsync {components} components"
+        if [ "{allow_missing}" == 'YES' ] ; then
+          echo "Missing components are allowed ({allow_missing}), will not fail on lookup error"
+        else
+          echo "Missing components are not allowed ({allow_missing}), will fail on lookup error"
+        fi
 
         IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
         for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
@@ -31,6 +36,19 @@
           RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
           # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
           RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+
+          # Check that components exist and if we are not allowed to have missing components and found on, die
+          if [ "{allow_missing}" == 'YES' ] ; then
+            if [ ! -e "${{RSYNC_SRC}}" ] ; then
+              echo "Missing components are allowed"
+              continue
+            fi
+          else
+            if [ ! -e "${{RSYNC_SRC}}" ] ; then
+              echo "Missing components are not allowed"
+              exit 1
+            fi
+          fi
 
           # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
 

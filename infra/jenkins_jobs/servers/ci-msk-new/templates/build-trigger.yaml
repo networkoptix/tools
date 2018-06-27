@@ -47,6 +47,9 @@
     clean-build: '' # false by default
     default-build-description: ''
     build-webadmin: true
+    build-installer: true
+    run-functests: '' # false
+    run-unittests: true
     # detailed-job-description required!
 
     properties:
@@ -77,6 +80,12 @@
         default: '{customizations}'
     - p_BUILD_WEBADMIN:
         default: '{build-webadmin}'
+    - p_BUILD_INSTALLER:
+        default: '{build-installer}'
+    - p_RUN_UNITTESTS:
+        default: '{run-unittests}'
+    - p_RUN_FUNCTESTS:
+        default: '{run-functests}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
@@ -148,6 +157,9 @@
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BUILD_WEBADMIN=$BUILD_WEBADMIN
+          BUILD_INSTALLER=$BUILD_INSTALLER
+          RUN_UNITTESTS=$RUN_UNITTESTS
+          RUN_FUNCTESTS=$RUN_FUNCTESTS
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$NX_VMS_COMMIT

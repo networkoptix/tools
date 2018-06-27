@@ -71,3 +71,21 @@
               </sp.sd.fileoperations.FileCreateOperation>
             </fileOperations>
           </sp.sd.fileoperations.FileOperationsBuilder>
+
+- builder:
+    # Requires 'File Operations Plugin': https://wiki.jenkins.io/display/JENKINS/File+Operations+Plugin
+    # flatten files is bool string - true | false
+    name: file-copy-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FileCopyOperation>
+                <includes>{includes}</includes>
+                <excludes>{excludes}</excludes>
+                <targetLocation>{target-location}</targetLocation>
+                <flattenFiles>{flatten-files}</flattenFiles>
+              </sp.sd.fileoperations.FileCopyOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>

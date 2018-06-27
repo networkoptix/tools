@@ -207,3 +207,30 @@
         description: >-
           Utility, special autoincremental number for failed builds
           (this num is appended for each folder where faile build lands)
+
+- parameter:
+    name: p_RUN_FUNCTESTS
+    parameters:
+    - bool:
+        name: RUN_FUNCTESTS
+        default: '{default}'
+        description: >-
+          Flag whether run functests or not.
+
+- parameter:
+    name: p_RUN_UNITTESTS
+    parameters:
+    - bool:
+        name: RUN_UNITTESTS
+        default: '{default}'
+        description: >-
+          Flag whether run functests or not.
+
+- parameter:
+    name: p_BUILD_INSTALLER
+    parameters:
+    - bool:
+        name: BUILD_INSTALLER
+        default: '{default}'
+        description: >-
+          Flag whether to build installer or not

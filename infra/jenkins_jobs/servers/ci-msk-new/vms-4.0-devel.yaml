@@ -146,6 +146,7 @@
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
+    - '{pipeline}.{branch}.{project}.installer.{customization}.functest'
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
