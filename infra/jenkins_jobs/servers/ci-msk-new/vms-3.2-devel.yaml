@@ -61,6 +61,8 @@
     # FIXME: HOME,PATH and other vars are represented as win env.
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
+    # FIXME: Code signing does not work properly for unknown reasons.
+    # This only shoots for windows and 3.2 branch.
     - windows-x64: &windows_config
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: |
@@ -73,6 +75,7 @@
           CMAKE_ARG_withPluginStubs=OFF
           CMAKE_ARG_withTests=ON
           CMAKE_TOOL=host=x64
+          CMAKE_ARG_codeSigning=OFF
 
     # -- apple platform --
 
