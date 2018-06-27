@@ -4,7 +4,7 @@
     platform: linux-x64
     upstream-jenkins: http://jenkins.enk.me
     upstream-project: ci
-    customization: hanwha
+    customization: default
 
     # See extra/burbank-node-readme.txt for explanation
     junk-shop-host: localhost
@@ -12,5 +12,5 @@
     jobs:
     - '{branch}-scalability':
         branch: vms_3.2
-    - '{branch}-scalability':
-        branch: vms
+#    - '{branch}-scalability':
+#        branch: vms
