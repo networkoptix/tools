@@ -101,6 +101,7 @@
         dst_path: '${{REPOSITORY_PATH}}'
         components: '${{COMPONENTS}}'
         force: '$FORCE_PUSH'
+        allow_missing: 'YES'
 
     publishers:
     - archive:
