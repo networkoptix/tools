@@ -17,6 +17,7 @@
         option: project
 
     parameters:
+    - p_REQUESTED_BY
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
