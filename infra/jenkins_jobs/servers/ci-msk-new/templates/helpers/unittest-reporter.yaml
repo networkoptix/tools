@@ -61,6 +61,7 @@
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
           BRANCH=$BRANCH
           PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
