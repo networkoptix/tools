@@ -58,3 +58,6 @@ sc config WSearch start= disabled
 
 REM Suppress the Network Location Wizard
 reg add HKLM\System\CurrentControlSet\Control\Network\NewNetworkWindowOff /f
+
+REM Set jenkins password never expired
+WMIC USERACCOUNT WHERE Name='jenkins' SET PasswordExpires=FALSE
