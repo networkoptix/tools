@@ -36,4 +36,4 @@ networks:
       netmask:        "255.255.255.0"
 
 # FIXME We need dedicated name in local network (office)
-jenkins_hostname: "{{ ansible_ssh_host }}"
+jenkins_hostname: "jenkins2.enk.me"
