@@ -142,6 +142,8 @@
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
@@ -173,6 +175,8 @@
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
