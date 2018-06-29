@@ -17,6 +17,8 @@
   copy:
     src: "/tmp/{{ node_exporter_archive_name }}/node_exporter"
     dest: "/usr/local/bin/node_exporter"
+    mode: 0750
+    group: "admin"
   notify:
     - restart node exporter
   when: not ansible_check_mode

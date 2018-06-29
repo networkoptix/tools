@@ -25,8 +25,6 @@
     {%   endfor -%}
     {% endif -%}
   </array>
-  <key>WorkingDirectory</key>
-  <string>{{ ansible_env.HOME }}/{{ node_exporter_service_name }}</string>
   <key>StandardOutPath</key>
   <string>/var/log/{{ node_exporter_service_name }}.log</string>
   <key>StandardErrorPath</key>
