@@ -1,5 +1,23 @@
 - builder:
     name: rsync-upload
+    # Parameters.
+    # destinations
+    #   dst_path: base path on remote host, where to download conponents
+    #   host: hostname or remote server ip to connect by ssh
+    #   port: ssh port on remote server
+    #   user: user on remote host
+    # sources
+    #   src_path: base path on local host from which to download list of components
+    #   (ssh key is supposed to be placed in ssh agent by Jenkins)
+    #   components: comma-separated list of files and folders in source
+    #               directory to download to local, e.g
+    #               a/,b,c
+    #               <src_path>/a/ -> <remote_host>/<dst_path>/a/
+    #               <src_path>/b  -> <remote_host>/<dst_path>/b
+    #               <src_path>/c  -> <remote_host>/<dst_path>/c
+    # options/flags:
+    #   allow_missing: YES/* - should we skip missing sources or fail?
+
     builders:
     - shell: |
         #!/bin/bash
@@ -61,6 +79,24 @@
 
 - builder:
     name: rsync-download
+    # Parameters.
+    # destinations
+    #   dst_path: base path on local host, where to download conponents
+    # sources
+    #   host: hostname or remote server ip to connect by ssh
+    #   port: ssh port on remote server
+    #   user: user on remote host
+    #   src_path: base path on remote host from which to download list of components
+    #   (ssh key is supposed to be placed in ssh agent by Jenkins)
+    #   components: comma-separated list of files and folders in source
+    #               directory to download to local, e.g
+    #               a/,b,c
+    #               <remote_host>/<src_path>/a/ -> <dst_path>/a/
+    #               <remote_host>/<src_path>/b  -> <dst_path>/b
+    #               <remote_host>/<src_path>/c  -> <dst_path>/c
+    # options/flags:
+    #   force: true/* - delete target (local) folder before downloading
+    #   allow_missing: YES/* - should we skip missing sources or fail?
     builders:
     - shell: |
         #!/bin/bash
@@ -91,12 +127,6 @@
             echo "{dst_path} does not exist yet"
           fi
 
-          if [ "{allow_missing}" == 'YES' ] ; then
-            echo "Missing components are allowed ({allow_missing}), will not fail on lookup error"
-          else
-            echo "Missing components are not allowed ({allow_missing}), will fail on lookup error"
-          fi
-
           echo "The components array is {components}"
           IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
           for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
@@ -117,6 +147,12 @@
               exit 1
             fi
           done
+        fi
+
+        if [ "{allow_missing}" == 'YES' ] ; then
+          echo "Missing components are allowed ({allow_missing}), will not fail on lookup error"
+        else
+          echo "Missing components are not allowed ({allow_missing}), will fail on lookup error"
         fi
 
         # components ~> "dir1/,dir2/,file1,file2"
