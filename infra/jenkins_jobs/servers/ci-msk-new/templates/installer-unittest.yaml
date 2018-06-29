@@ -17,6 +17,14 @@
     synchronous-reporting: '' # false
     workspace: 'nx_ut_thr${{EXECUTOR_NUMBER}}/'
 
+    # We have 2 kinds of timeouts:
+    # 1) timeout for entire job
+    # 2) timeout for only testrunner
+    # this is done because testrunner should be able to mark
+    # tests as timed out before it will be killed by build timeout
+    job-timeout: "20" # min
+    testrunner-timeout: "10" # min
+
     properties:
     - heavy-job:
         weight: 1
@@ -48,7 +56,7 @@
           PLATFORM={platform}
     - timestamps
     - timeout:
-        timeout: 20 # min
+        timeout: '{job-timeout}'
         fail: true
         type: absolute
     # - workspace-cleanup # always
@@ -98,7 +106,8 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - '{unittest-launcher}'
+    - '{unittest-launcher}':
+        testrunner-timeout: '{testrunner-timeout}'
     - count-fails
 
     publishers:

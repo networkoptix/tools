@@ -14,14 +14,14 @@
           def list = []
           def dir = new File("build/bin")
           println "Will search unittests in build/bin - all files that ends with _ut.exe"
-          dir.eachFile (FileType.FILES) { file ->
-            if (file.toString().endsWith("_ut.exe") ){
+          dir.eachFile (FileType.FILES) {{ file ->
+            if (file.toString().endsWith("_ut.exe") ){{
               println "[PICK] " + file.toString() + " - file appears to be unittest"
               list << file.getName()
-            } else {
+            }} else {{
               println "[SKIP] " + file.toString() + " - file appears NOT to be unittest"
-            }
-          }
+            }}
+          }}
 
           println "\nFound unittests\n================\n" + list.join("\n");
 
@@ -32,7 +32,7 @@
         properties-file: TEST_BINARY_LIST.envvar
     - inject:
         properties-content: |
-          TIMEOUT=1m
+          TIMEOUT={testrunner-timeout}
           CONFIG_PATH=$WORKSPACE/build/current_config.py
           BIN_DIR=$WORKSPACE/build/bin
     - folder-create-operation:
@@ -63,7 +63,7 @@
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
           BIN_DIR="$WORKSPACE/build/bin"
           CONFIG_PATH="$WORKSPACE/build/current_config.py"
-          TIMEOUT=1m
+          TIMEOUT={testrunner-timeout}
           TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
           mkdir -p unit_tests
           cd unit_tests
