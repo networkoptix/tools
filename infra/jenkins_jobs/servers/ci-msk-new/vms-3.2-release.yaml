@@ -182,6 +182,17 @@
             clean-build: true
             timer: '0 0 * * *'
 
+        - custom:
+            detailed-job-description: |-
+              This trigger serves for custom builds.
+              For example, you may want to verify that Jenkins works properly and can
+              successfully rebuild some successful build.
+            default-build-description: >-
+              Manually triggered
+            platforms: linux-x64,windows-x64,mac,bpi
+            customizations: default
+            freeze-commit-now: true
+
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
