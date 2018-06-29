@@ -55,6 +55,19 @@
     builders:
     - shell: |
         #!/bin/bash
+        set -ex
+        for var in  REQUESTED_BY    \
+                    BRANCH          \
+                    PIPELINE        \
+                    BUILD_IDENTITY  \
+                    CUSTOMIZATION   \
+                    COMPONENTS      ; do
+          echo "Checking $var to be defined and filled correctly; value is $${{!var}}"
+          test "${{!var}}" != '$'"${{var}}" # ~ "$REQUESTED_BY" != '$REQUESTED_BY'
+          test "${{!var}}" != ''            # ~ "$REQUESTED_BY" != ''
+        done
+    - shell: |
+        #!/bin/bash
         if [ "${{BUILD_STATUS}}" == 'passed' ] ; then
           REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
         else

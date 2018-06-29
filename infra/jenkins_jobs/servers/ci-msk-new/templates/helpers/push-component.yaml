@@ -61,20 +61,17 @@
           echo "RUNNING_NUM=${{RUNNING_NUM}}" > RUNNING_NUM.envvar
     - shell: |
         #!/bin/bash
-        : ${{REQUESTED_BY:?}}
-        : ${{BUILD_IDENTITY:?}}
-        : ${{CUSTOMIZATION:?}}
-        : ${{PLATFORM:?}}
-    # in rare case when build failed somewhere in checkout state some vars are undefined and passed as is
-    # anyways build will try to upload artifacts.
-    - shell: |
-        #!/bin/bash
         set -ex
-        test "$BRANCH" != '$BRANCH'
-        test "$PIPELINE" != '$PIPELINE'
-        test "$BUILD_IDENTITY" != '$BUILD_IDENTITY'
-        test "$CUSTOMIZATION" != '$CUSTOMIZATION'
-        test "$COMPONENTS" != '$COMPONENTS'
+        for var in  REQUESTED_BY    \
+                    BRANCH          \
+                    PIPELINE        \
+                    BUILD_IDENTITY  \
+                    CUSTOMIZATION   \
+                    COMPONENTS      ; do
+          echo "Checking $var to be defined and filled correctly; value is $${{!var}}"
+          test "${{!var}}" != '$'"${{var}}" # ~ "$REQUESTED_BY" != '$REQUESTED_BY'
+          test "${{!var}}" != ''            # ~ "$REQUESTED_BY" != ''
+        done
 
     - shell: |
         #!/bin/bash
