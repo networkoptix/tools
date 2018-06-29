@@ -139,8 +139,14 @@
           DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
           REVISION="$(cd nx_vms && hg id --id)"
 
+          if [ "$PIPELINE" == 'develop' ] ; then
+            JUNKSHOP_PROJECT=ci
+          else
+            JUNKSHOP_PROJECT="$PIPELINE"
+          fi
+
           # register build
-          BUILD_PARAMETERS="project=$PIPELINE,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$PLATFORM,jenkins_url=$JOB_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
+          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$PLATFORM,jenkins_url=$JOB_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
           devtools/ci/junk_shop/junk_shop/save_build_info.py "$DB_CONFIG" "$BUILD_PARAMETERS" nx_vms
 
           # upload build results
