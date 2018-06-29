@@ -69,6 +69,7 @@
         description: |
           Logfile that contains information about build
     - p_BUILD_STATUS
+    - p_RUNNER_URL
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
@@ -147,7 +148,7 @@
           fi
 
           # register build
-          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$PLATFORM,jenkins_url=$JOB_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
+          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
           devtools/ci/junk_shop/junk_shop/save_build_info.py "$DB_CONFIG" "$BUILD_PARAMETERS" nx_vms
 
           # upload build results

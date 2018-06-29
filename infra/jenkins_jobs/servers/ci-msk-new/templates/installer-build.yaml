@@ -86,6 +86,7 @@
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
         default: '{branch}'
+    - p_RUNNER_URL
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -490,6 +491,8 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 LOGFILE={cmake-build-log}
+                RUNNER_URL=$RUNNER_URL
+
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -511,6 +514,7 @@
                 BUILD_STATUS=failed
                 RUNNING_NUM=$RUNNING_NUM
                 LOGFILE={cmake-build-log}
+                RUNNER_URL=$RUNNER_URL
 
     - failure-email:
         email-recipients: '{build-watchers}'

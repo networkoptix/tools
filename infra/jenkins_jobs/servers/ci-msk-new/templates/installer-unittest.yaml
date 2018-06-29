@@ -45,6 +45,7 @@
     - p_CLEAN_CLONE
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT
+    - p_RUNNER_URL
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -146,6 +147,7 @@
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
+                RUNNER_URL=$RUNNER_URL
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -176,6 +178,7 @@
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
+                RUNNER_URL=$RUNNER_URL
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:

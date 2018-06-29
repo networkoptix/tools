@@ -29,6 +29,7 @@
     - p_PLATFORM
     - p_RUNNING_NUM
     - p_BUILD_STATUS
+    - p_RUNNER_URL # do we need it here?
 
     wrappers:
     - build-name:

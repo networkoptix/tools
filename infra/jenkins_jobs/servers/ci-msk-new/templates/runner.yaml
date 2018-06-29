@@ -131,6 +131,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -150,6 +151,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.default_cn.all'
@@ -166,6 +168,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.default_zh_CN.all'
@@ -182,6 +185,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.cox.all'
@@ -198,6 +202,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.digitalwatchdog.all'
@@ -214,6 +219,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.digitalwatchdog_global.all'
@@ -230,6 +236,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.hanwha.all'
@@ -246,6 +253,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ipera.all'
@@ -262,6 +270,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ionetworks.all'
@@ -278,6 +287,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.nutech.all'
@@ -294,6 +304,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ras.all'
@@ -310,6 +321,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.senturian.all'
@@ -326,6 +338,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.systemk.all'
@@ -342,6 +355,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.tricom.all'
@@ -358,6 +372,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ust.all'
@@ -374,6 +389,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vista.all'
@@ -390,6 +406,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vmsdemoblue.all'
@@ -406,6 +423,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vmsdemoorange.all'
@@ -422,6 +440,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default.all'
@@ -438,6 +457,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default_cn.all'
@@ -454,6 +474,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default_zh_CN.all'
@@ -470,6 +491,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.cox.all'
@@ -486,6 +508,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.digitalwatchdog.all'
@@ -502,6 +525,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.digitalwatchdog_global.all'
@@ -518,6 +542,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.hanwha.all'
@@ -534,6 +559,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ipera.all'
@@ -550,6 +576,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ionetworks.all'
@@ -566,6 +593,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.nutech.all'
@@ -582,6 +610,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ras.all'
@@ -598,6 +627,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.senturian.all'
@@ -614,6 +644,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.systemk.all'
@@ -630,6 +661,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.tricom.all'
@@ -646,6 +678,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ust.all'
@@ -662,6 +695,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vista.all'
@@ -678,6 +712,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vmsdemoblue.all'
@@ -694,6 +729,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vmsdemoorange.all'
@@ -710,6 +746,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.default.all'
@@ -726,6 +763,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.default_cn.all'
@@ -742,6 +780,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.default_zh_CN.all'
@@ -758,6 +797,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.cox.all'
@@ -774,6 +814,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.digitalwatchdog.all'
@@ -790,6 +831,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.digitalwatchdog_global.all'
@@ -806,6 +848,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.hanwha.all'
@@ -822,6 +865,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.ipera.all'
@@ -838,6 +882,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.ionetworks.all'
@@ -854,6 +899,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.nutech.all'
@@ -870,6 +916,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.ras.all'
@@ -886,6 +933,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.senturian.all'
@@ -902,6 +950,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.systemk.all'
@@ -918,6 +967,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.tricom.all'
@@ -934,6 +984,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.ust.all'
@@ -950,6 +1001,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.vista.all'
@@ -966,6 +1018,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.vmsdemoblue.all'
@@ -982,6 +1035,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bananapi.vmsdemoorange.all'
@@ -998,6 +1052,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.default.all'
@@ -1014,6 +1069,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.default_cn.all'
@@ -1030,6 +1086,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.default_zh_CN.all'
@@ -1046,6 +1103,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.cox.all'
@@ -1062,6 +1120,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.digitalwatchdog.all'
@@ -1078,6 +1137,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.digitalwatchdog_global.all'
@@ -1094,6 +1154,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.hanwha.all'
@@ -1110,6 +1171,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.ipera.all'
@@ -1126,6 +1188,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.ionetworks.all'
@@ -1142,6 +1205,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.nutech.all'
@@ -1158,6 +1222,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.ras.all'
@@ -1174,6 +1239,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.senturian.all'
@@ -1190,6 +1256,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.systemk.all'
@@ -1206,6 +1273,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.tricom.all'
@@ -1222,6 +1290,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.ust.all'
@@ -1238,6 +1307,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.vista.all'
@@ -1254,6 +1324,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.vmsdemoblue.all'
@@ -1270,6 +1341,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.bpi.vmsdemoorange.all'
@@ -1286,6 +1358,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.default.all'
@@ -1302,6 +1375,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.default_cn.all'
@@ -1318,6 +1392,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.default_zh_CN.all'
@@ -1334,6 +1409,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.cox.all'
@@ -1350,6 +1426,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.digitalwatchdog.all'
@@ -1366,6 +1443,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.digitalwatchdog_global.all'
@@ -1382,6 +1460,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.hanwha.all'
@@ -1398,6 +1477,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.ipera.all'
@@ -1414,6 +1494,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.ionetworks.all'
@@ -1430,6 +1511,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.nutech.all'
@@ -1446,6 +1528,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.ras.all'
@@ -1462,6 +1545,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.senturian.all'
@@ -1478,6 +1562,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.systemk.all'
@@ -1494,6 +1579,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.tricom.all'
@@ -1510,6 +1596,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.ust.all'
@@ -1526,6 +1613,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.vista.all'
@@ -1542,6 +1630,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.vmsdemoblue.all'
@@ -1558,6 +1647,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.rpi.vmsdemoorange.all'
@@ -1574,6 +1664,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.edge1.digitalwatchdog.all'
@@ -1590,6 +1681,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.default.all'
@@ -1606,6 +1698,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.default_cn.all'
@@ -1622,6 +1715,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.default_zh_CN.all'
@@ -1638,6 +1732,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.cox.all'
@@ -1654,6 +1749,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.digitalwatchdog.all'
@@ -1670,6 +1766,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.digitalwatchdog_global.all'
@@ -1686,6 +1783,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.hanwha.all'
@@ -1702,6 +1800,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.ipera.all'
@@ -1718,6 +1817,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.ionetworks.all'
@@ -1734,6 +1834,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.nutech.all'
@@ -1750,6 +1851,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.ras.all'
@@ -1766,6 +1868,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.senturian.all'
@@ -1782,6 +1885,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.systemk.all'
@@ -1798,6 +1902,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.tricom.all'
@@ -1814,6 +1919,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.ust.all'
@@ -1830,6 +1936,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.vista.all'
@@ -1846,6 +1953,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.vmsdemoblue.all'
@@ -1862,6 +1970,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tx1.vmsdemoorange.all'
@@ -1878,6 +1987,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.default.all'
@@ -1894,6 +2004,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.default_cn.all'
@@ -1910,6 +2021,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.default_zh_CN.all'
@@ -1926,6 +2038,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.cox.all'
@@ -1942,6 +2055,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.digitalwatchdog.all'
@@ -1958,6 +2072,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.digitalwatchdog_global.all'
@@ -1974,6 +2089,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.hanwha.all'
@@ -1990,6 +2106,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.ipera.all'
@@ -2006,6 +2123,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.ionetworks.all'
@@ -2022,6 +2140,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.nutech.all'
@@ -2038,6 +2157,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.ras.all'
@@ -2054,6 +2174,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.senturian.all'
@@ -2070,6 +2191,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.systemk.all'
@@ -2086,6 +2208,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.tricom.all'
@@ -2102,6 +2225,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.ust.all'
@@ -2118,6 +2242,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.vista.all'
@@ -2134,6 +2259,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.vmsdemoblue.all'
@@ -2150,6 +2276,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.android-arm.vmsdemoorange.all'
@@ -2166,6 +2293,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default.all'
@@ -2182,6 +2310,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default_cn.all'
@@ -2198,6 +2327,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default_zh_CN.all'
@@ -2214,6 +2344,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.cox.all'
@@ -2230,6 +2361,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.digitalwatchdog.all'
@@ -2246,6 +2378,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.digitalwatchdog_global.all'
@@ -2262,6 +2395,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.hanwha.all'
@@ -2278,6 +2412,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ipera.all'
@@ -2294,6 +2429,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ionetworks.all'
@@ -2310,6 +2446,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.nutech.all'
@@ -2326,6 +2463,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ras.all'
@@ -2342,6 +2480,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.senturian.all'
@@ -2358,6 +2497,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.systemk.all'
@@ -2374,6 +2514,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.tricom.all'
@@ -2390,6 +2531,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ust.all'
@@ -2406,6 +2548,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vista.all'
@@ -2422,6 +2565,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vmsdemoblue.all'
@@ -2438,6 +2582,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vmsdemoorange.all'
@@ -2454,6 +2599,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default.all'
@@ -2470,6 +2616,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_cn.all'
@@ -2486,6 +2633,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_zh_CN.all'
@@ -2502,6 +2650,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.cox.all'
@@ -2518,6 +2667,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog.all'
@@ -2534,6 +2684,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog_global.all'
@@ -2550,6 +2701,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.hanwha.all'
@@ -2566,6 +2718,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ipera.all'
@@ -2582,6 +2735,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ionetworks.all'
@@ -2598,6 +2752,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.nutech.all'
@@ -2614,6 +2769,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ras.all'
@@ -2630,6 +2786,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.senturian.all'
@@ -2646,6 +2803,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.systemk.all'
@@ -2662,6 +2820,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.tricom.all'
@@ -2678,6 +2837,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ust.all'
@@ -2694,6 +2854,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vista.all'
@@ -2710,6 +2871,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoblue.all'
@@ -2726,6 +2888,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoorange.all'
@@ -2742,6 +2905,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.default.all'
@@ -2758,6 +2922,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.default_cn.all'
@@ -2774,6 +2939,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.default_zh_CN.all'
@@ -2790,6 +2956,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.cox.all'
@@ -2806,6 +2973,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.digitalwatchdog.all'
@@ -2822,6 +2990,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.digitalwatchdog_global.all'
@@ -2838,6 +3007,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.hanwha.all'
@@ -2854,6 +3024,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.ipera.all'
@@ -2870,6 +3041,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.ionetworks.all'
@@ -2886,6 +3058,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.nutech.all'
@@ -2902,6 +3075,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.ras.all'
@@ -2918,6 +3092,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.senturian.all'
@@ -2934,6 +3109,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.systemk.all'
@@ -2950,6 +3126,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.tricom.all'
@@ -2966,6 +3143,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.ust.all'
@@ -2982,6 +3160,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.vista.all'
@@ -2998,6 +3177,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.vmsdemoblue.all'
@@ -3014,6 +3194,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.mac.vmsdemoorange.all'
@@ -3030,6 +3211,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.default.all'
@@ -3046,6 +3228,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.default_cn.all'
@@ -3062,6 +3245,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.default_zh_CN.all'
@@ -3078,6 +3262,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.cox.all'
@@ -3094,6 +3279,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.digitalwatchdog.all'
@@ -3110,6 +3296,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.digitalwatchdog_global.all'
@@ -3126,6 +3313,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.hanwha.all'
@@ -3142,6 +3330,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.ipera.all'
@@ -3158,6 +3347,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.ionetworks.all'
@@ -3174,6 +3364,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.nutech.all'
@@ -3190,6 +3381,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.ras.all'
@@ -3206,6 +3398,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.senturian.all'
@@ -3222,6 +3415,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.systemk.all'
@@ -3238,6 +3432,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.tricom.all'
@@ -3254,6 +3449,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.ust.all'
@@ -3270,6 +3466,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.vista.all'
@@ -3286,6 +3483,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.vmsdemoblue.all'
@@ -3302,6 +3500,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ios.vmsdemoorange.all'
@@ -3318,6 +3517,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 
 
     - multijob:
@@ -3337,6 +3537,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.default_cn.functest'
@@ -3351,6 +3552,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.default_zh_CN.functest'
@@ -3365,6 +3567,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.cox.functest'
@@ -3379,6 +3582,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.digitalwatchdog.functest'
@@ -3393,6 +3597,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.digitalwatchdog_global.functest'
@@ -3407,6 +3612,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.hanwha.functest'
@@ -3421,6 +3627,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ipera.functest'
@@ -3435,6 +3642,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ionetworks.functest'
@@ -3449,6 +3657,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.nutech.functest'
@@ -3463,6 +3672,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ras.functest'
@@ -3477,6 +3687,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.senturian.functest'
@@ -3491,6 +3702,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.systemk.functest'
@@ -3505,6 +3717,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.tricom.functest'
@@ -3519,6 +3732,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.ust.functest'
@@ -3533,6 +3747,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.vista.functest'
@@ -3547,6 +3762,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.vmsdemoblue.functest'
@@ -3561,6 +3777,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
         - name: '{pipeline}.{branch}.{project}.installer.vmsdemoorange.functest'
@@ -3575,6 +3792,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
 
     publishers:

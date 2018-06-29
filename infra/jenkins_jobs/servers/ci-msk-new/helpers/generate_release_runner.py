@@ -139,6 +139,7 @@ print '''#
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 
     - multijob:
         name: Run all VMS distribution related jobs
@@ -171,6 +172,7 @@ for platform in PLATFORMS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
 '''
 print '''
     - multijob:
@@ -192,6 +194,7 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
 '''
 
 print '''

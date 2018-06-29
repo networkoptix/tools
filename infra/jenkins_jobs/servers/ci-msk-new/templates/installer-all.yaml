@@ -33,6 +33,7 @@
         default: '{branch}'
     - p_RUN_UNITTESTS:
         default: true
+    - p_RUNNER_URL
 
     wrappers:
     - inject:
@@ -63,6 +64,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            RUNNER_URL=$RUNNER_URL
 
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)
@@ -78,6 +80,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            RUNNER_URL=$RUNNER_URL
 
         - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
@@ -88,3 +91,4 @@
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            RUNNER_URL=$RUNNER_URL

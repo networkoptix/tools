@@ -234,3 +234,10 @@
         default: '{default}'
         description: >-
           Flag whether to build installer or not
+
+- parameter:
+    name: p_RUNNER_URL
+    parameters:
+    - string:
+        name: RUNNER_URL
+        description: utility parameter, url for root build (runner)
