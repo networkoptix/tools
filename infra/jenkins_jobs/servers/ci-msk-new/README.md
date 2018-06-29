@@ -133,3 +133,11 @@ In section "Extended E-mail Notification"
 
 Configure smtp connection and credentials for service@networkoptix.user
 Exact config is not provided due to security reasons.
+
+# Allow iframe
+
+Go to http://10.0.0.112:8080/configureSecurity/
+
+In section "Markup Formatter"
+
+Choose "Allow Arbitrary HTML including Javascript (UNSAFE)"
