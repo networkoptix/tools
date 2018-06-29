@@ -33,7 +33,7 @@
       <p>
       <a href="/job/release.vms_3.2.vms.trigger.nightly/lastSuccessfulBuild/rebuild">
         Rebuild last nightly build now </a>
-      <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: release.vms_3.2.*build
 - view:
     name: VMS-3.2-rt
@@ -46,7 +46,7 @@
       <p>
       <a href="/job/release.vms_3.2.vms.trigger.nightly/lastSuccessfulBuild/rebuild">
         Rebuild last nightly build now </a>
-      <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: release.vms_3.2.*test
 
 # CI jobs
@@ -61,7 +61,7 @@
       <p>
       <a href="/job/develop.vms_3.2.vms.runner/lastBuild/rebuild">
         Rebuild last build </a> (see description about build reason)
-      <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: develop.vms_3.2.*build
 - view:
     name: VMS-3.2-dt
@@ -74,7 +74,7 @@
       <p>
       <a href="/job/develop.vms_3.2.vms.runner/lastBuild/rebuild">
         Rebuild last build </a> (see description about build reason)
-      <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: develop.vms_3.2.*test
 
 # vms-4.0
@@ -90,7 +90,7 @@
       <p>
       <a href="/job/develop.vms.vms.runner/lastBuild/rebuild">
         Rebuild last build </a> (see description about build reason)
-      <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"></iframe>
     regex: develop.vms\..*build
 - view:
     name: VMS-next-dt
@@ -103,7 +103,7 @@
       <p>
       <a href="/job/develop.vms.vms.runner/lastBuild/rebuild">
         Rebuild last build </a> (see description about build reason)
-      <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"></iframe>
     regex: develop.vms\..*test
 
 # Mobile 18.2
@@ -112,7 +112,7 @@
     view-type: list
     description: >-
       <h3> List of all CI jobs related to mobile next releases </h3>
-      <p><iframe src="http://junkshop.enk.me/project/ci/mobile" width="100%" height="500" align="center"/>
+      <p><iframe src="http://junkshop.enk.me/project/ci/mobile" width="100%" height="500" align="center"></iframe>
     regex: develop.mobile\..*build
 
 # Helpers and utilities
