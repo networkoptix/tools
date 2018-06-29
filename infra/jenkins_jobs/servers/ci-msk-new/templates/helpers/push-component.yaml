@@ -68,7 +68,7 @@
                     BUILD_IDENTITY  \
                     CUSTOMIZATION   \
                     COMPONENTS      ; do
-          echo "Checking $var to be defined and filled correctly; value is $${{!var}}"
+          echo "Checking $var to be defined and filled correctly; value is ${{!var}}"
           test "${{!var}}" != '$'"${{var}}" # ~ "$REQUESTED_BY" != '$REQUESTED_BY'
           test "${{!var}}" != ''            # ~ "$REQUESTED_BY" != ''
         done
