@@ -64,20 +64,27 @@ class Monitor:
         logger.info('Starting service...')
         while True:
             try:
-                self.analyze()
-                self.upload()
-                while not self.fetch():
+                try:
+                    self.analyze()
+                    self.upload()
+                    while not self.fetch():
+                        time.sleep(self._options.stand_by_sleep_s)
+
+                except Exception as error:
+                    error_message = utils.format_error(error, include_stack=True)
+                    try:
+                        logger.critical(error_message)
+                    except Exception as log_error:
+                        print(utils.format_error(log_error, include_stack=True))
+                        print(error_message)
+                        
                     time.sleep(self._options.stand_by_sleep_s)
+                    if debug_exceptions:
+                        raise
 
             except (KeyboardInterrupt, utils.KeyboardInterruptError):
                 logger.info('Service has stopped')
                 return
-
-            except Exception as error:
-                logger.critical(utils.format_error(error, include_stack=True))
-                time.sleep(self._options.stand_by_sleep_s)
-                if debug_exceptions:
-                    raise
 
     def cleanup_jira_issues(self):
         try:
@@ -162,7 +169,8 @@ class Monitor:
         self._cleanup_cache(
             self._options.dump_tool_directory,
             self._options.dump_tool_size_limit,
-            lambda d: d.name.endswith('release'))
+            lambda d: d.name.endswith('release'),
+            is_forced_on_failure=True)
             
         self._cleanup_cache(
             utils.Directory(dump_tool.CDB_CACHE_DIRECTORY),
@@ -218,7 +226,8 @@ class Monitor:
         return issue, reports
         
     @staticmethod
-    def _cleanup_cache(directory: utils.Directory, size_limit: utils.Size, is_impotant: callable):
+    def _cleanup_cache(directory: utils.Directory, size_limit: utils.Size, is_impotant: callable, 
+                       is_forced_on_failure: bool = False):
         def directory_message():
             return 'directory size {} is {} limit {}: {}'.format(
                 size, 'within' if size < size_limit else 'over', size_limit, directory.path)
@@ -238,6 +247,9 @@ class Monitor:
         size = directory.size()
         if size < size_limit:
             logger.info('Cleanup success for ' + directory_message())
+        elif is_forced_on_failure:
+            logger.warning('Starting forced cleanup for ' + directory_message())
+            Monitor._cleanup_cache(directory, size_limit, lambda x: False)
         else:
             logger.error('Cleanup failed for ' + directory_message())
 

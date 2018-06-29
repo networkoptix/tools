@@ -44,7 +44,7 @@ def cloud_watch_log_handler(**kwargs):
     return watchtower.CloudWatchLogHandler(**kwargs)
 
 
-def setup_logging(level: str = 'debug', title: str = '',
+def setup_logging(level: str = 'debug', title: str = '', botocore_level='warning',
                   stream: dict = {}, rotating_file: dict = {}, cloud_watch: dict = {}):
     """Sets up application log :level and :path.
     """
@@ -77,6 +77,8 @@ def setup_logging(level: str = 'debug', title: str = '',
     botocore_logger = logging.getLogger('botocore')
     botocore_logger.handlers = main_handlers
     botocore_logger.propagate = False
+    botocore_logger.setLevel(
+        getattr(logging, botocore_level.upper(), None) or int(botocore_level))
         
     logging.info('=' * 80)
     if title:
@@ -313,6 +315,8 @@ class File:
             if default is None: raise
             logger.warning('Read "{}" for non-existing file: {}'.format(default, self.path))
             return default
+        except UnicodeDecodeError as error:
+            raise UnicodeDecodeError('{} in file: {}'.format(error, self.path))
 
     def write_string(self, data):
         self.write(lambda f: f.write(data))
