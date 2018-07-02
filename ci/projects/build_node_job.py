@@ -219,7 +219,7 @@ class BuildNodeJob(object):
             timeout=timeout,
             )
         log.info('Parsing core files:')
-        make_backtraces(unit_tests_dir)
+        make_backtraces(unit_tests_dir, not self._is_unix)
         log.info('Saving results to junk-shop:')
         is_passed = parse_and_save_results_to_db(unit_tests_dir, self._repository)
         log.info('Unit tests are %s', 'passed' if is_passed else 'failed')

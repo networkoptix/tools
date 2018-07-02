@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 TRACEBACK_SUFFIX = '.bt'
 CORE_PATTERN = '*.core.*'
-TRACEBACK_PATTERN = CORE_PATTERN + TRACEBACK_SUFFIX
+TRACEBACK_PATTERN = '*' + TRACEBACK_SUFFIX
 
 
 def collect_core_file_list(test_name, test_work_dir):
@@ -17,10 +17,12 @@ def collect_core_file_list(test_name, test_work_dir):
         log.info('Core file is left after %r: %s', test_name, path)
         yield path
 
+
 def collect_backtrace_file_list(test_name, test_work_dir):
     for path in test_work_dir.rglob(TRACEBACK_PATTERN):
         log.info('Backtrace file for test %r: %s', test_name, path)
         yield path
+
 
 def produce_core_backtrace(binary_path, core_file_path):
     platform = create_platform()
