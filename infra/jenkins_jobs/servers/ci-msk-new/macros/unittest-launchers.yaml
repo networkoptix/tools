@@ -96,4 +96,13 @@
             }
           }
           println fails.toString() + " Fails"
-          System.exit (fails);
+
+          // While we don't export xUnit or similar stuff,
+          // the only way to mark build as unstable is to set flag, that will be handled by
+          // check_unstable post-build script
+          if (fails > 0) {
+            new File("unstable.flag").createNewFile()
+          }
+          // optionally we may just fail tests which is not good, because in this case all
+          // upstream stuff will fail too and we don't want unittests to block functests
+          // System.exit (fails);

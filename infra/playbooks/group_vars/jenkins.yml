@@ -55,6 +55,7 @@ jenkins_plugins:
 - conditional-buildstep
 - description-setter
 # post-build actions
+- groovy-postbuild
 - artifactdeployer
 - rebuild
 - naginator
