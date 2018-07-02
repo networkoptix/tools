@@ -143,6 +143,7 @@ print '''#
 
     - multijob:
         name: Run all VMS distribution related jobs
+        condition: COMPLETED # allow unstable
         projects:'''
 
 for platform in PLATFORMS_LIST:
@@ -183,6 +184,7 @@ print '''
 for customization in CUSTOMIZATIONS_LIST:
     print '''
         - name: '{pipeline}.{branch}.{project}.installer.'''+customization+'''.functest'
+          condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&

@@ -68,6 +68,7 @@
 
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)
+        condition: COMPLETED # allow unstable
         projects:
         - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
