@@ -9,6 +9,7 @@ from command import (
     BooleanProjectParameter,
     ChoiceProjectParameter,
     MultiChoiceProjectParameter,
+    ArchiveArtifactsCommand,
     )
 from deploy import Deployer
 
@@ -144,3 +145,8 @@ class ReleaseProject(BuildProject):
 
     def make_email_recipient_list(self, build_info):
         return self.build_user_email_list
+
+    def make_artifact_archiving_command_list(self, build_info_path):
+        return [
+            ArchiveArtifactsCommand([build_info_path]),
+            ]

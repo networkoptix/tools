@@ -427,7 +427,7 @@ class BuildProject(NxVmsProject):
             email_recipient_list = self.make_email_recipient_list(build_info)
             subject_and_html = email_sender.render_email(build_info, email_recipient_list, test_mode=self.in_assist_mode)
             command_list = (
-                self._make_artifact_archiving_command_list(build_info_path) +
+                self.make_artifact_archiving_command_list(build_info_path) +
                 self.make_postprocess_command_list(build_info.failed_build_platform_list) +
                 self._make_set_build_result_command_list(build_info))
         self.post_process(build_info, build_info_path, platform_build_info_map)
@@ -520,7 +520,7 @@ class BuildProject(NxVmsProject):
                 f.write(version)
         return path
 
-    def _make_artifact_archiving_command_list(self, build_info_path):
+    def make_artifact_archiving_command_list(self, build_info_path):
         return [
             ArchiveArtifactsCommand([build_info_path]),
             ArchiveArtifactsCommand(['**'], 'dist'),
