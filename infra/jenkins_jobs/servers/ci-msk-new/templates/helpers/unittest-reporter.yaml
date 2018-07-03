@@ -95,8 +95,14 @@
               JUNKSHOP_PROJECT="$PIPELINE"
             fi
 
+            if [ "$PLATFORM" == 'universal' ] ; then
+              JUNKSHOP_PLATFORM=webadmin
+            else
+              JUNKSHOP_PLATFORM="$PLATFORM"
+            fi
+
             DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
-            BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$PLATFORM
+            BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             cd unit_tests
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS"
