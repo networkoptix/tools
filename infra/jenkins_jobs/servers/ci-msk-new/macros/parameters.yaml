@@ -199,16 +199,6 @@
           with JENKINS ENUMs, valid options are "passed" and "failed"
 
 - parameter:
-    name: p_RUNNING_NUM
-    parameters:
-    - string:
-        name: RUNNING_NUM
-        default: ''
-        description: >-
-          Utility, special autoincremental number for failed builds
-          (this num is appended for each folder where faile build lands)
-
-- parameter:
     name: p_RUN_FUNCTESTS
     parameters:
     - bool:

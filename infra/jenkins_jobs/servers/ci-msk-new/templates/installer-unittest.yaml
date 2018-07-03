@@ -128,6 +128,8 @@
         - role: SLAVE
           build-on:
           - SUCCESS
+          - FAILURE
+          - UNSTABLE
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
@@ -144,6 +146,15 @@
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          build-steps:
+          - trigger-builds:
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
@@ -164,28 +175,6 @@
           - UNSTABLE
           build-steps:
           - trigger-builds:
-            - project: 'helper.push-component'
-              block: true
-              predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
-                PIPELINE=$PIPELINE
-                BRANCH=$BRANCH
-                BUILD_IDENTITY=$BUILD_IDENTITY
-                CUSTOMIZATION=$CUSTOMIZATION
-                PLATFORM=$PLATFORM
-                BUILD_STATUS=failed
-                COMPONENTS=unit_tests/
-                LOCAL_PATH=$WORKSPACE/
-                NODE_SSH_CONNECTION=$SSH_CONNECTION
-                SSH_USER=$USER
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'RUNNING_NUM.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: RUNNING_NUM.envvar
-          - trigger-builds:
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
@@ -197,7 +186,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
-                RUNNING_NUM=$RUNNING_NUM
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:

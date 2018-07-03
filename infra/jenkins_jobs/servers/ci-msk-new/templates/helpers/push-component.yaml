@@ -18,7 +18,6 @@
 
     parameters:
     - p_REQUESTED_BY
-    - p_BUILD_STATUS
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
@@ -54,11 +53,6 @@
         - jenkins
 
     builders:
-    - inject:
-        properties-content: |
-          RUNNING_NUM=$BUILD_ID
-    - shell: |
-          echo "RUNNING_NUM=${{RUNNING_NUM}}" > RUNNING_NUM.envvar
     - shell: |
         #!/bin/bash
         set -ex
@@ -75,13 +69,8 @@
 
     - shell: |
         #!/bin/bash
-        if [ "${{BUILD_STATUS}}" == 'passed' ] ; then
-          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
-          REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
-        else
-          REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern_failed}"
-          REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern_failed}"
-        fi
+        REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
+        REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
         echo "REPOSITORY_PATH=${{REPOSITORY_PATH}}" > REPOSITORY_PATH.envvar
         echo "REPOSITORY_URL=${{REPOSITORY_URL}}" > REPOSITORY_URL.envvar
     - inject:
@@ -112,9 +101,8 @@
         artifacts: 'REPOSITORY_URL.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - archive:
-        artifacts: 'RUNNING_NUM.envvar'
-        allow-empty: 'false'
-        fingerprint: true
-
+    - description-setter:
+        description: >-
+          <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+          <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
     - failure-email-helpers(maintainers)

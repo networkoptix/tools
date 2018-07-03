@@ -388,6 +388,7 @@
           build-on:
           - SUCCESS
           - UNSTABLE
+          - FAILURE
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
@@ -407,69 +408,10 @@
               block-thresholds:
                 failure-threshold: FAILURE
 
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'REPOSITORY_URL.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: REPOSITORY_URL.envvar
-          - inject:
-              properties-content: |
-                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
           - description-setter:
               description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
-
-
-    - postbuildscript:
-        mark-unstable-if-failed: true
-        builders:
-        - role: SLAVE
-          build-on:
-          - FAILURE
-          build-steps:
-          - trigger-builds:
-            - project: 'helper.push-component'
-              predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
-                BUILD_STATUS=failed
-                PIPELINE=$PIPELINE
-                BRANCH=$BRANCH
-                BUILD_IDENTITY=$BUILD_IDENTITY
-                CUSTOMIZATION=$CUSTOMIZATION
-                PLATFORM=$PLATFORM
-                LOCAL_PATH=$WORKSPACE/{build-dir}/
-                COMPONENTS={build-artifacts}
-                NODE_SSH_CONNECTION=$SSH_CONNECTION
-                SSH_USER=$USER
-              block: true
-              block-thresholds:
-                failure-threshold: FAILURE
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'REPOSITORY_URL.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: REPOSITORY_URL.envvar
-
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'RUNNING_NUM.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: RUNNING_NUM.envvar
-
-          - inject:
-              properties-content: |
-                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-          - description-setter:
-              description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
+                <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+                <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -512,7 +454,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
-                RUNNING_NUM=$RUNNING_NUM
                 LOGFILE={cmake-build-log}
                 RUNNER_URL=$RUNNER_URL
 

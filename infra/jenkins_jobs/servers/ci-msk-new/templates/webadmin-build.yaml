@@ -140,6 +140,10 @@
         environ: ''
 
     publishers:
+    - description-setter:
+        description: >-
+          <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+          <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
     - archive:
         artifacts: '{webadmin-build-artifacts-min}'
         allow-empty: 'false'
@@ -152,6 +156,7 @@
           build-on:
           - SUCCESS
           - UNSTABLE
+          - FAILURE
           build-steps:
           - trigger-builds:
             - project: 'helper.push-component'
@@ -170,59 +175,6 @@
                 COMPONENTS={webadmin-build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'REPOSITORY_URL.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: REPOSITORY_URL.envvar
-          - inject:
-              properties-content: |
-                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-          - description-setter:
-              description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
-
-    - postbuildscript:
-        mark-unstable-if-failed: true
-        builders:
-        - role: SLAVE
-          build-on:
-          - FAILURE
-          build-steps:
-          - trigger-builds:
-            - project: 'helper.push-component'
-              block: true
-              block-thresholds:
-                failure-threshold: FAILURE
-              predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
-                PIPELINE=$PIPELINE
-                BRANCH=$BRANCH
-                BUILD_IDENTITY=$BUILD_IDENTITY
-                CUSTOMIZATION=$CUSTOMIZATION
-                PLATFORM=$PLATFORM
-                BUILD_STATUS=failed
-                LOCAL_PATH=$WORKSPACE/
-                COMPONENTS={webadmin-build-artifacts}
-                NODE_SSH_CONNECTION=$SSH_CONNECTION
-                SSH_USER=$USER
-          - copyartifact:
-              project: 'helper.push-component'
-              filter: 'REPOSITORY_URL.envvar'
-              which-build: last-completed
-              parameter-filters: REQUESTED_BY={tag_requested_by}
-          - inject:
-              properties-file: REPOSITORY_URL.envvar
-          - inject:
-              properties-content: |
-                JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-          - description-setter:
-              description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - postbuildscript:
         mark-unstable-if-failed: true

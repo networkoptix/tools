@@ -27,7 +27,6 @@
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
     - p_PLATFORM
-    - p_RUNNING_NUM
     - p_BUILD_STATUS
     - p_RUNNER_URL # do we need it here?
 
@@ -74,8 +73,6 @@
           CUSTOMIZATION=$CUSTOMIZATION
           COMPONENTS=unit_tests/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
-          BUILD_STATUS=$BUILD_STATUS
-          RUNNING_NUM=$RUNNING_NUM
         block: true
         block-thresholds:
           failure-threshold: FAILURE
@@ -108,4 +105,8 @@
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS"
 
     publishers:
+    - description-setter:
+        description: >-
+          <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+          <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
     - failure-email-helpers(maintainers)

@@ -63,7 +63,6 @@
     - p_CUSTOMIZATION
     - p_PLATFORM
     - p_NX_VMS_COMMIT
-    - p_RUNNING_NUM
     - string:
         name: LOGFILE
         description: |
@@ -123,8 +122,6 @@
           LOCAL_PATH=$WORKSPACE/
           COMPONENTS=$LOGFILE
           NODE_SSH_CONNECTION=$SSH_CONNECTION
-          BUILD_STATUS=$BUILD_STATUS
-          RUNNING_NUM=$RUNNING_NUM
         block: true
         block-thresholds:
           failure-threshold: FAILURE
@@ -162,4 +159,8 @@
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" "$LOGFILE" "--outcome=$BUILD_STATUS"
 
     publishers:
+    - description-setter:
+        description: >-
+          <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+          <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
     - failure-email-helpers(maintainers)
