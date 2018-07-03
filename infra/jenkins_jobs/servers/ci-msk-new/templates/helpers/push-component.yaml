@@ -66,18 +66,11 @@
           test "${{!var}}" != '$'"${{var}}" # ~ "$REQUESTED_BY" != '$REQUESTED_BY'
           test "${{!var}}" != ''            # ~ "$REQUESTED_BY" != ''
         done
-
-    - shell: |
-        #!/bin/bash
-        REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
-        REPOSITORY_ROOT_PATH="{artifact_repository_base_path}/{artifact_location_root_pattern}"
-        REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
-        echo "REPOSITORY_PATH=${{REPOSITORY_PATH}}" > REPOSITORY_PATH.envvar
-        echo "REPOSITORY_URL=${{REPOSITORY_URL}}" > REPOSITORY_URL.envvar
     - inject:
-        properties-file: REPOSITORY_PATH.envvar
-    - inject:
-        properties-file: REPOSITORY_URL.envvar
+        properties-content: |
+          REPOSITORY_PATH={artifact_repository_base_path}/{artifact_location_full_pattern}
+          REPOSITORY_ROOT_PATH={artifact_repository_base_path}/{artifact_location_root_pattern}
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
 
     - description-setter:
         description: |
@@ -95,14 +88,6 @@
     - shell:  !include-raw-escape: ../../builders/organize_repo.sh
 
     publishers:
-    - archive:
-        artifacts: 'REPOSITORY_PATH.envvar'
-        allow-empty: 'false'
-        fingerprint: true
-    - archive:
-        artifacts: 'REPOSITORY_URL.envvar'
-        allow-empty: 'false'
-        fingerprint: true
     - description-setter:
         description: >-
           <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
