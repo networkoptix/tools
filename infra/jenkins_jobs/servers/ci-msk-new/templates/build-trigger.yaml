@@ -37,9 +37,15 @@
       --------------------------------------------------------------------------------
       </pre>
     # all build triggers will work under the same workspace as well as
-    node: '{hg-local-cache-node}'
-    workspace: '{hg-local-cache-node-workspace}'
-    concurrent: false
+    node: '{trigger-node}'
+    workspace: '{trigger-workspace}'
+    concurrent: '{trigger-concurrent}'
+
+    # defaults to those kind of triggers which ive on repo events
+    trigger-node: '{hg-local-cache-node}'
+    trigger-workspace: '{hg-local-cache-node-workspace}'
+    trigger-concurrent: '' # false by default
+    trigger-wait-runner-completion: '' # don't wait by default
 
     timer: ''  # no timed trigger by default
     poll-scm-timer: '' # no scm polling by default
@@ -164,7 +170,7 @@
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$NX_VMS_COMMIT
           CLEAN_BUILD=$CLEAN_BUILD
-        block: false # !! don't wait
+        block: '{trigger-wait-runner-completion}' # !! don't wait
         block-thresholds:
           failure-threshold: FAILURE
 

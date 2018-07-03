@@ -158,7 +158,13 @@
 
     # TRIGGERS - main entry points
 
+    # trigger that sterted by human or timer and  waits for runner completion
+    # in order to establish link between runner and trigger
     - '{pipeline}.{branch}.{project}.trigger.{preset}':
+        trigger-workspace: 'nx_trig_thr${{EXECUTOR_NUMBER}}/'
+        trigger-node: trigger
+        trigger-wait-runner-completion: 'true'
+        trigger-concurrent: 'true'
         preset:
         - example:
             detailed-job-description: |-
