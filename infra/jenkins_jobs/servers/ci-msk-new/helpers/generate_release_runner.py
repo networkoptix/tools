@@ -67,6 +67,20 @@ print '''#
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - system-groovy:
+        command: |
+          def currentBuild = Thread.currentThread().executable
+          def currentUrl = currentBuild.getUrl()
+          def cause = currentBuild.getCause(hudson.model.Cause$UpstreamCause)
+          def parentBuildNum = cause.upstreamBuild
+          def parentJobName = cause.upstreamProject
+          def parentJob = hudson.model.Hudson.instance.getItem(parentJobName)
+          def jlc = new jenkins.model.JenkinsLocationConfiguration()
+          def currentLink = "<a href='" + jlc.getUrl() + "/" + currentUrl.toString() + "'> to runner </a>"
+          def parentBuild = parentJob.getBuildByNumber(parentBuildNum)
+          def parentDescription = parentBuild.getDescription()
+          parentBuild.setDescription(parentDescription + "<br>" + currentLink)
+
     - inject:
         properties-content: |
           BUILD_IDENTITY=undef
