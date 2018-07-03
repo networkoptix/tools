@@ -108,6 +108,9 @@
     # TRIGGERS - main entry points
     # trigger that polls scm for changes and runs in fire & forget mode
     - '{pipeline}.{branch}.{project}.trigger.{preset}':
+        trigger-node: '{hg-local-cache-node}'
+        trigger-workspace: '{hg-local-cache-node-workspace}'
+        trigger-concurrent: '' # false by default
         preset:
         - on-push:
             detailed-job-description: |-
