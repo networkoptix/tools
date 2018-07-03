@@ -68,7 +68,6 @@
     - inject:
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base_path}/{artifact_location_full_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
 
     - rsync-upload:
