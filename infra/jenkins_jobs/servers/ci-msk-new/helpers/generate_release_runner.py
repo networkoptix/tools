@@ -198,7 +198,17 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
 '''
-
+for customization in CUSTOMIZATIONS_LIST:
+    print '''
+    - conditional-step:
+        condition-kind: boolean-expression
+        # pull webadmin only when needed
+        condition-expression: '("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") '
+        steps:
+        - description-setter:
+            description: |
+              <a href={artifact_repository_base_url}/'''+customization+'''/all/> '''+customization+''' artifacts </a>
+'''
 print '''
     publishers:
     - display-upstream-changes

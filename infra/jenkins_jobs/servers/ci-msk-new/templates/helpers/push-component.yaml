@@ -70,6 +70,7 @@
     - shell: |
         #!/bin/bash
         REPOSITORY_PATH="{artifact_repository_base_path}/{artifact_location_full_pattern}"
+        REPOSITORY_ROOT_PATH="{artifact_repository_base_path}/{artifact_location_root_pattern}"
         REPOSITORY_URL="{artifact_repository_base_url}/{artifact_location_full_pattern}"
         echo "REPOSITORY_PATH=${{REPOSITORY_PATH}}" > REPOSITORY_PATH.envvar
         echo "REPOSITORY_URL=${{REPOSITORY_URL}}" > REPOSITORY_URL.envvar
@@ -91,6 +92,7 @@
         components: '${{COMPONENTS}}'
         force: '$FORCE_PUSH'
         allow_missing: 'YES'
+    - shell:  !include-raw-escape: ../../builders/organize_repo.sh
 
     publishers:
     - archive:
