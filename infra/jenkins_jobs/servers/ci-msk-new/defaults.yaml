@@ -1,6 +1,8 @@
 - defaults:
     name: global
 
+    default-artifact-num-to-keep: 20
+
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER
     use-ninja-clean-file: 'NO' # TODO: switch to using ninja-clean when ready
     force-clean-build-based-on-build-configs-sha: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead

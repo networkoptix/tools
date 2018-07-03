@@ -59,7 +59,7 @@
         days-to-keep: 30
         num-to-keep: 100
         artifact-days-to-keep: 30
-        artifact-num-to-keep: 100
+        artifact-num-to-keep: '{default-artifact-num-to-keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
