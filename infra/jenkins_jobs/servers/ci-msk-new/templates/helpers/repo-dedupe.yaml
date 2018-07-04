@@ -46,7 +46,6 @@
     builders:
     - inject:
         properties-content: |
-          JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
           BRANCH={branch}
     # FIXME: this job relies on hardlink utility which is not installed with ansible yet
@@ -66,4 +65,5 @@
         fi
 
     publishers:
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'

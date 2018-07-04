@@ -34,7 +34,7 @@
         <<: *failure_email
         send-to:
         - recipients
-        recipients: '$JOB_MAINTAINERS'
+        recipients: '{email-recipients}'
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         body: |
           $BUILD_DESCRIPTION
@@ -55,7 +55,7 @@
         <<: *failure_email
         send-to:
         - recipients
-        recipients: '$JOB_MAINTAINERS'
+        recipients: '{email-recipients}'
         subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
         body: |
           $BUILD_DESCRIPTION

@@ -99,10 +99,6 @@
         ignore-post-commit-hooks: True
 
     wrappers:
-    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          JOB_MAINTAINERS={job-maintainers}
     - timestamps
     - timeout:
         # normally should complete in <1 min, but in case of clean clone this may not work
@@ -173,4 +169,5 @@
         artifacts: 'NX_VMS_COMMIT.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'

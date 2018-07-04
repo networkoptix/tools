@@ -91,7 +91,6 @@
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
-          JOB_MAINTAINERS={job-maintainers}
           PIPELINE={pipeline}
           BRANCH={branch}
           CUSTOMIZATION={customization}

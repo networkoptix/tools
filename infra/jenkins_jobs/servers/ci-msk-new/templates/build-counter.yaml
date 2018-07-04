@@ -108,10 +108,6 @@
         description: Set build number instead of incrementing previous
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          JOB_MAINTAINERS={job-maintainers}
     - timestamps
     - timeout:
         # normally, should complete in 1-2 min
@@ -169,4 +165,5 @@
         artifacts: '{counter_var_name}.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'

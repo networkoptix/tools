@@ -70,10 +70,6 @@
     - p_RUNNER_URL
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          JOB_MAINTAINERS={job-maintainers}
     - timestamps
     - timeout:
         timeout: 20 # min
@@ -162,4 +158,5 @@
         description: >-
           <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
           <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'
