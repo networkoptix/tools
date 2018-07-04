@@ -9,7 +9,7 @@ from junk_shop.utils import DbConfig
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 from .test_info import RunInfo, TestInfo
 from .output_parser import GTestOutputParser
-from .core_file import collect_backtrace_file_list
+from .make_backtraces import collect_backtrace_file_list
 from .save_results import save_test_results
 
 log = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ def parse_and_save_results_to_db(work_dir, repository):
     passed = save_test_results(repository, run_info, test_record_list)
     print 'Done in %r seconds.' % (time.time() - t)
     return passed
+
 
 def produce_test_record(work_dir, test_name):
     test_dir_base = work_dir.joinpath(test_name)
@@ -54,4 +55,4 @@ def main():
     work_dir = Path.cwd()
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
     setup_logging()
-    is_passed = parse_and_save_results_to_db(work_dir, repository)
+    parse_and_save_results_to_db(work_dir, repository)
