@@ -1,6 +1,5 @@
 - job-template:
     name: 'helper.freeze-build-config'
-    job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================

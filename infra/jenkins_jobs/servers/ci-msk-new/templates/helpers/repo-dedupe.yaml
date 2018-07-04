@@ -1,11 +1,10 @@
 - job-template:
     name: 'helper.{pipeline}.{branch}.repo-dedupe'
-    job-maintainers: 'iremizov@networkoptix.com'
-
-    num-rand-choice: 5
 
     node: repository-ops
     concurrent: false
+
+    num-rand-choice: 5
 
     properties:
     - heavy-job:

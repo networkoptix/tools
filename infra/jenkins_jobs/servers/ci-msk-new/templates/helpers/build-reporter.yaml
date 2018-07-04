@@ -1,6 +1,5 @@
 - job-template:
     name: 'helper.build-reporter'
-    job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================

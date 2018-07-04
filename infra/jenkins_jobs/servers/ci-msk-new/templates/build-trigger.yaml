@@ -1,7 +1,5 @@
 - job-template:
     name: '{pipeline}.{branch}.{project}.trigger.{preset}'
-    job-maintainers: 'iremizov@networkoptix.com'
-
     description: |
       <pre>
       ================================================================================

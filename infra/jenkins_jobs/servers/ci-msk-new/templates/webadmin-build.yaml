@@ -1,7 +1,6 @@
 - job-template:
     name: '{pipeline}.{branch}.{project}.webadmin.universal.build'
     project-type: multijob
-    job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================

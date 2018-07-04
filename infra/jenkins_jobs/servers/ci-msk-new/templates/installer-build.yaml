@@ -1,6 +1,5 @@
 - job-template:
     name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
-    job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================

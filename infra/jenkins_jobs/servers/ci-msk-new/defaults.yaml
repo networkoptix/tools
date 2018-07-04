@@ -1,5 +1,6 @@
 - defaults:
     name: global
+    job-maintainers: 'iremizov@networkoptix.com,anikitin@networkoptix.com,vfedorov@networkoptix.com'
 
     default-artifact-num-to-keep: 20
 

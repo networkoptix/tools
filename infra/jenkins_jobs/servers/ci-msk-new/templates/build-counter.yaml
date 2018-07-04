@@ -1,7 +1,7 @@
 # generate ID
 - job-template:
     name: '{pipeline}.{counter_name}.generator'
-    job-maintainers: 'iremizov@networkoptix.com'
+
     description: |
       <pre>
       ================================================================================

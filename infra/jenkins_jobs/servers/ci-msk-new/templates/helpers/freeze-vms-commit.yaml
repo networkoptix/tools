@@ -2,7 +2,6 @@
 
 - job-template:
     name: 'helper.freeze-nx-vms-commit'
-    job-maintainers: 'iremizov@networkoptix.com'
     description: |
       <pre>
       ================================================================================
