@@ -3,7 +3,7 @@ libvirt_guest__state: running
 
 libvirt_guest__type: linux
 libvirt_guest__copy_on_write: true
-libvirt_guest__extra_system_image_size_gb: "10"
+libvirt_guest__extra_system_image_size_gb: "30"
 libvirt_guest__memory: "{{ 3 * 1024 * 1024 }}"
 libvirt_guest__cpus: 2
 
