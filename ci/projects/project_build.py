@@ -107,7 +107,7 @@ class BuildProject(NxVmsProject):
 
     @property
     def add_qt_pdb_by_default(self):
-        return False
+        return True
 
     @property
     def checkout_nx_vms_revision(self):

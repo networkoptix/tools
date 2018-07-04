@@ -74,10 +74,6 @@ class ReleaseProject(BuildProject):
         return True
 
     @property
-    def add_qt_pdb_by_default(self):
-        return True
-
-    @property
     def checkout_nx_vms_revision(self):
         return self.params.get('revision') or None
 

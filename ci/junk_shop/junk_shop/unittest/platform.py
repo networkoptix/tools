@@ -29,8 +29,6 @@ class Platform(object):
 
     __metaclass__ = abc.ABCMeta
 
-    CORE_PATTERN = '*.core.*'
-
     @abc.abstractmethod
     def abort_process(self, process):
         pass
@@ -67,6 +65,18 @@ class Platform(object):
     @abc.abstractmethod
     def extract_core_backtrace(self, binary_path, core_path):
         pass
+
+    def produce_core_backtrace(self, binary_path, core_file_path):
+        """Extract backtrace from crash file `core_file_path`.
+        `binary_path` is using as executable and symbol path"""
+        detected_binary_path = self.extract_core_source_binary(str(core_file_path))
+        if detected_binary_path and detected_binary_path.is_file():
+            # extract_core_source_binary may fail, returning None; use binary we known of then
+            binary_path = detected_binary_path
+        backtrace = self.extract_core_backtrace(binary_path, core_file_path)
+        backtrace_path = core_file_path.with_suffix(core_file_path.suffix + TRACEBACK_SUFFIX)
+        backtrace_path.write_bytes(backtrace)
+        return backtrace_path
 
 
 class WindowsPlatform(Platform):
@@ -121,6 +131,8 @@ class PosixPlatform(Platform):
     """The base class for posix platforms"""
 
     __metaclass__ = abc.ABCMeta
+
+    CORE_PATTERN = '*.core.*'
 
     def abort_process(self, process):
         process.send_signal(signal.SIGABRT)  # using signal producing core dump

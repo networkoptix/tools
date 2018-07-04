@@ -57,10 +57,6 @@ class CiProject(BuildProject):
         return False
 
     @property
-    def add_qt_pdb_by_default(self):
-        return True
-
-    @property
     def deploy_webadmin_for_version(self):
         return True
 

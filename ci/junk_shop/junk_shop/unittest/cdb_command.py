@@ -1,9 +1,9 @@
 """
-  junk_shop.unittest.cdb_command
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+junk_shop.unittest.cdb_command
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  Microsoft CDB.exe command wrapper to extract backtrace from windows DUMP file (.dmp) file.
-  Used by junk_shop.unittest.platform. Based on devtools.crash_analyzer.dump_tool.
+Microsoft CDB.exe command wrapper to extract backtrace from windows DUMP file (.dmp) file.
+Used by junk_shop.unittest.platform. Based on devtools.crash_analyzer.dump_tool.
 """
 import logging
 # We're using subprocess32 Python3 backport to get communicate timeout feature.
