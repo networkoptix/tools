@@ -59,6 +59,13 @@ if [[ "$CLEAN" == "true" || "$CLEAN" == "True" ]]; then
 fi
 
 
+if [[ "$VERBOSE" == "true" ]] ; then
+  OPTIONS=(
+    "${OPTIONS[@]}"
+    "-s"
+  )
+fi
+
 source venv/bin/activate
 
 export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop

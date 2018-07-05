@@ -86,6 +86,10 @@
     builders:
     - folder-delete-operation:
         folder-path: 'build'
+
+    - folder-delete-operation:
+        folder-path: 'dist'
+
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
@@ -93,19 +97,18 @@
     - description-setter:
         description: |
           $BUILD_DESCRIPTION
-    # TODO: We don't have any platform here, so urls will appear to be broken
-    # - inject:
-    #     properties-content: |
-    #       REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
-    #       JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-    # - description-setter:
-    #     description: >-
-    #       <a href='$REPOSITORY_URL'> Artifacts </a>,
-    #       <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+    - description-setter:
+        description: >-
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - trigger-builds:
       - project: 'helper.pull-component'
         predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -113,7 +116,7 @@
           PLATFORM=windows-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,build_info.yaml,lib/,build/bin/appserver2_ut
+          COMPONENTS=distrib/,build_info.yaml,build/bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           ALLOW_MISSING=YES
         block: true
@@ -122,6 +125,7 @@
 
       - project: 'helper.pull-component'
         predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -129,7 +133,7 @@
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,build_info.yaml,lib/,build/bin/appserver2_ut
+          COMPONENTS=distrib/,build_info.yaml,build/bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           ALLOW_MISSING=YES
         block: true
@@ -137,52 +141,76 @@
           failure-threshold: FAILURE
 
     - file-copy-operation:
-        includes: 'build/distrib/*-server-*-linux64*.deb, build/distrib/*-server-*-win64*.exe'
+        includes: 'build/distrib/*-server-*-linux64*.deb, build/distrib/*-server-*-win64*.exe, build/bin/appserver2_ut'
         excludes: ''
-        target-location: '$WORKSPACE'
+        target-location: '$WORKSPACE/dist'
         flatten-files: 'true'
 
     - init-venv-linux:
         requirements-files: >-
           devtools/ci/junk_shop/requirements.txt
           nx_vms/func_tests/requirements.txt
-    # TODO: What means platform?? we are running tests against all possible platforms
-    # - parse-build-info:
-    #     branch: '{branch}'
-    #     customization: $CUSTOMIZATION
-    #     platform: '{platform}'
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "APPSERVER2_UT_PATH=$(readlink -f "$( \
+          find $WORKSPACE/dist -name appserver2_ut \
+        )")" > APPSERVER2_UT_PATH.envvar
+    - inject:
+        properties-file: APPSERVER2_UT_PATH.envvar
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "SERVER_DEB_PATH=$(readlink -f "$( \
+          find $WORKSPACE/dist -name *-server-*-linux64*.deb \
+        )")" > SERVER_DEB_PATH.envvar
+    - inject:
+        properties-file: APPSERVER2_UT_PATH.envvar
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+        if [ $PIPELINE == develop ] ; then
+          echo "PROJECT=ci" > PROJECT.envvar
+        else
+          echo "PROJECT=$PIPELINE" > PROJECT.envvar
+        fi
+    - inject:
+        properties-file: PROJECT.envvar
 
     - inject:
+        # TODO:  '{cloud-group}'
         properties-content: |
           JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@{junk_shop_host}
+          AUTOTEST_EMAIL_PASSWORD=4eAYstrPYsTEgU9i
           BIN_DIR=$WORKSPACE/funtest/bin
           WORK_DIR=$WORKSPACE/funtest/work
+          CLOUD_GROUP=test
     - shell: |
         #!/bin/bash
         set -ex
         mkdir -p "$BIN_DIR"
         rsync -av --delete {binaries_url} "$BIN_DIR/"
 
-        # if [ -f "dist/$APPSERVER2_UT_PATH" ]; then
-        #   cp "dist/$APPSERVER2_UT_PATH" "$BIN_DIR/"
-        # else
-        #   echo "Warning: $APPSERVER2_UT_PATH is missing"
-        # fi
+    - inject:
+        properties-content: |
+          VERBOSE=true
+          PYTEST_DEFAULTS_SECTION=ci
 
-    # TODO:
-    # - run-functional-tests:
-    #     project: '{project-name}'
-    #     branch: '{branch}'
-    #     build-num: $BUILD_NUM
-    #     customization: $CUSTOMIZATION
-    #     platform: '{platform}'
-    #     cloud-group: '{cloud-group}'
-    #     bin-dir: $BIN_DIR
-    #     work-dir: $WORK_DIR
-    #     mediaserver-dist-dir: "$WORKSPACE/dist"
-    #     clean: true
-    #     test-select-expr: "$TEST_SELECT_EXPR"
-    #     test-list: "$TEST_LIST"
-    #     test-timeout-hours: '{test-timeout-hours}'
+    - run-functional-tests:
+        project: $PROJECT  #'$PIPELINE'
+        branch: '$BRANCH'
+        build-num: $BUILD_IDENTITY
+        customization: $CUSTOMIZATION
+        platform: linux-x64
+        cloud-group: $CLOUD_GROUP
+        bin-dir: "$WORKSPACE/dist"
+        work-dir: "$WORKSPACE/dist" # todo: move to /work
+        mediaserver-dist-dir: "$WORKSPACE/dist"
+        clean: true
+        test-select-expr: $TEST_SELECT_EXPR
+        test-list: $TEST_LIST
+        test-timeout-hours: 1 # '{test-timeout-hours}'
 
     # TODO: reporting
