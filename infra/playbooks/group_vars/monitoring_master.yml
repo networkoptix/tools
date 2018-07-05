@@ -160,7 +160,6 @@ alertmanager_receivers:
     # Configurations for several notification integrations.
     email_configs:
     - to: 'anikitin@networkoptix.com'
-    - to: 'iremizov@networkoptix.com'
     - to: 'vfedorov@networkoptix.com'
 
 # The root node of the routing tree.
