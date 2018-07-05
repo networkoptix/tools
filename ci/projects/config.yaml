@@ -107,6 +107,7 @@ platforms:
     publish_dir: linux
     distributive_mask_list:
       - '*.deb'
+      - '*-testcamera-*'
     update_mask_list:
       - '*_update-*.zip'
   linux-x86:
@@ -115,6 +116,7 @@ platforms:
     publish_dir: linux
     distributive_mask_list:
       - '*.deb'
+      - '*-testcamera-*'
     update_mask_list:
       - '*_update-*.zip'
   windows-x64:
@@ -125,6 +127,7 @@ platforms:
     publish_dir: windows
     distributive_mask_list:
       - '*.exe'
+      - '*-testcamera-*.zip'
     update_mask_list:
       - '*_update-*.zip'
       - '*_debug-*.zip'  # strange, but pdbs go to updates dir
@@ -136,6 +139,7 @@ platforms:
     publish_dir: windows
     distributive_mask_list:
       - '*.exe'
+      - '*-testcamera-*.zip'
     update_mask_list:
       - '*_update-*.zip'
       - '*_debug-*.zip'  # strange, but pdbs go to updates dir
