@@ -124,6 +124,7 @@ print '''#
     # TODO: Should we fetch all links from publisher or something like that?
     - inject:
         properties-content: |
+          REPOSITORY_ROOT_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - build-name-setter:
@@ -212,41 +213,14 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
 '''
-for customization in CUSTOMIZATIONS_LIST:
-    print '''
-    - conditional-step:
-        condition-kind: boolean-expression
-        # pull webadmin only when needed
-        condition-expression: '("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") '
-        steps:
-        - description-setter:
-            description: |
-              <a href={artifact_repository_base_url}/'''+customization+'''/all/> '''+customization+''' artifacts </a>
-'''
 print '''
     publishers:
+    - groovy-postbuild:
+        script: !include-raw-escape: ../builders/report_all_links.groovy
     - display-upstream-changes
     - archive:
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
-
-    - postbuildscript:
-        mark-unstable-if-failed: true
-        builders:
-        - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILED
-          build-steps:
-          # At this moment all builds are completed and we may publish links
-
-          # TODO: Move to publishers
-          # TODO: set paths based on publisher?
-          - description-setter:
-              description: >-
-                <a href='$REPOSITORY_URL'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
     - completed-email(group)
 '''
