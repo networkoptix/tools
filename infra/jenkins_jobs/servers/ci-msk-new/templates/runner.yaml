@@ -117,7 +117,6 @@
     - inject:
         properties-content: |
           REPOSITORY_ROOT_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'

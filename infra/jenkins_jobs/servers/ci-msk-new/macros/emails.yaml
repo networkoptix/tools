@@ -27,27 +27,6 @@
         # ---- email contents ----
 
 - publisher:
-    name: failure-email(maintainers)
-
-    publishers:
-    - email-ext:
-        <<: *failure_email
-        send-to:
-        - recipients
-        recipients: '{email-recipients}'
-        subject: '[Jenkins] $BUILD_STATUS - $PROJECT_NAME - # $BUILD_NUMBER'
-        body: |
-          $BUILD_DESCRIPTION
-          $BRANCH $PLATFORM $CUSTOMIZATION failed on commit $NX_VMS_COMMIT
-
-          Build url - $BUILD_URL
-          Artifacts - $REPOSITORY_URL
-          Junkshop url - $JUNKSHOP_URL
-
-          $BUILD_LOG
-        # ---- email contents ----
-
-- publisher:
     name: failure-email-helpers(maintainers)
 
     publishers:
@@ -77,7 +56,7 @@
           $BRANCH $PLATFORMS $CUSTOMIZATIONS failed on commit $NX_VMS_COMMIT
 
           Build url - $BUILD_URL
-          Artifacts - $REPOSITORY_URL
+          Artifacts - $REPOSITORY_ROOT_URL
           Junkshop url - $JUNKSHOP_URL
 
           $BUILD_LOG
@@ -112,6 +91,8 @@
     - email-ext: &completed_email
 
         success: true
+        aborted: true
+        failure: true
 
         # ---- email contents ----
         send-to:
@@ -138,6 +119,6 @@
           Completed $BRANCH $PLATFORMS $CUSTOMIZATIONS $NX_VMS_COMMIT
 
           Build url - $BUILD_URL
-          Artifacts - $REPOSITORY_URL
+          Artifacts - $REPOSITORY_ROOT_URL
           Junkshop url - $JUNKSHOP_URL
         # ---- email contents ----
