@@ -109,4 +109,5 @@
         description: >-
           <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
           <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'

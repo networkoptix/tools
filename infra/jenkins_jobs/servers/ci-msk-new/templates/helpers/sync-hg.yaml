@@ -66,4 +66,5 @@
         allow_missing: 'NO'
 
     publishers:
-    - failure-email-helpers(maintainers)
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'
