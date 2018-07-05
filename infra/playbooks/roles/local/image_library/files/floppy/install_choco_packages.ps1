@@ -11,3 +11,4 @@ C:\ProgramData\chocolatey\choco.exe install visualstudio2017-workload-nativedesk
 C:\ProgramData\chocolatey\choco.exe install nuget.commandline -y --verbose --version 4.5.1
 C:\ProgramData\chocolatey\choco.exe install windows-sdk-10 -y --verbose --version 10.1.10586.15
 setx PATH "%PATH%;C:\Program Files (x86)\Windows Kits\10\Debuggers\x64"
+C:\ProgramData\chocolatey\choco.exe install processhacker -y --verbose --version 2.39
