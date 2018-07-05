@@ -4,6 +4,11 @@ cd "$REPOSITORY_ROOT_PATH/$CUSTOMIZATION"
 mkdir -p all/{update,install,debug,distrib}
 
 for platform in $(ls .) ; do
+
+  if [ $platform == all ] ; then
+    continue;
+  fi
+
   mkdir -p $platform/update
 
   find ./$platform/distrib -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -name '*_update-*' -print | \
