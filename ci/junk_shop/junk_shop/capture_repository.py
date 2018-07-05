@@ -382,6 +382,7 @@ class DbCaptureRepository(object):
         if len(data) > ARTIFACT_SIZE_LIMIT:
             log.warning('Skip artifact for run=%r: short_name=%r full_name=%r type=%r: size %d exceeded limit %d',
                             run.path, short_name, full_name, artifact_type_rec.name, len(data), ARTIFACT_SIZE_LIMIT)
+            return
         at = self._produce_artifact_type(artifact_type_rec)
         compressed_data = bz2.compress(data)
         artifact = models.Artifact(
