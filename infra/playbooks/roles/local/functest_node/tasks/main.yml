@@ -4,12 +4,6 @@
     state: present
   when: ansible_distribution_release == 'trusty'
 
-- pam_limits:
-    domain: "{{ jenkins_user }}"
-    limit_type: '-'
-    limit_item: nofile
-    value: 1048576
-
 - name: Install packages
   become: yes
   become_method: sudo

@@ -58,3 +58,9 @@
   with_items:
   - enk.me
   - hdw.mx
+
+- pam_limits:
+  domain: "{{ jenkins_user }}"
+  limit_type: '-'
+  limit_item: nofile
+  value: "{{ jenkins_nofile }}"
