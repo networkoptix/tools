@@ -21,7 +21,7 @@ import re
 targetBranch = '.';
 mergeCommit = 'merge'
 projectKeys = ['VMS', 'UT', 'CP', 'CLOUD', 'PSP', 'DESIGN', 'ENV', 'FR', 'HNW', 'LIC', 'MOBILE',
-    'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
+    'META', 'NCD', 'NXPROD', 'NXTOOL', 'STATS', 'CALC', 'TEST', 'VISTA', 'WEB', 'WS']
 
 def print_command(command):
     print '>> {0}'.format(subprocess.list2cmdline(command))

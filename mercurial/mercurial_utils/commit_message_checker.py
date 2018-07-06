@@ -12,6 +12,7 @@ class CommitMessageChecker:
         'FR',
         'HNW',
         'LIC',
+        'META',
         'MOBILE',
         'NCD',
         'NXPROD',
