@@ -405,7 +405,9 @@
               block: true
               block-thresholds:
                 failure-threshold: FAILURE
-
+          - inject:
+              properties-content: |
+                JUNKSHOP_URL={junkshop_base_url}/{artifact_location_full_pattern}
           - description-setter:
               description: >-
                 <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
