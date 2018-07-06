@@ -60,7 +60,7 @@
         timeout: '{job-timeout}'
         fail: true
         type: absolute
-    # - workspace-cleanup # always
+    - workspace-cleanup
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
