@@ -84,6 +84,8 @@
         revision: '$NX_VMS_COMMIT'
 
     builders:
+    - set-custom-build-description
+
     - folder-delete-operation:
         folder-path: 'build'
 
@@ -93,10 +95,6 @@
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
-
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
 
     - inject:
         properties-content: |
@@ -109,6 +107,7 @@
       - project: 'helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -126,6 +125,7 @@
       - project: 'helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY

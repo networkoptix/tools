@@ -101,6 +101,7 @@
         revision: 'default'
 
     builders:
+    - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
@@ -108,6 +109,7 @@
       - project: 'helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
           PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY

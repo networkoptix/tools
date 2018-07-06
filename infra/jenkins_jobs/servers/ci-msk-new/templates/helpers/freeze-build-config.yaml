@@ -92,10 +92,7 @@
         branch-name: default
 
     builders:
-
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
+    - set-custom-build-description
 
     - shell: |
         #!/bin/bash

@@ -52,9 +52,7 @@
         revision: '$BRANCH'
 
     builders:
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
+    - set-custom-build-description
 
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'

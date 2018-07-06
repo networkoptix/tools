@@ -67,6 +67,7 @@ print '''#
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - set-custom-build-description
     - system-groovy:
         command: |
           def currentBuild = Thread.currentThread().executable
@@ -92,6 +93,7 @@ print '''#
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BRANCH=$BRANCH
             PIPELINE=$PIPELINE
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
@@ -133,9 +135,6 @@ print '''#
     - description-setter:
         description: |
           $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
 
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
@@ -147,6 +146,7 @@ print '''#
             ("$BUILD_WEBADMIN").toBoolean()
           kill-phase-on: FAILURE
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -180,6 +180,7 @@ for platform in PLATFORMS_LIST:
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -204,6 +205,7 @@ for customization in CUSTOMIZATIONS_LIST:
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT

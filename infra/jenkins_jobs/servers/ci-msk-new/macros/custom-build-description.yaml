@@ -1,0 +1,13 @@
+- builder:
+    name: set-custom-build-description
+    builders:
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION
+
+- publisher:
+    name: set-custom-build-description
+    publishers:
+    - description-setter:
+        description: |
+          $BUILD_DESCRIPTION

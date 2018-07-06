@@ -59,6 +59,7 @@
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - set-custom-build-description
     - system-groovy:
         command: |
           def currentBuild = Thread.currentThread().executable
@@ -84,6 +85,7 @@
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BRANCH=$BRANCH
             PIPELINE=$PIPELINE
             NX_VMS_COMMIT=$_NX_VMS_COMMIT
@@ -125,9 +127,6 @@
     - description-setter:
         description: |
           $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
 
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
@@ -139,6 +138,7 @@
             ("$BUILD_WEBADMIN").toBoolean()
           kill-phase-on: FAILURE
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -159,6 +159,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -176,6 +177,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -193,6 +195,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -210,6 +213,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -227,6 +231,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -244,6 +249,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -261,6 +267,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -278,6 +285,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -295,6 +303,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -312,6 +321,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -329,6 +339,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -346,6 +357,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -363,6 +375,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -380,6 +393,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -397,6 +411,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -414,6 +429,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -431,6 +447,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -448,6 +465,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -465,6 +483,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -482,6 +501,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -499,6 +519,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -516,6 +537,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -533,6 +555,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -550,6 +573,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -567,6 +591,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -584,6 +609,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -601,6 +627,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -618,6 +645,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -635,6 +663,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -652,6 +681,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -669,6 +699,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -686,6 +717,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -703,6 +735,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -720,6 +753,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -737,6 +771,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -754,6 +789,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -771,6 +807,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -788,6 +825,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -805,6 +843,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -822,6 +861,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -839,6 +879,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -856,6 +897,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -873,6 +915,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -890,6 +933,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -907,6 +951,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -924,6 +969,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -941,6 +987,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -958,6 +1005,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -975,6 +1023,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -992,6 +1041,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1009,6 +1059,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1026,6 +1077,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1043,6 +1095,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1060,6 +1113,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1077,6 +1131,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1094,6 +1149,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1111,6 +1167,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1128,6 +1185,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1145,6 +1203,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1162,6 +1221,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1179,6 +1239,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1196,6 +1257,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1213,6 +1275,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1230,6 +1293,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1247,6 +1311,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1264,6 +1329,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1281,6 +1347,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1298,6 +1365,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1315,6 +1383,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1332,6 +1401,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1349,6 +1419,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1366,6 +1437,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1383,6 +1455,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1400,6 +1473,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1417,6 +1491,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1434,6 +1509,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1451,6 +1527,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1468,6 +1545,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1485,6 +1563,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1502,6 +1581,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1519,6 +1599,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1536,6 +1617,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1553,6 +1635,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1570,6 +1653,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1587,6 +1671,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1604,6 +1689,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1621,6 +1707,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1638,6 +1725,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1655,6 +1743,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1672,6 +1761,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1689,6 +1779,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1706,6 +1797,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1723,6 +1815,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1740,6 +1833,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1757,6 +1851,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1774,6 +1869,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1791,6 +1887,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1808,6 +1905,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1825,6 +1923,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1842,6 +1941,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1859,6 +1959,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1876,6 +1977,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1893,6 +1995,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1910,6 +2013,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1927,6 +2031,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1944,6 +2049,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1961,6 +2067,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1978,6 +2085,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -1995,6 +2103,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2012,6 +2121,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2029,6 +2139,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2046,6 +2157,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2063,6 +2175,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2080,6 +2193,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2097,6 +2211,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2114,6 +2229,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2131,6 +2247,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2148,6 +2265,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2165,6 +2283,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2182,6 +2301,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2199,6 +2319,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2216,6 +2337,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2233,6 +2355,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2250,6 +2373,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2267,6 +2391,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2284,6 +2409,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2301,6 +2427,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2318,6 +2445,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2335,6 +2463,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2352,6 +2481,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2369,6 +2499,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2386,6 +2517,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2403,6 +2535,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2420,6 +2553,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2437,6 +2571,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2454,6 +2589,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2471,6 +2607,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2488,6 +2625,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2505,6 +2643,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2522,6 +2661,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2539,6 +2679,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2556,6 +2697,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2573,6 +2715,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2590,6 +2733,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2607,6 +2751,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2624,6 +2769,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2641,6 +2787,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2658,6 +2805,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2675,6 +2823,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2692,6 +2841,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2709,6 +2859,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2726,6 +2877,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2743,6 +2895,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2760,6 +2913,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2777,6 +2931,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2794,6 +2949,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2811,6 +2967,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2828,6 +2985,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2845,6 +3003,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2862,6 +3021,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2879,6 +3039,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2896,6 +3057,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2913,6 +3075,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2930,6 +3093,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2947,6 +3111,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2964,6 +3129,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2981,6 +3147,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -2998,6 +3165,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3015,6 +3183,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3032,6 +3201,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3049,6 +3219,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3066,6 +3237,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3083,6 +3255,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3100,6 +3273,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3117,6 +3291,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3134,6 +3309,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3151,6 +3327,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3168,6 +3345,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3185,6 +3363,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3202,6 +3381,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3219,6 +3399,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3236,6 +3417,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3253,6 +3435,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3270,6 +3453,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3287,6 +3471,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3304,6 +3489,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3321,6 +3507,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3338,6 +3525,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3355,6 +3543,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3372,6 +3561,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3389,6 +3579,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3406,6 +3597,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3423,6 +3615,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3440,6 +3633,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3457,6 +3651,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3474,6 +3669,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3491,6 +3687,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3508,6 +3705,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3525,6 +3723,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3547,6 +3746,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3563,6 +3763,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3579,6 +3780,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3595,6 +3797,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3611,6 +3814,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3627,6 +3831,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3643,6 +3848,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3659,6 +3865,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3675,6 +3882,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3691,6 +3899,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3707,6 +3916,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3723,6 +3933,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3739,6 +3950,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3755,6 +3967,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3771,6 +3984,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3787,6 +4001,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3803,6 +4018,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
@@ -3819,6 +4035,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT

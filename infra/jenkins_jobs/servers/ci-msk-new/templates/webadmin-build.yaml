@@ -113,13 +113,11 @@
         revision: '$NX_VMS_COMMIT'
 
     builders:
+    - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
 
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
     - conditionally-clean-dir:
         condition-varname: CLEAN_BUILD
         dir: build
@@ -163,6 +161,7 @@
                 failure-threshold: FAILURE
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -187,6 +186,7 @@
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -208,6 +208,8 @@
             - project: 'helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION

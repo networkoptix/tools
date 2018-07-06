@@ -116,6 +116,7 @@
         type: absolute
 
     builders:
+    - set-custom-build-description
     # Note on conditional steps:
     # The same logic may be achieved by unconditional fetch & inject but in this case
     # artifact must be marked as optional. This may result in unexpected side effects

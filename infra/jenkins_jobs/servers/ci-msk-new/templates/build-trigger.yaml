@@ -113,14 +113,11 @@
         branch-name: '$_NX_VMS_COMMIT'
 
     builders:
+    - set-custom-build-description
     - inject:
         properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
-
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
 
     # inject given ref at first
     - shell: |

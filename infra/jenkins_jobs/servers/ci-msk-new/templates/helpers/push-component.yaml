@@ -53,6 +53,7 @@
         - jenkins
 
     builders:
+    - set-custom-build-description
     - shell: |
         #!/bin/bash
         set -ex

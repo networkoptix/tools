@@ -48,9 +48,7 @@
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
+    - set-custom-build-description
 
     - multijob:
         name: "Build installer for {platform} with {customization}"
@@ -58,6 +56,7 @@
         - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
@@ -75,6 +74,7 @@
           enable-condition: >-
             ("$RUN_UNITTESTS").toBoolean()
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE
@@ -86,6 +86,7 @@
         - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_CLONE=$CLEAN_CLONE

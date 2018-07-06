@@ -72,6 +72,7 @@
             basedir: $WORKSPACE
 
     builders:
+    - set-custom-build-description
     - folder-delete-operation:
         folder-path: 'build'
 
@@ -84,9 +85,6 @@
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
 
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
     - inject:
         properties-content: |
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
@@ -100,6 +98,7 @@
       - project: 'helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -136,6 +135,7 @@
               block: true
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -158,6 +158,7 @@
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
@@ -178,6 +179,7 @@
             - project: 'helper.unittests-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH

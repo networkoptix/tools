@@ -134,12 +134,11 @@
         revision: '$NX_VMS_COMMIT'
 
     builders:
+    - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
-    - description-setter:
-        description: |
-          $BUILD_DESCRIPTION
+
     # At first, calculate sha for build config files
     # since this job is crossplatform it's safier to just trigger freeze commit
     # with linux executor than try to inplement cross-platform stuff
@@ -157,6 +156,7 @@
             block: true
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               PIPELINE=$PIPELINE
               BRANCH=$BRANCH
               CUSTOMIZATION=$CUSTOMIZATION
@@ -298,6 +298,7 @@
           - project: 'helper.pull-component'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               PIPELINE=$PIPELINE
               BRANCH=$BRANCH
               BUILD_IDENTITY=$BUILD_IDENTITY
@@ -392,6 +393,7 @@
             - project: 'helper.push-component'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BUILD_STATUS=passed
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
@@ -425,6 +427,7 @@
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -447,6 +450,7 @@
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
