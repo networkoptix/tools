@@ -1,6 +1,6 @@
 
 - job-template:
-    name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
+    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
     project-type: multijob
 
     node: runner
@@ -55,7 +55,7 @@
     - multijob:
         name: "Build installer for {platform} with {customization}"
         projects:
-        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
+        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -70,7 +70,7 @@
         name: Run tests (tests are optional, only existing jobs are built)
         condition: COMPLETED # allow unstable
         projects:
-        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.unittest' # TODO:
+        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
           enable-condition: >-
             ("$RUN_UNITTESTS").toBoolean()
@@ -83,7 +83,7 @@
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$RUNNER_URL
 
-        - name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.perftest' # TODO:
+        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION

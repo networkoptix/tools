@@ -5,7 +5,7 @@
 #
 - job-template: &installer_unittests_default
     id: installer-unittests-default
-    name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.unittest'
+    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest'
     description: |
       Run unit tests for {platform} for branch {branch}.
 

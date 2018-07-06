@@ -152,7 +152,7 @@
         condition: COMPLETED # allow unstable
         projects:
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -169,7 +169,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -186,7 +186,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -203,7 +203,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -220,7 +220,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -237,7 +237,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -254,7 +254,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -271,7 +271,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -288,7 +288,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -305,7 +305,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -322,7 +322,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -339,7 +339,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -356,7 +356,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -373,7 +373,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -390,7 +390,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -407,7 +407,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -424,7 +424,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -441,7 +441,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x64.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x64.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -458,7 +458,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -475,7 +475,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -492,7 +492,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -509,7 +509,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -526,7 +526,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -543,7 +543,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -560,7 +560,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -577,7 +577,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -594,7 +594,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -611,7 +611,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -628,7 +628,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -645,7 +645,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -662,7 +662,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -679,7 +679,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -696,7 +696,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -713,7 +713,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -730,7 +730,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -747,7 +747,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.linux-x86.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.linux-x86.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -764,7 +764,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -781,7 +781,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -798,7 +798,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -815,7 +815,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -832,7 +832,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -849,7 +849,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -866,7 +866,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -883,7 +883,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -900,7 +900,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -917,7 +917,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -934,7 +934,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -951,7 +951,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -968,7 +968,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -985,7 +985,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1002,7 +1002,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1019,7 +1019,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1036,7 +1036,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1053,7 +1053,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bananapi.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bananapi.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1070,7 +1070,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1087,7 +1087,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1104,7 +1104,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1121,7 +1121,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1138,7 +1138,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1155,7 +1155,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1172,7 +1172,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1189,7 +1189,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1206,7 +1206,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1223,7 +1223,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1240,7 +1240,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1257,7 +1257,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1274,7 +1274,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1291,7 +1291,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1308,7 +1308,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1325,7 +1325,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1342,7 +1342,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1359,7 +1359,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.bpi.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.bpi.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1376,7 +1376,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1393,7 +1393,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1410,7 +1410,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1427,7 +1427,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1444,7 +1444,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1461,7 +1461,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1478,7 +1478,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1495,7 +1495,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1512,7 +1512,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1529,7 +1529,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1546,7 +1546,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1563,7 +1563,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1580,7 +1580,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1597,7 +1597,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1614,7 +1614,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1631,7 +1631,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1648,7 +1648,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1665,7 +1665,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.rpi.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.rpi.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -1682,7 +1682,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.edge1.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.edge1.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("edge1") &&
@@ -1699,7 +1699,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1716,7 +1716,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1733,7 +1733,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1750,7 +1750,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1767,7 +1767,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1784,7 +1784,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1801,7 +1801,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1818,7 +1818,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1835,7 +1835,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1852,7 +1852,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1869,7 +1869,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1886,7 +1886,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1903,7 +1903,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1920,7 +1920,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1937,7 +1937,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1954,7 +1954,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1971,7 +1971,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -1988,7 +1988,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tx1.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.tx1.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2005,7 +2005,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2022,7 +2022,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2039,7 +2039,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2056,7 +2056,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2073,7 +2073,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2090,7 +2090,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2107,7 +2107,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2124,7 +2124,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2141,7 +2141,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2158,7 +2158,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2175,7 +2175,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2192,7 +2192,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2209,7 +2209,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2226,7 +2226,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2243,7 +2243,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2260,7 +2260,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2277,7 +2277,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2294,7 +2294,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.android-arm.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.android-arm.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2311,7 +2311,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2328,7 +2328,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2345,7 +2345,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2362,7 +2362,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2379,7 +2379,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2396,7 +2396,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2413,7 +2413,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2430,7 +2430,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2447,7 +2447,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2464,7 +2464,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2481,7 +2481,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2498,7 +2498,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2515,7 +2515,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2532,7 +2532,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2549,7 +2549,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2566,7 +2566,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2583,7 +2583,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2600,7 +2600,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x64.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x64.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -2617,7 +2617,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2634,7 +2634,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2651,7 +2651,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2668,7 +2668,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2685,7 +2685,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2702,7 +2702,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2719,7 +2719,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2736,7 +2736,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2753,7 +2753,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2770,7 +2770,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2787,7 +2787,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2804,7 +2804,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2821,7 +2821,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2838,7 +2838,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2855,7 +2855,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2872,7 +2872,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2889,7 +2889,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2906,7 +2906,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.windows-x86.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.windows-x86.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -2923,7 +2923,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -2940,7 +2940,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -2957,7 +2957,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -2974,7 +2974,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -2991,7 +2991,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3008,7 +3008,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3025,7 +3025,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3042,7 +3042,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3059,7 +3059,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3076,7 +3076,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3093,7 +3093,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3110,7 +3110,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3127,7 +3127,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3144,7 +3144,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3161,7 +3161,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3178,7 +3178,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3195,7 +3195,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3212,7 +3212,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.mac.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.mac.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -3229,7 +3229,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.default.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3246,7 +3246,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.default_cn.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.default_cn.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3263,7 +3263,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.default_zh_CN.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.default_zh_CN.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3280,7 +3280,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.cox.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.cox.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3297,7 +3297,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.digitalwatchdog.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.digitalwatchdog.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3314,7 +3314,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.digitalwatchdog_global.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.digitalwatchdog_global.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3331,7 +3331,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.hanwha.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.hanwha.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3348,7 +3348,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.ipera.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.ipera.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3365,7 +3365,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.ionetworks.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.ionetworks.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3382,7 +3382,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.nutech.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.nutech.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3399,7 +3399,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.ras.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.ras.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3416,7 +3416,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.senturian.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.senturian.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3433,7 +3433,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.systemk.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.systemk.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3450,7 +3450,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.tricom.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.tricom.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3467,7 +3467,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.ust.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.ust.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3484,7 +3484,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.vista.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.vista.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3501,7 +3501,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.vmsdemoblue.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.vmsdemoblue.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3518,7 +3518,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ios.vmsdemoorange.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.ios.vmsdemoorange.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -3540,7 +3540,7 @@
         projects:
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.default.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.default.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3556,7 +3556,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.default_cn.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.default_cn.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3572,7 +3572,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.default_zh_CN.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.default_zh_CN.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3588,7 +3588,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.cox.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.cox.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3604,7 +3604,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.digitalwatchdog.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3620,7 +3620,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.digitalwatchdog_global.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog_global.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3636,7 +3636,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.hanwha.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.hanwha.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3652,7 +3652,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ipera.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.ipera.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3668,7 +3668,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ionetworks.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.ionetworks.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3684,7 +3684,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.nutech.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.nutech.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3700,7 +3700,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ras.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.ras.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3716,7 +3716,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.senturian.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.senturian.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3732,7 +3732,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.systemk.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.systemk.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3748,7 +3748,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.tricom.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.tricom.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3764,7 +3764,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.ust.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.ust.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3780,7 +3780,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.vista.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.vista.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3796,7 +3796,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.vmsdemoblue.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoblue.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3812,7 +3812,7 @@
             RUNNER_URL=$BUILD_URL
 
 
-        - name: '{pipeline}.{branch}.{project}.installer.vmsdemoorange.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoorange.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-

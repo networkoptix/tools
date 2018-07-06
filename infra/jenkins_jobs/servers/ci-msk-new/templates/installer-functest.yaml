@@ -1,6 +1,6 @@
 #
 - job-template:
-    name: '{pipeline}.{branch}.{project}.installer.{customization}.functest'
+    name: '{pipeline}.{branch}.{project}.distribution.{customization}.functest'
     description: |
       Run functional tests for {customization} for branch {branch}.
     node: '{functest-node}'

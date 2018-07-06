@@ -173,7 +173,7 @@ for platform in PLATFORMS_LIST:
         #     continue
 
         print '''
-        - name: '{pipeline}.{branch}.{project}.installer.'''+platform+'''.'''+customization+'''.all'
+        - name: '{pipeline}.{branch}.{project}.distribution.'''+platform+'''.'''+customization+'''.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("'''+platform+'''") &&
@@ -197,7 +197,7 @@ print '''
 
 for customization in CUSTOMIZATIONS_LIST:
     print '''
-        - name: '{pipeline}.{branch}.{project}.installer.'''+customization+'''.functest'
+        - name: '{pipeline}.{branch}.{project}.distribution.'''+customization+'''.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-

@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
+    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
     description: |
       <pre>
       ================================================================================

@@ -201,11 +201,11 @@
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build'
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
     # Edge1 is a platform that's exclusive for digitalwatchdog.
     # add extra jobs for edge1 with digitalwatchdog customization
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.all': &extra-edge1-platform
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all': &extra-edge1-platform
         platform:
         - edge1:
             installer-build-node: *linux_node
@@ -214,7 +214,7 @@
               CMAKE_ARG_targetDevice=edge1
         customization:
         - 'digitalwatchdog'
-    - '{pipeline}.{branch}.{project}.installer.{platform}.{customization}.build':
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build':
         <<: *extra-edge1-platform
 
     # Our tests work per-customization per-platform and not yet implemented
