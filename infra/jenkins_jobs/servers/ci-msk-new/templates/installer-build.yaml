@@ -408,7 +408,7 @@
 
           - description-setter:
               description: >-
-                <a href='{artifact_repository_base_path}/{artifact_location_full_pattern}'> Artifacts </a>,
+                <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
                 <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
 
     - postbuildscript:
