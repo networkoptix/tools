@@ -35,7 +35,12 @@
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
     - timeout:
-        timeout: 20 # min
+        # FIXME: Currently we pull too many files, not all are needed for reporting, timeot must be ~5 min
+        # NTH:
+        #   unit_tests/*.yaml
+        #   unit_tests/*.output
+        #   unit_tests/**/*.bt !! keep directory tree
+        timeout: 35 # min
         fail: true
         type: absolute
     - workspace-cleanup
