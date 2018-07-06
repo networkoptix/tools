@@ -118,6 +118,9 @@
         properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
 
     # inject given ref at first
     - shell: |

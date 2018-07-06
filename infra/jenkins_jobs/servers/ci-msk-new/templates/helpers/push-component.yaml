@@ -53,6 +53,9 @@
         - jenkins
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
     - shell: |
         #!/bin/bash

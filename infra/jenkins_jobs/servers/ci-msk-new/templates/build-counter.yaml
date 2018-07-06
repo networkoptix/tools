@@ -116,6 +116,9 @@
         type: absolute
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
     # Note on conditional steps:
     # The same logic may be achieved by unconditional fetch & inject but in this case

@@ -67,6 +67,9 @@ print '''#
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
     - system-groovy:
         command: |

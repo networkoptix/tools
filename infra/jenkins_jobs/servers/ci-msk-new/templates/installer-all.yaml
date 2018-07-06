@@ -42,6 +42,9 @@
           BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps

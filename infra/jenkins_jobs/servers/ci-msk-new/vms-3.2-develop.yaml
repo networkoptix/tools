@@ -32,6 +32,7 @@
 
     pipeline:
     - develop:
+        junkshop_project_name: ci
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline:
           CMAKE_ARG_CMAKE_BUILD_TYPE=Release

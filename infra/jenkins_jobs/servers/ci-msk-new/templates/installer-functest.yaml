@@ -84,6 +84,9 @@
         revision: '$NX_VMS_COMMIT'
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
 
     - folder-delete-operation:

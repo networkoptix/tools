@@ -52,6 +52,9 @@
         revision: '$BRANCH'
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
 
     - rsync-upload:
