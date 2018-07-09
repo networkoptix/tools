@@ -27,6 +27,7 @@
     - p_BRANCH
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
+    - p_NX_VMS_COMMIT
     - p_PLATFORM
     - p_COMPONENTS
     # Parameter that defines path to operate it's actually remote path

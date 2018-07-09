@@ -107,6 +107,7 @@
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
           COMPONENTS=bin/*_ut*,lib/,current_config.py
@@ -143,6 +144,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 COMPONENTS=unit_tests/
                 LOCAL_PATH=$WORKSPACE/

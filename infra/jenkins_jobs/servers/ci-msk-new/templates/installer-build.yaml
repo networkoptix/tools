@@ -403,6 +403,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
                 LOCAL_PATH=$WORKSPACE/{build-dir}/
                 COMPONENTS={build-artifacts}
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
