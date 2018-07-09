@@ -7,11 +7,13 @@
     properties:
     - heavy-job:
         weight: 1
+    # this job is heavily used on each pipeline build, so we need large
+    # GC timeouts in order to keep all builds for recent pipelines
     - build-discarder:
         days-to-keep: 30
-        num-to-keep: 100
+        num-to-keep: 500
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: 500
     - throttle:
         max-total: 3
         option: project

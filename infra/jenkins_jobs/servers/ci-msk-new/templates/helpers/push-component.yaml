@@ -10,11 +10,13 @@
     - throttle:
         max-total: 1
         option: project
+    # this job is heavily used on each pipeline build, so we need large
+    # GC timeouts in order to keep all builds for recent pipelines
     - build-discarder:
-        days-to-keep: 10
-        num-to-keep: 50
-        artifact-days-to-keep: 10
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        days-to-keep: 30
+        num-to-keep: 500
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 500
 
     parameters:
     - p_REQUESTED_BY
