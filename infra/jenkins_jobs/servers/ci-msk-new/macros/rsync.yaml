@@ -47,7 +47,7 @@
           for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
           do
             if [[ "$COMPONENT" == */ ]] ; then
-              COMPONENT="${{COMPONENT}}**/*.*"
+              COMPONENT="${{COMPONENT}}***"
             fi
             find . -path "./${{COMPONENT}}" -print >> $PWD_OLD/files_to_copy
           done
