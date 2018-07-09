@@ -4,8 +4,10 @@ cd "$REPOSITORY_ROOT_PATH/$CUSTOMIZATION"
 mkdir -p all/{update,install,debug,distrib}
 # fix permissions on files from windows builds (and others if there are same problems)
 # the problem is that on win nodes jenkins creates files with rwx perm for owner only
-# and nginx user can not serve these files (403 error), so we add read for everyone here.
+# and nginx user can not serve these files/dirs (403 error), so we add read for everyone
+# and also add +x on directories
 chmod -R a+r .
+find . -type d | xargs chmod a+x
 for platform in $(ls .) ; do
 
   if [ $platform == all ] ; then
