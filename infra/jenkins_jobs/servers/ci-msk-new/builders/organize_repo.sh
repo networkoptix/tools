@@ -2,7 +2,8 @@
 set -ex
 cd "$REPOSITORY_ROOT_PATH/$CUSTOMIZATION"
 mkdir -p all/{update,install,debug,distrib}
-
+# fix permissions on files from windows builds (and aothers if there are same problems)
+chmod -R a+r .
 for platform in $(ls .) ; do
 
   if [ $platform == all ] ; then
