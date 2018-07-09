@@ -35,12 +35,7 @@
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
     - timeout:
-        # FIXME: Currently we pull too many files, not all are needed for reporting, timeot must be ~5 min
-        # NTH:
-        #   unit_tests/*.yaml
-        #   unit_tests/*.output
-        #   unit_tests/**/*.bt !! keep directory tree
-        timeout: 35 # min
+        timeout: 20 # min
         fail: true
         type: absolute
     - workspace-cleanup
@@ -81,7 +76,7 @@
           LOCAL_PATH=$WORKSPACE/
           PLATFORM=$PLATFORM
           CUSTOMIZATION=$CUSTOMIZATION
-          COMPONENTS=unit_tests/
+          COMPONENTS=unit_tests/*.yaml,unit_tests/*.output,unit_tests/**/*.bt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
