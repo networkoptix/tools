@@ -109,7 +109,7 @@
           PLATFORM=$PLATFORM
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,bin/,lib/,current_config.py
+          COMPONENTS=bin/,lib/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
           ALLOW_MISSING=YES
         block: true
