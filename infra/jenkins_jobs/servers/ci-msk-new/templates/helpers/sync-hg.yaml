@@ -61,9 +61,9 @@
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'
-        src_path: '${{WORKSPACE}}/${{REPO}}/'
-        dst_path: '${{LOCAL_PATH}}/${{REPO}}/'
-        components: '/'
+        src_path: '${{WORKSPACE}}/'
+        dst_path: '${{LOCAL_PATH}}/'
+        components: '${{REPO}}/'
 
     publishers:
     - failure-email-helpers(maintainers):
