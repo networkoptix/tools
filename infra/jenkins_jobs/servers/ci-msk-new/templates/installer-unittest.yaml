@@ -111,7 +111,6 @@
           LOCAL_PATH=$WORKSPACE/build/
           COMPONENTS=bin/,lib/,current_config.py
           NODE_SSH_CONNECTION=$SSH_CONNECTION
-          ALLOW_MISSING=YES
         block: true
         block-thresholds:
           failure-threshold: FAILURE

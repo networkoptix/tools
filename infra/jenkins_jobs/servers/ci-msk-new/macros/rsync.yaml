@@ -10,13 +10,11 @@
     #   src_path: base path on local host from which to download list of components
     #   (ssh key is supposed to be placed in ssh agent by Jenkins)
     #   components: comma-separated list of files and folders in source
-    #               directory to download to local, e.g
+    #               directory to download to local (or file masks), e.g
     #               a/,b,c
     #               <src_path>/a/ -> <remote_host>/<dst_path>/a/
     #               <src_path>/b  -> <remote_host>/<dst_path>/b
     #               <src_path>/c  -> <remote_host>/<dst_path>/c
-    # options/flags:
-    #   allow_missing: YES/* - should we skip missing sources or fail?
 
     builders:
     - shell: |
@@ -27,55 +25,42 @@
         RSYNC_PORT="{port}"
         RSYNC_USER="{user}"
 
-        # components ~> "dir1/,dir2/,file1,file2"
-        echo "Will rsync {components} components"
-        if [ "{allow_missing}" == 'YES' ] ; then
-          echo "Missing components are allowed ({allow_missing}), will not fail on lookup error"
-        else
-          echo "Missing components are not allowed ({allow_missing}), will fail on lookup error"
-        fi
+        RSYNC_SRC="{src_path}"
+        RSYNC_DST="{dst_path}"
 
-        IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
-        for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
-        do
-          RSYNC_SRC="{src_path}/${{COMPONENT}}"
-          RSYNC_DST="{dst_path}/${{COMPONENT}}"
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_DST="${{RSYNC_DST//\\//}}"
 
-          # When working with windows Jenkins node Workspace is represented as windows path.
-          # Volume name ('C:') and back-slashes ('\') are error prone.
-          # One of the option is to replace them with cygwin paths.
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+        # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
 
-          # replace 'C:\' with '/cygdrive/c/'
-          RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
-          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-          RSYNC_DST="${{RSYNC_DST//\\//}}"
-
-          # replace 'C:\' with '/cygdrive/c/'
-          RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
-          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-          RSYNC_SRC="${{RSYNC_SRC//\\//}}"
-
-          # Check that components exist and if we are not allowed to have missing components and found on, die
-
-          if [ ! -e "${{RSYNC_SRC}}" ] ; then
-            if [ "{allow_missing}" == 'YES' ] ; then
-              echo "Missing components (${{RSYNC_SRC}}) are allowed, continue"
-              continue
-            else
-              echo "Missing components (${{RSYNC_SRC}}) are not allowed, fail"
-              exit 1
+        PWD_OLD=$PWD
+        echo '' > $PWD_OLD/files_to_copy
+        pushd "${{RSYNC_SRC}}"
+          echo "Will rsync {components} components"
+          IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
+          for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
+          do
+            if [[ "$COMPONENT" == */ ]] ; then
+              COMPONENT="${{COMPONENT}}**/*.*"
             fi
-          fi
-
-          # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
-
-          # -a ~ -rlptgoD
-          rsync -vrza --links --delete \
+            find . -path "./${{COMPONENT}}" -print >> $PWD_OLD/files_to_copy
+          done
+          # TODO: should we add --delete flag?
+          echo "Will rsync following files:"
+          cat $PWD_OLD/files_to_copy
+          rsync -vrza --links \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
-            --rsync-path="mkdir -p ${{RSYNC_DST%/*}} && rsync" \
-            "${{RSYNC_SRC}}" \
-            "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_DST}}"
-        done
+            --rsync-path="mkdir -p ${{RSYNC_DST}} && rsync" \
+            ./ \
+            "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_DST}}" \
+            --files-from=$PWD_OLD/files_to_copy
+        popd
 
 - builder:
     name: rsync-download

@@ -120,7 +120,6 @@
           LOCAL_PATH=$WORKSPACE/build/
           COMPONENTS=distrib/,build_info.yaml,build/bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
-          ALLOW_MISSING=YES
         block: true
         block-thresholds:
           failure-threshold: FAILURE
@@ -138,7 +137,6 @@
           LOCAL_PATH=$WORKSPACE/build/
           COMPONENTS=distrib/,build_info.yaml,build/bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
-          ALLOW_MISSING=YES
         block: true
         block-thresholds:
           failure-threshold: FAILURE
