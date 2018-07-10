@@ -1,0 +1,22 @@
+- job-template:
+    name: check-unittest-resources
+    description: >
+      Collect current state and usage of resources for unit tests.
+      Print current amount of open files and threads.
+
+    node: linux-ci
+    logrotate:
+      daysToKeep: 10
+
+    triggers:
+      - timed: 'H/1 * * * *'
+
+    wrappers:
+      - timestamps
+
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+
+          lsof | wc -l
+          ps -Tax | wc -l
