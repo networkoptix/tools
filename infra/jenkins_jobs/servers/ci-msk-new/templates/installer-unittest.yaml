@@ -22,8 +22,8 @@
     # 2) timeout for only testrunner
     # this is done because testrunner should be able to mark
     # tests as timed out before it will be killed by build timeout
-    job-timeout: "20" # min
-    testrunner-timeout: "10" # min
+    job-timeout: "35" # min
+    testrunner-timeout: "1800" # sec 30 min
 
     properties:
     - heavy-job:
