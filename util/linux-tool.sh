@@ -263,14 +263,14 @@ setup_vars()
 
 do_share() # target_path [branch]
 {
-    if (( $# >= 1 ))
+    if (($# >= 1))
     then
         local -r TARGET_PATH="$1" && shift
     else
         nx_fail "Target path should be specified as the first arg."
     fi
 
-    if (( $# >= 1 ))
+    if (($# >= 1))
     then
         local -r BRANCH="$1" && shift
     else
@@ -589,7 +589,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
 do_kit() # "$@"
 {
-    if (( $# >= 1 )) && [[ $1 = "cygwin" ]]
+    if (($# >= 1)) && [[ $1 = "cygwin" ]]
     then
         shift
         if ! nx_is_cygwin
@@ -606,7 +606,7 @@ do_kit() # "$@"
         fi
     fi
 
-    if (( $# >= 1 )) && [[ $1 = "keep-build-dir" ]]
+    if (($# >= 1)) && [[ $1 = "keep-build-dir" ]]
     then
         shift
         local -r -i KEEP_BUILD_DIR=1
@@ -705,8 +705,9 @@ list_dir() # dir listing.txt
     nx_popd
 }
 
-compare_distrib_tar_gz() # CHECKSUM original.tar.gz built.tar.gz
+compare_distrib_tar_gz() # description CHECKSUM original.tar.gz built.tar.gz
 {
+    local -r DESCRIPTION="$1" && shift
     local -r -i CHECKSUM="$1" && shift
     local -r ORIGINAL_TAR_GZ="$1" && shift
     local -r BUILT_TAR_GZ="$1" && shift
@@ -717,35 +718,39 @@ compare_distrib_tar_gz() # CHECKSUM original.tar.gz built.tar.gz
     else
         local -r CHECKSUM_MESSAGE="by filename list"
     fi
-    nx_echo "Comparing .tar.gz archives ${CHECKSUM_MESSAGE}:"
+    nx_echo "Comparing $DESCRIPTION ${CHECKSUM_MESSAGE}:"
 
     local -r ORIGINAL_LISTING="$ORIGINAL_TAR_GZ.txt"
     local -r BUILT_LISTING="$ORIGINAL_TAR_GZ.BUILT.txt"
     list_tar_gz $CHECKSUM "$ORIGINAL_TAR_GZ" "$ORIGINAL_LISTING"
     list_tar_gz $CHECKSUM "$BUILT_TAR_GZ" "$BUILT_LISTING"
 
-    nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING" \
-        || nx_fail "Archives are different; see above."
+    if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
+    then
+        nx_echo "FAILURE: Built and original $DESCRIPTION are different; see above."
+        return 10
+    fi
 
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS: The built .tar.gz contains the same files as the original one."
+    nx_echo "SUCCESS: The built $DESCRIPTION contains the same files as the original one."
 }
 
 # @param built-inner-file Full path to a file which should be packed inside the archive. It is
 #     excluded in .zip contents comparison, but such file inside .zip is compared to the specified
 #     file.
 #
-compare_distrib_zip_with_inner_file() # original.zip built.zip built-inner-file
+compare_distrib_zip_with_inner_file() # description original.zip built.zip built-inner-file
 {
+    local -r DESCRIPTION="$1" && shift
     local -r ORIGINAL_ZIP="$1" && shift
     local -r BUILT_ZIP="$1" && shift
     local -r BUILT_INNER_FILE="$1" && shift
 
-    local -r BUILT_INNER_FILE_EXT=$(nx_file_ext "$BUILT_INNER_FILE")
+    local -r INNER_FILE_EXT=$(nx_file_ext "$BUILT_INNER_FILE")
 
-    nx_echo "Comparing .zip archives (.$BUILT_INNER_FILE_EXT compared to the one built):"
+    nx_echo "Comparing $DESCRIPTION .zip archives (.$INNER_FILE_EXT compared to the one built):"
 
     local DIR
 
@@ -759,39 +764,48 @@ compare_distrib_zip_with_inner_file() # original.zip built.zip built-inner-file
     local -r INNER_FILE_NAME=$(basename "$BUILT_INNER_FILE")
 
     # Inner files can be bitwise-different, thus, compare the built file to the file in built zip.
-    nx_diff "$BUILT_INNER_FILE" "$BUILT_ZIP_UNPACKED/$(basename "$BUILT_INNER_FILE")" \
-        || nx_fail "The .$BUILT_INNER_FILE_EXT in .zip differs from the one built."
+    if ! nx_diff "$BUILT_INNER_FILE" "$BUILT_ZIP_UNPACKED/$(basename "$BUILT_INNER_FILE")"
+    then
+        nx_echo "FAILURE: The .$INNER_FILE_EXT in $DESCRIPTION .zip differs from the one built."
+        return 10
+    fi
 
-    nx_diff -r "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED" \
-        --exclude "$INNER_FILE_NAME" \
-        || nx_fail "The .zip archives are different; see above."
+    if ! nx_diff -r "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED" --exclude "$INNER_FILE_NAME"
+    then
+        nx_echo "FAILURE: The $DESCRIPTION .zip archives are different; see above."
+        return 20
+    fi
 
     # Check that files in .zip have the same permissions.
     local -r ORIGINAL_LISTING="$ORIGINAL_ZIP_UNPACKED.txt"
     local -r BUILT_LISTING="$BUILT_ZIP_UNPACKED.txt"
     list_dir "$ORIGINAL_ZIP_UNPACKED" "$ORIGINAL_LISTING"
     list_dir "$BUILT_ZIP_UNPACKED" "$BUILT_LISTING"
-    nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING" \
-        || nx_fail "The .zip  archive file trees are different; see above."
+    if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
+    then
+        nx_echo "FAILURE: The $DESCRIPTION .zip archive file trees are different; see above."
+        return 30
+    fi
 
     rm -r "$ORIGINAL_ZIP_UNPACKED"
     rm -r "$BUILT_ZIP_UNPACKED"
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS:" \
-        "The built .zip contains correct .$BUILT_INNER_FILE_EXT, and other files equal originals."
+    nx_echo "SUCCESS: The built $DESCRIPTION .zip contains correct .$INNER_FILE_EXT," \
+        "and other files equal originals."
 }
 
-compare_distrib_archives() # CHECKSUM original-archive built-archive
+compare_distrib_archive() # description CHECKSUM original-archive built-archive
 {
+    local -r DESCRIPTION="$1" && shift
     local -r -i CHECKSUM="$1" && shift
     local -r ORIGINAL_ARCHIVE="$1" && shift
     local -r BUILT_ARCHIVE="$1" && shift
 
     local -r EXT=$(nx_file_ext "$ORIGINAL_ARCHIVE")
 
-    nx_echo "Comparing .$EXT archives:"
+    nx_echo "Comparing $DESCRIPTION .$EXT archives:"
 
     local DIR
 
@@ -804,8 +818,11 @@ compare_distrib_archives() # CHECKSUM original-archive built-archive
 
     if [ $CHECKSUM = 1 ]
     then
-        nx_diff -r "$ORIGINAL_UNPACKED" "$BUILT_UNPACKED" \
-            || nx_fail "The .$EXT archives are different; see above."
+        if ! nx_diff -r "$ORIGINAL_UNPACKED" "$BUILT_UNPACKED"
+        then
+            nx_echo "FAILURE: The $DESCRIPTION .$EXT archives are different; see above."
+            return 10
+        fi
     fi
 
     # Compare file trees anyway because `diff -r` does not compare permissions.
@@ -813,15 +830,18 @@ compare_distrib_archives() # CHECKSUM original-archive built-archive
     local -r BUILT_LISTING="$BUILT_UNPACKED.txt"
     list_dir "$ORIGINAL_UNPACKED" "$ORIGINAL_LISTING"
     list_dir "$BUILT_UNPACKED" "$BUILT_LISTING"
-    nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING" \
-        || nx_fail "The .$EXT archive file trees are different; see above."
+    if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
+    then
+        nx_echo "FAILURE: The $DESCRIPTION .$EXT archive file trees are different; see above."
+        return 20
+    fi
 
     rm -r "$ORIGINAL_UNPACKED"
     rm -r "$BUILT_UNPACKED"
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS: The built .$EXT archive files equal originals."
+    nx_echo "SUCCESS: The built $DESCRIPTION .$EXT archive files equal originals."
 }
 
 # Test .tar.gz-based distribution.
@@ -831,22 +851,25 @@ compare_distrib_archives() # CHECKSUM original-archive built-archive
 #
 test_distrib_archives()
 {
-    local -r TAR_GZ_MASK="nxwitness-*.tar.gz"
-    local -r ZIP_MASK="nxwitness-*_update*.zip"
+    local -i RESULT=0
+
+    local -r TAR_GZ_MASK="*-*.tar.gz"
+    local -r ZIP_MASK="*-*_update*.zip"
     local -r DEBUG_TAR_GZ_SUFFIX="-debug-symbols.tar.gz"
 
     local BUILT_TAR_GZ
-    nx_find_file BUILT_TAR_GZ "main .tar.gz installer" "$BUILD_DIR" -name "$TAR_GZ_MASK" \
+    nx_find_file BUILT_TAR_GZ "main distribution .tar.gz" "$BUILD_DIR" -name "$TAR_GZ_MASK" \
         ! -name "*$DEBUG_TAR_GZ_SUFFIX"
 
     local BUILT_ZIP
-    nx_find_file BUILT_ZIP "installer .zip" "$BUILD_DIR" -name "$ZIP_MASK"
+    nx_find_file BUILT_ZIP "distribution .zip" "$BUILD_DIR" -name "$ZIP_MASK"
 
     local -r ORIGINAL_TAR_GZ="$ORIGINAL_DIR"/$(basename "$BUILT_TAR_GZ")
 
-    # Test main distrib .tar.gz.
     nx_echo
-    compare_distrib_tar_gz $CHECKSUM "$ORIGINAL_TAR_GZ" "$BUILT_TAR_GZ"
+    compare_distrib_tar_gz "main distribution .tar.gz" $CHECKSUM \
+        "$ORIGINAL_TAR_GZ" "$BUILT_TAR_GZ" \
+        || RESULT=1
 
     # Test the archive with debug libraries, if its sample is present in the "original" dir.
     local -r ORIGINAL_DEBUG_TAR_GZ="$ORIGINAL_TAR_GZ$DEBUG_TAR_GZ_SUFFIX"
@@ -854,19 +877,44 @@ test_distrib_archives()
     if [ -f "$ORIGINAL_DEBUG_TAR_GZ" ]
     then
         nx_echo
-        compare_distrib_tar_gz $CHECKSUM "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ"
+        compare_distrib_tar_gz "debug symbols .tar.gz" $CHECKSUM \
+            "$ORIGINAL_DEBUG_TAR_GZ" "$BUILT_DEBUG_TAR_GZ" \
+            || RESULT=2
     else
         # There is no original debug archive - require that there is no such file built.
         if [ -f "$BUILT_DEBUG_TAR_GZ" ]
         then
-            nx_fail "Debug symbols archive was built but not expected - the original is absent."
+            nx_echo "RESULT: " \
+                "Debug symbols archive was built but not expected - the original is absent."
+            RESULT=3
         fi
     fi
 
     # Test .zip which contains .tar.gz and some other files.
     local -r ORIGINAL_ZIP="$ORIGINAL_DIR"/$(basename "$BUILT_ZIP")
     nx_echo
-    compare_distrib_zip_with_inner_file "$ORIGINAL_ZIP" "$BUILT_ZIP" "$BUILT_TAR_GZ"
+    compare_distrib_zip_with_inner_file "update" "$ORIGINAL_ZIP" "$BUILT_ZIP" "$BUILT_TAR_GZ" \
+        || RESULT=4
+
+    return $RESULT
+}
+
+# Test .tgz-based distribution.
+#
+# [in] CHECKSUM 0|1
+# [in] ORIGINAL_DIR
+#
+test_distrib_tgz()
+{
+    local -r TGZ_MASK="*.tgz"
+
+    local BUILT_TGZ
+    nx_find_file BUILT_TGZ "distribution .tgz" "$BUILD_DIR" -name "$TGZ_MASK"
+
+    local -r ORIGINAL_TGZ="$ORIGINAL_DIR"/$(basename "$BUILT_TGZ")
+
+    nx_echo
+    compare_distrib_tar_gz "distribution .tgz" $CHECKSUM "$ORIGINAL_TGZ" "$BUILT_TGZ"
 }
 
 # [out] FILE
@@ -912,12 +960,14 @@ test_distrib_debs()
 {
     # Distribution structure:
     #
-    # nxwitness-client-<version>-<platform>-<suffixes>.deb
-    # nxwitness-client_update-<version>-<platform>-<suffixes>.zip
+    # <customized_product>-client-<version>-<platform>-<suffixes>.deb
+    # <customized_product>-client_update-<version>-<platform>-<suffixes>.zip
     #
-    # nxwitness-server-<version>-<platform>-<suffixes>.deb
-    # nxwitness-server_update-<version>-<platform>-<suffixes>.zip
-    #     nxwitness-server-<version>-<platform>-<suffixes>.deb
+    # <customized_product>-server-<version>-<platform>-<suffixes>.deb
+    # <customized_product>-server_update-<version>-<platform>-<suffixes>.zip
+    #     <customized_product>-server-<version>-<platform>-<suffixes>.deb
+
+    local -i RESULT=0
 
     local ORIGINAL_CLIENT_DEB=""
     nx_find_file_optional ORIGINAL_CLIENT_DEB \
@@ -929,12 +979,14 @@ test_distrib_debs()
     then
         find_distrib_FILE built client .deb && local -r BUILT_CLIENT_DEB="$FILE"
         nx_echo
-        compare_distrib_archives $CHECKSUM "$ORIGINAL_CLIENT_DEB" "$FILE"
+        compare_distrib_archive "client" $CHECKSUM "$ORIGINAL_CLIENT_DEB" "$FILE" \
+            || RESULT=1
 
         find_distrib_FILE original client .zip && local -r ORIGINAL_CLIENT_ZIP="$FILE"
         find_distrib_FILE built client .zip && local -r BUILT_CLIENT_ZIP="$FILE"
         nx_echo
-        compare_distrib_archives $CHECKSUM "$ORIGINAL_CLIENT_ZIP" "$BUILT_CLIENT_ZIP"
+        compare_distrib_archive "client" $CHECKSUM "$ORIGINAL_CLIENT_ZIP" "$BUILT_CLIENT_ZIP" \
+            || RESULT=2
     else
         nx_echo "WARNING: Client .deb not found in the original dir; ignoring."
     fi
@@ -942,13 +994,16 @@ test_distrib_debs()
     find_distrib_FILE original server .deb && local -r ORIGINAL_SERVER_DEB="$FILE"
     find_distrib_FILE built server .deb && local -r BUILT_SERVER_DEB="$FILE"
     nx_echo
-    compare_distrib_archives $CHECKSUM "$ORIGINAL_SERVER_DEB" "$BUILT_SERVER_DEB"
+    compare_distrib_archive "server" $CHECKSUM "$ORIGINAL_SERVER_DEB" "$BUILT_SERVER_DEB" \
+        || RESULT=3
 
     find_distrib_FILE original server .zip && local -r ORIGINAL_SERVER_ZIP="$FILE"
     find_distrib_FILE built server .zip && local -r BUILT_SERVER_ZIP="$FILE"
     nx_echo
-    compare_distrib_zip_with_inner_file "$ORIGINAL_SERVER_ZIP" "$BUILT_SERVER_ZIP" \
-        "$BUILT_SERVER_DEB"
+    compare_distrib_zip_with_inner_file "server" "$ORIGINAL_SERVER_ZIP" "$BUILT_SERVER_ZIP" \
+        "$BUILT_SERVER_DEB" \
+        || RESULT=4
+    return $RESULT
 }
 
 do_test_distrib() # [checksum] [no-build] orig/archives/dir
@@ -969,12 +1024,16 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
         build_distrib || return $?
     fi
 
+    local -i RESULT=0
     case "$TARGET" in
         linux)
-            test_distrib_debs || return $?
+            test_distrib_debs || RESULT=$?
             ;;
-        tx1|bpi|rpi|bananapi|edge1)
-            test_distrib_archives || return $?
+        bpi|rpi|bananapi|edge1)
+            test_distrib_archives || RESULT=$?
+            ;;
+        tx1)
+            test_distrib_tgz || RESULT=$?
             ;;
         *)
             nx_fail "Target \"$TARGET\" is not supported by this command."
@@ -982,7 +1041,14 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     esac
 
     nx_echo
-    nx_echo "All tests SUCCEEDED."
+
+    if [[ $RESULT = 0 ]]
+    then
+        nx_echo "All tests SUCCEEDED."
+    else
+        nx_echo "Some tests FAILED, see above."
+        return $RESULT
+    fi
 }
 
 # Scan current dir for immediate inner dirs which are repos, and extract info about them.

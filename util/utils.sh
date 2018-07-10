@@ -240,7 +240,7 @@ nx_verbose() # "$@"
     } 2>/dev/null
 }
 
-nx_echo_value() # VAR_NAME
+nx_echo_var() # VAR_NAME
 {
     local -r VAR_NAME="$1"
     eval local -r VAR_VALUE="\$$VAR_NAME"
