@@ -4,7 +4,7 @@
       Collect current state and usage of resources for unit tests.
       Print current amount of open files and threads.
 
-    node: linux-ci
+    node: vm116_webadmin
     logrotate:
       daysToKeep: 10
 
