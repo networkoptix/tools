@@ -76,7 +76,7 @@
           LOCAL_PATH=$WORKSPACE/
           PLATFORM=$PLATFORM
           CUSTOMIZATION=$CUSTOMIZATION
-          COMPONENTS=unit_tests/*.yaml,unit_tests/*.output,unit_tests/**/*.bt
+          COMPONENTS=unit_tests/*.yaml,unit_tests/*.output,unit_tests/*.bt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
