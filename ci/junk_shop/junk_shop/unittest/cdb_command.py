@@ -2,7 +2,8 @@
 junk_shop.unittest.cdb_command
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Microsoft CDB.exe command wrapper to extract backtrace from windows DUMP file (.dmp) file.
+Microsoft CDB.exe command wrapper to extract backtrace from Windows DUMP file
+(.dmp) file.
 Used by junk_shop.unittest.platform. Based on devtools.crash_analyzer.dump_tool.
 """
 import logging
@@ -21,19 +22,19 @@ CDB_EXE_PATH = r'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe'
 # Please, see https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/using-debugger-commands
 # to get help about CDB commands
 CDB_COMMANDS = [
-   b'.exr -1',  # Error
-   b'.ecxr',    # Exception Context Record
-   b'kc',       # Stack backtrace
-   b'~*kc',     # Stack backtrace for all threads
-   b'q'         # Exit
-   ]
+    b'.exr -1',  # Error
+    b'.ecxr',    # Exception Context Record
+    b'kc',       # Stack backtrace
+    b'~*kc',     # Stack backtrace for all threads
+    b'q'         # Exit
+]
 
 CDB_COMMAND_DESCRIPTIONS = [
     'Display error',
     'Display Exception Context Record',
     'Display stack backtrace',
     'Display stack backtrace for all threads'
-    ]
+]
 # Regex to cut & change prompt lines
 CDB_PROMPT_REGEX = r'^0:.*>'
 CDB_PROCESS_TIMEOUT_SEC = 30
@@ -48,7 +49,8 @@ def process_cdb_output(output):
     for line in output.split(b'\n'):
         if re.search(CDB_PROMPT_REGEX, line):
             if cmd_i < len(CDB_COMMAND_DESCRIPTIONS):
-                out_lines.append(b'\n-- {} --\n'.format(CDB_COMMAND_DESCRIPTIONS[cmd_i]))
+                out_lines.append(
+                    b'\n-- {} --\n'.format(CDB_COMMAND_DESCRIPTIONS[cmd_i]))
             cmd_i += 1
         else:
             out_lines.append(line)
@@ -57,12 +59,14 @@ def process_cdb_output(output):
 
 def extract_backtrace_from_dump(dump_file, binary_path):
     """Returns a backtrace as a string for given ``dump_file``
-    ``binary_path`` is using to get access to executable (.exe) and symbol (.pdb) files,
-    required by CDB debugger.
+
+    ``binary_path`` is using to get access to executable (.exe) and symbol
+    (.pdb) files, required by CDB debugger.
     """
-    cdb_command = [CDB_EXE_PATH, '-z', str(dump_file),
-                   '-i', str(binary_path),
-                   '-y', 'srv*;symsrv*;' + str(binary_path.parent)]
+    cdb_command = [
+        CDB_EXE_PATH, '-z', str(dump_file),
+        '-i', str(binary_path),
+        '-y', 'srv*;symsrv*;' + str(binary_path.parent)]
     try:
         cdb_process = Popen(
             cdb_command, stdin=PIPE, stdout=PIPE)

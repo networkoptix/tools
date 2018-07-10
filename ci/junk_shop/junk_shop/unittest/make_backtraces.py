@@ -26,11 +26,13 @@ def make_backtraces(work_dir):
 
 
 def _make_test_backtraces(work_dir, test_name):
-    """Create backtrace files unittests in the `work_dir` for the test by `test_name`"""
+    """Create backtrace files unittests in the `work_dir` for the test by
+    `test_name`"""
     platform = create_platform()
     test_dir_base = work_dir.joinpath(test_name)
     test_info = TestInfo.load_from_file(test_dir_base.with_suffix('.yaml'))
-    for core_file_path in platform.collect_core_file_list(test_name, test_info, test_dir_base):
+    for core_file_path in platform.collect_core_file_list(test_name, test_info,
+                                                          test_dir_base):
         platform.produce_core_backtrace(test_info.binary_path, core_file_path)
 
 
