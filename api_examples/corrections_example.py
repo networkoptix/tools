@@ -8,8 +8,7 @@ import uuid
 
 host = 'http://localhost:7001'
 username = 'admin'
-#password = 'password'
-password = 'qweasd123'
+password = 'password'
 
 
 def check_status(request, verbose):
@@ -56,14 +55,15 @@ def get_camera(id, verbose):
     return cameras[0] if cameras else None
 
 
-def add_camera_to_layout(layout, camera_uuid, tile_id, verbose):
+def add_camera_to_layout(layout, camera_id, tile_id, verbose):
     tile_pos = tile_id_to_pos(layout, tile_id)
     for item in layout['items']:
         item_pos = (item['left'], item['top'])
         if item_pos == tile_pos:
             if verbose:
                 print("Updating existing item")
-            item['resourceId'] = camera_uuid
+            item['resourceId'] = ''
+            item['resourcePath'] = str(camera_id)
             item['id'] = str(uuid.uuid4())
             return layout
 
@@ -77,7 +77,7 @@ def add_camera_to_layout(layout, camera_uuid, tile_id, verbose):
             'right': tile_pos[0] + 1,
             'bottom': tile_pos[1] + 1,
             'flags': 1,
-            'resourceId': camera_uuid
+            'resourcePath': str(camera_id)
         }
     )
     return layout
@@ -91,18 +91,12 @@ def save_layout(layout, verbose):
 
 
 def set_camera_to_tile(camera_id, screen_id, tile_id, verbose):
-    camera = get_camera(camera_id, verbose)
-    if not camera:
-        print("Camera {} not found".format(camera_id))
-        return 1
-    camera_uuid = camera['id']
-
     layout = get_layout(screen_id, verbose)
     if not layout:
         print("Layout {} not found".format(screen_id))
         return 2
 
-    layout = add_camera_to_layout(layout, camera_uuid, tile_id, verbose)
+    layout = add_camera_to_layout(layout, camera_id, tile_id, verbose)
     save_layout(layout, verbose)
     return 0
 
