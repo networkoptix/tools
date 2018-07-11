@@ -1,6 +1,51 @@
 - job-template:
     name: 'helper.pull-component'
+    description: |
+      <pre>
+      ================================================================================
+      Pull component
+      ================================================================================
 
+      JOB MAINTAINERS
+        {job-maintainers}
+        (notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/helpers/pull-component.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job serves for delivering components into particular workspace.
+
+      We have the same jenkins user on each node. But we don't want to mess up with
+      permissions and credentials and to find ourselves in situation when artifact
+      repo is writeable on nodes where it should be readonly.
+
+      Because of this and few other reasons related to unstable rsync, permissions,
+      lack of bash support on windows, etc, we have implemented consuming artifacts in
+      "reverse" direction.
+
+      The idea is that job that's being build, schedules another job (this job) to
+      deliver all artifacts/components required to build (independently on build type -
+      it may be unittesting build or reporting build or something else)
+
+      Build has following parameters
+
+      * Standard stuff related to pipeline, platform and others
+      * Target "coordinates" - path on remote host, ssh user and other service data
+      * List of components/filters used for filtering only stuff that required
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
     node: repository-ops
     concurrent: true
 
