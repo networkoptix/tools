@@ -56,6 +56,7 @@
           PIPELINE={pipeline}
           BRANCH={branch}
           CUSTOMIZATION={customization}
+          PLATFORM=all
     - timestamps
     - timeout:
         timeout: 300 # min
