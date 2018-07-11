@@ -11,6 +11,7 @@
     node: runner
     concurrent: true
 
+    realcameratesting-framework-branch: $BRANCH
 
     properties:
     - heavy-job:
@@ -40,6 +41,8 @@
     - p_RUN_UNITTESTS:
         default: true
     - p_RUN_FUNCTESTS:
+        default: false
+    - p_RUN_REALCAMERATESTS:
         default: false
     - string:
         name: _NX_VMS_COMMIT
@@ -81,6 +84,7 @@
         properties-content: |
           BUILD_IDENTITY=undef
           NX_VMS_COMMIT=undef
+
     - multijob:
         name: Freeze nx commit
         projects:
@@ -100,6 +104,27 @@
         parameter-filters: REQUESTED_BY={tag_requested_by}
     - inject:
         properties-file: 'NX_VMS_COMMIT.envvar'
+
+    - multijob:
+        name: Freeze nx realcamera framework commit
+        projects:
+        - name: 'helper.freeze-nx-vms-commit'
+          kill-phase-on: FAILURE
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BRANCH={realcameratesting-framework-branch}
+            PIPELINE=$PIPELINE
+            NX_VMS_COMMIT={realcameratesting-framework-branch}
+            NX_VMS_COMMIT_VARNAME=NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    - copyartifact:
+        project: 'helper.freeze-nx-vms-commit'
+        filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY={tag_requested_by}
+    - inject:
+        properties-file: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
 
     - multijob:
         name: Request new release build id
@@ -3753,6 +3778,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.default.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3770,6 +3813,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.default_cn.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3787,6 +3848,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.default_zh_CN.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3804,6 +3883,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.cox.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3821,6 +3918,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3838,6 +3953,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog_global.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3855,6 +3988,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.hanwha.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3872,6 +4023,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.ipera.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3889,6 +4058,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.ionetworks.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3906,6 +4093,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.nutech.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3923,6 +4128,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.ras.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3940,6 +4163,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.senturian.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3957,6 +4198,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.systemk.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3974,6 +4233,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.tricom.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -3991,6 +4268,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.ust.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -4008,6 +4303,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.vista.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -4025,6 +4338,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoblue.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
@@ -4042,6 +4373,24 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoorange.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE

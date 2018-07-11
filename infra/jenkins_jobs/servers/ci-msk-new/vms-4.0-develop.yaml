@@ -5,6 +5,8 @@
 
     branch: vms
 
+    realcameratesting-framework-branch: vms
+
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
 
@@ -142,6 +144,17 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             freeze-commit-now: true
+        - only-realcameratests:
+            detailed-job-description: |-
+              This trigger serves for testing on real cameras stand.
+              (by default it will build linux distrib and run realcameratest)
+            default-build-description: >-
+              Real cameras testing
+            platforms: linux-x64
+            customizations: default
+            freeze-commit-now: true
+            run-unittests: '' # false
+            run-realcameratests: true
 
     # RUNNER - root launcher of all builds
 
@@ -155,6 +168,9 @@
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
     - '{pipeline}.{branch}.{project}.distribution.{customization}.functest'
+    - '{pipeline}.{branch}.{project}.distribution.{customization}.realcameratest':
+        customization: default
+        build-watchers: muskov@networkoptix.com
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced

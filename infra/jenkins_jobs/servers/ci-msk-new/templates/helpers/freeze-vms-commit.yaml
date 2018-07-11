@@ -69,6 +69,10 @@
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
         default: ''
+    - string:
+        name: NX_VMS_COMMIT_VARNAME
+        default: NX_VMS_COMMIT
+        description: Name of variable to store commit to
 
     wrappers:
     - timestamps
@@ -95,7 +99,7 @@
     - shell: |
         #!/bin/bash
         set -ex
-        echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
+        echo "${{NX_VMS_COMMIT_VARNAME}}=${{MERCURIAL_REVISION_SHORT}}" > "${{NX_VMS_COMMIT_VARNAME}}.envvar"
     - inject:
         properties-file: NX_VMS_COMMIT.envvar
 
@@ -103,7 +107,7 @@
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
-        artifacts: 'NX_VMS_COMMIT.envvar'
+        artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
     - failure-email-helpers(maintainers):

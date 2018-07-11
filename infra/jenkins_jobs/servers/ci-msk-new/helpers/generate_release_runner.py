@@ -19,6 +19,7 @@ print '''#
     node: runner
     concurrent: true
 
+    realcameratesting-framework-branch: $BRANCH
 
     properties:
     - heavy-job:
@@ -48,6 +49,8 @@ print '''#
     - p_RUN_UNITTESTS:
         default: true
     - p_RUN_FUNCTESTS:
+        default: false
+    - p_RUN_REALCAMERATESTS:
         default: false
     - string:
         name: _NX_VMS_COMMIT
@@ -89,6 +92,7 @@ print '''#
         properties-content: |
           BUILD_IDENTITY=undef
           NX_VMS_COMMIT=undef
+
     - multijob:
         name: Freeze nx commit
         projects:
@@ -108,6 +112,27 @@ print '''#
         parameter-filters: REQUESTED_BY={tag_requested_by}
     - inject:
         properties-file: 'NX_VMS_COMMIT.envvar'
+
+    - multijob:
+        name: Freeze nx realcamera framework commit
+        projects:
+        - name: 'helper.freeze-nx-vms-commit'
+          kill-phase-on: FAILURE
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BRANCH={realcameratesting-framework-branch}
+            PIPELINE=$PIPELINE
+            NX_VMS_COMMIT={realcameratesting-framework-branch}
+            NX_VMS_COMMIT_VARNAME=NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    - copyartifact:
+        project: 'helper.freeze-nx-vms-commit'
+        filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY={tag_requested_by}
+    - inject:
+        properties-file: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
 
     - multijob:
         name: Request new release build id
@@ -212,6 +237,24 @@ for customization in CUSTOMIZATIONS_LIST:
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{branch}.{project}.distribution.'''+customization+'''.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE

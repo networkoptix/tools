@@ -208,6 +208,15 @@
           Flag whether run functests or not.
 
 - parameter:
+    name: p_RUN_REALCAMERATESTS
+    parameters:
+    - bool:
+        name: RUN_REALCAMERATESTS
+        default: '{default}'
+        description: >-
+          Flag whether run realcameratests or not.
+
+- parameter:
     name: p_RUN_UNITTESTS
     parameters:
     - bool:

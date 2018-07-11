@@ -36,3 +36,4 @@
 
     webadmin-build-node: webadmin-build
     functest-node: functests
+    realcameratest-node: realcameratest

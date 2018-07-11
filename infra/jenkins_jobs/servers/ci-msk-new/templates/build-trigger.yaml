@@ -48,6 +48,7 @@
     build-installer: true
     run-functests: '' # false
     run-unittests: true
+    run-realcameratests: '' # false
     # detailed-job-description required!
 
     properties:
@@ -84,13 +85,17 @@
         default: '{run-unittests}'
     - p_RUN_FUNCTESTS:
         default: '{run-functests}'
+    - p_RUN_REALCAMERATESTS:
+        default: '{run-realcameratests}'
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
     - bool:
         name: FREEZE_COMMIT_NOW
         default: '{freeze-commit-now}'
-        description: Freeze nx_vms commit right now, don't wait for starting builds
+        description: >-
+          Freeze nx_vms commit sources right now, don't wait for starting builds
+          (this does not affect commit from functests branch)
 
     triggers:
     - timed: "{timer}"
@@ -154,6 +159,7 @@
           BUILD_INSTALLER=$BUILD_INSTALLER
           RUN_UNITTESTS=$RUN_UNITTESTS
           RUN_FUNCTESTS=$RUN_FUNCTESTS
+          RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           _NX_VMS_COMMIT=$NX_VMS_COMMIT
