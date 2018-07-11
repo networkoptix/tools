@@ -43,18 +43,6 @@ def get_layout(id, verbose):
     return layouts[0] if layouts else None
 
 
-def request_camera(id, verbose):
-    r = requests.get(host + '/ec2/getCameras?id={}'.format(id), auth=(username, password))
-    return r.json() if check_status(r, verbose) else None
-
-
-def get_camera(id, verbose):
-    if verbose:
-        print("Looking for camera {}".format(id))
-    cameras = request_camera(id, verbose)
-    return cameras[0] if cameras else None
-
-
 def add_camera_to_layout(layout, camera_id, tile_id, verbose):
     tile_pos = tile_id_to_pos(layout, tile_id)
     for item in layout['items']:
@@ -62,7 +50,7 @@ def add_camera_to_layout(layout, camera_id, tile_id, verbose):
         if item_pos == tile_pos:
             if verbose:
                 print("Updating existing item")
-            item['resourceId'] = ''
+            item['resourceId'] = ''  # Existing id must be cleaned
             item['resourcePath'] = str(camera_id)
             item['id'] = str(uuid.uuid4())
             return layout
