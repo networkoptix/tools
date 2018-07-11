@@ -41,17 +41,13 @@ class TestResults(object):
         self.duration = None
         self.lines_artifacts = {}  # name -> LinesArtifact
         self.output_lines = self._make_lines_artifact('output')
-        self.gtest_errors = self._make_lines_artifact(
-            'gtest errors', is_error=True)
-        self.parse_errors = self._make_lines_artifact(
-            'parse errors', is_error=True)
-        self.errors = self._make_lines_artifact(
-            'errors', is_error=True)  # misc errors
+        self.gtest_errors = self._make_lines_artifact('gtest errors', is_error=True)
+        self.parse_errors = self._make_lines_artifact('parse errors', is_error=True)
+        self.errors = self._make_lines_artifact('errors', is_error=True)  # misc errors
         self.children = []
 
     def _make_lines_artifact(self, name, is_error=False):
-        self.lines_artifacts[name] = lines_artifact = LinesArtifact(
-            name, is_error)
+        self.lines_artifacts[name] = lines_artifact = LinesArtifact(name, is_error)
         return lines_artifact
 
 
