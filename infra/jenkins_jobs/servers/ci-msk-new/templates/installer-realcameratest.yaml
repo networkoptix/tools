@@ -6,7 +6,6 @@
     node: '{realcameratest-node}'
     concurrent: true
 
-    init-venv-method: init-venv-linux
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     synchronous-reporting: '' # false
     workspace: 'nx_rct_thr${{EXECUTOR_NUMBER}}/'
@@ -163,7 +162,7 @@
         platform: linux-x64 # Used when storing results to junk-shop only; All functional tests a tied to linux-x64
         cloud-group: $CLOUD_GROUP
         bin-dir: "$WORKSPACE/dist"
-        work-dir: "$WORKSPACE/dist" # todo: move to /work
+        work-dir: "$WORKSPACE/realcameratests" # todo: move to /work
         mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true
         test-select-expr: $TEST_SELECT_EXPR
@@ -172,6 +171,34 @@
 
     # TODO: reporting
     publishers:
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - UNSTABLE
+          - FAILURE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                BUILD_STATUS=passed
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                LOCAL_PATH=$WORKSPACE/
+                COMPONENTS=realcameratests/
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:

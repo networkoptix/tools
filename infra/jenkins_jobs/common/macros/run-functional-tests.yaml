@@ -23,6 +23,8 @@
     #   AUTOTEST_EMAIL_PASSWORD
 
     builders:
+    - folder-create-operation:
+        folder-path: "$WORKSPACE/{work-dir}"
     - extended-bash:
         headers: |
           #!/bin/bash
