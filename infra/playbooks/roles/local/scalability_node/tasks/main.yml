@@ -1,0 +1,37 @@
+- name: Install packages
+  become: yes
+  become_method: sudo
+  apt:
+    pkg: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  with_items:
+  # common utils
+  - gdb
+  - net-tools  # netstat
+  - curl
+  # mediaserver deb requirements
+  - libglib2.0-0
+  - libsm6
+  - libice6
+  - libaudio2
+  - libxrender1
+  - cifs-utils
+  - syslinux
+  - zlib1g
+  - debconf
+  - python
+  - psmisc
+  - libsm6
+  - libice6
+  - libaudio2
+  - libogg0
+  - libxfixes3
+  - libxrender1
+  - libfontconfig1
+  - libgl1-mesa-glx
+  - cifs-utils
+  - samba-common
+  - libtalloc2
+  - syslinux

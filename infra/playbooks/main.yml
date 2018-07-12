@@ -8,3 +8,4 @@
 - import_playbook: plays/jenkins_master_deploy.yml
 - import_playbook: plays/jenkins_master_configure.yml
 - import_playbook: plays/dev_build.yml
+- import_playbook: plays/scalability.yml
