@@ -111,6 +111,10 @@ def test_some_5(some_fixture_2, some_session_fixture_2, some_failing_on_teardown
     assert False, 'If you think this test 5 is bad, wait for the fixture...'
 
 
+def test_nothing():
+    pass
+
+
 def init_logging():
     #format = '%(asctime)-15s %(threadName)-15s %(levelname)-7s %(message)s'
     format = '%(asctime)-15s %(levelname)-7s %(message)s'
