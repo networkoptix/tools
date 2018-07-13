@@ -6,6 +6,7 @@
 
         aborted:        true
         failure:        true
+        still-failing:  false
 
         fixed:          false
 
