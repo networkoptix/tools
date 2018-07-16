@@ -150,7 +150,7 @@
         cloud-group: $CLOUD_GROUP
         bin-dir: "$BIN_DIR"
         work-dir: "WORK_DIR"
-        mediaserver-dist-dir: "$WORKSPACE/dist"MSG=
+        mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true
         test-select-expr: $TEST_SELECT_EXPR
         test-list: $TEST_LIST
