@@ -61,8 +61,7 @@
         timeout: 300 # min
         fail: true
         type: absolute
-    - workspace-cleanup:
-        check-parameter: CLEAN
+    - workspace-cleanup
     - credentials-binding:
       - username-password:
           credential-id: junk_shop_db
@@ -90,12 +89,6 @@
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
-
-    - folder-delete-operation:
-        folder-path: 'build'
-
-    - folder-delete-operation:
-        folder-path: 'dist'
 
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$NX_TEST_FRAMEWORK_COMMIT'
@@ -153,23 +146,6 @@
         requirements-files: >-
           devtools/ci/junk_shop/requirements.txt
           nx_vms/func_tests/requirements.txt
-    - shell: |
-        #!/bin/bash
-        set -ex
-        echo "APPSERVER2_UT_PATH=$(readlink -f "$( \
-          find $WORKSPACE/dist -name appserver2_ut \
-        )")" > APPSERVER2_UT_PATH.envvar
-    - inject:
-        properties-file: APPSERVER2_UT_PATH.envvar
-
-    - shell: |
-        #!/bin/bash
-        set -ex
-        echo "SERVER_DEB_PATH=$(readlink -f "$( \
-          find $WORKSPACE/dist -name *-server-*-linux64*.deb \
-        )")" > SERVER_DEB_PATH.envvar
-    - inject:
-        properties-file: SERVER_DEB_PATH.envvar
 
     - inject:
         # TODO:  '{cloud-group}'
@@ -183,6 +159,7 @@
         #!/bin/bash
         set -ex
         mkdir -p "$BIN_DIR"
+        mkdir -p "$WORK_DIR"
         rsync -av --delete {binaries_url} "$BIN_DIR/"
 
     - inject:
@@ -197,8 +174,8 @@
         customization: $CUSTOMIZATION
         platform: linux-x64 # Used when storing results to junk-shop only; All functional tests a tied to linux-x64
         cloud-group: $CLOUD_GROUP
-        bin-dir: "$WORKSPACE/$BIN_DIR"
-        work-dir: "$WORKSPACE/functests"
+        bin-dir: "$BIN_DIR"
+        work-dir: "WORK_DIR"
         mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true
         test-select-expr: $TEST_SELECT_EXPR
