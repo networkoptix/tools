@@ -127,6 +127,10 @@
         components: '${{COMPONENTS}}'
 
     publishers:
+    - archive:
+        artifacts: RSYNC_FILES_LIST.txt
+        allow-empty: 'false'
+        fingerprint: true
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,

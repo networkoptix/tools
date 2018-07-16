@@ -40,7 +40,7 @@
         # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
 
         PWD_OLD=$PWD
-        echo '' > $PWD_OLD/files_to_copy
+        echo '' > $PWD_OLD/RSYNC_FILES_LIST.txt
         pushd "${{RSYNC_SRC}}"
           echo "Will rsync {components} components"
           IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
@@ -49,17 +49,17 @@
             if [[ "$COMPONENT" == */ ]] ; then
               COMPONENT="${{COMPONENT}}***"
             fi
-            find . -path "./${{COMPONENT}}" -print >> $PWD_OLD/files_to_copy
+            find . -path "./${{COMPONENT}}" -print >> $PWD_OLD/RSYNC_FILES_LIST.txt
           done
           # TODO: should we add --delete flag?
           echo "Will rsync following files:"
-          cat $PWD_OLD/files_to_copy
+          cat $PWD_OLD/RSYNC_FILES_LIST.txt
           rsync -vrza --links \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
             --rsync-path="mkdir -p ${{RSYNC_DST}} && rsync" \
             ./ \
             "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_DST}}" \
-            --files-from=$PWD_OLD/files_to_copy
+            --files-from=$PWD_OLD/RSYNC_FILES_LIST.txt
         popd
 
 - builder:
