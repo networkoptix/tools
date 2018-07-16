@@ -162,9 +162,11 @@
         mkdir -p "$WORK_DIR"
         rsync -av --delete {binaries_url} "$BIN_DIR/"
 
-        if [ $(ps aux | grep "$WORKSPACE" | awk '{{print $2}}') ] ; then
-            kill -9 $(ps aux | grep "$WORKSPACE" | awk '{{print $2}}')
-        fi
+        while [ ! -z "$(ps aux | grep "$WORKSPACE" | grep pytest | awk '{{print $2}}')" ] ; do
+            echo "Killing pytest running in the same dir"
+            kill -9 $(ps aux | grep "$WORKSPACE" | grep pytest | awk '{{print $2}}')
+            sleep 5
+        done
 
     - inject:
         properties-content: |
@@ -179,7 +181,7 @@
         platform: linux-x64 # Used when storing results to junk-shop only; All functional tests a tied to linux-x64
         cloud-group: $CLOUD_GROUP
         bin-dir: "$BIN_DIR"
-        work-dir: "WORK_DIR"
+        work-dir: "$WORK_DIR"
         mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true
         test-select-expr: $TEST_SELECT_EXPR
