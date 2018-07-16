@@ -137,7 +137,7 @@
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/,build_info.yaml,build/bin/appserver2_ut
+          COMPONENTS=distrib/,build_info.yaml,bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -197,7 +197,7 @@
         customization: $CUSTOMIZATION
         platform: linux-x64 # Used when storing results to junk-shop only; All functional tests a tied to linux-x64
         cloud-group: $CLOUD_GROUP
-        bin-dir: "$WORKSPACE/dist"
+        bin-dir: "$WORKSPACE/$BIN_DIR"
         work-dir: "$WORKSPACE/functests"
         mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true

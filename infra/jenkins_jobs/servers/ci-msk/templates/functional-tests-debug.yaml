@@ -156,7 +156,6 @@
 
             if [ -f "dist/$APPSERVER2_UT_PATH" ]; then
               cp "dist/$APPSERVER2_UT_PATH" "$BIN_DIR/"
-              cp "dist/$APPSERVER2_UT_PATH" "dist/"
             else
               echo "Warning: $APPSERVER2_UT_PATH is missing"
             fi
