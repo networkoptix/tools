@@ -98,6 +98,12 @@
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL={junkshop_base_url}
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_full_pattern}
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+
     - set-custom-build-description
     - shell: |
         #!/bin/bash
@@ -115,8 +121,6 @@
     - inject:
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base_path}/{artifact_location_full_pattern}
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
 
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
@@ -134,6 +138,6 @@
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,
-          <a href='{junkshop_base_url}/{junkshop_location_root_pattern}'> Junkshop </a>
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
     - failure-email-helpers(maintainers):
         email-recipients: '{job-maintainers}'

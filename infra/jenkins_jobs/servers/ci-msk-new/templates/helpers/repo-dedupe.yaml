@@ -46,6 +46,13 @@
     builders:
     - inject:
         properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL={junkshop_base_url}
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
+    - inject:
+        properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
     # FIXME: this job relies on hardlink utility which is not installed with ansible yet

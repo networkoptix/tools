@@ -51,10 +51,7 @@
         name: '$REPO'
         revision: '$BRANCH'
 
-    builders:
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+    builders::
     - set-custom-build-description
 
     - rsync-upload:

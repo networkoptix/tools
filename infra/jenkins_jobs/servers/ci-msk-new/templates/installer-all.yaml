@@ -38,13 +38,17 @@
     wrappers:
     - inject:
         properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL={junkshop_base_url}
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
+    - inject:
+        properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps

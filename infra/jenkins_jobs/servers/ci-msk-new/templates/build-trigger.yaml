@@ -118,14 +118,18 @@
         branch-name: '$_NX_VMS_COMMIT'
 
     builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL={junkshop_base_url}
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
     - inject:
         properties-content: |
           PIPELINE={pipeline}
           BRANCH={branch}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
 
     # inject given ref at first
     - shell: |
