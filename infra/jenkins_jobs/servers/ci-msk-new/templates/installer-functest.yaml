@@ -162,6 +162,10 @@
         mkdir -p "$WORK_DIR"
         rsync -av --delete {binaries_url} "$BIN_DIR/"
 
+        if [ $(ps aux | grep "$WORKSPACE" | awk '{{print $2}}') ] ; then
+            kill -9 $(ps aux | grep "$WORKSPACE" | awk '{{print $2}}')
+        fi
+
     - inject:
         properties-content: |
           VERBOSE=true
