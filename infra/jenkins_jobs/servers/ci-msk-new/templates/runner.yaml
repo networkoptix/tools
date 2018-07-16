@@ -3784,6 +3784,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.default.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3801,6 +3802,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.default_cn.functest'
@@ -3819,6 +3821,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.default_cn.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3836,6 +3839,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.default_zh_CN.functest'
@@ -3854,6 +3858,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.default_zh_CN.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3871,6 +3876,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.cox.functest'
@@ -3889,6 +3895,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.cox.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3906,6 +3913,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog.functest'
@@ -3924,6 +3932,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3941,6 +3950,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog_global.functest'
@@ -3959,6 +3969,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.digitalwatchdog_global.realcameratest'
           condition: COMPLETED # allow unstable
@@ -3976,6 +3987,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.hanwha.functest'
@@ -3994,6 +4006,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.hanwha.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4011,6 +4024,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.ipera.functest'
@@ -4029,6 +4043,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.ipera.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4046,6 +4061,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.ionetworks.functest'
@@ -4064,6 +4080,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.ionetworks.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4081,6 +4098,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.nutech.functest'
@@ -4099,6 +4117,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.nutech.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4116,6 +4135,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.ras.functest'
@@ -4134,6 +4154,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.ras.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4151,6 +4172,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.senturian.functest'
@@ -4169,6 +4191,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.senturian.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4186,6 +4209,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.systemk.functest'
@@ -4204,6 +4228,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.systemk.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4221,6 +4246,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.tricom.functest'
@@ -4239,6 +4265,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.tricom.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4256,6 +4283,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.ust.functest'
@@ -4274,6 +4302,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.ust.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4291,6 +4320,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.vista.functest'
@@ -4309,6 +4339,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.vista.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4326,6 +4357,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoblue.functest'
@@ -4344,6 +4376,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoblue.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4361,6 +4394,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
         - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoorange.functest'
@@ -4379,6 +4413,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
         - name: '{pipeline}.{branch}.{project}.distribution.vmsdemoorange.realcameratest'
           condition: COMPLETED # allow unstable
@@ -4396,6 +4431,7 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
 
     publishers:

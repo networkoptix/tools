@@ -68,6 +68,7 @@
           Logfile that contains information about build
     - p_BUILD_STATUS
     - p_RUNNER_URL
+    - p_JUNKSHOP_BASE_URL
 
     wrappers:
     - timestamps
@@ -104,7 +105,6 @@
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL={junkshop_base_url}
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_full_pattern}

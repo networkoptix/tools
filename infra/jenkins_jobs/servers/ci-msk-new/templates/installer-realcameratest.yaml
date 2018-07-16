@@ -33,6 +33,7 @@
     - p_NX_VMS_COMMIT
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
+    - p_JUNKSHOP_BASE_URL
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -79,7 +80,6 @@
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL={junkshop_base_url}
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_full_pattern}

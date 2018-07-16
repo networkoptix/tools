@@ -140,7 +140,7 @@
           JUNKSHOP_BASE_URL={junkshop_base_url}
     - inject:
         properties-content: |
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_full_pattern}
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
     - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -442,6 +442,7 @@
                 BUILD_STATUS=passed
                 LOGFILE={cmake-build-log}
                 RUNNER_URL=$RUNNER_URL
+                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -465,6 +466,7 @@
                 BUILD_STATUS=failed
                 LOGFILE={cmake-build-log}
                 RUNNER_URL=$RUNNER_URL
+                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
 
     - failure-email:
         email-recipients: '{build-watchers}'
