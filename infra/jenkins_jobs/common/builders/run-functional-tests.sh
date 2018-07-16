@@ -62,7 +62,7 @@ fi
 if [[ "$VERBOSE" == "true" ]] ; then
   OPTIONS=(
     "${OPTIONS[@]}"
-    "-s"
+    "-v"
   )
 fi
 

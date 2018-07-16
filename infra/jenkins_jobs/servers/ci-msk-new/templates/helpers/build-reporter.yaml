@@ -95,7 +95,7 @@
     scm:
     - hg-local-no-changelog:
         name: nx_vms
-        revision: '$NX_VMS_COMMIT'
+        revision: '$BRANCH'
     - hg-local:
         name: devtools
         revision: 'default'
