@@ -97,8 +97,10 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
     - description-setter:
         description: >-
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - trigger-builds:
