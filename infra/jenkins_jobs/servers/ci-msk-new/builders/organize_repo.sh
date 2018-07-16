@@ -7,7 +7,7 @@ mkdir -p all/{update,install,debug,distrib}
 # and nginx user can not serve these files/dirs (403 error), so we add read for everyone
 # and also add +x on directories
 chmod -R a+r .
-find . -type d | xargs chmod a+x
+find . -type d -exec chmod a+x {} \;
 for platform in $(ls .) ; do
 
   if [ $platform == all ] ; then
