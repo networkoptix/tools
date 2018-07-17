@@ -60,9 +60,9 @@
         categories:
         - '{hg-local-cache-node-throttle-category}'
     - build-discarder:
-        days-to-keep: 10
-        num-to-keep: 50
-        artifact-days-to-keep: 10
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
         artifact-num-to-keep: '{default-artifact-num-to-keep}'
 
     parameters:
@@ -111,11 +111,6 @@
         timeout: 5 # min
         fail: true
         type: absolute
-    - build-discarder:
-        days-to-keep: 30
-        num-to-keep: 100
-        artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
 
     scm:
     - hg-la:
