@@ -78,7 +78,10 @@ Here <command> can be one of the following:
  build # Build via "cmake --build <dir>".
  cmake [gen-args] # Perform cmake generation, then build via "cmake --build".
  distrib # Build distribution.
- test-distrib [checksum] [no-build] orig/archives/dir # Test if built matches orig.
+ test-distrib [checksum] [no-build] orig/archives/dir [cmake-gen-args] # Test if built matches orig.
+
+ list [checksum] archive.tar.gz [listing.txt] # Make listing of the archived files and their attrs.
+ list dir [listing.txt] # Make a recursive listing of the files and their attrs.
 
  repos # List all hg repos in DEVELOP_DIR with their branches.
  print-dirs # Print VMS_DIR and BUILD_DIR for the target, on separate lines.
@@ -935,20 +938,22 @@ find_distrib_FILE() # original|built client|server .ext
         local -r DESCRIPTION=".deb"
         local -r MASK="*-${MODULE}-*.deb"
     else
-        nx_fail "find_distrib_file(): Unsupported extension: $EXT"
+        nx_fail "find_distrib_FILE(): Unsupported extension: $EXT"
     fi
 
     if [[ $LOCATION = original ]]
     then
         local -r DIR="$ORIGINAL_DIR"
+        local -r FIND_EXTRA_ARGS=( -maxdepth 1 )
     elif [[ $LOCATION = built ]]
     then
         local -r DIR="$BUILD_DIR"
+        local -r FIND_EXTRA_ARGS=( `# Exclude symlinks #` ! -type l )
     else
-        nx_fail "find_distrib_file(): Unsupported location: $LOCATION"
+        nx_fail "find_distrib_FILE(): Unsupported location: $LOCATION"
     fi
 
-    nx_find_file FILE "$LOCATION $MODULE $DESCRIPTION" "$DIR" -name "$MASK"
+    nx_find_file FILE "$LOCATION $MODULE $DESCRIPTION" "$DIR" "${FIND_EXTRA_ARGS[@]}" -name "$MASK"
 }
 
 # Test .deb-based distribution.
@@ -1021,7 +1026,7 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
     if [ $NO_BUILD = 0 ]
     then
-        build_distrib || return $?
+        build_distrib `# Avoid potential webadmin update #` -DrdepSync=OFF "$@" || return $?
     fi
 
     local -i RESULT=0
@@ -1048,6 +1053,40 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
     else
         nx_echo "Some tests FAILED, see above."
         return $RESULT
+    fi
+}
+
+do_list() # [checksum] dir|archive.tar.gz [listing.txt]
+{
+    if (($# >= 1)) && [[ $1 = "checksum" ]]
+    then
+        shift
+        local -r -i CHECKSUM=1
+    else
+        local -r -i CHECKSUM=0
+    fi
+
+    [[ $# == 0 ]] && nx_fail "Specify a directory or a .tar.gz to make the listing for."
+    local -r DIR_OR_FILE=$1 && shift
+
+    if [[ $# != 0 ]]
+    then
+        local -r LISTING=$1 && shift
+    else
+        local S=${DIR_OR_FILE%.tgz}
+        S=${S%.gz}
+        S=${S%.tar}
+        local -r LISTING=$S.txt
+    fi
+
+    nx_echo "Creating the listing in $LISTING"
+    rm -rf "$LISTING" #< Remove the old listing just in case.
+    if [[ -d $DIR_OR_FILE ]]
+    then
+        [[ $CHECKSUM = 1 ]] && nx_fail "Option \"checksum\" cannot be used for a directory."
+        list_dir "$DIR_OR_FILE" "$LISTING"
+    else
+        list_tar_gz $CHECKSUM "$PATH" "$LISTING"
     fi
 }
 
@@ -1385,6 +1424,9 @@ main()
         test-distrib)
             log_build_vars
             do_test_distrib "$@"
+            ;;
+        list)
+            do_list "$@"
             ;;
         #..........................................................................................
         repos)
