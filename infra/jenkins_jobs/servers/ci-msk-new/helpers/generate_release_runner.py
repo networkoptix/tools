@@ -78,7 +78,6 @@ print '''#
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - inject:
         properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
           JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
     - inject:
         properties-content: |
