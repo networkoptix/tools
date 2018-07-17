@@ -68,7 +68,7 @@
           JUNKSHOP_BASE_URL={junkshop_base_url}
     - inject:
         properties-content: |
-          JUNKSHOP_URL={junkshop_base_url}/{junkshop_location_root_pattern}
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
     - set-custom-build-description
     - system-groovy:
