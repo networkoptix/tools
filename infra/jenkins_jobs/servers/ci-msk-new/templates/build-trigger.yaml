@@ -120,6 +120,10 @@
     builders:
     - inject:
         properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+    - inject:
+        properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
     - inject:
         properties-content: |
@@ -129,10 +133,6 @@
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          BRANCH={branch}
 
     # inject given ref at first
     - shell: |
