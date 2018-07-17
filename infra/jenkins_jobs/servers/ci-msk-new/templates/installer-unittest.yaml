@@ -1,7 +1,7 @@
 #
 # IMPORTANT NOTE
 #
-# There are 2 job-templates defined in this file
+# There are 4 job-templates defined in this file
 #
 - job-template: &installer_unittests_default
     id: installer-unittests-default
@@ -210,3 +210,13 @@
     id: installer-unittests-windows
     unittest-launcher: unittest-launcher-windows
     init-venv-method: init-venv-windows
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-linux
+    unittest-launcher: unittest-launcher-sequence
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-mac
+    unittest-launcher: unittest-launcher-default
