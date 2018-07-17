@@ -76,7 +76,10 @@
           TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
           mkdir -p unit_tests
           cd unit_tests
-          $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
+          echo "Will run $TEST_BINARY_LIST" in sequence"
+          for test in $TEST_BINARY_LIST ; do
+            $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $test
+          done
           python $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py --work-dir=$WORKSPACE/unit_tests
 
 - builder:
