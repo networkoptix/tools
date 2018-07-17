@@ -33,7 +33,7 @@
     - p_NX_VMS_COMMIT
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
-    - p_JUNKSHOP_BASE_URL
+    - p_JUNKSHOP_HOST
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.

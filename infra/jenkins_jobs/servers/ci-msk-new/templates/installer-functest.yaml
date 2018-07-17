@@ -33,7 +33,7 @@
     - p_NX_VMS_COMMIT
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
-    - p_JUNKSHOP_BASE_URL
+    - p_JUNKSHOP_HOST
 
     - string:
         name: TEST_SELECT_EXPR
@@ -86,9 +86,6 @@
         revision: '$NX_TEST_FRAMEWORK_COMMIT'
 
     builders:
-    - inject:
-        properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}

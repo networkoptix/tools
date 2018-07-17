@@ -249,7 +249,7 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{branch}.{project}.distribution.'''+customization+'''.realcameratest'
           condition: COMPLETED # allow unstable
@@ -267,7 +267,7 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+            JUNKSHOP_HOST=$JUNKSHOP_HOST
 '''
 print '''
     publishers:

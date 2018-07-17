@@ -176,7 +176,7 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
@@ -198,7 +198,7 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:

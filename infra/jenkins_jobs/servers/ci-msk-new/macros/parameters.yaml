@@ -242,7 +242,7 @@
         description: utility parameter, url for root build (runner)
 
 - parameter:
-    name: p_JUNKSHOP_BASE_URL
+    name: p_JUNKSHOP_HOST
     parameters:
     - string:
-        name: JUNKSHOP_BASE_URL
+        name: JUNKSHOP_HOST

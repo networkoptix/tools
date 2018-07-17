@@ -207,7 +207,7 @@
                 BUILD_STATUS=passed
                 LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -230,7 +230,7 @@
                 BUILD_STATUS=failed
                 LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_BASE_URL=$JUNKSHOP_BASE_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - failure-email:
         email-recipients: '{build-watchers}'
