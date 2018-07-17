@@ -75,6 +75,7 @@
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          REPOSITORY_ROOT_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
     - set-custom-build-description
     - system-groovy:
         command: |
