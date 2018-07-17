@@ -88,6 +88,9 @@
     builders:
     - inject:
         properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+    - inject:
+        properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - inject:
         properties-content: |
@@ -153,7 +156,7 @@
     - inject:
         # TODO:  '{cloud-group}'
         properties-content: |
-          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@{junk_shop_host}
+          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_HOST
           AUTOTEST_EMAIL_PASSWORD=4eAYstrPYsTEgU9i
           BIN_DIR=$WORKSPACE/funtest/bin
           WORK_DIR=$WORKSPACE/funtest/work

@@ -104,6 +104,9 @@
     builders:
     - inject:
         properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+    - inject:
+        properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - inject:
         properties-content: |
@@ -140,7 +143,7 @@
         source venv/bin/activate
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
+          DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_HOST
           REVISION="$(cd nx_vms && hg id --id)"
 
           if [ "$PIPELINE" == 'develop' ] ; then

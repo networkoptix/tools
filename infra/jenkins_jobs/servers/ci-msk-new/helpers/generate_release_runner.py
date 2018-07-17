@@ -72,8 +72,14 @@ print '''#
     builders:
     - inject:
         properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+    - inject:
+        properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://{junk_shop_host}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
     - inject:
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
