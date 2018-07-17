@@ -38,6 +38,12 @@
     wrappers:
     - inject:
         properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+          CUSTOMIZATION={customization}
+          PLATFORM={platform}
+    - inject:
+        properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
     - inject:
         properties-content: |
@@ -46,12 +52,6 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          BRANCH={branch}
-          CUSTOMIZATION={customization}
-          PLATFORM={platform}
     - build-name:
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
