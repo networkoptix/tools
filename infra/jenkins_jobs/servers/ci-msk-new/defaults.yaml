@@ -20,7 +20,6 @@
     artifact_repository_base_path: '/mnt/beta-builds/repository/v1'
 
     artifact_repository_base_url: 'http://10.0.0.120/'
-    junkshop_base_url: 'http://10.0.0.160'
 
     artifact_location_root_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}'
     artifact_location_full_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}/${{CUSTOMIZATION}}/${{PLATFORM}}'
