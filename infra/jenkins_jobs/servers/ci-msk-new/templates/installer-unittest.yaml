@@ -11,7 +11,7 @@
 
     node: '{unittest-node}'
     concurrent: true
-
+    required-build-components: bin/,lib/,current_config.py
     unittest-launcher: unittest-launcher-default
     init-venv-method: init-venv-linux
     synchronous-reporting: '' # false
@@ -115,7 +115,7 @@
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=bin/*_ut*,lib/,current_config.py
+          COMPONENTS={required-build-components}
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -208,15 +208,18 @@
     <<: *installer_unittests_default
     # all the same, but not id, node and build steps..
     id: installer-unittests-windows
+    required-build-components: bin/*_ut*,bin/*.dll,lib/,current_config.py
     unittest-launcher: unittest-launcher-windows
     init-venv-method: init-venv-windows
 - job-template:
     <<: *installer_unittests_default
     # all the same, but not id, node and build steps..
     id: installer-unittests-linux
+    required-build-components: bin/*_ut*,lib/,current_config.py
     unittest-launcher: unittest-launcher-sequence
 - job-template:
     <<: *installer_unittests_default
     # all the same, but not id, node and build steps..
     id: installer-unittests-mac
+    required-build-components: bin/*_ut*,lib/,current_config.py
     unittest-launcher: unittest-launcher-default
