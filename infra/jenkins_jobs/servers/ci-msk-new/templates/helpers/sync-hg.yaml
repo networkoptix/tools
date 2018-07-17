@@ -51,7 +51,7 @@
         name: '$REPO'
         revision: '$BRANCH'
 
-    builders::
+    builders:
     - set-custom-build-description
 
     - rsync-upload:

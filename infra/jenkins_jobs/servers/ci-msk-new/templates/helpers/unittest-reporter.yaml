@@ -57,7 +57,7 @@
         name: devtools
         revision: 'default'
 
-    builders::
+    builders:
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
