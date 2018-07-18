@@ -60,7 +60,7 @@ class CrashServer:
 
 def fetch_new_crashes(directory: utils.Directory, report_count: int, known_reports: set = {},
                       min_version: str = '', extension: str = '*', max_size: Union[int, str] = 0,
-                      api: type = CrashServer, thread_count: int = 5, **options):
+                      api: type = CrashServer, thread_count: int = 5, **options) -> List[str]:
     """Fetches :count new reports into :directory, which are not present in :known_reports and
     satisfy :min_version and :extension, returns created file names.
     """
@@ -106,7 +106,7 @@ def fetch_new_crashes(directory: utils.Directory, report_count: int, known_repor
 
 
 def _fetch_crash(name: str, directory: utils.Directory, api: type = CrashServer,
-                 max_size: Union[int, str] = 0, **options):
+                 max_size: Union[int, str] = 0, **options) -> int:
     content = api(**options).get(name)
     size = utils.Size(len(content))
     if size > utils.Size(max_size):

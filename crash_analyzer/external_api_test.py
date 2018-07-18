@@ -45,7 +45,7 @@ def test_fetch_new_crashes(extension: str):
 def _test_crash_server(extension: str):
     server = external_api.CrashServer(**SERVER_CONFIG)
     dumps = server.list_all(extension=extension)
-    assert len(dumps) > 100
+    assert len(dumps) > 10
     for i in range(2):
         assert server.get(dumps[i])
 
