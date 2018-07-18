@@ -24,7 +24,7 @@
 
     builders:
     - folder-create-operation:
-        folder-path: "$WORKSPACE/{work-dir}"
+        folder-path: "{work-dir}"
     - extended-bash:
         headers: |
           #!/bin/bash
