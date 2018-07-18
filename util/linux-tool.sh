@@ -122,7 +122,7 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
         linux) QT_DIR="$LINUX_QT_DIR";;
-        tx1|bpi|rpi|bananapi|android-arm) `# Do nothing #`;;
+        tx1|bpi|rpi|bananapi|android-arm|macosx) `# Do nothing #`;;
         edge1) CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
@@ -329,10 +329,11 @@ do_gen() # [cache] "$@"
     mkdir -p "$BUILD_DIR"
 
     nx_pushd "$BUILD_DIR"
-    nx_echo "+ cd \"$BUILD_DIR\"" #< Log "cd build-dir".
+    nx_log_command "cd \"$BUILD_DIR\""
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
+        macosx) local -r TARGET_ARG="";;
         *) local -r TARGET_ARG="-DtargetDevice=$TARGET";;
     esac
 
@@ -385,7 +386,7 @@ do_build()
 
 do_run_ut() # [all|TestName] "$@"
 {
-    nx_verbose cd "$BUILD_DIR"
+    nx_cd "$BUILD_DIR"
 
     local TEST_NAME="$1" && shift
 
@@ -622,7 +623,7 @@ do_kit() # "$@"
     rm -rf "$KIT_BUILD_DIR"
     mkdir -p "$KIT_BUILD_DIR" || return $?
     nx_pushd "$KIT_BUILD_DIR"
-    nx_echo "+ cd $KIT_BUILD_DIR"
+    nx_log_command "cd $KIT_BUILD_DIR"
 
     local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
     build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
@@ -648,12 +649,12 @@ do_kit() # "$@"
 
 log_build_vars()
 {
-    local MESSAGE="+"
-    [[ $TARGET != windows ]] && MESSAGE+=" TARGET=$TARGET"
-    MESSAGE+=" CONFIG=$CONFIG"
-    [[ $DISTRIB = 1 ]] && MESSAGE+=" DISTRIB=$DISTRIB"
+    local MESSAGE=""
+    [[ $TARGET != windows ]] && MESSAGE+="TARGET=$TARGET "
+    MESSAGE+="CONFIG=$CONFIG "
+    [[ $DISTRIB = 1 ]] && MESSAGE+="DISTRIB=$DISTRIB "
 
-    echo "$MESSAGE"
+    nx_log_command "$MESSAGE"
 }
 
 do_cmake() # "$@"
@@ -672,6 +673,7 @@ do_cmake() # "$@"
 
 build_distrib() # "$@"
 {
+    # TODO: #mshevchenko: Build only "distribution" target, when it is implemented in CMake.
     DISTRIB=1 do_cmake "$@"
 }
 
@@ -721,7 +723,7 @@ compare_distrib_tar_gz() # description CHECKSUM original.tar.gz built.tar.gz
     else
         local -r CHECKSUM_MESSAGE="by filename list"
     fi
-    nx_echo "Comparing $DESCRIPTION ${CHECKSUM_MESSAGE}:"
+    nx_echo $(nx_lyellow)"Comparing $DESCRIPTION ${CHECKSUM_MESSAGE}:"$(nx_nocolor)
 
     local -r ORIGINAL_LISTING="$ORIGINAL_TAR_GZ.txt"
     local -r BUILT_LISTING="$ORIGINAL_TAR_GZ.BUILT.txt"
@@ -730,14 +732,16 @@ compare_distrib_tar_gz() # description CHECKSUM original.tar.gz built.tar.gz
 
     if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
     then
-        nx_echo "FAILURE: Built and original $DESCRIPTION are different; see above."
+        nx_echo $(nx_lred)"FAILURE:" \
+            "Built and original $DESCRIPTION are different; see above."$(nx_nocolor)
         return 10
     fi
 
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS: The built $DESCRIPTION contains the same files as the original one."
+    nx_echo $(nx_lgreen)"SUCCESS:" \
+        "The built $DESCRIPTION contains the same files as the original one."$(nx_nocolor)
 }
 
 # @param built-inner-file Full path to a file which should be packed inside the archive. It is
@@ -753,7 +757,8 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
 
     local -r INNER_FILE_EXT=$(nx_file_ext "$BUILT_INNER_FILE")
 
-    nx_echo "Comparing $DESCRIPTION .zip archives (.$INNER_FILE_EXT compared to the one built):"
+    nx_echo $(nx_lyellow)"Comparing $DESCRIPTION .zip archives" \
+        "(.$INNER_FILE_EXT compared to the one built):"$(nx_nocolor)
 
     local DIR
 
@@ -769,13 +774,15 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
     # Inner files can be bitwise-different, thus, compare the built file to the file in built zip.
     if ! nx_diff "$BUILT_INNER_FILE" "$BUILT_ZIP_UNPACKED/$(basename "$BUILT_INNER_FILE")"
     then
-        nx_echo "FAILURE: The .$INNER_FILE_EXT in $DESCRIPTION .zip differs from the one built."
+        nx_echo $(nx_lred)"FAILURE:" \
+            "The .$INNER_FILE_EXT in $DESCRIPTION .zip differs from the one built."$(nx_nocolor)
         return 10
     fi
 
     if ! nx_diff -r "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED" --exclude "$INNER_FILE_NAME"
     then
-        nx_echo "FAILURE: The $DESCRIPTION .zip archives are different; see above."
+        nx_echo $(nx_lred)"FAILURE:" \
+            "The $DESCRIPTION .zip archives are different; see above."$(nx_nocolor)
         return 20
     fi
 
@@ -786,7 +793,8 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
     list_dir "$BUILT_ZIP_UNPACKED" "$BUILT_LISTING"
     if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
     then
-        nx_echo "FAILURE: The $DESCRIPTION .zip archive file trees are different; see above."
+        nx_echo $(nx_lred)"FAILURE:" \
+            "The $DESCRIPTION .zip archive file trees are different; see above."$(nx_nocolor)
         return 30
     fi
 
@@ -795,8 +803,9 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS: The built $DESCRIPTION .zip contains correct .$INNER_FILE_EXT," \
-        "and other files equal originals."
+    nx_echo $(nx_lgreen)"SUCCESS:"
+        "The built $DESCRIPTION .zip contains correct .$INNER_FILE_EXT, and other files equal" \
+        "originals."$(nx_nocolor)
 }
 
 compare_distrib_archive() # description CHECKSUM original-archive built-archive
@@ -808,7 +817,7 @@ compare_distrib_archive() # description CHECKSUM original-archive built-archive
 
     local -r EXT=$(nx_file_ext "$ORIGINAL_ARCHIVE")
 
-    nx_echo "Comparing $DESCRIPTION .$EXT archives:"
+    nx_echo $(nx_lyellow)"Comparing $DESCRIPTION .$EXT archives:"$(nx_nocolor)
 
     local DIR
 
@@ -823,7 +832,8 @@ compare_distrib_archive() # description CHECKSUM original-archive built-archive
     then
         if ! nx_diff -r "$ORIGINAL_UNPACKED" "$BUILT_UNPACKED"
         then
-            nx_echo "FAILURE: The $DESCRIPTION .$EXT archives are different; see above."
+            nx_echo $(nx_lred)"FAILURE:" \
+                "The $DESCRIPTION .$EXT archives are different; see above."$(nx_nocolor)
             return 10
         fi
     fi
@@ -835,7 +845,8 @@ compare_distrib_archive() # description CHECKSUM original-archive built-archive
     list_dir "$BUILT_UNPACKED" "$BUILT_LISTING"
     if ! nx_diff "$ORIGINAL_LISTING" "$BUILT_LISTING"
     then
-        nx_echo "FAILURE: The $DESCRIPTION .$EXT archive file trees are different; see above."
+        nx_echo $(nx_lred)"FAILURE:" \
+            "The $DESCRIPTION .$EXT archive file trees are different; see above."$(nx_nocolor)
         return 20
     fi
 
@@ -844,7 +855,8 @@ compare_distrib_archive() # description CHECKSUM original-archive built-archive
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo "SUCCESS: The built $DESCRIPTION .$EXT archive files equal originals."
+    nx_echo $(nx_lgreen)"SUCCESS:" \
+        "The built $DESCRIPTION .$EXT archive files equal originals."$(nx_nocolor)
 }
 
 # Test .tar.gz-based distribution.
@@ -887,8 +899,8 @@ test_distrib_archives()
         # There is no original debug archive - require that there is no such file built.
         if [ -f "$BUILT_DEBUG_TAR_GZ" ]
         then
-            nx_echo "RESULT: " \
-                "Debug symbols archive was built but not expected - the original is absent."
+            nx_echo $(nx_lred)"FAILURE:" \
+                "Debug symbols archive was built, but the original is absent."$(nx_nocolor)
             RESULT=3
         fi
     fi
@@ -993,7 +1005,8 @@ test_distrib_debs()
         compare_distrib_archive "client" $CHECKSUM "$ORIGINAL_CLIENT_ZIP" "$BUILT_CLIENT_ZIP" \
             || RESULT=2
     else
-        nx_echo "WARNING: Client .deb not found in the original dir; ignoring."
+        nx_echo $(nx_dyellow)"WARNING:" \
+            "Client .deb not found in the original dir; ignoring."$(nx_nocolor)
     fi
 
     find_distrib_FILE original server .deb && local -r ORIGINAL_SERVER_DEB="$FILE"
@@ -1049,9 +1062,9 @@ do_test_distrib() # [checksum] [no-build] orig/archives/dir
 
     if [[ $RESULT = 0 ]]
     then
-        nx_echo "All tests SUCCEEDED."
+        nx_echo $(nx_lgreen)"All tests SUCCEEDED."$(nx_nocolor)
     else
-        nx_echo "Some tests FAILED, see above."
+        nx_echo $(nx_lred)"Some tests FAILED, see above."$(nx_nocolor)
         return $RESULT
     fi
 }
@@ -1306,11 +1319,11 @@ main()
             ;;
         #..........................................................................................
         start-s)
-            nx_verbose cd "$BUILD_DIR"
+            nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
                     local -r QT_PATH="$QT_DIR/bin"
-                    nx_echo "+ PATH=\"$QT_PATH:\$PATH\""
+                    nx_log_command "PATH=\"$QT_PATH:\$PATH\""
                     PATH="$QT_PATH:$PATH"
                     nx_verbose bin/mediaserver -e "$@"
                     ;;
@@ -1326,11 +1339,11 @@ main()
             sudo pkill -9 mediaserver
             ;;
         start-c)
-            nx_verbose cd "$BUILD_DIR"
+            nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
                     local -r QT_PATH="$QT_DIR/bin"
-                    nx_echo "+ PATH=\"$QT_PATH:\$PATH\""
+                    nx_log_command "PATH=\"$QT_PATH:\$PATH\""
                     PATH="$QT_PATH:$PATH"
                     nx_verbose "bin/HD Witness.exe" "$@"
                     ;;

@@ -8,7 +8,7 @@
 # Low-level utils.
 
 # Part of help text describing common options handled by nx_run().
-declare -g -r NX_HELP_TEXT_OPTIONS="$(cat \
+declare -r NX_HELP_TEXT_OPTIONS="$(cat \
 <<EOF
 Here <options> is a combination of the following options, in the listed order:
  -h, --help # Show this help. Also shown when called without arguments.
@@ -17,6 +17,9 @@ Here <options> is a combination of the following options, in the listed order:
  --mock-rsync # Do not call real rsync, just log its calling commands.
 EOF
 )"
+
+declare -i NX_VERBOSE=0 #< Whether the script logs each command to be executed.
+declare -i NX_GO_VERBOSE=1 #< Whether nx_go() logs each command to be executed.
 
 # Call help_callback() and exit the script if none or typical help command-line arguments are
 # specified.
@@ -28,29 +31,26 @@ nx_handle_help() # "$@"
     fi
 }
 
-# Set the verbose mode if required by $1; return whether $1 is consumed: define and set global var
-# NX_VERBOSE to either 0 or 1.
+# Set log-each-command mode and the global NX_VERBOSE var to 1 if required by $1; return whether $1
+# is consumed.
 nx_handle_verbose() # "$@" && shift
 {
     if [ "$1" = "--verbose" -o "$1" = "-v" ]; then
-        declare -g -r -i NX_VERBOSE=1
+        NX_VERBOSE=1
         set -x
         return 0
     else
-        declare -g -r -i NX_VERBOSE=0
         return 1
     fi
 }
 
-# Set the verbose mode for nx_go() if required by $1; return whether $1 is consumed: define and set
-# global var NX_GO_VERBOSE to either 0 or 1.
+# Set the global NX_GO_VERBOSE var to 1 if required by $1; return whether $1 is consumed.
 nx_handle_go_verbose() # "$@" && shift
 {
     if [ "$1" = "-gov" -o "$1" = "--go-verbose" ]; then
-        declare -g -r -i NX_GO_VERBOSE=1
+        NX_GO_VERBOSE=1
         return 0
     else
-        declare -g -r -i NX_GO_VERBOSE=0
         return 1
     fi
 }
@@ -104,6 +104,13 @@ nx_check_args() # N "$@"
 nx_rsync() # rsync_args...
 {
     rsync -rlpDh --progress "$@"
+}
+
+# Log the args as if it were a command to be executed, using nx_echo, prefixed with "+", and in
+# color.
+nx_log_command() # $@
+{
+    nx_echo $(nx_dgreen)"+ $*"$(nx_nocolor)
 }
 
 # Log the args if in verbose mode, otherwise, do nothing.
@@ -356,7 +363,9 @@ nx_restore_cursor_pos()
 
 nx_absolute_path() # path
 {
-    readlink -f -- "$1"
+    # readlink -f does not work in MacOS, so an alternative impl is needed.
+    #readlink -f -- "$1"
+    (cd "$(dirname "$0")" && pwd -P)
 }
 
 # Print file extension(s) without the trailing period, or nothing if there is no extension.
@@ -373,7 +382,8 @@ nx_cd() # dir
     local -r DIR="$1"
     if [ "$(nx_absolute_path "$(pwd)")" != "$(nx_absolute_path "$DIR")" ]
     then
-        nx_verbose cd "$DIR"
+        nx_log_command "cd $DIR"
+        cd "$DIR"
     fi
 }
 
@@ -453,7 +463,7 @@ nx_fail_on_invalid_arguments()
 # Also checks that the last 2 arguments (if exist) do not refer to the same file.
 nx_diff()
 {
-    nx_echo "+ diff" "$@"
+    nx_log_command "diff" "$@"
 
     # Check that the last two args (if exist) do not refer to the same file.
     if [[ $# -ge 2 ]]
@@ -466,7 +476,14 @@ nx_diff()
         fi
     fi
 
-    diff "$@"
+    if which colordiff >/dev/null
+    then
+        local -r COMMAND=colordiff
+    else
+        local -r COMMAND=diff
+    fi
+
+    $COMMAND "$@"
 }
 
 # Silently unpack archive of auto-detected type. If directory is not specified, it will be
