@@ -156,7 +156,17 @@
             freeze-commit-now: true
             run-unittests: '' # false
             run-realcameratests: true
-
+        - only-functests:
+            detailed-job-description: |-
+              This trigger serves for running functional tests.
+              (by default it will build linux and win distrib and run functional)
+            default-build-description: >-
+              Real cameras testing
+            platforms: linux-x64,windows-x64
+            customizations: default
+            freeze-commit-now: true
+            run-unittests: '' # false
+            run-functests: true
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
