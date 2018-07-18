@@ -316,7 +316,8 @@ class File:
             logger.warning('Read "{}" for non-existing file: {}'.format(default, self.path))
             return default
         except UnicodeDecodeError as error:
-            raise UnicodeDecodeError('{} in file: {}'.format(error, self.path))
+            error.reason += ' in file: {}'.format(self.path)
+            raise
 
     def write_string(self, data):
         self.write(lambda f: f.write(data))

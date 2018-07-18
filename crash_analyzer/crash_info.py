@@ -328,7 +328,7 @@ def analyze_reports_concurrent(reports: List[Report], problem_versions: list = [
     problem_versions = set(problem_versions)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
-        if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError)):
+        if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError)):
             if report.full_version in problem_versions:
                 logger.debug(utils.format_error(result))
             else:
