@@ -158,8 +158,8 @@
         properties-content: |
           JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_HOST
           AUTOTEST_EMAIL_PASSWORD=4eAYstrPYsTEgU9i
-          BIN_DIR=$WORKSPACE/funtest/bin
-          WORK_DIR=$WORKSPACE/funtest/work
+          BIN_DIR=$WORKSPACE/functests/bin
+          WORK_DIR=$WORKSPACE/functests/work
           CLOUD_GROUP=test
     - shell: |
         #!/bin/bash
