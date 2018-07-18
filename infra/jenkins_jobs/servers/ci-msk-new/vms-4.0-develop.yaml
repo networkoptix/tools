@@ -161,7 +161,7 @@
               This trigger serves for running functional tests.
               (by default it will build linux and win distrib and run functional)
             default-build-description: >-
-              Real cameras testing
+              Trigger functests related jobs
             platforms: linux-x64,windows-x64
             customizations: default
             freeze-commit-now: true
