@@ -118,17 +118,6 @@ def report_name(dump_path: str, empty_on_failure: bool = False) -> str:
     return dump_path[:-len(dump_ext)] + report_ext
 
 
-def clear_cache(cache_dir: str, keep_files: str):
-    existing = set(os.listdir(cache_dir))
-    for name in keep_files:
-        existing.discard(report_name(name, empty_on_failure=True))
-    for name in existing:
-        try:
-            os.remove(os.path.join(cache_dir, name))
-        except IOError:
-            pass
-
-
 def shell_line(command: List[str]):
     return ' '.join('"%s"' % a if (' ' in a) or ('\\' in a) else a for a in command)
 

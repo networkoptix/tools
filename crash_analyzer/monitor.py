@@ -36,6 +36,7 @@ class Options:
         self.min_report_count = 2
         self.reports_each_run = 1000
         self.stand_by_sleep_s = 60
+        self.keep_uploaded_reports = True
         for key, value in extra.items():
             assert isinstance(value, type(getattr(self, key)))
             setattr(self, key, value)
@@ -135,13 +136,16 @@ class Monitor:
 
         for name in new_reports:
             self._records[name] = dict()
-
         self.flush_records()
-        self._cleanup_cache(
-            directory,
-            self._options.reports_size_limit,
-            lambda d: self._records.get(d.name, {}).get('crash_id') != FAILED_CRASH_ID)
 
+        def is_useful(report):
+            r = self._records.get(report.name)
+            if r is None:
+                logger.warning('Unregistered report file: ' + report.name)
+                return False
+            return not('issue' in r or r.get('crash_id') == FAILED_CRASH_ID)
+        
+        self._cleanup_cache(directory, self._options.reports_size_limit, is_useful)
         return len(new_reports)
 
     def analyze(self) -> int:
@@ -206,7 +210,8 @@ class Monitor:
                 logger.debug('JIRA issue {} updated with {} new report(s)'.format(issue, len(reports)))
                 for r in reports:
                     self._records[r.name]['issue'] = issue
-                    self._options.reports_directory.file(r.name).remove()
+                    if not self._options.keep_uploaded_reports:
+                        self._options.reports_directory.file(r.name).remove()
 
         if crashes_to_push:
             self.flush_records()
@@ -225,9 +230,9 @@ class Monitor:
         jira.update_issue(issue, reports, directory=directory)
         return issue, reports
         
-    @staticmethod
-    def _cleanup_cache(directory: utils.Directory, size_limit: utils.Size, is_impotant: callable, 
-                       is_forced_on_failure: bool = False):
+    @classmethod
+    def _cleanup_cache(cls, directory: utils.Directory, size_limit: utils.Size, 
+                       is_impotant: callable, is_forced_on_failure: bool = False):
         def directory_message():
             return 'directory size {} is {} limit {}: {}'.format(
                 size, 'within' if size < size_limit else 'over', size_limit, directory.path)
@@ -249,7 +254,7 @@ class Monitor:
             logger.info('Cleanup success for ' + directory_message())
         elif is_forced_on_failure:
             logger.warning('Starting forced cleanup for ' + directory_message())
-            Monitor._cleanup_cache(directory, size_limit, lambda x: False)
+            cls._cleanup_cache(directory, size_limit, lambda x: False)
         else:
             logger.error('Cleanup failed for ' + directory_message())
 
