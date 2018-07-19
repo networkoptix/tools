@@ -3,6 +3,7 @@
 
     project: mobile
     junk_shop_host: '10.0.0.113'
+    junk_shop_db_host: '10.0.0.113'
 
     branch: mobile
 

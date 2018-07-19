@@ -246,3 +246,9 @@
     parameters:
     - string:
         name: JUNKSHOP_HOST
+
+- parameter:
+    name: p_JUNKSHOP_DB_HOST
+    parameters:
+    - string:
+        name: JUNKSHOP_DB_HOST

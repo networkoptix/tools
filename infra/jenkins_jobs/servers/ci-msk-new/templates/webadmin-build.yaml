@@ -116,6 +116,7 @@
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
+          JUNKSHOP_DB_HOST={junk_shop_db_host}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
@@ -208,6 +209,7 @@
                 LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
+                JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -231,6 +233,7 @@
                 LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
+                JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
     - failure-email:
         email-recipients: '{build-watchers}'

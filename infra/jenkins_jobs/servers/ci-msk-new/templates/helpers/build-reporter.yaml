@@ -74,6 +74,7 @@
     - p_BUILD_STATUS
     - p_RUNNER_URL
     - p_JUNKSHOP_HOST
+    - p_JUNKSHOP_DB_HOST
 
     wrappers:
     - timestamps
@@ -146,7 +147,7 @@
         source venv/bin/activate
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_HOST
+          DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
           REVISION="$(cd nx_vms && hg id --id)"
 
           if [ "$PIPELINE" == 'develop' ] ; then

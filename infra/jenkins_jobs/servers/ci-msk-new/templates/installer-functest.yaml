@@ -34,6 +34,7 @@
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
+    - p_JUNKSHOP_DB_HOST
 
     - string:
         name: TEST_SELECT_EXPR
@@ -156,7 +157,7 @@
     - inject:
         # TODO:  '{cloud-group}'
         properties-content: |
-          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_HOST
+          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
           AUTOTEST_EMAIL_PASSWORD=4eAYstrPYsTEgU9i
           BIN_DIR=$WORKSPACE/functests/bin
           WORK_DIR=$WORKSPACE/functests/work

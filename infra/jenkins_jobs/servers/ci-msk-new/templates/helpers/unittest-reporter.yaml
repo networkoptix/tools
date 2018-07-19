@@ -109,7 +109,7 @@
               JUNKSHOP_PLATFORM="$PLATFORM"
             fi
 
-            DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_HOST
+            DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
             BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             cd unit_tests
