@@ -2,7 +2,7 @@
     name: develop-pipeline-4.0
 
     project: vms
-    junk_shop_host: '10.0.0.113'
+    junk_shop_host: junkshop.enk.me
     junkshop_db_host: '10.0.0.113'
 
     branch: vms
