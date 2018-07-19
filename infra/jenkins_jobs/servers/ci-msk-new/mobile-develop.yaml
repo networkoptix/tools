@@ -116,6 +116,10 @@
         default-platforms: android-arm,ios
         default-customizations: default
 
+    # REGISTRIES
+
+    - '{pipeline}.{branch}.{project}.register-build'
+
     # BUILD AND TEST - main jobs
 
     # - '{pipeline}.{branch}.{project}.webadmin.universal.build'

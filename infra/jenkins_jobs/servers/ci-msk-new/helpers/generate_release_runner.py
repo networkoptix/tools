@@ -173,6 +173,13 @@ print '''#
         description: |
           $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
 
+    - build-registry-add:
+        pipeline: '{pipeline}'
+        branch: '{branch}'
+        project: '{project}'
+        build-identity: $BUILD_IDENTITY
+        nx-vms-commit: $NX_VMS_COMMIT
+
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
     - multijob:

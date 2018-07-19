@@ -1,0 +1,80 @@
+- job-template:
+    name: '{pipeline}.{branch}.{project}.register-build'
+    description: |
+      Register BUILD_IDENTITY -> NX_VMS_COMMIT
+
+    node: 'runner' # no special requirements
+    workspace: nx_reg_build
+
+    concurrent: false
+
+    properties:
+    - heavy-job:
+        weight: 1
+    # keep a lot
+    - build-discarder:
+        days-to-keep: 60
+        num-to-keep: 500
+        artifact-days-to-keep: 60
+        artifact-num-to-keep: 500
+
+    parameters:
+      - p_REQUESTED_BY
+      - p_BUILD_DESCRIPTION:
+          default: ''
+      - p_BUILD_IDENTITY
+      - p_NX_VMS_COMMIT:
+          default: '{branch}'
+
+    builders:
+    - set-custom-build-description
+    - shell: |
+        #!/bin/bash
+        echo "REGISTERED_BUILD_IDENTITY=NONE" > REGISTERED_BUILD_IDENTITY.envvar
+        echo "REGISTERED_NX_VMS_COMMIT=NONE" > REGISTERED_NX_VMS_COMMIT.envvar
+
+        # to reuse in copyartifact
+        echo "BUILD_IDENTITY=${{BUILD_IDENTITY}}" > BUILD_IDENTITY.envvar
+        echo "NX_VMS_COMMIT=${{NX_VMS_COMMIT}}" > NX_VMS_COMMIT.envvar
+
+    - copyartifact:
+        project: '{pipeline}.{branch}.{project}.register-build'
+        filter: 'REGISTERED_BUILD_IDENTITY.envvar,REGISTERED_NX_VMS_COMMIT.envvar'
+        which-build: last-successful
+        parameter-filters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+        optional: true
+
+    - inject:
+        properties-file: 'REGISTERED_BUILD_IDENTITY.envvar'
+    - inject:
+        properties-file: 'REGISTERED_NX_VMS_COMMIT.envvar'
+
+    - shell: |
+        #!/bin/bash
+        # Registering new commits
+        echo "REGISTERED_BUILD_IDENTITY=${{BUILD_IDENTITY}}" > REGISTERED_BUILD_IDENTITY.envvar
+        echo "REGISTERED_NX_VMS_COMMIT=${{NX_VMS_COMMIT}}" > REGISTERED_NX_VMS_COMMIT.envvar
+
+    - shell: |
+        #!/bin/bash
+        # Check that build vars are the same
+        if [ "${{REGISTERED_BUILD_IDENTITY}}" != "NONE" ] ; then
+          # if doesn' match KEY -> something is very bad
+          if [ "${{REGISTERED_BUILD_IDENTITY}}" != "${{BUILD_IDENTITY}}" ] ; then
+            exit 1
+          fi
+        fi
+
+        if [ "${{REGISTERED_NX_VMS_COMMIT}}" != "NONE" ] ; then
+          # Once we built something with commit, no other commits are allowed
+          if [ "${{REGISTERED_NX_VMS_COMMIT}}" != "${{NX_VMS_COMMIT}}" ] ; then
+            exit 1
+          fi
+        fi
+
+    publishers:
+    - archive:
+        artifacts: '*.envvar'
+        allow-empty: 'false'
+        fingerprint: true

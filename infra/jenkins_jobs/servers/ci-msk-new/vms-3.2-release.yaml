@@ -198,6 +198,10 @@
         default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
+    # REGISTRIES
+
+    - '{pipeline}.{branch}.{project}.register-build'
+
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'

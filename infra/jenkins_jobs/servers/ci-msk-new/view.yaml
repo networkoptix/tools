@@ -122,4 +122,4 @@
     view-type: list
     description: >-
       <h3> List of helper jobs </h3>
-    regex: '.*(helper|reporter).*'
+    regex: '.*(helper|reporter|register-build).*'

@@ -1,0 +1,26 @@
+- builder:
+    name: build-registry-add
+
+    builders:
+    - trigger-builds:
+      - project: '{pipeline}.{branch}.{project}.register-build'
+        # muted while not debugged
+        # block: true
+        block: false
+        predefined-parameters: |
+          BUILD_IDENTITY={build-identity}
+          NX_VMS_COMMIT={nx-vms-commit}
+
+- builder:
+    name: build-registry-get-commit
+
+    builders:
+    - copyartifact:
+        project: '{pipeline}.{branch}.{project}.register-build'
+        filter: 'NX_VMS_COMMIT.envvar'
+        which-build: last-successful
+        parameter-filters: |
+          BUILD_IDENTITY=$BUILD_IDENTITY
+        optional: false
+    - inject:
+        properties-file: 'NX_VMS_COMMIT.envvar'
