@@ -112,8 +112,18 @@ def _test_jira():
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
         assert {'a'} == jira.attachments()
         
-        logger.debug('Suppose case is closed by developer')
-        jira.api._transition(jira.issue.key, 'Reject')
+        logger.debug('Suppose case is rejected by developer')
+        jira.api._transition(jira.issue.key, 'Reject', resolution={'name': 'Rejected'})
+        assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
+
+        logger.debug('No reopen by any version')
+        jira.update_issue(['server--3.2.0.321-tricom-default--c.gdb-bt'])
+        assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
+
+        logger.debug('Suppose case is fixed by developer')
+        jira.api._transition(jira.issue.key, 'Reopen')
+        assert 'Open' == jira.api._jira.issue(jira.issue.key).fields.status.name
+        jira.api._transition(jira.issue.key, 'Start Development', 'Ready to Review', 'Done')
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('No reopen for the same version')

@@ -181,6 +181,9 @@ class Jira:
                     key, fix_build))
 
         if issue.fields.status.name == 'Closed':
+            if issue.fields.resolution.name == 'Rejected':
+                return logger.debug('JIRA issue {} is rejected'.format(key))
+
             if not fix_build:
                 min_fix_version = min(v.name for v in issue.fields.fixVersions)
                 max_report_version = max(r.version for r in reports)
@@ -250,9 +253,9 @@ class Jira:
             logger.debug(utils.format_error(error))
             raise JiraError('Unable to cleanup attachments at issue {}: {}'.format(key, error.text))
 
-    def _transition(self, issue: jira.Issue, *transition_names: List[str]):
+    def _transition(self, issue: jira.Issue, *transition_names: List[str], **kwargs: dict):
         for name in transition_names:
             for transition in self._jira.transitions(issue):
                 if transition['name'].startswith(name):
-                    self._jira.transition_issue(issue, transition['id'])
+                    self._jira.transition_issue(issue, transition['id'], **kwargs)
                     continue
