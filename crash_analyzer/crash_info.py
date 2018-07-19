@@ -4,6 +4,7 @@ import hashlib
 import logging
 import os
 import re
+import fnmatch
 from typing import List, Tuple
 
 import dump_tool
@@ -20,7 +21,9 @@ REPORT_NAME_REGEXP = re.compile('''
     (?P<version> [0-9]+ \. [0-9]+ \. [0-9]+) \. (?P<build> [0-9]+)
         - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<beta> (?: -beta)?)
     --
-    .+ \. (?P<extension> [^\.]+)
+    .+ (?P<platform> (?: windows | linux | arm) - [a-z0-9]+) .+
+    \.
+    (?P<extension> [^\.]+)
 ''', re.VERBOSE)
 
 CXX_MODULE_SEPARATOR = '!'
@@ -62,8 +65,9 @@ class Report:
         if not match:
             raise ReportNameError('Unable to parse name: ' + self.name)
 
-        self.binary, version, self.build, self.changeset, customization, beta, self.extension = \
-            REPORT_NAME_REGEXP.match(name).groups()
+        self.binary, version, self.build, self.changeset, customization, beta, \
+            self.platform, self.extension = \
+                REPORT_NAME_REGEXP.match(name).groups()
 
         if customization:
             self.customization = customization[1:]
@@ -80,6 +84,7 @@ class Report:
         self.component = 'Server' if ('server' in self.binary) else 'Client'
         if beta:
             self.beta = True
+
 
     def __repr__(self):
         return 'Report({})'.format(repr(self.name))
@@ -321,21 +326,35 @@ def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
     return analyze_bt(report, content, CdbDescriber, **options)
 
 
-def analyze_reports_concurrent(reports: List[Report], problem_versions: list = [], **options) \
+class ProblemBuilds:
+    def __init__(self, patterns: List[str]):
+        self.patterns = list(p.split() for p in patterns)
+        logger.debug('Problem builds patterns: {}'.format(self.patterns))
+
+    def is_known(self, report: Report):
+        for pattern in self.patterns:
+            if all(part in report.name for part in pattern):
+                return True
+
+        return False
+
+
+def analyze_reports_concurrent(reports: List[Report], problem_builds: list = [], **options) \
         -> List[Tuple[str, Reason]]:
     """Analyzes :reports in :directory, returns list of successful results.
     """
-    problem_versions = set(problem_versions)
+    known_problem_builds = ProblemBuilds(problem_builds)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError)):
-            if report.full_version in problem_versions:
+            if known_problem_builds.is_known(report):
                 logger.debug(utils.format_error(result))
             else:
                 logger.warning(utils.format_error(result))
-                problem_versions.add(report.full_version)
+
         elif isinstance(result, Exception):
             logger.error(utils.format_error(result))
+
         else:
             processed.append((report, result))
 

@@ -51,6 +51,28 @@ def test_analyze_bt(action: Callable, report: str):
         assert 64 == len(reason.crash_id)
 
 
+def test_problem_builds():
+    problem_builds = crash_info.ProblemBuilds([
+        '3.1.0.555 windows',
+        '3.1 arm',
+        '3.2 ipera',
+    ])
+
+    cases = [
+        ('mediaserver--3.1.0.555-77ebc0608e38-dw--2018_windows-x64-winxp-Windows-10_624.dmp', True),
+        ('mediaserver--3.1.0.555-77ebc0608e38-dw--2016_windows-x64-winnt-Windows-XP_543.dmp', True),
+        ('mediaserver--3.1.0.555-77ebc0608e38-dw--2016_linux-x64-ubuntu-Ubuntu-16.04.2_835.dmp', False),
+        ('mediaserver--3.1.0.987-970fdce49492-dw--2016_linux-arm-bpi-Debian-16.04.2_835.dmp', True),
+        ('mediaserver--3.1.0.987-970fdce49492-dw--2016_linux-x64-ubuntu-Ubuntu-16.04.2_835.dmp', False),
+        ('mediaserver--3.2.0.777-99c5cc48ae01-dw--2017_windows-x64-winxp-Windows-7_765.cdb-bt', False),
+        ('mediaserver--3.2.0.987-61fbffc8dfa1-ipera--2017_windows-x64-winxp-Windows-7_765.cdb-bt', True),
+        ('mediaserver--3.1.0.236-82b4cfb70abc-ipera--2016_linux-arm-bpi-Debian-16.04.2_835.dmp', True),
+    ]
+
+    for name, result in cases:
+        assert result == problem_builds.is_known(crash_info.Report(name)), name
+
+
 @pytest.mark.parametrize(
     'directory, extension',
     ((utils.Resource('linux'), 'gdb-bt'), (utils.Resource('windows'), 'cdb-bt'))
