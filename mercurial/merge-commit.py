@@ -1,52 +1,60 @@
-from mercurial import cmdutil, commands, revset
-from mercurial.i18n import _
+#!/usr/bin/env python
 
-import sys, os
+
+import argparse
+import os
+import sys
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from mercurial_utils import CommitMessageChecker
+from mercurial_utils import HgContext, CommitMessageChecker
 
-cmdtable = {}
-command = cmdutil.command(cmdtable)
 
-command_options = [
-    ('', 'amend', None, _('amend the parent of the working directory')),
-    ('u', 'user', '', _('record the specified user as committer'), _('USER')),
-    ('e', 'edit', None, _('invoke editor on commit messages'))
-]
-@command('merge-commit', command_options, _('[OPTIONS]'))
-def merge_commit(ui, repo, *pats, **opts):
-    ctx = repo[None]
+def merge_commit(edit=False, user=None):
+    hg = HgContext()
 
-    parents = ctx.parents()
+    parents = hg.execute("parents", "--template", "{node}\n").split()
     if len(parents) < 2:
-        ui.write_err("Current head has only one parent. This command is for merge commits only.\n")
-        return
+        print("Current head has only one parent. This command is for merge commits only.")
+        exit(1)
     elif len(parents) > 2:
-        ui.write_err("Current head has too many parents. This command handles only simple merges.\n")
-        return
+        exit(1)
 
-    branch = ctx.branch()
+    branch = hg.branch()
 
     other = None
+    other_branch = None
 
-    for i in [0, 1]:
-        if parents[i].branch() != branch:
-            other = parents[i]
+    for parent in parents:
+        b = hg.branch(parent)
+        if b != branch:
+            other = parent
+            other_branch = b
 
     if not other:
-        ui.write_err("Both parent revisions are from the same branch. To merge heads use 'commit'.")
+        print("Both parent revisions are from the same branch. To merge heads use 'commit'.")
         return
 
-    message = "Merge: {0} -> {1}\n".format(other.branch(), branch)
+    message = "Merge: {0} -> {1}\n\n".format(other_branch, branch)
     message_checker = CommitMessageChecker()
-    match = revset.match(ui, "only('{0}', '{1}')".format(other.branch(), branch))
-    for rev in match(repo, set(range(len(repo)))):
-        description = repo[rev].description()
-        if description:
-            summary = description.split('\n')[0].strip()
-            if message_checker.is_commit_message_accepted(summary):
-                message += summary + "\n"
 
-    options = opts
-    options["message"] = message
-    commands.commit(ui, repo, *pats, **options)
+    description = hg.log(
+        rev="only('{0}', '{1}')".format(other_branch, branch),
+        template="{desc|firstline}\n")
+    message += "\n".join([
+        msg for msg in description if message_checker.is_commit_message_accepted(msg)])
+
+    hg.commit(message=message, edit=edit, user=user)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "-e", "--edit", action="store_true",
+        help="Invoke editor on commit messages")
+    parser.add_argument(
+        "-u", "--user",
+        help="Record the specified user as committer")
+
+    args = parser.parse_args()
+
+    merge_commit(edit=args.edit, user=args.user)

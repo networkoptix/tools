@@ -15,6 +15,9 @@ class HgContext:
     def execute(self, *args):
         return subprocess.check_output([self._hg] + list(args)).decode("utf-8").strip()
 
+    def execute_interactive(self, *args):
+        subprocess.call([self._hg] + list(args))
+
     def log(self, rev=None, template=None, split_by="\n", *args):
         command = ("log",)
         if rev:
@@ -44,7 +47,7 @@ class HgContext:
         if dest:
             command += ("--dest", dest)
         command += args
-        print(self.execute(*command))
+        self.execute_interactive(*command)
 
     def update(self, rev=None, clean=False):
         command = ("update",)
@@ -52,4 +55,19 @@ class HgContext:
             command += (rev,)
         if clean:
             command += ("--clean",)
-        print(self.execute(*command))
+        self.execute_interactive(*command)
+
+    def branch(self, rev=".", *args):
+        return self.log(rev=rev, template="{branch}")[0]
+
+    def commit(self, message=None, edit=False, amend=False, user=None):
+        command = ("commit",)
+        if edit:
+            command += ("--edit",)
+        if amend:
+            command += ("--amend",)
+        if user:
+            command += ("--user", user)
+        if message:
+            command += ("--message", message)
+        self.execute_interactive(*command)
