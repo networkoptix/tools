@@ -152,7 +152,7 @@ print '''#
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
-          JUNKSHOP_DB_HOST={junk_shop_db_host}
+          JUNKSHOP_DB_HOST={junkshop_db_host}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
