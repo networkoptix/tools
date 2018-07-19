@@ -31,6 +31,11 @@
       Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
       latest artifact that has REQUESTED_BY equal to marker.
 
+      Known issues
+
+      - unknown revision '<rev-sha>' - means that branch have 2+ heads and prev build
+      is done from other head that's not parent for current.
+
       --------------------------------------------------------------------------------
       </pre>
     node: unittests-reporter
