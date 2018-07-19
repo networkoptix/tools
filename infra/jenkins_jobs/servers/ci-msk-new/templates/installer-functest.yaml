@@ -182,7 +182,7 @@
         done
 
         while [ ! -z "$(ps aux | grep "$WORKSPACE" | grep pytest | awk '{{print $2}}')" ] ; do
-            echo "Killing pytest running in the same dir (step 2)"
+            echo "Killing pytest running in the same dir finally if it's still running"
             kill -9 $(ps aux | grep "$WORKSPACE" | grep pytest | awk '{{print $2}}')
             sleep 5
         done
