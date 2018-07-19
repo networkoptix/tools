@@ -803,7 +803,7 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
     rm "$ORIGINAL_LISTING"
     rm "$BUILT_LISTING"
 
-    nx_echo $(nx_lgreen)"SUCCESS:"
+    nx_echo $(nx_lgreen)"SUCCESS:" \
         "The built $DESCRIPTION .zip contains correct .$INNER_FILE_EXT, and other files equal" \
         "originals."$(nx_nocolor)
 }

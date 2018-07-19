@@ -365,7 +365,7 @@ nx_absolute_path() # path
 {
     # readlink -f does not work in MacOS, so an alternative impl is needed.
     #readlink -f -- "$1"
-    (cd "$(dirname "$0")" && pwd -P)
+    (cd "$(dirname "$1")" && echo "$(pwd -P)/$(basename "$1")")
 }
 
 # Print file extension(s) without the trailing period, or nothing if there is no extension.
