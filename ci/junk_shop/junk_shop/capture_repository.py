@@ -170,8 +170,12 @@ class ArtifactTypeFactory(object):
     def __call__(self, name, content_type=None, ext=None):
         at = self._name2at.get(name)
         if at:
-            assert ((content_type is None or content_type == at.content_type) and
-                    (ext is None or ext == at.ext)) # conflicting content type or ext for same name
+            if content_type is not None:
+                assert content_type == at.content_type, (
+                    'Conflicting content type for %r: was: %r, requested: %r' % (at.name, at.content_type, content_type))
+            if ext is not None:
+                assert ext == at.ext, (
+                    'Conflicting extension for %r: was: %r, requested: %r' % (at.name, at.ext, ext))
             return at
         assert content_type  # required to create new ArtifactType
         at = ArtifactType(name, content_type, ext or '')
