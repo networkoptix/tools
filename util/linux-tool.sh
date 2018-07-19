@@ -779,7 +779,7 @@ compare_distrib_zip_with_inner_file() # description original.zip built.zip built
         return 10
     fi
 
-    if ! nx_diff -r "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED" --exclude "$INNER_FILE_NAME"
+    if ! nx_diff -r --exclude "$INNER_FILE_NAME" "$ORIGINAL_ZIP_UNPACKED" "$BUILT_ZIP_UNPACKED"
     then
         nx_echo $(nx_lred)"FAILURE:" \
             "The $DESCRIPTION .zip archives are different; see above."$(nx_nocolor)
