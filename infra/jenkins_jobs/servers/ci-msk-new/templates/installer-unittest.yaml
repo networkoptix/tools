@@ -226,5 +226,7 @@
     <<: *installer_unittests_default
     # all the same, but not id, node and build steps..
     id: installer-unittests-mac
+    job-timeout: "20" # min
+    testrunner-timeout: "900" # sec 15 min - limited due to limited mac hosts.
     required-build-components: bin/*_ut*,lib/,current_config.py
     unittest-launcher: unittest-launcher-default
