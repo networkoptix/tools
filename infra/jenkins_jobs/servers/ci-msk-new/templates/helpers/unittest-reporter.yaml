@@ -30,6 +30,7 @@
     - p_BUILD_STATUS
     - p_RUNNER_URL # do we need it here?
     - p_JUNKSHOP_HOST
+    - p_JUNKSHOP_DB_HOST
 
     wrappers:
     - build-name:
