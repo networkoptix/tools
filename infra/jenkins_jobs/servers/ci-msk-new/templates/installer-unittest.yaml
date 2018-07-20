@@ -221,7 +221,7 @@
     # all the same, but not id, node and build steps..
     id: installer-unittests-linux
     required-build-components: bin/*_ut*,lib/,current_config.py
-    unittest-launcher: unittest-launcher-sequence
+    unittest-launcher: unittest-launcher-default
 - job-template:
     <<: *installer_unittests_default
     # all the same, but not id, node and build steps..
