@@ -185,7 +185,9 @@
         condition-string1: '${{SHOULD_TRIGGER}}'
         condition-string2: 'false'
         steps:
-        - description-setter: "RUNNER IS NOT TRIGGERED"
+        - description-setter:
+            description: |
+              "RUNNER IS NOT TRIGGERED"
 
     - conditional-step:
         condition-kind: strings-match
