@@ -30,3 +30,7 @@
     # restore current value
     - inject:
         properties-file: "{varname}.tmp.envvar"
+    - shell: |
+        #!/bin/bash
+        set -ex
+        mv "{varname}.tmp.envvar" "{varname}.envvar"
