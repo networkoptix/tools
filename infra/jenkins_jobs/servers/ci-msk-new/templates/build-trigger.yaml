@@ -240,7 +240,7 @@
     - publisher-set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
-        artifacts: 'NX_VMS_COMMIT.envvar'
+        artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
     - failure-email-helpers(maintainers):
