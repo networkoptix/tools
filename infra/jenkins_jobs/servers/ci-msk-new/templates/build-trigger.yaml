@@ -92,7 +92,12 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-
+    - bool:
+        name: FREEZE_COMMIT_NOW
+        default: '{freeze-commit-now}'
+        description: >-
+          Freeze nx_vms commit sources right now, don't wait for starting builds
+          (this does not affect commit from functests branch)
     triggers:
     - timed: "{timer}"
     - pollscm:
@@ -131,7 +136,23 @@
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
 
-
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "NX_VMS_COMMIT=${{_NX_VMS_COMMIT}}" > 'NX_VMS_COMMIT.envvar'
+    - inject:
+        properties-file: NX_VMS_COMMIT.envvar
+    # freeze if needed and overwrite
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
+        steps:
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
+        - inject:
+            properties-file: NX_VMS_COMMIT.envvar
     # load old commit sha
     - get-old-envvar:
         varname: NX_VMS_COMMIT
