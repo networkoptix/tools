@@ -49,6 +49,8 @@
     run-functests: '' # false
     run-unittests: true
     run-realcameratests: '' # false
+
+    ignore-functests: 'false' #
     # detailed-job-description required!
 
     properties:
@@ -90,12 +92,6 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - bool:
-        name: FREEZE_COMMIT_NOW
-        default: '{freeze-commit-now}'
-        description: >-
-          Freeze nx_vms commit sources right now, don't wait for starting builds
-          (this does not affect commit from functests branch)
 
     triggers:
     - timed: "{timer}"
@@ -135,46 +131,87 @@
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
 
-    # inject given ref at first
+
+    # load old commit sha
+    - get-old-envvar:
+        varname: NX_VMS_COMMIT
+        which-build: last-successful
+        optional: true
+
+    # Next, decide whether we should start runner ...
+    # Jenkins does not support excluded-regions for hg and bazaar
+    # That's why we manually check that if source files changed..
+    - shell: |
+        #!/bin/bash
+        # Defaults to trigger
+        echo "SHOULD_TRIGGER=true" > SHOULD_TRIGGER.envvar
+
     - shell: |
         #!/bin/bash
         set -ex
-        echo "NX_VMS_COMMIT=${{_NX_VMS_COMMIT}}" > 'NX_VMS_COMMIT.envvar'
+
+        # Note that if you want to add other conditions, e.g.
+        # patch didn't affect 2 folders, you need to change this logic and calculate
+        # exact files changed instead of lines in diff
+
+        pushd nx_vms
+          echo "Changes in nx_vms:"
+          hg diff --stat -r "${{NX_VMS_COMMIT}}:${{NX_VMS_COMMIT_OLD}}" .
+          total_changed="$(hg diff --stat -r "${{NX_VMS_COMMIT}}:${{NX_VMS_COMMIT_OLD}}" . | wc -l)"
+          echo "total ${{total_changed}}"
+
+          pushd func_tests
+            echo "Changes in nx_vms/func_tests:"
+            hg diff --stat -r "${{NX_VMS_COMMIT}}:${{NX_VMS_COMMIT_OLD}}" .
+            func_tests_changed="$(hg diff --stat -r "${{NX_VMS_COMMIT}}:${{NX_VMS_COMMIT_OLD}}" . | wc -l)"
+            echo "total ${{func_tests_changed}}"
+          popd
+
+        popd
+
+        if [ "{ignore-functests}" != "false" ] ; then
+          if [ "${{total_changed}}" == "${{func_tests_changed}}" ] ; then
+            echo "Ignore changeset"
+            echo "SHOULD_TRIGGER=false" > SHOULD_TRIGGER.envvar
+          fi
+        fi
+
+    # finally inject
     - inject:
-        properties-file: NX_VMS_COMMIT.envvar
+        properties-file: SHOULD_TRIGGER.envvar
 
-    # freeze if needed and overwrite
     - conditional-step:
-        condition-kind: boolean-expression
-        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
+        condition-kind: strings-match
+        condition-string1: '${{SHOULD_TRIGGER}}'
+        condition-string2: 'false'
         steps:
-        - shell: |
-            #!/bin/bash
-            set -ex
-            echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
-        - inject:
-            properties-file: NX_VMS_COMMIT.envvar
+        - build-description: "RUNNER IS NOT TRIGGERED"
 
-    # We don't use multijob to hide dependency graph from trigger because graph
-    # is too big and takes a while to be loaded
-    # Anyway this graph is available in runner
-    - trigger-builds:
-      - project: '{pipeline}.{branch}.{project}.runner'
-        predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
-          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          BUILD_WEBADMIN=$BUILD_WEBADMIN
-          BUILD_INSTALLER=$BUILD_INSTALLER
-          RUN_UNITTESTS=$RUN_UNITTESTS
-          RUN_FUNCTESTS=$RUN_FUNCTESTS
-          RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
-          PLATFORMS=$PLATFORMS
-          CUSTOMIZATIONS=$CUSTOMIZATIONS
-          _NX_VMS_COMMIT=$NX_VMS_COMMIT
-          CLEAN_BUILD=$CLEAN_BUILD
-        block: false # !! don't wait
-        block-thresholds:
-          failure-threshold: FAILURE
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{SHOULD_TRIGGER}}'
+        condition-string2: 'true'
+        steps:
+        # We don't use multijob to hide dependency graph from trigger because graph
+        # is too big and takes a while to be loaded
+        # Anyway this graph is available in runner
+        - trigger-builds:
+          - project: '{pipeline}.{branch}.{project}.runner'
+            predefined-parameters: |
+              REQUESTED_BY={tag_requested_by}
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+              BUILD_WEBADMIN=$BUILD_WEBADMIN
+              BUILD_INSTALLER=$BUILD_INSTALLER
+              RUN_UNITTESTS=$RUN_UNITTESTS
+              RUN_FUNCTESTS=$RUN_FUNCTESTS
+              RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
+              PLATFORMS=$PLATFORMS
+              CUSTOMIZATIONS=$CUSTOMIZATIONS
+              _NX_VMS_COMMIT=$NX_VMS_COMMIT
+              CLEAN_BUILD=$CLEAN_BUILD
+            block: false # !! don't wait
+            block-thresholds:
+              failure-threshold: FAILURE
 
     publishers:
     - publisher-set-build-name:
