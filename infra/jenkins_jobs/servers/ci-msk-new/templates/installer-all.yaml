@@ -36,6 +36,10 @@
     - p_RUNNER_URL
 
     wrappers:
+    - timestamps
+    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
+
+    builders:
     - inject:
         properties-content: |
           PIPELINE={pipeline}
@@ -53,12 +57,9 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
-    - build-name:
-        name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
-    - timestamps
-    # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
-
-    builders:
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
     - set-custom-build-description
 
     - multijob:
