@@ -208,7 +208,7 @@
         steps:
         - description-setter:
             description: |
-              "RUNNER IS NOT TRIGGERED"
+              RUNNER IS NOT TRIGGERED
 
     - conditional-step:
         condition-kind: strings-match
