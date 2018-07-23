@@ -232,6 +232,8 @@
               Clean build is forced by CLEAN_BUILD var ( $CLEAN_BUILD )
         - folder-delete-operation:
             folder-path: 'build'
+        - folder-delete-operation:
+            folder-path: 'packages'
 
     # create build dir if not exists or removed
     - conditional-step:
@@ -342,7 +344,7 @@
         properties-content: |
           CMAKE_ARG_buildNumber=$BUILD_IDENTITY
           CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
-          CMAKE_ENV_environment=$WORKSPACE/build
+          CMAKE_ENV_environment=$WORKSPACE
     - inject:
         properties-content: |
           WORKDIR=$WORKSPACE/{build-dir}
