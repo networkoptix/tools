@@ -193,14 +193,14 @@
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    - 'installer-unittests-linux':
+    - installer-unittests-linux-dist:
         # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
             unittest-node: unittests-linux
         customization:
         - default
-    - 'installer-unittests-mac':
+    - installer-unittests-mac-dist:
         platform:
         - mac:
             unittest-node: unittests-mac

@@ -1,0 +1,238 @@
+#
+# IMPORTANT NOTE
+#
+# There are 4 job-templates defined in this file
+#
+# These jobs serve for tests based on test distributions
+#
+- job-template: &installer_unittests_default
+    id: installer-unittests-default-dist
+    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest'
+    description: |
+      Run unit tests for {platform} for branch {branch}.
+
+    node: '{unittest-node}'
+    concurrent: true
+    required-build-components: distrib/*unit_tests*,current_config.py
+    unittest-launcher: unittest-launcher-default
+    init-venv-method: init-venv-linux
+    synchronous-reporting: '' # false
+    workspace: 'nx_ut_thr${{EXECUTOR_NUMBER}}/'
+
+    # We have 2 kinds of timeouts:
+    # 1) timeout for entire job
+    # 2) timeout for only testrunner
+    # this is done because testrunner should be able to mark
+    # tests as timed out before it will be killed by build timeout
+    job-timeout: "35" # min
+    testrunner-timeout: "1800" # sec 30 min
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 5
+        option: category
+        categories:
+        - '{unittest-node}'
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_CLEAN_CLONE
+    - p_BUILD_IDENTITY
+    - p_NX_VMS_COMMIT
+    - p_RUNNER_URL
+
+    wrappers:
+    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+          CUSTOMIZATION={customization}
+          PLATFORM={platform}
+    - timestamps
+    - timeout:
+        timeout: '{job-timeout}'
+        fail: true
+        type: absolute
+    - workspace-cleanup
+    - pre-scm-buildstep:
+        failOnError: true
+        buildsteps:
+        - folder-delete-operation:
+            folder-path: 'devtools'
+        - import-hg-repo(if-missing):
+            name: devtools
+            branch: default
+            basedir: $WORKSPACE
+
+    builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+          JUNKSHOP_DB_HOST={junkshop_db_host}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
+          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+    - set-custom-build-description
+
+    - folder-delete-operation:
+        folder-path: 'build'
+
+    # clean marker of unstable build (if exists)
+    - file-delete-operation:
+        includes: unstable.flag
+        excludes: ''
+
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+
+    - description-setter:
+        description: >-
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    - trigger-builds:
+      - project: 'helper.pull-component'
+        predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          PIPELINE=$PIPELINE
+          BRANCH=$BRANCH
+          BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOMIZATION=$CUSTOMIZATION
+          PLATFORM=$PLATFORM
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          SSH_USER=$USER
+          LOCAL_PATH=$WORKSPACE/build/
+          COMPONENTS={required-build-components}
+          NODE_SSH_CONNECTION=$SSH_CONNECTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+        cd build
+        find . -path '*/*unit_tests*.tar.gz' -exec tar -zxvf {{}} \;
+
+    - '{unittest-launcher}':
+        testrunner-timeout: '{testrunner-timeout}'
+    - count-fails
+
+    publishers:
+    - groovy-postbuild:
+        script: !include-raw-escape: ../builders/check_unstable.groovy
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - FAILURE
+          - UNSTABLE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.push-component'
+              block: true
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                BUILD_STATUS=passed
+                COMPONENTS=unit_tests/
+                LOCAL_PATH=$WORKSPACE/
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.unittests-reporter'
+              block: '{synchronous-reporting}'
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                RUNNER_URL=$RUNNER_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
+                JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - FAILURE
+          - UNSTABLE
+          build-steps:
+          - trigger-builds:
+            - project: 'helper.unittests-reporter'
+              block: '{synchronous-reporting}'
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                RUNNER_URL=$RUNNER_URL
+                JUNKSHOP_HOST=$JUNKSHOP_HOST
+                JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
+    - failure-email:
+        email-recipients: '{build-watchers}'
+    - fixed-email:
+        email-recipients: '{build-watchers}'
+
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-windows-dist
+    unittest-launcher: unittest-launcher-windows
+    init-venv-method: init-venv-windows
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-linux-dist
+    unittest-launcher: unittest-launcher-default
+- job-template:
+    <<: *installer_unittests_default
+    # all the same, but not id, node and build steps..
+    id: installer-unittests-mac-dist
+    job-timeout: "20" # min
+    testrunner-timeout: "900" # sec 15 min - limited due to limited mac hosts.
+    required-build-components: bin/*_ut*,lib/,current_config.py
+    unittest-launcher: unittest-launcher-default
