@@ -199,28 +199,28 @@
             - folder-delete-operation:
                 folder-path: 'build'
 
-            # Once we have some info regarding oldbuild config, we'll check that
-            # incremental build is applicable, if not, again remove build folder
+        # Once we have some info regarding oldbuild config, we'll check that
+        # incremental build is applicable, if not, again remove build folder
+        - conditional-step:
+            condition-kind: file-exists
+            condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
+            condition-basedir: workspace
+            steps:
+            - inject:
+                properties-file: BUILD_CONFIG_SHA_OLD.envvar
             - conditional-step:
-                condition-kind: file-exists
-                condition-filename: 'BUILD_CONFIG_SHA_OLD.envvar'
-                condition-basedir: workspace
+                condition-kind: not
+                condition-operand:
+                    condition-kind: strings-match
+                    condition-string1: "${{BUILD_CONFIG_SHA}}"
+                    condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
                 steps:
-                - inject:
-                    properties-file: BUILD_CONFIG_SHA_OLD.envvar
-                - conditional-step:
-                    condition-kind: not
-                    condition-operand:
-                      condition-kind: strings-match
-                      condition-string1: "${{BUILD_CONFIG_SHA}}"
-                      condition-string2: "${{BUILD_CONFIG_SHA_OLD}}"
-                    steps:
-                    - description-setter:
-                        description: >-
-                          Clean build is forced by changed BUILD_CONFIG_SHA,
-                          $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
-                    - folder-delete-operation:
-                        folder-path: 'build'
+                - description-setter:
+                    description: >-
+                        Clean build is forced by changed BUILD_CONFIG_SHA,
+                        $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
+                - folder-delete-operation:
+                    folder-path: 'build'
 
     # Optionally when special flag is set, we also remove build directory
     - conditional-step:
