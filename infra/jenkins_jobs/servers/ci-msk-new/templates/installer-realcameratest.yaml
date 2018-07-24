@@ -36,7 +36,7 @@
     - p_JUNKSHOP_HOST
 
     wrappers:
-    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
+    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     # FIXME: add TEST_SELECT_EXPR for real camera tests
     - inject:
         properties-content: |

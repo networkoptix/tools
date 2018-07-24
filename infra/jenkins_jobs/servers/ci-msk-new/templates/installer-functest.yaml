@@ -51,7 +51,7 @@
         description: Tests to run, space-delimited list. Empty means run all tests.
 
     wrappers:
-    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
+    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
           PIPELINE={pipeline}

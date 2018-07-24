@@ -60,7 +60,7 @@
     build-artifacts-min: 'build/**/*.log'
 
     # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
-    # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one custmizations
+    # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one customization
     # must not be present while we are building other customization.
     # To simplify things we execute this file when it's present in workspace (see below)
     # anyways it's possible to override this file for other use cases.
@@ -88,7 +88,7 @@
     - p_RUNNER_URL
 
     wrappers:
-    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
+    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
           PIPELINE={pipeline}
@@ -151,7 +151,7 @@
         macro: true
 
     # At first, calculate sha for build config files
-    # since this job is crossplatform it's safier to just trigger freeze commit
+    # since this job is crossplatform it's safer to just trigger freeze commit
     # with linux executor than try to inplement cross-platform stuff
 
     # STAGE: CLEANUP
