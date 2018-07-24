@@ -36,6 +36,7 @@ jenkins_plugins:
 - credentials-binding
 - ssh-agent
 # wrappers, conditions and parameters
+- throttle-concurrents
 - job-restrictions
 - nodelabelparameter
 - extended-choice-parameter
