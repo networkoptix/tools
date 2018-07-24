@@ -3,7 +3,9 @@
 CUSTOMIZATIONS_LIST = ("default default_cn default_zh_CN cox "
                        "digitalwatchdog digitalwatchdog_global hanwha "
                        "ipera ionetworks nutech ras senturian systemk "
-                       "tricom ust vista vmsdemoblue vmsdemoorange").split()
+                       "tricom ust vista vmsdemoblue vmsdemoorange "
+                       "metavms"
+                       ).split()
 PLATFORMS_LIST = ("linux-x64 linux-x86 bananapi bpi rpi edge1 "
                   "tx1 android-arm windows-x64 windows-x86 mac ios").split()
 print '''#
