@@ -122,6 +122,22 @@
       <p><iframe src="http://junkshop.enk.me/project/ci/meta-vms" width="100%" height="500" align="center"></iframe>
     regex: develop.vms\..*(build|test)
 
+# meta-vms
+# CI jobs
+- view:
+    name: Cloud-18.2
+    view-type: list
+    description: >-
+      <h3> List of all release builds related to META-VMS </h3>
+      <p>
+      <a href="/job/develop.cloud_18.2_backend.vms.trigger.custom/build?delay=0sec">
+        Request new build </a>
+      <p>
+      <a href="/job/develop.cloud_18.2_backend.vms.runner/lastBuild/rebuild">
+        Rebuild last build </a> (see description about build reason)
+      <p><iframe src="http://junkshop.enk.me/project/ci/cloud_18.2_backend" width="100%" height="500" align="center"></iframe>
+    regex: develop.cloud_18\.2_backend\..*(build|test)
+
 # Mobile 18.2
 - view:
     name: MOB-18.2-db
