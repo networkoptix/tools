@@ -70,6 +70,7 @@
     - p_BRANCH
     - p_CUSTOMIZATION
     - p_PLATFORM
+    - p_BUILD_IDENTITY
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
