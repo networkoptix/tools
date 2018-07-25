@@ -1,5 +1,5 @@
 - project:
-    name: develop-pipeline-cloud_18.2_backend
+    name: develop-pipeline-cloud
 
     project: vms
     junk_shop_host: junkshop.enk.me
