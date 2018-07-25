@@ -30,9 +30,7 @@
     junkshop_location_full_pattern: 'project/$JUNKSHOP_PROJECT_NAME/$BRANCH/$BUILD_IDENTITY'
 
     # utility variables for jobs family which operate on the same workspace
-    hg-local-cache-node: repo # remove me
-    hg-local-cache-node-read: repo-read
-    hg-local-cache-node-write: repo-write
+    hg-local-cache-node: repo
     hg-local-cache-node-workspace: repo
     hg-local-cache-node-throttle-category: repo
     hg-local-cache-node-ip-addr: '192.168.13.116'

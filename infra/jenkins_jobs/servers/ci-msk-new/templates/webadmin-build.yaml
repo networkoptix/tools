@@ -139,10 +139,6 @@
         includes: '{webadmin-build-log}'
         excludes: ''
 
-    # Mark build started
-    - inject:
-        properties-content: |
-          BUILD_STARTED=YES
     - run-process:
         workdir: $WORKSPACE
         executable: nx_vms/webadmin/build.sh
@@ -171,30 +167,24 @@
           - UNSTABLE
           - FAILURE
           build-steps:
-          # Don't publish anything if build even didn't start
-          - conditional-step:
-              condition-kind: strings-match
-              condition-string1: '$BUILD_STARTED'
-              condition-string2: 'YES'
-              steps:
-              - trigger-builds:
-                - project: 'helper.push-component'
-                  block: true
-                  block-thresholds:
-                    failure-threshold: FAILURE
-                  predefined-parameters: |
-                    REQUESTED_BY={tag_requested_by}
-                    BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                    PIPELINE=$PIPELINE
-                    BRANCH=$BRANCH
-                    BUILD_IDENTITY=$BUILD_IDENTITY
-                    CUSTOMIZATION=$CUSTOMIZATION
-                    PLATFORM=$PLATFORM
-                    BUILD_STATUS=passed
-                    LOCAL_PATH=$WORKSPACE/
-                    COMPONENTS={webadmin-build-artifacts}
-                    NODE_SSH_CONNECTION=$SSH_CONNECTION
-                    SSH_USER=$USER
+          - trigger-builds:
+            - project: 'helper.push-component'
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                PIPELINE=$PIPELINE
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BUILD_STATUS=passed
+                LOCAL_PATH=$WORKSPACE/
+                COMPONENTS={webadmin-build-artifacts}
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
 
     - postbuildscript:
         mark-unstable-if-failed: true

@@ -252,27 +252,3 @@
     parameters:
     - string:
         name: JUNKSHOP_DB_HOST
-
-
-# Functional tests parameters
-
-- parameter:
-    name: p_TEST_SELECT_EXPR
-    parameters:
-    - string:
-        name: TEST_SELECT_EXPR
-        default: '{default}'
-        description: >
-          Test selection expression, parameter for pytest '-k' option.
-          Empty means run all tests specified in TEST_LIST parameter below.
-          Example: 'not windows and not smb' to exclude all windows and samba tests.
-          Value is passed as single argument enclosed with quotes. E.g. 'linux and ssh' would end up as '-k "linux and ssh"'.
-          See: https://docs.pytest.org/en/latest/example/markers.html#using-k-expr-to-select-tests-based-on-their-name
-
-- parameter:
-    name: p_TEST_LIST
-    parameters:
-    - string:
-        name: TEST_LIST
-        default: '{default}'
-        description: Tests to run, space-delimited list. Empty means run all tests.

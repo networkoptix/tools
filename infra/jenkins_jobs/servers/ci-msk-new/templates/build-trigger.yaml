@@ -35,13 +35,14 @@
       --------------------------------------------------------------------------------
       </pre>
     # all build triggers will work under the same workspace as well as
-    node: '{hg-local-cache-node-write}'
+    node: '{hg-local-cache-node}'
     workspace: '{hg-local-cache-node-workspace}'
     concurrent: false
 
     timer: ''  # no timed trigger by default
     poll-scm-timer: '' # no scm polling by default
     freeze-commit-now: true # default true
+    clean-workspace: '' # false by default
     clean-build: '' # false by default
     default-build-description: ''
     build-webadmin: true
@@ -72,6 +73,8 @@
         default: '{default-build-description}'
     - simple-separator:
         header: Build parameters
+    - p_CLEAN_WORKSPACE:
+        default: '{clean-workspace}'
     - p_CLEAN_BUILD:
         default: '{clean-build}'
     # FIXME: Figure out why extended choice created from JJB is not visible..
@@ -192,7 +195,7 @@
 
         if [ "{ignore-functests}" != "false" ] ; then
           if [ "${{total_changed}}" == "${{func_tests_changed}}" ] ; then
-            echo "Ignore changeset"
+            echo "Ignore changeset because only func_tests are changed."
             echo "SHOULD_TRIGGER=false" > SHOULD_TRIGGER.envvar
           fi
         fi
@@ -231,6 +234,7 @@
               PLATFORMS=$PLATFORMS
               CUSTOMIZATIONS=$CUSTOMIZATIONS
               _NX_VMS_COMMIT=$NX_VMS_COMMIT
+              CLEAN_WORKSPACE=$CLEAN_WORKSPACE
               CLEAN_BUILD=$CLEAN_BUILD
             block: false # !! don't wait
             block-thresholds:

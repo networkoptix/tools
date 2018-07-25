@@ -2,7 +2,7 @@
     name: 'helper.sync-hg'
 
     # all build triggers will work under the same workspace as well as
-    node: '{hg-local-cache-node-read}'
+    node: repo
     workspace: 'repo-sync-${{EXECUTOR_NUMBER}}'
     concurrent: true
 
