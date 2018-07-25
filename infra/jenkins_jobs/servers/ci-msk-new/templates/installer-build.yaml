@@ -354,6 +354,10 @@
           EXECUTABLE_IS_RELPATH=false
           LOGFILE=build/{cmake-configure-log}
           CMAKE_ENV_PATH=$PATH
+    # Mark build started
+    - inject:
+        properties-content: |
+          BUILD_STARTED=YES
     - groovy:
         version: '{groovy-version}'
         command: !include-raw-escape: ../builders/cmake_configure_wrapper.groovy
@@ -404,29 +408,35 @@
           - UNSTABLE
           - FAILURE
           build-steps:
-          - trigger-builds:
-            - project: 'helper.push-component'
-              predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
-                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                BUILD_STATUS=passed
-                PIPELINE=$PIPELINE
-                BRANCH=$BRANCH
-                BUILD_IDENTITY=$BUILD_IDENTITY
-                CUSTOMIZATION=$CUSTOMIZATION
-                PLATFORM=$PLATFORM
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
-                LOCAL_PATH=$WORKSPACE/{build-dir}/
-                COMPONENTS={build-artifacts}
-                NODE_SSH_CONNECTION=$SSH_CONNECTION
-                SSH_USER=$USER
-              block: true
-              block-thresholds:
-                failure-threshold: FAILURE
-          - description-setter:
-              description: >-
-                <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
-                <a href='$JUNKSHOP_URL'> Junkshop </a>
+          # Don't publish anything if build even didn't start
+          - conditional-step:
+              condition-kind: strings-match
+              condition-string1: '$BUILD_STARTED'
+              condition-string2: 'YES'
+            steps:
+            - trigger-builds:
+              - project: 'helper.push-component'
+                predefined-parameters: |
+                  REQUESTED_BY={tag_requested_by}
+                  BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                  BUILD_STATUS=passed
+                  PIPELINE=$PIPELINE
+                  BRANCH=$BRANCH
+                  BUILD_IDENTITY=$BUILD_IDENTITY
+                  CUSTOMIZATION=$CUSTOMIZATION
+                  PLATFORM=$PLATFORM
+                  NX_VMS_COMMIT=$NX_VMS_COMMIT
+                  LOCAL_PATH=$WORKSPACE/{build-dir}/
+                  COMPONENTS={build-artifacts}
+                  NODE_SSH_CONNECTION=$SSH_CONNECTION
+                  SSH_USER=$USER
+                block: true
+                block-thresholds:
+                  failure-threshold: FAILURE
+            - description-setter:
+                description: >-
+                  <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
+                  <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - postbuildscript:
         mark-unstable-if-failed: true
