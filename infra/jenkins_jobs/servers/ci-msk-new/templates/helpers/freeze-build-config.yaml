@@ -45,7 +45,7 @@
       </pre>
 
     # all build triggers will work under the same workspace as well as
-    node: '{hg-local-cache-node}'
+    node: '{hg-local-cache-node-write}'
     workspace: '{hg-local-cache-node-workspace}'
     concurrent: false
 
@@ -70,6 +70,7 @@
     - p_BRANCH
     - p_CUSTOMIZATION
     - p_PLATFORM
+    - p_BUILD_IDENTITY
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
