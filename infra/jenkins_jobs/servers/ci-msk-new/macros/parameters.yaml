@@ -25,7 +25,7 @@
     parameters:
     - bool:
         name: CLEAN_WORKSPACE
-        default: false
+        default: '{default}'
         description: >-
           Build strategy, don't even try to reuse existing workspace.
           Clean EVERYTHING (HG repos, build, distrib and other folders).

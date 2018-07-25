@@ -179,7 +179,7 @@
               triggered automatically by timer
             platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
             customizations: default,hanwha,vista,digitalwatchdog
-            clean-build: true
+            clean-workspace: true
             timer: '0 0 * * *'
         - custom:
             detailed-job-description: |-

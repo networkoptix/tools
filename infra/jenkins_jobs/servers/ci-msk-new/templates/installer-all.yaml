@@ -24,7 +24,8 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
-    - p_CLEAN_WORKSPACE
+    - p_CLEAN_WORKSPACE:
+        default: false
     - p_CLEAN_CLONE
     - p_CLEAN_BUILD:
         default: false

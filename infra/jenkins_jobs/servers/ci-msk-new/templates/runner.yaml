@@ -47,7 +47,8 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - p_CLEAN_WORKSPACE
+    - p_CLEAN_WORKSPACE:
+        default: false
     - p_CLEAN_BUILD:
         default: false
     - p_CLEAN_CLONE

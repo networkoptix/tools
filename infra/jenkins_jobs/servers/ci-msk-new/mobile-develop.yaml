@@ -108,7 +108,7 @@
             platforms: android-arm,ios
             customizations: default
             freeze-commit-now: true
-            clean-build: true
+            clean-workspace: true
             timer: 'H 6 * * *'
 
     # RUNNER - root launcher of all builds

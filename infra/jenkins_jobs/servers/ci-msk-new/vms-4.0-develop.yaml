@@ -135,7 +135,7 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             freeze-commit-now: true
-            clean-build: true
+            clean-workspace: true
             timer: '4 0 * * *'
         - custom:
             detailed-job-description: |-
