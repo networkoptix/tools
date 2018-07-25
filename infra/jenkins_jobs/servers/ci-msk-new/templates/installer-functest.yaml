@@ -35,20 +35,10 @@
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
     - p_JUNKSHOP_DB_HOST
-
-    - string:
-        name: TEST_SELECT_EXPR
+    - p_TEST_SELECT_EXPR:
         default: '{test-select-expr}'
-        description: >
-          Test selection expression, parameter for pytest '-k' option.
-          Empty means run all tests specified in TEST_LIST parameter below.
-          Example: 'not windows and not smb' to exclude all windows and samba tests.
-          Value is passed as single argument enclosed with quotes. E.g. 'linux and ssh' would end up as '-k "linux and ssh"'.
-          See: https://docs.pytest.org/en/latest/example/markers.html#using-k-expr-to-select-tests-based-on-their-name
-    - string:
-        name: TEST_LIST
+    - p_TEST_LIST:
         default: '{test-list}'
-        description: Tests to run, space-delimited list. Empty means run all tests.
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
