@@ -95,6 +95,8 @@
             poll-scm-timer: '* * * * *'
             freeze-commit-now: true
             ignore-functests: 'true'
+    - custom-trigger:
+        preset:
         - nightly:
             detailed-job-description: |-
               This trigger serves for nigtly clean builds to verify the state of product

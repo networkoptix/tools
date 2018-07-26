@@ -111,6 +111,8 @@
             poll-scm-timer: '* * * * *'
             freeze-commit-now: true
             ignore-functests: 'true'
+    - custom-trigger:
+        preset:
         - custom:
             detailed-job-description: |-
               This trigger serves for custom builds.

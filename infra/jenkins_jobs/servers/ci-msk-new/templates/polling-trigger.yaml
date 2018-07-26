@@ -58,11 +58,6 @@
     properties:
     - heavy-job:
         weight: 1
-    - throttle:
-        option: category
-        max-total: 1
-        categories:
-        - '{hg-local-cache-node-throttle-category}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
