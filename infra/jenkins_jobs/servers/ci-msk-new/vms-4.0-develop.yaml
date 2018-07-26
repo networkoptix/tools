@@ -169,6 +169,20 @@
             freeze-commit-now: true
             run-unittests: '' # false
             run-functests: true
+
+    - '{pipeline}.{branch}.{project}.trigger.functest.{preset}':
+        preset:
+        - nightly:
+            detailed-job-description: |-
+              Run nightly functional test with schedule "{timer}".
+
+              It should not be triggered manually excluding debugging of infra problems
+              associated with only this trigger type.
+            default-build-description: >-
+              Nightly functional tests
+            timer: 'H 21 * * *'
+
+
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
