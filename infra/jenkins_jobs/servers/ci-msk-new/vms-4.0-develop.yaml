@@ -119,7 +119,6 @@
               Triggered on push event
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            poll-scm-timer: '* * * * *'
             ignore-functests: 'true'
     - custom-trigger:
         preset:

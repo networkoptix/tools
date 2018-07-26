@@ -92,7 +92,6 @@
               Triggered on push event
             platforms: android-arm,ios
             customizations: default
-            poll-scm-timer: '* * * * *'
             ignore-functests: 'true'
     - custom-trigger:
         preset:

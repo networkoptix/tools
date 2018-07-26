@@ -70,7 +70,6 @@
     concurrent: false
 
     timer: ''  # no timed trigger by default
-    poll-scm-timer: '' # no scm polling by default
     freeze-commit-now: true # default true
     clean-workspace: '' # false by default
     clean-build: '' # false by default
