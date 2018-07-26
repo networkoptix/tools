@@ -129,7 +129,7 @@
         set -ex
         cd build
         find . -path '*/*unit_tests*.tar.gz' -exec tar -zxvf {{}} \;
-        find . -path '*/*unit_tests*.zip' -exec unzip -o '{}' \;
+        find . -path '*/*unit_tests*.zip' -exec unzip -o '{{}}' \;
 
     - '{unittest-launcher}':
         testrunner-timeout: '{testrunner-timeout}'
