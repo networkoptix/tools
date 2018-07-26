@@ -177,3 +177,6 @@ alertmanager_route:
   # been sent successfully for an alert. (Usually ~3h or more).
   repeat_interval: 4h
   receiver: email
+
+mac_node_exporter_hosts:
+  "{{ groups['build_mac'] | map('extract', hostvars, ['node_exporter_address']) | list }}"

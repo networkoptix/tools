@@ -163,3 +163,6 @@ grafana_api_keys: []
 
 # The location where the keys should be stored.
 grafana_api_keys_dir: "{{ lookup('env', 'HOME') }}/grafana/keys"
+
+# List of macOS hosts with node exporter installed
+mac_node_exporter_hosts: []
