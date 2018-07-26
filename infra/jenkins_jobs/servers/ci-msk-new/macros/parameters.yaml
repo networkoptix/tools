@@ -9,6 +9,14 @@
         description: |
           Sticky label to mark individual build and query it's artifact in future
 - parameter:
+    name: p_UPSTREAM_JOB_NAME
+    parameters:
+    - string:
+        name: UPSTREAM_JOB_NAME
+        default: ''
+        description: |
+          JOB_NAME of upstream job - that is job which triggered this one.
+- parameter:
     name: p_BUILD_DESCRIPTION
     parameters:
     - string:

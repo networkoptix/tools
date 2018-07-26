@@ -225,6 +225,7 @@
           - project: '{pipeline}.{branch}.{project}.runner'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
+              UPSTREAM_JOB_NAME=$JOB_NAME
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               BUILD_WEBADMIN=$BUILD_WEBADMIN
               BUILD_INSTALLER=$BUILD_INSTALLER
