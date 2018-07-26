@@ -116,7 +116,7 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BRANCH=$BRANCH
             PIPELINE=$PIPELINE
-            NX_VMS_COMMIT=$USE_NX_VMS_COMMIT
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: 'helper.freeze-nx-vms-commit'
