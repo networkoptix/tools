@@ -1,4 +1,7 @@
+#!/usr/bin/env python
+
 # This is a helper utility to generate list of all sub jobs in multijob
+# usage: generate_release_runner.py > ../templates/runner.yaml
 
 CUSTOMIZATIONS_LIST = [
     'default',
