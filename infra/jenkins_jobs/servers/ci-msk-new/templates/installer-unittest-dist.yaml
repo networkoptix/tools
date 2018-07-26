@@ -129,6 +129,7 @@
         set -ex
         cd build
         find . -path '*/*unit_tests*.tar.gz' -exec tar -zxvf {{}} \;
+        find . -path '*/*unit_tests*.zip' -exec unzip -o '{}' \;
 
     - '{unittest-launcher}':
         testrunner-timeout: '{testrunner-timeout}'
@@ -234,5 +235,4 @@
     id: installer-unittests-mac-dist
     job-timeout: "20" # min
     testrunner-timeout: "900" # sec 15 min - limited due to limited mac hosts.
-    required-build-components: bin/*_ut*,lib/,current_config.py
     unittest-launcher: unittest-launcher-default
