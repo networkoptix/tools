@@ -27,3 +27,4 @@
 
   roles:
   - role: scalability_node
+  - role: cloudalchemy.node-exporter
