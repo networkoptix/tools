@@ -93,7 +93,6 @@
             platforms: android-arm,ios
             customizations: default
             poll-scm-timer: '* * * * *'
-            freeze-commit-now: true
             ignore-functests: 'true'
     - custom-trigger:
         preset:

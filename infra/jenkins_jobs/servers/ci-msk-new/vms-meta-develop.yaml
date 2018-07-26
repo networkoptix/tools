@@ -109,7 +109,6 @@
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms
             poll-scm-timer: '* * * * *'
-            freeze-commit-now: true
             ignore-functests: 'true'
     - custom-trigger:
         preset:

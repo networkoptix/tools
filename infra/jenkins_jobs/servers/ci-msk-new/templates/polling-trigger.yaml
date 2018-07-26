@@ -42,7 +42,6 @@
 
     timer: ''  # no timed trigger by default
     poll-scm-timer: '' # no scm polling by default
-    freeze-commit-now: true # default true
     clean-workspace: '' # false by default
     clean-build: '' # false by default
     default-build-description: ''
@@ -88,11 +87,6 @@
         default: '{run-functests}'
     - p_RUN_REALCAMERATESTS:
         default: '{run-realcameratests}'
-    - string:
-        name: _NX_VMS_COMMIT
-        default: '{branch}'
-    - p_FREEZE_COMMIT_NOW:
-        default: '{freeze-commit-now}'
 
     triggers:
     - timed: "{timer}"
@@ -112,7 +106,7 @@
     scm:
     - hg-la:
         project-name: nx_vms
-        branch-name: '$_NX_VMS_COMMIT'
+        branch-name: '{branch}'
 
     builders:
     - inject:
@@ -135,20 +129,9 @@
     - shell: |
         #!/bin/bash
         set -ex
-        echo "NX_VMS_COMMIT=${{_NX_VMS_COMMIT}}" > 'NX_VMS_COMMIT.envvar'
+        echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
     - inject:
         properties-file: NX_VMS_COMMIT.envvar
-    # freeze if needed and overwrite
-    - conditional-step:
-        condition-kind: boolean-expression
-        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
-        steps:
-        - shell: |
-            #!/bin/bash
-            set -ex
-            echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
-        - inject:
-            properties-file: NX_VMS_COMMIT.envvar
     # load old commit sha
     - get-old-envvar:
         varname: NX_VMS_COMMIT
