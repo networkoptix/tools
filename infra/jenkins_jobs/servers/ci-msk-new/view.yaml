@@ -147,6 +147,16 @@
       <h3> List of all builds related to Cloud </h3>
     regex: develop.cloud_.*(build|test)
 
+# 4.0 alpha for pretorian
+# CI jobs
+- view:
+    name: VMS-4.0-alpha
+    view-type: list
+    description: >-
+      <h3> List of all builds related to 4.0 alpha </h3>
+    regex: develop.vms_4.0_alpha.*(build|test)
+
+
 # Mobile 18.2
 - view:
     name: MOB-18.2-db
