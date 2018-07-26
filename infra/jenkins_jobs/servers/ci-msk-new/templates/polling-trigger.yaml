@@ -87,6 +87,11 @@
         default: '{run-functests}'
     - p_RUN_REALCAMERATESTS:
         default: '{run-realcameratests}'
+    - administrative-section-separator
+    - string:
+        name: IGNORE_FUNCTESTS_COMMITS
+        default: '{ignore-functests}'
+
 
     triggers:
     - timed: "{timer}"
@@ -168,7 +173,7 @@
 
         popd
 
-        if [ "{ignore-functests}" != "false" ] ; then
+        if [ "$IGNORE_FUNCTESTS_COMMITS" != "false" ] ; then
           if [ "${{total_changed}}" == "${{func_tests_changed}}" ] ; then
             echo "Ignore changeset because only func_tests are changed."
             echo "SHOULD_TRIGGER=false" > SHOULD_TRIGGER.envvar
