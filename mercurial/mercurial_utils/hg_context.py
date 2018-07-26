@@ -40,10 +40,12 @@ class HgContext:
             command += tuple(branch)
         return self.execute(*command).split()
 
-    def rebase(self, source=None, dest=None, *args):
+    def rebase(self, source=None, base=None, dest=None, *args):
         command = ("rebase",)
         if source:
             command += ("--source", source)
+        if base:
+            command += ("--base", base)
         if dest:
             command += ("--dest", dest)
         command += args

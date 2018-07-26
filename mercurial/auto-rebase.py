@@ -34,18 +34,18 @@ def auto_rebase():
         print("Current branch has no private heads.")
         exit(1)
 
-    source = None
+    base = None
     if hg.phase(".") == "public":
         if len(private_heads) > 1:
             print("You have multiple private heads. Cannot rebase automatically.")
             exit(1)
         else:
-            source = private_heads[0]
+            base = private_heads[0]
 
-    print("Rebasing {} to {}".format(source if source else ".", dest))
-    hg.rebase(source=source, dest=dest)
+    print("Rebasing {} to {}".format(base if base else ".", dest))
+    hg.rebase(base=base, dest=dest)
 
-    if source:
+    if base:
         hg.update()
 
 
