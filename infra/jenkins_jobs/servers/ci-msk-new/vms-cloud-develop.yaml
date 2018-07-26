@@ -118,7 +118,7 @@
     # TRIGGERS - main entry points
 
     # trigger that polls scm for changes and runs in fire & forget mode
-    - '{pipeline}.{branch}.{project}.trigger.{preset}':
+    - polling-trigger:
         preset:
         - on-push:
             detailed-job-description: |-

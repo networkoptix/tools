@@ -99,6 +99,15 @@
           all builds will be produced within the same repo state
 
 - parameter:
+    name: p_USE_NX_VMS_COMMIT
+    parameters:
+    - string:
+        name: USE_NX_VMS_COMMIT
+        default: '{default}'
+        description: >-
+          Use AUTO, LATEST, branch name or exact sha of commit
+
+- parameter:
     name: p_BUILD_IDENTITY
     parameters:
     - string:
@@ -106,6 +115,16 @@
         default: ''
         description: >-
           Build number in context of this pipeline.
+
+- parameter:
+    name: p_USE_BUILD_IDENTITY
+    parameters:
+    - string:
+        name: USE_BUILD_IDENTITY
+        default: '{default}'
+        description: >-
+          Use AUTO, or existing build
+
 - parameter:
     name: p_PLATFORMS
     parameters:
@@ -176,7 +195,15 @@
           edge cases)
 
 # Specific parameters
-
+- parameter:
+    name: p_FREEZE_COMMIT_NOW
+    parameters:
+    - bool:
+        name: FREEZE_COMMIT_NOW
+        default: '{default}'
+        description: >-
+          Freeze nx_vms commit sources right now, don't wait for starting builds
+          (this does not affect commit from functests branch)
 # Define paths to operate on
 - parameter:
     name: p_LOCAL_PATH

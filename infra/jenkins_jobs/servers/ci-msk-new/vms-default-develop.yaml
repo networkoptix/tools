@@ -117,7 +117,7 @@
     # TRIGGERS - main entry points
 
     # trigger that polls scm for changes and runs in fire & forget mode
-    - '{pipeline}.{branch}.{project}.trigger.{preset}':
+    - polling-trigger:
         preset:
         - on-push:
             detailed-job-description: |-
@@ -129,6 +129,8 @@
             poll-scm-timer: '* * * * *'
             freeze-commit-now: true
             ignore-functests: 'true'
+    - custom-trigger:
+        preset:
         - custom:
             detailed-job-description: |-
               This trigger serves for custom builds.

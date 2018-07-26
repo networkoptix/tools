@@ -27,9 +27,14 @@
           default: '{branch}'
 
     builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
     - set-custom-build-description
     - shell: |
         #!/bin/bash
+        set -ex
         echo "REGISTERED_BUILD_IDENTITY=NONE" > REGISTERED_BUILD_IDENTITY.envvar
         echo "REGISTERED_NX_VMS_COMMIT=NONE" > REGISTERED_NX_VMS_COMMIT.envvar
 
@@ -41,8 +46,7 @@
         project: '{pipeline}.{branch}.{project}.register-build'
         filter: 'REGISTERED_BUILD_IDENTITY.envvar,REGISTERED_NX_VMS_COMMIT.envvar'
         which-build: last-successful
-        parameter-filters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
+        parameter-filters: BUILD_IDENTITY=$BUILD_IDENTITY
         optional: true
 
     - inject:
@@ -52,16 +56,23 @@
 
     - shell: |
         #!/bin/bash
+        set -ex
         # Registering new commits
         echo "REGISTERED_BUILD_IDENTITY=${{BUILD_IDENTITY}}" > REGISTERED_BUILD_IDENTITY.envvar
         echo "REGISTERED_NX_VMS_COMMIT=${{NX_VMS_COMMIT}}" > REGISTERED_NX_VMS_COMMIT.envvar
 
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+
     - shell: |
         #!/bin/bash
+        set -ex
         # Check that build vars are the same
         if [ "${{REGISTERED_BUILD_IDENTITY}}" != "NONE" ] ; then
           # if doesn' match KEY -> something is very bad
           if [ "${{REGISTERED_BUILD_IDENTITY}}" != "${{BUILD_IDENTITY}}" ] ; then
+            echo "REGISTERED_BUILD_IDENTITY does not match provided BUILD_IDENTITY"
             exit 1
           fi
         fi
@@ -69,6 +80,7 @@
         if [ "${{REGISTERED_NX_VMS_COMMIT}}" != "NONE" ] ; then
           # Once we built something with commit, no other commits are allowed
           if [ "${{REGISTERED_NX_VMS_COMMIT}}" != "${{NX_VMS_COMMIT}}" ] ; then
+          echo "REGISTERED_NX_VMS_COMMIT does not match provided NX_VMS_COMMIT"
             exit 1
           fi
         fi

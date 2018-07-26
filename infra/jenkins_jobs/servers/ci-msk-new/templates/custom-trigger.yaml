@@ -1,0 +1,289 @@
+- job-template:
+    name: '{pipeline}.{branch}.{project}.trigger.{preset}'
+    id: custom-trigger
+    description: |
+      <pre>
+      ================================================================================
+      Build Trigger
+      ================================================================================
+
+      JOB MAINTAINERS
+        {job-maintainers}
+        (NOT notified by email on build failures)
+
+      SOURCES
+        devtools/infra/jenkins_jobs/servers/templates/build-trigger.yaml
+
+      --------------------------------------------------------------------------------
+
+      This job serves for starting bunch of builds associated with particular commit
+      in nx_vms repository and also assigned build identity.
+
+      By default (e.g. triggered automatically) it will build following installers
+      {platforms}
+      {customizations}
+
+      There are some different triggers available.
+      See all triggers on {jenkins_host}/view/triggers/
+
+      {detailed-job-description}
+
+      See more details on build procedure in corresponding downstream "*.runner" job
+
+      Note, that this job doesn't wait for downstream build completion.
+      Find your build in crsp build queue
+
+      There are options for USE_NX_VMS_COMMIT:
+      1. LATEST - latest commit in branch
+      1.1. LATEST + FREEZE_COMMIT_NOW=true
+                  - use latest commit in branch + resolve it right now and skip
+                      runner if "ignore-functests" is set and runner shouldn't be
+                      triggered
+      2. AUTO + USE_BUILD_IDENTITY=<value>
+                  - commit thet will be set based on commit from existing build
+      3. <value>
+                  - exact commit to build
+
+      There are options for USE_BUILD_IDENTITY:
+      1. NEW - register build as new build
+      2. <value>  - use existing build
+
+      Note: guessing BUILD_IDENTITY based on commit sha is bad idea...
+
+      For all options there are somr limitations:
+      USE_NX_VMS_COMMIT | USE_BUILD_IDENTITY | FREEZE_COMMIT_NOW | Ok?
+      LATEST            | NEW                | true              | +
+      LATEST            | NEW                | false             | +
+      LATEST            | <value>            | N/A               | no
+      AUTO              | NEW                | true              | +
+      AUTO              | NEW                | false             | +
+      AUTO              | <value>            | N/A               | +
+      <value>           | NEW                | true              | +
+      <value>           | NEW                | false             | +
+      <value>           | <value>            | N/A               | no
+
+      --------------------------------------------------------------------------------
+
+      </pre>
+    # all build triggers will work under the same workspace as well as
+    node: 'runner'
+    concurrent: false
+
+    timer: ''  # no timed trigger by default
+    poll-scm-timer: '' # no scm polling by default
+    freeze-commit-now: true # default true
+    clean-workspace: '' # false by default
+    clean-build: '' # false by default
+    default-build-description: ''
+    build-webadmin: true
+    build-installer: true
+    run-functests: '' # false
+    run-unittests: true
+    run-realcameratests: '' # false
+
+    ignore-functests: 'false' #
+    # detailed-job-description required!
+
+    use-build-identity: NEW
+    use-nx-vms-commit: LATEST
+
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        option: category
+        max-total: 1
+        categories:
+        - '{hg-local-cache-node-throttle-category}'
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: '{default-build-description}'
+    - simple-separator:
+        header: Build parameters
+    - p_CLEAN_WORKSPACE:
+        default: '{clean-workspace}'
+    - p_CLEAN_BUILD:
+        default: '{clean-build}'
+    # FIXME: Figure out why extended choice created from JJB is not visible..
+    - p_PLATFORMS:
+        default: '{platforms}'
+    - p_CUSTOMIZATIONS:
+        default: '{customizations}'
+    - p_BUILD_WEBADMIN:
+        default: '{build-webadmin}'
+    - p_BUILD_INSTALLER:
+        default: '{build-installer}'
+    - p_RUN_UNITTESTS:
+        default: '{run-unittests}'
+    - p_RUN_FUNCTESTS:
+        default: '{run-functests}'
+    - p_RUN_REALCAMERATESTS:
+        default: '{run-realcameratests}'
+    - p_USE_BUILD_IDENTITY:
+        default: '{use-build-identity}'
+    - p_USE_NX_VMS_COMMIT:
+        default: '{use-nx-vms-commit}'
+    - p_FREEZE_COMMIT_NOW:
+        default: '{freeze-commit-now}'
+
+    triggers:
+    - timed: "{timer}"
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 5 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+    - inject:
+        properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+          JUNKSHOP_DB_HOST={junkshop_db_host}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
+    - set-custom-build-description
+
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{USE_NX_VMS_COMMIT}}-${{USE_BUILD_IDENTITY}}'
+        condition-string2: 'AUTO-AUTO'
+        steps:
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo "AUTO-AUTO is not valid"
+            exit 1
+    # inject BUILD_IDENTITY as is + save
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "BUILD_IDENTITY=${{USE_BUILD_IDENTITY}}" > 'BUILD_IDENTITY.envvar'
+    - inject:
+        properties-file: BUILD_IDENTITY.envvar
+
+    # inject NX_VMS_COMMIT as is + save
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "NX_VMS_COMMIT=${{USE_NX_VMS_COMMIT}}" > 'NX_VMS_COMMIT.envvar'
+    - inject:
+        properties-file: NX_VMS_COMMIT.envvar
+
+    # if it's latest, get latest
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{NX_VMS_COMMIT}}'
+        condition-string2: 'LATEST'
+        steps:
+        - trigger-builds:
+          - project: 'helper.freeze-nx-vms-commit'
+            predefined-parameters: |
+              REQUESTED_BY={tag_requested_by}
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+              BRANCH=$BRANCH
+              PIPELINE=$PIPELINE
+              NX_VMS_COMMIT=$BRANCH
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            block: true
+            block-thresholds:
+              failure-threshold: FAILURE
+        - copyartifact:
+            project: 'helper.freeze-nx-vms-commit'
+            filter: 'NX_VMS_COMMIT.envvar'
+            which-build: last-completed
+            parameter-filters: REQUESTED_BY={tag_requested_by}
+        - inject:
+            properties-file: 'NX_VMS_COMMIT.envvar'
+
+    # if it's auto, get from existing build
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{NX_VMS_COMMIT}}'
+        condition-string2: 'AUTO'
+        steps:
+        - copyartifact:
+            project: '{pipeline}.{branch}.{project}.register-build'
+            filter: 'NX_VMS_COMMIT.envvar'
+            which-build: last-successful
+            parameter-filters: >-
+              BUILD_IDENTITY=$USE_BUILD_IDENTITY
+            optional: false
+        - inject:
+            properties-file: 'NX_VMS_COMMIT.envvar'
+
+    # if it's auto, get from existing build
+    # freeze if needed and overwrite
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
+        steps:
+        - trigger-builds:
+          - project: 'helper.freeze-nx-vms-commit'
+            predefined-parameters: |
+              REQUESTED_BY={tag_requested_by}
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+              BRANCH=$BRANCH
+              PIPELINE=$PIPELINE
+              NX_VMS_COMMIT=$NX_VMS_COMMIT
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            block: true
+            block-thresholds:
+              failure-threshold: FAILURE
+        - copyartifact:
+            project: 'helper.freeze-nx-vms-commit'
+            filter: 'NX_VMS_COMMIT.envvar'
+            which-build: last-completed
+            parameter-filters: REQUESTED_BY={tag_requested_by}
+        - inject:
+            properties-file: 'NX_VMS_COMMIT.envvar'
+
+    # We don't use multijob to hide dependency graph from trigger because graph
+    # is too big and takes a while to be loaded
+    # Anyway this graph is available in runner
+    - trigger-builds:
+      - project: '{pipeline}.{branch}.{project}.runner'
+        predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
+          UPSTREAM_JOB_NAME=$JOB_NAME
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          BUILD_WEBADMIN=$BUILD_WEBADMIN
+          BUILD_INSTALLER=$BUILD_INSTALLER
+          RUN_UNITTESTS=$RUN_UNITTESTS
+          RUN_FUNCTESTS=$RUN_FUNCTESTS
+          RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
+          PLATFORMS=$PLATFORMS
+          CUSTOMIZATIONS=$CUSTOMIZATIONS
+          USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
+          USE_BUILD_IDENTITY=$BUILD_IDENTITY
+          CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+          CLEAN_BUILD=$CLEAN_BUILD
+        block: false # !! don't wait
+        block-thresholds:
+          failure-threshold: FAILURE
+
+    publishers:
+    - publisher-set-build-name:
+        name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
+    - archive:
+        artifacts: '*.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job-maintainers}'

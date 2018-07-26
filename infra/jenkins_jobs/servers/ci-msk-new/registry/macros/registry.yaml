@@ -19,8 +19,7 @@
         project: '{pipeline}.{branch}.{project}.register-build'
         filter: 'NX_VMS_COMMIT.envvar'
         which-build: last-successful
-        parameter-filters: |
-          BUILD_IDENTITY=$BUILD_IDENTITY
+        parameter-filters: BUILD_IDENTITY=$BUILD_IDENTITY
         optional: false
     - inject:
         properties-file: 'NX_VMS_COMMIT.envvar'

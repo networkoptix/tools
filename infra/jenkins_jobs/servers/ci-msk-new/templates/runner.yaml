@@ -45,9 +45,10 @@
         default: false
     - p_RUN_REALCAMERATESTS:
         default: false
-    - string:
-        name: _NX_VMS_COMMIT
+    - p_USE_NX_VMS_COMMIT:
         default: '{branch}'
+    - p_USE_BUILD_IDENTITY:
+        default: NEW
     - p_CLEAN_WORKSPACE:
         default: false
     - p_CLEAN_BUILD:
@@ -79,11 +80,32 @@
           def parentDescription = parentBuild.getDescription()
           parentBuild.setDescription(parentDescription + "<br>" + currentLink)
 
+    # inject as is
     - inject:
         properties-content: |
-          BUILD_IDENTITY=undef
-          NX_VMS_COMMIT=undef
+          BUILD_IDENTITY=$USE_BUILD_IDENTITY
+          NX_VMS_COMMIT=$USE_NX_VMS_COMMIT
 
+    # if it's auto, get from existing build
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{NX_VMS_COMMIT}}'
+        condition-string2: 'AUTO'
+        steps:
+        # Note, that we don't want to copy BUILD_IDENTITY. because we don't want
+        # to override the one that came from args
+
+        - copyartifact:
+            project: '{pipeline}.{branch}.{project}.register-build'
+            filter: 'NX_VMS_COMMIT.envvar'
+            which-build: last-successful
+            parameter-filters: >-
+              BUILD_IDENTITY=$USE_BUILD_IDENTITY
+            optional: false
+        - inject:
+            properties-file: 'NX_VMS_COMMIT.envvar'
+
+    # nx commit must be freezed anyway
     - multijob:
         name: Freeze nx commit
         projects:
@@ -94,7 +116,7 @@
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BRANCH=$BRANCH
             PIPELINE=$PIPELINE
-            NX_VMS_COMMIT=$_NX_VMS_COMMIT
+            NX_VMS_COMMIT=$USE_NX_VMS_COMMIT
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     - copyartifact:
         project: 'helper.freeze-nx-vms-commit'
@@ -125,21 +147,28 @@
     - inject:
         properties-file: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
 
-    - multijob:
-        name: Request new release build id
-        projects:
-        - name: '{pipeline}.build_number.generator'
-          kill-phase-on: FAILURE
-          predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-    - copyartifact:
-        project: '{pipeline}.build_number.generator'
-        filter: 'BUILD_IDENTITY.envvar'
-        which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
-    - inject:
-        properties-file: 'BUILD_IDENTITY.envvar'
+    # Build identity may be defained in args, or use NEW keqyword,
+    # which means that we need to create one..
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{USE_BUILD_IDENTITY}}'
+        condition-string2: 'NEW'
+        steps:
+        - multijob:
+            name: Request new release build id
+            projects:
+            - name: '{pipeline}.build_number.generator'
+              kill-phase-on: FAILURE
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        - copyartifact:
+            project: '{pipeline}.build_number.generator'
+            filter: 'BUILD_IDENTITY.envvar'
+            which-build: last-completed
+            parameter-filters: REQUESTED_BY={tag_requested_by}
+        - inject:
+            properties-file: 'BUILD_IDENTITY.envvar'
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
     # TODO: Should we fetch all links from publisher or something like that?
@@ -165,8 +194,9 @@
 
     - description-setter:
         description: |
-          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($_NX_VMS_COMMIT)
+          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($USE_NX_VMS_COMMIT)
 
+    # At this step we will register id->commit or fail if we have wrong commit for this id.
     - build-registry-add:
         pipeline: '{pipeline}'
         branch: '{branch}'

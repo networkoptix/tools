@@ -83,7 +83,7 @@
 
     # TRIGGERS - main entry points
 
-    - '{pipeline}.{branch}.{project}.trigger.{preset}':
+    - polling-trigger:
         preset:
         - on-push:
             detailed-job-description: |-

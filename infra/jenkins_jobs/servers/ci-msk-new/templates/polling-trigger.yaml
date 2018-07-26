@@ -1,5 +1,6 @@
 - job-template:
     name: '{pipeline}.{branch}.{project}.trigger.{preset}'
+    id: polling-trigger
     description: |
       <pre>
       ================================================================================
@@ -95,12 +96,9 @@
     - string:
         name: _NX_VMS_COMMIT
         default: '{branch}'
-    - bool:
-        name: FREEZE_COMMIT_NOW
+    - p_FREEZE_COMMIT_NOW:
         default: '{freeze-commit-now}'
-        description: >-
-          Freeze nx_vms commit sources right now, don't wait for starting builds
-          (this does not affect commit from functests branch)
+
     triggers:
     - timed: "{timer}"
     - pollscm:
@@ -170,6 +168,7 @@
         # Defaults to trigger
         echo "SHOULD_TRIGGER=true" > SHOULD_TRIGGER.envvar
 
+    # TODO: remove copy-paste
     - shell: |
         #!/bin/bash
         set -ex
@@ -234,7 +233,8 @@
               RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
               PLATFORMS=$PLATFORMS
               CUSTOMIZATIONS=$CUSTOMIZATIONS
-              _NX_VMS_COMMIT=$NX_VMS_COMMIT
+              USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
+              USE_BUILD_IDENTITY=NEW
               CLEAN_WORKSPACE=$CLEAN_WORKSPACE
               CLEAN_BUILD=$CLEAN_BUILD
             block: false # !! don't wait

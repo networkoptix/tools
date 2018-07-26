@@ -110,7 +110,7 @@
     # list of jobs to generate
     jobs:
 
-    - '{pipeline}.{branch}.{project}.trigger.{preset}':
+    - polling-trigger:
         preset:
         - on-push:
             detailed-job-description: |-
