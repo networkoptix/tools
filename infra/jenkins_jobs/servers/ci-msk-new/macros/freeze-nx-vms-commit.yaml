@@ -1,0 +1,33 @@
+- builder:
+    name: freeze-nx-vms-commit(remote)
+    builders:
+    - trigger-builds:
+      - project: 'helper.freeze-nx-vms-commit'
+        predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          BRANCH={branch}
+          PIPELINE=$PIPELINE
+          NX_VMS_COMMIT={commit-to-freeze}
+          NX_VMS_COMMIT_VARNAME={commit-varname}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+    - copyartifact:
+        project: 'helper.freeze-nx-vms-commit'
+        filter: '{commit-varname}.envvar'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY={tag_requested_by}
+    - inject:
+        properties-file: '{commit-varname}.envvar'
+
+- builder:
+    name: freeze-nx-vms-commit(local)
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "{commit-varname}={commit-to-freeze}" > '{commit-varname}.envvar'
+    - inject:
+        properties-file: '{commit-varname}.envvar'

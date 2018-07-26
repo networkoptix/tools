@@ -126,12 +126,10 @@
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
 
-    - shell: |
-        #!/bin/bash
-        set -ex
-        echo "NX_VMS_COMMIT=${{MERCURIAL_REVISION_SHORT}}" > 'NX_VMS_COMMIT.envvar'
-    - inject:
-        properties-file: NX_VMS_COMMIT.envvar
+    - freeze-nx-vms-commit(local):
+        commit-to-freeze: $MERCURIAL_REVISION_SHORT
+        commit-varname: NX_VMS_COMMIT
+
     # load old commit sha
     - get-old-envvar:
         varname: NX_VMS_COMMIT

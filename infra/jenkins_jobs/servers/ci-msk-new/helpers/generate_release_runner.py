@@ -147,47 +147,19 @@ print '''#
         - inject:
             properties-file: 'NX_VMS_COMMIT.envvar'
 
-    # nx commit must be freezed anyway
-    - multijob:
-        name: Freeze nx commit
-        projects:
-        - name: 'helper.freeze-nx-vms-commit'
-          kill-phase-on: FAILURE
-          predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            BRANCH=$BRANCH
-            PIPELINE=$PIPELINE
-            NX_VMS_COMMIT=$NX_VMS_COMMIT
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-    - copyartifact:
-        project: 'helper.freeze-nx-vms-commit'
-        filter: 'NX_VMS_COMMIT.envvar'
-        which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
-    - inject:
-        properties-file: 'NX_VMS_COMMIT.envvar'
+    # nx commit
+    - freeze-nx-vms-commit(remote):
+        tag_requested_by: '{tag_requested_by}'
+        branch: $BRANCH
+        commit-to-freeze: $NX_VMS_COMMIT
+        commit-varname: NX_VMS_COMMIT
 
-    - multijob:
-        name: Freeze nx realcamera framework commit
-        projects:
-        - name: 'helper.freeze-nx-vms-commit'
-          kill-phase-on: FAILURE
-          predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            BRANCH={realcameratesting-framework-branch}
-            PIPELINE=$PIPELINE
-            NX_VMS_COMMIT={realcameratesting-framework-branch}
-            NX_VMS_COMMIT_VARNAME=NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-    - copyartifact:
-        project: 'helper.freeze-nx-vms-commit'
-        filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
-        which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
-    - inject:
-        properties-file: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
+    # Freeze nx realcamera framework commit
+    - freeze-nx-vms-commit(remote):
+        tag_requested_by: '{tag_requested_by}'
+        branch: '{realcameratesting-framework-branch}'
+        commit-to-freeze: '{realcameratesting-framework-branch}'
+        commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
 
     # Build identity may be defained in args, or use NEW keqyword,
     # which means that we need to create one..

@@ -96,12 +96,15 @@
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
 
-    - shell: |
-        #!/bin/bash
-        set -ex
-        echo "${{NX_VMS_COMMIT_VARNAME}}=${{MERCURIAL_REVISION_SHORT}}" > "${{NX_VMS_COMMIT_VARNAME}}.envvar"
-    - inject:
-        properties-file: NX_VMS_COMMIT.envvar
+    # for query artifacts
+    - freeze-nx-vms-commit(local):
+        commit-to-freeze: $MERCURIAL_REVISION_SHORT
+        commit-varname: $NX_VMS_COMMIT_VARNAME
+
+    # for setting in build name
+    - freeze-nx-vms-commit(local):
+        commit-to-freeze: $MERCURIAL_REVISION_SHORT
+        commit-varname: NX_VMS_COMMIT
 
     publishers:
     - publisher-set-build-name:

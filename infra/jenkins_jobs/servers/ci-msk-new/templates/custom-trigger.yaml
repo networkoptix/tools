@@ -195,25 +195,12 @@
         condition-string1: '${{NX_VMS_COMMIT}}'
         condition-string2: 'LATEST'
         steps:
-        - trigger-builds:
-          - project: 'helper.freeze-nx-vms-commit'
-            predefined-parameters: |
-              REQUESTED_BY={tag_requested_by}
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              BRANCH=$BRANCH
-              PIPELINE=$PIPELINE
-              NX_VMS_COMMIT=$BRANCH
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            block: true
-            block-thresholds:
-              failure-threshold: FAILURE
-        - copyartifact:
-            project: 'helper.freeze-nx-vms-commit'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
-        - inject:
-            properties-file: 'NX_VMS_COMMIT.envvar'
+        # nx commit
+        - freeze-nx-vms-commit(remote):
+            tag_requested_by: '{tag_requested_by}'
+            branch: $BRANCH
+            commit-to-freeze: $BRANCH
+            commit-varname: NX_VMS_COMMIT
 
     # if it's auto, get from existing build
     - conditional-step:
@@ -237,25 +224,12 @@
         condition-kind: boolean-expression
         condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
         steps:
-        - trigger-builds:
-          - project: 'helper.freeze-nx-vms-commit'
-            predefined-parameters: |
-              REQUESTED_BY={tag_requested_by}
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              BRANCH=$BRANCH
-              PIPELINE=$PIPELINE
-              NX_VMS_COMMIT=$NX_VMS_COMMIT
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            block: true
-            block-thresholds:
-              failure-threshold: FAILURE
-        - copyartifact:
-            project: 'helper.freeze-nx-vms-commit'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
-        - inject:
-            properties-file: 'NX_VMS_COMMIT.envvar'
+        # nx commit
+        - freeze-nx-vms-commit(remote):
+            tag_requested_by: '{tag_requested_by}'
+            branch: $BRANCH
+            commit-to-freeze: $NX_VMS_COMMIT
+            commit-varname: NX_VMS_COMMIT
 
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
