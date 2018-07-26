@@ -123,7 +123,7 @@
         name: USE_BUILD_IDENTITY
         default: '{default}'
         description: >-
-          Use AUTO, or existing build
+          Use NEW, or existing build
 
 - parameter:
     name: p_PLATFORMS

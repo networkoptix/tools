@@ -159,16 +159,20 @@
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
     - set-custom-build-description
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '${{USE_NX_VMS_COMMIT}}-${{USE_BUILD_IDENTITY}}'
-        condition-string2: 'AUTO-AUTO'
-        steps:
-        - shell: |
-            #!/bin/bash
-            set -ex
-            echo "AUTO-AUTO is not valid"
-            exit 1
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        if [ "${{USE_BUILD_IDENTITY}}" == "" ] ; then
+          echo "USE_BUILD_IDENTITY must be set"
+          exit 1
+        fi
+
+        if [ "${{USE_BUILD_IDENTITY}}" == "AUTO" ] ; then
+          echo "AUTO is not valid for USE_BUILD_IDENTITY"
+          exit 1
+        fi
+
     # inject BUILD_IDENTITY as is + save
     - shell: |
         #!/bin/bash
