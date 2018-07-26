@@ -49,6 +49,7 @@ OPTIONS=(
     "--build-parameters=$(join_by ',' ${BUILD_PARAMETERS[@]})"
     "--vm-port-base=$VM_PORT"
     "--vm-name-prefix=$VM_NAME_PREFIX"
+    "--slot=$SLOT"
 )
 
 if [[ "$CLEAN" == "true" || "$CLEAN" == "True" ]]; then
