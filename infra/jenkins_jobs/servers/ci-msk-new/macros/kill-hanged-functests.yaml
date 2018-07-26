@@ -1,0 +1,25 @@
+- builder:
+    name: kill-hanged-functests
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        while [ ! -z "$(ps aux | grep "$WORKSPACE" | grep pytest | awk '{print $2}')" ] ; do
+          pid=$(ps aux | grep "$WORKSPACE" | grep pytest | awk '{{print $2}}')
+          if [ ps -p $pid ] ; then
+            echo "Killing pytest running in the same dir gracefully"
+            kill -3 $pid
+            sleep 300
+          fi
+          if [ ps -p $pid ] ; then
+            echo "Killing pytest running in the same dir after grace didn't work"
+            kill -3 $pid
+            sleep 5
+          fi
+          if [ ps -p $pid ] ; then
+            echo "Killing pytest running in the same dir after grace didn't work"
+            kill -9 $pid
+            sleep 5
+          fi
+        done
