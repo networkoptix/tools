@@ -488,6 +488,19 @@
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
+    # after everything is published, delete results
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - UNSTABLE
+          - FAILURE
+          build-steps:
+          - folder-delete-operation:
+              folder-path: 'build/distrib'
+
     - failure-email:
         email-recipients: '{build-watchers}'
     - fixed-email:
