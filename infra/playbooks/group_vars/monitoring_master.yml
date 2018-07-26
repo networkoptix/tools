@@ -84,6 +84,15 @@ prometheus_alert_rules:
     annotations:
       description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} - Critical disk space usage{% endraw %}"
+  - alert: CriticalDiskSpace
+    expr: 'wmi_logical_disk_free_bytes{job="node"} / wmi_logical_disk_size_bytes{job="node"} < 0.1'
+    for: 4m
+    labels:
+      severity: critical
+      environment: "{{ prometheus_environment_label }}"
+    annotations:
+      description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
+      summary: "{% raw %}Instance {{ $labels.instance }} - Critical disk space usage{% endraw %}"
   - alert: RebootRequired
     expr: "node_reboot_required > 0"
     labels:
