@@ -78,7 +78,7 @@
         revision: '$NX_TEST_FRAMEWORK_COMMIT'
     - hg-local:
         project-name: devtools
-        branch-name: default
+        revision: default
 
     builders:
     - inject:
