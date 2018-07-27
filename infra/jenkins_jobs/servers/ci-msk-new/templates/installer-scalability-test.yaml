@@ -11,7 +11,7 @@
 
     workdir: work
 
-    test-config: '../config/scalability-test.yaml'
+    test-config: '../config/scalability-test.yaml.inc'
 
     properties:
     - heavy-job:

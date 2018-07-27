@@ -9,7 +9,6 @@ ignore_cache=True
 keep_descriptions=False
 recursive=True
 include_path=.:scripts
-exclude=servers/ci-msk-new/config
 
 [__future__]
 param_order_from_yaml=true
