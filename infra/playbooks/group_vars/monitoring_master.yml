@@ -85,7 +85,7 @@ prometheus_alert_rules:
       description: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
       summary: "{% raw %}Instance {{ $labels.instance }} - Critical disk space usage{% endraw %}"
   - alert: CriticalDiskSpace
-    expr: 'wmi_logical_disk_free_bytes{job="node"} / wmi_logical_disk_size_bytes{job="node"} < 0.1'
+    expr: 'wmi_logical_disk_free_bytes{volume="C:"} / wmi_logical_disk_size_bytes{volume="C:"} < 0.1'
     for: 4m
     labels:
       severity: critical
