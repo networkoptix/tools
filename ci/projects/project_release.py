@@ -128,8 +128,8 @@ class ReleaseProject(BuildProject):
         return self.params.hardware_signing and (customization, platform) in hardware_signing_node_map
 
     def post_process(self, build_info, build_info_path, platform_build_info_map):
-        build_num = self.jenkins_env.build_number,
-        branch_name = self.nx_vms_branch_name,
+        build_num = self.jenkins_env.build_number
+        branch_name = self.nx_vms_branch_name
         deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
