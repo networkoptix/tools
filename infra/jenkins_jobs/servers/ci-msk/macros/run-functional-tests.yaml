@@ -1,0 +1,54 @@
+- builder:
+    name: run-functional-tests
+
+    # A wrapper for running functional tests
+    #
+    # Required template variables:
+    #   project
+    #   branch
+    #   build-num
+    #   customization
+    #   platform
+    #   cloud-group
+    #   bin-dir
+    #   work-dir
+    #   mediaserver-dist-dir
+    #   clean ('true'/'True' or 'false'/'False')
+    #   test-select-expr (argument for -k, if not empty)
+    #   test-list (space-delimited; empty means run all tests)
+    #   test-timeout-hours
+    #
+    # Required environment variables:
+    #   JUNK_SHOP_CAPTURE_DB (user:password@host[:port])
+    #   AUTOTEST_EMAIL_PASSWORD
+
+    builders:
+    - folder-create-operation:
+        folder-path: "{work-dir}"
+    - extended-bash:
+        headers: |
+          #!/bin/bash
+          set -ex
+
+          # must be injected by job template
+          : ${{JUNK_SHOP_CAPTURE_DB:?}}
+          : ${{AUTOTEST_EMAIL_PASSWORD:?}}
+
+          export PROJECT="{project}"
+          export BRANCH="{branch}"
+          export BUILD_NUM="{build-num}"
+          export CUSTOMIZATION="{customization}"
+          export PLATFORM="{platform}"
+          export CLOUD_GROUP="{cloud-group}"
+          export BIN_DIR="{bin-dir}"
+          export WORK_DIR="{work-dir}"
+          export MEDIASERVER_DIST_DIR="{mediaserver-dist-dir}"
+          export CLEAN="{clean}"
+          export TEST_SELECT_EXPR="{test-select-expr}"
+          export TEST_LIST="{test-list}"
+          export TIMEOUT_SEC="$(({test-timeout-hours} * 60*60))"
+          export SLOT="$EXECUTOR_NUMBER"
+        script:
+          !include-raw-escape:
+            - includes/join_by.sh
+            - ../builders/run-functional-tests.sh
