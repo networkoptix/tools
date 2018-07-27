@@ -201,6 +201,9 @@
     - '{pipeline}.{branch}.{project}.distribution.{customization}.functest':
         customization: default
         build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+    - '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test':
+        customization: default
+        build-watchers: vfedorov@networkoptix.com
     - '{pipeline}.{branch}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com

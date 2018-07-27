@@ -13,6 +13,7 @@ set -xe
 : ${BIN_DIR:?}
 : ${MEDIASERVER_DIST_DIR:?}
 : ${CLEAN:?}  # 'true'/'True' or 'false'/'False'
+: ${TEST_ARGS?}  # additional arguments
 : ${TEST_SELECT_EXPR?}
 : ${TEST_LIST?}  # space-delimited; empty means run all tests
 : ${TIMEOUT_SEC:?}
@@ -76,7 +77,7 @@ export PYTEST_PLUGINS=junk_shop.pytest_plugin
 cd nx_vms/func_tests
 
 if [[ "$TEST_SELECT_EXPR" != "" ]]; then
-	pytest $(join_by ' ' ${OPTIONS[@]}) -k "$TEST_SELECT_EXPR" $TEST_LIST
+	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_ARGS -k "$TEST_SELECT_EXPR" $TEST_LIST
 else
-	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_LIST
+	pytest $(join_by ' ' ${OPTIONS[@]}) $TEST_ARGS $TEST_LIST
 fi

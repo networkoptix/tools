@@ -1,0 +1,17 @@
+tests:
+
+  scalability_test:
+    host_list:
+      - name: kappa
+        address: kappa
+        username: jenkins
+        key_path: /home/jenkins/.ssh/id_rsa
+        dir: /home/jenkins/scalability
+        server_port_base: 7001
+        lws_port_base: 8001
+      - name: sigma
+        address: sigma
+        username: jenkins
+        key_path: /home/jenkins/.ssh/id_rsa
+        dir: /home/jenkins/scalability
+        server_port_base: 7001

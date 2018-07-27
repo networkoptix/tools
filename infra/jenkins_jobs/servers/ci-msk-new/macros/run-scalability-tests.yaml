@@ -1,0 +1,54 @@
+- builder:
+    name: run-scalability-tests
+
+    # Run scalability tests
+    #
+    # Required template variables:
+    #   project
+    #   branch
+    #   build-num
+    #   customization
+    #   platform
+    #   cloud-group
+    #   bin-dir
+    #   work-dir
+    #   mediaserver-dist-dir
+    #   clean ('true'/'True' or 'false'/'False')
+    #   test-config  (path to tests config)
+    #   use-lightweight-servers  ('true' or 'false')
+    #   server-count  (integer)
+    #   test-timeout-hours
+    #
+    # Required environment variables:
+    #   JUNK_SHOP_CAPTURE_DB (user:password@host[:port])
+    #   AUTOTEST_EMAIL_PASSWORD
+
+    builders:
+
+    - shell: |
+        #!/bin/bash
+        set -xe
+        echo '********************************************************************************'
+        echo '* use-lightweight-servers: {use-lightweight-servers}'
+        echo '* server-count: {server-count}'
+        echo '********************************************************************************'
+
+    - run-functional-tests:
+        project: '{project}'
+        branch: '{branch}'
+        build-num: '{build-num}'
+        customization: '{customization}'
+        platform: linux-x64
+        cloud-group: '{cloud-group}'
+        bin-dir: '{bin-dir}'
+        work-dir: '{work-dir}'
+        mediaserver-dist-dir: '{mediaserver-dist-dir}'
+        clean: '{clean}'
+        test-args: >-
+          --run-name=scalability
+          --tests-config-file={test-config}
+          --test-parameters=scalability_test.use_lightweight_servers={use-lightweight-servers}
+          --test-parameters=scalability_test.server_count={server-count}
+        test-select-expr: ''
+        test-list: 'tests/scalability_test.py'
+        test-timeout-hours: '{test-timeout-hours}'

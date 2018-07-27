@@ -1,18 +1,17 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.distribution.{customization}.functest'
+    name: '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test'
     description: |
-      Run functional tests for {customization} for branch {branch}.
+      Run scalability tests for {customization} for branch {branch}.
     node: '{functest-node}'
-    concurrent: true
+    concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     synchronous-reporting: '' # false
-    workspace: 'nx_ft_thr${{EXECUTOR_NUMBER}}/'
+    workspace: 'workspace/scalability'
 
-    workdir: functests
+    workdir: work
 
-    test-select-expr: not windows and not smb
-    test-list: ''
+    test-config: '../config/scalability-test.yaml'
 
     properties:
     - heavy-job:
@@ -29,19 +28,15 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
-    - p_CLEAN_CLONE
     - p_CLEAN_WORKSPACE:
         default: true
     - p_BUILD_IDENTITY
-    - p_NX_VMS_COMMIT
+    - p_NX_VMS_COMMIT:
+        default: ''
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
     - p_JUNKSHOP_DB_HOST
-    - p_TEST_SELECT_EXPR:
-        default: '{test-select-expr}'
-    - p_TEST_LIST:
-        default: '{test-list}'
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
@@ -138,23 +133,6 @@
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
-          PLATFORM=windows-x64
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/*-server-*-win64*.exe
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-
-      - project: 'helper.pull-component'
-        predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
-          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          PIPELINE=$PIPELINE
-          BRANCH=$BRANCH
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
@@ -167,7 +145,6 @@
     - file-copy-operation:
         includes: >-
           build/distrib/*-server-*-linux64*.deb,
-          build/distrib/*-server-*-win64*.exe,
           build/bin/appserver2_ut
         excludes: ''
         target-location: '$WORKSPACE/dist'
@@ -178,12 +155,16 @@
         set -ex
         rsync -av {binaries_url} "$BIN_DIR/"
 
+    - file-create-operation:
+        file-name: test-config.yaml
+        file-content: !include-raw-escape: '{test-config}'
+
     - inject:
         properties-content: |
           VERBOSE=true
           PYTEST_DEFAULTS_SECTION=ci
 
-    - run-functional-tests:
+    - run-scalability-tests:
         project: $JUNKSHOP_PROJECT_NAME
         branch: '$BRANCH'
         build-num: $BUILD_IDENTITY
@@ -194,39 +175,12 @@
         work-dir: "$WORK_DIR"
         mediaserver-dist-dir: "$WORKSPACE/dist"
         clean: true
-        test-args: ''
-        test-select-expr: $TEST_SELECT_EXPR
-        test-list: $TEST_LIST
+        test-config: "$WORKSPACE/test-config.yaml"
+        use-lightweight-servers: 'false'
+        server-count: 5
         test-timeout-hours: 4 # '{test-timeout-hours}'
 
     publishers:
-    - postbuildscript:
-        mark-unstable-if-failed: true
-        builders:
-        - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
-          build-steps:
-          - trigger-builds:
-            - project: 'helper.push-component'
-              predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
-                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                PIPELINE=$PIPELINE
-                BRANCH=$BRANCH
-                BUILD_IDENTITY=$BUILD_IDENTITY
-                CUSTOMIZATION=$CUSTOMIZATION
-                PLATFORM=$PLATFORM
-                NX_VMS_COMMIT=$NX_VMS_COMMIT
-                LOCAL_PATH=$WORKSPACE/
-                COMPONENTS={workdir}/
-                NODE_SSH_CONNECTION=$SSH_CONNECTION
-                SSH_USER=$USER
-              block: true
-              block-thresholds:
-                failure-threshold: FAILURE
 
     - failure-email:
         email-recipients: '{build-watchers}'
