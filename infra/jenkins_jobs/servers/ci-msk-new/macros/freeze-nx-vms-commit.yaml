@@ -28,6 +28,6 @@
     - shell: |
         #!/bin/bash
         set -ex
-        echo "{commit-varname}={commit-to-freeze}" > '{commit-varname}.envvar'
+        echo "{commit-varname}={commit-to-freeze}" > "{commit-varname}.envvar"
     - inject:
         properties-file: '{commit-varname}.envvar'
