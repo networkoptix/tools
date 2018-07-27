@@ -48,7 +48,7 @@ def check_config(config):
         conf.write(config_template.format(id, posix_path, config))
 
 
-def run_server(config):
+def run_server(config, verbose):
     command = [
         'mediaserver.exe',
         '-e',
@@ -59,15 +59,18 @@ def run_server(config):
         '--dev-mode-key',
         'razrazraz'
     ]
+    if verbose:
+        print(' '.join(command))
     subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", nargs=1, help="Server config.")
+    parser.add_argument("-v", "--verbose", action='store_true', help="Verbose output.")
     args = parser.parse_args()
     check_config(args.config[0])
-    run_server(args.config[0])
+    run_server(args.config[0], args.verbose)
 
 
 if __name__ == "__main__":
