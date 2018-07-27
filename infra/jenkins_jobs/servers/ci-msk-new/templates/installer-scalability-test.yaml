@@ -75,6 +75,9 @@
     - hg-local:
         name: nx_vms
         revision: '$NX_TEST_FRAMEWORK_COMMIT'
+    - hg-local:
+        name: devtools
+        revision: default
 
     builders:
     - inject:
