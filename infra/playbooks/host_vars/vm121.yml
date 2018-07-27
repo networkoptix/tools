@@ -2,7 +2,7 @@ libvirt_host: gamma
 libvirt_guest__state: running
 
 libvirt_guest__type: linux
-libvirt_guest__extra_system_image_size_gb: "400"
+libvirt_guest__extra_system_image_size_gb: "600"
 libvirt_guest__memory: "{{ 55 * 1024 * 1024 }}"  # 55 GiB
 libvirt_guest__cpus: 18
 
