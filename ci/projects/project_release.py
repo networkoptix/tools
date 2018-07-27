@@ -2,6 +2,8 @@
 
 import logging
 
+import requests
+
 from build import bool_to_cmake_param
 from project_build import VERSION_FILE, BuildProject
 from command import (
@@ -24,6 +26,8 @@ CLOUD_GROUP_LIST = [
     'stage',
     'prod',
     ]
+
+PUBCON_URL_TEMPLATE = 'http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory={build_num}-{branch}'
 
 
 class ReleaseProject(BuildProject):
@@ -124,12 +128,14 @@ class ReleaseProject(BuildProject):
         return self.params.hardware_signing and (customization, platform) in hardware_signing_node_map
 
     def post_process(self, build_info, build_info_path, platform_build_info_map):
+        build_num = self.jenkins_env.build_number,
+        branch_name = self.nx_vms_branch_name,
         deployer = Deployer(
             config=self.config,
             artifacts_stored_in_different_customization_dirs=self.must_store_artifacts_in_different_customization_dirs,
             ssh_key_file=None,  # default key from .ssh is ok
-            build_num=self.jenkins_env.build_number,
-            branch=self.nx_vms_branch_name,
+            build_num=build_num,
+            branch=branch_name,
             )
         deployer.deploy_artifacts(
             customization_list=self.requested_customization_list,
@@ -138,6 +144,18 @@ class ReleaseProject(BuildProject):
             version_path=VERSION_FILE,
             platform_build_info_map=platform_build_info_map,
             )
+        if not self.in_assist_mode and not build_info.has_failed_builds:
+            self._register_on_pubcon(build_num, branch_name):
+
+    def _register_on_pubcon(self, build_num, branch_name):
+        log.info('Registering on pubcon')
+        url = PUBCON_URL_TEMPLATE.format(
+            build_num=build_num,
+            branch=branch_name,
+            )
+        response = requests.get(url)
+        assert response.ok, repr(response.json())
+        assert response.json() == 'ok', repr(response.json())
 
     def make_email_recipient_list(self, build_info):
         return self.build_user_email_list
