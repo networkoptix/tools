@@ -203,7 +203,15 @@ class DbCaptureRepository(object):
         self.test_run = {}  # test path -> models.Run
 
     def _select_run_children(self, parent):
-        return select(run for run in models.Run if raw_sql("run.path similar to $parent.path || '[^/]+/'"))
+        return select(
+            run
+            for run in models.Run
+            if raw_sql(
+                "run.path similar to $parent.path || '[^/]+/'"  # Original condition, which makes seq scan.
+                " and run.root_run = split_part($parent.path, '/', 1)::int"  # Either btree on root_run...
+                " and run.path between $parent.path || '0' and $parent.path || 'a'"  # ...or btree on path.
+                # TODO: Make field a varchar and add varchar_pattern_ops or add text_pattern_ops.
+                ))
 
     def add_run(self, name=None, parent=None, test=None):
         root_run = None
