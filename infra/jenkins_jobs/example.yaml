@@ -1,0 +1,15 @@
+---
+- job-template:
+    name: 'helper-{job-name}'
+    description: Sample
+    properties:
+    - heavy-job:
+        weight: 1
+    - throttle:
+        max-total: 1
+        option: project
+    - build-discarder:
+        days-to-keep: 10
+        num-to-keep: 50
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: 100
