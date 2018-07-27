@@ -145,7 +145,7 @@ class ReleaseProject(BuildProject):
             platform_build_info_map=platform_build_info_map,
             )
         if not self.in_assist_mode and not build_info.has_failed_builds:
-            self._register_on_pubcon(build_num, branch_name):
+            self._register_on_pubcon(build_num, branch_name)
 
     def _register_on_pubcon(self, build_num, branch_name):
         log.info('Registering on pubcon')
