@@ -35,3 +35,44 @@
   - samba-common
   - libtalloc2
   - syslinux
+
+- name: Set Kernel core pattern for system
+  lineinfile:
+    path: /etc/sysctl.conf
+    create: yes
+    state: present
+    insertafter: EOF
+    line: "kernel.core_pattern=%e.core.%t.%p"
+  register: sysctl_conf
+
+- name: Reload sysctl
+  command: sysctl --system
+  when: "{{ sysctl_conf.changed }}"
+
+- name: "Add jenkins group {{ jenkins_group }}"
+  group:
+    name: "{{ jenkins_group }}"
+    state: present
+
+- name: "Add jenkins user {{ jenkins_user }}"
+  user:
+    name: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    home: "{{ jenkins_home }}"
+    createhome: yes
+    shell: /bin/bash
+
+- name: Set limits for user
+  lineinfile:
+    path: /etc/security/limits.conf
+    create: yes
+    state: present
+    insertafter: EOF
+    line: "{{ item }}"
+  with_items:
+  # maximum number of open files
+  - "{{ jenkins_user }} soft nofile 1048576"
+  - "{{ jenkins_user }} hard nofile 1048576"
+  # limits the core file size (KB)
+  - "{{ jenkins_user }} soft core unlimited"
+  - "{{ jenkins_user }} hard core unlimited"
