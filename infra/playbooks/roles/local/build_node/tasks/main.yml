@@ -133,6 +133,11 @@
   register: r
   changed_when: "'installed' in r.stdout"
 
+- name: Remove apport
+  apt:
+    name: apport
+    state: absent
+
 - name: Set Kernel core pattern for system
   lineinfile:
     path: /etc/sysctl.conf
