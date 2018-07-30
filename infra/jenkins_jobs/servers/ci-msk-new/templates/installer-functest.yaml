@@ -109,6 +109,8 @@
     - kill-hanged-functests
 
     - folder-delete-operation:
+        folder-path: 'build'
+    - folder-delete-operation:
         folder-path: 'dist'
     - folder-create-operation:
         folder-path: 'dist'
