@@ -73,7 +73,7 @@
           BIN_DIR="$WORKSPACE/build/bin"
           CONFIG_PATH="$WORKSPACE/build/current_config.py"
           TIMEOUT={testrunner-timeout}
-          TEST_BINARY_LIST="$(cd $BIN_DIR && echo *_ut)"
+          TEST_BINARY_LIST="$(cd $BIN_DIR && find . -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")"
           mkdir -p unit_tests
           cd unit_tests
           $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py --timeout=$TIMEOUT "$CONFIG_PATH" "$BIN_DIR" $TEST_BINARY_LIST
