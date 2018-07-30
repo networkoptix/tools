@@ -27,11 +27,12 @@
 
     - shell: |
         #!/bin/bash
-        set -xe
-        echo '********************************************************************************'
-        echo '* use-lightweight-servers: {use-lightweight-servers}'
-        echo '* server-count: {server-count}'
-        echo '********************************************************************************'
+        set -e
+        echo
+        echo '****************************************************************************************************'
+        echo '*   use-lightweight-servers: {use-lightweight-servers}'
+        echo '*   server-count: {server-count}'
+        echo '****************************************************************************************************'
 
     - run-functional-tests:
         project: '{project}'
@@ -47,8 +48,8 @@
         test-args: >-
           --run-name=scalability
           --tests-config-file={test-config}
-          --test-parameters=scalability_test.use_lightweight_servers={use-lightweight-servers}
-          --test-parameters=scalability_test.server_count={server-count}
+          --test-parameters=scalability_test.use_lightweight_servers={use-lightweight-servers},scalability_test.server_count={server-count}
+          --run-parameters=use_lightweight_servers={use-lightweight-servers},server_count={server-count}
         test-select-expr: ''
         test-list: 'tests/scalability_test.py'
         test-timeout-hours: '{test-timeout-hours}'
