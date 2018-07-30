@@ -48,6 +48,7 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default-build-description}'
+    - p_BUILD_IDENTITY
     - p_TEST_SELECT_EXPR:
         default: '{test-select-expr}'
     - p_TEST_LIST:
@@ -100,6 +101,25 @@
           BUILD_IDENTITY_ON_PUSH=0
           BUILD_IDENTITY_NIGHTLY=0
 
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$BUILD_IDENTITY'
+        condition-string2: ''
+        steps:
+        - inject:
+            properties-content: |
+              IS_CUSTOM_IDENTITY=true
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '$BUILD_IDENTITY'
+          condition-string2: ''
+        steps:
+        - inject:
+            properties-content: |
+              IS_CUSTOM_IDENTITY=false
+
     # use latest func_tests commit
     - shell: |
         #!/bin/bash
@@ -108,95 +128,114 @@
     - inject:
         properties-file: NX_TEST_FRAMEWORK_COMMIT.envvar
 
-    # pick commit and build identity from last successful on-push runner
-    - shell: |
-        #!/bin/bash
-        set -ex
-        rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
-    - copyartifact:
-        project: '{pipeline}.{branch}.{project}.runner'
-        filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
-        which-build: last-successful
-        # TODO: add UPSTREAM_JOB to runner and filter by it
-        parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.on-push
-        optional: true
     - conditional-step:
-        condition-kind: file-exists
-        condition-filename: BUILD_IDENTITY.envvar
-        condition-basedir: workspace
+        condition-kind: strings-match
+        condition-string1: '$IS_CUSTOM_IDENTITY'
+        condition-string2: 'false'
         steps:
-        - inject-properties-file:
-            properties-file: NX_VMS_COMMIT.envvar
-        - inject-properties-file:
-            properties-file: BUILD_IDENTITY.envvar
+
+        # pick commit and build identity from last successful on-push runner
         - shell: |
             #!/bin/bash
             set -ex
-            echo "BUILD_IDENTITY_ON_PUSH=$BUILD_IDENTITY" > 'ON_PUSH.envvar'
-            echo "NX_VMS_COMMIT_ON_PUSH=$NX_VMS_COMMIT" >> 'ON_PUSH.envvar'
-        - inject:
-            properties-file: ON_PUSH.envvar
+            rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
+        - copyartifact:
+            project: '{pipeline}.{branch}.{project}.runner'
+            filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
+            which-build: last-successful
+            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.on-push
+            optional: true
+        - conditional-step:
+            condition-kind: file-exists
+            condition-filename: BUILD_IDENTITY.envvar
+            condition-basedir: workspace
+            steps:
+            - inject-properties-file:
+                properties-file: NX_VMS_COMMIT.envvar
+            - inject-properties-file:
+                properties-file: BUILD_IDENTITY.envvar
+            - shell: |
+                #!/bin/bash
+                set -ex
+                echo "BUILD_IDENTITY_ON_PUSH=$BUILD_IDENTITY" > 'ON_PUSH.envvar'
+                echo "NX_VMS_COMMIT_ON_PUSH=$NX_VMS_COMMIT" >> 'ON_PUSH.envvar'
+            - inject:
+                properties-file: ON_PUSH.envvar
 
-    # pick commit and build identity from last successful nightly runner
-    - shell: |
-        #!/bin/bash
-        set -ex
-        rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
-    - copyartifact:
-        project: '{pipeline}.{branch}.{project}.runner'
-        filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
-        which-build: last-successful
-        # TODO: add UPSTREAM_JOB to runner and filter by it
-        parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.nightly
-        optional: true
-    - conditional-step:
-        condition-kind: file-exists
-        condition-filename: BUILD_IDENTITY.envvar
-        condition-basedir: workspace
-        steps:
-        - inject-properties-file:
-            properties-file: NX_VMS_COMMIT.envvar
-        - inject-properties-file:
-            properties-file: BUILD_IDENTITY.envvar
+        # pick commit and build identity from last successful nightly runner
         - shell: |
             #!/bin/bash
             set -ex
-            echo "BUILD_IDENTITY_NIGHTLY=$BUILD_IDENTITY" > 'NIGHTLY.envvar'
-            echo "NX_VMS_COMMIT_NIGHTLY=$NX_VMS_COMMIT" >> 'NIGHTLY.envvar'
-        - inject:
-            properties-file: NIGHTLY.envvar
+            rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
+        - copyartifact:
+            project: '{pipeline}.{branch}.{project}.runner'
+            filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
+            which-build: last-successful
+            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.custom
+            optional: true
+        - conditional-step:
+            condition-kind: file-exists
+            condition-filename: BUILD_IDENTITY.envvar
+            condition-basedir: workspace
+            steps:
+            - inject-properties-file:
+                properties-file: NX_VMS_COMMIT.envvar
+            - inject-properties-file:
+                properties-file: BUILD_IDENTITY.envvar
+            - shell: |
+                #!/bin/bash
+                set -ex
+                echo "BUILD_IDENTITY_NIGHTLY=$BUILD_IDENTITY" > 'NIGHTLY.envvar'
+                echo "NX_VMS_COMMIT_NIGHTLY=$NX_VMS_COMMIT" >> 'NIGHTLY.envvar'
+            - inject:
+                properties-file: NIGHTLY.envvar
 
-    - shell: |
-        #!/bin/bash
-        set -ex
-        if (($BUILD_IDENTITY_NIGHTLY == 0 && $BUILD_IDENTITY_ON_PUSH == 0)); then
-            echo ""
-            echo "*****  No successful nightly nor on-push builds were found; bailing out. *****"
-            echo ""
-            echo "" > 'LATEST.envvar'  # dummy for inject not to fail
-            echo "SHOULD_TRIGGER=false" > SHOULD_TRIGGER.envvar
-        else
-            if (($BUILD_IDENTITY_NIGHTLY > $BUILD_IDENTITY_ON_PUSH)); then
-                echo "Nightly build was later than on-push."
-                echo "TRIGGERED_KIND=NIGHTLY" > 'LATEST.envvar'
-                echo "BUILD_IDENTITY=$BUILD_IDENTITY_NIGHTLY" >> 'LATEST.envvar'
-                echo "NX_VMS_COMMIT=$NX_VMS_COMMIT_NIGHTLY" >> 'LATEST.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            if (($BUILD_IDENTITY_NIGHTLY == 0 && $BUILD_IDENTITY_ON_PUSH == 0)); then
+                echo ""
+                echo "*****  No successful nightly nor on-push builds were found; bailing out. *****"
+                echo ""
+                echo "SHOULD_TRIGGER=false" > CHOICE.envvar
             else
-                echo "On-push build was later than nightly."
-                echo "TRIGGERED_KIND=ON-PUSH" > 'LATEST.envvar'
-                echo "BUILD_IDENTITY=$BUILD_IDENTITY_ON_PUSH" >> 'LATEST.envvar'
-                echo "NX_VMS_COMMIT=$NX_VMS_COMMIT_ON_PUSH" >> 'LATEST.envvar'
+                if (($BUILD_IDENTITY_NIGHTLY > $BUILD_IDENTITY_ON_PUSH)); then
+                    echo "Nightly build was later than on-push."
+                    echo "TRIGGERED_KIND=NIGHTLY" > CHOICE.envvar
+                    echo "BUILD_IDENTITY=$BUILD_IDENTITY_NIGHTLY" >> CHOICE.envvar
+                    echo "NX_VMS_COMMIT=$NX_VMS_COMMIT_NIGHTLY" >> CHOICE.envvar
+                else
+                    echo "On-push build was later than nightly."
+                    echo "TRIGGERED_KIND=ON-PUSH" > CHOICE.envvar
+                    echo "BUILD_IDENTITY=$BUILD_IDENTITY_ON_PUSH" >> CHOICE.envvar
+                    echo "NX_VMS_COMMIT=$NX_VMS_COMMIT_ON_PUSH" >> CHOICE.envvar
+                fi
+                echo "SHOULD_TRIGGER=true" >> CHOICE.envvar
             fi
-            echo "SHOULD_TRIGGER=true" > SHOULD_TRIGGER.envvar
-        fi
-    - inject:
-        properties-file: LATEST.envvar
-    - inject:
-        properties-file: SHOULD_TRIGGER.envvar
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '${{SHOULD_TRIGGER}}'
+        condition-string1: '$IS_CUSTOM_IDENTITY'
+        condition-string2: 'true'
+        steps:
+        - build-registry-get-commit:
+            pipeline: '{pipeline}'
+            branch: '{branch}'
+            project: '{project}'
+            build-identity: $BUILD_IDENTITY
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo "TRIGGERED_KIND=CUSTOM" > CHOICE.envvar
+            echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> CHOICE.envvar
+            echo "SHOULD_TRIGGER=true" >> CHOICE.envvar
+
+    - inject:
+        properties-file: CHOICE.envvar
+
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$SHOULD_TRIGGER'
         condition-string2: 'true'
         steps:
         - build-name-setter:
@@ -224,7 +263,7 @@
         condition-kind: not
         condition-operand:
           condition-kind: strings-match
-          condition-string1: '${{SHOULD_TRIGGER}}'
+          condition-string1: '$SHOULD_TRIGGER'
           condition-string2: 'true'
         steps:
         - build-name-setter:
