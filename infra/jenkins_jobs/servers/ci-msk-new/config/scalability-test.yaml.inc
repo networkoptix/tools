@@ -1,6 +1,7 @@
 tests:
 
   scalability_test:
+    merge_timeout: 1h
     host_list:
       - name: kappa
         address: kappa
