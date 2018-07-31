@@ -4,7 +4,7 @@
       Check if cinas beta-builds directory still has proper permissions, and
       jenkins is able to write to it
 
-    node: megatron-host
+    node: maintenance
     logrotate:
       daysToKeep: 10
 
