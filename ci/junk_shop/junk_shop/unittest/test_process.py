@@ -73,6 +73,8 @@ class TestProcess(object):
                 bufsize=POPEN_BUF_SIZE,
                 )
         except OSError as x:
+            log.info('%s failed on start', self._test_name)
+            log.exception(x)
             self._test_info.errors.append('Error starting %r: %s' % (self._binary_path, x))
             return
         self._test_info.started_at = datetime_local_now()
@@ -93,11 +95,11 @@ class TestProcess(object):
         self._pipe.wait()
 
     def close(self):
-        if not self._pipe: return False
         if self._output_file:
             self._output_file.close()
-        self._test_info.exit_code = exit_code = self._pipe.wait()
+        if self._pipe:
+            self._test_info.exit_code = self._pipe.wait()
         self._test_info.duration = datetime_local_now() - self._test_info.started_at
         self._test_info.save_to_file(
             self._root_work_dir.joinpath(self._test_name).with_suffix('.yaml'))
-        log.info('%s ended with exit code %d', self._test_name, exit_code)
+        log.info('%s ended with exit code %d', self._test_name, self._test_info.exit_code)
