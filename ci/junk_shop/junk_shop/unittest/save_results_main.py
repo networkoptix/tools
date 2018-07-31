@@ -15,16 +15,19 @@ from .save_results import save_test_results
 log = logging.getLogger(__name__)
 
 
+DEFAULT_UNIT_TEST_NAME = 'unit'
+
+
 TestRecord = namedtuple('TestRecord', 'test_name test_info output_file_path test_results backtrace_file_list')
 
 
-def parse_and_save_results_to_db(work_dir, repository):
+def parse_and_save_results_to_db(work_dir, repository, root_name=DEFAULT_UNIT_TEST_NAME):
     run_info = RunInfo.load_from_dir(work_dir)
     print 'Parsing unit test results from %s:' % work_dir
     test_record_list = [produce_test_record(work_dir, test_name) for test_name in run_info.test_list]
     print 'Saving unit test results:'
     t = time.time()
-    passed = save_test_results(repository, run_info, test_record_list)
+    passed = save_test_results(repository, root_name, run_info, test_record_list)
     print 'Done in %r seconds.' % (time.time() - t)
     return passed
 
@@ -51,8 +54,10 @@ def main():
                         help='Capture postgres database credentials')
     parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
                         help='Build parameters')
+    parser.add_argument('--test-name', default=DEFAULT_UNIT_TEST_NAME,
+                        help='Name of tests, default is %r' % DEFAULT_UNIT_TEST_NAME)
     args = parser.parse_args()
     work_dir = Path.cwd()
     repository = DbCaptureRepository(args.db_config, args.build_parameters)
     setup_logging()
-    parse_and_save_results_to_db(work_dir, repository)
+    parse_and_save_results_to_db(work_dir, repository, args.test_name)

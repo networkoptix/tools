@@ -81,6 +81,8 @@
             Functional&nbsp;Tests
           {%- elif stage.stage_name == 'scalability' -%}
             Scalability&nbsp;Tests
+          {%- else -%}
+            {{ stage.stage_name }}
           {%- endif -%}
           </a>
         </h3>

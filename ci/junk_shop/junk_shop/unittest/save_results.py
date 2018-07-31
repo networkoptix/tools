@@ -37,8 +37,8 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
     return run
 
 @db_session
-def make_root_run(repository, run_info):
-    root_run = repository.produce_test_run(root_run=None, test_path_list=['unit'])
+def make_root_run(repository, run_info, root_name):
+    root_run = repository.produce_test_run(root_run=None, test_path_list=[root_name])
     root_run.duration = run_info.duration
     add_output_artifact(repository, root_run, 'errors', '\n'.join(run_info.errors), is_error=True)
     return root_run
@@ -69,12 +69,12 @@ def save_root_test_info(repository, run, test_record):
         run.outcome = status2outcome(False)
     return outcome2status(run.outcome)
 
-def save_test_results(repository, run_info, test_record_list):
-    root_run = make_root_run(repository, run_info)
+def save_test_results(repository, root_name, run_info, test_record_list):
+    root_run = make_root_run(repository, run_info, root_name)
     print 'Root run: id=%r' % root_run.id
     passed = True
     for test_record in test_record_list:
-        run = produce_test_run(repository, root_run, ['unit'], test_record.test_name, test_record.test_results)
+        run = produce_test_run(repository, root_run, [root_name], test_record.test_name, test_record.test_results)
         test_passed = save_root_test_info(repository, run, test_record)
         if not test_passed:
             passed = False
