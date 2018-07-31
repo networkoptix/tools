@@ -225,7 +225,7 @@
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    # - 'installer-unittests-default':
+    # - 'installer-unittests':
     #     # TODO: Rework a bit this parameterization as well as probably build node parameterization
     #     platform:
     #     - linux-x86:
@@ -234,7 +234,7 @@
     #         unittest-node: unittests-linux
     #     customization:
     #     - default
-    # - installer-unittests-windows:
+    # - installer-unittests:
     #     platform:
     #     - windows-x64:
     #         unittest-node: unittests-windows

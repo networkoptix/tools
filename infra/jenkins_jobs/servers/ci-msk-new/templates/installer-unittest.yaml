@@ -1,19 +1,11 @@
-#
-# IMPORTANT NOTE
-#
-# There are 4 job-templates defined in this file
-#
-- job-template: &installer_unittests_default
-    id: installer-unittests-default
+- job-template:
+    id: installer-unittests
     name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest'
     description: |
       Run unit tests for {platform} for branch {branch}.
 
     node: '{unittest-node}'
     concurrent: true
-    required-build-components: bin/,lib/,current_config.py
-    unittest-launcher: unittest-launcher-default
-    init-venv-method: init-venv-linux
     synchronous-reporting: '' # false
     workspace: 'nx_ut_thr${{EXECUTOR_NUMBER}}/'
 
@@ -22,7 +14,8 @@
     # 2) timeout for only testrunner
     # this is done because testrunner should be able to mark
     # tests as timed out before it will be killed by build timeout
-    job-timeout: "35" # min
+    job-timeout: "40" # min
+    sdk-testrunner-timeout: "300" # 5 min
     testrunner-timeout: "1800" # sec 30 min
 
     properties:
@@ -55,12 +48,13 @@
           BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
+          SDK_TESTRUNNER_TIMEOUT={sdk-testrunner-timeout}
+          TESTRUNNER_TIMEOUT={testrunner-timeout}
     - timestamps
     - timeout:
         timeout: '{job-timeout}'
         fail: true
         type: absolute
-    - workspace-cleanup
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
@@ -89,6 +83,12 @@
     - folder-delete-operation:
         folder-path: 'build'
 
+    - folder-delete-operation:
+        folder-path: 'unit_tests'
+
+    - folder-delete-operation:
+        folder-path: 'sdk_unit_tests'
+
     # clean marker of unstable build (if exists)
     - file-delete-operation:
         includes: unstable.flag
@@ -116,15 +116,84 @@
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS={required-build-components}
+          COMPONENTS=distrib/*unit_tests*,current_config.py,lib/,bin/*_ut,bin/*_ut.exe,bin/*_tests,bin/*_tests.exe,bin/*.dll
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
           failure-threshold: FAILURE
 
-    - '{unittest-launcher}':
-        testrunner-timeout: '{testrunner-timeout}'
-    - count-fails
+    - shell: |
+        #!bash
+        set -ex
+
+        pushd build
+          if [ "$( find -path './distrib/*unit_tests*' | wc -l)" -gt 0 ] ; then
+            rm -rf bin
+            rm -rf lib
+          fi
+          find -path './distrib/*unit_tests*.tar.gz' -exec tar -zxvf '{{}}' \;
+          find -path './distrib/*unit_tests*.zip' -exec unzip -o '{{}}' \;
+          find -name '*.exe' -exec chmod +x {{}} \;
+          ls -la bin
+        popd
+
+        if [ ! -d venv ]; then
+          virtualenv --system-site-packages venv
+        fi
+
+        if [ -d venv/Scripts ] ; then
+          source venv/Scripts/activate
+        else
+          source venv/bin/activate
+        fi
+        # venv activated
+          pip install --upgrade pip setuptools wheel
+          pip install --upgrade -r "devtools/ci/junk_shop/requirements.txt"
+
+          mkdir -p sdk_unit_tests unit_tests
+
+          # run metadata sdk tests if exists
+          if [ -d build/nx_metadata_sdk ] ; then
+            chmod +x -R build/nx_metadata_sdk
+
+            pushd sdk_unit_tests
+              # run tests
+              PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
+              $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
+                --timeout="$SDK_TESTRUNNER_TIMEOUT" \
+                "$WORKSPACE/build/current_config.py" \
+                "$WORKSPACE/build/nx_metadata_sdk" \
+                $(cd $WORKSPACE/build/nx_metadata_sdk && find -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
+              # collect backtraces
+              PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
+              $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py \
+                --work-dir=$WORKSPACE/sdk_unit_tests
+            popd
+          fi
+
+          chmod +x -R build/bin
+          # run vms tests
+          pushd unit_tests
+            # run tests
+            PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
+            $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
+              --timeout="$TESTRUNNER_TIMEOUT" \
+              "$WORKSPACE/build/current_config.py" \
+              "$WORKSPACE/build/bin" \
+              $(cd $WORKSPACE/build/bin && find -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
+            # collect backtraces
+            PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
+            $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py \
+              --work-dir=$WORKSPACE/unit_tests
+          popd
+
+        deactivate
+
+        failed_tests_num="$(find -type f -path './unit_tests/*_ut.yaml' -exec cat {{}} \; | grep -E '^exit_code' | grep -E -v '\b0\b' | wc -l)"
+        if [ $failed_tests_num -gt 0 ] ; then
+          echo "Detected ${{failed_tests_num}} failed test bundles, build will be marked as unstable"
+          touch unstable.flag
+        fi
 
     publishers:
     - groovy-postbuild:
@@ -152,7 +221,7 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
-                COMPONENTS=unit_tests/
+                COMPONENTS=unit_tests/,sdk_unit_tests/
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
@@ -208,25 +277,3 @@
         email-recipients: '{build-watchers}'
     - fixed-email:
         email-recipients: '{build-watchers}'
-
-- job-template:
-    <<: *installer_unittests_default
-    # all the same, but not id, node and build steps..
-    id: installer-unittests-windows
-    required-build-components: bin/*_ut*,bin/*.dll,lib/,current_config.py
-    unittest-launcher: unittest-launcher-windows
-    init-venv-method: init-venv-windows
-- job-template:
-    <<: *installer_unittests_default
-    # all the same, but not id, node and build steps..
-    id: installer-unittests-linux
-    required-build-components: bin/*_ut*,lib/,current_config.py
-    unittest-launcher: unittest-launcher-default
-- job-template:
-    <<: *installer_unittests_default
-    # all the same, but not id, node and build steps..
-    id: installer-unittests-mac
-    job-timeout: "20" # min
-    testrunner-timeout: "900" # sec 15 min - limited due to limited mac hosts.
-    required-build-components: bin/*_ut*,lib/,current_config.py
-    unittest-launcher: unittest-launcher-default
