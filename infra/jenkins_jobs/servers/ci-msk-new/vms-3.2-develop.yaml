@@ -182,6 +182,9 @@
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test':
+        customization: default
+        build-watchers: vfedorov@networkoptix.com
     - '{pipeline}.{branch}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com
