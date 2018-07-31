@@ -140,14 +140,14 @@
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    - 'installer-unittests-linux':
+    - 'installer-unittests-linux-dist':
         # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
             unittest-node: unittests-linux
         customization:
         - metavms
-    - installer-unittests-windows:
+    - installer-unittests-windows-dist:
         platform:
         - windows-x64:
             unittest-node: unittests-windows

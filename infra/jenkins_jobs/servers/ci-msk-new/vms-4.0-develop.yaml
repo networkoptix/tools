@@ -223,7 +223,7 @@
             unittest-node: unittests-mac
         customization:
         - default
-    - installer-unittests-windows:
+    - installer-unittests-windows-dist:
         platform:
         - windows-x64:
             unittest-node: unittests-windows
