@@ -4,7 +4,6 @@ import hashlib
 import logging
 import os
 import re
-import fnmatch
 from typing import List, Tuple
 
 import dump_tool
@@ -21,7 +20,7 @@ REPORT_NAME_REGEXP = re.compile('''
     (?P<version> [0-9]+ \. [0-9]+ \. [0-9]+) \. (?P<build> [0-9]+)
         - (?P<changeset> [^-]+) (?P<customization> (?: -[^-]+)?) (?P<beta> (?: -beta)?)
     --
-    .+ (?P<platform> (?: windows | linux | arm) - [a-z0-9]+) .+
+    .* (?P<platform> (?: windows | linux | arm) - [a-z0-9]+) .*
     \.
     (?P<extension> [^\.]+)
 ''', re.VERBOSE)
@@ -66,8 +65,7 @@ class Report:
             raise ReportNameError('Unable to parse name: ' + self.name)
 
         self.binary, version, self.build, self.changeset, customization, beta, \
-            self.platform, self.extension = \
-                REPORT_NAME_REGEXP.match(name).groups()
+            self.platform, self.extension = REPORT_NAME_REGEXP.match(name).groups()
 
         if customization:
             self.customization = customization[1:]
@@ -84,7 +82,6 @@ class Report:
         self.component = 'Server' if ('server' in self.binary) else 'Client'
         if beta:
             self.beta = True
-
 
     def __repr__(self):
         return 'Report({})'.format(repr(self.name))
@@ -326,7 +323,7 @@ def analyze_windows_cdb_bt(report: Report, content: str, **options) -> Reason:
     return analyze_bt(report, content, CdbDescriber, **options)
 
 
-class ProblemBuilds:
+class ProblemReports:
     def __init__(self, patterns: List[str]):
         self.patterns = list(p.split() for p in patterns)
         logger.debug('Problem builds patterns: {}'.format(self.patterns))
@@ -343,11 +340,11 @@ def analyze_reports_concurrent(reports: List[Report], problem_builds: list = [],
         -> List[Tuple[str, Reason]]:
     """Analyzes :reports in :directory, returns list of successful results.
     """
-    known_problem_builds = ProblemBuilds(problem_builds)
+    known_problem_reports = ProblemReports(problem_builds)
     processed = []
     for report, result in zip(reports, utils.run_concurrent(analyze_report, reports, **options)):
         if isinstance(result, (Error, dump_tool.CdbError, dump_tool.DistError, UnicodeError)):
-            if known_problem_builds.is_known(report):
+            if known_problem_reports.is_known(report):
                 logger.debug(utils.format_error(result))
             else:
                 logger.warning(utils.format_error(result))

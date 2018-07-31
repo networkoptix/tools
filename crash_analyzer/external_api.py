@@ -164,6 +164,7 @@ class Jira:
     def update_issue(self, key: str, reports: List[crash_info.Report], directory: utils.Directory) -> bool:
         """Update JIRA issue with new crash :reports.
         """
+        logger.debug('Update JIRA issue {} with {}'.format(key, reports))
         if not reports:
             raise JiraError('Unable to update issue {} with no reports'.format(key))
 
@@ -199,7 +200,10 @@ class Jira:
         for r in reports:
             versions.add(r.version)
             fix_versions.update(self._fix_versions_for(r.version))
-            self._attach_files(key, directory.files(r.file_mask()))
+            files = directory.files(r.file_mask())
+            if not files:
+                raise JiraError('Unable to find files for {}'.format(r.name))
+            self._attach_files(key, files)
             
         self._update_field_names(issue, 'versions', versions)
         self._update_field_names(issue, 'fixVersions', fix_versions)
@@ -235,7 +239,7 @@ class Jira:
                 message = 'Unable to attach "{}" file to JIRA issue {}: {}'.format(
                     report.name, key, error.text)
                 if error.status_code == 413: #< HTTP Code: Payload Too Large.
-                    logging.warning(message)
+                    logger.warning(message)
                 else:
                     raise JiraError(message)
             else:

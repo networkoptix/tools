@@ -99,8 +99,8 @@ def test_jira_concurrent(thread_count):
 
 def _test_jira():
     with JiraFixture() as jira:
-        jira.create_issue('server--3.1.0.311-abc-default--a.gdb-bt')
-        jira.update_issue(['server--3.1.0.311-abc-default--a.gdb-bt'])
+        jira.create_issue('server--3.1.0.311-abc-default--linux-x64--a.gdb-bt')
+        jira.update_issue(['server--3.1.0.311-abc-default--linux-x64--a.gdb-bt'])
         assert jira.issue.key.startswith('VMS-')
         assert 'Open' == jira.issue.fields.status.name
         assert 'TEST-RUN Server has crashed on Linux: SEGFAULT' == jira.issue.fields.summary
@@ -117,7 +117,7 @@ def _test_jira():
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('No reopen by any version')
-        jira.update_issue(['server--3.2.0.321-tricom-default--c.gdb-bt'])
+        jira.update_issue(['server--3.2.0.321-tricom-default--linux-x86--c.gdb-bt'])
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('Suppose case is fixed by developer')
@@ -127,12 +127,12 @@ def _test_jira():
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('No reopen for the same version')
-        jira.update_issue(['server--3.1.0.312-abc-default--b.gdb-bt'])
+        jira.update_issue(['server--3.1.0.312-abc-default--arm-bpi--b.gdb-bt'])
         assert 'Closed' == jira.issue.fields.status.name
         assert {'a'} == jira.attachments()
 
         logger.debug('Reopen is for new version')
-        jira.update_issue(['server--3.2.0.321-tricom-default--c.gdb-bt'])
+        jira.update_issue(['server--3.2.0.321-uvi-tricom--linux-x86--c.gdb-bt'])
         assert 'Open' == jira.issue.fields.status.name
         assert {'3.1', '3.2'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
@@ -144,12 +144,12 @@ def _test_jira():
         assert 'Closed' == jira.api._jira.issue(jira.issue.key).fields.status.name
 
         logger.debug('No reopen should happen for report on changeset before fix')
-        jira.update_issue(['server--3.2.0.322-tricom-default--d.gdb-bt'])
+        jira.update_issue(['server--3.2.0.322-uvi-tricom--arm-rpi--d.gdb-bt'])
         assert 'Closed' == jira.issue.fields.status.name
         assert {'a', 'c'} == jira.attachments()
 
         logger.debug('Reopen is for new changeset')
-        jira.update_issue(['server--3.2.0.323-xyz-default--e.gdb-bt'])
+        jira.update_issue(['server--3.2.0.323-xyz-default--arm-rpi--e.gdb-bt'])
         assert 'Open' == jira.issue.fields.status.name
         assert {'3.1', '3.2'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
@@ -157,8 +157,8 @@ def _test_jira():
 
         logging.debug('Attachments rotation')
         jira.update_issue([
-            'server--3.2.0.324-xyz-default--f.gdb-bt',
-            'server--4.0.0.412-abc-default--g.gdb-bt',
+            'server--3.2.0.324-xyz-default--arm-rpi--f.gdb-bt',
+            'server--4.0.0.412-abc-default--linux-x86--g.gdb-bt',
         ])
         assert {'3.1', '3.2', '4.0'} == jira.field_set('versions')
         assert {'3.1_hotfix', '3.2'} == jira.field_set('fixVersions')
