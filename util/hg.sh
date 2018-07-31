@@ -9,6 +9,7 @@ case "$COMMAND" in
     share|sh)
         hg share "$@"
         cp "$1/.hg/hgrc" "$2/.hg/hgrc"
+        cd "$2" && hg update "$2"
         ;;
     pull)
         hg shelve

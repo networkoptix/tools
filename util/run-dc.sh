@@ -16,11 +16,13 @@ set -e -x
 LL=${LL-DEBUG2}
 ARGS="--log-level=$LL --http-log-level=$LL --ec2-tran-log-level=$LL"
 
-case $PWD in
-    *-2.*)          BINARY=client.bin       ;;
-    *-3.0*|*-3.1*)  BINARY=desktop_client   ;;
-    *)              BINARY=client-bin       ;;
-esac
+: ${BINARY:=$(find -name client*bin -type f)}
+: ${BINARY:=$(find -name desktop_client -type f)}
+
+if [ ! "$BINARY" ]; then
+    echo Unable to find client binary. >2
+    exit 1 # U
+fi
 
 echo logs: '".local/share/Network\ Optix/Network\ Optix\ HD\ Witness\ Client/log/log_file.log"'
 $(dirname "${BASH_SOURCE[0]}")/run.sh $BINARY $ARGS $@
