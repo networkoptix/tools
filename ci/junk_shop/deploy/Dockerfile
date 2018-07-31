@@ -4,6 +4,7 @@ RUN apt-get update \
 	&& apt-get install -y libpq-dev
 
 COPY ./requirements.txt /tmp/
+RUN pip install --upgrade pip
 RUN pip install --requirement /tmp/requirements.txt
 
 COPY junk_shop /app/junk_shop

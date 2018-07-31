@@ -3,7 +3,7 @@ pytz
 python-dateutil
 tzlocal
 psycopg2
-pony
+pony==0.7.3
 pathlib2==2.3.0
 pyyaml
 cached-property
