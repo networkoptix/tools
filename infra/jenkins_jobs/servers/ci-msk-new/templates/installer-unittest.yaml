@@ -255,7 +255,6 @@
         builders:
         - role: SLAVE
           build-on:
-          - FAILURE
           - UNSTABLE
           build-steps:
           - trigger-builds:
