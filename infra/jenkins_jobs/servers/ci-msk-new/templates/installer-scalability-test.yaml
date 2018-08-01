@@ -160,7 +160,7 @@
 
     - file-create-operation:
         file-name: test-config.yaml
-        file-content: !include-raw-escape: '{test-config}'
+        file-content: !include-raw: '{test-config}'
 
     - inject:
         properties-content: |
