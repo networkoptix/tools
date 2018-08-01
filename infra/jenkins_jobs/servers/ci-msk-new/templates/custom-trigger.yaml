@@ -39,14 +39,14 @@
                   - use latest commit in branch + resolve it right now and skip
                       runner if "ignore-functests" is set and runner shouldn't be
                       triggered
-      2. AUTO + USE_BUILD_IDENTITY=<value>
+      2. AUTO + USE_BUILD_IDENTITY=value
                   - commit thet will be set based on commit from existing build
-      3. <value>
+      3. value
                   - exact commit to build
 
       There are options for USE_BUILD_IDENTITY:
       1. NEW - register build as new build
-      2. <value>  - use existing build
+      2. value  - use existing build
 
       Note: guessing BUILD_IDENTITY based on commit sha is bad idea...
 
@@ -54,13 +54,13 @@
       USE_NX_VMS_COMMIT | USE_BUILD_IDENTITY | FREEZE_COMMIT_NOW | Ok?
       LATEST            | NEW                | true              | +
       LATEST            | NEW                | false             | +
-      LATEST            | <value>            | N/A               | no
+      LATEST            | value              | N/A               | no
       AUTO              | NEW                | true              | +
       AUTO              | NEW                | false             | +
-      AUTO              | <value>            | N/A               | +
-      <value>           | NEW                | true              | +
-      <value>           | NEW                | false             | +
-      <value>           | <value>            | N/A               | no
+      AUTO              | value              | N/A               | +
+      value             | NEW                | true              | +
+      value             | NEW                | false             | +
+      value             | value              | N/A               | no
 
       --------------------------------------------------------------------------------
 
