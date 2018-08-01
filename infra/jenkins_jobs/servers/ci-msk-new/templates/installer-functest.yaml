@@ -203,6 +203,7 @@
         test-timeout-hours: 4 # '{test-timeout-hours}'
 
     publishers:
+    - delete-hg-repos(if-damaged)
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:

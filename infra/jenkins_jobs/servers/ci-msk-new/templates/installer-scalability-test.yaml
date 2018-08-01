@@ -197,6 +197,7 @@
         server-count: 100
 
     publishers:
+    - delete-hg-repos(if-damaged)
 
     - failure-email:
         email-recipients: '{build-watchers}'

@@ -153,6 +153,7 @@
         environ: ''
 
     publishers:
+    - delete-hg-repos(if-damaged)
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,

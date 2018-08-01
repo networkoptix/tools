@@ -118,6 +118,7 @@
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS"
 
     publishers:
+    - delete-hg-repos(if-damaged)
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,

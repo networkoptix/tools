@@ -1,0 +1,13 @@
+- publisher:
+    name: delete-hg-repos(if-damaged)
+
+    publishers:
+    - post-tasks:
+      - matches:
+        - log-text: '^abort: .*@[\d\a]{12}: unknown parent!$'
+          operator: OR
+        - log-text: '^helper.sync-hg #\d+ completed. Result was FAILURE$'
+          operator: OR
+        script: |
+          if [ -d nx_vms ] ; then rm -rf ./nx_vms ; fi
+          if [ -d devtools ] ; then rm -rf ./devtools ; fi

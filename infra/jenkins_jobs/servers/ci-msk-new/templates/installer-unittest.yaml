@@ -196,6 +196,7 @@
         fi
 
     publishers:
+    - delete-hg-repos(if-damaged)
     - groovy-postbuild:
         script: !include-raw-escape: ../builders/check_unstable.groovy
 

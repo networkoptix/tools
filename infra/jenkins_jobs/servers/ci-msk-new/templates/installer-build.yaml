@@ -394,6 +394,7 @@
     # ========================================
 
     publishers:
+    - delete-hg-repos(if-damaged)
     - archive:
         artifacts: '{build-artifacts-min}'
         allow-empty: 'false'
