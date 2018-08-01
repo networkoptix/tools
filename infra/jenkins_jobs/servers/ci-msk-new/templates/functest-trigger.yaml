@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.trigger.functest.{preset}'
+    name: '{pipeline}.{branch}.{project}.trigger.{tests}.{preset}'
     description: |
       <pre>
       ================================================================================
@@ -11,7 +11,7 @@
         (NOT notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/ci-msk-new/templates/functest-trigger.yaml
+        devtools/infra/jenkins_jobs/servers/ci-msk-new/templates/{tests}-trigger.yaml
 
       --------------------------------------------------------------------------------
 
@@ -48,7 +48,8 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default-build-description}'
-    - p_BUILD_IDENTITY
+    - p_USE_BUILD_IDENTITY:
+        default: ''
     - p_TEST_SELECT_EXPR:
         default: '{test-select-expr}'
     - p_TEST_LIST:
@@ -101,25 +102,6 @@
           BUILD_IDENTITY_ON_PUSH=0
           BUILD_IDENTITY_NIGHTLY=0
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$BUILD_IDENTITY'
-        condition-string2: ''
-        steps:
-        - inject:
-            properties-content: |
-              IS_CUSTOM_IDENTITY=true
-    - conditional-step:
-        condition-kind: not
-        condition-operand:
-          condition-kind: strings-match
-          condition-string1: '$BUILD_IDENTITY'
-          condition-string2: ''
-        steps:
-        - inject:
-            properties-content: |
-              IS_CUSTOM_IDENTITY=false
-
     # use latest func_tests commit
     - shell: |
         #!/bin/bash
@@ -130,8 +112,8 @@
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$IS_CUSTOM_IDENTITY'
-        condition-string2: 'false'
+        condition-string1: '$USE_BUILD_IDENTITY'
+        condition-string2: ''
         steps:
 
         # pick commit and build identity from last successful on-push runner
@@ -171,7 +153,7 @@
             project: '{pipeline}.{branch}.{project}.runner'
             filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
             which-build: last-successful
-            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.custom
+            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.nightly
             optional: true
         - conditional-step:
             condition-kind: file-exists
@@ -214,19 +196,22 @@
             fi
 
     - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$IS_CUSTOM_IDENTITY'
-        condition-string2: 'true'
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '$USE_BUILD_IDENTITY'
+          condition-string2: ''
         steps:
         - build-registry-get-commit:
             pipeline: '{pipeline}'
             branch: '{branch}'
             project: '{project}'
-            build-identity: $BUILD_IDENTITY
+            build-identity: $USE_BUILD_IDENTITY
         - shell: |
             #!/bin/bash
             set -ex
             echo "TRIGGERED_KIND=CUSTOM" > CHOICE.envvar
+            echo "BUILD_IDENTITY=$USE_BUILD_IDENTITY" >> CHOICE.envvar
             echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> CHOICE.envvar
             echo "SHOULD_TRIGGER=true" >> CHOICE.envvar
 
@@ -245,7 +230,7 @@
             description: |
               $TRIGGERED_KIND
         - trigger-builds:
-          - project: '{pipeline}.{branch}.{project}.distribution.{ft-customization}.functest'
+          - project: '{pipeline}.{branch}.{project}.distribution.{ft-customization}.{tests}'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION

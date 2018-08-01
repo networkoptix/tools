@@ -170,7 +170,11 @@
             run-unittests: '' # false
             run-functests: true
 
-    - '{pipeline}.{branch}.{project}.trigger.functest.{preset}':
+    - '{pipeline}.{branch}.{project}.trigger.{tests}.{preset}':
+        job-maintainers: vfedorov@networkoptix.com
+        tests:
+        - functest
+        - scalability-test
         preset:
         - nightly:
             detailed-job-description: |-
@@ -180,7 +184,7 @@
               associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
-            timer: 'H 21 * * *'
+            timer: 'H 23 * * *'
 
 
     # RUNNER - root launcher of all builds

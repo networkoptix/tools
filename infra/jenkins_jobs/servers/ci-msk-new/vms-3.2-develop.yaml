@@ -167,6 +167,21 @@
             run-unittests: '' # false
             run-realcameratests: true
 
+    - '{pipeline}.{branch}.{project}.trigger.{tests}.{preset}':
+        job-maintainers: vfedorov@networkoptix.com
+        tests:
+        - functest
+        preset:
+        - nightly:
+            detailed-job-description: |-
+              Run nightly functional test with schedule "{timer}".
+
+              It should not be triggered manually excluding debugging of infra problems
+              associated with only this trigger type.
+            default-build-description: >-
+              Nightly functional tests
+            timer: 'H 20 * * *'
+
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{branch}.{project}.runner':
@@ -182,6 +197,9 @@
     - '{pipeline}.{branch}.{project}.webadmin.universal.build'
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
     - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{branch}.{project}.distribution.{customization}.functest':
+        customization: default
+        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test':
         customization: default
         build-watchers: vfedorov@networkoptix.com
