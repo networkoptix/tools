@@ -18,7 +18,9 @@
         weight: 1
     - throttle:
         max-total: 1
-        option: project
+        option: category
+        categories:
+        - scalability
     - build-discarder:
         days-to-keep: 10
         num-to-keep: 50
