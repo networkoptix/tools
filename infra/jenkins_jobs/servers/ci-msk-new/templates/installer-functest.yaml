@@ -180,6 +180,7 @@
         #!/bin/bash
         set -ex
         rsync -av {binaries_url} "$BIN_DIR/"
+        ln -sf "$WORKSPACE/dist/appserver2_ut" "$BIN_DIR/"  # vms_3.2 func tests requirement
 
     - inject:
         properties-content: |
