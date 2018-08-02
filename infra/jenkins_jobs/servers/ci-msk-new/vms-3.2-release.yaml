@@ -158,17 +158,7 @@
 
     # TRIGGERS - main entry points
 
-    - polling-trigger:
-        preset:
-        - example:
-            detailed-job-description: |-
-              This trigger serves for demo purposes and will be removed in future
-            default-build-description: >-
-              Manually triggered build
-            platforms: linux-x64,linux-x86
-            customizations: default,hanwha
     - custom-trigger:
-        preset:
         - nightly:
             detailed-job-description: |-
               This trigger serves for nigtly clean builds to verify the state of product
