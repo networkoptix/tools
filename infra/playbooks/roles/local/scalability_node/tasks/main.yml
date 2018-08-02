@@ -35,6 +35,7 @@
   - samba-common
   - libtalloc2
   - syslinux
+  - iptables
 
 - name: Set Kernel core pattern for system
   lineinfile:
@@ -61,6 +62,71 @@
     home: "{{ jenkins_home }}"
     createhome: yes
     shell: /bin/bash
+
+# Firewall
+- name: Flush existing firewall rules
+  iptables:
+    flush: true
+  changed_when: false
+
+- name: Firewall rule - allow all loopback traffic
+  iptables:
+    action: append
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+  register: allow_loopback_rule
+
+- name: Firewall rule - allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+  become: true
+  register: allow_established_rule
+
+- name: Firewall rule - allow ICMP
+  iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: icmp
+  register: allow_icmp_rule
+
+- name: Firewall rule - allow port 22/SSH traffic
+  iptables:
+    chain: INPUT
+    destination_port: 22
+    jump: ACCEPT
+    protocol: tcp
+  become: true
+  register: allow_ssh_rule
+
+- name: Firewall rule - allow internal networks traffic
+  iptables:
+    chain: INPUT
+    source: "{{ item }}"
+    jump: ACCEPT
+  become: yes
+  with_items: "{{ allowable_ips }}"
+  register: allow_network_rule
+
+- name: Firewall rule - drop any traffic without rule
+  iptables:
+    chain: INPUT
+    jump: DROP
+  become: true
+  register: drop_rule
+
+- name: Save iptables rules
+  command: iptables-save
+  become: true
+  when: >-
+    allow_loopback_rule is changed or
+    allow_established_rule is changed or
+    allow_icmp_rule is changed or
+    allow_ssh_rule is changed or
+    allow_network_rule is changed or
+    drop_rule is changed
 
 - name: Set limits for user
   lineinfile:

@@ -1,3 +1,11 @@
 jenkins_user: jenkins
 jenkins_group: jenkins
 jenkins_home: /home/jenkins
+# List of allowable ip ranges for iptables settings
+allowable_ips:
+  # internal CI network (jenkins, prometheus, etc)
+  - "192.168.13.0/24"
+  # internal scalability network (mediaservers, scalability test environment)
+  - "192.168.20.0/24"
+  # Seva's host (debug purpose)
+  - "10.0.3.91"
