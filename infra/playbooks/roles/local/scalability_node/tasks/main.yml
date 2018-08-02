@@ -67,7 +67,6 @@
 - name: Flush existing firewall rules
   iptables:
     flush: true
-  changed_when: false
 
 - name: Firewall rule - allow all loopback traffic
   iptables:
