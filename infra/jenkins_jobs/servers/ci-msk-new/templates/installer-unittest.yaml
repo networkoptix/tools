@@ -63,6 +63,8 @@
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
 
     builders:

@@ -117,6 +117,8 @@
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: '{branch}'
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
         # this is an ugly huck to finally close the problem with long filenames in devtools
         - folder-delete-operation:
@@ -124,6 +126,8 @@
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
 
     # STAGE: SCM

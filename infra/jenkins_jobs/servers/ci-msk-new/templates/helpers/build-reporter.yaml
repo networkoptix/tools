@@ -93,10 +93,14 @@
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: $BRANCH
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
 
     scm:

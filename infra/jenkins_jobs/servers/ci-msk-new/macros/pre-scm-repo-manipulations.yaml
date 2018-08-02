@@ -31,6 +31,8 @@
               LOCAL_PATH={basedir}
               REPO={name}
               BRANCH={branch}
+              PLATFORM={platform}
+              CUSTOMIZATION={customization}
               NODE_SSH_CONNECTION=$SSH_CONNECTION
             block: true
             block-thresholds:

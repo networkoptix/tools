@@ -106,6 +106,8 @@
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: '{branch}'
+            platform: $PLATFORM
+            customization: $CUSTOMIZATION
             basedir: $WORKSPACE
 
     scm:
