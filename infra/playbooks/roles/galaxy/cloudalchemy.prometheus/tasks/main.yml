@@ -7,6 +7,22 @@
   debug:
     var: ansible_host
 
+- name: Get monitoring nodes dictionary
+  set_fact:
+    monitoring_hosts:
+      "{{ monitoring_hosts|default([]) + [ {'hostname': item, 'ip_address': hostvars[item]['node_exporter_address'] }] }}"
+  with_inventory_hostnames:
+    - all
+  when:
+    - item != hostvars[item]['node_exporter_address']
+
+- name: Add all monitoring nodes into /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item['ip_address'] }} {{ item['hostname'] }}"
+    state: present
+  with_items: "{{ monitoring_hosts }}"
+
 - name: Gather variables for each operating system
   include_vars: "{{ item }}"
   with_first_found:
