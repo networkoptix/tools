@@ -14,7 +14,7 @@
         option: project
     - build-discarder:
         days-to-keep: 10
-        num-to-keep: 25
+        num-to-keep: 500
         artifact-days-to-keep: 10
         artifact-num-to-keep: 500
 
