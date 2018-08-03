@@ -82,7 +82,7 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    # - workspace-cleanup
+    - workspace-cleanup
     - credentials-binding:
       - username-password:
           credential-id: junk_shop_db
