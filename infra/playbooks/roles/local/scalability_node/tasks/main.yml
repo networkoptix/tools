@@ -35,6 +35,7 @@
   - samba-common
   - libtalloc2
   - syslinux
+  # ansible module `iptables` requirements
   - iptables
 
 - name: Set Kernel core pattern for system
@@ -106,7 +107,7 @@
     source: "{{ item }}"
     jump: ACCEPT
   become: yes
-  with_items: "{{ allowable_ips }}"
+  with_items: "{{ allowed_ips }}"
   register: allow_network_rule
 
 - name: Firewall rule - drop any traffic without rule
