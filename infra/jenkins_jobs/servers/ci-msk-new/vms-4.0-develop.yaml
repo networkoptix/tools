@@ -117,7 +117,8 @@
               This trigger serves for automatic builds on every push to remote repository
             default-build-description: >-
               Triggered on push event
-            platforms: linux-x64,windows-x64,mac,bpi
+            # FIXME: mac is temporarily excluded because it's broken and will be fixed later
+            platforms: linux-x64,windows-x64,bpi
             customizations: default
             ignore-functests: 'true'
     - custom-trigger:
@@ -132,7 +133,8 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,windows-x64,mac,bpi
+            # FIXME: mac is temporarily excluded because it's broken and will be fixed later
+            platforms: linux-x64,windows-x64,bpi
             customizations: default
             freeze-commit-now: true
             clean-workspace: true
