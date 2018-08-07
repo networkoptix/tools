@@ -51,7 +51,7 @@
     webadmin-customization: default
 
     cmake-executable: cmake
-    custom-cleaner-log: 'build/cleaner.log'
+    custom-cleaner-log: 'cleaner.log'
     cmake-configure-log: 'cmake-configure.log'
     cmake-build-log: 'cmake-build.log'
     build-dir: build
@@ -65,6 +65,8 @@
     # To simplify things we execute this file when it's present in workspace (see below)
     # anyways it's possible to override this file for other use cases.
     custom_cleaner_path: '$WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py'
+
+    cmake_build_args_generator: ''
 
     properties:
     - heavy-job:
@@ -280,34 +282,35 @@
         condition-filename: '{custom_cleaner_path}'
         condition-basedir: workspace
         steps:
-        - display-file:
-            file: '{custom_cleaner_path}'
-        - run-process:
-            workdir: '${{WORKSPACE}}/{build-dir}'
-            executable: python
-            executable-is-relpath: 'false'
-            arguments: '{custom_cleaner_path},--build-dir,${{WORKSPACE}}/{build-dir}'
-            logfile: '{custom-cleaner-log}'
-            inherit-environ: 'true'
-            environ: ''
+        - shell: |
+            #!bash
+            set -ex
+
+            cd "${{WORKSPACE}}/{build-dir}"
+            if [ -f "{custom_cleaner_path}" ] ; then
+              echo "will run {custom_cleaner_path} with content"
+              cat "{custom_cleaner_path}"
+              SECONDS=0
+              # Log file must not exist
+              rm -f "{custom-cleaner-log}" # TODO: remove it in prep env
+              test ! -f "{custom-cleaner-log}"
+              python "{custom_cleaner_path}" --build-dir "${{WORKSPACE}}/{build-dir}" 2>&1 | tee "{custom-cleaner-log}"
+              ec="${{PIPESTATUS[0]}}"
+              echo "Took $SECONDS seconds"
+              # Abort if first cmd in pipe failed
+              test "X${{ec}}" == "X0"
+            fi
 
     # STAGE: SETUP BUILD ENVIRONMENT
     # ========================================
 
     # Create build folder
-    # TODO: Check that condition is really needed
-    - conditional-step:
-        condition-kind: not
-        condition-operand:
-          condition-kind: file-exists
-          condition-filename: '{build-dir}'
-          condition-basedir: workspace
-        steps:
-        - folder-create-operation:
-            folder-path: '{build-dir}'
+    - shell: |
+        #!bash
+        set -ex
+        mkdir -p '{build-dir}'
+        rm -rf "$WORKSPACE/$WEBADMIN_COMPONENT_NAME"
 
-    - folder-delete-operation:
-        folder-path: '$WORKSPACE/$WEBADMIN_COMPONENT_NAME'
     - conditional-step:
         condition-kind: boolean-expression
         # pull webadmin only when needed
@@ -334,65 +337,66 @@
     # STAGE: BUILD
     # ========================================
 
-    - inject:
-        properties-content: |
-          {cmake_configure_args_global}
-    - inject:
-        properties-content: |
-          {cmake_configure_args_pipeline}
-    - inject:
-        properties-content: |
-          {cmake_configure_args_platform}
-    - inject:
-        properties-content: |
-          {cmake_configure_args_customization}
-    - inject:
-        properties-content: |
-          CMAKE_ARG_buildNumber=$BUILD_IDENTITY
-          CMAKE_SOURCEDIR=$WORKSPACE/nx_vms
-          CMAKE_ENV_environment=$WORKSPACE
-    - inject:
-        properties-content: |
-          WORKDIR=$WORKSPACE/{build-dir}
-          EXECUTABLE={cmake-executable}
-          EXECUTABLE_IS_RELPATH=false
-          LOGFILE=build/{cmake-configure-log}
-          CMAKE_ENV_PATH=$PATH
-    # Mark build started
-    - inject:
-        properties-content: |
-          BUILD_STARTED=YES
-    - groovy:
-        version: '{groovy-version}'
-        command: !include-raw-escape: ../builders/cmake_configure_wrapper.groovy
-    # Normally just increment stored value
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '{use-ninja-clean-file}'
-        condition-string2: 'YES'
-        steps:
-        - run-process:
-            workdir: '${{WORKSPACE}}/{build-dir}'
-            executable: python
-            executable-is-relpath: 'false'
-            arguments: '${{WORKSPACE}}/devtools/ninja_clean/ninja_clean.py,--build-dir,${{WORKSPACE}}/{build-dir}'
-            logfile: 'ninja_clean.log'
-            inherit-environ: 'true'
-            environ: ''
+    - shell: |
+        #!bash
+        set -ex
 
-    # Build
-    - inject:
-        properties-content: |
-          WORKDIR=$WORKSPACE/{build-dir}
-          EXECUTABLE={cmake-executable}
-          CMAKE_BUILD_THREADS=20
-          LOGFILE=build/{cmake-build-log}
-          CMAKE_ENV_NINJA_STATUS="[%s/%t] %es "
-          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_ENV_PATH=$PATH
-    - groovy:
-        version: '{groovy-version}'
-        command: !include-raw-escape: ../builders/cmake_build_wrapper.groovy
+        # FIXME: deprecated
+        export environment=$WORKSPACE
+
+        cd "{build-dir}"
+
+        SECONDS=0
+        echo "Configuring project"
+        # Log file must not exist
+        rm -f "{cmake-configure-log}" # TODO: remove it in prep env
+        test ! -f "{cmake-configure-log}"
+        cmake {cmake_configure_args_global} \
+              {cmake_configure_args_pipeline} \
+              {cmake_configure_args_platform} \
+              {cmake_configure_args_customization} \
+              -DbuildNumber=$BUILD_IDENTITY \
+              -DcustomWebAdminPackageDirectory=$WORKSPACE/$WEBADMIN_COMPONENT_NAME \
+              $WORKSPACE/nx_vms 2>&1 | tee "{cmake-configure-log}"
+        ec="${{PIPESTATUS[0]}}"
+        echo "Took $SECONDS seconds"
+        # Abort if first cmd in pipe failed
+        test "X${{ec}}" == "X0"
+
+        if [ "{use-ninja-clean-file}" == 'YES' ] ; then
+          cleaner="${{WORKSPACE}}/devtools/ninja_clean/ninja_clean.py"
+          if [ -f "$cleaner" ] ; then
+            SECONDS=0
+            echo "Running cleaner"
+            # Log file must not exist
+            rm -f "ninja_clean.log" # TODO: remove it in prep env
+            test ! -f ninja_clean.log
+            python "$cleaner" --build-dir "${{WORKSPACE}}/{build-dir}" 2>&1 | tee ninja_clean.log
+            ec="${{PIPESTATUS[0]}}"
+            echo "Took $SECONDS seconds"
+            # Abort if first cmd in pipe failed
+            test "X${{ec}}" == "X0"
+          fi
+        fi
+
+        export NINJA_STATUS="[%s/%t] %es "
+        if [ $OS == Windows_NT ] ; then
+          echo "WINDOWS" # TODO: set _MSPDBSRV_ENDPOINT_ here
+        fi
+        export _MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+        SECONDS=0
+        echo "Building project"
+        # Log file must not exist
+        rm -f "{cmake-build-log}" # TODO: remove it in prep env
+        test ! -f "{cmake-build-log}"
+        # FIXME: CMAKE_BUILD_TYPE should be defined in project
+        cmake --build . \
+              --config "${{CMAKE_BUILD_TYPE:-Release}}" \
+              {cmake_build_args_generator} 2>&1 | tee "{cmake-build-log}"
+        ec="${{PIPESTATUS[0]}}"
+        echo "Took $SECONDS seconds"
+        # Abort if first cmd in pipe failed
+        test "X${{ec}}" == "X0"
 
     # STAGE: PUBLISH
     # ========================================
@@ -415,9 +419,9 @@
           build-steps:
           # Don't publish anything if build even didn't start
           - conditional-step:
-              condition-kind: strings-match
-              condition-string1: '$BUILD_STARTED'
-              condition-string2: 'YES'
+              condition-kind: file-exists
+              condition-filename: "{build-dir}/{cmake-build-log}"
+              condition-basedir: workspace
               steps:
               - trigger-builds:
                 - project: 'helper.push-component'

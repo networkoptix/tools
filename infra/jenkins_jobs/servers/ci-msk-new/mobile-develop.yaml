@@ -19,12 +19,11 @@
     use-webadmin: 'false'
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
-    cmake_configure_args_global: |
-      CMAKE_EXECUTABLE=cmake
-      CMAKE_ARG_beta=TRUE
-      CMAKE_ARG_developerBuild=OFF
-      CMAKE_ARG_cloudGroup=test
-      CMAKE_ARG_rdepSync=ON
+    cmake_configure_args_global: >-
+      -Dbeta=TRUE
+      -DdeveloperBuild=OFF
+      -DcloudGroup=test
+      -DrdepSync=ON
 
     # SECTION. PIPELINE CONFIG
     # ============================================================
@@ -33,8 +32,8 @@
     - develop:
         junkshop_project_name: ci
         # Pipeline-specific cmake arguments
-        cmake_configure_args_pipeline:
-          CMAKE_ARG_CMAKE_BUILD_TYPE=Release
+        cmake_configure_args_pipeline: >-
+          -DCMAKE_BUILD_TYPE=Release
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -48,15 +47,16 @@
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
         installer-build-node: &linux_node build-installer-linux
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=android-arm
-
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=android-arm
+        cmake_build_args_generator: >-
+          -- -j 20
     - ios:
         installer-build-node: build-installer-mac
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Xcode
-          CMAKE_ARG_targetDevice=ios
+        cmake_configure_args_platform: >-
+          -G Xcode
+          -DtargetDevice=ios
 
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================
@@ -66,8 +66,8 @@
     # it looks like there are too few customization spec. cmake args and we may move such
     # rare customizations to platform enum.
 
-    cmake_configure_args_customization: |
-      CMAKE_ARG_customization=$CUSTOMIZATION
+    cmake_configure_args_customization: >-
+      -Dcustomization=$CUSTOMIZATION
 
     customization:
 

@@ -141,18 +141,18 @@
         includes: '{webadmin-build-log}'
         excludes: ''
 
-    # Mark build started
-    - inject:
-        properties-content: |
-          BUILD_STARTED=YES
-    - run-process:
-        workdir: $WORKSPACE
-        executable: nx_vms/webadmin/build.sh
-        executable-is-relpath: 'true'
-        arguments: ''
-        logfile: '{webadmin-build-log}'
-        inherit-environ: 'true'
-        environ: ''
+    - shell: |
+        #!bash
+        set -ex
+
+        SECONDS=0
+        rm -f "{webadmin-build-log}" # TODO: remove it in prep env
+        test ! -f "{webadmin-build-log}"
+        nx_vms/webadmin/build.sh 2>&1 | tee "{webadmin-build-log}"
+        ec="${{PIPESTATUS[0]}}"
+        echo "Took $SECONDS seconds"
+        # Abort if first cmd in pipe failed
+        test "X${{ec}}" == "X0"
 
     publishers:
     - delete-hg-repos(if-damaged)
@@ -176,9 +176,9 @@
           build-steps:
           # Don't publish anything if build even didn't start
           - conditional-step:
-              condition-kind: strings-match
-              condition-string1: '$BUILD_STARTED'
-              condition-string2: 'YES'
+              condition-kind: file-exists
+              condition-filename: "{webadmin-build-log}"
+              condition-basedir: workspace
               steps:
               - trigger-builds:
                 - project: 'helper.push-component'

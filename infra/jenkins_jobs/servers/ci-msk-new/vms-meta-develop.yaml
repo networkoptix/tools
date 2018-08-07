@@ -18,14 +18,11 @@
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
-    cmake_configure_args_global: |
-      CMAKE_EXECUTABLE=cmake
-      CMAKE_ARG_beta=TRUE
-      CMAKE_ARG_developerBuild=OFF
-      CMAKE_ARG_cloudGroup=test
-      CMAKE_ARG_rdepSync=ON
-      CMAKE_ARG_customWebAdminPackageDirectory=$WORKSPACE/$WEBADMIN_COMPONENT_NAME
-      # CMAKE_ARG_withTests=TRUE
+    cmake_configure_args_global: >-
+      -Dbeta=TRUE
+      -DdeveloperBuild=OFF
+      -DcloudGroup=test
+      -DrdepSync=ON
 
     # SECTION. PIPELINE CONFIG
     # ============================================================
@@ -34,8 +31,8 @@
     - develop:
         junkshop_project_name: ci
         # Pipeline-specific cmake arguments
-        cmake_configure_args_pipeline:
-          CMAKE_ARG_CMAKE_BUILD_TYPE=Release
+        cmake_configure_args_pipeline: >-
+          -DCMAKE_BUILD_TYPE=Release
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -50,14 +47,16 @@
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
         installer-build-node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
+        cmake_configure_args_platform: >-
+          -G Ninja
+        cmake_build_args_generator: >-
+          -- -j 20
 
     - tx1:
         installer-build-node: *linux_node
-        cmake_configure_args_platform: |
-          CMAKE_GENERATOR=Ninja
-          CMAKE_ARG_targetDevice=tx1
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=tx1
 
     # -- windows platform --
     # FIXME: HOME,PATH and other vars are represented as win env.
@@ -65,16 +64,14 @@
     # Rsync goes mad ain result and nothing works.
     - windows-x64: &windows_config
         installer-build-node: build-installer-windows
-        cmake_configure_args_platform: |
-          CMAKE_ENV__MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
-          CMAKE_GENERATOR=Visual Studio 15 2017 Win64
-          CMAKE_ARG_beta=ON
-          CMAKE_ARG_codeSigning=OFF
-          CMAKE_ARG_withClouds=OFF
-          CMAKE_ARG_withPluginStubs=OFF
-          CMAKE_ARG_withTests=ON
-          CMAKE_ARG_targetDevice=windows-x64
-          CMAKE_TOOL=host=x64
+        cmake_configure_args_platform: >-
+          -G 'Visual Studio 15 2017 Win64'
+          -Dbeta=ON
+          -DcodeSigning=OFF
+          -DwithClouds=OFF
+          -DwithPluginStubs=OFF
+          -DtargetDevice=windows-x64
+          -T host=x64
 
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================
@@ -84,8 +81,8 @@
     # it looks like there are too few customization spec. cmake args and we may move such
     # rare customizations to platform enum.
 
-    cmake_configure_args_customization: |
-      CMAKE_ARG_customization=$CUSTOMIZATION
+    cmake_configure_args_customization: >-
+      -Dcustomization=$CUSTOMIZATION
 
     customization:
 
