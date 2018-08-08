@@ -15,7 +15,7 @@
     # ============================================================
 
     # comma-separated list of emails to whom send notifications related to builds
-    build-watchers: rvasilenko@networkoptix.com,mshevchenko@networkoptix.com,sivanov@networkoptix.com
+    build-watchers: ''
 
     # block builds and wait for reporting job to report results
     synchronous-reporting: '' # false
