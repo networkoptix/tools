@@ -1,14 +1,31 @@
+- builder:
+    name: set-hg-marker-successful-checkout
+    builders:
+    - shell: |
+        #!bash
+        touch ____successful_checkout.flag
+
+
 - publisher:
     name: delete-hg-repos(if-damaged)
-
     publishers:
-    - post-tasks:
-      - matches:
-        - log-text: 'ERROR: Failed to pull'
-          operator: OR
-        - log-text: 'helper.sync-hg .* completed. Result was FAILURE'
-          operator: OR
-        script: |
-          #!bash
-          if [ -d nx_vms ] ; then rm -rf ./nx_vms ; fi
-          if [ -d devtools ] ; then rm -rf ./devtools ; fi
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on:
+          - SUCCESS
+          - UNSTABLE
+          - FAILURE
+          - NOT_BUILT
+          - ABORTED
+          build-steps:
+          - shell: |
+              #!bash
+              rm -f ____successful_checkout.flag
+              if [ ! -f ____successful_checkout.flag ] ; then
+                # pre-scm or scm steps are failed => damaged hg repos
+                if [ -d nx_vms ] ; then rm -rf ./nx_vms ; fi
+                if [ -d devtools ] ; then rm -rf ./devtools ; fi
+              fi
+

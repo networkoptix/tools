@@ -141,6 +141,7 @@
         revision: '$NX_VMS_COMMIT'
 
     builders:
+    - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

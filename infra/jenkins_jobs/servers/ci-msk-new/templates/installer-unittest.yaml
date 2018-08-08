@@ -68,6 +68,7 @@
             basedir: $WORKSPACE
 
     builders:
+    - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

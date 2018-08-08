@@ -86,6 +86,7 @@
         revision: default
 
     builders:
+    - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
