@@ -8,6 +8,7 @@
           operator: OR
         - log-text: 'helper.sync-hg .* completed. Result was FAILURE'
           operator: OR
-        script: |
+        shell: |
+          #!bash
           if [ -d nx_vms ] ; then rm -rf ./nx_vms ; fi
           if [ -d devtools ] ; then rm -rf ./devtools ; fi
