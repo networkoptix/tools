@@ -173,8 +173,6 @@
                 --work-dir=$WORKSPACE/sdk_unit_tests
             popd
           fi
-
-          chmod +x -R build/bin
           # run vms tests
           pushd unit_tests
             # run tests
