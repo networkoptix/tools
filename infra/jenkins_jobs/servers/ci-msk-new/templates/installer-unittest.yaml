@@ -157,7 +157,11 @@
 
           # run metadata sdk tests if exists
           if [ -d build/nx_metadata_sdk ] ; then
-            chmod +x -R build/nx_metadata_sdk
+
+            # +x is needed for windows only
+            if [ "X${{OS}}" == "XWindows_NT" ] ; then
+              chmod +x -R build/nx_metadata_sdk
+            fi
 
             pushd sdk_unit_tests
               # run tests
@@ -173,6 +177,12 @@
                 --work-dir=$WORKSPACE/sdk_unit_tests
             popd
           fi
+
+          # +x is needed for windows only
+          if [ "X${{OS}}" == "XWindows_NT" ] ; then
+            chmod +x -R build/bin
+          fi
+
           # run vms tests
           pushd unit_tests
             # run tests
