@@ -22,10 +22,10 @@
           build-steps:
           - shell: |
               #!bash
-              rm -f ____successful_checkout.flag
               if [ ! -f ____successful_checkout.flag ] ; then
                 # pre-scm or scm steps are failed => damaged hg repos
                 if [ -d nx_vms ] ; then rm -rf ./nx_vms ; fi
                 if [ -d devtools ] ; then rm -rf ./devtools ; fi
               fi
+              rm -f ____successful_checkout.flag
 
