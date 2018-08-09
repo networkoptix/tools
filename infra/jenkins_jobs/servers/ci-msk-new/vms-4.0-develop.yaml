@@ -51,7 +51,7 @@
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 20
     - bpi:
         installer-build-node: *linux_node
@@ -81,7 +81,7 @@
           -G Ninja
           -Dbeta=ON
           -DcodeSigning=OFF
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 10
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================

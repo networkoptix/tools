@@ -50,7 +50,7 @@
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=android-arm
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 20
     - ios:
         installer-build-node: build-installer-mac

@@ -53,14 +53,14 @@
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 20
     - bpi:
         installer-build-node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bpi
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 20
     # -- windows platform --
     # FIXME: HOME,PATH and other vars are represented as win env.
@@ -90,7 +90,7 @@
           -G Ninja
           -Dbeta=ON
           -DcodeSigning=OFF
-        cmake_build_args_generator: >-
+        cmake_build_extra_args: >-
           -- -j 10
 
     # SECTION. CUSTOMIZATION CONFIG

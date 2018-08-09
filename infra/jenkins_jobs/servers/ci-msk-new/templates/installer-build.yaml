@@ -66,7 +66,7 @@
     # anyways it's possible to override this file for other use cases.
     custom_cleaner_path: '$WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py'
 
-    cmake_build_args_generator: ''
+    cmake_build_extra_args: ''
 
     # this is a list of vars that not require during build process and should be removed
     envvars_to_unset_during_build: >-
@@ -164,7 +164,7 @@
         name:  CMAKE_BUILD_COMMAND
         # FIXME: --config should be defined in project
         default: >-
-          cmake --build . --config Release {cmake_build_args_generator}
+          cmake --build . --config Release {cmake_build_extra_args}
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
