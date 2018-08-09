@@ -75,7 +75,7 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
             print("Finished downloading {file}, {size} bytes, md5={md5}".format(**result))
             return result
     
-    # This dictionary will be dumped to json
+    # This dictionary will be dumped to update.json
     output_index = {
         "version":"%s.%d"%(context['version'], build_num),
         "cloudHost":"cloud-test.hdw.mx",
@@ -85,6 +85,7 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
         "clientPackages": {},
     }
     
+    # This dictionary will be dumped to packages.json
     output_index_v2 = {
         "version":"%s.%d"%(context['version'], build_num),
         "cloudHost":"cloud-test.hdw.mx",
@@ -93,7 +94,7 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
         "packages": [],
     }
     
-    # Downloads update files and updates data for index.json
+    # Downloads update packages and updates the data for update.json
     def get_and_index_packages(component, platforms, dstPackages):
         # Do for clients
         context['component'] = component    
