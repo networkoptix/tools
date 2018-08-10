@@ -121,6 +121,10 @@ class BuildInfo(namedtuple('BuildInfo', [
         return bool(self.failed_build_platform_list)
 
     @property
+    def has_succeeded_builds(self):
+        return set(self.failed_build_platform_list) < set(self.platform_list)
+
+    @property
     def has_failed_tests(self):
         bool(self.failed_tests_platform_list)
 

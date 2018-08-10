@@ -144,7 +144,7 @@ class ReleaseProject(BuildProject):
             version_path=VERSION_FILE,
             platform_build_info_map=platform_build_info_map,
             )
-        if not self.in_assist_mode and not build_info.has_failed_builds:
+        if not self.in_assist_mode and not build_info.has_succeeded_builds:
             self._register_on_pubcon(build_num, branch_name)
 
     def _register_on_pubcon(self, build_num, branch_name):
@@ -154,7 +154,10 @@ class ReleaseProject(BuildProject):
             branch=branch_name,
             )
         response = requests.get(url)
-        assert response.ok, repr(response.json())
+        if not response.ok:
+            log.error('Error registering build on depcon:\n%s', response.content)
+            raise RuntimeError('Error registering build on depcon: %s'
+                                   % ' '.join(response.content.splitlines()[:2]))
         assert response.json() == 'ok', repr(response.json())
 
     def make_email_recipient_list(self, build_info):
