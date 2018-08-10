@@ -109,7 +109,7 @@
             customizations: default
             freeze-commit-now: true
             clean-workspace: true
-            timer: 'H 6 * * *'
+            timer: 'H 6 * * 1-5'
 
     # RUNNER - root launcher of all builds
 

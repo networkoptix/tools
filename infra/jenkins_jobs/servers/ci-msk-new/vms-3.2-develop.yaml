@@ -145,7 +145,7 @@
             customizations: default
             freeze-commit-now: true
             clean-workspace: true
-            timer: 'H 1 * * *'
+            timer: 'H 1 * * 1-5'
         - custom:
             detailed-job-description: |-
               This trigger serves for custom builds.
@@ -181,7 +181,7 @@
               associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
-            timer: 'H 20 * * *'
+            timer: 'H 20 * * 1-5'
 
     # RUNNER - root launcher of all builds
 

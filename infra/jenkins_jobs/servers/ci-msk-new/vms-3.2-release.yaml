@@ -171,7 +171,7 @@
             platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
             customizations: default,hanwha,vista,digitalwatchdog
             clean-workspace: true
-            timer: '0 0 * * *'
+            timer: '0 0 * * 1-5'
         - custom:
             detailed-job-description: |-
               This trigger serves for custom builds.
