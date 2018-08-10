@@ -24,3 +24,7 @@ ci/junk_shop/junk_shop/webapp/static/plotly-latest.min.js
 .idea
 api_examples/csharp_examples/bin/*
 api_examples/csharp_examples/obj/*
+**/.vs/**
+**/_ReSharper.Caches/**
+*.user
+*.bak
