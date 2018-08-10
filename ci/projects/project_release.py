@@ -144,7 +144,7 @@ class ReleaseProject(BuildProject):
             version_path=VERSION_FILE,
             platform_build_info_map=platform_build_info_map,
             )
-        if not self.in_assist_mode and not build_info.has_succeeded_builds:
+        if not self.in_assist_mode and build_info.has_succeeded_builds:
             self._register_on_pubcon(build_num, branch_name)
 
     def _register_on_pubcon(self, build_num, branch_name):
