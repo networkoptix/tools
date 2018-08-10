@@ -175,19 +175,6 @@
           PYTEST_DEFAULTS_SECTION=ci
 
     - scalability-tests-block:
-        use-lightweight-servers: 'true'  # note: string type
-        server-count: 50
-    - scalability-tests-block:
-        use-lightweight-servers: 'true'  # note: string type
-        server-count: 100
-    - scalability-tests-block:
-        use-lightweight-servers: 'true'  # note: string type
-        server-count: 150
-    - scalability-tests-block:
-        use-lightweight-servers: 'true'  # note: string type
-        server-count: 200
-
-    - scalability-tests-block:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 20
     - scalability-tests-block:
@@ -202,6 +189,19 @@
     - scalability-tests-block:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 100
+
+    - scalability-tests-block:
+        use-lightweight-servers: 'true'  # note: string type
+        server-count: 50
+    - scalability-tests-block:
+        use-lightweight-servers: 'true'  # note: string type
+        server-count: 100
+    - scalability-tests-block:
+        use-lightweight-servers: 'true'  # note: string type
+        server-count: 150
+    - scalability-tests-block:
+        use-lightweight-servers: 'true'  # note: string type
+        server-count: 200
 
     publishers:
     - delete-hg-repos(if-damaged)
