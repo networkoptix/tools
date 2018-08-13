@@ -159,7 +159,7 @@
           {cmake_configure_args_platform}
           {cmake_configure_args_customization}
           -DbuildNumber=$BUILD_IDENTITY
-          -DcustomWebAdminPackageDirectory=$WORKSPACE/$WEBADMIN_COMPONENT_NAME
+          -DcustomWebAdminPackageDirectory=../$WEBADMIN_COMPONENT_NAME
     - string:
         name:  CMAKE_BUILD_COMMAND
         # FIXME: --config should be defined in project
