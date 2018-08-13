@@ -183,7 +183,7 @@
             timer: 'H 23 * * 1-5'
 
     - '{pipeline}.{branch}.{project}.trigger.blinking-tests':
-        timer: '0 4 * * 6'
+        timer: ''
         use-nx-vms-commit: e8de543f9178
 
 
