@@ -55,7 +55,15 @@
 
     builders:
     - set-custom-build-description
-
+    - validate-required-params:
+        params: >-
+          BRANCH
+          PLATFORM
+          CUSTOMIZATION
+          REPO
+          LOCAL_PATH
+          NODE_SSH_CONNECTION
+          SSH_USER
     - rsync-upload:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'

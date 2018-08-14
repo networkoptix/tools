@@ -1,0 +1,13 @@
+# macro to validate that params are set correctly
+# not empty string and not variable name
+- builder:
+    name: validate-required-params
+    builders:
+    - shell: |
+        #!bash
+        set -ex
+        for var in {params} ; do
+          echo "Checking $var to be defined and filled correctly; value is ${{!var}}"
+          test "${{!var}}" != '$'"${{var}}" # ~ "$REQUESTED_BY" != '$REQUESTED_BY'
+          test "${{!var}}" != ''            # ~ "$REQUESTED_BY" != ''
+        done
