@@ -77,6 +77,7 @@
     parameters:
     - string:
         name: PIPELINE
+        default: '{default}'
         description: >-
           Build pipeline pipeline (e.g. custom, release and others)
 
@@ -85,6 +86,7 @@
     parameters:
     - string:
         name: BRANCH
+        default: '{default}'
         description: >-
           Branch of nx_vms from which product is built.
 
