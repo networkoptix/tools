@@ -156,7 +156,7 @@ namespace Nx
             return layout;
         }
 
-        public async Task SaveLayoutRaw(string layoutData, string id)
+        public async Task SaveLayoutRaw(string layoutData)
         {
             var uri = MakeUri("/ec2/saveLayout", "");
             var reqContent = new StringContent(layoutData);
@@ -186,7 +186,7 @@ namespace Nx
                     serializer.Serialize(jsonWriter, layout);
                 }
 
-                await SaveLayoutRaw(writer.ToString(), layout.id);
+                await SaveLayoutRaw(writer.ToString());
             }
             catch (JsonSerializationException ex)
             {

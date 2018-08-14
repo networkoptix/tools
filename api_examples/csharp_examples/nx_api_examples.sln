@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nx_api_examples", "nx_api_examples.csproj", "{742B8D20-ED68-490A-8009-666F71E5DAC5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "videowall_client", "..\videowall_client\videowall_client.csproj", "{B8EAE3BC-FB99-496C-804D-33CBD0CE3B25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{742B8D20-ED68-490A-8009-666F71E5DAC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{742B8D20-ED68-490A-8009-666F71E5DAC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{742B8D20-ED68-490A-8009-666F71E5DAC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8EAE3BC-FB99-496C-804D-33CBD0CE3B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8EAE3BC-FB99-496C-804D-33CBD0CE3B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8EAE3BC-FB99-496C-804D-33CBD0CE3B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8EAE3BC-FB99-496C-804D-33CBD0CE3B25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
