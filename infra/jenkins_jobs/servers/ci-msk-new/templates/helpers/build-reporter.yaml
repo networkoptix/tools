@@ -82,7 +82,6 @@
         timeout: 20 # min
         fail: true
         type: absolute
-    - workspace-cleanup
     - credentials-binding:
       - username-password:
           credential-id: junk_shop_db
@@ -112,6 +111,22 @@
         revision: 'default'
 
     builders:
+    - shell: |
+        #!bash
+        # TODO: rework as common macro
+        set -ex
+        for file in $(ls) ; do
+          if [ "$file" == 'nx_vms' ] ; then
+            continue
+          fi
+          if [ "$file" == 'devtools' ] ; then
+            continue
+          fi
+          if [ "$file" == 'venv' ] ; then
+            continue
+          fi
+          rm -rf "$file"
+        done
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
@@ -137,19 +152,36 @@
           PLATFORM=$PLATFORM
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/
-          COMPONENTS=$LOGFILE,build_logs/
+          COMPONENTS=*.log,build_logs/
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
           failure-threshold: FAILURE
 
-    - init-venv-linux:
-        requirements-files: devtools/ci/junk_shop/requirements.txt
     - shell: |
         #!/bin/bash
         set -ex
 
+        rm -f full_build.log
+
+        for logfile in  webadmin-build.log	   \
+                        cleaner.log           \
+                        cmake-configure.log   \
+                        ninja_clean.log       \
+                        cmake-build.log       ; do
+          if [ -f $logfile ] ; then
+            cat $logfile >> full_build.log
+          fi
+        done
+
+        if [ ! -d venv ]; then
+          virtualenv --system-site-packages venv
+        fi
+
         source venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          pip install --upgrade -r devtools/ci/junk_shop/requirements.txt
+
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
           DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
@@ -173,7 +205,7 @@
 
           # upload build results
           BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
-          devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" "$LOGFILE" "--outcome=$BUILD_STATUS"
+          devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" full_build.log "--outcome=$BUILD_STATUS"
 
     publishers:
     - delete-hg-repos(if-damaged)
