@@ -17,7 +17,6 @@
     vars:
       samba_mount_pass: "{{ cinas_infra_password }}"
   - role: alphabet_common
-  - role: MichaelRigart.interfaces
   - role: libvirt_host
     vars:
       image_library_path: '/mnt/infra/images'
