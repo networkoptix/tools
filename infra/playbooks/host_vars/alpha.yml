@@ -1,17 +1,3 @@
 # will build win2018base image locally
 # TODO: don't build on every host, build once and store on NAS
 build_win2018_server: true
-
-interfaces_bridge_interfaces:
-- device: br1
-  type: bridge
-  ports: 
-  - eno1
-  bootproto: dhcp # 10.0.3.174
-- device: br2
-  type: bridge
-  ports: 
-  - eno2
-  bootproto: static
-  address: 192.168.13.3
-  netmask: 255.255.255.0
