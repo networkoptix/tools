@@ -14,7 +14,8 @@
 
     - '{pipeline}.helper.sync-hg'
     - '{pipeline}.helper.pull-component'
-    - '{pipeline}.helper.push-component'
+    - '{pipeline}.helper.publish-build'
+    - '{pipeline}.helper.publish-tests'
     - '{pipeline}.helper.freeze-nx-vms-commit'
     - '{pipeline}.helper.freeze-build-config'
 

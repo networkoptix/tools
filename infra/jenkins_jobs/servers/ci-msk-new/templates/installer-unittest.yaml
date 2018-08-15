@@ -221,7 +221,7 @@
           - UNSTABLE
           build-steps:
           - trigger-builds:
-            - project: '{pipeline}.helper.push-component'
+            - project: '{pipeline}.helper.publish-tests'
               block: true
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}

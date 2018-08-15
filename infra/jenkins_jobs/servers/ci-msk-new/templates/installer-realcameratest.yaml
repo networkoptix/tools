@@ -200,7 +200,7 @@
           - FAILURE
           build-steps:
           - trigger-builds:
-            - project: '{pipeline}.helper.push-component'
+            - project: '{pipeline}.helper.publish-tests'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION

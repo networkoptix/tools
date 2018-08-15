@@ -1,9 +1,9 @@
 - job-template:
-    name: '{pipeline}.helper.push-component'
+    name: '{pipeline}.helper.publish-build'
     description: |
       <pre>
       ================================================================================
-      Pull component
+      Publish build
       ================================================================================
 
       JOB MAINTAINERS
@@ -11,7 +11,7 @@
         (notified by email on build failures)
 
       SOURCES
-        devtools/infra/jenkins_jobs/servers/templates/helpers/push-component.yaml
+        devtools/infra/jenkins_jobs/servers/templates/helpers/publish-build.yaml
 
       --------------------------------------------------------------------------------
 

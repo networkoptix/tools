@@ -549,7 +549,7 @@
               condition-basedir: workspace
               steps:
               - trigger-builds:
-                - project: '{pipeline}.helper.push-component'
+                - project: '{pipeline}.helper.publish-build'
                   predefined-parameters: |
                     REQUESTED_BY={tag_requested_by}
                     BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -560,7 +560,7 @@
                     PLATFORM=$PLATFORM
                     NX_VMS_COMMIT=$NX_VMS_COMMIT
                     LOCAL_PATH=$WORKSPACE/{build-dir}/
-                    COMPONENTS='build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
+                    COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log
                     NODE_SSH_CONNECTION=$SSH_CONNECTION
                     SSH_USER=$USER
                   block: true

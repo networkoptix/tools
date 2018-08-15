@@ -178,7 +178,7 @@
               condition-basedir: workspace
               steps:
               - trigger-builds:
-                - project: '{pipeline}.helper.push-component'
+                - project: '{pipeline}.helper.publish-build'
                   block: true
                   block-thresholds:
                     failure-threshold: FAILURE
@@ -191,7 +191,7 @@
                     PLATFORM=$PLATFORM
                     BUILD_STATUS=passed
                     LOCAL_PATH=$WORKSPACE/
-                    COMPONENTS='server-external/,webadmin-build.log,static/version.txt'
+                    COMPONENTS=server-external/,webadmin-build.log,static/version.txt
                     NODE_SSH_CONNECTION=$SSH_CONNECTION
                     SSH_USER=$USER
 
