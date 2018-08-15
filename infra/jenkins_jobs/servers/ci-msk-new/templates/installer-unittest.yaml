@@ -16,7 +16,7 @@
     # tests as timed out before it will be killed by build timeout
     job-timeout: "40" # min
     sdk-testrunner-timeout: "300" # 5 min
-    testrunner-timeout: "1800" # sec 30 min
+    testrunner-timeout: "750" # sec = 12.5 min
 
     properties:
     - heavy-job:
