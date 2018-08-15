@@ -79,9 +79,6 @@
     #               <remote_host>/<src_path>/a/ -> <dst_path>/a/
     #               <remote_host>/<src_path>/b  -> <dst_path>/b
     #               <remote_host>/<src_path>/c  -> <dst_path>/c
-    # options/flags:
-    #   force: true/* - delete target (local) folder before downloading
-    #   allow_missing: YES/* - should we skip missing sources or fail?
     builders:
     - shell: |
         #!/bin/bash
@@ -91,100 +88,40 @@
         RSYNC_PORT="{port}"
         RSYNC_USER="{user}"
 
-        #TODO: Should we move files somewhere instead of deleting?
-        if [ "{force}" == 'true' ] ; then
-          echo "== FORCE MODE - WILL OVERRIDE ALL ARTIFACTS =="
-          echo "Clean dir first.."
-          RSYNC_DST="{dst_path}"
-            # replace 'C:\' with '/cygdrive/c/'
-          RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
-          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-          RSYNC_DST="${{RSYNC_DST//\\//}}"
-          rm -rf "${{RSYNC_DST}}"
-          echo "Done"
-        else
-          echo "Ensure that components will not be overwritten..."
-          if [ -e "{dst_path}" ] ; then
-            echo "Here is a list of components currently located at the root of target directory."
-            echo "Note, that '..' are also allowed as part paths."
-            ls -la "{dst_path}"
-          else
-            echo "{dst_path} does not exist yet"
-          fi
+        RSYNC_SRC="{src_path}"
+        RSYNC_DST="{dst_path}"
 
-          echo "The components array is {components}"
-          IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
-          for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
-          do
-            RSYNC_DST="{dst_path}/${{COMPONENT}}"
-            # When working with windows Jenkins node Workspace is represented as windows path.
-            # Volume name ('C:') and back-slashes ('\') are error prone.
-            # One of the option is to replace them with cygwin paths.
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_DST="${{RSYNC_DST//\\//}}"
 
-            # replace 'C:\' with '/cygdrive/c/'
-            RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
-            # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-            RSYNC_DST="${{RSYNC_DST//\\//}}"
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+        # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
 
-            echo "Checking path \"${{RSYNC_DST}}\""
-            if [ -e ${{RSYNC_DST}} ] ; then
-              echo "Path exists. FAIL."
-              exit 1
-            fi
-          done
-        fi
-
-        if [ "{allow_missing}" == 'YES' ] ; then
-          echo "Missing components are allowed ({allow_missing}), will not fail on lookup error"
-        else
-          echo "Missing components are not allowed ({allow_missing}), will fail on lookup error"
-        fi
-
-        # components ~> "dir1/,dir2/,file1,file2"
-        echo "Will rsync {components} components"
+        PWD_OLD=$PWD
+        echo '' > "$PWD_OLD/RSYNC_FILES_LIST.txt"
 
         IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
         for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
         do
-          RSYNC_SRC="{src_path}/${{COMPONENT}}"
-          RSYNC_DST="{dst_path}/${{COMPONENT}}"
-
-          # When working with windows Jenkins node Workspace is represented as windows path.
-          # Volume name ('C:') and back-slashes ('\') are error prone.
-          # One of the option is to replace them with cygwin paths.
-
-          # replace 'C:\' with '/cygdrive/c/'
-          RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
-          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-          RSYNC_DST="${{RSYNC_DST//\\//}}"
-
-          # replace 'C:\' with '/cygdrive/c/'
-          RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
-          # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
-          RSYNC_SRC="${{RSYNC_SRC//\\//}}"
-
-          # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
-
-          # Check that components exist and if we are not allowed to have missing components and found on, die
-          if $( \
-              ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-              -p "${{RSYNC_PORT}}" "${{RSYNC_USER}}@${{RSYNC_HOST}}" \
-              test ! -e "${{RSYNC_SRC}}" \
-            ) ; then
-            if [ "{allow_missing}" == 'YES' ] ; then
-              echo "Missing components(${{RSYNC_SRC}}) are allowed, continue"
-              continue
-            else
-              echo "Missing components (${{RSYNC_SRC}} are not allowed, fail"
-              exit 1
-            fi
+          if [[ "$COMPONENT" == */ ]] ; then
+            COMPONENT="${{COMPONENT}}***"
           fi
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            -p "${{RSYNC_PORT}}" "${{RSYNC_USER}}@${{RSYNC_HOST}}" \
+            "cd \"${{RSYNC_SRC}}\" && find . -path \"./${{COMPONENT}}\" -print" >> RSYNC_FILES_LIST.txt
+        done
 
-          mkdir -p "${{RSYNC_DST%/*}}"
-
-          # FIXME: added -O  --no-perms and removed -a - is a tmp solution hile testing on smb
+        mkdir -p "${{RSYNC_DST}}"
+        cat RSYNC_FILES_LIST.txt
+        pushd "${{RSYNC_DST}}"
           rsync -vrzO --no-perms --links \
             -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
             "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_SRC}}" \
-            "${{RSYNC_DST}}"
-        done
+            "${{RSYNC_DST}}" \
+            --files-from="$PWD_OLD/RSYNC_FILES_LIST.txt"
+        popd

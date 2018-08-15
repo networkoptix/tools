@@ -140,8 +140,6 @@
         src_path: '${{LOCAL_PATH}}'
         dst_path: '${{REPOSITORY_PATH}}'
         components: '${{COMPONENTS}}'
-        force: '$FORCE_PUSH'
-        allow_missing: 'YES'
     - shell:  !include-raw-escape: ../../builders/organize_repo.sh
 
     publishers:

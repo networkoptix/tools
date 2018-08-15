@@ -133,6 +133,18 @@
           REPOSITORY_ROOT_PATH={artifact_repository_base_path}/{artifact_location_root_pattern}
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
 
+    - shell: |
+        #!bash
+        if [ -d "${{REPOSITORY_PATH}}" ] ; then
+          if [ ${{FORCE_PUSH}} == 'true' ] ; then
+            echo "Path exists, renaming existing build just in case"
+            mv "${{REPOSITORY_PATH}}" "${{REPOSITORY_PATH}}.old.${{BUILD_ID}}"
+          else
+            echo "Path exists, FAIL"
+            exit 1
+          fi
+        fi
+
     - rsync-download:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
@@ -140,8 +152,6 @@
         src_path: '${{LOCAL_PATH}}'
         dst_path: '${{REPOSITORY_PATH}}'
         components: '${{COMPONENTS}}'
-        force: '$FORCE_PUSH'
-        allow_missing: 'YES'
     - shell:  !include-raw-escape: ../../builders/organize_repo.sh
 
     publishers:
