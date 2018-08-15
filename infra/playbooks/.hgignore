@@ -3,6 +3,3 @@ syntax: glob
 *.retry
 .venv/
 secrets.yml
-inventory-local.ini
-host_vars/anik*.yml
-host_vars/localhost.yml
