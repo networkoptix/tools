@@ -186,11 +186,7 @@
           DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
           REVISION="$(cd nx_vms && hg id --id)"
 
-          if [ "$PIPELINE" == 'develop' ] ; then
-            JUNKSHOP_PROJECT=ci
-          else
-            JUNKSHOP_PROJECT="$PIPELINE"
-          fi
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
 
           if [ "$PLATFORM" == 'universal' ] ; then
             JUNKSHOP_PLATFORM=webadmin
@@ -199,11 +195,11 @@
           fi
 
           # register build
-          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$JUNKSHOP_PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
+          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$JUNKSHOP_PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
           devtools/ci/junk_shop/junk_shop/save_build_info.py "$DB_CONFIG" "$BUILD_PARAMETERS" nx_vms
 
           # upload build results
-          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
+          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" full_build.log "--outcome=$BUILD_STATUS"
 
     publishers:
