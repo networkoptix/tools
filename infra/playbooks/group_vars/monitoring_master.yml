@@ -1,5 +1,10 @@
 prometheus_web_external_url: "http://{{ ansible_ssh_host }}:9090"
 
+prometheus_global:
+  scrape_interval: 10s
+  scrape_timeout: 60s
+  evaluation_interval: 15s
+
 prometheus_alertmanager_config:
   - scheme: http
     static_configs:
