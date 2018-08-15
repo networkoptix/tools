@@ -56,9 +56,6 @@
     cmake-build-log: 'cmake-build.log'
     build-dir: build
 
-    build-artifacts: 'build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
-    build-artifacts-min: 'build/**/*.log'
-
     # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
     # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one customization
     # must not be present while we are building other customization.
@@ -347,7 +344,7 @@
 
     # Remove any logs located in build dir since build dir is shared across customizations
     - file-delete-operation:
-        includes: '{build-artifacts-min}'
+        includes: 'build/**/*.log'
         excludes: ''
 
     # Remove distrib folder
@@ -528,7 +525,7 @@
     publishers:
     - delete-hg-repos(if-damaged)
     - archive:
-        artifacts: '{build-artifacts-min}'
+        artifacts: 'build/**/*.log'
         allow-empty: 'false'
         fingerprint: true
 
@@ -563,7 +560,7 @@
                     PLATFORM=$PLATFORM
                     NX_VMS_COMMIT=$NX_VMS_COMMIT
                     LOCAL_PATH=$WORKSPACE/{build-dir}/
-                    COMPONENTS={build-artifacts}
+                    COMPONENTS='build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log'
                     NODE_SSH_CONNECTION=$SSH_CONNECTION
                     SSH_USER=$USER
                   block: true
