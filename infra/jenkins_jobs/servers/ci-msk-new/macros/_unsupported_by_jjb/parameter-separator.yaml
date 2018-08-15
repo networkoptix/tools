@@ -1,6 +1,5 @@
 - parameter:
     name: separator
-
     parameters:
     - raw:
         xml: |
@@ -11,6 +10,7 @@
             <sectionHeaderStyle>{section-style}</sectionHeaderStyle>
             <separatorStyle>{separator-style}</separatorStyle>
           </jenkins.plugins.parameter__separator.ParameterSeparatorDefinition>
+
 - parameter:
     name: simple-separator
     parameters:
