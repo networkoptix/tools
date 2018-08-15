@@ -149,6 +149,7 @@ print '''#
 
     # nx commit
     - freeze-nx-vms-commit(remote):
+        pipeline: '{pipeline}'
         tag_requested_by: '{tag_requested_by}'
         branch: $BRANCH
         commit-to-freeze: $NX_VMS_COMMIT
@@ -156,6 +157,7 @@ print '''#
 
     # Freeze nx realcamera framework commit
     - freeze-nx-vms-commit(remote):
+        pipeline: '{pipeline}'
         tag_requested_by: '{tag_requested_by}'
         branch: '{realcameratesting-framework-branch}'
         commit-to-freeze: '{realcameratesting-framework-branch}'

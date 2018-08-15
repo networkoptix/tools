@@ -1,5 +1,5 @@
 - job-template:
-    name: 'helper.push-component'
+    name: '{pipeline}.helper.push-component'
     description: |
       <pre>
       ================================================================================
@@ -71,7 +71,6 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     # Parameters related to artifact location in repository
-    - p_PIPELINE
     - p_BRANCH
     - p_BUILD_IDENTITY
     - p_PLATFORM
@@ -104,6 +103,9 @@
         - jenkins
 
     builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

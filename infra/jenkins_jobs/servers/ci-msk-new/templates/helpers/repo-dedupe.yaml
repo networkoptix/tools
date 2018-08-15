@@ -1,5 +1,5 @@
 - job-template:
-    name: 'helper.{pipeline}.{branch}.repo-dedupe'
+    name: '{pipeline}.helper.{branch}.repo-dedupe'
 
     node: repository-ops
     concurrent: false
@@ -46,6 +46,10 @@
     builders:
     - inject:
         properties-content: |
+          PIPELINE={pipeline}
+          BRANCH={branch}
+    - inject:
+        properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
           JUNKSHOP_DB_HOST={junkshop_db_host}
     - inject:
@@ -55,10 +59,6 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          BRANCH={branch}
     # FIXME: this job relies on hardlink utility which is not installed with ansible yet
     - shell: |
         #!/bin/bash

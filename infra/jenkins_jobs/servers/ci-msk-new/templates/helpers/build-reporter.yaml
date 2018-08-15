@@ -1,5 +1,5 @@
 - job-template:
-    name: 'helper.build-reporter'
+    name: '{pipeline}.helper.build-reporter'
     description: |
       <pre>
       ================================================================================
@@ -40,7 +40,7 @@
       </pre>
     node: unittests-reporter
     concurrent: true
-    workspace: 'nx_report_thr${{EXECUTOR_NUMBER}}/'
+    workspace: 'nx_{pipeline}_report_thr${{EXECUTOR_NUMBER}}/'
 
     # junk_shop_host: required!
 
@@ -61,7 +61,6 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_CLONE
-    - p_PIPELINE
     - p_BRANCH
     - p_BUILD_IDENTITY
     - p_CUSTOMIZATION
@@ -94,12 +93,14 @@
             branch: $BRANCH
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
 
     scm:
@@ -130,6 +131,9 @@
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
+          PIPELINE={pipeline}
+    - inject:
+        properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
           JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
     - inject:
@@ -141,12 +145,11 @@
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
     - trigger-builds:
-      - project: 'helper.pull-component'
+      - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
-          PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM

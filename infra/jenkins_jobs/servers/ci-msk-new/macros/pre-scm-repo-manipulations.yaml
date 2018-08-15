@@ -24,7 +24,7 @@
           condition-basedir: workspace
         steps:
         - trigger-builds:
-          - project: 'helper.sync-hg'
+          - project: '{pipeline}.helper.sync-hg'
             # LOCAL_PATH= $WORKSPACE -> {dest-workspace}
             predefined-parameters: |
               SSH_USER=$USER

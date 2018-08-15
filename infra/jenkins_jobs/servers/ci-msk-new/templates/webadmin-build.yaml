@@ -108,6 +108,7 @@
             branch: '{branch}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
 
     scm:
@@ -182,14 +183,13 @@
               condition-basedir: workspace
               steps:
               - trigger-builds:
-                - project: 'helper.push-component'
+                - project: '{pipeline}.helper.push-component'
                   block: true
                   block-thresholds:
                     failure-threshold: FAILURE
                   predefined-parameters: |
                     REQUESTED_BY={tag_requested_by}
                     BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                    PIPELINE=$PIPELINE
                     BRANCH=$BRANCH
                     BUILD_IDENTITY=$BUILD_IDENTITY
                     CUSTOMIZATION=$CUSTOMIZATION
@@ -209,12 +209,11 @@
           - UNSTABLE
           build-steps:
           - trigger-builds:
-            - project: 'helper.build-reporter'
+            - project: '{pipeline}.helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
@@ -234,7 +233,7 @@
           - FAILURE
           build-steps:
           - trigger-builds:
-            - project: 'helper.build-reporter'
+            - project: '{pipeline}.helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}

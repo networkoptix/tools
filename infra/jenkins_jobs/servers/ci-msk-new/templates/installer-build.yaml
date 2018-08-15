@@ -197,6 +197,7 @@
             branch: '{branch}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
         # this is an ugly huck to finally close the problem with long filenames in devtools
         - delete-files(on-windows):
@@ -206,6 +207,7 @@
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
 
     # STAGE: SCM
@@ -247,12 +249,11 @@
         condition-string2: 'YES'
         steps:
         - trigger-builds:
-          - project: 'helper.freeze-build-config'
+          - project: '{pipeline}.helper.freeze-build-config'
             block: true
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              PIPELINE=$PIPELINE
               BRANCH=$BRANCH
               CUSTOMIZATION=$CUSTOMIZATION
               PLATFORM=$PLATFORM
@@ -262,7 +263,7 @@
 
         # Inject commit sha
         - copyartifact:
-            project: 'helper.freeze-build-config'
+            project: '{pipeline}.helper.freeze-build-config'
             filter: 'BUILD_CONFIG_SHA.envvar'
             which-build: last-completed
             parameter-filters: REQUESTED_BY={tag_requested_by}
@@ -394,11 +395,10 @@
         condition-expression: '${{ENV,var="USE_WEBADMIN"}}'
         steps:
         - trigger-builds:
-          - project: 'helper.pull-component'
+          - project: '{pipeline}.helper.pull-component'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              PIPELINE=$PIPELINE
               BRANCH=$BRANCH
               BUILD_IDENTITY=$BUILD_IDENTITY
               CUSTOMIZATION={webadmin-customization}
@@ -552,12 +552,11 @@
               condition-basedir: workspace
               steps:
               - trigger-builds:
-                - project: 'helper.push-component'
+                - project: '{pipeline}.helper.push-component'
                   predefined-parameters: |
                     REQUESTED_BY={tag_requested_by}
                     BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                     BUILD_STATUS=passed
-                    PIPELINE=$PIPELINE
                     BRANCH=$BRANCH
                     BUILD_IDENTITY=$BUILD_IDENTITY
                     CUSTOMIZATION=$CUSTOMIZATION
@@ -583,12 +582,11 @@
           - SUCCESS
           build-steps:
           - trigger-builds:
-            - project: 'helper.build-reporter'
+            - project: '{pipeline}.helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
@@ -608,12 +606,11 @@
           - FAILURE
           build-steps:
           - trigger-builds:
-            - project: 'helper.build-reporter'
+            - project: '{pipeline}.helper.build-reporter'
               block: '{synchronous-reporting}'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION

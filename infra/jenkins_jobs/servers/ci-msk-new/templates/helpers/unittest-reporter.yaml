@@ -1,8 +1,8 @@
 - job-template:
-    name: 'helper.unittests-reporter'
+    name: '{pipeline}.helper.unittests-reporter'
 
     node: unittests-reporter
-    workspace: 'nx_report_thr${{EXECUTOR_NUMBER}}/'
+    workspace: 'nx_{pipeline}_report_thr${{EXECUTOR_NUMBER}}/'
     concurrent: true
 
     properties:
@@ -21,7 +21,6 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_CLONE
-    - p_PIPELINE
     - p_BRANCH
     - p_NX_VMS_COMMIT
     - p_BUILD_IDENTITY
@@ -54,6 +53,7 @@
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
 
     scm:
@@ -62,6 +62,9 @@
         revision: 'default'
 
     builders:
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
@@ -74,12 +77,11 @@
 
     # unittests
     - trigger-builds:
-      - project: 'helper.pull-component'
+      - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
-          PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM
@@ -95,12 +97,11 @@
 
     # sdk tests
     - trigger-builds:
-      - project: 'helper.pull-component'
+      - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
-          PIPELINE=$PIPELINE
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM
@@ -123,11 +124,7 @@
           source venv/bin/activate
             export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-            if [ "$PIPELINE" == 'develop' ] ; then
-              JUNKSHOP_PROJECT=ci
-            else
-              JUNKSHOP_PROJECT="$PIPELINE"
-            fi
+            JUNKSHOP_PROJECT_NAME="{junkshop_project_name}"
 
             if [ "$PLATFORM" == 'universal' ] ; then
               JUNKSHOP_PLATFORM=webadmin
@@ -136,7 +133,7 @@
             fi
 
             DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
-            BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
+            BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             if [ -d unit_tests ] ; then
               pushd unit_tests

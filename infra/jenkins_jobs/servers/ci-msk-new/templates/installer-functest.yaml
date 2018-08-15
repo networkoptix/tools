@@ -73,12 +73,14 @@
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: '{branch}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
+            pipeline: '{pipeline}'
             basedir: $WORKSPACE
     scm:
     - hg-local:
@@ -138,11 +140,10 @@
           nx_vms/func_tests/requirements.txt
 
     - trigger-builds:
-      - project: 'helper.pull-component'
+      - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
@@ -155,11 +156,10 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-      - project: 'helper.pull-component'
+      - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          PIPELINE=$PIPELINE
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
@@ -220,11 +220,10 @@
           - FAILURE
           build-steps:
           - trigger-builds:
-            - project: 'helper.push-component'
+            - project: '{pipeline}.helper.push-component'
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                PIPELINE=$PIPELINE
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
