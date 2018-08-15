@@ -115,7 +115,7 @@
                 filter: '{copyartifact_filter}'
                 target: dist
 
-      - init-venv-linux:
+      - init-venv:
           requirements-files: >-
             devtools/ci/junk_shop/requirements.txt
             nx_vms/func_tests/requirements.txt

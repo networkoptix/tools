@@ -115,7 +115,7 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - init-venv-linux:
+    - init-venv:
         requirements-files: devtools/ci/junk_shop/requirements.txt
     - shell: |
           #!/bin/bash

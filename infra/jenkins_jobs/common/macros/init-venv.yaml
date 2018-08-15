@@ -1,60 +1,26 @@
 # Create 'venv' directory, if it is not yet exists, install requirements
-# params:
-# * requirements-files
-
 # Usage example:
-#  - init-venv-{os}:
+#  - init-venv:
 #      requirements-files: >-
 #        test/requirements1.txt
 #        test/requirements2.txt
 
-
-# Implementation
 - builder:
-    name: init-venv-windows-impl
+    name: init-venv
     builders:
-      - batch: |
-          if not exist venv (
-            virtualenv --system-site-packages venv
-          )
-          venv\\Scripts\\PIP.exe install --upgrade pip setuptools wheel
-          for %%V IN ({requirements-files}) do (
-            venv\\Scripts\\PIP.exe install --upgrade -r %%V
-          )
+    - shell: |
+        #!shell
+        if [ ! -d venv ]; then
+          virtualenv --system-site-packages venv
+        fi
 
-- builder:
-    name: init-venv-posix-impl
-    builders:
-      - shell: |
-          #!/bin/bash
-          set -ex
-
-          if [ ! -d venv ]; then
-            virtualenv --system-site-packages venv
-          fi
-
+        if [ -d venv/Scripts ] ; then
+          source venv/Scripts/activate
+        else
           source venv/bin/activate
-            pip install --upgrade pip setuptools wheel
-            for path in {requirements-files}; do
-              pip install --upgrade -r "$path"
-            done
-          deactivate
+        fi
 
-# Interface
-- builder:
-    name: init-venv-windows
-    builders:
-      - init-venv-windows-impl:
-          requirements-files: '{requirements-files}'
-
-- builder:
-    name: init-venv-linux
-    builders:
-      - init-venv-posix-impl:
-          requirements-files: '{requirements-files}'
-
-- builder:
-    name: init-venv-mac
-    builders:
-      - init-venv-posix-impl:
-          requirements-files: '{requirements-files}'
+        pip install --upgrade pip setuptools wheel
+        for file in {requirements-files} ; do
+          pip install --upgrade -r "$file"
+        done

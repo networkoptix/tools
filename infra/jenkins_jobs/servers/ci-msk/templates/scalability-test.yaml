@@ -70,7 +70,7 @@
           rm -rf dist/build_info.yaml bin/mediaserver.deb
           mkdir -p dist work
 
-      - init-venv-linux:
+      - init-venv:
           requirements-files: >-
             devtools/ci/junk_shop/requirements.txt
             nx_vms/func_tests/requirements.txt

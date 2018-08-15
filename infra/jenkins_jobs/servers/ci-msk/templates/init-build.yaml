@@ -48,7 +48,7 @@
           properties-content: |
             DB_CONFIG=$junk_shop_db_credentials@{junk_shop_host}
 
-      - init-venv-linux:
+      - init-venv:
           requirements-files: devtools/ci/junk_shop/requirements.txt
 
       - init-build:

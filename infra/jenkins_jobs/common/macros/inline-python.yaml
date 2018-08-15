@@ -32,7 +32,7 @@
           script: '{script}'
       - batch: |
           if not exist venv (
-            echo "Include init-venv-{{os}} macro first!" 1>&2
+            echo "Include init-venv macro first!" 1>&2
             exit 1
           )
           type __inline_python.py
@@ -46,7 +46,7 @@
           script: '{script}'
       - shell: |
           if [ ! -d venv ]; then
-            echo "Include init-venv-{{os}} macro first!" 1>&2
+            echo "Include init-venv macro first!" 1>&2
             exit 1
           fi
           cat __inline_python.py
