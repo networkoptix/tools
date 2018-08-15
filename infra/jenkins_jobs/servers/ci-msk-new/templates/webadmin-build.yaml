@@ -51,12 +51,7 @@
     webadmin-platform: universal
     webadmin-customization: default
 
-    # artifact used in reporting
-    webadmin-build-log: 'webadmin-build.log'
-    # artifacts to save in repository
-    webadmin-build-artifacts: 'server-external/,webadmin-build.log,static/version.txt'
     # artifacts to save in jenkins
-    webadmin-build-artifacts-min: 'webadmin-build.log,static/version.txt'
 
     properties:
     - heavy-job:
@@ -140,7 +135,7 @@
         dir: build
 
     - file-delete-operation:
-        includes: '{webadmin-build-log}'
+        includes: 'webadmin-build.log'
         excludes: ''
 
     - shell: |
@@ -148,9 +143,9 @@
         set -ex
 
         SECONDS=0
-        rm -f "{webadmin-build-log}" # TODO: remove it in prep env
-        test ! -f "{webadmin-build-log}"
-        nx_vms/webadmin/build.sh 2>&1 | tee "{webadmin-build-log}"
+        rm -f 'webadmin-build.log' # TODO: remove it in prep env
+        test ! -f 'webadmin-build.log'
+        nx_vms/webadmin/build.sh 2>&1 | tee 'webadmin-build.log'
         ec="${{PIPESTATUS[0]}}"
         echo "Took $SECONDS seconds"
         # Abort if first cmd in pipe failed
@@ -163,7 +158,7 @@
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
     - archive:
-        artifacts: '{webadmin-build-artifacts-min}'
+        artifacts: 'webadmin-build.log,static/version.txt'
         allow-empty: 'false'
         fingerprint: true
 
@@ -179,7 +174,7 @@
           # Don't publish anything if build even didn't start
           - conditional-step:
               condition-kind: file-exists
-              condition-filename: "{webadmin-build-log}"
+              condition-filename: 'webadmin-build.log'
               condition-basedir: workspace
               steps:
               - trigger-builds:
@@ -196,7 +191,7 @@
                     PLATFORM=$PLATFORM
                     BUILD_STATUS=passed
                     LOCAL_PATH=$WORKSPACE/
-                    COMPONENTS={webadmin-build-artifacts}
+                    COMPONENTS='server-external/,webadmin-build.log,static/version.txt'
                     NODE_SSH_CONNECTION=$SSH_CONNECTION
                     SSH_USER=$USER
 
@@ -220,7 +215,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
-                LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
@@ -244,7 +238,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
-                LOGFILE={webadmin-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST

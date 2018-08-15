@@ -593,7 +593,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
-                LOGFILE={cmake-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
@@ -617,7 +616,6 @@
                 PLATFORM=$PLATFORM
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
-                LOGFILE={cmake-build-log}
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
