@@ -58,8 +58,8 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - folder-delete-operation:
-            folder-path: 'devtools'
+        - delete-files(on-windows):
+            files: devtools
         - import-hg-repo(if-missing):
             name: devtools
             branch: default

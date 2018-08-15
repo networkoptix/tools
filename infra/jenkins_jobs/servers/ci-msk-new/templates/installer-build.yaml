@@ -199,8 +199,8 @@
             customization: $CUSTOMIZATION
             basedir: $WORKSPACE
         # this is an ugly huck to finally close the problem with long filenames in devtools
-        - folder-delete-operation:
-            folder-path: 'devtools'
+        - delete-files(on-windows):
+            files: devtools
         - import-hg-repo(if-missing):
             name: devtools
             branch: default

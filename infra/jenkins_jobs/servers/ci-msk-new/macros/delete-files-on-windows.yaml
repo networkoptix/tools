@@ -1,0 +1,13 @@
+- builder:
+    name: delete-files(on-windows)
+    builders:
+    - shell: |
+        #!bash
+        if [ "X${{OS}}" == "XWindows_NT" ] ; then
+          for file in {files} ; do
+            if [ -e "$file" ] ; then
+              rm -rf "$file"
+            fi
+          done
+        fi
+
