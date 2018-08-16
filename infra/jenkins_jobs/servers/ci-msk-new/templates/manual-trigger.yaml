@@ -1,5 +1,5 @@
-- job-template:
-    name: '{pipeline}.{branch}.{project}.trigger.{preset}'
+- job-template: &base_trigger
+    name: '{pipeline}.{version}.{project}.trigger.{preset}'
     id: manual-trigger
     description: |
       <pre>
@@ -70,7 +70,6 @@
     concurrent: false
 
     timer: ''  # no timed trigger by default
-    freeze-commit-now: true # default true
     clean-workspace: '' # false by default
     clean-build: '' # false by default
     default-build-description: ''
@@ -128,8 +127,6 @@
         default: '{use-build-identity}'
     - p_USE_NX_VMS_COMMIT:
         default: '{use-nx-vms-commit}'
-    - p_FREEZE_COMMIT_NOW:
-        default: '{freeze-commit-now}'
 
     triggers:
     - timed: "{timer}"
@@ -142,23 +139,6 @@
         type: absolute
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          BRANCH={branch}
-    - inject:
-        properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-          JUNKSHOP_DB_HOST={junkshop_db_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
-    - set-custom-build-description
-
     - shell: |
         #!/bin/bash
         set -ex
@@ -211,7 +191,7 @@
         condition-string2: 'AUTO'
         steps:
         - copyartifact:
-            project: '{pipeline}.{branch}.{project}.register-build'
+            project: '{pipeline}.{version}.{project}.register-build'
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-successful
             parameter-filters: >-
@@ -220,26 +200,38 @@
         - inject:
             properties-file: 'NX_VMS_COMMIT.envvar'
 
-    # if it's auto, get from existing build
-    # freeze if needed and overwrite
-    - conditional-step:
-        condition-kind: boolean-expression
-        condition-expression: '${{ENV,var="FREEZE_COMMIT_NOW"}}'
-        steps:
-        # nx commit
-        - inject: {} # workaround: must have >1 builder to correctly expand macro
-        - freeze-nx-vms-commit(remote):
-            pipeline: '{pipeline}'
-            tag_requested_by: '{tag_requested_by}'
-            branch: $BRANCH
-            commit-to-freeze: $NX_VMS_COMMIT
-            commit-varname: NX_VMS_COMMIT
+    - freeze-nx-vms-commit(remote):
+        pipeline: '{pipeline}'
+        tag_requested_by: '{tag_requested_by}'
+        commit-to-freeze: $NX_VMS_COMMIT
+        commit-varname: NX_VMS_COMMIT
+    - freeze-nx-vms-branch(remote):
+        pipeline: '{pipeline}'
+        tag_requested_by: '{tag_requested_by}'
+        commit-to-freeze: $NX_VMS_COMMIT
+        branch-varname: BRANCH
+
+    - inject:
+        properties-content: |
+          PIPELINE={pipeline}
+    - inject:
+        properties-content: |
+          JUNKSHOP_HOST={junk_shop_host}
+          JUNKSHOP_DB_HOST={junkshop_db_host}
+    - inject:
+        properties-content: |
+          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
+          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
+    - set-custom-build-description
 
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
     # Anyway this graph is available in runner
     - trigger-builds:
-      - project: '{pipeline}.{branch}.{project}.runner'
+      - project: '{pipeline}.{version}.{project}.runner'
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           UPSTREAM_JOB_NAME=$JOB_NAME
@@ -251,6 +243,7 @@
           RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
+          BRANCH=$BRANCH
           USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
           USE_BUILD_IDENTITY=$BUILD_IDENTITY
           CLEAN_WORKSPACE=$CLEAN_WORKSPACE
@@ -268,3 +261,39 @@
         fingerprint: true
     - failure-email-helpers(maintainers):
         email-recipients: '{job-maintainers}'
+
+- job-template:
+    <<: *base_trigger
+    name: '{pipeline}.{version}.{project}.trigger.{preset}'
+    id: _manual-trigger
+    # TODO: REFACTOR ME!
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: '{default-build-description}'
+    - p_PLATFORMS:
+        default: '{platforms}'
+    - p_RUN_UNITTESTS:
+        default: '{run-unittests}'
+    - p_USE_NX_VMS_COMMIT:
+        default: '{use-nx-vms-commit}'
+
+    triggers:
+    - timed: "{timer}"
+
+    wrappers:
+    - inject:
+        properties-content: |
+          CLEAN_WORKSPACE={clean-workspace}
+          CLEAN_BUILD={clean-build}
+          CUSTOMIZATIONS={customizations}
+          BUILD_WEBADMIN={build-webadmin}
+          BUILD_INSTALLER={build-installer}
+          RUN_FUNCTESTS={run-functests}
+          RUN_REALCAMERATESTS={run-realcameratests}
+          USE_BUILD_IDENTITY={use-build-identity}
+    - timestamps
+    - timeout:
+        timeout: 5 # min
+        fail: true
+        type: absolute

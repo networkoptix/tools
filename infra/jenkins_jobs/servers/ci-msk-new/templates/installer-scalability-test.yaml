@@ -1,7 +1,7 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test'
+    name: '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test'
     description: |
-      Run scalability tests for {customization} for branch {branch}.
+      Run scalability tests for {customization} for {version}.
     node: '{functest-node}'
     concurrent: false
 
@@ -33,6 +33,8 @@
     - p_CLEAN_WORKSPACE:
         default: true
     - p_BUILD_IDENTITY
+    - p_BRANCH:
+        default: '{default-branch}'
     - p_NX_VMS_COMMIT:
         default: ''
     - string:
@@ -45,7 +47,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM=all
     - timestamps
@@ -74,7 +75,7 @@
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: nx_vms
-            branch: '{branch}'
+            branch: '{version}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'

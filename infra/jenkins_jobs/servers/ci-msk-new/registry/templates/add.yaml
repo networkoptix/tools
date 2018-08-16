@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.register-build'
+    name: '{pipeline}.{version}.{project}.register-build'
     description: |
       Register BUILD_IDENTITY -> NX_VMS_COMMIT
 
@@ -19,18 +19,19 @@
         artifact-num-to-keep: 500
 
     parameters:
-      - p_REQUESTED_BY
-      - p_BUILD_DESCRIPTION:
-          default: ''
-      - p_BUILD_IDENTITY
-      - p_NX_VMS_COMMIT:
-          default: '{branch}'
+    - p_REQUESTED_BY
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_BUILD_IDENTITY
+    - p_NX_VMS_COMMIT:
+        default: '{default-branch}'
+    - p_BRANCH:
+        default: '{default-branch}'
 
     builders:
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
     - set-custom-build-description
     - shell: |
         #!/bin/bash
@@ -43,7 +44,7 @@
         echo "NX_VMS_COMMIT=${{NX_VMS_COMMIT}}" > NX_VMS_COMMIT.envvar
 
     - copyartifact:
-        project: '{pipeline}.{branch}.{project}.register-build'
+        project: '{pipeline}.{version}.{project}.register-build'
         filter: 'REGISTERED_BUILD_IDENTITY.envvar,REGISTERED_NX_VMS_COMMIT.envvar'
         which-build: last-successful
         parameter-filters: BUILD_IDENTITY=$BUILD_IDENTITY

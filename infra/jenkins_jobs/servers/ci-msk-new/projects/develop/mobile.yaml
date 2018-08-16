@@ -5,7 +5,9 @@
     junk_shop_host: junkshop.enk.me
     junkshop_db_host: '10.0.0.113'
 
-    branch: mobile
+    version:
+    - mobile:
+        default-branch: mobile
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -107,22 +109,21 @@
               triggered automatically by timer
             platforms: android-arm,ios
             customizations: default
-            freeze-commit-now: true
             clean-workspace: true
             timer: 'H 6 * * 1-5'
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.{project}.runner':
+    - '{pipeline}.{version}.{project}.runner':
         default-platforms: android-arm,ios
         default-customizations: default
 
     # REGISTRIES
 
-    - '{pipeline}.{branch}.{project}.register-build'
+    - '{pipeline}.{version}.{project}.register-build'
 
     # BUILD AND TEST - main jobs
 
-    # - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    # - '{pipeline}.{version}.{project}.webadmin.universal.build'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'

@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
     description: |
       <pre>
       ================================================================================
@@ -40,7 +40,7 @@
     node: '{installer-build-node}'
     # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
     # '_{platform}' combination is unallowed
-    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}-{branch}/'
+    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}-{version}/'
     concurrent: true
 
     synchronous-reporting: '' # false
@@ -144,8 +144,10 @@
     - p_CLEAN_BUILD:
         default: false
     - p_BUILD_IDENTITY
+    - p_BRANCH:
+        default: '{default-branch}'
     - p_NX_VMS_COMMIT:
-        default: '{branch}'
+        default: '{default-branch}'
     - p_RUNNER_URL
     - string:
         name: CMAKE_CONFIGURE_COMMAND
@@ -168,7 +170,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
           USE_WEBADMIN={use-webadmin}
@@ -191,7 +192,7 @@
         buildsteps:
         - import-hg-repo(if-missing):
             name: nx_vms
-            branch: '{branch}'
+            branch: $BRANCH
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -255,6 +256,7 @@
               CUSTOMIZATION=$CUSTOMIZATION
               PLATFORM=$PLATFORM
               BUILD_IDENTITY=$BUILD_IDENTITY
+              BRANCH=$BRANCH
               NX_VMS_COMMIT=$NX_VMS_COMMIT
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
 
@@ -558,6 +560,7 @@
                     BUILD_IDENTITY=$BUILD_IDENTITY
                     CUSTOMIZATION=$CUSTOMIZATION
                     PLATFORM=$PLATFORM
+                    BRANCH=$BRANCH
                     NX_VMS_COMMIT=$NX_VMS_COMMIT
                     LOCAL_PATH=$WORKSPACE/{build-dir}/
                     COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log
@@ -588,6 +591,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 RUNNER_URL=$RUNNER_URL
@@ -611,6 +615,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 RUNNER_URL=$RUNNER_URL

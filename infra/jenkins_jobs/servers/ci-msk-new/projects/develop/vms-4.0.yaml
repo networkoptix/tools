@@ -5,7 +5,9 @@
     junk_shop_host: junkshop.enk.me
     junkshop_db_host: '10.0.0.113'
 
-    branch: vms
+    version:
+    - vms:
+        default-branch: vms
 
     realcameratesting-framework-branch: vms
 
@@ -130,7 +132,6 @@
               triggered automatically by timer
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            freeze-commit-now: true
             clean-workspace: true
             timer: '4 0 * * 1-5'
         - custom:
@@ -142,7 +143,6 @@
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            freeze-commit-now: true
         - only-realcameratests:
             detailed-job-description: |-
               This trigger serves for testing on real cameras stand.
@@ -151,7 +151,6 @@
               Real cameras testing
             platforms: linux-x64
             customizations: default
-            freeze-commit-now: true
             run-unittests: '' # false
             run-realcameratests: true
         - only-functests:
@@ -162,11 +161,10 @@
               Trigger functests related jobs
             platforms: linux-x64,windows-x64
             customizations: default
-            freeze-commit-now: true
             run-unittests: '' # false
             run-functests: true
 
-    - '{pipeline}.{branch}.{project}.trigger.{tests}.{preset}':
+    - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
         job-maintainers: vfedorov@networkoptix.com
         tests:
         - functest
@@ -182,33 +180,33 @@
               Nightly functional tests
             timer: 'H 23 * * 1-5'
 
-    - '{pipeline}.{branch}.{project}.trigger.blinking-tests':
+    - '{pipeline}.{version}.{project}.trigger.blinking-tests':
         timer: ''
         use-nx-vms-commit: e8de543f9178
 
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.{project}.runner':
+    - '{pipeline}.{version}.{project}.runner':
         default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
     # REGISTRIES
 
-    - '{pipeline}.{branch}.{project}.register-build'
+    - '{pipeline}.{version}.{project}.register-build'
 
     # BUILD AND TEST - main jobs
 
-    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
-    - '{pipeline}.{branch}.{project}.distribution.{customization}.functest':
+    - '{pipeline}.{version}.{project}.webadmin.universal.build'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{version}.{project}.distribution.{customization}.functest':
         customization: default
         build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
-    - '{pipeline}.{branch}.{project}.distribution.{customization}.scalability-test':
+    - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
         build-watchers: vfedorov@networkoptix.com
-    - '{pipeline}.{branch}.{project}.distribution.{customization}.realcameratest':
+    - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com
 

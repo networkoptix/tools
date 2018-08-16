@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.trigger.{tests}.{preset}'
+    name: '{pipeline}.{version}.{project}.trigger.{tests}.{preset}'
     description: |
       <pre>
       ================================================================================
@@ -48,6 +48,8 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default-build-description}'
+    - p_BRANCH:
+        default: '{default-branch}'
     - p_USE_BUILD_IDENTITY:
         default: ''
     - p_TEST_SELECT_EXPR:
@@ -72,13 +74,12 @@
     scm:
     - hg-la:
         project-name: nx_vms
-        branch-name: '{branch}'
+        branch-name: $BRANCH
 
     builders:
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
@@ -122,10 +123,10 @@
             set -ex
             rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
         - copyartifact:
-            project: '{pipeline}.{branch}.{project}.runner'
+            project: '{pipeline}.{version}.{project}.runner'
             filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
             which-build: last-successful
-            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.on-push
+            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{version}.{project}.trigger.on-push
             optional: true
         - conditional-step:
             condition-kind: file-exists
@@ -150,10 +151,10 @@
             set -ex
             rm -f NX_VMS_COMMIT.envvar BUILD_IDENTITY.envvar
         - copyartifact:
-            project: '{pipeline}.{branch}.{project}.runner'
+            project: '{pipeline}.{version}.{project}.runner'
             filter: 'NX_VMS_COMMIT.envvar, BUILD_IDENTITY.envvar'
             which-build: last-successful
-            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{branch}.{project}.trigger.nightly
+            parameter-filters: UPSTREAM_JOB_NAME={pipeline}.{version}.{project}.trigger.nightly
             optional: true
         - conditional-step:
             condition-kind: file-exists
@@ -204,7 +205,8 @@
         steps:
         - build-registry-get-commit:
             pipeline: '{pipeline}'
-            branch: '{branch}'
+            version: '{version}'
+            branch: $BRANCH
             project: '{project}'
             build-identity: $USE_BUILD_IDENTITY
         - shell: |
@@ -230,11 +232,12 @@
             description: |
               $TRIGGERED_KIND
         - trigger-builds:
-          - project: '{pipeline}.{branch}.{project}.distribution.{ft-customization}.{tests}'
+          - project: '{pipeline}.{version}.{project}.distribution.{ft-customization}.{tests}'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               BUILD_IDENTITY=$BUILD_IDENTITY
+              BRANCH=$BRANCH
               NX_VMS_COMMIT=$NX_VMS_COMMIT
               NX_TEST_FRAMEWORK_COMMIT=$NX_TEST_FRAMEWORK_COMMIT
               JUNKSHOP_HOST=$JUNKSHOP_HOST

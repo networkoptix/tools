@@ -6,7 +6,6 @@
         predefined-parameters: |
           REQUESTED_BY={tag_requested_by}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          BRANCH={branch}
           NX_VMS_COMMIT={commit-to-freeze}
           NX_VMS_COMMIT_VARNAME={commit-varname}
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -30,3 +29,36 @@
         echo "{commit-varname}={commit-to-freeze}" > "{commit-varname}.envvar"
     - inject:
         properties-file: '{commit-varname}.envvar'
+
+- builder:
+    name: freeze-nx-vms-branch(remote)
+    builders:
+    - trigger-builds:
+      - project: '{pipeline}.helper.freeze-nx-vms-commit'
+        predefined-parameters: |
+          REQUESTED_BY={tag_requested_by}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          NX_VMS_COMMIT={commit-to-freeze}
+          NX_VMS_BRANCH_VARNAME={branch-varname}
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        block: true
+        block-thresholds:
+          failure-threshold: FAILURE
+    - copyartifact:
+        project: '{pipeline}.helper.freeze-nx-vms-commit'
+        filter: '{branch-varname}.envvar'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY={tag_requested_by}
+    - inject:
+        properties-file: '{branch-varname}.envvar'
+
+- builder:
+    name: freeze-nx-vms-branch(local)
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+        BRANCH="$(cd nx_vms && hg log --rev {commit-to-freeze} --template "{{branch}}")"
+        echo "{branch-varname}=$BRANCH" > "{branch-varname}.envvar"
+    - inject:
+        properties-file: '{branch-varname}.envvar'

@@ -1,6 +1,6 @@
 
 - job-template:
-    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
+    name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
     project-type: multijob
 
     node: runner
@@ -30,8 +30,10 @@
     - p_CLEAN_BUILD:
         default: false
     - p_BUILD_IDENTITY
+    - p_BRANCH:
+        default: '{default-branch}'
     - p_NX_VMS_COMMIT:
-        default: '{branch}'
+        default: '{default-branch}'
     - p_RUN_UNITTESTS:
         default: true
     - p_RUNNER_URL
@@ -44,7 +46,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
     - inject:
@@ -66,7 +67,7 @@
     - multijob:
         name: "Build installer for {platform} with {customization}"
         projects:
-        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
           kill-phase-on: FAILURE
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -75,6 +76,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$RUNNER_URL
 
@@ -82,7 +84,7 @@
         name: Run tests (tests are optional, only existing jobs are built)
         condition: COMPLETED # allow unstable
         projects:
-        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest' # TODO:
+        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest' # TODO:
           kill-phase-on: NEVER
           enable-condition: >-
             ("$RUN_UNITTESTS").toBoolean()
@@ -93,10 +95,11 @@
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$RUNNER_URL
 
-        - name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.perftest' # TODO:
+        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.perftest' # TODO:
           kill-phase-on: NEVER
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -105,5 +108,6 @@
             CLEAN_CLONE=$CLEAN_CLONE
             CLEAN_BUILD=$CLEAN_BUILD
             BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$RUNNER_URL

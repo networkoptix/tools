@@ -1,8 +1,8 @@
 - job-template:
     id: installer-unittests
-    name: '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.unittest'
+    name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest'
     description: |
-      Run unit tests for {platform} for branch {branch}.
+      Run unit tests for {platform} for {version}.
 
     node: '{unittest-node}'
     concurrent: true
@@ -39,13 +39,14 @@
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT
     - p_RUNNER_URL
+    - p_BRANCH:
+        default: '{default-branch}'
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM={platform}
           SDK_TESTRUNNER_TIMEOUT={sdk-testrunner-timeout}
@@ -116,6 +117,7 @@
           BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOMIZATION=$CUSTOMIZATION
           PLATFORM=$PLATFORM
+          BRANCH=$BRANCH
           NX_VMS_COMMIT=$NX_VMS_COMMIT
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
@@ -230,6 +232,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 COMPONENTS=unit_tests/,sdk_unit_tests/
@@ -254,6 +257,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
@@ -276,6 +280,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST

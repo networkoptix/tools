@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.helper.{branch}.repo-dedupe'
+    name: '{pipeline}.helper.{version}.repo-dedupe'
 
     node: repository-ops
     concurrent: false
@@ -26,6 +26,8 @@
         type: absolute
 
     parameters:
+    - p_BRANCH:
+        default: '{default-branch}'
     - string:
         name: DEDUPE_FOLDERS
         default: ''
@@ -47,7 +49,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

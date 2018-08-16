@@ -5,7 +5,9 @@
     junk_shop_host: junkshop.enk.me
     junkshop_db_host: '10.0.0.113'
 
-    branch: meta
+    version:
+    - meta:
+        default-branch: meta
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -117,23 +119,22 @@
               Manually triggered
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms
-            freeze-commit-now: true
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.{project}.runner':
+    - '{pipeline}.{version}.{project}.runner':
         default-platforms: linux-x64,windows-x64,tx1
         default-customizations: metavms
 
     # REGISTRIES
 
-    - '{pipeline}.{branch}.{project}.register-build'
+    - '{pipeline}.{version}.{project}.register-build'
 
     # BUILD AND TEST - main jobs
 
-    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{version}.{project}.webadmin.universal.build'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced

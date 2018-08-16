@@ -3,7 +3,9 @@
 
     project: vms
 
-    branch: vms_3.2
+    version:
+    - vms_3.2:
+        default-branch: vms_3.2
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -181,26 +183,25 @@
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            freeze-commit-now: true
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.{project}.runner':
+    - '{pipeline}.{version}.{project}.runner':
         default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
     # REGISTRIES
 
-    - '{pipeline}.{branch}.{project}.register-build'
+    - '{pipeline}.{version}.{project}.register-build'
 
     # BUILD AND TEST - main jobs
 
-    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{version}.{project}.webadmin.universal.build'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
     # Edge1 is a platform that's exclusive for digitalwatchdog.
     # add extra jobs for edge1 with digitalwatchdog customization
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all': &extra-edge1-platform
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all': &extra-edge1-platform
         platform:
         - edge1:
             installer-build-node: *linux_node
@@ -209,7 +210,7 @@
               -DtargetDevice=edge1
         customization:
         - 'digitalwatchdog'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build':
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build':
         <<: *extra-edge1-platform
 
     # Our tests work per-customization per-platform and not yet implemented

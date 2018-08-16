@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.webadmin.universal.build'
+    name: '{pipeline}.{version}.{project}.webadmin.universal.build'
     project-type: multijob
     description: |
       <pre>
@@ -44,7 +44,7 @@
 
     node: '{webadmin-build-node}'
     concurrent: true
-    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{branch}/'
+    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{version}/'
 
     synchronous-reporting: '' # false
     webadmin-build-node: webadmin-build
@@ -73,9 +73,11 @@
     - p_CLEAN_CLONE
     - p_CLEAN_BUILD:
         default: false
+    - p_BRANCH:
+        default: '{default-branch}'
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
-        default: '{branch}'
+        default: '{default-branch}'
     - p_RUNNER_URL
 
     wrappers:
@@ -83,7 +85,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={webadmin-customization}
           PLATFORM={webadmin-platform}
 
@@ -100,7 +101,7 @@
         buildsteps:
         - import-hg-repo(if-missing):
             name: nx_vms
-            branch: '{branch}'
+            branch: $BRANCH
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -213,6 +214,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 RUNNER_URL=$RUNNER_URL
@@ -236,6 +238,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 RUNNER_URL=$RUNNER_URL

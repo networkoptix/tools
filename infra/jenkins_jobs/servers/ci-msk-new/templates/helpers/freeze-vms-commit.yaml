@@ -64,7 +64,6 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: ''
-    - p_BRANCH
     - p_REQUESTED_BY
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
@@ -72,6 +71,10 @@
     - string:
         name: NX_VMS_COMMIT_VARNAME
         default: NX_VMS_COMMIT
+        description: Name of variable to store commit to
+    - string:
+        name: NX_VMS_BRANCH_VARNAME
+        default: NX_VMS_BRANCH
         description: Name of variable to store commit to
 
     wrappers:
@@ -103,11 +106,17 @@
     - freeze-nx-vms-commit(local):
         commit-to-freeze: $MERCURIAL_REVISION_SHORT
         commit-varname: $NX_VMS_COMMIT_VARNAME
+    - freeze-nx-vms-branch(local):
+        commit-to-freeze: $MERCURIAL_REVISION_SHORT
+        branch-varname: $NX_VMS_BRANCH_VARNAME
 
     # for setting in build name
     - freeze-nx-vms-commit(local):
         commit-to-freeze: $MERCURIAL_REVISION_SHORT
         commit-varname: NX_VMS_COMMIT
+    - freeze-nx-vms-branch(local):
+        commit-to-freeze: $MERCURIAL_REVISION_SHORT
+        branch-varname: BRANCH
 
     publishers:
     - publisher-set-build-name:

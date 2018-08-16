@@ -1,7 +1,7 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.distribution.{customization}.realcameratest'
+    name: '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest'
     description: |
-      Run real camera tests for {customization} for branch {branch}.
+      Run real camera tests for {customization} for branch {version}.
     node: '{realcameratest-node}'
     concurrent: true
 
@@ -32,6 +32,8 @@
     - p_CLEAN_CLONE
     - p_BUILD_IDENTITY
     - p_CLEAN_WORKSPACE
+    - p_BRANCH:
+        default: '{version}'
     - p_NX_VMS_COMMIT
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
@@ -43,7 +45,6 @@
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
           CUSTOMIZATION={customization}
           PLATFORM=all
           TEST_SELECT_EXPR="not some-stub-because-you-cannot-avoid-k-flag"
@@ -73,7 +74,7 @@
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: nx_vms
-            branch: '{branch}'
+            branch: '$BRANCH'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -209,6 +210,7 @@
                 BUILD_IDENTITY=$BUILD_IDENTITY
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 LOCAL_PATH=$WORKSPACE/
                 COMPONENTS={workdir}/

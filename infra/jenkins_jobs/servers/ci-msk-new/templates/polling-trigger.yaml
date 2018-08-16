@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{branch}.{project}.trigger.{preset}'
+    name: '{pipeline}.{version}.{project}.trigger.{preset}'
     id: polling-trigger
     description: |
       <pre>
@@ -91,6 +91,8 @@
     - string:
         name: IGNORE_FUNCTESTS_COMMITS
         default: '{ignore-functests}'
+    - p_BRANCH:
+        default: '{default-branch}'
 
 
     triggers:
@@ -111,13 +113,12 @@
     scm:
     - hg-la:
         project-name: nx_vms
-        branch-name: '{branch}'
+        branch-name: $BRANCH
 
     builders:
     - inject:
         properties-content: |
           PIPELINE={pipeline}
-          BRANCH={branch}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
@@ -202,7 +203,7 @@
         # is too big and takes a while to be loaded
         # Anyway this graph is available in runner
         - trigger-builds:
-          - project: '{pipeline}.{branch}.{project}.runner'
+          - project: '{pipeline}.{version}.{project}.runner'
             predefined-parameters: |
               REQUESTED_BY={tag_requested_by}
               UPSTREAM_JOB_NAME=$JOB_NAME
@@ -214,6 +215,7 @@
               RUN_REALCAMERATESTS=$RUN_REALCAMERATESTS
               PLATFORMS=$PLATFORMS
               CUSTOMIZATIONS=$CUSTOMIZATIONS
+              BRANCH=$BRANCH
               USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
               USE_BUILD_IDENTITY=NEW
               CLEAN_WORKSPACE=$CLEAN_WORKSPACE

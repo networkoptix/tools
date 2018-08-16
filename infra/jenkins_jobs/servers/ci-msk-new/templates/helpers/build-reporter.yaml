@@ -186,8 +186,6 @@
           DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
           REVISION="$(cd nx_vms && hg id --id)"
 
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-
           if [ "$PLATFORM" == 'universal' ] ; then
             JUNKSHOP_PLATFORM=webadmin
           else

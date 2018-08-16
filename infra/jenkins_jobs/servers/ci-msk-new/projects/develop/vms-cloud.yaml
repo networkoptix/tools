@@ -5,9 +5,11 @@
     junk_shop_host: junkshop.enk.me
     junkshop_db_host: '10.0.0.113'
 
-    branch:
-    - cloud_18.2_backend
-    - cloud_dev
+    version:
+    - cloud_18.2_backend:
+        default-branch: cloud_18.2_backend
+    - cloud_dev:
+        default-branch: cloud_18.2_backend
 
     realcameratesting-framework-branch: vms
 
@@ -139,23 +141,22 @@
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            freeze-commit-now: true
 
     # RUNNER - root launcher of all builds
 
-    - '{pipeline}.{branch}.{project}.runner':
+    - '{pipeline}.{version}.{project}.runner':
         default-platforms: linux-x64,linux-x86,windows-x86
         default-customizations: default,hanwha
 
     # REGISTRIES
 
-    - '{pipeline}.{branch}.{project}.register-build'
+    - '{pipeline}.{version}.{project}.register-build'
 
     # BUILD AND TEST - main jobs
 
-    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+    - '{pipeline}.{version}.{project}.webadmin.universal.build'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
