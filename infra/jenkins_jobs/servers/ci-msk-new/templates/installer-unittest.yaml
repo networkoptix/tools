@@ -19,6 +19,7 @@
     testrunner-timeout: "750" # sec = 12.5 min
 
     properties:
+    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     - throttle:

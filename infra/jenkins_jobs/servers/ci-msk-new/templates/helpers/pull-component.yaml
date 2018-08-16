@@ -50,6 +50,7 @@
     concurrent: true
 
     properties:
+    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     # this job is heavily used on each pipeline build, so we need large

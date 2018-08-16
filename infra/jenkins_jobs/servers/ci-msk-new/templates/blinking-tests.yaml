@@ -24,6 +24,9 @@
     run-realcameratests: ''
     use-build-identity: 'NEW'
 
+    properties:
+    - authorization-{pipeline}-system
+
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default-build-description}'

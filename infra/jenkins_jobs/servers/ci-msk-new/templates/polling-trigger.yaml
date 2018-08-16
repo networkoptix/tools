@@ -55,6 +55,7 @@
     # detailed-job-description required!
 
     properties:
+    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     - build-discarder:

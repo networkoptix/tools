@@ -1,0 +1,133 @@
+# This is ACL configuration based on macros system..
+# It's supposed that
+# - read, discover and other nondestructive things are configured globally
+# - every pipeline has it's own entry here
+# - every pipeline has 2 kinds of jobs: triggers and system (e.g publically
+#   available stuff and hidden layers) which are managed differently
+
+- property:  &___base_dev_trigger
+    # everyone can read (should be inherited)
+    # admins can do anything (should be inherited)
+    # everyone can build
+    name: ___base_trigger
+    properties:
+    - authorization:
+        authenticated:
+        - job-build
+
+- property: &___base_dev_system
+    # everyone can read (should be inherited)
+    # admins can do anything (should be inherited)
+    # some users may cancel running jobs
+    name: ___base_system
+    properties:
+    - authorization:
+        sivanov:
+        - job-cancel
+        rvasilenko:
+        - job-cancel
+
+- property:  &___base_release_trigger
+    # everyone can read (should be inherited)
+    # admins can do anything (should be inherited)
+    # everyone can build
+    name: ___base_release_trigger
+    properties:
+    - authorization:
+        syuldashev:
+        - job-build
+        omironenko:
+        - job-build
+
+- property: &___base_release_system
+    # everyone can read (should be inherited)
+    # admins can do anything (should be inherited)
+    # some users may cancel running jobs
+    name: ___base_release_system
+    properties:
+    - authorization:
+        syuldashev:
+        - job-cancel
+        omironenko:
+        - job-cancel
+
+- property: &___debugger
+    # admins can do anything (should be inherited)
+    name: ___debugger
+    properties:
+    - authorization: []
+
+
+- property:
+    name: __example_full_access
+    properties:
+    - authorization:
+        authenticated:
+        - job-read
+        - job-extended-read
+        - job-discover
+        - job-status
+        admin:
+        - job-build
+        - credentials-create
+        - credentials-delete
+        - credentials-manage-domains
+        - credentials-update
+        - credentials-view
+        - job-build
+        - job-cancel
+        - job-configure
+        - job-delete
+        - job-discover
+        - job-move
+        - job-read
+        - job-status
+        - job-workspace
+        - ownership-jobs
+        - run-delete
+        - run-update
+        - scm-tag
+        - job-read
+        - job-extended-read
+
+# ============================================================================
+
+- property:
+    <<: *___base_dev_trigger
+    name: authorization-custom-trigger
+
+- property:
+    <<: *___base_dev_system
+    name: authorization-custom-system
+
+
+- property:
+    <<: *___debugger
+    name: authorization-debug-trigger
+- property:
+    <<: *___debugger
+    name: authorization-debug-system
+
+
+- property:
+    <<: *___base_dev_trigger
+    name: authorization-develop-trigger
+- property:
+    <<: *___base_dev_system
+    name: authorization-develop-system
+
+
+- property:
+    <<: *___base_release_trigger
+    name: authorization-hotfix-trigger
+- property:
+    <<: *___base_release_system
+    name: authorization-hotfix-system
+
+
+- property:
+    <<: *___base_release_trigger
+    name: authorization-release-trigger
+- property:
+    <<: *___base_release_system
+    name: authorization-release-system

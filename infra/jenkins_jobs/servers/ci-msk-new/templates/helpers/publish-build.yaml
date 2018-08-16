@@ -53,6 +53,7 @@
     concurrent: false  # important
 
     properties:
+    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     - throttle:

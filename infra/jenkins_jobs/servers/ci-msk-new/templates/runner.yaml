@@ -14,6 +14,7 @@
     realcameratesting-framework-branch: $BRANCH
 
     properties:
+    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     - throttle:

@@ -86,6 +86,7 @@
     use-nx-vms-commit: LATEST
 
     properties:
+    - authorization-{pipeline}-trigger
     - heavy-job:
         weight: 1
     - throttle:
