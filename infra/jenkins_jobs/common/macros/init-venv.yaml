@@ -9,7 +9,7 @@
     name: init-venv
     builders:
     - shell: |
-        #!shell
+        #!bash
         if [ ! -d venv ]; then
           virtualenv --system-site-packages venv
         fi
