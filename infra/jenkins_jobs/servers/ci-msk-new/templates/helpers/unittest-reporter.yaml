@@ -115,13 +115,16 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - init-venv:
-        requirements-files: devtools/ci/junk_shop/requirements.txt
     - shell: |
           #!/bin/bash
           set -ex
-
+          if [ ! -d venv ]; then
+            virtualenv --system-site-packages venv
+          fi
           source venv/bin/activate
+            pip install --upgrade pip setuptools wheel
+            pip install --upgrade -r devtools/ci/junk_shop/requirements.txt
+
             export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
             if [ "$PLATFORM" == 'universal' ] ; then
