@@ -6,7 +6,6 @@
     concurrent: true
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
-    synchronous-reporting: '' # false
     workspace: 'nx_ft_thr${{EXECUTOR_NUMBER}}/'
 
     workdir: functests

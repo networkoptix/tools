@@ -43,8 +43,6 @@
     workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-{pipeline}-{platform}-{version}/'
     concurrent: true
 
-    synchronous-reporting: '' # false
-
     use-webadmin: 'true' # defaults to build installer that requires webadmin
     webadmin-component-name: 'server-external'
     webadmin-platform: universal
@@ -584,7 +582,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -608,7 +606,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION

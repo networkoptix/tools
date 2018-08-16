@@ -46,7 +46,6 @@
     concurrent: true
     workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{version}/'
 
-    synchronous-reporting: '' # false
     webadmin-build-node: webadmin-build
     webadmin-platform: universal
     webadmin-customization: default
@@ -207,7 +206,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -231,7 +230,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION

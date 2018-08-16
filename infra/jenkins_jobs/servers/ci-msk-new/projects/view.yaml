@@ -12,11 +12,21 @@
         To see lists of tests and builds for particular branches and pipelines see
         other tabs. You may also find useful information there.
     regex: '.*.trigger.*'
+    columns: &default_cols
+    - build-button
+    - status
+    - weather
+    - job
+    - last-success
+    - last-failure
+    - last-duration
+
 - view:
     name: runners
     view-type: list
     description: 'List of all runners'
     regex: '.*.runner'
+    columns: *default_cols
 
 # Per-release sections
 
@@ -35,6 +45,8 @@
         Rebuild last nightly build now </a>
       <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: release.vms_3.2.*build
+    columns: *default_cols
+
 - view:
     name: VMS-3.2-rt
     view-type: list
@@ -48,6 +60,7 @@
         Rebuild last nightly build now </a>
       <p><iframe src="http://junkshop.enk.me/project/release/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: release.vms_3.2.*test
+    columns: *default_cols
 
 # CI jobs
 - view:
@@ -63,6 +76,8 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: develop.vms_3.2.*build
+    columns: *default_cols
+
 - view:
     name: VMS-3.2-dt
     view-type: list
@@ -76,6 +91,7 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/vms_3.2" width="100%" height="500" align="center"></iframe>
     regex: develop.vms_3.2.*test
+    columns: *default_cols
 
 # vms-4.0
 # CI jobs
@@ -92,6 +108,8 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"></iframe>
     regex: develop.vms\..*build
+    columns: *default_cols
+
 - view:
     name: VMS-4.0-dt
     view-type: list
@@ -105,6 +123,7 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/vms" width="100%" height="500" align="center"></iframe>
     regex: develop.vms\..*test
+    columns: *default_cols
 
 # meta-vms
 # CI jobs
@@ -121,6 +140,7 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/meta" width="100%" height="500" align="center"></iframe>
     regex: develop.meta\..*(build|test)
+    columns: *default_cols
 
 # default
 # CI jobs
@@ -137,6 +157,7 @@
         Rebuild last build </a> (see description about build reason)
       <p><iframe src="http://junkshop.enk.me/project/ci/default" width="100%" height="500" align="center"></iframe>
     regex: develop.default\..*(build|test)
+    columns: *default_cols
 
 # meta-vms
 # CI jobs
@@ -146,6 +167,7 @@
     description: >-
       <h3> List of all builds related to Cloud </h3>
     regex: develop.cloud_.*(build|test)
+    columns: *default_cols
 
 # 4.0 alpha for pretorian
 # CI jobs
@@ -155,6 +177,7 @@
     description: >-
       <h3> List of all builds related to 4.0 alpha </h3>
     regex: develop.vms_4.0_alpha.*(build|test)
+    columns: *default_cols
 
 
 # Mobile 18.2
@@ -165,6 +188,7 @@
       <h3> List of all CI jobs related to mobile next releases </h3>
       <p><iframe src="http://junkshop.enk.me/project/ci/mobile" width="100%" height="500" align="center"></iframe>
     regex: develop.mobile\..*build
+    columns: *default_cols
 
 # Helpers and utilities
 
@@ -174,3 +198,4 @@
     description: >-
       <h3> List of helper jobs </h3>
     regex: '.*(helper|reporter|register-build).*'
+    columns: *default_cols

@@ -6,7 +6,6 @@
     concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
-    synchronous-reporting: '' # false
     workspace: 'workspace/scalability'
 
     workdir: work

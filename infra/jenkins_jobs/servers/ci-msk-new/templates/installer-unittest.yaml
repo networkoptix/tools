@@ -6,7 +6,6 @@
 
     node: '{unittest-node}'
     concurrent: true
-    synchronous-reporting: '' # false
     workspace: 'nx_{pipeline}_ut_thr${{EXECUTOR_NUMBER}}/'
 
     # We have 2 kinds of timeouts:
@@ -250,7 +249,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.unittests-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
@@ -273,7 +272,7 @@
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.unittests-reporter'
-              block: '{synchronous-reporting}'
+              block: false
               predefined-parameters: |
                 REQUESTED_BY={tag_requested_by}
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
