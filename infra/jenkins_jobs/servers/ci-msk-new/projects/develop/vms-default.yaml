@@ -127,7 +127,7 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             ignore-functests: 'true'
-    - custom-trigger:
+    - manual-trigger:
         preset:
         - custom:
             detailed-job-description: |-

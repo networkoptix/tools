@@ -106,7 +106,7 @@
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms
             ignore-functests: 'true'
-    - custom-trigger:
+    - manual-trigger:
         preset:
         - custom:
             detailed-job-description: |-

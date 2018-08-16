@@ -106,7 +106,7 @@
     # list of jobs to generate
     jobs:
 
-    - custom-trigger:
+    - manual-trigger:
         preset:
         - custom:
             detailed-job-description: |-

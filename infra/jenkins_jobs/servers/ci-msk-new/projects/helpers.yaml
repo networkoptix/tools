@@ -9,6 +9,7 @@
     - release
     - develop:
         junkshop_project_name: ci
+    - custom
     jobs:
 
     # HELPERS - syncronize and publish different stuff

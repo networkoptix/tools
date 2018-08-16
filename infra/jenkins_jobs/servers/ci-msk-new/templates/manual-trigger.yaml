@@ -1,6 +1,6 @@
 - job-template:
     name: '{pipeline}.{branch}.{project}.trigger.{preset}'
-    id: custom-trigger
+    id: manual-trigger
     description: |
       <pre>
       ================================================================================
