@@ -124,8 +124,6 @@
           source venv/bin/activate
             export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-            JUNKSHOP_PROJECT_NAME="{junkshop_project_name}"
-
             if [ "$PLATFORM" == 'universal' ] ; then
               JUNKSHOP_PLATFORM=webadmin
             else
