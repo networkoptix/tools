@@ -16,14 +16,16 @@ def project_list():
         (rec[0], rec[1]) : rec[2] for rec in
         select((build.project, build.branch, max(build.build_num))
                for build in models.Build
-               if exists(build.runs))}
+               if exists(build.runs)
+               and build.branch.is_active)}
     build_num_set = set(latest_build_map.values())  # just to narrow down following select
     project_map = {}  # project -> branch set
     branch_map = {}  # (project, branch) -> build
     platform_map = {}  # (project, branch, platform) -> MatrixCell
     for build, run in select(
             (run.build, run) for run in models.Run
-            if run.build.build_num in build_num_set and
+            if run.build.branch.is_active and
+            run.build.build_num in build_num_set and
             run.test.path in ['build', 'unit', 'functional']).order_by(2):
         if latest_build_map.get((build.project, build.branch)) != build.build_num:
             continue

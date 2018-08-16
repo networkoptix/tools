@@ -26,6 +26,7 @@ class Customization(db.Entity):
 class Branch(db.Entity):
     name = Required(str)
     order_num = Required(int, default=1000)
+    is_active = Required(bool, default=True)
     builds = Set('Build')
 
 class Platform(db.Entity):
