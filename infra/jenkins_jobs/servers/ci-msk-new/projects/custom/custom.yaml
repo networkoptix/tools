@@ -1,0 +1,150 @@
+- project:
+    name: custom-pipeline
+
+    project: vms
+    junk_shop_host: junkshop.enk.me
+    junkshop_db_host: '10.0.0.113'
+
+    branch: any
+
+    realcameratesting-framework-branch: vms
+
+    # SECTION. GLOBAL PIPELINE CONFIG
+    # ============================================================
+
+    # comma-separated list of emails to whom send notifications related to builds
+    build-watchers: ''
+
+    # block builds and wait for reporting job to report results
+    synchronous-reporting: '' # false
+
+    # Some cmake args are applicable for any builds they are applied at first
+    # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
+    cmake_configure_args_global: >-
+      -Dbeta=TRUE
+      -DdeveloperBuild=OFF
+      -DcloudGroup=test
+      -DrdepSync=ON
+
+    # SECTION. PIPELINE CONFIG
+    # ============================================================
+
+    pipeline:
+    - custom:
+        junkshop_project_name: ci
+        # Pipeline-specific cmake arguments
+        cmake_configure_args_pipeline: >-
+          -DCMAKE_BUILD_TYPE=Release
+
+    # SECTION. PLATFORM CONFIG
+    # ============================================================
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    platform:
+    # there is also edge1 platform, it's declared and commented in jobs section
+    - linux-x64:
+        # most of builds are linux cross-builds that built on "build-installer-linux"
+        # here we make an anchor to avoid typos and other kind of missconfiguration in future
+        installer-build-node: &linux_node build-installer-linux
+        # There are some CMake args that aplicable only for particular platform
+        cmake_configure_args_platform: >-
+          -G Ninja
+        cmake_build_extra_args: >-
+          -- -j 20
+    - bpi:
+        installer-build-node: *linux_node
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=bpi
+
+    # -- windows platform --
+
+    - windows-x64: &windows_config
+        installer-build-node: build-installer-windows
+        cmake_configure_args_platform: >-
+          -G 'Visual Studio 15 2017 Win64'
+          -Dbeta=ON
+          -DcodeSigning=OFF
+          -DwithClouds=OFF
+          -DwithPluginStubs=OFF
+          -DtargetDevice=windows-x64
+          -T host=x64
+
+    # -- apple platform --
+
+    - mac: &osx_config
+        installer-build-node: build-installer-mac
+        use-webadmin: false
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -Dbeta=ON
+          -DcodeSigning=OFF
+        cmake_build_extra_args: >-
+          -- -j 10
+    # SECTION. CUSTOMIZATION CONFIG
+    # ============================================================
+
+    # TODO: There are some customization that may be build only on specific platform
+    # there is no need to generate extra set of jobs that never gonna be triggered.
+    # it looks like there are too few customization spec. cmake args and we may move such
+    # rare customizations to platform enum.
+
+    cmake_configure_args_customization: >-
+      -Dcustomization=$CUSTOMIZATION
+
+    customization:
+
+    # TODO: Enable later when we'll be ready to test it.
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    - default
+
+    # list of jobs to generate
+    jobs:
+
+    - manual-trigger:
+        preset:
+        - custom:
+            detailed-job-description: |-
+              This trigger serves for custom builds.
+              For example, you may want to verify that Jenkins works properly and can
+              successfully rebuild some successful build.
+            default-build-description: >-
+              Manually triggered
+            platforms: linux-x64,windows-x64,mac,bpi
+            customizations: default
+            freeze-commit-now: true
+
+    # RUNNER - root launcher of all builds
+
+    - '{pipeline}.{branch}.{project}.runner':
+        default-platforms: linux-x64,linux-x86,windows-x86
+        default-customizations: default,hanwha
+
+    # REGISTRIES
+
+    - '{pipeline}.{branch}.{project}.register-build'
+
+    # BUILD AND TEST - main jobs
+
+    - '{pipeline}.{branch}.{project}.webadmin.universal.build'
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.all'
+    - '{pipeline}.{branch}.{project}.distribution.{platform}.{customization}.build'
+
+    # Our tests work per-customization per-platform and not yet implemented
+    # for all platforms, so list of jobs is reduced
+    - installer-unittests:
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
+        platform:
+        - linux-x64:
+            unittest-node: unittests-linux
+        - mac:
+            unittest-node: unittests-mac
+        - windows-x64:
+            unittest-node: unittests-windows
+        customization:
+        - default

@@ -51,7 +51,7 @@
     scm:
     - hg-local-no-changelog:
         name: '$REPO'
-        revision: '$BRANCH'
+        revision: '$NX_VMS_COMMIT'
 
     builders:
     - set-custom-build-description
