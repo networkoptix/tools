@@ -11,6 +11,7 @@ from junk_shop.utils import DbConfig
 from junk_shop.capture_repository import BuildParameters
 from pony.orm import db_session
 
+DEFAULT_JUNK_SHOP_URL = 'http://junkshop.enk.me/'
 DEFAULT_JIRA_URL = 'https://networkoptix.atlassian.net/browse'
 DEFAULT_SCM_BROWSER_URL_FORMAT = 'http://enk.me:8082/{repository_name}/revision/{revision}'  # Upsource
 
@@ -26,8 +27,8 @@ def main():
         'build_parameters', type=BuildParameters.from_string,
         metavar=BuildParameters.example, help='Build parameters')
     parser.add_argument(
-        '--junk-shop-url', required=True,
-        help='junk shop URL')
+        '--junk-shop-url', default=DEFAULT_JUNK_SHOP_URL,
+        help='junk shop URL, default=%s' % DEFAULT_JUNK_SHOP_URL)
     parser.add_argument(
         '--jira-url', default=DEFAULT_JIRA_URL,
         help='JIRA URL, default=%s' % DEFAULT_JIRA_URL)
