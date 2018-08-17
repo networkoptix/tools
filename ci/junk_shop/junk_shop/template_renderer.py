@@ -1,5 +1,9 @@
-'load and render templates'
+"""
+junk_shop.template_renderer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Load and render templates'
+"""
 import logging
 import os.path
 
@@ -10,16 +14,14 @@ from junk_shop.filters import JinjaFilters
 log = logging.getLogger(__name__)
 
 
-PROJECTS_DIR = os.path.abspath(os.path.dirname(__file__))
-JUNK_SHOP_DIR = os.path.abspath(os.path.join(PROJECTS_DIR, '../junk_shop'))
-PROJECTS_TEMPLATES_DIR = os.path.join(PROJECTS_DIR, 'templates')
-JUNK_SHOP_TEMPLATES_DIR = os.path.join(JUNK_SHOP_DIR, 'junk_shop/webapp/templates')
+JUNK_SHOP_DIR = os.path.abspath(os.path.dirname(__file__))
+JUNK_SHOP_TEMPLATES_DIR = os.path.join(JUNK_SHOP_DIR, 'webapp/templates')
 
 
 class TemplateRenderer(object):
 
     def __init__(self, services_config):
-        loader = jinja2.FileSystemLoader([PROJECTS_TEMPLATES_DIR, JUNK_SHOP_TEMPLATES_DIR])
+        loader = jinja2.FileSystemLoader([JUNK_SHOP_TEMPLATES_DIR])
         self._env = jinja2.Environment(loader=loader)
         self._junk_shop_url = services_config.junk_shop_url
         self._filters = JinjaFilters(services_config)

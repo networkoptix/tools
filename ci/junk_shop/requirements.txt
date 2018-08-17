@@ -8,3 +8,4 @@ pathlib2==2.3.0
 pyyaml
 cached-property
 subprocess32==3.5.2
+Jinja2==2.10

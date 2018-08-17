@@ -7,10 +7,9 @@ from email.mime.text import MIMEText
 import yaml
 from pony.orm import db_session
 
-from junk_shop import models, DbConfig, BuildInfoLoader
-from utils import is_list_inst, setup_logging
+from junk_shop import models, DbConfig, BuildInfoLoader, TemplateRenderer
+from utils import setup_logging
 from config import Config
-from template_renderer import TemplateRenderer
 from test_watcher_selector import make_email_recipient_list
 
 log = logging.getLogger(__name__)
@@ -80,6 +79,7 @@ def test_me():
         print subject_and_html
         if smtp_password and recipient:
             sender.send_email(smtp_password, subject_and_html, [recipient])
+
 
 if __name__ == '__main__':
     test_me()
