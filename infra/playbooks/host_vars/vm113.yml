@@ -3,8 +3,8 @@ libvirt_guest__state: running
 
 libvirt_guest__type: linux
 libvirt_guest__extra_system_image_size_gb: "120"
-libvirt_guest__memory: "{{ 10 * 1024 * 1024 }}"
-libvirt_guest__cpus: 8
+libvirt_guest__memory: "{{ 8 * 1024 * 1024 }}"
+libvirt_guest__cpus: 4
 
 node_exporter_enabled_collectors:
   - diskstats:
