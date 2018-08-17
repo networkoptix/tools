@@ -19,7 +19,7 @@ EOF
 )"
 
 declare -i NX_VERBOSE=0 #< Whether the script logs each command to be executed.
-declare -i NX_GO_VERBOSE=1 #< Whether nx_go() logs each command to be executed.
+declare -i NX_GO_VERBOSE=0 #< Whether nx_go() logs each command to be executed.
 
 # Call help_callback() and exit the script if none or typical help command-line arguments are
 # specified.
@@ -62,8 +62,8 @@ nx_handle_mock_rsync() # "$@" && shift
         rsync() #< Define the function which overrides rsync executable name.
         {
             nx_echo
-            nx_echo "MOCKED:"
-            nx_echo "rsync $*"
+            nx_echo "$(nx_dred)MOCKED:$(nx_nocolor)"
+            nx_echo "$(nx_dgreen)rsync $*$(nx_nocolor)"
             nx_echo
             # Check that all local files exist.
             local FILE
@@ -103,7 +103,7 @@ nx_check_args() # N "$@"
 # Copy the file(s) recursively, showing a progress.
 nx_rsync() # rsync_args...
 {
-    rsync -rlpDh --progress "$@"
+    rsync -r --links --perms --human-readable --progress "$@"
 }
 
 # Log the args as if it were a command to be executed, using nx_echo, prefixed with "+", and in
@@ -609,7 +609,7 @@ nx_go_verbose() # "$@"
 {
     local ARGS
     nx_concat_ARGS "$@"
-    echo "+go $ARGS"
+    echo "$(nx_dgreen)+go $ARGS$(nx_nocolor)"
 
     go_callback "$@"
 
@@ -643,6 +643,36 @@ nx_ssh() # user password host port terminal_title background_rrggbb [command [ar
     nx_set_title "$TERMINAL_TITLE"
 
     sshpass -p "$PASSWORD" ssh -q -p "$PORT" -t "$USER@$HOST" \
+        `# Do not use known_hosts #` -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+        ${ARGS:+"$ARGS"} `#< Omit arg if empty #`
+    local RESULT=$?
+
+    nx_pop_title
+    nx_set_background "$OLD_BACKGROUND"
+    return $RESULT
+}
+
+# Execute a command via ssh, or log in via ssh.
+#
+# Ssh reparses the concatenated args string at the remote host, thus, this function performs the
+# escaping of the args, except for the "*" chars (to enable globs) and args in square brackets (to
+# enable e.g. combining commands via "[&&]" or redirecting with "[>]").
+nx_ssh_without_password() # user host terminal_title background_rrggbb [command [args...]]
+{
+    local USER="$1"; shift
+    local HOST="$1"; shift
+    local TERMINAL_TITLE="$1"; shift
+    local BACKGROUND_RRGGBB="$1"; shift
+    local ARGS
+    nx_concat_ARGS "$@"
+
+    local OLD_BACKGROUND
+    nx_get_background OLD_BACKGROUND
+    nx_set_background "$BACKGROUND_RRGGBB"
+    nx_push_title
+    nx_set_title "$TERMINAL_TITLE"
+
+    ssh -q -t "$USER@$HOST" \
         `# Do not use known_hosts #` -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
         ${ARGS:+"$ARGS"} `#< Omit arg if empty #`
     local RESULT=$?

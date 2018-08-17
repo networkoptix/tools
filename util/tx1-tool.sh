@@ -22,7 +22,7 @@ nx_load_config "${RC=".tx1-toolrc"}"
 : ${BOX_LIBS_DIR="$BOX_INSTALL_DIR/lib"}
 : ${BOX_DEVELOP_DIR="/home/$BOX_USER/develop"} #< Mount point at the box for the workstation's "develop".
 
-: ${PACKAGES_BASE_DIR="$DEVELOP_DIR/buildenv/packages"}
+: ${PACKAGES_BASE_DIR="$DEVELOP_DIR/packages"}
 : ${PACKAGES_DIR="$PACKAGES_BASE_DIR/tx1"} #< Path at the workstation.
 : ${PACKAGES_ANY_DIR="$PACKAGES_BASE_DIR/any"} #< Path at the workstation.
 : ${PACKAGE_GCC_LIBS_DIR="$PACKAGES_BASE_DIR/linux-aarch64/gcc-7.2.0/aarch64-unknown-linux-gnu/sysroot/lib"}
@@ -617,7 +617,7 @@ main()
         log)
             local -r LOG="$BOX_MEDIASERVER_DIR/var/log/log_file.log"
             if [[ $# == 0 ]]
-            then 
+            then
                 nx_go tail -F "$LOG"
             else
                 nx_go tail -F "$LOG" "[|]" grep "$@"

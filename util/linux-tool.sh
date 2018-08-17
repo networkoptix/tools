@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o pipefail
 
-source "$(dirname $0)/utils.sh"
+source "$(dirname "$0")/utils.sh"
 
 nx_load_config "${RC=".linux-toolrc"}"
 : ${VMS_DIR=""} #< nx_vms repo.
@@ -11,12 +11,14 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${CUSTOMIZATION=""}
 : ${DEVELOP_DIR="$HOME/develop"}
 : ${WIN_DEVELOP_DIR="/C/develop"}
-: ${PACKAGES_DIR="$DEVELOP_DIR/buildenv/packages"}
-: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.6.1-1"}
-: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.6.2-2"}
+: ${PACKAGES_DIR="$RDEP_PACKAGES_DIR"}
+: ${WINDOWS_QT_DIR="$PACKAGES_DIR/windows-x64/qt-5.11.1"}
+: ${LINUX_QT_DIR="$PACKAGES_DIR/linux-x64/qt-5.11.1"}
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
+: ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
+: ${VEGA_BACKGROUND_RRGGBB="300000"}
 if nx_is_cygwin
 then
     : ${CMAKE_GEN=""}
@@ -63,11 +65,16 @@ Here <command> can be one of the following:
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
  kit-rdep # Upload $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
+ meta # Rebuild nx_metadata_sdk.
+
+ go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
+ go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
+ rsync # Syncronize current vms source dir to vega (first time via tar/scp, then via rsync).
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
- start-c [args] # Start desktop_client with [args].
- stop-c # Stop desktop_client.
- run-ut [all|test_name] [args] # Run all or the specified unit test via ctest.
+ start-c [args] # Start client-bin with [args].
+ stop-c # Stop client-bin.
+ run-ut all|test_name [args] # Run all or the specified unit test via ctest.
  testcamera [video-file.ext] [args] # Start testcamera, or show its help.
 
  dmp file.dmp [args] # Cygwin-only: Analyze .dmp with crash_analyzer. Requires win-python3.
@@ -84,6 +91,7 @@ Here <command> can be one of the following:
  list dir [listing.txt] # Make a recursive listing of the files and their attrs.
 
  repos # List all hg repos in DEVELOP_DIR with their branches.
+ mount-repo win-repo [mnt-point] # Mount Windows repo via "mount --bind" to mnt-point.
  print-dirs # Print VMS_DIR and BUILD_DIR for the target, on separate lines.
  tunnel ip1 [ip2]... # Create two-way ssh tunnel to Burbank for the specified Burbank IP addresses.
  tunnel-s ip1 [port]... # Create ssh tunnel to Burbank for the specified port (default is 7001).
@@ -92,8 +100,13 @@ EOF
 
 #--------------------------------------------------------------------------------------------------
 
+go_callback()
+{
+    nx_ssh_without_password "$USER" "$VEGA_HOST" "$USER@vega" "$VEGA_BACKGROUND_RRGGBB" "$@"
+}
+
 # [out] TARGET
-# [out] CUSTOMIZATION
+# [in,out] CUSTOMIZATION
 # [out] QT_DIR
 # [in] VMS_DIR
 get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
@@ -119,14 +132,23 @@ get_TARGET_and_CUSTOMIZATION_and_QT_DIR()
 
     # If the target is already defined, use its value.
 
+    local DEFAULT_CUSTOMIZATION=""
+
     case "$TARGET" in
         windows) QT_DIR="$WINDOWS_QT_DIR";;
         linux) QT_DIR="$LINUX_QT_DIR";;
         tx1|bpi|rpi|bananapi|android-arm|macosx) `# Do nothing #`;;
-        edge1) CUSTOMIZATION="digitalwatchdog";;
+        edge1) DEFAULT_CUSTOMIZATION="digitalwatchdog";;
         "") nx_fail "Unknown target - either set TARGET, or use build dir suffix \"-target\".";;
         *) nx_fail "Target \"$TARGET\" is not supported.";;
     esac
+
+    # Assign DEFAULT_CUSTOMIZATION for certain branches.
+    case "$(cat "$VMS_DIR/.hg/branch")" in
+        meta) DEFAULT_CUSTOMIZATION="metavms";;
+    esac
+
+    [[ -z $CUSTOMIZATION ]] && CUSTOMIZATION="$DEFAULT_CUSTOMIZATION"
 
     # Assertion: target "windows" is supported only in cygwin.
     if nx_is_cygwin
@@ -384,7 +406,7 @@ do_build()
     time nx_verbose cmake --build "$(nx_path "$BUILD_DIR")" $CONFIG_ARG "$@"
 }
 
-do_run_ut() # [all|TestName] "$@"
+do_run_ut() # all|TestName "$@"
 {
     nx_cd "$BUILD_DIR"
 
@@ -405,6 +427,22 @@ do_run_ut() # [all|TestName] "$@"
     fi
 
     nx_verbose ctest $CONFIG_ARG $TEST_ARG "$@"
+    local -i -r RESULT=$?
+    if [[ $RESULT = 0 ]]
+    then
+        nx_echo
+        nx_echo $(nx_dgreen)"SUCCESS: All tests PASSED."$(nx_nocolor)
+    else
+        nx_echo
+        local -r LOG="$BUILD_DIR/Testing/Temporary/LastTest.log"
+        if [[ -f $LOG ]]
+        then
+            nx_echo $(nx_lred)"FAILURE: Some test(s) FAILED; see $LOG"$(nx_nocolor)
+        else
+            nx_echo $(nx_lred)"FAILURE: Some test(s) FAILED."$(nx_nocolor)
+        fi
+    fi
+    return $RESULT
 }
 
 copy_if_exists_and_different() # source_file target_file
@@ -569,10 +607,8 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
         local -r GENERATION_ARGS="-Ax64 -Thost=x64"
         local -r GENERATOR_ARG=""
         local -r BUILD_ARGS="--config Release"
-        local -r EXE_DIR="Release"
     else
         local -r BUILD_ARGS=""
-        local -r EXE_DIR="."
         if nx_is_cygwin
         then
             local -r GENERATION_ARGS="-DCMAKE_C_COMPILER=gcc"
@@ -588,7 +624,18 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     nx_echo
     time nx_verbose cmake --build . $BUILD_ARGS || return $?
     nx_echo
-    "$EXE_DIR"/nx_kit_*
+
+    local UT_EXE
+    if nx_is_cygwin
+    then
+        local -r UT_EXE_PATTERN="nx_kit_*.exe"
+        nx_log_command "PATH=\"Release:\$PATH\""
+        PATH="Release:$PATH"
+    else
+        local -r UT_EXE_PATTERN="nx_kit_*"
+    fi
+    nx_find_file UT_EXE "Unit tests executable" -type f -name "$UT_EXE_PATTERN"
+    nx_verbose "$UT_EXE"
 }
 
 do_kit() # "$@"
@@ -625,7 +672,7 @@ do_kit() # "$@"
     nx_pushd "$KIT_BUILD_DIR"
     nx_log_command "cd $KIT_BUILD_DIR"
 
-    local KIT_SRC_DIR="$VMS_DIR/$NX_KIT_DIR"
+    local KIT_SRC_DIR=$(nx_path "$VMS_DIR/$NX_KIT_DIR")
     build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
 
     nx_popd
@@ -653,6 +700,7 @@ log_build_vars()
     [[ $TARGET != windows ]] && MESSAGE+="TARGET=$TARGET "
     MESSAGE+="CONFIG=$CONFIG "
     [[ $DISTRIB = 1 ]] && MESSAGE+="DISTRIB=$DISTRIB "
+    [[ ! -z $CUSTOMIZATION ]] && MESSAGE+="CUSTOMIZATION=$CUSTOMIZATION "
 
     nx_log_command "$MESSAGE"
 }
@@ -1275,6 +1323,30 @@ printRepos()
     done
 }
 
+doMountRepo() # win-repo [mnt-point]
+{
+    local -r WIN_REPO="$1" && shift
+    if (($# > 0))
+    then
+        local -r MNT=$(nx_absolute_path "$DEVELOP_DIR/$1") && shift
+    else
+        local -r MNT=$(nx_absolute_path "$DEVELOP_DIR/$WIN_REPO-win") && shift
+    fi
+    local -r DIR=$(nx_absolute_path "$WIN_DEVELOP_DIR/$WIN_REPO")
+
+    nx_echo "Mounting $DIR to $MNT"
+
+    if mount |grep --color=always "$MNT"
+    then
+        nx_fail "The repo seems to be already mounted, see above."
+        return 42
+    fi
+
+    nx_verbose mkdir -p "$MNT"
+    nx_verbose sudo mount --bind "$DIR" "$MNT"
+    ls --color=always "$MNT"
+}
+
 #--------------------------------------------------------------------------------------------------
 
 main()
@@ -1283,9 +1355,9 @@ main()
 
     local -r COMMAND="$1" && shift
     case "$COMMAND" in
-        apidoc|kit|start-s|start-c|run-ut|testcamera| \
+        apidoc|kit|meta|start-s|start-c|run-ut|testcamera| \
         share|gen|cd|build|cmake|distrib|test-distrib| \
-        print-dirs)
+        print-dirs|rsync)
             setup_vars
             ;;
     esac
@@ -1317,7 +1389,22 @@ main()
             nx_echo "SUCCESS: nx_kit uploaded via rdep"
             nx_popd
             ;;
+        meta)
+            nx_verbose rm -rf "$BUILD_DIR/distrib"/*metadata_sdk*.zip
+            nx_verbose rm -rf "$BUILD_DIR/nx_metadata_sdk"
+            DISTRIB=1 do_gen "$@"
+            do_build --target nx_metadata_sdk
+            ;;
         #..........................................................................................
+        go)
+            nx_go "$@"
+            ;;
+        go-verbose)
+            nx_go_verbose "$@"
+            ;;
+        rsync)
+            nx_rsync "$VMS_DIR/" "$VEGA_HOST:$VMS_DIR/" #< ATTENTION: Leading slash is essential.
+            ;;
         start-s)
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
@@ -1345,17 +1432,17 @@ main()
                     local -r QT_PATH="$QT_DIR/bin"
                     nx_log_command "PATH=\"$QT_PATH:\$PATH\""
                     PATH="$QT_PATH:$PATH"
-                    nx_verbose "bin/HD Witness.exe" "$@"
+                    nx_verbose "bin/Nx MetaVMS.exe" "$@"
                     ;;
                 linux)
-                    nx_verbose bin/desktop_client "$@"
+                    nx_verbose bin/client-bin "$@"
                     ;;
                 *) nx_fail "Target [$TARGET] not supported yet.";;
             esac
             ;;
         stop-c)
             # TODO: Decide on better impl.
-            sudo pkill -9 desktop_client
+            sudo pkill -9 client-bin
             ;;
         run-ut)
             do_run_ut "$@"
@@ -1373,7 +1460,7 @@ main()
 
             if nx_is_cygwin
             then
-                PATH="$QT_DIR\bin:$BUILD_DIR/bin:$PATH"
+                PATH="$QT_DIR/bin:$BUILD_DIR/bin:$PATH"
             fi
 
             if [ $SHOW_HELP = 1 ]
@@ -1444,6 +1531,9 @@ main()
         #..........................................................................................
         repos)
             printRepos
+            ;;
+        mount-repo)
+            doMountRepo "$@"
             ;;
         print-dirs)
             if [ ! -d "$BUILD_DIR" ]
