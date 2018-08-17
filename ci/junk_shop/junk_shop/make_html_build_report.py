@@ -4,6 +4,15 @@ make_html_build_report
 ~~~~~~~~~~~~~~~~~~~~~~
 
 It's a script to get Junkshop build report in HTML format.
+
+Sample:
+  ./make_html_build_report.py user:password@junkshop_db_host project=ci,branch=vms,build_num=2739
+
+  user:password@junkshop_db_host - Junkshop database credentials
+  project=ci,branch=vms,build_num=2739 - build parameters, only project, branch and build_num are required
+
+  You can use optional parameters only if you need to use non-default junk_shop,
+  JIRA and SCM browser URLs in your report.
 """
 import argparse
 from junk_shop import TemplateRenderer, BuildInfoLoader, models
@@ -22,19 +31,22 @@ def main():
     parser.add_argument(
         'db_config', type=DbConfig.from_string,
         metavar='user:password@host',
-        help='Capture postgres database credentials')
+        help='Capture postgres database credentials.')
     parser.add_argument(
         'build_parameters', type=BuildParameters.from_string,
-        metavar=BuildParameters.example, help='Build parameters')
+        metavar=BuildParameters.example,
+        help='Build parameters.')
     parser.add_argument(
         '--junk-shop-url', default=DEFAULT_JUNK_SHOP_URL,
-        help='junk shop URL, default=%s' % DEFAULT_JUNK_SHOP_URL)
+        help=("Junk shop URL, default={}.".format(DEFAULT_JUNK_SHOP_URL)))
     parser.add_argument(
         '--jira-url', default=DEFAULT_JIRA_URL,
-        help='JIRA URL, default=%s' % DEFAULT_JIRA_URL)
+        help=("NX VMS JIRA URL, default={}.".format(DEFAULT_JIRA_URL)))
     parser.add_argument(
         '--scm-browser-url-format', default=DEFAULT_SCM_BROWSER_URL_FORMAT,
-        help='SCM browser URL format, default=%s' % DEFAULT_SCM_BROWSER_URL_FORMAT)
+        help=("SCM browser URL format, default={}. "
+              "We use upsource as SCM browser now "
+              "to make links to an SCM revision.".format(DEFAULT_SCM_BROWSER_URL_FORMAT)))
 
     args = parser.parse_args()
 
