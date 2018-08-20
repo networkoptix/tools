@@ -135,6 +135,7 @@
         type: 'multi-select'
         value: '{default}'
         default-value: '{default}'
+        visible-items: 10
         description: >-
           Target platforms for distributions
 
@@ -156,6 +157,7 @@
         type: 'multi-select'
         value: '{default}'
         default-value: '{default}'
+        visible-items: 10
         description: >-
           Target customizations for distributions
 - parameter:
