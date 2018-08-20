@@ -70,7 +70,6 @@ print '''#
     parameters:
     - p_REQUESTED_BY
     - p_UPSTREAM_JOB_NAME
-    # FIXME: Figure out why extended choice created from JJB is not visible..
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_PLATFORMS:
