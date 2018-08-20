@@ -83,7 +83,6 @@
     # detailed-job-description required!
 
     use-build-identity: NEW
-    use-nx-vms-commit: LATEST
 
     properties:
     - authorization-{pipeline}-trigger

@@ -8,6 +8,7 @@
     version:
     - vms:
         default-branch: vms
+        use-nx-vms-commit: vms  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 

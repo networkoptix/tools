@@ -8,8 +8,10 @@
     version:
     - vms_3.2:
         default-branch: vms_3.2
+        use-nx-vms-commit: vms_3.2  # FIXME: this is temp fix
     - vms_3.2_release:
         default-branch: vms_3.2_release
+        use-nx-vms-commit: vms_3.2_release  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 

@@ -8,8 +8,10 @@
     version:
     - cloud_18.2_backend:
         default-branch: cloud_18.2_backend
+        use-nx-vms-commit: cloud_18.2_backend  # FIXME: this is temp fix
     - cloud_dev:
-        default-branch: cloud_18.2_backend
+        default-branch: cloud_dev
+        use-nx-vms-commit: cloud_dev  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 
