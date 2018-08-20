@@ -177,7 +177,21 @@
               associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
+            default-test-framework-branch: '{default-branch}'
             timer: 'H 20 * * 1-5'
+
+    - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
+        job-maintainers: vfedorov@networkoptix.com
+        tests:
+        - scalability-test
+        preset:
+        - nightly:
+            detailed-job-description: |-
+              Run nightly scalability test with schedule "{timer}".
+            default-build-description: >-
+              Nightly scalability tests
+            default-test-framework-branch: vms  # used for testing of all branches
+            timer: 'H 18 * * 1-5'
 
     # RUNNER - root launcher of all builds
 

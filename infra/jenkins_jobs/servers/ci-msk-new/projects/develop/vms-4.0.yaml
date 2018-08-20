@@ -175,6 +175,7 @@
               associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
+            default-test-framework-branch: '{default-branch}'
             timer: 'H 23 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.blinking-tests':

@@ -51,6 +51,9 @@
         default: '{default-build-description}'
     - p_BRANCH:
         default: '{default-branch}'
+    - string:
+        name: TEST_FRAMEWORK_BRANCH
+        default: '{default-test-framework-branch}'
     - p_USE_BUILD_IDENTITY:
         default: ''
     - p_TEST_SELECT_EXPR:
@@ -75,7 +78,7 @@
     scm:
     - hg-la:
         project-name: nx_vms
-        branch-name: $BRANCH
+        branch-name: $TEST_FRAMEWORK_BRANCH
 
     builders:
     - inject:
