@@ -41,7 +41,11 @@ def delete_build_changesets(build):
 def load_change_sets(repository, src_dir, build, prev_revision):
     rev_range = build.revision + '%' + prev_revision
     args = ['hg', 'log', '--template', HG_LOG_TEMPLATE, '--rev', rev_range]
-    output = subprocess.check_output(args, cwd=src_dir)
+    try:
+        output = subprocess.check_output(args, cwd=src_dir, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as x:
+        log.error('Error retrieving repository log: %s', x.output)
+        return
     lines = output.splitlines()
     for line in lines:
         revision, date_str, user, email, desc = line.split('|', 4)
