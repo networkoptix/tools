@@ -179,8 +179,8 @@
               successfully rebuild some successful build.
             default-build-description: >-
               Manually triggered
-            platforms: linux-x64,windows-x64,mac,bpi
-            customizations: default
+            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
+            customizations: default,hanwha,vista,digitalwatchdog
 
     # RUNNER - root launcher of all builds
 
