@@ -49,17 +49,6 @@
     webadmin-customization: default
 
     cmake-executable: cmake
-    custom-cleaner-log: 'cleaner.log'
-    cmake-configure-log: 'cmake-configure.log'
-    cmake-build-log: 'cmake-build.log'
-    build-dir: build
-
-    # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
-    # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one customization
-    # must not be present while we are building other customization.
-    # To simplify things we execute this file when it's present in workspace (see below)
-    # anyways it's possible to override this file for other use cases.
-    custom_cleaner_path: '$WORKSPACE/nx_vms/build_utils/python/clear_cmake_build.py'
 
     cmake_build_extra_args: ''
 
@@ -348,34 +337,65 @@
         includes: 'build/**/*.log'
         excludes: ''
 
+    # recreate build_logs folder
+    - folder-delete-operation:
+        folder-path: 'build_logs'
+    - folder-create-operation:
+        folder-path: 'build_logs'
+
     # Remove distrib folder
     - folder-delete-operation:
-        folder-path: '{build-dir}/distrib'
+        folder-path: 'build/distrib'
 
     # Run custom cleaner provided by development team
+    # Currently there is custom cleaner file in mobile branches (and all branches where mobile is merged)
+    # It's main purpose as of 21.06.2016 is to clean all built icons. The idea is that icons from one customization
+    # must not be present while we are building other customization.
+    # To simplify things we execute this file when it's present in workspace (see below)
+    # anyways it's possible to override this file for other use cases.
     - conditional-step:
         condition-kind: file-exists
-        condition-filename: '{custom_cleaner_path}'
+        condition-filename: 'nx_vms/build_utils/python/clear_cmake_build.py'
         condition-basedir: workspace
         steps:
         - shell: |
             #!bash
             set -ex
 
-            cd "${{WORKSPACE}}/{build-dir}"
-            if [ -f "{custom_cleaner_path}" ] ; then
-              echo "will run {custom_cleaner_path} with content"
-              cat "{custom_cleaner_path}"
-              SECONDS=0
-              # Log file must not exist
-              rm -f "{custom-cleaner-log}" # TODO: remove it in prep env
-              test ! -f "{custom-cleaner-log}"
-              python "{custom_cleaner_path}" --build-dir "${{WORKSPACE}}/{build-dir}" 2>&1 | tee "{custom-cleaner-log}"
-              ec="${{PIPESTATUS[0]}}"
-              echo "Took $SECONDS seconds"
-              # Abort if first cmd in pipe failed
-              test "X${{ec}}" == "X0"
+            # Log file must not exist
+            test ! -f "build_logs/cleaner.log"
+
+            # Create bash script filled with args, unset too long envvars and
+            # execute cleaner command
+            # ----------------------------------------------------------------------
+            cat > custom_clean.sh <<BUILDSCRIPT
+            #!bash
+            # set -xe is is missing intentionally
+            SECONDS=0
+
+            echo "Env is:"
+            env
+            echo "Running custom cleaner"
+            cd "build"
+
+
+            if [ ! -f "nx_vms/build_utils/python/clear_cmake_build.py" ] ; then
+              echo "There is no custom cleaner"
+              exit 0
             fi
+            echo "Running custom cleaner"
+
+            python "nx_vms/build_utils/python/clear_cmake_build.py" --build-dir "\${{WORKSPACE}}/build"
+            ec=\$?
+            echo "Took - \$SECONDS seconds"
+            echo "Exit code - \$ec"
+            exit "\$ec"
+            BUILDSCRIPT
+            # ----------------------------------------------------------------------
+            cat custom_clean.sh
+            bash custom_clean.sh 2>&1 | tee "build_logs/cleaner.log"
+            # Abort if buildscript failed
+            exit "${{PIPESTATUS[0]}}"
 
     # STAGE: SETUP BUILD ENVIRONMENT
     # ========================================
@@ -384,7 +404,7 @@
     - shell: |
         #!bash
         set -ex
-        mkdir -p '{build-dir}'
+        mkdir -p 'build'
         rm -rf "$WORKSPACE/$WEBADMIN_COMPONENT_NAME"
 
     - conditional-step:
@@ -415,6 +435,10 @@
     - shell: |
         #!bash
         set -ex
+
+        # Log file must not exist
+        test ! -f "build_logs/cmake-configure.log"
+
         # Create bash script filled with args, unset too long envvars and
         # execute cmake command
         # ----------------------------------------------------------------------
@@ -422,10 +446,6 @@
         #!bash
         # set -xe is is missing intentionally
         SECONDS=0
-
-        # Log file must not exist
-        rm -f "{cmake-configure-log}" # TODO: remove it in prep env
-        test ! -f "{cmake-configure-log}"
 
         # remove all extra env vars
         for ev in {envvars_to_unset_during_build} ; do
@@ -438,7 +458,7 @@
         echo "Env is:"
         env
         echo "Configuring project"
-        cd "{build-dir}"
+        cd "build"
 
         echo "Cmake command - $CMAKE_CONFIGURE_COMMAND \$WORKSPACE/nx_vms"
         $CMAKE_CONFIGURE_COMMAND \$WORKSPACE/nx_vms
@@ -449,35 +469,52 @@
         BUILDSCRIPT
         # ----------------------------------------------------------------------
         cat configure.sh
-        bash configure.sh 2>&1 | tee "{build-dir}/{cmake-configure-log}"
+        bash configure.sh 2>&1 | tee "cmake-configure.log"
         # Abort if buildscript failed
         exit "${{PIPESTATUS[0]}}"
 
     - shell: |
         #!bash
         set -ex
-        # TODO: rework in the same way as cmake stuff
-        pushd "{build-dir}"
-        if [ "{use-ninja-clean-file}" == 'YES' ] ; then
-          cleaner="${{WORKSPACE}}/devtools/ninja_clean/ninja_clean.py"
-          if [ -f "$cleaner" ] ; then
-            SECONDS=0
-            echo "Running cleaner"
-            # Log file must not exist
-            rm -f "ninja_clean.log" # TODO: remove it in prep env
-            test ! -f ninja_clean.log
-            python "$cleaner" --build-dir "${{WORKSPACE}}/{build-dir}" 2>&1 | tee ninja_clean.log
-            ec="${{PIPESTATUS[0]}}"
-            echo "Took $SECONDS seconds"
-            # Abort if first cmd in pipe failed
-            test "X${{ec}}" == "X0"
-          fi
+
+        # Create bash script filled with args, unset too long envvars and
+        # execute cleaner command
+        # ----------------------------------------------------------------------
+        cat > ninja_clean.sh <<BUILDSCRIPT
+        #!bash
+        # set -xe is is missing intentionally
+        SECONDS=0
+
+        echo "Env is:"
+        env
+        echo "Running custom cleaner"
+        cd "build"
+
+
+        if [ ! -f "./devtools/ninja_clean/ninja_clean.py" ] ; then
+          echo "There is no ninja_clean.py"
+          exit 0
         fi
-        popd
+        echo "Running custom ninja_clean"
+
+        python "./devtools/ninja_clean/ninja_clean.py" --build-dir "./build"
+        ec=\$?
+        echo "Took - \$SECONDS seconds"
+        echo "Exit code - \$ec"
+        exit "\$ec"
+        BUILDSCRIPT
+        # ----------------------------------------------------------------------
+        cat ninja_clean.sh
+        bash ninja_clean.sh 2>&1 | tee "build_logs/ninja_clean.log"
+        # Abort if buildscript failed
+        exit "${{PIPESTATUS[0]}}"
 
     - shell: |
         #!bash
         set -ex
+        # Log file must not exist
+        test ! -f "build_logs/cmake-build.log"
+
         # Create bash script filled with args, unset too long envvars and
         # execute cmake command
         # ----------------------------------------------------------------------
@@ -485,11 +522,6 @@
         #!bash
         # set -xe is is missing intentionally
         SECONDS=0
-
-        # Log file must not exist
-        rm -f "{cmake-build-log}" # TODO: remove it in prep env
-        test ! -f "{cmake-build-log}"
-
         # remove all extra env vars
         for ev in {envvars_to_unset_during_build} ; do
           echo "Unsetting \${{ev}}=\${{!ev}}"
@@ -505,7 +537,7 @@
         echo "Env is:"
         env
         echo "Building project"
-        cd "{build-dir}"
+        cd "build"
 
         echo "Cmake command - $CMAKE_BUILD_COMMAND"
         $CMAKE_BUILD_COMMAND
@@ -516,7 +548,7 @@
         BUILDSCRIPT
         # ----------------------------------------------------------------------
         cat build.sh
-        bash build.sh 2>&1 | tee "{build-dir}/{cmake-build-log}"
+        bash build.sh 2>&1 | tee "build_logs/cmake-build.log"
         # Abort if buildscript failed
         exit "${{PIPESTATUS[0]}}"
 
@@ -526,7 +558,7 @@
     publishers:
     - delete-hg-repos(if-damaged)
     - archive:
-        artifacts: 'build/**/*.log'
+        artifacts: '**/*.log'
         allow-empty: 'false'
         fingerprint: true
 
@@ -543,31 +575,30 @@
           - UNSTABLE
           - FAILURE
           build-steps:
-          # Don't publish anything if build even didn't start
-          - conditional-step:
-              condition-kind: file-exists
-              condition-filename: "{build-dir}/{cmake-build-log}"
-              condition-basedir: workspace
-              steps:
-              - trigger-builds:
-                - project: '{pipeline}.helper.publish-build'
-                  predefined-parameters: |
-                    REQUESTED_BY={tag_requested_by}
-                    BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                    BUILD_STATUS=passed
-                    BRANCH=$BRANCH
-                    BUILD_IDENTITY=$BUILD_IDENTITY
-                    CUSTOMIZATION=$CUSTOMIZATION
-                    PLATFORM=$PLATFORM
-                    BRANCH=$BRANCH
-                    NX_VMS_COMMIT=$NX_VMS_COMMIT
-                    LOCAL_PATH=$WORKSPACE/{build-dir}/
-                    COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,cmake-build.log,cmake-configure.log
-                    NODE_SSH_CONNECTION=$SSH_CONNECTION
-                    SSH_USER=$USER
-                  block: true
-                  block-thresholds:
-                    failure-threshold: FAILURE
+          - shell: |
+              #!bash
+              mkdir -p ./build/build_logs
+              mv ./build_logs/* ./build/build_logs/
+
+          - trigger-builds:
+            - project: '{pipeline}.helper.publish-build'
+              predefined-parameters: |
+                REQUESTED_BY={tag_requested_by}
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                BUILD_STATUS=passed
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                LOCAL_PATH=$WORKSPACE/build/
+                COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
           - description-setter:
               description: >-
                 <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
