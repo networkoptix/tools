@@ -168,7 +168,7 @@
             default-build-description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
-            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
+            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
             customizations: default,hanwha,vista,digitalwatchdog
             clean-workspace: true
             timer: '0 0 * * 1-5'
@@ -179,7 +179,7 @@
               successfully rebuild some successful build.
             default-build-description: >-
               Manually triggered
-            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1,edge1
+            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
             customizations: default,hanwha,vista,digitalwatchdog
 
     # RUNNER - root launcher of all builds
