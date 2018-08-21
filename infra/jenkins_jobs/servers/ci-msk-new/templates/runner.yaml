@@ -14,7 +14,6 @@
     realcameratesting-framework-branch: $BRANCH
 
     properties:
-    - authorization-{pipeline}-system
     - heavy-job:
         weight: 1
     - throttle:
@@ -558,6 +557,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -905,6 +923,25 @@
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -1280,6 +1317,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -1641,6 +1697,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -1988,6 +2063,25 @@
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -2382,6 +2476,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -2729,6 +2842,25 @@
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -3104,6 +3236,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -3451,6 +3602,25 @@
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -3826,6 +3996,25 @@
             RUNNER_URL=$BUILD_URL
 
 
+        - name: '{pipeline}.{version}.{project}.distribution.mac.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("mac") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
         - name: '{pipeline}.{version}.{project}.distribution.ios.default.all'
           kill-phase-on: NEVER
           enable-condition: >-
@@ -4173,6 +4362,25 @@
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$BUILD_INSTALLER").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
+            RUNNER_URL=$BUILD_URL
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.ios.xcello.all'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$PLATFORMS     ").trim().split(",").contains("ios") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
@@ -4955,6 +5163,47 @@
           kill-phase-on: NEVER
           enable-condition: >-
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
+            ("$RUN_REALCAMERATESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+            JUNKSHOP_HOST=$JUNKSHOP_HOST
+            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
+
+        - name: '{pipeline}.{version}.{project}.distribution.xcello.functest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$RUN_FUNCTESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY={tag_requested_by}
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_BUILD=$CLEAN_BUILD
+            CLEAN_CLONE=$CLEAN_CLONE
+            RUNNER_URL=$BUILD_URL
+            JUNKSHOP_HOST=$JUNKSHOP_HOST
+            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
+        - name: '{pipeline}.{version}.{project}.distribution.xcello.realcameratest'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}

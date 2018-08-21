@@ -132,24 +132,25 @@
     # extra items are added or removed, so don't forget to change runner
     # template according to changes made here
     - default
-    # - default_cn
-    # - default_zh_CN
-    # - cox
-    # - digitalwatchdog
-    # - digitalwatchdog_global
+    - default_cn
+    - default_zh_CN
+    - cox
+    - digitalwatchdog
+    - digitalwatchdog_global
     - hanwha
-    # - ipera
-    # - ionetworks
-    # - nutech
-    # - ras
-    # - senturian
-    # - systemk
-    # - tricom
-    # - ust
+    - ipera
+    - ionetworks
+    - nutech
+    - ras
+    - senturian
+    - systemk
+    - tricom
+    - ust
     - vista
-    # - vmsdemoblue
-    # - vmsdemoorange
-    # + digitalwatchdog
+    - vmsdemoblue
+    - vmsdemoorange
+    - metavms
+    - xcello
 
     # list of jobs to generate
     jobs:
@@ -180,7 +181,9 @@
             default-build-description: >-
               Manually triggered
             platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
-            customizations: default,hanwha,vista,digitalwatchdog
+            # TODO: rework defaults to accept space-separated values, and add >- here
+            # TODO: split into default-selected and full-list
+            customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xcello
 
     # RUNNER - root launcher of all builds
 

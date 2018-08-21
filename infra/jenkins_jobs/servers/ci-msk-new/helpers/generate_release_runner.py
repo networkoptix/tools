@@ -22,7 +22,8 @@ CUSTOMIZATIONS_LIST = [
     'vista',
     'vmsdemoblue',
     'vmsdemoorange',
-    'metavms'
+    'metavms',
+    'xcello'
 ]
 
 PLATFORMS_LIST = [
