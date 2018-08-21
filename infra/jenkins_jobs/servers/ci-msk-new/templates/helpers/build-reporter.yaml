@@ -163,6 +163,7 @@
         set -ex
 
         rm -f full_build.log
+        touch full_build.log
 
         for logfile in  webadmin-build.log	             \
                         build_logs/cleaner.log           \
