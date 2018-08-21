@@ -276,6 +276,8 @@
         default: '{run-unittests}'
     - p_USE_NX_VMS_COMMIT:
         default: '{use-nx-vms-commit}'
+    - p_CLEAN_BUILD:
+        default: '{clean-build}'
 
     triggers:
     - timed: "{timer}"
@@ -284,7 +286,6 @@
     - inject:
         properties-content: |
           CLEAN_WORKSPACE={clean-workspace}
-          CLEAN_BUILD={clean-build}
           CUSTOMIZATIONS={customizations}
           BUILD_WEBADMIN={build-webadmin}
           BUILD_INSTALLER={build-installer}
