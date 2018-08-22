@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 
 
 VERSION_REGEX = r'^\d+(\.\d+)+$'
-ARTIFACT_SIZE_LIMIT = 512 * 1024*1024
+ARTIFACT_SIZE_LIMIT = 128 * 1024*1024
 
 
 class BuildParameters(object):
@@ -391,13 +391,13 @@ class DbCaptureRepository(object):
         if not data: return
         if type(data) is unicode:
             data = data.encode('utf-8')
-        if len(data) > ARTIFACT_SIZE_LIMIT:
-            log.warning('Skip artifact for run=%r: short_name=%r full_name=%r type=%r: size %d exceeded limit %d',
-                            run.path, short_name, full_name, artifact_type_rec.name, len(data), ARTIFACT_SIZE_LIMIT)
-            return
         at = self._produce_artifact_type(artifact_type_rec)
         compressed_data = bz2.compress(data)
-        log.debug('Store artifact %r to db, compressed size: %d', full_name, len(compressed_data))
+        if len(compressed_data) > ARTIFACT_SIZE_LIMIT:
+            log.warning(
+                'Skip artifact for run=%r: short_name=%r full_name=%r type=%r: compressed size %d exceeded limit %d',
+                run.path, short_name, full_name, artifact_type_rec.name, len(compressed_data), ARTIFACT_SIZE_LIMIT)
+            return
         artifact = models.Artifact(
             type=at,
             short_name=short_name,
