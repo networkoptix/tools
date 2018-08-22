@@ -397,6 +397,7 @@ class DbCaptureRepository(object):
             return
         at = self._produce_artifact_type(artifact_type_rec)
         compressed_data = bz2.compress(data)
+        log.debug('Store artifact %r to db, compressed size: %d', full_name, len(compressed_data))
         artifact = models.Artifact(
             type=at,
             short_name=short_name,
