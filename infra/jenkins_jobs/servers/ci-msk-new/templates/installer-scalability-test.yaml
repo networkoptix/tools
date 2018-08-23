@@ -188,6 +188,9 @@
     - scalability-tests-block:
         use-lightweight-servers: 'true'  # note: string type
         server-count: 200
+    - scalability-tests-block:
+        use-lightweight-servers: 'true'  # note: string type
+        server-count: 250
 
     - scalability-tests-block:
         use-lightweight-servers: 'false'  # note: string type
