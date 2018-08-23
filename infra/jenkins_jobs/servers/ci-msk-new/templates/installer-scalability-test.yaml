@@ -244,4 +244,5 @@
         cameras-per-server: 20
         users-per-server: 4
         properties-per-camera: 5
+        merge-timeout: 2h
         test-timeout-hours: 4 # '{test-timeout-hours}'

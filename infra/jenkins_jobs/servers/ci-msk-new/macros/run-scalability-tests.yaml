@@ -47,6 +47,7 @@
               "cameras_per_server={cameras-per-server}"
               "users_per_server={users-per-server}"
               "properties_per_camera={properties-per-camera}"
+              "merge_timeout={merge-timeout}"
               )
           echo > PARAMETERS.envvar
           echo "RUN_PARAMETERS=$(join_by ',' ${{PARAMETERS[@]}})" >> PARAMETERS.envvar
