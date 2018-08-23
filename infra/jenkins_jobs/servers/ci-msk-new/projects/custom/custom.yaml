@@ -127,7 +127,7 @@
               successfully rebuild some successful build.
             default-build-description: >-
               Manually triggered
-            platforms: linux-x64,windows-x64,mac,bpi
+            platforms: linux-x64,windows-x64,,windows-x86,mac,bpi
             customizations: default
             run-unittests: true
             use-nx-vms-commit: ''
