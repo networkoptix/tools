@@ -34,6 +34,27 @@
         echo '*   server-count: {server-count}'
         echo '****************************************************************************************************'
 
+    - extended-bash:
+        headers:
+          !include-raw-escape: includes/join_by.sh
+        script: |
+          set -ex
+
+          PARAMETERS=(
+              "use_lightweight_servers={use-lightweight-servers}"
+              "server_count={server-count}"
+              "storages_per_server={storages-per-server}"
+              "cameras_per_server={cameras-per-server}"
+              "users_per_server={users-per-server}"
+              "properties_per_camera={properties-per-camera}"
+              )
+          echo > PARAMETERS.envvar
+          echo "RUN_PARAMETERS=$(join_by ',' ${{PARAMETERS[@]}})" >> PARAMETERS.envvar
+          echo "TEST_PARAMETERS=scalability_test.$(join_by ',scalability_test.' ${{PARAMETERS[@]}})" >> PARAMETERS.envvar
+
+    - inject:
+        properties-file: 'PARAMETERS.envvar'
+
     - run-functional-tests:
         project: '{project}'
         branch: '{branch}'
@@ -48,8 +69,8 @@
         test-args: >-
           --run-name=scalability
           --tests-config-file={test-config}
-          --test-parameters=scalability_test.use_lightweight_servers={use-lightweight-servers},scalability_test.server_count={server-count}
-          --run-parameters=use_lightweight_servers={use-lightweight-servers},server_count={server-count}
+          --test-parameters=$TEST_PARAMETERS
+          --run-parameters=$RUN_PARAMETERS
         test-select-expr: ''
         test-list: 'tests/scalability_test.py'
         test-timeout-hours: '{test-timeout-hours}'

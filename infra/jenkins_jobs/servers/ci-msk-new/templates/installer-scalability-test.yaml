@@ -237,4 +237,8 @@
         test-config: "$WORKSPACE/test-config.yaml"
         use-lightweight-servers: '{use-lightweight-servers}'
         server-count: '{server-count}'
+        storages-per-server: 1
+        cameras-per-server: 20
+        users-per-server: 4
+        properties-per-camera: 5
         test-timeout-hours: 4 # '{test-timeout-hours}'
