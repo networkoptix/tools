@@ -388,15 +388,25 @@ class DbCaptureRepository(object):
         return outcome
 
     def add_artifact(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
+
+        def log_skipping(size_description, size):
+            log.warning(
+                'Skip artifact for run=%r: short_name=%r full_name=%r type=%r: %s %d exceeded limit %d',
+                run.path, short_name, full_name, artifact_type_rec.name, size_description, size, ARTIFACT_SIZE_LIMIT)
+
         if not data: return
+        if len(data) > ARTIFACT_SIZE_LIMIT:
+            log_skipping('raw size', len(data))
+            return
         if type(data) is unicode:
             data = data.encode('utf-8')
+            if len(data) > ARTIFACT_SIZE_LIMIT:
+                log_skipping('utf-8 encoded size', len(data))
+                return
         at = self._produce_artifact_type(artifact_type_rec)
         compressed_data = bz2.compress(data)
         if len(compressed_data) > ARTIFACT_SIZE_LIMIT:
-            log.warning(
-                'Skip artifact for run=%r: short_name=%r full_name=%r type=%r: compressed size %d exceeded limit %d',
-                run.path, short_name, full_name, artifact_type_rec.name, len(compressed_data), ARTIFACT_SIZE_LIMIT)
+            log_skipping('compressed size', len(compressed_data))
             return
         artifact = models.Artifact(
             type=at,
