@@ -51,7 +51,7 @@
           PLATFORM=all
     - timestamps
     - timeout:
-        timeout: 300 # min
+        timeout: 420 # min
         fail: true
         type: absolute
     - workspace-cleanup:
