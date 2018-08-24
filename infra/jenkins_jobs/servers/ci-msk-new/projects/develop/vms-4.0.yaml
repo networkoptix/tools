@@ -171,13 +171,26 @@
         - nightly:
             detailed-job-description: |-
               Run nightly functional test with schedule "{timer}".
-
-              It should not be triggered manually excluding debugging of infra problems
-              associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
             default-test-framework-branch: '{default-branch}'
             timer: 'H 23 * * 1-5'
+
+
+    - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
+        job-maintainers: vfedorov@networkoptix.com
+        tests:
+        - windows-self-tests
+        preset:
+        - nightly:
+            test-list: self_tests
+            test-select-expr: 'windows or smb'
+            detailed-job-description: |-
+              Run nightly windows self tests with schedule "{timer}".
+            default-build-description: >-
+              Nightly windows self tests
+            default-test-framework-branch: '{default-branch}'
+            timer: 'H 21 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.blinking-tests':
         timer: ''
