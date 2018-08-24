@@ -103,11 +103,13 @@ nx_check_args() # N "$@"
 # Copy the file(s) recursively, showing a progress.
 nx_rsync() # rsync_args...
 {
-    rsync -r --links --perms --human-readable --progress "$@"
+    # NOTE: --archive includes --group and --owner, which are not needed.
+    rsync -r --links --perms --times --human-readable --progress "$@"
 }
 
 # Log the args as if it were a command to be executed, using nx_echo, prefixed with "+", and in
 # color.
+# ATTENTION: Arguments with spaces are shown as is, without being enquoted.
 nx_log_command() # $@
 {
     nx_echo $(nx_dgreen)"+ $*"$(nx_nocolor)
@@ -373,6 +375,13 @@ nx_file_ext() # any-filename
 {
     local -r FILENAME=$(basename -- "$1")
     echo "${FILENAME##*.}" #< Remove prefix up to and including the last period.
+}
+
+nx_append_path() # new-path-components-via-colon
+{
+    local -r NEW_COMPONENTS="$1" && shift
+    nx_log_command "PATH=$NEW_COMPONENTS:\$PATH"
+    PATH=$NEW_COMPONENTS:$PATH
 }
 
 # Change directory verbously, but only if the current dir is not the desired one.

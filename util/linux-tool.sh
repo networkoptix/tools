@@ -17,7 +17,9 @@ nx_load_config "${RC=".linux-toolrc"}"
 : ${BUILD_DIR=""} #< If empty, will be detected based on the VMS_DIR name and the target.
 : ${BUILD_SUFFIX="-build"} #< Suffix to add to "nx_vms" dir to get the cmake build dir.
 : ${DEV=1} #< Whether to make a developer build: -DdeveloperBuild=ON|OFF.
+: ${VEGA_USER="$USER"}
 : ${VEGA_HOST="vega"} #< Recommented to add "<ip> vega" to /etc/hosts.
+: ${VEGA_DEVELOP_DIR="/home/$VEGA_USER/develop"}
 : ${VEGA_BACKGROUND_RRGGBB="300000"}
 if nx_is_cygwin
 then
@@ -63,13 +65,12 @@ Here <command> can be one of the following:
  apidoc-rdep # Run apidoctool tests, deploy from devtools to packages/any and upload via "rdep -u".
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
- kit-rdep # Upload $PACKAGES_DIR/any/nx_kit via "rdep -u".
 
  meta # Rebuild nx_metadata_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
  go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
- rsync # Syncronize current vms source dir to vega (first time via tar/scp, then via rsync).
+ rsync # Rsync current vms source dir to vega.
  start-s [args] # Start mediaserver with [args].
  stop-s # Stop mediaserver.
  start-c [args] # Start client-bin with [args].
@@ -102,7 +103,8 @@ EOF
 
 go_callback()
 {
-    nx_ssh_without_password "$USER" "$VEGA_HOST" "$USER@vega" "$VEGA_BACKGROUND_RRGGBB" "$@"
+    nx_ssh_without_password \
+        "$VEGA_USER" "$VEGA_HOST" "$VEGA_USER@vega" "$VEGA_BACKGROUND_RRGGBB" "$@"
 }
 
 # [out] TARGET
@@ -350,8 +352,7 @@ do_gen() # [cache] "$@"
     fi
     mkdir -p "$BUILD_DIR"
 
-    nx_pushd "$BUILD_DIR"
-    nx_log_command "cd \"$BUILD_DIR\""
+    nx_cd "$BUILD_DIR"
     case "$TARGET" in
         linux) local -r TARGET_ARG="";;
         windows) local -r TARGET_ARG="-Ax64 -Thost=x64";;
@@ -379,10 +380,6 @@ do_gen() # [cache] "$@"
         -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 \
         ${GENERATOR_ARG:+"$GENERATOR_ARG"} \
         $CUSTOMIZATION_ARG $TARGET_ARG $CONFIG_ARG $DISTRIB_ARG $DEV_ARG "$@"
-    local RESULT=$?
-
-    nx_popd
-    return $RESULT
 }
 
 do_build()
@@ -590,11 +587,10 @@ do_apidoc_rdep() # "$@"
     nx_echo
     cp "$JAR_DEV" "$JAR_PROD" || exit $?
 
-    nx_pushd "$PACKAGE_DIR"
+    cd "$PACKAGE_DIR" || nx_fail
     rdep -u || exit $?
     nx_echo
     nx_echo "SUCCESS: apidoctool tested and uploaded via rdep"
-    nx_popd
 }
 
 # [in] MSVC 0|1 Whether to use MSVC (cygwin only).
@@ -629,8 +625,7 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
     if nx_is_cygwin
     then
         local -r UT_EXE_PATTERN="nx_kit_*.exe"
-        nx_log_command "PATH=\"Release:\$PATH\""
-        PATH="Release:$PATH"
+        nx_append_path "Release"
     else
         local -r UT_EXE_PATTERN="nx_kit_*"
     fi
@@ -669,13 +664,11 @@ do_kit() # "$@"
     local KIT_BUILD_DIR="$TEMP_DIR/nx_kit-build"
     rm -rf "$KIT_BUILD_DIR"
     mkdir -p "$KIT_BUILD_DIR" || return $?
-    nx_pushd "$KIT_BUILD_DIR"
-    nx_log_command "cd $KIT_BUILD_DIR"
+    nx_cd "$KIT_BUILD_DIR"
 
     local KIT_SRC_DIR=$(nx_path "$VMS_DIR/$NX_KIT_DIR")
     build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
 
-    nx_popd
     if [[ $KEEP_BUILD_DIR = 0 ]]
     then
         rm -rf "$KIT_BUILD_DIR"
@@ -683,15 +676,7 @@ do_kit() # "$@"
     else
         nx_echo
         nx_echo "ATTENTION: Built at $KIT_BUILD_DIR"
-        #nx_echo
     fi
-
-    # Deploying to artifacts commented out - starting with vms_3.2, this artifact is not used.
-    #nx_verbose rm -r "$PACKAGES_DIR/any/nx_kit/src"
-    #nx_verbose cp -r "$KIT_SRC_DIR/src" "$PACKAGES_DIR/any/nx_kit/" || return $?
-    #nx_verbose cp -r "$KIT_SRC_DIR/nx_kit.cmake" "$PACKAGES_DIR/any/nx_kit/" || return $?
-    #nx_echo
-    #nx_echo "SUCCESS: $NX_KIT_DIR/src and nx_kit.cmake copied to packages/any/"
 }
 
 log_build_vars()
@@ -1383,12 +1368,6 @@ main()
         kit)
             do_kit "$@"
             ;;
-        kit-rdep)
-            nx_pushd "$PACKAGES_DIR/any/nx_kit"
-            rdep -u || exit $?
-            nx_echo "SUCCESS: nx_kit uploaded via rdep"
-            nx_popd
-            ;;
         meta)
             nx_verbose rm -rf "$BUILD_DIR/distrib"/*metadata_sdk*.zip
             nx_verbose rm -rf "$BUILD_DIR/nx_metadata_sdk"
@@ -1403,19 +1382,23 @@ main()
             nx_go_verbose "$@"
             ;;
         rsync)
-            nx_rsync "$VMS_DIR/" "$VEGA_HOST:$VMS_DIR/" #< ATTENTION: Leading slash is essential.
+            # ATTENTION: Trailing slashes are essential for rsync to work properly.
+            local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
+            local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
+            nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
+            nx_rsync --delete --exclude=".*" "$VMS_DIR/" "$VEGA_DIR"
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
             case "$TARGET" in
                 windows)
                     local -r QT_PATH="$QT_DIR/bin"
-                    nx_log_command "PATH=\"$QT_PATH:\$PATH\""
-                    PATH="$QT_PATH:$PATH"
+                    nx_append_path "$QT_PATH"
                     nx_verbose bin/mediaserver -e "$@"
                     ;;
                 linux)
-                    sudo chown root:root bin/root_tool && sudo chmod u+s bin/root_tool
+                    # root-tool support commented out.
+                    #sudo chown root:root bin/root_tool && sudo chmod u+s bin/root_tool
                     nx_verbose bin/mediaserver -e "$@"
                     ;;
                 *) nx_fail "Target [$TARGET] not supported yet.";;
@@ -1430,8 +1413,7 @@ main()
             case "$TARGET" in
                 windows)
                     local -r QT_PATH="$QT_DIR/bin"
-                    nx_log_command "PATH=\"$QT_PATH:\$PATH\""
-                    PATH="$QT_PATH:$PATH"
+                    nx_append_path "$QT_PATH"
                     nx_verbose "bin/Nx MetaVMS.exe" "$@"
                     ;;
                 linux)
