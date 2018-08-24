@@ -180,9 +180,9 @@
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
         job-maintainers: vfedorov@networkoptix.com
         tests:
-        - windows-self-tests
+        - functest
         preset:
-        - nightly:
+        - windows-self-tests-nightly:
             test-list: self_tests
             test-select-expr: 'windows or smb'
             detailed-job-description: |-
