@@ -71,6 +71,15 @@
           -DtargetDevice=windows-x64
           -T host=x64
 
+    - windows-x86:
+        <<: *windows_config
+        cmake_configure_args_platform: >-
+          -G 'Visual Studio 15 2017'
+          -Dbeta=ON
+          -DcodeSigning=OFF
+          -DwithClouds=OFF
+          -DwithPluginStubs=OFF
+
     # -- apple platform --
 
     - mac: &osx_config
