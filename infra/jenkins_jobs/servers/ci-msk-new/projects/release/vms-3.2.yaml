@@ -88,7 +88,6 @@
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
           -DwithClouds=OFF
-          -DwithPluginStubs=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -99,7 +98,6 @@
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
           -DwithClouds=OFF
-          -DwithPluginStubs=OFF
           -DwithTests=ON
 
     # -- apple platform --

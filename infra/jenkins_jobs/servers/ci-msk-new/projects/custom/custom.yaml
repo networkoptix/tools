@@ -67,7 +67,6 @@
           -Dbeta=ON
           -DcodeSigning=OFF
           -DwithClouds=OFF
-          -DwithPluginStubs=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -78,7 +77,6 @@
           -Dbeta=ON
           -DcodeSigning=OFF
           -DwithClouds=OFF
-          -DwithPluginStubs=OFF
 
     # -- apple platform --
 

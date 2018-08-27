@@ -76,7 +76,6 @@
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
           -DwithClouds=OFF
-          -DwithPluginStubs=OFF
           -DwithTests=ON
           -T host=x64
           -DcodeSigning=OFF
