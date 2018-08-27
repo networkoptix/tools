@@ -64,7 +64,6 @@
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DcodeSigning=OFF
-          -DwithClouds=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -73,7 +72,6 @@
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017'
           -DcodeSigning=OFF
-          -DwithClouds=OFF
 
     # -- apple platform --
 

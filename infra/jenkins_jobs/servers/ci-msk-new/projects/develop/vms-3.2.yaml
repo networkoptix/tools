@@ -75,7 +75,6 @@
           -DcodeSigning=OFF
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
-          -DwithClouds=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 

@@ -85,7 +85,6 @@
           -G 'Visual Studio 15 2017 Win64'
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
-          -DwithClouds=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -95,7 +94,6 @@
           -G 'Visual Studio 15 2017'
           -DaddQtPdb=ON
           -DtrustedTimestamping=OFF
-          -DwithClouds=OFF
           -DwithTests=ON
 
     # -- apple platform --
