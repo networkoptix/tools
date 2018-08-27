@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
  *     private static final class MyParams
  *         extends ParamsBase
  *     {
- *         public String stringParam() { return stringParam.toString(); }
- *         private final StringBuilder stringParam = regStringParam("stringParam",
+ *         public String myStringParam() { return myStringParam.toString(); }
+ *         private final StringBuilder myStringParam = regStringParam("myStringParam",
  *             "default value", "Description of this param.");
  *     }
  *
