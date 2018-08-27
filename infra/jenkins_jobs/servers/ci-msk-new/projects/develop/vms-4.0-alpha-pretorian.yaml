@@ -31,8 +31,7 @@
     - develop:
         junkshop_project_name: ci
         # Pipeline-specific cmake arguments
-        cmake_configure_args_pipeline: >-
-          -DCMAKE_BUILD_TYPE=Release
+        cmake_configure_args_pipeline: ''
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
