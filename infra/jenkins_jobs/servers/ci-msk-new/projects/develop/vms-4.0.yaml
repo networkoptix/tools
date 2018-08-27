@@ -24,7 +24,6 @@
       -Dbeta=TRUE
       -DdeveloperBuild=OFF
       -DcloudGroup=test
-      -DrdepSync=ON
 
     # SECTION. PIPELINE CONFIG
     # ============================================================
