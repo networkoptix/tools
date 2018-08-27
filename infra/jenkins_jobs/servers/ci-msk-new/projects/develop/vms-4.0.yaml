@@ -65,7 +65,6 @@
         installer-build-node: build-installer-windows
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
-          -Dbeta=ON
           -DcodeSigning=OFF
           -DwithClouds=OFF
           -DtargetDevice=windows-x64
@@ -78,7 +77,6 @@
         use-webadmin: false
         cmake_configure_args_platform: >-
           -G Ninja
-          -Dbeta=ON
           -DcodeSigning=OFF
         cmake_build_extra_args: >-
           -- -j 10
