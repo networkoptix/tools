@@ -91,23 +91,10 @@
         name: Run tests (tests are optional, only existing jobs are built)
         condition: COMPLETED # allow unstable
         projects:
-        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest' # TODO:
+        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$RUN_UNITTESTS").toBoolean()
-          predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
-            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
-            CLEAN_CLONE=$CLEAN_CLONE
-            CLEAN_BUILD=$CLEAN_BUILD
-            BUILD_IDENTITY=$BUILD_IDENTITY
-            BRANCH=$BRANCH
-            NX_VMS_COMMIT=$NX_VMS_COMMIT
-            RUNNER_URL=$RUNNER_URL
-
-        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.perftest' # TODO:
-          kill-phase-on: NEVER
           predefined-parameters: |
             REQUESTED_BY={tag_requested_by}
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
