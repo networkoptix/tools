@@ -20,10 +20,11 @@
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
+    # $CLOUD_GROUP comes from job parameters
     cmake_configure_args_global: >-
       -Dbeta=TRUE
       -DdeveloperBuild=OFF
-      -DcloudGroup=test
+      -DcloudGroup=$CLOUD_GROUP
 
     # SECTION. PIPELINE CONFIG
     # ============================================================

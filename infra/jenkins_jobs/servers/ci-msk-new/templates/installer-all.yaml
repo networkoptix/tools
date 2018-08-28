@@ -38,6 +38,8 @@
     - p_RUN_UNITTESTS:
         default: true
     - p_RUNNER_URL
+    - p_CLOUD_GROUP:
+        default: test
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -83,6 +85,7 @@
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
             RUNNER_URL=$RUNNER_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)

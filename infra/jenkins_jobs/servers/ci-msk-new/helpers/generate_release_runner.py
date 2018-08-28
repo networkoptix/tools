@@ -98,6 +98,8 @@ print '''#
     - p_CLEAN_BUILD:
         default: false
     - p_CLEAN_CLONE
+    - p_CLOUD_GROUP:
+        default: test
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -272,6 +274,7 @@ for platform in PLATFORMS_LIST:
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 '''
 print '''
     - multijob:

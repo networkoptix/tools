@@ -55,6 +55,8 @@
     - p_CLEAN_BUILD:
         default: false
     - p_CLEAN_CLONE
+    - p_CLOUD_GROUP:
+        default: test
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -216,6 +218,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_cn.all'
@@ -236,6 +239,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_zh_CN.all'
@@ -256,6 +260,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.cox.all'
@@ -276,6 +281,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog.all'
@@ -296,6 +302,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog_global.all'
@@ -316,6 +323,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.hanwha.all'
@@ -336,6 +344,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ipera.all'
@@ -356,6 +365,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ionetworks.all'
@@ -376,6 +386,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.nutech.all'
@@ -396,6 +407,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ras.all'
@@ -416,6 +428,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.senturian.all'
@@ -436,6 +449,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.systemk.all'
@@ -456,6 +470,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.tricom.all'
@@ -476,6 +491,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ust.all'
@@ -496,6 +512,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vista.all'
@@ -516,6 +533,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoblue.all'
@@ -536,6 +554,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoorange.all'
@@ -556,6 +575,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.all'
@@ -576,6 +596,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xcello.all'
@@ -596,6 +617,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.all'
@@ -616,6 +638,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_cn.all'
@@ -636,6 +659,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_zh_CN.all'
@@ -656,6 +680,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.cox.all'
@@ -676,6 +701,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog.all'
@@ -696,6 +722,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog_global.all'
@@ -716,6 +743,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.hanwha.all'
@@ -736,6 +764,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ipera.all'
@@ -756,6 +785,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ionetworks.all'
@@ -776,6 +806,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.nutech.all'
@@ -796,6 +827,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ras.all'
@@ -816,6 +848,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.senturian.all'
@@ -836,6 +869,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.systemk.all'
@@ -856,6 +890,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.tricom.all'
@@ -876,6 +911,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ust.all'
@@ -896,6 +932,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vista.all'
@@ -916,6 +953,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoblue.all'
@@ -936,6 +974,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoorange.all'
@@ -956,6 +995,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.metavms.all'
@@ -976,6 +1016,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xcello.all'
@@ -996,6 +1037,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default.all'
@@ -1016,6 +1058,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_cn.all'
@@ -1036,6 +1079,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_zh_CN.all'
@@ -1056,6 +1100,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.cox.all'
@@ -1076,6 +1121,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog.all'
@@ -1096,6 +1142,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog_global.all'
@@ -1116,6 +1163,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.hanwha.all'
@@ -1136,6 +1184,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ipera.all'
@@ -1156,6 +1205,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ionetworks.all'
@@ -1176,6 +1226,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.nutech.all'
@@ -1196,6 +1247,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ras.all'
@@ -1216,6 +1268,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.senturian.all'
@@ -1236,6 +1289,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.systemk.all'
@@ -1256,6 +1310,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.tricom.all'
@@ -1276,6 +1331,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ust.all'
@@ -1296,6 +1352,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vista.all'
@@ -1316,6 +1373,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoblue.all'
@@ -1336,6 +1394,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoorange.all'
@@ -1356,6 +1415,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.metavms.all'
@@ -1376,6 +1436,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.xcello.all'
@@ -1396,6 +1457,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default.all'
@@ -1416,6 +1478,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_cn.all'
@@ -1436,6 +1499,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_zh_CN.all'
@@ -1456,6 +1520,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.cox.all'
@@ -1476,6 +1541,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog.all'
@@ -1496,6 +1562,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog_global.all'
@@ -1516,6 +1583,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.hanwha.all'
@@ -1536,6 +1604,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ipera.all'
@@ -1556,6 +1625,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ionetworks.all'
@@ -1576,6 +1646,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.nutech.all'
@@ -1596,6 +1667,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ras.all'
@@ -1616,6 +1688,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.senturian.all'
@@ -1636,6 +1709,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.systemk.all'
@@ -1656,6 +1730,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.tricom.all'
@@ -1676,6 +1751,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ust.all'
@@ -1696,6 +1772,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vista.all'
@@ -1716,6 +1793,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoblue.all'
@@ -1736,6 +1814,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoorange.all'
@@ -1756,6 +1835,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.metavms.all'
@@ -1776,6 +1856,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.xcello.all'
@@ -1796,6 +1877,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default.all'
@@ -1816,6 +1898,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_cn.all'
@@ -1836,6 +1919,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_zh_CN.all'
@@ -1856,6 +1940,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.cox.all'
@@ -1876,6 +1961,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog.all'
@@ -1896,6 +1982,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog_global.all'
@@ -1916,6 +2003,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.hanwha.all'
@@ -1936,6 +2024,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ipera.all'
@@ -1956,6 +2045,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ionetworks.all'
@@ -1976,6 +2066,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.nutech.all'
@@ -1996,6 +2087,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ras.all'
@@ -2016,6 +2108,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.senturian.all'
@@ -2036,6 +2129,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.systemk.all'
@@ -2056,6 +2150,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.tricom.all'
@@ -2076,6 +2171,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ust.all'
@@ -2096,6 +2192,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vista.all'
@@ -2116,6 +2213,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoblue.all'
@@ -2136,6 +2234,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoorange.all'
@@ -2156,6 +2255,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.metavms.all'
@@ -2176,6 +2276,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.xcello.all'
@@ -2196,6 +2297,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.edge1.digitalwatchdog.all'
@@ -2216,6 +2318,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default.all'
@@ -2236,6 +2339,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_cn.all'
@@ -2256,6 +2360,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_zh_CN.all'
@@ -2276,6 +2381,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.cox.all'
@@ -2296,6 +2402,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog.all'
@@ -2316,6 +2423,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog_global.all'
@@ -2336,6 +2444,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.hanwha.all'
@@ -2356,6 +2465,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ipera.all'
@@ -2376,6 +2486,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ionetworks.all'
@@ -2396,6 +2507,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.nutech.all'
@@ -2416,6 +2528,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ras.all'
@@ -2436,6 +2549,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.senturian.all'
@@ -2456,6 +2570,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.systemk.all'
@@ -2476,6 +2591,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.tricom.all'
@@ -2496,6 +2612,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ust.all'
@@ -2516,6 +2633,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vista.all'
@@ -2536,6 +2654,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoblue.all'
@@ -2556,6 +2675,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoorange.all'
@@ -2576,6 +2696,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.metavms.all'
@@ -2596,6 +2717,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.xcello.all'
@@ -2616,6 +2738,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.all'
@@ -2636,6 +2759,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_cn.all'
@@ -2656,6 +2780,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_zh_CN.all'
@@ -2676,6 +2801,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.cox.all'
@@ -2696,6 +2822,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog.all'
@@ -2716,6 +2843,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog_global.all'
@@ -2736,6 +2864,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.hanwha.all'
@@ -2756,6 +2885,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ipera.all'
@@ -2776,6 +2906,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ionetworks.all'
@@ -2796,6 +2927,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.nutech.all'
@@ -2816,6 +2948,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ras.all'
@@ -2836,6 +2969,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.senturian.all'
@@ -2856,6 +2990,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.systemk.all'
@@ -2876,6 +3011,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.tricom.all'
@@ -2896,6 +3032,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ust.all'
@@ -2916,6 +3053,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vista.all'
@@ -2936,6 +3074,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoblue.all'
@@ -2956,6 +3095,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoorange.all'
@@ -2976,6 +3116,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.metavms.all'
@@ -2996,6 +3137,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.xcello.all'
@@ -3016,6 +3158,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default.all'
@@ -3036,6 +3179,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_cn.all'
@@ -3056,6 +3200,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_zh_CN.all'
@@ -3076,6 +3221,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.cox.all'
@@ -3096,6 +3242,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog.all'
@@ -3116,6 +3263,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog_global.all'
@@ -3136,6 +3284,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.hanwha.all'
@@ -3156,6 +3305,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ipera.all'
@@ -3176,6 +3326,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ionetworks.all'
@@ -3196,6 +3347,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.nutech.all'
@@ -3216,6 +3368,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ras.all'
@@ -3236,6 +3389,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.senturian.all'
@@ -3256,6 +3410,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.systemk.all'
@@ -3276,6 +3431,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.tricom.all'
@@ -3296,6 +3452,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ust.all'
@@ -3316,6 +3473,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vista.all'
@@ -3336,6 +3494,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoblue.all'
@@ -3356,6 +3515,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoorange.all'
@@ -3376,6 +3536,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.all'
@@ -3396,6 +3557,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xcello.all'
@@ -3416,6 +3578,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.all'
@@ -3436,6 +3599,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_cn.all'
@@ -3456,6 +3620,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_zh_CN.all'
@@ -3476,6 +3641,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.cox.all'
@@ -3496,6 +3662,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog.all'
@@ -3516,6 +3683,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog_global.all'
@@ -3536,6 +3704,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.hanwha.all'
@@ -3556,6 +3725,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ipera.all'
@@ -3576,6 +3746,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ionetworks.all'
@@ -3596,6 +3767,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.nutech.all'
@@ -3616,6 +3788,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ras.all'
@@ -3636,6 +3809,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.senturian.all'
@@ -3656,6 +3830,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.systemk.all'
@@ -3676,6 +3851,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.tricom.all'
@@ -3696,6 +3872,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ust.all'
@@ -3716,6 +3893,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vista.all'
@@ -3736,6 +3914,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoblue.all'
@@ -3756,6 +3935,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoorange.all'
@@ -3776,6 +3956,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.metavms.all'
@@ -3796,6 +3977,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xcello.all'
@@ -3816,6 +3998,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default.all'
@@ -3836,6 +4019,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_cn.all'
@@ -3856,6 +4040,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_zh_CN.all'
@@ -3876,6 +4061,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.cox.all'
@@ -3896,6 +4082,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog.all'
@@ -3916,6 +4103,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog_global.all'
@@ -3936,6 +4124,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.hanwha.all'
@@ -3956,6 +4145,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ipera.all'
@@ -3976,6 +4166,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ionetworks.all'
@@ -3996,6 +4187,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.nutech.all'
@@ -4016,6 +4208,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ras.all'
@@ -4036,6 +4229,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.senturian.all'
@@ -4056,6 +4250,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.systemk.all'
@@ -4076,6 +4271,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.tricom.all'
@@ -4096,6 +4292,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ust.all'
@@ -4116,6 +4313,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vista.all'
@@ -4136,6 +4334,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoblue.all'
@@ -4156,6 +4355,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoorange.all'
@@ -4176,6 +4376,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.metavms.all'
@@ -4196,6 +4397,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.xcello.all'
@@ -4216,6 +4418,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default.all'
@@ -4236,6 +4439,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_cn.all'
@@ -4256,6 +4460,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_zh_CN.all'
@@ -4276,6 +4481,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.cox.all'
@@ -4296,6 +4502,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog.all'
@@ -4316,6 +4523,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog_global.all'
@@ -4336,6 +4544,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.hanwha.all'
@@ -4356,6 +4565,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ipera.all'
@@ -4376,6 +4586,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ionetworks.all'
@@ -4396,6 +4607,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.nutech.all'
@@ -4416,6 +4628,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ras.all'
@@ -4436,6 +4649,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.senturian.all'
@@ -4456,6 +4670,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.systemk.all'
@@ -4476,6 +4691,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.tricom.all'
@@ -4496,6 +4712,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ust.all'
@@ -4516,6 +4733,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vista.all'
@@ -4536,6 +4754,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoblue.all'
@@ -4556,6 +4775,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoorange.all'
@@ -4576,6 +4796,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.metavms.all'
@@ -4596,6 +4817,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.xcello.all'
@@ -4616,6 +4838,7 @@
             CLEAN_CLONE=$CLEAN_CLONE
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
+            CLOUD_GROUP=$CLOUD_GROUP
 
 
     - multijob:

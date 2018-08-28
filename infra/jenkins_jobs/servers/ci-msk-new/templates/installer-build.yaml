@@ -136,6 +136,8 @@
         default: '{default-branch}'
     - p_NX_VMS_COMMIT:
         default: '{default-branch}'
+    - p_CLOUD_GROUP:
+        default: test
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
     - p_RUNNER_URL

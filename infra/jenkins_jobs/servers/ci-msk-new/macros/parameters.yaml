@@ -302,6 +302,18 @@
         name: CUSTOM_CMAKE_PARAMETERS
         default: '{default}'
 
+- parameter:
+    name: p_CLOUD_GROUP
+    parameters:
+    - extended-choice:
+        name: CLOUD_GROUP
+        type: 'single-select'
+        value: test,prod
+        default-value: '{default}'
+        visible-items: 2
+        description: >-
+          Cloud group
+
 # Functional tests parameters
 
 - parameter:
