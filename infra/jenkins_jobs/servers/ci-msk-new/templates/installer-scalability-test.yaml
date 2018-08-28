@@ -10,8 +10,6 @@
 
     workdir: work
 
-    test-config: '../config/scalability-test.yaml.inc'
-
     properties:
     - authorization-{pipeline}-system
     - heavy-job:
@@ -178,7 +176,6 @@
                   dir: /home/jenkins/scalability
                   server_bind_address: 192.168.20.4
                   server_port_base: 7001
-
 
     - run-scalability-tests:
         use-lightweight-servers: 'true'  # note: string type
