@@ -37,6 +37,7 @@
   - syslinux
   # ansible module `iptables` requirements
   - iptables
+  - iptables-persistent
 
 - name: Set Kernel core pattern for system
   lineinfile:
@@ -75,7 +76,8 @@
     chain: INPUT
     in_interface: lo
     jump: ACCEPT
-  register: allow_loopback_rule
+  notify:
+    - save ip tables
 
 - name: Firewall rule - allow established connections
   iptables:
@@ -83,23 +85,27 @@
     ctstate: ESTABLISHED,RELATED
     jump: ACCEPT
   become: true
-  register: allow_established_rule
+  notify:
+    - save ip tables
 
 - name: Firewall rule - allow ICMP
   iptables:
     chain: INPUT
     jump: ACCEPT
     protocol: icmp
-  register: allow_icmp_rule
+  notify:
+    - save ip tables
 
-- name: Firewall rule - allow port 22/SSH traffic
+- name: Firewall rule - allow tcp ports
   iptables:
     chain: INPUT
-    destination_port: 22
+    destination_port: "{{ item }}"
     jump: ACCEPT
     protocol: tcp
   become: true
-  register: allow_ssh_rule
+  with_items: "{{ allowed_tcp_ports }}"
+  notify:
+    - save ip tables
 
 - name: Firewall rule - allow internal networks traffic
   iptables:
@@ -108,25 +114,16 @@
     jump: ACCEPT
   become: yes
   with_items: "{{ allowed_ips }}"
-  register: allow_network_rule
+  notify:
+    - save ip tables
 
 - name: Firewall rule - drop any traffic without rule
   iptables:
     chain: INPUT
     jump: DROP
   become: true
-  register: drop_rule
-
-- name: Save iptables rules
-  command: iptables-save
-  become: true
-  when: >-
-    allow_loopback_rule is changed or
-    allow_established_rule is changed or
-    allow_icmp_rule is changed or
-    allow_ssh_rule is changed or
-    allow_network_rule is changed or
-    drop_rule is changed
+  notify:
+    - save ip tables
 
 - name: Set limits for user
   lineinfile:
