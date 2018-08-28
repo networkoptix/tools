@@ -44,7 +44,7 @@
           USERS_PER_SERVER=4
           PROPERTIES_PER_CAMERA=5
           MERGE_TIMEOUT=2h
-          TEST_TIMEOUT=14400 # 4hr
+          TEST_TIMEOUT="$((4 * 60 * 60))" # 4hr
 
           cd nx_vms/func_tests
 

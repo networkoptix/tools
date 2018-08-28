@@ -181,7 +181,7 @@
           cd nx_vms/func_tests
 
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
-            test_timeout=14400 # 4hr
+            test_timeout="$((4 * 60 * 60))" # 4hr
             pytest \
               --work-dir=$WORK_DIR \
               --bin-dir=$BIN_DIR \
