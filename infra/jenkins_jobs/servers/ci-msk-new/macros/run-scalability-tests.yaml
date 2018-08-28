@@ -1,13 +1,10 @@
 - builder:
     name: run-scalability-tests
     # Required template variables:
-    #   test-select-expr (argument for -k, if not empty)
-    #   test-list (space-delimited; empty means run all tests)
-    #   test-timeout-hours
+    #   use-lightweight-servers
+    #   server-count
     #
     # Required environment variables:
-    #   JUNK_SHOP_CAPTURE_DB (user:password@host[:port])
-    #   AUTOTEST_EMAIL_PASSWORD
     #   JUNKSHOP_PROJECT_NAME
     #   BIN_DIR
     #   WORK_DIR
@@ -15,6 +12,8 @@
     #   BRANCH
     #   BUILD_IDENTITY
     #   CUSTOMIZATION
+    #   JUNK_SHOP_DB_CREDENTIALS
+    #   JUNKSHOP_DB_HOST
 
     builders:
     - shell: |
@@ -25,91 +24,74 @@
         echo '****************************************************************************************************'
         set -ex
 
-        # https://stackoverflow.com/questions/1527049/join-elements-of-an-array
-        function join_by {{
-          local d=$1
-          shift
-          echo -n "$1"
-          shift
-          printf "%s" "${{@/#/$d}}"
-        }}
-
         test -d "$BIN_DIR"
         mkdir -p "$WORK_DIR"
 
-        # TODO: convert to EXTRA_OPTIONS and test-list and merge w/ functests
-        # to merge:
-        # --tests-config-file=$WORKSPACE/test-config.yaml \
-        # --test-parameters=$TEST_PARAMETERS \
-        # --run-parameters=$RUN_PARAMETERS \
-        # tests/scalability_test.py
-
-        PARAMETERS=(
-          "use_lightweight_servers={use-lightweight-servers}"
-          "server_count={server-count}"
-          "storages_per_server={storages-per-server}"
-          "cameras_per_server={cameras-per-server}"
-          "users_per_server={users-per-server}"
-          "properties_per_camera={properties-per-camera}"
-          "merge_timeout={merge-timeout}"
-        )
-        RUN_PARAMETERS="$(join_by ',' ${{PARAMETERS[@]}})"
-        TEST_PARAMETERS="scalability_test.$(join_by ',scalability_test.' ${{PARAMETERS[@]}})"
-
-        VM_PORT_BASE=20000  # base for REST API ports forwarded from vm to host
-        VM_PORT_RANGE=100  # how many forwarded ports one functional tests run may require, max
-        VM_PORT=$(($VM_PORT_BASE + $EXECUTOR_NUMBER * $VM_PORT_RANGE))
-        VM_NAME_PREFIX="funtest-$EXECUTOR_NUMBER-"
+        if [ ! -d venv ]; then
+          virtualenv --system-site-packages venv
+        fi
 
         source venv/bin/activate
+          pip install --upgrade pip setuptools wheel
+          pip install --upgrade -r devtools/ci/junk_shop/requirements.txt
+          pip install --upgrade -r nx_vms/func_tests/requirements.txt
 
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
           export PYTEST_PLUGINS=junk_shop.pytest_plugin
 
-          : ${{JUNK_SHOP_CAPTURE_DB:?}}  # reporting DB to be used by tests
-          : ${{AUTOTEST_EMAIL_PASSWORD:?}}  # password for cloud accont
+          STORAGES_PER_SERVER=1
+          CAMERAS_PER_SERVER=20
+          USERS_PER_SERVER=4
+          PROPERTIES_PER_CAMERA=5
+          MERGE_TIMEOUT=2h
+          TEST_TIMEOUT=14400 # 4hr
 
           cd nx_vms/func_tests
 
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
-
-            if [[ "{test-select-expr}" != "" ]]; then
-              EXTRA_OPTIONS="-k \"{test-select-expr}\""
-            else
-              EXTRA_OPTIONS=""
-            fi
-
             pytest \
               --work-dir=$WORK_DIR \
               --bin-dir=$BIN_DIR \
               --mediaserver-installers-dir=$WORKSPACE/dist \
               --mediaserver-dist-path="$(echo $WORKSPACE/dist/*-server-*.deb)" \
               --customization=$CUSTOMIZATION \
-              --cloud-group=$CLOUD_GROUP \
-              --timeout=$(({test-timeout-hours} * 60*60)) \
-              --capture-db=$JUNK_SHOP_CAPTURE_DB \
-              --build-parameters=project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=linux-x64,customization=$CUSTOMIZATION \
-              --vm-port-base=$VM_PORT \
-              --vm-name-prefix=$VM_NAME_PREFIX \
+              --cloud-group=test \
+              --timeout=$TEST_TIMEOUT \
+              --capture-db=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST \
+              --build-parameters="\
+        project=$JUNKSHOP_PROJECT_NAME,\
+        branch=$BRANCH,\
+        build_num=$BUILD_IDENTITY,\
+        platform=linux-x64,\
+        customization=$CUSTOMIZATION" \
+              --vm-port-base=$((20000 + $EXECUTOR_NUMBER * 100)) \
+              --vm-name-prefix=funtest-$EXECUTOR_NUMBER- \
               --slot=$EXECUTOR_NUMBER \
               --reinstall \
               -v \
               --run-name=scalability \
               --tests-config-file=$WORKSPACE/test-config.yaml \
-              --test-parameters=$TEST_PARAMETERS \
-              --run-parameters=$RUN_PARAMETERS \
+              --test-parameters="\
+        scalability_test.use_lightweight_servers={use-lightweight-servers},\
+        scalability_test.server_count={server-count},\
+        scalability_test.storages_per_server=$STORAGES_PER_SERVER,\
+        scalability_test.cameras_per_server=$CAMERAS_PER_SERVER,\
+        scalability_test.users_per_server=$USERS_PER_SERVER,\
+        scalability_test.properties_per_camera=$PROPERTIES_PER_CAMERA,\
+        scalability_test.merge_timeout=$MERGE_TIMEOUT" \
+              --run-parameters="\
+        use_lightweight_servers={use-lightweight-servers},\
+        server_count={server-count},\
+        storages_per_server=$STORAGES_PER_SERVER,\
+        cameras_per_server=$CAMERAS_PER_SERVER,\
+        users_per_server=$USERS_PER_SERVER,\
+        properties_per_camera=$PROPERTIES_PER_CAMERA,\
+        merge_timeout=$MERGE_TIMEOUT" \
               tests/scalability_test.py
 
 - builder:
     name: scalability-tests-block
     builders:
     - run-scalability-tests:
-        test-select-expr: ''
         use-lightweight-servers: '{use-lightweight-servers}'
         server-count: '{server-count}'
-        storages-per-server: 1
-        cameras-per-server: 20
-        users-per-server: 4
-        properties-per-camera: 5
-        merge-timeout: 2h
-        test-timeout-hours: 4 # '{test-timeout-hours}'

@@ -113,29 +113,18 @@
 
     - kill-hanged-functests
 
-    - folder-delete-operation:
-        folder-path: 'build'
-    - folder-delete-operation:
-        folder-path: 'dist'
-    - folder-create-operation:
-        folder-path: 'dist'
-
-    - folder-delete-operation:
-        folder-path: '{workdir}'
-    - folder-create-operation:
-        folder-path: '{workdir}'
+    - shell: |
+        #!/bin/bash
+        set -ex
+        for dir in "build" "dist" "{workdir}" ; do
+          rm -rf "$dir"
+          mkdir -p "$dir"
+        done
 
     - inject:
         properties-content: |
-          JUNK_SHOP_CAPTURE_DB=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
           BIN_DIR=$WORKSPACE/bin
           WORK_DIR=$WORKSPACE/{workdir}
-          CLOUD_GROUP=test
-
-    - init-venv:
-        requirements-files: >-
-          devtools/ci/junk_shop/requirements.txt
-          nx_vms/func_tests/requirements.txt
 
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
@@ -169,40 +158,60 @@
 
     - file-create-operation:
         file-name: test-config.yaml
-        file-content: !include-raw: '{test-config}'
+        file-content: |
+          tests:
+            scalability_test:
+              merge_timeout: 1h
+              host_list:
+                - name: kappa
+                  address: 192.168.13.8
+                  username: jenkins
+                  key_path: /home/jenkins/.ssh/id_rsa
+                  dir: /home/jenkins/scalability
+                  server_bind_address: 192.168.20.3
+                  server_port_base: 7001
+                  lws_port_base: 8001
+                - name: sigma
+                  address: 192.168.13.9
+                  username: jenkins
+                  key_path: /home/jenkins/.ssh/id_rsa
+                  dir: /home/jenkins/scalability
+                  server_bind_address: 192.168.20.4
+                  server_port_base: 7001
 
-    - scalability-tests-block:
+
+    - run-scalability-tests:
         use-lightweight-servers: 'true'  # note: string type
         server-count: 50
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'true'  # note: string type
         server-count: 100
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'true'  # note: string type
         server-count: 150
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'true'  # note: string type
         server-count: 200
 
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 20
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 40
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 60
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 80
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 100
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 120
-    - scalability-tests-block:
+    - run-scalability-tests:
         use-lightweight-servers: 'false'  # note: string type
         server-count: 140
 
