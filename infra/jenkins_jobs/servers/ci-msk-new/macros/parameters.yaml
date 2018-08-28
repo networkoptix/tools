@@ -295,6 +295,12 @@
     - string:
         name: JUNKSHOP_DB_HOST
 
+- parameter:
+    name: p_CUSTOM_CMAKE_PARAMETERS
+    parameters:
+    - string:
+        name: CUSTOM_CMAKE_PARAMETERS
+        default: '{default}'
 
 # Functional tests parameters
 

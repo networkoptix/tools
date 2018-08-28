@@ -38,6 +38,8 @@
     - p_RUN_UNITTESTS:
         default: true
     - p_RUNNER_URL
+    - p_CUSTOM_CMAKE_PARAMETERS:
+        default: ''
 
     wrappers:
     - timestamps
@@ -79,6 +81,7 @@
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
             RUNNER_URL=$RUNNER_URL
 
     - multijob:

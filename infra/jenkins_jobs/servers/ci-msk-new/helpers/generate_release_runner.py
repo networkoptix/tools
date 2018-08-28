@@ -98,6 +98,8 @@ print '''#
     - p_CLEAN_BUILD:
         default: false
     - p_CLEAN_CLONE
+    - p_CUSTOM_CMAKE_PARAMETERS:
+        default: ''
 
     wrappers:
     # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
@@ -264,6 +266,7 @@ for platform in PLATFORMS_LIST:
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
+            CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE

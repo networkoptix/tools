@@ -126,6 +126,9 @@
         default: '{use-build-identity}'
     - p_USE_NX_VMS_COMMIT:
         default: '{use-nx-vms-commit}'
+    - p_CUSTOM_CMAKE_PARAMETERS:
+        default: ''
+
 
     triggers:
     - timed: "{timer}"
@@ -245,6 +248,7 @@
           BRANCH=$BRANCH
           USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
           USE_BUILD_IDENTITY=$BUILD_IDENTITY
+          CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
           CLEAN_WORKSPACE=$CLEAN_WORKSPACE
           CLEAN_BUILD=$CLEAN_BUILD
         block: false # !! don't wait
