@@ -9,3 +9,4 @@ pyyaml
 cached-property
 subprocess32==3.5.2
 Jinja2==2.10
+futures

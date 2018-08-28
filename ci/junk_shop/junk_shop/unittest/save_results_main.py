@@ -34,8 +34,8 @@ def parse_and_save_results_to_db(work_dir, repository, root_name=DEFAULT_UNIT_TE
 
 def produce_test_record(work_dir, test_name):
     test_dir_base = work_dir.joinpath(test_name)
-    test_info = TestInfo.load_from_file(test_dir_base.with_suffix('.yaml'))
-    output_file_path = test_dir_base.with_suffix('.output')
+    test_info = TestInfo.load_from_file(test_dir_base.with_suffix(test_dir_base.suffix + '.yaml'))
+    output_file_path = test_dir_base.with_suffix(test_dir_base.suffix + '.output')
     killed_by_signal = test_info.exit_code < 0
     is_aborted = test_info.timed_out or killed_by_signal
     test_results = GTestOutputParser.run(test_name, output_file_path, is_aborted)
