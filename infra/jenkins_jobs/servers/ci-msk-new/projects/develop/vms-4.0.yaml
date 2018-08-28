@@ -125,7 +125,7 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
             clean-workspace: true
-            timer: '4 0 * * 1-5'
+            timer: '' # temp. isabled, was '4 0 * * 1-5'
         - custom:
             detailed-job-description: |-
               This trigger serves for custom builds.
