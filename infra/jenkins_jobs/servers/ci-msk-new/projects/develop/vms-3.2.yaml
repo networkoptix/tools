@@ -210,6 +210,9 @@
     - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
         build-watchers: vfedorov@networkoptix.com
+    - '{pipeline}.{version}.{project}.distribution.{customization}.scaletest':
+        customization: default
+        build-watchers: vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com

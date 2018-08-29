@@ -1,6 +1,7 @@
 - job-template:
     # TODO: rename properly
     name: '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test'
+    project-type: multijob
     description: |
       Run scalability tests for {customization} for {version}.
     node: runner
