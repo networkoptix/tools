@@ -1,5 +1,10 @@
 prometheus_web_external_url: "http://{{ ansible_ssh_host }}:9090"
 
+prometheus_global:
+  scrape_interval: 10s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
 prometheus_alertmanager_config:
   - scheme: http
     static_configs:
@@ -59,7 +64,7 @@ prometheus_environment_label: "Moscow"
 prometheus_alert_rules:
   - alert: InstanceDown
     expr: "up == 0"
-    for: 5m
+    for: 10m
     labels:
       severity: critical
       environment: "{{ prometheus_environment_label }}"
