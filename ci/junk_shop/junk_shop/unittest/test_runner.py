@@ -1,64 +1,13 @@
 import logging
 import sys
-import subprocess
 import concurrent.futures
-import time
 
 from ..utils import datetime_local_now, timedelta_to_str
 from .platform import create_platform
 from .test_info import RunInfo
-from .test_process import SimpleTestProcess, GoogleTestProcess
+from .test_process import GTestProcess, CTestProcess
 
 log = logging.getLogger(__name__)
-
-
-class SimpleTestBinary(object):
-
-    @classmethod
-    def is_test_suite(cls, executable_path):
-        return True
-
-    def get_test_processes(self, platform, config_vars, work_dir, test_name, executable_path):
-        return [SimpleTestProcess(
-            platform, config_vars, work_dir, test_name, executable_path)]
-
-
-class GoogleTestBinary(object):
-
-    @classmethod
-    def is_test_suite(cls, executable_path):
-        try:
-            output = subprocess.check_output(
-                [str(executable_path), '--help'],
-                stderr=subprocess.STDOUT,
-                universal_newlines=True)
-        except (subprocess.CalledProcessError, OSError):
-            return False
-        else:
-            return '--gtest_list_tests' in output
-
-    def get_test_processes(self, platform, config_vars, work_dir, test_name, executable_path):
-        output = subprocess.check_output([
-            str(executable_path),
-            '--gtest_list_tests',
-            '--gtest_filter=-NxCritical.All3'],
-            stderr=subprocess.STDOUT, universal_newlines=True)
-
-        def strip_comment(x):
-            comment_start = x.find('#')
-            if comment_start != -1:
-                x = x[:comment_start]
-            return x
-
-        for line in output.splitlines():
-            has_indent = line.startswith(' ')
-            if not has_indent and '.' in line:
-                test_suite = strip_comment(line).strip()
-            elif has_indent:
-                test_case_name = test_suite + strip_comment(line).strip()
-                yield GoogleTestProcess(
-                        platform, config_vars, work_dir, test_name,
-                        test_case_name.replace('/', '_'), executable_path)
 
 
 class TestRunner(object):
@@ -78,11 +27,50 @@ class TestRunner(object):
         self._prepare_test_env()
 
     def _prepare_test_env(self):
-        self._run_pre_checks()
         config_vars = self._read_current_config()
         self._clean_core_files()
+        self._create_nx_ini_file()
         self._collect_test_processes(config_vars)
         self._run_info = RunInfo([str(test_process) for test_process in self._processes])
+        self._run_pre_checks()
+
+    def _read_current_config(self):
+        assert self._config_path.is_file(), 'Current config file is required but is missing: %s' % self._config_path
+        config_vars = {}
+        execfile(str(self._config_path), config_vars)
+        return config_vars
+
+    def _clean_core_files(self):
+        for path in self._work_dir.rglob('*.core.*'):
+            log.info('Removing old core file %s', path)
+            path.unlink()
+
+    def _create_nx_ini_file(self):
+        """Create nx_utils.ini file. For more details, please see:
+            - https://networkoptix.atlassian.net/browse/CI-248
+            - https://networkoptix.atlassian.net/wiki/spaces/SD/pages/83895081/Experimenting+and+debugging+.ini+files"""
+        nx_ini_file = self._work_dir.joinpath('nx_utils.ini')
+        nx_ini_file.open('w').writelines(
+            [u'assertCrash=1\n', u'assertHeavyCondition=1'])
+
+    def _collect_test_processes(self, config_vars):
+        env = self._platform.env_with_library_path(config_vars)
+        # Setup NX_INI_DIR
+        # https://networkoptix.atlassian.net/wiki/spaces/SD/pages/83895081/Experimenting+and+debugging+.ini+files
+        env['NX_INI_DIR'] = str(self._work_dir)
+        for binary_name in self._binary_list:
+            test_name = self._binary_to_test_name(binary_name)
+            executable_path = self._bin_dir / binary_name
+            find_test = False
+            for test_binary_cls in [GTestProcess, CTestProcess]:
+                if test_binary_cls.is_test_suite(executable_path):
+                    self._processes += list(
+                        test_binary_cls.get_test_processes(
+                            self._platform, env, self._work_dir, test_name, executable_path))
+                    find_test = True
+                    break
+            if not find_test:
+                log.warning('Test executable file %s is not found', executable_path)
 
     def _run_pre_checks(self):
         error_list = self._platform.do_unittests_pre_checks()
@@ -91,28 +79,6 @@ class TestRunner(object):
         for error in error_list:
             log.warning('Environment configuration error: %s', error)
         self._run_info.errors += error_list
-
-    def _clean_core_files(self):
-        for path in self._work_dir.rglob('*.core.*'):
-            log.info('Removing old core file %s', path)
-            path.unlink()
-
-    def _collect_test_processes(self, config_vars):
-        for binary_name in self._binary_list:
-            test_name = self._binary_to_test_name(binary_name)
-            executable_path = self._bin_dir / binary_name
-            for test_binary_cls in [GoogleTestBinary, SimpleTestBinary]:
-                if test_binary_cls.is_test_suite(executable_path):
-                    self._processes += list(
-                        test_binary_cls().get_test_processes(
-                            self._platform, config_vars, self._work_dir, test_name, executable_path))
-                    break
-
-    def _read_current_config(self):
-        assert self._config_path.is_file(), 'Current config file is required but is missing: %s' % self._config_path
-        config_vars = {}
-        execfile(str(self._config_path), config_vars)
-        return config_vars
 
     def run(self):
         self._run_info.started_at = datetime_local_now()
@@ -132,7 +98,6 @@ class TestRunner(object):
                     # Wait test finished or timed out
                     future.result(timeout=self._test_timeout.seconds)
                 except concurrent.futures.TimeoutError:
-                    if not process.is_finished():
                         process.abort()
                 finally:
                     process.process_core_files()
