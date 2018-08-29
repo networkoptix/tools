@@ -1386,7 +1386,7 @@ main()
             local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
-            nx_rsync --delete --exclude=".*" "$VMS_DIR/" "$VEGA_DIR"
+            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" "$VMS_DIR/" "$VEGA_DIR"
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
