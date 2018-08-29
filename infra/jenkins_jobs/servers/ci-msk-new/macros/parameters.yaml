@@ -314,6 +314,25 @@
         description: >-
           Cloud group
 
+- parameter:
+    name: p_HARDWARE_SIGNING
+    parameters:
+    - extended-choice:
+        name: HARDWARE_SIGNING
+        type: 'single-select'
+        value: ON,OFF
+        default-value: '{default}'
+        visible-items: 2
+
+- parameter:
+    name: p_TRUSTED_TIMESTAMPING
+    parameters:
+    - extended-choice:
+        name: TRUSTED_TIMESTAMPING
+        type: 'single-select'
+        value: ON,OFF
+        default-value: '{default}'
+        visible-items: 2
 # Functional tests parameters
 
 - parameter:

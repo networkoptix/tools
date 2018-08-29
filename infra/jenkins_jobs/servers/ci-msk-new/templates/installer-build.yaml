@@ -138,6 +138,10 @@
         default: '{default-branch}'
     - p_CLOUD_GROUP:
         default: test
+    - p_HARDWARE_SIGNING:
+        default: OFF
+    - p_TRUSTED_TIMESTAMPING:
+        default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
     - p_RUNNER_URL

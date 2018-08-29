@@ -100,6 +100,10 @@ print '''#
     - p_CLEAN_CLONE
     - p_CLOUD_GROUP:
         default: test
+    - p_HARDWARE_SIGNING:
+        default: OFF
+    - p_TRUSTED_TIMESTAMPING:
+        default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -275,6 +279,8 @@ for platform in PLATFORMS_LIST:
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 '''
 print '''
     - multijob:

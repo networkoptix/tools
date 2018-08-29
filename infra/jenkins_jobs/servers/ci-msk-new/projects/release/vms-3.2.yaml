@@ -83,7 +83,8 @@
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DaddQtPdb=ON
-          -DtrustedTimestamping=OFF
+          -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
+          -DhardwareSigning=$HARDWARE_SIGNING
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -92,7 +93,8 @@
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017'
           -DaddQtPdb=ON
-          -DtrustedTimestamping=OFF
+          -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
+          -DhardwareSigning=$HARDWARE_SIGNING
           -DwithTests=ON
 
     # -- apple platform --

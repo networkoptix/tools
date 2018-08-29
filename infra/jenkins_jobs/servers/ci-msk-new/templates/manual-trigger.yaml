@@ -128,6 +128,10 @@
         default: '{use-nx-vms-commit}'
     - p_CLOUD_GROUP:
         default: test
+    - p_HARDWARE_SIGNING:
+        default: OFF
+    - p_TRUSTED_TIMESTAMPING:
+        default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -254,6 +258,8 @@
           CLEAN_WORKSPACE=$CLEAN_WORKSPACE
           CLEAN_BUILD=$CLEAN_BUILD
           CLOUD_GROUP=$CLOUD_GROUP
+          HARDWARE_SIGNING=$HARDWARE_SIGNING
+          TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
         block: false # !! don't wait
         block-thresholds:
           failure-threshold: FAILURE

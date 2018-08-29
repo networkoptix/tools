@@ -57,6 +57,10 @@
     - p_CLEAN_CLONE
     - p_CLOUD_GROUP:
         default: test
+    - p_HARDWARE_SIGNING:
+        default: OFF
+    - p_TRUSTED_TIMESTAMPING:
+        default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -219,6 +223,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_cn.all'
@@ -240,6 +246,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_zh_CN.all'
@@ -261,6 +269,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.cox.all'
@@ -282,6 +292,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog.all'
@@ -303,6 +315,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog_global.all'
@@ -324,6 +338,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.hanwha.all'
@@ -345,6 +361,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ipera.all'
@@ -366,6 +384,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ionetworks.all'
@@ -387,6 +407,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.nutech.all'
@@ -408,6 +430,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ras.all'
@@ -429,6 +453,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.senturian.all'
@@ -450,6 +476,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.systemk.all'
@@ -471,6 +499,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.tricom.all'
@@ -492,6 +522,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ust.all'
@@ -513,6 +545,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vista.all'
@@ -534,6 +568,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoblue.all'
@@ -555,6 +591,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoorange.all'
@@ -576,6 +614,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.all'
@@ -597,6 +637,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xcello.all'
@@ -618,6 +660,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.all'
@@ -639,6 +683,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_cn.all'
@@ -660,6 +706,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_zh_CN.all'
@@ -681,6 +729,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.cox.all'
@@ -702,6 +752,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog.all'
@@ -723,6 +775,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog_global.all'
@@ -744,6 +798,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.hanwha.all'
@@ -765,6 +821,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ipera.all'
@@ -786,6 +844,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ionetworks.all'
@@ -807,6 +867,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.nutech.all'
@@ -828,6 +890,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ras.all'
@@ -849,6 +913,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.senturian.all'
@@ -870,6 +936,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.systemk.all'
@@ -891,6 +959,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.tricom.all'
@@ -912,6 +982,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ust.all'
@@ -933,6 +1005,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vista.all'
@@ -954,6 +1028,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoblue.all'
@@ -975,6 +1051,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoorange.all'
@@ -996,6 +1074,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.metavms.all'
@@ -1017,6 +1097,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xcello.all'
@@ -1038,6 +1120,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default.all'
@@ -1059,6 +1143,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_cn.all'
@@ -1080,6 +1166,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_zh_CN.all'
@@ -1101,6 +1189,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.cox.all'
@@ -1122,6 +1212,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog.all'
@@ -1143,6 +1235,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog_global.all'
@@ -1164,6 +1258,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.hanwha.all'
@@ -1185,6 +1281,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ipera.all'
@@ -1206,6 +1304,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ionetworks.all'
@@ -1227,6 +1327,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.nutech.all'
@@ -1248,6 +1350,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ras.all'
@@ -1269,6 +1373,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.senturian.all'
@@ -1290,6 +1396,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.systemk.all'
@@ -1311,6 +1419,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.tricom.all'
@@ -1332,6 +1442,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.ust.all'
@@ -1353,6 +1465,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vista.all'
@@ -1374,6 +1488,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoblue.all'
@@ -1395,6 +1511,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoorange.all'
@@ -1416,6 +1534,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.metavms.all'
@@ -1437,6 +1557,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bananapi.xcello.all'
@@ -1458,6 +1580,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default.all'
@@ -1479,6 +1603,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_cn.all'
@@ -1500,6 +1626,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.default_zh_CN.all'
@@ -1521,6 +1649,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.cox.all'
@@ -1542,6 +1672,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog.all'
@@ -1563,6 +1695,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog_global.all'
@@ -1584,6 +1718,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.hanwha.all'
@@ -1605,6 +1741,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ipera.all'
@@ -1626,6 +1764,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ionetworks.all'
@@ -1647,6 +1787,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.nutech.all'
@@ -1668,6 +1810,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ras.all'
@@ -1689,6 +1833,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.senturian.all'
@@ -1710,6 +1856,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.systemk.all'
@@ -1731,6 +1879,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.tricom.all'
@@ -1752,6 +1902,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.ust.all'
@@ -1773,6 +1925,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vista.all'
@@ -1794,6 +1948,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoblue.all'
@@ -1815,6 +1971,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoorange.all'
@@ -1836,6 +1994,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.metavms.all'
@@ -1857,6 +2017,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.bpi.xcello.all'
@@ -1878,6 +2040,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default.all'
@@ -1899,6 +2063,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_cn.all'
@@ -1920,6 +2086,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.default_zh_CN.all'
@@ -1941,6 +2109,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.cox.all'
@@ -1962,6 +2132,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog.all'
@@ -1983,6 +2155,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog_global.all'
@@ -2004,6 +2178,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.hanwha.all'
@@ -2025,6 +2201,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ipera.all'
@@ -2046,6 +2224,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ionetworks.all'
@@ -2067,6 +2247,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.nutech.all'
@@ -2088,6 +2270,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ras.all'
@@ -2109,6 +2293,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.senturian.all'
@@ -2130,6 +2316,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.systemk.all'
@@ -2151,6 +2339,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.tricom.all'
@@ -2172,6 +2362,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.ust.all'
@@ -2193,6 +2385,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vista.all'
@@ -2214,6 +2408,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoblue.all'
@@ -2235,6 +2431,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoorange.all'
@@ -2256,6 +2454,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.metavms.all'
@@ -2277,6 +2477,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.rpi.xcello.all'
@@ -2298,6 +2500,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.edge1.digitalwatchdog.all'
@@ -2319,6 +2523,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default.all'
@@ -2340,6 +2546,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_cn.all'
@@ -2361,6 +2569,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.default_zh_CN.all'
@@ -2382,6 +2592,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.cox.all'
@@ -2403,6 +2615,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog.all'
@@ -2424,6 +2638,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog_global.all'
@@ -2445,6 +2661,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.hanwha.all'
@@ -2466,6 +2684,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ipera.all'
@@ -2487,6 +2707,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ionetworks.all'
@@ -2508,6 +2730,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.nutech.all'
@@ -2529,6 +2753,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ras.all'
@@ -2550,6 +2776,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.senturian.all'
@@ -2571,6 +2799,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.systemk.all'
@@ -2592,6 +2822,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.tricom.all'
@@ -2613,6 +2845,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.ust.all'
@@ -2634,6 +2868,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vista.all'
@@ -2655,6 +2891,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoblue.all'
@@ -2676,6 +2914,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoorange.all'
@@ -2697,6 +2937,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.metavms.all'
@@ -2718,6 +2960,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tx1.xcello.all'
@@ -2739,6 +2983,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.all'
@@ -2760,6 +3006,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_cn.all'
@@ -2781,6 +3029,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_zh_CN.all'
@@ -2802,6 +3052,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.cox.all'
@@ -2823,6 +3075,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog.all'
@@ -2844,6 +3098,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog_global.all'
@@ -2865,6 +3121,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.hanwha.all'
@@ -2886,6 +3144,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ipera.all'
@@ -2907,6 +3167,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ionetworks.all'
@@ -2928,6 +3190,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.nutech.all'
@@ -2949,6 +3213,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ras.all'
@@ -2970,6 +3236,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.senturian.all'
@@ -2991,6 +3259,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.systemk.all'
@@ -3012,6 +3282,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.tricom.all'
@@ -3033,6 +3305,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.ust.all'
@@ -3054,6 +3328,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vista.all'
@@ -3075,6 +3351,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoblue.all'
@@ -3096,6 +3374,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoorange.all'
@@ -3117,6 +3397,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.metavms.all'
@@ -3138,6 +3420,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.android-arm.xcello.all'
@@ -3159,6 +3443,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default.all'
@@ -3180,6 +3466,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_cn.all'
@@ -3201,6 +3489,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_zh_CN.all'
@@ -3222,6 +3512,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.cox.all'
@@ -3243,6 +3535,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog.all'
@@ -3264,6 +3558,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog_global.all'
@@ -3285,6 +3581,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.hanwha.all'
@@ -3306,6 +3604,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ipera.all'
@@ -3327,6 +3627,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ionetworks.all'
@@ -3348,6 +3650,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.nutech.all'
@@ -3369,6 +3673,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ras.all'
@@ -3390,6 +3696,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.senturian.all'
@@ -3411,6 +3719,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.systemk.all'
@@ -3432,6 +3742,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.tricom.all'
@@ -3453,6 +3765,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ust.all'
@@ -3474,6 +3788,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vista.all'
@@ -3495,6 +3811,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoblue.all'
@@ -3516,6 +3834,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoorange.all'
@@ -3537,6 +3857,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.all'
@@ -3558,6 +3880,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xcello.all'
@@ -3579,6 +3903,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.all'
@@ -3600,6 +3926,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_cn.all'
@@ -3621,6 +3949,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_zh_CN.all'
@@ -3642,6 +3972,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.cox.all'
@@ -3663,6 +3995,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog.all'
@@ -3684,6 +4018,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog_global.all'
@@ -3705,6 +4041,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.hanwha.all'
@@ -3726,6 +4064,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ipera.all'
@@ -3747,6 +4087,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ionetworks.all'
@@ -3768,6 +4110,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.nutech.all'
@@ -3789,6 +4133,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ras.all'
@@ -3810,6 +4156,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.senturian.all'
@@ -3831,6 +4179,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.systemk.all'
@@ -3852,6 +4202,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.tricom.all'
@@ -3873,6 +4225,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ust.all'
@@ -3894,6 +4248,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vista.all'
@@ -3915,6 +4271,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoblue.all'
@@ -3936,6 +4294,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoorange.all'
@@ -3957,6 +4317,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.metavms.all'
@@ -3978,6 +4340,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xcello.all'
@@ -3999,6 +4363,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default.all'
@@ -4020,6 +4386,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_cn.all'
@@ -4041,6 +4409,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.default_zh_CN.all'
@@ -4062,6 +4432,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.cox.all'
@@ -4083,6 +4455,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog.all'
@@ -4104,6 +4478,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog_global.all'
@@ -4125,6 +4501,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.hanwha.all'
@@ -4146,6 +4524,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ipera.all'
@@ -4167,6 +4547,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ionetworks.all'
@@ -4188,6 +4570,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.nutech.all'
@@ -4209,6 +4593,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ras.all'
@@ -4230,6 +4616,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.senturian.all'
@@ -4251,6 +4639,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.systemk.all'
@@ -4272,6 +4662,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.tricom.all'
@@ -4293,6 +4685,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.ust.all'
@@ -4314,6 +4708,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vista.all'
@@ -4335,6 +4731,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoblue.all'
@@ -4356,6 +4754,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoorange.all'
@@ -4377,6 +4777,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.metavms.all'
@@ -4398,6 +4800,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.mac.xcello.all'
@@ -4419,6 +4823,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default.all'
@@ -4440,6 +4846,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_cn.all'
@@ -4461,6 +4869,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.default_zh_CN.all'
@@ -4482,6 +4892,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.cox.all'
@@ -4503,6 +4915,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog.all'
@@ -4524,6 +4938,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog_global.all'
@@ -4545,6 +4961,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.hanwha.all'
@@ -4566,6 +4984,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ipera.all'
@@ -4587,6 +5007,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ionetworks.all'
@@ -4608,6 +5030,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.nutech.all'
@@ -4629,6 +5053,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ras.all'
@@ -4650,6 +5076,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.senturian.all'
@@ -4671,6 +5099,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.systemk.all'
@@ -4692,6 +5122,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.tricom.all'
@@ -4713,6 +5145,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.ust.all'
@@ -4734,6 +5168,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vista.all'
@@ -4755,6 +5191,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoblue.all'
@@ -4776,6 +5214,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoorange.all'
@@ -4797,6 +5237,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.metavms.all'
@@ -4818,6 +5260,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ios.xcello.all'
@@ -4839,6 +5283,8 @@
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
     - multijob:

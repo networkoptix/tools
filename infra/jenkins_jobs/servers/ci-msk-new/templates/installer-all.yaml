@@ -40,6 +40,10 @@
     - p_RUNNER_URL
     - p_CLOUD_GROUP:
         default: test
+    - p_HARDWARE_SIGNING:
+        default: OFF
+    - p_TRUSTED_TIMESTAMPING:
+        default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
@@ -86,6 +90,8 @@
             CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
             RUNNER_URL=$RUNNER_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            HARDWARE_SIGNING=$HARDWARE_SIGNING
+            TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
     - multijob:
         name: Run tests (tests are optional, only existing jobs are built)
