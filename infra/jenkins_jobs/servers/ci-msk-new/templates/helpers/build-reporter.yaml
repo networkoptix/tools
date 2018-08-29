@@ -85,6 +85,8 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
+        - custom-clean-workspace:
+            keep_files: [ nx_vms, devtools, venv ]
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: $BRANCH
@@ -109,22 +111,6 @@
         revision: 'default'
 
     builders:
-    - shell: |
-        #!bash
-        # TODO: rework as common macro
-        set -ex
-        for file in $(ls) ; do
-          if [ "$file" == 'nx_vms' ] ; then
-            continue
-          fi
-          if [ "$file" == 'devtools' ] ; then
-            continue
-          fi
-          if [ "$file" == 'venv' ] ; then
-            continue
-          fi
-          rm -rf "$file"
-        done
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
@@ -204,6 +190,8 @@
 
     publishers:
     - delete-hg-repos(if-damaged)
+    - custom-clean-workspace:
+        keep_files: [ nx_vms, devtools, venv ]
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,

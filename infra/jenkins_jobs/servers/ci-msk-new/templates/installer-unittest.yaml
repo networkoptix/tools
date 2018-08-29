@@ -59,6 +59,8 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
+        - custom-clean-workspace:
+            keep_files: [ devtools, venv ]
         - delete-files(on-windows):
             files: devtools
         - import-hg-repo(if-missing):
@@ -71,6 +73,7 @@
 
     builders:
     - set-hg-marker-successful-checkout
+
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
@@ -84,20 +87,6 @@
           JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
     - set-custom-build-description
-
-    - folder-delete-operation:
-        folder-path: 'build'
-
-    - folder-delete-operation:
-        folder-path: 'unit_tests'
-
-    - folder-delete-operation:
-        folder-path: 'sdk_unit_tests'
-
-    # clean marker of unstable build (if exists)
-    - file-delete-operation:
-        includes: unstable.flag
-        excludes: ''
 
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -285,6 +274,9 @@
                 RUNNER_URL=$RUNNER_URL
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
                 JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
+    - custom-clean-workspace:
+        keep_files: [ devtools, venv ]
 
     - failure-email:
         email-recipients: '{build-watchers}'

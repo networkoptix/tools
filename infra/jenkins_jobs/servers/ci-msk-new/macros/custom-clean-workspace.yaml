@@ -1,0 +1,26 @@
+- builder:
+    name: custom-clean-workspace
+    builders:
+    - shell: !j2: |
+        #!bash
+        set -ex
+        for file in $(ls) ; do
+          {% for keep_file in keep_files %}
+          if [ "$file" == '{{ keep_file }}' ] ; then
+            continue
+          fi
+          {% endfor %}
+          rm -rf "$file"
+        done
+
+- publisher:
+    name: custom-clean-workspace
+    publishers:
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE, NOT_BUILT, ABORTED ]
+          build-steps:
+          - custom-clean-workspace:
+              keep_files: '{keep_files}'
