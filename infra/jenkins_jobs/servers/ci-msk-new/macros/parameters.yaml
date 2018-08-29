@@ -308,7 +308,7 @@
     - extended-choice:
         name: CLOUD_GROUP
         type: 'single-select'
-        value: test,prod
+        value: test,tmp,dev,demo,stage,prod
         default-value: '{default}'
         visible-items: 2
         description: >-
