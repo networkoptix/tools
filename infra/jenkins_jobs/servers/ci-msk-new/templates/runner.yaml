@@ -72,19 +72,12 @@
 
     builders:
     - set-custom-build-description
-    - system-groovy:
-        command: |
-          def currentBuild = Thread.currentThread().executable
-          def currentUrl = currentBuild.getUrl()
-          def cause = currentBuild.getCause(hudson.model.Cause$UpstreamCause)
-          def parentBuildNum = cause.upstreamBuild
-          def parentJobName = cause.upstreamProject
-          def parentJob = hudson.model.Hudson.instance.getItem(parentJobName)
-          def jlc = new jenkins.model.JenkinsLocationConfiguration()
-          def currentLink = "<a href='" + jlc.getUrl() + "/" + currentUrl.toString() + "'> to runner </a>"
-          def parentBuild = parentJob.getBuildByNumber(parentBuildNum)
-          def parentDescription = parentBuild.getDescription()
-          parentBuild.setDescription(parentDescription + "<br>" + currentLink)
+    - custom-build-description:
+        envvars: [ BUILD_URL ]
+        action: append
+        target: upstream
+        description: >-
+          <br> <a href='$BUILD_URL'>to runner</a>
 
     # inject as is
     - inject:
