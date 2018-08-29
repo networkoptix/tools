@@ -12,10 +12,10 @@
     line: i386
     create: yes
 
-- name: Install Ubuntu Toolchain repository
-  apt_repository:
-    repo: ppa:ubuntu-toolchain-r/test
-    state: present
+#- name: Install Ubuntu Toolchain repository
+#  apt_repository:
+#    repo: ppa:ubuntu-toolchain-r/test
+#    state: present
 
 - name: Install Mercurial repository
   apt_repository:
@@ -31,7 +31,7 @@
   with_items:
   # Common
   - software-properties-common
-  - python-software-properties
+#  - python-software-properties
   - bzip2
   - unzip
   - xz-utils
@@ -70,10 +70,10 @@
   # x11 screen saver extension lib
   - libxss-dev
   # gstreamer
-  - libgstreamer0.10-0
-  - libgstreamer-plugins-base0.10-0
+#  - libgstreamer0.10-0
+#  - libgstreamer-plugins-base0.10-0
   # unit tests requirements
-  - libgstreamer-plugins-base1.0-0
+  #- libgstreamer-plugins-base1.0-0
   - libpulse-mainloop-glib0
   # xslt
   - libxslt1.1
@@ -90,8 +90,8 @@
   - gcc-multilib
   - g++-multilib
   # i386 gstreamer
-  - libgstreamer0.10-0:i386
-  - libgstreamer-plugins-base0.10-0:i386
+  #- libgstreamer0.10-0:i386
+  #- libgstreamer-plugins-base0.10-0:i386
   # i386 x
   - libxrender1:i386
   - libxcomposite1:i386
@@ -103,35 +103,35 @@
   - libxss-dev:i386
   - libxfixes-dev:i386
   - libxslt1.1:i386
-  - libpng12-0:i386
+  #- libpng12-0:i386
   # functional tests
   - python-demjson
   - python-opencv
 
   # Ubuntu Toolchain packages
-  - gcc-7
-  - g++-7
-  - gcc-7-multilib
-  - g++-7-multilib
+  #- gcc-7
+  #- g++-7
+  #- gcc-7-multilib
+  #- g++-7-multilib
 
-  - mercurial
+  #- mercurial
 
   # TODO Move NodeJS packages into separate file
   # Install webadmin build requirements (npm, nodejs and Co)
   - git
-  - npm
+  #- npm
   - ruby-compass
   - python-yaml
 
-- name: Install N for NodeJS
-  npm:
-    name: n
-    global: yes
+#- name: Install N for NodeJS
+#  npm:
+#    name: n
+#    global: yes
 
-- name: Install NodeJS
-  command: n stable
-  register: r
-  changed_when: "'installed' in r.stdout"
+#- name: Install NodeJS
+#  command: n stable
+#  register: r
+#  changed_when: "'installed' in r.stdout"
 
 - name: Remove apport
   apt:
