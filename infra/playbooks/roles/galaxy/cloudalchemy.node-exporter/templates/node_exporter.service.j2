@@ -15,7 +15,7 @@ ExecStart=/usr/local/bin/node_exporter \
     {%   else -%}
     {%     set name,opt = (c.items() | list)[0] -%}
     {%     for k,v in opt.items() -%}
-    --collector.{{ name }}.{{ k }}={{ v }} \
+    --collector.{{ name }}.{{ k }}="{{ v }}" \
     {%     endfor -%}
     {%   endif -%}
     {% endfor -%}
