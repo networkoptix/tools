@@ -2,9 +2,9 @@ libvirt_host: gamma
 libvirt_guest__state: running
 
 libvirt_guest__type: linux
-libvirt_guest__extra_system_image_size_gb: "10"
-libvirt_guest__memory: "{{ 2 * 1024 * 1024 }}"
-libvirt_guest__cpus: 1
+libvirt_guest__extra_system_image_size_gb: "60"
+libvirt_guest__memory: "{{ 6 * 1024 * 1024 }}"
+libvirt_guest__cpus: 10
 
 networks:
 - interface_type: bridge

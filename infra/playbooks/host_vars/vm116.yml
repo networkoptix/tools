@@ -3,8 +3,8 @@ libvirt_guest__state: running
 
 libvirt_guest__type: linux
 libvirt_guest__extra_system_image_size_gb: "1000"
-libvirt_guest__memory: "{{ 100 * 1024 * 1024 }}"  # 100 GiB
-libvirt_guest__cpus: 36
+libvirt_guest__memory: "{{ 50 * 1024 * 1024 }}"  # 50 GiB
+libvirt_guest__cpus: 18
 
 networks:
 - interface_type: bridge
