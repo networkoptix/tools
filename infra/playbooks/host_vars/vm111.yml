@@ -6,6 +6,21 @@ libvirt_guest__extra_system_image_size_gb: "50"
 libvirt_guest__memory: "{{ 2 * 1024 * 1024 }}"
 libvirt_guest__cpus: 2
 
+node_exporter_enabled_collectors:
+  - diskstats:
+      ignored-devices: "^(ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+$"
+  - filesystem:
+      ignored-mount-points: "^/(sys|proc|dev|mnt|var/lib/docker|run/docker|vol/ftp/beta-builds)($|/)"
+      ignored-fs-types: "^(sys|proc|auto)fs$"
+  - systemd
+  - diskstats
+  - hwmon
+  - loadavg
+  - meminfo
+  - netdev
+  - netstat
+  - stat
+
 networks:
 - interface_type: bridge
   source_bridge: br1
