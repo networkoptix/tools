@@ -195,11 +195,6 @@
           cd nx_vms/func_tests
 
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
-            if [[ "$TEST_SELECT_EXPR" != "" ]]; then
-              EXTRA_OPTIONS="-k \"$TEST_SELECT_EXPR\""
-            else
-              EXTRA_OPTIONS=""
-            fi
 
             test_timeout="$((4 * 60 * 60))" # 4hr
             pytest \
@@ -222,7 +217,7 @@
               --slot=$EXECUTOR_NUMBER \
               --reinstall \
               -v \
-              $EXTRA_OPTIONS \
+              -k "$TEST_SELECT_EXPR"
               $TEST_LIST
 
     publishers:
