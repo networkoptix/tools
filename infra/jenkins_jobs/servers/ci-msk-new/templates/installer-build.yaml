@@ -160,14 +160,17 @@
         # FIXME: --config should be defined in project
         default: >-
           cmake --build . --config Release {cmake_build_extra_args}
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: '{customization}'
+    - p_PLATFORM(hidden):
+        default: '{platform}'
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={customization}
-          PLATFORM={platform}
           USE_WEBADMIN={use-webadmin}
           WEBADMIN_COMPONENT_NAME={webadmin-component-name}
 

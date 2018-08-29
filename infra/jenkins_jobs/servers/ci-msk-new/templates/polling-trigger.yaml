@@ -93,7 +93,8 @@
         default: '{ignore-functests}'
     - p_BRANCH:
         default: '{default-branch}'
-
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     triggers:
     - timed: "{timer}"
@@ -116,9 +117,6 @@
         branch-name: $BRANCH
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

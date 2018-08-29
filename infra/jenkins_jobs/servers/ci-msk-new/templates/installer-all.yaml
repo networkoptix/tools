@@ -46,17 +46,18 @@
         default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: '{customization}'
+    - p_PLATFORM(hidden):
+        default: '{platform}'
 
     wrappers:
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={customization}
-          PLATFORM={platform}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

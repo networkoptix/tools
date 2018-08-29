@@ -62,6 +62,8 @@
         default: '{test-list}'
     - p_CLEAN_WORKSPACE:
         default: '{clean-workspace}'
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     triggers:
     - timed: "{timer}"
@@ -81,9 +83,6 @@
         branch-name: $TEST_FRAMEWORK_BRANCH
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

@@ -31,6 +31,8 @@
     - p_RUNNER_URL # do we need it here?
     - p_JUNKSHOP_HOST
     - p_JUNKSHOP_DB_HOST
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
     - build-name:
@@ -63,9 +65,6 @@
         revision: 'default'
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}

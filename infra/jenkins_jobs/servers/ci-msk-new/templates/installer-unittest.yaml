@@ -41,14 +41,17 @@
     - p_RUNNER_URL
     - p_BRANCH:
         default: '{default-branch}'
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: '{customization}'
+    - p_PLATFORM(hidden):
+        default: '{platform}'
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={customization}
-          PLATFORM={platform}
           SDK_TESTRUNNER_TIMEOUT={sdk-testrunner-timeout}
           TESTRUNNER_TIMEOUT={testrunner-timeout}
     - timestamps

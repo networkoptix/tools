@@ -134,6 +134,8 @@
         default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
 
     triggers:
@@ -219,9 +221,6 @@
         commit-to-freeze: $NX_VMS_COMMIT
         branch-varname: BRANCH
 
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

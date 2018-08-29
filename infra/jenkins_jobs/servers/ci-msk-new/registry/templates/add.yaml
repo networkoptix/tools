@@ -27,11 +27,10 @@
         default: '{default-branch}'
     - p_BRANCH:
         default: '{default-branch}'
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - set-custom-build-description
     - shell: |
         #!/bin/bash

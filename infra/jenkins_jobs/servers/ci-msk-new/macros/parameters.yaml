@@ -75,11 +75,15 @@
 - parameter:
     name: p_PIPELINE
     parameters:
-    - string:
+    - string: &p_PIPELINE_OPTS
         name: PIPELINE
         default: '{default}'
         description: >-
           Build pipeline pipeline (e.g. custom, release and others)
+- parameter:
+    name: p_PIPELINE(hidden)
+    parameters:
+    - hidden: *p_PIPELINE_OPTS
 
 - parameter:
     name: p_BRANCH
@@ -142,12 +146,17 @@
 - parameter:
     name: p_PLATFORM
     parameters:
-    - string:
+    - string: &p_PLATFORM_OPTS
         name: PLATFORM
-        default: ''
+        default: '{default}'
         description: >
           Target platform for installer (e.g. linux-x64, windows-x86 and others,
           note that universal is used for webadmin and other platform-independent components)
+
+- parameter:
+    name: p_PLATFORM(hidden)
+    parameters:
+    - hidden: *p_PLATFORM_OPTS
 
 - parameter:
     name: p_CUSTOMIZATIONS
@@ -163,11 +172,15 @@
 - parameter:
     name: p_CUSTOMIZATION
     parameters:
-    - string:
+    - string: &p_CUSTOMIZATION_OPTS
         name: CUSTOMIZATION
-        default: 'default'
+        default: '{default}'
         description: >
           Name of installer customization (e.g. default, hanwha and others)
+- parameter:
+    name: p_CUSTOMIZATION(hidden)
+    parameters:
+    - hidden: *p_CUSTOMIZATION_OPTS
 
 - parameter:
     name: p_COMPONENTS

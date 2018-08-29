@@ -45,11 +45,10 @@
         default: '{num-rand-choice}'
         description:
           How many random folders to take if List of folders is not provided
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

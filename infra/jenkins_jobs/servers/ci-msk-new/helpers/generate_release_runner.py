@@ -106,12 +106,10 @@ print '''#
         default: OFF
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
-    # NOTE: There is abug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - timestamps
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 

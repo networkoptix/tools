@@ -81,6 +81,8 @@
     # Utility parameters used to describe connection details
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
     - build-name:
@@ -96,9 +98,6 @@
         - jenkins
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

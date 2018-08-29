@@ -38,14 +38,17 @@
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: '{customization}'
+    - p_PLATFORM(hidden):
+        default: all
 
     wrappers:
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={customization}
-          PLATFORM=all
           TEST_LIST=cameras_integration/test_server.py::test_cameras
     - timestamps
     - timeout:
@@ -71,14 +74,14 @@
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
-            pipeline: '{pipeline}'
+            pipeline: $PIPELINE
             basedir: $WORKSPACE
         - import-hg-repo(if-missing):
             name: nx_vms
             branch: '$BRANCH'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
-            pipeline: '{pipeline}'
+            pipeline: $PIPELINE
             basedir: $WORKSPACE
     scm:
     - hg-local:

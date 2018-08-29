@@ -71,6 +71,8 @@
     - p_RUNNER_URL
     - p_JUNKSHOP_HOST
     - p_JUNKSHOP_DB_HOST
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
     - timestamps
@@ -112,9 +114,6 @@
 
     builders:
     - set-hg-marker-successful-checkout
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}

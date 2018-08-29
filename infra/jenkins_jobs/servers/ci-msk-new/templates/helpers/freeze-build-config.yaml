@@ -76,6 +76,8 @@
     - p_CLEAN_CLONE
     - p_NX_VMS_COMMIT:
         default: ''
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
     - timestamps
@@ -94,9 +96,6 @@
         branch-name: default
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

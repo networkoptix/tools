@@ -89,6 +89,8 @@
         name: FORCE_PUSH
         default: 'false'
         description: "Delete existing artifacts before pushing."
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
 
     wrappers:
     - build-name:
@@ -104,9 +106,6 @@
         - jenkins
 
     builders:
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}

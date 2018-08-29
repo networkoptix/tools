@@ -47,8 +47,6 @@
     workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{version}/'
 
     webadmin-build-node: webadmin-build
-    webadmin-platform: universal
-    webadmin-customization: default
 
     # artifacts to save in jenkins
 
@@ -79,15 +77,14 @@
     - p_NX_VMS_COMMIT:
         default: '{default-branch}'
     - p_RUNNER_URL
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: default
+    - p_PLATFORM(hidden):
+        default: universal  # webadmin platform is called universal
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          PIPELINE={pipeline}
-          CUSTOMIZATION={webadmin-customization}
-          PLATFORM={webadmin-platform}
-
     - timestamps
     - timeout:
         # normally, should complete in 7-15 min
@@ -104,7 +101,7 @@
             branch: $BRANCH
             platform: $PLATFORM
             customization: $CUSTOMIZATION
-            pipeline: '{pipeline}'
+            pipeline: $PIPELINE
             basedir: $WORKSPACE
 
     scm:
