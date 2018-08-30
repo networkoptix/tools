@@ -142,6 +142,8 @@
         customization: default
         build-watchers: muskov@networkoptix.com
 
+    - '{pipeline}.helper.build-notification'
+
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
     - installer-unittests:

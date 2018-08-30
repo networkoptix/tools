@@ -319,6 +319,27 @@ for customization in CUSTOMIZATIONS_LIST:
             JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 '''
 print '''
+    - shell: |
+        #!bash
+        echo "Wait a bit before scheduling reporting"
+        echo "To be sure that all build/ut reporters are scheduled"
+        sleep 10
+
+    - multijob:
+        name: Send notifications
+        projects:
+        - name: '{pipeline}.helper.build-notification'
+          condition: ALWAYS
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            RUNNER_URL=$BUILD_URL
+            JUNKSHOP_HOST=$JUNKSHOP_HOST
+            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
+
     publishers:
     - groovy-postbuild:
         script: !include-raw-escape: ../builders/report_all_links.groovy
@@ -327,5 +348,5 @@ print '''
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
-    - completed-email(group)
+    # - completed-email(group)
 '''

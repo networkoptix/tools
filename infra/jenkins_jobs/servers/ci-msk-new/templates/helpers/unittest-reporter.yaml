@@ -1,8 +1,8 @@
 - job-template:
     name: '{pipeline}.helper.unittests-reporter'
 
-    node: unittests-reporter
-    workspace: 'nx_{pipeline}_report_thr${{EXECUTOR_NUMBER}}/'
+    node: reporter
+    workspace: 'nx_{pipeline}_reporter_ut'
     concurrent: true
 
     properties:

@@ -38,9 +38,9 @@
 
       --------------------------------------------------------------------------------
       </pre>
-    node: unittests-reporter
-    concurrent: true
-    workspace: 'nx_{pipeline}_report_thr${{EXECUTOR_NUMBER}}/'
+    node: reporter
+    concurrent: false
+    workspace: 'nx_{pipeline}_reporter_bld'
 
     # junk_shop_host: required!
 

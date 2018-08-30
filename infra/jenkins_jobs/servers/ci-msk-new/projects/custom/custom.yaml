@@ -151,6 +151,8 @@
     - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
     - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
 
+    - '{pipeline}.helper.build-notification'
+
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
     - installer-unittests:
