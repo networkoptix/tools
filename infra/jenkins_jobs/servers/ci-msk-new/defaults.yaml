@@ -2,6 +2,8 @@
     name: global
     job-maintainers: 'iremizov@networkoptix.com,anikitin@networkoptix.com,vfedorov@networkoptix.com'
 
+    __debug__: false
+
     default-artifact-num-to-keep: 20
 
     tag_requested_by: $JOB_NAME-$BUILD_NUMBER

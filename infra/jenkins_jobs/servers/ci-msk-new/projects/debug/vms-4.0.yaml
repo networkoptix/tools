@@ -1,5 +1,6 @@
 - project:
     name: debug-pipeline-4.0
+    __debug__: true
 
     project: vms
     # junk_shop_host: junkshop.enk.me

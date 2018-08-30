@@ -5,7 +5,8 @@
     build-watchers: iremizov@networkoptix.com
 
     pipeline:
-    - debug
+    - debug:
+        __debug__: true
     - release
     - develop:
         junkshop_project_name: ci
