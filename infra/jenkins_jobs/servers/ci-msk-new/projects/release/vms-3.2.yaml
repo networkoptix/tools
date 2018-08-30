@@ -28,6 +28,7 @@
     - release:
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline: ''
+        pipeline_priority: 9
 
     # SECTION. PLATFORM CONFIG
     # ============================================================

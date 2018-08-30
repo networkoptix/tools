@@ -51,6 +51,8 @@
 
     properties:
     - authorization-{pipeline}-system
+    - priority-sorter:
+        priority: !j2: '{{ pipeline_priority }}'
     - heavy-job:
         weight: 1
     # this job is heavily used on each pipeline build, so we need large

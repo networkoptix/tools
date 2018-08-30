@@ -14,6 +14,8 @@
     realcameratesting-framework-branch: $BRANCH
 
     properties:
+    - priority-sorter:
+        priority: !j2: '{{ pipeline_priority }}'
     - heavy-job:
         weight: 1
     - throttle:

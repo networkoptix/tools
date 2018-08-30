@@ -34,6 +34,7 @@
         junkshop_project_name: debug
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline: ''
+        pipeline_priority: 1
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
