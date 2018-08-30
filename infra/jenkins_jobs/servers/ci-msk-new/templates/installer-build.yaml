@@ -602,6 +602,7 @@
                 BUILD_STATUS=passed
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
+                PIPELINE=$PIPELINE
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 BRANCH=$BRANCH
@@ -633,6 +634,7 @@
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
+                PIPELINE=$PIPELINE
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 BRANCH=$BRANCH
@@ -657,6 +659,7 @@
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
+                PIPELINE=$PIPELINE
                 CUSTOMIZATION=$CUSTOMIZATION
                 PLATFORM=$PLATFORM
                 BRANCH=$BRANCH
