@@ -285,6 +285,7 @@
     - timed: "{timer}"
 
     wrappers:
+    # TODO: rework as hidden parameter
     - inject:
         properties-content: |
           CLEAN_WORKSPACE={clean-workspace}
@@ -294,6 +295,11 @@
           RUN_FUNCTESTS={run-functests}
           RUN_REALCAMERATESTS={run-realcameratests}
           USE_BUILD_IDENTITY={use-build-identity}
+          CLOUD_GROUP=test
+          HARDWARE_SIGNING=OFF
+          TRUSTED_TIMESTAMPING=OFF
+          CUSTOM_CMAKE_PARAMETERS=
+          PIPELINE={pipeline}
     - timestamps
     - timeout:
         timeout: 5 # min
