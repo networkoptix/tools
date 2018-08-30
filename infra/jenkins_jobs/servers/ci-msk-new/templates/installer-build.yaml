@@ -608,7 +608,7 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 LOCAL_PATH=$WORKSPACE/build/
-                COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt
+                COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,*.log
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
               block: true
