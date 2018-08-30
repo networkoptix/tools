@@ -5,7 +5,7 @@
 
     version:
     - vms_3.2:
-        default-branch: vms_3.2
+        default_branch: vms_3.2
         use-nx-vms-commit: vms_3.2  # FIXME: this is temp fix
 
     # SECTION. GLOBAL PIPELINE CONFIG

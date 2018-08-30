@@ -9,8 +9,6 @@
     concurrent: false
 
     properties:
-    - heavy-job:
-        weight: 1
     # keep a lot
     - build-discarder:
         days-to-keep: 60
@@ -24,9 +22,9 @@
         default: ''
     - p_BUILD_IDENTITY
     - p_NX_VMS_COMMIT:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 

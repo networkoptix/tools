@@ -7,10 +7,10 @@
 
     version:
     - vms_3.2:
-        default-branch: vms_3.2
+        default_branch: vms_3.2
         use-nx-vms-commit: vms_3.2  # FIXME: this is temp fix
     - vms_3.2_release:
-        default-branch: vms_3.2_release
+        default_branch: vms_3.2_release
         use-nx-vms-commit: vms_3.2_release  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
@@ -161,7 +161,7 @@
             run-realcameratests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job-maintainers: vfedorov@networkoptix.com
+        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         preset:
@@ -173,11 +173,11 @@
               associated with only this trigger type.
             default-build-description: >-
               Nightly functional tests
-            default-test-framework-branch: '{default-branch}'
+            default-test-framework-branch: '{default_branch}'
             timer: 'H 20 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job-maintainers: vfedorov@networkoptix.com
+        job_maintainers: vfedorov@networkoptix.com
         tests:
         - scalability-test
         preset:

@@ -2,8 +2,8 @@
     name: '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest'
     description: |
       Run real camera tests for {customization} for branch {version}.
-    node: '{realcameratest-node}'
-    concurrent: true
+    node: '{realcameratest_node}'
+    concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     workspace: 'nx_rct_thr${{EXECUTOR_NUMBER}}/'
@@ -17,16 +17,11 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
-    - throttle:
-        max-total: 1
-        option: project
     - build-discarder:
         days-to-keep: 10
         num-to-keep: 50
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -132,14 +127,10 @@
           BIN_DIR=$WORKSPACE/bin
           WORK_DIR=$WORKSPACE/{workdir}
 
-    - init-venv:
-        requirements-files: >-
-          devtools/ci/junk_shop/requirements.txt
-          nx_vms/func_tests/requirements.txt
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -217,7 +208,7 @@
           - trigger-builds:
             - project: '{pipeline}.helper.publish-tests'
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BUILD_STATUS=passed
                 BRANCH=$BRANCH

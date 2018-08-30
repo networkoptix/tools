@@ -4,7 +4,7 @@
     - trigger-builds:
       - project: '{pipeline}.helper.freeze-nx-vms-commit'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           NX_VMS_COMMIT={commit-to-freeze}
           NX_VMS_COMMIT_VARNAME={commit-varname}
@@ -16,7 +16,7 @@
         project: '{pipeline}.helper.freeze-nx-vms-commit'
         filter: '{commit-varname}.envvar'
         which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
+        parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
     - inject:
         properties-file: '{commit-varname}.envvar'
 
@@ -36,7 +36,7 @@
     - trigger-builds:
       - project: '{pipeline}.helper.freeze-nx-vms-commit'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           NX_VMS_COMMIT={commit-to-freeze}
           NX_VMS_BRANCH_VARNAME={branch-varname}
@@ -48,7 +48,7 @@
         project: '{pipeline}.helper.freeze-nx-vms-commit'
         filter: '{branch-varname}.envvar'
         which-build: last-completed
-        parameter-filters: REQUESTED_BY={tag_requested_by}
+        parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
     - inject:
         properties-file: '{branch-varname}.envvar'
 

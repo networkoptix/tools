@@ -9,7 +9,7 @@
       ================================================================================
 
       JOB MAINTAINERS
-        {job-maintainers}
+        {job_maintainers}
         (notified by email on build failures)
 
       SOURCES
@@ -49,13 +49,13 @@
     #     - name: '{pipeline}.{counter_name}.generator'
     #       kill-phase-on: FAILURE
     #       predefined-parameters: |
-    #         REQUESTED_BY={tag_requested_by}
+    #         REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
     #         BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     # - copyartifact:
     #     project: '{pipeline}.{counter_name}.generator'
     #     filter: '{counter_var_name}.envvar'
     #     which-build: last-completed
-    #     parameter-filters: REQUESTED_BY={tag_requested_by}
+    #     parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
     # - inject:
     #     properties-file: '{counter_var_name}.envvar'
     # ```
@@ -66,7 +66,7 @@
     #   - project: '{pipeline}.{counter_name}.generator'
     #     block: true
     #     predefined-parameters: |
-    #       REQUESTED_BY={tag_requested_by}
+    #       REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
     #       BUILD_DESCRIPTION=$BUILD_DESCRIPTION
     # - copyartifact:
     #     project: '{pipeline}.{counter_name}.generator'
@@ -82,16 +82,11 @@
 
     properties:
     - authorization-{pipeline}-system
-    - heavy-job:
-        weight: 1
-    - throttle:
-        max-total: 1
-        option: project
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
 
@@ -171,4 +166,4 @@
         allow-empty: 'false'
         fingerprint: true
     - failure-email-helpers(maintainers):
-        email-recipients: '{job-maintainers}'
+        email-recipients: '{job_maintainers}'

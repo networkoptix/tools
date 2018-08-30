@@ -1,20 +1,14 @@
 - defaults:
     name: global
-    job-maintainers: 'iremizov@networkoptix.com,anikitin@networkoptix.com,vfedorov@networkoptix.com'
+    job_maintainers: 'iremizov@networkoptix.com,anikitin@networkoptix.com,vfedorov@networkoptix.com'
 
     __debug__: false
 
     pipeline_priority: 5
 
-    default-artifact-num-to-keep: 20
+    default_artifact_num_to_keep: 20
 
-    tag_requested_by: $JOB_NAME-$BUILD_NUMBER
-    use-ninja-clean-file: 'YES' # TODO: switch to using ninja-clean when ready
-    force-clean-build-based-on-build-configs-sha: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead
-
-    # IMPORTANT NOTE: need to define in jenkins tools config section
-    # We may probably replace that groovy incl groovy w/ python.
-    groovy-version: groovy
+    clean_build_if_build_scripts_changed: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead
 
     junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
     junkshop_db_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
@@ -34,12 +28,11 @@
     junkshop_location_full_pattern: 'project/$JUNKSHOP_PROJECT_NAME/$BRANCH/$BUILD_IDENTITY'
 
     # utility variables for jobs family which operate on the same workspace
-    hg-local-cache-node-read: repo-read
-    hg-local-cache-node-write: repo-write
-    hg-local-cache-node-workspace: repo
-    hg-local-cache-node-throttle-category: repo
-    hg-local-cache-node-ip-addr: '192.168.13.121'
+    hg_local_cache_node_read: repo-read
+    hg_local_cache_node_write: repo-write
+    hg_local_cache_node_workspace: repo
+    hg_local_cache_node_ip_addr: '192.168.13.121'
 
-    webadmin-build-node: webadmin-build
-    functest-node: functests
-    realcameratest-node: realcameratest
+    webadmin_build_node: webadmin-build
+    functest_node: functests
+    realcameratest_node: realcameratest

@@ -7,7 +7,7 @@
       ================================================================================
 
       JOB MAINTAINERS
-        {job-maintainers}
+        {job_maintainers}
         (NOT notified by email on build failures)
       BUILD WATCHERS
         {build-watchers}
@@ -117,13 +117,11 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -135,9 +133,9 @@
         default: false
     - p_BUILD_IDENTITY
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_NX_VMS_COMMIT:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_CLOUD_GROUP:
         default: test
     - p_HARDWARE_SIGNING:
@@ -244,14 +242,14 @@
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '{force-clean-build-based-on-build-configs-sha}'
+        condition-string1: '{clean_build_if_build_scripts_changed}'
         condition-string2: 'YES'
         steps:
         - trigger-builds:
           - project: '{pipeline}.helper.freeze-build-config'
             block: true
             predefined-parameters: |
-              REQUESTED_BY={tag_requested_by}
+              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               BRANCH=$BRANCH
               CUSTOMIZATION=$CUSTOMIZATION
@@ -266,7 +264,7 @@
             project: '{pipeline}.helper.freeze-build-config'
             filter: 'BUILD_CONFIG_SHA.envvar'
             which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
+            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
         - inject:
             properties-file: 'BUILD_CONFIG_SHA.envvar'
 
@@ -427,7 +425,7 @@
         - trigger-builds:
           - project: '{pipeline}.helper.pull-component'
             predefined-parameters: |
-              REQUESTED_BY={tag_requested_by}
+              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               BRANCH=$BRANCH
               BUILD_IDENTITY=$BUILD_IDENTITY
@@ -599,7 +597,7 @@
           - trigger-builds:
             - project: '{pipeline}.helper.publish-build'
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BUILD_STATUS=passed
                 BRANCH=$BRANCH
@@ -632,7 +630,7 @@
             - project: '{pipeline}.helper.build-reporter'
               block: false
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -657,7 +655,7 @@
             - project: '{pipeline}.helper.build-reporter'
               block: false
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY

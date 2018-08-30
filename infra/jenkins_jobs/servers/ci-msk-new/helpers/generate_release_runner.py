@@ -57,8 +57,6 @@ print '''#
     realcameratesting-framework-branch: $BRANCH
 
     properties:
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 5
         option: project
@@ -88,9 +86,9 @@ print '''#
     - p_RUN_REALCAMERATESTS:
         default: false
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_USE_NX_VMS_COMMIT:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_USE_BUILD_IDENTITY:
         default: NEW
     - p_CLEAN_WORKSPACE:
@@ -150,7 +148,6 @@ print '''#
     # Freeze nx realcamera framework commit
     - freeze-nx-vms-commit(remote):
         pipeline: '{pipeline}'
-        tag_requested_by: '{tag_requested_by}'
         branch: '{realcameratesting-framework-branch}'
         commit-to-freeze: '{realcameratesting-framework-branch}'
         commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
@@ -168,13 +165,13 @@ print '''#
             - name: '{pipeline}.build_number.generator'
               kill-phase-on: FAILURE
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
         - copyartifact:
             project: '{pipeline}.build_number.generator'
             filter: 'BUILD_IDENTITY.envvar'
             which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
+            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
         - inject:
             properties-file: 'BUILD_IDENTITY.envvar'
 
@@ -223,7 +220,7 @@ print '''#
             ("$BUILD_WEBADMIN").toBoolean()
           kill-phase-on: FAILURE
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -258,7 +255,7 @@ for platform in PLATFORMS_LIST:
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -288,7 +285,7 @@ for customization in CUSTOMIZATIONS_LIST:
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -308,7 +305,7 @@ for customization in CUSTOMIZATIONS_LIST:
             ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH

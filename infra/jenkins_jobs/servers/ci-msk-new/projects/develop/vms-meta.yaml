@@ -7,7 +7,7 @@
 
     version:
     - meta:
-        default-branch: meta
+        default_branch: meta
         use-nx-vms-commit: meta  # FIXME: this is temp fix
 
     # SECTION. GLOBAL PIPELINE CONFIG

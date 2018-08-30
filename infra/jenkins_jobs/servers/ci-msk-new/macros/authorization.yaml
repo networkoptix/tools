@@ -9,7 +9,7 @@
     # everyone can read (should be inherited)
     # admins can do anything (should be inherited)
     # everyone can build
-    name: ___base_trigger
+    name: ___base_dev_trigger
     properties:
     - authorization:
         authenticated:
@@ -19,7 +19,7 @@
     # everyone can read (should be inherited)
     # admins can do anything (should be inherited)
     # some users may cancel running jobs
-    name: ___base_system
+    name: ___base_dev_system
     properties:
     - authorization:
         sivanov:

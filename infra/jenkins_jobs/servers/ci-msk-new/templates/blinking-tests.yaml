@@ -80,7 +80,7 @@
       - project: '{pipeline}.{version}.{project}.runner'
         current-parameters: true
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           UPSTREAM_JOB_NAME=$JOB_NAME
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
         block: false # !! don't wait

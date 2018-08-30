@@ -7,7 +7,7 @@
       ================================================================================
 
       JOB MAINTAINERS
-        {job-maintainers}
+        {job_maintainers}
         (notified by email on build failures)
 
       SOURCES
@@ -56,11 +56,6 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
-    - throttle:
-        max-total: 1
-        option: project
     # this job is heavily used on each pipeline build, so we need large
     # GC timeouts in order to keep all builds for recent pipelines
     - build-discarder:
@@ -162,4 +157,4 @@
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
     - failure-email-helpers(maintainers):
-        email-recipients: '{job-maintainers}'
+        email-recipients: '{job_maintainers}'

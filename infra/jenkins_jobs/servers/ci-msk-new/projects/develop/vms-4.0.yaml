@@ -7,7 +7,7 @@
 
     version:
     - vms:
-        default-branch: vms
+        default_branch: vms
         use-nx-vms-commit: vms  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
@@ -157,7 +157,7 @@
             run-functests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job-maintainers: vfedorov@networkoptix.com
+        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         - scalability-test
@@ -167,12 +167,12 @@
               Run nightly functional test with schedule "{timer}".
             default-build-description: >-
               Nightly functional tests
-            default-test-framework-branch: '{default-branch}'
+            default-test-framework-branch: '{default_branch}'
             timer: 'H 23 * * 1-5'
 
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job-maintainers: vfedorov@networkoptix.com
+        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         preset:
@@ -183,7 +183,7 @@
               Run nightly windows self tests with schedule "{timer}".
             default-build-description: >-
               Nightly windows self tests
-            default-test-framework-branch: '{default-branch}'
+            default-test-framework-branch: '{default_branch}'
             timer: 'H 21 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.blinking-tests':

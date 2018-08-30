@@ -7,7 +7,7 @@
 
     version:
     - mobile:
-        default-branch: mobile
+        default_branch: mobile
         use-nx-vms-commit: mobile  # FIXME: this is temp fix
 
     # SECTION. GLOBAL PIPELINE CONFIG

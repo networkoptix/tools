@@ -16,8 +16,6 @@
     properties:
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 5
         option: project
@@ -47,9 +45,9 @@
     - p_RUN_REALCAMERATESTS:
         default: false
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_USE_NX_VMS_COMMIT:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_USE_BUILD_IDENTITY:
         default: NEW
     - p_CLEAN_WORKSPACE:
@@ -109,7 +107,6 @@
     # Freeze nx realcamera framework commit
     - freeze-nx-vms-commit(remote):
         pipeline: '{pipeline}'
-        tag_requested_by: '{tag_requested_by}'
         branch: '{realcameratesting-framework-branch}'
         commit-to-freeze: '{realcameratesting-framework-branch}'
         commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
@@ -127,13 +124,13 @@
             - name: '{pipeline}.build_number.generator'
               kill-phase-on: FAILURE
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
         - copyartifact:
             project: '{pipeline}.build_number.generator'
             filter: 'BUILD_IDENTITY.envvar'
             which-build: last-completed
-            parameter-filters: REQUESTED_BY={tag_requested_by}
+            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
         - inject:
             properties-file: 'BUILD_IDENTITY.envvar'
 
@@ -182,7 +179,7 @@
             ("$BUILD_WEBADMIN").toBoolean()
           kill-phase-on: FAILURE
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -204,7 +201,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -227,7 +224,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -250,7 +247,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -273,7 +270,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -296,7 +293,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -319,7 +316,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -342,7 +339,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -365,7 +362,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -388,7 +385,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -411,7 +408,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -434,7 +431,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -457,7 +454,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -480,7 +477,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -503,7 +500,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -526,7 +523,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -549,7 +546,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -572,7 +569,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -595,7 +592,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -618,7 +615,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -641,7 +638,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -664,7 +661,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -687,7 +684,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -710,7 +707,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -733,7 +730,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -756,7 +753,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -779,7 +776,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -802,7 +799,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -825,7 +822,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -848,7 +845,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -871,7 +868,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -894,7 +891,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -917,7 +914,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -940,7 +937,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -963,7 +960,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -986,7 +983,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1009,7 +1006,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1032,7 +1029,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1055,7 +1052,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1078,7 +1075,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1101,7 +1098,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1124,7 +1121,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1147,7 +1144,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1170,7 +1167,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1193,7 +1190,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1216,7 +1213,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1239,7 +1236,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1262,7 +1259,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1285,7 +1282,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1308,7 +1305,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1331,7 +1328,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1354,7 +1351,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1377,7 +1374,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1400,7 +1397,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1423,7 +1420,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1446,7 +1443,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1469,7 +1466,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1492,7 +1489,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1515,7 +1512,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1538,7 +1535,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1561,7 +1558,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1584,7 +1581,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1607,7 +1604,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1630,7 +1627,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1653,7 +1650,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1676,7 +1673,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1699,7 +1696,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1722,7 +1719,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1745,7 +1742,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1768,7 +1765,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1791,7 +1788,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1814,7 +1811,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1837,7 +1834,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1860,7 +1857,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1883,7 +1880,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1906,7 +1903,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1929,7 +1926,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1952,7 +1949,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1975,7 +1972,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -1998,7 +1995,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2021,7 +2018,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2044,7 +2041,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2067,7 +2064,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2090,7 +2087,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2113,7 +2110,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2136,7 +2133,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2159,7 +2156,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2182,7 +2179,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2205,7 +2202,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2228,7 +2225,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2251,7 +2248,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2274,7 +2271,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2297,7 +2294,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2320,7 +2317,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2343,7 +2340,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2366,7 +2363,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2389,7 +2386,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2412,7 +2409,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2435,7 +2432,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2458,7 +2455,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2481,7 +2478,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2504,7 +2501,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2527,7 +2524,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2550,7 +2547,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2573,7 +2570,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2596,7 +2593,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2619,7 +2616,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2642,7 +2639,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2665,7 +2662,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2688,7 +2685,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2711,7 +2708,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2734,7 +2731,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2757,7 +2754,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2780,7 +2777,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2803,7 +2800,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2826,7 +2823,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2849,7 +2846,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2872,7 +2869,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2895,7 +2892,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2918,7 +2915,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2941,7 +2938,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2964,7 +2961,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -2987,7 +2984,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3010,7 +3007,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3033,7 +3030,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3056,7 +3053,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3079,7 +3076,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3102,7 +3099,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3125,7 +3122,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3148,7 +3145,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3171,7 +3168,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3194,7 +3191,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3217,7 +3214,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3240,7 +3237,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3263,7 +3260,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3286,7 +3283,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3309,7 +3306,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3332,7 +3329,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3355,7 +3352,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3378,7 +3375,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3401,7 +3398,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3424,7 +3421,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3447,7 +3444,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3470,7 +3467,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3493,7 +3490,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3516,7 +3513,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3539,7 +3536,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3562,7 +3559,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3585,7 +3582,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3608,7 +3605,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3631,7 +3628,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3654,7 +3651,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3677,7 +3674,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3700,7 +3697,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3723,7 +3720,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3746,7 +3743,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3769,7 +3766,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3792,7 +3789,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3815,7 +3812,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3838,7 +3835,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3861,7 +3858,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3884,7 +3881,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3907,7 +3904,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3930,7 +3927,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3953,7 +3950,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3976,7 +3973,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -3999,7 +3996,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4022,7 +4019,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4045,7 +4042,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4068,7 +4065,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4091,7 +4088,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4114,7 +4111,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4137,7 +4134,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4160,7 +4157,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4183,7 +4180,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4206,7 +4203,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4229,7 +4226,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4252,7 +4249,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4275,7 +4272,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4298,7 +4295,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4321,7 +4318,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4344,7 +4341,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4367,7 +4364,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4390,7 +4387,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4413,7 +4410,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4436,7 +4433,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4459,7 +4456,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4482,7 +4479,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4505,7 +4502,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4528,7 +4525,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4551,7 +4548,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4574,7 +4571,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4597,7 +4594,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4620,7 +4617,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4643,7 +4640,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4666,7 +4663,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4689,7 +4686,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4712,7 +4709,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4735,7 +4732,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4758,7 +4755,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4781,7 +4778,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4804,7 +4801,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4827,7 +4824,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4850,7 +4847,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4873,7 +4870,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4896,7 +4893,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4919,7 +4916,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4942,7 +4939,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4965,7 +4962,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -4988,7 +4985,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5011,7 +5008,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5034,7 +5031,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5057,7 +5054,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5080,7 +5077,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5103,7 +5100,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5126,7 +5123,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5149,7 +5146,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5172,7 +5169,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5195,7 +5192,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5218,7 +5215,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5241,7 +5238,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5264,7 +5261,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5292,7 +5289,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5312,7 +5309,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5333,7 +5330,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5353,7 +5350,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_cn") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5374,7 +5371,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5394,7 +5391,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("default_zh_CN") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5415,7 +5412,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5435,7 +5432,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("cox") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5456,7 +5453,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5476,7 +5473,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5497,7 +5494,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5517,7 +5514,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("digitalwatchdog_global") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5538,7 +5535,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5558,7 +5555,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("hanwha") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5579,7 +5576,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5599,7 +5596,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ipera") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5620,7 +5617,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5640,7 +5637,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ionetworks") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5661,7 +5658,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5681,7 +5678,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("nutech") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5702,7 +5699,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5722,7 +5719,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ras") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5743,7 +5740,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5763,7 +5760,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("senturian") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5784,7 +5781,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5804,7 +5801,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("systemk") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5825,7 +5822,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5845,7 +5842,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("tricom") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5866,7 +5863,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5886,7 +5883,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("ust") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5907,7 +5904,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5927,7 +5924,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vista") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5948,7 +5945,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5968,7 +5965,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoblue") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -5989,7 +5986,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -6009,7 +6006,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("vmsdemoorange") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -6030,7 +6027,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -6050,7 +6047,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("metavms") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -6071,7 +6068,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
@@ -6091,7 +6088,7 @@
             ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
-            REQUESTED_BY={tag_requested_by}
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH

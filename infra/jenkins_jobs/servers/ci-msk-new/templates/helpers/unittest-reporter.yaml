@@ -9,8 +9,6 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 10
         option: project
@@ -49,7 +47,7 @@
     - credentials-binding:
       - username-password:
           credential-id: junk_shop_db
-          variable: junk_shop_db_credentials
+          variable: JUNK_SHOP_DB_CREDENTIALS
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
@@ -80,7 +78,7 @@
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -114,7 +112,7 @@
               JUNKSHOP_PLATFORM="$PLATFORM"
             fi
 
-            DB_CONFIG=$junk_shop_db_credentials@$JUNKSHOP_DB_HOST
+            DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
             BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             if [ -d unit_tests ] ; then
@@ -136,4 +134,4 @@
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
     - failure-email-helpers(maintainers):
-        email-recipients: '{job-maintainers}'
+        email-recipients: '{job_maintainers}'

@@ -11,13 +11,11 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - build-discarder:
         days-to-keep: 10
         num-to-keep: 50
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -26,7 +24,7 @@
         default: true
     - p_BUILD_IDENTITY
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_NX_VMS_COMMIT:
         default: ''
     - string:

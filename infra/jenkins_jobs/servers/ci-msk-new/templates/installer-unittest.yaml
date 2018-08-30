@@ -21,8 +21,6 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 5
         option: category
@@ -32,7 +30,7 @@
         days-to-keep: 30
         num-to-keep: 100
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -42,7 +40,7 @@
     - p_NX_VMS_COMMIT
     - p_RUNNER_URL
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_PIPELINE(hidden):
         default: '{pipeline}'
     - p_CUSTOMIZATION(hidden):
@@ -105,7 +103,7 @@
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
@@ -220,7 +218,7 @@
             - project: '{pipeline}.helper.publish-tests'
               block: true
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -245,7 +243,7 @@
             - project: '{pipeline}.helper.unittests-reporter'
               block: false
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY
@@ -268,7 +266,7 @@
             - project: '{pipeline}.helper.unittests-reporter'
               block: false
               predefined-parameters: |
-                REQUESTED_BY={tag_requested_by}
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
                 BUILD_DESCRIPTION=$BUILD_DESCRIPTION
                 BRANCH=$BRANCH
                 BUILD_IDENTITY=$BUILD_IDENTITY

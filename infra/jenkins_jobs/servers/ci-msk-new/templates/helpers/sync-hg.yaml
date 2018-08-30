@@ -2,7 +2,7 @@
     name: '{pipeline}.helper.sync-hg'
 
     # all build triggers will work under the same workspace as well as
-    node: '{hg-local-cache-node-read}'
+    node: '{hg_local_cache_node_read}'
     workspace: 'nx_{pipeline}_hgsync_thr${{EXECUTOR_NUMBER}}'
     concurrent: true
 
@@ -10,8 +10,6 @@
     - authorization-{pipeline}-system
     - priority-sorter:
         priority: !j2: '{{ pipeline_priority }}'
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 2
         option: project
@@ -77,4 +75,4 @@
 
     publishers:
     - failure-email-helpers(maintainers):
-        email-recipients: '{job-maintainers}'
+        email-recipients: '{job_maintainers}'

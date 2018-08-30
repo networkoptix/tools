@@ -7,7 +7,7 @@
       ================================================================================
 
       JOB MAINTAINERS
-        {job-maintainers}
+        {job_maintainers}
         (notified by email on build failures)
 
       SOURCES
@@ -46,24 +46,17 @@
 
     # all build triggers will work under the same workspace as well as
     # Important: this node must have only 1 worker
-    node: '{hg-local-cache-node-write}'
-    workspace: '{hg-local-cache-node-workspace}'
+    node: '{hg_local_cache_node_write}'
+    workspace: '{hg_local_cache_node_workspace}'
     concurrent: false
 
     properties:
     - authorization-{pipeline}-system
-    - heavy-job:
-        weight: 1
-    - throttle:
-        option: category
-        max-total: 1
-        categories:
-        - '{hg-local-cache-node-throttle-category}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -148,4 +141,4 @@
         allow-empty: 'false'
         fingerprint: true
     - failure-email-helpers(maintainers):
-        email-recipients: '{job-maintainers}'
+        email-recipients: '{job_maintainers}'

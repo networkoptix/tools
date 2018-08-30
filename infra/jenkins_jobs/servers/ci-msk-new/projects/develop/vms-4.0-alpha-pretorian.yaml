@@ -7,7 +7,7 @@
 
     version:
     - vms_4.0_alpha:
-        default-branch: vms_4.0_alpha
+        default_branch: vms_4.0_alpha
         use-nx-vms-commit: vms_4.0_alpha  # FIXME: this is temp fix
 
     # SECTION. GLOBAL PIPELINE CONFIG

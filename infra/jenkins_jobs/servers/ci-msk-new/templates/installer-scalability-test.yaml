@@ -2,7 +2,7 @@
     name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
     description: |
       Run scalability tests for {customization} for {version}.
-    node: '{functest-node}'
+    node: '{functest_node}'
     concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
@@ -12,8 +12,6 @@
 
     properties:
     - authorization-{pipeline}-system
-    - heavy-job:
-        weight: 1
     - throttle:
         max-total: 1
         option: category
@@ -23,7 +21,7 @@
         days-to-keep: 10
         num-to-keep: 50
         artifact-days-to-keep: 30
-        artifact-num-to-keep: '{default-artifact-num-to-keep}'
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
     - p_BUILD_DESCRIPTION:
@@ -32,7 +30,7 @@
         default: true
     - p_BUILD_IDENTITY
     - p_BRANCH:
-        default: '{default-branch}'
+        default: '{default_branch}'
     - p_NX_VMS_COMMIT:
         default: ''
     - string:
@@ -131,7 +129,7 @@
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BRANCH=$BRANCH
           BUILD_IDENTITY=$BUILD_IDENTITY
