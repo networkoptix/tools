@@ -75,7 +75,6 @@
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
     - set-custom-build-description
 
-    # unittests
     - trigger-builds:
       - project: '{pipeline}.helper.pull-component'
         predefined-parameters: |
@@ -89,27 +88,7 @@
           LOCAL_PATH=$WORKSPACE/
           PLATFORM=$PLATFORM
           CUSTOMIZATION=$CUSTOMIZATION
-          COMPONENTS=unit_tests/*.yaml,unit_tests/*.output,unit_tests/*.bt
-          NODE_SSH_CONNECTION=$SSH_CONNECTION
-        block: true
-        block-thresholds:
-          failure-threshold: FAILURE
-
-    # sdk tests
-    - trigger-builds:
-      - project: '{pipeline}.helper.pull-component'
-        predefined-parameters: |
-          REQUESTED_BY={tag_requested_by}
-          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          BRANCH=$BRANCH
-          BUILD_IDENTITY=$BUILD_IDENTITY
-          CUSTOMIZATION=$CUSTOMIZATION
-          PLATFORM=$PLATFORM
-          SSH_USER=$USER
-          LOCAL_PATH=$WORKSPACE/
-          PLATFORM=$PLATFORM
-          CUSTOMIZATION=$CUSTOMIZATION
-          COMPONENTS=sdk_unit_tests/*.yaml,sdk_unit_tests/*.output,sdk_unit_tests/*.bt
+          COMPONENTS=unit_tests*.yaml,unit_tests*.output,unit_tests*.bt
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -142,8 +121,8 @@
               popd
             fi
 
-            if [ -d sdk_unit_tests ] ; then
-              pushd sdk_unit_tests
+            if [ -d unit_tests_sdk ] ; then
+              pushd unit_tests_sdk
                 $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS" --test-name "sdk_unit"
               popd
             fi

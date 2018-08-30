@@ -147,7 +147,7 @@
           pip install --upgrade pip setuptools wheel
           pip install --upgrade -r "devtools/ci/junk_shop/requirements.txt"
 
-          mkdir -p sdk_unit_tests unit_tests
+          mkdir -p unit_tests_sdk unit_tests
 
           # run metadata sdk tests if exists
           if [ -d build/nx_metadata_sdk ] ; then
@@ -157,7 +157,7 @@
               chmod +x -R build/nx_metadata_sdk
             fi
 
-            pushd sdk_unit_tests
+            pushd unit_tests_sdk
               # run tests
               PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
               $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
@@ -168,7 +168,7 @@
               # collect backtraces
               PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
               $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py \
-                --work-dir=$WORKSPACE/sdk_unit_tests
+                --work-dir=$WORKSPACE/unit_tests_sdk
             popd
           fi
 
@@ -194,7 +194,7 @@
 
         deactivate
 
-        failed_tests_num="$(find . -type f -path './unit_tests/*_ut.yaml' -exec cat {{}} \; | grep -E '^exit_code' | grep -E -v '\b0\b' | wc -l)"
+        failed_tests_num="$(find . -type f -path './unit_tests*_ut.yaml' -exec cat {{}} \; | grep -E '^exit_code' | grep -E -v '\b0\b' | wc -l)"
         if [ $failed_tests_num -gt 0 ] ; then
           echo "Detected ${{failed_tests_num}} failed test bundles, build will be marked as unstable"
           touch unstable.flag
@@ -227,7 +227,7 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
-                COMPONENTS=unit_tests/,sdk_unit_tests/
+                COMPONENTS=unit_tests*.yaml,unit_tests*.output,unit_tests*.bt
                 LOCAL_PATH=$WORKSPACE/
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
