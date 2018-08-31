@@ -82,7 +82,9 @@
         properties-content: |
           BUILD_IDENTITY=$USE_BUILD_IDENTITY
           NX_VMS_COMMIT=$USE_NX_VMS_COMMIT
-
+    - shell: !j2: |
+        #!bash
+        echo "NX_VMS_COMMIT=${NX_VMS_COMMIT}" > NX_VMS_COMMIT.envvar
     # if it's auto, get from existing build
     - conditional-step:
         condition-kind: strings-match

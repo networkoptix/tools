@@ -21,7 +21,6 @@ jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
 # all required plugins are installed. Optional plugins like "greenballs" are
 # not listed there for obvious reasons.
 jenkins_plugins:
-- PrioritySorter
 - view-job-filters
 - anything-goes-formatter
 - ssh-slaves
