@@ -15,9 +15,12 @@ DEFAULT_TEST_TIMEOUT = "100s"  # 100 seconds
 
 def run_unit_tests(config_path, work_dir, bin_dir, test_binary_list, timeout, max_workers, test_timeout):
     assert timeout is None or isinstance(timeout, timedelta), repr(timeout)
+    assert test_timeout is None or isinstance(test_timeout, timedelta), repr(test_timeout)
     runner = TestRunner(
         config_path, work_dir, bin_dir, test_binary_list, timeout, max_workers, test_timeout)
     try:
+        log.info("Run tests '%s', timeout: %s, test timeout: %s, workers: %d",
+                 test_binary_list, timeout, test_timeout, max_workers)
         runner.run()
     except Exception as x:
         runner.add_error('Internal unittest.py error: %r' % x)
