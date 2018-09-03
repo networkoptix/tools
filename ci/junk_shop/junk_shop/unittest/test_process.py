@@ -198,7 +198,7 @@ class GTestProcess(BaseTestProcess):
         output = subprocess.check_output([
             str(executable_path),
             '--gtest_list_tests',
-            '--gtest_filter=-NxCritical.All3'],
+            '--gtest_filter=-NxAssert*:-NxCritical*'],
             stderr=subprocess.STDOUT, universal_newlines=True)
 
         def strip_comment(x):
@@ -213,7 +213,6 @@ class GTestProcess(BaseTestProcess):
                 test_suite = strip_comment(line).strip()
             elif has_indent:
                 test_case_name = test_suite + strip_comment(line).strip()
-                if not test_case_name.endswith('NxCritical.All3'):
-                    yield cls(
-                        platform, env, work_dir, test_name,
-                        test_case_name.replace('/', '_'), executable_path)
+                yield cls(
+                    platform, env, work_dir, test_name,
+                    test_case_name.replace('/', '_'), executable_path)

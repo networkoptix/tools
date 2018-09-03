@@ -95,8 +95,12 @@ class TestRunner(object):
                             log.warning(error)
                             self._run_info.errors.append(error)
                             aborted = True
+                    # test_timeout should be used for google tests only
+                    timeout = None
+                    if isinstance(process, GTestProcess):
+                        timeout = self._test_timeout.seconds
                     # Wait test finished or timed out
-                    future.result(timeout=self._test_timeout.seconds)
+                    future.result(timeout=timeout)
                 except concurrent.futures.TimeoutError:
                         process.abort()
                 finally:
