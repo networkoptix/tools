@@ -7,10 +7,14 @@
     pipeline:
     - debug:
         __debug__: true
-    - release
+        pipeline_priority: 1
+    - release:
+        pipeline_priority: 9
     - develop:
         junkshop_project_name: ci
-    - custom
+        pipeline_priority: 5
+    - custom:
+        pipeline_priority: 3
     jobs:
 
     # HELPERS - syncronize and publish different stuff
@@ -26,6 +30,7 @@
 
     - '{pipeline}.helper.unittests-reporter'
     - '{pipeline}.helper.build-reporter'
+    - '{pipeline}.helper.build-notification'
 
     # UTILITY - register commit, build identities and other
 
