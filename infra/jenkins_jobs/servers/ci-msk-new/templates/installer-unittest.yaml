@@ -74,6 +74,11 @@
             pipeline: '{pipeline}'
             basedir: $WORKSPACE
 
+    scm:
+    - hg-local-no-changelog:
+        name: devtools
+        revision: 'default'
+
     builders:
     - set-hg-marker-successful-checkout
 
