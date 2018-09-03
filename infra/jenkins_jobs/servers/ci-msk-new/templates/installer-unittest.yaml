@@ -170,10 +170,6 @@
                 "$WORKSPACE/build/current_config.py" \
                 "$WORKSPACE/build/nx_metadata_sdk" \
                 $(cd $WORKSPACE/build/nx_metadata_sdk && find . -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
-              # collect backtraces
-              PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
-              $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py \
-                --work-dir=$WORKSPACE/unit_tests_sdk
             popd
           fi
 
@@ -191,10 +187,6 @@
               "$WORKSPACE/build/current_config.py" \
               "$WORKSPACE/build/bin" \
               $(cd $WORKSPACE/build/bin && find . -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
-            # collect backtraces
-            PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
-            $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_make_backtraces.py \
-              --work-dir=$WORKSPACE/unit_tests
           popd
 
         deactivate
