@@ -127,10 +127,12 @@ class BaseTestProcess(object):
         return self._pipe.poll() is not None
 
     def process_core_files(self):
-        for core_file_path in self._platform.collect_core_file_list(
+        """Collect & make backtraces from crash files if test process is failed."""
+        if self._test_info.exit_code != 0:
+            for core_file_path in self._platform.collect_core_file_list(
                 self._test_name, self._test_info, self.work_dir):
-            self._platform.produce_core_backtrace(
-                self._test_info.binary_path, core_file_path)
+                self._platform.produce_core_backtrace(
+                    self._test_info.binary_path, core_file_path)
 
 
 class CTestProcess(BaseTestProcess):

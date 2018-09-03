@@ -15,6 +15,7 @@ import subprocess
 import signal
 import shutil
 from datetime import datetime, timedelta
+from dateutil.tz import tzlocal
 
 from pathlib2 import Path
 from .cdb_command import extract_backtrace_from_dump
@@ -108,7 +109,7 @@ class WindowsPlatform(Platform):
         """
         dump_dir = Path(os.environ['LOCALAPPDATA'])
         for path in dump_dir.glob('*{}.exe*.dmp'.format(test_name)):
-            dump_time = datetime.utcfromtimestamp(path.stat().st_mtime)
+            dump_time = datetime.fromtimestamp(path.stat().st_mtime, tz=tzlocal())
             if test_info.started_at <= dump_time < test_info.started_at + test_info.duration + self.DUMP_FILE_CREATION_DELAY:
                 test_dump_path = test_work_dir / path.name
                 shutil.move(str(path), str(test_dump_path))
