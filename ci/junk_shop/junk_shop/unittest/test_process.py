@@ -52,7 +52,7 @@ class BaseTestProcess(object):
 
     @classmethod
     @abc.abstractmethod
-    def is_test_suite(cls, executable_path):
+    def is_test_suite(cls, executable_path, env):
         raise NotImplementedError
 
     @classmethod
@@ -150,7 +150,7 @@ class CTestProcess(BaseTestProcess):
         return self._root_work_dir / self._test_name
 
     @classmethod
-    def is_test_suite(cls, executable_path):
+    def is_test_suite(cls, executable_path, env):
         return executable_path.exists()
 
     @classmethod
@@ -184,13 +184,15 @@ class GTestProcess(BaseTestProcess):
         ]
 
     @classmethod
-    def is_test_suite(cls, executable_path):
+    def is_test_suite(cls, executable_path, env):
         try:
             output = subprocess.check_output(
                 [str(executable_path), '--help'],
+                env=env,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True)
         except (subprocess.CalledProcessError, OSError):
+
             return False
         else:
             return '--gtest_list_tests' in output
@@ -201,6 +203,7 @@ class GTestProcess(BaseTestProcess):
             str(executable_path),
             '--gtest_list_tests',
             '--gtest_filter=-NxAssert*:-NxCritical*'],
+            env=env,
             stderr=subprocess.STDOUT, universal_newlines=True)
 
         def strip_comment(x):

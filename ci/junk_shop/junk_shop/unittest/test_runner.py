@@ -63,7 +63,7 @@ class TestRunner(object):
             executable_path = self._bin_dir / binary_name
             find_test = False
             for test_binary_cls in [GTestProcess, CTestProcess]:
-                if test_binary_cls.is_test_suite(executable_path):
+                if test_binary_cls.is_test_suite(executable_path, env):
                     self._processes += list(
                         test_binary_cls.get_test_processes(
                             self._platform, env, self._work_dir, test_name, executable_path))
