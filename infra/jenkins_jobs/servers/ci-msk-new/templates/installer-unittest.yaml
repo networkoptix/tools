@@ -63,9 +63,7 @@
         failOnError: true
         buildsteps:
         - custom-clean-workspace:
-            keep_files: [ devtools, venv ]
-        - delete-files(on-windows):
-            files: devtools
+            keep_files: [ venv ]
         - import-hg-repo(if-missing):
             name: devtools
             branch: default
@@ -73,11 +71,6 @@
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
             basedir: $WORKSPACE
-
-    scm:
-    - hg-local-no-changelog:
-        name: devtools
-        revision: 'default'
 
     builders:
     - set-hg-marker-successful-checkout
