@@ -94,18 +94,17 @@ class GTestResults(BaseTestResults):
 
     def add_children(self, test_name, test_artifacts):
         test_name, test_name_suffix = split_test_name(test_name)
-        if not test_name_suffix:
-            self._children[test_name] = child = GTestResults(
-                test_name, test_artifacts=test_artifacts, is_leaf=True)
-            return child
+        is_leaf = not test_name_suffix
         child = self._children.setdefault(
             test_name, GTestResults(
-                test_name, test_artifacts=test_artifacts)
+                test_name, test_artifacts=test_artifacts, is_leaf=is_leaf)
         )
+        if not is_leaf:
+            child = child.add_children(test_name_suffix, test_artifacts)
         self.duration += child.duration
         self.passed = self.passed and child.passed
         self.started_at = min(self.started_at, child.started_at)
-        return child.add_children(test_name_suffix, test_artifacts)
+        return child
 
 
 #
