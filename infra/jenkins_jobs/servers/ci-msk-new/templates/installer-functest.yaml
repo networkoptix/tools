@@ -6,7 +6,10 @@
     concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
-    workspace: 'nx_ft_thr${{EXECUTOR_NUMBER}}/'
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}functest{{
+      "-thr${EXECUTOR_NUMBER}" if run_functests_concurrently else ""
+      }}'
+    run_functests_concurrently: true
 
     workdir: functests
 

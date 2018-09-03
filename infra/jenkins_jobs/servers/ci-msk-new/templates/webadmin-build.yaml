@@ -43,10 +43,13 @@
       </pre>
 
     node: '{webadmin_build_node}'
-    concurrent: true
-    workspace: 'nx_build_thr${{EXECUTOR_NUMBER}}-webadmin-{version}/'
+    concurrent: '{build_webadmin_concurrently}'
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}nx_build{{
+      "_thr${EXECUTOR_NUMBER}" if build_webadmin_concurrently else ""
+      }}-webadmin'
 
     webadmin_build_node: webadmin-build
+    build_webadmin_concurrently: true
 
     # artifacts to save in jenkins
 

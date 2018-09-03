@@ -14,7 +14,7 @@
       </pre>
     node: reporter
     concurrent: false
-    workspace: 'nx_{pipeline}_notification'
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}nx_notification'
 
     # junk_shop_host: required!
 

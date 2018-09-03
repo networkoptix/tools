@@ -44,7 +44,7 @@
     # all build triggers will work under the same workspace as well as
     # Important: this node must have only 1 worker
     node: '{hg_local_cache_node_write}'
-    workspace: '{hg_local_cache_node_workspace}'
+    workspace: !j2: '{{ hg_local_cache_node_workspace }}'
     concurrent: false
 
     properties:
