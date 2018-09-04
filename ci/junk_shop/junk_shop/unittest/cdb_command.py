@@ -37,7 +37,7 @@ CDB_COMMAND_DESCRIPTIONS = [
 ]
 # Regex to cut & change prompt lines
 CDB_PROMPT_REGEX = r'^0:.*>'
-CDB_PROCESS_TIMEOUT_SEC = 30
+CDB_PROCESS_TIMEOUT_SEC = 120
 
 
 def process_cdb_output(output):
