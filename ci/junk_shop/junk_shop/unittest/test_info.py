@@ -32,9 +32,12 @@ class TestInfo(InfoBase):
             duration=str_to_timedelta(data['duration']),
             exit_code=data['exit_code'],
             timed_out=data['timed_out'],
+            pid=data['pid']
             )
 
-    def __init__(self, binary_path, command_line=None, errors=None, started_at=None, duration=None, exit_code=None, timed_out=False):
+    def __init__(self, binary_path, command_line=None, errors=None,
+                 started_at=None, duration=None, exit_code=None,
+                 timed_out=False, pid = None):
         self.binary_path = binary_path
         self.command_line = command_line
         self.errors = errors or []
@@ -42,6 +45,7 @@ class TestInfo(InfoBase):
         self.duration = duration  # timedelta
         self.exit_code = exit_code
         self.timed_out = timed_out
+        self.pid = pid
 
     def as_dict(self):
         return dict(
@@ -52,6 +56,7 @@ class TestInfo(InfoBase):
             duration=timedelta_to_str(self.duration),
             exit_code=self.exit_code,
             timed_out=self.timed_out,
+            pid=self.pid
             )
 
 

@@ -107,8 +107,11 @@ class WindowsPlatform(Platform):
 
         Side-effect: Dump-files are moving to `test_work_dir` before processing.
         """
+        # PID is used to detect dump owner process
+        if not test_info.pid:
+            log.info('Cannot collect backtraces for test %r: pid is unknown', test_name)
         dump_dir = Path(os.environ['LOCALAPPDATA'])
-        for path in dump_dir.glob('*{}.exe*.dmp'.format(test_name)):
+        for path in dump_dir.glob('*{}.exe*_{}.dmp'.format(test_name, test_info.pid)):
             dump_time = datetime.fromtimestamp(path.stat().st_mtime, tz=tzlocal())
             if test_info.started_at <= dump_time < test_info.started_at + test_info.duration + self.DUMP_FILE_CREATION_DELAY:
                 test_dump_path = test_work_dir / path.name
