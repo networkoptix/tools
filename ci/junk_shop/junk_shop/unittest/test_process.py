@@ -6,6 +6,7 @@ import logging
 import subprocess
 import time
 import abc
+import re
 
 from ..utils import datetime_local_now
 from .test_info import TestInfo
@@ -214,9 +215,9 @@ class GTestProcess(BaseTestProcess):
 
         for line in output.splitlines():
             has_indent = line.startswith(' ')
-            if not has_indent and '.' in line:
+            if not has_indent and re.search(r'^\w+\.$', line):
                 test_suite = strip_comment(line).strip()
-            elif has_indent:
+            elif has_indent and re.search(r'^\s+\w+$', line):
                 test_case_name = test_suite + strip_comment(line).strip()
                 yield cls(
                     platform, env, work_dir, test_name,
