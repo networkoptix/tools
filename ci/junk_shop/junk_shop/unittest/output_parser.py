@@ -107,7 +107,6 @@ class GTestResults(BaseTestResults):
         return child
 
 
-#
 class CTestOutputParser(GoogleTestEventHandler):
     """Use CTestParser to parse test output file (google test formatted).
     Implement GoogleTestEventHandler methods to construct TestResult tree.
@@ -203,7 +202,7 @@ class GTestOutputParser(GoogleTestEventHandler):
         return self._test_results
 
     def on_parse_error(self, error):
-        self._test_results[0].parse_errors.add(error)
+        self._test_results.parse_errors.add(error)
 
     def on_gtest_error(self, line):
         self._test_results.gtest_errors.add(line)
