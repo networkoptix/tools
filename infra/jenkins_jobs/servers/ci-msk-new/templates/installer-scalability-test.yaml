@@ -115,11 +115,8 @@
 
     - shell: |
         #!/bin/bash
-        set -ex
-        for dir in "build" "dist" "{workdir}" ; do
-          rm -rf "$dir"
-          mkdir -p "$dir"
-        done
+        rm -rf   "build" "dist" "{workdir}"
+        mkdir -p "build" "dist" "{workdir}"
 
     - inject:
         properties-content: |
@@ -191,7 +188,7 @@
         mkdir -p "$WORK_DIR"
 
         if [ ! -d venv ]; then
-          virtualenv --system-site-packages venv
+          virtualenv venv
         fi
 
         source venv/bin/activate

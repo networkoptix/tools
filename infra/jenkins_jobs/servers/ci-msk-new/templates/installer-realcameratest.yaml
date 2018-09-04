@@ -61,9 +61,6 @@
       - username-password:
           credential-id: junk_shop_db
           variable: JUNK_SHOP_DB_CREDENTIALS
-      - text:
-          credential-id: service_email
-          variable: AUTOTEST_EMAIL_PASSWORD
     - workspace-cleanup:
         check-parameter: CLEAN_WORKSPACE
     - pre-scm-buildstep:
@@ -120,10 +117,8 @@
     - shell: |
         #!/bin/bash
         set -ex
-        for dir in "build" "dist" "{workdir}" ; do
-          rm -rf "$dir"
-          mkdir -p "$dir"
-        done
+        rm -rf   "build" "dist" "{workdir}"
+        mkdir -p "build" "dist" "{workdir}"
 
     - inject:
         properties-content: |
@@ -162,7 +157,7 @@
         mkdir -p "$WORK_DIR"
 
         if [ ! -d venv ]; then
-          virtualenv --system-site-packages venv
+          virtualenv venv
         fi
 
         source venv/bin/activate
@@ -172,8 +167,6 @@
 
           export PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop"
           export PYTEST_PLUGINS=junk_shop.pytest_plugin
-
-          : "${{AUTOTEST_EMAIL_PASSWORD:?}}"  # password for cloud accont
 
           TEST_TIMEOUT="$((4 * 60 * 60))" # 4hr
 
