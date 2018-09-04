@@ -216,9 +216,9 @@ class GTestProcess(BaseTestProcess):
 
         for line in output.splitlines():
             has_indent = line.startswith(' ')
-            if not has_indent and re.search(r'^\w+\.$', line):
+            if not has_indent and re.search(r'^\S+\.(\s+#.*)?$', line):
                 test_suite = strip_comment(line).strip()
-            elif has_indent and re.search(r'^\s+\w+$', line):
+            elif has_indent and re.search(r'^\s+\w+(\s+#.*)?$', line):
                 test_case_name = test_suite + strip_comment(line).strip()
                 yield cls(
                     platform, env, work_dir, test_name,
