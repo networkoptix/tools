@@ -94,6 +94,7 @@ class BaseTestProcess(object):
                 self._test_info.exit_code = -1
                 return
             log.info('%s is started', self)
+            self._test_info.pid = self._pipe.pid
             while not self.is_finished():
                 time.sleep(1)
         finally:
