@@ -222,4 +222,4 @@ class GTestProcess(BaseTestProcess):
                 test_case_name = test_suite + strip_comment(line).strip()
                 yield cls(
                     platform, env, work_dir, test_name,
-                    test_case_name.replace('/', '_'), executable_path)
+                    test_case_name.replace('/', '.'), executable_path)
