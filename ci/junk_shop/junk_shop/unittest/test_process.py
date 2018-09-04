@@ -171,10 +171,10 @@ class GTestProcess(BaseTestProcess):
 
     @property
     def work_dir(self):
-        return self._root_work_dir / self._test_name / self._test_case_name
+        return self._root_work_dir / self._test_name / self._test_case_name.replace('/', '.')
 
     def __str__(self):
-        return '%s.%s' % (self._test_name, self._test_case_name)
+        return '%s.%s' % (self._test_name, self._test_case_name.replace('/', '.'))
 
     def get_arguments(self):
         log_level = TEST_LOG_LEVEL.get(self._test_name, DEFAULT_LOG_LEVEL)
@@ -222,4 +222,4 @@ class GTestProcess(BaseTestProcess):
                 test_case_name = test_suite + strip_comment(line).strip()
                 yield cls(
                     platform, env, work_dir, test_name,
-                    test_case_name.replace('/', '.'), executable_path)
+                    test_case_name, executable_path)
