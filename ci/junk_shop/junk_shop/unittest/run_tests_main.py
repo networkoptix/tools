@@ -9,7 +9,7 @@ from .test_runner import TestRunner
 
 log = logging.getLogger(__name__)
 
-DEFAULT_MAX_WORKERS = 10
+DEFAULT_MAX_WORKERS = 20
 DEFAULT_TEST_TIMEOUT = "100s"  # 100 seconds
 
 
@@ -19,8 +19,6 @@ def run_unit_tests(config_path, work_dir, bin_dir, test_binary_list, timeout, ma
     runner = TestRunner(
         config_path, work_dir, bin_dir, test_binary_list, timeout, max_workers, test_timeout)
     try:
-        log.info("Run tests '%s', timeout: %s, test timeout: %s, workers: %d",
-                 test_binary_list, timeout, test_timeout, max_workers)
         runner.run()
     except Exception as x:
         runner.add_error('Internal unittest.py error: %r' % x)
@@ -54,10 +52,10 @@ def main():
         '--timeout', type=str_to_timedelta, dest='timeout', help='Total run timeout, in format: 1d2h3m4s')
     parser.add_argument(
         '--max-workers', type=int, default=DEFAULT_MAX_WORKERS,
-        help="Max. number of multiple tests to perform at a time, default={}.".format(DEFAULT_MAX_WORKERS))
+        help="Max. number of multiple tests to perform at a time, default=%(default)r.")
     parser.add_argument(
         '--test-timeout', type=str_to_timedelta, default=DEFAULT_TEST_TIMEOUT,
-        help="Test timeout, in format 1d2h3m4s, default={}.".format(DEFAULT_TEST_TIMEOUT))
+        help="Test timeout, in format 1d2h3m4s, default=%(default)r.")
     parser.add_argument('config_path', type=file_path, help='Path to current_config.py')
     parser.add_argument('bin_dir', type=dir_path, help='Directory to test binaries')
     parser.add_argument('test_binary', nargs='+', help='Executable for unit test, *_ut')

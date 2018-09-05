@@ -9,6 +9,8 @@ from .test_process import GTestProcess, CTestProcess
 
 log = logging.getLogger(__name__)
 
+NX_INI_FILENAME = 'nx_utils.ini'
+
 
 class TestRunner(object):
 
@@ -31,7 +33,7 @@ class TestRunner(object):
         self._clean_core_files()
         self._create_nx_ini_file()
         self._collect_test_processes(config_vars)
-        self._run_info = RunInfo([str(test_process) for test_process in self._processes])
+        self._run_info = RunInfo([test_process.test_name for test_process in self._processes])
         self._run_pre_checks()
 
     def _read_current_config(self):
@@ -49,9 +51,10 @@ class TestRunner(object):
         """Create nx_utils.ini file. For more details, please see:
             - https://networkoptix.atlassian.net/browse/CI-248
             - https://networkoptix.atlassian.net/wiki/spaces/SD/pages/83895081/Experimenting+and+debugging+.ini+files"""
-        nx_ini_file = self._work_dir.joinpath('nx_utils.ini')
-        nx_ini_file.open('w').writelines(
-            [u'assertCrash=1\n', u'assertHeavyCondition=1'])
+        nx_ini_file = self._work_dir.joinpath(NX_INI_FILENAME)
+        with nx_ini_file.open('w') as f:
+            f.writelines(
+                [u'assertCrash=1\n', u'assertHeavyCondition=1'])
 
     def _collect_test_processes(self, config_vars):
         env = self._platform.env_with_library_path(config_vars)
@@ -74,8 +77,6 @@ class TestRunner(object):
 
     def _run_pre_checks(self):
         error_list = self._platform.do_unittests_pre_checks()
-        if not error_list:
-            return
         for error in error_list:
             log.warning('Environment configuration error: %s', error)
         self._run_info.errors += error_list
@@ -84,7 +85,7 @@ class TestRunner(object):
         self._run_info.started_at = datetime_local_now()
         aborted = False
         with concurrent.futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-            for process, future in [(p, executor.submit(p)) for p in self._processes]:
+            for process, future in [(p, executor.submit(p.run)) for p in self._processes]:
                 try:
                     # Check total run timeout
                     run_duration = datetime_local_now() - self._run_info.started_at

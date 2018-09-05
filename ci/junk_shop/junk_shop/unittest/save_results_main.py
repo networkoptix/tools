@@ -35,10 +35,9 @@ def parse_and_save_results_to_db(work_dir, repository, root_name=DEFAULT_UNIT_TE
 def get_test_record_list(work_dir, run_info):
     test_records = dict()
     for test_name in run_info.test_list:
-        test_dir_base = work_dir.joinpath(test_name)
         binary_name, test_case_name = split_test_name(test_name)
-        test_info = TestInfo.load_from_file(test_dir_base.with_suffix(test_dir_base.suffix + '.yaml'))
-        output_file_path = test_dir_base.with_suffix(test_dir_base.suffix + '.output')
+        test_info = TestInfo.load_from_file(work_dir.joinpath(test_name + '.yaml'))
+        output_file_path = work_dir.joinpath(test_name + '.output')
         killed_by_signal = test_info.exit_code < 0
         is_aborted = test_info.timed_out or killed_by_signal
 
