@@ -157,7 +157,6 @@
             run-functests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         - scalability-test
@@ -172,7 +171,6 @@
 
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         preset:
@@ -211,10 +209,10 @@
         build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
-        build-watchers: vfedorov@networkoptix.com
+        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scaletest':
         customization: default
-        build-watchers: vfedorov@networkoptix.com
+        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com

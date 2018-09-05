@@ -161,7 +161,6 @@
             run-realcameratests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job_maintainers: vfedorov@networkoptix.com
         tests:
         - functest
         preset:
@@ -177,7 +176,6 @@
             timer: 'H 20 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
-        job_maintainers: vfedorov@networkoptix.com
         tests:
         - scalability-test
         preset:
@@ -209,10 +207,10 @@
         build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
-        build-watchers: vfedorov@networkoptix.com
+        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scaletest':
         customization: default
-        build-watchers: vfedorov@networkoptix.com
+        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build-watchers: muskov@networkoptix.com
