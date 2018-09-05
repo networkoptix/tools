@@ -46,10 +46,6 @@
         default: all
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          TEST_LIST=cameras_integration/test_server.py::test_cameras
     - timestamps
     - timeout:
         timeout: 300 # min

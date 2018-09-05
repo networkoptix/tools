@@ -222,7 +222,7 @@
               --slot=$EXECUTOR_NUMBER \
               --reinstall \
               -v \
-              -k "$TEST_SELECT_EXPR"
+              -k "$TEST_SELECT_EXPR" \
               $TEST_LIST
 
     publishers:
