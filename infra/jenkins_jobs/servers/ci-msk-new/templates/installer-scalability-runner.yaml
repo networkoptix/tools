@@ -106,43 +106,43 @@
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=20
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=40
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=60
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=80
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=100
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=120
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=true
+            USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=140
 
     publishers:
