@@ -7,6 +7,8 @@ import time
 import abc
 import re
 import subprocess
+import timeit
+
 
 from ..utils import datetime_local_now
 from .test_info import TestInfo
@@ -34,23 +36,21 @@ class BaseTestProcess(object):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, platform, env, root_work_dir, work_dir, test_name, executable_path):
+    def __init__(self, platform, env, root_work_dir, work_dir, binary_name, executable_path):
         self._env = env
         self._root_work_dir = root_work_dir
         self._work_dir = work_dir  # pathlib2.Path
         self._platform = platform
-        self._test_name = test_name  # aka executable file name
+        self._binary_name = binary_name  # aka executable file name
         self._executable_path = executable_path  # full path to test binary, *_ut, pathlib2.Path
         self._pipe = None
         self._test_info = TestInfo(executable_path)
         self._output_file = None
+        self.timeout = None
+        self.test_name = self._binary_name
         if not self._work_dir.is_dir():
             log.debug('Creating test working directory: %s', self._work_dir)
             self._work_dir.mkdir(parents=True)
-
-    @abc.abstractproperty
-    def test_name(self):
-        pass
 
     @classmethod
     @abc.abstractmethod
@@ -59,7 +59,7 @@ class BaseTestProcess(object):
 
     @classmethod
     @abc.abstractmethod
-    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path):
+    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path, timeout):
         raise NotImplementedError
 
     def get_arguments(self):
@@ -69,10 +69,8 @@ class BaseTestProcess(object):
         try:
             args = [str(self._executable_path),
                     '--tmp=%s' % self._work_dir] + self.get_arguments()
-            self._test_info.command_line = subprocess.list2cmdline(args)
-            if not self._executable_path.exists():
-                self._test_info.errors.append('Test executable is missing: %r' % self._executable_path)
-                return
+            self._test_info.command_line = ' '.join(args)
+
             output_file_path = self._root_work_dir.joinpath(self.test_name + '.output')
             self._output_file = output_file_path.open('wb')
 
@@ -112,7 +110,6 @@ class BaseTestProcess(object):
             self._test_info.errors.append(
                 'Aborted by timeout, still running after %s seconds' % self._test_info.duration.total_seconds())
 
-        print self._test_info, str(self._root_work_dir.joinpath(self.test_name + '.yaml'))
         self._test_info.save_to_file(
             self._root_work_dir.joinpath(self.test_name + '.yaml'))
         log.info('%s ended with exit code %d', self.test_name, self._test_info.exit_code)
@@ -134,7 +131,7 @@ class BaseTestProcess(object):
         """Collect & make backtraces from crash files if test process is failed."""
         if self._test_info.exit_code != 0:
             for core_file_path in self._platform.collect_core_file_list(
-                self._test_name, self._test_info, self._work_dir):
+                    self._binary_name, self._test_info, self._work_dir):
                 self._platform.produce_core_backtrace(
                     self._test_info.binary_path, core_file_path)
 
@@ -142,21 +139,17 @@ class BaseTestProcess(object):
 class CTestProcess(BaseTestProcess):
     """Nx_vms C++ test process"""
 
-    def __init__(self, platform, env, root_work_dir, test_name, executable_path):
+    def __init__(self, platform, env, root_work_dir, binary_name, executable_path):
         super(CTestProcess, self).__init__(
-            platform, env, root_work_dir, root_work_dir / test_name,
-            test_name, executable_path)
-
-    @property
-    def test_name(self):
-        return self._test_name
+            platform, env, root_work_dir, root_work_dir / binary_name,
+            binary_name, executable_path)
 
     @classmethod
     def is_test_suite(cls, executable_path, env):
         return executable_path.exists()
 
     @classmethod
-    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path):
+    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path, timeout):
         return [cls(
             platform, env, work_dir, test_name, executable_path)]
 
@@ -164,23 +157,18 @@ class CTestProcess(BaseTestProcess):
 class GTestProcess(BaseTestProcess):
     """Nx_vms google test process"""
 
-    def __init__(self, platform, env, root_work_dir, test_name, test_case_name, executable_path):
+    def __init__(self, platform, env, root_work_dir, binary_name,
+                 test_case_name, executable_path, timeout):
         super(GTestProcess, self).__init__(
             platform, env, root_work_dir,
-            root_work_dir / test_name / test_case_name.replace('/', '.'),
-            test_name, executable_path)
+            root_work_dir / binary_name / test_case_name.replace('/', '.'),
+            binary_name, executable_path)
         self._test_case_name = test_case_name
-
-    @property
-    def test_name(self):
-        return '%s.%s' % (self._test_name, self._test_case_name.replace('/', '.'))
-
-    @property
-    def work_dir(self):
-        return
+        self.test_name += ".%s" % test_case_name.replace('/', '.')
+        self.timeout = timeout
 
     def get_arguments(self):
-        log_level = TEST_LOG_LEVEL.get(self._test_name, DEFAULT_LOG_LEVEL)
+        log_level = TEST_LOG_LEVEL.get(self._binary_name, DEFAULT_LOG_LEVEL)
         # developers asked for these flags to be used for unit tests
         return [
             '--gtest_break_on_failure',
@@ -203,7 +191,7 @@ class GTestProcess(BaseTestProcess):
             return '--gtest_list_tests' in output
 
     @classmethod
-    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path):
+    def get_test_processes(cls, platform, env, work_dir, test_name, executable_path, timeout):
         output = subprocess.check_output([
             str(executable_path),
             '--gtest_list_tests',
@@ -211,18 +199,15 @@ class GTestProcess(BaseTestProcess):
             env=env,
             stderr=subprocess.STDOUT, universal_newlines=True)
 
-        def strip_comment(x):
-            comment_start = x.find('#')
-            if comment_start != -1:
-                x = x[:comment_start]
-            return x
-
+        test_suite = None
         for line in output.splitlines():
-            has_indent = line.startswith(' ')
-            if not has_indent and re.search(r'^\S+\.(\s+#.*)?$', line):
-                test_suite = strip_comment(line).strip()
-            elif has_indent and re.search(r'^\s+\w+(\s+#.*)?$', line):
-                test_case_name = test_suite + strip_comment(line).strip()
-                yield cls(
-                    platform, env, work_dir, test_name,
-                    test_case_name, executable_path)
+            match_suit = re.match(r'^([^.]+\.)(\s+#.*)?$', line)
+            if match_suit:
+                test_suite = match_suit.group(1)
+            elif test_suite:
+                match_case = re.search(r'^\s+(\w+)(\s+#.*)?$', line)
+                if match_case:
+                    test_case_name = test_suite + match_case.group(1)
+                    yield cls(
+                        platform, env, work_dir, test_name,
+                        test_case_name, executable_path, timeout)

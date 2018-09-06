@@ -30,9 +30,10 @@ class TestRunner(object):
 
     def _prepare_test_env(self):
         config_vars = self._read_current_config()
-        self._clean_core_files()
-        self._create_nx_ini_file()
-        self._collect_test_processes(config_vars)
+        self._clean_crash_files()
+        env = self._platform.env_with_library_path(config_vars)
+        self._prepare_nx_ini_file(env)
+        self._collect_test_processes(env)
         self._run_info = RunInfo([test_process.test_name for test_process in self._processes])
         self._run_pre_checks()
 
@@ -42,37 +43,40 @@ class TestRunner(object):
         execfile(str(self._config_path), config_vars)
         return config_vars
 
-    def _clean_core_files(self):
-        for path in self._work_dir.rglob('*.core.*'):
+    def _clean_crash_files(self):
+        crash_file_mask = '*.core.*'
+        if sys.platform == 'win32':
+            crash_file_mask = '*.dmp'
+        for path in self._work_dir.rglob(crash_file_mask):
             log.info('Removing old core file %s', path)
             path.unlink()
 
-    def _create_nx_ini_file(self):
+    def _prepare_nx_ini_file(self, env):
         """Create nx_utils.ini file. For more details, please see:
             - https://networkoptix.atlassian.net/browse/CI-248
             - https://networkoptix.atlassian.net/wiki/spaces/SD/pages/83895081/Experimenting+and+debugging+.ini+files"""
+        env['NX_INI_DIR'] = str(self._work_dir)
         nx_ini_file = self._work_dir.joinpath(NX_INI_FILENAME)
         with nx_ini_file.open('w') as f:
             f.writelines(
                 [u'assertCrash=1\n', u'assertHeavyCondition=1'])
 
-    def _collect_test_processes(self, config_vars):
-        env = self._platform.env_with_library_path(config_vars)
+    def _collect_test_processes(self, env):
         # Setup NX_INI_DIR
         # https://networkoptix.atlassian.net/wiki/spaces/SD/pages/83895081/Experimenting+and+debugging+.ini+files
-        env['NX_INI_DIR'] = str(self._work_dir)
         for binary_name in self._binary_list:
             test_name = self._binary_to_test_name(binary_name)
             executable_path = self._bin_dir / binary_name
-            find_test = False
             for test_binary_cls in [GTestProcess, CTestProcess]:
                 if test_binary_cls.is_test_suite(executable_path, env):
-                    self._processes += list(
+                    test_processes = list(
                         test_binary_cls.get_test_processes(
-                            self._platform, env, self._work_dir, test_name, executable_path))
-                    find_test = True
-                    break
-            if not find_test:
+                            self._platform, env, self._work_dir, test_name,
+                            executable_path, self._test_timeout.seconds))
+                    if test_processes:
+                        self._processes += test_processes
+                        break
+            else:
                 log.warning('Test executable file %s is not found', executable_path)
 
     def _run_pre_checks(self):
@@ -96,12 +100,8 @@ class TestRunner(object):
                             log.warning(error)
                             self._run_info.errors.append(error)
                             aborted = True
-                    # test_timeout should be used for google tests only
-                    timeout = None
-                    if isinstance(process, GTestProcess):
-                        timeout = self._test_timeout.seconds
                     # Wait test finished or timed out
-                    future.result(timeout=timeout)
+                    future.result(process.timeout)
                 except concurrent.futures.TimeoutError:
                         process.abort()
                 finally:
