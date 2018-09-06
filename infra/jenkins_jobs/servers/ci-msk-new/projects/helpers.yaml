@@ -39,3 +39,8 @@
     - '{pipeline}.{counter_name}.generator':
         counter_name: build_number
         counter_var_name: BUILD_IDENTITY
+
+    - '{pipeline}.helper.promote-build':
+        pipeline:
+        - release:
+            pipeline_priority: 9

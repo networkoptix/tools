@@ -1,0 +1,50 @@
+- job-template:
+    name: '{pipeline}.helper.promote-build'
+
+    description: ''
+
+    node: repository-ops
+    concurrent: false
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_BRANCH
+    - p_NX_VMS_COMMIT
+    - p_BUILD_IDENTITY
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 20 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - set-custom-build-description
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+    - shell: !j2: |
+        #!bash
+        REPOSITORY_ROOT_PATH={{ artifact_repository_base_path }}/{{ artifact_location_root_pattern }}
+        _version="$(cat "${REPOSITORY_ROOT_PATH}"/default/*/build_info.txt | grep version | tail -1 | cut -f 2 -d '=')"
+        TARGET_ROOT="/mnt/beta-builds/daily/${BUILD_IDENTITY}-${BRANCH}"
+        echo mkdir -p "${TARGET_ROOT}"
+        echo echo "$_version" '>' "${TARGET_ROOT}/version"
+        tree $REPOSITORY_ROOT_PATH
+        for customization in $(ls "${REPOSITORY_ROOT_PATH}") ; do
+          echo mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}"
+          echo mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/updates"
+          echo mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/distributive"
+          for file in $(ls "$REPOSITORY_ROOT_PATH/$customization/all/update") ; do
+            ls "$REPOSITORY_ROOT_PATH/${customization}/all/update/${file}"
+            echo ln -f "$REPOSITORY_ROOT_PATH/${customization}/all/update/${file}" "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/updates/${file}"
+          done
+          for file in $(ls $REPOSITORY_ROOT_PATH/${customization}/all/distrib) ; do
+            ls "$REPOSITORY_ROOT_PATH/${customization}/all/distrib/${file}"
+            echo ln -f "$REPOSITORY_ROOT_PATH/${customization}/all/distrib/${file}" "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/distributive/${file}"
+          done
+        done

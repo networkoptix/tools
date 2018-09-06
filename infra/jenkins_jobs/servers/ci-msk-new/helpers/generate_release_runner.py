@@ -340,6 +340,17 @@ print '''
             JUNKSHOP_HOST=$JUNKSHOP_HOST
             JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
+    - multijob:
+        name: Promote build for publishing via DepCon
+        projects:
+        - name: '{pipeline}.helper.promote-build'
+          condition: SUCCESSFUL
+          predefined-parameters: |
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+
     publishers:
     - groovy-postbuild:
         script: !include-raw-escape: ../builders/report_all_links.groovy
