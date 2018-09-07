@@ -206,7 +206,7 @@
               --work-dir="$WORK_DIR" \
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
-              --mediaserver-dist-path="$(echo "$WORKSPACE/dist/*-server-*.deb")" \
+              --mediaserver-dist-path="$(echo $WORKSPACE/dist/*-server-*.deb)" \
               --customization="$CUSTOMIZATION" \
               --cloud-group=test \
               --timeout="$TEST_TIMEOUT" \
