@@ -20,7 +20,7 @@ class TxtPrinter(Printer):
         return self
 
     def __exit__(self, *args):
-        print('sds')
+        print('')
 
     def user_title(self, user_id, name, total_count):
         print('{} ({})'.format(name, total_count))
