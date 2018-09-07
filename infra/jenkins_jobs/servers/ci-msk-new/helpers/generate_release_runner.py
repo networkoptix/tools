@@ -23,7 +23,7 @@ CUSTOMIZATIONS_LIST = [
     'vmsdemoblue',
     'vmsdemoorange',
     'metavms',
-    'xcello'
+    'xccelo'
 ]
 
 PLATFORMS_LIST = [

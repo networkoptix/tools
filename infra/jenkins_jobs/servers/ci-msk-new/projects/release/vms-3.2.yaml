@@ -145,7 +145,7 @@
     - vmsdemoblue
     - vmsdemoorange
     - metavms
-    - xcello
+    - xccelo
 
     # list of jobs to generate
     jobs:
@@ -178,7 +178,7 @@
             platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
             # TODO: rework defaults to accept space-separated values, and add >- here
             # TODO: split into default-selected and full-list
-            customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xcello
+            customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xccelo
 
     # RUNNER - root launcher of all builds
 

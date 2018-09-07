@@ -629,11 +629,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -1089,11 +1089,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -1549,11 +1549,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -2009,11 +2009,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -2469,11 +2469,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -2952,11 +2952,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -3412,11 +3412,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -3872,11 +3872,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -4332,11 +4332,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -4792,11 +4792,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -5252,11 +5252,11 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.xcello.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.xccelo.all'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$BUILD_INSTALLER").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -6059,11 +6059,11 @@
             JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.xcello.functest'
+        - name: '{pipeline}.{version}.{project}.distribution.xccelo.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$RUN_FUNCTESTS").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -6079,11 +6079,11 @@
             JUNKSHOP_HOST=$JUNKSHOP_HOST
             JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
-        - name: '{pipeline}.{version}.{project}.distribution.xcello.realcameratest'
+        - name: '{pipeline}.{version}.{project}.distribution.xccelo.realcameratest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
           enable-condition: >-
-            ("$CUSTOMIZATIONS").trim().split(",").contains("xcello") &&
+            ("$CUSTOMIZATIONS").trim().split(",").contains("xccelo") &&
             ("$RUN_REALCAMERATESTS").toBoolean()
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
