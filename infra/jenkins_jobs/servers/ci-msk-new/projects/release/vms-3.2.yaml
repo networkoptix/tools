@@ -80,7 +80,7 @@
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
     - windows-x64: &windows_config
-        installer-build-node: build-installer-windows
+        installer-build-node: build-installer-windows-hw-sign
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DaddQtPdb=ON
