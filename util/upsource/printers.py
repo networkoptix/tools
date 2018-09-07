@@ -71,8 +71,6 @@ class HtmlPrinter(Printer):
 
         reviews.sort(key=lambda r: -r.age)
         print('<h4>{0} ({1})</h4>'.format(caption, len(reviews)))
-        print('<ul>')
         for r in reviews:
-            print('<li><a href="{0}">{1}</a> ({2} days)</li>'
+            print('<span><a href="{0}">{1}</a> ({2} days)</span>'
                   .format(review_link(r), r.id, r.age.days))
-        print('</ul>')
