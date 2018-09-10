@@ -11,24 +11,26 @@
       daysToKeep: 30
 
     triggers:
-      - timed: 'H/10 * * * *'
+    - timed: 'H/10 * * * *'
 
     wrappers:
-      - timestamps
+    - timestamps
+    - priority-sorter:
+        priority: 1
 
     builders:
-      - batch: |
-          if not exist venv (
-              virtualenv --system-site-packages venv
-          )
-      - inline-python-win:
-          venv: venv
-          command:
-            !include-raw: ../builders/check-hardware-signing.py
+    - batch: |
+        if not exist venv (
+            virtualenv --system-site-packages venv
+        )
+    - inline-python-win:
+        venv: venv
+        command:
+          !include-raw: ../builders/check-hardware-signing.py
 
     publishers:
-      - email-ext:
-          recipients: '{recipients}'
-          subject: '[CI failure] CI hardware signing on node {node} is broken.'
-          attach-build-log: true
-          fixed: true
+    - email-ext:
+        recipients: '{recipients}'
+        subject: '[CI failure] CI hardware signing on node {node} is broken.'
+        attach-build-log: true
+        fixed: true
