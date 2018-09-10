@@ -20,7 +20,7 @@ GTEST_PATTERN_LIST = [
     ]
 
 
-class GoogleTestEventHandler(object):
+class TestEventHandler(object):
 
     __metaclass__ = abc.ABCMeta
 
@@ -43,7 +43,7 @@ class GoogleTestEventHandler(object):
     @abc.abstractmethod
     def on_suite_stop(self, duration_ms):
         pass
-    
+
     @abc.abstractmethod
     def on_test_start(self, test_name):
         pass
@@ -53,7 +53,7 @@ class GoogleTestEventHandler(object):
         pass
 
 
-class GoogleTestParser(object):
+class GTestParser(object):
 
     def __init__(self, handler):
         self._handler = handler
@@ -168,7 +168,7 @@ class GoogleTestParser(object):
         self._handler.on_parse_error(error)
 
 
-class TestEventHandler(GoogleTestEventHandler):
+class DebugTestEventHandler(TestEventHandler):
 
     def __init__(self, print_output, print_gtest_errors):
         self._print_output = print_output
@@ -190,7 +190,7 @@ class TestEventHandler(GoogleTestEventHandler):
 
     def on_suite_stop(self, duration_ms):
         print 'Suite finished: %s' % duration_ms
-    
+
     def on_test_start(self, test_name):
         print 'Test: %s' % test_name
 
@@ -204,11 +204,12 @@ def test_output():
     parser.add_argument('--print-gtest-errors', '-e', action='store_true', help='Print google test errors')
     parser.add_argument('file', help='Google test output to parse')
     args = parser.parse_args()
-    handler = TestEventHandler(print_output=args.print_output, print_gtest_errors=args.print_gtest_errors)
-    parser = GoogleTestParser(handler)
+    handler = DebugTestEventHandler(print_output=args.print_output, print_gtest_errors=args.print_gtest_errors)
+    parser = GTestParser(handler)
     for line in file(args.file):
         parser.process_line(line)
     parser.finish()
+
 
 if __name__ == '__main__':
     test_output()

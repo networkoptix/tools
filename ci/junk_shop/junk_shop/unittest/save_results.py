@@ -3,6 +3,10 @@ import logging
 from pony.orm import db_session
 
 from ..utils import status2outcome, outcome2status
+from .output_parser import (
+    ERROR_ARTIFACT_NAME,
+    COMMAND_LINE_ARTIFACT_NAME,
+    FULL_OUTPUT_ARTIFACT_NAME)
 from .. import models
 
 log = logging.getLogger(__name__)
@@ -28,13 +32,24 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
                 # and it is already caused run.outcome to be failed
                 if outcome2status(run.outcome) or results.test_artifacts.test_info.exit_code != 1:
                     error_list.append('exit code: %d' % results.test_artifacts.test_info.exit_code)
-            add_output_artifact(repository, run, 'errors', '\n'.join(error_list), is_error=True)
-            add_output_artifact(repository, run, 'command line', results.test_artifacts.test_info.command_line)
-            add_output_artifact(repository, run, 'full output', results.test_artifacts.output_file_path.read_bytes())
-            for backtrace_path in results.test_artifacts.backtrace_file_list:
+            add_output_artifact(
+                repository, run,
+                ERROR_ARTIFACT_NAME, '\n'.join(error_list),
+                is_error=True)
+            add_output_artifact(
+                repository, run, COMMAND_LINE_ARTIFACT_NAME,
+                results.test_artifacts.test_info.command_line)
+            add_output_artifact(
+                repository, run, FULL_OUTPUT_ARTIFACT_NAME,
+                results.test_artifacts.output_file.read_bytes())
+            run.started_at = results.test_artifacts.test_info.started_at
+            for backtrace_path in results.test_artifacts.backtrace_files:
                 name = backtrace_path.name
-                repository.add_artifact(run, name, name, repository.artifact_type.traceback,
-                                        backtrace_path.read_bytes(), is_error=True)
+                repository.add_artifact(
+                    run, name, name,
+                    repository.artifact_type.traceback,
+                    backtrace_path.read_bytes(),
+                    is_error=True)
         for name, artifact in results.lines_artifacts.items():
             data = artifact.data
             if artifact.is_truncated:
@@ -43,13 +58,10 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
             add_output_artifact(repository, run, name, data, artifact.is_error)
 
         run.duration = results.duration
-        run.started_at = None
 
-        if not results:
-            return run
-
-    for child_results in results.children:
-        produce_test_run(repository, run, test_path_list, child_results.test_name, child_results)
+    if results:
+        for child_results in results.children:
+            produce_test_run(repository, run, test_path_list, child_results.test_name, child_results)
 
     return run
 
@@ -58,12 +70,12 @@ def produce_test_run(repository, parent_run, parent_path_list, test_name, result
 def make_root_run(repository, run_info, root_name):
     root_run = repository.produce_test_run(root_run=None, test_path_list=[root_name])
     root_run.duration = run_info.duration
-    add_output_artifact(repository, root_run, 'errors', '\n'.join(run_info.errors), is_error=True)
+    add_output_artifact(repository, root_run, ERROR_ARTIFACT_NAME, '\n'.join(run_info.errors), is_error=True)
     return root_run
 
 
 @db_session
-def save_root_test_info(repository, run, test_record):
+def save_root_test_info(run, test_record):
     run = models.Run[run.id]
     run.started_at = test_record.test_results.started_at
     run.duration = test_record.test_results.duration
@@ -78,7 +90,7 @@ def save_test_results(repository, root_name, run_info, test_record_list):
     passed = True
     for test_record in test_record_list:
         run = produce_test_run(repository, root_run, [root_name], test_record.test_name, test_record.test_results)
-        test_passed = save_root_test_info(repository, run, test_record)
+        test_passed = save_root_test_info(run, test_record)
         if not test_passed:
             passed = False
     with db_session:

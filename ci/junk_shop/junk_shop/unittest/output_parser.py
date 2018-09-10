@@ -3,21 +3,22 @@ from collections import deque
 import logging
 
 from collections import namedtuple
-from ..google_test_parser import GoogleTestEventHandler, GoogleTestParser
+from ..google_test_parser import TestEventHandler, GTestParser
 
 
 log = logging.getLogger(__name__)
 
 
 ARTIFACT_LINE_COUNT_LIMIT = 100000
+OUTPUT_ARTIFACT_NAME = 'output'
+GTEST_ERROR_ARTIFACT_NAME = 'gtest errors'
+PARSE_ERROR_ARTIFACT_NAME = 'parse errors'
+ERROR_ARTIFACT_NAME = 'errors'
+COMMAND_LINE_ARTIFACT_NAME = 'command line'
+FULL_OUTPUT_ARTIFACT_NAME = 'full output'
 
-
-TestArtifacts = namedtuple('TestArtifacts', 'test_info output_file_path backtrace_file_list')
-
-
-def split_test_name(test_name):
-    test_parts = test_name.split('.')
-    return test_parts[0], '.'.join(test_parts[1:])
+# TODO: the entity looks unnecessary, will be removed later
+TestArtifactsContainer = namedtuple('TestArtifactsContainer', ['test_info', 'output_file', 'backtrace_files'])
 
 
 class LinesArtifact(object):
@@ -41,92 +42,101 @@ class LinesArtifact(object):
         return '\n'.join(self._line_list)
 
 
-class BaseTestResults(object):
+class BaseTestResultsStorage(object):
     """Base class to store test results"""
 
-    def __init__(self, test_name, test_artifacts, is_leaf):
-        assert test_artifacts is None or isinstance(test_artifacts, TestArtifacts), repr(test_artifacts)
+    def __init__(
+            self, test_name, is_leaf, test_artifacts,
+            started_at, duration, passed):
+        assert test_artifacts is None or isinstance(test_artifacts, TestArtifactsContainer), repr(test_artifacts)
         self.test_name = test_name
         self.is_leaf = is_leaf
         self.test_artifacts = test_artifacts
-        self.duration = None
-        self.started_at = None
-        self.passed = True
-        if self.test_artifacts:
-            self.started_at = test_artifacts.test_info.started_at
-            self.duration = test_artifacts.test_info.duration
-            self.passed = (
-                test_artifacts.test_info.exit_code == 0 and not test_artifacts.backtrace_file_list)
+        self.duration = duration
+        self.started_at = started_at
+        self.passed = passed
         self.lines_artifacts = {}  # name -> LinesArtifact
-        self.output_lines = self._make_lines_artifact('output')
-        self.gtest_errors = self._make_lines_artifact('gtest errors', is_error=True)
-        self.parse_errors = self._make_lines_artifact('parse errors', is_error=True)
-        self.errors = self._make_lines_artifact('errors', is_error=True)  # misc errors
+        self.output_lines = self._make_lines_artifact(OUTPUT_ARTIFACT_NAME)
+        self.gtest_errors = self._make_lines_artifact(GTEST_ERROR_ARTIFACT_NAME, is_error=True)
+        self.parse_errors = self._make_lines_artifact(PARSE_ERROR_ARTIFACT_NAME, is_error=True)
+        self.errors = self._make_lines_artifact(ERROR_ARTIFACT_NAME, is_error=True)  # misc errors
 
     def _make_lines_artifact(self, name, is_error=False):
         self.lines_artifacts[name] = lines_artifact = LinesArtifact(name, is_error)
         return lines_artifact
 
 
-class CTestResults(BaseTestResults):
+class CTestResultsStorage(BaseTestResultsStorage):
     """C++ test results storage"""
 
-    def __init__(self, test_name, test_artifacts=None, is_leaf=False):
-        super(CTestResults, self).__init__(
-            test_name, test_artifacts, is_leaf)
+    def __init__(
+            self, test_name, is_leaf=False, test_artifacts=None,
+            started_at=None, duration=None, passed=True):
+        super(CTestResultsStorage, self).__init__(
+            test_name, is_leaf, test_artifacts,
+            started_at, duration, passed)
         self.children = []
 
 
-class GTestResults(BaseTestResults):
+class GTestResultsStorage(BaseTestResultsStorage):
     """Google test results storage"""
 
-    def __init__(self, test_name, test_artifacts, is_leaf=False):
-        super(GTestResults, self).__init__(
-            test_name, test_artifacts, is_leaf)
+    def __init__(self, test_name, is_leaf=False, test_artifacts=None,
+                 started_at=None, duration=None, passed=True):
+        super(GTestResultsStorage, self).__init__(
+            test_name, is_leaf, test_artifacts,
+            started_at, duration, passed)
         self._children = {}
-        # To show artifacts in 'leaf' node only
-        if not is_leaf:
-            self.test_artifacts = None
 
     @property
     def children(self):
         return self._children.values()
 
-    def add_children(self, test_name, test_artifacts):
-        test_name, test_name_suffix = split_test_name(test_name)
-        is_leaf = not test_name_suffix
-        child = self._children.setdefault(
-            test_name, GTestResults(
-                test_name, test_artifacts=test_artifacts, is_leaf=is_leaf)
-        )
-        if not is_leaf:
-            child = child.add_children(test_name_suffix, test_artifacts)
-        self.duration += child.duration
-        self.passed = self.passed and child.passed
-        self.started_at = min(self.started_at, child.started_at)
+    def add_child(self, test_name, test_artifacts):
+        test_started_at = test_artifacts.test_info.started_at
+        test_passed = test_artifacts.test_info.exit_code == 0
+        test_duration = test_artifacts.test_info.duration
+        child = self
+        for test_name in test_name.split('.'):
+            child.duration += test_duration
+            child.passed = child.passed and test_passed
+            child.started_at = min(child.started_at, test_started_at)
+            child = child._children.setdefault(
+                test_name, GTestResultsStorage(
+                    test_name,
+                    started_at=test_started_at,
+                    duration=test_duration,
+                    passed=test_passed))
+        child.test_artifacts = test_artifacts
+        child.is_leaf = True
         return child
 
 
-class CTestOutputParser(GoogleTestEventHandler):
-    """Use CTestParser to parse test output file (google test formatted).
-    Implement GoogleTestEventHandler methods to construct TestResult tree.
-    Return result tree root.C++ test output parser (expect output in google test format)
+# TODO: CTest -> NxKitTest, so the parser might be changed
+# TODO: https://networkoptix.atlassian.net/browse/CI-255
+class CTestOutputParser(TestEventHandler):
+    """Use `CTestOutputParser` to parse c++ test output file.
+    We've decided that CTest output should be google test formatted,
+    so we use `GTestParser` to parse their output.
     """
 
     @classmethod
-    def run(cls, test_name, test_artifacts, is_aborted):
+    def run(cls, test_name, output_file, test_artifacts, is_aborted):
         parser = cls(test_name, test_artifacts)
-        return parser.parse(is_aborted)
+        return parser.parse(output_file, is_aborted)
 
     def __init__(self, test_name, test_artifacts):
-        self._test_artifacts = test_artifacts
         self._levels = [
-            CTestResults(test_name, test_artifacts=self._test_artifacts)
+            CTestResultsStorage(
+                test_name, test_artifacts=test_artifacts,
+                started_at=test_artifacts.test_info.started_at,
+                duration=test_artifacts.test_info.duration,
+                passed=test_artifacts.test_info.exit_code == 0)
         ]  # [test binary, suite, test]
 
-    def parse(self, is_aborted):
-        parser = GoogleTestParser(self)
-        with self._test_artifacts.output_file_path.open('rb') as f:
+    def parse(self, output_file, is_aborted):
+        parser = GTestParser(self)
+        with output_file.open('rb') as f:
             for line in iter(f.readline, ''):
                 parser.process_line(line)
         parser.finish(is_aborted)
@@ -166,7 +176,7 @@ class CTestOutputParser(GoogleTestEventHandler):
         self._drop_level(duration_ms, status)
 
     def _add_level(self, test_name, is_leaf):
-        results = CTestResults(test_name, is_leaf=is_leaf)
+        results = CTestResultsStorage(test_name, is_leaf=is_leaf)
         self._levels[-1].children.append(results)
         self._levels.append(results)
 
@@ -180,22 +190,23 @@ class CTestOutputParser(GoogleTestEventHandler):
             self._levels[-1].passed = False
 
 
-class GTestOutputParser(GoogleTestEventHandler):
-    """Use GTestParser to parse google test output file (one test case per output).
-    Implement GoogleTestEventHandler methods to construct TestResult tree.
-    Return result tree root. test output parser (expect output in google test format)"""
+class GTestOutputParser(TestEventHandler):
+    """Use `GTestCaseOutputParser` to parse google test case output file.
+    Google test case - a google test run with `--gtest_filter` parameter for a single case.
+    `GTestParser` is used to parse output (only one test case expected in output).
+    """
 
     @classmethod
-    def run(cls, test_results, is_aborted):
+    def run(cls, output_file, test_results, is_aborted):
         parser = cls(test_results)
-        return parser.parse(is_aborted)
+        return parser.parse(output_file, is_aborted)
 
     def __init__(self, test_results):
         self._test_results = test_results
 
-    def parse(self, is_aborted):
-        parser = GoogleTestParser(self)
-        with self._test_results.test_artifacts.output_file_path.open('rb') as f:
+    def parse(self, output_file, is_aborted):
+        parser = GTestParser(self)
+        with output_file.open('rb') as f:
             for line in iter(f.readline, ''):
                 parser.process_line(line)
         parser.finish(is_aborted)
@@ -220,5 +231,6 @@ class GTestOutputParser(GoogleTestEventHandler):
         pass
 
     def on_test_stop(self, status, duration_ms, is_aborted=False):
-        if is_aborted:
-            self._test_results.errors.add('aborted')
+        # We always have valid status & duration for a google test case,
+        # so we don't need to process it here
+        pass
