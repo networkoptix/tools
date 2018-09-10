@@ -69,7 +69,7 @@
 
     - multijob:
         name: Run lightweight servers
-        condition: COMPLETED
+        condition: ALWAYS
         execution-type: 'SEQUENTIALLY'
         projects:
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
