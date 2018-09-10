@@ -67,6 +67,7 @@ class BaseTestProcess(object):
 
     def run(self):
         try:
+            self._test_info.started_at = datetime_local_now()
             args = [str(self._executable_path),
                     '--tmp=%s' % self._work_dir] + self.get_arguments()
             self._test_info.command_line = ' '.join(args)
@@ -92,7 +93,6 @@ class BaseTestProcess(object):
                 self._test_info.exit_code = -1
                 return
             log.info('%s is started', self.test_name)
-            self._test_info.started_at = datetime_local_now()
             self._test_info.pid = self._pipe.pid
             while not self.is_finished():
                 time.sleep(0.01)
@@ -117,7 +117,7 @@ class BaseTestProcess(object):
     def abort(self):
         if self.is_finished():
             return
-        log.warning('%s is aborted', self)
+        log.warning('%s is aborted', self.test_name)
         self._test_info.timed_out = True
         self._platform.abort_process(self._pipe)
         self._pipe.wait()

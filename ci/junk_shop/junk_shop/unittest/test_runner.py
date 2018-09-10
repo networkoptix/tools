@@ -101,9 +101,14 @@ class TestRunner(object):
                             self._run_info.errors.append(error)
                             aborted = True
                     # Wait test finished or timed out
-                    future.result(process.timeout)
+                    future.result(timeout=process.timeout)
                 except concurrent.futures.TimeoutError:
-                        process.abort()
+                    log.info("Process %s timed out", process.test_name)
+                    process.abort()
+                except Exception as exc:
+                    # if `process.run` raise an exception `future.result` raise the same
+                    log.exception(exc)
+                    process.abort()
                 finally:
                     process.process_core_files()
 
