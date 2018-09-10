@@ -242,7 +242,7 @@ printCmakeCacheValue() # cmake_build_dir cmake_var_name
 # [out] BUILD_DIR
 setup_vars()
 {
-    local -r HELP="Run this script from any dir inside a vms repo dir or its cmake build dir."
+    local -r HELP="Run this script from any dir inside nx_vms repo dir or its cmake build dir."
     nx_find_parent_dir VMS_DIR "$(basename "$DEVELOP_DIR")" "$HELP"
     local -r CMAKE_CACHE_TXT="$VMS_DIR/CMakeCache.txt"
     local -r CMAKE_LISTS_TXT="$VMS_DIR/CMakeLists.txt"
