@@ -7,14 +7,14 @@
       (rdp or ssh won't work), and run autosignin.cmd script, which will enter usb key's password.
 
     node: '{node}'
-    logrotate:
-      daysToKeep: 30
 
     triggers:
     - timed: 'H/10 * * * *'
 
     wrappers:
     - timestamps
+
+    properties:
     - priority-sorter:
         priority: 1
 
