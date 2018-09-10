@@ -36,7 +36,7 @@ def _make_test_backtraces(work_dir, test_name):
         platform.produce_core_backtrace(test_info.binary_path, core_file_path)
 
 
-def collect_backtrace_file_list(test_name, test_work_dir):
+def collect_backtrace_files(test_name, test_work_dir):
     """Collect crash files for test by `test_name`.
     `test_work_dir` is using to get prerequisites and store artifacts."""
     for path in test_work_dir.rglob(TRACEBACK_PATTERN):
