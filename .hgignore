@@ -2,6 +2,7 @@ subinclude:apidoctool/.hgignore
 subinclude:rdep/.hgignore
 subinclude:infra/playbooks/.hgignore
 subinclude:infra/jenkins_jobs/.hgignore
+subinclude:api_examples/.hgignore
 
 syntax: glob
 *.pyc
@@ -22,9 +23,6 @@ sample.mkv
 ci/junk_shop/junk_shop/webapp/static/plotly-latest.min.js
 .pytest_cache
 .idea
-api_examples/csharp_examples/bin/*
-api_examples/csharp_examples/obj/*
 **/.vs/**
-**/_ReSharper.Caches/**
 *.user
 *.bak

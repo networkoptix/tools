@@ -1,0 +1,4 @@
+syntax: glob
+**/_ReSharper.Caches/**
+**/obj**
+**/packages/**
