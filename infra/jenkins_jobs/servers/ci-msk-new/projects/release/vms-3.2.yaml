@@ -193,11 +193,10 @@
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{version}.{project}.webadmin.universal.build'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
+    - installer-build
     # Edge1 is a platform that's exclusive for digitalwatchdog.
     # add extra jobs for edge1 with digitalwatchdog customization
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all': &extra-edge1-platform
+    - installer-build:
         platform:
         - edge1:
             installer-build-node: *linux_node
@@ -206,26 +205,4 @@
               -DtargetDevice=edge1
         customization:
         - 'digitalwatchdog'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build':
-        <<: *extra-edge1-platform
-
-    # Our tests work per-customization per-platform and not yet implemented
-    # for all platforms, so list of jobs is reduced
-    # - 'installer-unittests':
-    #     # TODO: Rework a bit this parameterization as well as probably build node parameterization
-    #     platform:
-    #     - linux-x86:
-    #         unittest-node: unittests-linux
-    #     - linux-x64:
-    #         unittest-node: unittests-linux
-    #     customization:
-    #     - default
-    # - installer-unittests:
-    #     platform:
-    #     - windows-x64:
-    #         unittest-node: unittests-windows
-    #     - windows-x86:
-    #         unittest-node: unittests-windows
-    #     customization:
-    #     - default
-
+    # NOTE: If extra UT combinations are added, don't forget to add them in runner

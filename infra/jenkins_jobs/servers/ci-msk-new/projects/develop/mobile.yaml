@@ -122,5 +122,4 @@
     # BUILD AND TEST - main jobs
 
     # - '{pipeline}.{version}.{project}.webadmin.universal.build'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
+    - installer-build

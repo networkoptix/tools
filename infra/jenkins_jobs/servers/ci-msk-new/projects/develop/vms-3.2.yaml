@@ -200,8 +200,7 @@
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{version}.{project}.webadmin.universal.build'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
-    - '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
+    - installer-build
     - '{pipeline}.{version}.{project}.distribution.{customization}.functest':
         customization: default
         build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
@@ -217,7 +216,8 @@
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
-    - 'installer-unittests':
+    # NOTE: If extra UT combinations are added, don't forget to add them in runner
+    - installer-build-with-unittests:
         # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:

@@ -1,5 +1,6 @@
 - job-template:
     name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build'
+    id: installer-build
     description: |
       <pre>
       ================================================================================

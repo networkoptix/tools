@@ -215,7 +215,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -231,14 +231,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -254,14 +253,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -277,14 +275,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -300,14 +297,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -323,14 +319,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -346,14 +341,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -369,14 +363,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -392,14 +385,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -415,14 +407,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -438,14 +429,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -461,14 +451,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -484,14 +473,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -507,14 +495,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -530,14 +517,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -553,14 +539,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -576,14 +561,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -599,14 +583,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -622,14 +605,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -645,14 +627,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -668,14 +649,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -691,14 +671,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -714,14 +693,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -737,14 +715,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -760,14 +737,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -783,14 +759,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -806,14 +781,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -829,14 +803,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -852,14 +825,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -875,14 +847,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -898,14 +869,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -921,14 +891,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -944,14 +913,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -967,14 +935,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -990,14 +957,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -1013,14 +979,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -1036,14 +1001,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -1059,14 +1023,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -1082,14 +1045,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x86.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x86") &&
@@ -1105,14 +1067,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1128,14 +1089,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1151,14 +1111,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1174,14 +1133,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1197,14 +1155,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1220,14 +1177,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1243,14 +1199,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1266,14 +1221,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1289,14 +1243,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1312,14 +1265,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1335,14 +1287,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1358,14 +1309,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1381,14 +1331,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1404,14 +1353,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1427,14 +1375,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1450,14 +1397,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1473,14 +1419,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1496,14 +1441,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1519,14 +1463,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1542,14 +1485,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bananapi.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bananapi.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bananapi") &&
@@ -1565,14 +1507,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1588,14 +1529,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1611,14 +1551,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1634,14 +1573,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1657,14 +1595,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1680,14 +1617,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1703,14 +1639,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1726,14 +1661,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1749,14 +1683,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1772,14 +1705,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1795,14 +1727,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1818,14 +1749,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1841,14 +1771,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1864,14 +1793,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1887,14 +1815,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1910,14 +1837,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1933,14 +1859,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1956,14 +1881,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -1979,14 +1903,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -2002,14 +1925,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.bpi.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.bpi.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("bpi") &&
@@ -2025,14 +1947,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2048,14 +1969,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2071,14 +1991,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2094,14 +2013,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2117,14 +2035,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2140,14 +2057,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2163,14 +2079,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2186,14 +2101,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2209,14 +2123,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2232,14 +2145,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2255,14 +2167,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2278,14 +2189,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2301,14 +2211,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2324,14 +2233,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2347,14 +2255,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2370,14 +2277,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2393,14 +2299,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2416,14 +2321,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2439,14 +2343,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2462,14 +2365,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.rpi.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.rpi.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("rpi") &&
@@ -2485,14 +2387,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.edge1.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.edge1.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("edge1") &&
@@ -2508,14 +2409,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2531,14 +2431,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2554,14 +2453,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2577,14 +2475,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2600,14 +2497,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2623,14 +2519,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2646,14 +2541,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2669,14 +2563,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2692,14 +2585,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2715,14 +2607,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2738,14 +2629,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2761,14 +2651,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2784,14 +2673,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2807,14 +2695,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2830,14 +2717,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2853,14 +2739,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2876,14 +2761,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2899,14 +2783,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2922,14 +2805,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2945,14 +2827,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.tx1.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.tx1.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("tx1") &&
@@ -2968,14 +2849,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -2991,14 +2871,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3014,14 +2893,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3037,14 +2915,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3060,14 +2937,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3083,14 +2959,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3106,14 +2981,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3129,14 +3003,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3152,14 +3025,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3175,14 +3047,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3198,14 +3069,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3221,14 +3091,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3244,14 +3113,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3267,14 +3135,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3290,14 +3157,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3313,14 +3179,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3336,14 +3201,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3359,14 +3223,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3382,14 +3245,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3405,14 +3267,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.android-arm.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.android-arm.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("android-arm") &&
@@ -3428,7 +3289,6 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
@@ -3458,7 +3318,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3474,14 +3334,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3497,14 +3356,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3520,14 +3378,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3543,14 +3400,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3566,14 +3422,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3589,14 +3444,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3612,14 +3466,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3635,14 +3488,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3658,14 +3510,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3681,14 +3532,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3704,14 +3554,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3727,14 +3576,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3750,14 +3598,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3773,14 +3620,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3796,14 +3642,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3819,14 +3664,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3842,14 +3686,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3865,14 +3708,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3888,14 +3730,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -3911,14 +3752,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -3934,14 +3774,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -3957,14 +3796,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -3980,14 +3818,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4003,14 +3840,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4026,14 +3862,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4049,14 +3884,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4072,14 +3906,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4095,14 +3928,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4118,14 +3950,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4141,14 +3972,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4164,14 +3994,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4187,14 +4016,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4210,14 +4038,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4233,14 +4060,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4256,14 +4082,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4279,14 +4104,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4302,14 +4126,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4325,14 +4148,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x86.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x86") &&
@@ -4348,7 +4170,6 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
@@ -4378,7 +4199,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4394,14 +4215,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4417,14 +4237,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4440,14 +4259,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4463,14 +4281,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4486,14 +4303,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4509,14 +4325,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4532,14 +4347,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4555,14 +4369,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4578,14 +4391,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4601,14 +4413,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4624,14 +4435,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4647,14 +4457,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4670,14 +4479,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4693,14 +4501,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4716,14 +4523,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4739,14 +4545,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4762,14 +4567,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4785,14 +4589,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&
@@ -4808,14 +4611,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.default.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4831,14 +4633,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.default_cn.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.default_cn.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4854,14 +4655,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.default_zh_CN.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.default_zh_CN.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4877,14 +4677,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.cox.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.cox.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4900,14 +4699,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4923,14 +4721,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog_global.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.digitalwatchdog_global.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4946,14 +4743,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.hanwha.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.hanwha.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4969,14 +4765,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.ipera.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.ipera.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -4992,14 +4787,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.ionetworks.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.ionetworks.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5015,14 +4809,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.nutech.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.nutech.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5038,14 +4831,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.ras.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.ras.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5061,14 +4853,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.senturian.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.senturian.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5084,14 +4875,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.systemk.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.systemk.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5107,14 +4897,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.tricom.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.tricom.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5130,14 +4919,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.ust.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.ust.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5153,14 +4941,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.vista.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.vista.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5176,14 +4963,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoblue.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoblue.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5199,14 +4985,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoorange.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.vmsdemoorange.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5222,14 +5007,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.metavms.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.metavms.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5245,14 +5029,13 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.ios.xccelo.all'
+        - name: '{pipeline}.{version}.{project}.distribution.ios.xccelo.build'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("ios") &&
@@ -5268,7 +5051,6 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
-            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
