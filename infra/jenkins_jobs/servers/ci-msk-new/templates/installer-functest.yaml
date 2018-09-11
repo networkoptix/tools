@@ -236,14 +236,13 @@
         #!bash
         set -ex
         ls -la "{workdir}"
-        RUN_DIR_RELATIVE="$(ls -1 "{workdir}" | grep run_ | tail -1)"
+        RUN_DIR_RELATIVE={workdir}/"$(ls -1 "{workdir}" | grep run_ | tail -1)"
         echo RUN_DIR_RELATIVE="$RUN_DIR_RELATIVE" > RUN_DIR_RELATIVE.envvar
     - inject:
-        properties-file: RUN_DIR.envvar
+        properties-file: RUN_DIR_RELATIVE.envvar
 
     - description-setter:
         description: >-
-          <br />
           <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE'>Run dir</a>,
           <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE/debug.log'>debug.log</a>,
           <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE/info.log'>info.log</a>
