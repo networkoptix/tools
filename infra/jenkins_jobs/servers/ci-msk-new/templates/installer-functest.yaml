@@ -169,6 +169,14 @@
         target-location: '$WORKSPACE/dist'
         flatten-files: 'true'
 
+    - file-copy-operation:
+        includes: >-
+          build/distrib/*-server-*-linux64*.deb,
+          build/distrib/*-server-*-win64*.exe
+        excludes: ''
+        target-location: '$WORKSPACE/updates'
+        flatten-files: 'true'
+
     - shell: |
         #!/bin/bash
         set -ex
@@ -206,6 +214,7 @@
               --work-dir="$WORK_DIR" \
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
+              --mediaserver-updates-dir="$WORKSPACE/updates" \
               --mediaserver-dist-path="$(echo $WORKSPACE/dist/*-server-*.deb)" \
               --customization="$CUSTOMIZATION" \
               --cloud-group=test \
