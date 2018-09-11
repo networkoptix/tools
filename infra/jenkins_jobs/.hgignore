@@ -6,4 +6,4 @@ output
 
 syntax: regexp
 
-^(?!tox)\.ini
+^(?!tox).+\.ini
