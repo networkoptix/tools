@@ -119,8 +119,8 @@
     - shell: |
         #!/bin/bash
         set -ex
-        rm -rf   "build" "dist" "{workdir}"
-        mkdir -p "build" "dist" "{workdir}"
+        rm -rf   "build" "dist" "updates" "{workdir}"
+        mkdir -p "build" "dist" "updates" "{workdir}"
 
     - inject:
         properties-content: |
@@ -138,7 +138,7 @@
           PLATFORM=windows-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/*-server-*-win64*.exe
+          COMPONENTS=distrib/*-server-*-win64*.exe,distrib/*-server_update-*
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -154,7 +154,7 @@
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/*-server-*-linux64*.deb,bin/appserver2_ut
+          COMPONENTS=distrib/*-server-*-linux64*.deb,distrib/*-server_update-*,bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -171,8 +171,7 @@
 
     - file-copy-operation:
         includes: >-
-          build/distrib/*-server-*-linux64*.deb,
-          build/distrib/*-server-*-win64*.exe
+          build/distrib/*-server_update-*
         excludes: ''
         target-location: '$WORKSPACE/updates'
         flatten-files: 'true'
