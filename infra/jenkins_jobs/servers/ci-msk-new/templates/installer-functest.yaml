@@ -111,8 +111,7 @@
 
     - description-setter:
         description: >-
-          <a href='$REPOSITORY_URL'> Artifacts </a>,
-          <a href='$JUNKSHOP_URL'> Junkshop </a>
+          <a href='$JUNKSHOP_URL'>JunkShop</a>
 
     - kill-hanged-functests
 
@@ -233,6 +232,22 @@
               -k "$TEST_SELECT_EXPR" \
               $TEST_LIST
 
+    - shell: |
+        #!bash
+        set -ex
+        ls -la "{workdir}"
+        RUN_DIR_RELATIVE="$(ls -1 "{workdir}" | grep run_ | tail -1)"
+        echo RUN_DIR_RELATIVE="$RUN_DIR_RELATIVE" > RUN_DIR_RELATIVE.envvar
+    - inject:
+        properties-file: RUN_DIR.envvar
+
+    - description-setter:
+        description: >-
+          <br />
+          <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE'>Run dir</a>,
+          <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE/debug.log'>debug.log</a>,
+          <a href='$REPOSITORY_URL/$RUN_DIR_RELATIVE/info.log'>info.log</a>
+
     publishers:
     - delete-hg-repos(if-damaged)
     - postbuildscript:
@@ -256,7 +271,7 @@
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 LOCAL_PATH=$WORKSPACE/
-                COMPONENTS={workdir}/
+                COMPONENTS={workdir}/run_*
                 NODE_SSH_CONNECTION=$SSH_CONNECTION
                 SSH_USER=$USER
               block: true
