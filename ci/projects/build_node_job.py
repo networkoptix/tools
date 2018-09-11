@@ -20,6 +20,7 @@ from command import (
     )
 from cmake import CMake
 from build import BuildInfo, CMakeBuilder
+from datetime import timedelta
 
 log = logging.getLogger(__name__)
 
@@ -217,6 +218,8 @@ class BuildNodeJob(object):
             bin_dir=Path(bin_dir),
             test_binary_list=test_binary_list,
             timeout=timeout,
+            max_workers=20,
+            test_timeout=timedelta(seconds=100)
             )
         log.info('Parsing core files:')
         make_backtraces(unit_tests_dir)
