@@ -376,7 +376,7 @@
         steps:
         - shell: !j2: |
             #!bash
-            set -ex
+            set -x # set -e is is missing intentionally
 
             # Log file must not exist
             test ! -f "build_logs/cleaner.log"
@@ -449,7 +449,7 @@
 
     - shell: !j2: |
         #!bash
-        set -ex
+        set -x # set -e is is missing intentionally
 
         # Log file must not exist
         test ! -f "build_logs/cmake-configure.log"
@@ -492,7 +492,7 @@
 
     - shell: !j2: |
         #!bash
-        set -ex
+        set -x # set -e is is missing intentionally
 
         # Create bash script filled with args, unset too long envvars and
         # execute cleaner command
@@ -528,7 +528,7 @@
 
     - shell: !j2: |
         #!bash
-        set -ex
+        set -x # set -e is is missing intentionally
         # Log file must not exist
         test ! -f "build_logs/cmake-build.log"
 
