@@ -1232,8 +1232,9 @@ populate_REPO_TO_SHARED_BASE() # "${REPOS[@]}"
         if [[ -f $HG_SHAREDPATH_FILE ]]
         then #< This source folder was created using "hg share" from a base source folder.
             local HG_SHAREDPATH=$(dirname "$(cat "$HG_SHAREDPATH_FILE")")
-            local SHAREDPATH=$(nx_unix_path "$HG_SHAREDPATH")
-            local SHAREDPATH_RELATIVE=${SHAREDPATH#$(nx_absolute_path "$(pwd)")/}
+            local SHAREDPATH=$(nx_absolute_path "$(nx_unix_path "$HG_SHAREDPATH")")
+            local CURRENT_DIR=$(nx_absolute_path "$(pwd -P)")
+            local SHAREDPATH_RELATIVE=${SHAREDPATH#$CURRENT_DIR/}
             REPO_TO_SHARED_BASE["$REPO"]="$SHAREDPATH_RELATIVE" #< Add key-value.
         fi
     done
