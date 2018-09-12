@@ -463,7 +463,7 @@
         SECONDS=0
 
         # remove all extra env vars
-        for ev in {envvars_to_unset_during_build} ; do
+        for ev in {{ envvars_to_unset_during_build }} ; do
           {% if __debug__ %}
           echo "Unsetting \${ev}=\${!ev}"
           {% endif %}
