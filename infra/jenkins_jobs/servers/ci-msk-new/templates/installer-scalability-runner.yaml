@@ -96,6 +96,12 @@
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=200
+        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=250
 
     - multijob:
         name: Run heavyweight servers
@@ -144,6 +150,12 @@
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=140
+        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            USE_LIGHTWEIGHT_SERVERS=false
+            SERVER_COUNT=160
 
     publishers:
     - failure-email:
