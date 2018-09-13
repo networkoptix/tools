@@ -21,6 +21,8 @@
         yaxis: { title: 'Merge times, sec' },
       {% endcall %}
 
+      {{ metrics_macros.plotly_source_ref(project_name, branch_name, platform_name, div_id_prefix + '_merge_duration_plot') }}
+
       {% if trace_list.total_bytes_sent %}
         {% call metrics_macros.plotly_plot(div_id_prefix + '_total_bytes_sent_plot', trace_list.total_bytes_sent, 'lines+markers') %}
           title: 'Total bytes sent by build version',
@@ -29,11 +31,15 @@
         {% endcall %}
       {% endif %}
 
+      {{ metrics_macros.plotly_source_ref(project_name, branch_name, platform_name, div_id_prefix + '_total_bytes_sent_plot') }}
+
       {% call metrics_macros.plotly_plot(div_id_prefix + '_memory_usage_plot', trace_list.memory_usage, 'lines+markers') %}
         title: 'Host memory usage by build version',
         xaxis: { title: 'Build version' },
         yaxis: { title: 'Memory usage' },
       {% endcall %}
+
+      {{ metrics_macros.plotly_source_ref(project_name, branch_name, platform_name, div_id_prefix + '_memory_usage_plot') }}
 
     {% endfor %}
 

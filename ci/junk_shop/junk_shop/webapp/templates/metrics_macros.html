@@ -35,7 +35,10 @@
       {{- caller() -}}
     };
 
-    Plotly.plot(document.getElementById("{{ div_id }}"), traces_data, layout);
+    var plot = document.getElementById("{{ div_id }}");
+
+    Plotly.plot(plot, traces_data, layout);
+
   });
 
 
@@ -43,6 +46,27 @@
     Plotly.Plots.resize(document.getElementById("{{ div_id }}"));
   });
 
+
+{% endmacro %}
+
+
+{% macro plotly_source_ref(project_name, branch_name, platform_name, div_id) %}
+
+  window.addEventListener('load', function() {
+
+    var plot = document.getElementById("{{ div_id }}");
+
+    plot.on('plotly_click', function(data) {
+      if (data.points.length > 0) {
+        var build_num = data.points[0].x.toString();
+        var url_template = "{{ url_for('build_platform_metrics',
+                                        project_name=project_name, branch_name=branch_name,
+                                        build_num='-build-num-', platform_name=platform_name) }}";
+        var url = url_template.replace('-build-num-', build_num);
+        window.open(url);
+      }
+    });
+  });
 
 {% endmacro %}
 
