@@ -8,6 +8,8 @@
         # block: true
         block: false
         predefined-parameters: |
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
           BUILD_IDENTITY={build-identity}
           NX_VMS_COMMIT={nx-vms-commit}
 

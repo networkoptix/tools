@@ -77,7 +77,7 @@
 
 
     - trigger-builds:
-      - project: '{pipeline}.{version}.{project}.runner'
+      - project: '{pipeline}.{version}.{project}.trigger.custom'
         current-parameters: true
         predefined-parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER

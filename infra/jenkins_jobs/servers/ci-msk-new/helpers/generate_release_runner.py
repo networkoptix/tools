@@ -95,10 +95,8 @@ print '''#
         default: false
     - p_BRANCH:
         default: '{default_branch}'
-    - p_USE_NX_VMS_COMMIT:
-        default: '{default_branch}'
-    - p_USE_BUILD_IDENTITY:
-        default: NEW
+    - p_NX_VMS_COMMIT
+    - p_BUILD_IDENTITY
     - p_CLEAN_WORKSPACE:
         default: false
     - p_CLEAN_BUILD:
@@ -127,61 +125,10 @@ print '''#
         target: upstream
         description: >-
           <br> <a href='$BUILD_URL'>to runner</a>
-
-    # inject as is
-    - inject:
-        properties-content: |
-          BUILD_IDENTITY=$USE_BUILD_IDENTITY
-          NX_VMS_COMMIT=$USE_NX_VMS_COMMIT
-
-    # if it's auto, get from existing build
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '${{NX_VMS_COMMIT}}'
-        condition-string2: 'AUTO'
-        steps:
-        # Note, that we don't want to copy BUILD_IDENTITY. because we don't want
-        # to override the one that came from args
-
-        - copyartifact:
-            project: '{pipeline}.{version}.{project}.register-build'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-successful
-            parameter-filters: >-
-              BUILD_IDENTITY=$USE_BUILD_IDENTITY
-            optional: false
-        - inject:
-            properties-file: 'NX_VMS_COMMIT.envvar'
-
-    # Freeze nx realcamera framework commit
-    - freeze-nx-vms-commit(remote):
-        pipeline: '{pipeline}'
-        branch: '{realcameratesting-framework-branch}'
-        commit-to-freeze: '{realcameratesting-framework-branch}'
-        commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
-
-    # Build identity may be defained in args, or use NEW keqyword,
-    # which means that we need to create one..
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '${{USE_BUILD_IDENTITY}}'
-        condition-string2: 'NEW'
-        steps:
-        - multijob:
-            name: Request new release build id
-            projects:
-            - name: '{pipeline}.build_number.generator'
-              kill-phase-on: FAILURE
-              predefined-parameters: |
-                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-        - copyartifact:
-            project: '{pipeline}.build_number.generator'
-            filter: 'BUILD_IDENTITY.envvar'
-            which-build: last-completed
-            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-        - inject:
-            properties-file: 'BUILD_IDENTITY.envvar'
+    - validate-required-params:
+        params: >-
+          NX_VMS_COMMIT
+          BUILD_IDENTITY
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
     # TODO: Should we fetch all links from publisher or something like that?

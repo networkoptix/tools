@@ -156,6 +156,12 @@
           exit 1
         fi
 
+        if [ "${{USE_BUILD_IDENTITY}}" != "NEW" ] ; then
+          if [ "${{USE_NX_VMS_COMMIT}}" == "LATEST" ] ; then
+            echo "USE_NX_VMS_COMMIT may be set to laest only for NEW builds"
+            exit 1
+          fi
+        fi
     # inject BUILD_IDENTITY as is + save
     - shell: |
         #!/bin/bash
@@ -163,6 +169,27 @@
         echo "BUILD_IDENTITY=${{USE_BUILD_IDENTITY}}" > 'BUILD_IDENTITY.envvar'
     - inject:
         properties-file: BUILD_IDENTITY.envvar
+
+    # Build identity may be defained in args, or use NEW keqyword,
+    # which means that we need to create one..
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{USE_BUILD_IDENTITY}}'
+        condition-string2: 'NEW'
+        steps:
+        - trigger-builds:
+          - project: '{pipeline}.build_number.generator'
+            block: true
+            predefined-parameters: |
+              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        - copyartifact:
+            project: '{pipeline}.build_number.generator'
+            filter: 'BUILD_IDENTITY.envvar'
+            which-build: last-completed
+            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+        - inject:
+            properties-file: 'BUILD_IDENTITY.envvar'
 
     # inject NX_VMS_COMMIT as is + save
     - shell: |
@@ -197,7 +224,7 @@
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-successful
             parameter-filters: >-
-              BUILD_IDENTITY=$USE_BUILD_IDENTITY
+              BUILD_IDENTITY=$BUILD_IDENTITY
             optional: false
         - inject:
             properties-file: 'NX_VMS_COMMIT.envvar'
@@ -241,8 +268,8 @@
           PLATFORMS=$PLATFORMS
           CUSTOMIZATIONS=$CUSTOMIZATIONS
           BRANCH=$BRANCH
-          USE_NX_VMS_COMMIT=$NX_VMS_COMMIT
-          USE_BUILD_IDENTITY=$BUILD_IDENTITY
+          NX_VMS_COMMIT=$NX_VMS_COMMIT
+          BUILD_IDENTITY=$BUILD_IDENTITY
           CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
           CLEAN_WORKSPACE=$CLEAN_WORKSPACE
           CLEAN_BUILD=$CLEAN_BUILD
