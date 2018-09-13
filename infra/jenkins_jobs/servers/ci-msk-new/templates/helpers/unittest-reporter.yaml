@@ -30,7 +30,6 @@
     - p_BUILD_STATUS
     - p_RUNNER_URL # do we need it here?
     - p_JUNKSHOP_HOST
-    - p_JUNKSHOP_DB_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -112,7 +111,7 @@
               JUNKSHOP_PLATFORM="$PLATFORM"
             fi
 
-            DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
+            DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
             BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             if [ -d unit_tests ] ; then

@@ -41,7 +41,6 @@
     - p_NX_VMS_COMMIT
     - p_RUNNER_URL
     - p_JUNKSHOP_HOST
-    - p_JUNKSHOP_DB_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -102,7 +101,7 @@
 
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
+          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
 
           BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY"
           devtools/ci/junk_shop/junk_shop/make_html_build_report.py "$DB_CONFIG" "$BUILD_PARAMETERS" > _report.html

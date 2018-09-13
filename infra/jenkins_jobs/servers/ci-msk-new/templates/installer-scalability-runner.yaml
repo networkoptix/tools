@@ -30,7 +30,6 @@
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
-    - p_JUNKSHOP_DB_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
     - p_CUSTOMIZATION(hidden):

@@ -88,7 +88,6 @@
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
-          JUNKSHOP_DB_HOST={junkshop_db_host}
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - inject:
         properties-content: |
@@ -174,7 +173,7 @@
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
               --timeout="$TEST_TIMEOUT" \
-              --capture-db="$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST" \
+              --capture-db="$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}" \
               --build-parameters="\
         project=$JUNKSHOP_PROJECT_NAME,\
         branch=$BRANCH,\

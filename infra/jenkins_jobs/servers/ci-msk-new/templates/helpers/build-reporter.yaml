@@ -70,7 +70,6 @@
     - p_BUILD_STATUS
     - p_RUNNER_URL
     - p_JUNKSHOP_HOST
-    - p_JUNKSHOP_DB_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -171,7 +170,7 @@
 
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@$JUNKSHOP_DB_HOST
+          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
           REVISION="$(cd nx_vms && hg id --id)"
 
           if [ "$PLATFORM" == 'universal' ] ; then

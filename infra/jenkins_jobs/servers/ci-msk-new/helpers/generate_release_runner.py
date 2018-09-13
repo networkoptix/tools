@@ -135,7 +135,6 @@ print '''#
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
-          JUNKSHOP_DB_HOST={junkshop_db_host}
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
@@ -280,7 +279,6 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
             JUNKSHOP_HOST=$JUNKSHOP_HOST
-            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.realcameratest'
           condition: COMPLETED # allow unstable
@@ -300,7 +298,6 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
             JUNKSHOP_HOST=$JUNKSHOP_HOST
-            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 '''
 print '''
     - shell: |
@@ -322,7 +319,6 @@ print '''
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$BUILD_URL
             JUNKSHOP_HOST=$JUNKSHOP_HOST
-            JUNKSHOP_DB_HOST=$JUNKSHOP_DB_HOST
 
     - multijob:
         name: Promote build for publishing via DepCon
