@@ -53,13 +53,13 @@ def load_scalability_platform_set(build):
     return set(select(
         run.root_run.platform.name for run in models.Run
         if run.root_run.build is build and
-           run.test.path.startswith('functional/scalability_test.py') and run.test.is_leaf and exists(run.metrics)))
+           (run.test.path.startswith('functional/tests/scalability_test.py') or
+            run.test.path.startswith('functional/scalability_test.py')) and run.test.is_leaf and exists(run.metrics)))
 
 def render_ci_build(build):
     loader = BuildInfoLoader.for_full_build(build)
     build_info = loader.load_build_platform_list()
     scalability_platform_set = load_scalability_platform_set(build)
-    print 'scalability_platform_set:', scalability_platform_set
     return render_template('build.html',
                                scalability_platform_set=scalability_platform_set,
                                **build_info._asdict())
