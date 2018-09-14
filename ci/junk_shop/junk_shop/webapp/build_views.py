@@ -70,7 +70,7 @@ def render_ci_build(build):
                            **build_info._asdict())
 
 
-def render_platform_build(build, customization, platform, start_build, paginator):
+def render_platform_build(build, customization, platform, paginator):
     loader = BuildInfoLoader.for_build_customzation_platform(build, customization, platform)
     build_platform_info = loader.load_build_platform()
     if not build_platform_info:
@@ -78,7 +78,7 @@ def render_platform_build(build, customization, platform, start_build, paginator
     scalability_platform_set = load_scalability_platform_set(build)
     return render_template(
         'platform_build.html',
-        paginator=paginator, start_build=start_build,
+        paginator=paginator,
         scalability_platform_set=scalability_platform_set,
         **build_platform_info._asdict())
 
@@ -116,12 +116,11 @@ def platform_build(project_name, branch_name, build_num, customization_name, pla
         customization = models.Customization.get(name=customization_name)
         if not customization:
             abort(404)
-    start_build = int(request.args.get('start_build', build_num))
+
     query = select(
         build for build in models.Build
         if build.project.name == project_name and
         build.branch.name == branch_name and
-        build.build_num <= start_build and
         exists(run for run in build.runs
                if run.platform.name == platform_name and
                run.customization.name == customization_name))
@@ -129,5 +128,5 @@ def platform_build(project_name, branch_name, build_num, customization_name, pla
     build_list = [b.build_num for b in query.order_by(desc(models.Build.build_num))]
 
     return render_platform_build(
-        build, customization, platform, start_build,
+        build, customization, platform,
         paginator=paginator_from_list(build_num, build_list))

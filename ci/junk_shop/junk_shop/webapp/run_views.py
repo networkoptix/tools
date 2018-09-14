@@ -33,13 +33,11 @@ def run_children(run_id):
 @db_session
 def run(run_id):
     run = get_or_abort(models.Run, run_id)
-    start_run = int(request.args.get('start_run', run_id))
 
     query = select(
         r for r in models.Run
         if r.build.project == run.build.project and
         r.build.branch == run.build.branch and
-        r.id <= start_run and
         r.name == run.name and
         r.platform == run.platform and
         r.customization == run.customization)
@@ -51,7 +49,6 @@ def run(run_id):
         run=run,
         build=run.build,
         run_node=load_run_node_tree(run),
-        start_run=start_run,
         paginator=paginator_from_list(run_id, run_list))
 
 

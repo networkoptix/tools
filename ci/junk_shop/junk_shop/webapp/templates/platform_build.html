@@ -28,7 +28,7 @@
   {% call(page) common_macros.paginator(paginator) %}
     {{ url_for('platform_build', project_name=build.project.name,
          branch_name=build.branch.name, customization_name=customization.name,
-         platform_name=platform.name, build_num=page, start_build=start_build) }}
+         platform_name=platform.name, build_num=page) }}
   {% endcall %}
 
 {% endblock contents %}
