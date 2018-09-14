@@ -62,8 +62,6 @@ print '''#
     node: runner
     concurrent: true
 
-    realcameratesting-framework-branch: $BRANCH
-
     properties:
     - throttle:
         max-total: 5
@@ -112,6 +110,8 @@ print '''#
         default: ''
     - p_PIPELINE(hidden):
         default: '{pipeline}'
+    - string:
+        name: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
 
     wrappers:
     - timestamps

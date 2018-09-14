@@ -78,6 +78,7 @@
     run-functests: '' # false
     run-unittests: true
     run-realcameratests: '' # false
+    realcameratesting-framework-branch: $BRANCH
 
     ignore-functests: 'false' #
     # detailed-job-description required!
@@ -129,7 +130,9 @@
         default: ''
     - p_PIPELINE(hidden):
         default: '{pipeline}'
-
+    - string:
+        name: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+        default: '{realcameratesting-framework-branch}'
 
     triggers:
     - timed: "{timer}"
@@ -238,6 +241,13 @@
         commit-to-freeze: $NX_VMS_COMMIT
         branch-varname: BRANCH
 
+    # Freeze nx realcamera framework commit
+    - freeze-nx-vms-commit(remote):
+        pipeline: '{pipeline}'
+        branch: $NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+        commit-to-freeze: $NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+        commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
@@ -275,6 +285,7 @@
           CLOUD_GROUP=$CLOUD_GROUP
           HARDWARE_SIGNING=$HARDWARE_SIGNING
           TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
+          NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
         block: false # !! don't wait
         block-thresholds:
           failure-threshold: FAILURE
