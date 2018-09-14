@@ -337,6 +337,7 @@
           TRUSTED_TIMESTAMPING=OFF
           CUSTOM_CMAKE_PARAMETERS=
           PIPELINE={pipeline}
+          NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT={realcameratesting-framework-branch}
     - timestamps
     - timeout:
         timeout: 5 # min
