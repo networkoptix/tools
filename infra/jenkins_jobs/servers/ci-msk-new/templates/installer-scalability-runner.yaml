@@ -101,6 +101,12 @@
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=250
+        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=300
 
     - multijob:
         name: Run heavyweight servers
@@ -112,25 +118,7 @@
           current-parameters: true
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=20
-        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
-          kill-phase-on: FAILURE
-          current-parameters: true
-          predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=40
-        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
-          kill-phase-on: FAILURE
-          current-parameters: true
-          predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=60
-        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
-          kill-phase-on: FAILURE
-          current-parameters: true
-          predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=80
+            SERVER_COUNT=50
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
@@ -142,19 +130,13 @@
           current-parameters: true
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=120
+            SERVER_COUNT=150
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
             USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=140
-        - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
-          kill-phase-on: FAILURE
-          current-parameters: true
-          predefined-parameters: |
-            USE_LIGHTWEIGHT_SERVERS=false
-            SERVER_COUNT=160
+            SERVER_COUNT=200
 
     publishers:
     - failure-email:
