@@ -36,4 +36,8 @@
     {{ run_macros.run_box(run_node, expand_level=1) }}
   </div>
 
+  {% call(page) common_macros.paginator(paginator) %}
+    {{ url_for('run', run_id=page, start_run=start_run) }}
+  {% endcall %}
+
 {% endblock contents %}

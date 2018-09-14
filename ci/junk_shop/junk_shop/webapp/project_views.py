@@ -2,18 +2,15 @@ from flask import request, render_template
 from pony.orm import db_session, select, desc, exists
 from .. import models
 from junk_shop.webapp import app
-from .utils import paginator
+from .utils import paginator, DEFAULT_BUILD_LIST_PAGE_SIZE
 from .matrix_cell import MatrixCell
-
-
-DEFAULT_BUILD_LIST_PAGE_SIZE = 10
 
 
 @app.route('/project/')
 @db_session
 def project_list():
     latest_build_map = {  # (project, branch) -> last build
-        (rec[0], rec[1]) : rec[2] for rec in
+        (rec[0], rec[1]): rec[2] for rec in
         select((build.project, build.branch, max(build.build_num))
                for build in models.Build
                if exists(build.runs)
@@ -37,8 +34,9 @@ def project_list():
     ordered_project_list = models.Project.select().order_by(models.Project.order_num)
     ordered_branch_list = models.Branch.select().order_by(models.Branch.order_num)
     project_list = [project for project in ordered_project_list if project in project_map]
-    project_branch_list = {project: [branch for branch in ordered_branch_list if branch in project_map[project]]
-                               for project in project_list}
+    project_branch_list = {
+        project: [branch for branch in ordered_branch_list if branch in project_map[project]]
+        for project in project_list}
     return render_template(
         'project_list.html',
         platform_list=platform_list,
@@ -48,6 +46,7 @@ def project_list():
         platform_map=platform_map,
         )
 
+
 @app.route('/project/<project_name>/<branch_name>')
 @db_session
 def branch(project_name, branch_name):
@@ -56,7 +55,7 @@ def branch(project_name, branch_name):
     query = select(
         (build.build_num, build) for build in models.Build
         if build.project.name == project_name and
-           build.branch.name == branch_name)
+        build.branch.name == branch_name)
     rec_count = query.count()
     build_list = [build for build_num, build in query.order_by(desc(1)).page(page, page_size)]
     build_changesets_map = {}  # build -> changeset list
@@ -71,8 +70,10 @@ def branch(project_name, branch_name):
         cell.add_run(run)
     scalability_platform_list = list(select(
         run.root_run.platform.name for run in models.Run
-        if run.root_run.build.project.name == project_name and run.root_run.build.branch.name == branch_name and
-           run.test.path.startswith('functional/scalability_test.py') and run.test.is_leaf and exists(run.metrics)))
+        if run.root_run.build.project.name == project_name and
+        run.root_run.build.branch.name == branch_name and
+        run.test.path.startswith('functional/scalability_test.py') and
+        run.test.is_leaf and exists(run.metrics)))
     platform_list = list(select(run.platform for run in models.Run if run.build in build_list).order_by(models.Platform.order_num))
     return render_template(
         'branch.html',
