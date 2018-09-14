@@ -19,7 +19,7 @@ namespace Nx
         private Thread m_transactionsThread;
 
         // Makes proper uri
-        private Uri MakeUri(string path, string query, string scheme = "http")
+        private Uri MakeUri(string path, string query, string scheme)
         {
             return new UriBuilder()
             {
@@ -58,10 +58,10 @@ namespace Nx
             if (transaction == null)
                 return;
 
-            int command = (int) transaction["command"];
+            string command = transaction["command"].ToString();
             Console.WriteLine($"Got command {command}");
 
-            if (command == 703)
+            if (command == "videowallControl")
             {
                 var controlMessage = transaction["params"].ToObject<ControlMessage>();
                 string parameters = string.Join("\n",
@@ -85,11 +85,9 @@ namespace Nx
                     "ws");
                 var headers = new Dictionary<string, string>()
                 {
-                    {"X-Version", "1"},
                     {"X-NetworkOptix-VideoWall", videoWallId},
                     {"X-runtime-guid", runtimeId}
                 };
-
 
                 using (var ws = new WebSocketSharp.WebSocket (eventsUri.ToString()))
                 {
