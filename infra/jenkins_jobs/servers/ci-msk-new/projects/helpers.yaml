@@ -9,6 +9,7 @@
         __debug__: true
         pipeline_priority: 1
     - release:
+        junkshop_project_name: debug-release
         pipeline_priority: 9
     - develop:
         junkshop_project_name: ci

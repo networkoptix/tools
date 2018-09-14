@@ -11,7 +11,7 @@
     clean_build_if_build_scripts_changed: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead
 
     junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
-    junkshop_db_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
+    junkshop_db_host: '10.0.0.113'
 
     jenkins_host: http://jenkins2.enk.me
     junkshop_project_name: $PIPELINE

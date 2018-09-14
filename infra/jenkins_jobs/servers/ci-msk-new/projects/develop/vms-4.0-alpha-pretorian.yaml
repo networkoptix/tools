@@ -3,7 +3,6 @@
 
     project: vms
     junk_shop_host: junkshop.enk.me
-    junkshop_db_host: '10.0.0.113'
 
     version:
     - vms_4.0_alpha:
