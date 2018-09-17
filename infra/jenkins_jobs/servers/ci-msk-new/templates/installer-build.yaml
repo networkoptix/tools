@@ -598,9 +598,6 @@
               #!bash
               mkdir -p ./build/build_logs
               mv ./build_logs/* ./build/build_logs/
-          - shell: |
-              #!bash
-              ls ./distrib/*unit_tests*.tar.gz
 
           # Depending on test distribution strategy, we have 2 options:
           # - unpacked in ./build/bin/*, ./build/lib/*, "as is"
