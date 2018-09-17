@@ -21,7 +21,14 @@ def format_bytes(count):
     return '%.2f%sB' % (count, BYTE_FORMATS[index])
 
 
-Paginator = namedtuple('Paginator', 'current_page pages_range at_begin at_end backward_page forward_page first_page last_page')
+Paginator = namedtuple(
+    'Paginator',
+    [
+        'current_page', 'pages_range', 'at_begin',
+        'at_end', 'backward_page', 'forward_page',
+        'first_page', 'last_page'
+    ]
+)
 
 
 def paginator(current_page, rec_count, page_size):
@@ -44,24 +51,30 @@ def paginator(current_page, rec_count, page_size):
         )
 
 
-def paginator_from_list(current_value, lst):
+class PageValueError(Exception):
+    pass
 
-    last_page = len(lst) - 1
+
+def paginator_from_list(current_value, lst):
+    '''Create paginator from `lst` of page values and
+    current page sets by the `current_value`'''
+
+    if not lst:
+        return None
+
+    lst_len = len(lst)
 
     def get_page(index):
         if index < 0:
             return 0
-        if index > last_page:
-            return last_page
+        if index >= lst_len:
+            return lst_len - 1
         return index
-
-    def get_page_value(index):
-        return lst[index] if index <= last_page else 0
 
     try:
         current_page = lst.index(current_value)
     except ValueError:
-        current_page = 0
+        raise PageValueError("Page value '%s' not found" % current_value)
 
     start = get_page(current_page - PAGINATOR_PAGE_LIMIT / 2 - 1)
     end = get_page(current_page + PAGINATOR_PAGE_LIMIT / 2)
@@ -77,11 +90,11 @@ def paginator_from_list(current_value, lst):
         current_page=current_value,
         pages_range=lst[start:end],
         at_begin=(start == 0),
-        at_end=(end == last_page),
-        backward_page=get_page_value(backward_page),
-        forward_page=get_page_value(forward_page),
-        first_page=get_page_value(0),
-        last_page=get_page_value(last_page))
+        at_end=(end == lst_len - 1),
+        backward_page=lst[backward_page],
+        forward_page=lst[forward_page],
+        first_page=lst[0],
+        last_page=lst[lst_len-1])
 
 
 def get_or_abort(Model, id):
