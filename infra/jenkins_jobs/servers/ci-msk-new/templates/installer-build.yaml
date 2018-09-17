@@ -41,8 +41,9 @@
     node: '{installer-build-node}'
     # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
     # '_{platform}' combination is unallowed
-    workspace: !j2: '{{ "__debug__" if __debug__ else ""
-      }}build-thr${EXECUTOR_NUMBER}-distribution-{{
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}build{{
+      "-thr${EXECUTOR_NUMBER}" if build_distribution_concurrently
+      or build_distribution_custom_suffix == "" else "" }}-distribution-{{
       platform }}{{ build_distribution_custom_suffix }}'
 
     concurrent: '{build_distribution_concurrently}'
