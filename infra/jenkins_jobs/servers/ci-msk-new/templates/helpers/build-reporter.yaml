@@ -40,7 +40,7 @@
       </pre>
     node: reporter
     concurrent: false
-    workspace: !j2:  '{{ "__debug__" if __debug__ else "" }}nx_reporter_build'
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}{{ pipeline }}-build-reporter'
 
     # junk_shop_host: required!
 

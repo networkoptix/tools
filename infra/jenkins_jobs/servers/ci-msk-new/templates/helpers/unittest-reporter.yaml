@@ -2,7 +2,7 @@
     name: '{pipeline}.helper.unittests-reporter'
 
     node: reporter
-    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}ut-reporter'
+    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}{{ pipeline }}-ut-reporter'
     concurrent: false
 
     properties:
