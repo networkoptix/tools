@@ -19,6 +19,7 @@
 
     build_distribution_concurrently: false
     test_distribution_concurrently: false
+    max_concurrent_runners: 1
 
     # comma-separated list of emails to whom send notifications related to builds
     build-watchers: akolesnikov@networkoptix.com

@@ -15,6 +15,8 @@
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
 
+    max_concurrent_runners: 3
+
     # comma-separated list of emails to whom send notifications related to builds
     build-watchers: ''
 

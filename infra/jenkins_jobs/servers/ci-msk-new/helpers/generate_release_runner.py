@@ -61,10 +61,11 @@ print '''#
 
     node: runner
     concurrent: true
+    max_concurrent_runners: 5 # default
 
     properties:
     - throttle:
-        max-total: 5
+        max-total: '{max_concurrent_runners}'
         option: project
     - build-discarder:
         days-to-keep: 30
