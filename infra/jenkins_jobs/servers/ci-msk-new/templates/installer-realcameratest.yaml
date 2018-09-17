@@ -6,9 +6,8 @@
     concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
-    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}realcameratest{{
-      "-thr${EXECUTOR_NUMBER}" if run_realcameratests_concurrently else ""
-      }}'
+    workspace: !j2: '{{ "__debug__" if __debug__ else ""
+      }}realcameratest-thr${EXECUTOR_NUMBER}'
     run_realcameratests_concurrently: true
 
     workdir: realcameratests

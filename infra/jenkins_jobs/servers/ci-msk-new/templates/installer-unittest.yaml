@@ -5,8 +5,11 @@
       Run unit tests for {platform} for {version}.
 
     node: '{unittest-node}'
-    concurrent: true
-    workspace: 'nx_{pipeline}_ut_thr${{EXECUTOR_NUMBER}}/'
+    concurrent: '{test_distribution_concurrently}'
+
+    test_distribution_concurrently: true
+    workspace: !j2: '{{ "__debug__" if __debug__ else ""
+      }}ut-thr${EXECUTOR_NUMBER}'
 
     # We have 2 kinds of timeouts:
     # 1) timeout for entire job

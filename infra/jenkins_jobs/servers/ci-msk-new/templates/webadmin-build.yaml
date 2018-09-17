@@ -44,9 +44,8 @@
 
     node: '{webadmin_build_node}'
     concurrent: '{build_webadmin_concurrently}'
-    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}nx_build{{
-      "_thr${EXECUTOR_NUMBER}" if build_webadmin_concurrently else ""
-      }}-webadmin'
+    workspace: !j2: '{{ "__debug__" if __debug__ else ""
+      }}build-thr${EXECUTOR_NUMBER}-webadmin'
 
     webadmin_build_node: webadmin-build
     build_webadmin_concurrently: true

@@ -10,6 +10,7 @@
         use-nx-vms-commit: ''  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
+    build_distribution_custom_suffix: '' # no suffix that determines branch
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================

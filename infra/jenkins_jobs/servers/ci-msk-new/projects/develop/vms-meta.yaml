@@ -12,6 +12,9 @@
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
 
+    build_distribution_concurrently: false
+    test_distribution_concurrently: false
+
     # comma-separated list of emails to whom send notifications related to builds
     build-watchers: mshevchenko@networkoptix.com
 

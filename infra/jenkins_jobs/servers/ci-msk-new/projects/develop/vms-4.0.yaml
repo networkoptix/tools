@@ -14,6 +14,9 @@
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
 
+    build_distribution_concurrently: true  # !important - this is active branch
+    test_distribution_concurrently: true   # !important - this is active branch
+
     # comma-separated list of emails to whom send notifications related to builds
     build-watchers: ''
 

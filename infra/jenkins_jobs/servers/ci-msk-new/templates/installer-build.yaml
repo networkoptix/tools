@@ -41,11 +41,12 @@
     node: '{installer-build-node}'
     # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
     # '_{platform}' combination is unallowed
-    workspace: !j2: '{{ "__debug__" if __debug__ else "" }}build{{
-      "-thr${EXECUTOR_NUMBER}" if build_distribution_concurrently else ""
-      }}-distribution-{{ platform }}-$BRANCH'
+    workspace: !j2: '{{ "__debug__" if __debug__ else ""
+      }}build-thr${EXECUTOR_NUMBER}-distribution-{{
+      platform }}{{ build_distribution_custom_suffix }}'
 
     concurrent: '{build_distribution_concurrently}'
+    build_distribution_custom_suffix: '-$BRANCH'
 
     use-webadmin: 'true' # defaults to build installer that requires webadmin
     webadmin-component-name: 'server-external'
