@@ -1,9 +1,11 @@
 import os
 import re
 import pytz
+import argparse
 from dateutil.tz import tzlocal
 import datetime
 from argparse import ArgumentTypeError
+from pathlib2 import Path
 
 from pony.orm import sql_debug
 
@@ -25,8 +27,10 @@ class SimpleNamespace:
 def datetime_utc_now():
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
+
 def datetime_local_now():
     return datetime.datetime.now(tzlocal())
+
 
 def as_local_tz(dt):
     return dt.astimezone(tzlocal())
@@ -42,6 +46,7 @@ TIMEDELTA_REGEXP = re.compile(
     r'((?P<microseconds>\d+?)usec)?'
     r'$')
 
+
 def str_to_timedelta(duration_str):
     '''Create datetime from it's string representation
     >>> str_to_timedelta('1d2h3m4s')
@@ -54,7 +59,8 @@ def str_to_timedelta(duration_str):
     datetime.timedelta(0, 0, 6453)
     '''
     match = TIMEDELTA_REGEXP.match(duration_str)
-    if not match: return datetime.timedelta(seconds=int(duration_str))
+    if not match:
+        return datetime.timedelta(seconds=int(duration_str))
     timedelta_params = {k: float(v)
                         for (k, v) in match.groupdict().iteritems() if v}
     try:
@@ -111,15 +117,32 @@ def timedelta_to_str(d):
         s = '0'
     return s
 
+
+def dir_path(value):
+    path = Path(value).expanduser()
+    if not path.is_dir():
+        raise argparse.ArgumentTypeError('%s is not an existing directory' % path)
+    return path
+
+
+def file_path(value):
+    path = Path(value).expanduser()
+    if not path.is_file():
+        raise argparse.ArgumentTypeError('%s is not an existing file' % path)
+    return path
+
+
 def status2outcome(passed):
     if passed:
         return 'passed'
     else:
         return 'failed'
 
+
 def outcome2status(outcome):
     assert outcome in ['failed', 'passed'], repr(outcome)
     return outcome == 'passed'
+
 
 def param_to_bool(value):
     if value in ['true', 'yes']:
@@ -155,5 +178,5 @@ class DbConfig(object):
         if 'SQL_DEBUG' in os.environ:
             sql_debug(True)
         db.bind('postgres', host=self.host, user=self.user,
-                    password=self.password, port=self.port)
+                password=self.password, port=self.port)
         db.generate_mapping(create_tables=True)

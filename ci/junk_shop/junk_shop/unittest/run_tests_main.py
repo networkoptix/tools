@@ -4,7 +4,7 @@ import argparse
 
 from pathlib2 import Path
 
-from ..utils import str_to_timedelta
+from ..utils import str_to_timedelta, file_path, dir_path
 from .test_runner import TestRunner
 
 log = logging.getLogger(__name__)
@@ -30,20 +30,6 @@ def run_unit_tests(config_path, work_dir, bin_dir, test_binary_list, timeout, ma
 def setup_logging(level=None):
     format = '%(asctime)-15s %(levelname)-7s %(message)s'
     logging.basicConfig(level=level or logging.INFO, format=format)
-
-
-def dir_path(value):
-    path = Path(value).expanduser()
-    if not path.is_dir():
-        raise argparse.ArgumentTypeError('%s is not an existing directory' % path)
-    return path
-
-
-def file_path(value):
-    path = Path(value).expanduser()
-    if not path.is_file():
-        raise argparse.ArgumentTypeError('%s is not an existing file' % path)
-    return path
 
 
 def main():
