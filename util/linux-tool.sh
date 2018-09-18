@@ -600,25 +600,22 @@ build_and_test_nx_kit() # nx_kit_src_dir "$@"
 
     if [[ $MSVC = 1 ]]
     then
-        local -r GENERATION_ARGS="-Ax64 -Thost=x64"
-        local -r GENERATOR_ARG=""
-        local -r BUILD_ARGS="--config Release"
+        local -r GENERATION_ARGS=( -Ax64 -Thost=x64 )
+        local -r BUILD_ARGS=( --config Release )
     else
-        local -r BUILD_ARGS=""
+        local -r BUILD_ARGS=()
+        local GENERATION_ARGS=( -DCMAKE_BUILD_TYPE=Release )
         if nx_is_cygwin
         then
-            local -r GENERATION_ARGS="-DCMAKE_C_COMPILER=gcc"
-            local -r GENERATOR_ARG="-GUnix Makefiles"
+            GENERATION_ARGS+=( -DCMAKE_C_COMPILER=gcc -G "Unix Makefiles" )
         else
-            local -r GENERATION_ARGS=""
-            local -r GENERATOR_ARG="-GNinja"
+            GENERATION_ARGS+=( -G Ninja )
         fi
     fi
 
-    nx_verbose cmake "$SRC" -DCMAKE_BUILD_TYPE=Release \
-        ${GENERATOR_ARG:+"$GENERATOR_ARG"} $GENERATION_ARGS "$@" || return $?
+    nx_verbose cmake "$SRC" "${GENERATION_ARGS[@]}" "$@" || return $?
     nx_echo
-    time nx_verbose cmake --build . $BUILD_ARGS || return $?
+    time nx_verbose cmake --build . "${BUILD_ARGS[@]}" || return $?
     nx_echo
 
     local UT_EXE
@@ -667,7 +664,7 @@ do_kit() # "$@"
     nx_cd "$KIT_BUILD_DIR"
 
     local KIT_SRC_DIR=$(nx_path "$VMS_DIR/$NX_KIT_DIR")
-    build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || { local RESULT=$?; nx_popd; return $?; }
+    build_and_test_nx_kit "$KIT_SRC_DIR" "$@" || return $?
 
     if [[ $KEEP_BUILD_DIR = 0 ]]
     then
