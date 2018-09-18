@@ -49,7 +49,7 @@
     concurrent: '{build_distribution_concurrently}'
     build_distribution_custom_suffix: '-$BRANCH'
 
-    use-webadmin: 'true' # defaults to build installer that requires webadmin
+    use_webadmin: 'true' # defaults to build installer that requires webadmin
     build_distribution_concurrently: true
 
     cmake_build_extra_args: ''
@@ -168,7 +168,7 @@
         default: '{platform}'
     - hidden:
         name: USE_WEBADMIN
-        default: '{use-webadmin}'
+        default: '{use_webadmin}'
 
 
     wrappers:

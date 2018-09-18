@@ -75,7 +75,7 @@
 
     - mac: &osx_config
         installer_build_node: build-installer-mac
-        use-webadmin: false
+        use_webadmin: false
         cmake_configure_args_platform: >-
           -G Ninja
           -DcodeSigning=OFF
