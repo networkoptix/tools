@@ -11,7 +11,7 @@
         {job_maintainers}
         (NOT notified by email on build failures)
       BUILD WATCHERS
-        {build-watchers}
+        {build_watchers}
         (notified by email on build failures)
 
       SOURCES
@@ -236,6 +236,6 @@
                 JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - failure-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'
     - fixed-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'

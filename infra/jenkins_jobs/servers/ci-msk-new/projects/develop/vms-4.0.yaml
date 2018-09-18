@@ -18,7 +18,7 @@
     test_distribution_concurrently: true   # !important - this is active branch
 
     # comma-separated list of emails to whom send notifications related to builds
-    build-watchers: ''
+    build_watchers: ''
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
@@ -207,16 +207,16 @@
     - installer-build
     - '{pipeline}.{version}.{project}.distribution.{customization}.functest':
         customization: default
-        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
-        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scaletest':
         customization: default
-        build-watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
-        build-watchers: muskov@networkoptix.com
+        build_watchers: muskov@networkoptix.com
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced

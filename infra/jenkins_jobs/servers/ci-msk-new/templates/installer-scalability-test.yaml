@@ -254,7 +254,7 @@
     - delete-hg-repos(if-damaged)
 
     - failure-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'
     - fixed-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'
 

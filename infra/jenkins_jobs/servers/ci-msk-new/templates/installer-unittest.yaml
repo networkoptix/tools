@@ -16,9 +16,9 @@
     # 2) timeout for only testrunner
     # this is done because testrunner should be able to mark
     # tests as timed out before it will be killed by build timeout
-    job-timeout: "40" # min
-    sdk-testrunner-timeout: "300" # 5 min
-    testrunner-timeout: "750" # sec = 12.5 min
+    job_timeout: "40" # min
+    sdk_testrunner_timeout: "300" # 5 min
+    testrunner_timeout: "750" # sec = 12.5 min
 
     properties:
     - authorization-{pipeline}-system
@@ -55,11 +55,11 @@
     # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
     - inject:
         properties-content: |
-          SDK_TESTRUNNER_TIMEOUT={sdk-testrunner-timeout}
-          TESTRUNNER_TIMEOUT={testrunner-timeout}
+          SDK_TESTRUNNER_TIMEOUT={sdk_testrunner_timeout}
+          TESTRUNNER_TIMEOUT={testrunner_timeout}
     - timestamps
     - timeout:
-        timeout: '{job-timeout}'
+        timeout: '{job_timeout}'
         fail: true
         type: absolute
     - pre-scm-buildstep:
@@ -267,6 +267,6 @@
         keep_files: [ devtools, venv ]
 
     - failure-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'
     - fixed-email:
-        email-recipients: '{build-watchers}'
+        email-recipients: '{build_watchers}'
