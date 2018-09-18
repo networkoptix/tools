@@ -225,10 +225,10 @@
         # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
-            unittest-node: unittests-linux
+            unittest_node: unittests-linux
         - mac:
-            unittest-node: unittests-mac
+            unittest_node: unittests-mac
         - windows-x64:
-            unittest-node: unittests-windows
+            unittest_node: unittests-windows
         customization:
         - default

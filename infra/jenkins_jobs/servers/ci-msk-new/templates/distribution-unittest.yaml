@@ -4,7 +4,7 @@
     description: |
       Run unit tests for {platform} for {version}.
 
-    node: '{unittest-node}'
+    node: '{unittest_node}'
     concurrent: '{test_distribution_concurrently}'
 
     test_distribution_concurrently: true
@@ -28,7 +28,7 @@
         max-total: 5
         option: category
         categories:
-        - '{unittest-node}'
+        - '{unittest_node}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100
