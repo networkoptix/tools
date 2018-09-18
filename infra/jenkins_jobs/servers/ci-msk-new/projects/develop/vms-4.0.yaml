@@ -105,7 +105,7 @@
     - polling-trigger:
         preset:
         - on-push:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for automatic builds on every push to remote repository
             default_build_description: >-
               Triggered on push event
@@ -115,7 +115,7 @@
     - manual-trigger:
         preset:
         - nightly:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for nigtly clean builds to verify the state of product
               It builds with corresponding schedule "{timer}".
 
@@ -129,7 +129,7 @@
             clean_workspace: true
             timer: '' # temp. isabled, was '4 0 * * 1-5'
         - custom:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
@@ -138,7 +138,7 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
         - only-realcameratests:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for testing on real cameras stand.
               (by default it will build linux distrib and run realcameratest)
             default_build_description: >-
@@ -148,7 +148,7 @@
             run-unittests: '' # false
             run-realcameratests: true
         - only-functests:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for running functional tests.
               (by default it will build linux and win distrib and run functional)
             default_build_description: >-
@@ -164,7 +164,7 @@
         - scalability-test
         preset:
         - nightly:
-            detailed-job-description: |-
+            detailed_job_description: |-
               Run nightly functional test with schedule "{timer}".
             default_build_description: >-
               Nightly functional tests
@@ -179,7 +179,7 @@
         - windows-self-tests-nightly:
             test_list: self_tests
             test_select_expr: 'windows or smb'
-            detailed-job-description: |-
+            detailed_job_description: |-
               Run nightly windows self tests with schedule "{timer}".
             default_build_description: >-
               Nightly windows self tests

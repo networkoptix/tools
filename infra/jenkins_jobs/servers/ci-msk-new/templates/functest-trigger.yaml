@@ -18,7 +18,7 @@
       This job serves for starting functional tests for latest successfull build
       from on-push or niglty trigger.
 
-      {detailed-job-description}
+      {detailed_job_description}
 
       Note, that this job doesn't wait for downstream build completion.
       Find your build in crsp build queue

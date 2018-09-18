@@ -26,7 +26,7 @@
       There are some different triggers available.
       See all triggers on {jenkins_host}/view/triggers/
 
-      {detailed-job-description}
+      {detailed_job_description}
 
       See more details on build procedure in corresponding downstream "*.runner" job
 
@@ -81,7 +81,7 @@
     realcameratesting-framework-branch: $BRANCH
 
     ignore-functests: 'false' #
-    # detailed-job-description required!
+    # detailed_job_description required!
 
     use-build-identity: NEW
 

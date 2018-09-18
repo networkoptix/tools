@@ -103,7 +103,7 @@
     - polling-trigger:
         preset:
         - on-push:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for automatic builds on every push to remote repository
             default_build_description: >-
               Triggered on push event

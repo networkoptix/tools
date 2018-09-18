@@ -157,7 +157,7 @@
     - manual-trigger:
         preset:
         - nightly:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for nigtly clean builds to verify the state of product
               It builds with corresponding schedule "{timer}".
 
@@ -171,7 +171,7 @@
             clean_workspace: true
             timer: '' # temp. isabled, was '0 0 * * 1-5'
         - custom:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.

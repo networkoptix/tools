@@ -112,7 +112,7 @@
     - manual-trigger:
         preset:
         - custom:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
@@ -125,7 +125,7 @@
     - _manual-trigger:
         preset:
         - custom2:
-            detailed-job-description: |-
+            detailed_job_description: |-
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
