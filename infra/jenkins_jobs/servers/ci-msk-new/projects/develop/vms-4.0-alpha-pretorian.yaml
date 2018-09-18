@@ -7,7 +7,7 @@
     version:
     - vms_4.0_alpha:
         default_branch: vms_4.0_alpha
-        use-nx-vms-commit: vms_4.0_alpha  # FIXME: this is temp fix
+        use_nx_vms_commit: vms_4.0_alpha  # FIXME: this is temp fix
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
@@ -114,8 +114,8 @@
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
-        default-platforms: linux-x64,windows-x64
-        default-customizations: hanwha
+        default_platforms: linux-x64,windows-x64
+        default_customizations: hanwha
 
     # REGISTRIES
 

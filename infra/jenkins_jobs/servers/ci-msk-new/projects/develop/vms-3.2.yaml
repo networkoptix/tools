@@ -7,10 +7,10 @@
     version:
     - vms_3.2:
         default_branch: vms_3.2
-        use-nx-vms-commit: vms_3.2  # FIXME: this is temp fix
+        use_nx_vms_commit: vms_3.2  # FIXME: this is temp fix
     - vms_3.2_release:
         default_branch: vms_3.2_release
-        use-nx-vms-commit: vms_3.2_release  # FIXME: this is temp fix
+        use_nx_vms_commit: vms_3.2_release  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 
@@ -160,8 +160,8 @@
               Real cameras testing
             platforms: linux-x64
             customizations: default
-            run-unittests: '' # false
-            run-realcameratests: true
+            run_unittests: '' # false
+            run_realcameratests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
         tests:
@@ -193,8 +193,8 @@
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,windows-x86
-        default-customizations: default,hanwha
+        default_platforms: linux-x64,linux-x86,windows-x86
+        default_customizations: default,hanwha
 
     # REGISTRIES
 

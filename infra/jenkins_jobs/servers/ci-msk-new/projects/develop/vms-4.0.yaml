@@ -7,7 +7,7 @@
     version:
     - vms:
         default_branch: vms
-        use-nx-vms-commit: vms  # FIXME: this is temp fix
+        use_nx_vms_commit: vms  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 
@@ -145,8 +145,8 @@
               Real cameras testing
             platforms: linux-x64
             customizations: default
-            run-unittests: '' # false
-            run-realcameratests: true
+            run_unittests: '' # false
+            run_realcameratests: true
         - only-functests:
             detailed_job_description: |-
               This trigger serves for running functional tests.
@@ -155,8 +155,8 @@
               Trigger functests related jobs
             platforms: linux-x64,windows-x64
             customizations: default
-            run-unittests: '' # false
-            run-functests: true
+            run_unittests: '' # false
+            run_functests: true
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
         tests:
@@ -188,14 +188,14 @@
 
     - '{pipeline}.{version}.{project}.trigger.blinking-tests':
         timer: ''
-        use-nx-vms-commit: e8de543f9178
+        use_nx_vms_commit: e8de543f9178
 
 
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,windows-x86
-        default-customizations: default,hanwha
+        default_platforms: linux-x64,linux-x86,windows-x86
+        default_customizations: default,hanwha
 
     # REGISTRIES
 

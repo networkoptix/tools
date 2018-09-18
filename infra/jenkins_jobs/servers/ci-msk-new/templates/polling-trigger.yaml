@@ -47,9 +47,9 @@
     default_build_description: ''
     build-webadmin: true
     build-installer: true
-    run-functests: '' # false
-    run-unittests: true
-    run-realcameratests: '' # false
+    run_functests: '' # false
+    run_unittests: true
+    run_realcameratests: '' # false
 
     ignore-functests: 'false' #
     # detailed_job_description required!
@@ -80,11 +80,11 @@
     - p_BUILD_INSTALLER:
         default: '{build-installer}'
     - p_RUN_UNITTESTS:
-        default: '{run-unittests}'
+        default: '{run_unittests}'
     - p_RUN_FUNCTESTS:
-        default: '{run-functests}'
+        default: '{run_functests}'
     - p_RUN_REALCAMERATESTS:
-        default: '{run-realcameratests}'
+        default: '{run_realcameratests}'
     - administrative-section-separator
     - string:
         name: IGNORE_FUNCTESTS_COMMITS

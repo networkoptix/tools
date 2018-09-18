@@ -75,15 +75,15 @@
     default_build_description: ''
     build-webadmin: true
     build-installer: true
-    run-functests: '' # false
-    run-unittests: true
-    run-realcameratests: '' # false
+    run_functests: '' # false
+    run_unittests: true
+    run_realcameratests: '' # false
     realcameratesting-framework-branch: $BRANCH
 
     ignore-functests: 'false' #
     # detailed_job_description required!
 
-    use-build-identity: NEW
+    use_build_identity: NEW
 
     properties:
     - authorization-{pipeline}-trigger
@@ -111,15 +111,15 @@
     - p_BUILD_INSTALLER:
         default: '{build-installer}'
     - p_RUN_UNITTESTS:
-        default: '{run-unittests}'
+        default: '{run_unittests}'
     - p_RUN_FUNCTESTS:
-        default: '{run-functests}'
+        default: '{run_functests}'
     - p_RUN_REALCAMERATESTS:
-        default: '{run-realcameratests}'
+        default: '{run_realcameratests}'
     - p_USE_BUILD_IDENTITY:
-        default: '{use-build-identity}'
+        default: '{use_build_identity}'
     - p_USE_NX_VMS_COMMIT:
-        default: '{use-nx-vms-commit}'
+        default: '{use_nx_vms_commit}'
     - p_CLOUD_GROUP:
         default: test
     - p_HARDWARE_SIGNING:
@@ -312,9 +312,9 @@
     - p_PLATFORMS:
         default: '{platforms}'
     - p_RUN_UNITTESTS:
-        default: '{run-unittests}'
+        default: '{run_unittests}'
     - p_USE_NX_VMS_COMMIT:
-        default: '{use-nx-vms-commit}'
+        default: '{use_nx_vms_commit}'
     - p_CLEAN_BUILD:
         default: '{clean-build}'
 
@@ -329,9 +329,9 @@
           CUSTOMIZATIONS={customizations}
           BUILD_WEBADMIN={build-webadmin}
           BUILD_INSTALLER={build-installer}
-          RUN_FUNCTESTS={run-functests}
-          RUN_REALCAMERATESTS={run-realcameratests}
-          USE_BUILD_IDENTITY={use-build-identity}
+          RUN_FUNCTESTS={run_functests}
+          RUN_REALCAMERATESTS={run_realcameratests}
+          USE_BUILD_IDENTITY={use_build_identity}
           CLOUD_GROUP=test
           HARDWARE_SIGNING=OFF
           TRUSTED_TIMESTAMPING=OFF

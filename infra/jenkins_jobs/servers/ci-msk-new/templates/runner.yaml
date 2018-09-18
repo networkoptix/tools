@@ -28,9 +28,9 @@
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_PLATFORMS:
-        default: '{default-platforms}'
+        default: '{default_platforms}'
     - p_CUSTOMIZATIONS:
-        default: '{default-customizations}'
+        default: '{default_customizations}'
     - p_BUILD_WEBADMIN:
         default: true
     - p_BUILD_INSTALLER:

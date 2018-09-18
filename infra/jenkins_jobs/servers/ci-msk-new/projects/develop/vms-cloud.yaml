@@ -7,10 +7,10 @@
     version:
     - cloud_18.2_backend:
         default_branch: cloud_18.2_backend
-        use-nx-vms-commit: cloud_18.2_backend  # FIXME: this is temp fix
+        use_nx_vms_commit: cloud_18.2_backend  # FIXME: this is temp fix
     - cloud_dev:
         default_branch: cloud_dev
-        use-nx-vms-commit: cloud_dev  # FIXME: this is temp fix
+        use_nx_vms_commit: cloud_dev  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
 
@@ -141,8 +141,8 @@
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,windows-x86
-        default-customizations: default,hanwha
+        default_platforms: linux-x64,linux-x86,windows-x86
+        default_customizations: default,hanwha
 
     # REGISTRIES
 

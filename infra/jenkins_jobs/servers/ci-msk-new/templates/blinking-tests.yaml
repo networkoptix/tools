@@ -19,10 +19,10 @@
     customizations: default
     build-webadmin: true
     build-installer: true
-    run-unittests: true
-    run-functests: false
-    run-realcameratests: ''
-    use-build-identity: 'NEW'
+    run_unittests: true
+    run_functests: false
+    run_realcameratests: ''
+    use_build_identity: 'NEW'
 
     properties:
     - authorization-{pipeline}-system
@@ -45,15 +45,15 @@
     - p_BUILD_INSTALLER:
         default: '{build-installer}'
     - p_RUN_UNITTESTS:
-        default: '{run-unittests}'
+        default: '{run_unittests}'
     - p_RUN_FUNCTESTS:
-        default: '{run-functests}'
+        default: '{run_functests}'
     - p_RUN_REALCAMERATESTS:
-        default: '{run-realcameratests}'
+        default: '{run_realcameratests}'
     - p_USE_BUILD_IDENTITY:
-        default: '{use-build-identity}'
+        default: '{use_build_identity}'
     - p_USE_NX_VMS_COMMIT:
-        default: '{use-nx-vms-commit}'
+        default: '{use_nx_vms_commit}'
 
     triggers:
     - timed: "{timer}"

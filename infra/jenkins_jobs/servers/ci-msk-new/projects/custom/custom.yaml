@@ -7,7 +7,7 @@
     version:
     - any:
         default_branch: default
-        use-nx-vms-commit: ''  # FIXME: this is temp fix
+        use_nx_vms_commit: ''  # FIXME: this is temp fix
 
     realcameratesting-framework-branch: vms
     build_distribution_custom_suffix: '' # no suffix that determines branch
@@ -120,8 +120,8 @@
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            run-unittests: true
-            use-nx-vms-commit: ''
+            run_unittests: true
+            use_nx_vms_commit: ''
     - _manual-trigger:
         preset:
         - custom2:
@@ -133,15 +133,15 @@
               Manually triggered
             platforms: linux-x64,windows-x64,,windows-x86,mac,bpi
             customizations: default
-            run-unittests: true
-            use-nx-vms-commit: ''
+            run_unittests: true
+            use_nx_vms_commit: ''
 
 
     # RUNNER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
-        default-platforms: linux-x64,linux-x86,windows-x86
-        default-customizations: default,hanwha
+        default_platforms: linux-x64,linux-x86,windows-x86
+        default_customizations: default,hanwha
 
     # REGISTRIES
 
