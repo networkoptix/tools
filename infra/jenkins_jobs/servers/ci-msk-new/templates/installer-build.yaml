@@ -50,13 +50,9 @@
     build_distribution_custom_suffix: '-$BRANCH'
 
     use-webadmin: 'true' # defaults to build installer that requires webadmin
-    webadmin-component-name: 'server-external'
-    webadmin-platform: universal
-    webadmin-customization: default
     build_distribution_concurrently: true
 
     cmake-executable: cmake
-
     cmake_build_extra_args: ''
 
     # this is a list of vars that not require during build process and should be removed
@@ -84,7 +80,6 @@
       BUILD_CAUSE_UPSTREAMTRIGGER
       TRIGGERED_BUILD_NUMBER_helper_freeze_build_config
       NX_VMS_COMMIT
-      WEBADMIN_COMPONENT_NAME
       TRIGGERED_BUILD_NUMBER_helper_sync_hg
       BUILD_DESCRIPTION
       USE_WEBADMIN
@@ -160,7 +155,7 @@
           {cmake_configure_args_platform}
           {cmake_configure_args_customization}
           -DbuildNumber=$BUILD_IDENTITY
-          -DcustomWebAdminPackageDirectory=../$WEBADMIN_COMPONENT_NAME
+          -DcustomWebAdminPackageDirectory=../server-external
     - string:
         name:  CMAKE_BUILD_COMMAND
         # FIXME: --config should be defined in project
@@ -172,14 +167,12 @@
         default: '{customization}'
     - p_PLATFORM(hidden):
         default: '{platform}'
+    - hidden:
+        name: USE_WEBADMIN
+        default: '{use-webadmin}'
+
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          USE_WEBADMIN={use-webadmin}
-          WEBADMIN_COMPONENT_NAME={webadmin-component-name}
-
     - timestamps
     - timeout:
         # normally, should complete in 7-30 min
@@ -420,7 +413,7 @@
         #!bash
         set -ex
         mkdir -p 'build'
-        rm -rf "$WORKSPACE/$WEBADMIN_COMPONENT_NAME"
+        rm -rf "./server-external"
 
     - conditional-step:
         condition-kind: boolean-expression
@@ -434,9 +427,9 @@
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION
               BRANCH=$BRANCH
               BUILD_IDENTITY=$BUILD_IDENTITY
-              CUSTOMIZATION={webadmin-customization}
-              PLATFORM={webadmin-platform}
-              COMPONENTS=$WEBADMIN_COMPONENT_NAME/
+              CUSTOMIZATION=default
+              PLATFORM=universal
+              COMPONENTS=server-external/
               SSH_USER=$USER
               LOCAL_PATH=$WORKSPACE/
               NODE_SSH_CONNECTION=$SSH_CONNECTION

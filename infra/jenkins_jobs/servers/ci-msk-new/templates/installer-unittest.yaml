@@ -52,11 +52,6 @@
         default: '{platform}'
 
     wrappers:
-    # NOTE: There is a bug in jenkins: vars set here are read-only and can not be modified.
-    - inject:
-        properties-content: |
-          SDK_TESTRUNNER_TIMEOUT={sdk_testrunner_timeout}
-          TESTRUNNER_TIMEOUT={testrunner_timeout}
     - timestamps
     - timeout:
         timeout: '{job_timeout}'
@@ -161,7 +156,7 @@
               # run tests
               PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
               $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
-                --timeout="$SDK_TESTRUNNER_TIMEOUT" \
+                --timeout="{sdk_testrunner_timeout}" \
                 "$WORKSPACE/build/current_config.py" \
                 "$WORKSPACE/build/nx_metadata_sdk" \
                 $(cd $WORKSPACE/build/nx_metadata_sdk && find . -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
@@ -178,7 +173,7 @@
             # run tests
             PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop" \
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_run.py \
-              --timeout="$TESTRUNNER_TIMEOUT" \
+              --timeout="{testrunner_timeout}" \
               "$WORKSPACE/build/current_config.py" \
               "$WORKSPACE/build/bin" \
               $(cd $WORKSPACE/build/bin && find . -name '*_ut' -or -name '*_ut.exe' -or -name '*_tests' -or -name '*_tests.exe' | sed "s|^\./||")
