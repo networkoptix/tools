@@ -38,8 +38,7 @@
         name: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
     - timestamps
     - timeout:
-        # FIXME: revert to 20min, temp added teme, see CI-186
-        timeout: 40 # min
+        timeout: 20 # min
         fail: true
         type: absolute
     - workspace-cleanup
