@@ -43,35 +43,35 @@
     - linux-x64:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        installer_build_node: &linux_node build-installer-linux
+        distribution_build_node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
         cmake_build_extra_args: >-
           -- -j 20
     - linux-x86:
-        installer_build_node: *linux_node
+        distribution_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=linux-x86
     - bananapi:
-        installer_build_node: *linux_node
+        distribution_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bananapi
           -DwithTests=OFF
     - bpi:
-        installer_build_node: *linux_node
+        distribution_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bpi
     - rpi:
-        installer_build_node: *linux_node
+        distribution_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=rpi
     # - tx1:
-    #     installer_build_node: *linux_node
+    #     distribution_build_node: *linux_node
     #     cmake_configure_args_platform: >-
     #       -G Ninja
     #       -DtargetDevice=tx1
@@ -82,7 +82,7 @@
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
     - windows-x64: &windows_config
-        installer_build_node: build-installer-windows-hw-sign
+        distribution_build_node: build-installer-windows-hw-sign
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DaddQtPdb=ON
@@ -103,7 +103,7 @@
     # -- apple platform --
 
     - mac: &osx_config
-        installer_build_node: build-installer-mac
+        distribution_build_node: build-installer-mac
         use_webadmin: false
         cmake_configure_args_platform: >-
           -G Ninja
@@ -195,13 +195,13 @@
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{version}.{project}.webadmin.universal.build'
-    - installer-build
+    - distribution-build
     # Edge1 is a platform that's exclusive for digitalwatchdog.
     # add extra jobs for edge1 with digitalwatchdog customization
-    - installer-build:
+    - distribution-build:
         platform:
         - edge1:
-            installer_build_node: *linux_node
+            distribution_build_node: *linux_node
             cmake_configure_args_platform: >-
               -G Ninja
               -DtargetDevice=edge1

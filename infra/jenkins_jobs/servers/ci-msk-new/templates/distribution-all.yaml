@@ -1,6 +1,7 @@
 
 - job-template:
     name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    id: distribution-all
     project-type: multijob
 
     node: runner
@@ -12,10 +13,7 @@
         priority: !j2: '{{ pipeline_priority }}'
     - throttle:
         max-total: 5
-        option: category
-        # limit this job to have only 5 exec+queued actual builds
-        categories:
-        - '{installer_build_node}'
+        option: project
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100

@@ -1,5 +1,5 @@
 - job-template:
-    id: installer-unittests
+    id: distribution-unittests
     name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest'
     description: |
       Run unit tests for {platform} for {version}.

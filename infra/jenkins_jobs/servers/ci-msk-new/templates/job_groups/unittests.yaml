@@ -2,7 +2,7 @@
 # also unittest job inside this wrapper.
 # It must be used for only those projects and configurations which are supported in runner.
 - job-group:
-    name: installer-build-with-unittests
+    name: distribution-build-with-unittests
     jobs:
-    - installer-all
-    - installer-unittests
+    - distribution-all
+    - distribution-unittests

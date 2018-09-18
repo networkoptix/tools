@@ -48,14 +48,14 @@
     - linux-x64:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        installer_build_node: &linux_node build-installer-linux
+        distribution_build_node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
         cmake_build_extra_args: >-
           -- -j 20
     - bpi:
-        installer_build_node: *linux_node
+        distribution_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bpi
@@ -63,7 +63,7 @@
     # -- windows platform --
 
     - windows-x64: &windows_config
-        installer_build_node: build-installer-windows
+        distribution_build_node: build-installer-windows
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DcodeSigning=OFF
@@ -79,7 +79,7 @@
     # -- apple platform --
 
     - mac: &osx_config
-        installer_build_node: build-installer-mac
+        distribution_build_node: build-installer-mac
         use_webadmin: false
         cmake_configure_args_platform: >-
           -G Ninja
@@ -150,11 +150,11 @@
     # BUILD AND TEST - main jobs
 
     - '{pipeline}.{version}.{project}.webadmin.universal.build'
-    - installer-build
+    - distribution-build
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
     # NOTE: If extra UT combinations are added, don't forget to add them in runner
-    - installer-build-with-unittests:
+    - distribution-build-with-unittests:
         # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
