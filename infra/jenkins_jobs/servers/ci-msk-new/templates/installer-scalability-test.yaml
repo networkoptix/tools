@@ -133,7 +133,7 @@
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/*-server-*-linux64*.deb,bin/appserver2_ut
+          COMPONENTS=distrib/*-server-*-linux64*.deb,distrib/*-unit_tests-*-linux64*.tar.gz
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -142,10 +142,17 @@
     - file-copy-operation:
         includes: >-
           build/distrib/*-server-*-linux64*.deb,
-          build/bin/appserver2_ut
+          build/distrib/*-unit_tests-*-linux64*.tar.gz
         excludes: ''
         target-location: '$WORKSPACE/dist'
         flatten-files: 'true'
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+        tar xvz -C dist -f dist/*-unit_tests-*-linux64*.tar.gz bin/appserver2_ut
+        mv dist/bin/appserver2_ut dist/
+        rmdir dist/bin
 
     - shell: |
         #!/bin/bash
