@@ -42,7 +42,7 @@
 
     timer: ''  # no timed trigger by default
     poll-scm-timer: '* * * * *'
-    clean-workspace: '' # false by default
+    clean_workspace: '' # false by default
     clean-build: '' # false by default
     default_build_description: ''
     build-webadmin: true
@@ -68,7 +68,7 @@
     - simple-separator:
         header: Build parameters
     - p_CLEAN_WORKSPACE:
-        default: '{clean-workspace}'
+        default: '{clean_workspace}'
     - p_CLEAN_BUILD:
         default: '{clean-build}'
     - p_PLATFORMS:

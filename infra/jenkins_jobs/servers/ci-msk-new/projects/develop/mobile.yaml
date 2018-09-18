@@ -108,7 +108,7 @@
               triggered automatically by timer
             platforms: android-arm,ios
             customizations: default
-            clean-workspace: true
+            clean_workspace: true
             timer: '' # temp. isabled, was 'H 6 * * 1-5'
 
     # RUNNER - root launcher of all builds

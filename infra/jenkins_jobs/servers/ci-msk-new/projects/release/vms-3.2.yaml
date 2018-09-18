@@ -168,7 +168,7 @@
               triggered automatically by timer
             platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
             customizations: default,hanwha,vista,digitalwatchdog
-            clean-workspace: true
+            clean_workspace: true
             timer: '' # temp. isabled, was '0 0 * * 1-5'
         - custom:
             detailed-job-description: |-

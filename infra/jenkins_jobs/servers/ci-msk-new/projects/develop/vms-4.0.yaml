@@ -126,7 +126,7 @@
               triggered automatically by timer
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            clean-workspace: true
+            clean_workspace: true
             timer: '' # temp. isabled, was '4 0 * * 1-5'
         - custom:
             detailed-job-description: |-
@@ -177,7 +177,7 @@
         - functest
         preset:
         - windows-self-tests-nightly:
-            test-list: self_tests
+            test_list: self_tests
             test_select_expr: 'windows or smb'
             detailed-job-description: |-
               Run nightly windows self tests with schedule "{timer}".

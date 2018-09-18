@@ -31,11 +31,11 @@
     concurrent: false
 
     test_select_expr: 'not windows and not smb'
-    test-list: ''
+    test_list: ''
     ft-customization: default  # TODO: sync with ci customizations
 
     timer: ''  # no timed trigger by default
-    clean-workspace: '' # false by default
+    clean_workspace: '' # false by default
     default_build_description: ''
 
     properties:
@@ -59,9 +59,9 @@
     - p_TEST_SELECT_EXPR:
         default: '{test_select_expr}'
     - p_TEST_LIST:
-        default: '{test-list}'
+        default: '{test_list}'
     - p_CLEAN_WORKSPACE:
-        default: '{clean-workspace}'
+        default: '{clean_workspace}'
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 

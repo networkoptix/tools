@@ -14,7 +14,7 @@
     workdir: functests
 
     test_select_expr: not windows and not smb
-    test-list: ''
+    test_list: ''
 
     properties:
     - authorization-{pipeline}-system
@@ -42,7 +42,7 @@
     - p_TEST_SELECT_EXPR:
         default: '{test_select_expr}'
     - p_TEST_LIST:
-        default: '{test-list}'
+        default: '{test_list}'
     - p_PIPELINE(hidden):
         default: '{pipeline}'
     - p_CUSTOMIZATION(hidden):

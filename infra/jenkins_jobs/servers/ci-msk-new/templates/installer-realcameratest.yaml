@@ -13,7 +13,7 @@
     workdir: realcameratests
 
     test_select_expr: not windows and not smb
-    test-list: ''
+    test_list: ''
 
     properties:
     - authorization-{pipeline}-system
