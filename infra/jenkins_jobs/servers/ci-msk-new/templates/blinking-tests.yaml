@@ -14,11 +14,11 @@
 
     default_build_description: Weekly blinking tests
     clean_workspace: ''
-    clean-build: ''
+    clean_build: ''
     platforms: linux-x64
     customizations: default
-    build-webadmin: true
-    build-installer: true
+    build_webadmin: true
+    build_installer: true
     run_unittests: true
     run_functests: false
     run_realcameratests: ''
@@ -35,15 +35,15 @@
     - p_CLEAN_WORKSPACE:
         default: '{clean_workspace}'
     - p_CLEAN_BUILD:
-        default: '{clean-build}'
+        default: '{clean_build}'
     - p_PLATFORMS:
         default: '{platforms}'
     - p_CUSTOMIZATIONS:
         default: '{customizations}'
     - p_BUILD_WEBADMIN:
-        default: '{build-webadmin}'
+        default: '{build_webadmin}'
     - p_BUILD_INSTALLER:
-        default: '{build-installer}'
+        default: '{build_installer}'
     - p_RUN_UNITTESTS:
         default: '{run_unittests}'
     - p_RUN_FUNCTESTS:

@@ -18,7 +18,7 @@
     # comma-separated list of emails to whom send notifications related to builds
     build-watchers: iremizov@networkoptix.com
 
-    build-webadmin: 'false'
+    build_webadmin: 'false'
     use-webadmin: 'false'
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
