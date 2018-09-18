@@ -89,7 +89,7 @@
         - on-push:
             detailed-job-description: |-
               This trigger serves for automatic builds on every push to remote repository
-            default-build-description: >-
+            default_build_description: >-
               Triggered on push event
             platforms: android-arm,ios
             customizations: default
@@ -103,7 +103,7 @@
 
               It should not be triggered manually excluding debugging of infra problems
               associated with only this trigger type.
-            default-build-description: >-
+            default_build_description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
             platforms: android-arm,ios

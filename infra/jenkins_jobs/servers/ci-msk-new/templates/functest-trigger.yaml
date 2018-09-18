@@ -30,13 +30,13 @@
     workspace: '{hg_local_cache_node_workspace}'
     concurrent: false
 
-    test-select-expr: 'not windows and not smb'
+    test_select_expr: 'not windows and not smb'
     test-list: ''
     ft-customization: default  # TODO: sync with ci customizations
 
     timer: ''  # no timed trigger by default
     clean-workspace: '' # false by default
-    default-build-description: ''
+    default_build_description: ''
 
     properties:
     - authorization-{pipeline}-trigger
@@ -48,16 +48,16 @@
 
     parameters:
     - p_BUILD_DESCRIPTION:
-        default: '{default-build-description}'
+        default: '{default_build_description}'
     - p_BRANCH:
         default: '{default_branch}'
     - string:
         name: TEST_FRAMEWORK_BRANCH
-        default: '{default-test-framework-branch}'
+        default: '{default_test_framework_branch}'
     - p_USE_BUILD_IDENTITY:
         default: ''
     - p_TEST_SELECT_EXPR:
-        default: '{test-select-expr}'
+        default: '{test_select_expr}'
     - p_TEST_LIST:
         default: '{test-list}'
     - p_CLEAN_WORKSPACE:

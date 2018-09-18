@@ -122,7 +122,7 @@
         - on-push:
             detailed-job-description: |-
               This trigger serves for automatic builds on every push to remote repository
-            default-build-description: >-
+            default_build_description: >-
               Triggered on push event
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
@@ -136,7 +136,7 @@
 
               It should not be triggered manually excluding debugging of infra problems
               associated with only this trigger type.
-            default-build-description: >-
+            default_build_description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
             platforms: linux-x64,windows-x64,mac,bpi
@@ -148,7 +148,7 @@
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default-build-description: >-
+            default_build_description: >-
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
@@ -156,7 +156,7 @@
             detailed-job-description: |-
               This trigger serves for testing on real cameras stand.
               (by default it will build linux distrib and run realcameratest)
-            default-build-description: >-
+            default_build_description: >-
               Real cameras testing
             platforms: linux-x64
             customizations: default
@@ -173,9 +173,9 @@
 
               It should not be triggered manually excluding debugging of infra problems
               associated with only this trigger type.
-            default-build-description: >-
+            default_build_description: >-
               Nightly functional tests
-            default-test-framework-branch: '{default_branch}'
+            default_test_framework_branch: '{default_branch}'
             timer: 'H 20 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.{tests}.{preset}':
@@ -185,9 +185,9 @@
         - nightly:
             detailed-job-description: |-
               Run nightly scalability test with schedule "{timer}".
-            default-build-description: >-
+            default_build_description: >-
               Nightly scalability tests
-            default-test-framework-branch: vms  # used for testing of all branches
+            default_test_framework_branch: vms  # used for testing of all branches
             timer: 'H 18 * * 1-5'
 
     # RUNNER - root launcher of all builds

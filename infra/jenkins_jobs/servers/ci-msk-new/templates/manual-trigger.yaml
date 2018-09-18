@@ -72,7 +72,7 @@
     timer: ''  # no timed trigger by default
     clean-workspace: '' # false by default
     clean-build: '' # false by default
-    default-build-description: ''
+    default_build_description: ''
     build-webadmin: true
     build-installer: true
     run-functests: '' # false
@@ -95,7 +95,7 @@
 
     parameters:
     - p_BUILD_DESCRIPTION:
-        default: '{default-build-description}'
+        default: '{default_build_description}'
     - simple-separator:
         header: Build parameters
     - p_CLEAN_WORKSPACE:
@@ -308,7 +308,7 @@
 
     parameters:
     - p_BUILD_DESCRIPTION:
-        default: '{default-build-description}'
+        default: '{default_build_description}'
     - p_PLATFORMS:
         default: '{platforms}'
     - p_RUN_UNITTESTS:

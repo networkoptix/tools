@@ -12,7 +12,7 @@
 
     workdir: realcameratests
 
-    test-select-expr: not windows and not smb
+    test_select_expr: not windows and not smb
     test-list: ''
 
     properties:

@@ -12,7 +12,7 @@
 
     node: 'runner'
 
-    default-build-description: Weekly blinking tests
+    default_build_description: Weekly blinking tests
     clean-workspace: ''
     clean-build: ''
     platforms: linux-x64
@@ -29,7 +29,7 @@
 
     parameters:
     - p_BUILD_DESCRIPTION:
-        default: '{default-build-description}'
+        default: '{default_build_description}'
     - simple-separator:
         header: Build parameters
     - p_CLEAN_WORKSPACE:

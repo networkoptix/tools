@@ -99,7 +99,7 @@
         - on-push:
             detailed-job-description: |-
               This trigger serves for automatic builds on every push to remote repository
-            default-build-description: >-
+            default_build_description: >-
               Triggered on push event
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms
@@ -111,7 +111,7 @@
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default-build-description: >-
+            default_build_description: >-
               Manually triggered
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms

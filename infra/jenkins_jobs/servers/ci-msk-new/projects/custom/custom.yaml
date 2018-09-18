@@ -116,7 +116,7 @@
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default-build-description: >-
+            default_build_description: >-
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
@@ -129,7 +129,7 @@
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default-build-description: >-
+            default_build_description: >-
               Manually triggered
             platforms: linux-x64,windows-x64,,windows-x86,mac,bpi
             customizations: default

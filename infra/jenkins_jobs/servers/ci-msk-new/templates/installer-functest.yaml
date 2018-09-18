@@ -13,7 +13,7 @@
 
     workdir: functests
 
-    test-select-expr: not windows and not smb
+    test_select_expr: not windows and not smb
     test-list: ''
 
     properties:
@@ -40,7 +40,7 @@
         name: NX_TEST_FRAMEWORK_COMMIT
     - p_JUNKSHOP_HOST
     - p_TEST_SELECT_EXPR:
-        default: '{test-select-expr}'
+        default: '{test_select_expr}'
     - p_TEST_LIST:
         default: '{test-list}'
     - p_PIPELINE(hidden):

@@ -107,7 +107,7 @@
         - on-push:
             detailed-job-description: |-
               This trigger serves for automatic builds on every push to remote repository
-            default-build-description: >-
+            default_build_description: >-
               Triggered on push event
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
@@ -121,7 +121,7 @@
 
               It should not be triggered manually excluding debugging of infra problems
               associated with only this trigger type.
-            default-build-description: >-
+            default_build_description: >-
               Nightly clean build for all platforms and customizations
               triggered automatically by timer
             platforms: linux-x64,windows-x64,mac,bpi
@@ -133,7 +133,7 @@
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default-build-description: >-
+            default_build_description: >-
               Manually triggered
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
@@ -141,7 +141,7 @@
             detailed-job-description: |-
               This trigger serves for testing on real cameras stand.
               (by default it will build linux distrib and run realcameratest)
-            default-build-description: >-
+            default_build_description: >-
               Real cameras testing
             platforms: linux-x64
             customizations: default
@@ -151,7 +151,7 @@
             detailed-job-description: |-
               This trigger serves for running functional tests.
               (by default it will build linux and win distrib and run functional)
-            default-build-description: >-
+            default_build_description: >-
               Trigger functests related jobs
             platforms: linux-x64,windows-x64
             customizations: default
@@ -166,9 +166,9 @@
         - nightly:
             detailed-job-description: |-
               Run nightly functional test with schedule "{timer}".
-            default-build-description: >-
+            default_build_description: >-
               Nightly functional tests
-            default-test-framework-branch: '{default_branch}'
+            default_test_framework_branch: '{default_branch}'
             timer: 'H 23 * * 1-5'
 
 
@@ -178,12 +178,12 @@
         preset:
         - windows-self-tests-nightly:
             test-list: self_tests
-            test-select-expr: 'windows or smb'
+            test_select_expr: 'windows or smb'
             detailed-job-description: |-
               Run nightly windows self tests with schedule "{timer}".
-            default-build-description: >-
+            default_build_description: >-
               Nightly windows self tests
-            default-test-framework-branch: '{default_branch}'
+            default_test_framework_branch: '{default_branch}'
             timer: 'H 21 * * 1-5'
 
     - '{pipeline}.{version}.{project}.trigger.blinking-tests':
