@@ -10,7 +10,7 @@
         default_branch: vms
         use_nx_vms_commit: vms  # FIXME: this is temp fix
 
-    realcameratesting-framework-branch: vms
+    realcameratesting_framework_branch: vms
     build_webadmin_concurrently: false
 
     # SECTION. GLOBAL PIPELINE CONFIG

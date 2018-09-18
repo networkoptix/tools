@@ -78,7 +78,7 @@
     run_functests: '' # false
     run_unittests: true
     run_realcameratests: '' # false
-    realcameratesting-framework-branch: $BRANCH
+    realcameratesting_framework_branch: $BRANCH
 
     ignore_functests: 'false' #
     # detailed_job_description required!
@@ -132,7 +132,7 @@
         default: '{pipeline}'
     - string:
         name: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
-        default: '{realcameratesting-framework-branch}'
+        default: '{realcameratesting_framework_branch}'
 
     triggers:
     - timed: "{timer}"
@@ -337,7 +337,7 @@
           TRUSTED_TIMESTAMPING=OFF
           CUSTOM_CMAKE_PARAMETERS=
           PIPELINE={pipeline}
-          NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT={realcameratesting-framework-branch}
+          NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT={realcameratesting_framework_branch}
     - timestamps
     - timeout:
         timeout: 5 # min

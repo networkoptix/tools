@@ -41,7 +41,7 @@
     concurrent: false
 
     timer: ''  # no timed trigger by default
-    poll-scm-timer: '* * * * *'
+    poll_scm_timer: '* * * * *'
     clean_workspace: '' # false by default
     clean_build: '' # false by default
     default_build_description: ''
@@ -97,7 +97,7 @@
     triggers:
     - timed: "{timer}"
     - pollscm:
-        cron: "{poll-scm-timer}"
+        cron: "{poll_scm_timer}"
         ignore-post-commit-hooks: True
 
     wrappers:

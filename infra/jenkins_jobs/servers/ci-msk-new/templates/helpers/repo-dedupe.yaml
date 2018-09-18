@@ -4,7 +4,7 @@
     node: repository-ops
     concurrent: false
 
-    num-rand-choice: 5
+    num_rand_choice: 5
 
     properties:
     - authorization-{pipeline}-system
@@ -37,7 +37,7 @@
           Don't dedupe, just check possible outcome
     - string:
         name: NUM_RAND_CHOICE
-        default: '{num-rand-choice}'
+        default: '{num_rand_choice}'
         description:
           How many random folders to take if List of folders is not provided
     - p_PIPELINE(hidden):

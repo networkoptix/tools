@@ -12,7 +12,7 @@
         default_branch: cloud_dev
         use_nx_vms_commit: cloud_dev  # FIXME: this is temp fix
 
-    realcameratesting-framework-branch: vms
+    realcameratesting_framework_branch: vms
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
