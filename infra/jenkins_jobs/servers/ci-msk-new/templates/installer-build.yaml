@@ -52,7 +52,6 @@
     use-webadmin: 'true' # defaults to build installer that requires webadmin
     build_distribution_concurrently: true
 
-    cmake-executable: cmake
     cmake_build_extra_args: ''
 
     # this is a list of vars that not require during build process and should be removed
