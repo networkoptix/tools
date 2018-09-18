@@ -122,7 +122,7 @@
               Triggered on push event
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
-            ignore-functests: 'true'
+            ignore_functests: 'true'
     - manual-trigger:
         preset:
         - custom:

@@ -103,7 +103,7 @@
               Triggered on push event
             platforms: linux-x64,windows-x64,tx1
             customizations: metavms
-            ignore-functests: 'true'
+            ignore_functests: 'true'
     - manual-trigger:
         preset:
         - custom:

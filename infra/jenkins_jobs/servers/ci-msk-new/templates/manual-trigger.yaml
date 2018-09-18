@@ -37,7 +37,7 @@
       1. LATEST - latest commit in branch
       1.1. LATEST + FREEZE_COMMIT_NOW=true
                   - use latest commit in branch + resolve it right now and skip
-                      runner if "ignore-functests" is set and runner shouldn't be
+                      runner if "ignore_functests" is set and runner shouldn't be
                       triggered
       2. AUTO + USE_BUILD_IDENTITY=value
                   - commit thet will be set based on commit from existing build
@@ -80,7 +80,7 @@
     run_realcameratests: '' # false
     realcameratesting-framework-branch: $BRANCH
 
-    ignore-functests: 'false' #
+    ignore_functests: 'false' #
     # detailed_job_description required!
 
     use_build_identity: NEW

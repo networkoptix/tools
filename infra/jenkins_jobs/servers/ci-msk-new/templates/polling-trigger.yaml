@@ -51,7 +51,7 @@
     run_unittests: true
     run_realcameratests: '' # false
 
-    ignore-functests: 'false' #
+    ignore_functests: 'false' #
     # detailed_job_description required!
 
     properties:
@@ -88,7 +88,7 @@
     - administrative-section-separator
     - string:
         name: IGNORE_FUNCTESTS_COMMITS
-        default: '{ignore-functests}'
+        default: '{ignore_functests}'
     - p_BRANCH:
         default: '{default_branch}'
     - p_PIPELINE(hidden):

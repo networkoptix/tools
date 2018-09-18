@@ -93,7 +93,7 @@
               Triggered on push event
             platforms: android-arm,ios
             customizations: default
-            ignore-functests: 'true'
+            ignore_functests: 'true'
     - manual-trigger:
         preset:
         - nightly:

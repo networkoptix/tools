@@ -109,7 +109,7 @@
               Triggered on push event
             platforms: linux-x64,windows-x64
             customizations: hanwha
-            ignore-functests: 'true'
+            ignore_functests: 'true'
 
     # RUNNER - root launcher of all builds
 
