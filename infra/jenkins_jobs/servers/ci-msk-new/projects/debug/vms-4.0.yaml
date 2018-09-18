@@ -49,14 +49,14 @@
     - linux-x64:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        installer-build-node: &linux_node build-installer-linux
+        installer_build_node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
         cmake_build_extra_args: >-
           -- -j 20
     - bpi:
-        installer-build-node: *linux_node
+        installer_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bpi
@@ -64,7 +64,7 @@
     # -- windows platform --
 
     - windows-x64: &windows_config
-        installer-build-node: build-installer-windows
+        installer_build_node: build-installer-windows
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DcodeSigning=OFF
@@ -74,7 +74,7 @@
     # -- apple platform --
 
     - mac: &osx_config
-        installer-build-node: build-installer-mac
+        installer_build_node: build-installer-mac
         use-webadmin: false
         cmake_configure_args_platform: >-
           -G Ninja

@@ -15,7 +15,7 @@
         option: category
         # limit this job to have only 5 exec+queued actual builds
         categories:
-        - '{installer-build-node}'
+        - '{installer_build_node}'
     - build-discarder:
         days-to-keep: 30
         num-to-keep: 100

@@ -38,7 +38,7 @@
 
       --------------------------------------------------------------------------------
       </pre>
-    node: '{installer-build-node}'
+    node: '{installer_build_node}'
     # NOTE: There is a bug in our build framework that has regex like '_{platform}' therefore
     # '_{platform}' combination is unallowed
     workspace: !j2: '{{ "__debug__" if __debug__ else "" }}build{{

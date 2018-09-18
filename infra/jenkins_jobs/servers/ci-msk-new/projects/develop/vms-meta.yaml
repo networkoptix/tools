@@ -46,7 +46,7 @@
     - linux-x64:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        installer-build-node: &linux_node build-installer-linux
+        installer_build_node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
         cmake_configure_args_platform: >-
           -G Ninja
@@ -54,7 +54,7 @@
           -- -j 20
 
     - tx1:
-        installer-build-node: *linux_node
+        installer_build_node: *linux_node
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=tx1
@@ -64,7 +64,7 @@
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
     - windows-x64: &windows_config
-        installer-build-node: build-installer-windows
+        installer_build_node: build-installer-windows
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DcodeSigning=OFF

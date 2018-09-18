@@ -32,7 +32,7 @@
 
     test_select_expr: 'not windows and not smb'
     test_list: ''
-    ft-customization: default  # TODO: sync with ci customizations
+    ft_customization: default  # TODO: sync with ci customizations
 
     timer: ''  # no timed trigger by default
     clean_workspace: '' # false by default
@@ -234,7 +234,7 @@
             description: |
               $TRIGGERED_KIND
         - trigger-builds:
-          - project: '{pipeline}.{version}.{project}.distribution.{ft-customization}.{tests}'
+          - project: '{pipeline}.{version}.{project}.distribution.{ft_customization}.{tests}'
             predefined-parameters: |
               REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
               BUILD_DESCRIPTION=$BUILD_DESCRIPTION

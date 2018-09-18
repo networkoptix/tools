@@ -47,14 +47,14 @@
     - android-arm:
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        installer-build-node: &linux_node build-installer-linux
+        installer_build_node: &linux_node build-installer-linux
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=android-arm
         cmake_build_extra_args: >-
           -- -j 20
     - ios:
-        installer-build-node: build-installer-mac
+        installer_build_node: build-installer-mac
         cmake_configure_args_platform: >-
           -G Xcode
           -DtargetDevice=ios
