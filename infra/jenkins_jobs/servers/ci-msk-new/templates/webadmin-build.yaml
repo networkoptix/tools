@@ -165,10 +165,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
           # Don't publish anything if build even didn't start
           - conditional-step:
@@ -198,9 +195,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
+          build-on: [ SUCCESS, UNSTABLE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
@@ -222,8 +217,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - FAILURE
+          build-on: [ FAILURE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'

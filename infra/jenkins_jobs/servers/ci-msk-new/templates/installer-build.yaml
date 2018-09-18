@@ -589,10 +589,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
           - shell: |
               #!bash
@@ -667,8 +664,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
+          build-on: [ SUCCESS ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
@@ -691,8 +687,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - FAILURE
+          build-on: [ FAILURE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.build-reporter'
@@ -716,10 +711,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
           - folder-delete-operation:
               folder-path: 'build/distrib'

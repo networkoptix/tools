@@ -201,10 +201,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - FAILURE
-          - UNSTABLE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.publish-tests'
@@ -228,8 +225,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
+          build-on: [ SUCCESS ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.unittests-reporter'
@@ -250,8 +246,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - UNSTABLE
+          build-on: [ UNSTABLE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.unittests-reporter'

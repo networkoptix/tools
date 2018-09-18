@@ -190,10 +190,7 @@
         mark-unstable-if-failed: true
         builders:
         - role: SLAVE
-          build-on:
-          - SUCCESS
-          - UNSTABLE
-          - FAILURE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
           - trigger-builds:
             - project: '{pipeline}.helper.publish-tests'
