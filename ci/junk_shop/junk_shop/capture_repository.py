@@ -125,7 +125,7 @@ class BuildParameters(object):
 
     @property
     def is_beta(self):
-       return self.release == 'beta'
+        return self.release == 'beta'
 
 
 class RunParameters(object):
@@ -197,7 +197,10 @@ class DbCaptureRepository(object):
             ArtifactType('output', 'text/plain', '.txt'),
             ArtifactType('log', 'text/plain', '.log'),
             ArtifactType('core', 'application/octet-stream'),
+            ArtifactType('core', 'application/octet-stream'),
             ArtifactType('core-traceback', 'text/plain', '.txt'),
+            ArtifactType('cap', 'application/vnd.tcpdump.pcap', '.cap'),
+            ArtifactType('json', 'application/json', '.json')
             ])
         db_config.bind(models.db)
         self.test_run = {}  # test path -> models.Run
@@ -276,7 +279,8 @@ class DbCaptureRepository(object):
                 build_num=build_num,
                 version=self._produce_build_parameter('version') or '')
         for name, t in BuildParameters.known_parameters.items():
-            if name in ['project', 'branch', 'build_num']: continue
+            if name in ['project', 'branch', 'build_num']:
+                continue
             if name == 'duration_ms':
                 name = 'duration'
             value = self._produce_build_parameter(name)
@@ -357,9 +361,9 @@ class DbCaptureRepository(object):
         branch = models.Branch.get(name=self.build_parameters.branch)
         build_set = set(select(
             build for build in models.Build
-            if build.build_num < self.build_parameters.build_num
-            and build.project==project
-            and build.branch==branch)
+            if build.build_num < self.build_parameters.build_num and
+            build.project == project and
+            build.branch == branch)
                             .order_by(desc(models.Build.build_num))[:build_count_limit])
         outcome_dict = {}  # (platform_name, test_path) -> (build_num, outcome)
         for build_num, platform_name, test_path, outcome in select(
@@ -394,7 +398,8 @@ class DbCaptureRepository(object):
                 'Skip artifact for run=%r: short_name=%r full_name=%r type=%r: %s %d exceeded limit %d',
                 run.path, short_name, full_name, artifact_type_rec.name, size_description, size, ARTIFACT_SIZE_LIMIT)
 
-        if not data: return
+        if not data:
+            return
         if len(data) > ARTIFACT_SIZE_LIMIT:
             log_skipping('raw size', len(data))
             return
@@ -408,7 +413,7 @@ class DbCaptureRepository(object):
         if len(compressed_data) > ARTIFACT_SIZE_LIMIT:
             log_skipping('compressed size', len(compressed_data))
             return
-        artifact = models.Artifact(
+        models.Artifact(
             type=at,
             short_name=short_name,
             full_name=full_name,
@@ -416,7 +421,6 @@ class DbCaptureRepository(object):
             run=run,
             encoding='bz2',
             data=compressed_data)
-        #print '----- added artifact %s for run %s' % (artifact.type, run.path)
 
     @db_session
     def add_artifact_with_session(self, run, short_name, full_name, artifact_type_rec, data, is_error=False):
