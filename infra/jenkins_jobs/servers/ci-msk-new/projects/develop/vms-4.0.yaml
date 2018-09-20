@@ -216,7 +216,7 @@
         build_watchers: anikitin@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
-        build_watchers: muskov@networkoptix.com
+        build_watchers: muskov@networkoptix.com,mpodstrechny@networkoptix.com
 
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
