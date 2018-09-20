@@ -56,9 +56,9 @@
               {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
             </span>
           </div>
-          {{ run_link('build', element.build) }}
-          {{ run_link('unit', element.unit) }}
-          {{ run_link('functional', element.functional) }}
+          {% for path, stage in element.stages.items() %}
+            {{ run_link(path, stage) }}
+          {% endfor %}
         </div>
       </div>
     {% endfor %}
@@ -66,15 +66,15 @@
 {% endmacro %}
 
 
-{% macro platform_box(element) %}
+{% macro platform_box(element, stages) %}
   <div class="platform-box">
     <div class="datetime">
       {{ element.started_at|format_datetime(precise=False)|default('&nbsp;')|safe }}
     </div>
     <div>
-      {{ run_link('build', element.build if element else None) }}
-      {{ run_link('unit', element.unit if element else None) }}
-      {{ run_link('functional', element.functional if element else None) }}
+      {% for stage in stages %}
+        {{ run_link(stage, element.stages[stage] if element else None) }}
+      {% endfor %}
     </div>
   </div>
 {% endmacro %}

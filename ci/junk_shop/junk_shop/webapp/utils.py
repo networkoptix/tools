@@ -11,6 +11,8 @@ BYTE_FORMATS = ['', 'K', 'M', 'G', 'T']
 
 DEFAULT_BUILD_LIST_PAGE_SIZE = 10
 
+STAGES = ['build', 'unit', 'functional', 'cameratest']
+
 
 def format_bytes(count):
     index = 0

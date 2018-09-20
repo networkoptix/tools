@@ -56,7 +56,7 @@
               </td>
               {% for platform in platform_list %}
                 <td>
-                  {{ matrix_macros.platform_box(platform_map.get((project, branch, platform))) }}
+                  {{ matrix_macros.platform_box(platform_map.get((project, branch, platform)), stages) }}
                 </td>
               {% endfor %}
             </tr>

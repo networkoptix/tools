@@ -50,7 +50,7 @@
             </td>
             {% for platform in platform_list %}
               <td>
-                {{ matrix_macros.platform_box(row.platform2cell.get(platform)) }}
+                {{ matrix_macros.platform_box(row.platform2cell.get(platform), stages) }}
               </td>
             {% endfor %}
           </tr>
