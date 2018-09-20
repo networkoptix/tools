@@ -1,5 +1,4 @@
 from collections import namedtuple
-
 from flask import abort
 
 
@@ -24,9 +23,14 @@ def format_bytes(count):
 Paginator = namedtuple(
     'Paginator',
     [
-        'current_page', 'pages_range', 'at_begin',
-        'at_end', 'backward_page', 'forward_page',
-        'first_page', 'last_page'
+        'current_page',
+        'pages_range',
+        'at_begin',
+        'at_end',
+        'backward_page',
+        'forward_page',
+        'first_page',
+        'last_page'
     ]
 )
 
@@ -56,7 +60,7 @@ class PageValueError(Exception):
 
 
 def paginator_from_list(current_value, lst):
-    '''Create paginator from `lst` of page values and
+    '''Create paginator from `lst` of page values,
     current page sets by the `current_value`'''
 
     if not lst:
@@ -82,13 +86,13 @@ def paginator_from_list(current_value, lst):
     forward_page = get_page(current_page + PAGINATOR_PAGE_LIMIT - 1)
 
     if end - start < PAGINATOR_PAGE_LIMIT:
-        end = get_page(start + PAGINATOR_PAGE_LIMIT)
+        end = min(lst_len-1, get_page(start + PAGINATOR_PAGE_LIMIT))
     if end - start < PAGINATOR_PAGE_LIMIT:
-        start = get_page(end - PAGINATOR_PAGE_LIMIT)
+        start = max(0, get_page(end - PAGINATOR_PAGE_LIMIT))
 
     return Paginator(
         current_page=current_value,
-        pages_range=lst[start:end],
+        pages_range=lst[start:end+1],
         at_begin=(start == 0),
         at_end=(end == lst_len - 1),
         backward_page=lst[backward_page],
