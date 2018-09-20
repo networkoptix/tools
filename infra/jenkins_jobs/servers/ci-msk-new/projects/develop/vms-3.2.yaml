@@ -206,13 +206,13 @@
     - distribution-build
     - '{pipeline}.{version}.{project}.distribution.{customization}.functest':
         customization: default
-        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scalability-test':
         customization: default
-        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.scaletest':
         customization: default
-        build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
+        build_watchers: anikitin@networkoptix.com,vfedorov@networkoptix.com
     - '{pipeline}.{version}.{project}.distribution.{customization}.realcameratest':
         customization: default
         build_watchers: muskov@networkoptix.com
