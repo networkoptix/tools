@@ -101,8 +101,19 @@
           REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
     - set-custom-build-description
 
+    - extended-bash:
+        headers: ''
+        script: |
+          #!/bin/bash
+          if [[ "$USE_LIGHTWEIGHT_SERVERS" == "true" ]]; then
+              LWS_TYPE=lws
+          else
+              LWS_TYPE=full
+          fi
+          inject LWS_TYPE $LWS_TYPE
+
     - build-name-setter:
-        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$NX_TEST_FRAMEWORK_COMMIT'
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY: $SERVER_COUNT $LWS_TYPE'
         macro: true
 
     - description-setter:
