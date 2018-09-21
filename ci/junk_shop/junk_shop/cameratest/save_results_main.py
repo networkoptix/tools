@@ -60,11 +60,19 @@ def str_to_timedelta(duration):
         microseconds=t.microsecond)
 
 
+class InvalidFieldType(Exception):
+    pass
+
 def string_list_from_field(data, field_name):
-    errors = data.get(field_name, [])
-    if isinstance(errors, list):
-        return errors
-    return [str(errors)]
+    v = data.get(field_name)
+    if v is None:
+        return []
+    elif isinstance(v, list):
+        return v
+    elif isinstance(v, str):
+        return [v]
+    raise InvalidFieldType(
+        "'%s' has unexpected type %s", field_name, type(v))
 
 
 def file_ext_to_artifact_type(file_ext, artifact_type_factory):
