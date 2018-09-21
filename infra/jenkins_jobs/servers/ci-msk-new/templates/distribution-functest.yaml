@@ -210,6 +210,10 @@
 
           TEST_TIMEOUT="$((4 * 60 * 60))" # 4hr
 
+          # Hardcoded address on host delta.
+          # Test camera will respond only to requests from this address.
+          VM_ADDRESS=192.168.13.7
+
           cd nx_vms/func_tests
 
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
@@ -237,6 +241,7 @@
         customization=$CUSTOMIZATION" \
               --vm-port-base="$((20000 + "$EXECUTOR_NUMBER" * 100))" \
               --vm-name-prefix=funtest-$EXECUTOR_NUMBER- \
+              --vm-address="$VM_ADDRESS" \
               --slot=$EXECUTOR_NUMBER \
               --reinstall \
               -v \
