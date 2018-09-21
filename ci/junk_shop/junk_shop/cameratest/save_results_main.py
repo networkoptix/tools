@@ -33,7 +33,7 @@ from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
 import junk_shop.models as models
 
 
-log = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 DEFAULT_UNIT_TEST_NAME = 'cameratest'
@@ -67,13 +67,13 @@ def string_list_from_field(data, field_name):
     return [str(errors)]
 
 
-def file_ext_to_artifact_type(file_ext, artifact_type):
+def file_ext_to_artifact_type(file_ext, artifact_type_factory):
     # type: (str, ArtifactTypeFactory) -> ArtifactType
     if file_ext == '.json':
-        return artifact_type.json
+        return artifact_type_factory.json
     if file_ext == '.cap':
-        return artifact_type.cap
-    return artifact_type.output
+        return artifact_type_factory.cap
+    return artifact_type_factory.output
 
 
 class StageInfo(object):
@@ -102,7 +102,8 @@ class StageInfo(object):
 class CameraTestStorage(object):
 
     @classmethod
-    def from_dict(cls, camera_id, data):
+    def from_camera_item(cls, camera_item):
+        camera_id, data = camera_item
         return cls(
             camera_id=camera_id,
             duration=str_to_timedelta(data.get('duration')),
@@ -148,13 +149,13 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
 
 
 @db_session
-def save_root_run_info(repository, root_run, passed, duration, artifacts):
+def save_root_run_info(repository, root_run, passed, artifacts):
+    # type: (DbCaptureRepository, models.Run, bool, dict) -> None
     root_run = models.Run[root_run.id]
     root_run.outcome = status2outcome(passed)
-    root_run.duration = duration
     for artifact_name, artifact_file in artifacts.items():
         if artifact_name not in [TEST_RESULTS_FILE_NAME, ALL_CAMERAS_FILENAME]:
-            log.debug("Save root artifact '%s'...", artifact_name)
+            _logger.debug("Save root artifact '%s'...", artifact_name)
             repository.add_artifact(
                 root_run,
                 artifact_name,
@@ -162,7 +163,7 @@ def save_root_run_info(repository, root_run, passed, duration, artifacts):
                 file_ext_to_artifact_type(
                     artifact_file.suffix, repository.artifact_type),
                 artifact_file.read_bytes())
-            log.debug("Save root '%s' artifact done.", artifact_name)
+            _logger.debug("Save root '%s' artifact done.", artifact_name)
 
 
 def save_run_artifacts(repository, run, errors, messages):
@@ -184,7 +185,7 @@ def save_run_artifacts(repository, run, errors, messages):
 
 def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, all_cameras):
     # type: (DbCaptureRepository, models.Run, list, dict, dict) -> None
-    log.debug("Process camera '%s' data", camera_tests.camera_id)
+    _logger.debug("Process camera '%s' data", camera_tests.camera_id)
     test_path_list = parent_path_list + [camera_tests.camera_id]
 
     camera_info = all_cameras.get(camera_tests.camera_id)
@@ -203,23 +204,23 @@ def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, a
 
 def collect_test_artifacts(work_dir):
     # type: (Path) -> dict
-    log.info("Collect artifacts starting...")
+    _logger.info("Collect artifacts starting...")
     artifact_exts = ['.log', '.json', '.cap']
     artifacts = dict()
     for f in work_dir.rglob('*'):
         if f.is_file() and (
                 f.suffix in artifact_exts or
                 f.name in [TEST_RESULTS_FILE_NAME, ALL_CAMERAS_FILENAME]):
-                log.debug("Store artifact '%s'", str(f))
-                artifacts[f.name] = f
-    log.info("Collect artifacts done.")
+            _logger.debug("Artifact '%s' was found.", str(f))
+            artifacts[f.name] = f
+    _logger.info("Collect artifacts done.")
     return artifacts
 
 
 def parse_all_cameras_file(all_cameras_file):
     # type: (Path) -> dict
     if not all_cameras_file:
-        log.warning("Camera information file '%s' not found", ALL_CAMERAS_FILENAME)
+        _logger.warning("Camera information file '%s' not found.", ALL_CAMERAS_FILENAME)
         return dict()
     else:
         with all_cameras_file.open() as f:
@@ -229,21 +230,20 @@ def parse_all_cameras_file(all_cameras_file):
 def parse_and_save_results_to_db(repository, root_run, results_file, cameras_info):
     # type: (DbCaptureRepository, models.Run, Path, dict) -> (bool, timedelta)
     passed = True
-    duration = ZERO_DURATION
 
-    log.info("'%s' processing...", str(results_file))
+    _logger.info("'%s' processing...", str(results_file))
     with results_file.open() as f:
         camera_tests_list = [
-            CameraTestStorage.from_dict(camera_id, camera_results)
-            for camera_id, camera_results in yaml.load(f).items()]
+            CameraTestStorage.from_camera_item(camera_item)
+            for camera_item in yaml.load(f).items()]
         for camera_tests in camera_tests_list:
-            produce_camera_tests(
-                repository, root_run, [root_run.name], camera_tests, cameras_info)
-            passed = passed and camera_tests.passed
-            duration += camera_tests.duration
-    log.info("'%s' processing done.", str(results_file))
+            if not produce_camera_tests(
+                    repository, root_run, [root_run.name],
+                    camera_tests, cameras_info):
+                passed = False
+    _logger.info("'%s' processing done.", str(results_file))
 
-    return passed, duration
+    return passed
 
 
 def main():
@@ -279,15 +279,15 @@ def main():
     results_file = artifacts.get(TEST_RESULTS_FILE_NAME)
     all_cameras_file = artifacts.get(ALL_CAMERAS_FILENAME)
     if not results_file:
-        log.error("Can't create test report, '%s' not found.", TEST_RESULTS_FILE_NAME)
+        _logger.error("Can't create test report, '%s' not found.", TEST_RESULTS_FILE_NAME)
         sys.exit(1)
 
     cameras_info = parse_all_cameras_file(all_cameras_file)
 
     root_run = make_root_run(repository, args.test_name)
-    passed, duration = parse_and_save_results_to_db(
+    passed = parse_and_save_results_to_db(
         repository, root_run, results_file, cameras_info)
-    save_root_run_info(repository, root_run, passed, duration, artifacts)
+    save_root_run_info(repository, root_run, passed, artifacts)
 
 
 if __name__ == "__main__":

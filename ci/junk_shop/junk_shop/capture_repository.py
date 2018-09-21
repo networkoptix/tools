@@ -197,7 +197,6 @@ class DbCaptureRepository(object):
             ArtifactType('output', 'text/plain', '.txt'),
             ArtifactType('log', 'text/plain', '.log'),
             ArtifactType('core', 'application/octet-stream'),
-            ArtifactType('core', 'application/octet-stream'),
             ArtifactType('core-traceback', 'text/plain', '.txt'),
             ArtifactType('cap', 'application/vnd.tcpdump.pcap', '.cap'),
             ArtifactType('json', 'application/json', '.json')
