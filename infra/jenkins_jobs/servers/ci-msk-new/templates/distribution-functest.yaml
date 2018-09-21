@@ -152,7 +152,7 @@
           PLATFORM=linux-x64
           SSH_USER=$USER
           LOCAL_PATH=$WORKSPACE/build/
-          COMPONENTS=distrib/*-server-*-linux64*.deb,distrib/*-server_update-*,distrib/*-unit_tests-*-linux64*.tar.gz
+          COMPONENTS=distrib/*-server-*-linux64*.deb,distrib/*-server_update-*,distrib/*-unit_tests-*-linux64*.tar.gz,bin/appserver2_ut
           NODE_SSH_CONNECTION=$SSH_CONNECTION
         block: true
         block-thresholds:
@@ -162,7 +162,8 @@
         includes: >-
           build/distrib/*-server-*-linux64*.deb,
           build/distrib/*-server-*-win64*.exe,
-          build/distrib/*-unit_tests-*-linux64*.tar.gz
+          build/distrib/*-unit_tests-*-linux64*.tar.gz,
+          build/bin/appserver2_ut
         excludes: ''
         target-location: '$WORKSPACE/dist'
         flatten-files: 'true'
@@ -179,10 +180,16 @@
         set -ex
         rsync -av {binaries_url} "$BIN_DIR/"
 
-        tar xvz -C dist -f dist/*-unit_tests-*-linux64*.tar.gz bin/appserver2_ut
-        mv dist/bin/appserver2_ut dist/
-        rmdir dist/bin
-        ln -sf "$WORKSPACE/dist/appserver2_ut" "$BIN_DIR/"  # vms_3.2 func tests requirement
+        if [ -f dist/*-unit_tests-*-linux64*.tar.gz ]; then
+            tar xvz -C dist -f dist/*-unit_tests-*-linux64*.tar.gz bin/appserver2_ut
+            mv dist/bin/appserver2_ut dist/
+            rmdir dist/bin
+        fi
+        if [ -f dist/appserver2_ut ]; then
+            ln -sf "$WORKSPACE/dist/appserver2_ut" "$BIN_DIR/"  # vms_3.2 func tests requirement
+        else
+            echo "WARNING: appserver2_ut is missing"
+        fi
 
         mkdir -p "$WORK_DIR"
 
