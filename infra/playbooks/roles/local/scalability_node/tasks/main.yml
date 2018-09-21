@@ -35,9 +35,6 @@
   - samba-common
   - libtalloc2
   - syslinux
-  # ansible module `iptables` requirements
-  - iptables
-  - iptables-persistent
 
 - name: Set Kernel core pattern for system
   lineinfile:
@@ -64,66 +61,6 @@
     home: "{{ jenkins_home }}"
     createhome: yes
     shell: /bin/bash
-
-# Firewall
-- name: Flush existing firewall rules
-  iptables:
-    flush: true
-
-- name: Firewall rule - allow all loopback traffic
-  iptables:
-    action: append
-    chain: INPUT
-    in_interface: lo
-    jump: ACCEPT
-  notify:
-    - save ip tables
-
-- name: Firewall rule - allow established connections
-  iptables:
-    chain: INPUT
-    ctstate: ESTABLISHED,RELATED
-    jump: ACCEPT
-  become: true
-  notify:
-    - save ip tables
-
-- name: Firewall rule - allow ICMP
-  iptables:
-    chain: INPUT
-    jump: ACCEPT
-    protocol: icmp
-  notify:
-    - save ip tables
-
-- name: Firewall rule - allow tcp ports
-  iptables:
-    chain: INPUT
-    destination_port: "{{ item }}"
-    jump: ACCEPT
-    protocol: tcp
-  become: true
-  with_items: "{{ allowed_tcp_ports }}"
-  notify:
-    - save ip tables
-
-- name: Firewall rule - allow internal networks traffic
-  iptables:
-    chain: INPUT
-    source: "{{ item }}"
-    jump: ACCEPT
-  become: yes
-  with_items: "{{ allowed_ips }}"
-  notify:
-    - save ip tables
-
-- name: Firewall rule - drop any traffic without rule
-  iptables:
-    chain: INPUT
-    jump: DROP
-  become: true
-  notify:
-    - save ip tables
 
 - name: Set limits for user
   lineinfile:

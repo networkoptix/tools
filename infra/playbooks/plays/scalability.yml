@@ -28,3 +28,4 @@
   roles:
   - role: scalability_node
   - role: cloudalchemy.node-exporter
+  - role: firewall_linux
