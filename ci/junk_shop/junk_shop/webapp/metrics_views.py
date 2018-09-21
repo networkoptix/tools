@@ -62,6 +62,15 @@ class DurationPoint(Point):
         return timedelta_to_str(datetime.timedelta(seconds=self.y))
 
 
+class NeutralPoint(Point):
+
+    @property
+    def text(self):
+        if self.y is None:
+            return None
+        return '{:.3}'.format(self.y)
+
+
 class BytesPoint(Point):
 
     @property
@@ -159,6 +168,9 @@ def generate_branch_platform_build_traces(accumulators):
             if metric_name == 'total_bytes_sent':
                 Point = BytesPoint
                 yaxis = 'y2'
+            elif metric_name == 'cpu_load_average':
+                Point = NeutralPoint
+                yaxis = None
             elif metric_name.startswith('host_memory_usage.'):
                 Point = BytesPoint
                 yaxis = None
