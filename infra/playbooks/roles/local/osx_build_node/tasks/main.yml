@@ -1,10 +1,13 @@
-# TODO: set computer name
-# TODO: add authorized keys
-# TODO: install xcode (or at least check installed)
-# TODO: install updates?
-# TODO: add users - jenkins!
-# TODO: add '%admin          ALL = (ALL) NOPASSWD: ALL' in /etc/sudoers
-# TODO: run sudo xcode-select -s /Applications/Xcode.app/Contents/Developer to enable iOS builds
+# TODO: 1. set computer name
+# TODO: - sudo scutil --set HostName <new host name>
+# TODO: - sudo scutil --set LocalHostName <new host name>
+# TODO: - sudo scutil --set ComputerName <new name>
+# TODO: 2. add authorized keys
+# TODO: 3. install xcode (or at least check installed) (UI)
+# TODO: 4. install updates? (UI)
+# TODO: 5. add users - jenkins!
+# TODO: 6. add '%admin          ALL = (ALL) NOPASSWD: ALL' in /etc/sudoers
+# TODO: 7. run sudo xcode-select -s /Applications/Xcode.app/Contents/Developer to enable iOS builds
 
 # this and next tasks are useless for remote setup, but may be used for local
 - name: Check remote login
