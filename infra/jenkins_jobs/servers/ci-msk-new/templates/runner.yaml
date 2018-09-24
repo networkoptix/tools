@@ -113,7 +113,7 @@
         project: '{project}'
         build-identity: $BUILD_IDENTITY
         nx-vms-commit: $NX_VMS_COMMIT
-    - shell:
+    - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
         echo "BUILD_IDENTITY=$BUILD_IDENTITY" > BUILD_IDENTITY.envvar
