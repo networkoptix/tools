@@ -3,6 +3,8 @@
     {% block head %}
       <title>{% block title %}Test results{% endblock %}</title>
       <script src="{{ url_for('static', filename='ajax.js') }}"></script>
+      <script src="{{ url_for('static', filename='moment.js') }}"></script>
+      <script src="{{ url_for('static', filename='moment-timezone-with-data.js') }}"></script>
       <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
       <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='common.css') }}">
     {% endblock head %}

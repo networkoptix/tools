@@ -8,6 +8,14 @@ from .utils import datetime_utc_now, timedelta_to_str
 
 
 JIRA_REF_REGEX = r'(([a-z]+|[A-z]+)\-\d+)'
+DATETIME_FORMAT_JS_SCRIPT = """
+<script>
+  var zone_name =  moment.tz.guess();
+  var timezone = moment.tz(zone_name).zoneAbbr();
+  document.write(moment.utc('{0}', 'YYYY-MM-DDTHH:mm:ss').local().format('{1} ') + timezone);
+ </script>
+ """
+DATETIME_FORMAT_MOMENTJS = "%Y-%m-%dT%H:%M:%S"
 
 
 class JinjaFilters(object):
@@ -19,7 +27,8 @@ class JinjaFilters(object):
 
     def install(self, jinja_env):
         for name in dir(self):
-            if name.startswith('_') or name == 'install': continue
+            if name.startswith('_') or name == 'install':
+                continue
             jinja_env.filters[name] = getattr(self, name)
 
     def to_ident(self, value):
@@ -29,21 +38,22 @@ class JinjaFilters(object):
         return result
 
     def format_datetime(self, dt, precise=True):
-        if not dt: return dt
+        if not dt:
+            return dt
         assert isinstance(dt, datetime), repr(dt)
         now = datetime_utc_now()
         if now.year == dt.year:
-            s = dt.strftime('%b %d')
+            fmt = 'MMM DD'
         else:
-            s = dt.strftime('%Y %b %d')
+            fmt = 'YYYY MMM DD'
         if dt.timetuple()[:3] < now.timetuple()[:3]:
-            s += ' ' + dt.strftime('%H:%M')
+            fmt += ' ' + 'HH:mm'
         else:
-            s += ' <b>' + dt.strftime('%H:%M') + '</b>'
+            fmt += ' <b>' + 'HH:mm' + '</b>'
         if precise:
-            s += ':' + dt.strftime('%S') + '.%03d' % (dt.microsecond/1000)
-        return Markup(s)
-
+            fmt += ':ss' + '.%03d' % (dt.microsecond/1000)
+        return Markup(DATETIME_FORMAT_JS_SCRIPT.format(
+                dt.strftime(DATETIME_FORMAT_MOMENTJS), fmt))
 
     def format_timedelta(self, td):
         return timedelta_to_str(td)
