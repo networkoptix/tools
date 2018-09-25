@@ -134,6 +134,7 @@ class BaseTestProcess(object):
                     self._binary_name, self._test_info, self._work_dir):
                 self._platform.produce_core_backtrace(
                     self._test_info.binary_path, core_file_path)
+                core_file_path.unlink()
 
 
 class CTestProcess(BaseTestProcess):
