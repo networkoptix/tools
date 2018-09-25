@@ -37,9 +37,10 @@ _logger = logging.getLogger(__name__)
 
 
 DEFAULT_UNIT_TEST_NAME = 'cameratest'
-ERRORS_ARTIFACT_NAME = 'errors'
-CAMERA_INFO_ARTIFACT_NAME = 'camera_info'
 MESSAGES_ARTIFACT_NAME = 'messages'
+ERRORS_ARTIFACT_NAME = 'errors'
+EXCEPTION_ARTIFACT_NAME = 'exceptions'
+CAMERA_INFO_ARTIFACT_NAME = 'camera_info'
 ZERO_DURATION = timedelta(seconds=0)
 TEST_RESULTS_FILE_NAME = 'test_results.yaml'
 ALL_CAMERAS_FILENAME = 'all_cameras.yaml'
@@ -95,16 +96,18 @@ class StageInfo(object):
             name=data['_'],
             duration=str_to_timedelta(data.get('duration')),
             passed=condition_to_passed(data['condition']),
-            errors=errors,
-            messages=string_list_from_field(data, 'message')
+            messages=string_list_from_field(data, 'message'),
+            errors = errors,
+            exceptions = string_list_from_field(data, 'exception')
         )
 
-    def __init__(self, name, duration, passed, errors, messages):
+    def __init__(self, name, duration, passed, messages, errors, exceptions):
         self.name = name
         self.duration = duration
         self.passed = passed
         self.errors = errors
         self.messages = messages
+        self.exceptions = exceptions
 
 
 class CameraTestStorage(object):
@@ -118,15 +121,19 @@ class CameraTestStorage(object):
             passed=condition_to_passed(data['condition']),
             messages=string_list_from_field(data, 'message'),
             errors=string_list_from_field(data, 'errors'),
+            exceptions=string_list_from_field(data, 'exception'),
             stages=map(StageInfo.from_dict, data.get('stages', []))
         )
 
-    def __init__(self, camera_id, duration, passed, errors, messages, stages):
+    def __init__(
+            self, camera_id, duration, passed,
+            messages, errors, exceptions, stages):
         self.camera_id = camera_id
         self.duration = duration
         self.passed = passed
-        self.errors = errors
         self.messages = messages
+        self.errors = errors
+        self.exceptions = exceptions
         self.stages = stages
 
 
@@ -145,7 +152,8 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
     run.duration = camera_tests.duration
     run.outcome = status2outcome(camera_tests.passed)
     save_run_artifacts(
-        repository, run, camera_tests.errors, camera_tests.messages)
+        repository, run, camera_tests.messages,
+        camera_tests.errors, camera_tests.exceptions)
     if camera_info:
         repository.add_artifact(
             run,
@@ -174,8 +182,14 @@ def save_root_run_info(repository, root_run, passed, artifacts):
             _logger.debug("Save root '%s' artifact done.", artifact_name)
 
 
-def save_run_artifacts(repository, run, errors, messages):
-    # type: (DbCaptureRepository, models.Run, timedelta, bool, list, list) -> None
+def save_run_artifacts(repository, run, messages, errors, exceptions):
+    # type: (DbCaptureRepository, models.Run, timedelta, bool, list, list, list) -> None
+    repository.add_artifact(
+        run,
+        MESSAGES_ARTIFACT_NAME,
+        '%s-%s' % (run.name, MESSAGES_ARTIFACT_NAME),
+        repository.artifact_type.output,
+        '\n'.join(messages))
     repository.add_artifact(
         run,
         ERRORS_ARTIFACT_NAME,
@@ -185,10 +199,11 @@ def save_run_artifacts(repository, run, errors, messages):
         is_error=True)
     repository.add_artifact(
         run,
-        MESSAGES_ARTIFACT_NAME,
-        '%s-%s' % (run.name, MESSAGES_ARTIFACT_NAME),
+        ERRORS_ARTIFACT_NAME,
+        '%s-%s' % (run.name, EXCEPTION_ARTIFACT_NAME),
         repository.artifact_type.output,
-        '\n'.join(messages))
+        '\n'.join(exceptions),
+        is_error=True)
 
 
 def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, all_cameras):
@@ -207,7 +222,7 @@ def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, a
             stage_run.duration = stage.duration
             stage_run.outcome = status2outcome(stage.passed)
             save_run_artifacts(
-                repository, stage_run, stage.errors, stage.messages)
+                repository, stage_run, stage.messages, stage.errors, stage.exceptions)
 
 
 def collect_test_artifacts(work_dir):
