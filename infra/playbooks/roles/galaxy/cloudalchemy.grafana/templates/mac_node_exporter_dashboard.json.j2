@@ -1475,11 +1475,12 @@
         "type": "query",
         "useTags": false
       },
+{% endraw %}
       {
         "allValue": null,
         "current": {
-          "text": "10.0.1.167",
-          "value": "10.0.1.167"
+          "text": "{{ mac_node_exporter_hosts|first }}",
+          "value": "{{ mac_node_exporter_hosts|first }}"
         },
         "hide": 0,
         "includeAll": false,
@@ -1487,7 +1488,6 @@
         "multi": false,
         "name": "node",
         "options": [
-{% endraw %}
 {%        for host in mac_node_exporter_hosts -%}
           {{ '{' }}
             "selected": true,
