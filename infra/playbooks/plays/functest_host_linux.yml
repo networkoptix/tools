@@ -18,4 +18,3 @@
   - role: jenkins_slave
   - role: functest_node
   - role: cloudalchemy.node-exporter
-  - role: firewall_linux
