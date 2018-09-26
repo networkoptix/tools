@@ -140,11 +140,11 @@
           platform=linux-x64,\
           customization=$CUSTOMIZATION"
 
-
+            LAST_RUN_DIR=$(find $WORKSPACE/realcameratests -maxdepth 1 -type d -name "run*" | sort | tail -n 1)
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/cameratest/save_results_main.py \
                 "$DB_CONFIG" \
                 "$BUILD_PARAMETERS" \
-                "$WORKSPACE/realcameratests"
+                "$LAST_RUN_DIR"
 
     publishers:
     - delete-hg-repos(if-damaged)
