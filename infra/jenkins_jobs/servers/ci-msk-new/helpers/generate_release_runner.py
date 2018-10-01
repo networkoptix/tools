@@ -164,6 +164,10 @@ print '''#
         project: '{project}'
         build-identity: $BUILD_IDENTITY
         nx-vms-commit: $NX_VMS_COMMIT
+    - shell: |
+        #!bash
+        echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
+        echo "BUILD_IDENTITY=$BUILD_IDENTITY" > BUILD_IDENTITY.envvar
 
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
