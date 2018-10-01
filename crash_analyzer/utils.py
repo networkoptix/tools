@@ -221,7 +221,7 @@ class Size:
     step = 1024
     suffixes = ('', 'K', 'M', 'G', 'T')
 
-    def __init__(self, value: Union[int, str]):
+    def __init__(self, value: Union[int, str] = 0):
         if isinstance(value, int):
             self.bytes = value
         elif isinstance(value, str):
@@ -364,6 +364,9 @@ class Directory:
     def __init__(self, *path):
         self.path = os.path.join(*path)
 
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, repr(self.path))
+
     @property
     def name(self) -> str:
         return os.path.basename(self.path)
@@ -398,6 +401,56 @@ class Directory:
     def remove(self):
         shutil.rmtree(self.path)
 
+        
+class MultiDirectory:
+    """Emulates a single directory interface for multiple directories.
+    """
+    def __init__(self, *directories):
+        assert directories
+        self._directories = [d if isinstance(d, Directory) else Directory(d) for d in directories]
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, ', '.join(
+            repr(d.path) for d in self._directories))
+
+    @property
+    def path(self):
+        return self._directories[0].path
+        
+    @property
+    def name(self):
+        return self._directories[0].name
+
+    def file(self, *args, **kwargs):
+        return self._one_result('file', *args, **kwargs)
+
+    def files(self, *args, **kwargs):
+        return self._sum_result('files', [], *args, **kwargs)
+
+    def directory(self, *args, **kwargs):
+        return self._one_result('directory', *args, **kwargs)
+
+    def directories(self, *args, **kwargs):
+        return self._sum_result('directories', [], *args, **kwargs)
+
+    def content(self, *args, **kwargs):
+        return self._sum_result('content', [], *args, **kwargs)
+
+    def make(self):
+        return [d.make() for d in self._directories]
+            
+    def size(self, *args, **kwargs):
+        return self._sum_result('size', Size(), *args, **kwargs)
+
+    def remove(self):
+        return [d.remove() for d in self._directories]
+            
+    def _one_result(self, method, *args, **kwargs):
+        return getattr(self._directories[0], method)(*args, **kwargs)
+        
+    def _sum_result(self, method, init, *args, **kwargs):
+        return sum([getattr(d, method)(*args, **kwargs) for d in self._directories], init)
+        
 
 class TemporaryDirectory(Directory):
     def __init__(self):

@@ -145,7 +145,10 @@ class Monitor:
                 return False
             return not('issue' in r or r.get('crash_id') == FAILED_CRASH_ID)
         
-        self._cleanup_cache(directory, self._options.reports_size_limit, is_useful)
+        self._cleanup_cache(
+            directory, self._options.reports_size_limit, is_useful,
+            is_forced_on_failure=False)  #< It's better to see warning and enhance storage.
+
         return len(new_reports)
 
     def analyze(self) -> int:
@@ -156,28 +159,27 @@ class Monitor:
                 to_analyze.append(crash_info.Report(name))
 
         logger.info('Analyze {} report(s) from local cache'.format(len(to_analyze)))
-        if not to_analyze:
-            return 0
+        analyzed = []
+        if to_analyze:
+            reasons = crash_info.analyze_reports_concurrent(
+                to_analyze, directory=self._options.reports_directory, **self._analyze)
 
-        reasons = crash_info.analyze_reports_concurrent(
-            to_analyze, directory=self._options.reports_directory, **self._analyze)
+            analyzed = {report.name: reason for report, reason in reasons}
+            for report in to_analyze:
+                reason = analyzed.get(report.name)
+                record = self._records[report.name]
+                record['crash_id'] = reason.crash_id if reason else (
+                    FAILED_CRASH_ID if record.get('crash_id') else RETRY_CRASH_ID)
 
-        analyzed = {report.name: reason for report, reason in reasons}
-        for report in to_analyze:
-            reason = analyzed.get(report.name)
-            record = self._records[report.name]
-            record['crash_id'] = reason.crash_id if reason else (
-                FAILED_CRASH_ID if record.get('crash_id') else RETRY_CRASH_ID)
+            self.flush_records()
 
-        self.flush_records()
         self._cleanup_cache(
             self._options.dump_tool_directory,
             self._options.dump_tool_size_limit,
-            lambda d: d.name.endswith('release'),
-            is_forced_on_failure=True)
-            
+            lambda d: d.name.endswith('release'))
+
         self._cleanup_cache(
-            utils.Directory(dump_tool.CDB_CACHE_DIRECTORY),
+            utils.MultiDirectory(*dump_tool.CDB_CACHE_DIRECTORIES),
             self._options.cdb_cache_size_limit,
             lambda d: d.size() < self._options.cdb_cache_size_limit / 1000)
 
@@ -232,10 +234,10 @@ class Monitor:
         
     @classmethod
     def _cleanup_cache(cls, directory: utils.Directory, size_limit: utils.Size, 
-                       is_impotant: callable, is_forced_on_failure: bool = False):
+                       is_impotant: callable, is_forced_on_failure: bool = True):
         def directory_message():
-            return 'directory size {} is {} limit {}: {}'.format(
-                size, 'within' if size < size_limit else 'over', size_limit, directory.path)
+            return 'size {} is {} limit {} in {}'.format(
+                size, 'within' if size < size_limit else 'over', size_limit, directory)
 
         size = directory.size()
         if size < size_limit:
@@ -248,13 +250,13 @@ class Monitor:
                 removed_count += 1
                 d.remove()
 
-        logger.info('Cleanup has removed {} items in: {}'.format(removed_count, directory.path))
+        logger.info('Cleanup has removed {} items in {}'.format(removed_count, directory))
         size = directory.size()
         if size < size_limit:
             logger.info('Cleanup success for ' + directory_message())
         elif is_forced_on_failure:
             logger.warning('Starting forced cleanup for ' + directory_message())
-            cls._cleanup_cache(directory, size_limit, lambda x: False)
+            cls._cleanup_cache(directory, size_limit, lambda x: False, is_forced_on_failure=False)
         else:
             logger.error('Cleanup failed for ' + directory_message())
 

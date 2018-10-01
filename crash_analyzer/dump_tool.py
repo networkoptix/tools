@@ -24,7 +24,10 @@ from typing import List, Callable
 logger = logging.getLogger(__name__)
 
 
-CDB_CACHE_DIRECTORY = '''C:\ProgramData\dbg\sym'''
+CDB_CACHE_DIRECTORIES = [
+    'C:/ProgramData/dbg/sym',
+    'C:/Program Files (x86)/Windows Kits/10/Debuggers/x64/sym',
+]
 
 CDB_KNOWN_ERRORS = [
     'Minidump does not have system info',
