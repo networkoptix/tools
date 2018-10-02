@@ -29,7 +29,7 @@
 
 # Common build parameters and build process customizations
 - parameter:
-    name: p_CLEAN_WORKSPACE
+    name: p_CLEAN_WORKSPACE  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: CLEAN_WORKSPACE
@@ -39,7 +39,7 @@
           Clean EVERYTHING (HG repos, build, distrib and other folders).
 
 - parameter:
-    name: p_CLEAN_CLONE
+    name: p_CLEAN_CLONE  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: CLEAN_CLONE
@@ -49,7 +49,7 @@
           Clean repositories folders and reclone HG repos.
 
 - parameter:
-    name: p_CLEAN_BUILD
+    name: p_CLEAN_BUILD  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: CLEAN_BUILD
@@ -214,16 +214,6 @@
           Name of ssh user used for ssh session (usually jenkins, but it may differ for
           edge cases)
 
-# Specific parameters
-- parameter:
-    name: p_FREEZE_COMMIT_NOW
-    parameters:
-    - bool:
-        name: FREEZE_COMMIT_NOW
-        default: '{default}'
-        description: >-
-          Freeze nx_vms commit sources right now, don't wait for starting builds
-          (this does not affect commit from functests branch)
 # Define paths to operate on
 - parameter:
     name: p_LOCAL_PATH
@@ -254,7 +244,7 @@
           with JENKINS ENUMs, valid options are "passed" and "failed"
 
 - parameter:
-    name: p_RUN_FUNCTESTS
+    name: p_RUN_FUNCTESTS  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: RUN_FUNCTESTS
@@ -263,7 +253,7 @@
           Flag whether run functests or not.
 
 - parameter:
-    name: p_RUN_REALCAMERATESTS
+    name: p_RUN_REALCAMERATESTS  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: RUN_REALCAMERATESTS
@@ -272,7 +262,7 @@
           Flag whether run realcameratests or not.
 
 - parameter:
-    name: p_RUN_UNITTESTS
+    name: p_RUN_UNITTESTS  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: RUN_UNITTESTS
@@ -281,7 +271,7 @@
           Flag whether run functests or not.
 
 - parameter:
-    name: p_BUILD_INSTALLER
+    name: p_BUILD_INSTALLER  # TODO: switch to *_SKIP
     parameters:
     - bool:
         name: BUILD_INSTALLER
@@ -312,34 +302,39 @@
 - parameter:
     name: p_CLOUD_GROUP
     parameters:
-    - extended-choice:
+    - better-single-select:
         name: CLOUD_GROUP
-        type: 'single-select'
-        value: test,tmp,dev,demo,stage,prod
-        default-value: '{default}'
-        visible-items: 2
+        choices:
+        - - test
+          - test   # TODO: Write description
+        - - tmp
+          - tmp    # TODO: Write description
+        - - dev
+          - dev    # TODO: Write description
+        - - demo
+          - demo   # TODO: Write description
+        - - stage
+          - stage  # TODO: Write description
+        - - prod
+          - prod   # TODO: Write description
+        default: '{default}'
         description: >-
           Cloud group
 
 - parameter:
     name: p_HARDWARE_SIGNING
     parameters:
-    - extended-choice:
+    - on-off-option:
         name: HARDWARE_SIGNING
-        type: 'single-select'
-        value: ON,OFF
-        default-value: '{default}'
-        visible-items: 2
+        default: '{default}'
 
 - parameter:
     name: p_TRUSTED_TIMESTAMPING
     parameters:
-    - extended-choice:
+    - on-off-option:
         name: TRUSTED_TIMESTAMPING
-        type: 'single-select'
-        value: ON,OFF
-        default-value: '{default}'
-        visible-items: 2
+        default: '{default}'
+
 # Functional tests parameters
 
 - parameter:
@@ -362,3 +357,72 @@
         name: TEST_LIST
         default: '{default}'
         description: Tests to run, space-delimited list. Empty means run all tests.
+
+- parameter:
+    name: p_VMS_BUILD_w_OPTION
+    parameters:
+    - better-single-select:
+        name: VMS_BUILD
+        choices:
+        - - VMS_NEW_BUILD_BY_COMMIT
+          - "Make new build (ENTER commit)"
+        - - VMS_EXIST_BUILD_BY_IDENTITY
+          - "Existing build (ENTER build identity)"
+        - - VMS_EXIST_BUILD_STABLE_PUSH
+          - "Existing green build (latest push)"
+        - - VMS_EXIST_BUILD_STABLE_NIGHTLY
+          - "Existing green build (latest nightly)"
+        - - VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+          - "Existing green build (latest push or nightly)"
+        default: '{default}'
+        description: >-
+          Which VMS build should be used
+    - string:
+        name: VMS_BUILD_OPTION
+        default: '{option_default}'
+        description: >-
+          ENTER option for VMS_BUILD, optional, depending on what's selected in prev field
+
+- parameter:
+    name: p_FT_COMMIT_w_OPTION
+    parameters:
+    - better-single-select:
+        name: FT_COMMIT
+        choices:
+        - - "FT_OTHER_COMMIT"
+          - "Use other commit (ENTER commit)"
+        - - "FT_STABLE_PUSH"
+          - "Tested green (latest push)"
+        - - "FT_STABLE_NIGHTLY"
+          - "Tested green (latest nightly)"
+        - - "FT_STABLE_PUSH_OR_NIGHTLY"
+          - "Tested green(latest push or nightly)"
+        default: '{default}'
+        description: Which FT commit should be used
+    - string:
+        name: FT_COMMIT_OPTION
+        default: '{option_default}'
+        description: >-
+          ENTER option for FT_COMMIT, optional, depending on what's selected in prev field
+
+- parameter:
+    name: p_RCT_COMMIT_w_OPTION
+    parameters:
+    - better-single-select:
+        name: RCT_COMMIT
+        choices:
+        - - "RCT_BY_COMMIT"
+          - "Use other commit (ENTER commit)"
+        - - "RCT_STABLE_PUSH"
+          - "Tested green (latest push)"
+        - - "RCT_STABLE_NIGHTLY"
+          - "Tested green (latest nightly)"
+        - - "RCT_STABLE_PUSH_OR_NIGHTLY"
+          - "Tested green(latest push or nightly)"
+        default: '{default}'
+        description: Which RCT commit should be used
+    - string:
+        name: RCT_COMMIT_OPTION
+        default: '{option_default}'
+        description: >-
+          ENTER option for RCT_COMMIT, optional, depending on what's selected in prev field

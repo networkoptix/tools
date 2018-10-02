@@ -1,0 +1,10 @@
+- parameter:
+    name: skip-option
+    parameters:
+    - better-single-select:
+        name: '{name}'
+        choices:
+        - [ SKIP, "Skip (don't run {subject})" ]
+        - [ RUN,  "Run (don't skip {subject})" ]
+        default: !j2: '{{ default | default("RUN") }}'
+        description: 'Skip {subject} or run?'

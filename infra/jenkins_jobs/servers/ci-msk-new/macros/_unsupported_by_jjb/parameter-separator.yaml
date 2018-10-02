@@ -19,3 +19,12 @@
         header: '{header}'
         section-style: ''
         separator-style: ''
+
+- parameter:
+    name: simple-separator-colored
+    parameters:
+    - separator:
+        # name: '{name}'
+        header: '{header}'
+        section-style: 'background-color: {color}'
+        separator-style: ''

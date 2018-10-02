@@ -1,0 +1,9 @@
+- parameter:
+    name: on-off-option
+    parameters:
+    - extended-choice:
+        name: '{name}'
+        type: 'single-select'
+        value: ON,OFF
+        default-value: '{default}'
+        visible-items: 2

@@ -174,7 +174,6 @@
               --timeout="$TEST_TIMEOUT" \
               --slot="$EXECUTOR_NUMBER" \
               --reinstall \
-              -v \
               cameras_integration/test_server.py::test_cameras
 
     publishers:

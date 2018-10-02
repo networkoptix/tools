@@ -1,0 +1,40 @@
+- builder:
+    name: calculate-latest-commit
+    builders:
+    - shell: !j2: |
+        #!bash
+        set -ex
+        python - <<EOF
+        impor os.path
+        identity_1 = 0
+        identity_2 = 0
+        if os.path.isfile('{{ identity_file_1 }}'):
+            with open('{{ identity_file_1 }}') as f:
+                identity_1 = int(f.read().strip().split('=', 1)[1])
+                print "identity 1 -> ", identity_1
+        if os.path.isfile('{{ identity_file_2 }}'):
+            with open('{{ identity_file_2 }}') as f:
+                identity_2 = int(f.read().strip().split('=', 1)[1])
+                print "identity 2 -> ", identity_2
+        identity_latest = max(identity_1, identity_2)
+        print "Latest identity -> ", identity_latest
+
+        if identity_latest == 0:
+            print "0 is invalid"
+            exit 1
+
+        if identity_latest == identity_1:
+            with open('{{ commit_file_1 }}') as f:
+                commit_latest = f.read().strip().split('=', 1)[1]
+        else:
+            with open('{{ commit_file_2 }}') as f:
+                commit_latest = f.read().strip().split('=', 1)[1]
+
+        with open('{{ output_file }}', 'at') as f:
+        {% if identity_latest_varname | default("") %}
+            f.write('{{ identity_latest_varname }}={}'.format(identity_latest))
+        {% endif %}
+        {% if commit_latest_varname | default("") %}
+            f.write('{{ commit_latest_varname }}={}'.format(commit_latest))
+        {% endif %}
+        EOF

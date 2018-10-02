@@ -35,10 +35,6 @@
 
       There are options for USE_NX_VMS_COMMIT:
       1. LATEST - latest commit in branch
-      1.1. LATEST + FREEZE_COMMIT_NOW=true
-                  - use latest commit in branch + resolve it right now and skip
-                      runner if "ignore_functests" is set and runner shouldn't be
-                      triggered
       2. AUTO + USE_BUILD_IDENTITY=value
                   - commit thet will be set based on commit from existing build
       3. value
@@ -49,18 +45,6 @@
       2. value  - use existing build
 
       Note: guessing BUILD_IDENTITY based on commit sha is bad idea...
-
-      For all options there are somr limitations:
-      USE_NX_VMS_COMMIT | USE_BUILD_IDENTITY | FREEZE_COMMIT_NOW | Ok?
-      LATEST            | NEW                | true              | +
-      LATEST            | NEW                | false             | +
-      LATEST            | value              | N/A               | no
-      AUTO              | NEW                | true              | +
-      AUTO              | NEW                | false             | +
-      AUTO              | value              | N/A               | +
-      value             | NEW                | true              | +
-      value             | NEW                | false             | +
-      value             | value              | N/A               | no
 
       --------------------------------------------------------------------------------
 

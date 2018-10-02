@@ -1,0 +1,146 @@
+- job-template:
+    name: '{pipeline}.{version}.preset.{preset-name}'
+    id: 'preset'
+    node: runner
+    concurrent: true
+
+    timer: ''  # no timed trigger by default
+
+    properties:
+    - authorization-{pipeline}-trigger
+
+    parameters:
+
+    # FIXME:
+    - p_BRANCH:
+        default: '{default_branch}'
+    - p_BUILD_DESCRIPTION:
+        default: Triggered manually
+
+    - simple-separator-colored:
+        header: 'Options for VMS'
+        color: lavender
+    - p_VMS_BUILD_w_OPTION:
+        default: '{vms_build_default}'
+        option_default: '{vms_build_option_default}'
+    # - better-single-select:
+    #     name: VMS_BUILD_FROM_PIPELINE
+    #     choices:
+    #     - [ debug,   "Debug - Jenkins testing" ]
+    #     - [ develop, "Development - CI and nightly builds" ]
+    #     - [ custom,  "Custom - feature testing" ]
+    #     - [ release, "Release - builds intended to be published" ]
+    #     default: '{pipeline}'
+    - p_PLATFORMS:
+        default: '{default_platforms}'
+    - p_CUSTOMIZATIONS:
+        default: '{default_customizations}'
+
+    - p_CLOUD_GROUP:
+        default: test
+    - p_HARDWARE_SIGNING:
+        default: 'OFF'
+    - p_TRUSTED_TIMESTAMPING:
+        default: 'OFF'
+    - p_CUSTOM_CMAKE_PARAMETERS:
+        default: ''
+
+    - simple-separator-colored:
+        header: 'Options for Unittests'
+        color: lavender
+    - skip-option:
+        name: UT_SKIP
+        subject: UnitTests
+        default: '{ut_skip}'
+
+    - simple-separator-colored:
+        header: 'Options for Functional tests'
+        color: lavender
+
+    - skip-option:
+        name: FT_SKIP
+        subject: FuncTests
+        default: '{ft_skip}'
+    - p_FT_COMMIT_w_OPTION:
+        default: '{ft_commit_default}'
+        option_default: '{ft_commit_option_default}'
+    - p_TEST_SELECT_EXPR:
+        default: !j2: '{{ test_select_expr | default("") }}'
+    - p_TEST_LIST:
+        default: !j2: '{{ test_list | default("") }}'
+
+    - simple-separator-colored:
+        header: 'Options for Real cameras tests'
+        color: lavender
+    - skip-option:
+        name: RCT_SKIP
+        subject: RealCameraTests
+        default: '{rct_skip}'
+    - p_RCT_COMMIT_w_OPTION:
+        default: '{rct_commit_default}'
+        option_default: '{rct_commit_option_default}'
+
+    # TODO: Add additional sections and options...
+    # - simple-separator-colored:
+    #     header: 'Extra options'
+    #     color: lavender
+    # - string:
+    #     name: EMAIL_NOTIFY_CC
+    #     default: ''
+    #     description: Add reciepients for email notification. You will receive email anyways.
+
+    triggers:
+    - timed: "{timer}"
+
+    wrappers:
+    - timestamps
+
+    builders:
+    - custom-clean-workspace:
+        keep_files: [ devtools, nx_vms ]
+    - set-custom-build-description
+    - cancel-queued-child-runner:
+        cancel: true
+    - trigger-builds:
+      - project: '__{pipeline}.{version}.param-resolver'
+        block: true
+        current-parameters: true
+        predefined-parameters: |
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+    - copyartifact:
+        project: '__{pipeline}.{version}.param-resolver'
+        filter: 'RUNNER_ARGS.envvars'
+        which-build: last-completed
+        parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+    - shell: cat RUNNER_ARGS.envvars
+    - inject:
+        properties-file: 'RUNNER_ARGS.envvars'
+    - shell: |
+        #!bash
+        echo "BUILD_IDENTITY=$BUILD_IDENTITY" >> BUILD_IDENTITY.envvar
+        # TODO: Change these argnames!!!
+        echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> NX_VMS_COMMIT.envvar
+        echo "NX_FUNCTESTS_COMMIT=$NX_FUNCTESTS_COMMIT" > NX_FUNCTESTS_COMMIT.envvar
+        echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT" >> NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
+
+    - trigger-builds:
+      - project: '{pipeline}.{version}.vms.runner'
+        block: true
+        property-file: RUNNER_ARGS.envvars
+        predefined-parameters: !j2: |
+          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+          UPSTREAM_JOB_NAME=$JOB_NAME
+          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          REPLACE_BUILD_WITH_NEWER={{ replace_build_with_newer | default("YES") }}
+
+    publishers:
+    - archive:
+        artifacts: '*.envvars'
+        allow-empty: 'false'
+        fingerprint: true
+    - archive:
+        artifacts: '*.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+
+

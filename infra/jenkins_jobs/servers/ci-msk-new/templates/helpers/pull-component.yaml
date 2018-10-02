@@ -98,6 +98,7 @@
         - jenkins
 
     builders:
+    - shell: rm -f unstable.flag
     - inject:
         properties-content: |
           JUNKSHOP_HOST={junk_shop_host}
@@ -123,15 +124,29 @@
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base_path}/{artifact_location_full_pattern}
 
-    - rsync-upload:
-        host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
-        port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
-        user: '${{SSH_USER}}'
-        src_path: '${{REPOSITORY_PATH}}'
-        dst_path: '${{LOCAL_PATH}}'
-        components: '${{COMPONENTS}}'
+    # If something is missing (e.g windows build) we shouldn't fail on
+    # bringing components to target. It's up to parent job to decide whether
+    # it's ok or not ok to have something not pulled.
+    - conditional-step:
+        condition-kind: shell
+        condition-command: test -e "$REPOSITORY_PATH"
+        steps:
+        - rsync-upload:
+            host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
+            port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
+            user: '${{SSH_USER}}'
+            src_path: '${{REPOSITORY_PATH}}'
+            dst_path: '${{LOCAL_PATH}}'
+            components: '${{COMPONENTS}}'
+    - shell: |
+        #bash
+        if [ ! -e "$REPOSITORY_PATH" ] ; then
+          touch unstable.flag
+        fi
 
     publishers:
+    - groovy-postbuild:
+        script: !include-raw-escape: ../../builders/check_unstable.groovy
     - archive:
         artifacts: RSYNC_FILES_LIST.txt
         allow-empty: 'false'

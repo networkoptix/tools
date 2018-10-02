@@ -78,6 +78,9 @@ print '''#
     - p_UPSTREAM_JOB_NAME
     - p_BUILD_DESCRIPTION:
         default: ''
+    - string:
+        name: REPLACE_BUILD_WITH_NEWER
+        default: 'NO'
     - p_PLATFORMS:
         default: '{default_platforms}'
     - p_CUSTOMIZATIONS:
@@ -113,6 +116,9 @@ print '''#
         default: '{pipeline}'
     - string:
         name: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+    # TODO:
+    # - string:
+    #     name: NX_FUNCTESTS_COMMIT
 
     wrappers:
     - timestamps
@@ -120,6 +126,7 @@ print '''#
 
     builders:
     - set-custom-build-description
+    # FIXME: remove when it will be unused
     - custom-build-description:
         envvars: [ BUILD_URL ]
         action: append
@@ -130,6 +137,16 @@ print '''#
         params: >-
           NX_VMS_COMMIT
           BUILD_IDENTITY
+    # FIXME: temp stub
+    - inject:
+        properties-content: |
+          NX_FUNCTESTS_COMMIT=$NX_VMS_COMMIT
+    - shell:
+        #!bash
+        echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
+        echo "BUILD_IDENTITY=$BUILD_IDENTITY" > BUILD_IDENTITY.envvar
+        echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT" > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
+        echo "NX_FUNCTESTS_COMMIT=$NX_FUNCTESTS_COMMIT" > NX_FUNCTESTS_COMMIT.envvar
 
     # At this point we know BUILD_IDENTITY and NX_VMS_COMMIT
     # TODO: Should we fetch all links from publisher or something like that?
@@ -154,8 +171,9 @@ print '''#
 
     - description-setter:
         description: |
-          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT ($USE_NX_VMS_COMMIT)
+          $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT
 
+    # TODO: remove this: unused
     # At this step we will register id->commit or fail if we have wrong commit for this id.
     - build-registry-add:
         pipeline: '{pipeline}'
@@ -164,10 +182,6 @@ print '''#
         project: '{project}'
         build-identity: $BUILD_IDENTITY
         nx-vms-commit: $NX_VMS_COMMIT
-    - shell: |
-        #!bash
-        echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
-        echo "BUILD_IDENTITY=$BUILD_IDENTITY" > BUILD_IDENTITY.envvar
 
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
@@ -278,7 +292,7 @@ for customization in CUSTOMIZATIONS_LIST:
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
-            NX_TEST_FRAMEWORK_COMMIT=$NX_VMS_COMMIT
+            NX_TEST_FRAMEWORK_COMMIT=$NX_FUNCTESTS_COMMIT
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE

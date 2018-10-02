@@ -1,0 +1,57 @@
+- parameter:
+    name: better-single-select
+    parameters:
+    - extended-choice:
+        name: '{name}'
+        type: 'single-select'
+        # value: !j2: '{{ choices | map(attribute=0) | join (",") }}'
+        value: !j2: >-
+          {%- if allowed_choices | default([]) -%}
+            {%- for c in choices if c[0] in allowed_choices -%}
+                {{- c[0] -}}
+                {%- if not loop.last -%}
+                    {{- ',' -}}
+                {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for c in choices -%}
+                {{- c[0] -}}
+                {%- if not loop.last -%}
+                    {{- ',' -}}
+                {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        # value-description: !j2: '{{ choices | map(attribute=1) | join (",") }}'
+        value-description: !j2: >-
+          {%- if allowed_choices | default([]) -%}
+            {%- for c in choices if c[0] in allowed_choices -%}
+                {{- c[1] -}}
+                {%- if not loop.last -%}
+                    {{- ',' -}}
+                {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- for c in choices -%}
+                {{- c[1] -}}
+                {%- if not loop.last -%}
+                    {{- ',' -}}
+                {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        default-value: '{default}'
+        description: '{description}'
+# {%- if allowed_choices | deffault(false) -%}
+#   {%- for c in choices if c[0] in allowed_choices -%}
+#       {{- c[0] -}}
+#       {%- if not loop.last -%}
+#           {{- ',' -}}
+#       {%- endif -%}
+#   {%- endfor -%}
+# {%- else -%}
+#   {%- for c in choices -%}
+#       {{- c[0] -}}
+#       {%- if not loop.last -%}
+#           {{- ',' -}}
+#       {%- endif -%}
+#   {%- endfor -%}
+# {%- endif -%}
