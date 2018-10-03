@@ -4,81 +4,45 @@
     concurrent: false
     node: runner
 
-
     properties:
     - authorization-{pipeline}-system
 
     parameters:
-    - string:
-        name: REQUESTED_BY
-    - string:
-        name: BUILD_DESCRIPTION
-
-    - string:
-        name: BRANCH  # do we really need it?
-
-    - string:
-        name: VMS_BUILD
-    - string:
-        name: VMS_BUILD_OPTION
-    - string:
-        name: PLATFORMS
-    - string:
-        name: CUSTOMIZATIONS
-    - string:
-        name: CLOUD_GROUP
-    - string:
-        name: HARDWARE_SIGNING
-    - string:
-        name: TRUSTED_TIMESTAMPING
-    - string:
-        name: CUSTOM_CMAKE_PARAMETERS
-
-    - string:
-        name: UT_ENABLED
-
-    - string:
-        name: FT_ENABLED
-    - string:
-        name: FT_COMMIT
-    - string:
-        name: FT_COMMIT_OPTION
-    - string:
-        name: TEST_SELECT_EXPR
-    - string:
-        name: TEST_LIST
-
-    - string:
-        name: RCT_ENABLED
-    - string:
-        name: RCT_COMMIT
-    - string:
-        name: RCT_COMMIT_OPTION
+    - string: { name: REQUESTED_BY            }
+    - string: { name: BUILD_DESCRIPTION       }
+    # do we really need it?
+    - string: { name: BRANCH                  }
+    - string: { name: VMS_BUILD               }
+    - string: { name: VMS_BUILD_OPTION        }
+    - string: { name: PLATFORMS               }
+    - string: { name: CUSTOMIZATIONS          }
+    - string: { name: CLOUD_GROUP             }
+    - string: { name: HARDWARE_SIGNING        }
+    - string: { name: TRUSTED_TIMESTAMPING    }
+    - string: { name: CUSTOM_CMAKE_PARAMETERS }
+    - string: { name: UT_ENABLED              }
+    - string: { name: FT_ENABLED              }
+    - string: { name: FT_COMMIT               }
+    - string: { name: FT_COMMIT_OPTION        }
+    - string: { name: TEST_SELECT_EXPR        }
+    - string: { name: TEST_LIST               }
+    - string: { name: RCT_ENABLED             }
+    - string: { name: RCT_COMMIT              }
+    - string: { name: RCT_COMMIT_OPTION       }
 
     builders:
-
     - custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
-
-    # clean old
-    - shell: |
-        #!bash
-        echo '' > RUNNER_ARGS.envvars
 
     # working with build identity & commit
 
     # === NEW BUILD ===
-    # 1) new from commit
-    - shell: echo 'Check $VMS_BUILD <> VMS_NEW_BUILD_BY_COMMIT'
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
+        condition-string1: $VMS_BUILD
+        condition-string2: VMS_NEW_BUILD_BY_COMMIT
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_NEW_BUILD_BY_COMMIT)"
-        - shell: |
-            #!bash
-            test $VMS_BUILD_OPTION != ''
+        - shell: test $VMS_BUILD_OPTION != ''
         - trigger-builds:
           - project: '{pipeline}.build_number.generator'
             block: true
@@ -93,30 +57,28 @@
         - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
             branch: $BRANCH
-            commit-to-freeze: $BRANCH
+            commit-to-freeze: $VMS_BUILD_OPTION
             commit-varname: NX_VMS_COMMIT
         - shell: |
             #!bash
             cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
             echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> RUNNER_ARGS.envvars
+            echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=true >> RUNNER_ARGS.envvars
 
     # === EXISTING BUILDS ===
-    # 3) get by identity
-    - shell: echo 'Check $VMS_BUILD <> VMS_EXIST_BUILD_BY_COMMIT'
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_EXIST_BUILD_BY_COMMIT'
+        condition-string1: $VMS_BUILD
+        condition-string2: VMS_EXIST_BUILD_BY_COMMIT
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_EXIST_BUILD_BY_COMMIT)"
         - copyartifact:
             # runner is shared between presets, so this is the place where any
             # build may be found
             project: '{pipeline}.{version}.vms.runner'
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-successful # or last-completed ?
-            parameter-filters: >-
-              NX_VMS_COMMIT=$VMS_BUILD_OPTION
+            parameter-filters: NX_VMS_COMMIT=$VMS_BUILD_OPTION
             optional: false
         - shell: |
             #!bash
@@ -125,22 +87,18 @@
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
             echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
 
-    # 3) get by identity
-    - shell: echo 'Check $VMS_BUILD <> VMS_EXIST_BUILD_BY_IDENTITY'
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$VMS_BUILD'
         condition-string2: 'VMS_EXIST_BUILD_BY_IDENTITY'
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_EXIST_BUILD_BY_IDENTITY)"
         - copyartifact:
             # runner is shared between presets, so this is the place where any
             # build may be found
             project: '{pipeline}.{version}.vms.runner'
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-successful # or last-completed ?
-            parameter-filters: >-
-              BUILD_IDENTITY=$VMS_BUILD_OPTION
+            parameter-filters: BUILD_IDENTITY=$VMS_BUILD_OPTION
             optional: false
         - shell: |
             #!bash
@@ -149,14 +107,11 @@
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
             echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
 
-    # 3) get last pushed
-    - shell: echo 'Check $VMS_BUILD <> VMS_EXIST_BUILD_STABLE_PUSH'
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$VMS_BUILD'
         condition-string2: 'VMS_EXIST_BUILD_STABLE_PUSH'
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_EXIST_BUILD_STABLE_PUSH)"
         - copyartifact:
             project: '{pipeline}.{version}.preset.on-push-vms'
             filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
@@ -164,20 +119,16 @@
             optional: false  #! build must exist
         - shell: |
             #!bash
-            # echo "BUILD_IDENTITY=$VMS_BUILD_OPTION" >> RUNNER_ARGS.envvars
             cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
             cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
             echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
 
-    # 3) get last nightly
-    - shell: echo 'Check $VMS_BUILD <> VMS_EXIST_BUILD_STABLE_NIGHTLY'
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$VMS_BUILD'
         condition-string2: 'VMS_EXIST_BUILD_STABLE_NIGHTLY'
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_EXIST_BUILD_STABLE_NIGHTLY)"
         - copyartifact:
             project: '{pipeline}.{version}.preset.nightly-vms'
             filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
@@ -190,14 +141,11 @@
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
             echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
 
-    # 3) get last push / nightly
-    - shell: echo 'Check $VMS_BUILD <> VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY'
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$VMS_BUILD'
         condition-string2: 'VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY'
         steps:
-        - shell: echo "VMS_BUILD=$VMS_BUILD (VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY)"
         - shell: mkdir -p on-push nightly
         - copyartifact:
             project: '{pipeline}.{version}.preset.on-push-vms'
@@ -239,60 +187,59 @@
           echo "RUN_UNITTESTS=true" >> RUNNER_ARGS.envvars
         fi
 
-        if [ $FT_ENABLED == 'OFF' ] ; then
-          echo "RUN_FUNCTESTS=false" >> RUNNER_ARGS.envvars
-        else
-          echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
-        fi
-
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$FT_ENABLED'
-        condition-string2: 'RUN'
+        condition-string2: 'OFF'
         steps:
+        - shell: |
+            #!bash
+            echo "RUN_FUNCTESTS=false" >> RUNNER_ARGS.envvars
+            echo 'NX_FUNCTESTS_COMMIT=' > NX_FUNCTESTS_COMMIT.envvar
+            echo "TEST_SELECT_EXPR=" >> RUNNER_ARGS.envvars
+            echo "TEST_LIST=" >> RUNNER_ARGS.envvars
+
+    # If FTs are enabled, then we'll calculate ft commit
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$FT_ENABLED'
+        condition-string2: 'ON'
+        steps:
+        - shell: echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$FT_COMMIT'
             condition-string2: 'FT_OTHER_COMMIT'
             steps:
-            - freeze-nx-vms-commit(remote):
+            - freeze-nx-vms-commit(remote):  # creates NX_FUNCTESTS_COMMIT.envvar
                 pipeline: '{pipeline}'
                 branch: $BRANCH
                 commit-to-freeze: $BRANCH
                 commit-varname: NX_FUNCTESTS_COMMIT
-            - shell: |
-                #!bash
-                echo "NX_FUNCTESTS_COMMIT=$NX_FUNCTESTS_COMMIT" >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$FT_COMMIT'
             condition-string2: 'FT_STABLE_PUSH'
             steps:
-            - shell: echo NX_FUNCTESTS_COMMIT= > NX_FUNCTESTS_COMMIT.envvar
             - copyartifact:
                 project: '{pipeline}.{version}.preset.on-push-ft'
                 filter: 'NX_FUNCTESTS_COMMIT.envvar'
                 which-build: last-successful
                 optional: true
-            - shell: |
-                #!bash
-                # FIXME: no such file
-                cat NX_FUNCTESTS_COMMIT.envvar >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$FT_COMMIT'
             condition-string2: 'FT_STABLE_NIGHTLY'
             steps:
-            - shell: echo NX_FUNCTESTS_COMMIT= > NX_FUNCTESTS_COMMIT.envvar
             - copyartifact:
                 project: '{pipeline}.{version}.preset.nightly-ft'
                 filter: 'NX_FUNCTESTS_COMMIT.envvar'
                 which-build: last-successful
                 optional: true
-            - shell: |
-                #!bash
-                # FIXME: no such file
-                cat NX_FUNCTESTS_COMMIT.envvar >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$FT_COMMIT'
@@ -316,68 +263,67 @@
                 identity_file_2: './nightly/BUILD_IDENTITY.envvar'
                 commit_file_1:   './on-push/NX_VMS_COMMIT.envvar'
                 commit_file_2:   './nightly/NX_VMS_COMMIT.envvar'
-                output_file:     'RUNNER_ARGS.envvars'
+                output_file:     'NX_FUNCTESTS_COMMIT.envvars'
                 commit_latest_varname: NX_FUNCTESTS_COMMIT
             - shell: rm -rf on-push nightly
-
     - shell: |
         #!bash
+        touch NX_FUNCTESTS_COMMIT.envvar
+        cat NX_FUNCTESTS_COMMIT.envvar >> RUNNER_ARGS.envvars
         echo "TEST_SELECT_EXPR=$TEST_SELECT_EXPR" >> RUNNER_ARGS.envvars
         echo "TEST_LIST=$TEST_LIST" >> RUNNER_ARGS.envvars
 
-        if [ $RCT_ENABLED == 'OFF' ] ; then
-          echo "RUN_REALCAMERATESTS=false" >> RUNNER_ARGS.envvars
-        else
-          echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
-        fi
+    # RCT
 
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$RCT_ENABLED'
-        condition-string2: 'RUN'
+        condition-string2: 'OFF'
         steps:
-        - shell: echo
+        - shell: |
+            echo "RUN_REALCAMERATESTS=false" >> RUNNER_ARGS.envvars
+            echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=" > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
+
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$RCT_ENABLED'
+        condition-string2: 'ON'
+        steps:
+        - shell: echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
         # get FT commit from RCT_COMMIT & RCT_COMMIT_OPTION
         - conditional-step:
             condition-kind: strings-match
-            condition-string1: '$RCT_COMMIT'
-            condition-string2: 'RCT_BY_COMMIT'
+            condition-string1: $RCT_COMMIT
+            condition-string2: RCT_BY_COMMIT
             steps:
             - freeze-nx-vms-commit(remote):
                 pipeline: '{pipeline}'
                 branch: $BRANCH
                 commit-to-freeze: $BRANCH
                 commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
-            # TODO: Check branches
-            - shell: |
-                #!bash
-                echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT" >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$RCT_COMMIT'
             condition-string2: 'RCT_STABLE_PUSH'
             steps:
-            - shell: echo NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT= > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
             - copyartifact:
                 project: '{pipeline}.{version}.preset.on-push-rct'
                 filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
                 which-build: last-successful
                 optional: true
-            - shell: cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$RCT_COMMIT'
             condition-string2: 'RCT_STABLE_NIGHTLY'
             steps:
-            - shell: echo NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT= > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
             - copyartifact:
                 project: '{pipeline}.{version}.preset.nightly-rct'
                 filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
                 which-build: last-successful
                 optional: true
-            - shell: |
-                #!bash
-                cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
+
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$RCT_COMMIT'
@@ -402,9 +348,14 @@
                 identity_file_2: './nightly/BUILD_IDENTITY.envvar'
                 commit_file_1:   './on-push/NX_VMS_COMMIT.envvar'
                 commit_file_2:   './nightly/NX_VMS_COMMIT.envvar'
-                output_file:     'RUNNER_ARGS.envvars'
+                output_file:     'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
                 commit_latest_varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
             - shell: rm -rf on-push nightly
+
+    - shell: |
+        #!bash
+        touch NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
+        cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
 
     publishers:
     - archive:
