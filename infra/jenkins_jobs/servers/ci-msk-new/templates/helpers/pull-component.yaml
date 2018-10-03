@@ -139,7 +139,7 @@
             dst_path: '${{LOCAL_PATH}}'
             components: '${{COMPONENTS}}'
     - shell: |
-        #bash
+        #!bash
         if [ ! -e "$REPOSITORY_PATH" ] ; then
           touch unstable.flag
         fi
