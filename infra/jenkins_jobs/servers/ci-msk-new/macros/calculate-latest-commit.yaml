@@ -2,9 +2,7 @@
     name: calculate-latest-commit
     builders:
     - shell: !j2: |
-        #!bash
-        set -ex
-        python - <<EOF
+        #!python
         impor os.path
         identity_1 = 0
         identity_2 = 0
@@ -37,4 +35,3 @@
         {% if commit_latest_varname | default("") %}
             f.write('{{ commit_latest_varname }}={}'.format(commit_latest))
         {% endif %}
-        EOF
