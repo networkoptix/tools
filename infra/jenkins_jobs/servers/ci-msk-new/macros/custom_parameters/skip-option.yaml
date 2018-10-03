@@ -2,6 +2,11 @@
 # Compared to ON/OFF it's generally the same functionality, but should be used
 # for skipping some steps in runner/pipeline which are not required for
 # particular build.
+#
+# Parameters:
+# - name
+# - subject - what is gonna be skipped or not skipped
+# - default value (RUN or SKIP), optional, defaults to RUN
 - parameter:
     name: skip-option
     parameters:

@@ -4,6 +4,10 @@
 # - text is not deformed during bypassing from build to build
 # - extra information in UI may be added for each option (in future)
 # It's also good for enabling/disabling cmake flags
+#
+# Parameters:
+# - name
+# - default
 - parameter:
     name: on-off-option
     parameters:
