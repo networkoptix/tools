@@ -51,7 +51,7 @@
     - on-off-option:
         name: UT_ENABLED
         description: If ON, then UnitTests will run, otherwise skipped
-        default: '{ut_skip}'
+        default: '{ut_enabled}'
 
     - simple-separator-colored:
         header: 'Options for Functional tests'
@@ -60,7 +60,7 @@
     - on-off-option:
         name: FT_ENABLED
         subject: If ON, then FuncTests will run, otherwise skipped
-        default: '{ft_skip}'
+        default: '{ft_enabled}'
     - p_FT_COMMIT_w_OPTION:
         default: '{ft_commit_default}'
         option_default: '{ft_commit_option_default}'
@@ -75,7 +75,7 @@
     - on-off-option:
         name: RCT_ENABLED
         subject: If ON, then RealCameraTests will run, otherwise skipped
-        default: '{rct_skip}'
+        default: '{rct_enabled}'
     - p_RCT_COMMIT_w_OPTION:
         default: '{rct_commit_default}'
         option_default: '{rct_commit_option_default}'
