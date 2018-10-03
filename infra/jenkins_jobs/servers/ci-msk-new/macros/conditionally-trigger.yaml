@@ -16,3 +16,22 @@
           - project: '{{ project | default("") }}'
             predefined-parameters: '{{ parameters }}'
             block: '{{ block | default(true) }}'
+            block-thresholds:
+              failure-threshold: FAILURE
+
+# The same as above, but triggers when shell exit != 0
+- builder:
+    name: conditionally-trigger(shell-NOT)
+    builders:
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: shell
+          condition-command:  !j2: '{{ shell }}'
+        steps:
+        - trigger-builds:
+          - project: '{{ project | default("") }}'
+            predefined-parameters: '{{ parameters }}'
+            block: '{{ block | default(true) }}'
+            block-thresholds:
+              failure-threshold: FAILURE

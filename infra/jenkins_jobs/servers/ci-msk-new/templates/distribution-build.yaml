@@ -594,58 +594,44 @@
           # note COMPONENTS=... in next 2 section
 
           # Case *unit_tests* exists
-          - conditional-step:
-              condition-kind: shell
-              condition-command: ls ./build/distrib/*unit_tests*
-              steps:
-              - trigger-builds:
-                - project: '{pipeline}.helper.publish-build'
-                  predefined-parameters: |
-                    REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-                    BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                    BUILD_STATUS=passed
-                    BRANCH=$BRANCH
-                    BUILD_IDENTITY=$BUILD_IDENTITY
-                    PIPELINE=$PIPELINE
-                    CUSTOMIZATION=$CUSTOMIZATION
-                    PLATFORM=$PLATFORM
-                    BRANCH=$BRANCH
-                    NX_VMS_COMMIT=$NX_VMS_COMMIT
-                    LOCAL_PATH=$WORKSPACE/build/
-                    COMPONENTS=build_logs/,distrib/,current_config.py,build_info.txt,*.log
-                    NODE_SSH_CONNECTION=$SSH_CONNECTION
-                    SSH_USER=$USER
-                  block: true
-                  block-thresholds:
-                    failure-threshold: FAILURE
+          - conditionally-trigger(shell):
+              shell: ls ./build/distrib/*unit_tests*
+              project: '{pipeline}.helper.publish-build'
+              parameters: |
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                BUILD_STATUS=passed
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PIPELINE=$PIPELINE
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                LOCAL_PATH=$WORKSPACE/build/
+                COMPONENTS=build_logs/,distrib/,current_config.py,build_info.txt,*.log
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
 
           # Case *unit_tests* does not exist, old branch/version
-          - conditional-step:
-              condition-kind: not
-              condition-operand:
-                condition-kind: shell
-                condition-command: ls ./build/distrib/*unit_tests*
-              steps:
-              - trigger-builds:
-                - project: '{pipeline}.helper.publish-build'
-                  predefined-parameters: |
-                    REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-                    BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-                    BUILD_STATUS=passed
-                    BRANCH=$BRANCH
-                    BUILD_IDENTITY=$BUILD_IDENTITY
-                    PIPELINE=$PIPELINE
-                    CUSTOMIZATION=$CUSTOMIZATION
-                    PLATFORM=$PLATFORM
-                    BRANCH=$BRANCH
-                    NX_VMS_COMMIT=$NX_VMS_COMMIT
-                    LOCAL_PATH=$WORKSPACE/build/
-                    COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,*.log
-                    NODE_SSH_CONNECTION=$SSH_CONNECTION
-                    SSH_USER=$USER
-                  block: true
-                  block-thresholds:
-                    failure-threshold: FAILURE
+          - conditionally-trigger(shell-NOT):
+              shell: ls ./build/distrib/*unit_tests*
+              project: '{pipeline}.helper.publish-build'
+              parameters: |
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                BUILD_STATUS=passed
+                BRANCH=$BRANCH
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                PIPELINE=$PIPELINE
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                LOCAL_PATH=$WORKSPACE/build/
+                COMPONENTS=build_logs/,distrib/,bin/,lib/,current_config.py,build_info.txt,*.log
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
 
           - description-setter:
               description: >-
