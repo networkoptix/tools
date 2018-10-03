@@ -1,3 +1,17 @@
+# Special builder for cancelling runners.
+#
+# It look through Jenkins queue, tests every found item for following:
+# - is it '*.runner' job?
+# - is it's parent job the same as job for current build?
+# - does it have marker REPLACE_BUILD_WITH_NEWER=YES?
+# If yes for all questions, then this item is removed from queue and it's parent
+# job get description that it's been cancelled by newer build and also gets grey
+# ball status (cancelled) instead of red (failed).
+# Red is set by jenkins internal logic. And this is not what we want here.
+#
+# Parameters:
+# - cancel - true/false - if cansel is set to false, entire logic is replaced and
+#   this builder becomes noop builder
 - builder:
     name: cancel-queued-child-runner
     builders:
