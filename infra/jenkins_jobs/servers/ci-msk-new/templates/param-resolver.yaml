@@ -35,10 +35,10 @@
         name: CUSTOM_CMAKE_PARAMETERS
 
     - string:
-        name: UT_SKIP
+        name: UT_ENABLED
 
     - string:
-        name: FT_SKIP
+        name: FT_ENABLED
     - string:
         name: FT_COMMIT
     - string:
@@ -49,7 +49,7 @@
         name: TEST_LIST
 
     - string:
-        name: RCT_SKIP
+        name: RCT_ENABLED
     - string:
         name: RCT_COMMIT
     - string:
@@ -233,13 +233,13 @@
         echo "TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING" >> RUNNER_ARGS.envvars
         echo "CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS" >> RUNNER_ARGS.envvars
 
-        if [ $UT_SKIP == SKIP ] ; then
+        if [ $UT_ENABLED == 'OFF' ] ; then
           echo "RUN_UNITTESTS=false" >> RUNNER_ARGS.envvars
         else
           echo "RUN_UNITTESTS=true" >> RUNNER_ARGS.envvars
         fi
 
-        if [ $FT_SKIP == SKIP ] ; then
+        if [ $FT_ENABLED == 'OFF' ] ; then
           echo "RUN_FUNCTESTS=false" >> RUNNER_ARGS.envvars
         else
           echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
@@ -247,7 +247,7 @@
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$FT_SKIP'
+        condition-string1: '$FT_ENABLED'
         condition-string2: 'RUN'
         steps:
         - conditional-step:
@@ -325,7 +325,7 @@
         echo "TEST_SELECT_EXPR=$TEST_SELECT_EXPR" >> RUNNER_ARGS.envvars
         echo "TEST_LIST=$TEST_LIST" >> RUNNER_ARGS.envvars
 
-        if [ $RCT_SKIP == SKIP ] ; then
+        if [ $RCT_ENABLED == 'OFF' ] ; then
           echo "RUN_REALCAMERATESTS=false" >> RUNNER_ARGS.envvars
         else
           echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
@@ -333,7 +333,7 @@
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$RCT_SKIP'
+        condition-string1: '$RCT_ENABLED'
         condition-string2: 'RUN'
         steps:
         - shell: echo

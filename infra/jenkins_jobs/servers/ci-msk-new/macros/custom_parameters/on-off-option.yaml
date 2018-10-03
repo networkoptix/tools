@@ -17,3 +17,5 @@
         value: ON,OFF
         default-value: '{default}'
         visible-items: 2
+        description: !j2: |
+          {{ description | default("") }}

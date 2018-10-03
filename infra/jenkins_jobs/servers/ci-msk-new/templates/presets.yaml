@@ -48,18 +48,18 @@
     - simple-separator-colored:
         header: 'Options for Unittests'
         color: lavender
-    - skip-option:
-        name: UT_SKIP
-        subject: UnitTests
+    - on-off-option:
+        name: UT_ENABLED
+        description: If ON, then UnitTests will run, otherwise skipped
         default: '{ut_skip}'
 
     - simple-separator-colored:
         header: 'Options for Functional tests'
         color: lavender
 
-    - skip-option:
-        name: FT_SKIP
-        subject: FuncTests
+    - on-off-option:
+        name: FT_ENABLED
+        subject: If ON, then FuncTests will run, otherwise skipped
         default: '{ft_skip}'
     - p_FT_COMMIT_w_OPTION:
         default: '{ft_commit_default}'
@@ -72,9 +72,9 @@
     - simple-separator-colored:
         header: 'Options for Real cameras tests'
         color: lavender
-    - skip-option:
-        name: RCT_SKIP
-        subject: RealCameraTests
+    - on-off-option:
+        name: RCT_ENABLED
+        subject: If ON, then RealCameraTests will run, otherwise skipped
         default: '{rct_skip}'
     - p_RCT_COMMIT_w_OPTION:
         default: '{rct_commit_default}'

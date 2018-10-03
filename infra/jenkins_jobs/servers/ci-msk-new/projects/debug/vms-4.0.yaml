@@ -116,7 +116,7 @@
             platforms: linux-x64,windows-x64,mac,bpi
             customizations: default
 
-    # RUNNER - root launcher of all builds
+    # 'ON'NER - root launcher of all builds
 
     - '{pipeline}.{version}.{project}.runner':
         default_platforms: linux-x64,linux-x86,windows-x86
@@ -163,11 +163,11 @@
         - custom:
             vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_option_default: ''
-            ut_skip: RUN
-            ft_skip: RUN
+            ut_skip: 'ON'
+            ft_skip: 'ON'
             ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
             ft_commit_option_default: ''
-            rct_skip: RUN
+            rct_skip: 'ON'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
             default_platforms: linux-x64
@@ -175,11 +175,11 @@
         - on-push-vms:
             vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_option_default: ''
-            ut_skip: RUN
-            ft_skip: SKIP
+            ut_skip: 'ON'
+            ft_skip: 'OFF'
             ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
             ft_commit_option_default: ''
-            rct_skip: SKIP
+            rct_skip: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
             default_platforms: linux-x64
@@ -187,11 +187,11 @@
         - on-push-ft:
             vms_build_default: 'VMS_EXIST_BUILD_STABLE_PUSH'  # VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
             vms_build_option_default: ''
-            ut_skip: SKIP
-            ft_skip: RUN
+            ut_skip: 'OFF'
+            ft_skip: 'ON'
             ft_commit_default: FT_STABLE_PUSH
             ft_commit_option_default: ''
-            rct_skip: SKIP
+            rct_skip: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH
             rct_commit_option_default: ''
             default_platforms: bpi
@@ -201,11 +201,11 @@
         - on-push-rct:
             vms_build_default: 'VMS_EXIST_BUILD_STABLE_PUSH'  # VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
             vms_build_option_default: ''
-            ut_skip: SKIP
-            ft_skip: SKIP
+            ut_skip: 'OFF'
+            ft_skip: 'OFF'
             ft_commit_default: FT_STABLE_PUSH
             ft_commit_option_default: ''
-            rct_skip: RUN
+            rct_skip: 'ON'
             rct_commit_default: RCT_STABLE_PUSH
             rct_commit_option_default: ''
             default_platforms: bpi
@@ -213,11 +213,11 @@
         - vms-nightly:
             vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_option_default: 'vms'
-            ut_skip: RUN
-            ft_skip: SKIP
+            ut_skip: 'ON'
+            ft_skip: 'OFF'
             ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
             ft_commit_option_default: ''
-            rct_skip: SKIP
+            rct_skip: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
             default_platforms: linux-x64
