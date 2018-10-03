@@ -1,3 +1,9 @@
+# This parameter is for switching something. It's wrapper over extended-choice.
+# So all options are passed as text in the end.
+# This behaviour is better than boolen parameter for some cases:
+# - text is not deformed during bypassing from build to build
+# - extra information in UI may be added for each option (in future)
+# It's also good for enabling/disabling cmake flags
 - parameter:
     name: on-off-option
     parameters:

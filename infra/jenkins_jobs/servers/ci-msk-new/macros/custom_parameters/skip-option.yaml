@@ -1,3 +1,7 @@
+# This parameter is for switching something. It's wrapper over extended-choice.
+# Compared to ON/OFF it's generally the same functionality, but should be used
+# for skipping some steps in runner/pipeline which are not required for
+# particular build.
 - parameter:
     name: skip-option
     parameters:
