@@ -1,0 +1,18 @@
+# Handy wrapper that combines and flattens conditional trigger + trigger build
+#
+# Parameters:
+# - shell - shell command to use as condition (exit 0 = true)
+# - project - project to trigger (may be omitted)
+# - parameters - predefined parameters for build
+# - block - wait for completeion or not (defaults to true)
+- builder:
+    name: conditionally-trigger(shell)
+    builders:
+    - conditional-step:
+        condition-kind: shell
+        condition-command: !j2: '{{ shell }}'
+        steps:
+        - trigger-builds:
+          - project: '{{ project | default("") }}'
+            predefined-parameters: '{{ parameters }}'
+            block: '{{ block | default(true) }}'

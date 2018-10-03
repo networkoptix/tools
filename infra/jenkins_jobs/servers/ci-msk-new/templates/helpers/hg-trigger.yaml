@@ -1,26 +1,25 @@
 - job-template:
-    # The main purpose of this job is emulate behaviour that's available in
-    # git, svn and other scm plugins.
-    # This job filters paths from changes in particular branch and
-    # then triggers crsp. preset.
-    # This job may be dropped if we move to git.
-
-    # Other important thing is that this job will not have noop builds.
-    # When something is happened in Repo, then something will be triggered.
-
     name: '__{pipeline}.helper.hg-trigger.{repo}.{branch}'
     id: hg-trigger
+    description: |
+      The main purpose of this job is emulate behaviour that's available in
+      git, svn and other scm plugins.
+      This job filters paths from changes in particular branch and
+      then triggers crsp. preset.
+      This job may be dropped if we move to git.
+
+      Other important thing is that this job will not have noop builds.
+      When something is happened in Repo, then something will be triggered.
+
     node: '{hg_local_cache_node_write}'
     workspace: !j2: '{{ hg_local_cache_node_workspace }}'
     concurrent: false
 
-    timer: ''  # defaults to no timer
-    poll_scm_timer: '* * * * *'  # defaults to every sec
 
     triggers:
-    - timed: "{timer}"
+    - timed: !j2: "{{ timer | default('') }}"
     - pollscm:
-        cron: "{poll_scm_timer}"
+        cron: !j2: "{{ poll_scm_timer | default('* * * * *') }}"
         ignore-post-commit-hooks: True
 
     properties:
@@ -52,10 +51,7 @@
     # TODO: Convert this to macro
 
     # get prev commit
-    - shell: |
-        #!bash
-        set -ex
-        mkdir -p old
+    - shell: mkdir -p old
     - copyartifact:
         project: '$JOB_NAME'
         filter: 'NX_VMS_COMMIT.envvar'
@@ -75,70 +71,39 @@
         properties-file: NX_VMS_COMMIT_OLD.envvar
 
     # get current commit
+    - shell: echo "NX_VMS_COMMIT=$MERCURIAL_REVISION_SHORT" > NX_VMS_COMMIT.envvar
     - inject:
-        properties-content: |
-          NX_VMS_COMMIT=$MERCURIAL_REVISION_SHORT
-    - shell: |
-        #!bash
-        set -ex
-        echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
-    - shell: |
-        #!bash
-        set -ex
-        cd nx_vms
-        VMS_VERSION="$(grep 'project(vms VERSION .*)' "CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+)+\)/\1/')"
-        echo echo "VMS_VERSION=$VMS_VERSION" > VMS_VERSION.envvar
+        properties-file: NX_VMS_COMMIT.envvar
 
-    # Trigger functests
-    - conditional-step:
-        condition-kind: shell
-        condition-command: !j2: |
-          #!bash
-          set -ex
-          cd nx_vms
-          hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
-        steps:
-        - trigger-builds:
-          - project: '{pipeline}.{version}.preset.on-push-rct'
-            predefined-parameters: |
-              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              RCT_COMMIT_OPTION=$NX_VMS_COMMIT
-            block: false
+    # TODO: This is not used yet
+    - parse-vms-version
 
-    # Trigger realcameratests
-    - conditional-step:
-        condition-kind: shell
-        condition-command: !j2: |
-          #!bash
-          set -ex
-          cd nx_vms
-          hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
-        steps:
-        - trigger-builds:
-          - project: '{pipeline}.{version}.preset.on-push-ft'
-            predefined-parameters: |
-              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              FT_COMMIT_OPTION=$NX_VMS_COMMIT
-            block: false
+    # Trigger Build
+    - conditionally-trigger(shell):
+      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" --exclude path:func_tests | grep -q 'files changed'
+      project: '{pipeline}.{version}.preset.on-push-rct'
+      parameters: |
+        REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+        BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        VMS_BUILD_OPTION=$NX_VMS_COMMIT
 
-    # Trigger VMS
-    - conditional-step:
-        condition-kind: shell
-        condition-command: !j2: |
-          #!bash
-          set -ex
-          cd nx_vms
-          hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" --exclude path:func_tests | grep -q 'files changed'
-        steps:
-        - trigger-builds:
-          - project: '{pipeline}.{version}.preset.on-push-vms'
-            predefined-parameters: |
-              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-              VMS_BUILD_OPTION=$NX_VMS_COMMIT
-            block: false
+    # Trigger FT
+    - conditionally-trigger(shell):
+      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
+      project: '{pipeline}.{version}.preset.on-push-ft'
+      parameters: |
+        REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+        BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        FT_COMMIT_OPTION=$NX_VMS_COMMIT
+
+    # Trigger RCT
+    - conditionally-trigger(shell):
+      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
+      project: '{pipeline}.{version}.preset.on-push-rct'
+      parameters: |
+        REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+        BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+        RCT_COMMIT_OPTION=$NX_VMS_COMMIT
 
     publishers:
     - archive:
