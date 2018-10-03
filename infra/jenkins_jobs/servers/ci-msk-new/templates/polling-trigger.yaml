@@ -138,19 +138,8 @@
         optional: true
 
     # get new BUILD_IDENTITY
-    - trigger-builds:
-      - project: '{pipeline}.build_number.generator'
-        block: true
-        predefined-parameters: |
-          REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-          BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-    - copyartifact:
-        project: '{pipeline}.build_number.generator'
-        filter: 'BUILD_IDENTITY.envvar'
-        which-build: last-completed
-        parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-    - inject:
-        properties-file: 'BUILD_IDENTITY.envvar'
+    - request-new-build-identity:
+        pipeline: '{pipeline}'
 
     # Next, decide whether we should start runner ...
     # Jenkins does not support excluded-regions for hg and bazaar

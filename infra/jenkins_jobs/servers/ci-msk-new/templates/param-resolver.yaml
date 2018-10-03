@@ -43,17 +43,8 @@
         condition-string2: VMS_NEW_BUILD_BY_COMMIT
         steps:
         - shell: test $VMS_BUILD_OPTION != ''
-        - trigger-builds:
-          - project: '{pipeline}.build_number.generator'
-            block: true
-            predefined-parameters: |
-              REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-              BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-        - copyartifact:
-            project: '{pipeline}.build_number.generator'
-            filter: 'BUILD_IDENTITY.envvar'
-            which-build: last-completed
-            parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+        - request-new-build-identity:
+            pipeline: '{pipeline}'
         - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
             branch: $BRANCH
