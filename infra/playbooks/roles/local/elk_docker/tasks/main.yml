@@ -1,0 +1,93 @@
+---
+- name: "Add elk group {{ elk_group }}"
+  group:
+    name: "{{ elk_group }}"
+    state: present
+
+- name: "Add elk user {{ elk_user }}"
+  user:
+    name: "{{ elk_user }}"
+    group: "{{ elk_group }}"
+    home: "{{ elk_home }}"
+    createhome: yes
+    shell: /bin/bash
+
+- name: Add elk user to 'docker' group
+  user:
+    name: '{{ item }}'
+    groups: 'docker'
+    append: True
+  with_items:
+  - "{{ elk_user }}"
+
+- name: "Create .ssh in {{ elk_user }} home dir"
+  become: true
+  become_user: "{{ elk_user }}"
+  file:
+    path: "{{ elk_home }}/.ssh/"
+    state: directory
+    owner: "{{ elk_user }}"
+    group: "{{ elk_group }}"
+    mode: "u+rwx,g-rwx,o-rwx"
+
+- name: Configure pub keys
+  become: true
+  become_user: "{{ elk_user }}"
+  lineinfile:
+    path: "{{ elk_home }}/.ssh/authorized_keys"
+    line: "{{ item }}"
+    create: true
+  with_items: "{{ elk_authorized_keys }}"
+
+- name: Create some required directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ elk_user }}"
+    group: "{{ elk_group }}"
+    mode: "777"
+  with_items:
+  - "{{ elk_home }}/db"
+  - "{{ elk_home }}/log"
+
+- name: Clone elastic/stack-docker
+  become: true
+  become_user: "{{ elk_user }}"
+  git:
+    repo: ssh://git@github.com:sovetov/stack-docker.git  # FIXME: Locate in NX network.
+    dest: '{{ ekl_home }}/src'
+    depth: 1
+
+- name: Docker build
+  become: true
+  become_user: "{{ elk_user }}"
+  command: '{{ item }}'
+  args:
+    chdir: "{{ elk_home }}/src/"
+  with_items:
+    - /usr/local/bin/docker-compose -f docker-compose.setup.yml build
+    - /usr/local/bin/docker-compose -f docker-compose.yml build
+
+- name: Create SystemD Unit
+  include_role:
+    name: tumf.systemd-service
+  vars:
+    systemd_service_name: '{{ elk_systemd_service }}'
+    systemd_service_Service_User: "{{ elk_user }}"
+    systemd_service_Service_WorkingDirectory: "{{ elk_home }}"
+    systemd_service_Unit_Description: NX  Deployment Console
+    systemd_service_Unit_Requires: docker.service
+    systemd_service_Unit_After: docker.service
+    systemd_service_Service_ExecStartPre:
+    - /usr/local/bin/docker-compose -f {{ elk_home }}/src/docker-compose.yml down -v
+    - /usr/local/bin/docker-compose -f {{ elk_home }}/src/docker-compose.yml rm -v
+    systemd_service_Service_ExecStart: >-
+      /usr/local/bin/docker-compose -f {{ elk_home }}/src/docker-compose.yml up
+    systemd_service_Service_ExecStop: >-
+      /usr/local/bin/docker-compose -f {{ elk_home }}/src/docker-compose.yml down -v
+  notify:
+  - Restart elk
+
+- service:
+    name: '{{ elk_systemd_service }}'
+    state: started

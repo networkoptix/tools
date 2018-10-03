@@ -1,0 +1,47 @@
+libvirt_host: gamma
+libvirt_guest__state: running
+
+libvirt_guest__type: linux
+libvirt_guest__extra_system_image_size_gb: "10"
+libvirt_guest__memory: "{{ 4 * 1024 * 1024 }}"  # 4 GiB.
+libvirt_guest__cpus: 2
+
+networks:
+- interface_type: bridge
+  source_bridge: br1
+  model_type: virtio
+  address_slot: 3
+  config:
+    name:             ens3
+    type:             static
+    # 10.0.0.101 - 10.0.0.150 /22
+    options:
+      address:        "{{ ansible_ssh_host }}"
+      netmask:        "{{ office_net_netmask }}"
+      gateway:        "{{ office_net_gateway }}"
+      dns-search:     "{{ office_net_dns_search }}"
+      dns-nameservers: "{{ office_net_dns_nameservers }}"
+- interface_type: bridge
+  source_bridge: br2
+  model_type: virtio
+  address_slot: 9
+  config:
+    name:             ens9
+    type:             static
+    # 192.168.13.101-192.168.13.150 /24
+    # FIXME: get rid of hardcode
+    options:
+      address:        "192.168.13.122"
+      netmask:        "255.255.255.0"
+
+administrators:
+- name: iremizov
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  groups: [users, sudo]
+  ssh_keys:
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5paXsANnMZKKmrlAeBWRsos97U1+x8tgyG4TDkyj0bRswyLl4SVRILZ+no2nA9GlybM89I0nMx/VTvYf0oUw0I0RQ1KlynNoYjcfALM+w47cw/Ec2osGiB1NoJ1iKsqJJbRTbZfUSbPmcktwl3S1qJqlRtJurx3C8k7MYmGdzcC6dokbYuvLMEKeoM0z41feMaCPE0DxAF9SdgpN1qkciGzUAM10baV1JMWKFVjaB+s3BNakudFJQX8wZJj5d82VfVZK5/Txirs786wuEgy4hMXwApz8XdoOnWDo+jP5nr87vMnYXOH7/nWcDYr4udNFvawVby0ZOk7mddDPlmNSsD72ht5hxOFCLdzdlaGFq2wn0ksqFkKAzmCNOLneP3S7cK+15hsE32x6LrE4Wd9RK4PkWDKn8RMYop5iq6yOddYhC0bhwls1KlsR6Qg56C8rXLhA4CxFTBuAoEm8kSJN6mUHCFgSpv0o+ZQi+XBzs5ya3nFZdScscaO8lzFJO/wHkLN03cSAYyjbO9Z2j3z9SYp6aKpcBkctGsj4K5m01+zPqPAiHEwCUIHDZiXZ+DBhtOU3wCqHhrEhGgekY2QK3tzaGuXrl0YArdPFqvh+syZ0yCzmyqcyw9EXgHycKvUbD4K+Pjg2TtUfSWAhYvuKD3tFSy1x8Kbq3TqycRPij2Q== iremizov@networkoptix.com"
+- name: gsovetov
+  sudo: ALL=(ALL) NOPASSWD:ALL
+  groups: [users, sudo]
+  ssh_keys:
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMVF2i2/HoJh0UVQBjuAE6eat/yGscSlB7xV1Dfk5dVEEqKDDYtdllPA1ZTR4ujg93Wg6LLvlJNBlqrEVGhA6hLUImdUrCys19ideVlv6JcKIEaJkU47Hqx30BDKb/K8zk0rGxHKbidcZFtqfhng0ILM1rXVVW1fJWvW9y+Lmc9W3l5ZxEh9+q2bLD2vTFRfeCn34yAeddnT9R7Cki/fzp1I3NzVG9/aYjUYYxVQY5iQ40l/yOa8cv/sWu/rha55ibs+Q2igaRR0IeijUNQsbkeww5Sdld0G9zmwCN8vCgZGYoYCUoaNPhwzTvEKI8g9n/DDbPb1KfgyNkBFdE/5Ex"
