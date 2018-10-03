@@ -3,6 +3,9 @@ import sys
 import time
 from pony.orm import sql_debug, OperationalError
 from flask import Flask
+from flask_bootstrap import Bootstrap
+from flask_wtf.csrf import CSRFProtect
+
 from .. import models
 
 app = Flask(__name__)
@@ -10,6 +13,10 @@ app = Flask(__name__)
 app.config.from_object('junk_shop.webapp.default_config')
 if 'JUNK_SHOP_SETTINGS' in os.environ:
     app.config.from_envvar('JUNK_SHOP_SETTINGS')
+
+CSRFProtect(app)
+Bootstrap(app)
+
 
 from . import commands
 from ..filters import JinjaFilters
@@ -19,6 +26,7 @@ from . import project_views
 from . import build_views
 from . import run_views
 from . import metrics_views
+from . import fail_stats_views
 
 
 filters_config = JinjaFilters.Config(
@@ -38,6 +46,7 @@ def retry_on_db_error(fn, *args, **kw):
             print >>sys.stderr, 'Error connecting to database:', x
             time.sleep(1)
 
+
 def init():
     pg_password = os.environ['PGPASSWORD']
     sql_debug(app.config['SQL_DEBUG'])
@@ -47,5 +56,6 @@ def init():
                       password=pg_password,
                       port=app.config['DB_PORT'])
     retry_on_db_error(models.db.generate_mapping, create_tables=True)
+
 
 init()
