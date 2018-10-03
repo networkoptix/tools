@@ -1,5 +1,10 @@
-# macro to validate that params are set correctly
-# not empty string and not variable name
+# Macro to validate that params are set correctly:
+# - not empty string
+# - not variable name
+# - not unfilled jjb template
+#
+# Parameters:
+# - params - array of varnames to be checked
 - builder:
     name: validate-required-params
     builders:
