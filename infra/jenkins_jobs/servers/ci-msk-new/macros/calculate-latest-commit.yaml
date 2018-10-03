@@ -1,3 +1,16 @@
+# Builder for calculating latest commit for given set of two identities and
+# commit files.
+#
+# Prameters:
+# - identity_file_1, identity_file_2 — files with 2 build Identities from the
+#   same identities pool (envvar file format, varnames does not matter)
+# - commit_file_1, commit_file_2 - files with 2 commits crsp to identities files
+#   (envvar file format, varnames does not matter)
+# - output_file — file where resulting latest commit will be placed
+# - identity_latest_varname - name of variable under which latest identity will
+#   be placed, optional, if not present, identity will not be written
+# - commit_latest_varname - name of variable under which latest commit will
+#   be placed, optional, if not present, commit will not be written
 - builder:
     name: calculate-latest-commit
     builders:
