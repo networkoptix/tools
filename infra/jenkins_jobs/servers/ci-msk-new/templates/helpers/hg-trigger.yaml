@@ -80,7 +80,7 @@
 
     # Trigger Build
     - conditionally-trigger(shell):
-      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" --exclude path:func_tests | grep -q 'files changed'
+      shell: !j2: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" --exclude path:func_tests | grep -q 'files changed'
       project: '{pipeline}.{version}.preset.on-push-rct'
       parameters: |
         REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -89,7 +89,7 @@
 
     # Trigger FT
     - conditionally-trigger(shell):
-      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
+      shell: !j2: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
       project: '{pipeline}.{version}.preset.on-push-ft'
       parameters: |
         REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -98,7 +98,7 @@
 
     # Trigger RCT
     - conditionally-trigger(shell):
-      shell: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
+      shell: !j2: cd nx_vms && hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
       project: '{pipeline}.{version}.preset.on-push-rct'
       parameters: |
         REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
