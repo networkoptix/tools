@@ -145,9 +145,9 @@ class Monitor:
                 return False
             return not('issue' in r or r.get('crash_id') == FAILED_CRASH_ID)
         
+        # No force cleanup because it's better to catch warning and increase storage.
         self._cleanup_cache(
-            directory, self._options.reports_size_limit, is_useful,
-            is_forced_on_failure=False)  #< It's better to see warning and enhance storage.
+            directory, self._options.reports_size_limit, is_useful, is_forced_on_failure=False)
 
         return len(new_reports)
 
@@ -234,7 +234,7 @@ class Monitor:
         
     @classmethod
     def _cleanup_cache(cls, directory: utils.Directory, size_limit: utils.Size, 
-                       is_impotant: callable, is_forced_on_failure: bool = True):
+                       is_important: callable, is_forced_on_failure: bool = True):
         def directory_message():
             return 'size {} is {} limit {} in {}'.format(
                 size, 'within' if size < size_limit else 'over', size_limit, directory)
@@ -246,7 +246,7 @@ class Monitor:
         logger.info('Cleanup is started for ' + directory_message())
         removed_count = 0
         for d in directory.content():
-            if not is_impotant(d):
+            if not is_important(d):
                 removed_count += 1
                 d.remove()
 

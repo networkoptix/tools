@@ -403,11 +403,14 @@ class Directory:
 
         
 class MultiDirectory:
-    """Emulates a single directory interface for multiple directories.
+    """Emulates a single directory interface for multiple directories. Useful when there is
+    several directories for single type of objects.
+    The first directory is considered to by primary so :path and :name are bound to it.
     """
     def __init__(self, *directories):
-        assert directories
         self._directories = [d if isinstance(d, Directory) else Directory(d) for d in directories]
+        if not self._directories:
+            raise ValueError('At least 1 directory should be provided')
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, ', '.join(
