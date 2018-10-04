@@ -1,3 +1,88 @@
+# Local macros
+- builder:
+    name: __build_make_new_vms_build
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: $VMS_BUILD
+        condition-string2: '{when_vms_build_value}'
+        steps:
+        - shell: test $VMS_BUILD_OPTION != ''
+        - request-new-build-identity:
+            pipeline: '{pipeline}'
+        - freeze-nx-vms-commit(remote):
+            pipeline: '{pipeline}'
+            branch: $BRANCH
+            commit-to-freeze: '{vms_commit}'
+            commit-varname: NX_VMS_COMMIT
+        - shell: |
+            #!bash
+            cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
+            cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
+            echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=true >> RUNNER_ARGS.envvars
+
+
+- builder:
+    name: __build_get_vms_build_and_commit_from_existing_build
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$VMS_BUILD'
+        condition-string2: '{when_vms_build_value}'
+        steps:
+        - copyartifact:
+            # runner is shared between presets, so this is the place where any
+            # build may be found
+            project: '{project}'
+            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
+            which-build: last-successful # or last-completed ?
+            parameter-filters: '{param_filter}'
+            optional: false
+        - shell: |
+            #!bash
+            cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
+            cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
+            echo BUILD_WEBADMIN=false  >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+
+- builder:
+    name: __build_get_vms_build_latest_by_two_builds
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$VMS_BUILD'
+        condition-string2: '{when_vms_build_value}'
+        steps:
+        - shell: mkdir -p "{job_1}" "{job_2}"
+        - copyartifact:
+            project: '{job_1}'
+            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
+            which-build: last-successful
+            optional: true
+            target: '{job_1}'
+        - copyartifact:
+            project: '{job_2}'
+            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
+            which-build: last-successful
+            optional: true
+            target: "{job_2}"
+        - calculate-latest-commit:
+            identity_file_1: './{job_1}/BUILD_IDENTITY.envvar'
+            identity_file_2: './{job_2}/BUILD_IDENTITY.envvar'
+            commit_file_1:   './{job_1}/NX_VMS_COMMIT.envvar'
+            commit_file_2:   './{job_2}/NX_VMS_COMMIT.envvar'
+            output_file:     'RUNNER_ARGS.envvars'
+            identity_latest_varname: BUILD_IDENTITY
+            commit_latest_varname: NX_VMS_COMMIT
+        - shell: rm -rf "{job_1}" "{job_2}"
+        - shell: |
+            #!bash
+            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+
+# ------
+
 - job-template:
     name: '__{pipeline}.{version}.param-resolver'
     id: param-resolver
@@ -34,135 +119,51 @@
     - custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
 
-    # working with build identity & commit
+    # === BUILD ===
 
-    # === NEW BUILD ===
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: $VMS_BUILD
-        condition-string2: VMS_NEW_BUILD_BY_COMMIT
-        steps:
-        - shell: test $VMS_BUILD_OPTION != ''
-        - request-new-build-identity:
-            pipeline: '{pipeline}'
-        - freeze-nx-vms-commit(remote):
-            pipeline: '{pipeline}'
-            branch: $BRANCH
-            commit-to-freeze: $VMS_BUILD_OPTION
-            commit-varname: NX_VMS_COMMIT
-        - shell: |
-            #!bash
-            cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
-            echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=true >> RUNNER_ARGS.envvars
+    # resolve values:
+    # - BUILD_IDENTITY
+    # - NX_VMS_COMMIT
+    # - BUILD_WEBADMIN
+    # - BUILD_INSTALLER
+    # (based on VMS_BUILD and VMS_BUILD_OPTION, see macros above)
 
-    # === EXISTING BUILDS ===
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: $VMS_BUILD
-        condition-string2: VMS_EXIST_BUILD_BY_COMMIT
-        steps:
-        - copyartifact:
-            # runner is shared between presets, so this is the place where any
-            # build may be found
-            project: '{pipeline}.{version}.vms.runner'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-successful # or last-completed ?
-            parameter-filters: NX_VMS_COMMIT=$VMS_BUILD_OPTION
-            optional: false
-        - shell: |
-            #!bash
-            echo "NX_VMS_COMMIT=$VMS_BUILD_OPTION" >> RUNNER_ARGS.envvars
-            cat BUILD_IDENTITY.envvar >> BUILD_IDENTITY.envvar
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+    - __build_make_new_vms_build:
+        when_vms_build_value: VMS_NEW_BUILD_BY_COMMIT
+        vms_commit: $VMS_BUILD_OPTION
+        pipeline: '{pipeline}'
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_EXIST_BUILD_BY_IDENTITY'
-        steps:
-        - copyartifact:
-            # runner is shared between presets, so this is the place where any
-            # build may be found
-            project: '{pipeline}.{version}.vms.runner'
-            filter: 'NX_VMS_COMMIT.envvar'
-            which-build: last-successful # or last-completed ?
-            parameter-filters: BUILD_IDENTITY=$VMS_BUILD_OPTION
-            optional: false
-        - shell: |
-            #!bash
-            echo "BUILD_IDENTITY=$VMS_BUILD_OPTION" >> RUNNER_ARGS.envvars
-            cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+    - __build_get_vms_build_and_commit_from_existing_build:
+        when_vms_build_value: VMS_EXIST_BUILD_BY_COMMIT
+        project: '{pipeline}.{version}.vms.runner'
+        param_filter: NX_VMS_COMMIT=$VMS_BUILD_OPTION
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_EXIST_BUILD_STABLE_PUSH'
-        steps:
-        - copyartifact:
-            project: '{pipeline}.{version}.preset.on-push-vms'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: false  #! build must exist
-        - shell: |
-            #!bash
-            cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
-            cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+    - __build_get_vms_build_and_commit_from_existing_build:
+        when_vms_build_value: VMS_EXIST_BUILD_BY_IDENTITY
+        project: '{pipeline}.{version}.vms.runner'
+        param_filter: BUILD_IDENTITY=$VMS_BUILD_OPTION
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_EXIST_BUILD_STABLE_NIGHTLY'
-        steps:
-        - copyartifact:
-            project: '{pipeline}.{version}.preset.nightly-vms'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: false
-        - shell: |
-            #!bash
-            cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
-            cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+    - __build_get_vms_build_and_commit_from_existing_build:
+        when_vms_build_value: VMS_EXIST_BUILD_STABLE_PUSH
+        project: '{pipeline}.{version}.preset.on-push-vms'
+        param_filter: ''
 
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: 'VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY'
-        steps:
-        - shell: mkdir -p on-push nightly
-        - copyartifact:
-            project: '{pipeline}.{version}.preset.on-push-vms'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: true
-            target: on-push
-        - copyartifact:
-            project: '{pipeline}.{version}.preset.nightly-vms'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: true
-            target: nightly
-        - calculate-latest-commit:
-            identity_file_1: './on-push/BUILD_IDENTITY.envvar'
-            identity_file_2: './nightly/BUILD_IDENTITY.envvar'
-            commit_file_1:   './on-push/NX_VMS_COMMIT.envvar'
-            commit_file_2:   './nightly/NX_VMS_COMMIT.envvar'
-            output_file:     'RUNNER_ARGS.envvars'
-            identity_latest_varname: BUILD_IDENTITY
-            commit_latest_varname: NX_VMS_COMMIT
-        - shell: rm -rf on-push nightly
-        - shell: |
-            #!bash
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+    - __build_get_vms_build_and_commit_from_existing_build:
+        when_vms_build_value: VMS_EXIST_BUILD_STABLE_NIGHTLY
+        project: '{pipeline}.{version}.preset.nightly-vms'
+        param_filter: ''
+
+    - __build_get_vms_build_latest_by_two_builds:
+        when_vms_build_value: VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+        job_1: '{pipeline}.{version}.preset.on-push-vms'
+        job_2: '{pipeline}.{version}.preset.nightly-vms'
+
+    # resolve/map values:
+    # - PLATFORMS
+    # - CUSTOMIZATIONS
+    # - HARDWARE_SIGNING
+    # - TRUSTED_TIMESTAMPING
+    # - CUSTOM_CMAKE_PARAMETERS
 
     - shell: |
         #!bash
@@ -172,11 +173,27 @@
         echo "TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING" >> RUNNER_ARGS.envvars
         echo "CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS" >> RUNNER_ARGS.envvars
 
+    # === UNITTESTS ===
+
+    # resolve/map values:
+    # - RUN_UNITTESTS
+
+    - shell: |
+        #!bash
         if [ $UT_ENABLED == 'OFF' ] ; then
           echo "RUN_UNITTESTS=false" >> RUNNER_ARGS.envvars
         else
           echo "RUN_UNITTESTS=true" >> RUNNER_ARGS.envvars
         fi
+
+    # === FUNCTESTS ===
+
+    # resolve/map values:
+    # - RUN_FUNCTESTS
+    # - NX_FUNCTESTS_COMMIT
+    # - TEST_SELECT_EXPR
+    # - TEST_LIST
+    # (based on FT_ENABLED, FT_COMMIT and FT_COMMIT_OPTION)
 
     - conditional-step:
         condition-kind: strings-match
@@ -197,7 +214,6 @@
         condition-string2: 'ON'
         steps:
         - shell: echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
-
         - conditional-step:
             condition-kind: strings-match
             condition-string1: '$FT_COMMIT'
@@ -206,7 +222,7 @@
             - freeze-nx-vms-commit(remote):  # creates NX_FUNCTESTS_COMMIT.envvar
                 pipeline: '{pipeline}'
                 branch: $BRANCH
-                commit-to-freeze: $BRANCH
+                commit-to-freeze: $FT_COMMIT_OPTION
                 commit-varname: NX_FUNCTESTS_COMMIT
 
         - conditional-step:

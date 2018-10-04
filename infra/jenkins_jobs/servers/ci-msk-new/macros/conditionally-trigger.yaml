@@ -13,9 +13,9 @@
         condition-command: !j2: '{{ shell }}'
         steps:
         - trigger-builds:
-          - project: '{{ project | default("") }}'
-            predefined-parameters: '{{ parameters }}'
-            block: '{{ block | default(true) }}'
+          - project: !j2: '{{ project | default("") }}'
+            predefined-parameters:  !j2: '{{ parameters | default("") }}'
+            block:  !j2: '{{ block | default(true) }}'
             block-thresholds:
               failure-threshold: FAILURE
 
@@ -30,8 +30,8 @@
           condition-command:  !j2: '{{ shell }}'
         steps:
         - trigger-builds:
-          - project: '{{ project | default("") }}'
-            predefined-parameters: '{{ parameters }}'
-            block: '{{ block | default(true) }}'
+          - project: !j2: '{{ project | default("") }}'
+            predefined-parameters:  !j2: '{{ parameters | default("") }}'
+            block:  !j2: '{{ block | default(true) }}'
             block-thresholds:
               failure-threshold: FAILURE

@@ -8,9 +8,10 @@
     - shell: !j2: |
         #!bash
         set -ex
-        cd "{{ nx_vms_repo_path | default("nx_vms") }}"
-        # this is copy-pasted from depcon or something like that
-        VMS_VERSION="$(grep 'project(vms VERSION .*)' "CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+)+\)/\1/')"
+        pushd "{{ nx_vms_repo_path | default("nx_vms") }}"
+          # this is copy-pasted from depcon or something like that
+          VMS_VERSION="$(grep 'project(vms VERSION .*)' "CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+)+\)/\1/')"
+        popd
         echo "VMS_VERSION=$VMS_VERSION" > VMS_VERSION.envvar
     - inject:
         properties-file: VMS_VERSION.envvar
