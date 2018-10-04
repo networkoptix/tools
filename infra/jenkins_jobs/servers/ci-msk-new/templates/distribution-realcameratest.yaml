@@ -85,6 +85,9 @@
 
     builders:
     - set-hg-marker-successful-checkout
+
+    - reboot-switch
+
     - inject:
         properties-content: |
           JUNKSHOP_PROJECT_NAME={junkshop_project_name}
@@ -104,7 +107,6 @@
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
-
 
     - kill-hanged-functests
 
