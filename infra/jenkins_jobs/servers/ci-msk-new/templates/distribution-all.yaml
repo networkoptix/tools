@@ -90,22 +90,22 @@
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
-# Unittests are disabled because masive flood in network
-#     - multijob:
-#         name: Run tests (tests are optional, only existing jobs are built)
-#         condition: COMPLETED # allow unstable
-#         projects:
-#         - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest'
-#           kill-phase-on: NEVER
-#           enable-condition: >-
-#             ("$RUN_UNITTESTS").toBoolean()
-#           predefined-parameters: |
-#             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
-#             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-#             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
-#             CLEAN_CLONE=$CLEAN_CLONE
-#             CLEAN_BUILD=$CLEAN_BUILD
-#             BUILD_IDENTITY=$BUILD_IDENTITY
-#             BRANCH=$BRANCH
-#             NX_VMS_COMMIT=$NX_VMS_COMMIT
-#             RUNNER_URL=$RUNNER_URL
+
+    - multijob:
+        name: Run tests (tests are optional, only existing jobs are built)
+        condition: COMPLETED # allow unstable
+        projects:
+        - name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.unittest'
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$RUN_UNITTESTS").toBoolean()
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            CLEAN_WORKSPACE=$CLEAN_WORKSPACE
+            CLEAN_CLONE=$CLEAN_CLONE
+            CLEAN_BUILD=$CLEAN_BUILD
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            RUNNER_URL=$RUNNER_URL
