@@ -16,7 +16,7 @@
     builders:
     - shell: !j2: |
         #!python
-        impor os.path
+        import os.path
         identity_1 = 0
         identity_2 = 0
         if os.path.isfile('{{ identity_file_1 }}'):
