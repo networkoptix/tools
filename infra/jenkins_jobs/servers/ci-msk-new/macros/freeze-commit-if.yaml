@@ -1,6 +1,6 @@
 # Conditionally freeze commit
 #
-# If ginven env "var" equals to "val", then commit "commit_to_freeze" will be
+# If given env "var" equals to "val", then commit "commit_to_freeze" will be
 # captured into variable passed to "as" param.
 #
 # Parameters:
