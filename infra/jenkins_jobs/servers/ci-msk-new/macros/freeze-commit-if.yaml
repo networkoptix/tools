@@ -1,3 +1,14 @@
+# Conditionally freeze commit
+#
+# If ginven env "var" equals to "val", then commit "commit_to_freeze" will be
+# captured into variable passed to "as" param.
+#
+# Parameters:
+# - var
+# - val
+# - pipeline
+# - commit_to_freeze
+# - as
 - builder:
     name: freeze-commit-if(var=val)
     builders:
@@ -6,7 +17,7 @@
         condition-string1: '${var}'
         condition-string2: '{val}'
         steps:
-        - freeze-nx-vms-commit(remote):  # creates NX_FUNCTESTS_COMMIT.envvar
+        - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
             branch: $BRANCH
             commit-to-freeze: '{commit_to_freeze}'
