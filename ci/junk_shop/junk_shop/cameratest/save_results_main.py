@@ -182,7 +182,7 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
 
 @db_session
 def save_root_run_info(repository, root_run, passed, started_at, artifacts):
-    # type: (DbCaptureRepository, models.Run, bool, timedelta, dict) -> None
+    # type: (DbCaptureRepository, models.Run, bool, datetime, dict) -> None
     root_run = models.Run[root_run.id]
     root_run.outcome = status2outcome(passed)
     root_run.started_at = started_at
@@ -200,7 +200,7 @@ def save_root_run_info(repository, root_run, passed, started_at, artifacts):
 
 
 def save_run_artifacts(repository, run, messages, errors, exceptions):
-    # type: (DbCaptureRepository, models.Run, timedelta, bool, list, list, list) -> None
+    # type: (DbCaptureRepository, models.Run, list, list, list) -> None
     repository.add_artifact(
         run,
         MESSAGES_ARTIFACT_NAME,
@@ -269,7 +269,7 @@ def parse_all_cameras_file(all_cameras_file):
 
 
 def parse_and_save_results_to_db(repository, root_run, results_file, cameras_info):
-    # type: (DbCaptureRepository, models.Run, Path, dict) -> (bool, timedelta)
+    # type: (DbCaptureRepository, models.Run, Path, dict) -> (bool, Optional[datetime])
     passed = True
     started_at = None
 
