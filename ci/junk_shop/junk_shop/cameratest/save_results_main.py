@@ -22,7 +22,7 @@ Sample:
 
 import logging
 import argparse
-import yaml
+import oyaml as yaml
 import json
 import sys
 from pony.orm import db_session
@@ -46,8 +46,8 @@ TEST_RESULTS_FILE_NAME = 'test_results.yaml'
 ALL_CAMERAS_FILENAME = 'all_cameras.yaml'
 
 
-def condition_to_passed(condition):
-    return condition == 'success'
+def status_to_passed(status):
+    return status == 'success'
 
 
 def str_to_timedelta(duration):
@@ -61,8 +61,16 @@ def str_to_timedelta(duration):
         microseconds=t.microsecond)
 
 
+def str_to_datetime(datetime_str):
+    if not datetime_str:
+        return None
+    return datetime.strptime(
+        datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+
+
 class InvalidFieldType(Exception):
     pass
+
 
 def string_list_from_field(data, field_name):
     v = data.get(field_name)
@@ -88,21 +96,26 @@ def file_ext_to_artifact_type(file_ext, artifact_type_factory):
 class StageInfo(object):
 
     @classmethod
-    def from_dict(cls, data):
+    def from_stage_item(cls, stage_item):
+        name, data = stage_item
         errors = string_list_from_field(data, 'errors')
-        if data['condition'] == 'halt':
+        if data['status'] == 'halt':
             errors.append('Stage is aborted')
         return cls(
-            name=data['_'],
+            name=name,
+            start_time=str_to_datetime(data['start_time']),
             duration=str_to_timedelta(data.get('duration')),
-            passed=condition_to_passed(data['condition']),
+            passed=status_to_passed(data['status']),
             messages=string_list_from_field(data, 'message'),
-            errors = errors,
-            exceptions = string_list_from_field(data, 'exception')
+            errors=errors,
+            exceptions=string_list_from_field(data, 'exception')
         )
 
-    def __init__(self, name, duration, passed, messages, errors, exceptions):
+    def __init__(
+            self, name, start_time, duration,
+            passed, messages, errors, exceptions):
         self.name = name
+        self.start_time = start_time
         self.duration = duration
         self.passed = passed
         self.errors = errors
@@ -117,19 +130,21 @@ class CameraTestStorage(object):
         camera_id, data = camera_item
         return cls(
             camera_id=camera_id,
+            start_time=str_to_datetime(data.get('start_time')),
             duration=str_to_timedelta(data.get('duration')),
-            passed=condition_to_passed(data['condition']),
+            passed=status_to_passed(data['status']),
             messages=string_list_from_field(data, 'message'),
             errors=string_list_from_field(data, 'errors'),
             exceptions=string_list_from_field(data, 'exception'),
-            stages=map(StageInfo.from_dict, data.get('stages', []))
+            stages=map(StageInfo.from_stage_item, data.get('stages', {}).items())
         )
 
     def __init__(
-            self, camera_id, duration, passed,
+            self, camera_id, start_time, duration, passed,
             messages, errors, exceptions, stages):
         self.camera_id = camera_id
         self.duration = duration
+        self.start_time = start_time
         self.passed = passed
         self.messages = messages
         self.errors = errors
@@ -150,6 +165,7 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
     run = repository.produce_test_run(
         parent_run, test_path_list, is_test=False)
     run.duration = camera_tests.duration
+    run.started_at = camera_tests.start_time
     run.outcome = status2outcome(camera_tests.passed)
     save_run_artifacts(
         repository, run, camera_tests.messages,
@@ -165,10 +181,11 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
 
 
 @db_session
-def save_root_run_info(repository, root_run, passed, artifacts):
-    # type: (DbCaptureRepository, models.Run, bool, dict) -> None
+def save_root_run_info(repository, root_run, passed, started_at, artifacts):
+    # type: (DbCaptureRepository, models.Run, bool, timedelta, dict) -> None
     root_run = models.Run[root_run.id]
     root_run.outcome = status2outcome(passed)
+    root_run.started_at = started_at
     for artifact_name, artifact_file in artifacts.items():
         if artifact_name not in [TEST_RESULTS_FILE_NAME, ALL_CAMERAS_FILENAME]:
             _logger.debug("Save root artifact '%s'...", artifact_name)
@@ -220,6 +237,7 @@ def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, a
             stage_run = repository.produce_test_run(
                 camera_run, test_path_list + [stage.name], is_test=True)
             stage_run.duration = stage.duration
+            stage_run.started_at = stage.start_time
             stage_run.outcome = status2outcome(stage.passed)
             save_run_artifacts(
                 repository, stage_run, stage.messages, stage.errors, stage.exceptions)
@@ -241,8 +259,8 @@ def collect_test_artifacts(work_dir):
 
 
 def parse_all_cameras_file(all_cameras_file):
-    # type: (Path) -> dict
-    if not all_cameras_file:
+    # type: (Optional[Path]) -> dict
+    if all_cameras_file is None:
         _logger.warning("Camera information file '%s' not found.", ALL_CAMERAS_FILENAME)
         return dict()
     else:
@@ -253,6 +271,7 @@ def parse_all_cameras_file(all_cameras_file):
 def parse_and_save_results_to_db(repository, root_run, results_file, cameras_info):
     # type: (DbCaptureRepository, models.Run, Path, dict) -> (bool, timedelta)
     passed = True
+    started_at = None
 
     _logger.info("'%s' processing...", str(results_file))
     with results_file.open() as f:
@@ -264,9 +283,14 @@ def parse_and_save_results_to_db(repository, root_run, results_file, cameras_inf
                     repository, root_run, [root_run.name],
                     camera_tests, cameras_info):
                 passed = False
+            if camera_tests.start_time:
+                if started_at:
+                    started_at = min(started_at, camera_tests.start_time)
+                else:
+                    started_at = camera_tests.start_time
     _logger.info("'%s' processing done.", str(results_file))
 
-    return passed
+    return passed, started_at
 
 
 def main():
@@ -308,9 +332,9 @@ def main():
     cameras_info = parse_all_cameras_file(all_cameras_file)
 
     root_run = make_root_run(repository, args.test_name)
-    passed = parse_and_save_results_to_db(
+    passed, started_at = parse_and_save_results_to_db(
         repository, root_run, results_file, cameras_info)
-    save_root_run_info(repository, root_run, passed, artifacts)
+    save_root_run_info(repository, root_run, passed, started_at, artifacts)
 
 
 if __name__ == "__main__":
