@@ -1,0 +1,15 @@
+{%- if allowed_choices | default([]) -%}
+    {%- for c in choices if c[0] in allowed_choices -%}
+        {{- c[0] -}}
+        {%- if not loop.last -%}
+            {{- ',' -}}
+        {%- endif -%}
+    {%- endfor -%}
+    {%- else -%}
+    {%- for c in choices -%}
+        {{- c[0] -}}
+        {%- if not loop.last -%}
+            {{- ',' -}}
+        {%- endif -%}
+    {%- endfor -%}
+{%- endif -%}

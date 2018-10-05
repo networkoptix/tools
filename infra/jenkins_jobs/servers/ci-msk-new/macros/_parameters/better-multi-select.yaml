@@ -1,4 +1,4 @@
-# This is special parameter that wraps extended-choice with single-select in
+# This is special parameter that wraps extended-choice with multi-select in
 # way which makes it easier and better to configure.
 #
 # Parameters:
@@ -14,12 +14,13 @@
 # - default - default value which is selected, ex: "a"
 # - description - description of parameter visible in UI
 - parameter:
-    name: better-single-select
+    name: better-multi-select
     parameters:
     - extended-choice:
         name: '{name}'
-        type: 'single-select'
+        type: 'multi-select'
         value: !include-jinja2: './_includes/choices-to-values.j2'
         value-description: !include-jinja2: './_includes/choices-to-value-descriptions.j2'
         default-value: '{default}'
         description: '{description}'
+        visible-items: !j2: '{{ visible_items | default(10) }}'
