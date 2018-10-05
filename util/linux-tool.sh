@@ -66,7 +66,7 @@ Here <command> can be one of the following:
 
  kit [cygwin] [keep-build-dir] [cmake-build-args] # $NX_KIT_DIR: build, test.
 
- meta # Rebuild nx_metadata_sdk.
+ meta # Rebuild nx_analytics_sdk.
 
  go [command args] # Execute a command at vega via ssh, or log in to vega via ssh.
  go-verbose [command args] # Same as "go", but log the command to stdout with "+go " prefix.
@@ -1367,10 +1367,10 @@ main()
             do_kit "$@"
             ;;
         meta)
-            nx_verbose rm -rf "$BUILD_DIR/distrib"/*metadata_sdk*.zip
-            nx_verbose rm -rf "$BUILD_DIR/nx_metadata_sdk"
+            nx_verbose rm -rf "$BUILD_DIR/distrib"/*analytics_sdk*.zip
+            nx_verbose rm -rf "$BUILD_DIR/nx_analytics_sdk"
             DISTRIB=1 do_gen "$@"
-            do_build --target nx_metadata_sdk
+            do_build --target nx_analytics_sdk
             ;;
         #..........................................................................................
         go)
@@ -1384,7 +1384,7 @@ main()
             local -r RELATIVE_VMS_DIR=${VMS_DIR#$DEVELOP_DIR/} #< Remove prefix.
             local -r VEGA_DIR="$VEGA_USER@$VEGA_HOST:$VEGA_DEVELOP_DIR/$RELATIVE_VMS_DIR/"
             nx_echo "Rsyncing to" $(nx_lcyan)"$VEGA_DIR"$(nx_nocolor)
-            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" "$VMS_DIR/" "$VEGA_DIR"
+            nx_rsync --delete  --include "/.hg/branch" --exclude="/.hg/*" --exclude="*.orig" "$VMS_DIR/" "$VEGA_DIR"
             ;;
         start-s)
             nx_cd "$BUILD_DIR"
