@@ -1,3 +1,13 @@
+# Import envvar which is associated with latest build by given condition.
+#
+# Parameters:
+# - var
+# - val
+# - job_1
+# - job_2
+# - envvar
+# - as (optional)
+# - save_build_identity (optional)
 - builder:
     name: import-latest-envvar-if(var=val)
     builders:
@@ -19,11 +29,12 @@
             which-build: !j2: '{{ condition | default("last-successful") }}'
             optional: !j2: '{{ optional | default(true) | lower }}'
             target: "{job_2}"
+        # TODO: Allow to bring more than one file
         - calculate-latest-envvar:
             identity_file_1: './{job_1}/BUILD_IDENTITY.envvar'
             identity_file_2: './{job_2}/BUILD_IDENTITY.envvar'
-            commit_file_1:   './{job_1}/{envvar}.envvar'
-            commit_file_2:   './{job_2}/{envvar}.envvar'
-            commit_latest_varname: !j2: '{{ as | default(envvar) }}'
+            envvar_file_1:   './{job_1}/{envvar}.envvar'
+            envvar_file_2:   './{job_2}/{envvar}.envvar'
+            envvar_latest_varname: !j2: '{{ as | default(envvar) }}'
             identity_latest_varname: !j2: '{{ "BUILD_IDENTITY" if save_build_identity | default(false) else ""}}'
         - shell: rm -rf "{job_1}" "{job_2}"
