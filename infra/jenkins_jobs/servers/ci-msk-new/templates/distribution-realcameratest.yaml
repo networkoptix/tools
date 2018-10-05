@@ -164,7 +164,7 @@
           export PYTHONPATH="$WORKSPACE/devtools/ci/junk_shop"
           export PYTEST_PLUGINS=junk_shop.pytest_plugin
 
-          TEST_TIMEOUT="$(( 60 * 60 ))" # 30 min
+          TEST_TIMEOUT="$(( 60 * 60 ))" # 60 min
 
           cd nx_vms/func_tests
 
