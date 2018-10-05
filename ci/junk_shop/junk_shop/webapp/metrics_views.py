@@ -68,7 +68,7 @@ class NeutralPoint(Point):
     def text(self):
         if self.y is None:
             return None
-        return '{:.3}'.format(self.y)
+        return '{:.4}'.format(self.y)
 
 
 class BytesPoint(Point):
@@ -168,7 +168,7 @@ def generate_branch_platform_build_traces(accumulators):
             if metric_name == 'total_bytes_sent':
                 Point = BytesPoint
                 yaxis = 'y2'
-            elif metric_name == 'cpu_load_average':
+            elif metric_name.startswith('cpu_load_average.'):
                 Point = NeutralPoint
                 yaxis = None
             elif metric_name.startswith('host_memory_usage.'):
