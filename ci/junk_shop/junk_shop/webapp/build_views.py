@@ -5,7 +5,7 @@ from junk_shop.webapp import app
 from .. import models
 from ..build_info import BuildInfoLoader
 from .matrix_cell import MatrixCell
-from .utils import paginator_from_list, STAGES
+from .utils import paginator_from_list, STAGES, STAGE_NAMES
 
 
 class CustomizationRow(object):
@@ -34,7 +34,7 @@ def render_release_build(build):
     for customization, platform, run in select(
             (run.customization, run.platform, run) for run in models.Run
             if run.build is build and
-            run.test.path in STAGES):
+            run.test.path in STAGE_NAMES):
         if not customization:
             customization = WebadminPhonyCustomization()
         row = customization2row.setdefault(customization, CustomizationRow(customization))

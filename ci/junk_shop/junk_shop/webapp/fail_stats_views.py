@@ -6,7 +6,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import SelectField, DateField, validators, ValidationError
-from .utils import paginator,  STAGES
+from .utils import paginator, STAGE_NAMES
 from pony.orm import db_session, select, count, desc, max
 from datetime import timedelta, datetime
 from flask import render_template, request
@@ -67,7 +67,7 @@ def fail_stats():
     form.platform.choices = [(platform.id, platform.name) for platform in models.Platform.select()
                              if platform.name in ['linux-x64', 'windows-x64', 'mac']]
     form.test_bundle.choices = [(test.id, test.path) for test in models.Test.select()
-                                if test.path in STAGES]
+                                if test.path in STAGE_NAMES]
 
     if request.method == 'GET':
         # Initialize form values

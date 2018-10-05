@@ -31,6 +31,7 @@ a {
 .platform-box .datetime {
     font-size: 80%;
 	padding: 0 0 5px 3px;
+	white-space: nowrap;
 }
 
 .platforms-narrow .outcome {

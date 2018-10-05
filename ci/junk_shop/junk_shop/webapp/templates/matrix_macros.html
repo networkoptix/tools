@@ -45,27 +45,6 @@
 {% endmacro %}
 
 
-{% macro outcome_box_list(list) %}
-  <div>
-    {% for element in list %}
-      <div class="top-level-box">
-        <div class="list-row-box">
-          {{ caller(element) }}
-          <div class="started-at-block">
-            <span class="datetime">
-              {{ element.started_at|format_datetime(precise=False)|default('-', true) }}
-            </span>
-          </div>
-          {% for path, stage in element.stages.items() %}
-            {{ run_link(path, stage) }}
-          {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-{% endmacro %}
-
-
 {% macro platform_box(element, stages) %}
   <div class="platform-box">
     <div class="datetime">
@@ -73,7 +52,8 @@
     </div>
     <div>
       {% for stage in stages %}
-        {{ run_link(stage, element.stages[stage] if element else None) }}
+        {{ run_link(stage.short_name, element.stages[stage.name]
+           if element else None) }}
       {% endfor %}
     </div>
   </div>

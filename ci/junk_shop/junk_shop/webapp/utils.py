@@ -11,7 +11,19 @@ BYTE_FORMATS = ['', 'K', 'M', 'G', 'T']
 
 DEFAULT_BUILD_LIST_PAGE_SIZE = 10
 
-STAGES = ['build', 'unit', 'functional', 'cameratest']
+
+StageDescriptor = namedtuple(
+    'StageDescriptor', ['name', 'short_name'])
+
+
+STAGES = [
+    StageDescriptor('build', 'build'),
+    StageDescriptor('unit', 'ut'),
+    StageDescriptor('functional', 'ft'),
+    StageDescriptor('cameratest', 'rct'),
+    ]
+
+STAGE_NAMES = map(lambda stage: stage.name, STAGES)
 
 
 def format_bytes(count):

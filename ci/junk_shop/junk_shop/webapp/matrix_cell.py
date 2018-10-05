@@ -1,5 +1,5 @@
 from ..utils import SimpleNamespace
-from .utils import STAGES
+from .utils import STAGE_NAMES
 from collections import OrderedDict
 
 
@@ -7,7 +7,7 @@ class MatrixCell(object):
 
     def __init__(self):
         self.started_at = None
-        self.stages = OrderedDict([(stage, None) for stage in STAGES])
+        self.stages = OrderedDict([(stage, None) for stage in STAGE_NAMES])
 
     def add_run(self, run):
         # run.test.path is one of 'build', 'unit' or 'functional'
