@@ -28,7 +28,7 @@ TEST_LOG_LEVEL = dict(
     cloud_db_ut='DEBUG2',
     relaying_ut='DEBUG2',
     vms_gateway_ut='DEBUG2',
-    vms_cloud_integration_tests='DEBUG2'
+    vms_cloud_integration_tests='DEBUG2',
     )
 
 
