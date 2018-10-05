@@ -1,0 +1,13 @@
+- builder:
+    name: freeze-commit-if(var=val)
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${var}'
+        condition-string2: '{val}'
+        steps:
+        - freeze-nx-vms-commit(remote):  # creates NX_FUNCTESTS_COMMIT.envvar
+            pipeline: '{pipeline}'
+            branch: $BRANCH
+            commit-to-freeze: '{commit_to_freeze}'
+            commit-varname: '{as}'

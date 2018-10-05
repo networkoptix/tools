@@ -6,13 +6,12 @@
 #   same identities pool (envvar file format, varnames does not matter)
 # - commit_file_1, commit_file_2 - files with 2 commits crsp to identities files
 #   (envvar file format, varnames does not matter)
-# - output_file — file where resulting latest commit will be placed
 # - identity_latest_varname - name of variable under which latest identity will
 #   be placed, optional, if not present, identity will not be written
 # - commit_latest_varname - name of variable under which latest commit will
 #   be placed, optional, if not present, commit will not be written
 - builder:
-    name: calculate-latest-commit
+    name: calculate-latest-envvar
     builders:
     - shell: !j2: |
         #!python
@@ -41,10 +40,11 @@
             with open('{{ commit_file_2 }}') as f:
                 commit_latest = f.read().strip().split('=', 1)[1]
 
-        with open('{{ output_file }}', 'at') as f:
         {% if identity_latest_varname | default("") %}
+        with open('{{ identity_latest_varname }}'.envvar, 'wt') as f:
             f.write('{{ identity_latest_varname }}={}'.format(identity_latest))
         {% endif %}
         {% if commit_latest_varname | default("") %}
+        with open('{{ commit_latest_varname }}'.envvar, 'wt') as f:
             f.write('{{ commit_latest_varname }}={}'.format(commit_latest))
         {% endif %}

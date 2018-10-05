@@ -1,88 +1,3 @@
-# Local macros
-- builder:
-    name: __build_make_new_vms_build
-    builders:
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: $VMS_BUILD
-        condition-string2: '{when_vms_build_value}'
-        steps:
-        - shell: test $VMS_BUILD_OPTION != ''
-        - request-new-build-identity:
-            pipeline: '{pipeline}'
-        - freeze-nx-vms-commit(remote):
-            pipeline: '{pipeline}'
-            branch: $BRANCH
-            commit-to-freeze: '{vms_commit}'
-            commit-varname: NX_VMS_COMMIT
-        - shell: |
-            #!bash
-            cat BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
-            cat NX_VMS_COMMIT.envvar >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=true >> RUNNER_ARGS.envvars
-
-
-- builder:
-    name: __build_get_vms_build_and_commit_from_existing_build
-    builders:
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: '{when_vms_build_value}'
-        steps:
-        - copyartifact:
-            # runner is shared between presets, so this is the place where any
-            # build may be found
-            project: '{project}'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful # or last-completed ?
-            parameter-filters: '{param_filter}'
-            optional: false
-        - shell: |
-            #!bash
-            cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
-            cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
-            echo BUILD_WEBADMIN=false  >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
-
-- builder:
-    name: __build_get_vms_build_latest_by_two_builds
-    builders:
-    - conditional-step:
-        condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
-        condition-string2: '{when_vms_build_value}'
-        steps:
-        - shell: mkdir -p "{job_1}" "{job_2}"
-        - copyartifact:
-            project: '{job_1}'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: true
-            target: '{job_1}'
-        - copyartifact:
-            project: '{job_2}'
-            filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-            which-build: last-successful
-            optional: true
-            target: "{job_2}"
-        - calculate-latest-commit:
-            identity_file_1: './{job_1}/BUILD_IDENTITY.envvar'
-            identity_file_2: './{job_2}/BUILD_IDENTITY.envvar'
-            commit_file_1:   './{job_1}/NX_VMS_COMMIT.envvar'
-            commit_file_2:   './{job_2}/NX_VMS_COMMIT.envvar'
-            output_file:     'RUNNER_ARGS.envvars'
-            identity_latest_varname: BUILD_IDENTITY
-            commit_latest_varname: NX_VMS_COMMIT
-        - shell: rm -rf "{job_1}" "{job_2}"
-        - shell: |
-            #!bash
-            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
-            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
-
-# ------
-
 - job-template:
     name: '__{pipeline}.{version}.param-resolver'
     id: param-resolver
@@ -128,35 +43,72 @@
     # - BUILD_INSTALLER
     # (based on VMS_BUILD and VMS_BUILD_OPTION, see macros above)
 
-    - __build_make_new_vms_build:
-        when_vms_build_value: VMS_NEW_BUILD_BY_COMMIT
-        vms_commit: $VMS_BUILD_OPTION
-        pipeline: '{pipeline}'
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$VMS_BUILD'
+        condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
+        steps:
+        - request-new-build-identity:
+            pipeline: '{pipeline}'
+        - freeze-nx-vms-commit(remote):
+            pipeline: '{pipeline}'
+            branch: $BRANCH
+            commit-to-freeze: $VMS_BUILD_OPTION
+            commit-varname: NX_VMS_COMMIT
+        - shell: |
+            #!bash
+            cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
+            cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
+            echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=true >> RUNNER_ARGS.envvars
 
-    - __build_get_vms_build_and_commit_from_existing_build:
-        when_vms_build_value: VMS_EXIST_BUILD_BY_COMMIT
-        project: '{pipeline}.{version}.vms.runner'
-        param_filter: NX_VMS_COMMIT=$VMS_BUILD_OPTION
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '$VMS_BUILD'
+          condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
+        steps:
 
-    - __build_get_vms_build_and_commit_from_existing_build:
-        when_vms_build_value: VMS_EXIST_BUILD_BY_IDENTITY
-        project: '{pipeline}.{version}.vms.runner'
-        param_filter: BUILD_IDENTITY=$VMS_BUILD_OPTION
+        - import-envvars-if(var=val):
+            var: VMS_BUILD
+            val: VMS_EXIST_BUILD_BY_COMMIT
+            from: '{pipeline}.{version}.vms.runner'
+            envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
+            param_filter: NX_VMS_COMMIT=$VMS_BUILD_OPTION
 
-    - __build_get_vms_build_and_commit_from_existing_build:
-        when_vms_build_value: VMS_EXIST_BUILD_STABLE_PUSH
-        project: '{pipeline}.{version}.preset.on-push-vms'
-        param_filter: ''
+        - import-envvars-if(var=val):
+            var: VMS_BUILD
+            val: VMS_EXIST_BUILD_BY_IDENTITY
+            from: '{pipeline}.{version}.vms.runner'
+            envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
+            param_filter: BUILD_IDENTITY=$VMS_BUILD_OPTION
 
-    - __build_get_vms_build_and_commit_from_existing_build:
-        when_vms_build_value: VMS_EXIST_BUILD_STABLE_NIGHTLY
-        project: '{pipeline}.{version}.preset.nightly-vms'
-        param_filter: ''
+        - import-envvars-if(var=val):
+            var: VMS_BUILD
+            val: VMS_EXIST_BUILD_STABLE_PUSH
+            from: '{pipeline}.{version}.preset.on-push-vms'
+            envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
 
-    - __build_get_vms_build_latest_by_two_builds:
-        when_vms_build_value: VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
-        job_1: '{pipeline}.{version}.preset.on-push-vms'
-        job_2: '{pipeline}.{version}.preset.nightly-vms'
+        - import-envvars-if(var=val):
+            var: VMS_BUILD
+            val: VMS_EXIST_BUILD_STABLE_NIGHTLY
+            from: '{pipeline}.{version}.preset.nightly-vms'
+            envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
+
+        - import-latest-envvar-if(var=val):
+            var: VMS_BUILD
+            val: VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+            job_1: '{pipeline}.{version}.preset.on-push-vms'
+            job_2: '{pipeline}.{version}.preset.nightly-vms'
+            envvar: NX_VMS_COMMIT
+
+        - shell: |
+            #!bash
+            cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
+            cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
+            echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
+            echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
 
     # resolve/map values:
     # - PLATFORMS
@@ -207,80 +159,48 @@
             echo "TEST_SELECT_EXPR=" >> RUNNER_ARGS.envvars
             echo "TEST_LIST=" >> RUNNER_ARGS.envvars
 
-    # If FTs are enabled, then we'll calculate ft commit
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$FT_ENABLED'
         condition-string2: 'ON'
         steps:
-        - shell: echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$FT_COMMIT'
-            condition-string2: 'FT_OTHER_COMMIT'
-            steps:
-            - freeze-nx-vms-commit(remote):  # creates NX_FUNCTESTS_COMMIT.envvar
-                pipeline: '{pipeline}'
-                branch: $BRANCH
-                commit-to-freeze: $FT_COMMIT_OPTION
-                commit-varname: NX_FUNCTESTS_COMMIT
+        # in case if we won't find any commits, we don't want to fail calc
+        - shell: echo 'NX_FUNCTESTS_COMMIT=' > NX_FUNCTESTS_COMMIT.envvar
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$FT_COMMIT'
-            condition-string2: 'FT_STABLE_PUSH'
-            steps:
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.on-push-ft'
-                filter: 'NX_FUNCTESTS_COMMIT.envvar'
-                which-build: last-successful
-                optional: true
+        - freeze-commit-if(var=val):
+            pipeline: '{pipeline}'
+            var: FT_COMMIT
+            val: FT_OTHER_COMMIT
+            commit_to_freeze: $FT_COMMIT_OPTION
+            as: NX_FUNCTESTS_COMMIT
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$FT_COMMIT'
-            condition-string2: 'FT_STABLE_NIGHTLY'
-            steps:
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.nightly-ft'
-                filter: 'NX_FUNCTESTS_COMMIT.envvar'
-                which-build: last-successful
-                optional: true
+        - import-envvars-if(var=val):
+            var: FT_COMMIT
+            val: FT_STABLE_PUSH
+            from: '{pipeline}.{version}.preset.on-push-ft'
+            envvars: [ NX_FUNCTESTS_COMMIT ]
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$FT_COMMIT'
-            condition-string2: 'FT_STABLE_PUSH_OR_NIGHTLY'
-            steps:
-            - shell: mkdir -p on-push nightly
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.on-push-ft'
-                filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-                which-build: last-successful
-                optional: true
-                target: on-push
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.nightly-ft'
-                filter: 'NX_VMS_COMMIT.envvar,BUILD_IDENTITY.envvar'
-                which-build: last-successful
-                optional: true
-                target: nightly
-            - calculate-latest-commit:
-                identity_file_1: './on-push/BUILD_IDENTITY.envvar'
-                identity_file_2: './nightly/BUILD_IDENTITY.envvar'
-                commit_file_1:   './on-push/NX_VMS_COMMIT.envvar'
-                commit_file_2:   './nightly/NX_VMS_COMMIT.envvar'
-                output_file:     'NX_FUNCTESTS_COMMIT.envvars'
-                commit_latest_varname: NX_FUNCTESTS_COMMIT
-            - shell: rm -rf on-push nightly
-    - shell: |
-        #!bash
-        touch NX_FUNCTESTS_COMMIT.envvar
-        cat NX_FUNCTESTS_COMMIT.envvar >> RUNNER_ARGS.envvars
-        echo "TEST_SELECT_EXPR=$TEST_SELECT_EXPR" >> RUNNER_ARGS.envvars
-        echo "TEST_LIST=$TEST_LIST" >> RUNNER_ARGS.envvars
+        - import-envvars-if(var=val):
+            var: FT_COMMIT
+            val: FT_STABLE_NIGHTLY
+            from: '{pipeline}.{version}.preset.nightly-ft'
+            envvars: [ NX_FUNCTESTS_COMMIT ]
 
-    # RCT
+        - import-latest-envvar-if(var=val):
+            var: FT_COMMIT
+            val: FT_STABLE_PUSH_OR_NIGHTLY
+            job_1: '{pipeline}.{version}.preset.on-push-ft'
+            job_2: '{pipeline}.{version}.preset.nightly-ft'
+            envvar: NX_FUNCTESTS_COMMIT
+
+        - shell: |
+            #!bash
+            echo "RUN_FUNCTESTS=true" >> RUNNER_ARGS.envvars
+            cat NX_FUNCTESTS_COMMIT.envvar >> RUNNER_ARGS.envvars
+            echo "TEST_SELECT_EXPR=$TEST_SELECT_EXPR" >> RUNNER_ARGS.envvars
+            echo "TEST_LIST=$TEST_LIST" >> RUNNER_ARGS.envvars
+
+    # === REAL CAMERA TESTS ===
 
     - conditional-step:
         condition-kind: strings-match
@@ -296,73 +216,39 @@
         condition-string1: '$RCT_ENABLED'
         condition-string2: 'ON'
         steps:
-        - shell: echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
-        # get FT commit from RCT_COMMIT & RCT_COMMIT_OPTION
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: $RCT_COMMIT
-            condition-string2: RCT_BY_COMMIT
-            steps:
-            - freeze-nx-vms-commit(remote):
-                pipeline: '{pipeline}'
-                branch: $BRANCH
-                commit-to-freeze: $BRANCH
-                commit-varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+        # in case if we won't find any commits, we don't want to fail calc
+        - shell: echo 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=' > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$RCT_COMMIT'
-            condition-string2: 'RCT_STABLE_PUSH'
-            steps:
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.on-push-rct'
-                filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
-                which-build: last-successful
-                optional: true
+        - freeze-commit-if(var=val):
+            pipeline: '{pipeline}'
+            var: RCT_COMMIT
+            val: RCT_OTHER_COMMIT
+            commit_to_freeze: $RCT_COMMIT_OPTION
+            as: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$RCT_COMMIT'
-            condition-string2: 'RCT_STABLE_NIGHTLY'
-            steps:
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.nightly-rct'
-                filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
-                which-build: last-successful
-                optional: true
+        - import-envvars-if(var=val):
+            var: RCT_COMMIT
+            val: RCT_STABLE_PUSH
+            from: '{pipeline}.{version}.preset.on-push-rct'
+            envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
-        - conditional-step:
-            condition-kind: strings-match
-            condition-string1: '$RCT_COMMIT'
-            condition-string2: 'RCT_STABLE_PUSH_OR_NIGHTLY'
-            steps:
-            # TODO: build identities are not very clear here..
-            - shell: mkdir -p on-push nightly
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.on-push-rct'
-                filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar,BUILD_IDENTITY.envvar'
-                which-build: last-successful
-                optional: true
-                target: on-push
-            - copyartifact:
-                project: '{pipeline}.{version}.preset.nightly-rct'
-                filter: 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar,BUILD_IDENTITY.envvar'
-                which-build: last-successful
-                optional: true
-                target: nightly
-            - calculate-latest-commit:
-                identity_file_1: './on-push/BUILD_IDENTITY.envvar'
-                identity_file_2: './nightly/BUILD_IDENTITY.envvar'
-                commit_file_1:   './on-push/NX_VMS_COMMIT.envvar'
-                commit_file_2:   './nightly/NX_VMS_COMMIT.envvar'
-                output_file:     'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar'
-                commit_latest_varname: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
-            - shell: rm -rf on-push nightly
+        - import-envvars-if(var=val):
+            var: RCT_COMMIT
+            val: RCT_STABLE_NIGHTLY
+            from: '{pipeline}.{version}.preset.nightly-rct'
+            envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
-    - shell: |
-        #!bash
-        touch NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
-        cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
+        - import-latest-envvar-if(var=val):
+            var: FT_COMMIT
+            val: FT_STABLE_PUSH_OR_NIGHTLY
+            job_1: '{pipeline}.{version}.preset.on-push-rct'
+            job_2: '{pipeline}.{version}.preset.nightly-rct'
+            envvar: NX_FUNCTESTS_COMMIT
+
+        - shell: |
+            #!bash
+            echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
+            cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
 
     publishers:
     - archive:
@@ -373,5 +259,3 @@
         artifacts: '*.envvars'
         allow-empty: false
         fingerprint: true
-
-

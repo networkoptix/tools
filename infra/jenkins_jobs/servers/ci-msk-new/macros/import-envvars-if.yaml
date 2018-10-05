@@ -1,0 +1,20 @@
+- builder:
+    name: import-envvars-if(var=val)
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${var}'
+        condition-string2: '{val}'
+        steps:
+        - copyartifact:
+            project: '{from}'
+            filter: !j2: >-
+              {%- for ev in envvars -%}
+                  {{- ev -}}.envvar
+                  {%- if not loop.last -%}
+                      {{- ',' -}}
+                  {%- endif -%}
+              {%- endfor -%}
+            parameter-filters: !j2: '{{ param_filter | default("") }}'
+            which-build: !j2: '{{ condition | default("last-successful") }}'
+            optional: !j2: '{{ optional | default(true) | lower }}'
