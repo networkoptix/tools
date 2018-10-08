@@ -8,21 +8,27 @@ from shutil import rmtree
 
 prefix = "nxwitness"
 
+"""
+Example output:
+
+Preparing output dir: /var/www/vms_updates/updates/default/2155
+Downloading nxwitness-client_update-4.0.0.2155-linux64-beta-test.zip
+Downloading nxwitness-client_update-4.0.0.2155-win64-beta-test.zip
+Downloading nxwitness-server_update-4.0.0.2155-linux64-beta-test.zip
+Downloading nxwitness-server_update-4.0.0.2155-bpi-beta-test.zip
+Downloading nxwitness-server_update-4.0.0.2155-win64-beta-test.zip
+"""
+
+# pkg_platform, system, arch, variant, version
 client_platforms = [
-    ('linux64', 'linux', 'x64_ubuntu'), 
-    ('win64', 'windows', 'x64_winxp')] # There can be a mac as well
+    ('linux64', 'linux', 'x64', 'ubuntu', '14.04'), 
+    ('win64', 'windows', 'x64', 'winxp', '7.0')] # There can be a mac as well
 
 server_platforms = [
-    ('linux64', 'linux', 'x64_ubuntu'),
-    ('bpi', 'linux', 'arm_bpi'),
-    ('win64', 'windows', 'x64_winxp')
+    ('linux64', 'linux', 'x64', 'ubuntu', '14.04'),
+    ('bpi', 'linux', 'arm', 'bananapi', '7.0'),
+    ('win64', 'windows', 'x64', 'winxp', '7.0')
 ]
-
-# Placeholder table to provide mapping from os name to supported os version
-os_variants = {
-    'windows': '7',
-    'linux64': '14.04',
-}
 
 # From old jenkins
 # http://jenkins.enk.me/job/ci/job/vms/1156/artifact/nxwitness-server_update-4.0.0.1156-bpi-beta-test.zip
@@ -35,11 +41,31 @@ def make_filename(**kwargs):
 # Makes url to get update source
 def make_update_source_url(**kwargs):
     # prefix, component, version, build, platform, suffix
-    #baseurl = "http://jenkins.enk.me/job/ci/job/vms/{build}/artifact/".format(**kwargs)
+    # baseurl = "http://jenkins.enk.me/job/ci/job/vms/{build}/artifact/".format(**kwargs)
     # http://10.0.0.120/develop/vms/{build}/default/all/update/
     baseurl = "http://10.0.0.120/develop/vms/{build}/default/all/update/".format(**kwargs)
     url = make_filename(**kwargs)
     return baseurl + url
+
+# Download helper. Downloads a file to a target directory and calculates its length and md5
+# @param auth - tuple with user and a password. Used for authentication in our jenkins
+# @param output_dir - directory to store files
+def download(context, auth, output_dir):
+    url = make_update_source_url(**context)
+    target_file = make_filename(**context)
+    print("Downloading "+ target_file)
+
+    with requests.get(url, stream=True, auth=auth) as r:
+        length = 0
+        md5 = hashlib.md5()
+        with open(output_dir + "/" + target_file, "wb") as handle:
+            for chunk in r.iter_content(chunk_size=1024): 
+                length += len(chunk)
+                md5.update(chunk)
+                handle.write(chunk)
+        result = {'file':target_file, 'size':length, 'md5':md5.hexdigest()}
+        print("Finished downloading {file}, {size} bytes, md5={md5}".format(**result))
+        return result
 
 # update_root = "vms_updates/updates"
 def generate_update_folder(update_root, build_num, jenkins_auth, customization="default"):
@@ -56,24 +82,6 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
         os.makedirs(updates_version_dir)
     except OSError as e:
         pass
-    
-    # Download helper. Downloads a file to a target directory and calculates its length and md5
-    def download(context):
-        url = make_update_source_url(**context)
-        target_file = make_filename(**context)
-        print("Downloading "+ target_file)
-        
-        with requests.get(url, stream=True, auth=jenkins_auth) as r:
-            length = 0
-            md5 = hashlib.md5()
-            with open(updates_version_dir + "/" + target_file, "wb") as handle:
-                for chunk in r.iter_content(chunk_size=1024): 
-                    length += len(chunk)
-                    md5.update(chunk)
-                    handle.write(chunk)
-            result = {'file':target_file, 'size':length, 'md5':md5.hexdigest()}
-            print("Finished downloading {file}, {size} bytes, md5={md5}".format(**result))
-            return result
     
     # This dictionary will be dumped to update.json
     output_index = {
@@ -97,10 +105,11 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
     # Downloads update packages and updates the data for update.json
     def get_and_index_packages(component, platforms, dstPackages):
         # Do for clients
-        context['component'] = component    
-        for pkg_platform, system, arch in platforms:        
+        context['component'] = component
+        # Trying to download all the instances, that enumerated in [platforms]
+        for pkg_platform, system, arch, variant, version in platforms:        
             context['platform'] = pkg_platform
-            package_v1 = download(context)
+            package_v1 = download(context, jenkins_auth, updates_version_dir)
             if package_v1 is not None:
                 if not (system in output_index[dstPackages]):
                     output_index[dstPackages][system] = {}
@@ -109,9 +118,9 @@ def generate_update_folder(update_root, build_num, jenkins_auth, customization="
                 package_v2 = {
                     "component": component,
                     "arch": arch,
-                    "platform": pkg_platform,
-                    "variant": system,
-                    "variantVersion": os_variants.get(system, system+"-nover"),
+                    "platform": system,
+                    "variant": variant,
+                    "variantVersion": version,
                     "file": package_v1.get('file'),
                     "size": package_v1.get('size'),
                     "md5": package_v1.get('md5')
