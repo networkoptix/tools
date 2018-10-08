@@ -15,7 +15,8 @@
         - trigger-builds:
           - project: !j2: '{{ project | default("") }}'
             predefined-parameters:  !j2: '{{ parameters | default("") }}'
-            block:  !j2: '{{ block | default(true) }}'
+            # NOTE: JJB will not treat !j2: '{{ false }}' as false
+            block:  !j2: "{{ 'true' if block | default(true) else '' }}"
             block-thresholds:
               failure-threshold: FAILURE
 
@@ -32,6 +33,7 @@
         - trigger-builds:
           - project: !j2: '{{ project | default("") }}'
             predefined-parameters:  !j2: '{{ parameters | default("") }}'
-            block:  !j2: '{{ block | default(true) }}'
+            # NOTE: JJB will not treat !j2: '{{ false }}' as false
+            block:  !j2: "{{ 'true' if block | default(true) else '' }}"
             block-thresholds:
               failure-threshold: FAILURE
