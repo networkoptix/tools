@@ -1,4 +1,5 @@
-# Handy wrapper that combines and flattens conditional trigger + trigger build
+# Simple wrapper that composes conditional-step and trigger-builds, so
+# amount of boilerplate is reduced.
 #
 # Parameters:
 # - shell - shell command to use as condition (exit 0 = true)
