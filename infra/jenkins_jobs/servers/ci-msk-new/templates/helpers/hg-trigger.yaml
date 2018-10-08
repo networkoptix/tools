@@ -86,7 +86,7 @@
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          VMS_BUILD_OPTION=$NX_VMS_COMMIT
+          VMS_BUILD_CHOICE_OPTION=$NX_VMS_COMMIT
 
     # Trigger FT
     - conditionally-trigger(shell):
@@ -96,7 +96,7 @@
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          FT_COMMIT_OPTION=$NX_VMS_COMMIT
+          FT_COMMIT_CHOICE_OPTION=$NX_VMS_COMMIT
 
     # Trigger RCT
     - conditionally-trigger(shell):
@@ -106,7 +106,7 @@
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          RCT_COMMIT_OPTION=$NX_VMS_COMMIT
+          RCT_COMMIT_CHOICE_OPTION=$NX_VMS_COMMIT
 
     publishers:
     - archive:

@@ -20,9 +20,9 @@
     - simple-separator-colored:
         header: 'Options for VMS'
         color: lavender
-    - p_VMS_BUILD_w_OPTION:
-        default: '{vms_build_default}'
-        option_default: '{vms_build_option_default}'
+    - p_VMS_BUILD_CHOICE_w_OPTION:
+        default: '{vms_build_choice_default}'
+        option_default: '{vms_build_choice_option_default}'
     # - better-single-select:
     #     name: VMS_BUILD_FROM_PIPELINE
     #     choices:
@@ -61,9 +61,9 @@
         name: FT_ENABLED
         subject: If ON, then FuncTests will run, otherwise skipped
         default: '{ft_enabled}'
-    - p_FT_COMMIT_w_OPTION:
-        default: '{ft_commit_default}'
-        option_default: '{ft_commit_option_default}'
+    - p_FT_COMMIT_CHOICE_w_OPTION:
+        default: '{ft_commit_choice_default}'
+        option_default: '{ft_commit_choice_option_default}'
     - p_TEST_SELECT_EXPR:
         default: !j2: '{{ test_select_expr | default("") }}'
     - p_TEST_LIST:
@@ -76,9 +76,9 @@
         name: RCT_ENABLED
         subject: If ON, then RealCameraTests will run, otherwise skipped
         default: '{rct_enabled}'
-    - p_RCT_COMMIT_w_OPTION:
-        default: '{rct_commit_default}'
-        option_default: '{rct_commit_option_default}'
+    - p_RCT_COMMIT_CHOICE_w_OPTION:
+        default: '{rct_commit_choice_default}'
+        option_default: '{rct_commit_choice_option_default}'
 
     - simple-separator-colored:
         header: 'Options for Scalability tests'
@@ -87,9 +87,9 @@
         name: ST_ENABLED
         subject: If ON, then SacalbilityTests will run, otherwise skipped
         default: '{st_enabled}'
-    - p_ST_COMMIT_w_OPTION:
-        default: '{st_commit_default}'
-        option_default: '{st_commit_option_default}'
+    - p_ST_COMMIT_CHOICE_w_OPTION:
+        default: '{st_commit_choice_default}'
+        option_default: '{st_commit_choice_option_default}'
 
     # TODO: Add additional sections and options...
     # - simple-separator-colored:

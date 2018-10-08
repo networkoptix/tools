@@ -160,98 +160,98 @@
     - preset:
         preset-name:
         - custom:
-            vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_option_default: ''
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: ''
             ut_enabled: 'ON'
             ft_enabled: 'ON'
-            ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
-            ft_commit_option_default: ''
+            ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
+            ft_commit_choice_option_default: ''
             rct_enabled: 'ON'
-            rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
-            rct_commit_option_default: ''
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
             st_enabled: 'OFF'
-            st_commit_default: ST_BY_COMMIT
-            st_commit_option_default: 'vms'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         - on-push-vms:
-            vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_option_default: ''
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: ''
             ut_enabled: 'ON'
             ft_enabled: 'OFF'
-            ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
-            ft_commit_option_default: ''
+            ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
+            ft_commit_choice_option_default: ''
             rct_enabled: 'OFF'
-            rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
-            rct_commit_option_default: ''
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
             st_enabled: 'OFF'
-            st_commit_default: ST_BY_COMMIT
-            st_commit_option_default: 'vms'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         - on-push-ft:
-            vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
-            vms_build_option_default: ''
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
+            vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
             ft_enabled: 'ON'
-            ft_commit_default: FT_STABLE_PUSH
-            ft_commit_option_default: ''
+            ft_commit_choice_default: FT_STABLE_PUSH
+            ft_commit_choice_option_default: ''
             rct_enabled: 'OFF'
-            rct_commit_default: RCT_STABLE_PUSH
-            rct_commit_option_default: ''
+            rct_commit_choice_default: RCT_STABLE_PUSH
+            rct_commit_choice_option_default: ''
             st_enabled: 'OFF'
-            st_commit_default: ST_BY_COMMIT
-            st_commit_option_default: 'vms'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
             default_platforms: bpi
             default_customizations: default
             test_list: self_tests
             test_select_expr: 'windows or smb'
         - on-push-rct:
-            vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
-            vms_build_option_default: ''
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
+            vms_build_choice_option_default: ''
             ut_enabled: 'OFF'
             ft_enabled: 'OFF'
-            ft_commit_default: FT_STABLE_PUSH
-            ft_commit_option_default: ''
+            ft_commit_choice_default: FT_STABLE_PUSH
+            ft_commit_choice_option_default: ''
             rct_enabled: 'ON'
-            rct_commit_default: RCT_STABLE_PUSH
-            rct_commit_option_default: ''
+            rct_commit_choice_default: RCT_STABLE_PUSH
+            rct_commit_choice_option_default: ''
             st_enabled: 'OFF'
-            st_commit_default: ST_BY_COMMIT
-            st_commit_option_default: 'vms'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
             default_platforms: bpi
             default_customizations: default
         - vms-nightly:
-            vms_build_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_option_default: 'vms'
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'vms'
             ut_enabled: 'ON'
             ft_enabled: 'OFF'
-            ft_commit_default: FT_STABLE_PUSH_OR_NIGHTLY
-            ft_commit_option_default: ''
+            ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
+            ft_commit_choice_option_default: ''
             rct_enabled: 'OFF'
-            rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
-            rct_commit_option_default: ''
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
             st_enabled: 'ON'
-            st_commit_default: ST_BY_COMMIT
-            st_commit_option_default: 'vms'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         # - nightly:
-        #     vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
-        #     vms_build_option_default: ''
-        #     ft_commit_default: FT_STABLE_PUSH
-        #     ft_commit_option_default: ''
-        #     rct_commit_default: FT_STABLE_PUSH
-        #     rct_commit_option_default: ''
+        #     vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
+        #     vms_build_choice_option_default: ''
+        #     ft_commit_choice_default: FT_STABLE_PUSH
+        #     ft_commit_choice_option_default: ''
+        #     rct_commit_choice_default: FT_STABLE_PUSH
+        #     rct_commit_choice_option_default: ''
         #     default_platforms: bpi
         #     default_customizations: default
         # - nightly:
-        #     vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
-        #     vms_build_option_default: ''
-        #     ft_commit_default: FT_STABLE_PUSH
-        #     ft_commit_option_default: ''
-        #     rct_commit_default: FT_STABLE_PUSH
-        #     rct_commit_option_default: ''
+        #     vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
+        #     vms_build_choice_option_default: ''
+        #     ft_commit_choice_default: FT_STABLE_PUSH
+        #     ft_commit_choice_option_default: ''
+        #     rct_commit_choice_default: FT_STABLE_PUSH
+        #     rct_commit_choice_option_default: ''
         #     default_platforms: bpi
         #     default_customizations: default
 

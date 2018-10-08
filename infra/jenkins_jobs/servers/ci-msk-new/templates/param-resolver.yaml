@@ -8,30 +8,35 @@
     - authorization-{pipeline}-system
 
     parameters:
-    - string: { name: REQUESTED_BY            }
-    - string: { name: BUILD_DESCRIPTION       }
+    - string: { name: REQUESTED_BY                   }
+    - string: { name: BUILD_DESCRIPTION              }
     # do we really need it?
-    - string: { name: BRANCH                  }
-    - string: { name: VMS_BUILD               }
-    - string: { name: VMS_BUILD_OPTION        }
-    - string: { name: PLATFORMS               }
-    - string: { name: CUSTOMIZATIONS          }
-    - string: { name: CLOUD_GROUP             }
-    - string: { name: HARDWARE_SIGNING        }
-    - string: { name: TRUSTED_TIMESTAMPING    }
-    - string: { name: CUSTOM_CMAKE_PARAMETERS }
-    - string: { name: UT_ENABLED              }
-    - string: { name: FT_ENABLED              }
-    - string: { name: FT_COMMIT               }
-    - string: { name: FT_COMMIT_OPTION        }
-    - string: { name: TEST_SELECT_EXPR        }
-    - string: { name: TEST_LIST               }
-    - string: { name: RCT_ENABLED             }
-    - string: { name: RCT_COMMIT              }
-    - string: { name: RCT_COMMIT_OPTION       }
-    - string: { name: ST_ENABLED              }
-    - string: { name: ST_COMMIT_CHOICE        }
-    - string: { name: ST_COMMIT_OPTION        }
+    - string: { name: BRANCH                         }
+
+    - string: { name: VMS_BUILD_CHOICE               }
+    - string: { name: VMS_BUILD_CHOICE_OPTION        }
+    - string: { name: PLATFORMS                      }
+    - string: { name: CUSTOMIZATIONS                 }
+    - string: { name: CLOUD_GROUP                    }
+    - string: { name: HARDWARE_SIGNING               }
+    - string: { name: TRUSTED_TIMESTAMPING           }
+    - string: { name: CUSTOM_CMAKE_PARAMETERS        }
+
+    - string: { name: UT_ENABLED                     }
+
+    - string: { name: FT_ENABLED                     }
+    - string: { name: FT_COMMIT_CHOICE               }
+    - string: { name: FT_COMMIT_CHOICE_OPTION        }
+    - string: { name: TEST_SELECT_EXPR               }
+    - string: { name: TEST_LIST                      }
+
+    - string: { name: RCT_ENABLED                    }
+    - string: { name: RCT_COMMIT_CHOICE              }
+    - string: { name: RCT_COMMIT_CHOICE_OPTION       }
+
+    - string: { name: ST_ENABLED                     }
+    - string: { name: ST_COMMIT_CHOICE               }
+    - string: { name: ST_COMMIT_CHOICE_OPTION        }
 
     builders:
     - custom-clean-workspace:
@@ -44,11 +49,11 @@
     # - NX_VMS_COMMIT
     # - BUILD_WEBADMIN
     # - BUILD_INSTALLER
-    # (based on VMS_BUILD and VMS_BUILD_OPTION, see macros above)
+    # (based on VMS_BUILD_CHOICE and VMS_BUILD_CHOICE_OPTION, see macros above)
 
     - conditional-step:
         condition-kind: strings-match
-        condition-string1: '$VMS_BUILD'
+        condition-string1: '$VMS_BUILD_CHOICE'
         condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
         steps:
         - request-new-build-identity:
@@ -56,7 +61,7 @@
         - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
             branch: $BRANCH
-            commit-to-freeze: $VMS_BUILD_OPTION
+            commit-to-freeze: $VMS_BUILD_CHOICE_OPTION
             commit-varname: NX_VMS_COMMIT
         - shell: |
             #!bash
@@ -69,38 +74,38 @@
         condition-kind: not
         condition-operand:
           condition-kind: strings-match
-          condition-string1: '$VMS_BUILD'
+          condition-string1: '$VMS_BUILD_CHOICE'
           condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
         steps:
 
         - import-envvars-if(var=val):
-            var: VMS_BUILD
+            var: VMS_BUILD_CHOICE
             val: VMS_EXIST_BUILD_BY_COMMIT
             from: '{pipeline}.{version}.vms.runner'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
-            param_filter: NX_VMS_COMMIT=$VMS_BUILD_OPTION
+            param_filter: NX_VMS_COMMIT=$VMS_BUILD_CHOICE_OPTION
 
         - import-envvars-if(var=val):
-            var: VMS_BUILD
+            var: VMS_BUILD_CHOICE
             val: VMS_EXIST_BUILD_BY_IDENTITY
             from: '{pipeline}.{version}.vms.runner'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
-            param_filter: BUILD_IDENTITY=$VMS_BUILD_OPTION
+            param_filter: BUILD_IDENTITY=$VMS_BUILD_CHOICE_OPTION
 
         - import-envvars-if(var=val):
-            var: VMS_BUILD
+            var: VMS_BUILD_CHOICE
             val: VMS_EXISTING_BUILD_FROM_STABLE_PUSH
             from: '{pipeline}.{version}.preset.on-push-vms'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
 
         - import-envvars-if(var=val):
-            var: VMS_BUILD
+            var: VMS_BUILD_CHOICE
             val: VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY
             from: '{pipeline}.{version}.preset.nightly-vms'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
 
         - import-latest-envvar-if(var=val):
-            var: VMS_BUILD
+            var: VMS_BUILD_CHOICE
             val: VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             job_1: '{pipeline}.{version}.preset.on-push-vms'
             job_2: '{pipeline}.{version}.preset.nightly-vms'
@@ -148,7 +153,7 @@
     # - NX_FUNCTESTS_COMMIT
     # - TEST_SELECT_EXPR
     # - TEST_LIST
-    # (based on FT_ENABLED, FT_COMMIT and FT_COMMIT_OPTION)
+    # (based on FT_ENABLED, FT_COMMIT_CHOICE and FT_COMMIT_CHOICE_OPTION)
 
     - conditional-step:
         condition-kind: strings-match
@@ -172,25 +177,25 @@
 
         - freeze-commit-if(var=val):
             pipeline: '{pipeline}'
-            var: FT_COMMIT
+            var: FT_COMMIT_CHOICE
             val: FT_OTHER_COMMIT
-            commit_to_freeze: $FT_COMMIT_OPTION
+            commit_to_freeze: $FT_COMMIT_CHOICE_OPTION
             as: NX_FUNCTESTS_COMMIT
 
         - import-envvars-if(var=val):
-            var: FT_COMMIT
+            var: FT_COMMIT_CHOICE
             val: FT_STABLE_PUSH
             from: '{pipeline}.{version}.preset.on-push-ft'
             envvars: [ NX_FUNCTESTS_COMMIT ]
 
         - import-envvars-if(var=val):
-            var: FT_COMMIT
+            var: FT_COMMIT_CHOICE
             val: FT_STABLE_NIGHTLY
             from: '{pipeline}.{version}.preset.nightly-ft'
             envvars: [ NX_FUNCTESTS_COMMIT ]
 
         - import-latest-envvar-if(var=val):
-            var: FT_COMMIT
+            var: FT_COMMIT_CHOICE
             val: FT_STABLE_PUSH_OR_NIGHTLY
             job_1: '{pipeline}.{version}.preset.on-push-ft'
             job_2: '{pipeline}.{version}.preset.nightly-ft'
@@ -224,25 +229,25 @@
 
         - freeze-commit-if(var=val):
             pipeline: '{pipeline}'
-            var: RCT_COMMIT
+            var: RCT_COMMIT_CHOICE
             val: RCT_OTHER_COMMIT
-            commit_to_freeze: $RCT_COMMIT_OPTION
+            commit_to_freeze: $RCT_COMMIT_CHOICE_OPTION
             as: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
 
         - import-envvars-if(var=val):
-            var: RCT_COMMIT
+            var: RCT_COMMIT_CHOICE
             val: RCT_STABLE_PUSH
             from: '{pipeline}.{version}.preset.on-push-rct'
             envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
         - import-envvars-if(var=val):
-            var: RCT_COMMIT
+            var: RCT_COMMIT_CHOICE
             val: RCT_STABLE_NIGHTLY
             from: '{pipeline}.{version}.preset.nightly-rct'
             envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
         - import-latest-envvar-if(var=val):
-            var: FT_COMMIT
+            var: FT_COMMIT_CHOICE
             val: FT_STABLE_PUSH_OR_NIGHTLY
             job_1: '{pipeline}.{version}.preset.on-push-rct'
             job_2: '{pipeline}.{version}.preset.nightly-rct'
@@ -279,7 +284,7 @@
             pipeline: '{pipeline}'
             var: ST_COMMIT_CHOICE
             val: ST_BY_COMMIT
-            commit_to_freeze: $ST_COMMIT_OPTION
+            commit_to_freeze: $ST_COMMIT_CHOICE_OPTION
             as: ST_COMMIT
 
         - shell: |

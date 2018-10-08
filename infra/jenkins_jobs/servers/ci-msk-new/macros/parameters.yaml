@@ -347,10 +347,10 @@
         description: Tests to run, space-delimited list. Empty means run all tests.
 
 - parameter:
-    name: p_VMS_BUILD_w_OPTION
+    name: p_VMS_BUILD_CHOICE_w_OPTION
     parameters:
     - better-single-select:
-        name: VMS_BUILD
+        name: VMS_BUILD_CHOICE
         choices:
         - - VMS_NEW_BUILD_BY_COMMIT
           - "Make new build (ENTER commit)"
@@ -366,16 +366,16 @@
         description: >-
           Which VMS build should be used
     - string:
-        name: VMS_BUILD_OPTION
+        name: VMS_BUILD_CHOICE_OPTION
         default: '{option_default}'
         description: >-
-          ENTER option for VMS_BUILD, optional, depending on what's selected in prev field
+          ENTER option for VMS_BUILD_CHOICE, optional, depending on what's selected in prev field
 
 - parameter:
-    name: p_FT_COMMIT_w_OPTION
+    name: p_FT_COMMIT_CHOICE_w_OPTION
     parameters:
     - better-single-select:
-        name: FT_COMMIT
+        name: FT_COMMIT_CHOICE
         choices:
         - - "FT_OTHER_COMMIT"
           - "Use other commit (ENTER commit)"
@@ -388,16 +388,16 @@
         default: '{default}'
         description: Which FT commit should be used
     - string:
-        name: FT_COMMIT_OPTION
+        name: FT_COMMIT_CHOICE_OPTION
         default: '{option_default}'
         description: >-
-          ENTER option for FT_COMMIT, optional, depending on what's selected in prev field
+          ENTER option for FT_COMMIT_CHOICE, optional, depending on what's selected in prev field
 
 - parameter:
-    name: p_RCT_COMMIT_w_OPTION
+    name: p_RCT_COMMIT_CHOICE_w_OPTION
     parameters:
     - better-single-select:
-        name: RCT_COMMIT
+        name: RCT_COMMIT_CHOICE
         choices:
         - - "RCT_BY_COMMIT"
           - "Use other commit (ENTER commit)"
@@ -410,12 +410,12 @@
         default: '{default}'
         description: Which RCT commit should be used
     - string:
-        name: RCT_COMMIT_OPTION
+        name: RCT_COMMIT_CHOICE_OPTION
         default: '{option_default}'
         description: >-
-          ENTER option for RCT_COMMIT, optional, depending on what's selected in prev field
+          ENTER option for RCT_COMMIT_CHOICE, optional, depending on what's selected in prev field
 - parameter:
-    name: p_ST_COMMIT_w_OPTION
+    name: p_ST_COMMIT_CHOICE_w_OPTION
     parameters:
     - better-single-select:
         name: ST_COMMIT_CHOICE
@@ -425,7 +425,7 @@
         default: '{default}'
         description: Which RCT commit should be used
     - string:
-        name: ST_COMMIT_OPTION
+        name: ST_COMMIT_CHOICE_OPTION
         default: '{option_default}'
         description: >-
           ENTER option for ST_COMMIT, optional, depending on what's selected in prev field
