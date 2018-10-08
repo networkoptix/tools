@@ -30,7 +30,7 @@
         print "Latest identity -> ", identity_latest
 
         if identity_latest == 0:
-            print "0 is invalid"
+            print "Couldn't find any build satisfying requested criteria"
             exit 1
 
         if identity_latest == identity_1:
