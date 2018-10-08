@@ -11,7 +11,7 @@
       Other important thing is that this job will not have noop builds.
       When something is happened in Repo, then something will be triggered.
 
-    node: '{hg_local_cache_node_write}'
+    node: repo-write
     workspace: !j2: '{{ hg_local_cache_node_workspace }}'
     concurrent: false
 

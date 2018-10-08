@@ -2,7 +2,7 @@
     name: '{pipeline}.helper.sync-hg'
 
     # all build triggers will work under the same workspace as well as
-    node: '{hg_local_cache_node_read}'
+    node: repo-read
     workspace: 'nx_{pipeline}_hgsync_thr${{EXECUTOR_NUMBER}}'
     concurrent: true
 

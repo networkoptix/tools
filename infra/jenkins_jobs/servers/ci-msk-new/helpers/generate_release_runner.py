@@ -152,18 +152,9 @@ print '''#
     # TODO: Should we fetch all links from publisher or something like that?
     - inject:
         properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-    - inject:
-        properties-content: |
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-          REPOSITORY_ROOT_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_ROOT_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
 
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -297,7 +288,6 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.realcameratest'
           condition: COMPLETED # allow unstable
@@ -316,7 +306,6 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 '''
 print '''
     - shell: |
@@ -337,7 +326,6 @@ print '''
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - multijob:
         name: Promote build for publishing via DepCon

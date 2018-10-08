@@ -43,7 +43,7 @@
 
     # all build triggers will work under the same workspace as well as
     # Important: this node must have only 1 worker
-    node: '{hg_local_cache_node_write}'
+    node: repo-write
     workspace: !j2: '{{ hg_local_cache_node_workspace }}'
     concurrent: false
 
@@ -90,9 +90,6 @@
         branch-name: default
 
     builders:
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
     - set-custom-build-description
 
     # for query artifacts

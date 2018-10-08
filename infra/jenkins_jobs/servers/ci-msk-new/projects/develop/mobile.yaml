@@ -2,7 +2,6 @@
     name: develop-pipeline-mobile
 
     project: mobile
-    junk_shop_host: junkshop.enk.me
 
     version:
     - mobile:

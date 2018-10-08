@@ -82,7 +82,6 @@
       TRIGGERED_BUILD_NUMBER_helper_sync_hg
       BUILD_DESCRIPTION
       USE_WEBADMIN
-      JUNKSHOP_BASE_URL
       TRIGGERED_BUILD_NUMBERS_helper_freeze_build_config
       TRIGGERED_BUILD_RESULT_helper_freeze_build_config
       RUN_DISPLAY_URL
@@ -111,7 +110,6 @@
       JUNKSHOP_URL
       MERCURIAL_REPOSITORY_URL
       TRIGGERED_BUILD_RESULT_helper_sync_hg
-      JUNKSHOP_HOST
 
     properties:
     - authorization-{pipeline}-system
@@ -217,14 +215,7 @@
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
     - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -635,7 +626,7 @@
 
           - description-setter:
               description: >-
-                <a href='{artifact_repository_base_url}/{artifact_location_full_pattern}'> Artifacts </a>,
+                <a href='{artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM'> Artifacts </a>,
                 <a href='$JUNKSHOP_URL'> Junkshop </a>
 
     - postbuildscript:
@@ -659,7 +650,6 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=passed
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - postbuildscript:
         mark-unstable-if-failed: true
@@ -682,7 +672,6 @@
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
                 BUILD_STATUS=failed
                 RUNNER_URL=$RUNNER_URL
-                JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     # after everything is published, delete results
     - postbuildscript:

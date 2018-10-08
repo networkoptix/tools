@@ -287,12 +287,6 @@
         description: utility parameter, url for root build (runner)
 
 - parameter:
-    name: p_JUNKSHOP_HOST
-    parameters:
-    - string:
-        name: JUNKSHOP_HOST
-
-- parameter:
     name: p_CUSTOM_CMAKE_PARAMETERS
     parameters:
     - string:

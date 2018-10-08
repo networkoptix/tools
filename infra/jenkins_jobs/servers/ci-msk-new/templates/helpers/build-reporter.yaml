@@ -42,8 +42,6 @@
     concurrent: false
     workspace: !j2: '{{ "__debug__" if __debug__ else "" }}{{ pipeline }}-build-reporter'
 
-    # junk_shop_host: required!
-
     properties:
     - authorization-{pipeline}-system
     - priority-sorter:
@@ -69,7 +67,6 @@
     - p_NX_VMS_COMMIT
     - p_BUILD_STATUS
     - p_RUNNER_URL
-    - p_JUNKSHOP_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -115,12 +112,8 @@
     - set-hg-marker-successful-checkout
     - inject:
         properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
     - set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -180,11 +173,11 @@
           fi
 
           # register build
-          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$JUNKSHOP_PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
+          BUILD_PARAMETERS="project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$JUNKSHOP_PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
           devtools/ci/junk_shop/junk_shop/save_build_info.py "$DB_CONFIG" "$BUILD_PARAMETERS" nx_vms
 
           # upload build results
-          BUILD_PARAMETERS="project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
+          BUILD_PARAMETERS="project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" full_build.log "--outcome=$BUILD_STATUS"
 
     publishers:

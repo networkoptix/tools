@@ -2,7 +2,6 @@
     name: develop-pipeline-cloud
 
     project: vms
-    junk_shop_host: junkshop.enk.me
 
     version:
     - cloud_18.2_backend:

@@ -10,26 +10,16 @@
 
     clean_build_if_build_scripts_changed: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead
 
-    junk_shop_host: 10.0.0.160 # TODO: switch to '10.0.2.101'
     junkshop_db_host: '10.0.0.113'
+    junkshop_base_url: http://junkshop.enk.me
+    artifacts_base_url: http://artifacts.enk.me
 
-    jenkins_host: http://jenkins2.enk.me
     junkshop_project_name: $PIPELINE
 
     # artifact repository location on publish-node filesystem
     artifact_repository_base_path: '/mnt/beta-builds/repository/v1'
 
-    artifact_repository_base_url: 'http://artifacts.enk.me'
-
-    artifact_location_root_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}'
-    artifact_location_full_pattern: '${{PIPELINE}}/${{BRANCH}}/${{BUILD_IDENTITY}}/${{CUSTOMIZATION}}/${{PLATFORM}}'
-
-    junkshop_location_root_pattern: 'project/$JUNKSHOP_PROJECT_NAME/$BRANCH/$BUILD_IDENTITY'
-    junkshop_location_full_pattern: 'project/$JUNKSHOP_PROJECT_NAME/$BRANCH/$BUILD_IDENTITY'
-
     # utility variables for jobs family which operate on the same workspace
-    hg_local_cache_node_read: repo-read
-    hg_local_cache_node_write: repo-write
     hg_local_cache_node_workspace: repo
     hg_local_cache_node_ip_addr: '192.168.13.121'
 

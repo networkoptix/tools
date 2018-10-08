@@ -101,18 +101,9 @@
     # TODO: Should we fetch all links from publisher or something like that?
     - inject:
         properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-    - inject:
-        properties-content: |
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
-          REPOSITORY_ROOT_URL={artifact_repository_base_url}/{artifact_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_ROOT_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
 
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
@@ -5044,7 +5035,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.default.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5063,7 +5053,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.default_cn.functest'
@@ -5083,7 +5072,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.default_cn.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5102,7 +5090,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.default_zh_CN.functest'
@@ -5122,7 +5109,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.default_zh_CN.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5141,7 +5127,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.cox.functest'
@@ -5161,7 +5146,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.cox.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5180,7 +5164,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.digitalwatchdog.functest'
@@ -5200,7 +5183,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.digitalwatchdog.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5219,7 +5201,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.digitalwatchdog_global.functest'
@@ -5239,7 +5220,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.digitalwatchdog_global.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5258,7 +5238,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.hanwha.functest'
@@ -5278,7 +5257,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.hanwha.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5297,7 +5275,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ipera.functest'
@@ -5317,7 +5294,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.ipera.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5336,7 +5312,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ionetworks.functest'
@@ -5356,7 +5331,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.ionetworks.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5375,7 +5349,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.nutech.functest'
@@ -5395,7 +5368,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.nutech.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5414,7 +5386,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ras.functest'
@@ -5434,7 +5405,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.ras.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5453,7 +5423,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.senturian.functest'
@@ -5473,7 +5442,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.senturian.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5492,7 +5460,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.systemk.functest'
@@ -5512,7 +5479,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.systemk.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5531,7 +5497,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.tricom.functest'
@@ -5551,7 +5516,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.tricom.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5570,7 +5534,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.ust.functest'
@@ -5590,7 +5553,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.ust.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5609,7 +5571,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.vista.functest'
@@ -5629,7 +5590,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.vista.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5648,7 +5608,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.vmsdemoblue.functest'
@@ -5668,7 +5627,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.vmsdemoblue.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5687,7 +5645,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.vmsdemoorange.functest'
@@ -5707,7 +5664,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.vmsdemoorange.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5726,7 +5682,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.metavms.functest'
@@ -5746,7 +5701,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.metavms.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5765,7 +5719,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
         - name: '{pipeline}.{version}.{project}.distribution.xccelo.functest'
@@ -5785,7 +5738,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
         - name: '{pipeline}.{version}.{project}.distribution.xccelo.realcameratest'
           condition: COMPLETED # allow unstable
@@ -5804,7 +5756,6 @@
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
 
     - shell: |
@@ -5825,7 +5776,6 @@
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             RUNNER_URL=$BUILD_URL
-            JUNKSHOP_HOST=$JUNKSHOP_HOST
 
     - multijob:
         name: Promote build for publishing via DepCon

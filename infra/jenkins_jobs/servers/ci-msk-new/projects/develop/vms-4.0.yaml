@@ -2,7 +2,6 @@
     name: develop-pipeline-4.0
 
     project: vms
-    junk_shop_host: junkshop.enk.me
 
     version:
     - vms:

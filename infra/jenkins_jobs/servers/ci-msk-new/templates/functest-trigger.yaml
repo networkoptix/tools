@@ -26,7 +26,7 @@
       --------------------------------------------------------------------------------
       </pre>
     # all build triggers will work under the same workspace as well as
-    node: '{hg_local_cache_node_write}'
+    node: repo-write
     workspace: '{hg_local_cache_node_workspace}'
     concurrent: false
 
@@ -85,14 +85,7 @@
     builders:
     - inject:
         properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_root_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
     - set-custom-build-description
 
     # cleanup old envvars; prepare default values
@@ -242,7 +235,6 @@
               BRANCH=$BRANCH
               NX_VMS_COMMIT=$NX_VMS_COMMIT
               NX_TEST_FRAMEWORK_COMMIT=$NX_TEST_FRAMEWORK_COMMIT
-              JUNKSHOP_HOST=$JUNKSHOP_HOST
               TEST_SELECT_EXPR=$TEST_SELECT_EXPR
               TEST_LIST=$TEST_LIST
             block: false # !! don't wait

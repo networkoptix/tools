@@ -1,4 +1,3 @@
-
 - job-template:
     name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
     id: distribution-all
@@ -58,14 +57,7 @@
     builders:
     - inject:
         properties-content: |
-          JUNKSHOP_HOST={junk_shop_host}
-    - inject:
-        properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true

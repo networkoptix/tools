@@ -29,7 +29,7 @@
         macro: true
     - shell: !j2: |
         #!bash
-        REPOSITORY_ROOT_PATH={{ artifact_repository_base_path }}/{{ artifact_location_root_pattern }}
+        REPOSITORY_ROOT_PATH="{{ artifact_repository_base_path }}/$PIPELINE/$BRANCH/$BUILD_IDENTITY"
         _version="$(cat "${REPOSITORY_ROOT_PATH}"/default/*/build_info.txt | grep version | tail -1 | cut -f 2 -d '=')"
         TARGET_ROOT="/mnt/beta-builds/daily/${BUILD_IDENTITY}-${BRANCH}"
         echo mkdir -p "${TARGET_ROOT}"

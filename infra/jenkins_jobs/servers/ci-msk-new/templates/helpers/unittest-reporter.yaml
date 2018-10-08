@@ -29,7 +29,6 @@
     - p_PLATFORM
     - p_BUILD_STATUS
     - p_RUNNER_URL # do we need it here?
-    - p_JUNKSHOP_HOST
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -65,12 +64,8 @@
     builders:
     - inject:
         properties-content: |
-          JUNKSHOP_PROJECT_NAME={junkshop_project_name}
-          JUNKSHOP_BASE_URL=http://$JUNKSHOP_HOST
-    - inject:
-        properties-content: |
-          JUNKSHOP_URL=$JUNKSHOP_BASE_URL/{junkshop_location_full_pattern}
-          REPOSITORY_URL={artifact_repository_base_url}/{artifact_location_full_pattern}
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
     - set-custom-build-description
 
     - trigger-builds:
@@ -111,7 +106,7 @@
             fi
 
             DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
-            BUILD_PARAMETERS=project=$JUNKSHOP_PROJECT_NAME,branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
+            BUILD_PARAMETERS=project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
 
             if [ -d unit_tests ] ; then
               pushd unit_tests
