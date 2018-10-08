@@ -52,3 +52,13 @@
 .scalability-dynamics-link-block a {
 	font-weight: bold;
 }
+
+.fail-stats-link-block {
+	font-size: 110%;
+	padding: 10px;
+}
+
+.fail-stats-link-block a {
+	font-weight: bold;
+	padding: 10px;
+}

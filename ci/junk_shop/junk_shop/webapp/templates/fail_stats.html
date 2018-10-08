@@ -14,6 +14,18 @@
 {% endblock %}
 
 {% block content %}
+
+  {% if project and branch %}
+  {{ common_macros.breadcrumbs([
+       ('Projects',  url_for('project_list')),
+       (project + ' / ' + branch, url_for('branch', project_name=project, branch_name=branch))
+  ]) }}
+  {% else %}
+  {{ common_macros.breadcrumbs([
+       ('Projects',  url_for('project_list'))
+    ]) }}
+  {% endif %}
+
   <h2>Statistic of fails</h2>
       <form class="form form-horizontal" method="post" role="form">
         {{ form.hidden_tag() }}
@@ -57,20 +69,22 @@
           </tr>
         </thead>
        <tbody>
-       {% for path, id, count, root_run, run_id, last_fail in failed_tests %}
+       {% for rec in failed_tests %}
          <tr>
            <td class="fail-list-cell">
-              <a class="test-link" href="{{ url_for('run', run_id=root_run, _anchor=run_id) }}">
-                  {{- path -}}
+              <a class="test-link"
+                 href="{{ url_for('run', run_id=rec.last_root_run, _anchor=rec.last_run_id) }}">
+                  {{- rec.path -}}
               </a>
            </td>
            <td class="fail-list-cell" align="center">
-              <a href="{{ url_for('build', project_name=project, branch_name=branch, build_num=last_fail ) }}">
-                  {{- last_fail -}}
+              <a href="{{ url_for('build',
+              project_name=project, branch_name=branch, build_num=rec.last_build_num ) }}">
+                  {{- rec.last_build_num -}}
               </a>
            </td>
            <td class="fail-list-cell" align="center">
-               <b>{{- count -}}</b>
+               <b>{{- rec.fail_count -}}</b>
            </td>
          </tr>
        {% endfor %}

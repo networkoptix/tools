@@ -9,6 +9,8 @@ VERSION_AS_INTS_SQL = "string_to_array(run.version, '.')::int[]"
 
 BYTE_FORMATS = ['', 'K', 'M', 'G', 'T']
 
+TESTED_PLATFORMS = ['linux-x64', 'windows-x64', 'mac']
+
 DEFAULT_BUILD_LIST_PAGE_SIZE = 10
 
 

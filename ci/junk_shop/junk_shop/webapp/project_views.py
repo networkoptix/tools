@@ -2,7 +2,9 @@ from flask import request, render_template
 from pony.orm import db_session, select, desc, exists
 from .. import models
 from junk_shop.webapp import app
-from .utils import paginator, DEFAULT_BUILD_LIST_PAGE_SIZE, STAGES, STAGE_NAMES
+from .utils import (
+    paginator, DEFAULT_BUILD_LIST_PAGE_SIZE,
+    STAGES, STAGE_NAMES, TESTED_PLATFORMS)
 from .matrix_cell import MatrixCell
 
 
@@ -76,6 +78,7 @@ def branch(project_name, branch_name):
         run.root_run.build.branch.name == branch_name and
         run.test.path.startswith('functional/scalability_test.py') and
         run.test.is_leaf and exists(run.metrics)))
+
     platform_list = list(select(run.platform for run in models.Run if run.build in build_list).order_by(models.Platform.order_num))
     return render_template(
         'branch.html',
@@ -87,5 +90,6 @@ def branch(project_name, branch_name):
         build_changesets_map=build_changesets_map,
         platform_map=platform_map,
         scalability_platform_list=scalability_platform_list,
-        stages=STAGES
+        tested_platform_list=TESTED_PLATFORMS,
+        stages=STAGES,
         )

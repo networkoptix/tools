@@ -37,6 +37,19 @@
       </div>
     {% endif %}
 
+    {% if tested_platform_list  %}
+      <div class="fail-stats-link-block">
+        Fail statistics:
+        {% for platform_name in tested_platform_list %}
+          <a href="{{ url_for('fail_stats', project=project_name, platform=platform_name,
+                              branch=branch_name, bundle='unit') }}"
+             class="link">
+          {{ platform_name }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <table class="branch {{ matrix_macros.platform_width_class(platform_list) }}">
       <thead>
         <tr>
