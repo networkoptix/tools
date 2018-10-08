@@ -10,7 +10,7 @@ namespace Nx
         static string host = "localhost";
         static int port = 7001;
         static string login = "admin";
-        static string password = "qweasd123";
+        static string password = "";
 
         // This example allows to add camera to layout.
         // Camera is specified by its Logical ID.
@@ -71,8 +71,7 @@ namespace Nx
                     permissions = "GlobalAccessAllMediaPermission",
                     realm = "VMS"
                 };
-                //test.setPassword("testPassword123");
-                test.setPassword("qweasd123");
+                test.setPassword("testPassword123");
                 await api.saveUser(test);
             }
 
