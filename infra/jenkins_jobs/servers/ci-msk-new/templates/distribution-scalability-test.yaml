@@ -34,7 +34,7 @@
     - p_NX_VMS_COMMIT:
         default: ''
     - string:
-        name: NX_TEST_FRAMEWORK_COMMIT
+        name: ST_COMMIT
     - string:
         name: USE_LIGHTWEIGHT_SERVERS
     - string:
@@ -81,7 +81,7 @@
     scm:
     - hg-local:
         name: nx_vms
-        revision: '$NX_TEST_FRAMEWORK_COMMIT'
+        revision: '$ST_COMMIT'
     - hg-local:
         name: devtools
         revision: default

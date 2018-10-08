@@ -169,6 +169,9 @@
             rct_enabled: 'ON'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
+            st_enabled: 'OFF'
+            st_commit_default: ST_BY_COMMIT
+            st_commit_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         - on-push-vms:
@@ -181,6 +184,9 @@
             rct_enabled: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
+            st_enabled: 'OFF'
+            st_commit_default: ST_BY_COMMIT
+            st_commit_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         - on-push-ft:
@@ -193,6 +199,9 @@
             rct_enabled: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH
             rct_commit_option_default: ''
+            st_enabled: 'OFF'
+            st_commit_default: ST_BY_COMMIT
+            st_commit_option_default: 'vms'
             default_platforms: bpi
             default_customizations: default
             test_list: self_tests
@@ -207,6 +216,9 @@
             rct_enabled: 'ON'
             rct_commit_default: RCT_STABLE_PUSH
             rct_commit_option_default: ''
+            st_enabled: 'OFF'
+            st_commit_default: ST_BY_COMMIT
+            st_commit_option_default: 'vms'
             default_platforms: bpi
             default_customizations: default
         - vms-nightly:
@@ -219,6 +231,9 @@
             rct_enabled: 'OFF'
             rct_commit_default: RCT_STABLE_PUSH_OR_NIGHTLY
             rct_commit_option_default: ''
+            st_enabled: 'ON'
+            st_commit_default: ST_BY_COMMIT
+            st_commit_option_default: 'vms'
             default_platforms: linux-x64
             default_customizations: default
         # - nightly:

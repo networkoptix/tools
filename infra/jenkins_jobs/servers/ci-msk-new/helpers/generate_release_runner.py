@@ -119,6 +119,12 @@ print '''#
     # TODO:
     # - string:
     #     name: NX_FUNCTESTS_COMMIT
+    - string:
+        name: ST_ENABLED
+        default: 'NO'
+    - string:
+        name: ST_COMMIT
+        default: ''
 
     wrappers:
     - timestamps
@@ -269,8 +275,11 @@ print '''
         projects:
 '''
 
-for customization in CUSTOMIZATIONS_LIST:
-    print '''
+# For now we test only default, so next 2 lines should be changed after other customizations added
+# for customization in CUSTOMIZATIONS_LIST:
+#     print '''
+customization = 'default'
+print '''
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.functest'
           condition: COMPLETED # allow unstable
           kill-phase-on: NEVER
@@ -306,6 +315,23 @@ for customization in CUSTOMIZATIONS_LIST:
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+
+        - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.scalability-test'
+          condition: COMPLETED # allow unstable
+          kill-phase-on: NEVER
+          enable-condition: >-
+            ("$CUSTOMIZATIONS").trim().split(",").contains("'''+customization+'''") &&
+            ("$ST_ENABLED").contains("ON")
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+            BUILD_IDENTITY=$BUILD_IDENTITY
+            BRANCH=$BRANCH
+            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            ST_COMMIT=$ST_COMMIT
+            CLEAN_WORKSPACE=true
+            RUNNER_URL=$BUILD_URL
+
 '''
 print '''
     - shell: |

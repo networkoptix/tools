@@ -29,6 +29,9 @@
     - string: { name: RCT_ENABLED             }
     - string: { name: RCT_COMMIT              }
     - string: { name: RCT_COMMIT_OPTION       }
+    - string: { name: ST_ENABLED              }
+    - string: { name: ST_COMMIT_CHOICE        }
+    - string: { name: ST_COMMIT_OPTION        }
 
     builders:
     - custom-clean-workspace:
@@ -249,6 +252,40 @@
             #!bash
             echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
             cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
+
+    # ===SCALABILITY TESTS ===
+
+    - shell: |
+        echo "ST_ENABLED=$ST_ENABLED" >> RUNNER_ARGS.envvars
+
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$ST_ENABLED'
+        condition-string2: 'OFF'
+        steps:
+        - shell:
+            #!bash
+            echo 'ST_COMMIT=' > ST_COMMIT.envvar
+
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '$ST_ENABLED'
+        condition-string2: 'ON'
+        steps:
+        # in case if we won't find any commits, we don't want to fail calc
+        - shell: echo 'ST_COMMIT=' > ST_COMMIT.envvar
+
+        - freeze-commit-if(var=val):
+            pipeline: '{pipeline}'
+            var: ST_COMMIT_CHOICE
+            val: ST_BY_COMMIT
+            commit_to_freeze: $ST_COMMIT_OPTION
+            as: ST_COMMIT
+
+        - shell: |
+            #!bash
+            echo "RUN_ST=true" >> RUNNER_ARGS.envvars
+            cat ST_COMMIT.envvar >> RUNNER_ARGS.envvars
 
     publishers:
     - archive:

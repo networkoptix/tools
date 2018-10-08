@@ -414,3 +414,18 @@
         default: '{option_default}'
         description: >-
           ENTER option for RCT_COMMIT, optional, depending on what's selected in prev field
+- parameter:
+    name: p_ST_COMMIT_w_OPTION
+    parameters:
+    - better-single-select:
+        name: ST_COMMIT_CHOICE
+        choices:
+        - - "ST_BY_COMMIT"
+          - "Use other commit (ENTER commit)"
+        default: '{default}'
+        description: Which RCT commit should be used
+    - string:
+        name: ST_COMMIT_OPTION
+        default: '{option_default}'
+        description: >-
+          ENTER option for ST_COMMIT, optional, depending on what's selected in prev field

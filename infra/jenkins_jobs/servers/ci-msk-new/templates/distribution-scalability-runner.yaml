@@ -18,6 +18,7 @@
         artifact-num-to-keep: '{default_artifact_num_to_keep}'
 
     parameters:
+    - p_REQUESTED_BY
     - p_BUILD_DESCRIPTION:
         default: ''
     - p_CLEAN_WORKSPACE:
@@ -28,7 +29,7 @@
     - p_NX_VMS_COMMIT:
         default: ''
     - string:
-        name: NX_TEST_FRAMEWORK_COMMIT
+        name: ST_COMMIT
     - p_PIPELINE(hidden):
         default: '{pipeline}'
     - p_CUSTOMIZATION(hidden):
@@ -51,7 +52,7 @@
     - set-custom-build-description
 
     - build-name-setter:
-        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$NX_TEST_FRAMEWORK_COMMIT'
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$ST_COMMIT'
         macro: true
 
     - description-setter:
@@ -68,36 +69,42 @@
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=50
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=100
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=150
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=200
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=250
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=true
             SERVER_COUNT=300
 
@@ -110,24 +117,28 @@
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=50
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=100
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=150
         - name: '{pipeline}.{version}.{project}.distribution.{customization}.scaletest'
           kill-phase-on: FAILURE
           current-parameters: true
           predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
             USE_LIGHTWEIGHT_SERVERS=false
             SERVER_COUNT=200
 

@@ -80,6 +80,17 @@
         default: '{rct_commit_default}'
         option_default: '{rct_commit_option_default}'
 
+    - simple-separator-colored:
+        header: 'Options for Scalability tests'
+        color: lavender
+    - on-off-option:
+        name: ST_ENABLED
+        subject: If ON, then SacalbilityTests will run, otherwise skipped
+        default: '{st_enabled}'
+    - p_ST_COMMIT_w_OPTION:
+        default: '{st_commit_default}'
+        option_default: '{st_commit_option_default}'
+
     # TODO: Add additional sections and options...
     # - simple-separator-colored:
     #     header: 'Extra options'
