@@ -356,11 +356,11 @@
           - "Make new build (ENTER commit)"
         - - VMS_EXIST_BUILD_BY_IDENTITY
           - "Existing build (ENTER build identity)"
-        - - VMS_EXIST_BUILD_STABLE_PUSH
+        - - VMS_EXISTING_BUILD_FROM_STABLE_PUSH
           - "Existing green build (latest push)"
-        - - VMS_EXIST_BUILD_STABLE_NIGHTLY
+        - - VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY
           - "Existing green build (latest nightly)"
-        - - VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+        - - VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
           - "Existing green build (latest push or nightly)"
         default: '{default}'
         description: >-

@@ -86,19 +86,19 @@
 
         - import-envvars-if(var=val):
             var: VMS_BUILD
-            val: VMS_EXIST_BUILD_STABLE_PUSH
+            val: VMS_EXISTING_BUILD_FROM_STABLE_PUSH
             from: '{pipeline}.{version}.preset.on-push-vms'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
 
         - import-envvars-if(var=val):
             var: VMS_BUILD
-            val: VMS_EXIST_BUILD_STABLE_NIGHTLY
+            val: VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY
             from: '{pipeline}.{version}.preset.nightly-vms'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
 
         - import-latest-envvar-if(var=val):
             var: VMS_BUILD
-            val: VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+            val: VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             job_1: '{pipeline}.{version}.preset.on-push-vms'
             job_2: '{pipeline}.{version}.preset.nightly-vms'
             envvar: NX_VMS_COMMIT

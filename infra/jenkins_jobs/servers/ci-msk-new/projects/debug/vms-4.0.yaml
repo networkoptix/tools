@@ -184,7 +184,7 @@
             default_platforms: linux-x64
             default_customizations: default
         - on-push-ft:
-            vms_build_default: 'VMS_EXIST_BUILD_STABLE_PUSH'  # VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+            vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_option_default: ''
             ut_enabled: 'OFF'
             ft_enabled: 'ON'
@@ -198,7 +198,7 @@
             test_list: self_tests
             test_select_expr: 'windows or smb'
         - on-push-rct:
-            vms_build_default: 'VMS_EXIST_BUILD_STABLE_PUSH'  # VMS_EXIST_BUILD_STABLE_PUSH_OR_NIGHTLY
+            vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_option_default: ''
             ut_enabled: 'OFF'
             ft_enabled: 'OFF'
@@ -222,7 +222,7 @@
             default_platforms: linux-x64
             default_customizations: default
         # - nightly:
-        #     vms_build_default: 'VMS_EXIST_BUILD_STABLE_NIGHTLY'
+        #     vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
         #     vms_build_option_default: ''
         #     ft_commit_default: FT_STABLE_PUSH
         #     ft_commit_option_default: ''
@@ -231,7 +231,7 @@
         #     default_platforms: bpi
         #     default_customizations: default
         # - nightly:
-        #     vms_build_default: 'VMS_EXIST_BUILD_STABLE_NIGHTLY'
+        #     vms_build_default: 'VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY'
         #     vms_build_option_default: ''
         #     ft_commit_default: FT_STABLE_PUSH
         #     ft_commit_option_default: ''
