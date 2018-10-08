@@ -1,19 +1,21 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nx
 {
     class examples
     {
-        static string server = "localhost";
+        static string host = "localhost";
         static int port = 7001;
-        static string user = "admin";
-        static string password = "";
+        static string login = "admin";
+        static string password = "qweasd123";
 
         // This example allows to add camera to layout.
         // Camera is specified by its Logical ID.
         // Layout is specified by its Logical ID.
-        static async Task LayoutExample(string[] args)
+        static async Task layoutExample(string[] args)
         {
             if (args.Length < 3)
             {
@@ -26,21 +28,61 @@ namespace Nx
             if (cameraId <= 0 || layoutId <= 0)
                 return;
 
-            var api = new Nx.Connection(server, port, user, password);
+            var api = new Nx.Api(new Nx.Connection(host, port, login, password));
 
-            var layout = await api.GetLayout(layoutId);
+            var layout = await api.getLayout(layoutId);
             if (layout is null)
             {
                 Debug.WriteLine("No such layout id=" + layoutId);
                 return;
             }
-            await api.AddCameraToLayout(layout, cameraId, tileId);
+            await api.addCameraToLayout(layout, cameraId, tileId);
+            Debug.WriteLine("Done");
+        }
+
+        static async Task usersExample()
+        {
+            var api = new Nx.Api(new Nx.Connection(host, port, login, password));
+            var userList = await api.getUsers();
+            foreach (var user in userList)
+            {
+                Debug.WriteLine($"User {user.name} found. It's full name is {user.fullName}");
+                if (user.fullName.Length == 0)
+                {
+                    user.fullName = char.ToUpper(user.name[0]) + user.name.Substring(1);
+                    Debug.WriteLine($"Fill {user.name} full name with {user.fullName}");
+                    await api.saveUser(user);
+                }
+            }
+
+            var testUser = userList.FirstOrDefault(user => user.name == "test");
+            if (testUser != null)
+            {
+                Debug.WriteLine("Deleting test user");
+                await api.deleteUser(testUser);
+            }
+            else
+            {
+                Debug.WriteLine("Creating test user with live viewer permissions");
+                User test = new User
+                {
+                    name = "test",
+                    fullName = "User For Testing",
+                    permissions = "GlobalAccessAllMediaPermission",
+                    realm = "VMS"
+                };
+                //test.setPassword("testPassword123");
+                test.setPassword("qweasd123");
+                await api.saveUser(test);
+            }
+
             Debug.WriteLine("Done");
         }
 
         static void Main(string[] args)
         {
-            LayoutExample(args).GetAwaiter().GetResult();
+            //LayoutExample(args).GetAwaiter().GetResult();
+            usersExample().Wait();
         }
     }
 }
