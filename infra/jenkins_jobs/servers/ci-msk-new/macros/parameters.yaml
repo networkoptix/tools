@@ -299,18 +299,12 @@
     - better-single-select:
         name: CLOUD_GROUP
         choices:
-        - - test
-          - test   # TODO: Write description
-        - - tmp
-          - tmp    # TODO: Write description
-        - - dev
-          - dev    # TODO: Write description
-        - - demo
-          - demo   # TODO: Write description
-        - - stage
-          - stage  # TODO: Write description
-        - - prod
-          - prod   # TODO: Write description
+        - [ test,   test  ]   # TODO: Write description
+        - [ tmp,    tmp   ]   # TODO: Write description
+        - [ dev,    dev   ]   # TODO: Write description
+        - [ demo,   demo  ]   # TODO: Write description
+        - [ stage,  stage ]   # TODO: Write description
+        - [ prod,   prod  ]   # TODO: Write description
         default: '{default}'
         description: >-
           Cloud group
