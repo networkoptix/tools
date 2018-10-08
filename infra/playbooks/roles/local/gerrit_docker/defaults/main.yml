@@ -1,0 +1,13 @@
+gerrit_user: gerrit
+gerrit_group: gerrit
+gerrit_home: /opt/gerrit
+
+
+gerrit_postgres_user: gerrit
+gerrit_postgres_password: gerrit
+gerrit_authorized_keys: []
+gerrit_canonical_url: http://review.enk.me
+
+# TODO
+google_auth_client_id: ''
+google_auth_client_secret: ''

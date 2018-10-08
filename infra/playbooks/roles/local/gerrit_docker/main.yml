@@ -1,0 +1,5 @@
+---
+- name: Restart gerrit
+  service:
+    name: '{{ gerrit_systemd_service }}'
+    state: 'restarted'

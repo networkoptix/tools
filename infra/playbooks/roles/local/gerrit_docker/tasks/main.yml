@@ -1,0 +1,128 @@
+---
+- name: "Add gerrit group {{ gerrit_group }}"
+  group:
+    name: "{{ gerrit_group }}"
+    state: present
+
+- name: "Add gerrit user {{ gerrit_user }}"
+  user:
+    name: "{{ gerrit_user }}"
+    group: "{{ gerrit_group }}"
+    home: "{{ gerrit_home }}"
+    createhome: yes
+    shell: /bin/bash
+
+- name: Add gerrit user to 'docker' group
+  user:
+    name: '{{ item }}'
+    groups: 'docker'
+    append: True
+  with_items:
+  - "{{ gerrit_user }}"
+
+- name: "Create .ssh in {{ gerrit_user }} home dir"
+  become: true
+  become_user: "{{ gerrit_user }}"
+  file:
+    path: "{{ gerrit_home }}/.ssh/"
+    state: directory
+    owner: "{{ gerrit_user }}"
+    group: "{{ gerrit_group }}"
+    mode: "u+rwx,g-rwx,o-rwx"
+
+- name: Configure pub keys
+  become: true
+  become_user: "{{ gerrit_user }}"
+  lineinfile:
+    path: "{{ gerrit_home }}/.ssh/authorized_keys"
+    line: "{{ item }}"
+    create: true
+  with_items: "{{ gerrit_authorized_keys }}"
+
+- name: Create some required directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ gerrit_user }}"
+    group: "{{ gerrit_group }}"
+    mode: "777"  #?
+  with_items:
+  - "{{ gerrit_home }}/data"
+  - "{{ gerrit_home }}/data/gerrit"
+  - "{{ gerrit_home }}/data/gerrit/cache"
+  - "{{ gerrit_home }}/data/gerrit/etc"
+  - "{{ gerrit_home }}/data/gerrit/git"
+  - "{{ gerrit_home }}/data/gerrit/index"
+  - "{{ gerrit_home }}/data/ldap"
+  - "{{ gerrit_home }}/data/ldap/etc"
+  - "{{ gerrit_home }}/data/ldap/var"
+  - "{{ gerrit_home }}/data/postgres"
+
+
+- name: Prepare configs (1)
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ gerrit_home }}/data/gerrit/etc/{{ item }}"
+    owner: "{{ gerrit_user }}"
+    group: "{{ gerrit_group }}"
+    mode: '0777' # ?
+  with_items:
+  - gerrit.config
+  - secure.config
+
+# TODO: Make this setup op. conditional
+- name: Prepare configs (2)
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ gerrit_home }}/{{ item }}"
+    owner: "{{ gerrit_user }}"
+    group: "{{ gerrit_group }}"
+  with_items:
+  - docker-compose.yaml
+
+- name: Setup (1)
+  become: true
+  become_user: "{{ gerrit_user }}"
+  shell: docker-compose up -d postgres && sleep 20
+  args:
+    chdir: "{{ gerrit_home }}"
+
+# TODO: copy or build plugin
+- name: Setup (2)
+  become: true
+  become_user: "{{ gerrit_user }}"
+  shell: docker-compose run gerrit java -jar /var/gerrit/bin/gerrit.war init -d /var/gerrit
+  args:
+    chdir: "{{ gerrit_home }}"
+
+- name: Setup (3)
+  become: true
+  become_user: "{{ gerrit_user }}"
+  shell: docker-compose up -d && sleep 10
+  args:
+    chdir: "{{ gerrit_home }}"
+
+# TODO:
+# - name: Create SystemD Unit
+#   include_role:
+#     name: tumf.systemd-service
+#   vars:
+#     systemd_service_name: '{{ gerrit_systemd_service }}'
+#     systemd_service_Service_User: "{{ gerrit_user }}"
+#     systemd_service_Service_WorkingDirectory: "{{ gerrit_home }}"
+#     systemd_service_Unit_Description: NX  Deployment Console
+#     systemd_service_Unit_Requires: docker.service
+#     systemd_service_Unit_After: docker.service
+#     systemd_service_Service_ExecStartPre:
+#     - /usr/local/bin/docker-compose -f {{ gerrit_home }}/src/docker-compose.yml down -v
+#     - /usr/local/bin/docker-compose -f {{ gerrit_home }}/src/docker-compose.yml rm -v
+#     systemd_service_Service_ExecStart: >-
+#       /usr/local/bin/docker-compose -f {{ gerrit_home }}/src/docker-compose.yml up
+#     systemd_service_Service_ExecStop: >-
+#       /usr/local/bin/docker-compose -f {{ gerrit_home }}/src/docker-compose.yml down -v
+#   notify:
+#   - Restart gerrit
+
+# - service:
+#     name: '{{ gerrit_systemd_service }}'
+#     state: started
