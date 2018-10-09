@@ -184,7 +184,7 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: linux-x64,windows-x-64,mac,bpi
+            default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
         - on-push-ft:
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
