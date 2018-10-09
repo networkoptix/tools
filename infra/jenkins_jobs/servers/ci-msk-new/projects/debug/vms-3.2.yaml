@@ -5,9 +5,9 @@
     project: vms
 
     version:
-    - vms:
-        default_branch: vms
-        use_nx_vms_commit: vms  # FIXME: this is temp fix
+    - vms_3.2_release:
+        default_branch: vms_3.2_release
+        use_nx_vms_commit: vms_3.2_release  # FIXME: this is temp fix
 
     realcameratesting_framework_branch: vms
 
