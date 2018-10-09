@@ -1,5 +1,5 @@
 - project:
-    name: debug-pipeline-4.0
+    name: debug-pipeline-3.2
     __debug__: true
 
     project: vms
@@ -10,12 +10,13 @@
         use_nx_vms_commit: vms  # FIXME: this is temp fix
 
     realcameratesting_framework_branch: vms
-    build_webadmin_concurrently: false
 
     # SECTION. GLOBAL PIPELINE CONFIG
     # ============================================================
 
-    max_concurrent_runners: 3
+    build_distribution_concurrently: false
+    test_distribution_concurrently: false
+    max_concurrent_runners: 1
 
     # comma-separated list of emails to whom send notifications related to builds
     build_watchers: ''
@@ -31,11 +32,10 @@
     # ============================================================
 
     pipeline:
-    - debug:
-        junkshop_project_name: debug
+    - develop:
+        junkshop_project_name: ci
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline: ''
-        pipeline_priority: 1
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -59,14 +59,21 @@
         cmake_configure_args_platform: >-
           -G Ninja
           -DtargetDevice=bpi
-
+        cmake_build_extra_args: >-
+          -- -j 20
     # -- windows platform --
-
+    # FIXME: HOME,PATH and other vars are represented as win env.
+    # But some other vars are linux-like.
+    # Rsync goes mad ain result and nothing works.
+    # FIXME: Code signing does not work properly for unknown reasons.
+    # This only shoots for windows and 3.2 branch.
     - windows-x64: &windows_config
         distribution_build_node: build-installer-windows
         cmake_configure_args_platform: >-
           -G 'Visual Studio 15 2017 Win64'
           -DcodeSigning=OFF
+          -DaddQtPdb=ON
+          -DtrustedTimestamping=OFF
           -DtargetDevice=windows-x64
           -T host=x64
 
@@ -80,6 +87,7 @@
           -DcodeSigning=OFF
         cmake_build_extra_args: >-
           -- -j 10
+
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================
 
@@ -102,18 +110,6 @@
 
     # list of jobs to generate
     jobs:
-
-    - manual-trigger:
-        preset:
-        - custom:
-            detailed_job_description: |-
-              This trigger serves for custom builds.
-              For example, you may want to verify that Jenkins works properly and can
-              successfully rebuild some successful build.
-            default_build_description: >-
-              Manually triggered
-            platforms: linux-x64,windows-x64,mac,bpi
-            customizations: default
 
     # RUNNER - root launcher of all builds
 
@@ -223,7 +219,7 @@
             default_customizations: default
         - vms-nightly:
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_choice_option_default: 'vms'
+            vms_build_choice_option_default: 'vms_3.2_release'
             ut_enabled: 'ON'
             ft_enabled: 'OFF'
             ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
