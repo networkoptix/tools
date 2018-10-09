@@ -17,6 +17,7 @@
         condition-string1: '${var}'
         condition-string2: '{val}'
         steps:
+        - inject: {} # workaround: must have >1 builder to correctly expand macro
         - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
             branch: $BRANCH
