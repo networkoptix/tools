@@ -68,7 +68,7 @@
       (url is http://<jenkins.url>/computer/<host.name>/configure ).
 
 
-# FIXME: Add missing "choco install cmake --version 3.10.2"
+# FIXME: Add missing "choco install cmake --version 3.12.3"
 
 - name: Install unzip
   command: >-
