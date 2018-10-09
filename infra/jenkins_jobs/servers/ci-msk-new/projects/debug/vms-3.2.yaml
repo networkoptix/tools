@@ -32,10 +32,11 @@
     # ============================================================
 
     pipeline:
-    - develop:
-        junkshop_project_name: ci
+    - debug:
+        junkshop_project_name: debug
         # Pipeline-specific cmake arguments
         cmake_configure_args_pipeline: ''
+        pipeline_priority: 1
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -254,5 +255,5 @@
     - param-resolver
     - hg-trigger:
         repo: nx_vms
-        branch: vms
-        version: vms
+        branch: vms_3.2_release
+        version: vms_3.2_release
