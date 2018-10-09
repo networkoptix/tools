@@ -93,6 +93,10 @@ print '''#
         default: true
     - p_RUN_FUNCTESTS:
         default: false
+    - p_TEST_SELECT_EXPR:
+        default: ''
+    - p_TEST_LIST:
+        default: ''
     - p_RUN_REALCAMERATESTS:
         default: false
     - p_BRANCH:
@@ -293,6 +297,8 @@ print '''
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_VMS_COMMIT
             NX_TEST_FRAMEWORK_COMMIT=$NX_FUNCTESTS_COMMIT
+            TEST_LIST=$TEST_LIST
+            TEST_SELECT_EXPR=$TEST_SELECT_EXPR
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE

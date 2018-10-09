@@ -205,7 +205,7 @@
             default_platforms: linux-x64
             default_customizations: default
             test_list: self_tests
-            test_select_expr: 'windows or smb'
+            test_select_expr: 'not windows and not smb'
         - on-push-rct:
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'  # VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
             vms_build_choice_option_default: ''
