@@ -49,7 +49,7 @@ def retry_on_db_error(fn, *args, **kw):
 
 def init():
     pg_password = os.environ['PGPASSWORD']
-    sql_debug(app.config['SQL_DEBUG'])
+    sql_debug(app.config['SQL_DEBUG'] or 'SQL_DEBUG' in os.environ)
     retry_on_db_error(models.db.bind, 'postgres',
                       host=app.config['DB_HOST'],
                       user=app.config['DB_USER'],
