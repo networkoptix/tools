@@ -81,6 +81,7 @@
 
     wrappers:
     - timestamps
+    - workspace-cleanup
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
@@ -100,7 +101,7 @@
     - inject:
         properties-content: |
           NX_FUNCTESTS_COMMIT=$NX_VMS_COMMIT
-    - shell:
+    - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
         echo "BUILD_IDENTITY=$BUILD_IDENTITY" > BUILD_IDENTITY.envvar
