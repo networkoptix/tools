@@ -51,6 +51,11 @@
     # - BUILD_INSTALLER
     # (based on VMS_BUILD_CHOICE and VMS_BUILD_CHOICE_OPTION, see macros above)
 
+    - shell: |
+        #!bash
+        set -ex
+        echo "NX_VMS_COMMIT=" > NX_VMS_COMMIT.envvar
+        echo "BUILD_IDENTITY=" > BUILD_IDENTITY.envvar
     - conditional-step:
         condition-kind: strings-match
         condition-string1: '$VMS_BUILD_CHOICE'
@@ -65,6 +70,7 @@
             commit-varname: NX_VMS_COMMIT
         - shell: |
             #!bash
+            set -ex
             cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
             cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
             echo BUILD_WEBADMIN=true >> RUNNER_ARGS.envvars
@@ -113,6 +119,7 @@
 
         - shell: |
             #!bash
+            set -ex
             cat  BUILD_IDENTITY.envvar >> RUNNER_ARGS.envvars
             cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
