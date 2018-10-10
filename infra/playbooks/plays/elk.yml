@@ -16,11 +16,11 @@
     become: true
     become_method: sudo
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-  # - role: nickjj.docker
-  #   become: true
-  #   become_method: sudo
-  # #- role: cloudalchemy.node-exporter
-  # #  when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-  # - role: elk_docker
-  #   become: true
-  #   become_method: sudo
+  - role: nickjj.docker
+    become: true
+    become_method: sudo
+  #- role: cloudalchemy.node-exporter
+  #  when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: elk_docker
+    become: true
+    become_method: sudo

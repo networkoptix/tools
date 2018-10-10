@@ -53,10 +53,13 @@
   - "{{ gerrit_home }}/data/gerrit/etc"
   - "{{ gerrit_home }}/data/gerrit/git"
   - "{{ gerrit_home }}/data/gerrit/index"
-  - "{{ gerrit_home }}/data/ldap"
-  - "{{ gerrit_home }}/data/ldap/etc"
-  - "{{ gerrit_home }}/data/ldap/var"
+  - "{{ gerrit_home }}/data/gerrit/index"
   - "{{ gerrit_home }}/data/postgres"
+
+- name: Download OAuth plugin
+  get_url:
+    url: https://github.com/davido/gerrit-oauth-provider/releases/download/v2.14.6.2/gerrit-oauth-provider.jar
+    dest: "{{ gerrit_home }}/data/gerrit/plugins/gerrit-oauth-provider.jar"
 
 
 - name: Prepare configs (1)
