@@ -1,7 +1,0 @@
-elk_user: elk
-elk_group: elk
-elk_home: /opt/elk
-elk_systemd_service: elk_docker
-elk_authorized_keys:
-  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDMVF2i2/HoJh0UVQBjuAE6eat/yGscSlB7xV1Dfk5dVEEqKDDYtdllPA1ZTR4ujg93Wg6LLvlJNBlqrEVGhA6hLUImdUrCys19ideVlv6JcKIEaJkU47Hqx30BDKb/K8zk0rGxHKbidcZFtqfhng0ILM1rXVVW1fJWvW9y+Lmc9W3l5ZxEh9+q2bLD2vTFRfeCn34yAeddnT9R7Cki/fzp1I3NzVG9/aYjUYYxVQY5iQ40l/yOa8cv/sWu/rha55ibs+Q2igaRR0IeijUNQsbkeww5Sdld0G9zmwCN8vCgZGYoYCUoaNPhwzTvEKI8g9n/DDbPb1KfgyNkBFdE/5Ex'
-
