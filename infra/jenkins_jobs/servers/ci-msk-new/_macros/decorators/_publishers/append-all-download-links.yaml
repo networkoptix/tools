@@ -1,0 +1,5 @@
+- publisher:
+    name: append-all-download-links
+    publishers:
+    - groovy-postbuild:
+        script: !include-raw-escape: ../_scripts/report_all_links.groovy

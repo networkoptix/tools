@@ -1,0 +1,128 @@
+# generate ID
+- job-template:
+    # FIXME: build_number -> build_identity
+    # This is kept for compatibility
+    name: '{pipeline}.build_number.generator'
+    id: build-identity-generator
+
+    description: |
+      <pre>
+      ================================================================================
+      BUILD_IDENTITY generator
+      ================================================================================
+
+      JOB MAINTAINERS
+        {job_maintainers}
+        (notified by email on build failures)
+
+      BUILDS MUST NOT BE TRIGGERED MANUALLY
+
+      The only exclusion is setting or changing current value of this counter.
+      This may be done via "SET_BUILD_IDENTITY" parameter.
+
+      --------------------------------------------------------------------------------
+
+      This job serves as registry and autoincrement for "BUILD_IDENTITY".
+      Value is available in BUILD_IDENTITY.envvar file represented in Jenkins
+      envvar format (Var name, equals and var value not enclosed in quotes).
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
+
+    node: runner
+    concurrent: false  # important
+
+    properties:
+    - authorization-{pipeline}-system
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
+
+    parameters:
+
+    # general parameters
+    - parameter-separator/simple:
+        header: "General parameters"
+    - p_REQUESTED_BY
+    - p_BUILD_DESCRIPTION:
+        default: ''
+
+    - administrative-section-separator
+    - string:
+        name: SET_BUILD_IDENTITY
+        default: ''
+        description: Set build number instead of incrementing previous
+
+    wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 1-2 min
+        timeout: 10 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - decorators/set-custom-build-description
+    # Note on conditional steps:
+    # The same logic may be achieved by unconditional fetch & inject but in this case
+    # artifact must be marked as optional. This may result in unexpected side effects
+    # and we'd like to avoid errors that are hard to debug.
+
+    # Normally just increment stored value
+    # FIXME: use import old vars or something like that
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{SET_BUILD_IDENTITY}}'
+        condition-string2: ''
+        steps:
+        - copyartifact:
+            project: ${{JOB_NAME}}
+            filter: 'BUILD_IDENTITY.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo 'Following content will be injected as env variables'
+            cat 'BUILD_IDENTITY.envvar'
+        - inject:
+            properties-file: 'BUILD_IDENTITY.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            (( BUILD_IDENTITY = BUILD_IDENTITY +1 ))
+            echo "BUILD_IDENTITY=${{BUILD_IDENTITY}}" > 'BUILD_IDENTITY.envvar'
+
+    # alternatively, set new value
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '${{SET_BUILD_IDENTITY}}'
+          condition-string2: ''
+        steps:
+        - shell: |
+            set -ex
+            echo "BUILD_IDENTITY=${{SET_BUILD_IDENTITY}}" > 'BUILD_IDENTITY.envvar'
+
+    - inject:
+        properties-file: 'BUILD_IDENTITY.envvar'
+
+    publishers:
+    - decorators/set-build-name:
+        name: '#$BUILD_ID $BUILD_IDENTITY'
+    - archive:
+        artifacts: 'BUILD_IDENTITY.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job_maintainers}'

@@ -1,0 +1,47 @@
+- project:
+    name: custom/any
+
+    pipeline: custom
+    pipeline_priority: 3
+    max_concurrent_runners: 3
+
+    project: vms
+    version: any
+
+    default_branch: default
+    use_nx_vms_commit: ''  # FIXME: this is temp fix
+    realcameratesting_framework_branch: vms
+    build_distribution_custom_suffix: '' # no suffix that determines branch
+    build_watchers: ''
+
+    jobs:
+
+    - manual-trigger:
+        preset:
+        - custom:
+            detailed_job_description: |-
+              This trigger serves for custom builds.
+              For example, you may want to verify that Jenkins works properly and can
+              successfully rebuild some successful build.
+            default_build_description: >-
+              Manually triggered
+            platforms: linux-x64,windows-x64,mac,bpi
+            customizations: default
+            run_unittests: true
+            use_nx_vms_commit: ''
+
+    - _manual-trigger:
+        preset:
+        - custom2:
+            detailed_job_description: |-
+              This trigger serves for custom builds.
+              For example, you may want to verify that Jenkins works properly and can
+              successfully rebuild some successful build.
+            default_build_description: >-
+              Manually triggered
+            platforms: linux-x64,windows-x64,,windows-x86,mac,bpi
+            customizations: default
+            run_unittests: true
+            use_nx_vms_commit: ''
+
+    - vms-current-with-tests

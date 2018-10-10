@@ -1,0 +1,141 @@
+- job-group:
+    name: release/vms-3.2-with-all-possible-builds
+
+    # Some cmake args are applicable for any builds they are applied at first
+    # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
+    cmake_configure_args_global: >-
+      -Dbeta=TRUE
+      -DdeveloperBuild=OFF
+      -DcloudGroup=test
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    platform:
+    # there is also edge1 platform, it's declared and commented in jobs section
+    - linux-x64:
+        # most of builds are linux cross-builds that built on "build-installer-linux"
+        # here we make an anchor to avoid typos and other kind of missconfiguration in future
+        distribution_build_node: &linux_node build-installer-linux
+        # There are some CMake args that aplicable only for particular platform
+        cmake_configure_args_platform: >-
+          -G Ninja
+        cmake_build_extra_args: >-
+          -- -j 20
+    - linux-x86:
+        distribution_build_node: *linux_node
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=linux-x86
+    - bananapi:
+        distribution_build_node: *linux_node
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=bananapi
+          -DwithTests=OFF
+    - bpi:
+        distribution_build_node: *linux_node
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=bpi
+    - rpi:
+        distribution_build_node: *linux_node
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=rpi
+    # - tx1:
+    #     distribution_build_node: *linux_node
+    #     cmake_configure_args_platform: >-
+    #       -G Ninja
+    #       -DtargetDevice=tx1
+    # + edge1
+
+    # -- windows platform --
+    # FIXME: HOME,PATH and other vars are represented as win env.
+    # But some other vars are linux-like.
+    # Rsync goes mad ain result and nothing works.
+    - windows-x64: &windows_config
+        distribution_build_node: build-installer-windows-hw-sign
+        cmake_configure_args_platform: >-
+          -G 'Visual Studio 15 2017 Win64'
+          -DaddQtPdb=ON
+          -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
+          -DhardwareSigning=$HARDWARE_SIGNING
+          -DtargetDevice=windows-x64
+          -T host=x64
+
+    - windows-x86:
+        <<: *windows_config
+        cmake_configure_args_platform: >-
+          -G 'Visual Studio 15 2017'
+          -DaddQtPdb=ON
+          -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
+          -DhardwareSigning=$HARDWARE_SIGNING
+          -DwithTests=ON
+
+    # -- apple platform --
+
+    - mac: &osx_config
+        distribution_build_node: build-installer-mac
+        use_webadmin: false
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DcodeSigning=OFF
+        cmake_build_extra_args: >-
+          -- -j 10
+    # SECTION. CUSTOMIZATION CONFIG
+    # ============================================================
+
+    # TODO: There are some customization that may be build only on specific platform
+    # there is no need to generate extra set of jobs that never gonna be triggered.
+    # it looks like there are too few customization spec. cmake args and we may move such
+    # rare customizations to platform enum.
+
+    cmake_configure_args_customization: >-
+      -Dcustomization=$CUSTOMIZATION
+
+    customization:
+
+    # TODO: Enable later when we'll be ready to test it.
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    - default
+    - default_cn
+    - default_zh_CN
+    - cox
+    - digitalwatchdog
+    - digitalwatchdog_global
+    - hanwha
+    - ipera
+    - ionetworks
+    - nutech
+    - ras
+    - senturian
+    - systemk
+    - tricom
+    - ust
+    - vista
+    - vmsdemoblue
+    - vmsdemoorange
+    - metavms
+    - xccelo
+
+    jobs:
+    - '{pipeline}.{version}.{project}.runner'
+    - webadmin/build
+    - distribution-build
+    # Edge1 is a platform that's exclusive for digitalwatchdog.
+    # add extra jobs for edge1 with digitalwatchdog customization
+    - distribution-build:
+        platform:
+        - edge1:
+            distribution_build_node: *linux_node
+            cmake_configure_args_platform: >-
+              -G Ninja
+              -DtargetDevice=edge1
+        customization:
+        - 'digitalwatchdog'
+
+    - '{pipeline}.{version}.{project}.register-build'

@@ -1,0 +1,163 @@
+# generate ID
+- job-template:
+    name: '{pipeline}.{counter_name}.generator'
+
+    description: |
+      <pre>
+      ================================================================================
+      {counter_var_name} generator
+      ================================================================================
+
+      JOB MAINTAINERS
+        {job_maintainers}
+        (notified by email on build failures)
+
+      BUILDS MUST NOT BE TRIGGERED MANUALLY
+
+      The only exclusion is setting or changing current value of this counter.
+      This may be done via "SET_{counter_var_name}" parameter.
+
+      --------------------------------------------------------------------------------
+
+      This job serves as registry and autoincrement for "{counter_var_name}".
+      Value is available in {counter_var_name}.envvar file represented in Jenkins
+      envvar format (Var name, equals and var value not enclosed in quotes).
+
+      To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
+      parameter. A string passed to BUILD_DESCRIPTION will be set as one of the lines
+      of build description.
+
+      Every build is connected with upstream builds by Jenkins internals, but due to
+      some internal limitations it's recommended to use REQUESTED_BY argument.
+      Trigger builds with some unique marker like $JOB_NAME-$BUILD_ID and then query
+      latest artifact that has REQUESTED_BY equal to marker.
+
+      --------------------------------------------------------------------------------
+      </pre>
+
+    # Examples
+    # ========
+    # multijob projects
+    # ```
+    # builders:
+    # - multijob:
+    #     name: Request new {counter_var_name}
+    #     projects:
+    #     - name: '{pipeline}.{counter_name}.generator'
+    #       kill-phase-on: FAILURE
+    #       predefined-parameters: |
+    #         REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+    #         BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    # - copyartifact:
+    #     project: '{pipeline}.{counter_name}.generator'
+    #     filter: '{counter_var_name}.envvar'
+    #     which-build: last-completed
+    #     parameter-filters: REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+    # - inject:
+    #     properties-file: '{counter_var_name}.envvar'
+    # ```
+    # freestyle projects
+    # ```
+    # builders:
+    # - trigger-builds:
+    #   - project: '{pipeline}.{counter_name}.generator'
+    #     block: true
+    #     predefined-parameters: |
+    #       REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+    #       BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+    # - copyartifact:
+    #     project: '{pipeline}.{counter_name}.generator'
+    #     filter: '{counter_var_name}.envvar'
+    #     which-build: last-completed
+    #     parameter-filters: REQUESTED_BY={{ag_requested_by}
+    # - inject:
+    #     properties-file: '{counter_var_name}.envvar'
+    # ```
+
+    node: runner
+    concurrent: false  # important
+
+    properties:
+    - authorization-{pipeline}-system
+    - build-discarder:
+        days-to-keep: 30
+        num-to-keep: 100
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
+
+    parameters:
+
+    # general parameters
+    - parameter-separator/simple:
+        header: "General parameters"
+    - p_REQUESTED_BY
+    - p_BUILD_DESCRIPTION:
+        default: ''
+
+    - administrative-section-separator
+    - string:
+        name: SET_{counter_var_name}
+        default: ''
+        description: Set build number instead of incrementing previous
+
+    wrappers:
+    - timestamps
+    - timeout:
+        # normally, should complete in 1-2 min
+        timeout: 10 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - decorators/set-custom-build-description
+    # Note on conditional steps:
+    # The same logic may be achieved by unconditional fetch & inject but in this case
+    # artifact must be marked as optional. This may result in unexpected side effects
+    # and we'd like to avoid errors that are hard to debug.
+
+    # Normally just increment stored value
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${{SET_{counter_var_name}}}'
+        condition-string2: ''
+        steps:
+        - copyartifact:
+            project: ${{JOB_NAME}}
+            filter: '{counter_var_name}.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            echo 'Following content will be injected as env variables'
+            cat '{counter_var_name}.envvar'
+        - inject:
+            properties-file: '{counter_var_name}.envvar'
+        - shell: |
+            #!/bin/bash
+            set -ex
+            (( {counter_var_name} = {counter_var_name} +1 ))
+            echo "{counter_var_name}=${{{counter_var_name}}}" > '{counter_var_name}.envvar'
+
+    # alternatively, set new value
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: strings-match
+          condition-string1: '${{SET_{counter_var_name}}}'
+          condition-string2: ''
+        steps:
+        - shell: |
+            set -ex
+            echo "{counter_var_name}=${{SET_{counter_var_name}}}" > '{counter_var_name}.envvar'
+
+    - inject:
+        properties-file: '{counter_var_name}.envvar'
+
+    publishers:
+    - decorators/set-build-name:
+        name: '#$BUILD_ID ${counter_var_name}'
+    - archive:
+        artifacts: '{counter_var_name}.envvar'
+        allow-empty: 'false'
+        fingerprint: true
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job_maintainers}'

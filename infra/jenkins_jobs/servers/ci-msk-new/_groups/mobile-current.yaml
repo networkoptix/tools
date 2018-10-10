@@ -1,0 +1,66 @@
+- job-group:
+    name: mobile-current
+
+
+    build_webadmin: 'false'
+    use_webadmin: 'false'
+    # Some cmake args are applicable for any builds they are applied at first
+    # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
+    cmake_configure_args_global: >-
+      -Dbeta=TRUE
+      -DdeveloperBuild=OFF
+      -DcloudGroup=test
+
+    # SECTION. PIPELINE CONFIG
+    # ============================================================
+
+    pipeline: develop
+    junkshop_project_name: ci
+
+    # SECTION. PLATFORM CONFIG
+    # ============================================================
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    platform:
+
+    - android-arm:
+        # most of builds are linux cross-builds that built on "build-installer-linux"
+        # here we make an anchor to avoid typos and other kind of missconfiguration in future
+        distribution_build_node: &linux_node build-installer-linux
+        cmake_configure_args_platform: >-
+          -G Ninja
+          -DtargetDevice=android-arm
+        cmake_build_extra_args: >-
+          -- -j 20
+    - ios:
+        distribution_build_node: build-installer-mac
+        cmake_configure_args_platform: >-
+          -G Xcode
+          -DtargetDevice=ios
+
+    # SECTION. CUSTOMIZATION CONFIG
+    # ============================================================
+
+    # TODO: There are some customization that may be build only on specific platform
+    # there is no need to generate extra set of jobs that never gonna be triggered.
+    # it looks like there are too few customization spec. cmake args and we may move such
+    # rare customizations to platform enum.
+
+    cmake_configure_args_customization: >-
+      -Dcustomization=$CUSTOMIZATION
+
+    customization:
+
+    # TODO: Enable later when we'll be ready to test it.
+
+    # REMINDER: runner will not change list of subprojects when
+    # extra items are added or removed, so don't forget to change runner
+    # template according to changes made here
+    - default
+
+
+    jobs:
+    - '{pipeline}.{version}.{project}.runner'
+    - distribution-build

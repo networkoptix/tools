@@ -1,0 +1,150 @@
+- job-template:
+    # TODO: rename properly
+    name: '{pipeline}.{version}.{project}.distribution.default.scalability-test'
+    id: scalability-runner
+    project-type: multijob
+    description: |
+      Run scalability tests for default for {version}.
+    node: runner
+    concurrent: false
+
+    properties:
+    - authorization-{pipeline}-system
+    - priority-sorter:
+        priority: !j2: '{{ pipeline_priority }}'
+    - build-discarder:
+        days-to-keep: 10
+        num-to-keep: 50
+        artifact-days-to-keep: 30
+        artifact-num-to-keep: '{default_artifact_num_to_keep}'
+
+    parameters:
+    - p_REQUESTED_BY
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_CLEAN_WORKSPACE:
+        default: true
+    - p_BUILD_IDENTITY
+    - p_BRANCH:
+        default: '{default_branch}'
+    - p_NX_VMS_COMMIT:
+        default: ''
+    - string:
+        name: ST_COMMIT
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+    - p_CUSTOMIZATION(hidden):
+        default: 'default'
+    - p_PLATFORM(hidden):
+        default: all
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 420 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - inject:
+        properties-content: |
+          JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
+    - decorators/set-custom-build-description
+
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$ST_COMMIT'
+        macro: true
+
+    - description-setter:
+        description: >-
+          <a href='$REPOSITORY_URL'> Artifacts </a>,
+          <a href='$JUNKSHOP_URL'> Junkshop </a>
+
+    - multijob:
+        name: Run lightweight servers
+        condition: ALWAYS
+        execution-type: 'SEQUENTIALLY'
+        projects:
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=50
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=100
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=150
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=200
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=250
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=true
+            SERVER_COUNT=300
+
+    - multijob:
+        name: Run heavyweight servers
+        condition: SUCCESSFUL
+        execution-type: 'SEQUENTIALLY'
+        projects:
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=false
+            SERVER_COUNT=50
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=false
+            SERVER_COUNT=100
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=false
+            SERVER_COUNT=150
+        - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
+          kill-phase-on: FAILURE
+          current-parameters: true
+          predefined-parameters: |
+            REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+            USE_LIGHTWEIGHT_SERVERS=false
+            SERVER_COUNT=200
+
+    publishers:
+    - failure-email:
+        email-recipients: '{build_watchers}'
+    - fixed-email:
+        email-recipients: '{build_watchers}'

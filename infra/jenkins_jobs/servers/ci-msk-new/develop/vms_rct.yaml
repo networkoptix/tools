@@ -1,0 +1,54 @@
+- project:
+    name: develop/vms_rct
+
+    project: vms
+    pipeline: develop
+    junkshop_project_name: ci
+
+    version: vms_rct
+    default_branch: vms_rct
+    use_nx_vms_commit: vms_rct  # FIXME: this is temp fix
+
+    realcameratesting_framework_branch: vms
+    build_watchers: ''
+
+    jobs:
+
+    - '{pipeline}.{version}.{project}.runner'
+
+    - realcamera:
+        build_watchers: muskov@networkoptix.com
+
+    - develop/hg-trigger:
+        repo: nx_vms
+        branch: vms_rct
+        version: vms_rct
+        job_to_trigger_on_vms_changed: ''
+        job_to_trigger_on_ft_changed: ''
+        job_to_trigger_on_rct_changed: 'develop.vms_rct.preset.on-push-rct'
+
+    - param-resolver
+
+    - preset:
+
+        preset-name:
+
+        - on-push-rct:
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_VMS32RELEASE'
+            vms_build_choice_option_default: ''
+            default_platforms: linux-x64
+            default_customizations: default
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'OFF'
+            ft_commit_choice_default: FT_OTHER_COMMIT
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'ON'
+            rct_commit_choice_default: RCT_OTHER_COMMIT
+            rct_commit_choice_option_default: 'vms_rct'
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''

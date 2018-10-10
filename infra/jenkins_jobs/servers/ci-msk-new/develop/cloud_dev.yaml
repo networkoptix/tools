@@ -1,0 +1,52 @@
+- project:
+    name: develop/cloud_dev
+
+    pipeline: develop
+    max_concurrent_runners: 1
+    junkshop_project_name: ci
+    build_distribution_concurrently: false
+    test_distribution_concurrently: false
+
+    project: vms
+    realcameratesting_framework_branch: vms
+    build_watchers: akolesnikov@networkoptix.com
+
+    version: cloud_dev
+    default_branch: cloud_dev
+    use_nx_vms_commit: cloud_dev  # FIXME: this is temp fix
+
+    jobs:
+
+    - vms-current-with-tests
+
+    - develop/hg-trigger:
+        repo: nx_vms
+        branch: cloud_dev
+        version: cloud_dev
+        job_to_trigger_on_vms_changed: 'develop.cloud_dev.preset.on-push-vms'
+        job_to_trigger_on_ft_changed: ''
+        job_to_trigger_on_rct_changed: ''
+
+    - param-resolver
+
+    - preset:
+        preset-name:
+        - on-push-vms:
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'cloud_dev'
+            default_platforms: linux-x64,windows-x64,mac,bpi
+            default_customizations: default
+
+            ut_enabled: 'ON'
+
+            ft_enabled: 'OFF'
+            ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''

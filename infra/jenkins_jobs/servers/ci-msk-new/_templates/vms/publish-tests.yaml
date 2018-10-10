@@ -1,9 +1,9 @@
 - job-template:
-    name: '{pipeline}.helper.pull-component'
+    name: '{pipeline}.helper.publish-tests'
     description: |
       <pre>
       ================================================================================
-      Pull component
+      Publish tests
       ================================================================================
 
       JOB MAINTAINERS
@@ -12,24 +12,27 @@
 
       --------------------------------------------------------------------------------
 
-      This job serves for delivering components into particular workspace.
+      This job serves for publishing components into artifacts repository.
 
       We have the same jenkins user on each node. But we don't want to mess up with
       permissions and credentials and to find ourselves in situation when artifact
       repo is writeable on nodes where it should be readonly.
 
       Because of this and few other reasons related to unstable rsync, permissions,
-      lack of bash support on windows, etc, we have implemented consuming artifacts in
+      lack of bash support on windows, etc, we have implemented publishing artifacts in
       "reverse" direction.
 
+      We also want to be 100% sure that there are no processes that working on the same
+      branch of artifacts because this will corrupt artifacts with high probability.
+      (this mean that this job has no more than 1 build at a time)
+
       The idea is that job that's being build, schedules another job (this job) to
-      deliver all artifacts/components required to build (independently on build type -
-      it may be unittesting build or reporting build or something else)
+      consume all artifacts/components produced by build.
 
       Build has following parameters
 
       * Standard stuff related to pipeline, platform and others
-      * Target "coordinates" - path on remote host, ssh user and other service data
+      * Source "coordinates" - path on remote host, ssh user and other service data
       * List of components/filters used for filtering only stuff that required
 
       To bypass pipeline descriptions from upstream builds there is BUILD_DESCRIPTION
@@ -44,7 +47,7 @@
       --------------------------------------------------------------------------------
       </pre>
     node: repository-ops
-    concurrent: true
+    concurrent: false  # important
 
     properties:
     - authorization-{pipeline}-system
@@ -57,9 +60,6 @@
         num-to-keep: 500
         artifact-days-to-keep: 30
         artifact-num-to-keep: 500
-    - throttle:
-        max-total: 3
-        option: project
 
     parameters:
     - p_REQUESTED_BY
@@ -68,16 +68,21 @@
     # Parameters related to artifact location in repository
     - p_BRANCH
     - p_BUILD_IDENTITY
-    - p_CUSTOMIZATION
-    - p_NX_VMS_COMMIT:
-        default: $BRANCH
     - p_PLATFORM
+    - p_CUSTOMIZATION
+    - p_NX_VMS_COMMIT
     - p_COMPONENTS
     # Parameter that defines path to operate it's actually remote path
     - p_LOCAL_PATH
     # Utility parameters used to describe connection details
     - p_NODE_SSH_CONNECTION
     - p_SSH_USER
+
+    - administrative-section-separator
+    - string:
+        name: FORCE_PUSH
+        default: 'false'
+        description: "Delete existing artifacts before pushing."
     - p_PIPELINE(hidden):
         default: '{pipeline}'
 
@@ -86,7 +91,7 @@
         name: '#$BUILD_ID $BUILD_IDENTITY $BRANCH $PLATFORM $CUSTOMIZATION'
     - timestamps
     - timeout:
-        # normally, should complete in 5-10 min
+        # normally, should complete in 2-10 min
         timeout: 30 # min
         fail: true
         type: absolute
@@ -95,12 +100,10 @@
         - jenkins
 
     builders:
-    - shell: rm -f unstable.flag
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
-
     - decorators/set-custom-build-description
     - validators/required-params:
         params: >-
@@ -113,33 +116,19 @@
     - inject:
         properties-content: |
           REPOSITORY_PATH={artifact_repository_base_path}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
+          REPOSITORY_ROOT_PATH={artifact_repository_base_path}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
+          REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
 
-    # If something is missing (e.g windows build) we shouldn't fail on
-    # bringing components to target. It's up to parent job to decide whether
-    # it's ok or not ok to have something not pulled.
-    - conditional-step:
-        condition-kind: shell
-        condition-command: test -e "$REPOSITORY_PATH"
-        steps:
-        - rsync/upload:
-            host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
-            port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
-            user: '${{SSH_USER}}'
-            src_path: '${{REPOSITORY_PATH}}'
-            dst_path: '${{LOCAL_PATH}}'
-            components: '${{COMPONENTS}}'
-    - shell: |
-        #!bash
-        if [ ! -e "$REPOSITORY_PATH" ] ; then
-          touch unstable.flag
-        fi
+    - rsync/download:
+        host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
+        port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
+        user: '${{SSH_USER}}'
+        src_path: '${{LOCAL_PATH}}'
+        dst_path: '${{REPOSITORY_PATH}}'
+        components: '${{COMPONENTS}}'
+    - repository/update-fs-links
 
     publishers:
-    - set-unstable-if-marked
-    - archive:
-        artifacts: RSYNC_FILES_LIST.txt
-        allow-empty: 'false'
-        fingerprint: true
     - description-setter:
         description: >-
           <a href='$REPOSITORY_URL'> Artifacts </a>,
