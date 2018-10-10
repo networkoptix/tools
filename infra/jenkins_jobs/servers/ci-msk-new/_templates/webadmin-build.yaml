@@ -1,5 +1,6 @@
 - job-template:
     name: '{pipeline}.{version}.{project}.webadmin.universal.build'
+    id: webadmin-build
     project-type: multijob
     description: |
       <pre>
