@@ -1,0 +1,10 @@
+path.logs: "/var/log/elasticsearch"
+path.data: "/var/lib/elasticsearch"
+network.host: [_local_, _site_]
+network.tcp.send_buffer_size: 200mb
+network.tcp.receive_buffer_size: 200mb
+thread_pool.index.queue_size: -1
+thread_pool.write.queue_size: -1
+xpack.security.enabled: false
+xpack.monitoring.collection.enabled: true
+
