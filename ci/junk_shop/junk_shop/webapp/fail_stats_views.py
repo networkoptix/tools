@@ -34,9 +34,10 @@ FailedTestRecord = namedtuple(
         'path',
         'test_id',
         'fail_count',
-        'last_root_run',
-        'last_run',
+        'last_root_run_id',
+        'last_run_id',
         'last_build_num',
+        'last_fail_timestamp',
     ])
 
 
@@ -156,7 +157,8 @@ def fail_stats():
          count(run),
          max(run.root_run.id),
          max(run.id),
-         max(run.root_run.build.build_num))
+         max(run.root_run.build.build_num),
+         max(run.started_at))
         for run in models.Run
         if (run.root_run.started_at >= form.date_from.data and
             run.root_run.started_at <= form.date_to.data + timedelta(days=1) and

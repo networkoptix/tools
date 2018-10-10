@@ -6,6 +6,9 @@
 
 {% block head %}
   {{ super() }}
+  <script src="{{ url_for('static', filename='ajax.js') }}"></script>
+  <script src="{{ url_for('static', filename='moment.js') }}"></script>
+  <script src="{{ url_for('static', filename='moment-timezone-with-data.js') }}"></script>
   <link type="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='common.css') }}">
@@ -66,6 +69,7 @@
           <tr>
             <th class="axiz">Test name</th>
             <th class="axiz">Last failed build</th>
+            <th class="axiz center">Last fail time</th>
             <th class="axiz">Fails</th>
           </tr>
         </thead>
@@ -74,11 +78,11 @@
          <tr>
            <td class="fail-list-cell">
               <a class="test-link"
-                 href="{{ url_for('run', run_id=rec.last_root_run, _anchor=rec.last_run_id) }}">
+                 href="{{ url_for('run', run_id=rec.last_root_run_id, _anchor=rec.last_run_id) }}">
                   {{- rec.path -}}
               </a>
            </td>
-           <td class="fail-list-cell" align="center">
+           <td class="fail-list-cell center">
               <a href="{{ url_for('build',
                                   project_name=form.project.data,
                                   branch_name=form.branch.data,
@@ -86,7 +90,12 @@
                   {{- rec.last_build_num -}}
               </a>
            </td>
-           <td class="fail-list-cell" align="center">
+           <td class="fail-list-cell">
+               <div class="datetime">
+                   {{ rec.last_fail_timestamp|format_datetime }}
+               </div>
+           </td>
+           <td class="fail-list-cell center">
                <b>{{- rec.fail_count -}}</b>
            </td>
          </tr>
@@ -108,9 +117,6 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="{{ url_for('static', filename='ajax.js') }}"></script>
-  <script src="{{ url_for('static', filename='moment.js') }}"></script>
-  <script src="{{ url_for('static', filename='moment-timezone-with-data.js') }}"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
   <script type="text/javascript">
     $(function () {

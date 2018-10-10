@@ -33,6 +33,11 @@
 	padding-left: 10px;
 }
 
+.fail-list td.center, .fail-list th.center {
+	text-align: center;
+}
+
+
 .fail-list td, .fail-list th {
 	padding: 5px;
 	border-top: 1px solid #DDD;
