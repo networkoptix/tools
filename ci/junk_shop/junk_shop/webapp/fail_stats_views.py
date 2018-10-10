@@ -81,11 +81,11 @@ class FailStatsForm(FlaskForm):
             (self.date_from,
              datetime_from_request_str(
                  request.args.get('date_from', None),
-                 datetime.now() - FROM_TIMEDELTA)),
+                 (datetime.now() - FROM_TIMEDELTA).date())),
             (self.date_to,
              datetime_from_request_str(
                  request.args.get('date_to', None),
-                 datetime.now())),
+                 datetime.now().date())),
             (self.branch, request.args.get('branch', DEFAULT_BRANCH)),
             (self.project, request.args.get('project', DEFAULT_PROJECT)),
             (self.platform, request.args.get('platform')),
