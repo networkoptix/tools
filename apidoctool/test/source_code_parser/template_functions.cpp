@@ -95,3 +95,10 @@ struct OutputStruct
  * %param innerObject.innerParam override description from function comment
  */
 regGet<InputStruct, OutputStructList>(p, ApiCommand::getStorages);
+
+
+/**%apidoc POST /urlPrefix/testFunction2
+ * Read the list of current storages.
+ * %param MyParam param description
+ */
+regUpdate<DummyStruct, OtherStruct>(p, ApiCommand::testFunction2);

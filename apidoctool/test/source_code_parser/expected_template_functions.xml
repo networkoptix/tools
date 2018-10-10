@@ -171,6 +171,19 @@
                         </params>
                     </result>
                 </function>
+                <function>
+                    <name>testFunction2</name>
+                    <description>Read the list of current storages.</description>
+                    <method>POST</method>
+                    <params>
+                        <param>
+                            <name>MyParam</name>
+                            <description>param description</description>
+                            <optional>false</optional>
+                        </param>
+                    </params>
+                    <result/>
+                </function>
             </functions>
         </group>
     </groups>
