@@ -47,15 +47,15 @@
 
 .scalability-dynamics-link-block {
 	padding: 10px;
-	font-size: 110%;
+	font-size: 15px;
 }
 .scalability-dynamics-link-block a {
 	font-weight: bold;
 }
 
 .fail-stats-link-block {
-	font-size: 110%;
 	padding: 10px;
+	font-size: 15px;
 }
 
 .fail-stats-link-block a {

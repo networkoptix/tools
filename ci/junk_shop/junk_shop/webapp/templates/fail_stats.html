@@ -15,10 +15,11 @@
 
 {% block content %}
 
-  {% if project and branch %}
+  {% if form.project.data and form.branch.data %}
   {{ common_macros.breadcrumbs([
        ('Projects',  url_for('project_list')),
-       (project + ' / ' + branch, url_for('branch', project_name=project, branch_name=branch))
+       (form.project.data + ' / ' + form.branch.data,
+        url_for('branch', project_name=form.project.data, branch_name=form.branch.data))
   ]) }}
   {% else %}
   {{ common_macros.breadcrumbs([
@@ -79,7 +80,9 @@
            </td>
            <td class="fail-list-cell" align="center">
               <a href="{{ url_for('build',
-              project_name=project, branch_name=branch, build_num=rec.last_build_num ) }}">
+                                  project_name=form.project.data,
+                                  branch_name=form.branch.data,
+                                  build_num=rec.last_build_num ) }}">
                   {{- rec.last_build_num -}}
               </a>
            </td>

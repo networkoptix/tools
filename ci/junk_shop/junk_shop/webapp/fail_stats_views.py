@@ -17,11 +17,14 @@ from .. import models
 FROM_TIMEDELTA = timedelta(days=7)
 DATETIME_FORM_FORMAT = '%Y %b %d'
 FAILED_TESTS_PAGE_SIZE = 30
+DEFAULT_BRANCH = 'default'
+DEFAULT_PROJECT = 'ci'
+DEFAULT_BUNDLE = 'unit'
 
 
-def datetime_from_request_str(datetime_str):
+def datetime_from_request_str(datetime_str, default=None):
     if datetime_str is None:
-        return None
+        return default
     return datetime.strptime(datetime_str, '%Y-%m-%d').date()
 
 
@@ -74,12 +77,18 @@ class FailStatsForm(FlaskForm):
     def _prepare_and_check_get_form(self, request):
         """Initialize form values from `request` and check all values are set"""
         form_field_values = [
-            (self.date_from, datetime_from_request_str(request.args.get('date_from', None))),
-            (self.date_to, datetime_from_request_str(request.args.get('date_to', None))),
-            (self.branch, request.args.get('branch')),
-            (self.project, request.args.get('project')),
+            (self.date_from,
+             datetime_from_request_str(
+                 request.args.get('date_from', None),
+                 datetime.now() - FROM_TIMEDELTA)),
+            (self.date_to,
+             datetime_from_request_str(
+                 request.args.get('date_to', None),
+                 datetime.now())),
+            (self.branch, request.args.get('branch', DEFAULT_BRANCH)),
+            (self.project, request.args.get('project', DEFAULT_PROJECT)),
             (self.platform, request.args.get('platform')),
-            (self.test_bundle, request.args.get('bundle'))]
+            (self.test_bundle, request.args.get('bundle', DEFAULT_BUNDLE))]
 
         def set_form_field_value(field, value):
             if value:
@@ -137,8 +146,6 @@ def fail_stats():
         return render_template(
             'fail_stats.html',
             total_records=0,
-            project=request.args.get('project'),
-            branch=request.args.get('branch'),
             form=form,
         )
 
@@ -168,8 +175,6 @@ def fail_stats():
     return render_template(
         'fail_stats.html',
         paginator=paginator(page, rec_count, page_size),
-        project=form.project.data,
-        branch=form.branch.data,
         form=form,
         total_records=rec_count,
         failed_tests=failed_tests,
