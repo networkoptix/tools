@@ -79,6 +79,10 @@
     - p_RCT_COMMIT_CHOICE_w_OPTION:
         default: '{rct_commit_choice_default}'
         option_default: '{rct_commit_choice_option_default}'
+    - string:
+        name: RCT_CAMERA_FILTER
+        default:  !j2: '{{ rct_camera_filter | default("*") }}'
+        description:
 
     - simple-separator-colored:
         header: 'Options for Scalability tests'
@@ -153,5 +157,3 @@
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
-
-

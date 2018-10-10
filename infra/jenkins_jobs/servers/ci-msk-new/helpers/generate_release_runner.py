@@ -120,6 +120,9 @@ print '''#
         default: '{pipeline}'
     - string:
         name: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
+    - string:
+        name: RCT_CAMERA_FILTER
+        default: '*'
     # TODO:
     # - string:
     #     name: NX_FUNCTESTS_COMMIT
@@ -322,6 +325,7 @@ print '''
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.scalability-test'
           condition: COMPLETED # allow unstable

@@ -33,6 +33,7 @@
     - string: { name: RCT_ENABLED                    }
     - string: { name: RCT_COMMIT_CHOICE              }
     - string: { name: RCT_COMMIT_CHOICE_OPTION       }
+    - string: { name: RCT_CAMERA_FILTER               }
 
     - string: { name: ST_ENABLED                     }
     - string: { name: ST_COMMIT_CHOICE               }
@@ -225,6 +226,7 @@
         - shell: |
             echo "RUN_REALCAMERATESTS=false" >> RUNNER_ARGS.envvars
             echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=" > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
+            echo "RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER" >> RUNNER_ARGS.envvars
 
     - conditional-step:
         condition-kind: strings-match
@@ -264,6 +266,7 @@
             #!bash
             echo "RUN_REALCAMERATESTS=true" >> RUNNER_ARGS.envvars
             cat NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar >> RUNNER_ARGS.envvars
+            echo "RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER" >> RUNNER_ARGS.envvars
 
     # ===SCALABILITY TESTS ===
 

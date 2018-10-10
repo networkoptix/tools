@@ -36,6 +36,9 @@
     - p_NX_VMS_COMMIT
     - string:
         name: NX_TEST_FRAMEWORK_COMMIT
+    - string: # TODO: convert to p_**
+        name: RCT_CAMERA_FILTER
+        default: '*'
     - p_PIPELINE(hidden):
         default: '{pipeline}'
     - p_CUSTOMIZATION(hidden):
@@ -169,6 +172,7 @@
               --timeout="$TEST_TIMEOUT" \
               --slot="$EXECUTOR_NUMBER" \
               --reinstall \
+              --rct-camera-filter="$RCT_CAMERA_FILTER" \
               cameras_integration/test_server.py::test_cameras
 
     publishers:
