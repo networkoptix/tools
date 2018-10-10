@@ -39,12 +39,12 @@
         type: absolute
 
     scm:
-    - hg-la:
+    - mercurial/hdw-mx:
         project-name: nx_vms
         branch-name: '{branch}'
 
     builders:
-    - custom-clean-workspace:
+    - cleaners/custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
 
     # TODO: We have macro for this but it has not very clear behaviour w/ sideffects
@@ -127,4 +127,3 @@
         fingerprint: true
     - failure-email-helpers(maintainers):
         email-recipients: '{job_maintainers}'
-

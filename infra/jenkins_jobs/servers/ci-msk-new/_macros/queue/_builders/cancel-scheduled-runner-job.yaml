@@ -1,0 +1,70 @@
+# Special builder for cancelling runners.
+#
+# It look through Jenkins queue, tests every found item for following:
+# - is it '*.runner' job?
+# - is it's parent job the same as job for current build?
+# - does it have marker REPLACE_BUILD_WITH_NEWER=YES?
+# If yes for all questions, then this item is removed from queue and it's parent
+# job get description that it's been cancelled by newer build and also gets grey
+# ball status (cancelled) instead of red (failed).
+# Red is set by jenkins internal logic. And this is not what we want here.
+#
+# Parameters:
+# - cancel - true/false - if cansel is set to false, entire logic is replaced and
+#   this builder becomes noop builder
+- builder:
+    name: queue/cancel-scheduled-runner-job
+    builders:
+    - system-groovy:
+        command: !j2: |
+          {% if cancel | default(true) %}
+          import jenkins.model.Jenkins;
+          import hudson.model.Result;
+
+          // instance of hudson.model.FreeStyleBuild
+          // https://javadoc.jenkins.io/hudson/model/FreeStyleBuild.html
+          def currentBuild = Thread.currentThread().executable;
+
+          // instance of hudson.EnvVars
+          // https://javadoc.jenkins-ci.org/hudson/EnvVars.html
+          def env = Thread.currentThread().executable.getEnvVars();
+
+          def jobname  = env.get("JOB_NAME");
+          def job = Jenkins.instance.getItemByFullName(jobname)
+
+          def q = Jenkins.instance.queue
+          q.items.each {
+            def sameParentJob = false;
+            def isRunnerJob = false;
+            def isReplaceable = false;
+            def parentBuildId = 0;
+
+            // We are searching for runners started by the same job which
+            // are still in queue and allowed to be replced == cancelled
+
+            if ( it.task.name.endsWith(".runner")) {
+                isRunnerJob = true;
+            }
+
+            it.params.split('\n').each {
+              if ( it.startsWith("REQUESTED_BY=${jobname}-")) {
+                sameParentJob = true;
+                parentBuildId = it.tokenize('-').last()
+
+              }
+              if ( it.startsWith("REPLACE_BUILD_WITH_NEWER=YES")) {
+                isReplaceable = true;
+              }
+            }
+            // We found one of such builds
+            if ( sameParentJob && isRunnerJob && isReplaceable ) {
+              // todo: try/catch
+              // cancel scheduled runner -> will abort parent build
+              q.cancel( it.task );
+              // get that parent and change it's description and status to grey
+              def parentBuild = job.getBuildByNumber(parentBuildId.toInteger());
+              parentBuild.setDescription("ABORTED IN FAV OF NEWER BUILD");
+              parentBuild.@result = hudson.model.Result.ABORTED
+            }
+          }
+          {% endif %}

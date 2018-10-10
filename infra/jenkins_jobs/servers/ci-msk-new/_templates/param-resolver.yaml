@@ -40,7 +40,7 @@
     - string: { name: ST_COMMIT_CHOICE_OPTION        }
 
     builders:
-    - custom-clean-workspace:
+    - cleaners/custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
 
     # === BUILD ===
@@ -62,7 +62,7 @@
         condition-string1: '$VMS_BUILD_CHOICE'
         condition-string2: 'VMS_NEW_BUILD_BY_COMMIT'
         steps:
-        - request-new-build-identity:
+        - envvars/request-new-build-identity:
             pipeline: '{pipeline}'
         - freeze-nx-vms-commit(remote):
             pipeline: '{pipeline}'
@@ -183,7 +183,7 @@
         # in case if we won't find any commits, we don't want to fail calc
         - shell: echo 'NX_FUNCTESTS_COMMIT=' > NX_FUNCTESTS_COMMIT.envvar
 
-        - freeze-commit-if(var=val):
+        - envvars/freeze-commit-if(var=val):
             pipeline: '{pipeline}'
             var: FT_COMMIT_CHOICE
             val: FT_OTHER_COMMIT
@@ -236,7 +236,7 @@
         # in case if we won't find any commits, we don't want to fail calc
         - shell: echo 'NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=' > NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
 
-        - freeze-commit-if(var=val):
+        - envvars/freeze-commit-if(var=val):
             pipeline: '{pipeline}'
             var: RCT_COMMIT_CHOICE
             val: RCT_OTHER_COMMIT
@@ -290,7 +290,7 @@
         # in case if we won't find any commits, we don't want to fail calc
         - shell: echo 'ST_COMMIT=' > ST_COMMIT.envvar
 
-        - freeze-commit-if(var=val):
+        - envvars/freeze-commit-if(var=val):
             pipeline: '{pipeline}'
             var: ST_COMMIT_CHOICE
             val: ST_BY_COMMIT

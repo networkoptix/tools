@@ -64,14 +64,14 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: devtools
             branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
             basedir: $WORKSPACE
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: nx_vms
             branch: '{version}'
             platform: $PLATFORM
@@ -79,20 +79,20 @@
             pipeline: '{pipeline}'
             basedir: $WORKSPACE
     scm:
-    - hg-local:
+    - mercurial/local-mirror:
         name: nx_vms
         revision: '$ST_COMMIT'
-    - hg-local:
+    - mercurial/local-mirror:
         name: devtools
         revision: default
 
     builders:
-    - set-hg-marker-successful-checkout
+    - mercurial/mark-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     - extended-bash:
         headers: ''
@@ -114,7 +114,7 @@
           <a href='$REPOSITORY_URL'> Artifacts </a>,
           <a href='$JUNKSHOP_URL'> Junkshop </a>
 
-    - kill-hanged-functests
+    - functests/kill-hanged
 
     - shell: |
         #!/bin/bash
@@ -143,7 +143,7 @@
         block-thresholds:
           failure-threshold: FAILURE
 
-    - file-copy-operation:
+    - file-operations/file-copy-operation:
         includes: >-
           build/distrib/*-server-*-linux64*.deb,
           build/distrib/*-unit_tests-*-linux64*.tar.gz
@@ -163,7 +163,7 @@
         set -ex
         rsync -av {binaries_url} "$BIN_DIR/"
 
-    - file-create-operation:
+    - file-operations/file-create-operation:
         file-name: test-config.yaml
         file-content: |
           tests:
@@ -255,10 +255,9 @@
               tests/scalability_test.py
 
     publishers:
-    - delete-hg-repos(if-damaged)
+    - mercurial/rm-repo-if-broken
 
     - failure-email:
         email-recipients: '{build_watchers}'
     - fixed-email:
         email-recipients: '{build_watchers}'
-

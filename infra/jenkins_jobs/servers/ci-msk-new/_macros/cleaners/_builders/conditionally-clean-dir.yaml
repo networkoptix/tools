@@ -1,0 +1,22 @@
+- builder:
+    name: conditionally-clean-dir
+
+    builders:
+    - conditional-step:
+        condition-kind: boolean-expression
+        condition-expression: '${{ENV,var="{condition-varname}"}}'
+        steps:
+        - inject: {}
+        - file-operations/folder-delete-operation:
+            folder-path: '{dir}'
+
+    - conditional-step:
+        condition-kind: not
+        condition-operand:
+          condition-kind: file-exists
+          condition-filename: '{dir}'
+          condition-basedir: workspace
+        steps:
+        - inject: {}
+        - file-operations/folder-create-operation:
+            folder-path: '{dir}'

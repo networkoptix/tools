@@ -1,0 +1,8 @@
+- parameter:
+    name: parameter-separator/simple
+    parameters:
+    - parameter-separator/separator:
+        # name: '{name}'
+        header: '{header}'
+        section-style: ''
+        separator-style: ''

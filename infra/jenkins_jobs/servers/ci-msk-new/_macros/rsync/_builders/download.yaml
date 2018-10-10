@@ -1,0 +1,63 @@
+- builder:
+    name: rsync/download
+    # Parameters.
+    # destinations
+    #   dst_path: base path on local host, where to download conponents
+    # sources
+    #   host: hostname or remote server ip to connect by ssh
+    #   port: ssh port on remote server
+    #   user: user on remote host
+    #   src_path: base path on remote host from which to download list of components
+    #   (ssh key is supposed to be placed in ssh agent by Jenkins)
+    #   components: comma-separated list of files and folders in source
+    #               directory to download to local, e.g
+    #               a/,b,c
+    #               <remote_host>/<src_path>/a/ -> <dst_path>/a/
+    #               <remote_host>/<src_path>/b  -> <dst_path>/b
+    #               <remote_host>/<src_path>/c  -> <dst_path>/c
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        RSYNC_HOST="{host}"
+        RSYNC_PORT="{port}"
+        RSYNC_USER="{user}"
+
+        RSYNC_SRC="{src_path}"
+        RSYNC_DST="{dst_path}"
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_DST="${{RSYNC_DST/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_DST="${{RSYNC_DST//\\//}}"
+
+        # replace 'C:\' with '/cygdrive/c/'
+        RSYNC_SRC="${{RSYNC_SRC/C:\\//cygdrive/c/}}"
+        # replace every (//) backslash '\' (\\) with (/)  slash '/' (/)
+        RSYNC_SRC="${{RSYNC_SRC//\\//}}"
+        # NOTE: solution from above is not tested when dealing with local Windows machine. But it should work.
+
+        PWD_OLD=$PWD
+        echo '' > "$PWD_OLD/RSYNC_FILES_LIST.txt"
+
+        IFS=, read -ra COMPONENTS_ARRAY <<< "{components}"
+        for COMPONENT in "${{COMPONENTS_ARRAY[@]}}"
+        do
+          if [[ "$COMPONENT" == */ ]] ; then
+            COMPONENT="${{COMPONENT}}***"
+          fi
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            -p "${{RSYNC_PORT}}" "${{RSYNC_USER}}@${{RSYNC_HOST}}" \
+            "cd \"${{RSYNC_SRC}}\" && find . -path \"./${{COMPONENT}}\" -print" >> RSYNC_FILES_LIST.txt
+        done
+
+        mkdir -p "${{RSYNC_DST}}"
+        cat RSYNC_FILES_LIST.txt
+        pushd "${{RSYNC_DST}}"
+          rsync -vrzO --no-perms --links \
+            -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${{RSYNC_PORT}}" \
+            "${{RSYNC_USER}}@${{RSYNC_HOST}}:${{RSYNC_SRC}}" \
+            "${{RSYNC_DST}}" \
+            --files-from="$PWD_OLD/RSYNC_FILES_LIST.txt"
+        popd

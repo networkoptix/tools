@@ -1,0 +1,8 @@
+- parameter:
+    name: parameter-separator/simple-colored
+    parameters:
+    - parameter-separator/separator:
+        # name: '{name}'
+        header: '{header}'
+        section-style: 'background-color: {color}'
+        separator-style: ''

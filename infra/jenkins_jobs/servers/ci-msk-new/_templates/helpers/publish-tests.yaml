@@ -107,8 +107,8 @@
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
-    - set-custom-build-description
-    - validate-required-params:
+    - decorators/set-custom-build-description
+    - validators/required-params:
         params: >-
           REQUESTED_BY
           BRANCH
@@ -122,7 +122,7 @@
           REPOSITORY_ROOT_PATH={artifact_repository_base_path}/$PIPELINE/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
 
-    - rsync-download:
+    - rsync/download:
         host: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 3)'
         port: '$(echo "${{NODE_SSH_CONNECTION}}" | cut -d " " -f 4)'
         user: '${{SSH_USER}}'

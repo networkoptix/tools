@@ -185,7 +185,7 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: nx_vms
             branch: $BRANCH
             platform: $PLATFORM
@@ -195,7 +195,7 @@
         # this is an ugly huck to finally close the problem with long filenames in devtools
         - delete-files(on-windows):
             files: devtools
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: devtools
             branch: default
             platform: $PLATFORM
@@ -207,16 +207,16 @@
     # ========================================
 
     scm:
-    - hg-local:
+    - mercurial/local-mirror:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
 
     builders:
-    - set-hg-marker-successful-checkout
+    - mercurial/mark-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
-    - set-custom-build-description
+    - decorators/set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
@@ -268,7 +268,7 @@
             - description-setter:
                 description: |
                   Clean build is forced by missing BUILD_CONFIG_SHA_OLD.envvar
-            - folder-delete-operation:
+            - file-operations/folder-delete-operation:
                 folder-path: 'build'
 
         # Once we have some info regarding oldbuild config, we'll check that
@@ -291,7 +291,7 @@
                     description: >-
                         Clean build is forced by changed BUILD_CONFIG_SHA,
                         $BUILD_CONFIG_SHA_OLD -> $BUILD_CONFIG_SHA
-                - folder-delete-operation:
+                - file-operations/folder-delete-operation:
                     folder-path: 'build'
 
     # Optionally when special flag is set, we also remove build directory
@@ -302,9 +302,9 @@
         - description-setter:
             description: |
               Clean build is forced by CLEAN_BUILD var ( $CLEAN_BUILD )
-        - folder-delete-operation:
+        - file-operations/folder-delete-operation:
             folder-path: 'build'
-        - folder-delete-operation:
+        - file-operations/folder-delete-operation:
             folder-path: 'packages'
 
     # create build dir if not exists or removed
@@ -315,11 +315,11 @@
           condition-filename: 'build'
           condition-basedir: workspace
         steps:
-        - folder-create-operation:
+        - file-operations/folder-create-operation:
             folder-path: 'build'
 
     # Once we completed checks related to CMakeLists.txt, store new value
-    - file-create-operation:
+    - file-operations/file-create-operation:
         file-name: BUILD_CONFIG_SHA_OLD.envvar
         file-content: BUILD_CONFIG_SHA_OLD=${{BUILD_CONFIG_SHA}}
 
@@ -327,23 +327,23 @@
     # any previous build process are removed
 
     # Remove CMake caches
-    - file-delete-operation:
+    - file-operations/file-delete-operation:
         includes: build/CMakeCache.txt
         excludes: ''
 
     # Remove any logs located in build dir since build dir is shared across customizations
-    - file-delete-operation:
+    - file-operations/file-delete-operation:
         includes: 'build/**/*.log'
         excludes: ''
 
     # recreate build_logs folder
-    - folder-delete-operation:
+    - file-operations/folder-delete-operation:
         folder-path: 'build_logs'
-    - folder-create-operation:
+    - file-operations/folder-create-operation:
         folder-path: 'build_logs'
 
     # Remove distrib folder
-    - folder-delete-operation:
+    - file-operations/folder-delete-operation:
         folder-path: 'build/distrib'
 
     # Run custom cleaner provided by development team
@@ -560,7 +560,7 @@
     # ========================================
 
     publishers:
-    - delete-hg-repos(if-damaged)
+    - mercurial/rm-repo-if-broken
     - archive:
         artifacts: '**/*.log'
         allow-empty: 'false'
@@ -682,7 +682,7 @@
         - role: SLAVE
           build-on: [ SUCCESS, UNSTABLE, FAILURE ]
           build-steps:
-          - folder-delete-operation:
+          - file-operations/folder-delete-operation:
               folder-path: 'build/distrib'
 
     - failure-email:

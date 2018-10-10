@@ -64,7 +64,7 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default_build_description}'
-    - simple-separator:
+    - parameter-separator/simple:
         header: Build parameters
     - p_CLEAN_WORKSPACE:
         default: '{clean_workspace}'
@@ -109,7 +109,7 @@
         type: absolute
 
     scm:
-    - hg-la:
+    - mercurial/hdw-mx:
         project-name: nx_vms
         branch-name: $BRANCH
 
@@ -117,20 +117,20 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     - freeze-nx-vms-commit(local):
         commit-to-freeze: $MERCURIAL_REVISION_SHORT
         commit-varname: NX_VMS_COMMIT
 
     # load old commit sha
-    - get-old-envvar:
+    - envvars/get-old-envvar:
         varname: NX_VMS_COMMIT
         which-build: last-successful
         optional: true
 
     # get new BUILD_IDENTITY
-    - request-new-build-identity:
+    - envvars/request-new-build-identity:
         pipeline: '{pipeline}'
 
     # Next, decide whether we should start runner ...
@@ -217,7 +217,7 @@
               failure-threshold: FAILURE
 
     publishers:
-    - publisher-set-build-name:
+    - decorators/set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
         artifacts: '*.envvar'

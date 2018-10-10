@@ -1,0 +1,40 @@
+# Import envvar which is associated with latest build by given condition.
+#
+# Parameters:
+# - var
+# - val
+# - job_1
+# - job_2
+# - envvar
+# - as (optional)
+# - save_build_identity (optional)
+- builder:
+    name: import-latest-envvar-if(var=val)
+    builders:
+    - conditional-step:
+        condition-kind: strings-match
+        condition-string1: '${var}'
+        condition-string2: '{val}'
+        steps:
+        - shell: mkdir -p "{job_1}" "{job_2}"
+        - copyartifact:
+            project: '{job_1}'
+            filter: '{envvar}.envvar,BUILD_IDENTITY.envvar'
+            which-build: !j2: '{{ condition | default("last-successful") }}'
+            optional: !j2: '{{ optional | default(true) | lower }}'
+            target: '{job_1}'
+        - copyartifact:
+            project: '{job_2}'
+            filter: '{envvar}.envvar,BUILD_IDENTITY.envvar'
+            which-build: !j2: '{{ condition | default("last-successful") }}'
+            optional: !j2: '{{ optional | default(true) | lower }}'
+            target: "{job_2}"
+        # TODO: Allow to bring more than one file
+        - envvars/calculate-latest:
+            identity_file_1: './{job_1}/BUILD_IDENTITY.envvar'
+            identity_file_2: './{job_2}/BUILD_IDENTITY.envvar'
+            envvar_file_1:   './{job_1}/{envvar}.envvar'
+            envvar_file_2:   './{job_2}/{envvar}.envvar'
+            envvar_latest_varname: !j2: '{{ as | default(envvar) }}'
+            identity_latest_varname: !j2: '{{ "BUILD_IDENTITY" if save_build_identity | default(false) else ""}}'
+        - shell: rm -rf "{job_1}" "{job_2}"

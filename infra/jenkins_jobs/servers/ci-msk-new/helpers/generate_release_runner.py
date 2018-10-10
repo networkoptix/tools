@@ -139,15 +139,15 @@ print '''#
     # note: DO NOT ADD any timeouts here. Put them in corresponding child jobs.
 
     builders:
-    - set-custom-build-description
+    - decorators/set-custom-build-description
     # FIXME: remove when it will be unused
-    - custom-build-description:
+    - decorators/custom-build-description:
         envvars: [ BUILD_URL ]
         action: append
         target: upstream
         description: >-
           <br> <a href='$BUILD_URL'>to runner</a>
-    - validate-required-params:
+    - validators/required-params:
         params: >-
           NX_VMS_COMMIT
           BUILD_IDENTITY

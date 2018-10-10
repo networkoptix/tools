@@ -79,7 +79,7 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default_build_description}'
-    - simple-separator:
+    - parameter-separator/simple:
         header: Build parameters
     - p_CLEAN_WORKSPACE:
         default: '{clean_workspace}'
@@ -163,7 +163,7 @@
         condition-string1: '${{USE_BUILD_IDENTITY}}'
         condition-string2: 'NEW'
         steps:
-        - request-new-build-identity:
+        - envvars/request-new-build-identity:
             pipeline: '{pipeline}'
 
     # inject NX_VMS_COMMIT as is + save
@@ -223,7 +223,7 @@
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     # We don't use multijob to hide dependency graph from trigger because graph
     # is too big and takes a while to be loaded
@@ -256,7 +256,7 @@
           failure-threshold: FAILURE
 
     publishers:
-    - publisher-set-build-name:
+    - decorators/set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
         artifacts: '*.envvar'

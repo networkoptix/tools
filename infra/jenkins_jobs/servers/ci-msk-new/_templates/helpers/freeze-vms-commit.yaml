@@ -82,15 +82,15 @@
         type: absolute
 
     scm:
-    - hg-la-no-changelog:
+    - mercurial/hdw-mx-no-changelog:
         project-name: nx_vms
         branch-name: '$NX_VMS_COMMIT'
-    - hg-la-no-changelog:
+    - mercurial/hdw-mx-no-changelog:
         project-name: devtools
         branch-name: default
 
     builders:
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     # for query artifacts
     - freeze-nx-vms-commit(local):
@@ -109,7 +109,7 @@
         branch-varname: BRANCH
 
     publishers:
-    - publisher-set-build-name:
+    - decorators/set-build-name:
         name: '#$BUILD_ID $BRANCH@$NX_VMS_COMMIT'
     - archive:
         artifacts: '*.envvar'

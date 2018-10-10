@@ -23,7 +23,7 @@
         type: absolute
 
     builders:
-    - set-custom-build-description
+    - decorators/set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true

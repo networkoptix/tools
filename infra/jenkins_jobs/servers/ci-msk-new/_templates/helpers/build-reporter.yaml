@@ -83,16 +83,16 @@
     - pre-scm-buildstep:
         failOnError: true
         buildsteps:
-        - custom-clean-workspace:
+        - cleaners/custom-clean-workspace:
             keep_files: [ nx_vms, devtools, venv ]
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: nx_vms
             branch: $BRANCH
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
             basedir: $WORKSPACE
-        - import-hg-repo(if-missing):
+        - mercurial/import-repo-if-missing:
             name: devtools
             branch: default
             platform: $PLATFORM
@@ -101,20 +101,20 @@
             basedir: $WORKSPACE
 
     scm:
-    - hg-local-no-changelog:
+    - mercurial/local-mirror-no-changelog:
         name: nx_vms
         revision: '$NX_VMS_COMMIT'
-    - hg-local:
+    - mercurial/local-mirror:
         name: devtools
         revision: 'default'
 
     builders:
-    - set-hg-marker-successful-checkout
+    - mercurial/mark-successful-checkout
     - inject:
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
-    - set-custom-build-description
+    - decorators/set-custom-build-description
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
@@ -181,8 +181,8 @@
           devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" full_build.log "--outcome=$BUILD_STATUS"
 
     publishers:
-    - delete-hg-repos(if-damaged)
-    - custom-clean-workspace:
+    - mercurial/rm-repo-if-broken
+    - cleaners/custom-clean-workspace:
         keep_files: [ nx_vms, devtools, venv ]
     - description-setter:
         description: >-

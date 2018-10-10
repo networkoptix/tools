@@ -1,0 +1,36 @@
+- builder:
+    name: envvars/get-old-envvar
+
+    builders:
+    # save current value
+    - shell: |
+        #!/bin/bash
+        echo "{varname}=${{{varname}}}" > "{varname}.tmp.envvar"
+    # get value
+    - shell: |
+        #!/bin/bash
+        set -ex
+        if [ "{optional}" == "true" ] ; then
+          echo "{varname}_OLD=" > "{varname}_OLD.envvar"
+        fi
+    - copyartifact:
+        project: '$JOB_NAME'
+        filter: '{varname}.envvar'
+        which-build: '{which-build}'
+        optional: '{optional}'
+    - inject:
+        properties-file: '{varname}.envvar'
+    # reinject with suffix
+    - shell: |
+        #!/bin/bash
+        set -ex
+        echo "{varname}_OLD=${{{varname}}}" > "{varname}_OLD.envvar"
+    - inject:
+        properties-file: "{varname}_OLD.envvar"
+    # restore current value
+    - inject:
+        properties-file: "{varname}.tmp.envvar"
+    - shell: |
+        #!/bin/bash
+        set -ex
+        mv "{varname}.tmp.envvar" "{varname}.envvar"

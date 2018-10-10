@@ -17,7 +17,7 @@
     - p_BUILD_DESCRIPTION:
         default: Triggered manually
 
-    - simple-separator-colored:
+    - parameter-separator/simple-colored:
         header: 'Options for VMS'
         color: lavender
     - p_VMS_BUILD_CHOICE_w_OPTION:
@@ -45,7 +45,7 @@
     - p_CUSTOM_CMAKE_PARAMETERS:
         default: ''
 
-    - simple-separator-colored:
+    - parameter-separator/simple-colored:
         header: 'Options for Unittests'
         color: lavender
     - on-off-option:
@@ -53,7 +53,7 @@
         description: If ON, then UnitTests will run, otherwise skipped
         default: '{ut_enabled}'
 
-    - simple-separator-colored:
+    - parameter-separator/simple-colored:
         header: 'Options for Functional tests'
         color: lavender
 
@@ -69,7 +69,7 @@
     - p_TEST_LIST:
         default: !j2: '{{ test_list | default("") }}'
 
-    - simple-separator-colored:
+    - parameter-separator/simple-colored:
         header: 'Options for Real cameras tests'
         color: lavender
     - on-off-option:
@@ -84,7 +84,7 @@
         default:  !j2: '{{ rct_camera_filter | default("*") }}'
         description:
 
-    - simple-separator-colored:
+    - parameter-separator/simple-colored:
         header: 'Options for Scalability tests'
         color: lavender
     - on-off-option:
@@ -96,7 +96,7 @@
         option_default: '{st_commit_choice_option_default}'
 
     # TODO: Add additional sections and options...
-    # - simple-separator-colored:
+    # - parameter-separator/simple-colored:
     #     header: 'Extra options'
     #     color: lavender
     # - string:
@@ -111,10 +111,10 @@
     - timestamps
 
     builders:
-    - custom-clean-workspace:
+    - cleaners/custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
-    - set-custom-build-description
-    - cancel-queued-child-runner:
+    - decorators/set-custom-build-description
+    - queue/cancel-scheduled-runner-job:
         cancel: true
     - trigger-builds:
       - project: '__{pipeline}.{version}.param-resolver'

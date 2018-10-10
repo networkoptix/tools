@@ -1,0 +1,12 @@
+- parameter:
+    name: parameter-separator/separator
+    parameters:
+    - raw:
+        xml: |
+          <jenkins.plugins.parameter__separator.ParameterSeparatorDefinition plugin="parameter-separator@1.0">
+            <name>{header}</name>
+            <description/>
+            <sectionHeader>{header}</sectionHeader>
+            <sectionHeaderStyle>{section-style}</sectionHeaderStyle>
+            <separatorStyle>{separator-style}</separatorStyle>
+          </jenkins.plugins.parameter__separator.ParameterSeparatorDefinition>

@@ -61,7 +61,7 @@
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
         macro: true
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     - multijob:
         name: "Build installer for {platform} with {customization}"

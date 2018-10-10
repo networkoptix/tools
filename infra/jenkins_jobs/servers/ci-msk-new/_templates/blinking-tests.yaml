@@ -30,7 +30,7 @@
     parameters:
     - p_BUILD_DESCRIPTION:
         default: '{default_build_description}'
-    - simple-separator:
+    - parameter-separator/simple:
         header: Build parameters
     - p_CLEAN_WORKSPACE:
         default: '{clean_workspace}'
@@ -66,7 +66,7 @@
         type: absolute
 
     builders:
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     # TODO: Make recursive or trigger w/ groovy, for ex:
     # def params = [new StringParameterValue('paramName', paramValue) ]

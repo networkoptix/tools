@@ -49,7 +49,7 @@
         properties-content: |
           JUNKSHOP_URL={junkshop_base_url}/project/{junkshop_project_name}/$BRANCH/$BUILD_IDENTITY
           REPOSITORY_URL={artifacts_base_url}/$PIPELINE/$BRANCH/$BUILD_IDENTITY/$CUSTOMIZATION/$PLATFORM
-    - set-custom-build-description
+    - decorators/set-custom-build-description
 
     - build-name-setter:
         template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT test@$ST_COMMIT'
@@ -147,4 +147,3 @@
         email-recipients: '{build_watchers}'
     - fixed-email:
         email-recipients: '{build_watchers}'
-

@@ -1,0 +1,12 @@
+- builder:
+    name: file-operations/folder-create-operation
+    builders:
+    - raw:
+        xml: |
+          <sp.sd.fileoperations.FileOperationsBuilder plugin="file-operations@1.7">
+            <fileOperations>
+              <sp.sd.fileoperations.FolderCreateOperation>
+                <folderPath>{folder-path}</folderPath>
+              </sp.sd.fileoperations.FolderCreateOperation>
+            </fileOperations>
+          </sp.sd.fileoperations.FileOperationsBuilder>

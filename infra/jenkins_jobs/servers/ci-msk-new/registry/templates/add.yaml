@@ -29,7 +29,7 @@
         default: '{pipeline}'
 
     builders:
-    - set-custom-build-description
+    - decorators/set-custom-build-description
     - shell: |
         #!/bin/bash
         set -ex

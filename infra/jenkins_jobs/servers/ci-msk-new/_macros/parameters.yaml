@@ -228,7 +228,7 @@
 - parameter:
     name: administrative-section-separator
     parameters:
-    - simple-separator:
+    - parameter-separator/simple:
         header: >-
           Special section for administrative/maintenance purposes..
           DON'T MODIFY anything if you are not administrator
