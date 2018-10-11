@@ -77,3 +77,4 @@ from . import build_views
 from . import run_views
 from . import metrics_views
 from . import fail_stats_views
+from . import check_revision
