@@ -15,7 +15,7 @@
     - p_BRANCH:
         default: '{default_branch}'
     - p_BUILD_DESCRIPTION:
-        default: Triggered manually
+        default: !j2: '{{ build_description | default("Triggered manually") }}'
 
     - parameter-separator/simple-colored:
         header: 'Options for VMS'

@@ -64,6 +64,7 @@
 
         - nightly-rct:
             timer: 'H 0 * * 2-6'
+            build_description: "Nightly test for stable RCT"
 
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms_3.2'
