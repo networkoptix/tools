@@ -61,3 +61,25 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: ''
+
+        - nightly-rct:
+            timer: 'H 0 * * 2-6'
+
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'vms_3.2'
+            default_platforms: linux-x64,windows-x64,mac,bpi
+            default_customizations: default
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'ON'
+            ft_commit_choice_default: FT_OTHER_COMMIT
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'ON'
+            rct_commit_choice_default: RCT_STABLE_PUSH
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''

@@ -252,7 +252,7 @@
         - import-envvars-if(var=val):
             var: RCT_COMMIT_CHOICE
             val: RCT_STABLE_PUSH
-            from: '{pipeline}.{version}.preset.on-push-rct'
+            from: '{pipeline}.vms_rct.preset.on-push-rct'
             envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
         - import-envvars-if(var=val):
