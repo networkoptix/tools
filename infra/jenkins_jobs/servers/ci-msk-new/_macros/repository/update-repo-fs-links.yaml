@@ -1,4 +1,4 @@
 - builder:
     name: repository/update-fs-links
     builders:
-    - shell:  !include-raw-escape: ../_scripts/update_hardlinks.sh
+    - shell:  !include-raw: ../_scripts/update_hardlinks.sh

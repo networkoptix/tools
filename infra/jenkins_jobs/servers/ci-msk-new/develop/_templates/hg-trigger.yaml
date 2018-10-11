@@ -83,9 +83,10 @@
         shell: !j2: |
           #!bash
           set -ex
+          test -n "{{ job_to_trigger_on_vms_changed }}"
           cd nx_vms
           hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" --exclude path:func_tests | grep -q 'files changed'
-        project: '{job_to_trigger_on_vms_changed}'  # {pipeline}.{version}.preset.on-push-vms
+        project: !j2: '{{ job_to_trigger_on_vms_changed if job_to_trigger_on_vms_changed else "noop" }}'  # {pipeline}.{version}.preset.on-push-vms
         block: false
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -97,9 +98,10 @@
         shell: !j2: |
           #!bash
           set -ex
+          test -n "{{ job_to_trigger_on_ft_changed }}"
           cd nx_vms
           hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
-        project: '{job_to_trigger_on_ft_changed}'  # '{pipeline}.{version}.preset.on-push-ft'
+        project: !j2: '{{ job_to_trigger_on_ft_changed  if job_to_trigger_on_ft_changed else "noop" }}'  # '{pipeline}.{version}.preset.on-push-ft'
         block: false
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -111,9 +113,10 @@
         shell: !j2:  |
           #!bash
           set -ex
+          test -n "{{ job_to_trigger_on_rct_changed }}"
           cd nx_vms
           hg diff --stat -r  "${NX_VMS_COMMIT}:${NX_VMS_COMMIT_OLD}" func_tests | grep -q 'files changed'
-        project: '{job_to_trigger_on_rct_changed}'  # '{pipeline}.{version}.preset.on-push-rct'
+        project: !j2: '{{ job_to_trigger_on_rct_changed  if job_to_trigger_on_rct_changed else "noop" }}'  # '{pipeline}.{version}.preset.on-push-rct'
         block: false
         parameters: |
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
