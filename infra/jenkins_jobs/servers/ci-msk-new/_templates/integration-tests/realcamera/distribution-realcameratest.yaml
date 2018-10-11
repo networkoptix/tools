@@ -174,7 +174,7 @@
               --slot="$EXECUTOR_NUMBER" \
               --reinstall \
               --rct-camera-filter="$RCT_CAMERA_FILTER" \
-              cameras_integration/test_server.py::test_cameras
+              real_camera_tests/test_server.py::test_cameras
 
     publishers:
     - mercurial/rm-repo-if-broken
