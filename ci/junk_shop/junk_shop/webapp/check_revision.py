@@ -55,7 +55,6 @@ def check_revision(revision):
                     and run.test.path in STAGE_NAMES
                     and run.build.project.name == CI_PROJECT)
     for run in query:
-        print run.build.build_num
         platform_dict = result.setdefault(run.platform.name, dict())
         if (platform_dict.get(run.test.path, OUTCOME_PASSED) == OUTCOME_PASSED or
                 run.outcome != OUTCOME_PASSED):
