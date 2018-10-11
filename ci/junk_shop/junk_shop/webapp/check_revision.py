@@ -13,26 +13,29 @@
 
     ```json
     {
-      "bpi":
-      {
-        "build": "passed"
-      },
-      "linux-x64":
-      {
-        "build": "failed"
-      },
-      "mac":
-      {
-        "build": "failed"
-      },
-      "webadmin":
-      {
-        "build": "passed"
-      },
-      "windows-x64":
-      {
-        "build": "failed"
-      }
+        "bpi":
+        {
+            "build": "passed"
+        },
+        "linux-x64":
+        {
+            "build": "passed",
+            "functional": "failed",
+            "unit": "passed"
+        },
+        "mac":
+        {
+            "build": "failed",
+        },
+        "webadmin":
+        {
+            "build": "passed"
+        },
+        "windows-x64":
+        {
+            "build": "passed",
+            "unit": "failed"
+        }
     }
     ```
 """
@@ -46,14 +49,15 @@ from flask import jsonify
 CI_PROJECT = 'ci'
 OUTCOME_PASSED = 'passed'
 
+
 @app.route('/check_revision/<revision>', methods=['GET'])
 @db_session
 def check_revision(revision):
     result = dict()
-    query =  select(run for run in models.Run
-                    if run.build.revision == revision
-                    and run.test.path in STAGE_NAMES
-                    and run.build.project.name == CI_PROJECT)
+    query = select(run for run in models.Run
+                   if run.build.revision == revision
+                   and run.test.path in STAGE_NAMES
+                   and run.build.project.name == CI_PROJECT)
     for run in query:
         platform_dict = result.setdefault(run.platform.name, dict())
         if (platform_dict.get(run.test.path, OUTCOME_PASSED) == OUTCOME_PASSED or
