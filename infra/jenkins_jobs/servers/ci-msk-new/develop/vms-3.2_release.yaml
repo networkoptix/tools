@@ -3,7 +3,7 @@
 
     pipeline: develop
     junkshop_project_name: ci
-    max_concurrent_runners: 1
+    max_concurrent_runners: 2
     build_distribution_concurrently: false
     test_distribution_concurrently: false
 
