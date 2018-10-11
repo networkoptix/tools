@@ -91,7 +91,7 @@
 
             ut_enabled: 'OFF'
 
-            ft_enabled: 'ON'
+            ft_enabled: 'OFF'
             ft_commit_choice_default: FT_OTHER_COMMIT
             ft_commit_choice_option_default: ''
 
