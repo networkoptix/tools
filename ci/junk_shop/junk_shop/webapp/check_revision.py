@@ -1,7 +1,7 @@
 """
     check_revision.py
     ~~~~~~~~~~~~~~~~~
-    An URL to get information about nx_vms revision to make a 'merge' decision.
+    An API endpoint to get information about nx_vms revision to make a 'merge' decision.
     http://junkshop.enk.me/check_revision/<REVISION>, where revision is a hexadecimal
     string less than 40 characters long, referred to as a short-form identifier.
 
@@ -44,9 +44,9 @@ from pony.orm import db_session, select
 from junk_shop.webapp import app
 from .. import models
 from .utils import STAGE_NAMES
-from flask import jsonify
+from flask import jsonify, request
 
-CI_PROJECT = 'ci'
+DEFAULT_PROJECT = 'ci'
 OUTCOME_PASSED = 'passed'
 
 
@@ -54,10 +54,11 @@ OUTCOME_PASSED = 'passed'
 @db_session
 def check_revision(revision):
     result = dict()
+    project = request.args.get('project', DEFAULT_PROJECT)
     query = select(run for run in models.Run
                    if run.build.revision == revision
                    and run.test.path in STAGE_NAMES
-                   and run.build.project.name == CI_PROJECT)
+                   and run.build.project.name == project)
     for run in query:
         platform_dict = result.setdefault(run.platform.name, dict())
         if (platform_dict.get(run.test.path, OUTCOME_PASSED) == OUTCOME_PASSED or
