@@ -160,6 +160,7 @@
         condition-string1: '${{USE_BUILD_IDENTITY}}'
         condition-string2: 'NEW'
         steps:
+        - inject: {}
         - envvars/request-new-build-identity:
             pipeline: '{pipeline}'
 
