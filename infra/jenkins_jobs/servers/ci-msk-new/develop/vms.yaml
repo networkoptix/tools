@@ -32,7 +32,7 @@
         version: vms
         job_to_trigger_on_vms_changed: 'develop.vms.preset.on-push-vms'
         job_to_trigger_on_ft_changed: 'develop.vms.preset.on-push-ft'
-        job_to_trigger_on_rct_changed: 'develop.vms.preset.on-push-rct'
+        job_to_trigger_on_rct_changed: ''
 
     - param-resolver
 
