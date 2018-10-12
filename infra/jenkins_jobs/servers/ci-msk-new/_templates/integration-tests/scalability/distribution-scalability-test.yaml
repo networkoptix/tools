@@ -214,7 +214,10 @@
           CAMERAS_PER_SERVER=20
           USERS_PER_SERVER=4
           PROPERTIES_PER_CAMERA=5
+          TRANSACTIONS_PER_SERVER_RATE=2
           MERGE_TIMEOUT=2h
+          MESSAGE_BUS_TIMEOUT=20s
+          TRANSACTIONS_STAGE_DURATION=20m
           TEST_TIMEOUT="$((4 * 60 * 60))" # 4hr
 
           cd nx_vms/func_tests
@@ -244,7 +247,10 @@
         scalability_test.cameras_per_server=$CAMERAS_PER_SERVER,\
         scalability_test.users_per_server=$USERS_PER_SERVER,\
         scalability_test.properties_per_camera=$PROPERTIES_PER_CAMERA,\
-        scalability_test.merge_timeout=$MERGE_TIMEOUT" \
+        scalability_test.transactions_per_server_rate=$TRANSACTIONS_PER_SERVER_RATE,\
+        scalability_test.merge_timeout=$MERGE_TIMEOUT,\
+        scalability_test.message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
+        scalability_test.transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
               --run-parameters="\
         use_lightweight_servers=$USE_LIGHTWEIGHT_SERVERS,\
         server_count=$SERVER_COUNT,\
@@ -252,7 +258,10 @@
         cameras_per_server=$CAMERAS_PER_SERVER,\
         users_per_server=$USERS_PER_SERVER,\
         properties_per_camera=$PROPERTIES_PER_CAMERA,\
-        merge_timeout=$MERGE_TIMEOUT" \
+        transactions_per_server_rate=$TRANSACTIONS_PER_SERVER_RATE,\
+        merge_timeout=$MERGE_TIMEOUT,\
+        message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
+        transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
               tests/scalability_test.py
 
     publishers:
