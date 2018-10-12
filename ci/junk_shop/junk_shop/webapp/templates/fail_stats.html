@@ -69,12 +69,15 @@
           <tr>
             <th class="axiz">Test name</th>
             <th class="axiz">Last failed build</th>
-            <th class="axiz center">Last fail time</th>
+            <th class="axiz center">Last fail timestamp</th>
+            <th class="axiz">Last passed build</th>
+            <th class="axiz center">Last success timestamp</th>
             <th class="axiz">Fails</th>
           </tr>
         </thead>
        <tbody>
        {% for rec in failed_tests %}
+         {% set passed_test = passed_tests[rec.path] %}
          <tr>
            <td class="fail-list-cell">
               <a class="test-link"
@@ -90,11 +93,29 @@
                   {{- rec.last_build_num -}}
               </a>
            </td>
-           <td class="fail-list-cell">
+           <td class="fail-list-cell center">
                <div class="datetime">
-                   {{ rec.last_fail_timestamp|format_datetime }}
+                   {{ rec.last_timestamp|format_datetime }}
                </div>
            </td>
+           {% if passed_test %}
+             <td class="fail-list-cell center">
+              <a href="{{ url_for('build',
+                                  project_name=form.project.data,
+                                  branch_name=form.branch.data,
+                                  build_num=passed_test.last_build_num ) }}">
+                  {{- passed_test.last_build_num -}}
+              </a>
+             </td>
+             <td class="fail-list-cell center">
+               <div class="datetime">
+                   {{ passed_test.last_timestamp|format_datetime }}
+               </div>
+             </td>
+           {% else %}
+             <td class="fail-list-cell center">-</td>
+             <td class="fail-list-cell center">-</td>
+           {% endif %}
            <td class="fail-list-cell center">
                <b>{{- rec.fail_count -}}</b>
            </td>

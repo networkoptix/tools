@@ -37,9 +37,15 @@ FailedTestRecord = namedtuple(
         'last_root_run_id',
         'last_run_id',
         'last_build_num',
-        'last_fail_timestamp',
+        'last_timestamp',
     ])
 
+PassedTestRecord = namedtuple(
+    'PassedTestRecord',
+    [
+      'last_build_num',
+      'last_timestamp',
+    ])
 
 class FailStatsForm(FlaskForm):
     """
@@ -150,7 +156,7 @@ def fail_stats():
             form=form,
         )
 
-    # Select tests
+    # Select failed tests
     query = select(
         (run.test.path,
          run.test.id,
@@ -158,7 +164,7 @@ def fail_stats():
          max(run.root_run.id),
          max(run.id),
          max(run.root_run.build.build_num),
-         max(run.started_at))
+         max(run.root_run.started_at))
         for run in models.Run
         if (run.root_run.started_at >= form.date_from.data and
             run.root_run.started_at <= form.date_to.data + timedelta(days=1) and
@@ -174,10 +180,31 @@ def fail_stats():
         FailedTestRecord(*test_record)
         for test_record in query.order_by(desc(3)).page(page, page_size)]
 
+    # Select last passed for failed tests
+    failed_ids = [fail.test_id for fail in failed_tests]
+
+    passed_tests = {
+        path: PassedTestRecord(
+            last_success_build_num,
+            last_success_timestamp)
+        for path, _, last_success_build_num, last_success_timestamp in
+        select(
+            (run.test.path,
+             run.test.id,
+             max(run.root_run.build.build_num),
+             max(run.root_run.started_at))
+            for run in models.Run
+            if (run.root_run.platform.name == form.platform.data and
+                run.root_run.build.project.name == form.project.data and
+                run.root_run.build.branch.name == form.branch.data and
+                run.test.id in failed_ids and
+                run.outcome == 'passed'))}
+
     return render_template(
         'fail_stats.html',
         paginator=paginator(page, rec_count, page_size),
         form=form,
         total_records=rec_count,
         failed_tests=failed_tests,
+        passed_tests=passed_tests,
     )
