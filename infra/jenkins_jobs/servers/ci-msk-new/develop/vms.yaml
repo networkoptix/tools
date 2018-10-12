@@ -31,8 +31,8 @@
         branch: vms
         version: vms
         job_to_trigger_on_vms_changed: 'develop.vms.preset.on-push-vms'
-        job_to_trigger_on_ft_changed: ''
-        job_to_trigger_on_rct_changed: 'develop.vms.preset.on-push-ft'
+        job_to_trigger_on_ft_changed: 'develop.vms.preset.on-push-ft'
+        job_to_trigger_on_rct_changed: 'develop.vms.preset.on-push-rct'
 
     - param-resolver
 
@@ -71,6 +71,55 @@
             ft_enabled: 'ON'
             ft_commit_choice_default: FT_OTHER_COMMIT
             ft_commit_choice_option_default: ''
+            test_list: self_tests
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''
+
+        - nightly-ft-linux:
+            timer: 'H 0 * * 2-6'
+            build_description: "Nightly functional tests - linux"
+
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
+            vms_build_choice_option_default: 'vms'
+            default_platforms: linux-x64,windows-x64
+            default_customizations: default
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'ON'
+            ft_commit_choice_default: FT_STABLE_PUSH
+            ft_commit_choice_option_default: ''
+            test_select_expr: 'not windows and not smb'
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''
+
+        - nightly-ft-windows:
+            timer: 'H 0 * * 2-6'
+            build_description: "Nightly functional tests - windows"
+
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
+            vms_build_choice_option_default: 'vms'
+            default_platforms: linux-x64,windows-x64
+            default_customizations: default
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'ON'
+            ft_commit_choice_default: FT_STABLE_PUSH
+            ft_commit_choice_option_default: ''
+            test_select_expr: 'windows or smb'
 
             rct_enabled: 'OFF'
             rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
