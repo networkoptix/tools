@@ -11,7 +11,7 @@
       }}realcameratest-thr${EXECUTOR_NUMBER}'
     run_realcameratests_concurrently: true
 
-    workdir: realcameratests
+    workdir: 'realcameratests.$BUILD_NUMBER'
 
     test_select_expr: not windows and not smb
     test_list: ''
@@ -222,6 +222,7 @@
                 PLATFORM=$PLATFORM
                 BRANCH=$BRANCH
                 NX_VMS_COMMIT=$NX_VMS_COMMIT
+                RCT_COMPONENT={workdir}
 
     - failure-email:
         email-recipients: '{build_watchers}'
