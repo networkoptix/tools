@@ -27,6 +27,7 @@ import json
 import sys
 from pony.orm import db_session
 from datetime import datetime, timedelta
+from dateutil.parser import parse
 from pathlib2 import Path
 from junk_shop.utils import DbConfig, status2outcome, dir_path
 from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
@@ -64,8 +65,7 @@ def str_to_timedelta(duration):
 def str_to_datetime(datetime_str):
     if not datetime_str:
         return None
-    return datetime.strptime(
-        datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+    return parse(datetime_str)
 
 
 class InvalidFieldType(Exception):
@@ -268,7 +268,7 @@ def parse_all_cameras_file(all_cameras_file):
             return yaml.load(f)
 
 
-def parse_and_save_results_to_db(repository, root_run, results_file, cameras_info):
+def parse_and_save_results_to_db(repository, root_run, results_file, all_cameras):
     # type: (DbCaptureRepository, models.Run, Path, dict) -> (bool, Optional[datetime])
     passed = True
     started_at = None
@@ -281,7 +281,7 @@ def parse_and_save_results_to_db(repository, root_run, results_file, cameras_inf
         for camera_tests in camera_tests_list:
             if not produce_camera_tests(
                     repository, root_run, [root_run.name],
-                    camera_tests, cameras_info):
+                    camera_tests, all_cameras):
                 passed = False
             if camera_tests.start_time:
                 if started_at:
