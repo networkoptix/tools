@@ -60,13 +60,16 @@
     # Our tests work per-customization per-platform and not yet implemented
     # for all platforms, so list of jobs is reduced
     # NOTE: If extra UT combinations are added, don't forget to add them in runner
-    - distribution-build-with-unittests:
+    - distribution-all:
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
             unittest_node: unittests-linux
         - windows-x64:
             unittest_node: unittests-windows
-    - distribution-all:
+
+    - distribution-unittests:
+        # TODO: Rework a bit this parameterization as well as probably build node parameterization
         platform:
         - linux-x64:
             unittest_node: unittests-linux

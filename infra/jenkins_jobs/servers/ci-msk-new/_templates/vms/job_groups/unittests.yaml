@@ -1,8 +1,0 @@
-# This is a special job-group for adding *.all wrapper for build and
-# also unittest job inside this wrapper.
-# It must be used for only those projects and configurations which are supported in runner.
-- job-group:
-    name: distribution-build-with-unittests
-    jobs:
-    - distribution-all
-    - distribution-unittests
