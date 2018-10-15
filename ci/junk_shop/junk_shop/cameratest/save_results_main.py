@@ -224,7 +224,7 @@ def save_run_artifacts(repository, run, messages, errors, exceptions):
 
 
 def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, all_cameras):
-    # type: (DbCaptureRepository, models.Run, list, dict, dict) -> None
+    # type: (DbCaptureRepository, models.Run, list, dict, dict) -> bool
     _logger.debug("Process camera '%s' data", camera_tests.camera_id)
     test_path_list = parent_path_list + [camera_tests.camera_id]
 
@@ -232,7 +232,11 @@ def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, a
     camera_run = save_camera_root_run(
         repository, root_run, test_path_list, camera_tests, camera_info)
 
+    passed = True
+
     for stage in camera_tests.stages:
+        if not stage.passed:
+            passed = False
         with db_session:
             stage_run = repository.produce_test_run(
                 camera_run, test_path_list + [stage.name], is_test=True)
@@ -241,6 +245,7 @@ def produce_camera_tests(repository, root_run, parent_path_list, camera_tests, a
             stage_run.outcome = status2outcome(stage.passed)
             save_run_artifacts(
                 repository, stage_run, stage.messages, stage.errors, stage.exceptions)
+    return passed
 
 
 def collect_test_artifacts(work_dir):
