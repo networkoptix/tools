@@ -107,4 +107,3 @@
             unittest_node: unittests-windows
         customization:
         - default
-    - '{pipeline}.{version}.{project}.register-build'

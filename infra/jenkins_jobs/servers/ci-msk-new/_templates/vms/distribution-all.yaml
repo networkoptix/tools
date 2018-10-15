@@ -1,5 +1,5 @@
 - job-template:
-    name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.all'
+    name: '{pipeline}.{version}.{project}.distribution.{platform}.{customization}.build-and-ut'
     id: distribution-all
     project-type: multijob
 

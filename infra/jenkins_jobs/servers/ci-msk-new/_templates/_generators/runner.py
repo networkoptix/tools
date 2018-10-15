@@ -213,14 +213,14 @@ for platform in PLATFORMS_LIST:
         # if platform in ['ios', 'android-arm']:
         #     continue
 
-        # *.all job contains build and test, so if this particular platform & customization is not
-        # unittestable at all, then we don't need to generate *.all that vontains only build..
+        # *.build-and-ut job contains build and test, so if this particular platform & customization is not
+        # unittestable at all, then we don't need to generate *.build-and-ut that vontains only build..
 
         # The only difference in all and build params are RUN_UNITTESTS parameter
         if platform in UNITTESTABLE.get(customization, []):
 
             print '''
-        - name: '{pipeline}.{version}.{project}.distribution.'''+platform+'''.'''+customization+'''.all'
+        - name: '{pipeline}.{version}.{project}.distribution.'''+platform+'''.'''+customization+'''.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("'''+platform+'''") &&

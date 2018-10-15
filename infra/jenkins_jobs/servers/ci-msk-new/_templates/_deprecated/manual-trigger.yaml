@@ -193,7 +193,7 @@
         condition-string2: 'AUTO'
         steps:
         - copyartifact:
-            project: '{pipeline}.{version}.{project}.register-build'
+            project: '{pipeline}.{version}.{project}.runner'
             filter: 'NX_VMS_COMMIT.envvar'
             which-build: last-successful
             parameter-filters: >-

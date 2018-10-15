@@ -125,16 +125,6 @@
         description: |
           $PLATFORMS $CUSTOMIZATIONS for $NX_VMS_COMMIT
 
-    # TODO: remove this: unused
-    # At this step we will register id->commit or fail if we have wrong commit for this id.
-    - build-registry-add:
-        pipeline: '{pipeline}'
-        version: '{version}'
-        branch: $BRANCH
-        project: '{project}'
-        build-identity: $BUILD_IDENTITY
-        nx-vms-commit: $NX_VMS_COMMIT
-
     # TODO: we don't need to build webadmin for macOS. But it's not enough to disable it here
     # because artifact is mandatory in build installers.
     - multijob:
@@ -160,7 +150,7 @@
         condition: COMPLETED # allow unstable
         projects:
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.default.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -3263,7 +3253,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.default.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -4144,7 +4134,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.mac.default.all'
+        - name: '{pipeline}.{version}.{project}.distribution.mac.default.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("mac") &&

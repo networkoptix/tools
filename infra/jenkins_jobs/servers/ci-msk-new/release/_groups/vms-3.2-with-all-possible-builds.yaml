@@ -137,5 +137,3 @@
               -DtargetDevice=edge1
         customization:
         - 'digitalwatchdog'
-
-    - '{pipeline}.{version}.{project}.register-build'
