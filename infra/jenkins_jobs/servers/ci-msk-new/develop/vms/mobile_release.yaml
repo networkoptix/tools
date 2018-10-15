@@ -1,7 +1,7 @@
 - project:
     name: develop/mobile_release
 
-    project: mobile
+    project: vms
     pipeline: develop
     junkshop_project_name: ci
     build_distribution_concurrently: false
