@@ -18,6 +18,8 @@
 
     build_watchers: ''
 
+    poll_scm_timer: '' # disable triggers
+
     jobs:
 
     - vms-3.2-with-tests

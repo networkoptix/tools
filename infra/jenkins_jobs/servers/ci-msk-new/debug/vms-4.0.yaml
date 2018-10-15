@@ -20,6 +20,8 @@
     default_branch: vms
     use_nx_vms_commit: vms  # FIXME: this is temp fix
 
+    poll_scm_timer: '' # disable triggers
+
     jobs:
 
     - param-resolver
