@@ -28,6 +28,13 @@
     regex: '.*.runner'
     columns: *default_cols
 
+- view:
+    name: presets
+    view-type: list
+    description: 'List of all presets'
+    regex: '.*preset.*'
+    columns: *default_cols
+
 # Per-release sections
 
 # vms-3.2
