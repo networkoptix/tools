@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ex
-cd "$REPOSITORY_ROOT_PATH/$CUSTOMIZATION"
+cd "${REPOSITORY_ROOT_PATH}/${CUSTOMIZATION}"
 mkdir -p all/{update,install,debug,distrib}
 # fix permissions on files from windows builds (and others if there are same problems)
 # the problem is that on win nodes jenkins creates files with rwx perm for owner only
@@ -8,31 +8,31 @@ mkdir -p all/{update,install,debug,distrib}
 # and also add +x on directories
 chmod -R a+r .
 find . -type d -exec chmod a+x {} \;
-for platform in $(ls .) ; do
+for platform in * ; do
 
-  if [ $platform == all ] ; then
+  if [ "${platform}" == all ] ; then
     continue;
   fi
 
-  mkdir -p $platform/update
+  mkdir -p "${platform}/update"
 
-  find ./$platform/distrib -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -name '*_update-*' -print | \
+  find "./${platform}/distrib" -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -name '*_update-*' -print | \
     xargs -I {} sh -c ' \
-      ln -f "$1" ./'"$platform"'/update/$(basename "$1") && \
+      ln -f "$1" ./'"${platform}"'/update/$(basename "$1") && \
       ln -f "$1" ./all/update/$(basename "$1") && \
       ln -f "$1" ./all/distrib/$(basename "$1") \
     ' - {}
 
-  mkdir -p $platform/debug
-  find ./$platform/distrib -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -name '*_debug-*' -print | \
+  mkdir -p "${platform}/debug"
+  find "./${platform}/distrib" -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -name '*_debug-*' -print | \
     xargs -I {} sh -c ' \
       ln -f "$1" ./"'$platform/'"debug/$(basename "$1") && \
       ln -f "$1" ./all/debug/$(basename "$1") && \
       ln -f "$1" ./all/distrib/$(basename "$1") \
     ' - {}
 
-  mkdir -p $platform/install
-  find ./$platform/distrib -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -not -name '*_update-*' -and -not -name '*_debug-*' -print | \
+  mkdir -p "${platform}/install"
+  find "./${platform}/distrib" -type f -and -name '*.'"$BUILD_IDENTITY-"'*' -and -not -name '*_update-*' -and -not -name '*_debug-*' -print | \
     xargs -I {} sh -c ' \
       ln -f "$1" ./'"$platform"'/install/$(basename "$1") && \
       ln -f "$1" ./all/install/$(basename "$1") && \
