@@ -1,6 +1,25 @@
 - job-template:
     name: '{pipeline}.{version}.preset.{preset-name}'
     id: 'preset'
+
+    description: !j2: |
+      <pre>
+      ================================================================================
+      Build Preset
+      ================================================================================
+
+      JOB MAINTAINERS
+        {{ job_maintainers | default ("") }}
+
+      --------------------------------------------------------------------------------
+
+      This job serves for starting bunch of builds associated with particular commit
+      in nx_vms repository and also assigned build identity.
+
+      {{ detailed_job_description | default("") }}
+
+      </pre>
+
     node: runner
     concurrent: true
 

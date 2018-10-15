@@ -1,0 +1,45 @@
+- job-template:
+    name: '{pipeline}.helper.promote-build'
+    id: helpers/promote-build
+
+    description: |
+      <pre>
+      ================================================================================
+      Build Promotion
+      ================================================================================
+
+      Create symlinks to beta-builds/daily, so build files will be accessible
+      for DepCon.
+
+      </pre>
+
+    node: repository-ops
+    concurrent: false
+
+    parameters:
+    - p_BUILD_DESCRIPTION:
+        default: ''
+    - p_BRANCH
+    - p_NX_VMS_COMMIT
+    - p_BUILD_IDENTITY
+    - p_PIPELINE(hidden):
+        default: '{pipeline}'
+
+    wrappers:
+    - timestamps
+    - timeout:
+        timeout: 20 # min
+        fail: true
+        type: absolute
+
+    builders:
+    - decorators/set-custom-build-description
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        macro: true
+    - repository/promote-to-daily:
+        artifact_repository_base_path: '{artifact_repository_base_path}'
+
+    publishers:
+    - failure-email-helpers(maintainers):
+        email-recipients: '{job_maintainers}'

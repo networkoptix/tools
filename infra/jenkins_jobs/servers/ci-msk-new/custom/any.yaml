@@ -16,20 +16,6 @@
 
     jobs:
 
-    - manual-trigger:
-        preset:
-        - custom:
-            detailed_job_description: |-
-              This trigger serves for custom builds.
-              For example, you may want to verify that Jenkins works properly and can
-              successfully rebuild some successful build.
-            default_build_description: >-
-              Manually triggered
-            platforms: linux-x64,windows-x64,mac,bpi
-            customizations: default
-            run_unittests: true
-            use_nx_vms_commit: ''
-
     - _manual-trigger:
         preset:
         - custom2:

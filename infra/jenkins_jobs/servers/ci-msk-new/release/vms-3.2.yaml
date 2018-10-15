@@ -1,15 +1,14 @@
 - project:
-    name: release/vms-3.2
+    name: release/vms_3.2
 
     pipeline: release
     pipeline_priority: 9
     max_concurrent_runners: 2
     project: vms
 
-    version:
-    - vms_3.2:
-        default_branch: vms_3.2
-        use_nx_vms_commit: vms_3.2  # FIXME: this is temp fix
+    version: vms_3.2
+    default_branch: vms_3.2
+    use_nx_vms_commit: vms_3.2  # FIXME: this is temp fix
 
     build_watchers: iremizov@networkoptix.com
 
@@ -17,30 +16,25 @@
 
     - release/vms-3.2-with-all-possible-builds
 
-    - manual-trigger:
-        preset:
-        - nightly:
-            detailed_job_description: |-
-              This trigger serves for nigtly clean builds to verify the state of product
-              It builds with corresponding schedule "{timer}".
-
-              It should not be triggered manually excluding debugging of infra problems
-              associated with only this trigger type.
-            default_build_description: >-
-              Nightly clean build for all platforms and customizations
-              triggered automatically by timer
-            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
-            customizations: default,hanwha,vista,digitalwatchdog
-            clean_workspace: true
-            timer: '' # temp. isabled, was '0 0 * * 1-5'
-        - custom:
-            detailed_job_description: |-
-              This trigger serves for custom builds.
-              For example, you may want to verify that Jenkins works properly and can
-              successfully rebuild some successful build.
-            default_build_description: >-
-              Manually triggered
-            platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
-            # TODO: rework defaults to accept space-separated values, and add >- here
+    - preset:
+        preset-name:
+        - manual:
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'vms_3.2'
             # TODO: split into default-selected and full-list
-            customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xccelo
+            default_platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
+            default_customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xccelo
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'OFF'
+            ft_commit_choice_default: FT_STABLE_PUSH_OR_NIGHTLY
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: FT_OTHER_COMMIT
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: ''

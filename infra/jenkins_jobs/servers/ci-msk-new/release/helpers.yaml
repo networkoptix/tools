@@ -32,4 +32,4 @@
     # e.g. 3.2 has own gen with own range, 4.0 has own range, mobile - own
     - build-identity-generator
 
-    - '{pipeline}.helper.promote-build'
+    - helpers/promote-build

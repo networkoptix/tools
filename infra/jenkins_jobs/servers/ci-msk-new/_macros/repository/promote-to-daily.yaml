@@ -1,0 +1,24 @@
+- builder:
+    name: repository/promote-to-daily
+    builders:
+    - shell: !j2: |
+        #!bash
+        REPOSITORY_ROOT_PATH="{{ artifact_repository_base_path }}/$PIPELINE/$BRANCH/$BUILD_IDENTITY"
+        _version="$(cat "${REPOSITORY_ROOT_PATH}"/default/*/build_info.txt | grep version | tail -1 | cut -f 2 -d '=')"
+        TARGET_ROOT="/mnt/beta-builds/daily/${BUILD_IDENTITY}-${BRANCH}"
+        mkdir -p "${TARGET_ROOT}"
+        echo "$_version" '>' "${TARGET_ROOT}/version"
+        tree $REPOSITORY_ROOT_PATH
+        for customization in $(ls "${REPOSITORY_ROOT_PATH}") ; do
+          mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}"
+          mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/updates"
+          mkdir -p "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/distributive"
+          for file in $(ls "$REPOSITORY_ROOT_PATH/$customization/all/update") ; do
+            ls "$REPOSITORY_ROOT_PATH/${customization}/all/update/${file}"
+            ln -f "$REPOSITORY_ROOT_PATH/${customization}/all/update/${file}" "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/updates/${file}"
+          done
+          for file in $(ls $REPOSITORY_ROOT_PATH/${customization}/all/install) ; do
+            ls "$REPOSITORY_ROOT_PATH/${customization}/all/install/${file}"
+            ln -f "$REPOSITORY_ROOT_PATH/${customization}/all/install/${file}" "${TARGET_ROOT}/${customization}/${BUILD_IDENTITY}/distributive/${file}"
+          done
+        done
