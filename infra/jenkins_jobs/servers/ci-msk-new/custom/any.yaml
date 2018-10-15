@@ -17,18 +17,33 @@
 
     jobs:
 
-    - _manual-trigger:
-        preset:
-        - custom2:
+    - param-resolver
+
+    - preset:
+        preset-name:
+        - full:
             detailed_job_description: |-
               This trigger serves for custom builds.
               For example, you may want to verify that Jenkins works properly and can
               successfully rebuild some successful build.
-            default_build_description: >-
-              Manually triggered
-            platforms: linux-x64,windows-x64,,windows-x86,mac,bpi
-            customizations: default
-            run_unittests: true
-            use_nx_vms_commit: ''
+
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'default'
+
+            ut_enabled: 'ON'
+
+            ft_enabled: 'OFF'
+            ft_commit_choice_default: FT_STABLE_PUSH
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: RCT_STABLE_PUSH
+            rct_commit_choice_option_default: ''
+
+            st_enabled: 'OFF'
+            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_option_default: 'vms'
+            default_platforms: linux-x64,windows-x64,windows-x86,mac,bpi
+            default_customizations: default
 
     - vms-current-with-tests
