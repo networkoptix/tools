@@ -1,5 +1,5 @@
 - project:
-    name: develop/mobile
+    name: develop/mobile_release
 
     project: mobile
     pipeline: develop
