@@ -1,19 +1,19 @@
 - project:
     name: develop/cloud_dev
 
+    project: vms
     pipeline: develop
-    max_concurrent_runners: 1
     junkshop_project_name: ci
+    max_concurrent_runners: 1
     build_distribution_concurrently: false
     test_distribution_concurrently: false
-
-    project: vms
-    realcameratesting_framework_branch: vms
-    build_watchers: akolesnikov@networkoptix.com
 
     version: cloud_dev
     default_branch: cloud_dev
     use_nx_vms_commit: cloud_dev  # FIXME: this is temp fix
+
+    realcameratesting_framework_branch: vms
+    build_watchers: akolesnikov@networkoptix.com
 
     jobs:
 

@@ -1,13 +1,12 @@
 - project:
     name: develop/vms_3.2
 
+    project: vms
     pipeline: develop
     junkshop_project_name: ci
     max_concurrent_runners: 1
     build_distribution_concurrently: false
     test_distribution_concurrently: false
-
-    project: vms
 
     version: vms_3.2
     default_branch: vms_3.2

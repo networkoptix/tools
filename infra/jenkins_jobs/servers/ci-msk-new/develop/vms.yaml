@@ -4,11 +4,13 @@
     project: vms
     pipeline: develop
     junkshop_project_name: ci
+    max_concurrent_runners: 5
+    build_distribution_concurrently: true
+    test_distribution_concurrently: true
 
-    version:
-    - vms:
-        default_branch: vms
-        use_nx_vms_commit: vms  # FIXME: this is temp fix
+    version: vms
+    default_branch: vms
+    use_nx_vms_commit: vms  # FIXME: this is temp fix
 
     realcameratesting_framework_branch: vms
     build_watchers: ''

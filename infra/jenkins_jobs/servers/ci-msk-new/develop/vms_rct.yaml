@@ -4,6 +4,9 @@
     project: vms
     pipeline: develop
     junkshop_project_name: ci
+    max_concurrent_runners: 2
+    build_distribution_concurrently: false
+    test_distribution_concurrently: false
 
     version: vms_rct
     default_branch: vms_rct

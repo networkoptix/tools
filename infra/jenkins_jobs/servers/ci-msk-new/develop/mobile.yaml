@@ -1,17 +1,15 @@
 - project:
     name: develop/mobile
 
-
+    project: mobile
     pipeline: develop
     junkshop_project_name: ci
-
-    project: mobile
+    build_distribution_concurrently: false
+    test_distribution_concurrently: false
 
     version: mobile
     default_branch: mobile
     use_nx_vms_commit: mobile  # FIXME: this is temp fix
-    build_distribution_concurrently: false
-    test_distribution_concurrently: false
 
     build_watchers: iremizov@networkoptix.com
 

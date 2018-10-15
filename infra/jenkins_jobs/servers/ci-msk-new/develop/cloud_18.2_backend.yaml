@@ -1,13 +1,13 @@
 - project:
     name: develop/cloud_18.2_backend
 
+    project: vms
     pipeline: develop
-    max_concurrent_runners: 1
     junkshop_project_name: ci
+    max_concurrent_runners: 1
     build_distribution_concurrently: false
     test_distribution_concurrently: false
 
-    project: vms
     realcameratesting_framework_branch: vms
     build_watchers: akolesnikov@networkoptix.com
 

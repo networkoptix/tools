@@ -6,7 +6,6 @@
     junkshop_project_name: debug
     pipeline_priority: 1
     max_concurrent_runners: 1
-
     build_distribution_concurrently: false
     test_distribution_concurrently: false
 

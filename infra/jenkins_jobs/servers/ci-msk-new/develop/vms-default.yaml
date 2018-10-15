@@ -1,15 +1,14 @@
 - project:
     name: develop-pipeline-default
 
+    project: vms
     pipeline: develop
     junkshop_project_name: ci
-    version: default
     max_concurrent_runners: 1
     build_distribution_concurrently: false
     test_distribution_concurrently: false
 
-    project: vms
-
+    version: default
     default_branch: default
     use_nx_vms_commit: default  # FIXME: this is temp fix
 

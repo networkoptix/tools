@@ -1,17 +1,18 @@
 - project:
     name: custom/any
 
+    project: vms
     pipeline: custom
     pipeline_priority: 3
     max_concurrent_runners: 3
 
-    project: vms
     version: any
-
     default_branch: default
     use_nx_vms_commit: ''  # FIXME: this is temp fix
+
     realcameratesting_framework_branch: vms
     build_distribution_custom_suffix: '' # no suffix that determines branch
+
     build_watchers: ''
 
     jobs:
