@@ -1,7 +1,6 @@
 - job-group:
     name: mobile-current
 
-
     build_webadmin: 'false'
     use_webadmin: 'false'
     # Some cmake args are applicable for any builds they are applied at first
@@ -10,12 +9,6 @@
       -Dbeta=TRUE
       -DdeveloperBuild=OFF
       -DcloudGroup=test
-
-    # SECTION. PIPELINE CONFIG
-    # ============================================================
-
-    pipeline: develop
-    junkshop_project_name: ci
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
