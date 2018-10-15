@@ -112,6 +112,7 @@
         set -ex
         rm -rf   "build" "dist" "{workdir}"
         mkdir -p "build" "dist" "{workdir}"
+        rm -f unstable.flag
 
     - inject:
         properties-content: |
@@ -165,8 +166,9 @@
 
           cd nx_vms/func_tests
 
+            set +e
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
-            exec pytest \
+            pytest \
               --work-dir="$WORK_DIR" \
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
@@ -176,8 +178,40 @@
               --rct-camera-filter="$RCT_CAMERA_FILTER" \
               real_camera_tests/test_server.py::test_cameras
 
+            case "X$?" in
+            X0)
+              echo "PyTest - All tests were collected and passed successfully"
+              rm -f unstable.flag
+              exit 0
+            ;;
+            X1)
+              echo "PyTest - Tests were collected and run but some of the tests failed"
+              touch unstable.flag
+              exit 0
+            ;;
+            X2)
+              echo "PyTest - Test execution was interrupted by the user"
+              exit 2
+            ;;
+            X3)
+              echo "PyTest - Internal error happened while executing tests"
+              exit 3
+            ;;
+            X4)
+              echo "PyTest - pytest command line usage error"
+              exit 4
+            ;;
+            X5)
+              echo "PyTest - 	No tests were collected"
+              exit 5
+            ;;
+            esac
     publishers:
     - mercurial/rm-repo-if-broken
+    - set-unstable-if-marked
+    - description-setter:
+        regexp: "'PyTest - (.*)'"
+        regexp-for-failed: "'PyTest - (.*)'"
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:

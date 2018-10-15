@@ -113,6 +113,7 @@
         set -ex
         rm -rf   "build" "dist" "updates" "{workdir}"
         mkdir -p "build" "dist" "updates" "{workdir}"
+        rm -f unstable.flag
 
     - inject:
         properties-content: |
@@ -210,6 +211,7 @@
 
           cd nx_vms/func_tests
 
+            set +e
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
             # These params are required only for functests from 3.2 branch
             # --mediaserver-dist-path
@@ -217,7 +219,7 @@
             # --cloud-group
             # --vm-port-base
             # --vm-name-prefix
-            exec pytest \
+            pytest \
               --work-dir="$WORK_DIR" \
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
@@ -242,6 +244,35 @@
               -k "$TEST_SELECT_EXPR" \
               $TEST_LIST
 
+            case "X$?" in
+            X0)
+              echo "PyTest - All tests were collected and passed successfully"
+              rm -f unstable.flag
+              exit 0
+            ;;
+            X1)
+              echo "PyTest - Tests were collected and run but some of the tests failed"
+              touch unstable.flag
+              exit 0
+            ;;
+            X2)
+              echo "PyTest - Test execution was interrupted by the user"
+              exit 2
+            ;;
+            X3)
+              echo "PyTest - Internal error happened while executing tests"
+              exit 3
+            ;;
+            X4)
+              echo "PyTest - pytest command line usage error"
+              exit 4
+            ;;
+            X5)
+              echo "PyTest - 	No tests were collected"
+              exit 5
+            ;;
+            esac
+
     - shell: |
         #!bash
         set -ex
@@ -259,6 +290,10 @@
 
     publishers:
     - mercurial/rm-repo-if-broken
+    - set-unstable-if-marked
+    - description-setter:
+        regexp: "'PyTest - (.*)'"
+        regexp-for-failed: "'PyTest - (.*)'"
     - postbuildscript:
         mark-unstable-if-failed: true
         builders:
