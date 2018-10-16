@@ -142,11 +142,25 @@
     - p_RUNNER_URL
     - string:
         name: CMAKE_CONFIGURE_COMMAND
-        default: >-
+        default: !j2: >-
+          {% set _cmake_configure_beta            = cmake_configure_beta            | default("") %}
+          {% set _cmake_configure_developer_build = cmake_configure_developer_build | default("") %}
+          {# TODO: default("$CLOUD_GROUP") #}
+          {% set _cmake_configure_cloud_group     = cmake_configure_cloud_group     | default("") %}
+          {% set _cmake_configure_generator       = cmake_configure_generator       | default("") %}
+          {% set _cmake_configure_target_device   = cmake_configure_target_device   | default("") %}
+          {% set _cmake_configure_customization   = cmake_configure_customization   | default("") %}
           cmake
-          {cmake_configure_args_global}
-          {cmake_configure_args_platform}
-          {cmake_configure_args_customization}
+          {{ "-Dbeta="            + _cmake_configure_beta            if _cmake_configure_beta            != "" else "" }}
+          {{ "-DdeveloperBuild="  + _cmake_configure_developer_build if _cmake_configure_developer_build != "" else "" }}
+          {{ "-DcloudGroup="      + _cmake_configure_cloud_group     if _cmake_configure_cloud_group     != "" else "" }}
+          {{ "-G '" + _cmake_configure_generator + "'"               if _cmake_configure_generator       != "" else "" }}
+          {{ "-DtargetDevice="    + _cmake_configure_target_device   if _cmake_configure_target_device   != "" else "" }}
+          {{ "-Dcustomization="   + _cmake_configure_customization   if _cmake_configure_customization   != "" else "" }}
+
+          {{ cmake_configure_args_global    if cmake_configure_args_global   | default("") != "" else "" }}
+          {{ cmake_configure_args_platform  if cmake_configure_args_platform | default("") != "" else "" }}
+          {{ cmake_configure_args_customization }}
           -DbuildNumber=$BUILD_IDENTITY
           -DcustomWebAdminPackageDirectory=../server-external
     - string:
@@ -456,9 +470,9 @@
         env
         echo "Configuring project"
         cd "build"
-
-        echo "Cmake command - $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS \$WORKSPACE/nx_vms"
-        $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS \$WORKSPACE/nx_vms
+        {% set _cmake_configure_project_root = cmake_configure_project_root | default("") %}
+        echo "Cmake command - $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS \$WORKSPACE/nx_vms{{ '/' + _cmake_configure_project_root if _cmake_configure_project_root != '' else '' }}"
+        $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS \$WORKSPACE/nx_vms{{ '/' + _cmake_configure_project_root if _cmake_configure_project_root != '' else '' }}
         ec=\$?
         echo "Took - \$SECONDS seconds"
         echo "Exit code - \$ec"
