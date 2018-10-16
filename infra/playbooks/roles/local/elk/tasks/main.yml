@@ -25,4 +25,5 @@
 - name: reload systemd configuration and restart services
   shell: |
     systemctl daemon-reload
+    systemctl enable elasticsearch kibana logstash
     systemctl restart elasticsearch kibana logstash
