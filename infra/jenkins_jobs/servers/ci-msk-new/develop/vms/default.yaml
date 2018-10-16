@@ -32,6 +32,7 @@
     - preset:
         preset-name:
         - on-push-vms:
+            auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'default'
             default_platforms: linux-x64,windows-x64,mac,bpi

@@ -42,6 +42,7 @@
     - preset:
         preset-name:
         - on-push-vms:
+            auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms_3.2'
             default_platforms: linux-x64,windows-x64,mac,bpi
@@ -62,6 +63,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-rct:
+            auth_kind: system
             timer: 'H 0 * * 2-6'
             build_description: "Nightly test for stable RCT"
 

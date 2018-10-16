@@ -30,6 +30,7 @@
     - preset:
         preset-name:
         - on-push-vms:
+            auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'mobile_release'
             default_platforms: android-arm,ios

@@ -43,6 +43,7 @@
         preset-name:
 
         - on-push-vms:
+            auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms'
             default_platforms: linux-x64,windows-x64,mac,bpi
@@ -63,6 +64,7 @@
             st_commit_choice_option_default: ''
 
         - on-push-ft:
+            auth_kind: system
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: 'vms'
             default_platforms: linux-x64,windows-x64,mac,bpi
@@ -84,6 +86,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-linux:
+            auth_kind: system
             timer: 'H 20 * * 2-6'
             build_description: "Nightly functional tests - linux"
 
@@ -109,6 +112,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-windows:
+            auth_kind: system
             timer: 'H 0 * * 2-6'
             build_description: "Nightly functional tests - windows"
 
@@ -134,6 +138,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-rct:
+            auth_kind: system
             timer: 'H 0 * * 2-6'
             build_description: "Nightly test for stable RCT"
 

@@ -37,6 +37,7 @@
         preset-name:
 
         - on-push-rct:
+            auth_kind: system
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_VMS32RELEASE'
             vms_build_choice_option_default: ''
             default_platforms: linux-x64

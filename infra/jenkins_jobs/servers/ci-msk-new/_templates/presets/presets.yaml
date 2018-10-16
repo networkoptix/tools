@@ -26,7 +26,7 @@
     timer: ''  # no timed trigger by default
 
     properties:
-    - authorization-{pipeline}-trigger
+    - !j2: authorization-{{ pipeline }}-{{ auth_kind | default("trigger") }}
 
     parameters:
 
