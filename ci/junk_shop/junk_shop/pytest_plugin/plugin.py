@@ -6,7 +6,6 @@ import logging
 import traceback
 from datetime import datetime, timedelta
 
-import py
 from pony.orm import db_session, commit
 import pytest
 from _pytest.fixtures import FixtureLookupErrorRepr
