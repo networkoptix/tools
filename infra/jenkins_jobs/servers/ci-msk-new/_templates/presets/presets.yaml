@@ -62,7 +62,7 @@
     - p_TRUSTED_TIMESTAMPING:
         default: 'OFF'
     - p_CUSTOM_CMAKE_PARAMETERS:
-        default: '{{ custom_cmake_parameters | default("") }}'
+        default: !j2: '{{ custom_cmake_parameters | default("") }}'
 
     - parameter-separator/simple-colored:
         header: 'Options for Unittests'
