@@ -209,7 +209,7 @@
           # Test camera will respond only to requests from this address.
           VM_ADDRESS=192.168.13.7
 
-          cd nx_vms/func_tests
+          pushd nx_vms/func_tests
 
             set +e
             export PYTEST_DEFAULTS_SECTION=ci  # init CI config
@@ -244,34 +244,37 @@
               -k "$TEST_SELECT_EXPR" \
               $TEST_LIST
 
-            case "X$?" in
-            X0)
-              echo "PyTest - All tests were collected and passed successfully"
-              rm -f unstable.flag
-              exit 0
-            ;;
-            X1)
-              echo "PyTest - Tests were collected and run but some of the tests failed"
-              touch unstable.flag
-              exit 0
-            ;;
-            X2)
-              echo "PyTest - Test execution was interrupted by the user"
-              exit 2
-            ;;
-            X3)
-              echo "PyTest - Internal error happened while executing tests"
-              exit 3
-            ;;
-            X4)
-              echo "PyTest - pytest command line usage error"
-              exit 4
-            ;;
-            X5)
-              echo "PyTest - 	No tests were collected"
-              exit 5
-            ;;
-            esac
+            pytest_status="X$?"
+          popd
+
+          case "$pytest_status" in
+          X0)
+            echo "PyTest - All tests were collected and passed successfully"
+            rm -f unstable.flag
+            exit 0
+          ;;
+          X1)
+            echo "PyTest - Tests were collected and run but some of the tests failed"
+            touch unstable.flag
+            exit 0
+          ;;
+          X2)
+            echo "PyTest - Test execution was interrupted by the user"
+            exit 2
+          ;;
+          X3)
+            echo "PyTest - Internal error happened while executing tests"
+            exit 3
+          ;;
+          X4)
+            echo "PyTest - pytest command line usage error"
+            exit 4
+          ;;
+          X5)
+            echo "PyTest - 	No tests were collected"
+            exit 5
+          ;;
+          esac
 
     - shell: |
         #!bash
