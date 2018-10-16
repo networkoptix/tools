@@ -15,6 +15,7 @@
     jobs:
 
     - release/vms-3.2-with-all-possible-builds
+    - param-resolver
 
     - preset:
         preset-name:
