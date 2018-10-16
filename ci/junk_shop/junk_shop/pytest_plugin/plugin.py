@@ -1,5 +1,6 @@
 '''pytest plugin capturing run results, artifacts stdout/stderr/log/etc to postgres database'''
 
+import collections
 import sys
 import logging
 import traceback
@@ -15,13 +16,65 @@ from .. import models
 
 
 LOG_FORMAT = '%(asctime)-15s %(levelname)-7s %(message)s'
+LOG_MESSAGE_COUNT_LIMIT = 10000
+
+
+class HeadAndTailHandler(logging.Handler):
+
+    # keep first and last limit/2 log messages
+
+    def __init__(self, limit):
+        super(HeadAndTailHandler, self).__init__()
+        self._limit = limit
+        self._head_message_list = []
+        self._tail_message_list = collections.deque(maxlen=limit/2)
+        self._dropped_record_count = 0
+        self.captured_size = 0
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            if isinstance(msg, unicode):
+                msg = msg.encode('utf-8', 'replace')
+            msg += '\n'
+            if len(self._head_message_list) < self._limit / 2:
+                self._head_message_list.append(msg)
+            else:
+                if len(self._tail_message_list) == self._tail_message_list.maxlen:
+                    self._dropped_record_count += 1
+                self._tail_message_list.append(msg)
+            self.captured_size += len(msg)
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
+    def pick_collected(self):
+        head = ''.join(self._head_message_list)
+        tail = ''.join(self._tail_message_list)
+        if self._dropped_record_count:
+            data = head + '[ %d messages are dropped ]\n' % self._dropped_record_count + tail
+        else:
+            data = head + tail
+        self._clear()
+        return data
+
+    def close(self):
+        # do not hold memory until gc collects us
+        self._clear()
+        super(HeadAndTailHandler, self).close()
+
+    def _clear(self):
+        del self._head_message_list[:]
+        self._tail_message_list.clear()
+        self._dropped_record_count = 0
+        self.captured_size = 0
 
 
 class LogCapturer(object):
 
     def __init__(self, log_format):
-        self._log_stream = py.io.TextIO()
-        self._log_handler = handler = logging.StreamHandler(self._log_stream)
+        self._log_handler = handler = HeadAndTailHandler(LOG_MESSAGE_COUNT_LIMIT)
         handler.setFormatter(logging.Formatter(log_format))
         root_logger = logging.getLogger()
         root_logger.addHandler(handler)
@@ -29,21 +82,17 @@ class LogCapturer(object):
 
     def close(self):
         self._log_handler.close()
-        self._log_stream.close()
         root_logger = logging.getLogger()
         root_logger.removeHandler(self._log_handler)
 
     def pick_collected(self):
         try:
-            log = self._log_stream.getvalue().strip()
+            return self._log_handler.pick_collected()
         except MemoryError as x:
             # logger is probably already failed by this point, using print
-            print 'Error: captured log is too large (%r): %r' % (self._log_stream.tell(), x)
+            print 'Error: captured log is too large (%r): %r' % (self._log_handler.captured_size, x)
             traceback.print_exc()
-            log = None
-        self._log_stream.seek(0)
-        self._log_stream.truncate()
-        return log
+            return None
 
 
 class DbCapturePlugin(object):
