@@ -143,21 +143,20 @@
     - string:
         name: CMAKE_CONFIGURE_COMMAND
         default: !j2: >-
-          {% set _cmake_configure_beta            = cmake_configure_beta            | default("") %}
-          {% set _cmake_configure_developer_build = cmake_configure_developer_build | default("") %}
-          {# TODO: default("$CLOUD_GROUP") #}
-          {% set _cmake_configure_cloud_group     = cmake_configure_cloud_group     | default("") %}
-          {% set _cmake_configure_generator       = cmake_configure_generator       | default("") %}
-          {% set _cmake_configure_target_device   = cmake_configure_target_device   | default("") %}
-          {% set _cmake_configure_customization   = cmake_configure_customization   | default("") %}
-          cmake
+          {%- set _cmake_configure_beta            = cmake_configure_beta            | default("") -%}
+          {%- set _cmake_configure_developer_build = cmake_configure_developer_build | default("") -%}
+          {#- TODO: default("$CLOUD_GROUP") -#}
+          {%- set _cmake_configure_cloud_group     = cmake_configure_cloud_group     | default("") -%}
+          {%- set _cmake_configure_generator       = cmake_configure_generator       | default("") -%}
+          {%- set _cmake_configure_target_device   = cmake_configure_target_device   | default("") -%}
+          {%- set _cmake_configure_customization   = cmake_configure_customization   | default("") -%}
+          {{ "cmake" }}
           {{ "-Dbeta="            + _cmake_configure_beta            if _cmake_configure_beta            != "" else "" }}
           {{ "-DdeveloperBuild="  + _cmake_configure_developer_build if _cmake_configure_developer_build != "" else "" }}
           {{ "-DcloudGroup="      + _cmake_configure_cloud_group     if _cmake_configure_cloud_group     != "" else "" }}
           {{ "-G '" + _cmake_configure_generator + "'"               if _cmake_configure_generator       != "" else "" }}
           {{ "-DtargetDevice="    + _cmake_configure_target_device   if _cmake_configure_target_device   != "" else "" }}
           {{ "-Dcustomization="   + _cmake_configure_customization   if _cmake_configure_customization   != "" else "" }}
-
           {{ cmake_configure_args_global    if cmake_configure_args_global   | default("") != "" else "" }}
           {{ cmake_configure_args_platform  if cmake_configure_args_platform | default("") != "" else "" }}
           {{ cmake_configure_args_customization }}
