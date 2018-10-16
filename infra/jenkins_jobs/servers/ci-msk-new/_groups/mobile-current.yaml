@@ -8,7 +8,7 @@
     cmake_configure_args_global: >-
       -Dbeta=TRUE
       -DdeveloperBuild=OFF
-      -DcloudGroup=test
+      -DcloudGroup=$CLOUD_GROUP
 
     # SECTION. PLATFORM CONFIG
     # ============================================================

@@ -8,7 +8,7 @@
     cmake_configure_args_global: >-
       -Dbeta=TRUE
       -DdeveloperBuild=OFF
-      -DcloudGroup=test
+      -DcloudGroup=$CLOUD_GROUP
 
     # REMINDER: runner will not change list of subprojects when
     # extra items are added or removed, so don't forget to change runner
