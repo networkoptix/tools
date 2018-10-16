@@ -5,7 +5,7 @@
     build_watchers: iremizov@networkoptix.com
 
     pipeline: release
-    junkshop_project_name: debug-release
+    junkshop_project_name: release
     pipeline_priority: 9
 
     jobs:
