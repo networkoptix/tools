@@ -48,7 +48,7 @@ class HeadAndTailHandler(logging.Handler):
         except:
             self.handleError(record)
 
-    def pick_collected(self):
+    def pop_collected(self):
         head = ''.join(self._head_message_list)
         tail = ''.join(self._tail_message_list)
         if self._dropped_record_count:
@@ -86,7 +86,7 @@ class LogCapturer(object):
 
     def pick_collected(self):
         try:
-            return self._log_handler.pick_collected()
+            return self._log_handler.pop_collected()
         except MemoryError as x:
             # logger is probably already failed by this point, using print
             print 'Error: captured log is too large (%r): %r' % (self._log_handler.captured_size, x)
