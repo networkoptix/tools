@@ -14,7 +14,7 @@
 
     jobs:
 
-    - release/vms-3.2-with-all-possible-builds
+    - metavms-current
     - param-resolver
 
     - preset:
