@@ -84,7 +84,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-linux:
-            timer: 'H 0 * * 2-6'
+            timer: 'H 20 * * 2-6'
             build_description: "Nightly functional tests - linux"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
@@ -98,6 +98,7 @@
             ft_commit_choice_default: FT_STABLE_PUSH
             ft_commit_choice_option_default: ''
             test_select_expr: 'not windows and not smb'
+            test_list: 'self_tests tests'
 
             rct_enabled: 'OFF'
             rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
@@ -122,6 +123,7 @@
             ft_commit_choice_default: FT_STABLE_PUSH
             ft_commit_choice_option_default: ''
             test_select_expr: 'windows or smb'
+            test_list: 'self_tests tests'
 
             rct_enabled: 'OFF'
             rct_commit_choice_default: RCT_STABLE_PUSH_OR_NIGHTLY
