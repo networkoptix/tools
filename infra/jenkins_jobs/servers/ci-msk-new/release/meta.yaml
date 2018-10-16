@@ -21,7 +21,7 @@
         preset-name:
         - manual:
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_choice_option_default: 'cloud_dev'
+            vms_build_choice_option_default: 'meta'
             default_platforms: linux-x64,windows-x64,tx1
             default_customizations: metavms
 
