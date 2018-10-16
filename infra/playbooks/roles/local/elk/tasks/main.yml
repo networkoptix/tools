@@ -22,8 +22,12 @@
     src: "etc/"
     dest: "/etc/"
 
-- name: reload systemd configuration and restart services
-  shell: |
-    systemctl daemon-reload
-    systemctl enable elasticsearch kibana logstash
-    systemctl restart elasticsearch kibana logstash
+- systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: "{{item}}"
+  with_items:
+  - elasticsearch
+  - kibana
+  - logstash
