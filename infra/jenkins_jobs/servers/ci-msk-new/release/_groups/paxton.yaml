@@ -15,16 +15,15 @@
     # template according to changes made here
     platform:
     # there is also edge1 platform, it's declared and commented in jobs section
-    - linux-x64:
-        # most of builds are linux cross-builds that built on "build-installer-linux"
-        # here we make an anchor to avoid typos and other kind of missconfiguration in future
-        distribution_build_node: &linux_node build-installer-linux
-        # There are some CMake args that aplicable only for particular platform
+    - windows-x64:
+        distribution_build_node: build-installer-windows
+        cmake_configure_generator: 'Visual Studio 15 2017 Win64'
+        cmake_configure_target_device: windows-x64
         cmake_configure_args_platform: >-
-          -G Ninja
-        cmake_build_extra_args: >-
-          -- -j 20
-
+          -DcodeSigning=OFF
+          -DaddQtPdb=ON
+          -DtrustedTimestamping=OFF
+          -Ax64 -T host=x64
 
     # TODO: There are some customization that may be build only on specific platform
     # there is no need to generate extra set of jobs that never gonna be triggered.
