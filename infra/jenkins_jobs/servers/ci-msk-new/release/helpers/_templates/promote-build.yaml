@@ -39,6 +39,20 @@
         macro: true
     - repository/promote-to-daily:
         artifact_repository_base_path: '{artifact_repository_base_path}'
+        # platform dir name mapping: repository -> daily builds
+        platform_map:
+          - [linux-x64, linux]
+          - [linux-x86, linux]
+          - [windows-x64, windows]
+          - [windows-x86, windows]
+          - [mac, macos]
+          - [ios, ios]
+          - [android-arm, android]
+          - [bananapi, arm]
+          - [bpi, arm]
+          - [rpi, arm]
+          - [edge1, arm]
+          - [tx1, arm]
 
     publishers:
     - failure-email-helpers(maintainers):

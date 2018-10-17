@@ -4,6 +4,13 @@
     - shell: !j2: |
         #!bash
         set -ex
+
+        cat > platform_dir.py <<EOF
+        import sys
+        PLATFORM_MAP = dict({{ platform_map }})
+        print PLATFORM_MAP.get(sys.argv[1], "")
+        EOF
+
         REPOSITORY_ROOT_PATH="{{ artifact_repository_base_path }}/$PIPELINE/$BRANCH/$BUILD_IDENTITY"
         _version_file="$(find "${REPOSITORY_ROOT_PATH}" -name build_info.txt | head -1)"
         _version="$(cat "${_version_file}" | grep version | tail -1 | cut -f 2 -d '=')"
@@ -12,19 +19,28 @@
         echo "$_version" > "${TARGET_ROOT}/version"
         tree $REPOSITORY_ROOT_PATH
         customizations="$(ls "${REPOSITORY_ROOT_PATH}")"
+
         for customization in $customizations ; do
           mkdir -p "${TARGET_ROOT}/${customization}/"
           platforms="$(ls $REPOSITORY_ROOT_PATH/$customization | grep -v all)"
-          for platform in $platforms ; do
-            mkdir -p "${TARGET_ROOT}/${customization}/${platform}"
-            if [ -d "${REPOSITORY_ROOT_PATH}/${customization}/${platform}/distrib/" ] ; then
-              pushd "${REPOSITORY_ROOT_PATH}/${customization}/${platform}/distrib/"
-                files="$(ls)"
-              popd
-              for file in $files ; do
-                ln -f "${REPOSITORY_ROOT_PATH}/${customization}/${platform}/distrib/${file}" "${TARGET_ROOT}/${customization}/${platform}/${file}"
-              done
+
+          for source_platform in $platforms ; do
+
+            target_platform="$(python platform_dir.py $source_platform)"
+            if [[ "$target_platform" != "" ]]; then
+
+              mkdir -p "${TARGET_ROOT}/${customization}/${target_platform}"
+              if [ -d "${REPOSITORY_ROOT_PATH}/${customization}/${source_platform}/distrib/" ] ; then
+                pushd "${REPOSITORY_ROOT_PATH}/${customization}/${source_platform}/distrib/"
+                  files="$(ls)"
+                popd
+                for file in $files ; do
+                  ln -f "${REPOSITORY_ROOT_PATH}/${customization}/${source_platform}/distrib/${file}" "${TARGET_ROOT}/${customization}/${target_platform}/${file}"
+                done
+              fi
+
             fi
+
           done
         done
         curl "http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory=${BUILD_IDENTITY}-${BRANCH}"
