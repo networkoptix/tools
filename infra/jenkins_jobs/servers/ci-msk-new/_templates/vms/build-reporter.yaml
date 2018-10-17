@@ -140,11 +140,13 @@
         rm -f full_build.log
         touch full_build.log
 
-        for logfile in  webadmin-build.log	             \
-                        build_logs/cleaner.log           \
-                        build_logs/cmake-configure.log   \
-                        build_logs/ninja_clean.log       \
-                        build_logs/cmake-build.log       ; do
+        for logfile in  webadmin-build.log	                 \
+                        build_logs/cleaner.log               \
+                        build_logs/cmake-configure-vms.log   \
+                        build_logs/ninja_clean.log           \
+                        build_logs/cmake-build-vms.log       \
+                        build_logs/cmake-configure-paxton*.log \
+                        build_logs/cmake-build-paxton*.log ; do
           if [ -f $logfile ] ; then
             cat $logfile >> full_build.log
           fi
