@@ -121,9 +121,8 @@ print '''#
     - string:
         name: RCT_CAMERA_FILTER
         default: '*'
-    # TODO:
-    # - string:
-    #     name: NX_FUNCTESTS_COMMIT
+    - string:
+        name: NX_FUNCTESTS_COMMIT
     - string:
         name: ST_ENABLED
         default: 'NO'
@@ -149,10 +148,6 @@ print '''#
         params: >-
           NX_VMS_COMMIT
           BUILD_IDENTITY
-    # FIXME: temp stub
-    - inject:
-        properties-content: |
-          NX_FUNCTESTS_COMMIT=$NX_VMS_COMMIT
     - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
@@ -326,7 +321,7 @@ print '''
             BUILD_DESCRIPTION=$BUILD_DESCRIPTION
             BUILD_IDENTITY=$BUILD_IDENTITY
             BRANCH=$BRANCH
-            NX_VMS_COMMIT=$NX_VMS_COMMIT
+            NX_VMS_COMMIT=$NX_FUNCTESTS_COMMIT
             ST_COMMIT=$ST_COMMIT
             CLEAN_WORKSPACE=true
             RUNNER_URL=$BUILD_URL
