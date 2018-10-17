@@ -1,5 +1,5 @@
 - job-group:
-    name: release/vms-3.2-with-all-possible-builds
+    name: release/vms-with-all-possible-builds
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
@@ -97,13 +97,19 @@
     # REMINDER: runner will not change list of subprojects when
     # extra items are added or removed, so don't forget to change runner
     # template according to changes made here
-    - default
-    - default_cn
-    - default_zh_CN
+    - default:
+        build_paxton: 'YES'
+    - default_cn:
+        build_paxton: 'YES'
+    - default_zh_CN:
+        build_paxton: 'YES'
     - cox
-    - digitalwatchdog
-    - digitalwatchdog_global
-    - hanwha
+    - digitalwatchdog:
+        build_paxton: 'YES'
+    - digitalwatchdog_global:
+        build_paxton: 'YES'
+    - hanwha:
+        build_paxton: 'YES'
     - ipera
     - ionetworks
     - nutech
@@ -113,6 +119,7 @@
     - tricom
     - ust
     - vista:
+        build_paxton: 'YES'
         cmake_configure_args_customization: >-
           -Dcustomization=$CUSTOMIZATION
           -DtrustedTimestamping=$TRUSTED_TIMESTAMPING

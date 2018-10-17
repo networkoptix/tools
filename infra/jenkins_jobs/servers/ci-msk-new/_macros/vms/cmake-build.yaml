@@ -1,0 +1,48 @@
+- builder:
+    name: vms/cmake-build
+    builders:
+    - shell: !j2: |
+        #!bash
+        set -x # set -e is is missing intentionally
+        # Log file must not exist
+        test ! -f "build_logs/cmake-build-{{ subject }}.log"
+
+        # Create bash script filled with args, unset too long envvars and
+        # execute cmake command
+        # ----------------------------------------------------------------------
+        cat > build-{{ subject }}.sh <<BUILDSCRIPT
+        #!bash
+        # set -xe is is missing intentionally
+        SECONDS=0
+        cmake --version
+        # remove all extra env vars
+        for ev in {{ envvars_to_unset_during_build }} ; do
+          {% if __debug__ %}
+          echo "Unsetting \${ev}=\${!ev}"
+          {% endif %}
+          unset \$ev
+        done
+        # add env vars
+        export environment=\$WORKSPACE
+        export NINJA_STATUS="[%s/%t] %es "
+        if [ "X${OS}" == "XWindows_NT" ] ; then
+          export _MSPDBSRV_ENDPOINT_=executor-$EXECUTOR_NUMBER
+        fi
+
+        echo "Env is:"
+        env
+        echo "Building project"
+        cd "build"
+
+        echo "Cmake command - $CMAKE_BUILD_COMMAND"
+        $CMAKE_BUILD_COMMAND
+        ec=\$?
+        echo "Took - \$SECONDS seconds"
+        echo "Exit code - \$ec"
+        exit "\$ec"
+        BUILDSCRIPT
+        # ----------------------------------------------------------------------
+        cat build-{{ subject }}.sh
+        bash build-{{ subject }}.sh 2>&1 | tee "build_logs/cmake-build-{{ subject }}.log"
+        # Abort if buildscript failed
+        exit "${PIPESTATUS[0]}"

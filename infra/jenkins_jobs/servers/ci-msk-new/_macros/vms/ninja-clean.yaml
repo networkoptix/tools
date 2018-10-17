@@ -1,0 +1,39 @@
+- builder:
+    name: vms/ninja-clean
+    builders:
+
+    - shell: !j2: |
+        #!bash
+        set -x # set -e is is missing intentionally
+
+        # Create bash script filled with args, unset too long envvars and
+        # execute cleaner command
+        # ----------------------------------------------------------------------
+        cat > ninja_clean.sh <<BUILDSCRIPT
+        #!bash
+        # set -xe is is missing intentionally
+        SECONDS=0
+        {% if __debug__ %}
+        echo "Env is:"
+        env
+        {% endif %}
+        cd "build"
+
+
+        if [ ! -f "./devtools/ninja_clean/ninja_clean.py" ] ; then
+          echo "There is no ninja_clean.py"
+          exit 0
+        fi
+        echo "Running custom ninja_clean"
+
+        python "./devtools/ninja_clean/ninja_clean.py" --build-dir "./build"
+        ec=\$?
+        echo "Took - \$SECONDS seconds"
+        echo "Exit code - \$ec"
+        exit "\$ec"
+        BUILDSCRIPT
+        # ----------------------------------------------------------------------
+        cat ninja_clean.sh
+        bash ninja_clean.sh 2>&1 | tee "build_logs/ninja_clean.log"
+        # Abort if buildscript failed
+        exit "${PIPESTATUS[0]}"
