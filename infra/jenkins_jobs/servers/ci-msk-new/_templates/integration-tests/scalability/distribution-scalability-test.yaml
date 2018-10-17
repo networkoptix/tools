@@ -3,7 +3,7 @@
     id: scalability
     description: |
       Run scalability tests for default for {version}.
-    node: '{functest_node}'
+    node: '{scalability_node}'
     concurrent: false
 
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'

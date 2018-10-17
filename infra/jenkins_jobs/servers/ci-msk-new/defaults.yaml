@@ -25,4 +25,5 @@
 
     webadmin_build_node: webadmin-build
     functest_node: functests
+    scalability_node: scalability
     realcameratest_node: realcameratest
