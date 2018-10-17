@@ -14,7 +14,7 @@ from _pytest._code.code import ReprExceptionInfo
 from .. import models
 
 
-LOG_FORMAT = '%(asctime)-15s %(levelname)-7s %(message)s'
+LOG_FORMAT = '%(asctime)-15s %(levelname)-7s %(threadName)-11s %(message)s'
 LOG_MESSAGE_COUNT_LIMIT = 10000
 
 
