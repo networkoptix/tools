@@ -38,6 +38,12 @@
         - job-build
         omironenko:
         - job-build
+        mpodstrechny:
+        - job-build
+        ebalashov:
+        - job-build
+        anisichenko:
+        - job-build
 
 - property: &___base_release_system
     # everyone can read (should be inherited)
