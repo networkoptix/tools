@@ -403,7 +403,7 @@
         __debug__: !j2: '{{ __debug__ }}'
         cmake_configure_project_root: ''
         cmake_configure_command: $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS
-        envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+        envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
     - vms/ninja-clean:
         __debug__: !j2: '{{ __debug__ }}'
@@ -411,7 +411,7 @@
     - vms/cmake-build:
         subject: vms
         __debug__: !j2: '{{ __debug__ }}'
-        envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+        envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
     # Paxton should be built on windows platforms only
     - conditional-step:
@@ -430,12 +430,12 @@
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
             cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY -DdotNetFramework=v4.0
-            envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
         - vms/cmake-build:
             subject: paxton-4.0
             __debug__: !j2: '{{ __debug__ }}'
-            envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
         # dotnet-4.6.2
 
@@ -444,12 +444,12 @@
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
             cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY
-            envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
         - vms/cmake-build:
             subject: paxton-4.6.2
             __debug__: !j2: '{{ __debug__ }}'
-            envvars_to_unset_during_build: '{{ envvars_to_unset_during_build }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
 
     # STAGE: PUBLISH
