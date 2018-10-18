@@ -70,4 +70,4 @@
         echo
 
         # hit depcon
-        # curl "http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory=$BUILD_IDENTITY-$BRANCH"
+        curl "http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory=$BUILD_IDENTITY-$BRANCH"
