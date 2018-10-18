@@ -245,7 +245,7 @@
         - envvars/freeze-commit-if(var=val):
             pipeline: '{pipeline}'
             var: RCT_COMMIT_CHOICE
-            val: RCT_OTHER_COMMIT
+            val: RCT_BY_COMMIT
             commit_to_freeze: $RCT_COMMIT_CHOICE_OPTION
             as: NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT
 
