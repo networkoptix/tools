@@ -45,116 +45,125 @@
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'
         - src: linux-x64
           dst: linux
           masks:
           - '*.deb'
           - '*-testcamera-*'
-          - 'eula-*.html'
 
         - src: linux-x86
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'
         - src: linux-x86
           dst: linux
           masks:
           - '*.deb'
           - '*-testcamera-*'
-          - 'eula-*.html'
 
         - src: windows-x64
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
           - '*_debug-*.zip'  # strange, but pdbs go to updates dir
+          - 'eula-*.html'
         - src: windows-x64
           dst: windows
           masks:
           - '*.exe'
           - '*-testcamera-*.zip'
-          - 'eula-*.html'
 
         - src: windows-x86
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
           - '*_debug-*.zip'  # strange, but pdbs go to updates dir
+          - 'eula-*.html'
         - src: windows-x86
           dst: windows
           masks:
           - '*.exe'
           - '*-testcamera-*.zip'
-          - 'eula-*.html'
 
         - src: mac
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'
         - src: mac
           dst: macos
           masks:
           - '*.dmg'
-          - 'eula-*.html'
 
+        - src: ios
+          dst: updates/$BUILD_IDENTITY
+          masks:
+          - 'eula-*.html'     
         - src: ios
           dst: ios
           masks:
           - '*.ipa'
-          - 'eula-*.html'
 
+        - src: android-arm
+          dst: updates/$BUILD_IDENTITY
+          masks:
+          - 'eula-*.html'          
         - src: android-arm
           dst: android
           masks:
           - '*.apk'
-          - 'eula-*.html'
 
         - src: bananapi
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'          
         - src: bananapi
           dst: arm
           masks:
           - '*.zip'
-          - 'eula-*.html'
 
         - src: bpi
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'          
         - src: bpi
           dst: arm
           masks:
           - '*.zip'
-          - 'eula-*.html'
 
         - src: rpi
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'          
         - src: rpi
           dst: arm
           masks:
           - '*.zip'
-          - 'eula-*.html'
 
         - src: edge1
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
+          - 'eula-*.html'
         - src: edge1
           dst: arm
           masks:
           - '*.zip'
-          - 'eula-*.html'
 
+        - src: tx1
+          dst: updates/$BUILD_IDENTITY
+          masks: 
+          - 'eula-*.html'
         - src: tx1
           dst: arm
           masks:
           - '*.tgz'
           - '*.zip'
-          - 'eula-*.html'
 
     publishers:
     - archive:
