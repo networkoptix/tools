@@ -5,90 +5,69 @@
         #!bash
         set -ex
 
-        cat > get_platform_info.py <<EOF
-
-        import sys, fnmatch
-        from collections import OrderedDict  # platform_map expands to it
-
-        platform_map = dict({{ platform_map }})
-
-        common_info = platform_map.get('__common')
-        platform_info = platform_map.get(sys.argv[1])
-
-        if sys.argv[2] == 'publish_dir':
-            if platform_info:
-                print platform_info['publish_dir']
-            else:
-                print ''
-        elif sys.argv[2] == 'file_type':
-
-            def match_any(mask_list):
-                return any(fnmatch.fnmatch(sys.argv[3], mask) for mask in mask_list)
-
-            # update mask has precedence over distributive mask
-            if match_any(platform_info['update_mask_list']):
-                print 'update'
-            elif match_any(platform_info['distributive_mask_list']):
-                print 'distributive'
-            elif match_any(common_info['distributive_mask_list']):
-                print 'distributive'
-            else:
-                print 'other'
-        EOF
-
         REPOSITORY_ROOT_PATH="{{ artifact_repository_base_path }}/$PIPELINE/$BRANCH/$BUILD_IDENTITY"
-        _version_file="$(find "$REPOSITORY_ROOT_PATH" -name build_info.txt | head -1)"
-        _version="$(cat "$_version_file" | grep version | tail -1 | cut -f 2 -d '=')"
         TARGET_ROOT="/mnt/beta-builds/daily/$BUILD_IDENTITY-$BRANCH"
         mkdir -p "$TARGET_ROOT"
+
+        # add version file
+        _version_file="$(find "$REPOSITORY_ROOT_PATH" -name build_info.txt | head -1)"
+        _version="$(cat "$_version_file" | grep version | tail -1 | cut -f 2 -d '=')"
         echo "$_version" > "$TARGET_ROOT/version"
+
+        # prepare file which will contain all processed items
+        processed_items_file=$WORKSPACE/processed.txt
+        rm -f $processed_items_file
+        touch $processed_items_file
+
+        linked_items_file=$WORKSPACE/linked.txt
+        rm -f $linked_items_file
+        touch $linked_items_file
+
+        # display sources
+        echo "Source:"
         tree $REPOSITORY_ROOT_PATH
-        customizations="$(ls "$REPOSITORY_ROOT_PATH")"
+        echo
 
-        for customization in $customizations ; do
-          platforms="$(ls $REPOSITORY_ROOT_PATH/$customization | grep -v all)"
-
-          for source_platform in $platforms ; do
-
-            target_platform_dir="$(python get_platform_info.py $source_platform publish_dir)"
-            if [[ "$target_platform_dir" = "" ]]; then
-              echo "Not a known platform: [$source_platform]; skipping."
-              continue
-            fi
-
-            if [ ! -d "$REPOSITORY_ROOT_PATH/$customization/$source_platform/distrib/" ] ; then
-              echo "Platform [$source_platform] has 'distrib' directory missing; skipping."
-              continue
-            fi
-
-            pushd "$REPOSITORY_ROOT_PATH/$customization/$source_platform/distrib/"
-              files="$(ls)"
+        pushd $REPOSITORY_ROOT_PATH
+          {# customization name does not affect mappings #}
+          for customization in *  ; do
+            pushd $customization
+              {% for mapping in artifacts_to_daily_mappings %}
+              {# process only known platforms and only when they exist #}
+              if [ -d "{{ mapping.src }}/distrib" ] ; then
+                pushd "{{ mapping.src }}/distrib"
+                  {%- for mask in mapping.masks %}
+                  {# check all masks and link files
+                     we do ls, because mask may not expand, so we'll get incorrect filename #}
+                  for file in $( ls {{ mask }} ) ; do
+                    {# file may match against 2 or more masks, but we don't want to link it twice #}
+                    if ! grep -Fx "$customization/{{ mapping.src }}/distrib/$file" "$processed_items_file" ; then
+                      mkdir -p "$TARGET_ROOT/$customization/{{ mapping.dst }}"
+                      echo     "$REPOSITORY_ROOT_PATH/$customization/{{ mapping.src }}/distrib/$file -> $TARGET_ROOT/$customization/{{ mapping.dst }}/$file" >> $linked_items_file
+                      ln -f    "$REPOSITORY_ROOT_PATH/$customization/{{ mapping.src }}/distrib/$file"  "$TARGET_ROOT/$customization/{{ mapping.dst }}/$file"
+                      echo "$customization/{{ mapping.src }}/distrib/$file" >> $processed_items_file
+                    fi
+                  done
+                  {% endfor %}
+                popd
+              fi
+              {% endfor %}
             popd
-
-            for file in $files ; do
-
-              case "$(python get_platform_info.py $source_platform file_type "$file")" in
-                distributive)
-                  target_dir="$target_platform_dir"
-                  ;;
-                update)
-                  target_dir="updates/$BUILD_IDENTITY"
-                  ;;
-                *)
-                  echo "File [$file] is not a distributive nor an update; skipping."
-                  continue
-                  ;;
-              esac
-
-              # Make directory only when we know there is a file; do not make empty ones.
-              mkdir -p "$TARGET_ROOT/$customization/"
-              mkdir -p "$TARGET_ROOT/$customization/$target_dir/"
-              ln -f \
-                "$REPOSITORY_ROOT_PATH/$customization/$source_platform/distrib/$file" \
-                "$TARGET_ROOT/$customization/$target_dir/$file"
-            done
-
           done
-        done
+        popd
 
-        curl "http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory=$BUILD_IDENTITY-$BRANCH"
+        echo
+        echo "Processed files:"
+        cat $processed_items_file
+        echo
+        echo "links created:"
+        cat $linked_items_file
+        echo
+
+        # display target
+        echo "Target:"
+        tree $TARGET_ROOT
+        echo
+
+        # hit depcon
+        # curl "http://depcon-test.hdw.mx/releases/registerBuild?buildDirectory=$BUILD_IDENTITY-$BRANCH"
