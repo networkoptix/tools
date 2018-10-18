@@ -67,6 +67,18 @@
       Make sure that environment is correct or override it in Jenkins
       (url is http://<jenkins.url>/computer/<host.name>/configure ).
 
+# https://networkoptix.atlassian.net/browse/CI-273
+- name: Increase dynamic port range
+  command: >-
+    netsh int ipv4 set dynamicport tcp start=10000 num=55000
+
+- name: Set TCP_TIMEWAIT delay to 30 seconds
+  command: >-
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
+    /v TcpTimedWaitDelay
+    /t REG_DWORD
+    /d 30
+    /f
 
 # FIXME: Add missing "choco install cmake --version 3.12.3"
 

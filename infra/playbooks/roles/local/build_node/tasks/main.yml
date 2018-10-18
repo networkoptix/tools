@@ -145,11 +145,20 @@
     state: present
     insertafter: EOF
     line: "kernel.core_pattern=%e.core.%t.%p"
-  register: sysctl_conf
+  notify: reload sysctl
 
-- name: Reload sysctl
-  command: sysctl --system
-  when: "{{ sysctl_conf.changed }}"
+- name: Set network limits
+  lineinfile:
+    path: /etc/sysctl.conf
+    create: yes
+    state: present
+    insertafter: EOF
+    line: "{{ item }}"
+  notify: reload sysctl
+  with_items:
+    - "net.ipv4.ip_local_port_range=18000    65535"
+    - "net.ipv4.netfilter.ip_conntrack_tcp_timeout_time_wait=1"
+    - "net.netfilter.nf_conntrack_tcp_timeout_established=600"
 
 - name: Set limits for user
   lineinfile:
@@ -161,8 +170,8 @@
   with_items:
   # NOTE: these values are copied from old slave
   # maximum number of open files
-  - "{{ build_user }} soft nofile 16384"
-  - "{{ build_user }} hard nofile 20480"
+  - "{{ build_user }} soft nofile 65535"
+  - "{{ build_user }} hard nofile 65535"
   # limits the core file size (KB)
   - "{{ build_user }} soft core unlimited"
   - "{{ build_user }} hard core unlimited"
