@@ -15,6 +15,7 @@
     jobs:
 
     - mobile-current
+    - '{pipeline}.{version}.{project}.runner'
 
     - develop/hg-trigger:
         repo: nx_vms

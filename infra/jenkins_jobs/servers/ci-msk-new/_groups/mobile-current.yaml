@@ -55,5 +55,4 @@
 
 
     jobs:
-    - '{pipeline}.{version}.{project}.runner'
     - distribution-build
