@@ -414,42 +414,42 @@
         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
     # Paxton should be built on windows platforms only
-    - conditional-step:
-        condition-kind: shell
-        condition-command: !j2: |
-          #!bash
-          set -ex
-          test "X${OS}" == "XWindows_NT"
-          test "{{ build_paxton | default("") }}" == 'YES'
-        steps:
+    # - conditional-step:
+    #     condition-kind: shell
+    #     condition-command: !j2: |
+    #       #!bash
+    #       set -ex
+    #       test "X${OS}" == "XWindows_NT"
+    #       test "{{ build_paxton | default("") }}" == 'YES'
+    #     steps:
 
-        # dotnet-4.0
+    #     # dotnet-4.0
 
-        - vms/cmake-configure:
-            subject: paxton-4.0
-            __debug__: !j2: '{{ __debug__ }}'
-            cmake_configure_project_root: 'client/paxton_plugin'
-            cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY -DdotNetFramework=v4.0
-            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+    #     - vms/cmake-configure:
+    #         subject: paxton-4.0
+    #         __debug__: !j2: '{{ __debug__ }}'
+    #         cmake_configure_project_root: 'client/paxton_plugin'
+    #         cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY -DdotNetFramework=v4.0
+    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
-        - vms/cmake-build:
-            subject: paxton-4.0
-            __debug__: !j2: '{{ __debug__ }}'
-            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+    #     - vms/cmake-build:
+    #         subject: paxton-4.0
+    #         __debug__: !j2: '{{ __debug__ }}'
+    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
-        # dotnet-4.6.2
+    #     # dotnet-4.6.2
 
-        - vms/cmake-configure:
-            subject: paxton-4.6.2
-            __debug__: !j2: '{{ __debug__ }}'
-            cmake_configure_project_root: 'client/paxton_plugin'
-            cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY
-            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+    #     - vms/cmake-configure:
+    #         subject: paxton-4.6.2
+    #         __debug__: !j2: '{{ __debug__ }}'
+    #         cmake_configure_project_root: 'client/paxton_plugin'
+    #         cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY
+    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
-        - vms/cmake-build:
-            subject: paxton-4.6.2
-            __debug__: !j2: '{{ __debug__ }}'
-            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+    #     - vms/cmake-build:
+    #         subject: paxton-4.6.2
+    #         __debug__: !j2: '{{ __debug__ }}'
+    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
 
 
     # STAGE: PUBLISH
