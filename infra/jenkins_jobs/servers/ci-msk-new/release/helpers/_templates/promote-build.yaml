@@ -100,7 +100,7 @@
         - src: ios
           dst: updates/$BUILD_IDENTITY
           masks:
-          - 'eula-*.html'     
+          - 'eula-*.html'
         - src: ios
           dst: ios
           masks:
@@ -109,7 +109,7 @@
         - src: android-arm
           dst: updates/$BUILD_IDENTITY
           masks:
-          - 'eula-*.html'          
+          - 'eula-*.html'
         - src: android-arm
           dst: android
           masks:
@@ -119,7 +119,7 @@
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
-          - 'eula-*.html'          
+          - 'eula-*.html'
         - src: bananapi
           dst: arm
           masks:
@@ -129,7 +129,7 @@
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
-          - 'eula-*.html'          
+          - 'eula-*.html'
         - src: bpi
           dst: arm
           masks:
@@ -139,7 +139,7 @@
           dst: updates/$BUILD_IDENTITY
           masks:
           - '*_update-*.zip'
-          - 'eula-*.html'          
+          - 'eula-*.html'
         - src: rpi
           dst: arm
           masks:
@@ -157,7 +157,7 @@
 
         - src: tx1
           dst: updates/$BUILD_IDENTITY
-          masks: 
+          masks:
           - 'eula-*.html'
         - src: tx1
           dst: arm
