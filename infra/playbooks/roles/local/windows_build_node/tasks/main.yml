@@ -70,7 +70,7 @@
 # https://networkoptix.atlassian.net/browse/CI-273
 - name: Increase dynamic port range
   command: >-
-    netsh int ipv4 set dynamicport tcp start=10000 num=47535
+    netsh int ipv4 set dynamicport tcp start=18000 num=47535
 
 - name: Set TCP_TIMEWAIT delay to 30 seconds
   command: >-
