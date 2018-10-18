@@ -41,18 +41,85 @@
         artifact_repository_base_path: '{artifact_repository_base_path}'
         # platform dir name mapping: repository -> daily builds
         platform_map:
-          - [linux-x64, linux]
-          - [linux-x86, linux]
-          - [windows-x64, windows]
-          - [windows-x86, windows]
-          - [mac, macos]
-          - [ios, ios]
-          - [android-arm, android]
-          - [bananapi, arm]
-          - [bpi, arm]
-          - [rpi, arm]
-          - [edge1, arm]
-          - [tx1, arm]
+          __common:
+            distributive_mask_list:
+            - 'eula-*.html'
+          linux-x64:
+            publish_dir: linux
+            distributive_mask_list:
+            - '*.deb'
+            - '*-testcamera-*'
+            update_mask_list:
+            - '*_update-*.zip'
+          linux-x86:
+            publish_dir: linux
+            distributive_mask_list:
+            - '*.deb'
+            - '*-testcamera-*'
+            update_mask_list:
+            - '*_update-*.zip'
+          windows-x64:
+            publish_dir: windows
+            distributive_mask_list:
+            - '*.exe'
+            - '*-testcamera-*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+            - '*_debug-*.zip'  # strange, but pdbs go to updates dir
+          windows-x86:
+            publish_dir: windows
+            distributive_mask_list:
+            - '*.exe'
+            - '*-testcamera-*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+            - '*_debug-*.zip'  # strange, but pdbs go to updates dir
+          mac:
+            publish_dir: macos
+            distributive_mask_list:
+            - '*.dmg'
+            update_mask_list:
+            - '*_update-*.zip'
+          ios:
+            publish_dir: ios
+            distributive_mask_list:
+            - '*.ipa'
+            update_mask_list: []
+          android-arm:
+            publish_dir: android
+            distributive_mask_list:
+            - '*.apk'
+            update_mask_list: []
+          bananapi:
+            publish_dir: arm
+            distributive_mask_list:
+            - '*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+          bpi:
+            publish_dir: arm
+            distributive_mask_list:
+            - '*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+          rpi:
+            publish_dir: arm
+            distributive_mask_list:
+            - '*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+          edge1:
+            publish_dir: arm
+            distributive_mask_list:
+            - '*.zip'
+            update_mask_list:
+            - '*_update-*.zip'
+          tx1:
+            publish_dir: arm
+            distributive_mask_list:
+            - '*.tgz'
+            - '*.zip'
+            update_mask_list: []
 
     publishers:
     - failure-email-helpers(maintainers):
