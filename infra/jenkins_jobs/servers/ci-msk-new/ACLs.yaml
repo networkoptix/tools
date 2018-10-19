@@ -40,6 +40,8 @@
         - job-build
         mpodstrechny:
         - job-build
+        snoshenkov:
+        - job-build
         ebalashov:
         - job-build
         anisichenko:
