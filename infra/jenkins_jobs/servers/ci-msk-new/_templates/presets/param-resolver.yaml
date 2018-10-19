@@ -36,6 +36,7 @@
     - string: { name: RCT_CAMERA_FILTER              }
 
     - string: { name: ST_ENABLED                     }
+    - string: { name: ST_SCENARIOS                   }
     - string: { name: ST_COMMIT_CHOICE               }
     - string: { name: ST_COMMIT_CHOICE_OPTION        }
 
@@ -289,6 +290,7 @@
 
     - shell: |
         echo "ST_ENABLED=$ST_ENABLED" >> RUNNER_ARGS.envvars
+        echo "ST_SCENARIOS=$ST_SCENARIOS" >> RUNNER_ARGS.envvars
 
     - conditional-step:
         condition-kind: strings-match

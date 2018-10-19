@@ -76,6 +76,9 @@
         name: ST_ENABLED
         default: 'NO'
     - string:
+        name: ST_SCENARIOS
+        default: ''
+    - string:
         name: ST_COMMIT
         default: ''
 

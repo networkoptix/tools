@@ -29,6 +29,8 @@
         default: '{default_branch}'
     - p_NX_VMS_COMMIT:
         default: ''
+    - p_ST_SCENARIOS:
+        default: ''
     - string:
         name: ST_COMMIT
     - p_PIPELINE(hidden):
@@ -68,6 +70,8 @@
         projects:
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-50").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -75,6 +79,8 @@
             SERVER_COUNT=50
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-100").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -82,6 +88,8 @@
             SERVER_COUNT=100
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-150").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -89,6 +97,8 @@
             SERVER_COUNT=150
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-200").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -96,6 +106,8 @@
             SERVER_COUNT=200
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-250").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -103,6 +115,8 @@
             SERVER_COUNT=250
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("lws-300").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -116,6 +130,8 @@
         projects:
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("full-50").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -123,6 +139,8 @@
             SERVER_COUNT=50
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("full-100").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -130,6 +148,8 @@
             SERVER_COUNT=100
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("full-150").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
@@ -137,6 +157,8 @@
             SERVER_COUNT=150
         - name: '{pipeline}.{version}.{project}.distribution.default.scaletest'
           kill-phase-on: FAILURE
+          enable-condition: >-
+            ("$ST_SCENARIOS").trim().split(",").contains("full-200").toBoolean()
           current-parameters: true
           predefined-parameters: |
             REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER

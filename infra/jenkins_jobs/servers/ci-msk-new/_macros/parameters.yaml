@@ -416,6 +416,7 @@
         default: '{option_default}'
         description: >-
           ENTER option for RCT_COMMIT_CHOICE, optional, depending on what's selected in prev field
+
 - parameter:
     name: p_ST_COMMIT_CHOICE_w_OPTION
     parameters:
@@ -431,3 +432,15 @@
         default: '{option_default}'
         description: >-
           ENTER option for ST_COMMIT, optional, depending on what's selected in prev field
+
+- parameter:
+    name: p_ST_SCENARIOS
+    parameters:
+    - extended-choice:
+        name: ST_SCENARIOS
+        type: 'multi-select'
+        value:  '{default}'
+        default-value:  '{default}'
+        visible-items: 10
+        description: >-
+          Comma-separated list of scalability test runs, in form: 50-lws or 100-full
