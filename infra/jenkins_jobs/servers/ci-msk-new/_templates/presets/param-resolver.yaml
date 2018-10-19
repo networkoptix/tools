@@ -33,7 +33,7 @@
     - string: { name: RCT_ENABLED                    }
     - string: { name: RCT_COMMIT_CHOICE              }
     - string: { name: RCT_COMMIT_CHOICE_OPTION       }
-    - string: { name: RCT_CAMERA_FILTER               }
+    - string: { name: RCT_CAMERA_FILTER              }
 
     - string: { name: ST_ENABLED                     }
     - string: { name: ST_COMMIT_CHOICE               }
@@ -131,6 +131,17 @@
             cat  NX_VMS_COMMIT.envvar  >> RUNNER_ARGS.envvars
             echo BUILD_WEBADMIN=false >> RUNNER_ARGS.envvars
             echo BUILD_INSTALLER=false >> RUNNER_ARGS.envvars
+
+        # check vars are set
+        - shell: |
+            #!bash
+            set -ex
+            for var in BUILD_IDENTITY NX_VMS_COMMIT ; do
+              if [[ "$(cat $var.envvar)" == "$var=" ]]; then
+                echo "Failed to resolve $var"
+                exit 1
+              fi
+            done
 
     # resolve/map values:
     # - PLATFORMS
@@ -309,6 +320,8 @@
             cat ST_COMMIT.envvar >> RUNNER_ARGS.envvars
 
     publishers:
+    - description-setter:
+        regexp-for-failed: "'(Failed to resolve .*)'"
     - archive:
         artifacts: '*.envvar'
         allow-empty: false
