@@ -46,6 +46,10 @@ UNITTESTABLE = {
         'linux-x64',
         'windows-x64',
         'mac'
+    ],
+    'metavms': [
+        'linux-x64',
+        'windows-x64',
     ]
 }
 

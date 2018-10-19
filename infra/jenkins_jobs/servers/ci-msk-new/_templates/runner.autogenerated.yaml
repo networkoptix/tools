@@ -545,7 +545,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.build'
+        - name: '{pipeline}.{version}.{project}.distribution.linux-x64.metavms.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("linux-x64") &&
@@ -561,6 +561,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
@@ -3648,7 +3649,7 @@
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 
 
-        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.build'
+        - name: '{pipeline}.{version}.{project}.distribution.windows-x64.metavms.build-and-ut'
           kill-phase-on: NEVER
           enable-condition: >-
             ("$PLATFORMS     ").trim().split(",").contains("windows-x64") &&
@@ -3664,6 +3665,7 @@
             CLEAN_WORKSPACE=$CLEAN_WORKSPACE
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
+            RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
             HARDWARE_SIGNING=$HARDWARE_SIGNING
