@@ -16,7 +16,7 @@
 
     - mobile-current
     - '{pipeline}.{version}.{project}.runner'
-    
+
     - develop/hg-trigger:
         repo: nx_vms
         branch: mobile
@@ -29,7 +29,7 @@
 
     - preset:
         preset-name:
-        - on-push-vms:
+        - manual:
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'mobile'
             default_platforms: android-arm,ios
