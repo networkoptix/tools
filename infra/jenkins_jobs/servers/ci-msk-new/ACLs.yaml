@@ -46,6 +46,8 @@
         - job-build
         anisichenko:
         - job-build
+        ovoron:
+        - job-build
 
 - property: &___base_release_system
     # everyone can read (should be inherited)
