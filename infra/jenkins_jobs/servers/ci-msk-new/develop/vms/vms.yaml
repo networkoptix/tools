@@ -181,10 +181,14 @@
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: ''
 
-        - manual-scalability:
+        - nightly-scalability:
+            auth_kind: system
+            timer: 'H 20 * * 2-6'
+            build_description: "Nightly scalability test"
+
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'
             vms_build_choice_option_default: ''
-            default_platforms: linux-x64,windows-x64
+            default_platforms: linux-x64
             default_customizations: default
 
             ut_enabled: 'OFF'
@@ -198,5 +202,25 @@
             rct_commit_choice_option_default: 'vms_rct'
 
             st_enabled: 'ON'
-            st_commit_choice_default: ST_BY_COMMIT
+            st_commit_choice_default: ST_STABLE
+            st_commit_choice_option_default: ''
+
+        - manual-scalability:
+            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'
+            vms_build_choice_option_default: ''
+            default_platforms: linux-x64
+            default_customizations: default
+
+            ut_enabled: 'OFF'
+
+            ft_enabled: 'OFF'
+            ft_commit_choice_default: FT_OTHER_COMMIT
+            ft_commit_choice_option_default: ''
+
+            rct_enabled: 'OFF'
+            rct_commit_choice_default: RCT_OTHER_COMMIT
+            rct_commit_choice_option_default: 'vms_rct'
+
+            st_enabled: 'ON'
+            st_commit_choice_default: ST_LATEST
             st_commit_choice_option_default: ''
