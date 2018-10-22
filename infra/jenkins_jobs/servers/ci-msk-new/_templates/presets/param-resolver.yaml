@@ -11,6 +11,8 @@
     - string: { name: REQUESTED_BY                   }
     - string: { name: BUILD_DESCRIPTION              }
     # do we really need it?
+    # may be it's because it's used directly by envvars/freeze-commit-if(var=val) macro
+    # and also as parameter to one of builders
     - string: { name: BRANCH                         }
 
     - string: { name: VMS_BUILD_CHOICE               }
@@ -312,14 +314,38 @@
         - envvars/freeze-commit-if(var=val):
             pipeline: '{pipeline}'
             var: ST_COMMIT_CHOICE
+            val: ST_LATEST
+            commit_to_freeze: $BRANCH
+            as: ST_COMMIT
+
+        - import-latest-envvar-if(var=val):
+            var: ST_COMMIT_CHOICE
+            val: ST_STABLE
+            job_1: '{pipeline}.{version}.preset.on-push-ft'
+            job_2: '{pipeline}.{version}.preset.nightly-ft'
+            envvar: NX_FUNCTESTS_COMMIT
+            as: ST_COMMIT
+
+        - envvars/freeze-commit-if(var=val):
+            pipeline: '{pipeline}'
+            var: ST_COMMIT_CHOICE
             val: ST_BY_COMMIT
             commit_to_freeze: $ST_COMMIT_CHOICE_OPTION
             as: ST_COMMIT
 
         - shell: |
             #!bash
-            echo "RUN_ST=true" >> RUNNER_ARGS.envvars
             cat ST_COMMIT.envvar >> RUNNER_ARGS.envvars
+
+        - shell: |
+            #!bash
+            set -ex
+            for var in ST_COMMIT ; do
+              if [[ "$(cat $var.envvar)" == "$var=" ]]; then
+                echo "Failed to resolve $var"
+                exit 1
+              fi
+            done
 
     publishers:
     - description-setter:

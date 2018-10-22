@@ -423,10 +423,11 @@
     - better-single-select:
         name: ST_COMMIT_CHOICE
         choices:
-        - - "ST_BY_COMMIT"
-          - "Use other commit (ENTER commit)"
+        - [ST_LATEST, "Latest nx_vms commit from the branch"]
+        - [ST_STABLE, "Latest stable self-ft commit (push or nightly)"]
+        - [ST_BY_COMMIT, "Particular (ENTER commit)"]
         default: '{default}'
-        description: Which RCT commit should be used
+        description: Which nx_vms commit should be used for test itself
     - string:
         name: ST_COMMIT_CHOICE_OPTION
         default: '{option_default}'
