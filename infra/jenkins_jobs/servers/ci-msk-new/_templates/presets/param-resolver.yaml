@@ -110,12 +110,6 @@
 
         - import-envvars-if(var=val):
             var: VMS_BUILD_CHOICE
-            val: VMS_EXISTING_BUILD_FROM_STABLE_PUSH_VMS32RELEASE
-            from: '{pipeline}.vms_3.2_release.preset.on-push-vms'
-            envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
-
-        - import-envvars-if(var=val):
-            var: VMS_BUILD_CHOICE
             val: VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY
             from: '{pipeline}.{version}.preset.nightly-vms'
             envvars: [ NX_VMS_COMMIT, BUILD_IDENTITY ]
@@ -266,7 +260,7 @@
         - import-envvars-if(var=val):
             var: RCT_COMMIT_CHOICE
             val: RCT_STABLE_PUSH
-            from: '{pipeline}.vms_rct.preset.on-push-rct'
+            from: '{pipeline}.vms_3.2_release.preset.on-push-rct-to-vms_rct'
             envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
         - import-envvars-if(var=val):
@@ -276,8 +270,8 @@
             envvars: [ NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ]
 
         - import-latest-envvar-if(var=val):
-            var: FT_COMMIT_CHOICE
-            val: FT_STABLE_PUSH_OR_NIGHTLY
+            var: RCT_COMMIT_CHOICE
+            val: RCT_STABLE_PUSH_OR_NIGHTLY
             job_1: '{pipeline}.{version}.preset.on-push-rct'
             job_2: '{pipeline}.{version}.preset.nightly-rct'
             envvar: NX_FUNCTESTS_COMMIT

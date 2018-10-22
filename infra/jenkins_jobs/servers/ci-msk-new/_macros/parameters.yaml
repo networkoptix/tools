@@ -358,8 +358,6 @@
           - "Existing build (ENTER build identity)"
         - - VMS_EXISTING_BUILD_FROM_STABLE_PUSH
           - "Existing green build (latest push)"
-        - - VMS_EXISTING_BUILD_FROM_STABLE_PUSH_VMS32RELEASE
-          - "Existing green build from vms_3.2_release branch (latest push)"
         - - VMS_EXISTING_BUILD_FROM_STABLE_NIGHTLY
           - "Existing green build (latest nightly)"
         - - VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY
