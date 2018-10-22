@@ -162,8 +162,8 @@
             st_commit_choice_option_default: ''
 
         - manual:
-            vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
-            vms_build_choice_option_default: ''
+            vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
+            vms_build_choice_option_default: 'vms'
             default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
 
@@ -173,7 +173,7 @@
             ft_commit_choice_default: FT_OTHER_COMMIT
             ft_commit_choice_option_default: ''
 
-            rct_enabled: 'ON'
+            rct_enabled: 'OFF'
             rct_commit_choice_default: RCT_OTHER_COMMIT
             rct_commit_choice_option_default: 'vms_rct'
 
