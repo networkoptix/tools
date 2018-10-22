@@ -30,8 +30,7 @@
 
     parameters:
 
-    # FIXME:
-    - p_BRANCH:
+    - p_BRANCH(hidden):
         default: '{default_branch}'
     - p_BUILD_DESCRIPTION:
         default: !j2: '{{ build_description | default("Triggered manually") }}'

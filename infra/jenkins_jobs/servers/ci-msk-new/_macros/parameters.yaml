@@ -88,11 +88,15 @@
 - parameter:
     name: p_BRANCH
     parameters:
-    - string:
+    - string: &p_BRANCH_OPTS
         name: BRANCH
         default: '{default}'
         description: >-
           Branch of nx_vms from which product is built.
+- parameter:
+    name: p_BRANCH(hidden)
+    parameters:
+    - hidden: *p_BRANCH_OPTS
 
 - parameter:
     name: p_NX_VMS_COMMIT
