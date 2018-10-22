@@ -2,7 +2,7 @@
     name: develop/vms_rct
 
     # This is a very specific case to trigger RCT tests on vms_3.2_release
-    # This does not include any
+    # We do not build VMS from vms_rct branch.
 
     project: vms
     pipeline: develop
@@ -27,6 +27,3 @@
         job_to_trigger_on_vms_changed: ''
         job_to_trigger_on_ft_changed: ''
         job_to_trigger_on_rct_changed: 'develop.vms_3.2_release.preset.on-push-rct-to-vms_rct'
-
-    # All presets are associated with vms builds from "this" particular branch
-    # We do not build VMS from vms_rct branch.
