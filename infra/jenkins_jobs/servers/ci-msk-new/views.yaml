@@ -31,7 +31,37 @@
 - view:
     name: presets
     view-type: list
-    description: 'List of all presets'
+    description: |
+      <h3> List of all available build presets </h3>
+      <pre>
+        To request new build or test or anything else choose crsp preset.
+
+        Current naming rules:
+
+        [pipeline-name].[branch-name].preset.[preset-name]
+
+        where
+
+        1. pipeline-name - is a name of pipelene, which defines kind of build we
+           produce.
+
+           debug is builds related to CI own tests and checks
+           develop is development related builds
+           release is release builds
+           custom is very specific build
+
+           different users have different ACLs assigned according to their roles
+
+        2. branch-name - is VMS branch. All builds are associated with particular
+           branch. But FTs, RCTs and other tests may have other branch than
+           branch-name.
+
+        3. preset-name - is self descriptive name of preset which is used for
+           different events or includes preconfigured defaults which fit best
+           for preset name.
+
+      </pre>
+
     regex: '.*preset.*'
     columns: *default_cols
 
