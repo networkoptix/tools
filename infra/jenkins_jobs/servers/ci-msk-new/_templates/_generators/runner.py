@@ -330,6 +330,7 @@ print '''
             BRANCH=$BRANCH
             NX_VMS_COMMIT=$NX_FUNCTESTS_COMMIT
             ST_COMMIT=$ST_COMMIT
+            ST_SCENARIOS=$ST_SCENARIOS
             CLEAN_WORKSPACE=true
             RUNNER_URL=$BUILD_URL
 

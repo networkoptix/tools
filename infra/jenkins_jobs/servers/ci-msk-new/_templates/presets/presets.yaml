@@ -111,8 +111,8 @@
         subject: If ON, then SacalbilityTests will run, otherwise skipped
         default: '{st_enabled}'
     - p_ST_SCENARIOS:
-        default: '50-lws,100-lws,150-lws,200-lws,250-lws,300-lws,50-full,100-full,150-full,200-full'
-    - p_ST_COMMIT_CHOICE_w_OPTION:
+        default: 'lws-50,lws-100,lws-150,lws-200,lws-250,lws-300,full-50,full-100,full-150,full-200'
+    _ST_COMMIT_CHOICE_w_OPTION:
         default: '{st_commit_choice_default}'
         option_default: '{st_commit_choice_option_default}'
 
