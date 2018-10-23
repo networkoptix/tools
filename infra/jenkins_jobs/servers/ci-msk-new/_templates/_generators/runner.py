@@ -111,7 +111,7 @@ print '''#
         default: false
     - p_CLEAN_CLONE
     - p_CLOUD_GROUP:
-        default: test
+        default: ''
     - p_HARDWARE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
@@ -155,6 +155,7 @@ print '''#
         params: >-
           NX_VMS_COMMIT
           BUILD_IDENTITY
+          CLOUD_GROUP
     - shell: |
         #!bash
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" > NX_VMS_COMMIT.envvar
