@@ -183,7 +183,7 @@
 
         - nightly-scalability:
             auth_kind: system
-            timer: 'H 20 * * 2-6'
+            timer: 'H 20 * * 1-5'
             build_description: "Nightly scalability test"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'
