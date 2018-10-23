@@ -30,7 +30,7 @@
 
     parameters:
 
-    - p_BRANCH(hidden):
+    - p_BRANCH:
         default: '{default_branch}'
     - p_BUILD_DESCRIPTION:
         default: !j2: '{{ build_description | default("Triggered manually") }}'
