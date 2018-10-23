@@ -4,7 +4,7 @@
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
     cmake_configure_args_global: >-
-      -Dbeta=TRUE
+      -Dbeta=$BETA
       -DdeveloperBuild=OFF
       -DcloudGroup=$CLOUD_GROUP
 

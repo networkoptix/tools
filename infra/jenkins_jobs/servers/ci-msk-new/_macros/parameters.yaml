@@ -314,6 +314,14 @@
           Cloud group
 
 - parameter:
+    name: p_BETA
+    parameters:
+    - on-off-option:
+        name: BETA
+        default: '{default}'
+        description: "ON will add BETA banner for build"
+
+- parameter:
     name: p_HARDWARE_SIGNING
     parameters:
     - on-off-option:

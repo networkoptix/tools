@@ -112,6 +112,8 @@ print '''#
     - p_CLEAN_CLONE
     - p_CLOUD_GROUP:
         default: ''
+    - p_BETA:
+        default: ''
     - p_HARDWARE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
@@ -242,6 +244,7 @@ for platform in PLATFORMS_LIST:
             RUN_UNITTESTS=$RUN_UNITTESTS
             RUNNER_URL=$BUILD_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 '''

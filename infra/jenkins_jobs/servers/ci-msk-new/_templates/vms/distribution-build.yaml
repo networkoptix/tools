@@ -133,6 +133,8 @@
         default: '{default_branch}'
     - p_CLOUD_GROUP:
         default: test
+    - p_BETA:
+        default: ''
     - p_HARDWARE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:

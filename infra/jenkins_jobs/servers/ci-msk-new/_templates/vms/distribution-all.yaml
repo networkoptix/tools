@@ -37,6 +37,8 @@
     - p_RUNNER_URL
     - p_CLOUD_GROUP:
         default: test
+    - p_BETA:
+        default: ''
     - p_HARDWARE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
@@ -80,6 +82,7 @@
             CUSTOM_CMAKE_PARAMETERS=$CUSTOM_CMAKE_PARAMETERS
             RUNNER_URL=$RUNNER_URL
             CLOUD_GROUP=$CLOUD_GROUP
+            BETA=$BETA
             HARDWARE_SIGNING=$HARDWARE_SIGNING
             TRUSTED_TIMESTAMPING=$TRUSTED_TIMESTAMPING
 

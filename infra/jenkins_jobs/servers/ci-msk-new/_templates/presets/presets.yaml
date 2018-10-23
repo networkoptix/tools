@@ -56,6 +56,8 @@
 
     - p_CLOUD_GROUP:
         default: test
+    - p_BETA:
+        default: '{{ beta | default("OFF") }}'
     - p_HARDWARE_SIGNING:
         default: 'OFF'
     - p_TRUSTED_TIMESTAMPING:
