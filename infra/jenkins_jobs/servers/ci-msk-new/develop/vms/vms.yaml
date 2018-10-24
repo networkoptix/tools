@@ -187,7 +187,7 @@
             build_description: "Nightly scalability test"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
-            # disabled until nightly-vms is not configured
+            # disabled until nightly-vms is configured
             #vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'
             vms_build_choice_option_default: ''
             default_platforms: linux-x64
@@ -209,7 +209,7 @@
 
         - manual-scalability:
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
-            # disabled until nightly-vms is not configured
+            # disabled until nightly-vms is configured
             #vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'
             vms_build_choice_option_default: ''
             default_platforms: linux-x64
