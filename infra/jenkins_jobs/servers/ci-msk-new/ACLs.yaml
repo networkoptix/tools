@@ -36,18 +36,40 @@
     - authorization:
         syuldashev:
         - job-build
+        - job-cancel
         omironenko:
         - job-build
+        - job-cancel
         mpodstrechny:
         - job-build
+        - job-cancel
         snoshenkov:
         - job-build
+        - job-cancel
         ebalashov:
         - job-build
+        - job-cancel
         anisichenko:
         - job-build
+        - job-cancel
         ovoron:
         - job-build
+        - job-cancel
+        aandreev:
+        - job-build
+        - job-cancel
+        mgilyazov:
+        - job-build
+        - job-cancel
+        gburmistrov:
+        - job-build
+        - job-cancel
+        amatveeva:
+        - job-build
+        - job-cancel
+        bbiryuchkov:
+        - job-build
+        - job-cancel
 
 - property: &___base_release_system
     # everyone can read (should be inherited)
