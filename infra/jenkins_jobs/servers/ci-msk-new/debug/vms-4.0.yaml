@@ -31,7 +31,8 @@
         branch: vms
         version: vms
 
-    - vms-current-with-tests
+    - vms-current-with-tests:
+        build_paxton: 'YES'
 
     - functest:
         build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
@@ -57,7 +58,7 @@
             st_enabled: 'OFF'
             st_commit_choice_default: ST_BY_COMMIT
             st_commit_choice_option_default: 'vms'
-            default_platforms: linux-x64,windows-x-64,mac,bpi
+            default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
         - on-push-vms:
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT

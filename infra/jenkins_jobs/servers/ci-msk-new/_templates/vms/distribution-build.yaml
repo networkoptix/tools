@@ -353,6 +353,17 @@
         folder-path: 'build_logs'
 
     # Remove distrib folder
+    - shell: |
+        #!bash
+        if [ -d build/distrib ] ; then
+          rm -rf build/distrib
+        fi
+        if [ -d paxton-4.0/distrib ] ; then
+          rm -rf paxton-4.0/distrib
+        fi
+        if [ -d paxton-4.6.2/distrib ] ; then
+          rm -rf paxton-4.6.2/distrib
+        fi
     - file-operations/folder-delete-operation:
         folder-path: 'build/distrib'
 
@@ -406,6 +417,7 @@
         cmake_configure_project_root: ''
         cmake_configure_command: $CMAKE_CONFIGURE_COMMAND $CUSTOM_CMAKE_PARAMETERS
         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        build_dir: build
 
     - vms/ninja-clean:
         __debug__: !j2: '{{ __debug__ }}'
@@ -414,44 +426,56 @@
         subject: vms
         __debug__: !j2: '{{ __debug__ }}'
         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        build_dir: build
 
     # Paxton should be built on windows platforms only
-    # - conditional-step:
-    #     condition-kind: shell
-    #     condition-command: !j2: |
-    #       #!bash
-    #       set -ex
-    #       test "X${OS}" == "XWindows_NT"
-    #       test "{{ build_paxton | default("") }}" == 'YES'
-    #     steps:
+    - conditional-step:
+        condition-kind: shell
+        condition-command: !j2: |
+          #!bash
+          set -ex
+          test "X${OS}" == "XWindows_NT"
+          test "{{ build_paxton | default("") }}" == 'YES'
+        steps:
 
-    #     # dotnet-4.0
+        # dotnet-4.0
 
-    #     - vms/cmake-configure:
-    #         subject: paxton-4.0
-    #         __debug__: !j2: '{{ __debug__ }}'
-    #         cmake_configure_project_root: 'client/paxton_plugin'
-    #         cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY -DdotNetFramework=v4.0
-    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        - vms/cmake-configure:
+            subject: paxton-4.0
+            __debug__: !j2: '{{ __debug__ }}'
+            cmake_configure_project_root: 'client/paxton_plugin'
+            cmake_configure_command: >-
+              cmake
+              -Dcustomization=$CUSTOMIZATION
+              -DbuildNumber=$BUILD_IDENTITY
+              -DdotNetFramework=v4.0
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+            build_dir: build-paxton-4.0
 
-    #     - vms/cmake-build:
-    #         subject: paxton-4.0
-    #         __debug__: !j2: '{{ __debug__ }}'
-    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        - vms/cmake-build:
+            subject: paxton-4.0
+            __debug__: !j2: '{{ __debug__ }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+            build_dir: build-paxton-4.0
 
-    #     # dotnet-4.6.2
+        # dotnet-4.6.2
 
-    #     - vms/cmake-configure:
-    #         subject: paxton-4.6.2
-    #         __debug__: !j2: '{{ __debug__ }}'
-    #         cmake_configure_project_root: 'client/paxton_plugin'
-    #         cmake_configure_command: cmake -DbuildNumber=$BUILD_IDENTITY
-    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        - vms/cmake-configure:
+            subject: paxton-4.6.2
+            __debug__: !j2: '{{ __debug__ }}'
+            cmake_configure_project_root: 'client/paxton_plugin'
+            cmake_configure_command: >-
+              cmake
+              -Dcustomization=$CUSTOMIZATION
+              -DbuildNumber=$BUILD_IDENTITY
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+            build_dir: build-paxton-4.6.2
 
-    #     - vms/cmake-build:
-    #         subject: paxton-4.6.2
-    #         __debug__: !j2: '{{ __debug__ }}'
-    #         envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+        - vms/cmake-build:
+            subject: paxton-4.6.2
+            __debug__: !j2: '{{ __debug__ }}'
+            envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
+            build_dir: build-paxton-4.6.2
 
 
     # STAGE: PUBLISH
@@ -477,7 +501,18 @@
           - shell: |
               #!bash
               mkdir -p ./build/build_logs
-              mv ./build_logs/* ./build/build_logs/
+              mkdir -p ./build/distrib
+              if [ -d ./build_logs ] ; then
+                mv ./build_logs/* ./build/build_logs/
+              fi
+              if [ -d ./build-paxton-4.0 ] ; then
+                mv ./build-paxton-4.0/build_logs/*   ./build/build_logs/
+                mv ./build-paxton-4.0/distrib/*      ./build/distrib/
+              fi
+              if [ -d ./build-paxton-4.6.2 ] ; then
+                mv ./build-paxton-4.6.2/build_logs/* ./build/build_logs/
+                mv ./build-paxton-4.6.2/distrib/*    ./build/distrib/
+              fi
 
           # Depending on test distribution strategy, we have 2 options:
           # - unpacked in ./build/bin/*, ./build/lib/*, "as is"

@@ -7,6 +7,7 @@
 
         # Log file must not exist
         test ! -f "build_logs/cmake-configure-{{ subject }}.log"
+        mkdir -p "{{ build_dir }}"
 
         # Create bash script filled with args, unset too long envvars and
         # execute cmake command
@@ -30,7 +31,7 @@
         echo "Env is:"
         env
         echo "Configuring project"
-        cd "build"
+        cd "{{ build_dir }}"
         {% set _cmake_configure_project_root = cmake_configure_project_root | default("") %}
         echo "Cmake command - {{ cmake_configure_command }} \$WORKSPACE/nx_vms{{ '/' + _cmake_configure_project_root if _cmake_configure_project_root != '' else '' }}"
         {{ cmake_configure_command }}  \$WORKSPACE/nx_vms{{ '/' + _cmake_configure_project_root if _cmake_configure_project_root != '' else '' }}

@@ -1,5 +1,5 @@
 - project:
-    name: debug-pipeline-3.2
+    name: debug/vms_3.2
     __debug__: true
 
     pipeline: debug
@@ -10,9 +10,9 @@
     test_distribution_concurrently: false
 
     project: vms
-    version: vms_3.2_release
-    default_branch: vms_3.2_release
-    use_nx_vms_commit: vms_3.2_release  # FIXME: this is temp fix
+    version: vms_3.2
+    default_branch: vms_3.2
+    use_nx_vms_commit: vms_3.2  # FIXME: this is temp fix
 
     realcameratesting_framework_branch: vms
 
@@ -22,7 +22,8 @@
 
     jobs:
 
-    - vms-3.2-with-tests
+    - vms-3.2-with-tests:
+        build_paxton: 'YES'
 
     - functest:
         build_watchers: anikitin@networkoptix.com,gsovetov@networkoptix.com,vfedorov@networkoptix.com
@@ -35,8 +36,8 @@
 
     - hg-trigger:
         repo: nx_vms
-        branch: vms_3.2_release
-        version: vms_3.2_release
+        branch: vms_3.2
+        version: vms_3.2
     - param-resolver
     - preset:
         preset-name:
@@ -86,7 +87,7 @@
             st_commit_choice_option_default: 'vms'
         - vms-nightly:
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
-            vms_build_choice_option_default: 'vms_3.2_release'
+            vms_build_choice_option_default: 'vms_3.2'
             ut_enabled: 'ON'
             ft_enabled: 'OFF'
             ft_commit_choice_default: FT_STABLE_PUSH

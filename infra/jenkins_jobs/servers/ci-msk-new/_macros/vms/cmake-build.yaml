@@ -32,7 +32,7 @@
         echo "Env is:"
         env
         echo "Building project"
-        cd "build"
+        cd "{{ build_dir }}"
 
         echo "Cmake command - $CMAKE_BUILD_COMMAND"
         $CMAKE_BUILD_COMMAND
