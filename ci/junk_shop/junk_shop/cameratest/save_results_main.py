@@ -181,11 +181,12 @@ def save_camera_root_run(repository, parent_run, test_path_list, camera_tests, c
 
 
 @db_session
-def save_root_run_info(repository, root_run, passed, started_at, artifacts):
-    # type: (DbCaptureRepository, models.Run, bool, datetime, dict) -> None
+def save_root_run_info(repository, root_run, passed, started_at, artifacts, error_message):
+    # type: (DbCaptureRepository, models.Run, bool, datetime, dict, str) -> None
     root_run = models.Run[root_run.id]
     root_run.outcome = status2outcome(passed)
     root_run.started_at = started_at
+    root_run.error_message = error_message
     for artifact_name, artifact_file in artifacts.items():
         if artifact_name not in [TEST_RESULTS_FILE_NAME, ALL_CAMERAS_FILENAME]:
             _logger.debug("Save root artifact '%s'...", artifact_name)
@@ -329,17 +330,20 @@ def main():
     artifacts = collect_test_artifacts(args.test_work_dir)
 
     results_file = artifacts.get(TEST_RESULTS_FILE_NAME)
-    all_cameras_file = artifacts.get(ALL_CAMERAS_FILENAME)
-    if not results_file:
-        _logger.error("Can't create test report, '%s' not found.", TEST_RESULTS_FILE_NAME)
-        sys.exit(1)
-
-    cameras_info = parse_all_cameras_file(all_cameras_file)
-
     root_run = make_root_run(repository, args.test_name)
-    passed, started_at = parse_and_save_results_to_db(
-        repository, root_run, results_file, cameras_info)
-    save_root_run_info(repository, root_run, passed, started_at, artifacts)
+    error_message = None
+    if not results_file:
+        error_message = "Can't find test report, '%s' not found." % TEST_RESULTS_FILE_NAME
+        _logger.warning(error_message)
+        passed = False
+        started_at = datetime.utcnow()
+    else:
+        all_cameras_file = artifacts.get(ALL_CAMERAS_FILENAME)
+        cameras_info = parse_all_cameras_file(all_cameras_file)
+        passed, started_at = parse_and_save_results_to_db(
+            repository, root_run, results_file, cameras_info)
+
+    save_root_run_info(repository, root_run, passed, started_at, artifacts, error_message)
 
 
 if __name__ == "__main__":

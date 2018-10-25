@@ -75,6 +75,7 @@ def render_platform_build(build, customization, platform, paginator):
     loader = BuildInfoLoader.for_build_customzation_platform(build, customization, platform)
     build_platform_info = loader.load_build_platform()
     if not build_platform_info:
+        print "Not a platform INFO"
         abort(404)
     scalability_platform_set = load_scalability_platform_set(build)
     return render_template(
@@ -110,12 +111,14 @@ def platform_build(project_name, branch_name, build_num, customization_name, pla
             build.build_num == build_num)
     platform = models.Platform.get(name=platform_name)
     if not build or not platform:
+        print "Not a platform"
         abort(404)
     if customization_name == 'none':
         customization = None
     else:
         customization = models.Customization.get(name=customization_name)
         if not customization:
+            print "Not a customization"
             abort(404)
 
     query = select(

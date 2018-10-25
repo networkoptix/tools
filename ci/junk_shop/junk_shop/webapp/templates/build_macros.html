@@ -1,11 +1,11 @@
 {% import "common_macros.html" as common_macros %}
 
 
-{% macro test_row(root_run, itr) %}
+{% macro test_row(stage, itr) %}
 
   <td>
-    <a class="test-link" href="{{ url_for('run', run_id=root_run.id, _anchor=itr.run.id) }}">
-      {{ itr.test_name }}
+    <a class="test-link" href="{{ url_for('run', run_id=stage.root_run.id, _anchor=itr.run.id) }}">
+      {{ itr.test_name|default(stage.stage_name, true) }}
     </a>
   </td>
   <td class="outcome {% if itr.succeeded -%} passed {%- else -%} failed {%- endif %}">
@@ -122,7 +122,7 @@
             <tbody>
               {% for run in stage.run_list %}
                 <tr>
-                  {{ test_row(stage.root_run, run) }}
+                  {{ test_row(stage, run) }}
                 </tr>
               {% endfor %}
             </tbody>
