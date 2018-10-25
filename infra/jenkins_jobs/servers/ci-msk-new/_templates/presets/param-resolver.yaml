@@ -47,6 +47,13 @@
     - cleaners/custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
 
+    # === GLOBALS ===
+
+    - shell: |
+        #!bash
+        set -ex
+        echo "BRANCH=$BRANCH" >> RUNNER_ARGS.envvars
+
     # === BUILD ===
 
     # resolve values:
