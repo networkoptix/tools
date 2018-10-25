@@ -251,8 +251,25 @@ class BuildInfoLoader(object):
             self.failed_tests_platform_set.add(root_run.platform.name)
             self.failed_test_set.add(test.path)
 
+    # ensure failed root runs show up when there is no failed leafs for them
+    def _create_root_failed_test_runs(self):
+        for run, test in select(
+                (run, run.test)
+                for run in models.Run if
+                run.build is self.build and
+                run.outcome == 'failed' and
+                run.test and
+                not exists(child for child in run.children if
+                               child.path.startswith(run.path) and
+                               child is not run and
+                               child.outcome == 'failed')).order_by(1):
+            if not self._is_run_wanted(run): continue
+            stage = self._produce_stage(run, TestsStage)
+            stage.add_run(run)
+            self.failed_tests_platform_set.add(run.platform.name)
+            self.failed_test_set.add(test.path)
+
     def _load_build_artifacts(self):
-        platform2artifact = {}
         for run, artifact in select(
                 (run, artifact)
                 for run in models.Run
@@ -311,6 +328,7 @@ class BuildInfoLoader(object):
         self._load_tracebacks()
         self._create_leaf_test_runs()
         self._create_non_leaf_failed_test_runs()
+        self._create_root_failed_test_runs()
         self._load_build_artifacts()
         self._load_test_stage_errors()
     
