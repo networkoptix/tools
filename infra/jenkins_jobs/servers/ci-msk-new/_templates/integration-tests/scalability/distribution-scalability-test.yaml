@@ -221,6 +221,28 @@
           TRANSACTIONS_STAGE_DURATION=20m
           TEST_TIMEOUT="$((4 * 60 * 60))" # 4hr
 
+          CONFIG_PATH="$WORKSPACE/scalability-test-config.yaml"
+
+          cat > "$CONFIG_PATH" <<EOF
+            build_parameters:
+              project: '{junkshop_project_name}'
+              branch: '$BRANCH'
+              build_num: '$BUILD_IDENTITY'
+              platform: 'linux-x64'
+              customization: '$CUSTOMIZATION"'
+            run_parameters:
+              use_lightweight_servers: $USE_LIGHTWEIGHT_SERVERS
+              server_count: $SERVER_COUNT
+              storages_per_server: $STORAGES_PER_SERVER
+              cameras_per_server: $CAMERAS_PER_SERVER
+              users_per_server: $USERS_PER_SERVER
+              properties_per_camera: $PROPERTIES_PER_CAMERA
+              transactions_per_server_rate: $TRANSACTIONS_PER_SERVER_RATE
+              merge_timeout: '$MERGE_TIMEOUT'
+              message_bus_timeout: '$MESSAGE_BUS_TIMEOUT'
+              transactions_stage_duration: '$TRANSACTIONS_STAGE_DURATION'
+          EOF
+
           pushd nx_vms/func_tests
 
             set +e
@@ -230,13 +252,8 @@
               --bin-dir="$BIN_DIR" \
               --mediaserver-installers-dir="$WORKSPACE/dist" \
               --timeout="$TEST_TIMEOUT" \
-              --capture-db="$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}" \
-              --build-parameters="\
-        project={junkshop_project_name},\
-        branch=$BRANCH,\
-        build_num=$BUILD_IDENTITY,\
-        platform=linux-x64,\
-        customization=$CUSTOMIZATION" \
+              --config="$CONFIG_PATH" \
+              --junk-shop-db="$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}" \
               --slot="$EXECUTOR_NUMBER" \
               --reinstall \
               -v \
@@ -253,17 +270,6 @@
         scalability_test.merge_timeout=$MERGE_TIMEOUT,\
         scalability_test.message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
         scalability_test.transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
-              --run-parameters="\
-        use_lightweight_servers=$USE_LIGHTWEIGHT_SERVERS,\
-        server_count=$SERVER_COUNT,\
-        storages_per_server=$STORAGES_PER_SERVER,\
-        cameras_per_server=$CAMERAS_PER_SERVER,\
-        users_per_server=$USERS_PER_SERVER,\
-        properties_per_camera=$PROPERTIES_PER_CAMERA,\
-        transactions_per_server_rate=$TRANSACTIONS_PER_SERVER_RATE,\
-        merge_timeout=$MERGE_TIMEOUT,\
-        message_bus_timeout=$MESSAGE_BUS_TIMEOUT,\
-        transactions_stage_duration=$TRANSACTIONS_STAGE_DURATION" \
               tests/scalability_test.py
 
             pytest_status="X$?"

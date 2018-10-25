@@ -26,6 +26,6 @@
   - ../secrets/infra_storage.yml
 
   roles:
-  - role: scalability_node
-  - role: cloudalchemy.node-exporter
+#  - role: scalability_node
+#  - role: cloudalchemy.node-exporter
   - role: firewall_linux

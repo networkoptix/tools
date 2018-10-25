@@ -126,19 +126,22 @@
 
             export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-            DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
-            BUILD_PARAMETERS="\
-          project={junkshop_project_name},\
-          branch=$BRANCH,\
-          build_num=$BUILD_IDENTITY,\
-          platform=linux-x64,\
-          customization=$CUSTOMIZATION"
+            JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
+
+            BUILD_PARAMETERS=(
+              "project={junkshop_project_name}"
+              "branch=$BRANCH"
+              "build_num=$BUILD_IDENTITY"
+              "platform=linux-x64"
+              "customization=$CUSTOMIZATION"
+              )
 
             LAST_RUN_DIR=$(find $RCT_COMPONENT -maxdepth 1 -type d -name "run_*" | sort | tail -n 1)
+
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/cameratest/save_results_main.py \
-                "$DB_CONFIG" \
-                "$BUILD_PARAMETERS" \
-                "$LAST_RUN_DIR"
+              --junk-shop-db="$JUNK_SHOP_DB" \
+              --build-parameters "${BUILD_PARAMETERS[@]}" \
+              "$LAST_RUN_DIR"
 
     publishers:
     - mercurial/rm-repo-if-broken

@@ -14,11 +14,13 @@ Sample:
   You can use optional parameters only if you need to use non-default junk_shop,
   JIRA and SCM browser URLs in your report.
 """
+
 import argparse
+
 from junk_shop import TemplateRenderer, BuildInfoLoader, models
-from junk_shop.utils import DbConfig
-from junk_shop.capture_repository import BuildParameters
+from junk_shop.parameters import add_db_arguments, create_db_parameters
 from pony.orm import db_session
+
 
 DEFAULT_JUNK_SHOP_URL = 'http://junkshop.enk.me/'
 DEFAULT_JIRA_URL = 'https://networkoptix.atlassian.net/browse'
@@ -28,14 +30,7 @@ DEFAULT_SCM_BROWSER_URL_FORMAT = 'http://enk.me:8082/{repository_name}/revision/
 def main():
     parser = argparse.ArgumentParser(
         usage='%(prog)s [options]')
-    parser.add_argument(
-        'db_config', type=DbConfig.from_string,
-        metavar='user:password@host',
-        help='Capture postgres database credentials.')
-    parser.add_argument(
-        'build_parameters', type=BuildParameters.from_string,
-        metavar=BuildParameters.example,
-        help='Build parameters.')
+    add_db_arguments(parser)
     parser.add_argument(
         '--junk-shop-url', default=DEFAULT_JUNK_SHOP_URL,
         help=("Junk shop URL, default={}.".format(DEFAULT_JUNK_SHOP_URL)))
@@ -49,14 +44,16 @@ def main():
               "to make links to an SCM revision.".format(DEFAULT_SCM_BROWSER_URL_FORMAT)))
 
     args = parser.parse_args()
+    db_params = create_db_parameters(args)
 
-    args.db_config.bind(models.db)
+    db_params.db_config.bind(models.db)
 
     with db_session:
         loader = BuildInfoLoader.from_project_branch_num(
-            args.build_parameters.project,
-            args.build_parameters.branch,
-            args.build_parameters.build_num)
+            db_params.build_parameters['project'],
+            db_params.build_parameters['branch'],
+            db_params.build_parameters['build_num'],
+            )
         build_info = loader.load_build_platform_list()
         renderer = TemplateRenderer(args)
         print(renderer.render(

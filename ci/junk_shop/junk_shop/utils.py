@@ -1,4 +1,3 @@
-import os
 import re
 import pytz
 import argparse
@@ -6,8 +5,6 @@ from dateutil.tz import tzlocal
 import datetime
 from argparse import ArgumentTypeError
 from pathlib2 import Path
-
-from pony.orm import sql_debug
 
 
 class SimpleNamespace:
@@ -24,6 +21,12 @@ class SimpleNamespace:
         return self.__dict__ == other.__dict__
 
 
+def compose(fn1, fn2):
+    def inner(*args, **kw):
+        return fn1(fn2(*args, **kw))
+    return inner
+
+
 def datetime_utc_now():
     return datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
 
@@ -36,15 +39,44 @@ def as_local_tz(dt):
     return dt.astimezone(tzlocal())
 
 
-TIMEDELTA_REGEXP = re.compile(
-    r'^'
-    r'((?P<days>\d+?)d)?'
-    r'((?P<hours>\d+?)h)?'
-    r'((?P<minutes>\d+?)m)?'
-    r'((?P<seconds>[\d.]+)s)?'
-    r'((?P<milliseconds>[\d.]+?)ms)?'
-    r'((?P<microseconds>\d+?)usec)?'
-    r'$')
+TIMEDELTA_REGEXP_LIST = [
+    re.compile(
+        r'^'
+        r'((?P<days>\d+?)d)?'
+        r'((?P<hours>\d+?)h)?'
+        r'((?P<minutes>\d+?)m)?'
+        r'((?P<seconds>[\d.]+)s)?'
+        r'((?P<milliseconds>[\d.]+?)ms)?'
+        r'((?P<microseconds>\d+?)usec)?'
+        r'$'),
+    # 100 days, 0:03:20.000300
+    re.compile(
+        r'^'
+        r'(?P<days>\d+) days?, '
+        r'(?P<hours>\d+):'
+        r'(?P<minutes>\d+):'
+        r'(?P<seconds>\d+)\.'
+        r'(?P<microseconds>\d{6})'
+        r'$'),
+    # 100 days, 0:03:20.030
+    re.compile(
+        r'^'
+        r'(?P<days>\d+) days?, '
+        r'(?P<hours>\d+):'
+        r'(?P<minutes>\d+):'
+        r'(?P<seconds>\d+)'
+        r'(\.(?P<milliseconds>\d{3}))?'
+        r'$'),
+    # just seconds
+    re.compile(
+        r'^'
+        r'(?P<seconds>\d+)'
+        r'$'),
+    ]
+
+
+class InvalidTimeDeltaString(RuntimeError):
+    pass
 
 
 def str_to_timedelta(duration_str):
@@ -57,18 +89,27 @@ def str_to_timedelta(duration_str):
     datetime.timedelta(0, 4, 56000)
     >>> str_to_timedelta('6.453ms')
     datetime.timedelta(0, 0, 6453)
+    >>> str_to_timedelta('1 day, 0:00:02.000003')
+    datetime.timedelta(1, 2, 3)
+    >>> str_to_timedelta('100 days, 0:03:20.000300')
+    datetime.timedelta(100, 200, 300)
+    >>> str_to_timedelta('100 days, 0:03:20.003')
+    datetime.timedelta(100, 200, 3000)
+    >>> str_to_timedelta('10 days, 0:00:20')
+    datetime.timedelta(10, 20)
     '''
-    match = TIMEDELTA_REGEXP.match(duration_str)
-    if not match:
-        return datetime.timedelta(seconds=int(duration_str))
+    for pattern in TIMEDELTA_REGEXP_LIST:
+        match = pattern.match(duration_str)
+        if match:
+            break
+    else:
+        raise InvalidTimeDeltaString('Invalid timedelta: %r' % duration_str)
     timedelta_params = {k: float(v)
                         for (k, v) in match.groupdict().iteritems() if v}
     try:
-        if not timedelta_params:
-            return datetime.timedelta(seconds=int(duration_str))
         return datetime.timedelta(**timedelta_params)
     except ValueError:
-        assert False, 'Invalid timedelta: %r' % duration_str
+        raise InvalidTimeDeltaString('Invalid timedelta: %r' % duration_str)
 
 
 def timedelta_to_str(d):
@@ -151,32 +192,8 @@ def param_to_bool(value):
         return False
     assert False, "Invalid bool value: %r; Expected one of 'true', 'false', 'yes', 'no'" % value
 
-
-class DbConfig(object):
-
-    @classmethod
-    def from_string(cls, value):
-        mo = re.match(r'^([^:]+):([^@]+)@([^:]+)(:(\d+))?$', value)
-        if not mo:
-            raise ArgumentTypeError('Expected postgres database credentials in form "user:password@host[:port]", but got: %r' % value)
-        user, password, host, _, port = mo.groups()
-        return cls(host, user, password, port)
-
-    def __init__(self, host, user, password, port=None):
-        self.host = host
-        self.user = user
-        self.password = password
-        self.port = port
-
-    def __repr__(self):
-        if self.port:
-            return '%s:%s' % (self.host, self.port)
-        else:
-            return self.host
-
-    def bind(self, db):
-        if 'SQL_DEBUG' in os.environ:
-            sql_debug(True)
-        db.bind('postgres', host=self.host, user=self.user,
-                password=self.password, port=self.port)
-        db.generate_mapping(create_tables=True)
+def bool_to_param(value):
+    if value:
+        return 'true'
+    else:
+        return 'false'

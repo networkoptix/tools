@@ -162,7 +162,7 @@
 
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
+          JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
           REVISION="$(cd nx_vms && hg id --id)"
 
           if [ "$PLATFORM" == 'universal' ] ; then
@@ -172,12 +172,35 @@
           fi
 
           # register build
-          BUILD_PARAMETERS="project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,platform=$JUNKSHOP_PLATFORM,jenkins_url=$RUNNER_URL,repository_url=ssh://hg@hdw.mx/nx_vms,revision=$REVISION"
-          devtools/ci/junk_shop/junk_shop/save_build_info.py "$DB_CONFIG" "$BUILD_PARAMETERS" nx_vms
+          BUILD_PARAMETERS=(
+            "project={junkshop_project_name}"
+            "branch=$BRANCH"
+            "build_num=$BUILD_IDENTITY"
+            "platform=$JUNKSHOP_PLATFORM"
+            "jenkins_url=$RUNNER_URL"
+            "repository_url=ssh://hg@hdw.mx/nx_vms"
+            "revision=$REVISION"
+            )
+
+          devtools/ci/junk_shop/junk_shop/save_build_info.py \
+            --junk-shop-db="$JUNK_SHOP_DB" \
+            --build-parameters "${BUILD_PARAMETERS[@]}" \
+            nx_vms
 
           # upload build results
-          BUILD_PARAMETERS="project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM"
-          devtools/ci/junk_shop/junk_shop/build.py "$DB_CONFIG" "$BUILD_PARAMETERS" full_build.log "--outcome=$BUILD_STATUS"
+          BUILD_PARAMETERS=(
+            "project={junkshop_project_name}"
+            "branch=$BRANCH"
+            "build_num=$BUILD_IDENTITY"
+            "customization=$CUSTOMIZATION"
+            "platform=$JUNKSHOP_PLATFORM"
+            )
+
+          devtools/ci/junk_shop/junk_shop/build.py \
+            --junk-shop-db="$JUNK_SHOP_DB" \
+            --build-parameters "${BUILD_PARAMETERS[@]}" \
+            "--outcome=$BUILD_STATUS" \
+            full_build.log
 
     publishers:
     - mercurial/rm-repo-if-broken

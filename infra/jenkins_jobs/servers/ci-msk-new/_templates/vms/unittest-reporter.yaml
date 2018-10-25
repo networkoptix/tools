@@ -105,18 +105,31 @@
               JUNKSHOP_PLATFORM="$PLATFORM"
             fi
 
-            DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
-            BUILD_PARAMETERS=project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY,customization=$CUSTOMIZATION,platform=$JUNKSHOP_PLATFORM
+            JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
+
+            BUILD_PARAMETERS=(
+              "project={junkshop_project_name}"
+              "branch=$BRANCH"
+              "build_num=$BUILD_IDENTITY"
+              "customization=$CUSTOMIZATION"
+              "platform=$JUNKSHOP_PLATFORM"
+              )
 
             if [ -d unit_tests ] ; then
               pushd unit_tests
-                $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS" --test-name "unit"
+                $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
+                  --junk-shop-db="$JUNK_SHOP_DB" \
+                  --build-parameters "${BUILD_PARAMETERS[@]}" \
+                  --test-name "unit"
               popd
             fi
 
             if [ -d unit_tests_sdk ] ; then
               pushd unit_tests_sdk
-                $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py "$DB_CONFIG" "$BUILD_PARAMETERS" --test-name "sdk_unit"
+                $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
+                  --junk-shop-db="$JUNK_SHOP_DB" \
+                  --build-parameters "${BUILD_PARAMETERS[@]}" \
+                  --test-name "sdk_unit"
               popd
             fi
 
