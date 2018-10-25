@@ -203,13 +203,16 @@ class GTestProcess(BaseTestProcess):
 
         test_suite = None
         for line in output.splitlines():
-            match_suit = re.match(r'^([^.]+\.)(\s+#.*)?$', line)
+            match_suit = re.match(r'^([^\.]+\.)(\s+#.*)?$', line)
             if match_suit:
                 test_suite = match_suit.group(1)
             elif test_suite:
-                match_case = re.search(r'^\s+(\w+)(\s+#.*)?$', line)
+                match_case = re.search(r'^\s+(\S+)(\s+#.*)?$', line)
                 if match_case:
-                    test_case_name = test_suite + match_case.group(1)
+                    case_name = match_case.group(1)
+                    if case_name.startswith('DISABLED_'):
+                        continue
+                    test_case_name = test_suite + case_name
                     yield cls(
                         platform, env, work_dir, test_name,
                         test_case_name, executable_path, timeout)
