@@ -453,7 +453,7 @@
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.0
-              {CUSTOM_CMAKE_PARAMETERS}
+              $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.0
 
@@ -478,7 +478,7 @@
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.6.2
-              {CUSTOM_CMAKE_PARAMETERS}
+              $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.6.2
 
