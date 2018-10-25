@@ -138,14 +138,22 @@
 - parameter:
     name: p_PLATFORMS
     parameters:
-    - extended-choice:
+    - better-multi-select:
         name: PLATFORMS
-        type: 'multi-select'
-        value: '{default}'
-        default-value: '{default}'
-        visible-items: 10
-        description: >-
-          Target platforms for distributions
+        default: '{default}'
+        description: Target platforms for distributions
+        choices:
+        - [ linux-x64,      linux-x64 ]
+        - [ linux-x86,      linux-x86 ]
+        - [ bananapi,       bananapi ]
+        - [ windows-x86,    windows-x86 ]
+        - [ windows-x64,    windows-x64 ]
+        - [ mac,            mac ]
+        - [ edge1,          edge1 ]
+        - [ bpi,            bpi ]
+        - [ rpi,            rpi ]
+        - [ tx1,            tx1 ]
+        allowed_choices: '{allowed_choices}'
 
 - parameter:
     name: p_PLATFORM
@@ -165,14 +173,33 @@
 - parameter:
     name: p_CUSTOMIZATIONS
     parameters:
-    - extended-choice:
+    - better-multi-select:
         name: CUSTOMIZATIONS
-        type: 'multi-select'
-        value: '{default}'
-        default-value: '{default}'
-        visible-items: 10
-        description: >-
-          Target customizations for distributions
+        default: '{default}'
+        description: Target customizations for distributions
+        choices:
+        - [ default,                default ]
+        - [ default_cn,             default_cn ]
+        - [ default_zh_CN,          default_zh_CN ]
+        - [ cox,                    cox ]
+        - [ digitalwatchdog,        digitalwatchdog ]
+        - [ digitalwatchdog_global, digitalwatchdog_global ]
+        - [ hanwha,                 hanwha ]
+        - [ ipera,                  ipera ]
+        - [ ionetworks,             ionetworks ]
+        - [ nutech,                 nutech ]
+        - [ ras,                    ras ]
+        - [ senturian,              senturian ]
+        - [ systemk,                systemk ]
+        - [ tricom,                 tricom ]
+        - [ ust,                    ust ]
+        - [ vista,                  vista ]
+        - [ vmsdemoblue,            vmsdemoblue ]
+        - [ vmsdemoorange,          vmsdemoorange ]
+        - [ metavms,                metavms ]
+        - [ xccelo,                 xccelo ]
+        allowed_choices: '{allowed_choices}'
+
 - parameter:
     name: p_CUSTOMIZATION
     parameters:

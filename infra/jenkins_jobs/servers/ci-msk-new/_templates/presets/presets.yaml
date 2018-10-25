@@ -49,10 +49,13 @@
     #     - [ custom,  "Custom - feature testing" ]
     #     - [ release, "Release - builds intended to be published" ]
     #     default: '{pipeline}'
+    # TODO: Separate allowed_choices and default on project level
     - p_PLATFORMS:
+        allowed_choices: !j2: '{{ default_platforms | default("") }}'
         default: !j2: '{{ default_platforms | default("") }}'
     - p_CUSTOMIZATIONS:
-        default:  !j2: '{{ default_customizations | default("") }}'
+        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        default: !j2: '{{ default_customizations | default("") }}'
 
     - p_CLOUD_GROUP:
         default: test

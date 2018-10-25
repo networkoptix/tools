@@ -85,8 +85,10 @@ print '''#
     - string:
         name: REPLACE_BUILD_WITH_NEWER
         default: 'NO'
-    - p_PLATFORMS
-    - p_CUSTOMIZATIONS
+    - string:
+        name: PLATFORMS
+    - string:
+        name: CUSTOMIZATIONS
     - p_BUILD_WEBADMIN:
         default: true
     - p_BUILD_INSTALLER:

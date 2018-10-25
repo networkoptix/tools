@@ -35,10 +35,10 @@
         default: '{clean_workspace}'
     - p_CLEAN_BUILD:
         default: '{clean_build}'
-    - p_PLATFORMS:
-        default: '{platforms}'
-    - p_CUSTOMIZATIONS:
-        default: '{customizations}'
+    - string:
+        name: PLATFORMS
+    - string:
+        name: CUSTOMIZATIONS
     - p_BUILD_WEBADMIN:
         default: '{build_webadmin}'
     - p_BUILD_INSTALLER:
