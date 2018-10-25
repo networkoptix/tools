@@ -186,7 +186,7 @@ def save_root_run_info(repository, root_run, passed, started_at, artifacts, erro
     root_run = models.Run[root_run.id]
     root_run.outcome = status2outcome(passed)
     root_run.started_at = started_at
-    root_run.error_message = error_message
+    root_run.error_message = error_message or ''
     for artifact_name, artifact_file in artifacts.items():
         if artifact_name not in [TEST_RESULTS_FILE_NAME, ALL_CAMERAS_FILENAME]:
             _logger.debug("Save root artifact '%s'...", artifact_name)
