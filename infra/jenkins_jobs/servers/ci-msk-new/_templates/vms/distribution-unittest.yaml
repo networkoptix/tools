@@ -64,7 +64,7 @@
             keep_files: [ venv ]
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'

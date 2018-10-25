@@ -27,3 +27,5 @@
     functest_node: functests
     scalability_node: scalability
     realcameratest_node: realcameratest
+
+    devtools_revision: default

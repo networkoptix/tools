@@ -77,7 +77,7 @@
         buildsteps:
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -86,7 +86,7 @@
     scm:
     - mercurial/local-mirror-no-changelog:
         name: devtools
-        revision: 'default'
+        revision: '{devtools_revision}'
 
     builders:
     - inject:

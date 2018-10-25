@@ -67,7 +67,7 @@
         buildsteps:
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -84,7 +84,7 @@
         name: nx_vms
         revision: '$ST_COMMIT'
     - mercurial/local-mirror:
-        name: devtools
+        name: '{devtools_revision}'
         revision: default
 
     builders:
