@@ -444,8 +444,12 @@
             subject: paxton-4.0
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
+            # FIXME: Will fail on develop builds
             cmake_configure_command: >-
               cmake
+              -DcodeSigning=ON
+              -DhardwareSigning=$HARDWARE_SIGNING
+              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.0
@@ -464,10 +468,15 @@
             subject: paxton-4.6.2
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
+            # FIXME: Will fail on develop builds
             cmake_configure_command: >-
               cmake
+              -DcodeSigning=ON
+              -DhardwareSigning=$HARDWARE_SIGNING
+              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
+              -DdotNetFramework=v4.6.2
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.6.2
 
