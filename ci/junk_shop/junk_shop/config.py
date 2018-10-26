@@ -1,5 +1,7 @@
-# Alternative for passing options via command line.
-# Command line options can be stored in yaml config.
+'''Yaml configuration file.
+
+Adds ability to store all or some options in yaml file instead of passing them via command-line.
+'''
 
 import os.path
 import collections
