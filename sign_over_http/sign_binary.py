@@ -34,7 +34,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--url', help='Signing server url', required=True)
     parser.add_argument('-f', '--file', help='Source file path', required=True)
-    parser.add_argument('-o', '--output', help='Target file path', required=True)
+    parser.add_argument('-o', '--output',
+                        help='Target file path. Source file is replaced if omitted.')
     parser.add_argument('-c', '--customization', help='Selected customization', required=True)
     parser.add_argument('-t', '--trusted-timestamping', action='store_true',
                         help='Trusted timestamping')
@@ -43,7 +44,7 @@ def main():
     sign_binary(
         url=args.url,
         file=args.file,
-        output=args.output,
+        output=args.output if args.output else args.file,
         customization=args.customization,
         trusted_timestamping=args.trusted_timestamping)
 
