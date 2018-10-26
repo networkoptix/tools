@@ -1,11 +1,10 @@
 # docker-compose configuration file for junk_shop deployment
 # Usage:
-# $ PGPASSWORD=xxxxx docker-compose -f deploy/compose-deploy.yaml up -d
+# $ export JUNK_SHOP_DB_DIR=<junk-shop postgres database location>
+# $ export PGPASSWORD=<postgress password>
+# $ docker-compose -f deploy/compose-deploy.yaml up -d
 
 version: '2'
-
-volumes:
-  junk_shop_database:
 
 services:
 
@@ -18,7 +17,7 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile
     ports:
-      - '10180:80'
+      - '80:80'
     environment:
       STATIC_PATH: /app/junk_shop/webapp/static
       JUNK_SHOP_SETTINGS: /app/settings.py
@@ -32,4 +31,4 @@ services:
     environment:
       - PGPASSWORD
     volumes:
-      - junk_shop_database:/var/lib/postgresql/data
+      - ${JUNK_SHOP_DB_DIR}:/var/lib/postgresql/data
