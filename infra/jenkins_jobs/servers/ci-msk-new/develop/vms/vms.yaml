@@ -87,7 +87,7 @@
 
         - nightly-ft-linux:
             auth_kind: system
-            timer: 'H 20 * * 2-6'
+            timer: 'H 3 * * 2-6'
             build_description: "Nightly functional tests - linux"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
@@ -113,7 +113,7 @@
 
         - nightly-ft-windows:
             auth_kind: system
-            timer: 'H 0 * * 2-6'
+            timer: 'H 3 * * 2-6'
             build_description: "Nightly functional tests - windows"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
@@ -139,7 +139,7 @@
 
         - nightly-rct:
             auth_kind: system
-            timer: 'H 0 * * 2-6'
+            timer: 'H 3 * * 2-6'
             build_description: "Nightly test for stable RCT"
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
