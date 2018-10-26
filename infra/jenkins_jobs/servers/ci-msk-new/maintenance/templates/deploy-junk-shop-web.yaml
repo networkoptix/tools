@@ -1,0 +1,86 @@
+
+- job-template:
+    name: deploy-junk-shop-web
+    description: >
+      (Re)deploy junk-shop web frontend (flask application)
+
+    # required template parameters:
+    # * node
+    # * watchers
+    # * junk-shop-db-dir
+
+    node: '{node}'
+
+    parameters:
+    - p_CLEAN_WORKSPACE:
+        default: false
+
+    wrappers:
+    - timestamps
+    - credentials-binding:
+      - username-password:
+          credential-id: junk_shop_db
+          variable: JUNK_SHOP_DB_CREDENTIALS
+    - workspace-cleanup:
+        check-parameter: CLEAN_WORKSPACE
+
+    scm:
+    - hg:
+        revision: 'default'
+        url: 'ssh://hg@hdw.mx/devtools'
+        credentials-id: nx-repository-readonly
+        clean: true
+        subdir: 'devtools'
+        disable-changelog: false
+
+    builders:
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        if [ ! -f docker-compose ]; then
+            # 1.23.0-rc3
+            curl -L \
+              "https://github.com/docker/compose/releases/download/1.15.0/docker-compose-Linux-x86_64" \
+              -o docker-compose
+            chmod +x docker-compose
+        fi
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        export PGPASSWORD="$(echo $JUNK_SHOP_DB_CREDENTIALS | cut -d: -f2)"
+        export JUNK_SHOP_DB_DIR="{junk-shop-db-dir}"
+        CI_COMPOSE=devtools/ci/junk_shop/deploy/compose-deploy.yaml
+
+        # check compose is valid before deleting images
+        ./docker-compose -f $CI_COMPOSE config
+
+        docker rmi -f junk_shop_web:prev
+        docker tag junk_shop_web junk_shop_web:prev
+        docker rm -f junk_shop_web  || true
+        docker rmi junk_shop_web  || true
+
+        ./docker-compose -f $CI_COMPOSE up -d junk_shop_web
+
+    publishers:
+    - email-ext:
+
+        aborted:        true
+        failure:        true
+        still-failing:  true
+        fixed:          true
+
+        # ---- email contents ----
+        send-to:
+        - recipients
+        - requester
+        recipients: '{watchers}'
+        subject: '[Jenkins] $BUILD_STATUS - Junk-shop web deployment - # $BUILD_NUMBER'
+        body: |
+          Junk-shop web deployment: $BUILD_STATUS
+
+          $BUILD_LOG
+        # ---- email contents ----
