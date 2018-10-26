@@ -2,15 +2,12 @@
 
 import argparse
 import os
-import pathlib
+import tempfile
 import yaml
 
-from tempfile import gettempdir
 from aiohttp import web
 from signtool_interface import sign_software, sign_hardware
 
-
-temp_directory = gettempdir()
 certs_directory = os.getcwd()
 signtool_directory = os.getcwd()
 default_timestamp_server = 'http://timestamp.comodoca.com/rfc3161'
@@ -62,27 +59,25 @@ async def sign_handler(request):
     source_path, filename = os.path.split(source_filename)
     print('filename is {}'.format(filename))
 
-    size = 0
-    target_file = os.path.join(temp_directory, filename)
-    with open(target_file, 'wb') as f:
-        while True:
-            chunk = await field.read_chunk()  # 8192 bytes by default.
-            if not chunk:
-                break
-            size += len(chunk)
-            f.write(chunk)
+    target_file = tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False)
+    target_file_name = target_file.name
+    while True:
+        chunk = await field.read_chunk()  # 8192 bytes by default.
+        if not chunk:
+            break
+        target_file.write(chunk)
+    target_file.close()
 
     sign_binary(
         customization=params['customization'],
         trusted_timestamping=params['trusted_timestamping'].lower() == 'true',
-        target_file=target_file)
-    content = open(target_file, 'rb')
+        target_file=target_file_name)
+    content = open(target_file_name, 'rb')
     return web.Response(body=content)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--temp', help='Temp directory')
     parser.add_argument('-c', '--certs', help='Certificates directory')
     parser.add_argument('-s', '--signtool', help='Signtool directory')
     args = parser.parse_args()
@@ -92,17 +87,10 @@ def main():
         signtool_directory = args.signtool
     print('Using {} as a signtool folder'.format(signtool_directory))
 
-    if args.temp:
-        global temp_directory
-        temp_directory = args.temp
-    print('Using {} as a temp directory'.format(temp_directory))
-
     if args.certs:
         global certs_directory
         certs_directory = args.certs
     print('Using {} as a certificates directory'.format(certs_directory))
-
-    pathlib.Path(temp_directory).mkdir(parents=True, exist_ok=True)
 
     app = web.Application()
     app.add_routes([web.post('/', sign_handler)])

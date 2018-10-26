@@ -53,8 +53,7 @@ def main():
         file=args.file,
         output=args.output,
         customization=args.customization,
-        trusted_timestamping=args.trusted_timestamping,
-        hardware_signing=args.hardware_signing))
+        trusted_timestamping=args.trusted_timestamping))
 
 
 if __name__ == '__main__':
