@@ -162,6 +162,7 @@
           {{ cmake_configure_args_global    if cmake_configure_args_global   | default("") != "" else "" }}
           {{ cmake_configure_args_platform  if cmake_configure_args_platform | default("") != "" else "" }}
           {{ cmake_configure_args_customization }}
+          -DsigningServer=http://192.168.13.15:8080
           -DbuildNumber=$BUILD_IDENTITY
           -DcustomWebAdminPackageDirectory=../server-external
     - string:
@@ -453,6 +454,7 @@
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.0
+              -DsigningServer=http://192.168.13.15:8080
               $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.0
@@ -478,6 +480,7 @@
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.6.2
+              -DsigningServer=http://192.168.13.15:8080
               $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.6.2
