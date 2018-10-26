@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-import asyncio
-import aiohttp
 import argparse
+import requests
 
 chunk_size = 1024 * 1024
 
@@ -11,31 +10,24 @@ def bool_to_str(value):
     return 'true' if value else 'false'
 
 
-async def sign_binary(url, file, output, customization, trusted_timestamping):
+def sign_binary(url, file, output, customization, trusted_timestamping):
+
     params = {
         'customization': customization,
         'trusted_timestamping': bool_to_str(trusted_timestamping)
     }
 
-    data = aiohttp.FormData()
-    data.add_field(
-        'file',
-        open(file, 'rb'),
-        filename=file,
-        content_type='application/exe')
+    files = {
+        'file': open(file, 'rb')
+    }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, params=params, data=data) as resp:
-            print(resp.status)
-            if resp.status != 200:
-                return
+    r = requests.post(url, params=params, files=files)
+    if r.status_code != 200:
+        return
 
-            with open(output, 'wb') as fd:
-                while True:
-                    chunk = await resp.content.read(chunk_size)
-                    if not chunk:
-                        break
-                    fd.write(chunk)
+    with open(output, 'wb') as fd:
+        for chunk in r.iter_content(chunk_size=chunk_size):
+            fd.write(chunk)
 
 
 def main():
@@ -48,12 +40,12 @@ def main():
                         help='Trusted timestamping')
     args = parser.parse_args()
 
-    asyncio.run(sign_binary(
+    sign_binary(
         url=args.url,
         file=args.file,
         output=args.output,
         customization=args.customization,
-        trusted_timestamping=args.trusted_timestamping))
+        trusted_timestamping=args.trusted_timestamping)
 
 
 if __name__ == '__main__':
