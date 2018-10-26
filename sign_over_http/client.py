@@ -4,23 +4,25 @@ import asyncio
 import aiohttp
 import argparse
 
+chunk_size = 1024 * 1024
+
+
 def bool_to_str(value):
     return 'true' if value else 'false'
 
-chunk_size = 1024 * 1024
 
-async def sign_binary(url, file, output, customization, trusted_timestamping, hardware_signing):
+async def sign_binary(url, file, output, customization, trusted_timestamping):
     params = {
         'customization': customization,
-        'trusted_timestamping': bool_to_str(trusted_timestamping),
-        'hardware_signing': bool_to_str(hardware_signing)
+        'trusted_timestamping': bool_to_str(trusted_timestamping)
     }
 
     data = aiohttp.FormData()
-    data.add_field('file',
-       open(file, 'rb'),
-       filename=file,
-       content_type='application/exe')
+    data.add_field(
+        'file',
+        open(file, 'rb'),
+        filename=file,
+        content_type='application/exe')
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, params=params, data=data) as resp:
@@ -42,8 +44,8 @@ def main():
     parser.add_argument('-f', '--file', help='Source file path', required=True)
     parser.add_argument('-o', '--output', help='Target file path', required=True)
     parser.add_argument('-c', '--customization', help='Selected customization', required=True)
-    parser.add_argument('-t', '--trusted-timestamping', action='store_true', help='Trusted timestamping')
-    parser.add_argument('-hw', '--hardware-signing', action='store_true', help='Sign with hardware key')
+    parser.add_argument('-t', '--trusted-timestamping', action='store_true',
+                        help='Trusted timestamping')
     args = parser.parse_args()
 
     asyncio.run(sign_binary(

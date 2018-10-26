@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
+import pathlib
+import yaml
 
 from tempfile import gettempdir
 from aiohttp import web
-import argparse
-import pathlib
 from signtool_interface import sign_software, sign_hardware
 
 
 temp_directory = gettempdir()
 certs_directory = os.getcwd()
 signtool_directory = os.getcwd()
-trusted_timestamping_server = 'http://timestamp.comodoca.com/rfc3161'
-
-def certificate_path(customization):
-    return os.path.join(certs_directory, customization, 'app.p12')
+default_timestamp_server = 'http://timestamp.comodoca.com/rfc3161'
 
 
-def sign_binary(customization, trusted_timestamping, hardware_signing, target_file):
-    timestamp_server = trusted_timestamping_server if trusted_timestamping else None
+def sign_binary(customization, trusted_timestamping, target_file):
+    signing_path = os.path.join(certs_directory, customization)
+    config_file = os.path.join(signing_path, 'config.yaml')
+    with open(config_file, 'r') as f:
+        config = yaml.load(f)
+
+    timestamp_server = None
+    if trusted_timestamping:
+        timestamp_server = config['timestamp_server']
+        if not timestamp_server:
+            timestamp_server = default_timestamp_server
+
     if timestamp_server:
         print('Using timestamp server {0}'.format(timestamp_server))
-    if hardware_signing:
-        print('Using harware key to sign {}'.format(target_file))
-        sign_hardware(
-            signtool_directory=signtool_directory,
-            target_file=target_file,
-            timestamp_server=timestamp_server)
-    else:
-        certificate = certificate_path(customization)
-        sign_password = 'qweasd123'
+
+    if config['software']:
+        certificate = os.path.join(signing_path, config['file'])
+        sign_password = config['password']
         print('Using {0} to sign {1}'.format(certificate, target_file))
         sign_software(
             signtool_directory=signtool_directory,
@@ -38,14 +41,18 @@ def sign_binary(customization, trusted_timestamping, hardware_signing, target_fi
             certificate=certificate,
             sign_password=sign_password,
             timestamp_server=timestamp_server)
-
+    else:
+        print('Using harware key to sign {}'.format(target_file))
+        sign_hardware(
+            signtool_directory=signtool_directory,
+            target_file=target_file,
+            timestamp_server=timestamp_server)
 
 
 async def sign_handler(request):
     params = request.query
     print(params['customization'])
     print(params['trusted_timestamping'])
-    print(params['hardware_signing'])
 
     reader = await request.multipart()
 
@@ -68,7 +75,6 @@ async def sign_handler(request):
     sign_binary(
         customization=params['customization'],
         trusted_timestamping=params['trusted_timestamping'].lower() == 'true',
-        hardware_signing=params['hardware_signing'].lower() == 'true',
         target_file=target_file)
     content = open(target_file, 'rb')
     return web.Response(body=content)
