@@ -3,12 +3,12 @@
 
     build_webadmin: 'false'
     use_webadmin: 'false'
+
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
-    cmake_configure_args_global: >-
-      -Dbeta=$BETA
-      -DdeveloperBuild=OFF
-      -DcloudGroup=$CLOUD_GROUP
+    cmake_configure_beta: $BETA
+    cmake_configure_developer_build: 'OFF'
+    cmake_configure_cloud_group: $CLOUD_GROUP
 
     # SECTION. PLATFORM CONFIG
     # ============================================================
@@ -22,16 +22,14 @@
         # most of builds are linux cross-builds that built on "build-installer-linux"
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
         distribution_build_node: &linux_node build-installer-linux
-        cmake_configure_args_platform: >-
-          -G Ninja
-          -DtargetDevice=android-arm
+        cmake_configure_generator: Ninja
+        cmake_configure_target_device: android-arm
         cmake_build_extra_args: >-
           -- -j 20
     - ios:
         distribution_build_node: build-installer-mac
-        cmake_configure_args_platform: >-
-          -G Xcode
-          -DtargetDevice=ios
+        cmake_configure_generator: Xcode
+        cmake_configure_target_device: ios
 
     # SECTION. CUSTOMIZATION CONFIG
     # ============================================================
@@ -40,9 +38,7 @@
     # there is no need to generate extra set of jobs that never gonna be triggered.
     # it looks like there are too few customization spec. cmake args and we may move such
     # rare customizations to platform enum.
-
-    cmake_configure_args_customization: >-
-      -Dcustomization=$CUSTOMIZATION
+    cmake_configure_customization: $CUSTOMIZATION
 
     customization:
 

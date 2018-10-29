@@ -5,10 +5,9 @@
 
     # Some cmake args are applicable for any builds they are applied at first
     # Run cmake -L / cmake -LH / cmake -LAH to see all configuration options
-    cmake_configure_args_global: >-
-      -Dbeta=$BETA
-      -DdeveloperBuild=OFF
-      -DcloudGroup=$CLOUD_GROUP
+    cmake_configure_beta: '$BETA'
+    cmake_configure_developer_build: 'OFF'
+    cmake_configure_cloud_group: $CLOUD_GROUP
 
     # REMINDER: runner will not change list of subprojects when
     # extra items are added or removed, so don't forget to change runner
@@ -20,36 +19,33 @@
         # here we make an anchor to avoid typos and other kind of missconfiguration in future
         distribution_build_node: &linux_node build-installer-linux
         # There are some CMake args that aplicable only for particular platform
-        cmake_configure_args_platform: >-
-          -G Ninja
+        cmake_configure_generator: Ninja
         cmake_build_extra_args: >-
           -- -j 20
 
     - tx1:
         distribution_build_node: *linux_node
-        cmake_configure_args_platform: >-
-          -G Ninja
-          -DtargetDevice=tx1
+        cmake_configure_generator: Ninja
+        cmake_configure_target_device: tx1
 
     # -- windows platform --
 
     # FIXME: HOME,PATH and other vars are represented as win env.
     # But some other vars are linux-like.
     # Rsync goes mad ain result and nothing works.
-    - windows-x64: &windows_config
+    - windows-x64:
         distribution_build_node: build-installer-windows
-        cmake_configure_args_platform: >-
-          -G 'Visual Studio 15 2017 Win64'
-          -DcodeSigning=OFF
-          -DtargetDevice=windows-x64
-          -T host=x64
+        cmake_configure_generator: Visual Studio 15 2017 Win64
+        cmake_configure_target_device: windows-x64
+        cmake_configure_code_signing: 'OFF'
+        cmake_configure_host: "x64"
 
     # TODO: There are some customization that may be build only on specific platform
     # there is no need to generate extra set of jobs that never gonna be triggered.
     # it looks like there are too few customization spec. cmake args and we may move such
     # rare customizations to platform enum.
 
-    cmake_configure_args_customization: -Dcustomization=metavms
+    cmake_configure_customization: metavms
 
     jobs:
     - '{pipeline}.{version}.{project}.runner'

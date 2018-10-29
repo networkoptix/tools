@@ -145,23 +145,32 @@
     - string:
         name: CMAKE_CONFIGURE_COMMAND
         default: !j2: >-
-          {%- set _cmake_configure_beta            = cmake_configure_beta            | default("") -%}
-          {%- set _cmake_configure_developer_build = cmake_configure_developer_build | default("") -%}
+          {%- set _cmake_configure_beta                  = cmake_configure_beta                  | default("") -%}
+          {%- set _cmake_configure_developer_build       = cmake_configure_developer_build       | default("") -%}
           {#- TODO: default("$CLOUD_GROUP") -#}
-          {%- set _cmake_configure_cloud_group     = cmake_configure_cloud_group     | default("") -%}
-          {%- set _cmake_configure_generator       = cmake_configure_generator       | default("") -%}
-          {%- set _cmake_configure_target_device   = cmake_configure_target_device   | default("") -%}
-          {%- set _cmake_configure_customization   = cmake_configure_customization   | default("") -%}
+          {%- set _cmake_configure_cloud_group           = cmake_configure_cloud_group           | default("") -%}
+          {%- set _cmake_configure_generator             = cmake_configure_generator             | default("") -%}
+          {%- set _cmake_configure_target_device         = cmake_configure_target_device         | default("") -%}
+          {%- set _cmake_configure_customization         = cmake_configure_customization         | default("") -%}
+          {%- set _cmake_configure_code_signing          = cmake_configure_code_signing          | default("") -%}
+          {%- set _cmake_configure_hardware_signing      = cmake_configure_hardware_signing      | default("") -%}
+          {%- set _cmake_configure_trusted_timestamping  = cmake_configure_trusted_timestamping  | default("") -%}
+          {%- set _cmake_configure_host                  = cmake_configure_host                  | default("") -%}
+          {%- set _cmake_configure_with_tests            = cmake_configure_with_tests            | default("") -%}
+          {%- set _cmake_configure_add_qt_pdb            = cmake_configure_add_qt_pdb            | default("") -%}
           {{ "cmake" }}
-          {{ "-Dbeta="            + _cmake_configure_beta            if _cmake_configure_beta            != "" else "" }}
-          {{ "-DdeveloperBuild="  + _cmake_configure_developer_build if _cmake_configure_developer_build != "" else "" }}
-          {{ "-DcloudGroup="      + _cmake_configure_cloud_group     if _cmake_configure_cloud_group     != "" else "" }}
-          {{ "-G '" + _cmake_configure_generator + "'"               if _cmake_configure_generator       != "" else "" }}
-          {{ "-DtargetDevice="    + _cmake_configure_target_device   if _cmake_configure_target_device   != "" else "" }}
-          {{ "-Dcustomization="   + _cmake_configure_customization   if _cmake_configure_customization   != "" else "" }}
-          {{ cmake_configure_args_global    if cmake_configure_args_global   | default("") != "" else "" }}
-          {{ cmake_configure_args_platform  if cmake_configure_args_platform | default("") != "" else "" }}
-          {{ cmake_configure_args_customization }}
+          {{ "-Dbeta="                + _cmake_configure_beta                  if _cmake_configure_beta                  != "" else "" }}
+          {{ "-DdeveloperBuild="      + _cmake_configure_developer_build       if _cmake_configure_developer_build       != "" else "" }}
+          {{ "-DcloudGroup="          + _cmake_configure_cloud_group           if _cmake_configure_cloud_group           != "" else "" }}
+          {{ "-G '" + _cmake_configure_generator + "'"                         if _cmake_configure_generator             != "" else "" }}
+          {{ "-DtargetDevice="        + _cmake_configure_target_device         if _cmake_configure_target_device         != "" else "" }}
+          {{ "-Dcustomization="       + _cmake_configure_customization         if _cmake_configure_customization         != "" else "" }}
+          {{ "-DcodeSigning="         + _cmake_configure_code_signing          if _cmake_configure_code_signing          != "" else "" }}
+          {{ "-DhardwareSigning="     + _cmake_configure_hardware_signing      if _cmake_configure_hardware_signing      != "" else "" }}
+          {{ "-DtrustedTimestamping=" + _cmake_configure_trusted_timestamping  if _cmake_configure_trusted_timestamping  != "" else "" }}
+          {{ "-T host="               + _cmake_configure_host                  if _cmake_configure_host                  != "" else "" }}
+          {{ "-DwithTests="           + _cmake_configure_with_tests            if _cmake_configure_with_tests            != "" else "" }}
+          {{ "-DaddQtPdb="            + _cmake_configure_add_qt_pdb            if _cmake_configure_add_qt_pdb            != "" else "" }}
           -DsigningServer=http://192.168.13.15:8080
           -DbuildNumber=$BUILD_IDENTITY
           -DcustomWebAdminPackageDirectory=../server-external
@@ -446,12 +455,16 @@
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
             # FIXME: Will fail on develop builds
-            cmake_configure_command: >-
-              cmake
-              -DcodeSigning=ON
-              -DhardwareSigning=$HARDWARE_SIGNING
-              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
-              -Dcustomization=$CUSTOMIZATION
+            cmake_configure_command: !j2: >-
+              {%- set _cmake_configure_customization         = cmake_configure_customization         | default("") -%}
+              {%- set _cmake_configure_code_signing          = cmake_configure_code_signing          | default("") -%}
+              {%- set _cmake_configure_hardware_signing      = cmake_configure_hardware_signing      | default("") -%}
+              {%- set _cmake_configure_trusted_timestamping  = cmake_configure_trusted_timestamping  | default("") -%}
+              {{ "cmake" }}
+              {{ "-Dcustomization="       + _cmake_configure_customization         if _cmake_configure_customization         != "" else "" }}
+              {{ "-DcodeSigning="         + _cmake_configure_code_signing          if _cmake_configure_code_signing          != "" else "" }}
+              {{ "-DhardwareSigning="     + _cmake_configure_hardware_signing      if _cmake_configure_hardware_signing      != "" else "" }}
+              {{ "-DtrustedTimestamping=" + _cmake_configure_trusted_timestamping  if _cmake_configure_trusted_timestamping  != "" else "" }}
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.0
               -DsigningServer=http://192.168.13.15:8080
@@ -472,12 +485,16 @@
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
             # FIXME: Will fail on develop builds
-            cmake_configure_command: >-
-              cmake
-              -DcodeSigning=ON
-              -DhardwareSigning=$HARDWARE_SIGNING
-              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
-              -Dcustomization=$CUSTOMIZATION
+            cmake_configure_command: !j2: >-
+              {%- set _cmake_configure_customization         = cmake_configure_customization         | default("") -%}
+              {%- set _cmake_configure_code_signing          = cmake_configure_code_signing          | default("") -%}
+              {%- set _cmake_configure_hardware_signing      = cmake_configure_hardware_signing      | default("") -%}
+              {%- set _cmake_configure_trusted_timestamping  = cmake_configure_trusted_timestamping  | default("") -%}
+              {{ "cmake" }}
+              {{ "-Dcustomization="       + _cmake_configure_customization         if _cmake_configure_customization         != "" else "" }}
+              {{ "-DcodeSigning="         + _cmake_configure_code_signing          if _cmake_configure_code_signing          != "" else "" }}
+              {{ "-DhardwareSigning="     + _cmake_configure_hardware_signing      if _cmake_configure_hardware_signing      != "" else "" }}
+              {{ "-DtrustedTimestamping=" + _cmake_configure_trusted_timestamping  if _cmake_configure_trusted_timestamping  != "" else "" }}
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.6.2
               -DsigningServer=http://192.168.13.15:8080
