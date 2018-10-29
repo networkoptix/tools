@@ -7,6 +7,7 @@
     - mirror-sync
     - deploy-junk-shop-web:
         node: 'junk-shop'
-        junk-shop-db-dir: '/junk_shop_db/db'
+        junk_shop_db_dir: '/junk_shop_db/db'
         watchers: vfedorov@networkoptix.com
+        # TODO: uncomment when job is workable
         #watchers: vfedorov@networkoptix.com anikitin@networkoptix.com
