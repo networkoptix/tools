@@ -229,7 +229,7 @@
               branch: '$BRANCH'
               build_num: '$BUILD_IDENTITY'
               platform: 'linux-x64'
-              customization: '$CUSTOMIZATION"'
+              customization: '$CUSTOMIZATION'
             run_parameters:
               use_lightweight_servers: $USE_LIGHTWEIGHT_SERVERS
               server_count: $SERVER_COUNT

@@ -1,7 +1,5 @@
-'''Yaml configuration file.
-
-Adds ability to store all or some options in yaml file instead of passing them via command-line.
-'''
+# Yaml configuration file.
+# Adds ability to store all or some options in yaml file instead of passing them via command-line.
 
 import os.path
 import collections
@@ -21,7 +19,7 @@ class Config(object):
             return cls(yaml.load(f))
 
     @classmethod
-    def merge(cls, config_list):
+    def merge(cls, config_list):  # type: List[Config] -> Config
         def merge_dict(x, y):
             result = dict(x)
             for key, value in y.items():

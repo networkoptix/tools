@@ -15,19 +15,19 @@ class ParameterType(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         pass
 
-    def from_value(self, name, value):
+    def value_to_parameter(self, name, value):
         if isinstance(value, (str, unicode)):
-            return self.from_str(name, value)
+            return self.str_to_parameter(name, value)
         else:
             return value
 
 
 class StrParameterType(ParameterType):
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         return value_str
 
 
@@ -36,7 +36,7 @@ class StrChoicesParameterType(ParameterType):
     def __init__(self, allowed_values):
         self._allowed_values = allowed_values
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         if not value_str in self._allowed_values:
             raise ArgumentTypeError(
                 'Invalid %s: %r; allowed are: %s' % (name, value_str, ', '.join(self._allowed_values)))
@@ -45,7 +45,7 @@ class StrChoicesParameterType(ParameterType):
 
 class IntParameterType(ParameterType):
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         if not re.match(r'^\d+$', value_str):
             raise ArgumentTypeError('Invalid int for %s: %r' % (name, value_str))
         return int(value_str)
@@ -53,7 +53,7 @@ class IntParameterType(ParameterType):
 
 class BoolParameterType(ParameterType):
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         if value_str.lower() in ['true', 'yes', 'on']:
             return True
         if value_str.lower() in ['false', 'no', 'off']:
@@ -64,13 +64,13 @@ class BoolParameterType(ParameterType):
 
 class TimeDeltaParameterType(ParameterType):
 
-    def from_value(self, name, value):
+    def value_to_parameter(self, name, value):
         if not isinstance(value, datetime.timedelta):
-            return self.from_str(name, str(value))
+            return self.str_to_parameter(name, str(value))
         else:
             return value
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         try:
             return str_to_timedelta(value_str)
         except InvalidTimeDeltaString as x:
@@ -81,7 +81,7 @@ class VersionParameterType(ParameterType):
 
     VERSION_REGEX = r'^\d+(\.\d+)+$'
 
-    def from_str(self, name, value_str):
+    def str_to_parameter(self, name, value_str):
         if not re.match(self.VERSION_REGEX, parameters.version):
             raise ArgumentTypeError(
                 ('Invalid version format for %s: %r.'
@@ -118,7 +118,7 @@ def _build_parameters_from_string(parameters_str):
         raise ArgumentTypeError(
             'Unknown build parameter: %r. Known are: %s'
             % (name, ', '.join(_build_parameter_types.keys())))
-    return (name, t.from_str(name, value_str))
+    return (name, t.str_to_parameter(name, value_str))
 
 
 def _run_parameters_from_string(parameters_str):
@@ -136,7 +136,7 @@ def build_parameters_from_value_list(parameters_dict_list):
             raise ArgumentTypeError(
                 'Unknown build parameter: %r. Known are: %s'
                 % (name, ', '.join(_build_parameter_types.keys())))
-        yield (name, t.from_value(name, value))
+        yield (name, t.value_to_parameter(name, value))
 
 def run_parameters_from_value_list(parameters_dict_list):
     for name, value in parameters_dict_list.iteritems():
@@ -191,4 +191,5 @@ def create_db_parameters(args):
 
 def create_db_repository(args):
     params = create_db_parameters(args)
+    assert params.db_config, '--junk-shop-db/junk_shop_db/JUNK_SHOP_CAPTURE_DB must be specified'
     return DbCaptureRepository(params.db_config, params.build_parameters, params.run_parameters)
