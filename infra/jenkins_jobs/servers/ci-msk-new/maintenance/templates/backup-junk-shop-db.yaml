@@ -36,7 +36,7 @@
         set -ex
 
         DATE_SUFFIX=`date +%04Y-%02m-%02e-%02H`
-        DEST_FILE_NAME=shelter-junk-shop-db-$DATE_SUFFIX
+        DEST_FILE_NAME=junk-shop-db-$DATE_SUFFIX
         DEST_DIR='{junk_shop_backup_dir}'
 
         if [[ $BACKUP_ARTIFACTS == OFF ]]; then
