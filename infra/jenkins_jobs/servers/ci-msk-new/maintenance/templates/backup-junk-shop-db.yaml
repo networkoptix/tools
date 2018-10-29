@@ -10,6 +10,10 @@
     # * junk_shop_backup_dir
     # * watchers
 
+    # Version of pg_dump utility must match one of postgres server.
+    # But it's version on host is different.
+    # So, for it to be the same, we use postgres docker image, same that used to run server.
+
     node: '{node}'
 
     parameters:
