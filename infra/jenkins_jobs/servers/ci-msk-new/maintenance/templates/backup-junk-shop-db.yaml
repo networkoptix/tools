@@ -6,8 +6,9 @@
 
     # required template parameters:
     # * node
-    # * watchers
+    # * junk_shop_db_host
     # * junk_shop_backup_dir
+    # * watchers
 
     node: '{node}'
 
