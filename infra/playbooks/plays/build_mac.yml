@@ -19,4 +19,4 @@
   #   become: true
   #   become_method: sudo
   - osx_build_node
-  - mac_node_exporter
+  #- mac_node_exporter
