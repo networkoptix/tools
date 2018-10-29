@@ -184,7 +184,7 @@
 
           devtools/ci/junk_shop/junk_shop/save_build_info.py \
             --junk-shop-db="$JUNK_SHOP_DB" \
-            --build-parameters "${BUILD_PARAMETERS[@]}" \
+            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
             nx_vms
 
           # upload build results
@@ -198,7 +198,7 @@
 
           devtools/ci/junk_shop/junk_shop/build.py \
             --junk-shop-db="$JUNK_SHOP_DB" \
-            --build-parameters "${BUILD_PARAMETERS[@]}" \
+            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
             "--outcome=$BUILD_STATUS" \
             full_build.log
 

@@ -119,7 +119,7 @@
               pushd unit_tests
                 $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
                   --junk-shop-db="$JUNK_SHOP_DB" \
-                  --build-parameters "${BUILD_PARAMETERS[@]}" \
+                  --build-parameters "${{BUILD_PARAMETERS[@]}}" \
                   --test-name "unit"
               popd
             fi
@@ -128,7 +128,7 @@
               pushd unit_tests_sdk
                 $WORKSPACE/devtools/ci/junk_shop/junk_shop/unittest_save_results.py \
                   --junk-shop-db="$JUNK_SHOP_DB" \
-                  --build-parameters "${BUILD_PARAMETERS[@]}" \
+                  --build-parameters "${{BUILD_PARAMETERS[@]}}" \
                   --test-name "sdk_unit"
               popd
             fi

@@ -104,7 +104,7 @@
 
           devtools/ci/junk_shop/junk_shop/make_html_build_report.py \
             --junk-shop-db="$JUNK_SHOP_DB" \
-            --build-parameters "${BUILD_PARAMETERS[@]}" \
+            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
             > _report.html
           # report contains trash in the first line.
           tail -n +2 _report.html > report.html
