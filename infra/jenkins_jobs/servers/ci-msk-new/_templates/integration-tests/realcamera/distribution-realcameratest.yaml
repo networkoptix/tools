@@ -83,8 +83,8 @@
         name: nx_vms
         revision: '$NX_TEST_FRAMEWORK_COMMIT'
     - mercurial/local-mirror:
-        name: '{devtools_revision}'
-        revision: default
+        name: devtools
+        revision: '{devtools_revision}'
 
     builders:
     - mercurial/mark-successful-checkout
