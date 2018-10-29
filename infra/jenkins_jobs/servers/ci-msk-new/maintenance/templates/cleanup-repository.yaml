@@ -59,9 +59,9 @@
         - recipients
         - requester
         recipients: '{watchers}'
-        subject: '[Jenkins] $BUILD_STATUS - Junk-shop DB backup - # $BUILD_NUMBER'
+        subject: '[Jenkins] $BUILD_STATUS - Cleanup repository - # $BUILD_NUMBER'
         body: |
-          Junk-shop DB backup: $BUILD_STATUS
+          Cleanup repository: $BUILD_STATUS
 
           $BUILD_LOG
         # ---- email contents ----
