@@ -7,7 +7,7 @@
     # required template parameters:
     # * node
     # * watchers
-    # * junk-shop-db-dir
+    # * junk_shop_db_dir
 
     node: '{node}'
 
@@ -53,7 +53,7 @@
         set -ex
 
         export PGPASSWORD="$JUNK_SHOP_DB_PASSWORD"
-        export JUNK_SHOP_DB_DIR="{junk-shop-db-dir}"
+        export JUNK_SHOP_DB_DIR="{junk_shop_db_dir}"
         CI_COMPOSE=devtools/ci/junk_shop/deploy/compose-deploy.yaml
 
         # check compose is valid before deleting images
