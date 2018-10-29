@@ -16,3 +16,8 @@
         junk_shop_db_host: '10.0.0.113'
         junk_shop_backup_dir: '/mnt/infra/backups/junkshop'  # should be mounted on the node above
         watchers: vfedorov@networkoptix.com, anikitin@networkoptix.com, iremizov@networkoptix.com
+    - cleanup-repository:
+        node: 'junk-shop'
+        retain_days: '30'
+        repository_dir: '/mnt/beta-builds/repository/v1'  # should be mounted on the node above
+        watchers: vfedorov@networkoptix.com, anikitin@networkoptix.com, iremizov@networkoptix.com

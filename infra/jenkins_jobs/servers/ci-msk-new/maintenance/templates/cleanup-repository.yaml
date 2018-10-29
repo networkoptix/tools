@@ -1,0 +1,67 @@
+
+- job-template:
+    name: cleanup-repository
+    description: >
+      Remove old builds from cinas repository
+
+    # required template parameters:
+    # * node
+    # * retain_days
+    # * repository_dir
+    # * watchers
+
+    node: '{node}'
+
+    parameters:
+    - string:
+        name: RETAIN_DAYS
+        default: '{retain_days}'
+        description: 'Remove builds older than this.'
+    - on-off-option:
+        name: DRY_RUN
+        default: 'OFF'
+        description: 'Do not remove, just show what would be removed.'
+
+    triggers:
+    - timed: 'H 21 * * *'
+
+    wrappers:
+    - timestamps
+
+    builders:
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        # repository has format like this:
+        # /mnt/beta-builds/repository/v1/develop/vms/3840
+        # so we must look into 3rd level, from v1 to build number
+
+        FIND_CMD="find {repository_dir} -mindepth 3 -maxdepth 3 -type d -mtime +$RETAIN_DAYS"
+
+        if [[ $DRY_RUN == ON ]]; then
+            $FIND_CMD
+        else
+            $FIND_CMD | xargs rm -rfv
+        fi
+
+    publishers:
+    - email-ext:
+
+        aborted:        true
+        failure:        true
+        still-failing:  true
+        fixed:          true
+
+        # ---- email contents ----
+        send-to:
+        - recipients
+        - requester
+        recipients: '{watchers}'
+        subject: '[Jenkins] $BUILD_STATUS - Junk-shop DB backup - # $BUILD_NUMBER'
+        body: |
+          Junk-shop DB backup: $BUILD_STATUS
+
+          $BUILD_LOG
+        # ---- email contents ----
