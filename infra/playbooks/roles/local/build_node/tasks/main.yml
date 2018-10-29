@@ -123,6 +123,11 @@
   - ruby-compass
   - python-yaml
 
+- name: Install python requests package
+  pip:
+    name: requests
+    version: 2.18.4
+
 - name: Install N for NodeJS
   npm:
     name: n

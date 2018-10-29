@@ -13,23 +13,23 @@
 
   roles:
   - role: libvirt_guest
-#  - role: samba_share
-#    become: true
-#    become_method: sudo
-#    when:
-#    - libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-#    # temp. workaround for local deployments
-#    - attach_infra_share | default(True) == True
-#    vars:
-#      samba_mount_pass: "{{ cinas_infra_password }}"
-#  - role: alphabet_common
-#    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-#  - role: beta_builds_share
-#    become: true
-#    become_method: sudo
+  - role: samba_share
+    become: true
+    become_method: sudo
+    when:
+    - libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+    # temp. workaround for local deployments
+    - attach_infra_share | default(True) == True
+    vars:
+      samba_mount_pass: "{{ cinas_infra_password }}"
+  - role: alphabet_common
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: beta_builds_share
+    become: true
+    become_method: sudo
   - role: build_node
     when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-#  - role: jenkins_slave
-#    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
-#  - role: cloudalchemy.node-exporter
-#    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: jenkins_slave
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'
+  - role: cloudalchemy.node-exporter
+    when: libvirt_guest__state is undefined or libvirt_guest__current_state == 'running'

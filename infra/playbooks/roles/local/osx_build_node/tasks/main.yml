@@ -100,6 +100,14 @@
   register: result
   changed_when: '"Requirement already satisfied" not in result.stdout'
 
+- name: Install python requests package
+  become: true
+  become_method: sudo
+  # FIXME: pip is not on path
+  command: /usr/local/bin/pip install requests==2.18.4
+  register: result
+  changed_when: '"Requirement already satisfied" not in result.stdout'
+
 - name: Copy plists
   become: true
   become_method: sudo
