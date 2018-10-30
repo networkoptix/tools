@@ -141,6 +141,7 @@
             $WORKSPACE/devtools/ci/junk_shop/junk_shop/cameratest/save_results_main.py \
               --junk-shop-db="$JUNK_SHOP_DB" \
               --build-parameters "${{BUILD_PARAMETERS[@]}}" \
+              -- \
               "$LAST_RUN_DIR"
 
     publishers:
