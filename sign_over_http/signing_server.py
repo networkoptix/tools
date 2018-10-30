@@ -31,11 +31,15 @@ def sign_binary(customization, trusted_timestamping, target_file):
 
     signing_path = os.path.join(certs_directory, customization)
     config_file = os.path.join(signing_path, CONFIG_NAME)
-    with open(config_file, 'r') as f:
-        config = yaml.load(f)
+    config = None
+    if os.path.exists(config_file):
+        with open(config_file, 'r') as f:
+            config = yaml.load(f)
 
     def option(name):
-        return config.get(name, default_config.get(name))
+        if config:
+            return config.get(name, default_config.get(name))
+        return default_config.get(name)
 
     timestamp_server = None
     if trusted_timestamping:
