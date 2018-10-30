@@ -153,6 +153,8 @@
         - [ bpi,            bpi ]
         - [ rpi,            rpi ]
         - [ tx1,            tx1 ]
+        - [ ios,            ios ]
+        - [ android-arm,    android-arm ]
         allowed_choices: '{allowed_choices}'
 
 - parameter:
