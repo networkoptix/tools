@@ -9,7 +9,7 @@
     binaries_url: 'rsync://noptix.enk.me/buildenv/test/'
     workspace: 'workspace/scalability'
 
-    workdir: work
+    workdir: scalability
 
     properties:
     - authorization-{pipeline}-system
@@ -198,6 +198,7 @@
 
         test -d "$BIN_DIR"
         mkdir -p "$WORK_DIR"
+        rm -rf "$WORK_DIR/run_*"
 
         if [ ! -d venv ]; then
           virtualenv venv
