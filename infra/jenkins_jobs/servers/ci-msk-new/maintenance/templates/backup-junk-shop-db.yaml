@@ -14,7 +14,7 @@
     # But it's version on host is different.
     # So, for it to be the same, we use postgres docker image, same that used to run server.
 
-    node: '{node}'
+    node: junk-shop
 
     parameters:
     - on-off-option:

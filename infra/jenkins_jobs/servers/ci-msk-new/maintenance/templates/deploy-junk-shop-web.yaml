@@ -9,7 +9,7 @@
     # * watchers
     # * junk_shop_db_dir
 
-    node: '{node}'
+    node: junk-shop
 
     parameters:
     - p_CLEAN_WORKSPACE:
