@@ -11,11 +11,12 @@ from collections import namedtuple
 import dateutil.parser as dateutil_parser
 from pony.orm import db_session, select, desc
 
-from junk_shop.utils import DbConfig
 from junk_shop import models
-from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
+from junk_shop.parameters import add_db_arguments, create_db_repository
+
 
 log = logging.getLogger(__name__)
+
 
 HG_LOG_TEMPLATE = r'{node|short}|{date|isodatesec}|{author|person}|{author|email}|{desc|firstline}\n'
 
@@ -27,9 +28,9 @@ def pick_last_revision(repository):
     parameters = repository.build_parameters
     prev_build = select(
         build for build in models.Build
-        if build.project.name == parameters.project and
-           build.branch.name == parameters.branch and
-           build.build_num < parameters.build_num).order_by(desc(1)).first()
+        if build.project.name == parameters['project'] and
+           build.branch.name == parameters['branch'] and
+           build.build_num < parameters['build_num']).order_by(desc(1)).first()
     if prev_build:
         return prev_build.revision
     else:
@@ -76,18 +77,17 @@ def update_build_info(repository, src_dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
-                        help='Capture postgres database credentials')
-    parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
-                        help='Build parameters; project, branch and changeset are the (only) required ones')
+    add_db_arguments(parser)
     parser.add_argument('src_dir', help='Source code directory to load changesets from')
     args = parser.parse_args()
-    for param in ['project', 'branch', 'build_num', 'revision']:
-        assert getattr(args.build_parameters, param), '%s build parameter is required' % param
+
     format = '%(asctime)-15s %(threadName)-15s %(levelname)-7s %(message).500s'
     logging.basicConfig(level=logging.INFO, format=format)
 
-    repository = DbCaptureRepository(args.db_config, args.build_parameters)
+    repository = create_db_repository(args)
+    for param in ['project', 'branch', 'build_num', 'revision']:
+        assert param in repository.build_parameters, '%s build parameter is required' % param
+
     update_build_info(repository, args.src_dir)
 
 

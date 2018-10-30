@@ -209,6 +209,17 @@
           # Test camera will respond only to requests from this address.
           VM_ADDRESS=192.168.13.7
 
+          CONFIG_PATH="$WORKSPACE/funtest-config.yaml"
+
+          cat > "$CONFIG_PATH" <<EOF
+            build_parameters:
+              project: '{junkshop_project_name}'
+              branch: '$BRANCH'
+              build_num: '$BUILD_IDENTITY'
+              platform: 'linux-x64'
+              customization: '$CUSTOMIZATION'
+        EOF
+
           pushd nx_vms/func_tests
 
             set +e
@@ -228,13 +239,8 @@
               --customization="$CUSTOMIZATION" \
               --cloud-group=test \
               --timeout="$TEST_TIMEOUT" \
-              --capture-db="$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}" \
-              --build-parameters="\
-        project={junkshop_project_name},\
-        branch=$BRANCH,\
-        build_num=$BUILD_IDENTITY,\
-        platform=linux-x64,\
-        customization=$CUSTOMIZATION" \
+              --config="$CONFIG_PATH" \
+              --junk-shop-db="$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}" \
               --vm-port-base="$((20000 + "$EXECUTOR_NUMBER" * 100))" \
               --vm-name-prefix=funtest-$EXECUTOR_NUMBER- \
               --vm-address="$VM_ADDRESS" \

@@ -5,8 +5,7 @@ from collections import namedtuple
 
 from pathlib2 import Path
 
-from junk_shop.utils import DbConfig
-from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
+from junk_shop.parameters import add_db_arguments, create_db_repository
 from .test_info import RunInfo, TestInfo
 from .output_parser import CTestOutputParser, GTestOutputParser, GTestResultsStorage, TestArtifactsContainer
 from .make_backtraces import collect_backtrace_files
@@ -74,14 +73,11 @@ def setup_logging(level=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('db_config', type=DbConfig.from_string, metavar='user:password@host',
-                        help='Capture postgres database credentials')
-    parser.add_argument('build_parameters', type=BuildParameters.from_string, metavar=BuildParameters.example,
-                        help='Build parameters')
+    add_db_arguments(parser)
     parser.add_argument('--test-name', default=DEFAULT_UNIT_TEST_NAME,
                         help='Name of tests, default is %r' % DEFAULT_UNIT_TEST_NAME)
     args = parser.parse_args()
     work_dir = Path.cwd()
-    repository = DbCaptureRepository(args.db_config, args.build_parameters)
+    repository = create_db_repository(args)
     setup_logging()
     parse_and_save_results_to_db(work_dir, repository, args.test_name)

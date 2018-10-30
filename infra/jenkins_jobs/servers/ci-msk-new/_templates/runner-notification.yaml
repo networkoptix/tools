@@ -94,10 +94,18 @@
 
           export PYTHONPATH=$WORKSPACE/devtools/ci/junk_shop
 
-          DB_CONFIG=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
+          JUNK_SHOP_DB=$JUNK_SHOP_DB_CREDENTIALS@{junkshop_db_host}
 
-          BUILD_PARAMETERS="project={junkshop_project_name},branch=$BRANCH,build_num=$BUILD_IDENTITY"
-          devtools/ci/junk_shop/junk_shop/make_html_build_report.py "$DB_CONFIG" "$BUILD_PARAMETERS" > _report.html
+          BUILD_PARAMETERS=(
+            "project={junkshop_project_name}"
+            "branch=$BRANCH"
+            "build_num=$BUILD_IDENTITY"
+            )
+
+          devtools/ci/junk_shop/junk_shop/make_html_build_report.py \
+            --junk-shop-db="$JUNK_SHOP_DB" \
+            --build-parameters "${{BUILD_PARAMETERS[@]}}" \
+            > _report.html
           # report contains trash in the first line.
           tail -n +2 _report.html > report.html
 

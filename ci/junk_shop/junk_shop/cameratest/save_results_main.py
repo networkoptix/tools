@@ -25,12 +25,14 @@ import argparse
 import oyaml as yaml
 import json
 import sys
+
 from pony.orm import db_session
 from datetime import datetime, timedelta
 from dateutil.parser import parse
 from pathlib2 import Path
-from junk_shop.utils import DbConfig, status2outcome, dir_path
-from junk_shop.capture_repository import BuildParameters, DbCaptureRepository
+
+from junk_shop.utils import status2outcome, dir_path
+from junk_shop.parameters import add_db_arguments, create_db_repository
 import junk_shop.models as models
 
 
@@ -302,16 +304,7 @@ def parse_and_save_results_to_db(repository, root_run, results_file, all_cameras
 def main():
     parser = argparse.ArgumentParser(
         usage='%(prog)s [options]')
-    parser.add_argument(
-        'db_config',
-        type=DbConfig.from_string,
-        metavar='user:password@host',
-        help='Capture postgres database credentials')
-    parser.add_argument(
-        'build_parameters',
-        type=BuildParameters.from_string,
-        metavar=BuildParameters.example,
-        help='Build parameters')
+    add_db_arguments(parser)
     parser.add_argument(
         'test_work_dir',
         type=dir_path,
@@ -325,7 +318,8 @@ def main():
 
     format = '%(asctime)-15s %(levelname)-7s %(message)s'
     logging.basicConfig(level=logging.DEBUG, format=format)
-    repository = DbCaptureRepository(args.db_config, args.build_parameters)
+
+    repository = create_db_repository(args)
 
     artifacts = collect_test_artifacts(args.test_work_dir)
 
