@@ -56,7 +56,7 @@
             DOCKER_CMD+=("--exclude-table=public.artifact")
         fi
 
-        BASH_CMD="PGPASSWORD=$JUNK_SHOP_DB_PASSWORD ""${{DOCKER_CMD[@]}}"
+        BASH_CMD="PGPASSWORD=$JUNK_SHOP_DB_PASSWORD ${{DOCKER_CMD[@]}}"
 
         docker run \
           --rm=true \
