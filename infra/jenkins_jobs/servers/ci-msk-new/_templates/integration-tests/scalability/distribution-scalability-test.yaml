@@ -67,7 +67,7 @@
         buildsteps:
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -85,7 +85,7 @@
         revision: '$ST_COMMIT'
     - mercurial/local-mirror:
         name: devtools
-        revision: default
+        revision: '{devtools_revision}'
 
     builders:
     - mercurial/mark-successful-checkout
@@ -310,6 +310,29 @@
     - description-setter:
         regexp: "'PyTest - (.*)'"
         regexp-for-failed: "'PyTest - (.*)'"
+    - postbuildscript:
+        mark-unstable-if-failed: true
+        builders:
+        - role: SLAVE
+          build-on: [ SUCCESS, UNSTABLE, FAILURE ]
+          build-steps:
+          - trigger-builds:
+            - project: '{pipeline}.helper.publish-tests'
+              predefined-parameters: |
+                REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
+                BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+                BUILD_IDENTITY=$BUILD_IDENTITY
+                CUSTOMIZATION=$CUSTOMIZATION
+                PLATFORM=$PLATFORM
+                BRANCH=$BRANCH
+                NX_VMS_COMMIT=$NX_VMS_COMMIT
+                LOCAL_PATH=$WORKSPACE/
+                COMPONENTS={workdir}/run_*
+                NODE_SSH_CONNECTION=$SSH_CONNECTION
+                SSH_USER=$USER
+              block: true
+              block-thresholds:
+                failure-threshold: FAILURE
     - failure-email:
         email-recipients: '{build_watchers}'
     - fixed-email:

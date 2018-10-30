@@ -13,6 +13,7 @@
     version: vms_3.2_release
     default_branch: vms_3.2_release
     use_nx_vms_commit: vms_3.2_release  # FIXME: this is temp fix
+    devtools_revision: 'new_junk_shop_params'
 
     realcameratesting_framework_branch: vms
 

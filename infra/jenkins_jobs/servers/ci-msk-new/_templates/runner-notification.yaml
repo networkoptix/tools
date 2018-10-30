@@ -58,7 +58,7 @@
             keep_files: [ devtools, venv ]
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -67,7 +67,7 @@
     scm:
     - mercurial/local-mirror:
         name: devtools
-        revision: 'default'
+        revision: '{devtools_revision}'
 
     builders:
     - mercurial/mark-successful-checkout

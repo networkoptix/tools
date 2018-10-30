@@ -99,15 +99,12 @@
     # template according to changes made here
     - default:
         build_paxton: 'YES'
-    - default_cn:
-        build_paxton: 'YES'
-    - default_zh_CN:
-        build_paxton: 'YES'
+    - default_cn
+    - default_zh_CN
     - cox
     - digitalwatchdog:
         build_paxton: 'YES'
-    - digitalwatchdog_global:
-        build_paxton: 'YES'
+    - digitalwatchdog_global
     - hanwha:
         build_paxton: 'YES'
     - ipera

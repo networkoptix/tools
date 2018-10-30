@@ -66,7 +66,7 @@
         buildsteps:
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: $PIPELINE
@@ -84,7 +84,7 @@
         revision: '$NX_TEST_FRAMEWORK_COMMIT'
     - mercurial/local-mirror:
         name: devtools
-        revision: default
+        revision: '{devtools_revision}'
 
     builders:
     - mercurial/mark-successful-checkout

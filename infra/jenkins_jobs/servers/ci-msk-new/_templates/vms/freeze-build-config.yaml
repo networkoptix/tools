@@ -83,7 +83,7 @@
         branch-name: '$NX_VMS_COMMIT'
     - mercurial/hdw-mx-no-changelog:
         project-name: devtools
-        branch-name: default
+        branch-name: '{devtools_revision}'
 
     builders:
     - inject:

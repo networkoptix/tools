@@ -1,0 +1,86 @@
+
+- job-template:
+    name: backup-junk-shop-db
+    description: >
+      Backup junk-shop postgres database to infra nas
+
+    # required template parameters:
+    # * node
+    # * junk_shop_db_host
+    # * junk_shop_backup_dir
+    # * watchers
+
+    # Version of pg_dump utility must match one of postgres server.
+    # But it's version on host is different.
+    # So, for it to be the same, we use postgres docker image, same that used to run server.
+
+    node: '{node}'
+
+    parameters:
+    - on-off-option:
+        name: BACKUP_ARTIFACTS
+        default: 'ON'
+
+    wrappers:
+    - timestamps
+    - credentials-binding:
+      - username-password-separated:
+          credential-id: junk_shop_db
+          username: JUNK_SHOP_DB_USER_NAME
+          password: JUNK_SHOP_DB_PASSWORD
+
+    builders:
+
+    - shell: |
+        #!/bin/bash
+        set -ex
+
+        DATE_SUFFIX=`date +%04Y-%02m-%02e-%02H`
+        DEST_FILE_NAME=junk-shop-db-$DATE_SUFFIX
+        DEST_DIR='{junk_shop_backup_dir}'
+
+        if [[ $BACKUP_ARTIFACTS == OFF ]]; then
+          DEST_FILE_NAME="$DEST_FILE_NAME-no-artifacts"
+        fi
+
+        DEST_FILE=$DEST_FILE_NAME.dump
+
+        DOCKER_CMD=(
+            pg_dump
+            -h '{junk_shop_db_host}'
+            -U "$JUNK_SHOP_DB_USER_NAME"
+            --format=custom
+            --file=/media/$DEST_FILE
+        )
+
+        if [[ $BACKUP_ARTIFACTS == OFF ]]; then
+            DOCKER_CMD+=("--exclude-table=public.artifact")
+        fi
+
+        BASH_CMD="PGPASSWORD=$JUNK_SHOP_DB_PASSWORD ""${{DOCKER_CMD[@]}}"
+
+        docker run \
+          --rm=true \
+          --mount type=bind,source=$DEST_DIR,destination=/media \
+          postgres \
+          bash -c "$BASH_CMD"
+
+    publishers:
+    - email-ext:
+
+        aborted:        true
+        failure:        true
+        still-failing:  true
+        fixed:          true
+
+        # ---- email contents ----
+        send-to:
+        - recipients
+        - requester
+        recipients: '{watchers}'
+        subject: '[Jenkins] $BUILD_STATUS - Junk-shop DB backup - # $BUILD_NUMBER'
+        body: |
+          Junk-shop DB backup: $BUILD_STATUS
+
+          $BUILD_LOG
+        # ---- email contents ----

@@ -162,6 +162,7 @@
           {{ cmake_configure_args_global    if cmake_configure_args_global   | default("") != "" else "" }}
           {{ cmake_configure_args_platform  if cmake_configure_args_platform | default("") != "" else "" }}
           {{ cmake_configure_args_customization }}
+          -DsigningServer=http://192.168.13.15:8080
           -DbuildNumber=$BUILD_IDENTITY
           -DcustomWebAdminPackageDirectory=../server-external
     - string:
@@ -207,7 +208,7 @@
             files: devtools
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: default
+            branch: '{devtools_revision}'
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -444,11 +445,17 @@
             subject: paxton-4.0
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
+            # FIXME: Will fail on develop builds
             cmake_configure_command: >-
               cmake
+              -DcodeSigning=ON
+              -DhardwareSigning=$HARDWARE_SIGNING
+              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
               -DdotNetFramework=v4.0
+              -DsigningServer=http://192.168.13.15:8080
+              $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.0
 
@@ -464,10 +471,17 @@
             subject: paxton-4.6.2
             __debug__: !j2: '{{ __debug__ }}'
             cmake_configure_project_root: 'client/paxton_plugin'
+            # FIXME: Will fail on develop builds
             cmake_configure_command: >-
               cmake
+              -DcodeSigning=ON
+              -DhardwareSigning=$HARDWARE_SIGNING
+              -DtrustedTimestamping=$TRUSTED_TIMESTAMPING
               -Dcustomization=$CUSTOMIZATION
               -DbuildNumber=$BUILD_IDENTITY
+              -DdotNetFramework=v4.6.2
+              -DsigningServer=http://192.168.13.15:8080
+              $CUSTOM_CMAKE_PARAMETERS
             envvars_to_unset_during_build: !j2: '{{ envvars_to_unset_during_build }}'
             build_dir: build-paxton-4.6.2
 
@@ -505,13 +519,17 @@
               if [ -d ./build_logs ] ; then
                 mv ./build_logs/* ./build/build_logs/
               fi
-              if [ -d ./build-paxton-4.0 ] ; then
-                mv ./build-paxton-4.0/build_logs/*   ./build/build_logs/
+              if [ -d ./build-paxton-4.0/distrib ] ; then
                 mv ./build-paxton-4.0/distrib/*      ./build/distrib/
               fi
-              if [ -d ./build-paxton-4.6.2 ] ; then
+              if [ -d ./build-paxton-4.0/build_logs ] ; then
+                mv ./build-paxton-4.0/build_logs/* ./build/build_logs/
+              fi
+              if [ -d ./build-paxton-4.6.2/distrib ] ; then
+                mv ./build-paxton-4.6.2/distrib/*      ./build/distrib/
+              fi
+              if [ -d ./build-paxton-4.6.2/build_logs ] ; then
                 mv ./build-paxton-4.6.2/build_logs/* ./build/build_logs/
-                mv ./build-paxton-4.6.2/distrib/*    ./build/distrib/
               fi
 
           # Depending on test distribution strategy, we have 2 options:
