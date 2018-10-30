@@ -10,5 +10,4 @@
     name: queue/cancel-if-queued-newer
     builders:
     - system-groovy:
-        # j2 here is to avoid escapes for {}
         command: !include-raw: ../_scripts/cancel-if-queued-newer.groovy
