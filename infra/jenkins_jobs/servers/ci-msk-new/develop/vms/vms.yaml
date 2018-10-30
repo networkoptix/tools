@@ -43,6 +43,9 @@
         preset-name:
 
         - on-push-vms:
+            max_concurrent_presets: 1
+            cancel_in_fav_of_newer_build: 'true'
+
             auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms'
@@ -64,6 +67,9 @@
             st_commit_choice_option_default: ''
 
         - on-push-ft:
+            max_concurrent_presets: 1
+            cancel_in_fav_of_newer_build: 'true'
+
             auth_kind: system
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: 'vms'
@@ -86,6 +92,9 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-linux:
+            max_concurrent_presets: 1
+            cancel_in_fav_of_newer_build: 'true'
+
             auth_kind: system
             timer: 'H 3 * * 2-6'
             build_description: "Nightly functional tests - linux"
@@ -112,6 +121,8 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-windows:
+            max_concurrent_presets: 1
+
             auth_kind: system
             timer: 'H 3 * * 2-6'
             build_description: "Nightly functional tests - windows"
@@ -138,6 +149,8 @@
             st_commit_choice_option_default: ''
 
         - nightly-rct:
+            max_concurrent_presets: 1
+
             auth_kind: system
             timer: 'H 3 * * 2-6'
             build_description: "Nightly test for stable RCT"
@@ -162,6 +175,8 @@
             st_commit_choice_option_default: ''
 
         - manual:
+            max_concurrent_presets: 2
+
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'vms'
             default_platforms: linux-x64,windows-x64,mac,bpi
@@ -182,6 +197,8 @@
             st_commit_choice_option_default: ''
 
         - nightly-scalability:
+            max_concurrent_presets: 1
+
             auth_kind: system
             timer: 'H 20 * * 1-5'
             build_description: "Nightly scalability test"
@@ -209,6 +226,8 @@
             st_commit_choice_option_default: ''
 
         - manual-scalability:
+            max_concurrent_presets: 2
+
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             # disabled until nightly-vms is configured
             #vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH_OR_NIGHTLY'

@@ -32,6 +32,9 @@
     - preset:
         preset-name:
         - on-push-vms:
+            max_concurrent_presets: 1
+            cancel_in_fav_of_newer_build: 'true'
+
             auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'default'
@@ -53,6 +56,8 @@
             st_commit_choice_option_default: ''
 
         - manual:
+            max_concurrent_presets: 2
+
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
             vms_build_choice_option_default: ''
             default_platforms: linux-x64,windows-x64,mac,bpi

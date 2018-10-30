@@ -83,9 +83,6 @@ print '''#
     - p_BUILD_DESCRIPTION:
         default: ''
     - string:
-        name: REPLACE_BUILD_WITH_NEWER
-        default: 'NO'
-    - string:
         name: PLATFORMS
     - string:
         name: CUSTOMIZATIONS

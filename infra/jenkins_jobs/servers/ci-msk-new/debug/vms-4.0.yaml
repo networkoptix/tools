@@ -47,6 +47,9 @@
     - preset:
         preset-name:
         - custom:
+            max_concurrent_presets: 2
+            cancel_in_fav_of_newer_build: 'true'
+
             vms_build_choice_default: VMS_NEW_BUILD_BY_COMMIT
             vms_build_choice_option_default: ''
             ut_enabled: 'ON'

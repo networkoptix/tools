@@ -28,6 +28,10 @@
     properties:
     - !j2: authorization-{{ pipeline }}-{{ auth_kind | default("trigger") }}
 
+    - throttle:
+        max-total: !j2: '{{ max_concurrent_presets | default (3) }}'
+        option: project
+
     parameters:
 
     - p_BRANCH:
@@ -119,6 +123,9 @@
     - p_ST_COMMIT_CHOICE_w_OPTION:
         default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
         option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'
+    - hidden:
+        name: CANCEL_IN_FAV_OF_NEWER_BUILD
+        default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
 
     # TODO: Add additional sections and options...
     # - parameter-separator/simple-colored:
@@ -139,8 +146,7 @@
     - cleaners/custom-clean-workspace:
         keep_files: [ devtools, nx_vms ]
     - decorators/set-custom-build-description
-    - queue/cancel-scheduled-runner-job:
-        cancel: true
+    - queue/cancel-if-queued-newer
     - trigger-builds:
       - project: '__{pipeline}.{version}.param-resolver'
         block: true
@@ -162,7 +168,12 @@
         echo "NX_VMS_COMMIT=$NX_VMS_COMMIT" >> NX_VMS_COMMIT.envvar
         echo "NX_FUNCTESTS_COMMIT=$NX_FUNCTESTS_COMMIT" > NX_FUNCTESTS_COMMIT.envvar
         echo "NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT=$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT" >> NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT.envvar
-
+        echo "ST_COMMIT=$ST_COMMIT" >> ST_COMMIT.envvar
+    - build-name-setter:
+        template: '#$BUILD_ID $BRANCH-$BUILD_IDENTITY@$NX_VMS_COMMIT'
+        # TODO: add after some args will be stored in resolver even when tests are disabled.
+        # FT@$NX_FUNCTESTS_COMMIT RCT@$NX_VMS_REAL_CAMERA_TEST_FRAMEWORK_COMMIT ST@$ST_COMMIT'
+        macro: true
     - trigger-builds:
       - project: '{pipeline}.{version}.vms.runner'
         block: true
@@ -171,7 +182,6 @@
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           UPSTREAM_JOB_NAME=$JOB_NAME
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
-          REPLACE_BUILD_WITH_NEWER={{ replace_build_with_newer | default("YES") }}
 
     publishers:
     - archive:
