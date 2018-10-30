@@ -6,3 +6,8 @@
         header: '{header}'
         section-style: 'background-color: {color}'
         separator-style: ''
+- parameter:
+    name: parameter-separator/simple-colored(hidden)
+    parameters:
+    - hidden:
+        name: '{header}'

@@ -19,3 +19,10 @@
         visible-items: 2
         description: !j2: |
           {{ description | default("") }}
+
+- parameter:
+    name: on-off-option(hidden)
+    parameters:
+    - hidden:
+        name: '{name}'
+        default: '{default}'

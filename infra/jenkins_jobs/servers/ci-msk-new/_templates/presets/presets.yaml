@@ -1,4 +1,4 @@
-- job-template:
+- job-template: &preset
     name: '{pipeline}.{version}.preset.{preset-name}'
     id: 'preset'
 
@@ -106,10 +106,9 @@
     - p_RCT_COMMIT_CHOICE_w_OPTION:
         default: '{rct_commit_choice_default}'
         option_default: '{rct_commit_choice_option_default}'
-    - string:
+    - p_RCT_CAMERA_FILTER:
         name: RCT_CAMERA_FILTER
         default:  !j2: '{{ rct_camera_filter | default("*") }}'
-        description:
 
     - parameter-separator/simple-colored:
         header: 'Options for Scalability tests'
@@ -192,3 +191,180 @@
         artifacts: '*.envvar'
         allow-empty: 'false'
         fingerprint: true
+
+
+- job-template:
+    <<: *preset
+    id: preset-build-only
+    parameters:
+
+    - p_BRANCH(hidden):
+        default: '{default_branch}'
+    - p_BUILD_DESCRIPTION:
+        default: !j2: '{{ build_description | default("Triggered manually") }}'
+
+    - parameter-separator/simple-colored:
+        header: 'Options for VMS'
+        color: lavender
+    - p_VMS_BUILD_CHOICE_w_OPTION(hidden):
+        default: '{vms_build_choice_default}'
+        option_default: '{vms_build_choice_option_default}'
+    - p_PLATFORMS:
+        allowed_choices: !j2: '{{ default_platforms | default("") }}'
+        default: !j2: '{{ default_platforms | default("") }}'
+    - p_CUSTOMIZATIONS:
+        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        default: !j2: '{{ default_customizations | default("") }}'
+
+    - p_CLOUD_GROUP:
+        default: test
+    - p_BETA:
+        default: !j2: '{{ beta | default("ON") }}'
+    - p_HARDWARE_SIGNING:
+        default: 'OFF'
+    - p_TRUSTED_TIMESTAMPING:
+        default: 'OFF'
+    - p_CUSTOM_CMAKE_PARAMETERS:
+        default: !j2: '{{ custom_cmake_parameters | default("") }}'
+
+    - parameter-separator/simple-colored(hidden):
+        header: 'Options for Unittests'
+        color: lavender
+    - on-off-option(hidden):
+        name: UT_ENABLED
+        description: If ON, then UnitTests will run, otherwise skipped
+        default: '{ut_enabled}'
+
+    - parameter-separator/simple-colored(hidden):
+        header: 'Options for Functional tests'
+        color: lavender
+
+    - on-off-option(hidden):
+        name: FT_ENABLED
+        subject: If ON, then FuncTests will run, otherwise skipped
+        default: '{ft_enabled}'
+    - p_FT_COMMIT_CHOICE_w_OPTION(hidden):
+        default: '{ft_commit_choice_default}'
+        option_default: '{ft_commit_choice_option_default}'
+    - p_TEST_SELECT_EXPR(hidden):
+        default: !j2: '{{ test_select_expr | default("") }}'
+    - p_TEST_LIST(hidden):
+        default: !j2: '{{ test_list | default("") }}'
+
+    - parameter-separator/simple-colored(hidden):
+        header: 'Options for Real cameras tests'
+        color: lavender
+    - on-off-option(hidden):
+        name: RCT_ENABLED
+        subject: If ON, then RealCameraTests will run, otherwise skipped
+        default: '{rct_enabled}'
+    - p_RCT_COMMIT_CHOICE_w_OPTION(hidden):
+        default: '{rct_commit_choice_default}'
+        option_default: '{rct_commit_choice_option_default}'
+    - p_RCT_CAMERA_FILTER(hidden):
+        name: RCT_CAMERA_FILTER
+        default:  !j2: '{{ rct_camera_filter | default("*") }}'
+
+    - parameter-separator/simple-colored(hidden):
+        header: 'Options for Scalability tests'
+        color: lavender
+    - on-off-option(hidden):
+        name: ST_ENABLED
+        subject: If ON, then SacalbilityTests will run, otherwise skipped
+        default: '{st_enabled}'
+    - p_ST_SCENARIOS(hidden):
+        default: !j2: '{{ st_scenarios | default("lws-50,lws-100,lws-150,lws-200,lws-250,lws-300,full-50,full-100,full-150,full-200") }}'
+    - p_ST_COMMIT_CHOICE_w_OPTION(hidden):
+        default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
+        option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'
+    - hidden:
+        name: CANCEL_IN_FAV_OF_NEWER_BUILD
+        default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+
+- job-template:
+    <<: *preset
+    id: preset-tests-only
+    parameters:
+
+    - p_BRANCH(hidden):
+        default: '{default_branch}'
+    - p_BUILD_DESCRIPTION:
+        default: !j2: '{{ build_description | default("Triggered manually") }}'
+
+    - parameter-separator/simple-colored:
+        header: 'Options for VMS'
+        color: lavender
+    - p_VMS_BUILD_CHOICE_w_OPTION:
+        default: '{vms_build_choice_default}'
+        option_default: '{vms_build_choice_option_default}'
+    - p_PLATFORMS(hidden):
+        allowed_choices: !j2: '{{ default_platforms | default("") }}'
+        default: !j2: '{{ default_platforms | default("") }}'
+    - p_CUSTOMIZATIONS(hidden):
+        allowed_choices: !j2: '{{ default_customizations | default("") }}'
+        default: !j2: '{{ default_customizations | default("") }}'
+
+    - p_CLOUD_GROUP(hidden):
+        default: test
+    - p_BETA(hidden):
+        default: !j2: '{{ beta | default("ON") }}'
+    - p_HARDWARE_SIGNING(hidden):
+        default: 'OFF'
+    - p_TRUSTED_TIMESTAMPING(hidden):
+        default: 'OFF'
+    - p_CUSTOM_CMAKE_PARAMETERS(hidden):
+        default: !j2: '{{ custom_cmake_parameters | default("") }}'
+
+    - parameter-separator/simple-colored(hidden):
+        header: 'Options for Unittests'
+        color: lavender
+    - on-off-option(hidden):
+        name: UT_ENABLED
+        description: If ON, then UnitTests will run, otherwise skipped
+        default: '{ut_enabled}'
+
+    - parameter-separator/simple-colored:
+        header: 'Options for Functional tests'
+        color: lavender
+
+    - on-off-option:
+        name: FT_ENABLED
+        subject: If ON, then FuncTests will run, otherwise skipped
+        default: '{ft_enabled}'
+    - p_FT_COMMIT_CHOICE_w_OPTION:
+        default: '{ft_commit_choice_default}'
+        option_default: '{ft_commit_choice_option_default}'
+    - p_TEST_SELECT_EXPR:
+        default: !j2: '{{ test_select_expr | default("") }}'
+    - p_TEST_LIST:
+        default: !j2: '{{ test_list | default("") }}'
+
+    - parameter-separator/simple-colored:
+        header: 'Options for Real cameras tests'
+        color: lavender
+    - on-off-option:
+        name: RCT_ENABLED
+        subject: If ON, then RealCameraTests will run, otherwise skipped
+        default: '{rct_enabled}'
+    - p_RCT_COMMIT_CHOICE_w_OPTION:
+        default: '{rct_commit_choice_default}'
+        option_default: '{rct_commit_choice_option_default}'
+    - p_RCT_CAMERA_FILTER:
+        name: RCT_CAMERA_FILTER
+        default:  !j2: '{{ rct_camera_filter | default("*") }}'
+
+    - parameter-separator/simple-colored:
+        header: 'Options for Scalability tests'
+        color: lavender
+    - on-off-option:
+        name: ST_ENABLED
+        subject: If ON, then SacalbilityTests will run, otherwise skipped
+        default: '{st_enabled}'
+    - p_ST_SCENARIOS:
+        default: !j2: '{{ st_scenarios | default("lws-50,lws-100,lws-150,lws-200,lws-250,lws-300,full-50,full-100,full-150,full-200") }}'
+    - p_ST_COMMIT_CHOICE_w_OPTION:
+        default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
+        option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'
+    - hidden:
+        name: CANCEL_IN_FAV_OF_NEWER_BUILD
+        default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'

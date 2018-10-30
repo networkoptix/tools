@@ -27,7 +27,7 @@
 
     - param-resolver
 
-    - preset:
+    - preset-build-only:
         preset-name:
         - manual:
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
