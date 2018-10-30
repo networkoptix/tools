@@ -115,7 +115,7 @@
         subject: If ON, then SacalbilityTests will run, otherwise skipped
         default: '{st_enabled}'
     - p_ST_SCENARIOS:
-        default: 'lws-50,lws-100,lws-150,lws-200,lws-250,lws-300,full-50,full-100,full-150,full-200'
+        default: !j2: '{{ st_scenarios | default("lws-50,lws-100,lws-150,lws-200,lws-250,lws-300,full-50,full-100,full-150,full-200") }}'
     - p_ST_COMMIT_CHOICE_w_OPTION:
         default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
         option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'

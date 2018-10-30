@@ -204,6 +204,7 @@
             rct_commit_choice_option_default: 'vms_rct'
 
             st_enabled: 'ON'
+            st_scenarios: 'full-50,full-100'
             st_commit_choice_default: ST_STABLE
             st_commit_choice_option_default: ''
 
