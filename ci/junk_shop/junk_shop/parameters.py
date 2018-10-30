@@ -165,7 +165,7 @@ def add_db_arguments(parser):
         parser.add_argument(*args, **kw)
 
 
-DbParameters = namedtuple('JunkShopDbParameters', 'db_config build_parameters run_parameters')
+DbParameters = namedtuple('DbParameters', 'db_config build_parameters run_parameters')
 
 
 def create_db_parameters(args):
