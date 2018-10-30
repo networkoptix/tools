@@ -67,7 +67,7 @@
         buildsteps:
         - mercurial/import-repo-if-missing:
             name: devtools
-            branch: '{devtools_revision}'
+            branch: default
             platform: $PLATFORM
             customization: $CUSTOMIZATION
             pipeline: '{pipeline}'
@@ -241,7 +241,7 @@
               merge_timeout: '$MERGE_TIMEOUT'
               message_bus_timeout: '$MESSAGE_BUS_TIMEOUT'
               transactions_stage_duration: '$TRANSACTIONS_STAGE_DURATION'
-          EOF
+        EOF
 
           pushd nx_vms/func_tests
 

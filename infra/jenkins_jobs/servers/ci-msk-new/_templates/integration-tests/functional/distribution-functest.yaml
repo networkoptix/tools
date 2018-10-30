@@ -218,7 +218,7 @@
               build_num: '$BUILD_IDENTITY'
               platform: 'linux-x64'
               customization: '$CUSTOMIZATION'
-          EOF
+        EOF
 
           pushd nx_vms/func_tests
 

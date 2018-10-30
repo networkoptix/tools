@@ -19,6 +19,7 @@
     version: vms
     default_branch: vms
     use_nx_vms_commit: vms  # FIXME: this is temp fix
+    devtools_revision: 'new_junk_shop_params'
 
     poll_scm_timer: '' # disable triggers
 
