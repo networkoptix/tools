@@ -2,7 +2,7 @@
 - job-template:
     name: backup-junk-shop-db
     description: >
-      Backup junk-shop postgres database to infra nas
+      Backup junk-shop postgres database to CINAS/infra nas
 
     # required template parameters:
     # * node
@@ -35,9 +35,8 @@
         #!/bin/bash
         set -ex
 
-        DATE_SUFFIX=`date +%04Y-%02m-%02e-%02H`
+        DATE_SUFFIX="$(date +%04Y-%02m-%02e-%02H)"
         DEST_FILE_NAME=junk-shop-db-$DATE_SUFFIX
-        DEST_DIR='{junk_shop_backup_dir}'
 
         if [[ $BACKUP_ARTIFACTS == OFF ]]; then
           DEST_FILE_NAME="$DEST_FILE_NAME-no-artifacts"
@@ -61,7 +60,7 @@
 
         docker run \
           --rm=true \
-          --mount type=bind,source=$DEST_DIR,destination=/media \
+          --mount type=bind,source='{junk_shop_backup_dir}',destination=/media \
           postgres \
           bash -c "$BASH_CMD"
 

@@ -2,7 +2,7 @@
 - job-template:
     name: cleanup-repository
     description: >
-      Remove old artifacts from CINAS repository
+      Remove old artifacts from CINAS/beta-builds repository
 
     # required template parameters:
     # * node  - Node to run this job on.
