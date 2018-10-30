@@ -62,7 +62,7 @@
 
       </pre>
 
-    regex: '.*preset.*'
+    regex: '(custom|develop|release).*preset.*'
     columns: *default_cols
 
 # Per-release sections
