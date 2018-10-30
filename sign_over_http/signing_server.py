@@ -6,6 +6,7 @@ import tempfile
 import yaml
 
 from aiohttp import web
+from datetime import datetime
 from signtool_interface import sign_software, sign_hardware
 
 certs_directory = os.getcwd()
@@ -22,6 +23,10 @@ timestamp_server: 'http://timestamp.comodoca.com/rfc3161'
 
 In case of hardware signing, file is not needed.
 '''
+
+
+def log(line):
+    print('{}: {}'.format(str(datetime.now()), line))
 
 
 def sign_binary(customization, trusted_timestamping, target_file):
@@ -44,12 +49,12 @@ def sign_binary(customization, trusted_timestamping, target_file):
     timestamp_server = None
     if trusted_timestamping:
         timestamp_server = option('timestamp_server')
-        print('Using trusted timestamping server {0}'.format(timestamp_server))
+        log('Using trusted timestamping server {0}'.format(timestamp_server))
 
     if option('software'):
         certificate = os.path.join(signing_path, option('file'))
         sign_password = option('password')
-        print('Using certificate {0}'.format(certificate))
+        log('Using certificate {0}'.format(certificate))
         sign_software(
             signtool_directory=signtool_directory,
             target_file=target_file,
@@ -57,7 +62,7 @@ def sign_binary(customization, trusted_timestamping, target_file):
             sign_password=sign_password,
             timestamp_server=timestamp_server)
     else:
-        print('Using hardware key')
+        log('Using hardware key')
         sign_hardware(
             signtool_directory=signtool_directory,
             target_file=target_file,
@@ -71,7 +76,7 @@ async def sign_handler(request):
     assert field.name == 'file'
     source_filename = field.filename
     source_path, filename = os.path.split(source_filename)
-    print('======== Signing {} ========'.format(filename))
+    log('======== Signing {} ========'.format(filename))
 
     target_file = tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False)
     target_file_name = target_file.name
@@ -85,7 +90,7 @@ async def sign_handler(request):
     params = request.query
     customization = params['customization']
     trusted_timestamping = (params['trusted_timestamping'].lower() == 'true')
-    print('Signing {0} with customization {1} {2}'.format(
+    log('Signing {0} with customization {1} {2}'.format(
         target_file_name,
         customization,
         '(trusted)' if trusted_timestamping else '(no timestamp)'))
@@ -109,12 +114,13 @@ def main():
     if args.signtool:
         global signtool_directory
         signtool_directory = args.signtool
-    print('Using {} as a signtool folder'.format(signtool_directory))
+    log('Using {} as a signtool folder'.format(signtool_directory))
 
     if args.certs:
         global certs_directory
         certs_directory = args.certs
-    print('Using {} as a certificates directory'.format(certs_directory))
+    log('Using {} as a certificates directory'.format(certs_directory))
+    log('Using {} as a temporary directory'.format(tempfile.gettempdir()))
 
     app = web.Application()
     app.add_routes([web.post('/', sign_handler)])
