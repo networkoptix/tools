@@ -98,6 +98,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--certs', help='Certificates directory')
     parser.add_argument('-s', '--signtool', help='Signtool directory')
+    parser.add_argument('-n', '--host', help='Host to listen')
+    parser.add_argument('-p', '--port', help='Port to listen')
     args = parser.parse_args()
 
     if args.signtool:
@@ -112,7 +114,7 @@ def main():
 
     app = web.Application()
     app.add_routes([web.post('/', sign_handler)])
-    web.run_app(app)
+    web.run_app(app, host=args.host, port=args.port)
 
 
 if __name__ == '__main__':
