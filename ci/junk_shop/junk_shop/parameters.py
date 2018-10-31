@@ -37,9 +37,10 @@ class StrChoicesParameterType(ParameterType):
         self._allowed_values = allowed_values
 
     def str_to_parameter(self, name, value_str):
-        if not value_str in self._allowed_values:
+        if value_str not in self._allowed_values:
             raise ArgumentTypeError(
-                'Invalid %s: %r; allowed are: %s' % (name, value_str, ', '.join(self._allowed_values)))
+                'Invalid %s: %r; allowed are: %s' % (
+                    name, value_str, ', '.join(self._allowed_values)))
         return value_str
 
 
@@ -107,6 +108,15 @@ _build_parameter_types = {
     'platform': StrParameterType(),
     }
 
+_run_property_types = {
+    'name': StrParameterType(),
+    'jenkins_url': StrParameterType(),
+    'revision': StrParameterType(),
+    'description': StrParameterType(),
+    'test_description': StrParameterType(),
+    'kind': StrParameterType()
+    }
+
 
 def _build_parameters_from_string(parameters_str):
     try:
@@ -138,11 +148,22 @@ def build_parameters_from_value_list(parameters_dict_list):
                 % (name, ', '.join(_build_parameter_types.keys())))
         yield (name, t.value_to_parameter(name, value))
 
+
 def run_parameters_from_value_list(parameters_dict_list):
     for name, value in parameters_dict_list.iteritems():
         if type(value) is bool:
             value = bool_to_param(value)
         yield (name, str(value))
+
+
+def run_properties_from_value_list(parameters_dict_list):
+    for name, value in parameters_dict_list.iteritems():
+        t = _run_property_types.get(name)
+        if not t:
+            raise ArgumentTypeError(
+                'Unknown build parameter: %r. Known are: %s'
+                % (name, ', '.join(_run_property_types.keys())))
+        yield (name, t.value_to_parameter(name, value))
 
 
 def enum_db_arguments():
@@ -165,7 +186,14 @@ def add_db_arguments(parser):
         parser.add_argument(*args, **kw)
 
 
-DbParameters = namedtuple('DbParameters', 'db_config build_parameters run_parameters')
+DbParameters = namedtuple(
+    'DbParameters',
+    [
+        'db_config',
+        'build_parameters',
+        'run_parameters',
+        'run_properties',
+    ])
 
 
 def create_db_parameters(args):
@@ -182,14 +210,21 @@ def create_db_parameters(args):
         file_config.get_args_option(
             args, 'run_parameters', compose(list, run_parameters_from_value_list))
         or [])
+    run_properties = dict(
+        file_config.get_option(
+            'run_properties', compose(list, run_properties_from_value_list))
+        or [])
     return DbParameters(
         db_config=db_config,
         build_parameters=build_parameters,
         run_parameters=run_parameters,
+        run_properties=run_properties,
         )
 
 
 def create_db_repository(args):
     params = create_db_parameters(args)
     assert params.db_config, '--junk-shop-db/junk_shop_db/JUNK_SHOP_CAPTURE_DB must be specified'
-    return DbCaptureRepository(params.db_config, params.build_parameters, params.run_parameters)
+    return DbCaptureRepository(
+        params.db_config, params.build_parameters,
+        params.run_parameters, params.run_properties)

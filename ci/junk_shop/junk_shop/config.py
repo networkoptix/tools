@@ -30,7 +30,7 @@ class Config(object):
             return result
         dict_data = reduce(merge_dict, [config._config for config in config_list or []], {})
         return cls(dict_data)
-        
+
     def __init__(self, dict_data=None):
         self._config = dict_data or {}
 
@@ -40,16 +40,16 @@ class Config(object):
             return option
         else:
             name = self._option_to_name(option_name)
-            return self._get_option(name, constructor)
+            return self.get_option(name, constructor)
 
     def get_args_option(self, args, name, constructor=None):
         option = getattr(args, name)
         if option is not None:
             return option
         else:
-            return self._get_option(name, constructor)
+            return self.get_option(name, constructor)
 
-    def _get_option(self, name, constructor):
+    def get_option(self, name, constructor):
         option = self._config.get(name)
         if option is not None and constructor:
             return constructor(option)

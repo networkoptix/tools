@@ -75,17 +75,10 @@
       <div class="build-block block">
         <h3>
           <a class="link" href="{{ url_for('run', run_id=stage.root_run.id) }}">
-          {%- if stage.stage_name == 'unit' -%}
-            Unit&nbsp;Tests
-          {%- elif stage.stage_name == 'functional' -%}
-            Functional&nbsp;Tests
-          {%- elif stage.stage_name == 'scalability' -%}
-            Scalability&nbsp;Tests
-          {%- else -%}
-            {{ stage.stage_name }}
-          {%- endif -%}
+            {{ stage.root_run.test.description|default(stage.stage_name, true) }}
           </a>
         </h3>
+        {{ run_info_block(stage.root_run) }}
         {%- if stage.stage_name == 'scalability' -%}
           <br/>
            {{ stage.run_parameters.server_count }}
@@ -213,6 +206,44 @@
       <div>
         <div class="title">Customization</div>
         <div class="value">{{ build.customization.name }}</div>
+      </div>
+    {% endif %}
+  </div>
+
+{% endmacro %}
+
+
+{% macro run_info_block(run) %}
+
+  <div class="run-info">
+    <div>
+      <div class="title">Started at</div>
+      <div class="markup-value">{{ run.started_at|format_datetime }}</div>
+    </div>
+    {% if run.revision %}
+      <div>
+        <div class="title">Revision</div>
+        <div class="value">{{ run.build.repository }} #{{ run.revision|decorate_revision(run.build.repository_url) }}</div>
+      </div>
+    {% endif %}
+    {% if run.jenkins_url %}
+      <div>
+        <div class="title">Jenkins page</div>
+        <div class="value">
+          <a href="{{ run.jenkins_url }}">..{{ run.jenkins_url[-20:] }}</a>
+        </div>
+      </div>
+    {% endif %}
+    {% if run.kind %}
+      <div>
+        <div class="title">Kind</div>
+        <div class="value">{{ run.kind.name }}</div>
+      </div>
+    {% endif %}
+    {% if run.description %}
+      <div>
+        <div class="title">Description</div>
+        <div class="description-value">{{ run.description }}</div>
       </div>
     {% endif %}
   </div>
