@@ -3,6 +3,7 @@ import click
 
 from junk_shop.webapp import app
 from .. import models
+from pony.orm import raw_sql, select
 
 
 @app.cli.command()
@@ -11,6 +12,7 @@ def list_projects():
     '''List projects'''
     for project in models.Project.select().order_by(models.Project.id):
         click.echo(project.name)
+
 
 @app.cli.command()
 @db_session
@@ -31,6 +33,7 @@ def kill_branch(branch_name):
         return
     click.echo('Deleting brach id=%r' % branch.id)
     branch.delete()
+
 
 @app.cli.command()
 @click.argument('project_name')
@@ -94,3 +97,19 @@ def kill_run(run_id, dry_run):
     if not dry_run:
         run.delete()
 
+
+@app.cli.command()
+@click.option('--dry-run/--no-dry-run')
+@db_session
+def kill_interrupted_runs(dry_run):
+    '''Remove child runs w/o root_run'''
+    param = '%/%/%'
+    query = select(
+        run for run in models.Run
+        if raw_sql(
+            "run.root_run IS NULL and run.path like $param"))
+
+    for run in query:
+        click.echo('Deleting run: %d' % run.id)
+        if not dry_run:
+            run.delete()
