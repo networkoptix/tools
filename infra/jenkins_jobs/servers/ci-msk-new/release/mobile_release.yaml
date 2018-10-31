@@ -17,14 +17,6 @@
     - mobile-current
     - '{pipeline}.{version}.{project}.runner'
 
-    - develop/hg-trigger:
-        repo: nx_vms
-        branch: mobile_release
-        version: mobile_release
-        job_to_trigger_on_vms_changed: 'release.mobile_release.preset.on-push-vms'
-        job_to_trigger_on_ft_changed: ''
-        job_to_trigger_on_rct_changed: ''
-
     - param-resolver
 
     - preset-build-only:
