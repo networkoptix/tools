@@ -238,7 +238,7 @@
               jenkins_url: '$BUILD_URL'
               revision: '$NX_VMS_COMMIT'
               description: '$BUILD_DESCRIPTION'
-              test_description: 'Scalability tests'
+              test_description: 'Functional tests'
               kind: '$RUN_KIND'
             run_parameters:
               use_lightweight_servers: $USE_LIGHTWEIGHT_SERVERS

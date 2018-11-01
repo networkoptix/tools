@@ -10,7 +10,7 @@
 
     clean_build_if_build_scripts_changed: 'YES' # TODO: switch to NO for linux builds, use ninja-clean instead
 
-    junkshop_db_host: '10.0.0.160'
+    junkshop_db_host: '10.0.0.113'
     junkshop_base_url: http://junkshop.enk.me
     artifacts_base_url: http://artifacts.enk.me
 

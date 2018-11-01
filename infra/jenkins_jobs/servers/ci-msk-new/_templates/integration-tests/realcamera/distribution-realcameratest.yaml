@@ -46,8 +46,6 @@
         default: 'default'
     - p_PLATFORM(hidden):
         default: all
-    - string:
-        name: RUN_KIND
 
     wrappers:
     - timestamps
