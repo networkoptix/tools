@@ -49,6 +49,8 @@
         default: 'default'
     - p_PLATFORM(hidden):
         default: all
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -218,6 +220,13 @@
               build_num: '$BUILD_IDENTITY'
               platform: 'linux-x64'
               customization: '$CUSTOMIZATION'
+            run_properties:
+              name: functional
+              jenkins_url: '$BUILD_URL'
+              revision: '$NX_TEST_FRAMEWORK_COMMIT'
+              description: '$BUILD_DESCRIPTION'
+              test_description: 'Functional tests'
+              kind: '$RUN_KIND'
         EOF
 
           pushd nx_vms/func_tests

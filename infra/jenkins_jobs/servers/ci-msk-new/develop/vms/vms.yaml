@@ -43,6 +43,7 @@
         preset-name:
 
         - on-push-vms:
+            run_kind: production
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -67,6 +68,7 @@
             st_commit_choice_option_default: ''
 
         - on-push-ft:
+            run_kind: test
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -92,6 +94,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-linux:
+            run_kind: production
             max_concurrent_presets: 1
             cancel_in_fav_of_newer_build: 'true'
 
@@ -121,6 +124,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-ft-windows:
+            run_kind: production
             max_concurrent_presets: 1
 
             auth_kind: system
@@ -149,6 +153,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-rct:
+            run_kind: production
             max_concurrent_presets: 1
 
             auth_kind: system
@@ -175,6 +180,7 @@
             st_commit_choice_option_default: ''
 
         - manual:
+            run_kind: manual
             max_concurrent_presets: 2
 
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
@@ -197,6 +203,7 @@
             st_commit_choice_option_default: ''
 
         - nightly-scalability:
+            run_kind: production
             max_concurrent_presets: 1
 
             auth_kind: system
@@ -226,6 +233,7 @@
             st_commit_choice_option_default: ''
 
         - manual-scalability:
+            run_kind: manual
             max_concurrent_presets: 2
 
             vms_build_choice_default: 'VMS_EXISTING_BUILD_FROM_STABLE_PUSH'
