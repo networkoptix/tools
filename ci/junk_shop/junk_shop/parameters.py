@@ -161,7 +161,7 @@ def run_properties_from_value_list(parameters_dict_list):
         t = _run_property_types.get(name)
         if not t:
             raise ArgumentTypeError(
-                'Unknown build parameter: %r. Known are: %s'
+                'Unknown run property: %r. Known are: %s'
                 % (name, ', '.join(_run_property_types.keys())))
         yield (name, t.value_to_parameter(name, value))
 

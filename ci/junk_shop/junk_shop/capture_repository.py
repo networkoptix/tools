@@ -107,9 +107,9 @@ class DbCaptureRepository(object):
             run.build = self.produce_build()
             run.customization = self._produce_build_parameter('customization')
             run.platform = self._produce_build_parameter('platform')
-            run.description = self._produce_run_property('description') or ''
-            run.jenkins_url = self._produce_run_property('jenkins_url') or ''
-            run.revision = self._produce_run_property('revision') or ''
+            run.description = self._produce_run_property('description')
+            run.jenkins_url = self._produce_run_property('jenkins_url')
+            run.revision = self._produce_run_property('revision')
             run.kind = self._produce_run_property('kind')
         if self.run_parameters:
             for name, value in self.run_parameters.iteritems():
@@ -159,9 +159,7 @@ class DbCaptureRepository(object):
         return build
 
     def _produce_run_property(self, name):
-        value = self.run_properties.get(name)
-        if not value:
-            return None
+        value = self.run_properties.get(name, '')
         if name == 'kind':
             model = models.RunKind
             return model.get(name=value) or model(name=value)

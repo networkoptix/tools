@@ -22,8 +22,6 @@
 	display: inline-block;
 	margin: 5px 30px 5px 0;
 }
-.run-info .title {
-}
 .run-info .value, .run-info .description-value, .run-info .markup-value {
 	font-size: 110%;
 	color: #404040;

@@ -230,7 +230,7 @@
       <div>
         <div class="title">Jenkins page</div>
         <div class="value">
-          <a href="{{ run.jenkins_url }}">..{{ run.jenkins_url[-20:] }}</a>
+          <a href="{{ run.jenkins_url }}">Run#{{ run.jenkins_url|extract_run_id_from_jenkins_url }}</a>
         </div>
       </div>
     {% endif %}

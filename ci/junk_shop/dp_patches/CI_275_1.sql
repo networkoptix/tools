@@ -10,11 +10,12 @@ ALTER TABLE public.run_kind OWNER TO postgres;
 INSERT INTO public.run_kind  (id, name, order_num)
 VALUES
  (1, 'production', 1),
- (2, 'test', 100);
+ (2, 'test', 50);
+ (3, 'test', 100);
 
  CREATE SEQUENCE public.run_kind_id_seq
     AS integer
-    START WITH 3
+    START WITH 4
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
@@ -53,22 +54,13 @@ CREATE INDEX IF NOT EXISTS idx_run__kind ON public.run(kind);
 ALTER TABLE public.test
   ADD COLUMN IF NOT EXISTS description text;
 
-DO $$
-DECLARE
-   m   varchar[];
-   arr varchar[] := array[
-     ['build','Build'],
-     ['unit', 'Unit tests'],
-     ['functional', 'Functional tests'],
-     ['cameratest', 'Real camera tests'],
-     ['sdk_unit', 'SDK unit tests'],
-     ['scalability', 'Scalability tests']];
-BEGIN
-   FOREACH m SLICE 1 IN ARRAY arr
-   LOOP
-      UPDATE public.test SET description = m[2] where path = m[1];
-   END LOOP;
-END $$;
+
+UPDATE public.test SET description = 'Build' where path = 'build';
+UPDATE public.test SET description = 'Unit tests' where path = 'unit';
+UPDATE public.test SET description = 'Functional tests' where path = 'functional';
+UPDATE public.test SET description = 'Real camera tests' where path = 'cameratest';
+UPDATE public.test SET description = 'SDK unit tests' where path = 'sdk_unit';
+UPDATE public.test SET description = 'Scalability tests' where path = 'scalability';
 
 
 
