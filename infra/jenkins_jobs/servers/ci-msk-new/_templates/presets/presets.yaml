@@ -206,7 +206,7 @@
     - parameter-separator/simple-colored:
         header: 'Options for VMS'
         color: lavender
-    - p_VMS_BUILD_CHOICE_w_OPTION(hidden):
+    - p_VMS_BUILD_CHOICE_w_OPTION:
         default: '{vms_build_choice_default}'
         option_default: '{vms_build_choice_option_default}'
     - p_PLATFORMS:
