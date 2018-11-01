@@ -123,8 +123,8 @@
         default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
         option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'
     - hidden:
-      name: RUN_KIND
-      default: !j2: '{{run_kind | default("production") }}'
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default("production") }}'
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
