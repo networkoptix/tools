@@ -36,24 +36,22 @@ def sign_binary(customization, trusted_timestamping, target_file):
 
     signing_path = os.path.join(certs_directory, customization)
     config_file = os.path.join(signing_path, CONFIG_NAME)
-    config = None
-    if os.path.exists(config_file):
-        with open(config_file, 'r') as f:
-            config = yaml.load(f)
 
-    def option(name):
-        if config:
-            return config.get(name, default_config.get(name))
-        return default_config.get(name)
+    config = default_config.copy()
+    try:
+        with open(config_file, 'r') as f:
+            config.update(yaml.load(f))
+    except FileNotFoundError:
+        pass
 
     timestamp_server = None
     if trusted_timestamping:
-        timestamp_server = option('timestamp_server')
+        timestamp_server = config.get('timestamp_server')
         log('Using trusted timestamping server {0}'.format(timestamp_server))
 
-    if option('software'):
-        certificate = os.path.join(signing_path, option('file'))
-        sign_password = option('password')
+    if config.get('software'):
+        certificate = os.path.join(signing_path, config.get('file'))
+        sign_password = config.get('password')
         log('Using certificate {0}'.format(certificate))
         sign_software(
             signtool_directory=signtool_directory,
@@ -78,14 +76,13 @@ async def sign_handler(request):
     source_path, filename = os.path.split(source_filename)
     log('======== Signing {} ========'.format(filename))
 
-    target_file = tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False)
-    target_file_name = target_file.name
-    while True:
-        chunk = await field.read_chunk()  # 8192 bytes by default.
-        if not chunk:
-            break
-        target_file.write(chunk)
-    target_file.close()
+    with tempfile.NamedTemporaryFile(prefix=filename, suffix='.exe', delete=False) as target_file:
+        target_file_name = target_file.name
+        while True:
+            chunk = await field.read_chunk()  # 8192 bytes by default.
+            if not chunk:
+                break
+            target_file.write(chunk)
 
     params = request.query
     customization = params['customization']
@@ -95,12 +92,15 @@ async def sign_handler(request):
         customization,
         '(trusted)' if trusted_timestamping else '(no timestamp)'))
 
-    sign_binary(
-        customization=customization,
-        trusted_timestamping=trusted_timestamping,
-        target_file=target_file_name)
-    content = open(target_file_name, 'rb')
-    return web.Response(body=content)
+    try:
+        sign_binary(
+            customization=customization,
+            trusted_timestamping=trusted_timestamping,
+            target_file=target_file_name)
+        content = open(target_file_name, 'rb')
+        return web.Response(body=content)
+    except Exception as e:
+        return web.Response(status=418, text=str(e))
 
 
 def main():

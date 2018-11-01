@@ -1,4 +1,4 @@
-'''
+"""
 Usage: signtool <command> [options]
 
         Valid commands:
@@ -69,40 +69,40 @@ Other options:
             SignTool returns 0 on success, 1 on failure, and 2 on warning.
 /v          Print verbose success and status messages. This may also provide
             slightly more information on error.
-'''
+"""
 
 import os
 from environment import execute_command
 
 
-def signtool_executable(signtool_directory):
+def _signtool_executable(signtool_directory):
     return os.path.join(signtool_directory, 'signtool.exe')
 
 
-def timestamp_options(timestamp_server):
+def _timestamp_options(timestamp_server):
     return ['/td', 'sha256', '/tr', timestamp_server]
 
 
-def common_signtool_options():
+def _common_signtool_options():
     return ['/fd', 'sha256', '/v']
 
 
-def common_sign_command(signtool_directory, timestamp_server):
-    command = [signtool_executable(signtool_directory), 'sign']
-    command += common_signtool_options()
+def _common_sign_command(signtool_directory, timestamp_server):
+    command = [_signtool_executable(signtool_directory), 'sign']
+    command += _common_signtool_options()
     if timestamp_server:
-        command += timestamp_options(timestamp_server)
+        command += _timestamp_options(timestamp_server)
     return command
 
 
-def sign_software_command(
+def _sign_software_command(
     signtool_directory,
     target_file,
     certificate,
     sign_password,
     timestamp_server
 ):
-    command = common_sign_command(signtool_directory, timestamp_server)
+    command = _common_sign_command(signtool_directory, timestamp_server)
     # if sign_description:
     #    command += ['/d', sign_description]
     command += ['/f', certificate]
@@ -111,12 +111,12 @@ def sign_software_command(
     return command
 
 
-def sign_hardware_command(
+def _sign_hardware_command(
     signtool_directory,
     target_file,
     timestamp_server
 ):
-    command = common_sign_command(signtool_directory, timestamp_server)
+    command = _common_sign_command(signtool_directory, timestamp_server)
     command += ['/a']
     command += [target_file]
     return command
@@ -129,7 +129,7 @@ def sign_software(
     sign_password,
     timestamp_server
 ):
-    execute_command(sign_software_command(
+    execute_command(_sign_software_command(
         signtool_directory=signtool_directory,
         target_file=target_file,
         certificate=certificate,
@@ -142,7 +142,7 @@ def sign_hardware(
     target_file,
     timestamp_server
 ):
-    execute_command(sign_hardware_command(
+    execute_command(_sign_hardware_command(
         signtool_directory=signtool_directory,
         target_file=target_file,
         timestamp_server=timestamp_server))
