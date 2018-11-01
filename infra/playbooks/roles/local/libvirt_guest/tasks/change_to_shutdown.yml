@@ -10,6 +10,10 @@
   changed_when: false
   check_mode: no
 
+- name: Display all libvirt_guest__os_machine
+  debug:
+    var: libvirt_guest__os_machine
+
 - name : Ensure os machine is available
   assert:
     that:
