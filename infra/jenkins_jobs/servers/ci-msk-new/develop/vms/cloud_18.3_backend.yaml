@@ -1,5 +1,5 @@
 - project:
-    name: develop/cloud_18.2_backend
+    name: develop/cloud_18.3_backend
 
     project: vms
     pipeline: develop
@@ -11,9 +11,9 @@
     realcameratesting_framework_branch: vms
     build_watchers: akolesnikov@networkoptix.com
 
-    version: cloud_18.2_backend
-    default_branch: cloud_18.2_backend
-    use_nx_vms_commit: cloud_18.2_backend  # FIXME: this is temp fix
+    version: cloud_18.3_backend
+    default_branch: cloud_18.3_backend
+    use_nx_vms_commit: cloud_18.3_backend  # FIXME: this is temp fix
 
     jobs:
 
@@ -21,9 +21,9 @@
 
     - develop/hg-trigger:
         repo: nx_vms
-        branch: cloud_18.2_backend
-        version: cloud_18.2_backend
-        job_to_trigger_on_vms_changed: 'develop.cloud_18.2_backend.preset.on-push-vms'
+        branch: cloud_18.3_backend
+        version: cloud_18.3_backend
+        job_to_trigger_on_vms_changed: 'develop.cloud_18.3_backend.preset.on-push-vms'
         job_to_trigger_on_ft_changed: ''
         job_to_trigger_on_rct_changed: ''
 
@@ -37,7 +37,7 @@
 
             auth_kind: system
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
-            vms_build_choice_option_default: 'cloud_18.2_backend'
+            vms_build_choice_option_default: 'cloud_18.3_backend'
             default_platforms: linux-x64,windows-x64,mac,bpi
             default_customizations: default
 
