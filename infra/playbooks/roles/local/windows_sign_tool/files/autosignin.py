@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 
 # This script enters password for hardware signing token. It is supposed to be autorun on user autologin.
-# It allows entering password only once per server start.
 
 # Requirements:
 # * Install:
@@ -9,6 +8,7 @@
 # * Enter into registry:
 #     [HKEY_CURRENT_USER\SOFTWARE\SAFENET\AUTHENTICATION\SAC\GENERAL]
 #     "SingleLogon"=dword:00000001
+# which allows entering password only once per server start, and also allows this script do in automatically.
 
 # KEY_PASSWORD is expected to be in environment
 
