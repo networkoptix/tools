@@ -74,6 +74,9 @@
         bbiryuchkov:
         - job-build
         - job-cancel
+        azaytsev:
+        - job-build
+        - job-cancel
 
 - property: &___base_release_system
     # everyone can read (should be inherited)
