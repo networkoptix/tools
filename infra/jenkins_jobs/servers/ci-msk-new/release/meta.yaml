@@ -22,8 +22,8 @@
         - manual:
             vms_build_choice_default: 'VMS_NEW_BUILD_BY_COMMIT'
             vms_build_choice_option_default: 'meta'
-            default_platforms: linux-x64,windows-x64,tx1
-            default_customizations: metavms
+            default_platforms: linux-x64,linux-x86,bananapi,windows-x86,windows-x64,mac,edge1,bpi,rpi,tx1
+            default_customizations: default,default_cn,default_zh_CN,cox,digitalwatchdog,digitalwatchdog_global,hanwha,ipera,ionetworks,nutech,ras,senturian,systemk,tricom,ust,vista,vmsdemoblue,vmsdemoorange,metavms,xccelo
 
             ut_enabled: 'ON'
 
