@@ -123,11 +123,11 @@
         default: !j2: '{{ st_commit_choice_default | default("ST_LATEST") }}'
         option_default: !j2: '{{ st_commit_choice_option_default | default("") }}'
     - hidden:
-        name: RUN_KIND
-        default: !j2: '{{run_kind | default("production") }}'
-    - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default("production") }}'
 
     # TODO: Add additional sections and options...
     # - parameter-separator/simple-colored:
@@ -184,6 +184,7 @@
           REQUESTED_BY=$JOB_NAME-$BUILD_NUMBER
           UPSTREAM_JOB_NAME=$JOB_NAME
           BUILD_DESCRIPTION=$BUILD_DESCRIPTION
+          RUN_KIND=$RUN_KIND
 
     publishers:
     - archive:
@@ -283,6 +284,9 @@
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default("production") }}'
 
 - job-template:
     <<: *preset
@@ -371,3 +375,6 @@
     - hidden:
         name: CANCEL_IN_FAV_OF_NEWER_BUILD
         default: !j2: '{{ cancel_in_fav_of_newer_build | default("false") }}'
+    - hidden:
+        name: RUN_KIND
+        default: !j2: '{{run_kind | default("production") }}'

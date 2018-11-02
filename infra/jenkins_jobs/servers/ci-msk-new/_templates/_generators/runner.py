@@ -137,6 +137,8 @@ print '''#
     - string:
         name: ST_COMMIT
         default: ''
+    - string:
+        name: RUN_KIND
 
     wrappers:
     - timestamps
@@ -301,6 +303,7 @@ print '''
             CLEAN_BUILD=$CLEAN_BUILD
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.realcameratest'
           condition: COMPLETED # allow unstable
@@ -320,6 +323,8 @@ print '''
             CLEAN_CLONE=$CLEAN_CLONE
             RUNNER_URL=$BUILD_URL
             RCT_CAMERA_FILTER=$RCT_CAMERA_FILTER
+            RUN_KIND=$RUN_KIND
+
 
         - name: '{pipeline}.{version}.{project}.distribution.'''+customization+'''.scalability-test'
           condition: COMPLETED # allow unstable
@@ -337,6 +342,7 @@ print '''
             ST_SCENARIOS=$ST_SCENARIOS
             CLEAN_WORKSPACE=true
             RUNNER_URL=$BUILD_URL
+            RUN_KIND=$RUN_KIND
 
 '''
 print '''
