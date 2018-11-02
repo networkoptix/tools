@@ -9,6 +9,8 @@
 #     [HKEY_CURRENT_USER\SOFTWARE\SAFENET\AUTHENTICATION\SAC\GENERAL]
 #     "SingleLogon"=dword:00000001
 # which allows entering password only once per server start, and also allows this script do in automatically.
+# See also:
+# https://networkoptix.atlassian.net/wiki/spaces/SD/pages/408289282/Signing+windows+executables+with+hardware+key
 
 # KEY_PASSWORD is expected to be in environment
 
